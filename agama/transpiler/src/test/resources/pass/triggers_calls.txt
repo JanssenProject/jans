@@ -1,0 +1,27 @@
+//This flow does not make sense, however is syntactically valid and must pass validation
+Flow flow
+    Basepath "oh/man"
+
+When pepperoni is forgotten
+    Trigger oh.ho
+    o."-x" = Trigger oh.no some params.here
+    
+Trigger $bah.humbug no params
+    Override templates "pea/body.ftl" "" "pea/media.ftl" "fluff.ftl"
+        
+    "caravan.ftl"  "../whoops.ftlh"
+
+x256 = Call java.lang.Math#incrementExact 255
+
+n | E = Call java.lang.Integer#parseInt "AGA" 16
+When E is not null
+    Log "An unexpected error has occurred at %" null
+    
+x.a[0] = Call x.a[2] method 
+Call anda le param1 param2
+
+minus1 = Call java.math.BigInteger#new "-1"
+
+bigcls = Call java.math.BigInteger#class
+bigcls = Call minus1 getClass
+bigcls = minus1.class

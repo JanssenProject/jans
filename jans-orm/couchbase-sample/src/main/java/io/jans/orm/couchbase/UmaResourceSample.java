@@ -1,7 +1,7 @@
 /*
  * oxCore is available under the MIT License (2014). See http://opensource.org/licenses/MIT for full text.
  *
- * Copyright (c) 2014, Gluu
+ * Copyright (c) 2020, Janssen Project
  */
 
 package io.jans.orm.couchbase;

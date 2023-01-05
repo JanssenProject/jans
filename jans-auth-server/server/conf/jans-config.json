@@ -19,14 +19,19 @@
     "deviceAuthorizationEndpoint":"${config.oxauth.contextPath}/restv1/device_authorization",
     "umaConfigurationEndpoint":"${config.oxauth.contextPath}/restv1/uma2-configuration",
     "sectorIdentifierEndpoint":"${config.oxauth.contextPath}/sectoridentifier",
-    "oxElevenGenerateKeyEndpoint":"${config.oxauth.contextPath}/oxeleven/rest/oxeleven/generateKey",
-    "oxElevenSignEndpoint":"${config.oxauth.contextPath}/oxeleven/rest/oxeleven/sign",
-    "oxElevenVerifySignatureEndpoint":"${config.oxauth.contextPath}/oxeleven/rest/oxeleven/verifySignature",
-    "oxElevenDeleteKeyEndpoint":"${config.oxauth.contextPath}/oxeleven/rest/oxeleven/deleteKey",
+    "jansElevenGenerateKeyEndpoint":"${config.oxauth.contextPath}/oxeleven/rest/oxeleven/generateKey",
+    "jansElevenSignEndpoint":"${config.oxauth.contextPath}/oxeleven/rest/oxeleven/sign",
+    "jansElevenVerifySignatureEndpoint":"${config.oxauth.contextPath}/oxeleven/rest/oxeleven/verifySignature",
+    "jansElevenDeleteKeyEndpoint":"${config.oxauth.contextPath}/oxeleven/rest/oxeleven/deleteKey",
     "backchannelAuthenticationEndpoint":"${config.oxauth.contextPath}/restv1/bc-authorize",
     "parEndpoint":"${config.oxauth.contextPath}/restv1/par",
     "backchannelDeviceRegistrationEndpoint":"${config.oxauth.contextPath}/restv1/bc-deviceRegistration",
     "openidSubAttribute":"inum",
+    "publicSubjectIdentifierPerClientEnabled": true,
+    "subjectIdentifiersPerClientSupported": [
+        "mail",
+        "uid"
+    ],
     "responseTypesSupported":[
         ["code"],
         ["code", "id_token"],
@@ -53,7 +58,8 @@
         "refresh_token",
         "urn:ietf:params:oauth:grant-type:uma-ticket",
         "urn:openid:params:grant-type:ciba",
-        "urn:ietf:params:oauth:grant-type:device_code"
+        "urn:ietf:params:oauth:grant-type:device_code",
+        "urn:ietf:params:oauth:grant-type:token-exchange"
     ],
     "subjectTypesSupported":[
         "public",
@@ -162,6 +168,7 @@
         "A128GCM",
         "A256GCM"
     ],
+    "forceSignedRequestObject": false,
     "requestObjectSigningAlgValuesSupported":[
         "none",
         "HS256",
@@ -276,8 +283,8 @@
     "keyRegenerationEnabled":false,
     "keyRegenerationInterval":48,
     "defaultSignatureAlgorithm":"RS256",
-    "oxOpenIdConnectVersion":"openidconnect-1.0",
-    "oxId":"https://${server.name}/oxid/service/gluu/inum",
+    "jansOpenIdConnectVersion":"openidconnect-1.0",
+    "jansId":"https://${server.name}/oxid/service/gluu/inum",
     "dynamicRegistrationEnabled":true,
     "dynamicRegistrationPasswordGrantTypeEnabled":true,
     "dynamicRegistrationExpirationTime":${config.client.dynamic-registration-expiration-time},
@@ -331,7 +338,7 @@
     "pairwiseCalculationSalt": "${config.oxauth.pairwiseCalculationSalt}",
     "shareSubjectIdBetweenClientsWithSameSectorId": true,
     "webKeysStorage": "keystore",
-    "oxElevenTestModeToken": "${config.oxeleven.testModeToken}",
+    "jansElevenTestModeToken": "${config.oxeleven.testModeToken}",
     "dnName": "CN=Jans Auth CA Certificates",
     "keyStoreFile": "./conf/keystore.p12",
     "keyStoreSecret": "secret",
@@ -359,9 +366,30 @@
     "logClientIdOnClientAuthentication": true,
     "logClientNameOnClientAuthentication": false,
     "authorizationRequestCustomAllowedParameters" : [
-        "customParam1",
-        "customParam2",
-        "customParam3"
+        {
+            "paramName": "customParam1",
+            "returnInResponse": false
+        },
+        {
+            "paramName": "customParam2",
+            "returnInResponse": false
+        },
+        {
+            "paramName": "customParam3",
+            "returnInResponse": false
+        },
+        {
+            "paramName": "customParam4",
+            "returnInResponse": true
+        },
+        {
+            "paramName": "customParam5",
+            "returnInResponse": true
+        },
+        {
+            "paramName": "agama_flow",
+            "returnInResponse": false
+        }
     ],
     "legacyDynamicRegistrationScopeParam": false,
     "openidScopeBackwardCompatibility": false,
@@ -377,6 +405,11 @@
         "PS384",
         "PS512"
     ],
+    "ssaConfiguration": {
+        "ssaEndpoint":"${config.oxauth.contextPath}/restv1/ssa",
+        "ssaSigningAlg": "RS256",
+        "ssaExpirationInDays": 30
+    },
     "backchannelClientId": "123-123-123",
     "backchannelRedirectUri": "https://ce.gluu.info:8443/ciba/home.htm",
     "backchannelUserCodeParameterSupported": true,
@@ -401,5 +434,26 @@
     },
     "deviceAuthzRequestExpiresIn": 1800,
     "deviceAuthzTokenPollInterval": 5,
-    "deviceAuthzResponseTypeToProcessAuthz": "code"
+    "deviceAuthzResponseTypeToProcessAuthz": "code",
+    "agamaConfiguration": {
+        "enabled": false,
+        "templatesPath": "/ftl",
+        "scriptsPath": "/scripts",
+        "serializerType": "KRYO",
+        "maxItemsLoggedInCollections": 7,
+        "pageMismatchErrorPage": "mismatch.ftlh",
+        "interruptionErrorPage": "timeout.ftlh",
+        "crashErrorPage": "crash.ftlh",
+        "finishedFlowPage": "finished.ftlh",
+        "bridgeScriptPage": "agama.xhtml",
+        "defaultResponseHeaders": {
+            "Cache-Control": "max-age=0, no-store"
+        }
+    },
+    "blockWebviewAuthorizationEnabled": false,
+    "userInfoConfiguration": {
+        "dateFormatterPattern": {
+            "birthdate": "yyyy-MM-dd"
+        }
+    }
 }

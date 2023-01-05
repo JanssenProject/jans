@@ -1,0 +1,19 @@
+
+apiVersion: v2
+name: opendj
+version: 1.0.6-dev
+kubeVersion: ">=v1.21.0-0"
+description: OpenDJ is a directory server which implements a wide range of Lightweight Directory Access Protocol and related standards, including full compliance with LDAPv3 but also support for Directory Service Markup Language (DSMLv2).Written in Java, OpenDJ offers multi-master replication, access control, and many extensions.
+type: application
+keywords:
+  - LDAP
+  - OpenDJ
+home: https://jans.io
+sources:
+  - https://github.com/GluuFederation/docker-opendj
+maintainers:
+  - name: Mohammad Abudayyeh
+    email: support@jans.io
+    url: https://github.com/moabu
+icon: https://github.com/JanssenProject/jans/raw/main/docs/assets/logo/janssen_project_favicon_transparent_50px_50px.png
+appVersion: "1.0.6-dev"

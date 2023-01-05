@@ -11,11 +11,12 @@ import io.jans.as.model.util.Base64Util;
 import org.testng.ITestContext;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-import sun.security.x509.X509CertImpl;
 
+import java.io.ByteArrayInputStream;
 import java.math.BigInteger;
 import java.security.PublicKey;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPublicKey;
 
@@ -44,7 +45,8 @@ public class WebKeysTest extends BaseTest {
         System.out.println("e: " + exponent);
 
         byte[] certBytes = Base64Util.base64urldecode(x5c);
-        X509Certificate cert = new X509CertImpl(certBytes);
+        CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+        X509Certificate cert = (X509Certificate) certFactory.generateCertificate(new ByteArrayInputStream(certBytes));
 
         PublicKey publicKey = cert.getPublicKey();
         RSAPublicKey rsaPublicKey = (RSAPublicKey) publicKey;

@@ -1,0 +1,20 @@
+
+apiVersion: v2
+name: scim
+version: 1.0.6-dev
+kubeVersion: ">=v1.21.0-0"
+description: System for Cross-domain Identity Management (SCIM) version 2.0
+type: application
+keywords:
+  - SCIM
+  - API
+home: https://jans.io
+sources:
+  - https://github.com/JanssenProject/jans/jans-scim
+  - https://github.com/JanssenProject/jans/docker-jans-scim
+maintainers:
+  - name: Mohammad Abudayyeh
+    email: support@jans.io
+    url: https://github.com/moabu
+icon: https://github.com/JanssenProject/jans/raw/main/docs/assets/logo/janssen_project_favicon_transparent_50px_50px.png
+appVersion: "1.0.6-dev"

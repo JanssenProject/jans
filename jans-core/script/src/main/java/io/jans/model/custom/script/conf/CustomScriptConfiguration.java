@@ -52,5 +52,13 @@ public class CustomScriptConfiguration {
     public int getLevel() {
         return this.customScript.getLevel();
     }
+    
+    @Override
+    public String toString() {
+        return "CustomScriptConfiguration [customScript=" + customScript + ", externalType=" + externalType + ", configurationAttributes="
+                + configurationAttributes
+                + "]";
+    }
+    
 
 }

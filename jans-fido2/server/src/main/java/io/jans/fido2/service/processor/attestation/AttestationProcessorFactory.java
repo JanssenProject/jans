@@ -24,17 +24,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.Produces;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
+import jakarta.enterprise.inject.Produces;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 import io.jans.fido2.ctap.AttestationFormat;
 import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.service.processors.AttestationFormatProcessor;
 
+/**
+ * The attestationObject contains base64url encoded buffer of CBOR encoded
+ * attestation object. When parsed, the "fmt" value contains the attestation
+ * format. 
+ * AttestationProcessorFactory - Factory Class that returns Processor based on the fmt
+ * 
+ */
 @ApplicationScoped
 public class AttestationProcessorFactory {
 

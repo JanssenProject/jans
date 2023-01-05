@@ -17,25 +17,21 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.model.base.CustomAttribute;
 import io.jans.orm.model.base.CustomEntry;
+import io.jans.orm.model.base.CustomObjectAttribute;
 import io.jans.service.BaseCacheService;
 import io.jans.service.CacheService;
 import io.jans.service.LocalCacheService;
 import io.jans.util.StringHelper;
 import io.jans.util.security.StringEncrypter;
 import io.jans.util.security.StringEncrypter.EncryptionException;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import org.json.JSONArray;
 import org.python.jline.internal.Preconditions;
 import org.slf4j.Logger;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import java.util.Collection;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.Set;
-import java.util.TimeZone;
+import java.util.*;
 
 import static org.apache.commons.lang3.BooleanUtils.isFalse;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
@@ -78,7 +74,21 @@ public class ClientService {
     private StaticConfiguration staticConfiguration;
 
     public void persist(Client client) {
+    	ignoreCustomObjectClassesForNonLDAP(client);
         ldapEntryManager.persist(client);
+    }
+
+    private Client ignoreCustomObjectClassesForNonLDAP(Client client) {
+        String persistenceType = ldapEntryManager.getPersistenceType();
+        log.debug("persistenceType: {}", persistenceType);
+        if (!PersistenceEntryManager.PERSITENCE_TYPES.ldap.name().equals(persistenceType)) {
+        	log.debug(
+                    "Setting CustomObjectClasses :{} to null as it's used only for LDAP and current persistenceType is {} ",
+                    client.getCustomObjectClasses(), persistenceType);
+            client.setCustomObjectClasses(null);
+        }
+
+        return client;
     }
 
     public void merge(Client client) {
@@ -196,8 +206,8 @@ public class ClientService {
         }
     }
 
-    public io.jans.orm.model.base.CustomAttribute getCustomAttribute(Client client, String attributeName) {
-        for (io.jans.orm.model.base.CustomAttribute customAttribute : client.getCustomAttributes()) {
+    public CustomObjectAttribute getCustomAttribute(Client client, String attributeName) {
+        for (CustomObjectAttribute customAttribute : client.getCustomAttributes()) {
             if (StringHelper.equalsIgnoreCase(attributeName, customAttribute.getName())) {
                 return customAttribute;
             }
@@ -207,10 +217,10 @@ public class ClientService {
     }
 
     public void setCustomAttribute(Client client, String attributeName, String attributeValue) {
-        io.jans.orm.model.base.CustomAttribute customAttribute = getCustomAttribute(client, attributeName);
+        CustomObjectAttribute customAttribute = getCustomAttribute(client, attributeName);
 
         if (customAttribute == null) {
-            customAttribute = new io.jans.orm.model.base.CustomAttribute(attributeName);
+            customAttribute = new CustomObjectAttribute(attributeName);
             client.getCustomAttributes().add(customAttribute);
         }
 
@@ -315,15 +325,15 @@ public class ClientService {
                 }
                 attribute = array;
             } else {
-                for (CustomAttribute customAttribute : client.getCustomAttributes()) {
+                for (CustomObjectAttribute customAttribute : client.getCustomAttributes()) {
                     if (customAttribute.getName().equals(clientAttribute)) {
-                        List<String> values = customAttribute.getValues();
+                        List<Object> values = customAttribute.getValues();
                         if (values != null) {
                             if (values.size() == 1) {
                                 attribute = values.get(0);
                             } else {
                                 JSONArray array = new JSONArray();
-                                for (String v : values) {
+                                for (Object v : values) {
                                     array.put(v);
                                 }
                                 attribute = array;

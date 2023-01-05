@@ -1,0 +1,78 @@
+{
+    "userId": "testUser4",
+    "customAttributes": [
+        {
+            "name": "birthdate",
+            "multiValued": false,
+            "values": [
+                "20001231041508.553Z"
+            ],
+            "value": "20001231041508.553Z",
+            "displayValue": "20001231041508.553Z"
+        },
+        {
+            "name": "emailVerified",
+            "multiValued": false,
+            "values": [
+                true
+            ],
+            "value": true,
+            "displayValue": true
+        },
+        {
+            "name": "jansAdminUIRole",
+            "multiValued": false,
+            "values": [
+                "api-admin"
+            ],
+            "value": "api-admin",
+            "displayValue": "api-admin"
+        },
+        {
+            "name": "memberOf",
+            "multiValued": false,
+            "values": [
+                "inum=60B7,ou=groups,o=jans"
+            ],
+            "value": "inum=60B7,ou=groups,o=jans",
+            "displayValue": "inum=60B7,ou=groups,o=jans"
+        },
+        {
+            "name": "middleName",
+            "multiValued": false,
+            "values": [
+                "Test USer 4"
+            ],
+            "value": "Test USer 4",
+            "displayValue": "Test USer 4"
+        },
+        {
+            "name": "nickname",
+            "multiValued": false,
+            "values": [
+                "Test USer 4"
+            ],
+            "value": "Test USer 4",
+            "displayValue": "Test USer 4"
+        },
+        {
+            "name": "sn",
+            "multiValued": false,
+            "values": [
+                "User4"
+            ],
+            "value": "User4",
+            "displayValue": "User4"
+        }
+    ],
+    "customObjectClasses": [
+        "top",
+        "jansCustomPerson"
+    ],
+    "inum": "5dc28c49-efcc-4eef-9e54-834b910fb3d8",
+    "mail": "test4@jans.server2",
+    "displayName": "Default Test User",
+    "jansStatus": "active",
+    "userPassword": "pwd123",
+    "givenName": "Test4"
+    }

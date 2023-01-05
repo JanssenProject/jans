@@ -9,11 +9,11 @@ package io.jans.as.client.uma;
 import io.jans.as.model.uma.UmaConstants;
 import io.jans.as.model.uma.UmaTokenResponse;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.Produces;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.FormParam;
+import jakarta.ws.rs.HeaderParam;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Produces;
 
 /**
  * @author yuriyz on 06/21/2017.

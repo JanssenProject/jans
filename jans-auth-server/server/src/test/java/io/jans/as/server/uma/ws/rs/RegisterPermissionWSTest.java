@@ -10,7 +10,7 @@ import io.jans.as.model.uma.PermissionTicket;
 import io.jans.as.model.uma.UmaConstants;
 import io.jans.as.model.uma.UmaPermission;
 import io.jans.as.model.uma.UmaResourceResponse;
-import io.jans.as.model.uma.UmaTestUtil;
+import io.jans.as.test.UmaTestUtil;
 import io.jans.as.model.uma.wrapper.Token;
 import io.jans.as.server.BaseTest;
 import io.jans.as.server.model.uma.TUma;
@@ -21,9 +21,9 @@ import org.testng.Assert;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.Invocation.Builder;
+import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Arrays;
@@ -55,14 +55,14 @@ public class RegisterPermissionWSTest extends BaseTest {
         RegisterPermissionWSTest.umaRegisterResourcePath = umaRegisterResourcePath;
         umaPermissionPath = p_umaPermissionPath;
 
-        pat = TUma.requestPat(url, authorizePath, tokenPath, umaUserId, umaUserSecret, umaPatClientId,
+        pat = TUma.requestPat(getApiTagetURI(url), authorizePath, tokenPath, umaUserId, umaUserSecret, umaPatClientId,
                 umaPatClientSecret, umaRedirectUri);
         UmaTestUtil.assertIt(pat);
     }
 
     @Test(dependsOnMethods = {"init_"})
     public void init() {
-        resource = TUma.registerResource(url, pat, umaRegisterResourcePath, UmaTestUtil.createResource());
+        resource = TUma.registerResource(getApiTagetURI(url), pat, umaRegisterResourcePath, UmaTestUtil.createResource());
         UmaTestUtil.assertIt(resource);
     }
 
@@ -72,7 +72,7 @@ public class RegisterPermissionWSTest extends BaseTest {
         r.setResourceId(resource.getId());
         r.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view"));
 
-        final PermissionTicket ticket = TUma.registerPermission(url, pat, r, umaPermissionPath);
+        final PermissionTicket ticket = TUma.registerPermission(getApiTagetURI(url), pat, r, umaPermissionPath);
         UmaTestUtil.assertIt(ticket);
     }
 
@@ -80,7 +80,7 @@ public class RegisterPermissionWSTest extends BaseTest {
     public void testRegisterPermissionWithInvalidResource() {
         final String path = umaPermissionPath;
         try {
-            Builder request = ResteasyClientBuilder.newClient().target(url.toString() + path).request();
+            Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + path).request();
             request.header("Accept", UmaConstants.JSON_MEDIA_TYPE);
             request.header("Authorization", "Bearer " + pat.getAccessToken());
 
@@ -121,7 +121,7 @@ public class RegisterPermissionWSTest extends BaseTest {
     @Test(dependsOnMethods = {"testRegisterPermissionWithInvalidResource"})
     public void cleanUp() {
         if (resource != null) {
-            TUma.deleteResource(url, pat, umaRegisterResourcePath, resource.getId());
+            TUma.deleteResource(getApiTagetURI(url), pat, umaRegisterResourcePath, resource.getId());
         }
     }
 }

@@ -1,0 +1,33 @@
+{
+    "dn": "inum=08E2,ou=attributes,o=jans",
+    "selected": false,
+    "inum": "08E2",
+    "name": "departmentNumber",
+    "displayName": "Department",
+    "description": "Organizational Department",
+    "origin": "jansCustomPerson",
+    "dataType": "string",
+    "editType": [
+        "admin"
+    ],
+    "viewType": [
+        "user",
+        "admin"
+    ],
+    "claimName": "department_number",
+    "status": "inactive",
+    "saml1Uri": "urn:mace:dir:attribute-def:departmentNumber",
+    "saml2Uri": "urn:oid:2.16.840.1.113730.3.1.2",
+    "urn": "urn:mace:dir:attribute-def:departmentNumber",
+    "oxMultiValuedAttribute": false,
+    "custom": false,
+    "requred": false,
+    "whitePagesCanView": false,
+    "adminCanEdit": true,
+    "userCanView": true,
+    "userCanEdit": false,
+    "adminCanAccess": true,
+    "adminCanView": true,
+    "userCanAccess": true,
+    "baseDn": "inum=08E2,ou=attributes,o=jans"
+}

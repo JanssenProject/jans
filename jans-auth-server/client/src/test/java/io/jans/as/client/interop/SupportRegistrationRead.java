@@ -10,6 +10,7 @@ import io.jans.as.client.BaseTest;
 import io.jans.as.client.RegisterClient;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.common.SubjectType;
@@ -22,18 +23,8 @@ import org.testng.annotations.Test;
 import java.util.Arrays;
 import java.util.List;
 
-import static io.jans.as.model.register.RegisterRequestParam.APPLICATION_TYPE;
-import static io.jans.as.model.register.RegisterRequestParam.CLIENT_NAME;
-import static io.jans.as.model.register.RegisterRequestParam.CONTACTS;
-import static io.jans.as.model.register.RegisterRequestParam.ID_TOKEN_SIGNED_RESPONSE_ALG;
-import static io.jans.as.model.register.RegisterRequestParam.JWKS_URI;
-import static io.jans.as.model.register.RegisterRequestParam.LOGO_URI;
-import static io.jans.as.model.register.RegisterRequestParam.POLICY_URI;
-import static io.jans.as.model.register.RegisterRequestParam.REQUEST_OBJECT_SIGNING_ALG;
-import static io.jans.as.model.register.RegisterRequestParam.REQUEST_URIS;
-import static io.jans.as.model.register.RegisterRequestParam.SCOPE;
-import static io.jans.as.model.register.RegisterRequestParam.SECTOR_IDENTIFIER_URI;
-import static io.jans.as.model.register.RegisterRequestParam.SUBJECT_TYPE;
+import static io.jans.as.client.client.Asserter.*;
+import static io.jans.as.model.register.RegisterRequestParam.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
@@ -72,12 +63,8 @@ public class SupportRegistrationRead extends BaseTest {
         RegisterResponse registerResponse1 = registerClient1.exec();
 
         showClient(registerClient1);
-        assertEquals(registerResponse1.getStatus(), 201, "Unexpected response code: " + registerResponse1.getEntity());
-        assertNotNull(registerResponse1.getClientId());
-        assertNotNull(registerResponse1.getClientSecret());
-        assertNotNull(registerResponse1.getRegistrationAccessToken());
-        assertNotNull(registerResponse1.getClientSecretExpiresAt());
-        assertNotNull(registerResponse1.getClaims().get(SCOPE.toString()));
+        AssertBuilder.registerResponse(registerResponse1).created().check();
+        assertRegisterResponseClaimsNotNull(registerResponse1, SCOPE);
 
         String clientId = registerResponse1.getClientId();
         String registrationAccessToken = registerResponse1.getRegistrationAccessToken();
@@ -91,23 +78,10 @@ public class SupportRegistrationRead extends BaseTest {
         RegisterResponse registerResponse2 = registerClient2.exec();
 
         showClient(registerClient2);
-        assertEquals(registerResponse2.getStatus(), 200, "Unexpected response code: " + registerResponse2.getEntity());
-        assertNotNull(registerResponse2.getClientId());
-        assertNotNull(registerResponse2.getClientSecret());
-        assertNotNull(registerResponse2.getRegistrationAccessToken());
-        assertNotNull(registerResponse2.getRegistrationClientUri());
-        assertNotNull(registerResponse2.getClientSecretExpiresAt());
-        assertNotNull(registerResponse2.getClaims().get(APPLICATION_TYPE.toString()));
-        assertNotNull(registerResponse2.getClaims().get(POLICY_URI.toString()));
-        assertNotNull(registerResponse2.getClaims().get(REQUEST_OBJECT_SIGNING_ALG.toString()));
-        assertNotNull(registerResponse2.getClaims().get(CONTACTS.toString()));
-        assertNotNull(registerResponse2.getClaims().get(SECTOR_IDENTIFIER_URI.toString()));
-        assertNotNull(registerResponse2.getClaims().get(SUBJECT_TYPE.toString()));
-        assertNotNull(registerResponse2.getClaims().get(ID_TOKEN_SIGNED_RESPONSE_ALG.toString()));
-        assertNotNull(registerResponse2.getClaims().get(JWKS_URI.toString()));
-        assertNotNull(registerResponse2.getClaims().get(CLIENT_NAME.toString()));
-        assertNotNull(registerResponse2.getClaims().get(LOGO_URI.toString()));
-        assertNotNull(registerResponse2.getClaims().get(REQUEST_URIS.toString()));
-        assertNotNull(registerResponse2.getClaims().get(SCOPE.toString()));
+        AssertBuilder.registerResponse(registerResponse2).ok()
+                .notNullRegistrationClientUri()
+                .check();
+        assertRegisterResponseClaimsNotNull(registerResponse2, APPLICATION_TYPE, POLICY_URI, REQUEST_OBJECT_SIGNING_ALG, CONTACTS, SECTOR_IDENTIFIER_URI);
+        assertRegisterResponseClaimsNotNull(registerResponse2, SUBJECT_TYPE, ID_TOKEN_SIGNED_RESPONSE_ALG, JWKS_URI, CLIENT_NAME, LOGO_URI, REQUEST_URIS, SCOPE);
     }
 }

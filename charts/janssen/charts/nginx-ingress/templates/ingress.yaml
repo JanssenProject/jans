@@ -1,0 +1,681 @@
+{{ if index .Values "global" "auth-server" "ingress" "openidConfigEnabled" -}}
+{{ $fullName := include "nginx-ingress.fullname" . -}}
+{{- $ingressPath := .Values.ingress.path -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $fullName }}-openid-config
+  labels:
+    app: {{ $fullName }}-openid-config
+{{- if .Values.ingress.additionalLabels }}
+{{ toYaml .Values.ingress.additionalLabels | indent 4 }}
+{{- end }}
+{{- if .Values.ingress.openidConfigLabels }}
+{{ toYaml .Values.ingress.openidConfigLabels | indent 4 }}
+{{- end }}
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/configuration-snippet: "rewrite /.well-known/openid-configuration /jans-auth/.well-known/openid-configuration$1 break;"
+    nginx.ingress.kubernetes.io/rewrite-target: /jans-auth/.well-known/openid-configuration
+{{- if .Values.ingress.openidAdditionalAnnotations }}
+{{ toYaml .Values.ingress.openidAdditionalAnnotations | indent 4 }}
+{{- end }}
+{{- if .Values.ingress.additionalAnnotations }}
+{{ toYaml .Values.ingress.additionalAnnotations | indent 4 }}
+{{- end }}
+spec:
+{{- if .Values.ingress.tls }}
+  tls:
+  {{- range .Values.ingress.tls }}
+    - hosts:
+      {{- range .hosts }}
+        - {{ . | quote }}
+      {{- end }}
+      secretName: {{ .secretName }}
+  {{- end }}
+{{- end }}
+  rules:
+  {{- range .Values.ingress.hosts }}
+  {{- $host := . -}}
+  {{- with $ }}
+    - host: {{ $host | quote }}
+      http:
+        paths:
+          - path: /.well-known/openid-configuration
+            pathType: Exact
+            backend:
+              service:
+                name: {{ index .Values "global" "auth-server" "authServerServiceName" }}
+                port:
+                  number: 8080
+  {{- end }}
+  {{- end }}
+{{- end }}
+
+---
+{{ if index .Values "global" "auth-server" "ingress" "deviceCodeEnabled" -}}
+{{ $fullName := include "nginx-ingress.fullname" . -}}
+{{- $ingressPath := .Values.ingress.path -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $fullName }}-device-code
+  labels:
+    app: {{ $fullName }}-device-code
+{{- if .Values.ingress.additionalLabels }}
+{{ toYaml .Values.ingress.additionalLabels | indent 4 }}
+{{- end }}
+{{- if .Values.ingress.deviceCodeLabels }}
+{{ toYaml .Values.ingress.deviceCodeLabels | indent 4 }}
+{{- end }}
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/configuration-snippet: "rewrite /device-code /jans-auth/device_authorization.htm$1 break;"
+    nginx.ingress.kubernetes.io/rewrite-target: /jans-auth/device_authorization.htm
+{{- if .Values.ingress.deviceCodeAdditionalAnnotations }}
+{{ toYaml .Values.ingress.deviceCodeAdditionalAnnotations | indent 4 }}
+{{- end }}
+{{- if .Values.ingress.additionalAnnotations }}
+{{ toYaml .Values.ingress.additionalAnnotations | indent 4 }}
+{{- end }}
+spec:
+{{- if .Values.ingress.tls }}
+  tls:
+  {{- range .Values.ingress.tls }}
+    - hosts:
+      {{- range .hosts }}
+        - {{ . | quote }}
+      {{- end }}
+      secretName: {{ .secretName }}
+  {{- end }}
+{{- end }}
+  rules:
+  {{- range .Values.ingress.hosts }}
+  {{- $host := . -}}
+  {{- with $ }}
+    - host: {{ $host | quote }}
+      http:
+        paths:
+          - path: /device-code
+            pathType: Exact
+            backend:
+              service:
+                name: {{ index .Values "global" "auth-server" "authServerServiceName" }}
+                port:
+                  number: 8080
+  {{- end }}
+  {{- end }}
+{{- end }}
+
+---
+{{ if index .Values "global" "auth-server" "ingress" "firebaseMessagingEnabled" -}}
+{{ $fullName := include "nginx-ingress.fullname" . -}}
+{{- $ingressPath := .Values.ingress.path -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $fullName }}-firebase-messaging
+  labels:
+    app: {{ $fullName }}-firebase-messaging
+{{- if .Values.ingress.additionalLabels }}
+{{ toYaml .Values.ingress.additionalLabels | indent 4 }}
+{{- end }}
+{{- if .Values.ingress.firebaseMessagingLabels }}
+{{ toYaml .Values.ingress.firebaseMessagingLabels | indent 4 }}
+{{- end }}
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/configuration-snippet: "rewrite /firebase-messaging-sw.js /jans-auth/firebase-messaging-sw.js$1 break;"
+    nginx.ingress.kubernetes.io/rewrite-target: /jans-auth/firebase-messaging-sw.js
+{{- if .Values.ingress.firebaseMessagingAdditionalAnnotations }}
+{{ toYaml .Values.ingress.firebaseMessagingAdditionalAnnotations | indent 4 }}
+{{- end }}
+{{- if .Values.ingress.additionalAnnotations }}
+{{ toYaml .Values.ingress.additionalAnnotations | indent 4 }}
+{{- end }}
+spec:
+{{- if .Values.ingress.tls }}
+  tls:
+  {{- range .Values.ingress.tls }}
+    - hosts:
+      {{- range .hosts }}
+        - {{ . | quote }}
+      {{- end }}
+      secretName: {{ .secretName }}
+  {{- end }}
+{{- end }}
+  rules:
+  {{- range .Values.ingress.hosts }}
+  {{- $host := . -}}
+  {{- with $ }}
+    - host: {{ $host | quote }}
+      http:
+        paths:
+          - path: /firebase-messaging-sw.js
+            pathType: Exact
+            backend:
+              service:
+                name: {{ index .Values "global" "auth-server" "authServerServiceName" }}
+                port:
+                  number: 8080
+  {{- end }}
+  {{- end }}
+{{- end }}
+
+---
+{{ if index .Values "global" "auth-server" "ingress" "uma2ConfigEnabled" -}}
+{{ $fullName := include "nginx-ingress.fullname" . -}}
+{{- $ingressPath := .Values.ingress.path -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $fullName }}-uma2-config
+  labels:
+    app: {{ $fullName }}-uma2-config
+{{- if .Values.ingress.additionalLabels }}
+{{ toYaml .Values.ingress.additionalLabels | indent 4 }}
+{{- end }}
+{{- if .Values.ingress.uma2ConfigLabels }}
+{{ toYaml .Values.ingress.uma2ConfigLabels | indent 4 }}
+{{- end }}
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/configuration-snippet: "rewrite /.well-known/uma2-configuration /jans-auth/restv1/uma2-configuration$1 break;"
+    nginx.ingress.kubernetes.io/rewrite-target: /jans-auth/restv1/uma2-configuration
+{{- if .Values.ingress.uma2AdditionalAnnotations }}
+{{ toYaml .Values.ingress.uma2AdditionalAnnotations | indent 4 }}
+{{- end }}
+{{- if .Values.ingress.additionalAnnotations }}
+{{ toYaml .Values.ingress.additionalAnnotations | indent 4 }}
+{{- end }}
+spec:
+{{- if .Values.ingress.tls }}
+  tls:
+  {{- range .Values.ingress.tls }}
+    - hosts:
+      {{- range .hosts }}
+        - {{ . | quote }}
+      {{- end }}
+      secretName: {{ .secretName }}
+  {{- end }}
+{{- end }}
+  rules:
+  {{- range .Values.ingress.hosts }}
+  {{- $host := . -}}
+  {{- with $ }}
+    - host: {{ $host | quote }}
+      http:
+        paths:
+          - path: /.well-known/uma2-configuration
+            pathType: Exact
+            backend:
+              service:
+                name: {{ index .Values "global" "auth-server" "authServerServiceName" }}
+                port:
+                  number: 8080
+  {{- end }}
+  {{- end }}
+{{- end }}
+
+---
+{{ if index .Values "global" "auth-server" "ingress" "webfingerEnabled" -}}
+{{ $fullName := include "nginx-ingress.fullname" . -}}
+{{- $ingressPath := .Values.ingress.path -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $fullName }}-webfinger
+  labels:
+    app: {{ $fullName }}-webfinger
+{{- if .Values.ingress.additionalLabels }}
+{{ toYaml .Values.ingress.additionalLabels | indent 4 }}
+{{- end }}
+{{- if .Values.ingress.webfingerLabels }}
+{{ toYaml .Values.ingress.webfingerLabels | indent 4 }}
+{{- end }}
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/configuration-snippet: "rewrite /.well-known/webfinger /jans-auth/.well-known/webfinger$1 break;"
+    nginx.ingress.kubernetes.io/rewrite-target: /jans-auth/.well-known/webfinger
+{{- if .Values.ingress.webfingerAdditionalAnnotations }}
+{{ toYaml .Values.ingress.webfingerAdditionalAnnotations | indent 4 }}
+{{- end }}
+{{- if .Values.ingress.additionalAnnotations }}
+{{ toYaml .Values.ingress.additionalAnnotations | indent 4 }}
+{{- end }}
+spec:
+{{- if .Values.ingress.tls }}
+  tls:
+  {{- range .Values.ingress.tls }}
+    - hosts:
+      {{- range .hosts }}
+        - {{ . | quote }}
+      {{- end }}
+      secretName: {{ .secretName }}
+  {{- end }}
+{{- end }}
+  rules:
+  {{- range .Values.ingress.hosts }}
+  {{- $host := . -}}
+  {{- with $ }}
+    - host: {{ $host | quote }}
+      http:
+        paths:
+          - path: /.well-known/webfinger
+            pathType: Exact
+            backend:
+              service:
+                name: {{ index .Values "global" "auth-server" "authServerServiceName" }}
+                port:
+                  number: 8080
+  {{- end }}
+  {{- end }}
+{{- end }}
+
+---
+{{ if index .Values "global" "auth-server" "ingress" "webdiscoveryEnabled" -}}
+{{ $fullName := include "nginx-ingress.fullname" . -}}
+{{- $ingressPath := .Values.ingress.path -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $fullName }}-webdiscovery
+  labels:
+    app: {{ $fullName }}-webdiscovery
+{{- if .Values.ingress.additionalLabels }}
+{{ toYaml .Values.ingress.additionalLabels | indent 4 }}
+{{- end }}
+{{- if .Values.ingress.webdiscoveryLabels }}
+{{ toYaml .Values.ingress.webdiscoveryLabels | indent 4 }}
+{{- end }}
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/configuration-snippet: "rewrite /.well-known/simple-web-discovery /jans-auth/.well-known/simple-web-discovery$1 break;"
+    nginx.ingress.kubernetes.io/rewrite-target: /jans-auth/.well-known/simple-web-discovery
+{{- if .Values.ingress.webdiscoveryAdditionalAnnotations }}
+{{ toYaml .Values.ingress.webdiscoveryAdditionalAnnotations | indent 4 }}
+{{- end }}
+{{- if .Values.ingress.additionalAnnotations }}
+{{ toYaml .Values.ingress.additionalAnnotations | indent 4 }}
+{{- end }}
+spec:
+{{- if .Values.ingress.tls }}
+  tls:
+  {{- range .Values.ingress.tls }}
+    - hosts:
+      {{- range .hosts }}
+        - {{ . | quote }}
+      {{- end }}
+      secretName: {{ .secretName }}
+  {{- end }}
+{{- end }}
+  rules:
+  {{- range .Values.ingress.hosts }}
+  {{- $host := . -}}
+  {{- with $ }}
+    - host: {{ $host | quote }}
+      http:
+        paths:
+          - path: /.well-known/simple-web-discovery
+            pathType: Exact
+            backend:
+              service:
+                name: {{ index .Values "global" "auth-server" "authServerServiceName" }}
+                port:
+                  number: 8080
+  {{- end }}
+  {{- end }}
+{{- end }}
+
+---
+{{- if .Values.global.scim.ingress.scimConfigEnabled }}
+{{ $fullName := include "nginx-ingress.fullname" . -}}
+{{- $ingressPath := .Values.ingress.path -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $fullName }}-scim-config
+  labels:
+    app: {{ $fullName }}-scim-config
+{{- if .Values.ingress.additionalLabels }}
+{{ toYaml .Values.ingress.additionalLabels | indent 4 }}
+{{- end }}
+{{- if .Values.ingress.scimConfigLabels }}
+{{ toYaml .Values.ingress.scimConfigLabels | indent 4 }}
+{{- end }}
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/configuration-snippet: "rewrite /.well-known/scim-configuration /jans-scim/restv1/scim-configuration$1 break;"
+    nginx.ingress.kubernetes.io/rewrite-target: /jans-scim/restv1/scim-configuration
+{{- if .Values.ingress.scimConfigAdditionalAnnotations }}
+{{ toYaml .Values.ingress.scimConfigAdditionalAnnotations | indent 4 }}
+{{- end }}
+{{- if .Values.ingress.additionalAnnotations }}
+{{ toYaml .Values.ingress.additionalAnnotations | indent 4 }}
+{{- end }}
+spec:
+{{- if .Values.ingress.tls }}
+  tls:
+  {{- range .Values.ingress.tls }}
+    - hosts:
+      {{- range .hosts }}
+        - {{ . | quote }}
+      {{- end }}
+      secretName: {{ .secretName }}
+  {{- end }}
+{{- end }}
+  rules:
+  {{- range .Values.ingress.hosts }}
+  {{- $host := . -}}
+  {{- with $ }}
+    - host: {{ $host | quote }}
+      http:
+        paths:
+          - path: /.well-known/scim-configuration
+            pathType: Exact
+            backend:
+              service:
+                name: {{ .Values.global.scim.scimServiceName }}
+                port:
+                  number: 8080
+  {{- end }}
+  {{- end }}
+{{- end }}
+
+---
+
+{{- if .Values.global.scim.ingress.scimEnabled }}
+{{ $fullName := include "nginx-ingress.fullname" . -}}
+{{- $ingressPath := .Values.ingress.path -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $fullName }}-scim
+  labels:
+    app: {{ $fullName }}-scim
+{{- if .Values.ingress.additionalLabels }}
+{{ toYaml .Values.ingress.additionalLabels | indent 4 }}
+{{- end }}
+{{- if .Values.ingress.scimLabels }}
+{{ toYaml .Values.ingress.scimLabels | indent 4 }}
+{{- end }}
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.org/ssl-services: "scim"
+    nginx.ingress.kubernetes.io/proxy-next-upstream: "error timeout invalid_header http_500 http_502 http_503 http_504"
+{{- if .Values.ingress.scimAdditionalAnnotations }}
+{{ toYaml .Values.ingress.scimAdditionalAnnotations | indent 4 }}
+{{- end }}
+{{- if .Values.ingress.additionalAnnotations }}
+{{ toYaml .Values.ingress.additionalAnnotations | indent 4 }}
+{{- end }}
+spec:
+{{- if .Values.ingress.tls }}
+  tls:
+  {{- range .Values.ingress.tls }}
+    - hosts:
+      {{- range .hosts }}
+        - {{ . | quote }}
+      {{- end }}
+      secretName: {{ .secretName }}
+  {{- end }}
+{{- end }}
+  rules:
+  {{- range .Values.ingress.hosts }}
+  {{- $host := . -}}
+  {{- with $ }}
+    - host: {{ $host | quote }}
+      http:
+        paths:
+          - path: /jans-scim
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.global.scim.scimServiceName }}
+                port:
+                  number: 8080
+  {{- end }}
+  {{- end }}
+{{- end }}
+
+---
+
+{{ if index .Values "global" "config-api" "ingress" "configApiEnabled" -}}
+{{ $fullName := include "nginx-ingress.fullname" . -}}
+{{- $ingressPath := .Values.ingress.path -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $fullName }}-config-api
+  labels:
+    app: {{ $fullName }}-config-api
+{{- if .Values.ingress.additionalLabels }}
+{{ toYaml .Values.ingress.additionalLabels | indent 4 }}
+{{- end }}
+{{- if .Values.ingress.configApiLabels }}
+{{ toYaml .Values.ingress.configApiLabels | indent 4 }}
+{{- end }}
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.org/ssl-services: "configapi"
+    nginx.ingress.kubernetes.io/proxy-next-upstream: "error timeout invalid_header http_500 http_502 http_503 http_504"
+{{- if .Values.ingress.configApiAdditionalAnnotations }}
+{{ toYaml .Values.ingress.configApiAdditionalAnnotations | indent 4 }}
+{{- end }}
+{{- if .Values.ingress.additionalAnnotations }}
+{{ toYaml .Values.ingress.additionalAnnotations | indent 4 }}
+{{- end }}
+spec:
+{{- if .Values.ingress.tls }}
+  tls:
+  {{- range .Values.ingress.tls }}
+    - hosts:
+      {{- range .hosts }}
+        - {{ . | quote }}
+      {{- end }}
+      secretName: {{ .secretName }}
+  {{- end }}
+{{- end }}
+  rules:
+  {{- range .Values.ingress.hosts }}
+  {{- $host := . -}}
+  {{- with $ }}
+    - host: {{ $host | quote }}
+      http:
+        paths:
+          - path: /jans-config-api
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ index .Values "global" "config-api" "configApiServerServiceName" }}
+                port:
+                  number: 8074
+  {{- end }}
+  {{- end }}
+{{- end }}
+
+---
+{{ if index .Values "global" "auth-server" "ingress" "u2fConfigEnabled" -}}
+{{ $fullName := include "nginx-ingress.fullname" . -}}
+{{- $ingressPath := .Values.ingress.path -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $fullName }}-u2f-config
+  labels:
+    app: {{ $fullName }}-u2f-config
+{{- if .Values.ingress.additionalLabels }}
+{{ toYaml .Values.ingress.additionalLabels | indent 4 }}
+{{- end }}
+{{- if .Values.ingress.u2fConfigLabels }}
+{{ toYaml .Values.ingress.u2fConfigLabels | indent 4 }}
+{{- end }}
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/configuration-snippet: "rewrite /.well-known/fido-configuration /jans-auth/restv1/fido-configuration$1 break;"
+    nginx.ingress.kubernetes.io/rewrite-target: /jans-auth/restv1/fido-configuration
+{{- if .Values.ingress.u2fAdditionalAnnotations }}
+{{ toYaml .Values.ingress.u2fAdditionalAnnotations | indent 4 }}
+{{- end }}
+{{- if .Values.ingress.additionalAnnotations }}
+{{ toYaml .Values.ingress.additionalAnnotations | indent 4 }}
+{{- end }}
+spec:
+{{- if .Values.ingress.tls }}
+  tls:
+  {{- range .Values.ingress.tls }}
+    - hosts:
+      {{- range .hosts }}
+        - {{ . | quote }}
+      {{- end }}
+      secretName: {{ .secretName }}
+  {{- end }}
+{{- end }}
+  rules:
+  {{- range .Values.ingress.hosts }}
+  {{- $host := . -}}
+  {{- with $ }}
+    - host: {{ $host | quote }}
+      http:
+        paths:
+          - path: /.well-known/fido-configuration
+            pathType: Exact
+            backend:
+              service:
+                name: {{ index .Values "global" "auth-server" "authServerServiceName" }}
+                port:
+                  number: 8080
+  {{- end }}
+  {{- end }}
+{{- end }}
+
+---
+
+{{ if .Values.global.fido2.ingress.fido2ConfigEnabled -}}
+{{ $fullName := include "nginx-ingress.fullname" . -}}
+{{- $ingressPath := .Values.ingress.path -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $fullName }}-fido2-configuration
+  labels:
+    app: {{ $fullName }}-fido2
+{{- if .Values.ingress.additionalLabels }}
+{{ toYaml .Values.ingress.additionalLabels | indent 4 }}
+{{- end }}
+{{- if .Values.ingress.fido2ConfigLabels }}
+{{ toYaml .Values.ingress.fido2ConfigLabels | indent 4 }}
+{{- end }}
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/configuration-snippet: "rewrite /.well-known/fido2-configuration /jans-fido2/restv1/configuration$1 break;"
+    nginx.ingress.kubernetes.io/rewrite-target: /jans-fido2/restv1/configuration
+{{- if .Values.ingress.fido2ConfigAdditionalAnnotations }}
+{{ toYaml .Values.ingress.fido2ConfigAdditionalAnnotations | indent 4 }}
+{{- end }}
+{{- if .Values.ingress.additionalAnnotations }}
+{{ toYaml .Values.ingress.additionalAnnotations | indent 4 }}
+{{- end }}
+spec:
+{{- if .Values.ingress.tls }}
+  tls:
+  {{- range .Values.ingress.tls }}
+    - hosts:
+      {{- range .hosts }}
+        - {{ . | quote }}
+      {{- end }}
+      secretName: {{ .secretName }}
+  {{- end }}
+{{- end }}
+  rules:
+  {{- range .Values.ingress.hosts }}
+  {{- $host := . -}}
+  {{- with $ }}
+    - host: {{ $host | quote }}
+      http:
+        paths:
+          - path: /.well-known/fido2-configuration
+            pathType: Exact
+            backend:
+              service:
+                name: {{ .Values.global.fido2.fido2ServiceName }}
+                port:
+                  number: 8080
+  {{- end }}
+  {{- end }}
+{{- end }}
+
+---
+
+{{ if index .Values "global" "auth-server" "ingress" "authServerEnabled" -}}
+{{ $fullName := include "nginx-ingress.fullname" . -}}
+{{- $ingressPath := .Values.ingress.path -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $fullName }}-auth-server
+  labels:
+    app: {{ $fullName }}-auth-server
+{{- if .Values.ingress.additionalLabels }}
+{{ toYaml .Values.ingress.additionalLabels | indent 4 }}
+{{- end }}
+{{- if .Values.ingress.authServerLabels }}
+{{ toYaml .Values.ingress.authServerLabels | indent 4 }}
+{{- end }}
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.org/ssl-services: "auth-server"
+    nginx.ingress.kubernetes.io/proxy-next-upstream: "error timeout invalid_header http_500 http_502 http_503 http_504"
+{{- if .Values.ingress.authServerAdditionalAnnotations }}
+{{ toYaml .Values.ingress.authServerAdditionalAnnotations | indent 4 }}
+{{- end }}
+{{- if .Values.ingress.additionalAnnotations }}
+{{ toYaml .Values.ingress.additionalAnnotations | indent 4 }}
+{{- end }}
+spec:
+{{- if .Values.ingress.tls }}
+  tls:
+  {{- range .Values.ingress.tls }}
+    - hosts:
+      {{- range .hosts }}
+        - {{ . | quote }}
+      {{- end }}
+      secretName: {{ .secretName }}
+  {{- end }}
+{{- end }}
+  rules:
+  {{- range .Values.ingress.hosts }}
+  {{- $host := . -}}
+  {{- with $ }}
+    - host: {{ $host | quote }}
+      http:
+        paths:
+          - path: /jans-auth
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ index .Values "global" "auth-server" "authServerServiceName" }}
+                port:
+                  number: 8080
+  {{- end }}
+  {{- end }}
+{{- end }}
+

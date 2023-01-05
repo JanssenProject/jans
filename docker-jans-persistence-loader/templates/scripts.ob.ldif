@@ -2,26 +2,23 @@ dn: inum=A51E-76DA,ou=scripts,o=jans
 description: Openbanking authentication module
 displayName: urn:openbanking:psd2:sca
 inum: A51E-76DA
+jansConfProperty: {"value1":"redirect_url","value2":"https://bank-op.gluu.org/oxauth/authorize.htm?scope=openid+profile+email+user_name&acr_values=basic&response_type=code&redirect_uri=https%3A%2F%2Fbank.gluu.org%2Fjans-auth%2Fpostlogin.htm&nonce=72fc1a52-25a7-4293-929d-b61b8a05c9c4&client_id=0c76f3bb-b6de-49c4-8dff-f53d7b768f96","description":""}
+jansConfProperty: {"value1":"tpp_jwks_url","value2":"https://keystore.openbankingtest.org.uk/0014H00001lFE7dQAG/0014H00001lFE7dQAG.jwks","description":""}
+jansEnabled: true
 jansLevel: 10
 jansModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
 jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
-jansConfProperty: {"value1":"redirect_url","value2":"https://bank-op.gluu.org/oxauth/authorize.htm?scope=openid+profile+email+user_name&acr_values=basic&response_type=code&redirect_uri=https%3A%2F%2Fbank.gluu.org%2Fjans-auth%2Fpostlogin.htm&nonce=72fc1a52-25a7-4293-929d-b61b8a05c9c4&client_id=0c76f3bb-b6de-49c4-8dff-f53d7b768f96","description":""}
-jansConfProperty: {"value1":"tpp_jwks_url","value2":"https://keystore.openbankingtest.org.uk/0014H00001lFE7dQAG/0014H00001lFE7dQAG.jwks","description":""}
-jansConfProperty: {"value1":"keyId","value2":"GkwIzWy88xWSlcWnLiEc8ip9s2M","description":null,"hide":false}
+jansProgLng: python
 jansRevision: 1
 jansScr::%(person_authentication_openbanking)s
 jansScrTyp: person_authentication
 objectClass: top
 objectClass: jansCustomScr
-jansEnabled: true
-jansProgLng: python
 
 dn: inum=DAA9-B788,ou=scripts,o=jans
 description: Openbanking Client Registration
 displayName: client_registration
 inum: DAA9-B788
-jansLevel: 100
-jansModuleProperty: {"value1":"v1","value2":"v2","description":""}
 jansConfProperty: {"value1":"clientScopes","value2":"ASPSPReadAccess AuthoritiesReadAccess TPPReadAccess","hide":false,"description":"Used in SSA validation"}
 jansConfProperty: {"value1":"keyId","value2":"GkwIzWy88xWSlcWnLiEc8ip9s2M","hide":false,"description":"Used in SSA Validation, kid used while encoding a JWT sent to token URL"}
 jansConfProperty: {"value1":"signingCert","value2":"/etc/certs/obieDir/AMTWPPovGpsZ3LQ2VQbyB4XcTyw.pem","hide":false,"description":"Used in SSA Validation, location of cert used for signing"}
@@ -37,39 +34,54 @@ jansConfProperty: {"value1":"rootCert","value2":"/etc/certs/obieDir/root.pem","h
 jansConfProperty: {"value1":"issuingaca","value2":"/etc/certs/obieDir/issuingca.pem","hide":false,"description":""}
 jansConfProperty: {"value1":"signingaca","value2":"/etc/certs/obieDir/signingca.pem","hide":false,"description":""}
 jansConfProperty: {"value1":"jwks_endpoint","value2":"https://keystore.openbankingtest.org.uk/keystore/openbanking.jwks","hide":false,"description":"Used for signing software statement and request object for DCR"}
+jansEnabled: true
+jansLevel: 100
+jansModuleProperty: {"value1":"v1","value2":"v2","description":""}
+jansProgLng: python
 jansRevision: 1
 jansScr::%(client_registration_registration)s
 jansScrTyp: client_registration
 objectClass: top
 objectClass: jansCustomScr
-jansEnabled: true
-jansProgLng: python
 
 dn: inum=CACD-5902,ou=scripts,o=jans
 description: Openbanking Token Update Script
 displayName: update_token
 inum: CACD-5902
+jansEnabled: true
 jansLevel: 100
 jansModuleProperty: {"value1":"v1","value2":"v2","description":""}
+jansProgLng: python
 jansRevision: 1
 jansScr::%(update_token_updatetoken)s
 jansScrTyp: update_token
 objectClass: top
 objectClass: jansCustomScr
-jansEnabled: true
-jansProgLng: python
 
 dn: inum=CABA-2222,ou=scripts,o=jans
 description: Openbanking Introspection Script
 displayName: introspection
 inum: CABA-2222
+jansEnabled: true
 jansLevel: 102
 jansModuleProperty: {"value1":"v1","value2":"v2","description":""}
-jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+jansProgLng: python
 jansRevision: 1
 jansScr::%(introspection_introspectionscript)s
 jansScrTyp: introspection
 objectClass: top
 objectClass: jansCustomScr
+
+dn: inum=A44E-4F3D,ou=scripts,o=jans
+objectClass: top
+objectClass: jansCustomScr
+description: Role Based Scopes
+displayName: role_based_scopes
+inum: A44E-4F3D
 jansEnabled: true
+jansLevel: 1
+jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
 jansProgLng: python
+jansRevision: 1
+jansScr::%(introspection_introspection_role_based_scope)s
+jansScrTyp: introspection

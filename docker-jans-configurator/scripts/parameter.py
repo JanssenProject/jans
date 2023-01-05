@@ -25,13 +25,14 @@ DEFAULT_SCOPES = (
 
 OPTIONAL_SCOPES = (
     "ldap",
-    "scim",
-    "fido2",
-    "client-api",
     "couchbase",
     "redis",
     "sql",
+
+    # these scopes are no longer needed; not removed for backward-compat
+    "fido2",
     "casa",
+    "scim",
 )
 
 

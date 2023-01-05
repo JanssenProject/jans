@@ -32,11 +32,7 @@
 		<!-- ############### Gluu ################# -->
 		<Logger name="org.gluu" level="${log4j.default.log.level}" />
 
-        <Logger name="io.jans.fido2" level="INFO">
-            <AppenderRef ref="FILE" />
-        </Logger>
-
-		<Logger name="org.gluu.site.ldap" level="${log4j.default.log.level}" additivity="false">
+        <Logger name="org.gluu.site.ldap" level="${log4j.default.log.level}" additivity="false">
 			<AppenderRef ref="PERSISTENCE_FILE" />
 		</Logger>
 

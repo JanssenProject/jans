@@ -2,11 +2,13 @@ package io.jans.ca.plugin.adminui.model.config;
 
 public class AUIConfiguration {
 
+    private String appType;
     //auth server
     private String authServerHost;
     private String authServerClientId;
     private String authServerClientSecret;
     private String authServerScope;
+    private String authServerAcrValues;
     private String authServerRedirectUrl;
     private String authServerFrontChannelLogoutUrl;
     private String authServerPostLogoutRedirectUri;
@@ -19,6 +21,7 @@ public class AUIConfiguration {
     private String tokenServerClientId;
     private String tokenServerClientSecret;
     private String tokenServerScope;
+    private String tokenServerAcrValues;
     private String tokenServerRedirectUrl;
     private String tokenServerFrontChannelLogoutUrl;
     private String tokenServerPostLogoutRedirectUri;
@@ -28,6 +31,13 @@ public class AUIConfiguration {
     private String tokenServerUserInfoEndpoint;
     private String tokenServerEndSessionEndpoint;
 
+    public String getAppType() {
+        return appType;
+    }
+
+    public void setAppType(String appType) {
+        this.appType = appType;
+    }
     // LicenseSpring
     private LicenseConfiguration licenseConfiguration;
 
@@ -223,4 +233,19 @@ public class AUIConfiguration {
         this.licenseConfiguration = licenseConfiguration;
     }
 
+    public String getAuthServerAcrValues() {
+        return authServerAcrValues;
+    }
+
+    public void setAuthServerAcrValues(String authServerAcrValues) {
+        this.authServerAcrValues = authServerAcrValues;
+    }
+
+    public String getTokenServerAcrValues() {
+        return tokenServerAcrValues;
+    }
+
+    public void setTokenServerAcrValues(String tokenServerAcrValues) {
+        this.tokenServerAcrValues = tokenServerAcrValues;
+    }
 }

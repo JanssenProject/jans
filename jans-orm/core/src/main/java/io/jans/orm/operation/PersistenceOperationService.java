@@ -7,10 +7,10 @@
 package io.jans.orm.operation;
 
 import io.jans.orm.exception.AuthenticationException;
-import io.jans.orm.exception.extension.PersistenceExtension;
 import io.jans.orm.exception.operation.ConnectionException;
 import io.jans.orm.exception.operation.EntryConvertationException;
 import io.jans.orm.exception.operation.SearchException;
+import io.jans.orm.extension.PersistenceExtension;
 
 /**
  * Base interface for Operation Service

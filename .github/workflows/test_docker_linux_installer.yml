@@ -1,0 +1,33 @@
+name: Test Linux installer
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "jans-linux-setup/**"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "jans-linux-setup/**"
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 6
+      matrix:
+        # add '"pgsql" when supported
+        persistence-backends: ["MYSQL"]
+        python-version: ["3.7"]
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python3
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Test Jans monolith demo
+      run: |
+        ip=$(ifconfig eth0 | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1')
+        sudo chmod u+x automation/startjanssenmonolithdemo.sh
+        sudo bash ./automation/startjanssenmonolithdemo.sh demoexample.jans.io ${{ matrix.persistence-backends }} $ip ${{ github.sha }}

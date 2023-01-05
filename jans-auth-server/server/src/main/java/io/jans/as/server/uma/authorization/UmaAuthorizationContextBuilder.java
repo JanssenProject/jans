@@ -16,7 +16,7 @@ import io.jans.as.server.uma.service.UmaResourceService;
 import io.jans.as.server.uma.service.UmaSessionService;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;

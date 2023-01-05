@@ -1,6 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>jans-orm-sql</artifactId>
@@ -10,7 +8,7 @@
 	<parent>
 		<groupId>io.jans</groupId>
 		<artifactId>jans-orm-parent</artifactId>
-		<version>1.0.0-SNAPSHOT</version>
+		<version>1.0.6-SNAPSHOT</version>
 	</parent>
 
 	<build>
@@ -44,8 +42,14 @@
 			<artifactId>commons-dbcp2</artifactId>
 		</dependency>
 		<dependency>
-		    <groupId>mysql</groupId>
-		    <artifactId>mysql-connector-java</artifactId>
+			<groupId>com.mysql</groupId>
+			<artifactId>mysql-connector-j</artifactId>
+		</dependency>
+		<!-- remove after nupdate mysql-libs -->
+		<dependency>
+			<groupId>com.google.protobuf</groupId>
+			<artifactId>protobuf-java</artifactId>
+			<version>3.19.6</version>
 		</dependency>
 		<dependency>
 		    <groupId>org.postgresql</groupId>
@@ -59,19 +63,19 @@
 		</dependency>
 
 		<!-- Weld -->
+        <dependency>
+		    <groupId>jakarta.enterprise</groupId>
+		    <artifactId>jakarta.enterprise.cdi-api</artifactId>
+   		</dependency>
 		<dependency>
-			<groupId>javax.enterprise</groupId>
-			<artifactId>cdi-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>javax.inject</groupId>
-			<artifactId>javax.inject</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>javax.annotation</groupId>
-			<artifactId>javax.annotation-api</artifactId>
-		</dependency>
+		    <groupId>jakarta.inject</groupId>
+        	<artifactId>jakarta.inject-api</artifactId>
+   		</dependency>	
+        <dependency>
+            <groupId>jakarta.annotation</groupId>
+            <artifactId>jakarta.annotation-api</artifactId>
+        </dependency>
+
 
 		<!-- Tests -->
 		<dependency>
@@ -80,5 +84,4 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-
 </project>

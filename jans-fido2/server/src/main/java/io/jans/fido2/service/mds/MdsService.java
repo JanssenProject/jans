@@ -18,10 +18,6 @@
 
 package io.jans.fido2.service.mds;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -29,15 +25,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.Response.StatusType;
-
 import org.apache.commons.codec.binary.Hex;
+import org.slf4j.Logger;
+
+import com.fasterxml.jackson.databind.JsonNode;
+
 import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.conf.Fido2Configuration;
@@ -47,11 +39,10 @@ import io.jans.fido2.service.DataMapperService;
 import io.jans.fido2.service.client.ResteasyClientFactory;
 import io.jans.fido2.service.verifier.CommonVerifiers;
 import io.jans.service.cdi.event.ApplicationInitialized;
-import io.jans.util.StringHelper;
-import org.jboss.resteasy.client.jaxrs.ResteasyClient;
-import org.slf4j.Logger;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
+import jakarta.inject.Inject;
 
 @ApplicationScoped
 public class MdsService {
@@ -83,99 +74,51 @@ public class MdsService {
         this.mdsEntries = Collections.synchronizedMap(new HashMap<String, JsonNode>());
     }
 
-    public JsonNode fetchMetadata(byte[] aaguidBuffer) {
-        Fido2Configuration fido2Configuration = appConfiguration.getFido2Configuration();
-        if (fido2Configuration == null) {
-            throw new Fido2RuntimeException("Fido2 configuration not exists");
-        }
+	public JsonNode fetchMetadata(byte[] aaguidBuffer) {
+		Fido2Configuration fido2Configuration = appConfiguration.getFido2Configuration();
+		if (fido2Configuration == null) {
+			throw new Fido2RuntimeException("Fido2 configuration not exists");
+		}
 
-        String mdsAccessToken = fido2Configuration.getMdsAccessToken();
-        if (StringHelper.isEmpty(mdsAccessToken)) {
-            throw new Fido2RuntimeException("Fido2 MDS access token should be set");
-        }
+		String aaguid = deconvert(aaguidBuffer);
 
-        String aaguid = deconvert(aaguidBuffer);
-        
-        JsonNode mdsEntry = mdsEntries.get(aaguid);
-        if (mdsEntry != null) {
-            log.debug("Get MDS by aaguid {} from cache", aaguid);
-            return mdsEntry;
-        }
+		JsonNode mdsEntry = mdsEntries.get(aaguid);
+		if (mdsEntry != null) {
+			log.debug("Get MDS by aaguid {} from cache", aaguid);
+			return mdsEntry;
+		}
 
-        JsonNode tocEntry = tocService.getAuthenticatorsMetadata(aaguid);
-        if (tocEntry == null) {
-            throw new Fido2RuntimeException("Authenticator not in TOC aaguid " + aaguid);
-        }
+		JsonNode tocEntry = tocService.getAuthenticatorsMetadata(aaguid);
+		if (tocEntry == null) {
+			throw new Fido2RuntimeException("Authenticator not in TOC aaguid " + aaguid);
+		}
 
-        String tocEntryUrl = tocEntry.get("url").asText();
-        URI metadataUrl;
-        try {
-            metadataUrl = new URI(String.format("%s/?token=%s", tocEntryUrl, mdsAccessToken));
-            log.debug("Authenticator AAGUI {} url metadataUrl {} downloaded", aaguid, metadataUrl);
-        } catch (URISyntaxException e) {
-            throw new Fido2RuntimeException("Invalid URI in TOC aaguid " + aaguid);
-        }
+		verifyTocEntryStatus(aaguid, tocEntry);
 
-        verifyTocEntryStatus(aaguid, tocEntry);
-        String metadataHash = commonVerifiers.verifyThatFieldString(tocEntry, "hash");
-
-        log.debug("Reaching MDS at {}", tocEntryUrl);
-
-        mdsEntry = downloadMdsFromServer(aaguid, metadataUrl, metadataHash);
-
-        mdsEntries.put(aaguid, mdsEntry);
-        
-        return mdsEntry;
-    }
-
-	private JsonNode downloadMdsFromServer(String aaguid, URI metadataUrl, String metadataHash) {
-		ResteasyClient resteasyClient = resteasyClientFactory.buildResteasyClient();
-        Response response = resteasyClient.target(metadataUrl).request().header("Content-Type", MediaType.APPLICATION_JSON).get();
-        String body = response.readEntity(String.class);
-
-        StatusType status = response.getStatusInfo();
-        log.debug("Response from resource server {}", status);
-        if (status.getFamily() == Status.Family.SUCCESSFUL) {
-            byte[] bodyBuffer;
-            try {
-                bodyBuffer = body.getBytes("UTF-8");
-            } catch (UnsupportedEncodingException e) {
-                throw new Fido2RuntimeException("Unable to verify metadata hash for aaguid " + aaguid);
-            }
-
-            byte[] digest = tocService.getDigester().digest(bodyBuffer);
-            if (!Arrays.equals(digest, base64Service.urlDecode(metadataHash))) {
-                throw new Fido2RuntimeException("Unable to verify metadata hash for aaguid " + aaguid);
-            }
-
-            try {
-            	return dataMapperService.readTree(base64Service.urlDecode(body));
-            } catch (IOException e) {
-                log.error("Can't parse payload from the server");
-                throw new Fido2RuntimeException("Unable to parse payload from server for aaguid " + aaguid);
-            }
-        } else {
-            throw new Fido2RuntimeException("Unable to retrieve metadata for aaguid " + aaguid + " status " + status);
-        }
+		return tocEntry;
 	}
 
-    private void verifyTocEntryStatus(String aaguid, JsonNode tocEntry) {
-        JsonNode statusReports = tocEntry.get("statusReports");
+	
 
-        Iterator<JsonNode> iter = statusReports.elements();
-        while (iter.hasNext()) {
-            JsonNode statusReport = iter.next();
-            AuthenticatorCertificationStatus authenticatorStatus = AuthenticatorCertificationStatus.valueOf(statusReport.get("status").asText());
-            String authenticatorEffectiveDate = statusReport.get("effectiveDate").asText();
-            log.debug("Authenticator AAGUI {} status {} effective date {}", aaguid, authenticatorStatus, authenticatorEffectiveDate);
-            verifyStatusAcceptable(aaguid, authenticatorStatus);
-        }
-    }
+	private void verifyTocEntryStatus(String aaguid, JsonNode tocEntry) {
+		JsonNode statusReports = tocEntry.get("statusReports");
 
-    private String deconvert(byte[] aaguidBuffer) {
-        return Hex.encodeHexString(aaguidBuffer).replaceFirst("([0-9a-fA-F]{8})([0-9a-fA-F]{4})([0-9a-fA-F]{4})([0-9a-fA-F]{4})([0-9a-fA-F]+)",
-                "$1-$2-$3-$4-$5");
-    }
+		Iterator<JsonNode> iter = statusReports.elements();
+		while (iter.hasNext()) {
+			JsonNode statusReport = iter.next();
+			AuthenticatorCertificationStatus authenticatorStatus = AuthenticatorCertificationStatus
+					.valueOf(statusReport.get("status").asText());
+			String authenticatorEffectiveDate = statusReport.get("effectiveDate").asText();
+			log.debug("Authenticator AAGUID {} status {} effective date {}", aaguid, authenticatorStatus,
+					authenticatorEffectiveDate);
+			verifyStatusAcceptable(aaguid, authenticatorStatus);
+		}
+	}
+
+	private String deconvert(byte[] aaguidBuffer) {
+		return Hex.encodeHexString(aaguidBuffer).replaceFirst(
+				"([0-9a-fA-F]{8})([0-9a-fA-F]{4})([0-9a-fA-F]{4})([0-9a-fA-F]{4})([0-9a-fA-F]+)", "$1-$2-$3-$4-$5");
+	}
 
     private void verifyStatusAcceptable(String aaguid, AuthenticatorCertificationStatus status) {
         final List<AuthenticatorCertificationStatus> undesiredAuthenticatorStatus = Arrays

@@ -14,6 +14,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.event.DeleteNotifier;
 import io.jans.orm.exception.KeyConversionException;
@@ -32,15 +35,13 @@ import io.jans.orm.reflect.property.PropertyAnnotation;
 import io.jans.orm.search.filter.Filter;
 import io.jans.orm.util.ArrayHelper;
 import io.jans.orm.util.StringHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Hybrid Entry Manager
  *
  * @author Yuriy Movchan Date: 07/10/2019
  */
-public class HybridEntryManager extends BaseEntryManager implements Serializable {
+public class HybridEntryManager extends BaseEntryManager<HybridPersistenceOperationService> implements Serializable {
 
     private static final long serialVersionUID = -1544664410881103105L;
 
@@ -188,6 +189,12 @@ public class HybridEntryManager extends BaseEntryManager implements Serializable
     	PersistenceEntryManager persistenceEntryManager = getEntryManagerForDn(dn);
     	return persistenceEntryManager.exportEntry(dn);
     }
+
+	@Override
+	public <T> List<AttributeData> exportEntry(String dn, String objectClass) {
+		PersistenceEntryManager persistenceEntryManager = getEntryManagerForDn(dn);
+		return persistenceEntryManager.exportEntry(dn, objectClass);
+	}
 
 	@Override
 	public <T> void importEntry(String dn, Class<T> entryClass, List<AttributeData> data) {
@@ -377,7 +384,7 @@ public class HybridEntryManager extends BaseEntryManager implements Serializable
 	@Override
 	public <T> void removeByDn(String primaryKey, String[] objectClasses) {
 		PersistenceEntryManager persistenceEntryManager = getEntryManagerForDn(primaryKey);
-    	persistenceEntryManager.remove(primaryKey);
+    	persistenceEntryManager.removeByDn(primaryKey, objectClasses);
 	}
 
 	@Override
@@ -400,7 +407,7 @@ public class HybridEntryManager extends BaseEntryManager implements Serializable
 	@Override
     public <T> void removeRecursivelyFromDn(String dn, String[] objectClasses) {
     	PersistenceEntryManager persistenceEntryManager = getEntryManagerForDn(dn);
-    	persistenceEntryManager.removeRecursively(dn);
+    	persistenceEntryManager.removeRecursivelyFromDn(dn, objectClasses);
     }
 
     //*************************************************************************
@@ -447,5 +454,6 @@ public class HybridEntryManager extends BaseEntryManager implements Serializable
 	protected Object getNativeDateAttributeValue(Date dateValue) {
         throw new UnsupportedOperationException("Method not implemented.");
 	}
+
 
 }

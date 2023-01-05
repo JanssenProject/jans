@@ -6,13 +6,17 @@
 
 package io.jans.fido2.service.shared;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.model.ApplicationType;
 
+/**
+ * Obtain Organization Info
+ *
+ */
 @ApplicationScoped
 @Named("organizationService")
 public class OrganizationService extends io.jans.as.common.service.OrganizationService {

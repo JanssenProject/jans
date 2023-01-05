@@ -8,7 +8,7 @@ package io.jans.notify.model.conf;
 
 import java.util.List;
 
-import javax.enterprise.inject.Vetoed;
+import jakarta.enterprise.inject.Vetoed;
 
 /**
  * @author Yuriy Movchan

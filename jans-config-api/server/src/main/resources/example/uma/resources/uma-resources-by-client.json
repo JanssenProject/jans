@@ -1,0 +1,32 @@
+[
+    {
+        "dn": "jansId=b0e7e1d7-ab67-45ec-be16-4466da70e63b,ou=resources,ou=uma,o=jans",
+        "id": "b0e7e1d7-ab67-45ec-be16-4466da70e63b",
+        "name": "uma-resource-2",
+        "iconUri": "https://config-api.com",
+        "scopes": [
+            "inum=ab47c599-d188-44b6-a32a-91e6b173856a,ou=scopes,o=jans"
+        ],
+        "clients": [
+            "inum=1800.768b3d38-a6e8-4be4-93d1-72df33d34fd6,ou=clients,o=jans",
+            "inum=1201.1d010784-b5bf-4813-8f49-cfea00f50498,ou=clients,o=jans"
+        ],
+        "description": "Uma resource two",
+        "deletable": false
+    },
+    {
+        "dn": "jansId=4754f784-e80f-4a36-a014-173bd3e6fb6f,ou=resources,ou=uma,o=jans",
+        "id": "4754f784-e80f-4a36-a014-173bd3e6fb6f",
+        "name": "uma-resource-1",
+        "iconUri": "https://config-api.com",
+        "scopes": [
+            "inum=ab47c599-d188-44b6-a32a-91e6b173856a,ou=scopes,o=jans"
+        ],
+        "clients": [
+            "inum=1800.768b3d38-a6e8-4be4-93d1-72df33d34fd6,ou=clients,o=jans",
+            "inum=1201.1d010784-b5bf-4813-8f49-cfea00f50498,ou=clients,o=jans"
+        ],
+        "description": "Uma resource one",
+        "deletable": false
+    }
+]

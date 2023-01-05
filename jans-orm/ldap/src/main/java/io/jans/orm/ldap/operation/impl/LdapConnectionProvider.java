@@ -11,10 +11,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Properties;
 
-import io.jans.orm.exception.operation.ConfigurationException;
-import io.jans.orm.operation.auth.PasswordEncryptionMethod;
-import io.jans.orm.util.ArrayHelper;
-import io.jans.orm.util.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +26,12 @@ import com.unboundid.ldap.sdk.SimpleBindRequest;
 import com.unboundid.util.ssl.SSLUtil;
 import com.unboundid.util.ssl.TrustAllTrustManager;
 import com.unboundid.util.ssl.TrustStoreTrustManager;
+
+import io.jans.orm.exception.operation.ConfigurationException;
+import io.jans.orm.operation.auth.PasswordEncryptionMethod;
+import io.jans.orm.util.ArrayHelper;
+import io.jans.orm.util.CertUtils;
+import io.jans.orm.util.StringHelper;
 
 /**
  * @author Yuriy Movchan
@@ -79,18 +81,17 @@ public class LdapConnectionProvider {
     public void create() {
         try {
             init(props);
-        } catch (LDAPException ex) {
-            creationResultCode = ex.getResultCode();
+        } catch (Exception ex) {
+        	if (ex instanceof LDAPException) {
+        		creationResultCode = ((LDAPException) ex).getResultCode();
+        	}
 
             Properties clonedProperties = (Properties) props.clone();
             if (clonedProperties.getProperty("bindPassword") != null) {
                 clonedProperties.setProperty("bindPassword", "REDACTED");
             }
-            LOG.error("Failed to create connection pool with properties: " + clonedProperties, ex);
-        } catch (Exception ex) {
-            Properties clonedProperties = (Properties) props.clone();
-            if (clonedProperties.getProperty("bindPassword") != null) {
-                clonedProperties.setProperty("bindPassword", "REDACTED");
+            if (clonedProperties.getProperty("ssl.trustStorePin") != null) {
+                clonedProperties.setProperty("ssl.trustStorePin", "REDACTED");
             }
             LOG.error("Failed to create connection pool with properties: " + clonedProperties, ex);
         }
@@ -133,23 +134,27 @@ public class LdapConnectionProvider {
 
         LDAPConnectionOptions connectionOptions = new LDAPConnectionOptions();
         connectionOptions.setConnectTimeoutMillis(100 * 1000);
-        connectionOptions.setAutoReconnect(true);
+        //connectionOptions.setAutoReconnect(true);
 
         this.useSSL = Boolean.valueOf(props.getProperty("useSSL")).booleanValue();
 
         SSLUtil sslUtil = null;
         FailoverServerSet failoverSet;
         if (this.useSSL) {
-            String sslTrustStoreFile = props.getProperty("ssl.trustStoreFile");
-            String sslTrustStorePin = props.getProperty("ssl.trustStorePin");
-            String sslTrustStoreFormat = props.getProperty("ssl.trustStoreFormat");
+            String trustStoreFile = props.getProperty("ssl.trustStoreFile");
+            String trustStorePin = props.getProperty("ssl.trustStorePin");
+            String trustStoreType = props.getProperty("ssl.trustStoreFormat");
 
-            if (StringHelper.isEmpty(sslTrustStoreFile) && StringHelper.isEmpty(sslTrustStorePin)) {
+            if (CertUtils.isFips()) {
+                sslUtil = new SSLUtil(CertUtils.getTrustManagers(trustStoreFile, trustStorePin, trustStoreType));
+            } else {
+	            if (StringHelper.isEmpty(trustStoreFile) && StringHelper.isEmpty(trustStorePin)) {
                 sslUtil = new SSLUtil(new TrustAllTrustManager());
             } else {
-                TrustStoreTrustManager trustStoreTrustManager = new TrustStoreTrustManager(sslTrustStoreFile, sslTrustStorePin.toCharArray(),
-                        sslTrustStoreFormat, true);
+	                TrustStoreTrustManager trustStoreTrustManager = new TrustStoreTrustManager(trustStoreFile, trustStorePin.toCharArray(),
+	                        trustStoreType, true);
                 sslUtil = new SSLUtil(trustStoreTrustManager);
+            }
             }
 
             failoverSet = new FailoverServerSet(this.addresses, this.ports, sslUtil.createSSLSocketFactory(SSL_PROTOCOLS[0]), connectionOptions);

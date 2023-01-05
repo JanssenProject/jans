@@ -1,0 +1,22 @@
+{{- if .Values.global.istio.enabled }}
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: {{ .Release.Name }}-fido2-mtls
+  namespace: {{.Release.Namespace}}
+  labels:
+    APP_NAME: fido2
+{{ include "fido2.labels" . | indent 4}}
+{{- if .Values.additionalLabels }}
+{{ toYaml .Values.additionalLabels | indent 4 }}
+{{- end }}
+{{- if .Values.additionalAnnotations }}
+  annotations:
+{{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+spec:
+  host: {{ .Values.global.fido2.fido2ServiceName }}.{{ .Release.Namespace }}.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+{{- end }}

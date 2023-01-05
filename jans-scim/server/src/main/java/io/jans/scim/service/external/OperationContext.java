@@ -2,7 +2,7 @@ package io.jans.scim.service.external;
 
 import java.util.Map;
 import java.net.URI;
-import javax.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.MultivaluedMap;
 
 public class OperationContext {
 

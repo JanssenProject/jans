@@ -35,4 +35,10 @@ public interface ClientRegistrationType extends BaseExternalType {
     // context - io.jans.as.server.service.external.context.DynamicClientRegistrationContext
     // cert - java.security.cert.X509Certificate
     boolean isCertValidForClient(Object cert, Object context);
+
+    boolean modifyPutResponse(Object responseAsJsonObject, Object executionContext);
+
+    boolean modifyReadResponse(Object responseAsJsonObject, Object executionContext);
+
+    boolean modifyPostResponse(Object responseAsJsonObject, Object executionContext);
 }

@@ -20,7 +20,7 @@ When method GET
 Then status 200
 And print response
 And assert response.length != null
-And assert response[0].scriptType == 'PERSON_AUTHENTICATION'
+And assert response.entries[0].scriptType == 'person_authentication'
 
 
 Scenario: Fetch the first three person custom scripts
@@ -31,8 +31,8 @@ And params ({ limit: 3})
 When method GET
 And print response
 Then status 200
-And assert response.length == 3
-And assert response[0].scriptType == 'PERSON_AUTHENTICATION'
+And assert response.entries.length == 3
+And assert response.entries[0].scriptType == 'person_authentication'
 
 
 Scenario: Search person custom scripts given a serach pattern
@@ -43,8 +43,8 @@ And params ({ limit: 3,pattern:'fido2'})
 When method GET
 And print response
 Then status 200
-And assert response.length <= 3
-And assert response[0].scriptType == 'PERSON_AUTHENTICATION'
+And assert response.entries.length <= 3
+And assert response.entries[0].scriptType == 'person_authentication'
 
 
 @CreateUpdateDelete
@@ -56,10 +56,10 @@ When method GET
 And print response
 Then status 200
 And assert response.length != 0
-And assert response[0].scriptType == 'PERSON_AUTHENTICATION'
+And assert response.entries[0].scriptType == 'person_authentication'
 Given url mainUrl
 And header Authorization = 'Bearer ' + accessToken
-And def testScript = response[0]
+And def testScript = response.entries[0]
 And print "testScript before = "+testScript
 And testScript.inum = null
 And testScript.dn = null
@@ -112,11 +112,11 @@ And path 'person_authentication'
 When method GET
 And print response
 Then status 200
-And print response[0].inum
-Given url mainUrl + '/inum/'+response[0].inum
+And print response.entries[0].inum
+Given url mainUrl + '/inum/'+response.entries[0].inum
 And header Authorization = 'Bearer ' + accessToken
 And print request
 When method GET
-#And print response
+And print response
 Then status 200
-And assert response.scriptType == 'PERSON_AUTHENTICATION'
+And assert response.scriptType == 'person_authentication'

@@ -8,15 +8,11 @@ package io.jans.as.model.uma.persistence;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.Lists;
-import io.jans.as.model.util.Util;
-import io.jans.orm.annotation.AttributeName;
-import io.jans.orm.annotation.DN;
-import io.jans.orm.annotation.DataEntry;
-import io.jans.orm.annotation.Expiration;
-import io.jans.orm.annotation.ObjectClass;
+import io.jans.orm.annotation.*;
+import jakarta.validation.constraints.NotNull;
 
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -58,9 +54,6 @@ public class UmaResource implements Serializable {
     @AttributeName(name = "jansResource")
     private List<String> resources;
 
-    @AttributeName(name = "jansRevision")
-    private String rev;
-
     @AttributeName(name = "owner")
     private String creator;
 
@@ -91,9 +84,10 @@ public class UmaResource implements Serializable {
     }
 
     public void resetTtlFromExpirationDate() {
-        final Integer ttl = Util.getNumberOfSecondFromNow(getExpirationDate());
-        if (ttl != null) {
-            setTtl(ttl);
+        final Long duration = Duration.between(new Date().toInstant(), getExpirationDate().toInstant()).getSeconds();
+        final Integer calculatedTtl = duration.intValue();
+        if (calculatedTtl != null) {
+            setTtl(calculatedTtl);
         }
     }
 
@@ -197,14 +191,6 @@ public class UmaResource implements Serializable {
         this.resources = resources;
     }
 
-    public String getRev() {
-        return rev;
-    }
-
-    public void setRev(String rev) {
-        this.rev = rev;
-    }
-
     public String getCreator() {
         return creator;
     }
@@ -246,7 +232,6 @@ public class UmaResource implements Serializable {
                 ", scopeExpression='" + scopeExpression + '\'' +
                 ", clients=" + clients +
                 ", resources=" + resources +
-                ", rev='" + rev + '\'' +
                 ", creator='" + creator + '\'' +
                 ", description='" + description + '\'' +
                 ", type='" + type + '\'' +

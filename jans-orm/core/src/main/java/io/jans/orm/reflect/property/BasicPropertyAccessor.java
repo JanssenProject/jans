@@ -7,6 +7,7 @@
 package io.jans.orm.reflect.property;
 
 import java.beans.Introspector;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -153,7 +154,6 @@ public class BasicPropertyAccessor implements PropertyAccessor {
         }
 
         Method method = setterMethod(theClass, propertyName);
-
         if (method != null) {
             if (!ReflectHelper.isPublic(theClass, method)) {
                 method.setAccessible(true);
@@ -181,14 +181,21 @@ public class BasicPropertyAccessor implements PropertyAccessor {
         Method[] methods = theClass.getDeclaredMethods();
         Method potentialSetter = null;
         for (int i = 0; i < methods.length; i++) {
-            String methodName = methods[i].getName();
+        	Method method = methods[i];
 
-            if (methods[i].getParameterTypes().length == 1 && methodName.startsWith("set")) {
+        	boolean isTransient = isTransient(method);
+        	if (isTransient) {
+        		continue;
+        	}
+
+        	String methodName = method.getName();
+
+            if (method.getParameterTypes().length == 1 && methodName.startsWith("set")) {
                 String testStdMethod = Introspector.decapitalize(methodName.substring(3));
                 String testOldMethod = methodName.substring(3);
                 if (testStdMethod.equals(propertyName) || testOldMethod.equals(propertyName)) {
-                    potentialSetter = methods[i];
-                    if (returnType == null || methods[i].getParameterTypes()[0].equals(returnType)) {
+                    potentialSetter = method;
+                    if (returnType == null || method.getParameterTypes()[0].equals(returnType)) {
                         return potentialSetter;
                     }
                 }
@@ -216,6 +223,16 @@ public class BasicPropertyAccessor implements PropertyAccessor {
         }
 
         Method method = getterMethod(theClass, propertyName);
+        if (method != null) {
+	    	Annotation[] methodAnnotations = method.getAnnotations();
+	    	if (methodAnnotations != null) {
+	    		for (Annotation methodAnnotation : methodAnnotations) {
+	    			if (methodAnnotation.annotationType().equals(java.beans.Transient.class)) {
+	    				method = null;
+	    			}
+	    		}
+	    	}
+        }
 
         if (method != null) {
             if (!ReflectHelper.isPublic(theClass, method)) {
@@ -241,14 +258,21 @@ public class BasicPropertyAccessor implements PropertyAccessor {
         for (int i = 0; i < methods.length; i++) {
             // only carry on if the method has no parameters
             if (methods[i].getParameterTypes().length == 0) {
-                String methodName = methods[i].getName();
+            	Method method = methods[i];
+
+            	boolean isTransient = isTransient(method);
+            	if (isTransient) {
+            		continue;
+            	}
+
+            	String methodName = methods[i].getName();
 
                 // try "get"
                 if (methodName.startsWith("get")) {
                     String testStdMethod = Introspector.decapitalize(methodName.substring(3));
                     String testOldMethod = methodName.substring(3);
                     if (testStdMethod.equals(propertyName) || testOldMethod.equals(propertyName)) {
-                        return methods[i];
+                        return method;
                     }
 
                 }
@@ -258,12 +282,25 @@ public class BasicPropertyAccessor implements PropertyAccessor {
                     String testStdMethod = Introspector.decapitalize(methodName.substring(2));
                     String testOldMethod = methodName.substring(2);
                     if (testStdMethod.equals(propertyName) || testOldMethod.equals(propertyName)) {
-                        return methods[i];
+                        return method;
                     }
                 }
             }
         }
         return null;
     }
+
+	private static boolean isTransient(Method method) {
+		Annotation[] methodAnnotations = method.getAnnotations();
+		if (methodAnnotations != null) {
+			for (Annotation methodAnnotation : methodAnnotations) {
+				if (methodAnnotation.annotationType().equals(java.beans.Transient.class)) {
+					return true;
+				}
+			}
+		}
+		
+		return false;
+	}
 
 }

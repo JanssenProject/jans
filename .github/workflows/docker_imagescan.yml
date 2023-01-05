@@ -4,7 +4,6 @@ name: Scan Image
 on:
   push:
     branches:
-      - master
       - main
       - "!update-pycloud-in-**"
     paths:
@@ -12,12 +11,10 @@ on:
       - "!**.md"
   pull_request:
     branches:
-      - master
       - main
       - "!update-pycloud-in-**"
     paths:
       - "docker-jans-**/**"
-      - "!docker-jans-**/CHANGELOG.md"
       - "!docker-jans-**/version.txt"
       - "!**.md"
   workflow_dispatch:
@@ -26,19 +23,30 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        docker-images: ["auth-server", "certmanager", "config-api", "client-api", "configurator", "fido2", "persistence-loader", "scim"]
+        docker-images: ["auth-server", "certmanager", "config-api", "configurator", "fido2", "persistence-loader", "scim", "monolith"]
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Build the Container image
       run: docker build ./docker-jans-${{ matrix.docker-images }} --file ./docker-jans-${{ matrix.docker-images }}/Dockerfile --tag localbuild/scanimage:latest
     - uses: anchore/scan-action@v3
       id: scan
       with:
         image: "localbuild/scanimage:latest"
-        acs-report-enable: true
+        output-format: sarif
         fail-build: false
+    - name: Send JSON report
+      if: github.event_name == 'workflow_dispatch'
+      run: |
+        curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
+        grype -v localbuild/scanimage:latest -o json > ${{ matrix.docker-images }}.results.json
+        curl "https://chat.gluu.org/api/v1/rooms.upload/YNz6rg7eNpngiygkv" \
+            -F "file=@${{ matrix.docker-images }}.results.json" \
+            -F "msg=${{ matrix.docker-images }} json report." \
+            -F "description=Scan detailed JSON report" \
+            -H "X-Auth-Token: ${{ secrets.MOAUTO_ROCKETCHAT_TOKEN }}" \
+            -H "X-User-Id: ${{ secrets.MOAUTO_ROCKETCHAT_ID }}"
     - name: upload Anchore scan SARIF report
-      uses: github/codeql-action/upload-sarif@v1
+      uses: github/codeql-action/upload-sarif@v2
       with:
         sarif_file: results.sarif
     - uses: azure/container-scan@v0

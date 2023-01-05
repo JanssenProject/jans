@@ -1,0 +1,20 @@
+{
+    "claims": [],
+    "dynamicScopeScripts": [],
+    "defaultScope": false,
+    "attributes": {
+        "spontaneousClientScopes": [],
+        "showInConfigurationEndpoint": true
+    },
+    "id": "Scope5",
+    "displayName": "Test Display Scope 5",
+    "description": "TEST Description for Scope 5",
+    "scopeType": "spontaneous",
+    "iconUrl": "http://google.com",
+    "umaAuthorizationPolicies": [
+        "inum=2DAF-F9A5,ou=scripts,o=jans",
+        "inum=2DAF-F995,ou=scripts,o=jans"
+    ],
+    "creatorType": "user",
+    "creatorId": "2000.99b53b02-dfa1-42cd-aaef-b940d58bb03f"
+}

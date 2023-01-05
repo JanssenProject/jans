@@ -1,0 +1,14 @@
+setup.properties
+*.log
+*.pyc
+setup.properties.last*
+/.project
+/.pydevproject
+/.idea
+/output/
+env/
+__pycache_/_
+pylib/__pycache_/
+*.egg-info
+dist/
+@*

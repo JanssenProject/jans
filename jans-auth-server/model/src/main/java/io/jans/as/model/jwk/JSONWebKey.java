@@ -6,6 +6,7 @@
 
 package io.jans.as.model.jwk;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.nimbusds.jose.jwk.JWKException;
 import io.jans.as.model.crypto.signature.EllipticEdvardsCurve;
 import io.jans.as.model.util.Base64Util;
@@ -25,6 +26,13 @@ import java.util.List;
  */
 public class JSONWebKey {
 
+    private static final String KTY_PARAM_APPEND = "\"kty\":";
+    private static final String CRV_PARAM_APPEND = "\"crv\":";
+    private static final String N_PARAM_APPEND = "\"n\":";
+    private static final String E_PARAM_APPEND = "\"e\":";
+    private static final String X_PARAM_APPEND = "\"x\":";
+    private static final String Y_PARAM_APPEND = "\"y\":";
+
     private String name;
     private String descr;
     private String kid;
@@ -34,7 +42,6 @@ public class JSONWebKey {
     private Long exp;
     private EllipticEdvardsCurve crv;
     private List<String> x5c;
-    private String jwkThumbprint;
 
     /**
      * Modulus
@@ -262,58 +269,71 @@ public class JSONWebKey {
      * @return The thumbprint of a JSON Web Key (JWK)
      * @see <a href="https://datatracker.ietf.org/doc/html/rfc7638">JSON Web Key (JWK) Thumbprint</a>
      */
+    @JsonIgnore
     public String getJwkThumbprint() throws NoSuchAlgorithmException, NoSuchProviderException, JWKException {
         String result;
 
         if (kty == null) throw new JWKException("The kty param is required");
 
         if (kty == KeyType.RSA) {
-            if (e == null) throw new JWKException("The e param is required");
-            if (n == null) throw new JWKException("The n param is required");
-
-            String jwkStr = new StringBuilder()
-                    .append("{")
-                    .append("\"e\":").append("\"").append(e).append("\",")
-                    .append("\"kty\":").append("\"").append(kty).append("\",")
-                    .append("\"n\":").append("\"").append(n).append("\"")
-                    .append("}")
-                    .toString();
-
-            byte[] hash = JwtUtil.getMessageDigestSHA256(jwkStr);
-            result = Base64Util.base64urlencode(hash);
+            result = contructJwkRSA();
         } else if (kty == KeyType.EC) {
-            if (crv == null) throw new JWKException("The crv is required");
-            if (x == null) throw new JWKException("The x is required");
-            if (y == null) throw new JWKException("The y is required");
-
-            String jwkStr = new StringBuilder()
-                    .append("{")
-                    .append("\"crv\":").append("\"").append(crv).append("\",")
-                    .append("\"kty\":").append("\"").append(kty).append("\",")
-                    .append("\"x\":").append("\"").append(x).append("\",")
-                    .append("\"y\":").append("\"").append(y).append("\"")
-                    .append("}")
-                    .toString();
-
-            byte[] hash = JwtUtil.getMessageDigestSHA256(jwkStr);
-            result = Base64Util.base64urlencode(hash);
+            result = contructJwkEC();
         } else if (kty == KeyType.OKP) {
-            if (crv == null) throw new JWKException("The crv is required");
-            if (x == null) throw new JWKException("The x is required");
-
-            String jwkStr = new StringBuilder()
-                    .append("{")
-                    .append("\"crv\":").append("\"").append(crv).append("\",")
-                    .append("\"kty\":").append("\"").append(kty).append("\",")
-                    .append("\"x\":").append("\"").append(y).append("\"")
-                    .append("}")
-                    .toString();
-
-            byte[] hash = JwtUtil.getMessageDigestSHA256(jwkStr);
-            result = Base64Util.base64urlencode(hash);
+            result = contructJwkOKP();
         } else throw new JWKException("Thumbprint not supported for the kty");
 
         return result;
+    }
+
+    private String contructJwkRSA() throws NoSuchAlgorithmException, NoSuchProviderException, JWKException {
+        if (e == null) throw new JWKException("The e param is required");
+        if (n == null) throw new JWKException("The n param is required");
+
+        String jwkStr = new StringBuilder()
+                .append("{")
+                .append(E_PARAM_APPEND).append("\"").append(e).append("\",")
+                .append(KTY_PARAM_APPEND).append("\"").append(kty).append("\",")
+                .append(N_PARAM_APPEND).append("\"").append(n).append("\"")
+                .append("}")
+                .toString();
+
+        byte[] hash = JwtUtil.getMessageDigestSHA256(jwkStr);
+        return Base64Util.base64urlencode(hash);
+    }
+
+    private String contructJwkEC() throws NoSuchAlgorithmException, NoSuchProviderException, JWKException {
+        if (crv == null) throw new JWKException("The crv is required");
+        if (x == null) throw new JWKException("The x is required");
+        if (y == null) throw new JWKException("The y is required");
+
+        String jwkStr = new StringBuilder()
+                .append("{")
+                .append(CRV_PARAM_APPEND).append("\"").append(crv).append("\",")
+                .append(KTY_PARAM_APPEND).append("\"").append(kty).append("\",")
+                .append(X_PARAM_APPEND).append("\"").append(x).append("\",")
+                .append(Y_PARAM_APPEND).append("\"").append(y).append("\"")
+                .append("}")
+                .toString();
+
+        byte[] hash = JwtUtil.getMessageDigestSHA256(jwkStr);
+        return Base64Util.base64urlencode(hash);
+    }
+
+    private String contructJwkOKP() throws NoSuchAlgorithmException, NoSuchProviderException, JWKException {
+        if (crv == null) throw new JWKException("The crv is required");
+        if (x == null) throw new JWKException("The x is required");
+
+        String jwkStr = new StringBuilder()
+                .append("{")
+                .append(CRV_PARAM_APPEND).append("\"").append(crv).append("\",")
+                .append(KTY_PARAM_APPEND).append("\"").append(kty).append("\",")
+                .append(X_PARAM_APPEND).append("\"").append(y).append("\"")
+                .append("}")
+                .toString();
+
+        byte[] hash = JwtUtil.getMessageDigestSHA256(jwkStr);
+        return Base64Util.base64urlencode(hash);
     }
 
     public JSONObject toJSONObject() throws JSONException {

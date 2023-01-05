@@ -23,8 +23,8 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.codec.binary.Hex;
@@ -35,7 +35,7 @@ import io.jans.fido2.google.safetynet.AttestationStatement;
 import io.jans.fido2.google.safetynet.OfflineVerify;
 import io.jans.fido2.model.auth.AuthData;
 import io.jans.fido2.model.auth.CredAndCounterData;
-import io.jans.fido2.model.entry.Fido2RegistrationData;
+import io.jans.orm.model.fido2.Fido2RegistrationData;
 import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.mds.AttestationCertificateService;
 import io.jans.fido2.service.processors.AttestationFormatProcessor;
@@ -44,6 +44,10 @@ import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+/**
+ * Attestation processor for attestations of fmt = android-safetynet
+ *
+ */
 @ApplicationScoped
 public class AndroidSafetyNetAttestationProcessor implements AttestationFormatProcessor {
 

@@ -1,0 +1,222 @@
+{
+  "jansPerson": {
+    "fields": [
+      "inum",
+      "uid",
+      "mail",
+      "displayName",
+      "givenName",
+      "ppid",
+      "sn"
+    ],
+    "custom": []
+  },
+  "jansPerson_jansExtUid": {
+    "fields": [
+      "jansExternalUid"
+    ],
+    "custom": []
+  },
+  "jansGrp": {
+    "fields": [
+      "inum",
+      "displayName",
+      "description"
+    ],
+    "custom": []
+  },
+  "jansClnt": {
+    "fields": [
+      "inum",
+      "displayName",
+      "description",
+      "jansRegistrationAccessTkn",
+      "jansClntSecretExpAt"
+    ],
+    "custom": [
+      "`del`, `exp`"
+    ]
+  },
+  "jansPar": {
+    "fields": [
+      "jansId"
+    ],
+    "custom": [
+      "`del`, `exp`"
+    ]
+  },
+  "jansUmaPCT": {
+    "fields": [
+      "tknCde"
+    ],
+    "custom": [
+      "`del`, `exp`"
+    ]
+  },
+  "jansScope": {
+    "fields": [
+      "jansId",
+      "displayName",
+      "description"
+    ],
+    "custom": [
+      "`del`, `exp`"
+    ]
+  },
+  "jansU2fReq": {
+    "fields": [
+      "creationDate"
+    ],
+    "custom": [
+      "`del`, `exp`"
+    ]
+  },
+  "jansMetric": {
+    "fields": [
+      "jansAppTyp",
+      "jansMetricTyp",
+      "jansStartDate",
+      "jansEndDate"
+    ],
+    "custom": [
+      "`del`, `exp`"
+    ]
+  },
+  "jansToken": {
+    "fields": [
+      "authzCode",
+      "grtId",
+      "ssnId",
+      "tknCde"
+    ],
+    "custom": [
+      "`del`, `exp`"
+    ]
+  },
+  "jansDeviceRegistration": {
+    "fields": [
+      "jansApp",
+      "personInum",
+      "jansStatus",
+      "jansDeviceHashCode",
+      "jansDeviceKeyHandle",
+      "creationDate"
+    ],
+    "custom": [
+      "`del`, `exp`"
+    ]
+  },
+  "cache": {
+    "fields": [],
+    "custom": [
+      "`del`, `exp`"
+    ]
+  },
+  "jansSessId": {
+    "fields": [
+      "jansUsrDN",
+      "sid",
+      "deviceSecret"
+    ],
+    "custom": [
+      "`del`, `exp`"
+    ]
+  },
+  "jansUmaResource": {
+    "fields": [
+      "jansId",
+      "displayName",
+      "jansUmaScope"
+    ],
+    "custom": [
+      "`del`, `exp`"
+    ]
+  },
+  "jansClntAuthz": {
+    "fields": [
+      "jansClntId",
+      "jansUsrId"
+    ],
+    "custom": [
+      "`del`, `exp`"
+    ]
+  },
+  "jansAttr": {
+    "fields": [
+      "inum",
+      "displayName",
+      "description",
+      "jansAttrName",
+      "jansAttrOrigin"
+    ],
+    "custom": []
+  },
+  "jansCustomScr": {
+    "fields": [
+      "inum",
+      "jansScrTyp"
+    ],
+    "custom": []
+  },
+  "jansUmaResourcePermission": {
+    "fields": [
+      "jansTicket"
+    ],
+    "custom": []
+  },
+  "pairwiseIdentifier": {
+    "fields": [
+      "jansClntId",
+      "jansUsrId",
+      "jansSectorIdentifier"
+    ],
+    "custom": []
+  },
+  "jansCibaReq": {
+    "fields": [],
+    "custom": [
+      "`jansStatus`, `exp`"
+    ]
+  },
+  "jansStatEntry": {
+    "fields": [
+      "jansId"
+    ],
+    "custom": []
+  },
+  "jansPassResetReq": {
+    "fields": [
+      "creationDate"
+    ],
+    "custom": []
+  },
+  "jansFido2AuthnEntry": {
+    "fields": [
+      "creationDate",
+      "jansStatus",
+      "personInum"
+    ],
+    "custom": []
+  },
+  "jansFido2RegistrationEntry": {
+    "fields": [
+      "creationDate",
+      "jansStatus",
+      "personInum"
+    ],
+    "custom": []
+  },
+  "jansInumMap": {
+    "fields": [
+      "inum",
+      "jansStatus"
+    ],
+    "custom": []
+  },
+  "__common__": {
+    "JSON": [],
+    "fields": [
+      "inum"
+    ]
+  }
+}

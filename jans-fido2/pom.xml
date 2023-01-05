@@ -1,23 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project
-	xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.jans</groupId>
 	<artifactId>jans-fido2-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>1.0.6-SNAPSHOT</version>
 	<name>Fido2 API</name>
-	
+
+    <distributionManagement>
+	  <repository>
+          <id>github</id>
+          <name>GitHub Packages</name>
+          <url>https://maven.pkg.github.com/JanssenProject/jans</url>
+      </repository>
+    </distributionManagement>
 	<properties>
 		<maven.min-version>3.3.9</maven.min-version>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		
-		<janssen.version>1.0.0-SNAPSHOT</janssen.version>
+		<janssen.version>${project.version}</janssen.version>
 
 		<jacoco.version>0.8.7</jacoco.version>
 
@@ -55,7 +59,7 @@
 		<repository>
 			<id>bouncycastle</id>
 			<name>Bouncy Castle</name>
-			<url>https://repo2.maven.org/maven2/org/bouncycastle</url>
+			<url>https://repo1.maven.org/maven2/org/bouncycastle</url>
 		</repository>
 	</repositories>
 
@@ -112,6 +116,16 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
 					<version>3.1</version>
+					<configuration>
+						<annotationProcessors>
+							<annotationProcessor>
+								io.jans.doc.annotation.DocPropertyProcessor
+							</annotationProcessor>
+						</annotationProcessors>
+						<compilerArgs>
+							<arg>-Amodule=Fido2</arg>
+						</compilerArgs>
+					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -164,5 +178,4 @@
 			</plugins>
 		</pluginManagement>
 	</build>
-	
 </project>

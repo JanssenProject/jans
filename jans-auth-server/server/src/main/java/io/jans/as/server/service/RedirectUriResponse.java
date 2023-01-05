@@ -13,9 +13,9 @@ import io.jans.as.server.util.RedirectUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -43,7 +43,7 @@ public class RedirectUriResponse {
 
     public WebApplicationException createWebException(IErrorType errorType, String reason) {
         if (fapiCompatible) {
-            log.trace("Reason: " + reason); // print reason and set it to null since FAPI does not allow unknown fields in response
+            log.trace("Reason: {}", reason); // print reason and set it to null since FAPI does not allow unknown fields in response
             reason = null;
         }
         redirectUri.parseQueryString(errorFactory.getErrorAsQueryString(errorType, state, reason));
@@ -52,6 +52,10 @@ public class RedirectUriResponse {
 
     public void setState(String state) {
         this.state = state;
+    }
+
+    public String getState() {
+        return state;
     }
 
     public Response.ResponseBuilder createErrorBuilder(IErrorType errorType) {

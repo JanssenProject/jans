@@ -6,6 +6,7 @@ import pytest
     "couchbase",
     "hybrid",
     "sql",
+    "spanner",
 ])
 def test_validate_persistence_type(type_):
     from jans.pycloudlib.validators import validate_persistence_type
@@ -17,26 +18,6 @@ def test_validate_persistence_type_invalid():
 
     with pytest.raises(ValueError):
         validate_persistence_type("random")
-
-
-@pytest.mark.parametrize("mapping", [
-    "default",
-    "user",
-    "site",
-    "cache",
-    "token",
-    "session",
-])
-def test_validate_persistence_ldap_mapping(mapping):
-    from jans.pycloudlib.validators import validate_persistence_ldap_mapping
-    assert validate_persistence_ldap_mapping("hybrid", mapping) is None
-
-
-def test_validate_persistence_ldap_mapping_invalid():
-    from jans.pycloudlib.validators import validate_persistence_ldap_mapping
-
-    with pytest.raises(ValueError):
-        validate_persistence_ldap_mapping("hybrid", "random")
 
 
 @pytest.mark.parametrize("dialect", [
@@ -54,3 +35,22 @@ def test_validate_persistence_sql_dialect_invalid():
 
     with pytest.raises(ValueError):
         validate_persistence_sql_dialect("random")
+
+
+def test_validate_persistence_ldap_mapping():
+    from jans.pycloudlib.validators import validate_persistence_ldap_mapping
+
+    with pytest.deprecated_call():
+        validate_persistence_ldap_mapping("hybrid", "default")
+
+
+def test_validate_persistence_hybrid_mapping(monkeypatch):
+    from jans.pycloudlib.validators import validate_persistence_hybrid_mapping
+
+    monkeypatch.setattr(
+        "jans.pycloudlib.persistence.utils.PersistenceMapper.validate_hybrid_mapping",
+        lambda cls: True,
+    )
+
+    # asserts PersistenceMapper.validate_hybrid_mapping is called
+    assert validate_persistence_hybrid_mapping() is None

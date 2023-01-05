@@ -6,26 +6,44 @@
 
 package io.jans.configapi.rest.resource.auth;
 
+import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
+
 import io.jans.as.model.common.ScopeType;
 import io.jans.as.persistence.model.Scope;
-import io.jans.configapi.filters.ProtectedApi;
+import io.jans.configapi.core.model.SearchRequest;
+import io.jans.orm.model.PagedResult;
+import io.jans.configapi.core.rest.ProtectedApi;
+import io.jans.configapi.rest.model.CustomScope;
 import io.jans.configapi.service.auth.ScopeService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.util.AttributeNames;
-import io.jans.configapi.util.Jackson;
-import io.jans.util.StringHelper;
+import io.jans.configapi.core.util.Jackson;
 
-import javax.inject.Inject;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.*;
+
+import jakarta.inject.Inject;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
+
+import static io.jans.as.model.util.Util.escapeLog;
+
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -41,7 +59,7 @@ import org.slf4j.Logger;
 @Path(ApiConstants.SCOPES)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class ScopesResource extends BaseResource {
+public class ScopesResource extends ConfigBaseResource {
 
     private static final String SCOPE = "scope";
 
@@ -54,36 +72,106 @@ public class ScopesResource extends BaseResource {
     @Context
     UriInfo uriInfo;
 
+    @Operation(summary = "Gets list of Scopes", description = "Gets list of Scopes", operationId = "get-oauth-scopes", tags = {
+            "OAuth - Scopes" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    ApiAccessConstants.SCOPES_READ_ACCESS }))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PagedResult.class), examples = @ExampleObject(name = "Response json example", value = "example/scopes/scopes-all.json"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_READ_ACCESS }  , groupScopes = {
+            ApiAccessConstants.SCOPES_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getScopes(@DefaultValue("") @QueryParam(ApiConstants.TYPE) String type,
-            @DefaultValue(DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
-            @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern) {
-        log.debug("SCOPES to be fetched type = " + type + " , limit = " + limit + " , pattern = " + pattern);
-        final List<Scope> scopes;
-        if (StringHelper.isNotEmpty(pattern)) {
-            scopes = scopeService.searchScopes(pattern, limit, type);
-        } else {
-            scopes = scopeService.getAllScopesList(limit, type);
-        }
-        return Response.ok(scopes).build();
+            @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
+            @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
+            @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
+            @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
+            @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder,
+            @DefaultValue("false") @QueryParam(value = ApiConstants.WITH_ASSOCIATED_CLIENTS) boolean withAssociatedClients) {
+        log.debug(
+                "SCOPES to be fetched based on type:{}, limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}, withAssociatedClients:{}",
+                type, limit, pattern, startIndex, sortBy, sortOrder, withAssociatedClients);
+        SearchRequest searchReq = createSearchRequest(scopeService.getDnForScope(null), pattern, sortBy, sortOrder,
+                startIndex, limit, null, null, this.getMaxCount());
+
+        return Response.ok(doSearch(searchReq, type, withAssociatedClients)).build();
     }
 
+    @Operation(summary = "Get Scope by Inum", description = "Get Scope by Inum", operationId = "get-oauth-scopes-by-inum", tags = {
+            "OAuth - Scopes" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    ApiAccessConstants.SCOPES_READ_ACCESS }))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomScope.class), examples = @ExampleObject(name = "Response json example", value = "example/scopes/scopes-get.json"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not Found"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_READ_ACCESS } , groupScopes = {
+            ApiAccessConstants.SCOPES_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Path(ApiConstants.INUM_PATH)
-    public Response getScopeById(@NotNull @PathParam(ApiConstants.INUM) String inum) {
-        log.debug("SCOPES to be fetched - inum = " + inum);
-        Scope scope = scopeService.getScopeByInum(inum);
+    public Response getScopeById(@NotNull @PathParam(ApiConstants.INUM) String inum,
+            @DefaultValue("false") @QueryParam(value = ApiConstants.WITH_ASSOCIATED_CLIENTS) boolean withAssociatedClients) {
+        log.debug("SCOPES to be fetched by inum:{}", inum);
+        CustomScope scope = scopeService.getScopeByInum(inum, withAssociatedClients);
         checkResourceNotNull(scope, SCOPE);
         return Response.ok(scope).build();
     }
 
+    @Operation(summary = "Get Scope by creatorId", description = "Get Scope by creatorId", operationId = "get-scope-by-creator", tags = {
+            "OAuth - Scopes" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    ApiAccessConstants.SCOPES_READ_ACCESS }))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = CustomScope.class)), examples = @ExampleObject(name = "Response json example", value = "example/scopes/scopes-get.json"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
+    @GET
+    @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.SCOPES_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    @Path(ApiConstants.CREATOR + ApiConstants.CREATORID_PATH)
+    public Response getScopeByClientId(@NotNull @PathParam(ApiConstants.CREATORID) String creatorId) {
+        log.debug("SCOPES to be fetched by creatorId:{}", creatorId);
+        SearchRequest searchReq = new SearchRequest();
+        searchReq.setFilterAttributeName(Arrays.asList("creatorId"));
+        searchReq.setFilter(creatorId);
+        List<CustomScope> scopes = scopeService.searchScope(searchReq);
+        return Response.ok(scopes).build();
+    }
+
+    @Operation(summary = "Get Scope by type", description = "Get Scope by type", operationId = "get-scope-by-type", tags = {
+            "OAuth - Scopes" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    ApiAccessConstants.SCOPES_READ_ACCESS }))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = CustomScope.class)) , examples = @ExampleObject(name = "Response json example", value = "example/scopes/scopes-get.json"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not Found"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
+    @GET
+    @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_READ_ACCESS } , groupScopes = {
+            ApiAccessConstants.SCOPES_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    @Path(ApiConstants.TYPE + ApiConstants.TYPE_PATH)
+    public Response getScopeByType(@NotNull @PathParam(ApiConstants.TYPE) String type) {
+        log.debug("SCOPES to be fetched by type:{}", type);
+        SearchRequest searchReq = new SearchRequest();
+        searchReq.setFilterAttributeName(Arrays.asList("jansScopeTyp"));
+        searchReq.setFilter(type);
+        List<CustomScope> scopes = scopeService.searchScope(searchReq);
+        return Response.ok(scopes).build();
+    }
+
+    @Operation(summary = "Create Scope", description = "Create Scope", operationId = "post-oauth-scopes", tags = {
+            "OAuth - Scopes" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    ApiAccessConstants.SCOPES_WRITE_ACCESS }))
+    @RequestBody(description = "Scope object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Scope.class), examples = @ExampleObject(name = "Request json example", value = "example/scopes/scopes-post.json")))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Scope.class), examples = @ExampleObject(name = "Response json example", value = "example/scopes/scopes.json"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
-    @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_WRITE_ACCESS }, groupScopes = {}, superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response createOpenidScope(@Valid Scope scope) {
-        log.debug("SCOPE to be added - scope = " + scope);
-        log.debug("SCOPE to be added - scope.getId() = " + scope.getId());
+        log.debug("SCOPE to be added - scope:{}", scope);
+
         checkNotNull(scope.getId(), AttributeNames.ID);
         if (scope.getDisplayName() == null) {
             scope.setDisplayName(scope.getId());
@@ -94,19 +182,26 @@ public class ScopesResource extends BaseResource {
         if (scope.getScopeType() == null) {
             scope.setScopeType(ScopeType.OAUTH);
         }
-        if (ScopeType.UMA.getValue().equalsIgnoreCase(scope.getScopeType().getValue())) {
-            scope.setScopeType(ScopeType.OAUTH);
-        }
+
         scopeService.addScope(scope);
         Scope result = scopeService.getScopeByInum(inum);
-        log.debug("SCOPE added is - " + result.getId());
+        log.debug("Id of newly added is {}", result.getId());
         return Response.status(Response.Status.CREATED).entity(result).build();
     }
 
+    @Operation(summary = "Update Scope", description = "Update Scope", operationId = "put-oauth-scopes", tags = {
+            "OAuth - Scopes" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    ApiAccessConstants.SCOPES_WRITE_ACCESS }))
+    @RequestBody(description = "Scope object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Scope.class), examples = @ExampleObject(name = "Request json example", value = "example/scopes/scopes.json")))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Scope.class), examples = @ExampleObject(name = "Response json example", value = "example/scopes/scopes.json"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not Found"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PUT
-    @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_WRITE_ACCESS }, groupScopes = {}, superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response updateScope(@Valid Scope scope) {
-        log.debug("SCOPE to be updated - scope = " + scope.getId());
+        log.debug("SCOPE to be updated - scop:{}", scope.getId());
         String inum = scope.getInum();
         checkNotNull(inum, SCOPE);
         Scope existingScope = scopeService.getScopeByInum(inum);
@@ -114,45 +209,77 @@ public class ScopesResource extends BaseResource {
         if (scope.getScopeType() == null) {
             scope.setScopeType(ScopeType.OAUTH);
         }
-        if (ScopeType.UMA.getValue().equalsIgnoreCase(scope.getScopeType().getValue())) {
-            scope.setScopeType(ScopeType.OAUTH);
-        }
+
         scope.setInum(existingScope.getInum());
         scope.setBaseDn(scopeService.getDnForScope(inum));
         scopeService.updateScope(scope);
         Scope result = scopeService.getScopeByInum(inum);
 
-        log.debug("SCOPE updated is - " + result.getId());
+        log.debug("Updated scope:{}", result.getId());
         return Response.ok(result).build();
     }
 
+    @Operation(summary = "Patch Scope", description = "Patch Scope", operationId = "patch-oauth-scopes-by-id", tags = {
+            "OAuth - Scopes" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    ApiAccessConstants.SCOPES_WRITE_ACCESS }))
+    @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class)), examples = @ExampleObject(name = "Request json example", value = "example/scopes/scopes-patch.json")))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Scope.class), examples = @ExampleObject(name = "Response json example", value = "example/scopes/scopes.json"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not Found"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
-    @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_WRITE_ACCESS }, groupScopes = {}, superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @Path(ApiConstants.INUM_PATH)
     public Response patchScope(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString)
             throws JsonPatchException, IOException {
-        log.debug("SCOPES to be patched - inum = " + inum + " , pathString = " + pathString);
+        log.debug("SCOPES patch details - inum:{}, pathString:{}", inum, pathString);
         Scope existingScope = scopeService.getScopeByInum(inum);
         checkResourceNotNull(existingScope, SCOPE);
         existingScope = Jackson.applyPatch(pathString, existingScope);
         scopeService.updateScope(existingScope);
 
         existingScope = scopeService.getScopeByInum(inum);
-        log.debug("SCOPE patched is - " + existingScope.getId());
+        log.debug("patched scope:{}", existingScope.getId());
 
         return Response.ok(existingScope).build();
     }
 
+    @Operation(summary = "Delete Scope", description = "Delete Scope", operationId = "delete-oauth-scopes-by-inum", tags = {
+            "OAuth - Scopes" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    ApiAccessConstants.SCOPES_DELETE_ACCESS }))
+    @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "No Content"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not Found"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @DELETE
     @Path(ApiConstants.INUM_PATH)
-    @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_DELETE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_DELETE_ACCESS }, groupScopes = {}, superScopes = { ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
     public Response deleteScope(@PathParam(ApiConstants.INUM) @NotNull String inum) {
-        log.debug("SCOPES to be deleted - inum = " + inum);
+        log.debug("SCOPES to be deleted - inum:{}", inum);
         Scope scope = scopeService.getScopeByInum(inum);
         checkResourceNotNull(scope, SCOPE);
         scopeService.removeScope(scope);
         log.debug("SCOPE is deleted");
         return Response.noContent().build();
+    }
+
+    private PagedResult<CustomScope> doSearch(SearchRequest searchReq, String type, boolean withAssociatedClients) {
+            logger.debug("CustomScope search params - searchReq:{}, type:{}, withAssociatedClients:{} ", searchReq, type, withAssociatedClients);
+
+        PagedResult<CustomScope> pagedResult = scopeService.getScopeResult(searchReq, type, withAssociatedClients);
+        if (logger.isTraceEnabled()) {
+            logger.trace("PagedResult  - pagedResult:{}", pagedResult);
+        }
+
+        if (pagedResult != null) {
+            logger.debug(
+                    "Scope fetched  - pagedResult.getTotalEntriesCount():{}, pagedResult.getEntriesCount():{}, pagedResult.getEntries():{}",
+                    pagedResult.getTotalEntriesCount(), pagedResult.getEntriesCount(), pagedResult.getEntries());
+        }
+        logger.debug("Scope  - pagedResult:{}", pagedResult);
+        return pagedResult;
+
     }
 }

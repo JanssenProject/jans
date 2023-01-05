@@ -8,7 +8,7 @@ package io.jans.as.server.service;
 
 import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.as.common.service.common.ConfigurationService;
-import io.jans.as.model.common.ComponentType;
+import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.model.ApplicationType;
@@ -16,11 +16,11 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.service.metric.inject.ReportMetric;
 import io.jans.service.net.NetworkService;
 
-import javax.ejb.DependsOn;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Instance;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.ejb.DependsOn;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 /**
  * Store and retrieve metric
@@ -71,7 +71,7 @@ public class MetricService extends io.jans.service.metric.MetricService {
 
     @Override
     public boolean isMetricReporterEnabled() {
-        return appConfiguration.isEnabledComponent(ComponentType.METRIC);
+        return appConfiguration.isFeatureEnabled(FeatureFlagType.METRIC);
     }
 
     @Override

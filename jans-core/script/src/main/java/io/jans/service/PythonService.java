@@ -15,10 +15,10 @@ import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.util.Properties;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import io.jans.exception.PythonException;
 import io.jans.orm.reflect.util.ReflectHelper;
@@ -67,9 +67,12 @@ public class PythonService implements Serializable {
     public boolean initPythonInterpreter(String pythonModulesDir) {
         boolean result = false;
 
-        if (isInitInterpreter()) {
+        String pythonHome = getPythonHome();
+    	log.info("Initializing PythonService with Jython: '{}'", pythonHome);
+        if (StringHelper.isNotEmpty(pythonHome)) {
             try {
-                PythonInterpreter.initialize(getPreProperties(), getPostProperties(pythonModulesDir), null);
+
+            	PythonInterpreter.initialize(getPreProperties(), getPostProperties(pythonModulesDir, pythonHome), null);
                 this.pythonInterpreter = new PythonInterpreter();
 
                 initPythonInterpreter(this.pythonInterpreter);
@@ -80,6 +83,8 @@ public class PythonService implements Serializable {
             } catch (Exception ex) {
                 log.error("Failed to initialize PythonInterpreter correctly", ex);
             }
+        } else {
+        	log.error("Failed to initialize PythonService. Jython location is not defined!");
         }
 
         this.interpereterReady = result;
@@ -120,16 +125,13 @@ public class PythonService implements Serializable {
         return clonedProps;
     }
 
-    private Properties getPostProperties(String pythonModulesDir) {
+    private Properties getPostProperties(String pythonModulesDir, String pythonHome) {
         Properties props = getPreProperties();
 
         String catalinaTmpFolder = System.getProperty("java.io.tmpdir") + File.separator + "python" + File.separator + "cachedir";
         props.setProperty("python.cachedir", catalinaTmpFolder);
 
-        String pythonHome = System.getenv("PYTHON_HOME");
-        if (StringHelper.isNotEmpty(pythonHome)) {
-            props.setProperty("python.home", pythonHome);
-        }
+        props.setProperty("python.home", pythonHome);
 
         // Register custom python modules
         if (StringHelper.isNotEmpty(pythonModulesDir)) {
@@ -142,15 +144,14 @@ public class PythonService implements Serializable {
         return props;
     }
 
-    private boolean isInitInterpreter() {
-        String pythonHome = System.getenv("PYTHON_HOME");
+	private String getPythonHome() {
+		String pythonHome = System.getenv("PYTHON_HOME");
         if (StringHelper.isNotEmpty(pythonHome)) {
-            System.setProperty("python.home", pythonHome);
+            return pythonHome;
         }
 
-        String pythonHomeProperty = System.getProperty("python.home");
-        return StringHelper.isNotEmpty(pythonHomeProperty);
-    }
+        return System.getProperty("python.home");
+	}
 
     public <T> T loadPythonScript(String scriptName, String scriptPythonType, Class<T> scriptJavaType, PyObject[] constructorArgs)
             throws PythonException {
@@ -183,7 +184,7 @@ public class PythonService implements Serializable {
         try {
             currentPythonInterpreter.execfile(scriptFile, scriptName);
         } catch (Exception ex) {
-            log.error("Failed to load python file", ex.getMessage(), ex);
+            log.error("Failed to load python file" + ex.getMessage(), ex);
             throw new PythonException(String.format("Failed to load python file '%s'", scriptFile), ex);
         }
 

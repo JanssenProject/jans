@@ -10,16 +10,18 @@ import java.util.Base64;
 import java.util.Base64.Decoder;
 import java.util.Base64.Encoder;
 
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 
 /**
+ * Utility methods for base64 encoding / decoding
  * @author Yuriy Movchan
  * @version May 08, 2020
  */
+
 @ApplicationScoped
 public class Base64Service {
 

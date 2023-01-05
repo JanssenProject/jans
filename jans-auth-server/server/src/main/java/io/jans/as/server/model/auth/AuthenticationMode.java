@@ -6,7 +6,7 @@
 
 package io.jans.as.server.model.auth;
 
-import javax.enterprise.inject.Vetoed;
+import jakarta.enterprise.inject.Vetoed;
 import java.io.Serializable;
 
 /**

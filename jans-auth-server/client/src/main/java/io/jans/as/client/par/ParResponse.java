@@ -6,7 +6,7 @@ import io.jans.as.model.error.IErrorType;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 
 /**
  * @author Yuriy Zabrovarnyy

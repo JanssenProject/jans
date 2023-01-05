@@ -9,7 +9,6 @@ package io.jans.as.client.ws.rs;
 import io.jans.as.client.AuthorizationRequest;
 import io.jans.as.client.AuthorizationResponse;
 import io.jans.as.client.BaseTest;
-import io.jans.as.client.JwkClient;
 import io.jans.as.client.RegisterClient;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
@@ -18,17 +17,14 @@ import io.jans.as.client.TokenRequest;
 import io.jans.as.client.TokenResponse;
 import io.jans.as.client.UserInfoClient;
 import io.jans.as.client.UserInfoResponse;
-import io.jans.as.client.client.Asserter;
+
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.common.SubjectType;
-import io.jans.as.model.crypto.signature.RSAPublicKey;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
-import io.jans.as.model.jws.RSASigner;
-import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
-import io.jans.as.model.jwt.JwtHeaderName;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.StringUtils;
 import org.testng.annotations.Parameters;
@@ -38,6 +34,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import static io.jans.as.client.client.Asserter.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
@@ -75,12 +72,7 @@ public class ValidateIdTokenHashesTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -94,11 +86,7 @@ public class ValidateIdTokenHashesTest extends BaseTest {
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
-
-        assertNotNull(authorizationResponse.getLocation(), "The location is null");
-        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
-        assertNotNull(authorizationResponse.getScope(), "The scope is null");
-        assertNotNull(authorizationResponse.getState(), "The state is null");
+        AssertBuilder.authorizationResponse(authorizationResponse).check();
         assertEquals(authorizationResponse.getState(), stateParam);
 
         String scope = authorizationResponse.getScope();
@@ -108,24 +96,16 @@ public class ValidateIdTokenHashesTest extends BaseTest {
         String state = authorizationResponse.getState();
 
         // 3. Validate id_token
-        Jwt jwt = Jwt.parse(idToken);
-        Asserter.assertIdToken(jwt);
-
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS256, publicKey);
-
-        assertTrue(rsaSigner.validate(jwt));
-
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.CODE_HASH));
-        assertTrue(rsaSigner.validateAuthorizationCode(authorizationCode, jwt));
-
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ACCESS_TOKEN_HASH));
-        assertTrue(rsaSigner.validateAccessToken(accessToken, jwt));
-
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.STATE_HASH));
-        assertTrue(rsaSigner.validateState(state, jwt));
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS256)
+                .authorizationCode(authorizationCode)
+                .accessToken(accessToken)
+                .state(state)
+                .notNullAuthenticationTime()
+                .notNullJansOpenIDConnectVersion()
+                .notNullAuthenticationContextClassReference()
+                .notNullAuthenticationMethodReferences()
+                .check();
 
         // 4. Request access token using the authorization code.
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
@@ -140,44 +120,34 @@ public class ValidateIdTokenHashesTest extends BaseTest {
         TokenResponse tokenResponse1 = tokenClient1.exec();
 
         showClient(tokenClient1);
-        assertEquals(tokenResponse1.getStatus(), 200, "Unexpected response code: " + tokenResponse1.getStatus());
-        assertNotNull(tokenResponse1.getEntity(), "The entity is null");
-        assertNotNull(tokenResponse1.getAccessToken(), "The access token is null");
-        assertNotNull(tokenResponse1.getExpiresIn(), "The expires in value is null");
-        assertNotNull(tokenResponse1.getTokenType(), "The token type is null");
-        assertNotNull(tokenResponse1.getRefreshToken(), "The refresh token is null");
+        AssertBuilder.tokenResponse(tokenResponse1)
+                .notNullRefreshToken()
+                .check();
 
         String refreshToken = tokenResponse1.getRefreshToken();
         String idToken2 = tokenResponse1.getIdToken();
         String accessToken2 = tokenResponse1.getAccessToken();
 
         // 5. Validate id_token
-        Jwt jwt2 = Jwt.parse(idToken2);
-        Asserter.assertIdToken(jwt2);
-
-        RSAPublicKey publicKey2 = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt2.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner2 = new RSASigner(SignatureAlgorithm.RS256, publicKey2);
-
-        assertTrue(rsaSigner2.validate(jwt2));
-
-        assertNotNull(jwt2.getClaims().getClaimAsString(JwtClaimName.ACCESS_TOKEN_HASH));
-        assertTrue(rsaSigner2.validateAccessToken(accessToken2, jwt2));
-
-        assertNull(jwt2.getClaims().getClaimAsString(JwtClaimName.STATE_HASH));
+        AssertBuilder.jwtParse(idToken2)
+                .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS256)
+                .accessToken(accessToken2)
+                .claimsNoPresence(JwtClaimName.STATE_HASH)
+                .notNullAuthenticationTime()
+                .notNullJansOpenIDConnectVersion()
+                .notNullAuthenticationContextClassReference()
+                .notNullAuthenticationMethodReferences()
+                .check();
 
         // 6. Request new access token using the refresh token.
         TokenClient tokenClient2 = new TokenClient(tokenEndpoint);
         TokenResponse tokenResponse2 = tokenClient2.execRefreshToken(scope, refreshToken, clientId, clientSecret);
 
         showClient(tokenClient2);
-        assertEquals(tokenResponse2.getStatus(), 200, "Unexpected response code: " + tokenResponse2.getStatus());
-        assertNotNull(tokenResponse2.getEntity(), "The entity is null");
-        assertNotNull(tokenResponse2.getAccessToken(), "The access token is null");
-        assertNotNull(tokenResponse2.getTokenType(), "The token type is null");
-        assertNotNull(tokenResponse2.getRefreshToken(), "The refresh token is null");
-        assertNotNull(tokenResponse2.getScope(), "The scope is null");
+        AssertBuilder.tokenResponse(tokenResponse2)
+                .notNullRefreshToken()
+                .notNullScope()
+                .check();
 
         String accessToken3 = tokenResponse2.getAccessToken();
 
@@ -186,28 +156,13 @@ public class ValidateIdTokenHashesTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken3);
 
         showClient(userInfoClient);
-        assertEquals(userInfoResponse.getStatus(), 200, "Unexpected response code: " + userInfoResponse.getStatus());
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NAME));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.BIRTHDATE));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.FAMILY_NAME));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.GENDER));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.GIVEN_NAME));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.MIDDLE_NAME));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NICKNAME));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.PICTURE));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.PREFERRED_USERNAME));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.PROFILE));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.WEBSITE));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.EMAIL_VERIFIED));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.PHONE_NUMBER));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.PHONE_NUMBER_VERIFIED));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.LOCALE));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ZONEINFO));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.USER_NAME));
-        assertNull(userInfoResponse.getClaim("org_name"));
-        assertNull(userInfoResponse.getClaim("work_phone"));
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .notNullClaimsPersonalData()
+                .claimsPresence(JwtClaimName.EMAIL, JwtClaimName.BIRTHDATE, JwtClaimName.GENDER, JwtClaimName.MIDDLE_NAME)
+                .claimsPresence(JwtClaimName.NICKNAME, JwtClaimName.PREFERRED_USERNAME, JwtClaimName.PROFILE)
+                .claimsPresence(JwtClaimName.WEBSITE, JwtClaimName.EMAIL_VERIFIED, JwtClaimName.PHONE_NUMBER)
+                .claimsPresence(JwtClaimName.PHONE_NUMBER_VERIFIED, JwtClaimName.ADDRESS, JwtClaimName.USER_NAME)
+                .claimsNoPresence("org_name", "work_phone")
+                .check();
     }
 }

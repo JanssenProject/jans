@@ -44,6 +44,8 @@
   "frontChannelLogoutSessionSupported": true,
   "spontaneousScopeLifetime": 86400,
   "forceIdTokenHintPrecense": false,
+  "rejectEndSessionIfIdTokenExpired": false,
+  "allowEndSessionWithUnmatchedSid": false,
   "claimsParameterSupported": false,
   "claimTypesSupported": [
     "normal"

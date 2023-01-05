@@ -1,9 +1,13 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
 
 <suite name="oxAuthCommon" parallel="false">
-    <test name="Audience Test" enabled="true">
+    <test name="Unit Tests" enabled="true">
         <classes>
             <class name="io.jans.as.common.AudienceTest"/>
+            <class name="io.jans.as.common.util.RedirectUriTest"/>
+            <class name="io.jans.as.common.model.registration.ClientSerializationTest"/>
+            <class name="io.jans.as.common.service.common.UserServiceTest"/>
+            <class name="io.jans.as.common.service.common.InumServiceTest"/>
         </classes>
     </test>
 </suite>

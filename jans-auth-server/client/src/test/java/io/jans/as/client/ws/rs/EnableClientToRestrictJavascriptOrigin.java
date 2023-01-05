@@ -9,7 +9,6 @@ package io.jans.as.client.ws.rs;
 import io.jans.as.client.AuthorizationRequest;
 import io.jans.as.client.AuthorizationResponse;
 import io.jans.as.client.BaseTest;
-import io.jans.as.client.JwkClient;
 import io.jans.as.client.RegisterClient;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
@@ -18,16 +17,14 @@ import io.jans.as.client.TokenRequest;
 import io.jans.as.client.TokenResponse;
 import io.jans.as.client.UserInfoClient;
 import io.jans.as.client.UserInfoResponse;
+
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.common.SubjectType;
-import io.jans.as.model.crypto.signature.RSAPublicKey;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
-import io.jans.as.model.jws.RSASigner;
-import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
-import io.jans.as.model.jwt.JwtHeaderName;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.register.RegisterRequestParam;
 import io.jans.as.model.util.StringUtils;
@@ -38,6 +35,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import static io.jans.as.client.client.Asserter.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
@@ -80,12 +78,7 @@ public class EnableClientToRestrictJavascriptOrigin extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        AssertBuilder.registerResponse(registerResponse).created().check();
         assertTrue(registerResponse.getClaims().containsKey(RegisterRequestParam.AUTHORIZED_ORIGINS.toString()));
 
         String clientId = registerResponse.getClientId();
@@ -101,10 +94,7 @@ public class EnableClientToRestrictJavascriptOrigin extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertNotNull(authorizationResponse.getLocation(), "The location is null");
-        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
-        assertNotNull(authorizationResponse.getState(), "The state is null");
-        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        AssertBuilder.authorizationResponse(authorizationResponse).check();
 
         String scope = authorizationResponse.getScope();
         String authorizationCode = authorizationResponse.getCode();
@@ -123,46 +113,29 @@ public class EnableClientToRestrictJavascriptOrigin extends BaseTest {
         TokenResponse tokenResponse1 = tokenClient1.exec();
 
         showClient(tokenClient1);
-        assertEquals(tokenResponse1.getStatus(), 200, "Unexpected response code: " + tokenResponse1.getStatus());
-        assertNotNull(tokenResponse1.getEntity(), "The entity is null");
-        assertNotNull(tokenResponse1.getAccessToken(), "The access token is null");
-        assertNotNull(tokenResponse1.getExpiresIn(), "The expires in value is null");
-        assertNotNull(tokenResponse1.getTokenType(), "The token type is null");
-        assertNotNull(tokenResponse1.getRefreshToken(), "The refresh token is null");
+        AssertBuilder.tokenResponse(tokenResponse1)
+                .notNullRefreshToken()
+                .check();
+
 
         String refreshToken = tokenResponse1.getRefreshToken();
 
         // 4. Validate id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.CODE_HASH));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.OX_OPENID_CONNECT_VERSION));
-
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS256, publicKey);
-
-        assertTrue(rsaSigner.validate(jwt));
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS256)
+                .notNullJansOpenIDConnectVersion()
+                .claimsPresence(JwtClaimName.CODE_HASH)
+                .check();
 
         // 5. Request new access token using the refresh token.
         TokenClient tokenClient2 = new TokenClient(tokenEndpoint);
         TokenResponse tokenResponse2 = tokenClient2.execRefreshToken(scope, refreshToken, clientId, clientSecret);
 
         showClient(tokenClient2);
-        assertEquals(tokenResponse2.getStatus(), 200, "Unexpected response code: " + tokenResponse2.getStatus());
-        assertNotNull(tokenResponse2.getEntity(), "The entity is null");
-        assertNotNull(tokenResponse2.getAccessToken(), "The access token is null");
-        assertNotNull(tokenResponse2.getTokenType(), "The token type is null");
-        assertNotNull(tokenResponse2.getRefreshToken(), "The refresh token is null");
-        assertNotNull(tokenResponse2.getScope(), "The scope is null");
+        AssertBuilder.tokenResponse(tokenResponse2)
+                .notNullRefreshToken()
+                .notNullScope()
+                .check();
 
         String accessToken = tokenResponse2.getAccessToken();
 
@@ -171,28 +144,13 @@ public class EnableClientToRestrictJavascriptOrigin extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertEquals(userInfoResponse.getStatus(), 200, "Unexpected response code: " + userInfoResponse.getStatus());
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NAME));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.BIRTHDATE));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.FAMILY_NAME));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.GENDER));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.GIVEN_NAME));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.MIDDLE_NAME));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NICKNAME));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.PICTURE));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.PREFERRED_USERNAME));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.PROFILE));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.WEBSITE));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.EMAIL_VERIFIED));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.PHONE_NUMBER));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.PHONE_NUMBER_VERIFIED));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.LOCALE));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ZONEINFO));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.USER_NAME));
-        assertNull(userInfoResponse.getClaim("org_name"));
-        assertNull(userInfoResponse.getClaim("work_phone"));
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .notNullClaimsPersonalData()
+                .claimsPresence(JwtClaimName.EMAIL, JwtClaimName.BIRTHDATE, JwtClaimName.GENDER, JwtClaimName.MIDDLE_NAME)
+                .claimsPresence(JwtClaimName.NICKNAME, JwtClaimName.PREFERRED_USERNAME, JwtClaimName.PROFILE)
+                .claimsPresence(JwtClaimName.WEBSITE, JwtClaimName.EMAIL_VERIFIED, JwtClaimName.PHONE_NUMBER)
+                .claimsPresence(JwtClaimName.PHONE_NUMBER_VERIFIED, JwtClaimName.ADDRESS, JwtClaimName.USER_NAME)
+                .claimsNoPresence("org_name", "work_phone")
+                .check();
     }
 }

@@ -8,11 +8,11 @@ package io.jans.as.server.service;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.util.StringHelper;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.faces.context.FacesContext;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.ServletContext;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.faces.context.FacesContext;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.servlet.ServletContext;
 
 /**
  * OxAuthConfigurationService

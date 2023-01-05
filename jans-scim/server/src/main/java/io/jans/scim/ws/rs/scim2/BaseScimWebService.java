@@ -8,19 +8,19 @@ package io.jans.scim.ws.rs.scim2;
 
 import static io.jans.scim.model.scim2.Constants.PATCH_REQUEST_SCHEMA_ID;
 import static io.jans.scim.model.scim2.Constants.SEARCH_REQUEST_SCHEMA_ID;
-import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
+import static jakarta.ws.rs.core.Response.Status.BAD_REQUEST;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.List;
 
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
-import javax.ws.rs.Path;
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
+import jakarta.ws.rs.Path;
 
 import org.apache.commons.lang.StringUtils;
 

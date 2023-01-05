@@ -16,6 +16,8 @@ import io.jans.as.client.TokenClient;
 import io.jans.as.client.TokenResponse;
 import io.jans.as.client.UserInfoClient;
 import io.jans.as.client.UserInfoResponse;
+
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.register.ApplicationType;
@@ -27,6 +29,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import static io.jans.as.client.client.Asserter.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
@@ -60,12 +63,7 @@ public class SecondUseOfAccessCodeRevokesPreviouslyIssuedAccessToken extends Bas
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -81,10 +79,7 @@ public class SecondUseOfAccessCodeRevokesPreviouslyIssuedAccessToken extends Bas
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertNotNull(authorizationResponse.getLocation(), "The location is null");
-        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
-        assertNotNull(authorizationResponse.getState(), "The state is null");
-        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        AssertBuilder.authorizationResponse(authorizationResponse).check();
         assertNotNull(authorizationResponse.getIdToken(), "The id token is null");
 
         String scope = authorizationResponse.getScope();
@@ -99,11 +94,9 @@ public class SecondUseOfAccessCodeRevokesPreviouslyIssuedAccessToken extends Bas
                     clientId, clientSecret);
 
             showClient(tokenClient);
-            assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-            assertNotNull(tokenResponse.getEntity(), "The entity is null");
-            assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
-            assertNotNull(tokenResponse.getTokenType(), "The token type is null");
-            assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
+            AssertBuilder.tokenResponse(tokenResponse)
+                .notNullRefreshToken()
+                .check();
 
             accessToken = tokenResponse.getAccessToken();
             refreshToken = tokenResponse.getRefreshToken();
@@ -115,14 +108,10 @@ public class SecondUseOfAccessCodeRevokesPreviouslyIssuedAccessToken extends Bas
             UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
             showClient(userInfoClient);
-            assertEquals(userInfoResponse.getStatus(), 200, "Unexpected response code: " + userInfoResponse.getStatus());
-            assertNotNull(userInfoResponse.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
-            assertNotNull(userInfoResponse.getClaim(JwtClaimName.NAME));
-            assertNotNull(userInfoResponse.getClaim(JwtClaimName.GIVEN_NAME));
-            assertNotNull(userInfoResponse.getClaim(JwtClaimName.FAMILY_NAME));
-            assertNotNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
-            assertNotNull(userInfoResponse.getClaim(JwtClaimName.ZONEINFO));
-            assertNotNull(userInfoResponse.getClaim(JwtClaimName.LOCALE));
+            AssertBuilder.userInfoResponse(userInfoResponse)
+                    .notNullClaimsPersonalData()
+                    .claimsPresence(JwtClaimName.EMAIL)
+                    .check();
         }
 
         // 5. Request access token using the same authorization code one more time. This call must fail.

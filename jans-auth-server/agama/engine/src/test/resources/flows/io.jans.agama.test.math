@@ -1,0 +1,52 @@
+//This flow is used to test some Java calls. It does not make use of idiomatic Agama. There is no UI either here
+Flow io.jans.agama.test.math
+    Basepath ""
+    Inputs numbers      //A non-empty list of positive integers
+
+// 1. Find the smallest
+small = Call java.util.Collections#min numbers
+Log "min element is" small
+
+
+// 2. Concat them all in a string
+strings = [ ]
+Iterate over numbers using n
+    i = strings.length
+    strings[i] = Call java.lang.Integer#toString n
+
+cat = Call java.lang.String#join "" strings
+Log "concatenation is" cat
+
+
+// 3. Sumation (with Repeat)
+s = 0
+Repeat numbers.length times max
+    i = idx[0]
+    s = Call java.lang.Math#addExact s numbers[i] 
+    
+Log "sumation is" s
+
+
+// 4. Find if they are mutually relatively prime (no integer divides them all)
+When numbers.length is 1 or small is 1
+    Finish true
+
+divisor = 1
+small = Call java.lang.Math#decrementExact small
+
+Repeat small times max
+    divisor = Call java.lang.Math#incrementExact divisor
+
+    //Try to divide the numbers by 2, 3, ... small+1
+    k = Iterate over numbers using n
+        modulus = Call java.lang.Math#floorMod n divisor
+        Quit When modulus is 0
+
+    Quit When k is numbers.length
+
+When k is numbers.length
+    Log "% are relative primes" numbers
+Otherwise
+    Log "All numbers can be divided by" divisor
+
+Finish true

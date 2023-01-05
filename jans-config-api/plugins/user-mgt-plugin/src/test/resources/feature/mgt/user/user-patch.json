@@ -1,0 +1,40 @@
+{
+   "jsonPatchString": "[ {\"op\":\"add\", \"path\": \"/userId\", \"value\":\"config_test_user_100_final_patch\" } ]",
+   "customAttributes": [{
+            "name": "emailVerified",
+            "multiValued": false,
+            "values": [
+                true
+            ],
+            "value": true,
+            "displayValue": true
+        },
+		{
+            "name": "secretAnswer",
+            "multiValued": false,
+            "values": [
+                "james-bond@123"
+            ],
+            "value": "james-bond@123",
+            "displayValue": "james-bond@123"
+        },
+        {
+            "name": "jansImsValue",
+            "multiValued": true,
+            "values": [{
+			  "value": "123456",
+			  "display": "Home phone",
+			  "type": "home",
+			  "primary": true			
+			},
+			{
+			  "value": "9821789",
+			  "display": "Work phone",
+			  "type": "work",
+			  "primary": false			
+			}
+                
+            ]
+        }
+        ]
+}

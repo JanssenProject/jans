@@ -1,12 +1,7 @@
 package io.jans.as.client.ws.rs.par;
 
-import io.jans.as.client.AuthorizationRequest;
-import io.jans.as.client.AuthorizationResponse;
-import io.jans.as.client.BaseTest;
-import io.jans.as.client.RegisterResponse;
-import io.jans.as.client.TokenClient;
-import io.jans.as.client.TokenRequest;
-import io.jans.as.client.TokenResponse;
+import io.jans.as.client.*;
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.client.par.ParClient;
 import io.jans.as.client.par.ParRequest;
 import io.jans.as.client.par.ParResponse;
@@ -15,6 +10,7 @@ import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.exception.InvalidJwtException;
+import io.jans.as.model.jwt.JwtClaimName;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
@@ -26,11 +22,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static io.jans.as.client.client.Asserter.assertAuthorizationResponse;
-import static io.jans.as.client.client.Asserter.assertOk;
-import static io.jans.as.client.client.Asserter.assertParResponse;
-import static io.jans.as.client.client.Asserter.assertTokenResponse;
-import static io.jans.as.client.client.Asserter.validateIdToken;
+import static io.jans.as.client.client.Asserter.*;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -50,10 +42,11 @@ public class ParHttpTest extends BaseTest {
         String nonce = UUID.randomUUID().toString();
 
         registerResponse = registerClient(redirectUris, responseTypes, scopes, sectorIdentifierUri);
-        assertOk(registerResponse);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, registerResponse.getClientId(), scopes, redirectUri, nonce);
         ParRequest parRequest = new ParRequest(authorizationRequest);
+        parRequest.setNbf((int) (System.currentTimeMillis() / 1000L));
         parRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
         parRequest.setAuthUsername(registerResponse.getClientId());
         parRequest.setAuthPassword(registerResponse.getClientSecret());
@@ -61,7 +54,7 @@ public class ParHttpTest extends BaseTest {
         ParClient parClient = newParClient(parRequest);
         parResponse = parClient.exec();
         showClient(parClient);
-        assertParResponse(parResponse);
+        AssertBuilder.parResponse(parResponse).check();
     }
 
     @Parameters({"userId", "userSecret", "redirectUri"})
@@ -84,8 +77,18 @@ public class ParHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertTokenResponse(tokenResponse);
-        validateIdToken(idToken, jwksUri, SignatureAlgorithm.RS256);
+        AssertBuilder.tokenResponse(tokenResponse).ok()
+                .notNullRefreshToken()
+                .check();
+
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureRSAClientEngine(jwksUri, SignatureAlgorithm.RS256)
+                .claimsPresence(JwtClaimName.CODE_HASH)
+                .notNullAuthenticationTime()
+                .notNullJansOpenIDConnectVersion()
+                .notNullAuthenticationContextClassReference()
+                .notNullAuthenticationMethodReferences()
+                .check();
     }
 
     private AuthorizationResponse requestAuthorization(final String userId, final String userSecret, String redirectUri) {
@@ -96,7 +99,7 @@ public class ParHttpTest extends BaseTest {
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertAuthorizationResponse(authorizationResponse, false);
+        AssertBuilder.authorizationResponse(authorizationResponse).nullState().check();
         return authorizationResponse;
     }
 }

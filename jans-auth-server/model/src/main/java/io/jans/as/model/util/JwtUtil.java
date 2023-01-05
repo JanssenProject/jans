@@ -9,9 +9,12 @@ package io.jans.as.model.util;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
 import io.jans.as.model.crypto.Certificate;
+import io.jans.as.model.crypto.signature.AlgorithmFamily;
 import io.jans.as.model.crypto.signature.ECDSAPublicKey;
+import io.jans.as.model.crypto.signature.EDDSAPublicKey;
 import io.jans.as.model.crypto.signature.RSAPublicKey;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.exception.InvalidParameterException;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.util.StringHelper;
 import org.bouncycastle.jce.provider.X509CertificateObject;
@@ -23,8 +26,8 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.StringReader;
 import java.math.BigInteger;
@@ -48,9 +51,13 @@ import static io.jans.as.model.jwk.JWKParameter.X;
 import static io.jans.as.model.jwk.JWKParameter.Y;
 
 /**
+ * Utility class (can't be instantiated), that provides suite of additional functions,
+ * which can be used, during JWT/JWE processing.
+ *
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version December 8, 2018
+ * @author Sergey Manoylo
+ * @version December 5, 2021
  */
 public class JwtUtil {
 
@@ -120,7 +127,7 @@ public class JwtUtil {
             if (signatureAlgorithm == null) {
                 signatureAlgorithm = SignatureAlgorithm.fromString(jsonKeyValue.getString(ALGORITHM));
                 if (signatureAlgorithm == null) {
-                    log.error(String.format("Failed to determine key '%s' signature algorithm", resultKeyId));
+                    log.error("Failed to determine key '{}' signature algorithm", resultKeyId);
                     return null;
                 }
             }
@@ -131,7 +138,8 @@ public class JwtUtil {
                 jsonPublicKey = jsonKeyValue.getJSONObject(PUBLIC_KEY);
             }
 
-            if (signatureAlgorithm == SignatureAlgorithm.RS256 || signatureAlgorithm == SignatureAlgorithm.RS384 || signatureAlgorithm == SignatureAlgorithm.RS512) {
+            AlgorithmFamily algorithmFamily = signatureAlgorithm.getFamily();
+            if (algorithmFamily == AlgorithmFamily.RSA) {
                 String exp = jsonPublicKey.getString(EXPONENT);
                 String mod = jsonPublicKey.getString(MODULUS);
 
@@ -139,7 +147,7 @@ public class JwtUtil {
                 BigInteger modulus = new BigInteger(1, Base64Util.base64urldecode(mod));
 
                 publicKey = new RSAPublicKey(modulus, publicExponent);
-            } else if (signatureAlgorithm == SignatureAlgorithm.ES256 || signatureAlgorithm == SignatureAlgorithm.ES384 || signatureAlgorithm == SignatureAlgorithm.ES512) {
+            } else if (algorithmFamily == AlgorithmFamily.EC) {
                 String xx = jsonPublicKey.getString(X);
                 String yy = jsonPublicKey.getString(Y);
 
@@ -147,9 +155,17 @@ public class JwtUtil {
                 BigInteger y = new BigInteger(1, Base64Util.base64urldecode(yy));
 
                 publicKey = new ECDSAPublicKey(signatureAlgorithm, x, y);
+            } else if (algorithmFamily == AlgorithmFamily.ED) {
+                String xx = jsonPublicKey.getString(X);
+
+                BigInteger x = new BigInteger(1, Base64Util.base64urldecode(xx));
+
+                publicKey = new EDDSAPublicKey(signatureAlgorithm, x.toByteArray());
+            } else {
+                throw new InvalidParameterException("Wrong value of the AlgorithmFamily: algorithmFamily = " + algorithmFamily);
             }
 
-            if (publicKey != null && jsonKeyValue.has(CERTIFICATE_CHAIN)) {
+            if (jsonKeyValue.has(CERTIFICATE_CHAIN)) {
                 final String BEGIN = "-----BEGIN CERTIFICATE-----";
                 final String END = "-----END CERTIFICATE-----";
 
@@ -161,10 +177,10 @@ public class JwtUtil {
                 io.jans.as.model.crypto.Certificate certificate = new Certificate(signatureAlgorithm, cert);
                 publicKey.setCertificate(certificate);
             }
-            if (publicKey != null) {
-                publicKey.setKeyId(resultKeyId);
-                publicKey.setSignatureAlgorithm(signatureAlgorithm);
-            }
+
+            publicKey.setKeyId(resultKeyId);
+            publicKey.setSignatureAlgorithm(signatureAlgorithm);
+
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
         }
@@ -172,43 +188,57 @@ public class JwtUtil {
         return publicKey;
     }
 
+    private static String getJwks(String jwksUri) {
+        String jwks = "";
+        jakarta.ws.rs.client.Client clientRequest = ClientBuilder.newClient();
+        try {
+            Response clientResponse = clientRequest.target(jwksUri).request().buildGet().invoke();
+
+            int status = clientResponse.getStatus();
+            if (log.isDebugEnabled()) {
+                log.debug(String.format("Status: %s", String.valueOf(status)));
+            }
+
+            if (status == 200) {
+                jwks = clientResponse.readEntity(String.class);
+                if (log.isDebugEnabled()) {
+                    log.debug(String.format("JWK: %s", jwks));
+                }
+            }
+        } finally {
+            clientRequest.close();
+        }
+        return jwks;
+    }
+
+    private static JSONObject buildJsonKey(String jwks, String keyId) {
+        JSONObject jsonKey = null;
+        JSONObject jsonObject = new JSONObject(jwks);
+        JSONArray keys = jsonObject.getJSONArray(JSON_WEB_KEY_SET);
+        if (keys.length() > 0) {
+            if (StringHelper.isEmpty(keyId)) {
+                jsonKey = keys.getJSONObject(0);
+            } else {
+                for (int i = 0; i < keys.length(); i++) {
+                    JSONObject kv = keys.getJSONObject(i);
+                    if (kv.getString(KEY_ID).equals(keyId)) {
+                        jsonKey = kv;
+                        break;
+                    }
+                }
+            }
+        }
+        return jsonKey;
+    }
+
     public static JSONObject getJsonKey(String jwksUri, String jwks, String keyId) {
         JSONObject jsonKey = null;
         try {
             if (StringHelper.isEmpty(jwks)) {
-                javax.ws.rs.client.Client clientRequest = ClientBuilder.newClient();
-                try {
-                    Response clientResponse = clientRequest.target(jwksUri).request().buildGet().invoke();
-
-                    int status = clientResponse.getStatus();
-                    log.debug(String.format("Status: %n%d", status));
-
-                    if (status == 200) {
-                        jwks = clientResponse.readEntity(String.class);
-                        if (log.isDebugEnabled()) {
-                            log.debug(String.format("JWK: %s", jwks));
-                        }
-                    }
-                } finally {
-                    clientRequest.close();
-                }
+                jwks = getJwks(jwksUri);
             }
             if (StringHelper.isNotEmpty(jwks)) {
-                JSONObject jsonObject = new JSONObject(jwks);
-                JSONArray keys = jsonObject.getJSONArray(JSON_WEB_KEY_SET);
-                if (keys.length() > 0) {
-                    if (StringHelper.isEmpty(keyId)) {
-                        jsonKey = keys.getJSONObject(0);
-                    } else {
-                        for (int i = 0; i < keys.length(); i++) {
-                            JSONObject kv = keys.getJSONObject(i);
-                            if (kv.getString(KEY_ID).equals(keyId)) {
-                                jsonKey = kv;
-                                break;
-                            }
-                        }
-                    }
-                }
+                jsonKey = buildJsonKey(jwks, keyId);
             }
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
@@ -232,12 +262,14 @@ public class JwtUtil {
                     ((ResteasyClientBuilder) clientBuilder).httpEngine(engine);
                 }
 
-                javax.ws.rs.client.Client clientRequest = clientBuilder.build();
+                jakarta.ws.rs.client.Client clientRequest = clientBuilder.build();
                 try {
                     Response clientResponse = clientRequest.target(jwksUri).request().buildGet().invoke();
 
                     int status = clientResponse.getStatus();
-                    log.debug(String.format("Status: %n%d", status));
+                    if (log.isDebugEnabled()) {
+                        log.debug(String.format("Status: %s", status));
+                    }
 
                     if (status == 200) {
                         jwks = fromJson(clientResponse.readEntity(String.class));

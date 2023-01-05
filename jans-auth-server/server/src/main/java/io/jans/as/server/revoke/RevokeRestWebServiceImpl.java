@@ -7,7 +7,7 @@
 package io.jans.as.server.revoke;
 
 import io.jans.as.common.model.registration.Client;
-import io.jans.as.model.common.ComponentType;
+import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.common.TokenTypeHint;
 import io.jans.as.model.config.Constants;
 import io.jans.as.model.configuration.AppConfiguration;
@@ -31,14 +31,14 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.Path;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
+import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.SecurityContext;
 import java.util.List;
 
 /**
@@ -81,7 +81,7 @@ public class RevokeRestWebServiceImpl implements RevokeRestWebService {
     public Response requestAccessToken(String tokenString, String tokenTypeHint, String clientId,
                                        HttpServletRequest request, HttpServletResponse response, SecurityContext sec) {
         log.debug("Attempting to revoke token: token = {}, tokenTypeHint = {}, isSecure = {}", tokenString, tokenTypeHint, sec.isSecure());
-        errorResponseFactory.validateComponentEnabled(ComponentType.REVOKE_TOKEN);
+        errorResponseFactory.validateFeatureEnabled(FeatureFlagType.REVOKE_TOKEN);
         OAuth2AuditLog oAuth2AuditLog = new OAuth2AuditLog(ServerUtil.getIpAddress(request), Action.TOKEN_REVOCATION);
 
         validateToken(tokenString);

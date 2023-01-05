@@ -6,11 +6,11 @@
 
 package io.jans.service.document.store.provider;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.Produces;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
+import jakarta.enterprise.inject.Produces;
+import jakarta.inject.Inject;
 
 import io.jans.service.document.store.conf.DocumentStoreConfiguration;
 import io.jans.service.document.store.LocalDocumentStore;

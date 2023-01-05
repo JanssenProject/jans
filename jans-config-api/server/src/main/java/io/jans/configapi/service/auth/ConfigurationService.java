@@ -11,12 +11,13 @@ import io.jans.as.model.config.Conf;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.persistence.model.configuration.GluuConfiguration;
 import io.jans.configapi.configuration.ConfigurationFactory;
+import io.jans.configapi.model.status.StatsData;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.util.StringHelper;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -30,9 +31,11 @@ public class ConfigurationService {
 
     @Inject
     ConfigurationFactory configurationFactory;
+    
+    private StatsData statsData;
 
     public Conf findConf() {
-        final String dn = configurationFactory.getConfigurationDn();
+        final String dn = configurationFactory.getAuthConfigurationDn();
         return persistenceManager.find(dn, Conf.class, null);
     }
 
@@ -61,4 +64,13 @@ public class ConfigurationService {
     public String getPersistenceType() {
         return configurationFactory.getBaseConfiguration().getString("persistence.type");
     }
+
+    public StatsData getStatsData() {
+        return statsData;
+    }
+
+    public void setStatsData(StatsData statsData) {
+        this.statsData = statsData;
+    }    
+  
 }

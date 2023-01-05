@@ -8,6 +8,10 @@ package io.jans.fido2.exception;
 
 import io.jans.fido2.model.error.Fido2RPError;
 
+/**
+ * Parent class of all FIDO2 RuntimeExceptions
+ *
+ */
 public class Fido2RuntimeException extends RuntimeException {
 
     private static final long serialVersionUID = -118563205092295773L;

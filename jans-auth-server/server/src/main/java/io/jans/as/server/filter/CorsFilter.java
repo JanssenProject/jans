@@ -16,19 +16,21 @@ import io.jans.util.StringHelper;
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 
-import javax.inject.Inject;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.annotation.WebFilter;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.inject.Inject;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.FilterConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.annotation.WebFilter;
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -104,7 +106,7 @@ public class CorsFilter extends AbstractCorsFilter {
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
             throws IOException, ServletException {
-        Collection<String> globalAllowedOrigins = null;
+        Collection<String> globalAllowedOrigins = new ArrayList<>(0);
         if (this.filterEnabled) {
             try {
                 globalAllowedOrigins = doFilterImpl(servletRequest);

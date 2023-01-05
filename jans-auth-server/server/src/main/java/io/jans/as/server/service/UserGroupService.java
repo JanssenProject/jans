@@ -13,9 +13,9 @@ import io.jans.orm.search.filter.Filter;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import java.util.Arrays;
 import java.util.List;
 

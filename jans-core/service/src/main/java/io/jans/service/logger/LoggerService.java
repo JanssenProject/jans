@@ -19,17 +19,35 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.slf4j.Logger;
 
-import javax.annotation.PostConstruct;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.event.Event;
+import jakarta.enterprise.event.Observes;
+import jakarta.inject.Inject;
 import java.io.File;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.LogManager;
 
 /**
  * Logger service
+ * At startup of any server (FIDO2, jans-auth, casa etc)
+ * LoggerService is initialized inside the Application Initializer
+ * (AppInitializer) class for the respective server.
+ *  
+ * In the server configuration for each application fido2, jans-auth,casa etc,
+ * you can change the log level and the same is reflected in the corresponding
+ * log level database entry
+ * 
+ * And this service/timer will update log level in all created loggers
+ * 
+ * There are 2 limitations of this Timer
+ * 
+ * 1. It updates log level only after server startup. First time it does this
+ * after 15 seconds delay. 2. It can update logging level only after
+ * instantiating loggers. This means that if no one call specific service with
+ * own logger this logger will be not created But after first call logger timer
+ * will update it level as well
  *
+ * 
  * @author Yuriy Movchan Date: 08/19/2018
  */
 public abstract class LoggerService {

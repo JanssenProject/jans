@@ -10,7 +10,6 @@ import io.jans.as.client.AuthorizationRequest;
 import io.jans.as.client.AuthorizationResponse;
 import io.jans.as.client.AuthorizeClient;
 import io.jans.as.client.BaseTest;
-import io.jans.as.client.JwkClient;
 import io.jans.as.client.RegisterClient;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
@@ -19,17 +18,16 @@ import io.jans.as.client.TokenRequest;
 import io.jans.as.client.TokenResponse;
 import io.jans.as.client.UserInfoClient;
 import io.jans.as.client.UserInfoResponse;
+
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.common.SubjectType;
-import io.jans.as.model.crypto.signature.RSAPublicKey;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
-import io.jans.as.model.jws.RSASigner;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
-import io.jans.as.model.jwt.JwtHeaderName;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.StringUtils;
 import org.testng.annotations.Parameters;
@@ -39,6 +37,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import static io.jans.as.client.client.Asserter.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertNotNull;
@@ -144,11 +143,7 @@ public class SectorIdentifierUrlVerificationHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         return registerResponse;
     }
@@ -178,10 +173,7 @@ public class SectorIdentifierUrlVerificationHttpTest extends BaseTest {
 
         showClient(authorizeClient);
         assertEquals(authorizationResponse.getStatus(), 302, "Unexpected response code: " + authorizationResponse.getStatus());
-        assertNotNull(authorizationResponse.getLocation(), "The location is null");
-        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
-        assertNotNull(authorizationResponse.getState(), "The state is null");
-        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        AssertBuilder.authorizationResponse(authorizationResponse).check();
         assertEquals(authorizationResponse.getState(), state);
 
         String authorizationCode = authorizationResponse.getCode();
@@ -189,23 +181,11 @@ public class SectorIdentifierUrlVerificationHttpTest extends BaseTest {
 
         // 2. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.CODE_HASH));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
-
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS256, publicKey);
-
-        assertTrue(rsaSigner.validate(jwt));
+        AssertBuilder.jwt(jwt)
+                .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS256)
+                .notNullAuthenticationTime()
+                .claimsPresence(JwtClaimName.CODE_HASH)
+                .check();
 
         String sub = jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER);
 
@@ -222,12 +202,9 @@ public class SectorIdentifierUrlVerificationHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity(), "The entity is null");
-        assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
-        assertNotNull(tokenResponse.getExpiresIn(), "The expires in value is null");
-        assertNotNull(tokenResponse.getTokenType(), "The token type is null");
-        assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
+        AssertBuilder.tokenResponse(tokenResponse)
+                .notNullRefreshToken()
+                .check();
 
         String accessToken = tokenResponse.getAccessToken();
 
@@ -236,15 +213,10 @@ public class SectorIdentifierUrlVerificationHttpTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertEquals(userInfoResponse.getStatus(), 200, "Unexpected response code: " + userInfoResponse.getStatus());
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NAME));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.GIVEN_NAME));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.FAMILY_NAME));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ZONEINFO));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.LOCALE));
-
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .notNullClaimsPersonalData()
+                .claimsPresence(JwtClaimName.EMAIL)
+                .check();
         return sub;
     }
 
@@ -279,11 +251,7 @@ public class SectorIdentifierUrlVerificationHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -309,10 +277,7 @@ public class SectorIdentifierUrlVerificationHttpTest extends BaseTest {
 
         showClient(authorizeClient);
         assertEquals(authorizationResponse.getStatus(), 302, "Unexpected response code: " + authorizationResponse.getStatus());
-        assertNotNull(authorizationResponse.getLocation(), "The location is null");
-        assertNotNull(authorizationResponse.getCode(), "The authorization code is null");
-        assertNotNull(authorizationResponse.getState(), "The state is null");
-        assertNotNull(authorizationResponse.getScope(), "The scope is null");
+        AssertBuilder.authorizationResponse(authorizationResponse).check();
         assertEquals(authorizationResponse.getState(), state);
 
         String authorizationCode = authorizationResponse.getCode();
@@ -320,23 +285,11 @@ public class SectorIdentifierUrlVerificationHttpTest extends BaseTest {
 
         // 3. Validate id_token
         Jwt jwt = Jwt.parse(idToken);
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.CODE_HASH));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
-
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS256, publicKey);
-
-        assertTrue(rsaSigner.validate(jwt));
+        AssertBuilder.jwt(jwt)
+                .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS256)
+                .notNullAuthenticationTime()
+                .claimsPresence(JwtClaimName.CODE_HASH)
+                .check();
 
         String sub = jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER);
 
@@ -353,12 +306,9 @@ public class SectorIdentifierUrlVerificationHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity(), "The entity is null");
-        assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
-        assertNotNull(tokenResponse.getExpiresIn(), "The expires in value is null");
-        assertNotNull(tokenResponse.getTokenType(), "The token type is null");
-        assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
+        AssertBuilder.tokenResponse(tokenResponse)
+                .notNullRefreshToken()
+                .check();
 
         String accessToken = tokenResponse.getAccessToken();
 
@@ -367,14 +317,10 @@ public class SectorIdentifierUrlVerificationHttpTest extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertEquals(userInfoResponse.getStatus(), 200, "Unexpected response code: " + userInfoResponse.getStatus());
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NAME));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.GIVEN_NAME));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.FAMILY_NAME));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ZONEINFO));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.LOCALE));
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .notNullClaimsPersonalData()
+                .claimsPresence(JwtClaimName.EMAIL)
+                .check();
 
         return sub;
     }
@@ -394,10 +340,7 @@ public class SectorIdentifierUrlVerificationHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(response.getStatus(), 400, "Unexpected response code: " + response.getEntity());
-        assertNotNull(response.getEntity(), "The entity is null");
-        assertNotNull(response.getErrorType(), "The error type is null");
-        assertNotNull(response.getErrorDescription(), "The error description is null");
+        AssertBuilder.registerResponse(response).bad().check();
     }
 
     @Parameters({"sectorIdentifierUri"})
@@ -417,10 +360,7 @@ public class SectorIdentifierUrlVerificationHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(response.getStatus(), 400, "Unexpected response code: " + response.getEntity());
-        assertNotNull(response.getEntity(), "The entity is null");
-        assertNotNull(response.getErrorType(), "The error type is null");
-        assertNotNull(response.getErrorDescription(), "The error description is null");
+        AssertBuilder.registerResponse(response).bad().check();
     }
 
     /**
@@ -442,9 +382,6 @@ public class SectorIdentifierUrlVerificationHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(response.getStatus(), 400, "Unexpected response code: " + response.getEntity());
-        assertNotNull(response.getEntity(), "The entity is null");
-        assertNotNull(response.getErrorType(), "The error type is null");
-        assertNotNull(response.getErrorDescription(), "The error description is null");
+        AssertBuilder.registerResponse(response).bad().check();
     }
 }

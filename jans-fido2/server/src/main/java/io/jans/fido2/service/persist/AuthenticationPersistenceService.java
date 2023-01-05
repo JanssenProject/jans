@@ -13,8 +13,8 @@ import java.util.List;
 import java.util.TimeZone;
 import java.util.UUID;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.conf.AppConfiguration;
@@ -34,6 +34,8 @@ import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
 /**
+ * Every authentication is persisted under Person Entry
+ * 
  * @author Yuriy Movchan
  * @version May 08, 2020
  */

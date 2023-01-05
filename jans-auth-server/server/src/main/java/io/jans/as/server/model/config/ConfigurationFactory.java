@@ -41,16 +41,16 @@ import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Instance;
-import javax.enterprise.inject.Produces;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletRegistration;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Event;
+import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.inject.Instance;
+import jakarta.enterprise.inject.Produces;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletRegistration;
 import java.io.File;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -122,7 +122,7 @@ public class ConfigurationFactory {
     private static final String DIR = BASE_DIR + File.separator + "conf" + File.separator;
 
     private static final String BASE_PROPERTIES_FILE = DIR + BASE_PROPERTIES_FILE_NAME;
-    private static final String LDAP_PROPERTIES_FILE = DIR + LDAP_PROPERTIES_FILE_NAME;
+    private static final String APP_PROPERTIES_FILE = DIR + LDAP_PROPERTIES_FILE_NAME;
 
     private static final String CONFIG_FILE_NAME = "jans-config.json";
     private static final String ERRORS_FILE_NAME = "jans-errors.json";
@@ -158,9 +158,11 @@ public class ConfigurationFactory {
 
     @PostConstruct
     public void init() {
+        log.info("Initializing ConfigurationFactory ...");
         this.isActive = new AtomicBoolean(true);
         try {
-            this.persistenceConfiguration = persistanceFactoryService.loadPersistenceConfiguration(LDAP_PROPERTIES_FILE);
+            log.info("---------PATH to file configuration: {}", APP_PROPERTIES_FILE);
+            this.persistenceConfiguration = persistanceFactoryService.loadPersistenceConfiguration(APP_PROPERTIES_FILE);
             loadBaseConfiguration();
 
             String confDir = confDir();
@@ -238,7 +240,7 @@ public class ConfigurationFactory {
 
     private void reloadConfiguration() {
         // Reload LDAP configuration if needed
-        PersistenceConfiguration newPersistenceConfiguration = persistanceFactoryService.loadPersistenceConfiguration(LDAP_PROPERTIES_FILE);
+        PersistenceConfiguration newPersistenceConfiguration = persistanceFactoryService.loadPersistenceConfiguration(APP_PROPERTIES_FILE);
 
         if (newPersistenceConfiguration != null &&
                 (!StringHelper.equalsIgnoreCase(this.persistenceConfiguration.getFileName(), newPersistenceConfiguration.getFileName()) ||
@@ -455,7 +457,7 @@ public class ConfigurationFactory {
             if (!dn.contains("_test")) {
                 ex.printStackTrace();
             }
-            log.error(ex.getMessage());
+            log.error(ex.getMessage(), ex);
         }
 
         return null;

@@ -1,19 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.jans</groupId>
 	<artifactId>jans-notify-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>1.0.6-SNAPSHOT</version>
 	<name>notify</name>
 	<url>http://ox.gluu.org</url>
 
+    <distributionManagement>
+	  <repository>
+          <id>github</id>
+          <name>GitHub Packages</name>
+          <url>https://maven.pkg.github.com/JanssenProject/jans</url>
+      </repository>
+    </distributionManagement>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.min-version>3.3.9</maven.min-version>
 
-		<janssen.version>1.0.0-SNAPSHOT</janssen.version>
+		<janssen.version>${project.version}</janssen.version>
 
 		<jacoco.version>0.8.7</jacoco.version>
 
@@ -27,12 +33,12 @@
 		<repository>
 			<id>repository.jboss.org</id>
 			<name>JBoss Repository</name>
-			<url>http://repository.jboss.org/nexus/content/groups/public-jboss/</url>
+			<url>https://repository.jboss.org/nexus/content/groups/public-jboss/</url>
 		</repository>
 		<repository>
 			<id>mavencentral</id>
 			<name>maven central</name>
-			<url>http://repo1.maven.org/maven2</url>
+			<url>https://repo1.maven.org/maven2</url>
 		</repository>
 		<repository>
 			<id>jans</id>
@@ -42,7 +48,7 @@
 		<repository>
 			<id>bouncycastle</id>
 			<name>Bouncy Castle</name>
-			<url>http://repo2.maven.org/maven2/org/bouncycastle</url>
+			<url>https://repo1.maven.org/maven2/org/bouncycastle</url>
 		</repository>
 	</repositories>
 

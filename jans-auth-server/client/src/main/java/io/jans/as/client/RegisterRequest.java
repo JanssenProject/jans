@@ -11,11 +11,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import io.jans.as.client.model.SoftwareStatement;
 import io.jans.as.client.util.ClientUtil;
-import io.jans.as.model.common.AuthenticationMethod;
-import io.jans.as.model.common.BackchannelTokenDeliveryMode;
-import io.jans.as.model.common.GrantType;
-import io.jans.as.model.common.ResponseType;
-import io.jans.as.model.common.SubjectType;
+import io.jans.as.model.common.*;
 import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
 import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
@@ -24,85 +20,19 @@ import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.json.JsonApplier;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.register.RegisterRequestParam;
+import io.jans.orm.model.base.LocalizedString;
+import jakarta.ws.rs.core.MediaType;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import javax.ws.rs.core.MediaType;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.function.BiFunction;
 
-import static io.jans.as.client.util.ClientUtil.booleanOrNull;
-import static io.jans.as.client.util.ClientUtil.extractListByKey;
-import static io.jans.as.client.util.ClientUtil.integerOrNull;
-import static io.jans.as.model.register.RegisterRequestParam.ACCESS_TOKEN_AS_JWT;
-import static io.jans.as.model.register.RegisterRequestParam.ACCESS_TOKEN_LIFETIME;
-import static io.jans.as.model.register.RegisterRequestParam.ACCESS_TOKEN_SIGNING_ALG;
-import static io.jans.as.model.register.RegisterRequestParam.ALLOW_SPONTANEOUS_SCOPES;
-import static io.jans.as.model.register.RegisterRequestParam.APPLICATION_TYPE;
-import static io.jans.as.model.register.RegisterRequestParam.AUTHORIZATION_ENCRYPTED_RESPONSE_ALG;
-import static io.jans.as.model.register.RegisterRequestParam.AUTHORIZATION_ENCRYPTED_RESPONSE_ENC;
-import static io.jans.as.model.register.RegisterRequestParam.AUTHORIZATION_SIGNED_RESPONSE_ALG;
-import static io.jans.as.model.register.RegisterRequestParam.AUTHORIZED_ORIGINS;
-import static io.jans.as.model.register.RegisterRequestParam.BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG;
-import static io.jans.as.model.register.RegisterRequestParam.BACKCHANNEL_CLIENT_NOTIFICATION_ENDPOINT;
-import static io.jans.as.model.register.RegisterRequestParam.BACKCHANNEL_LOGOUT_SESSION_REQUIRED;
-import static io.jans.as.model.register.RegisterRequestParam.BACKCHANNEL_LOGOUT_URI;
-import static io.jans.as.model.register.RegisterRequestParam.BACKCHANNEL_TOKEN_DELIVERY_MODE;
-import static io.jans.as.model.register.RegisterRequestParam.BACKCHANNEL_USER_CODE_PARAMETER;
-import static io.jans.as.model.register.RegisterRequestParam.CLAIMS;
-import static io.jans.as.model.register.RegisterRequestParam.CLAIMS_REDIRECT_URIS;
-import static io.jans.as.model.register.RegisterRequestParam.CLIENT_NAME;
-import static io.jans.as.model.register.RegisterRequestParam.CLIENT_URI;
-import static io.jans.as.model.register.RegisterRequestParam.CONTACTS;
-import static io.jans.as.model.register.RegisterRequestParam.DEFAULT_ACR_VALUES;
-import static io.jans.as.model.register.RegisterRequestParam.DEFAULT_MAX_AGE;
-import static io.jans.as.model.register.RegisterRequestParam.FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED;
-import static io.jans.as.model.register.RegisterRequestParam.FRONT_CHANNEL_LOGOUT_URI;
-import static io.jans.as.model.register.RegisterRequestParam.GRANT_TYPES;
-import static io.jans.as.model.register.RegisterRequestParam.ID_TOKEN_ENCRYPTED_RESPONSE_ALG;
-import static io.jans.as.model.register.RegisterRequestParam.ID_TOKEN_ENCRYPTED_RESPONSE_ENC;
-import static io.jans.as.model.register.RegisterRequestParam.ID_TOKEN_SIGNED_RESPONSE_ALG;
-import static io.jans.as.model.register.RegisterRequestParam.ID_TOKEN_TOKEN_BINDING_CNF;
-import static io.jans.as.model.register.RegisterRequestParam.INITIATE_LOGIN_URI;
-import static io.jans.as.model.register.RegisterRequestParam.JWKS;
-import static io.jans.as.model.register.RegisterRequestParam.JWKS_URI;
-import static io.jans.as.model.register.RegisterRequestParam.KEEP_CLIENT_AUTHORIZATION_AFTER_EXPIRATION;
-import static io.jans.as.model.register.RegisterRequestParam.LOGO_URI;
-import static io.jans.as.model.register.RegisterRequestParam.PAR_LIFETIME;
-import static io.jans.as.model.register.RegisterRequestParam.POLICY_URI;
-import static io.jans.as.model.register.RegisterRequestParam.POST_LOGOUT_REDIRECT_URIS;
-import static io.jans.as.model.register.RegisterRequestParam.REDIRECT_URIS;
-import static io.jans.as.model.register.RegisterRequestParam.REQUEST_OBJECT_ENCRYPTION_ALG;
-import static io.jans.as.model.register.RegisterRequestParam.REQUEST_OBJECT_ENCRYPTION_ENC;
-import static io.jans.as.model.register.RegisterRequestParam.REQUEST_OBJECT_SIGNING_ALG;
-import static io.jans.as.model.register.RegisterRequestParam.REQUEST_URIS;
-import static io.jans.as.model.register.RegisterRequestParam.REQUIRE_AUTH_TIME;
-import static io.jans.as.model.register.RegisterRequestParam.REQUIRE_PAR;
-import static io.jans.as.model.register.RegisterRequestParam.RESPONSE_TYPES;
-import static io.jans.as.model.register.RegisterRequestParam.RPT_AS_JWT;
-import static io.jans.as.model.register.RegisterRequestParam.RUN_INTROSPECTION_SCRIPT_BEFORE_ACCESS_TOKEN_CREATION_AS_JWT_AND_INCLUDE_CLAIMS;
-import static io.jans.as.model.register.RegisterRequestParam.SCOPE;
-import static io.jans.as.model.register.RegisterRequestParam.SECTOR_IDENTIFIER_URI;
-import static io.jans.as.model.register.RegisterRequestParam.SOFTWARE_ID;
-import static io.jans.as.model.register.RegisterRequestParam.SOFTWARE_STATEMENT;
-import static io.jans.as.model.register.RegisterRequestParam.SOFTWARE_VERSION;
-import static io.jans.as.model.register.RegisterRequestParam.SPONTANEOUS_SCOPES;
-import static io.jans.as.model.register.RegisterRequestParam.SUBJECT_TYPE;
-import static io.jans.as.model.register.RegisterRequestParam.TLS_CLIENT_AUTH_SUBJECT_DN;
-import static io.jans.as.model.register.RegisterRequestParam.TOKEN_ENDPOINT_AUTH_METHOD;
-import static io.jans.as.model.register.RegisterRequestParam.TOKEN_ENDPOINT_AUTH_SIGNING_ALG;
-import static io.jans.as.model.register.RegisterRequestParam.TOS_URI;
-import static io.jans.as.model.register.RegisterRequestParam.USERINFO_ENCRYPTED_RESPONSE_ALG;
-import static io.jans.as.model.register.RegisterRequestParam.USERINFO_ENCRYPTED_RESPONSE_ENC;
-import static io.jans.as.model.register.RegisterRequestParam.USERINFO_SIGNED_RESPONSE_ALG;
+import static io.jans.as.client.util.ClientUtil.*;
+import static io.jans.as.model.register.RegisterRequestParam.*;
 import static io.jans.as.model.util.StringUtils.implode;
 import static io.jans.as.model.util.StringUtils.toJSONArray;
 
@@ -111,7 +41,7 @@ import static io.jans.as.model.util.StringUtils.toJSONArray;
  *
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
- * @version July 28, 2021
+ * @version May 10, 2022
  */
 public class RegisterRequest extends BaseRequest {
 
@@ -135,15 +65,15 @@ public class RegisterRequest extends BaseRequest {
     private List<GrantType> grantTypes;
     private ApplicationType applicationType;
     private List<String> contacts;
-    private String clientName;
-    private String logoUri;
-    private String clientUri;
-    private String policyUri;
+    private final LocalizedString clientName;
+    private final LocalizedString logoUri;
+    private final LocalizedString clientUri;
+    private final LocalizedString policyUri;
+    private final LocalizedString tosUri;
     private String frontChannelLogoutUri;
     private Boolean frontChannelLogoutSessionRequired;
     private List<String> backchannelLogoutUris;
     private Boolean backchannelLogoutSessionRequired;
-    private String tosUri;
     private String jwksUri;
     private String jwks;
     private String sectorIdentifierUri;
@@ -151,9 +81,10 @@ public class RegisterRequest extends BaseRequest {
     private String tlsClientAuthSubjectDn;
     private Boolean allowSpontaneousScopes;
     private List<String> spontaneousScopes;
-    private Boolean runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims;
+    private Boolean runIntrospectionScriptBeforeJwtCreation;
     private Boolean keepClientAuthorizationAfterExpiration;
     private SubjectType subjectType;
+    private String subjectIdentifierAttribute;
     private Boolean rptAsJwt;
     private Boolean accessTokenAsJwt;
     private SignatureAlgorithm accessTokenSigningAlg;
@@ -172,9 +103,12 @@ public class RegisterRequest extends BaseRequest {
     private AuthenticationMethod tokenEndpointAuthMethod;
     private SignatureAlgorithm tokenEndpointAuthSigningAlg;
     private Integer defaultMaxAge;
-    private Boolean requireAuthTime;
     private List<String> defaultAcrValues;
+    private Integer minimumAcrLevel;
+    private Boolean minimumAcrLevelAutoresolve;
+    private List<String> minimumAcrPriorityList;
     private String initiateLoginUri;
+    private List<String> groups;
     private List<String> postLogoutRedirectUris;
     private List<String> requestUris;
     private List<String> authorizedOrigins;
@@ -184,11 +118,14 @@ public class RegisterRequest extends BaseRequest {
     private String softwareId;
     private String softwareVersion;
     private String softwareStatement;
+    private Boolean defaultPromptLogin;
+    private List<String> authorizedAcrValues;
     private BackchannelTokenDeliveryMode backchannelTokenDeliveryMode;
     private String backchannelClientNotificationEndpoint;
     private AsymmetricSignatureAlgorithm backchannelAuthenticationRequestSigningAlg;
     private Boolean backchannelUserCodeParameter;
     private List<String> additionalAudience;
+    private String redirectUrisRegex;
 
     /**
      * String containing a space-separated list of scope values. (correct name is 'scope' not 'scopes', see (rfc7591).)
@@ -220,12 +157,21 @@ public class RegisterRequest extends BaseRequest {
         this.grantTypes = new ArrayList<>();
         this.contacts = new ArrayList<>();
         this.defaultAcrValues = new ArrayList<>();
+        this.minimumAcrPriorityList = new ArrayList<>();
         this.postLogoutRedirectUris = new ArrayList<>();
+        this.groups = new ArrayList<>();
         this.requestUris = new ArrayList<>();
         this.authorizedOrigins = new ArrayList<>();
         this.scope = new ArrayList<>();
         this.claims = new ArrayList<>();
         this.customAttributes = new HashMap<>();
+        this.authorizedAcrValues = new ArrayList<>();
+
+        clientName = new LocalizedString();
+        logoUri = new LocalizedString();
+        clientUri = new LocalizedString();
+        policyUri = new LocalizedString();
+        tosUri = new LocalizedString();
     }
 
     /**
@@ -239,7 +185,7 @@ public class RegisterRequest extends BaseRequest {
                            List<String> redirectUris) {
         this();
         this.applicationType = applicationType;
-        this.clientName = clientName;
+        this.clientName.setValue(clientName);
         this.redirectUris = redirectUris;
     }
 
@@ -293,12 +239,12 @@ public class RegisterRequest extends BaseRequest {
         this.additionalAudience = additionalAudience;
     }
 
-    public Boolean getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims() {
-        return runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims;
+    public Boolean getRunIntrospectionScriptBeforeJwtCreation() {
+        return runIntrospectionScriptBeforeJwtCreation;
     }
 
-    public void setRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims(Boolean runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims) {
-        this.runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims = runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims;
+    public void setRunIntrospectionScriptBeforeJwtCreation(Boolean runIntrospectionScriptBeforeJwtCreation) {
+        this.runIntrospectionScriptBeforeJwtCreation = runIntrospectionScriptBeforeJwtCreation;
     }
 
     public Boolean getKeepClientAuthorizationAfterExpiration() {
@@ -517,7 +463,21 @@ public class RegisterRequest extends BaseRequest {
      * @return The name of the Client to be presented to the user.
      */
     public String getClientName() {
-        return clientName;
+        return clientName.getValue();
+    }
+
+    /**
+     * Returns the name of the Client to be presented to the user represented in a language and script.
+     *
+     * @param languageTag Language tag
+     * @return The name of the Client to be presented to the user.
+     */
+    public String getClientName(String languageTag) {
+        return clientName.getValue(languageTag);
+    }
+
+    public Set<String> getClientNameLanguageTags() {
+        return clientName.getLanguageTags();
     }
 
     /**
@@ -526,7 +486,17 @@ public class RegisterRequest extends BaseRequest {
      * @param clientName The name of the Client to be presented to the user.
      */
     public void setClientName(String clientName) {
-        this.clientName = clientName;
+        this.clientName.setValue(clientName);
+    }
+
+    /**
+     * Sets the name of the Client to be presented to the user represented in a language and script.
+     *
+     * @param clientName The name of the Client to be presented to the user.
+     * @param locale     The locale
+     */
+    public void setClientName(String clientName, Locale locale) {
+        this.clientName.setValue(clientName, locale);
     }
 
     /**
@@ -535,74 +505,174 @@ public class RegisterRequest extends BaseRequest {
      * @return The URL that references a logo for the Client application.
      */
     public String getLogoUri() {
-        return logoUri;
+        return logoUri.getValue();
     }
 
     /**
-     * Sets an URL that references a logo for the Client application.
+     * Returns a URL that references a logo for the Client application in a language and script.
+     *
+     * @param languageTag Language tag
+     * @return The URL that references a logo for the Client application in a language and script.
+     */
+    public String getLogoUri(String languageTag) {
+        return logoUri.getValue(languageTag);
+    }
+
+    public Set<String> getLogoUriLanguageTags() {
+        return logoUri.getLanguageTags();
+    }
+
+    /**
+     * Sets a URL that references a logo for the Client application.
      *
      * @param logoUri The URL that references a logo for the Client application.
      */
     public void setLogoUri(String logoUri) {
-        this.logoUri = logoUri;
+        this.logoUri.setValue(logoUri);
     }
 
     /**
-     * Returns an URL of the home page of the Client.
+     * Sets a URL that references a logo for the Client application represented in a language and script.
+     *
+     * @param logoUri The URL that references a logo for the Client application represented in a language and script.
+     * @param locale  The locale
+     */
+    public void setLogoUri(String logoUri, Locale locale) {
+        this.logoUri.setValue(logoUri, locale);
+    }
+
+    /**
+     * Returns a URL of the home page of the Client.
      *
      * @return The URL of the home page of the Client.
      */
     public String getClientUri() {
-        return clientUri;
+        return clientUri.getValue();
+    }
+
+    public Set<String> getClientUriLanguageTags() {
+        return clientUri.getLanguageTags();
     }
 
     /**
-     * Sets an URL of the home page of the Client.
+     * Returns a URL of the home page of the Client represented in a language and script.
+     *
+     * @param languageTag Language tag
+     * @return The URL of the home page of the Client represented in a language and script.
+     */
+    public String getClientUri(String languageTag) {
+        return clientUri.getValue(languageTag);
+    }
+
+    /**
+     * Sets a URL of the home page of the Client.
      *
      * @param clientUri The URL of the home page of the Client.
      */
     public void setClientUri(String clientUri) {
-        this.clientUri = clientUri;
+        this.clientUri.setValue(clientUri);
     }
 
     /**
-     * Returns an URL that the Relying Party Client provides to the End-User to read about the how the profile data
+     * Sets a URL of the home page of the Client represented in a language and script.
+     *
+     * @param clientUri The URL of the home page of the Client represented in a language and script.
+     * @param locale    The locale
+     */
+    public void setClientUri(String clientUri, Locale locale) {
+        this.clientUri.setValue(clientUri, locale);
+    }
+
+    /**
+     * Returns a URL that the Relying Party Client provides to the End-User to read about how the profile data
      * will be used.
      *
      * @return The policy URL.
      */
     public String getPolicyUri() {
-        return policyUri;
+        return policyUri.getValue();
     }
 
     /**
-     * Sets an URL that the Relying Party Client provides to the End-User to read about the how the profile data will
+     * Returns a URL that the Relying Party Client provides to the End-User to read about how the profile data
+     * will be used in a language and script.
+     *
+     * @param languageTag Language tag
+     * @return The policy URL.
+     */
+    public String getPolicyUri(String languageTag) {
+        return policyUri.getValue(languageTag);
+    }
+
+    public Set<String> getPolicyUriLanguageTags() {
+        return policyUri.getLanguageTags();
+    }
+
+    /**
+     * Sets a URL that the Relying Party Client provides to the End-User to read about how the profile data will
      * be used.
      *
      * @param policyUri The policy URL.
      */
     public void setPolicyUri(String policyUri) {
-        this.policyUri = policyUri;
+        this.policyUri.setValue(policyUri);
     }
 
     /**
-     * Returns an URL that the Relying Party Client provides to the End-User to read about the Relying Party's terms
+     * Sets a URL that the Relying Party Client provides to the End-User to read about how the profile data will
+     * be used in a language and script.
+     *
+     * @param policyUri The policy URL.
+     * @param locale    The locale
+     */
+    public void setPolicyUri(String policyUri, Locale locale) {
+        this.policyUri.setValue(policyUri, locale);
+    }
+
+    /**
+     * Returns a URL that the Relying Party Client provides to the End-User to read about the Relying Party's terms
      * of service.
      *
      * @return The tems of service URL.
      */
     public String getTosUri() {
-        return tosUri;
+        return tosUri.getValue();
     }
 
     /**
-     * Sets an URL that the Relying Party Client provides to the End-User to read about the Relying Party's terms of
+     * Returns a URL that the Relying Party Client provides to the End-User to read about the Relying Party's terms
+     * of service in a language and script.
+     *
+     * @param languageTag Language tag
+     * @return The terms of service URL.
+     */
+    public String getTosUri(String languageTag) {
+        return tosUri.getValue(languageTag);
+    }
+
+    public Set<String> getTosUriLanguageTags() {
+        return tosUri.getLanguageTags();
+    }
+
+    /**
+     * Sets a URL that the Relying Party Client provides to the End-User to read about the Relying Party's terms of
      * service.
      *
      * @param tosUri The term of service URL.
      */
     public void setTosUri(String tosUri) {
-        this.tosUri = tosUri;
+        this.tosUri.setValue(tosUri);
+    }
+
+    /**
+     * Sets a URL that the Relying Party Client provides to the End-User to read about the Relying Party's terms of
+     * service in a language and script.
+     *
+     * @param locale The locale
+     * @param tosUri The term of service URL.
+     */
+    public void setTosUri(String tosUri, Locale locale) {
+        this.tosUri.setValue(tosUri, locale);
     }
 
     /**
@@ -695,6 +765,14 @@ public class RegisterRequest extends BaseRequest {
      */
     public void setSubjectType(SubjectType subjectType) {
         this.subjectType = subjectType;
+    }
+
+    public String getSubjectIdentifierAttribute() {
+        return subjectIdentifierAttribute;
+    }
+
+    public void setSubjectIdentifierAttribute(String subjectIdentifierAttribute) {
+        this.subjectIdentifierAttribute = subjectIdentifierAttribute;
     }
 
     public Boolean getRptAsJwt() {
@@ -966,23 +1044,57 @@ public class RegisterRequest extends BaseRequest {
     }
 
     /**
-     * Returns the Boolean value specifying whether the auth_time claim in the id_token is required.
-     * It is required when the value is true. The auth_time claim request in the request object overrides this setting.
+     * Gets minimum acr level
      *
-     * @return The Boolean value specifying whether the auth_time claim in the id_token is required.
+     * @return minimum acr level
      */
-    public Boolean getRequireAuthTime() {
-        return requireAuthTime;
+    public Integer getMinimumAcrLevel() {
+        return minimumAcrLevel;
     }
 
     /**
-     * Sets the Boolean value specifying whether the auth_time claim in the id_token is required.
-     * Ir is required when the value is true. The auth_time claim request in the request object overrides this setting.
+     * Sets minimum acr level
      *
-     * @param requireAuthTime The Boolean value specifying whether the auth_time claim in the id_token is required.
+     * @param minimumAcrLevel minimum acr level
      */
-    public void setRequireAuthTime(Boolean requireAuthTime) {
-        this.requireAuthTime = requireAuthTime;
+    public void setMinimumAcrLevel(Integer minimumAcrLevel) {
+        this.minimumAcrLevel = minimumAcrLevel;
+    }
+
+    /**
+     * Gets minimum acr level auto resolve
+     *
+     * @return minimum acr level auto resolve
+     */
+    public Boolean getMinimumAcrLevelAutoresolve() {
+        return minimumAcrLevelAutoresolve;
+    }
+
+    /**
+     * Sets minimum acr level auto resolve
+     *
+     * @param minimumAcrLevelAutoresolve minimum acr level auto resolve
+     */
+    public void setMinimumAcrLevelAutoresolve(Boolean minimumAcrLevelAutoresolve) {
+        this.minimumAcrLevelAutoresolve = minimumAcrLevelAutoresolve;
+    }
+
+    /**
+     * Gets minimum acr priority list
+     *
+     * @return minimum acr priority list
+     */
+    public List<String> getMinimumAcrPriorityList() {
+        return minimumAcrPriorityList;
+    }
+
+    /**
+     * Sets minimum acr priority list
+     *
+     * @param minimumAcrPriorityList minimum acr priority list
+     */
+    public void setMinimumAcrPriorityList(List<String> minimumAcrPriorityList) {
+        this.minimumAcrPriorityList = minimumAcrPriorityList;
     }
 
     /**
@@ -1020,6 +1132,24 @@ public class RegisterRequest extends BaseRequest {
      */
     public void setInitiateLoginUri(String initiateLoginUri) {
         this.initiateLoginUri = initiateLoginUri;
+    }
+
+    /**
+     * Returns groups
+     *
+     * @return groups
+     */
+    public List<String> getGroups() {
+        return groups;
+    }
+
+    /**
+     * Sets groups
+     *
+     * @param groups groups
+     */
+    public void setGroups(List<String> groups) {
+        this.groups = groups;
     }
 
     /**
@@ -1224,6 +1354,22 @@ public class RegisterRequest extends BaseRequest {
         this.backchannelUserCodeParameter = backchannelUserCodeParameter;
     }
 
+    public Boolean getDefaultPromptLogin() {
+        return defaultPromptLogin;
+    }
+
+    public void setDefaultPromptLogin(Boolean defaultPromptLogin) {
+        this.defaultPromptLogin = defaultPromptLogin;
+    }
+
+    public List<String> getAuthorizedAcrValues() {
+        return authorizedAcrValues;
+    }
+
+    public void setAuthorizedAcrValues(List<String> authorizedAcrValues) {
+        this.authorizedAcrValues = authorizedAcrValues;
+    }
+
     public String getHttpMethod() {
         return httpMethod;
     }
@@ -1260,200 +1406,17 @@ public class RegisterRequest extends BaseRequest {
 
         JsonApplier.getInstance().apply(this, parameters);
 
-        if (redirectUris != null && !redirectUris.isEmpty()) {
-            parameters.put(REDIRECT_URIS.toString(), toJSONArray(redirectUris).toString());
-        }
-        if (claimsRedirectUris != null && !claimsRedirectUris.isEmpty()) {
-            parameters.put(CLAIMS_REDIRECT_URIS.toString(), toJSONArray(claimsRedirectUris).toString());
-        }
-        if (responseTypes != null && !responseTypes.isEmpty()) {
-            parameters.put(RESPONSE_TYPES.toString(), toJSONArray(responseTypes).toString());
-        }
-        if (grantTypes != null && !grantTypes.isEmpty()) {
-            parameters.put(GRANT_TYPES.toString(), toJSONArray(grantTypes).toString());
-        }
-        if (applicationType != null) {
-            parameters.put(APPLICATION_TYPE.toString(), applicationType.toString());
-        }
-        if (contacts != null && !contacts.isEmpty()) {
-            parameters.put(CONTACTS.toString(), toJSONArray(contacts).toString());
-        }
-        if (StringUtils.isNotBlank(clientName)) {
-            parameters.put(CLIENT_NAME.toString(), clientName);
-        }
-        if (StringUtils.isNotBlank(logoUri)) {
-            parameters.put(LOGO_URI.toString(), logoUri);
-        }
-        if (StringUtils.isNotBlank(clientUri)) {
-            parameters.put(CLIENT_URI.toString(), clientUri);
-        }
-        if (StringUtils.isNotBlank(policyUri)) {
-            parameters.put(POLICY_URI.toString(), policyUri);
-        }
-        if (StringUtils.isNotBlank(tosUri)) {
-            parameters.put(TOS_URI.toString(), tosUri);
-        }
-        if (StringUtils.isNotBlank(jwksUri)) {
-            parameters.put(JWKS_URI.toString(), jwksUri);
-        }
-        if (StringUtils.isNotBlank(jwks)) {
-            parameters.put(JWKS.toString(), jwks);
-        }
-        if (StringUtils.isNotBlank(sectorIdentifierUri)) {
-            parameters.put(SECTOR_IDENTIFIER_URI.toString(), sectorIdentifierUri);
-        }
-        if (subjectType != null) {
-            parameters.put(SUBJECT_TYPE.toString(), subjectType.toString());
-        }
-        if (rptAsJwt != null) {
-            parameters.put(RPT_AS_JWT.toString(), rptAsJwt.toString());
-        }
-        if (accessTokenAsJwt != null) {
-            parameters.put(ACCESS_TOKEN_AS_JWT.toString(), accessTokenAsJwt.toString());
-        }
-        if (accessTokenSigningAlg != null) {
-            parameters.put(ACCESS_TOKEN_SIGNING_ALG.toString(), accessTokenSigningAlg.toString());
-        }
-        if (authorizationSignedResponseAlg != null) {
-            parameters.put(AUTHORIZATION_SIGNED_RESPONSE_ALG.toString(), authorizationSignedResponseAlg.getName());
-        }
-        if (authorizationEncryptedResponseAlg != null) {
-            parameters.put(AUTHORIZATION_ENCRYPTED_RESPONSE_ALG.toString(), authorizationEncryptedResponseAlg.getName());
-        }
-        if (authorizationEncryptedResponseEnc != null) {
-            parameters.put(AUTHORIZATION_ENCRYPTED_RESPONSE_ENC.toString(), authorizationEncryptedResponseEnc.getName());
-        }
-        if (idTokenSignedResponseAlg != null) {
-            parameters.put(ID_TOKEN_SIGNED_RESPONSE_ALG.toString(), idTokenSignedResponseAlg.getName());
-        }
-        if (idTokenEncryptedResponseAlg != null) {
-            parameters.put(ID_TOKEN_ENCRYPTED_RESPONSE_ALG.toString(), idTokenEncryptedResponseAlg.getName());
-        }
-        if (idTokenEncryptedResponseEnc != null) {
-            parameters.put(ID_TOKEN_ENCRYPTED_RESPONSE_ENC.toString(), idTokenEncryptedResponseEnc.getName());
-        }
-        if (userInfoSignedResponseAlg != null) {
-            parameters.put(USERINFO_SIGNED_RESPONSE_ALG.toString(), userInfoSignedResponseAlg.getName());
-        }
-        if (userInfoEncryptedResponseAlg != null) {
-            parameters.put(USERINFO_ENCRYPTED_RESPONSE_ALG.toString(), userInfoEncryptedResponseAlg.getName());
-        }
-        if (userInfoEncryptedResponseEnc != null) {
-            parameters.put(USERINFO_ENCRYPTED_RESPONSE_ENC.toString(), userInfoEncryptedResponseEnc.getName());
-        }
-        if (requestObjectSigningAlg != null) {
-            parameters.put(REQUEST_OBJECT_SIGNING_ALG.toString(), requestObjectSigningAlg.getName());
-        }
-        if (requestObjectEncryptionAlg != null) {
-            parameters.put(REQUEST_OBJECT_ENCRYPTION_ALG.toString(), requestObjectEncryptionAlg.getName());
-        }
-        if (requestObjectEncryptionEnc != null) {
-            parameters.put(REQUEST_OBJECT_ENCRYPTION_ENC.toString(), requestObjectEncryptionEnc.getName());
-        }
-        if (tokenEndpointAuthMethod != null) {
-            parameters.put(TOKEN_ENDPOINT_AUTH_METHOD.toString(), tokenEndpointAuthMethod.toString());
-        }
-        if (tokenEndpointAuthSigningAlg != null) {
-            parameters.put(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString(), tokenEndpointAuthSigningAlg.toString());
-        }
-        if (defaultMaxAge != null) {
-            parameters.put(DEFAULT_MAX_AGE.toString(), defaultMaxAge.toString());
-        }
-        if (requireAuthTime != null) {
-            parameters.put(REQUIRE_AUTH_TIME.toString(), requireAuthTime.toString());
-        }
-        if (defaultAcrValues != null && !defaultAcrValues.isEmpty()) {
-            parameters.put(DEFAULT_ACR_VALUES.toString(), toJSONArray(defaultAcrValues).toString());
-        }
-        if (StringUtils.isNotBlank(initiateLoginUri)) {
-            parameters.put(INITIATE_LOGIN_URI.toString(), initiateLoginUri);
-        }
-        if (postLogoutRedirectUris != null && !postLogoutRedirectUris.isEmpty()) {
-            parameters.put(POST_LOGOUT_REDIRECT_URIS.toString(), toJSONArray(postLogoutRedirectUris).toString());
-        }
-        if (StringUtils.isNotBlank(frontChannelLogoutUri)) {
-            parameters.put(FRONT_CHANNEL_LOGOUT_URI.toString(), frontChannelLogoutUri);
-        }
-        if (frontChannelLogoutSessionRequired != null) {
-            parameters.put(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString(), frontChannelLogoutSessionRequired.toString());
-        }
-        if (backchannelLogoutUris != null && !backchannelLogoutUris.isEmpty()) {
-            parameters.put(BACKCHANNEL_LOGOUT_URI.toString(), toJSONArray(backchannelLogoutUris).toString());
-        }
-        if (backchannelLogoutSessionRequired != null) {
-            parameters.put(BACKCHANNEL_LOGOUT_SESSION_REQUIRED.toString(), backchannelLogoutSessionRequired.toString());
-        }
-        if (requestUris != null && !requestUris.isEmpty()) {
-            parameters.put(REQUEST_URIS.toString(), toJSONArray(requestUris).toString());
-        }
-        if (authorizedOrigins != null && !authorizedOrigins.isEmpty()) {
-            parameters.put(AUTHORIZED_ORIGINS.toString(), toJSONArray(authorizedOrigins).toString());
-        }
-        if (scope != null && !scope.isEmpty()) {
-            parameters.put(SCOPE.toString(), implode(scope, " "));
-        }
-        if (StringUtils.isNotBlank(idTokenTokenBindingCnf)) {
-            parameters.put(ID_TOKEN_TOKEN_BINDING_CNF.toString(), idTokenTokenBindingCnf);
-        }
-        if (StringUtils.isNotBlank(tlsClientAuthSubjectDn)) {
-            parameters.put(TLS_CLIENT_AUTH_SUBJECT_DN.toString(), tlsClientAuthSubjectDn);
-        }
-        if (allowSpontaneousScopes != null) {
-            parameters.put(ALLOW_SPONTANEOUS_SCOPES.toString(), allowSpontaneousScopes.toString());
-        }
-        if (spontaneousScopes != null && !spontaneousScopes.isEmpty()) {
-            parameters.put(SPONTANEOUS_SCOPES.toString(), implode(spontaneousScopes, " "));
-        }
-        if (runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims != null) {
-            parameters.put(RUN_INTROSPECTION_SCRIPT_BEFORE_ACCESS_TOKEN_CREATION_AS_JWT_AND_INCLUDE_CLAIMS.toString(), runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims.toString());
-        }
-        if (keepClientAuthorizationAfterExpiration != null) {
-            parameters.put(KEEP_CLIENT_AUTHORIZATION_AFTER_EXPIRATION.toString(), keepClientAuthorizationAfterExpiration.toString());
-        }
-        if (claims != null && !claims.isEmpty()) {
-            parameters.put(CLAIMS.toString(), implode(claims, " "));
-        }
-        if (accessTokenLifetime != null) {
-            parameters.put(ACCESS_TOKEN_LIFETIME.toString(), accessTokenLifetime.toString());
-        }
-        if (parLifetime != null) {
-            parameters.put(PAR_LIFETIME.toString(), parLifetime.toString());
-        }
-        if (requirePar != null) {
-            parameters.put(REQUIRE_PAR.toString(), requirePar.toString());
-        }
-        if (StringUtils.isNotBlank(softwareId)) {
-            parameters.put(SOFTWARE_ID.toString(), softwareId);
-        }
-        if (StringUtils.isNotBlank(softwareVersion)) {
-            parameters.put(SOFTWARE_VERSION.toString(), softwareVersion);
-        }
-        if (StringUtils.isNotBlank(softwareStatement)) {
-            parameters.put(SOFTWARE_STATEMENT.toString(), softwareStatement);
-        }
-        if (backchannelTokenDeliveryMode != null) {
-            parameters.put(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString(), backchannelTokenDeliveryMode.toString());
-        }
-        if (StringUtils.isNotBlank(backchannelClientNotificationEndpoint)) {
-            parameters.put(BACKCHANNEL_CLIENT_NOTIFICATION_ENDPOINT.toString(), backchannelClientNotificationEndpoint);
-        }
-        if (backchannelAuthenticationRequestSigningAlg != null) {
-            parameters.put(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString(), backchannelAuthenticationRequestSigningAlg.toString());
-        }
-        if (backchannelUserCodeParameter != null && backchannelUserCodeParameter) {
-            parameters.put(BACKCHANNEL_USER_CODE_PARAMETER.toString(), backchannelUserCodeParameter.toString());
-        }
+        clientName.addToMap(parameters, CLIENT_NAME.getName());
+        clientName.addToMap(parameters, LOGO_URI.getName());
+        clientName.addToMap(parameters, CLIENT_URI.getName());
+        clientName.addToMap(parameters, POLICY_URI.getName());
+        clientName.addToMap(parameters, TOS_URI.getName());
 
-        // Custom params
-        if (customAttributes != null && !customAttributes.isEmpty()) {
-            for (Map.Entry<String, String> entry : customAttributes.entrySet()) {
-                final String name = entry.getKey();
-                final String value = entry.getValue();
-                if (RegisterRequestParam.isCustomParameterValid(name) && StringUtils.isNotBlank(value)) {
-                    parameters.put(name, value);
-                }
-            }
-        }
+        getParameters((name, value) -> {
+            parameters.put(name, value.toString());
+            return null;
+        });
+
         return parameters;
     }
 
@@ -1472,8 +1435,11 @@ public class RegisterRequest extends BaseRequest {
         result.setClaimsRedirectUris(extractListByKey(requestObject, CLAIMS_REDIRECT_URIS.toString()));
         result.setInitiateLoginUri(requestObject.optString(INITIATE_LOGIN_URI.toString()));
         result.setPostLogoutRedirectUris(extractListByKey(requestObject, POST_LOGOUT_REDIRECT_URIS.toString()));
+        result.setGroups(extractListByKey(requestObject, GROUPS.toString()));
         result.setDefaultAcrValues(extractListByKey(requestObject, DEFAULT_ACR_VALUES.toString()));
-        result.setRequireAuthTime(requestObject.optBoolean(REQUIRE_AUTH_TIME.toString()));
+        result.setMinimumAcrLevel(integerOrNull(requestObject, MINIMUM_ACR_LEVEL.toString()));
+        result.setMinimumAcrLevelAutoresolve(requestObject.optBoolean(MINIMUM_ACR_LEVEL_AUTORESOLVE.toString()));
+        result.setMinimumAcrPriorityList(extractListByKey(requestObject, MINIMUM_ACR_PRIORITY_LIST.toString()));
         result.setFrontChannelLogoutUri(requestObject.optString(FRONT_CHANNEL_LOGOUT_URI.toString()));
         result.setFrontChannelLogoutSessionRequired(requestObject.optBoolean(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString()));
         result.setBackchannelLogoutUris(extractListByKey(requestObject, BACKCHANNEL_LOGOUT_URI.toString()));
@@ -1485,7 +1451,7 @@ public class RegisterRequest extends BaseRequest {
         result.setTlsClientAuthSubjectDn(requestObject.optString(TLS_CLIENT_AUTH_SUBJECT_DN.toString()));
         result.setAllowSpontaneousScopes(requestObject.optBoolean(ALLOW_SPONTANEOUS_SCOPES.toString()));
         result.setSpontaneousScopes(extractListByKey(requestObject, SPONTANEOUS_SCOPES.toString()));
-        result.setRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims(requestObject.optBoolean(RUN_INTROSPECTION_SCRIPT_BEFORE_ACCESS_TOKEN_CREATION_AS_JWT_AND_INCLUDE_CLAIMS.toString()));
+        result.setRunIntrospectionScriptBeforeJwtCreation(requestObject.optBoolean(RUN_INTROSPECTION_SCRIPT_BEFORE_JWT_CREATION.toString()));
         result.setKeepClientAuthorizationAfterExpiration(requestObject.optBoolean(KEEP_CLIENT_AUTHORIZATION_AFTER_EXPIRATION.toString()));
         result.setRptAsJwt(requestObject.optBoolean(RPT_AS_JWT.toString()));
         result.setAccessTokenAsJwt(requestObject.optBoolean(ACCESS_TOKEN_AS_JWT.toString()));
@@ -1511,16 +1477,34 @@ public class RegisterRequest extends BaseRequest {
         result.setGrantTypes(extractGrantTypes(requestObject));
         result.setApplicationType(ApplicationType.fromString(requestObject.optString(APPLICATION_TYPE.toString())));
         result.setContacts(extractListByKey(requestObject, CONTACTS.toString()));
-        result.setClientName(requestObject.optString(CLIENT_NAME.toString()));
         result.setIdTokenTokenBindingCnf(requestObject.optString(ID_TOKEN_TOKEN_BINDING_CNF.toString(), ""));
-        result.setLogoUri(requestObject.optString(LOGO_URI.toString()));
-        result.setClientUri(requestObject.optString(CLIENT_URI.toString()));
-        result.setPolicyUri(requestObject.optString(POLICY_URI.toString()));
-        result.setTosUri(requestObject.optString(TOS_URI.toString()));
+
+        LocalizedString.fromJson(requestObject, CLIENT_NAME.getName(), (String key, Locale locale) -> {
+            result.setClientName(key, locale);
+            return null;
+        });
+        LocalizedString.fromJson(requestObject, LOGO_URI.getName(), (String key, Locale locale) -> {
+            result.setLogoUri(key, locale);
+            return null;
+        });
+        LocalizedString.fromJson(requestObject, CLIENT_URI.getName(), (String key, Locale locale) -> {
+            result.setClientUri(key, locale);
+            return null;
+        });
+        LocalizedString.fromJson(requestObject, POLICY_URI.getName(), (String key, Locale locale) -> {
+            result.setPolicyUri(key, locale);
+            return null;
+        });
+        LocalizedString.fromJson(requestObject, TOS_URI.getName(), (String key, Locale locale) -> {
+            result.setTosUri(key, locale);
+            return null;
+        });
+
         result.setJwksUri(requestObject.optString(JWKS_URI.toString()));
         result.setJwks(requestObject.optString(JWKS.toString()));
         result.setSectorIdentifierUri(requestObject.optString(SECTOR_IDENTIFIER_URI.toString()));
         result.setSubjectType(SubjectType.fromString(requestObject.optString(SUBJECT_TYPE.toString())));
+        result.setSubjectIdentifierAttribute(requestObject.optString(PUBLIC_SUBJECT_IDENTIFIER_ATTRIBUTE.getName()));
         result.setSoftwareId(requestObject.optString(SOFTWARE_ID.toString()));
         result.setSoftwareVersion(requestObject.optString(SOFTWARE_VERSION.toString()));
         result.setSoftwareStatement(requestObject.optString(SOFTWARE_STATEMENT.toString()));
@@ -1528,6 +1512,9 @@ public class RegisterRequest extends BaseRequest {
         result.setBackchannelClientNotificationEndpoint(requestObject.optString(BACKCHANNEL_CLIENT_NOTIFICATION_ENDPOINT.toString()));
         result.setBackchannelAuthenticationRequestSigningAlg(AsymmetricSignatureAlgorithm.fromString(requestObject.optString(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString())));
         result.setBackchannelUserCodeParameter(booleanOrNull(requestObject, BACKCHANNEL_USER_CODE_PARAMETER.toString()));
+        result.setRedirectUrisRegex(requestObject.optString(REDIRECT_URIS_REGEX.toString()));
+        result.setDefaultPromptLogin(requestObject.optBoolean(DEFAULT_PROMPT_LOGIN.getName()));
+        result.setAuthorizedAcrValues(extractListByKey(requestObject, AUTHORIZED_ACR_VALUES.getName()));
 
         return result;
     }
@@ -1546,207 +1533,236 @@ public class RegisterRequest extends BaseRequest {
         return new ArrayList<>(grantTypes);
     }
 
-
     @Override
     public JSONObject getJSONParameters() throws JSONException {
-        JSONObject parameters = new JSONObject();
+        final JSONObject parameters = new JSONObject();
 
         JsonApplier.getInstance().apply(this, parameters);
 
+        Map<String, Object> paramsMap = parameters.toMap();
+        clientName.addToMap(paramsMap, CLIENT_NAME.getName());
+        logoUri.addToMap(paramsMap, LOGO_URI.getName());
+        clientUri.addToMap(paramsMap, CLIENT_URI.getName());
+        policyUri.addToMap(paramsMap, POLICY_URI.getName());
+        tosUri.addToMap(paramsMap, TOS_URI.getName());
+        parameters.clear();
+        paramsMap.forEach(parameters::put);
+
+        getParameters((name, value) -> {
+            parameters.put(name, value);
+            return null;
+        });
+
+        return parameters;
+    }
+
+    public void getParameters(BiFunction<String, Object, Void> function) {
         if (redirectUris != null && !redirectUris.isEmpty()) {
-            parameters.put(REDIRECT_URIS.toString(), toJSONArray(redirectUris));
+            function.apply(REDIRECT_URIS.toString(), toJSONArray(redirectUris));
         }
         if (claimsRedirectUris != null && !claimsRedirectUris.isEmpty()) {
-            parameters.put(CLAIMS_REDIRECT_URIS.toString(), toJSONArray(claimsRedirectUris));
+            function.apply(CLAIMS_REDIRECT_URIS.toString(), toJSONArray(claimsRedirectUris));
         }
         if (responseTypes != null && !responseTypes.isEmpty()) {
-            parameters.put(RESPONSE_TYPES.toString(), toJSONArray(responseTypes));
+            function.apply(RESPONSE_TYPES.toString(), toJSONArray(responseTypes));
         }
         if (grantTypes != null && !grantTypes.isEmpty()) {
-            parameters.put(GRANT_TYPES.toString(), toJSONArray(grantTypes));
+            function.apply(GRANT_TYPES.toString(), toJSONArray(grantTypes));
         }
         if (applicationType != null) {
-            parameters.put(APPLICATION_TYPE.toString(), applicationType.toString());
+            function.apply(APPLICATION_TYPE.toString(), applicationType.toString());
         }
         if (contacts != null && !contacts.isEmpty()) {
-            parameters.put(CONTACTS.toString(), toJSONArray(contacts));
+            function.apply(CONTACTS.toString(), toJSONArray(contacts));
         }
-        if (StringUtils.isNotBlank(clientName)) {
-            parameters.put(CLIENT_NAME.toString(), clientName);
-        }
-        if (StringUtils.isNotBlank(idTokenTokenBindingCnf)) {
-            parameters.put(ID_TOKEN_TOKEN_BINDING_CNF.toString(), idTokenTokenBindingCnf);
-        }
-        if (StringUtils.isNotBlank(tlsClientAuthSubjectDn)) {
-            parameters.put(TLS_CLIENT_AUTH_SUBJECT_DN.toString(), tlsClientAuthSubjectDn);
-        }
-        if (allowSpontaneousScopes != null) {
-            parameters.put(ALLOW_SPONTANEOUS_SCOPES.toString(), allowSpontaneousScopes);
-        }
-        if (spontaneousScopes != null && !spontaneousScopes.isEmpty()) {
-            parameters.put(SPONTANEOUS_SCOPES.toString(), toJSONArray(spontaneousScopes));
-        }
-        if (runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims != null) {
-            parameters.put(RUN_INTROSPECTION_SCRIPT_BEFORE_ACCESS_TOKEN_CREATION_AS_JWT_AND_INCLUDE_CLAIMS.toString(), runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims);
-        }
-        if (keepClientAuthorizationAfterExpiration != null) {
-            parameters.put(KEEP_CLIENT_AUTHORIZATION_AFTER_EXPIRATION.toString(), keepClientAuthorizationAfterExpiration);
-        }
-        if (StringUtils.isNotBlank(logoUri)) {
-            parameters.put(LOGO_URI.toString(), logoUri);
-        }
-        if (StringUtils.isNotBlank(clientUri)) {
-            parameters.put(CLIENT_URI.toString(), clientUri);
-        }
-        if (StringUtils.isNotBlank(policyUri)) {
-            parameters.put(POLICY_URI.toString(), policyUri);
-        }
-        if (StringUtils.isNotBlank(tosUri)) {
-            parameters.put(TOS_URI.toString(), tosUri);
-        }
+
         if (StringUtils.isNotBlank(jwksUri)) {
-            parameters.put(JWKS_URI.toString(), jwksUri);
+            function.apply(JWKS_URI.toString(), jwksUri);
         }
         if (StringUtils.isNotBlank(jwks)) {
-            parameters.put(JWKS.toString(), jwks);
+            function.apply(JWKS.toString(), jwks);
         }
         if (StringUtils.isNotBlank(sectorIdentifierUri)) {
-            parameters.put(SECTOR_IDENTIFIER_URI.toString(), sectorIdentifierUri);
+            function.apply(SECTOR_IDENTIFIER_URI.toString(), sectorIdentifierUri);
         }
         if (subjectType != null) {
-            parameters.put(SUBJECT_TYPE.toString(), subjectType.toString());
+            function.apply(SUBJECT_TYPE.toString(), subjectType.toString());
+        }
+        if (StringUtils.isNotBlank(subjectIdentifierAttribute)) {
+            function.apply(PUBLIC_SUBJECT_IDENTIFIER_ATTRIBUTE.getName(), subjectIdentifierAttribute);
         }
         if (rptAsJwt != null) {
-            parameters.put(RPT_AS_JWT.toString(), rptAsJwt.toString());
+            function.apply(RPT_AS_JWT.toString(), rptAsJwt.toString());
         }
         if (accessTokenAsJwt != null) {
-            parameters.put(ACCESS_TOKEN_AS_JWT.toString(), accessTokenAsJwt.toString());
+            function.apply(ACCESS_TOKEN_AS_JWT.toString(), accessTokenAsJwt.toString());
         }
         if (accessTokenSigningAlg != null) {
-            parameters.put(ACCESS_TOKEN_SIGNING_ALG.toString(), accessTokenSigningAlg.toString());
+            function.apply(ACCESS_TOKEN_SIGNING_ALG.toString(), accessTokenSigningAlg.toString());
         }
         if (authorizationSignedResponseAlg != null) {
-            parameters.put(AUTHORIZATION_SIGNED_RESPONSE_ALG.toString(), authorizationSignedResponseAlg.toString());
+            function.apply(AUTHORIZATION_SIGNED_RESPONSE_ALG.toString(), authorizationSignedResponseAlg.toString());
         }
         if (authorizationEncryptedResponseAlg != null) {
-            parameters.put(AUTHORIZATION_ENCRYPTED_RESPONSE_ALG.toString(), authorizationEncryptedResponseAlg.toString());
+            function.apply(AUTHORIZATION_ENCRYPTED_RESPONSE_ALG.toString(), authorizationEncryptedResponseAlg.toString());
         }
         if (authorizationEncryptedResponseEnc != null) {
-            parameters.put(AUTHORIZATION_ENCRYPTED_RESPONSE_ENC.toString(), authorizationEncryptedResponseEnc.toString());
+            function.apply(AUTHORIZATION_ENCRYPTED_RESPONSE_ENC.toString(), authorizationEncryptedResponseEnc.toString());
         }
+
         if (idTokenSignedResponseAlg != null) {
-            parameters.put(ID_TOKEN_SIGNED_RESPONSE_ALG.toString(), idTokenSignedResponseAlg.getName());
+            function.apply(ID_TOKEN_SIGNED_RESPONSE_ALG.toString(), idTokenSignedResponseAlg.getName());
         }
         if (idTokenEncryptedResponseAlg != null) {
-            parameters.put(ID_TOKEN_ENCRYPTED_RESPONSE_ALG.toString(), idTokenEncryptedResponseAlg.getName());
+            function.apply(ID_TOKEN_ENCRYPTED_RESPONSE_ALG.toString(), idTokenEncryptedResponseAlg.getName());
         }
         if (idTokenEncryptedResponseEnc != null) {
-            parameters.put(ID_TOKEN_ENCRYPTED_RESPONSE_ENC.toString(), idTokenEncryptedResponseEnc.getName());
+            function.apply(ID_TOKEN_ENCRYPTED_RESPONSE_ENC.toString(), idTokenEncryptedResponseEnc.getName());
         }
         if (userInfoSignedResponseAlg != null) {
-            parameters.put(USERINFO_SIGNED_RESPONSE_ALG.toString(), userInfoSignedResponseAlg.getName());
+            function.apply(USERINFO_SIGNED_RESPONSE_ALG.toString(), userInfoSignedResponseAlg.getName());
         }
         if (userInfoEncryptedResponseAlg != null) {
-            parameters.put(USERINFO_ENCRYPTED_RESPONSE_ALG.toString(), userInfoEncryptedResponseAlg.getName());
+            function.apply(USERINFO_ENCRYPTED_RESPONSE_ALG.toString(), userInfoEncryptedResponseAlg.getName());
         }
         if (userInfoEncryptedResponseEnc != null) {
-            parameters.put(USERINFO_ENCRYPTED_RESPONSE_ENC.toString(), userInfoEncryptedResponseEnc.getName());
+            function.apply(USERINFO_ENCRYPTED_RESPONSE_ENC.toString(), userInfoEncryptedResponseEnc.getName());
         }
         if (requestObjectSigningAlg != null) {
-            parameters.put(REQUEST_OBJECT_SIGNING_ALG.toString(), requestObjectSigningAlg.getName());
+            function.apply(REQUEST_OBJECT_SIGNING_ALG.toString(), requestObjectSigningAlg.getName());
         }
         if (requestObjectEncryptionAlg != null) {
-            parameters.put(REQUEST_OBJECT_ENCRYPTION_ALG.toString(), requestObjectEncryptionAlg.getName());
+            function.apply(REQUEST_OBJECT_ENCRYPTION_ALG.toString(), requestObjectEncryptionAlg.getName());
         }
         if (requestObjectEncryptionEnc != null) {
-            parameters.put(REQUEST_OBJECT_ENCRYPTION_ENC.toString(), requestObjectEncryptionEnc.getName());
+            function.apply(REQUEST_OBJECT_ENCRYPTION_ENC.toString(), requestObjectEncryptionEnc.getName());
         }
         if (tokenEndpointAuthMethod != null) {
-            parameters.put(TOKEN_ENDPOINT_AUTH_METHOD.toString(), tokenEndpointAuthMethod.toString());
+            function.apply(TOKEN_ENDPOINT_AUTH_METHOD.toString(), tokenEndpointAuthMethod.toString());
         }
         if (tokenEndpointAuthSigningAlg != null) {
-            parameters.put(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString(), tokenEndpointAuthSigningAlg.toString());
+            function.apply(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString(), tokenEndpointAuthSigningAlg.toString());
         }
         if (defaultMaxAge != null) {
-            parameters.put(DEFAULT_MAX_AGE.toString(), defaultMaxAge.toString());
-        }
-        if (requireAuthTime != null) {
-            parameters.put(REQUIRE_AUTH_TIME.toString(), requireAuthTime.toString());
+            function.apply(DEFAULT_MAX_AGE.toString(), defaultMaxAge.toString());
         }
         if (defaultAcrValues != null && !defaultAcrValues.isEmpty()) {
-            parameters.put(DEFAULT_ACR_VALUES.toString(), toJSONArray(defaultAcrValues));
+            function.apply(DEFAULT_ACR_VALUES.toString(), toJSONArray(defaultAcrValues));
+        }
+        if (minimumAcrLevel != null) {
+            function.apply(MINIMUM_ACR_LEVEL.toString(), minimumAcrLevel.toString());
+        }
+        if (minimumAcrLevelAutoresolve != null) {
+            function.apply(MINIMUM_ACR_LEVEL_AUTORESOLVE.toString(), minimumAcrLevelAutoresolve.toString());
+        }
+        if (minimumAcrPriorityList != null) {
+            function.apply(MINIMUM_ACR_PRIORITY_LIST.toString(), toJSONArray(minimumAcrPriorityList));
         }
         if (StringUtils.isNotBlank(initiateLoginUri)) {
-            parameters.put(INITIATE_LOGIN_URI.toString(), initiateLoginUri);
+            function.apply(INITIATE_LOGIN_URI.toString(), initiateLoginUri);
+        }
+        if (groups != null && !groups.isEmpty()) {
+            function.apply(GROUPS.toString(), toJSONArray(groups));
         }
         if (postLogoutRedirectUris != null && !postLogoutRedirectUris.isEmpty()) {
-            parameters.put(POST_LOGOUT_REDIRECT_URIS.toString(), toJSONArray(postLogoutRedirectUris));
+            function.apply(POST_LOGOUT_REDIRECT_URIS.toString(), toJSONArray(postLogoutRedirectUris));
         }
         if (StringUtils.isNotBlank(frontChannelLogoutUri)) {
-            parameters.put(FRONT_CHANNEL_LOGOUT_URI.toString(), frontChannelLogoutUri);
+            function.apply(FRONT_CHANNEL_LOGOUT_URI.toString(), frontChannelLogoutUri);
         }
         if (frontChannelLogoutSessionRequired != null) {
-            parameters.put(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString(), frontChannelLogoutSessionRequired.toString());
+            function.apply(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString(), frontChannelLogoutSessionRequired.toString());
         }
         if (backchannelLogoutUris != null && !backchannelLogoutUris.isEmpty()) {
-            parameters.put(BACKCHANNEL_LOGOUT_URI.toString(), toJSONArray(backchannelLogoutUris));
+            function.apply(BACKCHANNEL_LOGOUT_URI.toString(), toJSONArray(backchannelLogoutUris));
         }
         if (backchannelLogoutSessionRequired != null) {
-            parameters.put(BACKCHANNEL_LOGOUT_SESSION_REQUIRED.toString(), backchannelLogoutSessionRequired.toString());
+            function.apply(BACKCHANNEL_LOGOUT_SESSION_REQUIRED.toString(), backchannelLogoutSessionRequired.toString());
         }
         if (requestUris != null && !requestUris.isEmpty()) {
-            parameters.put(REQUEST_URIS.toString(), toJSONArray(requestUris));
+            function.apply(REQUEST_URIS.toString(), toJSONArray(requestUris));
         }
         if (authorizedOrigins != null && !authorizedOrigins.isEmpty()) {
-            parameters.put(AUTHORIZED_ORIGINS.toString(), toJSONArray(authorizedOrigins));
+            function.apply(AUTHORIZED_ORIGINS.toString(), toJSONArray(authorizedOrigins));
         }
         if (scope != null && !scope.isEmpty()) {
-            parameters.put(SCOPE.toString(), implode(scope, " "));
+            function.apply(SCOPE.toString(), implode(scope, " "));
         }
-        if (claims != null && !claims.isEmpty()) {
-            parameters.put(CLAIMS.toString(), implode(claims, " "));
-        }
-        if (accessTokenLifetime != null) {
-            parameters.put(ACCESS_TOKEN_LIFETIME.toString(), accessTokenLifetime);
-        }
-        if (parLifetime != null) {
-            parameters.put(PAR_LIFETIME.toString(), parLifetime);
-        }
-        if (requirePar != null) {
-            parameters.put(REQUIRE_PAR.toString(), requirePar);
-        }
+
         if (StringUtils.isNotBlank(softwareId)) {
-            parameters.put(SOFTWARE_ID.toString(), softwareId);
+            function.apply(SOFTWARE_ID.toString(), softwareId);
         }
         if (StringUtils.isNotBlank(softwareVersion)) {
-            parameters.put(SOFTWARE_VERSION.toString(), softwareVersion);
+            function.apply(SOFTWARE_VERSION.toString(), softwareVersion);
         }
         if (StringUtils.isNotBlank(softwareStatement)) {
-            parameters.put(SOFTWARE_STATEMENT.toString(), softwareStatement);
+            function.apply(SOFTWARE_STATEMENT.toString(), softwareStatement);
         }
         if (backchannelTokenDeliveryMode != null) {
-            parameters.put(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString(), backchannelTokenDeliveryMode);
+            function.apply(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString(), backchannelTokenDeliveryMode.toString());
         }
         if (StringUtils.isNotBlank(backchannelClientNotificationEndpoint)) {
-            parameters.put(BACKCHANNEL_CLIENT_NOTIFICATION_ENDPOINT.toString(), backchannelClientNotificationEndpoint);
+            function.apply(BACKCHANNEL_CLIENT_NOTIFICATION_ENDPOINT.toString(), backchannelClientNotificationEndpoint);
         }
         if (backchannelAuthenticationRequestSigningAlg != null) {
-            parameters.put(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString(), backchannelAuthenticationRequestSigningAlg.toString());
+            function.apply(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString(), backchannelAuthenticationRequestSigningAlg.toString());
         }
-        if (backchannelUserCodeParameter != null) {
-            parameters.put(BACKCHANNEL_USER_CODE_PARAMETER.toString(), backchannelUserCodeParameter);
+        if (backchannelUserCodeParameter != null && backchannelUserCodeParameter) {
+            function.apply(BACKCHANNEL_USER_CODE_PARAMETER.toString(), backchannelUserCodeParameter.toString());
         }
+
+        if (StringUtils.isNotBlank(idTokenTokenBindingCnf)) {
+            function.apply(ID_TOKEN_TOKEN_BINDING_CNF.toString(), idTokenTokenBindingCnf);
+        }
+        if (StringUtils.isNotBlank(tlsClientAuthSubjectDn)) {
+            function.apply(TLS_CLIENT_AUTH_SUBJECT_DN.toString(), tlsClientAuthSubjectDn);
+        }
+        if (allowSpontaneousScopes != null) {
+            function.apply(ALLOW_SPONTANEOUS_SCOPES.toString(), allowSpontaneousScopes.toString());
+        }
+        if (spontaneousScopes != null && !spontaneousScopes.isEmpty()) {
+            function.apply(SPONTANEOUS_SCOPES.toString(), implode(spontaneousScopes, " "));
+        }
+        if (runIntrospectionScriptBeforeJwtCreation != null) {
+            function.apply(RUN_INTROSPECTION_SCRIPT_BEFORE_JWT_CREATION.toString(), runIntrospectionScriptBeforeJwtCreation.toString());
+        }
+        if (keepClientAuthorizationAfterExpiration != null) {
+            function.apply(KEEP_CLIENT_AUTHORIZATION_AFTER_EXPIRATION.toString(), keepClientAuthorizationAfterExpiration.toString());
+        }
+        if (claims != null && !claims.isEmpty()) {
+            function.apply(CLAIMS.toString(), implode(claims, " "));
+        }
+        if (accessTokenLifetime != null) {
+            function.apply(ACCESS_TOKEN_LIFETIME.toString(), accessTokenLifetime.toString());
+        }
+        if (parLifetime != null) {
+            function.apply(PAR_LIFETIME.toString(), parLifetime.toString());
+        }
+        if (requirePar != null) {
+            function.apply(REQUIRE_PAR.toString(), requirePar.toString());
+        }
+
+        if (redirectUrisRegex != null) {
+            function.apply(REDIRECT_URIS_REGEX.toString(), redirectUrisRegex);
+        }
+
+        if (defaultPromptLogin != null) {
+            function.apply(DEFAULT_PROMPT_LOGIN.getName(), defaultPromptLogin);
+        }
+        if (authorizedAcrValues != null && !authorizedAcrValues.isEmpty()) {
+            function.apply(AUTHORIZED_ACR_VALUES.toString(), toJSONArray(authorizedAcrValues));
+        }
+
         // Custom params
         if (customAttributes != null && !customAttributes.isEmpty()) {
             for (Map.Entry<String, String> entry : customAttributes.entrySet()) {
                 final String name = entry.getKey();
                 final String value = entry.getValue();
                 if (RegisterRequestParam.isCustomParameterValid(name) && StringUtils.isNotBlank(value)) {
-                    parameters.put(name, value);
+                    function.apply(name, value);
                 }
             }
         }
-        return parameters;
     }
 
     public JSONObject getJsonObject() {
@@ -1793,5 +1809,13 @@ public class RegisterRequest extends BaseRequest {
 
     public boolean hasJwtRequestAsString() {
         return StringUtils.isNotBlank(jwtRequestAsString);
+    }
+
+    public String getRedirectUrisRegex() {
+        return redirectUrisRegex;
+    }
+
+    public void setRedirectUrisRegex(String redirectUrisRegex) {
+        this.redirectUrisRegex = redirectUrisRegex;
     }
 }

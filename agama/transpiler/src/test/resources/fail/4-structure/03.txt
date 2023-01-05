@@ -1,0 +1,11 @@
+Flow flow
+    Basepath ""
+
+When day is rainy
+    Log me
+Otherwise When there is hope
+    Log "cowboy music"
+Otherwise    
+    Log "By Cerce"
+
+//Failure reason: Otherwise-When does not exist 

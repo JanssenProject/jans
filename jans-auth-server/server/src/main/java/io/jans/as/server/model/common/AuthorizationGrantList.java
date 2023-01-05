@@ -21,12 +21,14 @@ import io.jans.as.server.service.MetricService;
 import io.jans.as.server.util.TokenHashUtil;
 import io.jans.model.metric.MetricType;
 import io.jans.service.CacheService;
+import io.jans.util.StringHelper;
+
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
-import javax.enterprise.context.Dependent;
-import javax.enterprise.inject.Instance;
-import javax.inject.Inject;
+import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -125,6 +127,13 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
         ResourceOwnerPasswordCredentialsGrant grant = grantInstance.select(ResourceOwnerPasswordCredentialsGrant.class).get();
         grant.init(user, client);
 
+        return grant;
+    }
+
+    @Override
+    public TokenExchangeGrant createTokenExchangeGrant(User user, Client client) {
+        TokenExchangeGrant grant = grantInstance.select(TokenExchangeGrant.class).get();
+        grant.init(user, client);
         return grant;
     }
 
@@ -259,7 +268,11 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
         if (tokenEntity != null) {
             final AuthorizationGrantType grantType = AuthorizationGrantType.fromString(tokenEntity.getGrantType());
             if (grantType != null) {
-                final User user = userService.getUser(tokenEntity.getUserId());
+            	String userId = tokenEntity.getUserId();
+            	User user = null;
+            	if (StringHelper.isNotEmpty(userId)) {
+                    user = userService.getUser(userId);
+            	}
                 final Client client = clientService.getClient(tokenEntity.getClientId());
                 final Date authenticationTime = tokenEntity.getAuthenticationTime();
                 final String nonce = tokenEntity.getNonce();
@@ -301,6 +314,12 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
                         deviceCodeGrant.init(user, AuthorizationGrantType.DEVICE_CODE, client, tokenEntity.getCreationDate());
 
                         result = deviceCodeGrant;
+                        break;
+                    case TOKEN_EXCHANGE:
+                        TokenExchangeGrant tokenExchangeGrant = grantInstance.select(TokenExchangeGrant.class).get();
+                        tokenExchangeGrant.init(user, AuthorizationGrantType.TOKEN_EXCHANGE, client, tokenEntity.getCreationDate());
+
+                        result = tokenExchangeGrant;
                         break;
                     default:
                         return null;

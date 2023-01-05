@@ -9,7 +9,7 @@ package io.jans.context;
 import java.io.IOException;
 import java.util.Map;
 
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * This is interface for J2E context wrapper

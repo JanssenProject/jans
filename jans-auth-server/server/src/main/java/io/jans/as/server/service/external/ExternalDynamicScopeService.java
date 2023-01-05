@@ -15,9 +15,9 @@ import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.custom.script.type.scope.DynamicScopeType;
 import io.jans.service.custom.script.ExternalScriptService;
 
-import javax.ejb.DependsOn;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Named;
+import jakarta.ejb.DependsOn;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Named;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;

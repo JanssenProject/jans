@@ -1,0 +1,84 @@
+# Please do not attempt to edit this flow without the direct consent from the DevOps team. This file is managed centrally.
+# Contact @moabu
+name: Label PRs and Issues
+on:
+  pull_request:
+    types:
+      - opened
+      - edited
+    branches:
+      - main
+  issues:
+    types:
+      - opened
+      - edited
+  workflow_dispatch:
+
+jobs:
+  label:
+    # This cannot run on forks as the user mo-auto does not have access to forks
+    if: github.repository_owner == 'JanssenProject'
+    name: label PR
+    runs-on: ubuntu-latest
+    steps:
+      - name: check out code
+        uses: actions/checkout@v3
+
+      - name: Setup Python 3.7
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.7
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo python3 -m pip install --upgrade pip
+          sudo pip3 install setuptools --upgrade
+          sudo pip3 install -r ./automation/requirements.txt
+          sudo apt-get update
+          sudo apt-get install jq
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+          sudo apt update
+          sudo apt install gh
+
+      - name: Update labels
+        run: |
+          git config --global user.name "mo-auto"
+          git config --global user.email "54212639+mo-auto@users.noreply.github.com"
+          echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" > token.txt
+          gh auth login --with-token < token.txt          
+          if [[ "${{github.event_name}}" == "issues" ]]; then
+            echo "Activated by an issue event"
+            issue_or_pull_number=$(jq --raw-output .issue.number "$GITHUB_EVENT_PATH")
+            changed_files="NONE"
+            operation="issue"
+            branch="NONE"
+            title=$(jq --raw-output .issue.title "$GITHUB_EVENT_PATH")
+          else
+            echo "Activated by a PR event"
+            issue_or_pull_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
+            gh pr view $issue_or_pull_number --json files --jq '.files.[].path' > changed_files
+            changed_files=$(paste -s -d, changed_files)
+            operation="pr"
+            branch=${{github.base_ref}}
+            title=$(jq --raw-output .pull_request.title "$GITHUB_EVENT_PATH")
+          fi
+          sudo python3 ./automation/github-labels/label.py ${issue_or_pull_number} ${changed_files} ${branch} ${operation} ${title}
+
+      # Remove once add-project option in gh cli support project beta. Add to labels.py
+      # TODO: Add PR to project
+      - name: Add issue to project
+        if: github.event_name != 'pull_request'
+        env:
+          ISSUE_ID: ${{ github.event.issue.node_id }}
+          PROJECT_ID: ${{ secrets.JANSSEN_ISSUE_DASHBOARD_PROJECT_ID }}
+        run: |
+          item_id="$( gh api graphql -f query='
+            mutation($project:ID!, $issue:ID!) {
+              addProjectNextItem(input: {projectId: $project, contentId: $issue}) {
+                projectNextItem {
+                  id
+                }
+              }
+            }' -f project=$PROJECT_ID -f issue=$ISSUE_ID --jq '.data.addProjectNextItem.projectNextItem.id')"

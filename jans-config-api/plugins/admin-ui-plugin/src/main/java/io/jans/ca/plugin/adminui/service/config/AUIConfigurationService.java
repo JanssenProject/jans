@@ -1,94 +1,123 @@
 package io.jans.ca.plugin.adminui.service.config;
 
+import com.google.api.client.util.Strings;
+import com.google.common.collect.Maps;
+import io.jans.as.model.config.adminui.AdminConf;
+import io.jans.as.model.config.adminui.LicenseSpringCredentials;
+import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.ca.plugin.adminui.model.config.AUIConfiguration;
 import io.jans.ca.plugin.adminui.model.config.LicenseConfiguration;
+import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.ca.plugin.adminui.rest.auth.OAuth2Resource;
+import io.jans.ca.plugin.adminui.utils.AppConstants;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
+import io.jans.orm.PersistenceEntryManager;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 import java.util.Properties;
 
 @Singleton
 public class AUIConfigurationService {
 
-    private AUIConfiguration auiConfiguration;
+    private Map<String, AUIConfiguration> appConfigurationMap;
 
     @Inject
     Logger log;
 
+    @Inject
+    private PersistenceEntryManager entryManager;
+
+    @Inject
+    ConfigurationService configurationService;
+
     public AUIConfiguration getAUIConfiguration() {
+        return getAUIConfiguration(null);
+    }
+
+    public AUIConfiguration getAUIConfiguration(String appType) {
 
         try {
-            if (this.auiConfiguration == null) {
-                Properties props = loadPropertiesFromFile();
-                this.auiConfiguration = addPropertiesToAUIConfiguration(props);
+            if (Strings.isNullOrEmpty(appType)) {
+                appType = AppConstants.APPLICATION_KEY_ADMIN_UI;
             }
 
-            return auiConfiguration;
+            if (appConfigurationMap == null) {
+                appConfigurationMap = Maps.newHashMap();
+            }
+
+            if (appConfigurationMap.get(appType) == null) {
+                AdminConf appConf = null;
+                if (appType.equals(AppConstants.APPLICATION_KEY_ADMIN_UI)) {
+                    appConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
+                } else if (appType.equals(AppConstants.APPLICATION_KEY_ADS)) {
+                    appConf = entryManager.find(AdminConf.class, AppConstants.ADS_CONFIG_DN);
+                }
+                appConfigurationMap.put(appType, addPropertiesToAUIConfiguration(appType, appConf));
+            }
+
+            return appConfigurationMap.get(appType);
         } catch (Exception e) {
             log.error(ErrorResponse.ERROR_READING_CONFIG.getDescription(), e);
             return null;
         }
+
     }
 
-    private AUIConfiguration addPropertiesToAUIConfiguration(Properties props) {
-        AUIConfiguration auiConfig = new AUIConfiguration();
-        auiConfig.setAuthServerHost(props.getProperty("authserver.host"));
-        auiConfig.setAuthServerClientId(props.getProperty("authserver.clientId"));
-        auiConfig.setAuthServerClientSecret(props.getProperty("authserver.clientSecret"));
-        auiConfig.setAuthServerScope(props.getProperty("authserver.scope"));
-        auiConfig.setAuthServerRedirectUrl(props.getProperty("authserver.redirectUrl"));
-        auiConfig.setAuthServerFrontChannelLogoutUrl(props.getProperty("authserver.frontChannelLogoutUrl"));
-        auiConfig.setAuthServerPostLogoutRedirectUri(props.getProperty("authserver.postLogoutRedirectUri"));
-        auiConfig.setAuthServerAuthzBaseUrl(props.getProperty("authserver.authzBaseUrl"));
-        auiConfig.setAuthServerTokenEndpoint(props.getProperty("authserver.tokenEndpoint"));
-        auiConfig.setAuthServerIntrospectionEndpoint(props.getProperty("authserver.introspectionEndpoint"));
-        auiConfig.setAuthServerUserInfoEndpoint(props.getProperty("authserver.userInfoEndpoint"));
-        auiConfig.setAuthServerEndSessionEndpoint(props.getProperty("authserver.endSessionEndpoint"));
+    public void setAuiConfiguration(AUIConfiguration auiConfiguration) {
+        if(!Strings.isNullOrEmpty(auiConfiguration.getAppType())) {
+            this.appConfigurationMap.put(auiConfiguration.getAppType(), auiConfiguration);
+        }
+    }
 
-        auiConfig.setTokenServerClientId(props.getProperty("tokenServer.clientId"));
-        auiConfig.setTokenServerClientSecret(props.getProperty("tokenServer.clientSecret"));
-        auiConfig.setTokenServerScope(props.getProperty("tokenServer.scope"));
-        auiConfig.setTokenServerRedirectUrl(props.getProperty("tokenServer.redirectUrl"));
-        auiConfig.setTokenServerFrontChannelLogoutUrl(props.getProperty("tokenServer.frontChannelLogoutUrl"));
-        auiConfig.setTokenServerPostLogoutRedirectUri(props.getProperty("tokenServer.postLogoutRedirectUri"));
-        auiConfig.setTokenServerAuthzBaseUrl(props.getProperty("tokenServer.authzBaseUrl"));
-        auiConfig.setTokenServerTokenEndpoint(props.getProperty("tokenServer.tokenEndpoint"));
-        auiConfig.setTokenServerIntrospectionEndpoint(props.getProperty("tokenServer.introspectionEndpoint"));
-        auiConfig.setTokenServerUserInfoEndpoint(props.getProperty("tokenServer.userInfoEndpoint"));
-        auiConfig.setTokenServerEndSessionEndpoint(props.getProperty("tokenServer.endSessionEndpoint"));
+    private AUIConfiguration addPropertiesToAUIConfiguration(String appType, AdminConf appConf) {
+        AUIConfiguration auiConfig = new AUIConfiguration();
+        AppConfiguration appConfiguration = configurationService.find();
+        auiConfig.setAppType(appType);
+        auiConfig.setAuthServerHost(appConf.getMainSettings().getOidcConfig().getAuthServerClient().getOpHost());
+        auiConfig.setAuthServerClientId(appConf.getMainSettings().getOidcConfig().getAuthServerClient().getClientId());
+        auiConfig.setAuthServerClientSecret(appConf.getMainSettings().getOidcConfig().getAuthServerClient().getClientSecret());
+        auiConfig.setAuthServerScope(StringUtils.join(appConf.getMainSettings().getOidcConfig().getAuthServerClient().getScopes(), "+"));
+        auiConfig.setAuthServerRedirectUrl(appConf.getMainSettings().getOidcConfig().getAuthServerClient().getRedirectUri());
+        auiConfig.setAuthServerFrontChannelLogoutUrl(appConf.getMainSettings().getOidcConfig().getAuthServerClient().getFrontchannelLogoutUri());
+        auiConfig.setAuthServerPostLogoutRedirectUri(appConf.getMainSettings().getOidcConfig().getAuthServerClient().getPostLogoutUri());
+        auiConfig.setAuthServerAuthzBaseUrl(appConfiguration.getAuthorizationEndpoint());
+        auiConfig.setAuthServerTokenEndpoint(appConfiguration.getTokenEndpoint());
+        auiConfig.setAuthServerIntrospectionEndpoint(appConfiguration.getIntrospectionEndpoint());
+        auiConfig.setAuthServerUserInfoEndpoint(appConfiguration.getUserInfoEndpoint());
+        auiConfig.setAuthServerEndSessionEndpoint(appConfiguration.getEndSessionEndpoint());
+        auiConfig.setAuthServerAcrValues(StringUtils.join(appConf.getMainSettings().getOidcConfig().getAuthServerClient().getAcrValues(), "+"));
+
+        auiConfig.setTokenServerClientId(appConf.getMainSettings().getOidcConfig().getTokenServerClient().getClientId());
+        auiConfig.setTokenServerClientSecret(appConf.getMainSettings().getOidcConfig().getTokenServerClient().getClientSecret());
+        auiConfig.setTokenServerScope(StringUtils.join(appConf.getMainSettings().getOidcConfig().getTokenServerClient().getScopes(), "+"));
+        auiConfig.setTokenServerTokenEndpoint(appConf.getMainSettings().getOidcConfig().getTokenServerClient().getTokenEndpoint());
+
+        if(appType.equals(AppConstants.APPLICATION_KEY_ADS)) {
+            return auiConfig;
+        }
 
         LicenseConfiguration licenseConfiguration = new LicenseConfiguration();
-        licenseConfiguration.setApiKey(props.getProperty("licenseSpring.apiKey"));
-        licenseConfiguration.setProductCode(props.getProperty("licenseSpring.productCode"));
-        licenseConfiguration.setSharedKey(props.getProperty("licenseSpring.sharedKey"));
-        licenseConfiguration.setEnabled(Boolean.valueOf(props.getProperty("licenseSpring.enabled")));
-        licenseConfiguration.setManagementKey(props.getProperty("licenseSpring.managementKey"));
-        licenseConfiguration.initializeLicenseManager();
+        LicenseSpringCredentials licenseSpringCredentials = appConf.getDynamic().getLicenseSpringCredentials();
 
-        auiConfig.setLicenseConfiguration(licenseConfiguration);
-
-        return auiConfig;
-    }
-
-    private Properties loadPropertiesFromFile() throws IOException {
-
-        Properties props = new Properties();
-        File jarPath = new File(OAuth2Resource.class.getProtectionDomain().getCodeSource().getLocation().getPath());
-        String propertiesPath = jarPath.getParentFile().getAbsolutePath() + "/../config";
-        try (InputStream in = new FileInputStream(propertiesPath + "/auiConfiguration.properties")) {
-            props.load(in);
-            return props;
-        } catch (IOException e) {
-            log.error(ErrorResponse.ERROR_READING_CONFIG.getDescription());
-            throw e;
+        if (licenseSpringCredentials != null) {
+            licenseConfiguration.setApiKey(licenseSpringCredentials.getApiKey());
+            licenseConfiguration.setProductCode(licenseSpringCredentials.getProductCode());
+            licenseConfiguration.setSharedKey(licenseSpringCredentials.getSharedKey());
+            licenseConfiguration.setManagementKey(licenseSpringCredentials.getManagementKey());
+            licenseConfiguration.setHardwareId(licenseSpringCredentials.getHardwareId());
+            licenseConfiguration.setLicenseKey(licenseSpringCredentials.getLicenseKey());
         }
+        auiConfig.setLicenseConfiguration(licenseConfiguration);
+        return auiConfig;
     }
 
 }

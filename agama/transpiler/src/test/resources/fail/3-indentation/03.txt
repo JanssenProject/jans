@@ -1,0 +1,9 @@
+Flow flow
+    Basepath ""
+    
+When day is rainy
+    Log me
+    Otherwise
+        Log "cowboy music"
+
+//Failure reason: Otherwise block statement mis-aligned

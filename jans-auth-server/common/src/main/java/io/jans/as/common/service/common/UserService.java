@@ -21,7 +21,7 @@ import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
 import javax.annotation.Nullable;
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -176,7 +176,7 @@ public abstract class UserService {
 
     public User getUserByAttribute(String attributeName, Object attributeValue, Boolean multiValued) {
         List<User> entries = getUsersByAttribute(attributeName, attributeValue, multiValued, 1);
-        if (entries.size() > 0) {
+        if (!entries.isEmpty()) {
             return entries.get(0);
         } else {
             return null;
@@ -185,8 +185,6 @@ public abstract class UserService {
 
     public User getUniqueUserByAttributes(List<String> attributeNames, String attributeValue) {
         log.debug("Getting user information from LDAP: attributeNames = '{}', attributeValue = '{}'", attributeNames, attributeValue);
-
-        User user = null;
 
         if (attributeNames != null) {
             for (String attributeName : attributeNames) {
@@ -202,12 +200,9 @@ public abstract class UserService {
                     List<User> entries = persistenceEntryManager.findEntries(searchUser);
                     log.debug(Constants.LOG_FOUND, entries.size());
 
-                    if (entries.size() == 0) {
-                        continue;
-                    } else if (entries.size() == 1) {
-                        user = entries.get(0);
-                        break;
-                    } else if (entries.size() > 0) {
+                    if (entries.size() == 1) {
+                        return entries.get(0);
+                    } else if (entries.size() > 1) {
                         break;
                     }
                 } catch (Exception e) {
@@ -216,7 +211,7 @@ public abstract class UserService {
             }
         }
 
-        return user;
+        return null;
     }
 
     public List<User> getUsersByAttribute(String attributeName, Object attributeValue, Boolean multiValued, int limit) {
@@ -252,7 +247,7 @@ public abstract class UserService {
 
         String peopleBaseDn = getPeopleBaseDn();
 
-        List<Filter> filters = new ArrayList<Filter>();
+        List<Filter> filters = new ArrayList<>();
         for (String attributeName : attributeNames) {
             Filter filter;
             if (dataSourceTypeService.isSpanner(peopleBaseDn)) {
@@ -288,7 +283,7 @@ public abstract class UserService {
 
         log.debug("Getting user information using next attributes '{}'", attributes);
 
-        List<Filter> filters = new ArrayList<Filter>();
+        List<Filter> filters = new ArrayList<>();
         for (CustomAttribute attribute : attributes) {
             Filter filter = Filter.createEqualityFilter(attribute.getName(), attribute.getValues());
             filter.multiValued(attribute.isMultiValued());
@@ -309,7 +304,7 @@ public abstract class UserService {
         List<User> entries = persistenceEntryManager.findEntries(getPeopleBaseDn(), User.class, searchFiler, returnAttributes, 1);
         log.debug("Found '{}' entries for user by next attributes '{}'", entries.size(), attributes);
 
-        if (entries.size() > 0) {
+        if (!entries.isEmpty()) {
             return entries.get(0);
         } else {
             return null;
@@ -377,7 +372,7 @@ public abstract class UserService {
         } else {
             List<Object> currentAttributeValues = customAttribute.getValues();
 
-            List<Object> newAttributeValues = new ArrayList<Object>();
+            List<Object> newAttributeValues = new ArrayList<>();
             newAttributeValues.addAll(currentAttributeValues);
 
             if (newAttributeValues.contains(attributeValue)) {
@@ -396,8 +391,8 @@ public abstract class UserService {
         return true;
     }
 
-    public User removeUserAttribute(String userId, String attributeName, String attributeValue) {
-        log.debug("Remove user attribute from LDAP: attributeName = '{}', attributeValue = '{}'", attributeName, attributeValue);
+    public User removeUserAttributeValue(String userId, String attributeName, String attributeValue) {
+        log.debug("Remove user attribute value from LDAP: attributeName = '{}', attributeValue = '{}'", attributeName, attributeValue);
 
         User user = getUser(userId);
         if (user == null) {
@@ -409,7 +404,7 @@ public abstract class UserService {
             List<Object> currentAttributeValues = customAttribute.getValues();
             if (currentAttributeValues.contains(attributeValue)) {
 
-                List<Object> newAttributeValues = new ArrayList<Object>();
+                List<Object> newAttributeValues = new ArrayList<>();
                 newAttributeValues.addAll(currentAttributeValues);
                 if (currentAttributeValues.contains(attributeValue)) {
                     newAttributeValues.remove(attributeValue);

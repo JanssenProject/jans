@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
 import io.jans.as.common.service.common.ApplicationFactory;
@@ -27,10 +28,10 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.core.CacheControl;
+import jakarta.faces.context.ExternalContext;
+import jakarta.faces.context.FacesContext;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.CacheControl;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
@@ -73,6 +74,17 @@ public class ServerUtil {
 
     public static GregorianCalendar now() {
         return new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+    }
+
+    public static int nowAsSeconds() {
+        return (int) (new Date().getTime() / 1000L);
+    }
+
+    public static int calculateTtl(Integer expirationDateAsSeconds) {
+        if (expirationDateAsSeconds == null) {
+            return 0;
+        }
+        return expirationDateAsSeconds - nowAsSeconds();
     }
 
     public static int calculateTtl(Date creationDate, Date expirationDate) {
@@ -129,7 +141,7 @@ public class ServerUtil {
     }
 
     public static ObjectMapper createJsonMapper() {
-        final AnnotationIntrospector jaxb = new JaxbAnnotationIntrospector();
+        final AnnotationIntrospector jaxb = new JaxbAnnotationIntrospector(TypeFactory.defaultInstance());
         final AnnotationIntrospector jackson = new JacksonAnnotationIntrospector();
 
         final AnnotationIntrospector pair = AnnotationIntrospector.pair(jackson, jaxb);

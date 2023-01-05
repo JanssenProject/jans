@@ -1,5 +1,5 @@
 /*
- * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * Janssen Project software is available under the Apache License (2004). See http://www.apache.org/licenses/ for full text.
  *
  * Copyright (c) 2020, Janssen Project
  */
@@ -15,8 +15,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,25 +35,26 @@ import io.jans.orm.impl.GenericKeyConverter;
 import io.jans.orm.impl.model.ParsedKey;
 import io.jans.orm.model.AttributeData;
 import io.jans.orm.model.AttributeDataModification;
-import io.jans.orm.model.AttributeDataModification.AttributeModificationType;
 import io.jans.orm.model.BatchOperation;
 import io.jans.orm.model.EntryData;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SearchScope;
 import io.jans.orm.model.Sort;
 import io.jans.orm.model.SortOrder;
+import io.jans.orm.model.AttributeDataModification.AttributeModificationType;
 import io.jans.orm.reflect.property.PropertyAnnotation;
 import io.jans.orm.search.filter.Filter;
 import io.jans.orm.search.filter.FilterProcessor;
 import io.jans.orm.util.ArrayHelper;
 import io.jans.orm.util.StringHelper;
+import jakarta.inject.Inject;
 
 /**
  * SQL Entry Manager
  *
  * @author Yuriy Movchan Date: 01/12/2020
  */
-public class SpannerEntryManager extends BaseEntryManager implements Serializable {
+public class SpannerEntryManager extends BaseEntryManager<SpannerOperationService> implements Serializable {
 
 	private static final long serialVersionUID = 2127241817126412574L;
 
@@ -117,7 +116,7 @@ public class SpannerEntryManager extends BaseEntryManager implements Serializabl
     @Override
 	protected List<String> buildAttributesListForUpdate(Object entry, String[] objectClasses, List<PropertyAnnotation> propertiesAnnotations) {
     	List<String> attributesList = getAttributesList(entry, propertiesAnnotations, false);
-    	Set<String> childAttributes = getOperationService().getTabeChildAttributes(objectClasses[0]);
+    	Set<String> childAttributes = getOperationService().getTabeChildAttributes(getBaseObjectClass(objectClasses));
     	if (childAttributes != null) {
     		attributesList.addAll(childAttributes);
     	}
@@ -151,7 +150,7 @@ public class SpannerEntryManager extends BaseEntryManager implements Serializabl
             }
             
             // We need to check only first element of each array because objectCLass in SQL is single value attribute
-            if (!StringHelper.equals(objectClassesFromDb[0], objectClasses[0])) {
+            if (!StringHelper.equals(getBaseObjectClass(entryClass, objectClassesFromDb), getBaseObjectClass(entryClass, objectClasses))) {
             	throw new UnsupportedOperationException(String.format("It's not possible to change objectClasses of already persisted entry! Entry is invalid: '%s'", entry));
             }
         }
@@ -215,7 +214,7 @@ public class SpannerEntryManager extends BaseEntryManager implements Serializabl
             resultAttributes.add(new AttributeData(SpannerOperationService.DN, dn));
             resultAttributes.add(new AttributeData(SpannerOperationService.DOC_ID, parsedKey.getKey()));
 
-            boolean result = getOperationService().addEntry(parsedKey.getKey(), objectClasses[0], resultAttributes);
+            boolean result = getOperationService().addEntry(parsedKey.getKey(), getBaseObjectClass(objectClasses), resultAttributes);
             if (!result) {
                 throw new EntryPersistenceException(String.format("Failed to persist entry: '%s'", dn));
             }
@@ -272,7 +271,7 @@ public class SpannerEntryManager extends BaseEntryManager implements Serializabl
             }
 
             if (modifications.size() > 0) {
-                boolean result = getOperationService().updateEntry(toSQLKey(dn).getKey(), objectClasses[0], modifications);
+                boolean result = getOperationService().updateEntry(toSQLKey(dn).getKey(), getBaseObjectClass(objectClasses), modifications);
                 if (!result) {
                     throw new EntryPersistenceException(String.format("Failed to update entry: '%s'", dn));
                 }
@@ -283,7 +282,7 @@ public class SpannerEntryManager extends BaseEntryManager implements Serializabl
     }
 
     @Override
-    protected <T> void removeByDn(String dn, String[] objectClasses) {
+    public <T> void removeByDn(String dn, String[] objectClasses) {
     	if (ArrayHelper.isEmpty(objectClasses)) {
     		throw new UnsupportedOperationException("Entry class is manadatory for remove operation!");
     	}
@@ -291,11 +290,11 @@ public class SpannerEntryManager extends BaseEntryManager implements Serializabl
 		// Remove entry
         try {
             for (DeleteNotifier subscriber : subscribers) {
-                subscriber.onBeforeRemove(dn);
+                subscriber.onBeforeRemove(dn, objectClasses);
             }
-            getOperationService().delete(toSQLKey(dn).getKey(), objectClasses[0]);
+            getOperationService().delete(toSQLKey(dn).getKey(), getBaseObjectClass(objectClasses));
             for (DeleteNotifier subscriber : subscribers) {
-                subscriber.onAfterRemove(dn);
+                subscriber.onAfterRemove(dn, objectClasses);
             }
         } catch (Exception ex) {
             throw new EntryDeleteException(String.format("Failed to remove entry: '%s'", dn), ex);
@@ -303,20 +302,18 @@ public class SpannerEntryManager extends BaseEntryManager implements Serializabl
     }
 
     @Override
-    protected <T> void removeRecursivelyFromDn(String dn, String[] objectClasses) {
+    public <T> void removeRecursivelyFromDn(String dn, String[] objectClasses) {
     	if (ArrayHelper.isEmpty(objectClasses)) {
     		throw new UnsupportedOperationException("Entry class is manadatory for recursive remove operation!");
     	}
 		
-    	removeByDn(dn, objectClasses);
-
 		try {
             for (DeleteNotifier subscriber : subscribers) {
-                subscriber.onBeforeRemove(dn);
+                subscriber.onBeforeRemove(dn, objectClasses);
             }
-            getOperationService().deleteRecursively(toSQLKey(dn).getKey(), objectClasses[0]);
+            getOperationService().deleteRecursively(toSQLKey(dn).getKey(), getBaseObjectClass(objectClasses));
             for (DeleteNotifier subscriber : subscribers) {
-                subscriber.onAfterRemove(dn);
+                subscriber.onAfterRemove(dn, objectClasses);
             }
         } catch (Exception ex) {
             throw new EntryDeleteException(String.format("Failed to remove entry: '%s'", dn), ex);
@@ -360,13 +357,13 @@ public class SpannerEntryManager extends BaseEntryManager implements Serializabl
         String key = toSQLKey(dn).getKey();
         ConvertedExpression convertedExpression;
 		try {
-			convertedExpression = toSqlFilterWithEmptyAlias(key, objectClasses[0], searchFilter, propertiesAnnotationsMap);
+			convertedExpression = toSqlFilterWithEmptyAlias(key, getBaseObjectClass(entryClass, objectClasses), searchFilter, propertiesAnnotationsMap);
 		} catch (SearchException ex) {
             throw new EntryDeleteException(String.format("Failed to convert filter '%s' to expression", searchFilter));
 		}
         
         try {
-        	int processed = (int) getOperationService().delete(key, objectClasses[0], convertedExpression, count);
+        	int processed = (int) getOperationService().delete(key, getBaseObjectClass(entryClass, objectClasses), convertedExpression, count);
         	
         	return processed;
         } catch (Exception ex) {
@@ -379,7 +376,7 @@ public class SpannerEntryManager extends BaseEntryManager implements Serializabl
         try {
             // Load entry
             ParsedKey keyWithInum = toSQLKey(dn);
-            List<AttributeData> result = getOperationService().lookup(keyWithInum.getKey(), objectClasses[0], toInternalAttributes(ldapReturnAttributes));
+            List<AttributeData> result = getOperationService().lookup(keyWithInum.getKey(), getBaseObjectClass(objectClasses), toInternalAttributes(ldapReturnAttributes));
             if (result != null) {
                 return result;
             }
@@ -480,7 +477,7 @@ public class SpannerEntryManager extends BaseEntryManager implements Serializabl
         String key = toSQLKey(baseDN).getKey();
         ConvertedExpression convertedExpression;
 		try {
-			convertedExpression = toSqlFilter(key, objectClasses[0], searchFilter, propertiesAnnotationsMap);
+			convertedExpression = toSqlFilter(key, getBaseObjectClass(entryClass, objectClasses), searchFilter, propertiesAnnotationsMap);
 		} catch (SearchException ex) {
             throw new EntryPersistenceException(String.format("Failed to convert filter '%s' to expression", searchFilter), ex);
 		}
@@ -491,7 +488,7 @@ public class SpannerEntryManager extends BaseEntryManager implements Serializabl
             if (batchOperation != null) {
                 batchOperationWraper = new SpannerBatchOperationWraper<T>(batchOperation, this, entryClass, propertiesAnnotations);
             }
-            searchResult = searchImpl(key, objectClasses[0], convertedExpression, scope, currentLdapReturnAttributes,
+            searchResult = searchImpl(key, getBaseObjectClass(entryClass, objectClasses), convertedExpression, scope, currentLdapReturnAttributes,
                     defaultSort, batchOperationWraper, returnDataType, start, count, chunkSize);
 
             if (searchResult == null) {
@@ -527,14 +524,14 @@ public class SpannerEntryManager extends BaseEntryManager implements Serializabl
 
         ConvertedExpression convertedExpression;
 		try {
-			convertedExpression = toSqlFilter(key, objectClasses[0], searchFilter, propertiesAnnotationsMap);
+			convertedExpression = toSqlFilter(key, getBaseObjectClass(entryClass, objectClasses), searchFilter, propertiesAnnotationsMap);
 		} catch (SearchException ex) {
             throw new EntryPersistenceException(String.format("Failed to convert filter '%s' to expression", searchFilter));
 		}
 
         PagedResult<EntryData> searchResult = null;
         try {
-            searchResult = searchImpl(key, objectClasses[0], convertedExpression, SearchScope.SUB, ldapReturnAttributes, null,
+            searchResult = searchImpl(key, getBaseObjectClass(entryClass, objectClasses), convertedExpression, SearchScope.SUB, ldapReturnAttributes, null,
                     null, SearchReturnDataType.SEARCH, 0, 1, 0);
             if (searchResult == null) {
                 throw new EntryPersistenceException(String.format("Failed to find entry with baseDN: '%s', filter: '%s'", baseDN, searchFilter));
@@ -570,7 +567,7 @@ public class SpannerEntryManager extends BaseEntryManager implements Serializabl
             count++;
             EntryData entryData = searchResultEntries[i];
             
-            AttributeData attributeDataDn = entryData.getAttributeDate(SpannerOperationService.DN);
+            AttributeData attributeDataDn = entryData.getAttributeData(SpannerOperationService.DN);
             if ((attributeDataDn == null) || (attributeDataDn.getValue() == null)) {
                 throw new MappingException("Failed to convert EntryData to Entry because DN is missing");
             }
@@ -622,19 +619,19 @@ public class SpannerEntryManager extends BaseEntryManager implements Serializabl
 
         ConvertedExpression convertedExpression;
 		try {
-			convertedExpression = toSqlFilter(key, objectClasses[0], searchFilter, propertiesAnnotationsMap);
+			convertedExpression = toSqlFilter(key, getBaseObjectClass(entryClass, objectClasses), searchFilter, propertiesAnnotationsMap);
 		} catch (SearchException ex) {
             throw new EntryPersistenceException(String.format("Failed to convert filter '%s' to expression", searchFilter));
 		}
 
 		try {
-			PagedResult<EntryData> searchResult = searchImpl(key, objectClasses[0], convertedExpression,
+			PagedResult<EntryData> searchResult = searchImpl(key, getBaseObjectClass(entryClass, objectClasses), convertedExpression,
                     SearchScope.SUB, SpannerOperationService.UID_ARRAY, null, null, SearchReturnDataType.SEARCH, 0, 1, 1);
             if ((searchResult == null) || (searchResult.getEntriesCount() != 1)) {
                 return false;
             }
 
-            AttributeData attributeData = searchResult.getEntries().get(0).getAttributeDate(SpannerOperationService.DN);
+            AttributeData attributeData = searchResult.getEntries().get(0).getAttributeData(SpannerOperationService.DN);
             if ((attributeData == null) || (attributeData.getValue() == null)) {
                 throw new AuthenticationException("Failed to find user DN in entry: '%s'");
             }
@@ -666,7 +663,7 @@ public class SpannerEntryManager extends BaseEntryManager implements Serializabl
 		String[] objectClasses = getTypeObjectClasses(entryClass);
 
     	try {
-            return getOperationService().authenticate(toSQLKey(bindDn).getKey(), escapeValue(password), objectClasses[0]);
+            return getOperationService().authenticate(toSQLKey(bindDn).getKey(), escapeValue(password), getBaseObjectClass(entryClass, objectClasses));
         } catch (Exception ex) {
             throw new AuthenticationException(String.format("Failed to authenticate DN: '%s'", bindDn), ex);
         }
@@ -703,14 +700,14 @@ public class SpannerEntryManager extends BaseEntryManager implements Serializabl
 
         ConvertedExpression convertedExpression;
 		try {
-			convertedExpression = toSqlFilter(key, objectClasses[0], searchFilter, propertiesAnnotationsMap);
+			convertedExpression = toSqlFilter(key, getBaseObjectClass(entryClass, objectClasses), searchFilter, propertiesAnnotationsMap);
 		} catch (SearchException ex) {
             throw new EntryPersistenceException(String.format("Failed to convert filter '%s' to expression", searchFilter));
 		}
 
         PagedResult<EntryData> searchResult;
         try {
-            searchResult = searchImpl(toSQLKey(baseDN).getKey(), objectClasses[0], convertedExpression, scope, null, null,
+            searchResult = searchImpl(toSQLKey(baseDN).getKey(), getBaseObjectClass(entryClass, objectClasses), convertedExpression, scope, null, null,
                     null, SearchReturnDataType.COUNT, 0, 0, 0);
         } catch (Exception ex) {
             throw new EntryPersistenceException(
@@ -772,10 +769,19 @@ public class SpannerEntryManager extends BaseEntryManager implements Serializabl
 
     @Override
     public List<AttributeData> exportEntry(String dn) {
-        try {
+        throw new EntryPersistenceException("This is deprectated method. Use exportEntry(String dn, Class<T> entryClass) instead of it!");
+    }
+
+	@Override
+	public <T> List<AttributeData> exportEntry(String dn, String objectClass) {
+		if (StringHelper.isEmpty(objectClass)) {
+			throw new MappingException("Object class isn't defined!");
+		}
+
+		try {
             // Load entry
             ParsedKey keyWithInum = toSQLKey(dn);
-            List<AttributeData> entry = getOperationService().lookup(keyWithInum.getKey(), null);
+            List<AttributeData> entry = getOperationService().lookup(keyWithInum.getKey(), objectClass);
 
             if (entry != null) {
                 return entry;
@@ -786,7 +792,6 @@ public class SpannerEntryManager extends BaseEntryManager implements Serializabl
             throw new EntryPersistenceException(String.format("Failed to find entry: '%s'", dn), ex);
         }
     }
-
     
     private ConvertedExpression toSqlFilter(String key, String objectClass, Filter genericFilter, Map<String, PropertyAnnotation> propertiesAnnotationsMap) throws SearchException {
     	TableMapping tableMapping = getOperationService().getTabeMapping(key, objectClass);
@@ -806,7 +811,7 @@ public class SpannerEntryManager extends BaseEntryManager implements Serializabl
     	return filterConverter.convertToSqlFilter(tableMapping, excludeObjectClassFilters(genericFilter), propertiesAnnotationsMap, true);
     }
 
-	private Filter excludeObjectClassFilters(Filter genericFilter) {
+	protected Filter excludeObjectClassFilters(Filter genericFilter) {
 		return filterProcessor.excludeFilter(genericFilter, FilterProcessor.OBJECT_CLASS_EQUALITY_FILTER, FilterProcessor.OBJECT_CLASS_PRESENCE_FILTER);
 	}
 
@@ -945,6 +950,22 @@ public class SpannerEntryManager extends BaseEntryManager implements Serializabl
 
 	protected boolean isSupportForceUpdate() {
 		return true;
+	}
+
+	private String getBaseObjectClass(String[] objectClasses) {
+		if (ArrayHelper.isEmpty(objectClasses)) {
+			throw new MappingException("Object class isn't defined!");
+		}
+		
+		return objectClasses[0];
+	}
+
+	private String getBaseObjectClass(Class<?> entryClass, String[] objectClasses) {
+		if (ArrayHelper.isEmpty(objectClasses)) {
+			throw new MappingException(String.format("Object class isn't defined in bean '%s'!", entryClass));
+		}
+		
+		return objectClasses[0];
 	}
 
 }

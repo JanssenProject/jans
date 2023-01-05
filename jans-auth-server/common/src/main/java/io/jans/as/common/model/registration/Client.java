@@ -6,46 +6,36 @@
 
 package io.jans.as.common.model.registration;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.jans.as.model.common.AuthenticationMethod;
-import io.jans.as.model.common.BackchannelTokenDeliveryMode;
-import io.jans.as.model.common.GrantType;
-import io.jans.as.model.common.ResponseType;
-import io.jans.as.model.common.SubjectType;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import io.jans.as.model.common.*;
 import io.jans.as.model.crypto.signature.AsymmetricSignatureAlgorithm;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.persistence.model.ClientAttributes;
-import io.jans.orm.annotation.AttributeName;
-import io.jans.orm.annotation.AttributesList;
-import io.jans.orm.annotation.CustomObjectClass;
-import io.jans.orm.annotation.DN;
-import io.jans.orm.annotation.DataEntry;
-import io.jans.orm.annotation.Expiration;
-import io.jans.orm.annotation.JsonObject;
-import io.jans.orm.annotation.ObjectClass;
-import io.jans.orm.model.base.CustomAttribute;
+import io.jans.orm.annotation.*;
+import io.jans.orm.model.base.CustomObjectAttribute;
 import io.jans.orm.model.base.DeletableEntity;
+import io.jans.orm.model.base.LocalizedString;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * @author Javier Rojas Blum
- * @version July 30, 2021
+ * @version October 17, 2022
  */
 @DataEntry(sortBy = {"displayName"})
 @ObjectClass(value = "jansClnt")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Client extends DeletableEntity implements Serializable {
 
-    private static final long serialVersionUID = -6832496019942067970L;
-
-    @DN
-    private String dn;
+    private static final long serialVersionUID = -6832496019942067971L;
 
     @JsonProperty("inum")
     @AttributeName(name = "inum", ignoreDuringUpdate = true)
@@ -87,11 +77,11 @@ public class Client extends DeletableEntity implements Serializable {
     @AttributeName(name = "jansContact")
     private String[] contacts;
 
-    @AttributeName(name = "displayName")
-    private String clientName;
-
     @AttributeName(name = "tknBndCnf")
     private String idTokenTokenBindingCnf;
+
+    @AttributeName(name = "displayName")
+    private String clientName;
 
     @AttributeName(name = "jansLogoURI")
     private String logoUri;
@@ -104,6 +94,31 @@ public class Client extends DeletableEntity implements Serializable {
 
     @AttributeName(name = "jansTosURI")
     private String tosUri;
+
+    @AttributeName(name = "displayNameLocalized")
+    @JsonObject
+    @LanguageTag
+    private LocalizedString clientNameLocalized = new LocalizedString();
+
+    @AttributeName(name = "jansLogoURILocalized")
+    @JsonObject
+    @LanguageTag
+    private LocalizedString logoUriLocalized = new LocalizedString();
+
+    @AttributeName(name = "jansClntURILocalized")
+    @JsonObject
+    @LanguageTag
+    private LocalizedString clientUriLocalized = new LocalizedString();
+
+    @AttributeName(name = "jansPolicyURILocalized")
+    @JsonObject
+    @LanguageTag
+    private LocalizedString policyUriLocalized = new LocalizedString();
+
+    @AttributeName(name = "jansTosURILocalized")
+    @JsonObject
+    @LanguageTag
+    private LocalizedString tosUriLocalized = new LocalizedString();
 
     @AttributeName(name = "jansJwksURI")
     private String jwksUri;
@@ -153,9 +168,6 @@ public class Client extends DeletableEntity implements Serializable {
     @AttributeName(name = "jansDefMaxAge")
     private Integer defaultMaxAge;
 
-    @AttributeName(name = "jansRequireAuthTime")
-    private boolean requireAuthTime;
-
     @AttributeName(name = "jansDefAcrValues")
     private String[] defaultAcrValues;
 
@@ -195,8 +207,8 @@ public class Client extends DeletableEntity implements Serializable {
     @AttributeName(name = "jansAccessTknLife")
     private Integer accessTokenLifetime;
 
-    @AttributesList(name = "name", value = "values", sortByName = true)
-    private List<CustomAttribute> customAttributes = new ArrayList<CustomAttribute>();
+    @AttributesList(name = "name", value = "values", multiValued = "multiValued", sortByName = true)
+    private List<CustomObjectAttribute> customAttributes = new ArrayList<>();
 
     @CustomObjectClass
     private String[] customObjectClasses;
@@ -241,8 +253,33 @@ public class Client extends DeletableEntity implements Serializable {
     @AttributeName(name = "jansBackchannelUsrCodeParameter")
     private Boolean backchannelUserCodeParameter;
 
+    @AttributeName(name = "description")
+    private String description;
+
+    @AttributeName(name = "o")
+    private String organization;
+
+    @AttributeName(name = "jansGrp")
+    private String[] groups;
+
     @Expiration
     private Integer ttl;
+
+    public String[] getGroups() {
+        return groups;
+    }
+
+    public void setGroups(String[] groups) {
+        this.groups = groups;
+    }
+
+    public String getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(String organization) {
+        this.organization = organization;
+    }
 
     public ClientAttributes getAttributes() {
         if (attributes == null) {
@@ -289,14 +326,6 @@ public class Client extends DeletableEntity implements Serializable {
 
     public AuthenticationMethod getAuthenticationMethod() {
         return AuthenticationMethod.fromString(tokenEndpointAuthMethod);
-    }
-
-    public String getDn() {
-        return dn;
-    }
-
-    public void setDn(String dn) {
-        this.dn = dn;
     }
 
     /**
@@ -565,6 +594,19 @@ public class Client extends DeletableEntity implements Serializable {
         this.contacts = contacts;
     }
 
+    public String getIdTokenTokenBindingCnf() {
+        return idTokenTokenBindingCnf;
+    }
+
+    public void setIdTokenTokenBindingCnf(String idTokenTokenBindingCnf) {
+        this.idTokenTokenBindingCnf = idTokenTokenBindingCnf;
+    }
+
+    @JsonIgnore
+    public boolean isTokenBindingSupported() {
+        return StringUtils.isNotBlank(idTokenTokenBindingCnf);
+    }
+
     /**
      * Returns the name of the Client to be presented to the user.
      *
@@ -583,20 +625,8 @@ public class Client extends DeletableEntity implements Serializable {
         this.clientName = clientName;
     }
 
-    public String getIdTokenTokenBindingCnf() {
-        return idTokenTokenBindingCnf;
-    }
-
-    public void setIdTokenTokenBindingCnf(String idTokenTokenBindingCnf) {
-        this.idTokenTokenBindingCnf = idTokenTokenBindingCnf;
-    }
-
-    public boolean isTokenBindingSupported() {
-        return StringUtils.isNotBlank(idTokenTokenBindingCnf);
-    }
-
     /**
-     * Returns an URL that references a logo for the Client application.
+     * Returns a URL that references a logo for the Client application.
      *
      * @return The URL of a logo image for the Client where it can be retrieved.
      */
@@ -605,7 +635,7 @@ public class Client extends DeletableEntity implements Serializable {
     }
 
     /**
-     * Sets an URL that references a logo for the Client application.
+     * Sets a URL that references a logo for the Client application.
      *
      * @param logoUri The URL of a logo image for the Client where it can be retrieved.
      */
@@ -614,7 +644,7 @@ public class Client extends DeletableEntity implements Serializable {
     }
 
     /**
-     * Returns an URL of the home page of the Client.
+     * Returns a URL of the home page of the Client.
      *
      * @return The URL of the home page of the Client.
      */
@@ -623,7 +653,7 @@ public class Client extends DeletableEntity implements Serializable {
     }
 
     /**
-     * Sets an URL of the home page of the Client.
+     * Sets a URL of the home page of the Client.
      *
      * @param clientUri The URL of the home page of the Client.
      */
@@ -632,27 +662,27 @@ public class Client extends DeletableEntity implements Serializable {
     }
 
     /**
-     * Returns an that the Relying Party Client provides to the End-User to read about the how the profile data will
+     * Returns a URL that the Relying Party Client provides to the End-User to read about how the profile data will
      * be used.
      *
-     * @return An URL location about the how the profile data will be used.
+     * @return A URL location about how the profile data will be used.
      */
     public String getPolicyUri() {
         return policyUri;
     }
 
     /**
-     * Sets an that the Relying Party Client provides to the End-User to read about the how the profile data will
+     * Sets a URL that the Relying Party Client provides to the End-User to read about how the profile data will
      * be used.
      *
-     * @param policyUri An URL location about the how the profile data will be used.
+     * @param policyUri A URL location about how the profile data will be used.
      */
     public void setPolicyUri(String policyUri) {
         this.policyUri = policyUri;
     }
 
     /**
-     * Returns an URL that the Relying Party Client provides to the End-User to read about the Relying Party's terms
+     * Returns a URL that the Relying Party Client provides to the End-User to read about the Relying Party's terms
      * of service.
      *
      * @return The terms of service URL.
@@ -662,13 +692,219 @@ public class Client extends DeletableEntity implements Serializable {
     }
 
     /**
-     * Sets an URL that the Relying Party Client provides to the End-User to read about the Relying Party's terms of
+     * Sets a URL that the Relying Party Client provides to the End-User to read about the Relying Party's terms of
      * service.
      *
      * @param tosUri The terms of service URL.
      */
     public void setTosUri(String tosUri) {
         this.tosUri = tosUri;
+    }
+
+    /**
+     * Returns the name of the Client to be presented to the user represented in a language and a script.
+     *
+     * @return The name of the Client to be presented to the user.
+     */
+    public LocalizedString getClientNameLocalized() {
+        return clientNameLocalized;
+    }
+
+    @JsonSetter
+    public void setClientNameLocalized(LocalizedString clientNameLocalized) {
+        this.clientNameLocalized = clientNameLocalized;
+    }
+
+    @JsonSetter
+    public void setLogoUriLocalized(LocalizedString logoUriLocalized) {
+        this.logoUriLocalized = logoUriLocalized;
+    }
+
+    @JsonSetter
+    public void setClientUriLocalized(LocalizedString clientUriLocalized) {
+        this.clientUriLocalized = clientUriLocalized;
+    }
+
+    @JsonSetter
+    public void setPolicyUriLocalized(LocalizedString policyUriLocalized) {
+        this.policyUriLocalized = policyUriLocalized;
+    }
+
+    @JsonSetter
+    public void setTosUriLocalized(LocalizedString tosUriLocalized) {
+        this.tosUriLocalized = tosUriLocalized;
+    }
+
+    /**
+     * Sets the name of the Client to be presented to the user.
+     *
+     * @param clientName The name of the Client to be presented to the user.
+     */
+    @JsonIgnore
+    public void setClientNameLocalized(String clientName) {
+        this.clientName = clientName;
+        this.clientNameLocalized.setValue(clientName);
+    }
+
+    /**
+     * Sets the name of the Client to be presented to the user represented in a language and a script.
+     *
+     * @param clientName The name of the Client to be presented to the user.
+     * @param locale     The locale
+     */
+    @JsonIgnore
+    public void setClientNameLocalized(String clientName, Locale locale) {
+        if (StringUtils.isNotBlank(locale.toString())) {
+            this.clientNameLocalized.setValue(clientName, locale);
+        } else {
+            setClientNameLocalized(clientName);
+        }
+    }
+
+    /**
+     * Returns a URL that references a logo for the Client application represented in a language and a script.
+     *
+     * @return The URL of a logo image for the Client where it can be retrieved.
+     */
+    public LocalizedString getLogoUriLocalized() {
+        return logoUriLocalized;
+    }
+
+    /**
+     * Sets a URL that references a logo for the Client application.
+     *
+     * @param logoUri The URL of a logo image for the Client where it can be retrieved.
+     */
+    @JsonIgnore
+    public void setLogoUriLocalized(String logoUri) {
+        this.logoUri = logoUri;
+        this.logoUriLocalized.setValue(logoUri);
+    }
+
+    /**
+     * Sets a URL that references a logo for the Client application represented in a language and script.
+     *
+     * @param logoUri The URL of a logo image for the Client where it can be retrieved.
+     * @param locale  The locale
+     */
+    @JsonIgnore
+    public void setLogoUriLocalized(String logoUri, Locale locale) {
+        if (StringUtils.isNotBlank(locale.toString())) {
+            this.logoUriLocalized.setValue(logoUri, locale);
+        } else {
+            setLogoUriLocalized(logoUri);
+        }
+    }
+
+    /**
+     * Returns a URL of the home page of the Client represented in a language and script
+     *
+     * @return The URL of the home page of the Client.
+     */
+    public LocalizedString getClientUriLocalized() {
+        return clientUriLocalized;
+    }
+
+    /**
+     * Sets a URL of the home page of the Client.
+     *
+     * @param clientUri The URL of the home page of the Client.
+     */
+    @JsonIgnore
+    public void setClientUriLocalized(String clientUri) {
+        this.clientUri = clientUri;
+        this.clientUriLocalized.setValue(clientUri);
+    }
+
+    /**
+     * Sets a URL of the home page of the Client represented in a language and script.
+     *
+     * @param clientUri The URL of the home page of the Client.
+     * @param locale    The locale
+     */
+    @JsonIgnore
+    public void setClientUriLocalized(String clientUri, Locale locale) {
+        if (StringUtils.isNotBlank(locale.toString())) {
+            this.clientUriLocalized.setValue(clientUri, locale);
+        } else {
+            setClientUriLocalized(clientUri);
+        }
+    }
+
+    /**
+     * Returns a URL that the Relying Party Client provides to the End-User to read about how the profile data will
+     * be used represented in a language and script.
+     *
+     * @return A URL location about how the profile data will be used.
+     */
+    public LocalizedString getPolicyUriLocalized() {
+        return policyUriLocalized;
+    }
+
+    /**
+     * Sets a URL that the Relying Party Client provides to the End-User to read about how the profile data will
+     * be used.
+     *
+     * @param policyUri A URL location about how the profile data will be used.
+     */
+    @JsonIgnore
+    public void setPolicyUriLocalized(String policyUri) {
+        this.policyUri = policyUri;
+        this.policyUriLocalized.setValue(policyUri);
+    }
+
+    /**
+     * Sets a URL that the Relying Party Client provides to the End-User to read about how the profile data will
+     * be used represented in a language and script.
+     *
+     * @param policyUri A URL location about how the profile data will be used.
+     * @param locale    The locale
+     */
+    @JsonIgnore
+    public void setPolicyUriLocalized(String policyUri, Locale locale) {
+        if (StringUtils.isNotBlank(locale.toString())) {
+            this.policyUriLocalized.setValue(policyUri, locale);
+        } else {
+            setPolicyUriLocalized(policyUri);
+        }
+    }
+
+    /**
+     * Returns a URL that the Relying Party Client provides to the End-User to read about the Relying Party's terms
+     * of service represented in a language and script.
+     *
+     * @return The terms of service URL.
+     */
+    public LocalizedString getTosUriLocalized() {
+        return tosUriLocalized;
+    }
+
+    /**
+     * Sets a URL that the Relying Party Client provides to the End-User to read about the Relying Party's terms of
+     * service.
+     *
+     * @param tosUri The terms of service URL.
+     */
+    @JsonIgnore
+    public void setTosUriLocalized(String tosUri) {
+        this.tosUri = tosUri;
+        this.tosUriLocalized.setValue(tosUri);
+    }
+
+    /**
+     * Sets a URL that the Relying Party Client provides to the End-User to read about the Relying Party's terms of
+     * service represented in a language and script.
+     *
+     * @param tosUri The terms of service URL.
+     * @param locale The Locale
+     */
+    @JsonIgnore
+    public void setTosUriLocalized(String tosUri, Locale locale) {
+        if (StringUtils.isNotBlank(locale.toString())) {
+            this.tosUriLocalized.setValue(tosUri, locale);
+        } else {
+            setTosUriLocalized(tosUri);
+        }
     }
 
     /**
@@ -986,26 +1222,6 @@ public class Client extends DeletableEntity implements Serializable {
     }
 
     /**
-     * Returns a boolean value specifying whether the auth_time Claim in the ID Token is required.
-     * It is required when the value is true. The auth_time Claim request in the Request Object overrides this setting.
-     *
-     * @return The required authentication time.
-     */
-    public boolean getRequireAuthTime() {
-        return requireAuthTime;
-    }
-
-    /**
-     * Sets a boolean value specifying whether the auth_time Claim in the ID Token is required.
-     * It is required when the value is true. The auth_time Claim request in the Request Object overrides this setting.
-     *
-     * @param requireAuthTime The required authentication time.
-     */
-    public void setRequireAuthTime(boolean requireAuthTime) {
-        this.requireAuthTime = requireAuthTime;
-    }
-
-    /**
      * Returns the Default requested Authentication Context Class Reference values.
      * Array of strings that specifies the default acr values that the Authorization Server must use for processing
      * requests from the Client.
@@ -1155,11 +1371,11 @@ public class Client extends DeletableEntity implements Serializable {
         this.accessTokenLifetime = accessTokenLifetime;
     }
 
-    public List<CustomAttribute> getCustomAttributes() {
+    public List<CustomObjectAttribute> getCustomAttributes() {
         return customAttributes;
     }
 
-    public void setCustomAttributes(List<CustomAttribute> customAttributes) {
+    public void setCustomAttributes(List<CustomObjectAttribute> customAttributes) {
         this.customAttributes = customAttributes;
     }
 
@@ -1167,8 +1383,8 @@ public class Client extends DeletableEntity implements Serializable {
         return customObjectClasses;
     }
 
-    public void setCustomObjectClasses(String[] p_customObjectClasses) {
-        customObjectClasses = p_customObjectClasses;
+    public void setCustomObjectClasses(String[] customObjectClasses) {
+        this.customObjectClasses = customObjectClasses;
     }
 
     public boolean isDisabled() {
@@ -1244,11 +1460,18 @@ public class Client extends DeletableEntity implements Serializable {
     }
 
     public String getDisplayName() {
-        return clientName;
+        return getClientName();
     }
 
     public void setDisplayName(String displayName) {
-        this.clientName = displayName;
+        setClientName(displayName);
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 }

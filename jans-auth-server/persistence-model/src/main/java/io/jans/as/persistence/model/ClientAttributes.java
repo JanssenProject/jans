@@ -16,6 +16,8 @@ import java.util.List;
 
 /**
  * @author Yuriy Zabrovarnyy
+ * @author Javier Rojas Blum
+ * @version March 17, 2022
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ClientAttributes implements Serializable {
@@ -30,8 +32,8 @@ public class ClientAttributes implements Serializable {
     @JsonProperty("tlsClientAuthSubjectDn")
     private String tlsClientAuthSubjectDn;
 
-    @JsonProperty("runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims")
-    private Boolean runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims = false;
+    @JsonProperty("runIntrospectionScriptBeforeJwtCreation")
+    private Boolean runIntrospectionScriptBeforeJwtCreation = false;
 
     @JsonProperty("keepClientAuthorizationAfterExpiration")
     private Boolean keepClientAuthorizationAfterExpiration = false;
@@ -86,6 +88,75 @@ public class ClientAttributes implements Serializable {
 
     @JsonProperty("jansAuthEncRespEnc")
     private String authorizationEncryptedResponseEnc;
+
+    @JsonProperty("jansSubAttr")
+    private String publicSubjectIdentifierAttribute;
+
+    @JsonProperty("redirectUrisRegex")
+    private String redirectUrisRegex;
+
+    @JsonProperty("jansAuthorizedAcr")
+    private List<String> authorizedAcrValues;
+
+    @JsonProperty("jansDefaultPromptLogin")
+    private Boolean defaultPromptLogin = false;
+
+    @JsonProperty("idTokenLifetime")
+    private Integer idTokenLifetime;
+
+    @JsonProperty("allowOfflineAccessWithoutConsent")
+    private Boolean allowOfflineAccessWithoutConsent;
+
+    @JsonProperty("minimumAcrLevel")
+    private Integer minimumAcrLevel = -1;
+
+    @JsonProperty("minimumAcrLevelAutoresolve")
+    private Boolean minimumAcrLevelAutoresolve;
+
+    @JsonProperty("minimumAcrPriorityList")
+    private List<String> minimumAcrPriorityList;
+
+    public Boolean getMinimumAcrLevelAutoresolve() {
+        return minimumAcrLevelAutoresolve;
+    }
+
+    public void setMinimumAcrLevelAutoresolve(Boolean minimumAcrLevelAutoresolve) {
+        this.minimumAcrLevelAutoresolve = minimumAcrLevelAutoresolve;
+    }
+
+    public List<String> getMinimumAcrPriorityList() {
+        if (minimumAcrPriorityList == null) minimumAcrPriorityList = new ArrayList<>();
+        return minimumAcrPriorityList;
+    }
+
+    public void setMinimumAcrPriorityList(List<String> minimumAcrPriorityList) {
+        this.minimumAcrPriorityList = minimumAcrPriorityList;
+    }
+
+    public Integer getMinimumAcrLevel() {
+        if (minimumAcrLevel == null) minimumAcrLevel = -1;
+        return minimumAcrLevel;
+    }
+
+    public void setMinimumAcrLevel(Integer minimumAcrLevel) {
+        this.minimumAcrLevel = minimumAcrLevel;
+    }
+
+    public Boolean getAllowOfflineAccessWithoutConsent() {
+        return allowOfflineAccessWithoutConsent;
+    }
+
+    public void setAllowOfflineAccessWithoutConsent(Boolean allowOfflineAccessWithoutConsent) {
+        this.allowOfflineAccessWithoutConsent = allowOfflineAccessWithoutConsent;
+    }
+
+    public Integer getIdTokenLifetime() {
+        return idTokenLifetime;
+    }
+
+    public void setIdTokenLifetime(Integer idTokenLifetime) {
+        this.idTokenLifetime = idTokenLifetime;
+    }
 
     public List<String> getRopcScripts() {
         if (ropcScripts == null) ropcScripts = new ArrayList<>();
@@ -204,15 +275,15 @@ public class ClientAttributes implements Serializable {
         this.updateTokenScriptDns = updateTokenScriptDns;
     }
 
-    public Boolean getRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims() {
-        if (runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims == null) {
-            runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims = false;
+    public Boolean getRunIntrospectionScriptBeforeJwtCreation() {
+        if (runIntrospectionScriptBeforeJwtCreation == null) {
+            runIntrospectionScriptBeforeJwtCreation = false;
         }
-        return runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims;
+        return runIntrospectionScriptBeforeJwtCreation;
     }
 
-    public void setRunIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims(Boolean runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims) {
-        this.runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims = runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims;
+    public void setRunIntrospectionScriptBeforeJwtCreation(Boolean runIntrospectionScriptBeforeJwtCreation) {
+        this.runIntrospectionScriptBeforeJwtCreation = runIntrospectionScriptBeforeJwtCreation;
     }
 
     public Boolean getKeepClientAuthorizationAfterExpiration() {
@@ -268,11 +339,62 @@ public class ClientAttributes implements Serializable {
         this.authorizationEncryptedResponseEnc = authorizationEncryptedResponseEnc;
     }
 
+    /**
+     * Return the custom subject identifier attribute. It is used for public subject type.
+     * If null, the default is used. Else use the custom attribute per client basis.
+     *
+     * @return The custom subject identifier attribute.
+     */
+    public String getPublicSubjectIdentifierAttribute() {
+        return publicSubjectIdentifierAttribute;
+    }
+
+    /**
+     * Sets the custom subject identifier attribute. It is used for public subject type.
+     * if null, the default is used. Else use the custom attribute per client basis.
+     *
+     * @param publicSubjectIdentifierAttribute The custom subject identifier attribute.
+     */
+    public void setPublicSubjectIdentifierAttribute(String publicSubjectIdentifierAttribute) {
+        this.publicSubjectIdentifierAttribute = publicSubjectIdentifierAttribute;
+    }
+
+    public String getRedirectUrisRegex() {
+        return redirectUrisRegex;
+    }
+
+    public void setRedirectUrisRegex(String redirectUrisRegex) {
+        this.redirectUrisRegex = redirectUrisRegex;
+    }
+
+    public List<String> getAuthorizedAcrValues() {
+        if (authorizedAcrValues == null) {
+            return Lists.newArrayList();
+        }
+        return authorizedAcrValues;
+    }
+
+    public void setAuthorizedAcrValues(List<String> authorizedAcrValues) {
+        this.authorizedAcrValues = authorizedAcrValues;
+    }
+
+    public Boolean getDefaultPromptLogin() {
+        if (defaultPromptLogin == null) {
+            defaultPromptLogin = false;
+        }
+
+        return defaultPromptLogin;
+    }
+
+    public void setDefaultPromptLogin(Boolean defaultPromptLogin) {
+        this.defaultPromptLogin = defaultPromptLogin;
+    }
+
     @Override
     public String toString() {
         return "ClientAttributes{" +
                 "tlsClientAuthSubjectDn='" + tlsClientAuthSubjectDn + '\'' +
-                ", runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims=" + runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims +
+                ", runIntrospectionScriptBeforeJwtCreation=" + runIntrospectionScriptBeforeJwtCreation +
                 ", keepClientAuthorizationAfterExpiration=" + keepClientAuthorizationAfterExpiration +
                 ", allowSpontaneousScopes=" + allowSpontaneousScopes +
                 ", spontaneousScopes=" + spontaneousScopes +
@@ -288,6 +410,13 @@ public class ClientAttributes implements Serializable {
                 ", authorizationSignedResponseAlg=" + authorizationSignedResponseAlg +
                 ", authorizationEncryptedResponseAlg=" + authorizationEncryptedResponseAlg +
                 ", authorizationEncryptedResponseEnc=" + authorizationEncryptedResponseEnc +
+                ", publicSubjectIdentifierAttribute=" + publicSubjectIdentifierAttribute +
+                ", redirectUrisRegex=" + redirectUrisRegex +
+                ", allowOfflineAccessWithoutConsent=" + allowOfflineAccessWithoutConsent +
+                ", minimumAcrLevel=" + minimumAcrLevel +
+                ", minimumAcrLevelAutoresolve=" + minimumAcrLevelAutoresolve +
+                ", minimumAcrPriorityList=" + minimumAcrPriorityList +
+                ", defaultPromptLogin=" + defaultPromptLogin +
                 '}';
     }
 }

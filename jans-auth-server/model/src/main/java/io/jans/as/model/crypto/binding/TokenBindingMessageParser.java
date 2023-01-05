@@ -48,17 +48,11 @@ public class TokenBindingMessageParser {
                 int tokenTypeAsByteValue = stream.read();
 
                 TokenBindingType tokenBindingType = TokenBindingType.valueOf(tokenTypeAsByteValue);
-                if (tokenBindingType == null) {
-                    throw new TokenBindingParseException("Failed to identify TokenBindingType, byteValue: " + tokenTypeAsByteValue);
-                }
 
                 int fromID = stream.getPos();
                 int keyParametersAsByteValue = stream.read();
 
                 TokenBindingKeyParameters tokenBindingKeyParameters = TokenBindingKeyParameters.valueOf(keyParametersAsByteValue);
-                if (tokenBindingKeyParameters == null) {
-                    throw new TokenBindingParseException("Failed to identify TokenBindingKeyParameters, byteValue: " + keyParametersAsByteValue);
-                }
 
                 byte[] publicKey = readBytesWithSuffixLength(stream);
                 byte[] bindingIdRaw = Arrays.copyOfRange(raw, fromID, stream.getPos());
@@ -71,6 +65,8 @@ public class TokenBindingMessageParser {
                 result.add(new TokenBinding(tokenBindingType, id, signature, new TokenBindingExtension(TokenBindingExtensionType.UNKNOWN, extensions)));
             }
             return result;
+        } catch (TokenBindingParseException e) {
+            throw e;
         } catch (Exception e) {
             throw new TokenBindingParseException("Failed to parse TokenBindingMessage, raw: " + Base64Util.base64urlencode(raw), e);
         }

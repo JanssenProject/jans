@@ -10,10 +10,11 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
 
 import java.text.SimpleDateFormat;
-import javax.inject.Singleton;
-import javax.ws.rs.ext.ContextResolver;
+import jakarta.inject.Singleton;
+import jakarta.ws.rs.ext.ContextResolver;
 
 @Singleton
 public class ObjectMapperContextResolver implements ContextResolver<ObjectMapper> {
@@ -29,8 +30,10 @@ public class ObjectMapperContextResolver implements ContextResolver<ObjectMapper
         return defaultObjectMapper;
     }
 
+    @SuppressWarnings("deprecation")
     public static ObjectMapper createDefaultMapper() {
         ObjectMapper mapper = new ObjectMapper();
+        mapper.enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS);
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         mapper.enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT);
@@ -39,6 +42,9 @@ public class ObjectMapperContextResolver implements ContextResolver<ObjectMapper
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
         mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss"));
+        mapper.enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING);
+        mapper.enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING); 
+
         return mapper;
     }
 

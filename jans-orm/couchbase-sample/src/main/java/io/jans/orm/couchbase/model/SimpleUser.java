@@ -1,5 +1,5 @@
 /*
- * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * Janssen Project software is available under the Apache License (2004). See http://www.apache.org/licenses/ for full text.
  *
  * Copyright (c) 2020, Janssen Project
  */
@@ -37,6 +37,15 @@ public class SimpleUser implements Serializable {
     @AttributeName(name = "userPassword")
     private String userPassword;
     
+    @AttributeName(name = "displayName")
+    private String displayName;
+
+    @AttributeName(name = "mail")
+    private String mail;
+
+    @AttributeName(name = "jansStatus")
+    private GluuStatus status;
+    
     @AttributeName(name = "role")
     private UserRole userRole; 
 
@@ -72,6 +81,30 @@ public class SimpleUser implements Serializable {
     public void setUserPassword(String userPassword) {
         this.userPassword = userPassword;
     }
+
+    public String getDisplayName() {
+		return displayName;
+	}
+
+	public void setDisplayName(String displayName) {
+		this.displayName = displayName;
+	}
+
+	public String getMail() {
+		return mail;
+	}
+
+	public void setMail(String mail) {
+		this.mail = mail;
+	}
+
+	public GluuStatus getStatus() {
+		return status;
+	}
+
+	public void setStatus(GluuStatus status) {
+		this.status = status;
+	}
 
     public UserRole getUserRole() {
 		return userRole;

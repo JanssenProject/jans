@@ -11,28 +11,23 @@ import com.google.common.collect.Sets;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 import io.jans.as.common.model.common.User;
+import io.jans.as.common.model.session.SessionId;
+import io.jans.as.common.model.session.SessionIdState;
 import io.jans.as.common.service.common.UserService;
 import io.jans.as.model.authorize.AuthorizeRequestParam;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.config.StaticConfiguration;
-import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.model.crypto.signature.SignatureAlgorithm;
-import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
-import io.jans.as.model.jwt.JwtSubClaimObject;
 import io.jans.as.model.util.JwtUtil;
 import io.jans.as.model.util.Pair;
 import io.jans.as.model.util.Util;
 import io.jans.as.server.audit.ApplicationAuditLogger;
 import io.jans.as.server.model.audit.Action;
 import io.jans.as.server.model.audit.OAuth2AuditLog;
-import io.jans.as.server.model.common.SessionId;
-import io.jans.as.server.model.common.SessionIdState;
 import io.jans.as.server.model.config.Constants;
 import io.jans.as.server.model.exception.AcrChangedException;
 import io.jans.as.server.model.exception.InvalidSessionStateException;
-import io.jans.as.server.model.token.JwtSigner;
 import io.jans.as.server.security.Identity;
 import io.jans.as.server.service.exception.FailedComputeSessionStateException;
 import io.jans.as.server.service.external.ExternalApplicationSessionService;
@@ -47,33 +42,24 @@ import io.jans.orm.search.filter.Filter;
 import io.jans.service.CacheService;
 import io.jans.service.LocalCacheService;
 import io.jans.util.StringHelper;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.faces.context.ExternalContext;
+import jakarta.faces.context.FacesContext;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONException;
 import org.slf4j.Logger;
 
-import javax.enterprise.context.RequestScoped;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import static org.apache.commons.lang.BooleanUtils.isTrue;
@@ -88,7 +74,6 @@ import static org.apache.commons.lang.BooleanUtils.isTrue;
 @Named
 public class SessionIdService {
 
-    public static final String OP_BROWSER_STATE = "opbs";
     public static final String SESSION_CUSTOM_STATE = "session_custom_state";
     private static final int MAX_MERGE_ATTEMPTS = 3;
     private static final int DEFAULT_LOCAL_CACHE_EXPIRATION = 2;
@@ -107,9 +92,6 @@ public class SessionIdService {
 
     @Inject
     private AppConfiguration appConfiguration;
-
-    @Inject
-    private WebKeysConfiguration webKeysConfiguration;
 
     @Inject
     private FacesContext facesContext;
@@ -251,6 +233,11 @@ public class SessionIdService {
     public boolean reinitLogin(SessionId session, boolean force) {
         final Map<String, String> sessionAttributes = session.getSessionAttributes();
         final Map<String, String> currentSessionAttributes = getCurrentSessionAttributes(sessionAttributes);
+        if (log.isTraceEnabled()) {
+            log.trace("sessionAttributes: {}", sessionAttributes);
+            log.trace("currentSessionAttributes: {}", currentSessionAttributes);
+            log.trace("shouldReinitSession: {}, force: {}", shouldReinitSession(sessionAttributes, currentSessionAttributes), force);
+        }
 
         if (force || shouldReinitSession(sessionAttributes, currentSessionAttributes)) {
             sessionAttributes.putAll(currentSessionAttributes);
@@ -277,6 +264,9 @@ public class SessionIdService {
             boolean updateResult = updateSessionId(session, true, true, true);
             if (!updateResult) {
                 log.debug("Failed to update session entry: '{}'", session.getId());
+            }
+            if (log.isTraceEnabled()) {
+                log.trace("sessionAttributes after update: {}, ", session.getSessionAttributes());
             }
             return updateResult;
         }
@@ -315,13 +305,17 @@ public class SessionIdService {
         // Update from request
         final Map<String, String> currentSessionAttributes = new HashMap<>(sessionAttributes);
 
-        Map<String, String> parameterMap = externalContext.getRequestParameterMap();
-        Map<String, String> newRequestParameterMap = requestParameterService.getAllowedParameters(parameterMap);
+        Map<String, String> requestParameters = externalContext.getRequestParameterMap();
+        Map<String, String> newRequestParameterMap = requestParameterService.getAllowedParameters(requestParameters);
         for (Entry<String, String> newRequestParameterMapEntry : newRequestParameterMap.entrySet()) {
             String name = newRequestParameterMapEntry.getKey();
             if (!StringHelper.equalsIgnoreCase(name, io.jans.as.model.config.Constants.AUTH_STEP)) {
                 currentSessionAttributes.put(name, newRequestParameterMapEntry.getValue());
             }
+        }
+        if (!requestParameters.containsKey(AuthorizeRequestParam.CODE_CHALLENGE) || !requestParameters.containsKey(AuthorizeRequestParam.CODE_CHALLENGE_METHOD)) {
+            currentSessionAttributes.remove(AuthorizeRequestParam.CODE_CHALLENGE);
+            currentSessionAttributes.remove(AuthorizeRequestParam.CODE_CHALLENGE_METHOD);
         }
 
         return currentSessionAttributes;
@@ -452,7 +446,7 @@ public class SessionIdService {
         final String redirectUri = sessionIdAttributes.get("redirect_uri");
         final String sessionState = computeSessionState(clientId, redirectUri, opbs, salt);
         final String dn = buildDn(internalSid);
-        sessionIdAttributes.put(OP_BROWSER_STATE, opbs);
+        sessionIdAttributes.put(SessionId.OP_BROWSER_STATE, opbs);
 
         Preconditions.checkNotNull(dn);
 
@@ -471,9 +465,6 @@ public class SessionIdService {
         sessionId.setExpirationDate(expiration.getFirst());
         sessionId.setTtl(expiration.getSecond());
 
-        Boolean sessionAsJwt = appConfiguration.getSessionAsJwt();
-        sessionId.setIsJwt(sessionAsJwt != null && sessionAsJwt);
-
         sessionId.setAuthenticationTime(authenticationDate != null ? authenticationDate : new Date());
 
         if (state != null) {
@@ -483,10 +474,6 @@ public class SessionIdService {
         sessionId.setSessionAttributes(sessionIdAttributes);
         sessionId.setLastUsedAt(new Date());
 
-        if (isTrue(sessionId.getIsJwt())) {
-            sessionId.setJwt(generateJwt(sessionId, userDn).asString());
-        }
-
         boolean persisted = false;
         if (persist) {
             persisted = persistSessionId(sessionId);
@@ -494,36 +481,8 @@ public class SessionIdService {
 
         auditLogging(sessionId);
 
-        log.trace("Generated new session, id = '{}', state = '{}', asJwt = '{}', persisted = '{}'", sessionId.getId(), sessionId.getState(), sessionId.getIsJwt(), persisted);
+        log.trace("Generated new session, id = '{}', state = '{}', persisted = '{}'", sessionId.getId(), sessionId.getState(), persisted);
         return sessionId;
-    }
-
-
-    private Jwt generateJwt(SessionId sessionId, String audience) {
-        try {
-            JwtSigner jwtSigner = new JwtSigner(appConfiguration, webKeysConfiguration, SignatureAlgorithm.RS512, audience);
-            Jwt jwt = jwtSigner.newJwt();
-
-            // claims
-            jwt.getClaims().setClaim("id", sessionId.getId());
-            jwt.getClaims().setClaim("authentication_time", sessionId.getAuthenticationTime());
-            jwt.getClaims().setClaim("user_dn", sessionId.getUserDn());
-            jwt.getClaims().setClaim("state", sessionId.getState() != null ?
-                    sessionId.getState().getValue() : "");
-
-            jwt.getClaims().setClaim("session_attributes", JwtSubClaimObject.fromMap(sessionId.getSessionAttributes()));
-
-            jwt.getClaims().setClaim("last_used_at", sessionId.getLastUsedAt());
-            jwt.getClaims().setClaim("permission_granted", sessionId.getPermissionGranted());
-            jwt.getClaims().setClaim("permission_granted_map", JwtSubClaimObject.fromBooleanMap(sessionId.getPermissionGrantedMap().getPermissionGranted()));
-
-            // sign
-            return jwtSigner.sign();
-        } catch (Exception e) {
-            if (log.isErrorEnabled())
-                log.error("Failed to sign session jwt! " + e.getMessage(), e);
-            throw new RuntimeException(e);
-        }
     }
 
     public SessionId setSessionIdStateAuthenticated(HttpServletRequest httpRequest, HttpServletResponse httpResponse, SessionId sessionId, String userDn) {
@@ -547,9 +506,6 @@ public class SessionIdService {
             sessionId.setId(newSessionId);
             sessionId.setDn(buildDn(newSessionId));
             sessionId.getSessionAttributes().put(SessionId.OLD_SESSION_ID_ATTR_KEY, oldSessionId);
-            if (isTrue(sessionId.getIsJwt())) {
-                sessionId.setJwt(generateJwt(sessionId, sessionId.getUserDn()).asString());
-            }
 
             persisted = persistSessionId(sessionId, true);
             cookieService.createSessionIdCookie(sessionId, httpRequest, httpResponse, false);
@@ -776,6 +732,19 @@ public class SessionIdService {
     }
 
     @Nullable
+    public SessionId getSessionByDeviceSecret(@Nullable String deviceSecret) {
+        if (StringUtils.isBlank(deviceSecret)) {
+            return null;
+        }
+
+        final List<SessionId> entries = persistenceEntryManager.findEntries(staticConfiguration.getBaseDn().getSessions(), SessionId.class, Filter.createEqualityFilter("deviceSecret", deviceSecret));
+        if (entries == null || entries.size() != 1) {
+            return null;
+        }
+        return entries.get(0);
+    }
+
+    @Nullable
     public SessionId getSessionByDn(@Nullable String dn, boolean silently) {
         if (StringUtils.isBlank(dn)) {
             return null;
@@ -801,7 +770,7 @@ public class SessionIdService {
             return sessionId;
         } catch (Exception e) {
             if (!silently) {
-                log.error("Failed to get session by dn: " + dn, e);
+                log.error("Failed to get session by dn: {}. {}", dn, e.getMessage());
             }
         }
         return null;

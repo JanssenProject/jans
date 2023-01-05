@@ -11,7 +11,7 @@ import io.jans.as.model.uma.RPTResponse;
 import io.jans.as.model.uma.RptIntrospectionResponse;
 import io.jans.as.model.uma.UmaPermission;
 import io.jans.as.model.uma.UmaResourceResponse;
-import io.jans.as.model.uma.UmaTestUtil;
+import io.jans.as.test.UmaTestUtil;
 import io.jans.as.model.uma.wrapper.Token;
 import io.jans.as.server.BaseTest;
 import io.jans.as.server.model.uma.TUma;
@@ -43,7 +43,7 @@ public class AccessProtectedResourceFlowWSTest extends BaseTest {
             "umaRedirectUri"})
     public void init_0(String authorizePath, String tokenPath, String umaUserId, String umaUserSecret,
                        String umaPatClientId, String umaPatClientSecret, String umaRedirectUri) {
-        pat = TUma.requestPat(url, authorizePath, tokenPath, umaUserId, umaUserSecret, umaPatClientId,
+        pat = TUma.requestPat(getApiTagetURI(url), authorizePath, tokenPath, umaUserId, umaUserSecret, umaPatClientId,
                 umaPatClientSecret, umaRedirectUri);
         UmaTestUtil.assertIt(pat);
     }
@@ -58,7 +58,7 @@ public class AccessProtectedResourceFlowWSTest extends BaseTest {
     @Test(dependsOnMethods = {"init_1"})
     @Parameters({"umaRptPath"})
     public void init(String umaRptPath) {
-        rpt = TUma.requestRpt(url, umaRptPath);
+        rpt = TUma.requestRpt(getApiTagetURI(url), umaRptPath);
         UmaTestUtil.assertIt(rpt);
     }
 
@@ -69,7 +69,7 @@ public class AccessProtectedResourceFlowWSTest extends BaseTest {
     @Test(dependsOnMethods = {"init"})
     @Parameters({"umaRegisterResourcePath"})
     public void _1_registerResource(String umaRegisterResourcePath) throws Exception {
-        resource = TUma.registerResource(url, pat, umaRegisterResourcePath, UmaTestUtil.createResource());
+        resource = TUma.registerResource(getApiTagetURI(url), pat, umaRegisterResourcePath, UmaTestUtil.createResource());
         UmaTestUtil.assertIt(resource);
     }
 
@@ -91,7 +91,7 @@ public class AccessProtectedResourceFlowWSTest extends BaseTest {
     @Test(dependsOnMethods = {"_2_requesterAccessProtectedResourceWithNotEnoughPermissionsRpt"})
     @Parameters({"umaRptStatusPath"})
     public void _3_hostDeterminesRptStatus(String umaRptStatusPath) throws Exception {
-        final RptIntrospectionResponse status = TUma.requestRptStatus(url, umaRptStatusPath, rpt.getRpt());
+        final RptIntrospectionResponse status = TUma.requestRptStatus(getApiTagetURI(url), umaRptStatusPath, rpt.getRpt());
         Assert.assertTrue(status.getActive(), "Token response status is not active");
         Assert.assertTrue(status.getPermissions() == null || status.getPermissions().isEmpty(),
                 "Permissions list is not empty.");
@@ -109,7 +109,7 @@ public class AccessProtectedResourceFlowWSTest extends BaseTest {
         r.setResourceId(resource.getId());
         r.setScopes(Arrays.asList("http://photoz.example.com/dev/scopes/view"));
 
-        ticket = TUma.registerPermission(url, pat, r, umaPermissionPath);
+        ticket = TUma.registerPermission(getApiTagetURI(url), pat, r, umaPermissionPath);
         UmaTestUtil.assertIt(ticket);
     }
 
@@ -126,7 +126,7 @@ public class AccessProtectedResourceFlowWSTest extends BaseTest {
     @Test(dependsOnMethods = {"_5_authorizePermission"})
     @Parameters({"umaRptStatusPath"})
     public void _6_hostDeterminesRptStatus(String umaRptStatusPath) throws Exception {
-        final RptIntrospectionResponse status = TUma.requestRptStatus(url, umaRptStatusPath, rpt.getRpt());
+        final RptIntrospectionResponse status = TUma.requestRptStatus(getApiTagetURI(url), umaRptStatusPath, rpt.getRpt());
         UmaTestUtil.assertIt(status);
 
     }
@@ -149,7 +149,7 @@ public class AccessProtectedResourceFlowWSTest extends BaseTest {
     @Parameters({"umaRegisterResourcePath"})
     public void cleanUp(String umaRegisterResourcePath) {
         if (resource != null) {
-            TUma.deleteResource(url, pat, umaRegisterResourcePath, resource.getId());
+            TUma.deleteResource(getApiTagetURI(url), pat, umaRegisterResourcePath, resource.getId());
         }
     }
 

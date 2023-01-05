@@ -25,11 +25,11 @@ import org.json.JSONObject;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.Invocation.Builder;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.MultivaluedHashMap;
+import jakarta.ws.rs.core.Response;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
@@ -71,7 +71,7 @@ public class TokenRestWebServiceWithESAlgEmbeddedTest extends BaseTest {
     @Test
     public void requestAccessTokenWithClientSecretJwtES256Step1(final String registerPath, final String redirectUris,
                                                                 final String jwksUri) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath).request();
 
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
@@ -114,7 +114,7 @@ public class TokenRestWebServiceWithESAlgEmbeddedTest extends BaseTest {
     public void requestAccessTokenWithClientSecretJwtES256Step2(final String tokenPath, final String userId,
                                                                 final String userSecret, final String audience, final String keyId, final String keyStoreFile,
                                                                 final String keyStoreSecret) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + tokenPath).request();
 
         request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
@@ -162,7 +162,7 @@ public class TokenRestWebServiceWithESAlgEmbeddedTest extends BaseTest {
     @Test
     public void requestAccessTokenWithClientSecretJwtES384Step1(final String registerPath, final String redirectUris,
                                                                 final String jwksUri) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath).request();
 
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
@@ -206,7 +206,7 @@ public class TokenRestWebServiceWithESAlgEmbeddedTest extends BaseTest {
     public void requestAccessTokenWithClientSecretJwtES384Step2(final String tokenPath, final String userId,
                                                                 final String userSecret, final String audience, final String keyId, final String keyStoreFile,
                                                                 final String keyStoreSecret) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + tokenPath).request();
 
         request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
@@ -255,7 +255,7 @@ public class TokenRestWebServiceWithESAlgEmbeddedTest extends BaseTest {
     public void requestAccessTokenWithClientSecretJwtES512Step1(final String registerPath, final String redirectUris,
                                                                 final String jwksUri) throws Exception {
 
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath).request();
 
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
@@ -299,7 +299,7 @@ public class TokenRestWebServiceWithESAlgEmbeddedTest extends BaseTest {
     public void requestAccessTokenWithClientSecretJwtES512Step2(final String tokenPath, final String userId,
                                                                 final String userSecret, final String audience, final String keyId, final String keyStoreFile,
                                                                 final String keyStoreSecret) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + tokenPath).request();
 
         request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
@@ -348,7 +348,7 @@ public class TokenRestWebServiceWithESAlgEmbeddedTest extends BaseTest {
     public void requestAccessTokenWithClientSecretJwtES256X509CertStep1(final String registerPath,
                                                                         final String redirectUris, final String jwksUri) throws Exception {
 
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath).request();
 
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
@@ -393,7 +393,7 @@ public class TokenRestWebServiceWithESAlgEmbeddedTest extends BaseTest {
     public void requestAccessTokenWithClientSecretJwtES256X509CertStep2(final String tokenPath, final String userId,
                                                                         final String userSecret, final String audience, final String keyId, final String keyStoreFile,
                                                                         final String keyStoreSecret) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + tokenPath).request();
 
         request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 
@@ -441,7 +441,7 @@ public class TokenRestWebServiceWithESAlgEmbeddedTest extends BaseTest {
     @Test
     public void requestAccessTokenWithClientSecretJwtES384X509CertStep1(final String registerPath,
                                                                         final String redirectUris, final String jwksUri) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath).request();
 
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
@@ -485,7 +485,7 @@ public class TokenRestWebServiceWithESAlgEmbeddedTest extends BaseTest {
     public void requestAccessTokenWithClientSecretJwtES384X509CertStep2(final String tokenPath, final String userId,
                                                                         final String userSecret, final String audience, final String keyId, final String keyStoreFile,
                                                                         final String keyStoreSecret) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + tokenPath).request();
 
         AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, null);
 
@@ -532,7 +532,7 @@ public class TokenRestWebServiceWithESAlgEmbeddedTest extends BaseTest {
     @Test
     public void requestAccessTokenWithClientSecretJwtES512X509CertStep1(final String registerPath,
                                                                         final String redirectUris, final String jwksUri) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath).request();
 
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
@@ -576,7 +576,7 @@ public class TokenRestWebServiceWithESAlgEmbeddedTest extends BaseTest {
     public void requestAccessTokenWithClientSecretJwtES512X509CertStep2(final String tokenPath, final String userId,
                                                                         final String userSecret, final String audience, final String keyId, final String keyStoreFile,
                                                                         final String keyStoreSecret) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + tokenPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + tokenPath).request();
 
         request.header("Content-Type", MediaType.APPLICATION_FORM_URLENCODED);
 

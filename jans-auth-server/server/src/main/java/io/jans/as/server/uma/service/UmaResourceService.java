@@ -20,10 +20,10 @@ import io.jans.util.StringHelper;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.ws.rs.core.Response;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.ws.rs.core.Response;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;

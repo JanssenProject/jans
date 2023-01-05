@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>jans-auth-server</artifactId>
 	<name>Jans authentication server</name>
@@ -9,7 +8,7 @@
 	<parent>
 		<groupId>io.jans</groupId>
 		<artifactId>jans-auth-server-parent</artifactId>
-		<version>1.0.0-SNAPSHOT</version>
+		<version>1.0.6-SNAPSHOT</version>
 	</parent>
 
 	<prerequisites>
@@ -144,10 +143,8 @@
 				<configuration>
 					<argLine>-Xms1024m -Xmx2048m -XX:MaxMetaspaceSize=512m -XX:+DisableExplicitGC
 						-Djans.base=${project.build.directory}
-						-Dserver.base=${project.build.directory}
 						-Dlog.base=${project.build.directory}
 						-Dgluu.disable.scheduler=true
- 
 					</argLine>
 				</configuration>
 			</plugin>
@@ -291,6 +288,12 @@
 		<dependency>
 			<groupId>io.jans</groupId>
 			<artifactId>jans-auth-common</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.jboss.resteasy</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<!-- persistence model -->
 		<dependency>
@@ -311,10 +314,22 @@
 		<dependency>
 			<groupId>io.jans</groupId>
 			<artifactId>jans-core-model</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.jboss.resteasy</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>io.jans</groupId>
 			<artifactId>jans-core-util</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.jboss.resteasy</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>io.jans</groupId>
@@ -327,10 +342,22 @@
 		<dependency>
 			<groupId>io.jans</groupId>
 			<artifactId>jans-core-service</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.jboss.resteasy</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>io.jans</groupId>
 			<artifactId>jans-core-server</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>org.jboss.resteasy</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>io.jans</groupId>
@@ -365,25 +392,25 @@
 			<artifactId>jans-notify-client</artifactId>
 		</dependency>
 
-		<!-- Fido2 -->
-		<dependency>
-			<groupId>io.jans</groupId>
-			<artifactId>jans-fido2-client</artifactId>
-		</dependency>
+		<!-- agama -->
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>agama-engine</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
 		<!-- Weld -->
 		<dependency>
-			<groupId>javax.enterprise</groupId>
-			<artifactId>cdi-api</artifactId>
-			<scope>provided</scope>
+            <groupId>jakarta.validation</groupId>
+            <artifactId>jakarta.validation-api</artifactId>
 		</dependency>
 
-        <dependency>
+       <!--  <dependency>
             <groupId>net.bootsfaces</groupId>
             <artifactId>bootsfaces</artifactId>
             <version>1.4.1</version>
             <scope>compile</scope>
-        </dependency>
+        </dependency> -->
 
 			<!-- OmniFaces -->
 		<dependency>
@@ -463,8 +490,8 @@
 			<artifactId>jakarta.mail</artifactId>
 			<exclusions>
 				<exclusion>
-					<groupId>javax.activation</groupId>
-					<artifactId>activation</artifactId>
+					<groupId>jakarta.activation</groupId>
+					<artifactId>jakarta.activation-api</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
@@ -474,21 +501,18 @@
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>com.google.code.findbugs</groupId>
-			<artifactId>jsr305</artifactId>
-		</dependency>
 
 		<!-- Jython -->
 		<dependency>
-			<groupId>org.gluufederation</groupId>
+			<groupId>io.jans</groupId>
 			<artifactId>jython-standalone</artifactId>
 		</dependency>
 
 		<!-- JMS -->
 		<dependency>
-			<groupId>javax.jms</groupId>
-			<artifactId>javax.jms-api</artifactId>
+		    <groupId>jakarta.jms</groupId>
+		    <artifactId>jakarta.jms-api</artifactId>
+		    <version>${jakarta.jms.api.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.activemq</groupId>
@@ -566,28 +590,23 @@
 		<!-- Test -->
 		<dependency>
 			<groupId>io.jans</groupId>
-			<artifactId>jans-auth-model</artifactId>
-			<version>${project.version}</version>
-			<type>test-jar</type>
+			<artifactId>jans-auth-test-model</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>io.jans</groupId>
-			<artifactId>jans-auth-client</artifactId>
-			<version>${project.version}</version>
-			<type>test-jar</type>
-			<scope>test</scope>
-		</dependency>
-
 		<dependency>
 			<groupId>org.testng</groupId>
 			<artifactId>testng</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>javax.websocket</groupId>
-			<artifactId>javax.websocket-api</artifactId>
+            <groupId>jakarta.websocket</groupId>
+            <artifactId>jakarta.websocket-api</artifactId>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.xml.bind</groupId>
+			<artifactId>jaxb-api</artifactId>
+			<version>2.3.1</version>
 		</dependency>
 
 		<!-- Test: Arquillian container and extensions -->
@@ -599,11 +618,13 @@
 		<dependency>
 			<groupId>org.jboss.arquillian.extension</groupId>
 			<artifactId>arquillian-rest-client-impl-3x</artifactId>
+			<version>${arquillian.rest.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eu.ingwar.tools</groupId>
 			<artifactId>arquillian-suite-extension</artifactId>
+			<version>${arquillian.ingwar.tools.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -613,29 +634,52 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- We have to explicitly specify version because arquillian-jetty-container depends on 1.1.11-->
+		<!-- Test: External DB drivers-->
+		<!-- Couchbase -->
+		<dependency>
+			<groupId>com.couchbase.client</groupId>
+			<artifactId>java-client</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<!-- Cloud Spanner -->
+		<dependency>
+			<groupId>com.google.cloud</groupId>
+			<artifactId>google-cloud-spanner</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- We have to explicitly specify version because arquillian-jetty-container depends on 1.1.11 -->
 		<dependency>
 			<groupId>org.jboss.arquillian.container</groupId>
 			<artifactId>arquillian-container-test-impl-base</artifactId>
-			<version>1.4.0.Final</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.jboss.arquillian.container</groupId>
 			<artifactId>arquillian-container-spi</artifactId>
-			<version>1.4.0.Final</version>
+			<version>${arquillian.test.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.jboss.arquillian.container</groupId>
 			<artifactId>arquillian-container-test-spi</artifactId>
-			<version>1.4.0.Final</version>
+			<version>${arquillian.test.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.jboss.arquillian.testenricher</groupId>
 			<artifactId>arquillian-testenricher-cdi</artifactId>
-			<version>1.4.0.Final</version>
+			<version>${arquillian.test.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.arquillian.test</groupId>
+			<artifactId>arquillian-test-impl-base</artifactId>
+			<version>${arquillian.test.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.arquillian.protocol</groupId>
+			<artifactId>arquillian-protocol-servlet</artifactId>
 			<scope>test</scope>
 		</dependency>
 
@@ -656,7 +700,6 @@
 			<artifactId>shrinkwrap-descriptors-impl-javaee</artifactId>
 			<scope>test</scope>
 		</dependency>
-
 		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>
@@ -683,28 +726,32 @@
 
 			<dependencies>
 				<dependency>
-					<groupId>javax.enterprise</groupId>
-					<artifactId>cdi-api</artifactId>
+		            <groupId>jakarta.enterprise</groupId>
+		            <artifactId>jakarta.enterprise.cdi-api</artifactId>
 				</dependency>
 				<dependency>
 				    <groupId>org.glassfish</groupId>
 				    <artifactId>jakarta.faces</artifactId>
 				</dependency>
 
-				<dependency>
+				<!-- <dependency>
 					<groupId>org.glassfish.web</groupId>
 					<artifactId>el-impl</artifactId>
 					<exclusions>
 						<exclusion>
-							<groupId>javax.el</groupId>
+                            <groupId>javax.el</groupId>
 							<artifactId>el-api</artifactId>
 						</exclusion>
 					</exclusions>
-				</dependency>
+				</dependency> -->
 
 				<dependency>
-					<groupId>javax.el</groupId>
-					<artifactId>el-api</artifactId>
+					<groupId>org.glassfish</groupId>
+					<artifactId>jakarta.el</artifactId>
+				</dependency>
+				<dependency>
+					<groupId>jakarta.el</groupId>
+					<artifactId>jakarta.el-api</artifactId>
 					<scope>test</scope>
 				</dependency>
 
@@ -720,18 +767,17 @@
 					<groupId>org.jboss.weld.module</groupId>
 					<artifactId>weld-jsf</artifactId>
 				</dependency>
+			    <dependency>
+    		        <groupId>jakarta.ejb</groupId>
+                    <artifactId>jakarta.ejb-api</artifactId>
+                </dependency>
 
-		        <dependency>
-		            <groupId>org.jboss.spec.javax.ejb</groupId>
-		            <artifactId>jboss-ejb-api_3.2_spec</artifactId>
-		            <scope>provided</scope>
-		        </dependency>
  
 				<!-- Test: Embedded Jetty -->
 				<dependency>
 					<groupId>org.jboss.arquillian.container</groupId>
-					<artifactId>arquillian-jetty-embedded-9</artifactId>
-					<scope>test</scope>
+					<artifactId>arquillian-jetty-embedded-11</artifactId>
+					<version>${arquillian.jetty.embedded.11.version}</version>
 				</dependency>
 				<dependency>
 					<groupId>org.eclipse.jetty</groupId>
@@ -948,7 +994,7 @@
 				<dependency>
 					<groupId>org.jboss.resteasy</groupId>
 					<artifactId>resteasy-client</artifactId>
-					<version>3.0.21.Final</version>
+					<version>3.14.0.Final</version>
 					<scope>test</scope>
 				</dependency>
 				<dependency>
@@ -1000,12 +1046,13 @@
 				</repository>
 			</repositories>
 			<dependencies>
+<!--
 				<dependency>
-					<groupId>com.notnoop.apns</groupId>
-					<artifactId>apns</artifactId>
-					<version>1.0.0.Beta6</version>
-					<scope>compile</scope>
+				    <groupId>com.eatthepath</groupId>
+				    <artifactId>pushy</artifactId>
+				    <version>0.15.1</version>
 				</dependency>
+-->
 				<dependency>
 					<groupId>com.google.gcm</groupId>
 					<artifactId>gcm-server</artifactId>
@@ -1057,13 +1104,6 @@
 				<dependency>
 					<groupId>io.jans</groupId>
 					<artifactId>jans-auth-model</artifactId>
-					<version>${project.version}</version>
-					<type>test-jar</type>
-					<scope>test</scope>
-				</dependency>
-				<dependency>
-					<groupId>io.jans</groupId>
-					<artifactId>jans-auth-client</artifactId>
 					<version>${project.version}</version>
 					<type>test-jar</type>
 					<scope>test</scope>

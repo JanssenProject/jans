@@ -1,57 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>plugins</artifactId>
-        <groupId>io.jans</groupId>
-        <version>1.0.0-SNAPSHOT</version>
+        <groupId>io.jans.jans-config-api.plugins</groupId>
+        <version>1.0.6-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>io.jans</groupId>
+    <groupId>io.jans.jans-config-api.plugins</groupId>
     <artifactId>admin-ui-plugin</artifactId>
 
-    <properties>
-        <licenseSpring.version>2.4.5</licenseSpring.version>
-        <jna.version>5.8.0</jna.version>
-    </properties>
-
-    <repositories>
-        <repository>
-            <id>jdk-java</id>
-            <url>https://licensespring-maven.s3.eu-central-1.amazonaws.com/</url>
-        </repository>
-    </repositories>
-
     <dependencies>
-        <!-- license spring-->
-        <dependency>
-            <groupId>com.licensespring</groupId>
-            <artifactId>licensespring-license-client</artifactId>
-            <version>${licenseSpring.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.licensespring</groupId>
-            <artifactId>licensespring-license-management</artifactId>
-            <version>${licenseSpring.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>net.java.dev.jna</groupId>
-            <artifactId>jna</artifactId>
-            <version>${jna.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>net.java.dev.jna</groupId>
-            <artifactId>jna-platform</artifactId>
-            <version>${jna.version}</version>
-        </dependency>
         <!-- config api -->
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-config-api-shared</artifactId>
+            <scope>compile</scope>
+        </dependency>
         <dependency>
             <groupId>io.jans</groupId>
             <artifactId>jans-config-api-server</artifactId>
             <scope>compile</scope>
         </dependency>
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-auth-client</artifactId>
+		</dependency>
         <dependency>
             <groupId>commons-collections</groupId>
             <artifactId>commons-collections</artifactId>
@@ -92,6 +66,26 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
         </dependency>
+        <!-- API, java.xml.bind module -->
+        <dependency>
+            <groupId>jakarta.xml.bind</groupId>
+            <artifactId>jakarta.xml.bind-api</artifactId>
+            <version>2.3.2</version>
+        </dependency>
+
+        <!-- Runtime, com.sun.xml.bind module -->
+        <dependency>
+            <groupId>org.glassfish.jaxb</groupId>
+            <artifactId>jaxb-runtime</artifactId>
+            <version>2.3.2</version>
+        </dependency>
+        
+       	<!-- Swagger -->
+		<dependency>
+			<groupId>io.swagger.core.v3</groupId>
+			<artifactId>swagger-core-jakarta</artifactId>
+		</dependency>		
+		
     </dependencies>
 
     <build>
@@ -172,6 +166,34 @@
                     </execution>
                 </executions>
             </plugin>
+            
+			<!-- swagger -->
+			<plugin>
+				<groupId>io.swagger.core.v3</groupId>
+				<artifactId>swagger-maven-plugin-jakarta</artifactId>
+				<version>${swagger-maven-plugin-jakarta}</version>
+				<executions>
+					<execution>
+						<configuration>
+							<alwaysResolveAppPath>true</alwaysResolveAppPath>
+							<outputFileName>jans-admin-ui-plugin-swagger</outputFileName>
+							<contextId>${project.artifactId}</contextId>
+							<prettyPrint>true</prettyPrint>
+							<resourcePackages>
+								<package>io.jans.ca.plugin.adminui.rest</package>			
+							</resourcePackages>
+						</configuration>
+					</execution>
+				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>io.swagger.core.v3</groupId>
+						<artifactId>swagger-models-jakarta</artifactId>
+						<version>${swagger-models-jakarta}</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+			
         </plugins>
     </build>
 </project>

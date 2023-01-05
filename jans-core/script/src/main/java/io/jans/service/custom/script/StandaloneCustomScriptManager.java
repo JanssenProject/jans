@@ -9,11 +9,11 @@ package io.jans.service.custom.script;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.enterprise.inject.Vetoed;
+import jakarta.enterprise.inject.Vetoed;
 
-import io.jans.model.custom.script.CustomScriptType;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.service.PythonService;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -26,25 +26,38 @@ public class StandaloneCustomScriptManager extends CustomScriptManager {
 
 	private static final long serialVersionUID = -7212146007659551839L;
 	
-	private List<ExternalScriptService> externalScriptServices = new ArrayList<ExternalScriptService>();
-	
-	public StandaloneCustomScriptManager(PersistenceEntryManager entryManager, String scriptsBaseDn, String pythonModulesDir) {
-		// Configure python service
-		PythonService pythonService = new PythonService();
-		pythonService.configure();
-		pythonService.init();
-		// Initialize python interpreter
-		pythonService.initPythonInterpreter(pythonModulesDir);
+	private final List<ExternalScriptService> externalScriptServices = new ArrayList<>();
 
+    public StandaloneCustomScriptManager(PersistenceEntryManager entryManager, String scriptsBaseDn) {
+        this(entryManager, scriptsBaseDn, null);
+    }
+
+    public StandaloneCustomScriptManager(PersistenceEntryManager entryManager, String scriptsBaseDn, String pythonModulesDir) {
 		// Configure custom script service
 		StandaloneCustomScriptService standaloneCustomScriptService = new StandaloneCustomScriptService();
 		standaloneCustomScriptService.configure(entryManager, scriptsBaseDn);
 
+		ExternalTypeCreator externalTypeCreator = new ExternalTypeCreator();
+		if (StringUtils.isNotBlank(pythonModulesDir)) {
+            externalTypeCreator.pythonService = createPythonService(pythonModulesDir);
+        }
+		externalTypeCreator.customScriptService = standaloneCustomScriptService;
+
 		this.log = LoggerFactory.getLogger(StandaloneCustomScriptManager.class);
-		this.supportedCustomScriptTypes = new ArrayList<CustomScriptType>();
-		this.pythonService = pythonService;
+		this.supportedCustomScriptTypes = new ArrayList<>();
+		this.externalTypeCreator = externalTypeCreator;
 		this.customScriptService = standaloneCustomScriptService;
 	}
+
+	private static PythonService createPythonService(String pythonModulesDir) {
+        // Configure python service
+        PythonService pythonService = new PythonService();
+        pythonService.configure();
+        pythonService.init();
+        // Initialize python interpreter
+        pythonService.initPythonInterpreter(pythonModulesDir);
+        return pythonService;
+    }
 
 	public void init() {
 		configure();

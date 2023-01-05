@@ -7,11 +7,10 @@ from collections import Counter
 from collections import deque
 
 from jans.pycloudlib.persistence.couchbase import CouchbaseClient
-from jans.pycloudlib.persistence.couchbase import get_couchbase_user
-from jans.pycloudlib.persistence.couchbase import get_couchbase_password
 from jans.pycloudlib.persistence.ldap import LdapClient
-from jans.pycloudlib.persistence.sql import SQLClient
+from jans.pycloudlib.persistence.sql import SqlClient
 from jans.pycloudlib.persistence.spanner import SpannerClient
+from jans.pycloudlib.persistence.utils import PersistenceMapper
 from jans.pycloudlib.utils import encode_text
 from jans.pycloudlib.utils import exec_cmd
 from jans.pycloudlib.utils import generate_base64_contents
@@ -110,15 +109,12 @@ class LdapPersistence(BasePersistence):
 
 class CouchbasePersistence(BasePersistence):
     def __init__(self, manager):
-        host = os.environ.get("CN_COUCHBASE_URL", "localhost")
-        user = get_couchbase_user(manager)
-        password = get_couchbase_password(manager)
-        self.client = CouchbaseClient(host, user, password)
+        self.client = CouchbaseClient(manager)
 
     def get_auth_config(self):
         bucket = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
         req = self.client.exec_query(
-            "SELECT jansRevision, jansConfDyn, jansConfWebKeys "
+            "SELECT jansRevision, jansConfDyn, jansConfWebKeys "  # nosec: B608
             f"FROM `{bucket}` "
             "USE KEYS 'configuration_jans-auth'",
         )
@@ -152,7 +148,7 @@ class CouchbasePersistence(BasePersistence):
 
 class SqlPersistence(BasePersistence):
     def __init__(self, manager):
-        self.client = SQLClient()
+        self.client = SqlClient(manager)
 
     def get_auth_config(self):
         config = self.client.get(
@@ -177,7 +173,7 @@ class SqlPersistence(BasePersistence):
 
 class SpannerPersistence(SqlPersistence):
     def __init__(self, manager):
-        self.client = SpannerClient()
+        self.client = SpannerClient(manager)
 
 
 _backend_classes = {
@@ -192,20 +188,11 @@ class AuthHandler(BaseHandler):
     def __init__(self, manager, dry_run, **opts):
         super().__init__(manager, dry_run, **opts)
 
-        persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "ldap")
-        ldap_mapping = os.environ.get("CN_PERSISTENCE_LDAP_MAPPING", "default")
-
-        if persistence_type in ("ldap", "couchbase", "sql", "spanner"):
-            backend_type = persistence_type
-        else:
-            # persistence_type is hybrid
-            if ldap_mapping == "default":
-                backend_type = "ldap"
-            else:
-                backend_type = "couchbase"
-
         # resolve backend
+        mapper = PersistenceMapper()
+        backend_type = mapper.mapping["default"]
         self.backend = _backend_classes[backend_type](manager)
+
         self.rotation_interval = opts.get("interval", 48)
         self.push_keys = as_boolean(opts.get("push-to-container", True))
         self.key_strategy = opts.get("key-strategy", "OLDER")
@@ -433,13 +420,18 @@ class AuthHandler(BaseHandler):
             if int(self.privkey_push_delay) > 0:
                 logger.info(f"Waiting for private key push delay ({int(self.privkey_push_delay)} seconds) ...")
                 time.sleep(int(self.privkey_push_delay))
+
                 for container in auth_containers:
+                    logger.info(f"creating backup of {name}:{jks_fn}")
+                    self.meta_client.exec_cmd(container, f"cp {jks_fn} {jks_fn}.backup")
                     logger.info(f"creating new {name}:{jks_fn}")
                     self.meta_client.copy_to_container(container, jks_fn)
 
-                # key selection is changed
-                if self.privkey_push_strategy != self.key_strategy:
-                    rev = rev + 1
+                    # as new JKS pushed to container, we need to tell auth-server to reload the private keys
+                    # by increasing jansRevision again; note that as jansRevision may have been modified externally
+                    # we need to ensure we have fresh jansRevision value to increase to
+                    config = self.backend.get_auth_config()
+                    rev = int(config["jansRevision"]) + 1
                     conf_dynamic.update({
                         "keySelectionStrategy": self.privkey_push_strategy,
                     })

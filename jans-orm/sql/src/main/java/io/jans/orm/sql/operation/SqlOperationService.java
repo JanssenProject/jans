@@ -1,5 +1,5 @@
 /*
- * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * Janssen Project software is available under the Apache License (2004). See http://www.apache.org/licenses/ for full text.
  *
  * Copyright (c) 2020, Janssen Project
  */
@@ -9,6 +9,7 @@ package io.jans.orm.sql.operation;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import com.querydsl.core.types.OrderSpecifier;
@@ -28,6 +29,7 @@ import io.jans.orm.operation.PersistenceOperationService;
 import io.jans.orm.sql.impl.SqlBatchOperationWraper;
 import io.jans.orm.sql.model.ConvertedExpression;
 import io.jans.orm.sql.model.SearchReturnDataType;
+import io.jans.orm.sql.model.TableMapping;
 import io.jans.orm.sql.operation.impl.SqlConnectionProvider;
 
 /**
@@ -37,6 +39,11 @@ import io.jans.orm.sql.operation.impl.SqlConnectionProvider;
  */
 public interface SqlOperationService extends PersistenceOperationService {
 
+	String JSON_TYPE_NAME = "json";
+	String JSONB_TYPE_NAME = "jsonb";
+	String LONGTEXT_TYPE_NAME = "longtext";
+	String TIMESTAMP = "timestamp";
+
     static String DN = "dn";
     static String UID = "uid";
     static String[] UID_ARRAY = new String[] { "uid" };
@@ -44,10 +51,11 @@ public interface SqlOperationService extends PersistenceOperationService {
     static String OBJECT_CLASS = "objectClass";
 
     static String DOC_ALIAS = "doc";
+    static String DOC_INNER_ALIAS = "doc_inner";
     static String ID = "id";
     static String DOC_ID = "doc_id";
 
-	public static final String SQL_DATA_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
+	public static final String SQL_DATA_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS";
 	public static final Object[] NO_OBJECTS = new Object[0];
 
     SqlConnectionProvider getConnectionProvider();
@@ -89,5 +97,12 @@ public interface SqlOperationService extends PersistenceOperationService {
 	Connection getConnection();
 
 	DatabaseMetaData getMetadata();
+
+	boolean isJsonColumn(String tableName, String attributeType);
+
+	TableMapping getTabeMapping(String key, String objectClass);
+
+	String encodeTime(Date date);
+    Date decodeTime(String date, boolean silent);
 
 }

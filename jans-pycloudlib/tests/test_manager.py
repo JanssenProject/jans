@@ -1,27 +1,44 @@
 import pytest
 
 
-class GAdapter(object):
-    def get(self, k, default=None):
-        return "GET"
+def test_base_configuration():
+    from functools import cached_property
+    from jans.pycloudlib.manager import BaseConfiguration
 
-    def set(self, k, v):
-        return "SET"
+    class Configuration(BaseConfiguration):
+        @cached_property
+        def adapter(self):
+            return Adapter()
 
-    def all(self):
-        return {}
+    class Adapter:
+        def get(self, k, default=None):
+            return "random"
 
-    def get_all(self):
-        return {}
+        def set(self, k, v):  # noqa: A003
+            return True
 
-    def set_all(self, data):
-        return True
+        def all(self):  # noqa: A003
+            return {}
+
+        def get_all(self):
+            return {}
+
+        def set_all(self, data):
+            return True
+
+    config = Configuration()
+
+    assert config.get("foo") == "random"
+    assert config.set("foo", "bar") is True
+    assert config.all() == {}  # ``all`` method is deprecated
+    assert config.get_all() == {}
+    assert config.set_all({"foo": "bar"}) is True
 
 
 @pytest.mark.parametrize("adapter, adapter_cls", [
     ("consul", "ConsulConfig"),
     ("kubernetes", "KubernetesConfig"),
-    ("random", "NoneType"),
+    ("google", "GoogleConfig"),
 ])
 def test_config_manager(monkeypatch, adapter, adapter_cls):
     from jans.pycloudlib.manager import ConfigManager
@@ -31,10 +48,19 @@ def test_config_manager(monkeypatch, adapter, adapter_cls):
     assert manager.adapter.__class__.__name__ == adapter_cls
 
 
+def test_config_manager_invalid_adapter(monkeypatch):
+    from jans.pycloudlib.manager import ConfigManager
+
+    monkeypatch.setenv("CN_CONFIG_ADAPTER", "random")
+    with pytest.raises(ValueError) as exc:
+        _ = ConfigManager().get("config1")
+    assert "Unsupported config adapter" in str(exc.value)
+
+
 @pytest.mark.parametrize("adapter, adapter_cls", [
     ("vault", "VaultSecret"),
     ("kubernetes", "KubernetesSecret"),
-    ("random", "NoneType"),
+    ("google", "GoogleSecret")
 ])
 def test_secret_manager(monkeypatch, adapter, adapter_cls):
     from jans.pycloudlib.manager import SecretManager
@@ -44,99 +70,51 @@ def test_secret_manager(monkeypatch, adapter, adapter_cls):
     assert manager.adapter.__class__.__name__ == adapter_cls
 
 
-def test_config_manager_methods():
-    from jans.pycloudlib.manager import ConfigManager
-
-    gadapter = GAdapter()
-    manager = ConfigManager()
-    manager.adapter = gadapter
-
-    assert manager.get("foo") == gadapter.get("foo")
-    assert manager.set("foo", "bar") == gadapter.set("foo", "bar")
-    assert manager.all() == gadapter.all()
-
-
-def test_secret_manager_methods():
+def test_secret_manager_invalid_adapter(monkeypatch):
     from jans.pycloudlib.manager import SecretManager
 
-    gadapter = GAdapter()
-    manager = SecretManager()
-    manager.adapter = gadapter
-
-    assert manager.get("foo") == gadapter.get("foo")
-    assert manager.set("foo", "bar") == gadapter.set("foo", "bar")
-    assert manager.all() == gadapter.all()
+    monkeypatch.setenv("CN_SECRET_ADAPTER", "random")
+    with pytest.raises(ValueError) as exc:
+        _ = SecretManager().get("secret1")
+    assert "Unsupported secret adapter" in str(exc.value)
 
 
-@pytest.mark.skip(reason="need to rewrite testcase")
-@pytest.mark.parametrize("value, expected, decode, binary_mode", [
-    ("abcd", "abcd", False, False),
-    ("YgH8NDxhxmA=", "abcd", True, False),
-    ("abcd", b"abcd", False, True),
-    ("YgH8NDxhxmA=", b"abcd", True, True),
+@pytest.mark.parametrize("key, expected, decode, binary_mode", [
+    ("sql_password", "secret", False, False),
+    ("encoded_ox_ldap_pw", "secret", True, False),
+    ("encoded_ox_ldap_pw", "secret", False, True),
+    ("encoded_ox_ldap_pw", "secret", True, True),
 ])
 def test_manager_secret_to_file(
     gmanager,
     tmpdir,
     monkeypatch,
-    value,
+    key,
     expected,
     decode,
     binary_mode,
 ):
-    def maybe_salt(*args, **kwargs):
-        if args[1] == "encoded_salt":
-            return "a" * 24
-        return value
-
-    monkeypatch.setattr(
-        "jans.pycloudlib.secret.VaultSecret.get",
-        maybe_salt,
-    )
-
     dst = tmpdir.join("secret.txt")
-
-    result = gmanager.secret.to_file(
-        "secret_key", str(dst), decode, binary_mode,
-    )
-    assert result == expected
+    gmanager.secret.to_file(key, str(dst), decode, binary_mode)
+    assert dst.read() == expected
 
 
-@pytest.mark.skip(reason="need to rewrite testcase")
-@pytest.mark.parametrize("value, expected, encode, binary_mode", [
-    ("abcd", "abcd", False, False),
-    ("abcd", "YgH8NDxhxmA=", True, False),
-    (b"abcd", "abcd", False, True),
-    (b"abcd", "YgH8NDxhxmA=", True, True),
+@pytest.mark.parametrize("key, value, expected, encode, binary_mode", [
+    ("random", "secret", "fHL54sT5qHk=", True, False),
+    ("random", b"secret", "fHL54sT5qHk=", True, True),
 ])
 def test_manager_secret_from_file(
     gmanager,
     tmpdir,
     monkeypatch,
+    key,
     value,
     expected,
     encode,
     binary_mode,
 ):
-    def maybe_salt(*args, **kwargs):
-        if args[1] == "encoded_salt":
-            return "a" * 24
-        return expected
-
-    monkeypatch.setattr(
-        "jans.pycloudlib.secret.VaultSecret.get",
-        maybe_salt,
-    )
-
-    monkeypatch.setattr(
-        "jans.pycloudlib.secret.VaultSecret.set",
-        lambda instance, key, value: True,
-    )
-
     dst = tmpdir.join("secret_file")
     dst.write(value)
 
-    result = gmanager.secret.from_file(
-        "secret_key", str(dst), encode, binary_mode,
-    )
-    assert result == expected
+    gmanager.secret.from_file(key, str(dst), encode, binary_mode)
+    assert gmanager.secret.get(key) == expected

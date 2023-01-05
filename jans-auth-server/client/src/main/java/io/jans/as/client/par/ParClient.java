@@ -5,10 +5,10 @@ import io.jans.as.client.ClientAuthnEnabler;
 import io.jans.as.model.authorize.AuthorizeRequestParam;
 import org.apache.log4j.Logger;
 
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.MediaType;
+import jakarta.ws.rs.HttpMethod;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.Invocation.Builder;
+import jakarta.ws.rs.core.MediaType;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -60,6 +60,7 @@ public class ParClient extends BaseClient<ParRequest, ParResponse> {
         addReqParam(AuthorizeRequestParam.SCOPE, scopesAsString);
         addReqParam(AuthorizeRequestParam.REDIRECT_URI, getRequest().getAuthorizationRequest().getRedirectUri());
         addReqParam(AuthorizeRequestParam.STATE, getRequest().getAuthorizationRequest().getState());
+        addReqParam(AuthorizeRequestParam.NBF, getRequest().getNbf() != null ? getRequest().getNbf().toString() : null);
 
         addReqParam(AuthorizeRequestParam.NONCE, getRequest().getAuthorizationRequest().getNonce());
         addReqParam(AuthorizeRequestParam.DISPLAY, getRequest().getAuthorizationRequest().getDisplay());

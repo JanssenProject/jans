@@ -10,6 +10,8 @@ import io.jans.as.client.AuthorizationRequest;
 import io.jans.as.client.AuthorizationResponse;
 import io.jans.as.client.BaseTest;
 import io.jans.as.client.RegisterResponse;
+
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.client.load.benchmark.suite.BenchmarkTestListener;
 import io.jans.as.client.load.benchmark.suite.BenchmarkTestSuiteListener;
 import io.jans.as.model.common.ResponseType;
@@ -22,6 +24,8 @@ import org.testng.annotations.Test;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+
+
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -48,12 +52,7 @@ public class BenchmarkRequestAuthorization extends BaseTest {
 
         RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, scopes, sectorIdentifierUri);
 
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         this.clientId = registerResponse.getClientId();
         this.clientSecret = registerResponse.getClientSecret();
@@ -82,12 +81,10 @@ public class BenchmarkRequestAuthorization extends BaseTest {
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email", "user_name");
         String nonce = UUID.randomUUID().toString();
 
-        AuthorizationResponse response = requestAuthorization(userId, userSecret, redirectUri, responseTypes, scopes, clientId, nonce, useNewDriver);
-
-        assertNotNull(response.getLocation(), "The location is null");
-        assertNotNull(response.getCode(), "The authorization code is null");
-        assertNotNull(response.getState(), "The state is null");
-        assertNotNull(response.getScope(), "The scope is null");
+        AuthorizationResponse authorizationResponse = requestAuthorization(userId, userSecret, redirectUri, responseTypes, scopes, clientId, nonce, useNewDriver);
+        AssertBuilder.authorizationResponse(authorizationResponse)
+                .responseTypes(responseTypes)
+                .check();
     }
 
     private AuthorizationResponse requestAuthorization(final String userId, final String userSecret, final String redirectUri,

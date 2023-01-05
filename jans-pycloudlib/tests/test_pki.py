@@ -1,3 +1,6 @@
+import pytest
+
+
 def test_generate_private_key(tmpdir):
     from jans.pycloudlib.pki import generate_private_key
 
@@ -6,7 +9,12 @@ def test_generate_private_key(tmpdir):
     assert key_fn.read().startswith("-----BEGIN RSA PRIVATE KEY-----")
 
 
-def test_generate_public_key(tmpdir):
+@pytest.mark.parametrize("extra_dns, extra_ips", [
+    (["localhost"], ["127.0.0.1"]),
+    ([], None),
+    (None, []),
+])
+def test_generate_public_key(tmpdir, extra_dns, extra_ips):
     from jans.pycloudlib.pki import generate_private_key
     from jans.pycloudlib.pki import generate_public_key
 
@@ -26,13 +34,18 @@ def test_generate_public_key(tmpdir):
         country_code="US",
         state="TX",
         city="Austin",
-        extra_dns=["localhost"],
-        extra_ips=["127.0.0.1"],
+        extra_dns=extra_dns,
+        extra_ips=extra_ips,
     )
     assert cert_fn.read().startswith("-----BEGIN CERTIFICATE-----")
 
 
-def test_generate_csr(tmpdir):
+@pytest.mark.parametrize("extra_dns, extra_ips", [
+    (["localhost"], ["127.0.0.1"]),
+    ([], None),
+    (None, []),
+])
+def test_generate_csr(tmpdir, extra_dns, extra_ips):
     from jans.pycloudlib.pki import generate_private_key
     from jans.pycloudlib.pki import generate_csr
 
@@ -51,8 +64,8 @@ def test_generate_csr(tmpdir):
         country_code="US",
         state="TX",
         city="Austin",
-        extra_dns=["localhost"],
-        extra_ips=["127.0.0.1"],
+        extra_dns=extra_dns,
+        extra_ips=extra_ips,
     )
     assert csr_fn.read().startswith("-----BEGIN CERTIFICATE REQUEST-----")
 

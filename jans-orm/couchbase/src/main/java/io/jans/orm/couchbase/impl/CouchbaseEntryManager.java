@@ -6,24 +6,27 @@
 
 package io.jans.orm.couchbase.impl;
 
-import com.couchbase.client.core.message.kv.subdoc.multi.Mutation;
-import com.couchbase.client.java.document.json.JsonArray;
-import com.couchbase.client.java.document.json.JsonObject;
-import com.couchbase.client.java.query.consistency.ScanConsistency;
-import com.couchbase.client.java.query.dsl.Expression;
-import com.couchbase.client.java.query.dsl.Sort;
-import com.couchbase.client.java.subdoc.MutationSpec;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+
+import io.jans.orm.util.ArrayHelper;
+import io.jans.orm.util.StringHelper;
+import jakarta.inject.Inject;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.annotation.AttributeName;
-import io.jans.orm.couchbase.model.ConvertedExpression;
-import io.jans.orm.couchbase.model.SearchReturnDataType;
-import io.jans.orm.couchbase.operation.CouchbaseOperationService;
-import io.jans.orm.couchbase.operation.impl.CouchbaseConnectionProvider;
 import io.jans.orm.event.DeleteNotifier;
 import io.jans.orm.exception.AuthenticationException;
 import io.jans.orm.exception.EntryDeleteException;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.exception.MappingException;
+import io.jans.orm.exception.UnsupportedOperationException;
 import io.jans.orm.exception.operation.SearchException;
 import io.jans.orm.impl.BaseEntryManager;
 import io.jans.orm.impl.GenericKeyConverter;
@@ -35,37 +38,31 @@ import io.jans.orm.model.BatchOperation;
 import io.jans.orm.model.DefaultBatchOperation;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SearchScope;
+import io.jans.orm.model.Sort;
 import io.jans.orm.model.SortOrder;
 import io.jans.orm.reflect.property.PropertyAnnotation;
 import io.jans.orm.reflect.util.ReflectHelper;
 import io.jans.orm.search.filter.Filter;
-import io.jans.orm.util.ArrayHelper;
-import io.jans.orm.util.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
-import java.io.Serializable;
-import java.time.DateTimeException;
-import java.time.Instant;
-import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
+import com.couchbase.client.core.msg.kv.SubdocCommandType;
+import com.couchbase.client.java.json.JsonArray;
+import com.couchbase.client.java.json.JsonObject;
+import com.couchbase.client.java.kv.MutateInSpec;
+import com.couchbase.client.java.query.QueryScanConsistency;
 
-import static java.time.format.DateTimeFormatter.ISO_INSTANT;
+import io.jans.orm.couchbase.model.ConvertedExpression;
+import io.jans.orm.couchbase.model.SearchReturnDataType;
+import io.jans.orm.couchbase.operation.CouchbaseOperationService;
+import io.jans.orm.couchbase.operation.impl.CouchbaseConnectionProvider;
 
 /**
  * Couchbase Entry Manager
  *
  * @author Yuriy Movchan Date: 05/14/2018
  */
-public class CouchbaseEntryManager extends BaseEntryManager implements Serializable {
+public class CouchbaseEntryManager extends BaseEntryManager<CouchbaseOperationService> implements Serializable {
 
     public static final int EXPIRATION_30_DAYS = 30 * 86400;
 
@@ -83,19 +80,13 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 
     protected CouchbaseEntryManager(CouchbaseOperationService operationService) {
         this.operationService = operationService;
-        this.FILTER_CONVERTER = new CouchbaseFilterConverter(this);
+        this.FILTER_CONVERTER = new CouchbaseFilterConverter(operationService);
         subscribers = new LinkedList<DeleteNotifier>();
     }
 
     @Override
     protected <T> Integer getExpirationValue(Object entry, Class<T> entryClass, boolean merge) {
         Integer value = super.getExpirationValue(entry, entryClass, merge);
-
-        // if expiration is more then 30 days we must convert it to absolute Unit time stamp to avoid immediate expiration https://docs.couchbase.com/java-sdk/current/concept-docs/documents.html#setting-document-expiration
-        if (value != null && value >= EXPIRATION_30_DAYS) {
-            final int now = (int) (System.currentTimeMillis() / 1000);
-            value = now + value;
-        }
 
         return value;
     }
@@ -106,11 +97,11 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
             return true;
         }
 
-        return ((CouchbaseOperationService) this.operationService).destroy();
+        return this.operationService.destroy();
     }
 
     public CouchbaseOperationService getOperationService() {
-        return (CouchbaseOperationService) operationService;
+        return operationService;
     }
 
     @Override
@@ -174,7 +165,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 
         LOG.debug("LDAP entry to remove: '{}'", dnValue.toString());
 
-        remove(dnValue.toString());
+        remove(dnValue.toString(), entryClass);
     }
 
     @Override
@@ -228,7 +219,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
     public void merge(String dn, String[] objectClasses, List<AttributeDataModification> attributeDataModifications, Integer expirationValue) {
         // Update entry
         try {
-            List<MutationSpec> modifications = new ArrayList<MutationSpec>(attributeDataModifications.size());
+            List<MutateInSpec> modifications = new ArrayList<MutateInSpec>(attributeDataModifications.size());
             for (AttributeDataModification attributeDataModification : attributeDataModifications) {
                 AttributeData attribute = attributeDataModification.getAttribute();
                 AttributeData oldAttribute = attributeDataModification.getOldAttribute();
@@ -249,14 +240,14 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
                     oldAttributeValues = oldAttribute.getValues();
                 }
 
-                MutationSpec modification = null;
+                MutateInSpec modification = null;
                 if (AttributeModificationType.ADD.equals(attributeDataModification.getModificationType())) {
-                    modification = createModification(Mutation.DICT_ADD, toInternalAttribute(attributeName), multiValued, attributeValues);
+                    modification = createModification(SubdocCommandType.DICT_ADD, toInternalAttribute(attributeName), multiValued, attributeValues);
                 } else {
                     if (AttributeModificationType.REMOVE.equals(attributeDataModification.getModificationType())) {
-                        modification = createModification(Mutation.DELETE, toInternalAttribute(oldAttributeName), multiValued, oldAttributeValues);
+                        modification = createModification(SubdocCommandType.DELETE, toInternalAttribute(oldAttributeName), multiValued, oldAttributeValues);
                     } else if (AttributeModificationType.REPLACE.equals(attributeDataModification.getModificationType())) {
-                        modification = createModification(Mutation.REPLACE, toInternalAttribute(attributeName), multiValued, attributeValues);
+                        modification = createModification(SubdocCommandType.REPLACE, toInternalAttribute(attributeName), multiValued, attributeValues);
                     }
                 }
 
@@ -277,15 +268,15 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
     }
 
     @Override
-    protected <T> void removeByDn(String dn, String[] objectClasses) {
+    public <T> void removeByDn(String dn, String[] objectClasses) {
         // Remove entry
         try {
             for (DeleteNotifier subscriber : subscribers) {
-                subscriber.onBeforeRemove(dn);
+                subscriber.onBeforeRemove(dn, objectClasses);
             }
             getOperationService().delete(toCouchbaseKey(dn).getKey());
             for (DeleteNotifier subscriber : subscribers) {
-                subscriber.onAfterRemove(dn);
+                subscriber.onAfterRemove(dn, objectClasses);
             }
         } catch (Exception ex) {
             throw new EntryDeleteException(String.format("Failed to remove entry: %s", dn), ex);
@@ -296,11 +287,11 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
     public <T> void removeRecursivelyFromDn(String dn, String[] objectClasses) {
         try {
             for (DeleteNotifier subscriber : subscribers) {
-                subscriber.onBeforeRemove(dn);
+                subscriber.onBeforeRemove(dn, objectClasses);
             }
             getOperationService().deleteRecursively(toCouchbaseKey(dn).getKey());
             for (DeleteNotifier subscriber : subscribers) {
-                subscriber.onAfterRemove(dn);
+                subscriber.onAfterRemove(dn, objectClasses);
             }
         } catch (Exception ex) {
             throw new EntryDeleteException(String.format("Failed to remove entry: %s", dn), ex);
@@ -351,7 +342,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 		}
         
         try {
-        	int processed = getOperationService().delete(keyWithInum.getKey(), getScanConsistency(convertedExpression), convertedExpression.expression(), count);
+        	int processed = getOperationService().delete(keyWithInum.getKey(), getQueryScanConsistency(convertedExpression), convertedExpression, count);
         	
         	return processed;
         } catch (Exception ex) {
@@ -364,8 +355,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         try {
             // Load entry
             ParsedKey keyWithInum = toCouchbaseKey(dn);
-            ScanConsistency scanConsistency = getScanConsistency(keyWithInum.getName(), propertiesAnnotationsMap);
-            JsonObject entry = getOperationService().lookup(keyWithInum.getKey(), scanConsistency, toInternalAttributes(ldapReturnAttributes));
+            JsonObject entry = getOperationService().lookup(keyWithInum.getKey(), toInternalAttributes(ldapReturnAttributes));
             List<AttributeData> result = getAttributeDataList(entry);
             if (result != null) {
                 return result;
@@ -478,7 +468,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
             if (batchOperation != null) {
                 batchOperationWraper = new CouchbaseBatchOperationWraper<T>(batchOperation, this, entryClass, propertiesAnnotations);
             }
-            searchResult = searchImpl(keyWithInum.getKey(), getScanConsistency(convertedExpression), convertedExpression.expression(), scope, currentLdapReturnAttributes,
+            searchResult = searchImpl(keyWithInum.getKey(), getQueryScanConsistency(convertedExpression), convertedExpression, scope, currentLdapReturnAttributes,
                     defaultSort, batchOperationWraper, returnDataType, start, count, chunkSize);
 
             if (searchResult == null) {
@@ -518,7 +508,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         PagedResult<JsonObject> searchResult = null;
         try {
             ParsedKey keyWithInum = toCouchbaseKey(baseDN);
-            searchResult = searchImpl(keyWithInum.getKey(), getScanConsistency(convertedExpression), convertedExpression.expression(), SearchScope.SUB, ldapReturnAttributes, null,
+            searchResult = searchImpl(keyWithInum.getKey(), getQueryScanConsistency(convertedExpression), convertedExpression, SearchScope.SUB, ldapReturnAttributes, null,
                     null, SearchReturnDataType.SEARCH, 1, 1, 0);
             if (searchResult == null) {
                 throw new EntryPersistenceException(String.format("Failed to find entry with baseDN: %s, filter: %s", baseDN, searchFilter));
@@ -530,7 +520,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         return (searchResult != null) && (searchResult.getEntriesCount() > 0);
     }
 
-	private <O> PagedResult<JsonObject> searchImpl(String key, ScanConsistency scanConsistency, Expression expression, SearchScope scope, String[] attributes, Sort[] orderBy,
+	private <O> PagedResult<JsonObject> searchImpl(String key, QueryScanConsistency scanConsistency, ConvertedExpression expression, SearchScope scope, String[] attributes, Sort[] orderBy,
             CouchbaseBatchOperationWraper<O> batchOperationWraper, SearchReturnDataType returnDataType, int start, int count, int pageSize) throws SearchException {
 		return getOperationService().search(key, scanConsistency, expression, scope, toInternalAttributes(attributes), orderBy, batchOperationWraper, returnDataType, start, count, pageSize);
 	}
@@ -606,7 +596,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
                     attributeValueObjects = new Object[] { attributeObject };
             	} else if (attributeObject instanceof String) {
             		// If it looks like date, treat as Date
-            		Object valueAsDate = decodeTime(null, attributeObject.toString(), true);
+                    Object valueAsDate = decodeTime(null, attributeObject.toString(), true);
                     Object value = valueAsDate == null ? attributeObject.toString() : valueAsDate;
                     
             		attributeValueObjects = new Object[] { value };
@@ -656,7 +646,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 		}
 
 		try {
-            PagedResult<JsonObject> searchResult = searchImpl(toCouchbaseKey(baseDN).getKey(), getScanConsistency(convertedExpression), convertedExpression.expression(),
+            PagedResult<JsonObject> searchResult = searchImpl(toCouchbaseKey(baseDN).getKey(), getQueryScanConsistency(convertedExpression), convertedExpression,
                     SearchScope.SUB, CouchbaseOperationService.UID_ARRAY, null, null, SearchReturnDataType.SEARCH, 0, 1, 1);
             if ((searchResult == null) || (searchResult.getEntriesCount() != 1)) {
                 return false;
@@ -723,7 +713,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 
         PagedResult<JsonObject> searchResult;
         try {
-            searchResult = searchImpl(toCouchbaseKey(baseDN).getKey(), getScanConsistency(convertedExpression), convertedExpression.expression(), scope, null, null,
+            searchResult = searchImpl(toCouchbaseKey(baseDN).getKey(), getQueryScanConsistency(convertedExpression), convertedExpression, scope, null, null,
                     null, SearchReturnDataType.COUNT, 0, 0, 0);
         } catch (Exception ex) {
             throw new EntryPersistenceException(
@@ -733,7 +723,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         return searchResult.getTotalEntriesCount();
     }
 
-    private MutationSpec createModification(final Mutation type, final String attributeName, final Boolean multiValued, final Object... attributeValues) {
+    private MutateInSpec createModification(final SubdocCommandType type, final String attributeName, final Boolean multiValued, final Object... attributeValues) {
         String realAttributeName = attributeName;
 
         Object[] realValues = attributeValues;
@@ -743,21 +733,41 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 
         escapeValues(realValues);
         
-        if ((multiValued == null) || !multiValued) {
-            return new MutationSpec(type, realAttributeName, realValues[0]);
+        MutateInSpec result = null;
+        if (SubdocCommandType.DELETE == type) {
+        	result = MutateInSpec.remove(realAttributeName);
         } else {
-            return new MutationSpec(type, realAttributeName, realValues);
+	        if ((multiValued == null) || !multiValued) {
+	        	if (SubdocCommandType.DICT_ADD == type) {
+	        		result = MutateInSpec.insert(realAttributeName, realValues[0]);
+	        	} else if (SubdocCommandType.REPLACE == type) {
+	        		result = MutateInSpec.replace(realAttributeName, realValues[0]);
+	        	}
+	        } else {
+	        	// TODO: Check if we can use array here
+	        	if (SubdocCommandType.DICT_ADD == type) {
+	        		result = MutateInSpec.insert(realAttributeName, realValues);
+	        	} else if (SubdocCommandType.REPLACE == type) {
+	        		result = MutateInSpec.replace(realAttributeName, realValues);
+	        	}
+	        }
         }
+        
+        if (result == null) {
+        	throw new UnsupportedOperationException(String.format("Operation with type '%s' isn't supported", type));
+        }
+        
+        return result;
     }
 
     protected Sort buildSort(String sortBy, SortOrder sortOrder) {
         Sort requestedSort = null;
         if (SortOrder.DESCENDING == sortOrder) {
-            requestedSort = Sort.desc(Expression.path(sortBy));
+            requestedSort = Sort.desc(sortBy);
         } else if (SortOrder.ASCENDING == sortOrder) {
-            requestedSort = Sort.asc(Expression.path(sortBy));
+            requestedSort = Sort.asc(sortBy);
         } else {
-            requestedSort = Sort.def(Expression.path(sortBy));
+            requestedSort = Sort.def(sortBy);
         }
         return requestedSort;
     }
@@ -775,7 +785,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 
         Sort[] sort = new Sort[sortByProperties.length];
         for (int i = 0; i < sortByProperties.length; i++) {
-            sort[i] = Sort.def(Expression.path(sortByProperties[i]));
+            sort[i] = Sort.def(sortByProperties[i]);
         }
 
         return sort;
@@ -799,7 +809,12 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         }
     }
 
-    private ConvertedExpression toCouchbaseFilter(Filter genericFilter, Map<String, PropertyAnnotation> propertiesAnnotationsMap) throws SearchException {
+	@Override
+	public <T> List<AttributeData> exportEntry(String dn, String objectClass) {
+		return exportEntry(dn);
+	}
+
+	private ConvertedExpression toCouchbaseFilter(Filter genericFilter, Map<String, PropertyAnnotation> propertiesAnnotationsMap) throws SearchException {
         return FILTER_CONVERTER.convertToCouchbaseFilter(genericFilter, propertiesAnnotationsMap);
     }
 
@@ -817,6 +832,9 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 			return filter;
 		}
 		
+		// Make sure that there is only one objectClass in filter
+		filter = excludeObjectClassFilters(filter);
+
 		// In Couchbase implementation we need to use first one as entry type
 		Filter searchFilter = Filter.createEqualityFilter(OBJECT_CLASS, objectClasses[0]);
 		if (filter != null) {
@@ -847,19 +865,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 
     @Override
     public String encodeTime(String baseDN, Date date) {
-        if (date == null) {
-            return null;
-        }
-        
-        try {
-            String utcDate = ISO_INSTANT.format(Instant.ofEpochMilli(date.getTime()));
-            // Drop UTC zone identifier to comply with format employed in CB: yyyy-MM-dd'T'HH:mm:ss.SSS 
-            return utcDate.substring(0, utcDate.length() - 1);
-        } catch (DateTimeException ex) {
-        	LOG.error("Cannot format date '{}' as ISO", date, ex);
-        	return null;
-        }
-        
+    	return operationService.encodeTime(date);
     }
 
     @Override
@@ -873,21 +879,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
     }
 
     protected Date decodeTime(String baseDN, String date, boolean silent) {
-        if (StringHelper.isEmpty(date)) {
-            return null;
-        }
-
-        // Add ending Z if necessary
-        String dateZ = date.endsWith("Z") ? date : date + "Z";
-        try {
-            return new Date(Instant.parse(dateZ).toEpochMilli());
-        } catch (DateTimeParseException ex) {
-			if (!silent) {
-				LOG.error("Failed to decode generalized time '{}'", date, ex);
-			}
-
-			return null;
-        }
+    	return operationService.decodeTime(date, silent);
     }
 
     @Override
@@ -946,15 +938,15 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 		return encodeTime(dateValue);
     }
 
-	private ScanConsistency getScanConsistency(ConvertedExpression convertedExpression) {
+	private QueryScanConsistency getQueryScanConsistency(ConvertedExpression convertedExpression) {
 		if (convertedExpression.consistency()) {
-			return ScanConsistency.REQUEST_PLUS;
+			return QueryScanConsistency.REQUEST_PLUS;
 		}
 
 		return null;
 	}
 
-	private ScanConsistency getScanConsistency(String attributeName, Map<String, PropertyAnnotation> propertiesAnnotationsMap) {
+	private QueryScanConsistency getQueryScanConsistency(String attributeName, Map<String, PropertyAnnotation> propertiesAnnotationsMap) {
 		if (StringHelper.isEmpty(attributeName)) {
 			return null;
 		}
@@ -967,7 +959,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 				AttributeName.class);
 		
 		if (attributeNameAnnotation.consistency()) {
-			return ScanConsistency.REQUEST_PLUS;
+			return QueryScanConsistency.REQUEST_PLUS;
 		}
 
 		return null;
@@ -1004,51 +996,20 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 	}
 
 	public String toInternalAttribute(String attributeName) {
-		return attributeName;
-//		if (getOperationService().isDisableAttributeMapping()) {
-//			return attributeName;
-//		}
-//
-//		return KeyShortcuter.shortcut(attributeName);
+		return ((CouchbaseOperationService) operationService).toInternalAttribute(attributeName);
 	}
 
 	public String[] toInternalAttributes(String[] attributeNames) {
-		return attributeNames;
-//		if (getOperationService().isDisableAttributeMapping() || ArrayHelper.isEmpty(attributeNames)) {
-//			return attributeNames;
-//		}
-//		
-//		String[] resultAttributeNames = new String[attributeNames.length];
-//		
-//		for (int i = 0; i < attributeNames.length; i++) {
-//			resultAttributeNames[i] = KeyShortcuter.shortcut(attributeNames[i]);
-//		}
-//		
-//		return resultAttributeNames;
+		return ((CouchbaseOperationService) operationService).toInternalAttributes(attributeNames);
 	}
 
 	public String fromInternalAttribute(String internalAttributeName) {
-		return internalAttributeName;
-//		if (getOperationService().isDisableAttributeMapping()) {
-//			return internalAttributeName;
-//		}
-//
-//		return KeyShortcuter.fromShortcut(internalAttributeName);
+		return ((CouchbaseOperationService) operationService).fromInternalAttribute(internalAttributeName);
 	}
 
 	public String[] fromInternalAttributes(String[] internalAttributeNames) {
-		return internalAttributeNames;
-//		if (getOperationService().isDisableAttributeMapping() || ArrayHelper.isEmpty(internalAttributeNames)) {
-//			return internalAttributeNames;
-//		}
-//		
-//		String[] resultAttributeNames = new String[internalAttributeNames.length];
-//		
-//		for (int i = 0; i < internalAttributeNames.length; i++) {
-//			resultAttributeNames[i] = KeyShortcuter.fromShortcut(internalAttributeNames[i]);
-//		}
-//		
-//		return resultAttributeNames;
+		return ((CouchbaseOperationService) operationService).fromInternalAttributes(internalAttributeNames);
 	}
+
 
 }

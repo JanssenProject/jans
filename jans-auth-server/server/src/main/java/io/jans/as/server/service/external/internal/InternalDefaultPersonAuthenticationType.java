@@ -11,9 +11,9 @@ import io.jans.model.SimpleCustomProperty;
 import io.jans.model.custom.script.type.auth.DummyPersonAuthenticationType;
 import io.jans.model.security.Credentials;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import java.util.Map;
 
 /**

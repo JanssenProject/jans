@@ -10,11 +10,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import io.jans.as.model.exception.InvalidParameterException;
 import org.apache.commons.lang.StringUtils;
 import org.jboss.resteasy.annotations.providers.jaxb.IgnoreMediaTypes;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
 import java.util.List;
 
 /**
@@ -132,6 +133,7 @@ public class UmaResource {
         this.scopeExpression = scopeExpression;
     }
 
+    @SuppressWarnings("java:S112")
     @JsonIgnore
     public static void assertValidExpression(String scopeExpression) {
         if (!isValidExpression(scopeExpression)) {

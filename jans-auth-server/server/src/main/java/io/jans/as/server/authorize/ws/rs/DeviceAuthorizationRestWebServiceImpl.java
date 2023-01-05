@@ -8,7 +8,7 @@ package io.jans.as.server.authorize.ws.rs;
 
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.authorize.DeviceAuthorizationResponseParam;
-import io.jans.as.model.common.ComponentType;
+import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.util.StringUtils;
@@ -28,16 +28,16 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.Path;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-import javax.ws.rs.core.UriBuilder;
+import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.SecurityContext;
+import jakarta.ws.rs.core.UriBuilder;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -97,7 +97,7 @@ public class DeviceAuthorizationRestWebServiceImpl implements DeviceAuthorizatio
 
         try {
             log.debug("Attempting to request device codes: clientId = {}, scope = {}", clientId, scope);
-            errorResponseFactory.validateComponentEnabled(ComponentType.DEVICE_AUTHZ);
+            errorResponseFactory.validateFeatureEnabled(FeatureFlagType.DEVICE_AUTHZ);
 
             SessionClient sessionClient = identity.getSessionClient();
             Client client = sessionClient != null ? sessionClient.getClient() : null;

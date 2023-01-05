@@ -1,0 +1,403 @@
+{
+    "issuer":"https://%(hostname)s",
+    "baseEndpoint":"https://%(hostname)s/jans-auth/restv1",
+    "authorizationEndpoint":"https://%(hostname)s/jans-auth/restv1/authorize",
+    "tokenEndpoint":"https://%(hostname)s/jans-auth/restv1/token",
+    "tokenRevocationEndpoint": "https://%(hostname)s/jans-auth/restv1/revoke",
+    "userInfoEndpoint":"https://%(hostname)s/jans-auth/restv1/userinfo",
+    "clientInfoEndpoint":"https://%(hostname)s/jans-auth/restv1/clientinfo",
+    "checkSessionIFrame":"https://%(hostname)s/jans-auth/opiframe.htm",
+    "endSessionEndpoint":"https://%(hostname)s/jans-auth/restv1/end_session",
+    "jwksUri":"%(jwks_uri)s",
+    "registrationEndpoint":"https://%(hostname)s/jans-auth/restv1/register",
+    "openIdDiscoveryEndpoint":"https://%(hostname)s/.well-known/webfinger",
+    "openIdConfigurationEndpoint":"https://%(hostname)s/.well-known/openid-configuration",
+    "idGenerationEndpoint":"https://%(hostname)s/jans-auth/restv1/id",
+    "introspectionEndpoint":"https://%(hostname)s/jans-auth/restv1/introspection",
+    "parEndpoint":"https://%(hostname)s/jans-auth/restv1/par",
+    "umaConfigurationEndpoint":"https://%(hostname)s/jans-auth/restv1/uma2-configuration",
+    "sectorIdentifierEndpoint":"https://%(hostname)s/jans-auth/sectoridentifier",
+    "jansElevenGenerateKeyEndpoint":"https://%(hostname)s/oxeleven/rest/oxeleven/generateKey",
+    "jansElevenSignEndpoint":"https://%(hostname)s/oxeleven/rest/oxeleven/sign",
+    "jansElevenVerifySignatureEndpoint":"https://%(hostname)s/oxeleven/rest/oxeleven/verifySignature",
+    "jansElevenDeleteKeyEndpoint":"https://%(hostname)s/oxeleven/rest/oxeleven/deleteKey",
+    "oxElevenJwksEndpoint":"https://%(hostname)s/oxeleven/rest/oxeleven/jwks",
+    "backchannelAuthenticationEndpoint":"https://%(hostname)s/jans-auth/restv1/bc-authorize",
+    "backchannelDeviceRegistrationEndpoint":"https://%(hostname)s/jans-auth/restv1/bc-deviceRegistration",
+    "deviceAuthzEndpoint":"https://%(hostname)s/jans-auth/restv1/device_authorization",
+    "openidSubAttribute":"inum",
+    "accessTokenSigningAlgValuesSupported":[
+        "none",
+        "HS256",
+        "HS384",
+        "HS512",
+        "RS256",
+        "RS384",
+        "RS512",
+        "ES256",
+        "ES384",
+        "ES512",
+        "ES512",
+        "PS256",
+        "PS384",
+        "PS512"
+    ],
+    "discoveryDenyKeys": [
+        "id_generation_endpoint",
+        "auth_level_mapping",
+        "scope_to_claims_mapping",
+        "op_policy_uri"
+    ],
+    "discoveryAllowedKeys": [
+        "issuer",
+        "authorization_endpoint",
+        "token_endpoint",
+        "registration_endpoint",
+        "token_endpoint_auth_methods_supported",
+        "jwks_uri",
+        "scopes_supported",
+        "response_types_supported",
+        "response_modes_supported",
+        "acr_values_supported",
+        "subject_types_supported",
+        "id_token_signing_alg_values_supported",
+        "request_object_signing_alg_values_supported",
+        "display_values_supported",
+        "claim_types_supported",
+        "claims_supported",
+        "claims_parameter_supported",
+        "grant_types_supported",
+        "request_parameter_supported",
+        "request_uri_parameter_supported",
+        "token_endpoint_auth_signing_alg_values_supported",
+        "tls_client_certificate_bound_access_tokens",
+        "mtls_endpoint_aliases"
+    ],
+    "scopesSupported":[
+        "openid",
+        "consents",
+        "accounts",
+        "resources"
+    ],
+    "responseTypesSupported":[
+        ["code", "id_token"]
+    ],
+    "responseModesSupported":[
+        "fragment",
+        "jwt"
+    ],
+    "grantTypesSupported":[
+        "client_credentials",
+        "authorization_code",
+        "refresh_token",
+        "urn:ietf:params:oauth:grant-type:device_code",
+        "urn:ietf:params:oauth:grant-type:token-exchange"
+    ],
+    "allowIdTokenWithoutImplicitGrantType": true,
+    "subjectTypesSupported":[
+        "pairwise"
+    ],
+    "defaultSubjectType": "pairwise",
+    "keySignWithSameKeyButDiffAlg": true,
+    "authorizationSigningAlgValuesSupported":[
+        "HS256",
+        "HS384",
+        "HS512",
+        "RS256",
+        "RS384",
+        "RS512",
+        "ES256",
+        "ES384",
+        "ES512",
+        "ES512",
+        "PS256",
+        "PS384",
+        "PS512"
+    ],
+    "authorizationEncryptionAlgValuesSupported":[
+        "RSA1_5",
+        "RSA-OAEP",
+        "A128KW",
+        "A256KW"
+    ],
+    "authorizationEncryptionEncValuesSupported":[
+        "A128CBC+HS256",
+        "A256CBC+HS512",
+        "A128GCM",
+        "A256GCM"
+    ],
+    "userInfoSigningAlgValuesSupported":[
+    ],
+    "userInfoEncryptionAlgValuesSupported":[
+    ],
+    "userInfoEncryptionEncValuesSupported":[
+    ],
+    "idTokenSigningAlgValuesSupported":[
+        "PS256",
+        "RS256"
+    ],
+    "idTokenEncryptionAlgValuesSupported":[
+    ],
+    "idTokenEncryptionEncValuesSupported":[
+    ],
+    "forceSignedRequestObject": false,
+    "requestObjectSigningAlgValuesSupported":[
+        "HS256",
+        "RS256",
+        "PS256"
+    ],
+    "jwksAlgorithmsSupported":[
+        "RS256",
+        "RS384",
+        "RS512",
+        "ES256",
+        "ES384",
+        "ES512",
+        "PS256",
+        "PS384",
+        "PS512",
+        "RSA1_5",
+        "RSA-OAEP"
+    ],
+    "requestObjectEncryptionAlgValuesSupported":[
+    ],
+    "requestObjectEncryptionEncValuesSupported":[
+    ],
+    "tokenEndpointAuthMethodsSupported":[
+        "client_secret_post",
+        "private_key_jwt",
+        "tls_client_auth"
+    ],
+    "tokenEndpointAuthSigningAlgValuesSupported":[
+        "PS256",
+        "RS256"
+    ],
+    "dynamicRegistrationCustomAttributes":[
+    ],
+    "displayValuesSupported":[
+        "page"
+    ],
+    "claimTypesSupported":[
+        "normal"
+    ],
+    "serviceDocumentation":"http://jans.org/docs",
+    "claimsLocalesSupported":[
+        "en"
+    ],
+    "idTokenTokenBindingCnfValuesSupported":[
+        "tbh"
+    ],
+    "uiLocalesSupported":[
+        "en",
+        "bg",
+        "de",
+        "es",
+        "fr",
+        "it",
+        "ru",
+        "tr"
+    ],
+    "dynamicGrantTypeDefault":[
+        "client_credentials",
+        "authorization_code",
+        "refresh_token"
+    ],
+    "claimsParameterSupported":true,
+    "requestParameterSupported":true,
+    "requestUriParameterSupported":true,
+    "requestUriBlockList": [
+        "localhost",
+        "127.0.0.1"
+    ],
+    "requireRequestUriRegistration":false,
+    "allowPostLogoutRedirectWithoutValidation":false,
+    "introspectionAccessTokenMustHaveUmaProtectionScope":false,
+    "requestUriHashVerificationEnabled": false,
+    "idTokenFilterClaimsBasedOnAccessToken": false,
+    "opPolicyUri":"http://www.jans.io/doku.php?id=jans:policy",
+    "opTosUri":"http://www.jans.io/doku.php?id=jans:tos",
+    "authorizationCodeLifetime":60,
+    "refreshTokenLifetime":14400,
+    "idTokenLifetime":3600,
+    "spontaneousScopeLifetime":86400,
+    "accessTokenLifetime":300,
+    "umaResourceLifetime":2592000,
+    "umaRptLifetime": 3600,
+    "umaTicketLifetime": 3600,
+    "umaPctLifetime": 2592000,
+    "umaAddScopesAutomatically":true,
+    "umaValidateClaimToken":false,
+    "umaGrantAccessIfNoPolicies":false,
+    "umaRestrictResourceToAssociatedClient":false,
+    "umaKeepClientDuringResourceSetRegistration":true,
+    "umaRptAsJwt":false,
+    "cleanServiceInterval":86400,
+    "cleanServiceBatchChunkSize": 10000,
+    "keyRegenerationEnabled":true,
+    "keyRegenerationInterval":48,
+    "defaultSignatureAlgorithm":"RS256",
+    "jansOpenIdConnectVersion":"openidconnect-1.0",
+    "jansId":"https://%(hostname)s/oxid/service/jans/inum",
+    "dcrSignatureValidationEnabled": true,
+    "dcrSignatureValidationSoftwareStatementJwksURIClaim": "jwks_uri",
+    "dcrSignatureValidationSoftwareStatementJwksClaim": null,
+    "dcrSignatureValidationJwks": null,
+    "dcrSignatureValidationJwksUri": null,
+    "dcrAuthorizationWithClientCredentials": false,
+    "dcrAuthorizationWithMTLS": false,
+    "softwareStatementValidationType": "script",
+    "softwareStatementValidationClaimName": "jwks_uri",
+    "dynamicRegistrationEnabled":true,
+    "dynamicRegistrationExpirationTime":-1,
+    "dynamicRegistrationPersistClientAuthorizations":true,
+    "trustedClientEnabled":true,
+    "skipAuthorizationForOpenIdScopeAndPairwiseId": false,
+    "dynamicRegistrationScopesParamEnabled":false,
+    "dynamicRegistrationCustomObjectClass":"",
+    "personCustomObjectClassList":[
+        "jansPerson"
+    ],
+    "persistIdTokenInLdap":false,
+    "persistRefreshTokenInLdap":true,
+    "authenticationFiltersEnabled":false,
+    "invalidateSessionCookiesAfterAuthorizationFlow":false,
+    "clientAuthenticationFiltersEnabled":false,
+    "clientRegDefaultToCodeFlowWithRefresh": true,
+    "grantTypesAndResponseTypesAutofixEnabled": false,
+    "authenticationFilters":[
+    ],
+    "clientAuthenticationFilters":[
+    ],
+    "sessionIdUnusedLifetime":86400,
+    "sessionIdUnauthenticatedUnusedLifetime":120,
+    "changeSessionIdOnAuthentication":true,
+    "returnClientSecretOnRead": true,
+    "sessionIdPersistOnPromptNone":true,
+    "sessionIdLifetime": 86400,
+    "configurationUpdateInterval":3600,
+    "cssLocation":"",
+    "jsLocation":"",
+    "imgLocation":"",
+    "metricReporterInterval":300,
+    "metricReporterKeepDataDays":15,
+    "metricReporterEnabled": false,
+    "pairwiseIdType":"algorithmic",
+    "pairwiseCalculationKey":"%(pairwiseCalculationKey)s",
+    "pairwiseCalculationSalt": "%(pairwiseCalculationSalt)s",
+    "shareSubjectIdBetweenClientsWithSameSectorId": true,
+    "webKeysStorage": "keystore",
+    "dnName": "%(default_openid_jks_dn_name)s",
+    "keyStoreFile": "%(oxauth_openid_jks_fn)s",
+    "keyStoreSecret": "%(oxauth_openid_jks_pass)s",
+    "endSessionWithAccessToken":false,
+    "clientWhiteList": ["*"],
+    "clientBlackList": ["*.attacker.com/*"],
+    "legacyIdTokenClaims": false,
+    "customHeadersWithAuthorizationResponse": true,
+    "frontChannelLogoutSessionSupported":true,
+    "updateUserLastLogonTime": false,
+    "updateClientAccessTime":false,
+    "enableClientGrantTypeUpdate": true,
+    "corsConfigurationFilters": [
+        {
+            "filterName": "CorsFilter",
+            "corsAllowedOrigins": "*",
+            "corsAllowedMethods": "GET,POST,HEAD,OPTIONS",
+            "corsAllowedHeaders": "Origin,Authorization,Accept,X-Requested-With,Content-Type,Access-Control-Request-Method,Access-Control-Request-Headers",
+            "corsExposedHeaders": "",
+            "corsSupportCredentials": true,
+            "corsLoggingEnabled": false,
+            "corsPreflightMaxAge": 1800,
+            "corsRequestDecorate": true,
+            "corsEnabled": true
+        }
+    ],
+    "logClientIdOnClientAuthentication": true,
+    "logClientNameOnClientAuthentication": false,
+    "httpLoggingEnabled": false,
+    "httpLoggingExcludePaths": [],
+    "externalLoggerConfiguration": "",
+    "authorizationRequestCustomAllowedParameters" : [
+        {
+            "paramName": "customParam1",
+            "returnInResponse": false
+        },
+        {
+            "paramName": "customParam2",
+            "returnInResponse": false
+        },
+        {
+            "paramName": "customParam3",
+            "returnInResponse": false
+        },
+        {
+            "paramName": "customParam4",
+            "returnInResponse": true
+        },
+        {
+            "paramName": "customParam5",
+            "returnInResponse": true
+        }
+    ],
+    "legacyDynamicRegistrationScopeParam": false,
+    "openidScopeBackwardCompatibility": false,
+    "disableU2fEndpoint":false,
+    "authenticationProtectionConfiguration": {
+        "attemptExpiration": 15,
+        "maximumAllowedAttemptsWithoutDelay": 4,
+        "delayTime": 2,
+        "bruteForceProtectionEnabled": false
+    },
+    "loggingLevel": "TRACE",
+    "loggingLayout": "text",
+    "errorHandlingMethod":"internal",
+    "useLocalCache":true,
+    "backchannelTokenDeliveryModesSupported": [
+        "poll",
+        "ping",
+        "push"
+     ],
+    "backchannelAuthenticationRequestSigningAlgValuesSupported": [],
+    "backchannelClientId": "",
+    "backchannelRedirectUri": "https://%(hostname)s/jans-auth/ciba/home.htm",
+    "backchannelUserCodeParameterSupported": false,
+    "backchannelBindingMessagePattern": "^[a-zA-Z0-9]{4,8}$",
+    "backchannelAuthenticationResponseExpiresIn": 3600,
+    "backchannelAuthenticationResponseInterval": 2,
+    "backchannelRequestsProcessorJobIntervalSec": 5,
+    "backchannelRequestsProcessorJobChunkSize": 100,
+    "cibaGrantLifeExtraTimeSec": 180,
+    "cibaMaxExpirationTimeAllowedSec": 1800,
+    "backchannelLoginHintClaims": ["inum", "uid", "mail"],
+    "cibaEnabled": false,
+    "ssaConfiguration": {
+        "ssaEndpoint":"https://%(hostname)s/jans-auth/restv1/ssa",
+        "ssaSigningAlg": "RS256",
+        "ssaExpirationInDays": 30
+    },
+    "cibaEndUserNotificationConfig": {
+        "apiKey": "",
+        "authDomain": "",
+        "databaseURL": "",
+        "projectId": "",
+        "storageBucket": "",
+        "messagingSenderId": "",
+        "appId": "",
+        "notificationUrl": "",
+        "notificationKey": "",
+        "publicVapidKey": ""
+    },
+    "deviceAuthzRequestExpiresIn": 1800,
+    "deviceAuthzTokenPollInterval": 5,
+    "deviceAuthzResponseTypeToProcessAuthz": "code",
+    "staticKid": "%(static_kid)s",
+    "forceOfflineAccessScopeToEnableRefreshToken" : false,
+    "redirectUrisRegexEnabled": false,
+    "useHighestLevelScriptIfAcrScriptNotFound": true,
+    "blockWebviewAuthorizationEnabled": false,
+    "userInfoConfiguration": {
+        "dateFormatterPattern": {
+            "birthdate": "yyyy-MM-dd"
+        }
+    }
+}

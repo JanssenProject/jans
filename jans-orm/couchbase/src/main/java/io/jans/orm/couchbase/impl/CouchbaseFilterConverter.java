@@ -7,47 +7,48 @@
 package io.jans.orm.couchbase.impl;
 
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.couchbase.client.java.document.json.JsonArray;
-import com.couchbase.client.java.query.dsl.Expression;
-import com.couchbase.client.java.query.dsl.functions.Collections;
-import com.couchbase.client.java.query.dsl.functions.Collections.SatisfiesBuilder;
-import com.couchbase.client.java.query.dsl.functions.StringFunctions;
-
+import io.jans.orm.util.ArrayHelper;
+import io.jans.orm.util.StringHelper;
 import io.jans.orm.annotation.AttributeEnum;
 import io.jans.orm.annotation.AttributeName;
-import io.jans.orm.couchbase.model.ConvertedExpression;
 import io.jans.orm.exception.operation.SearchException;
 import io.jans.orm.ldap.impl.LdapFilterConverter;
 import io.jans.orm.reflect.property.PropertyAnnotation;
 import io.jans.orm.reflect.util.ReflectHelper;
 import io.jans.orm.search.filter.Filter;
 import io.jans.orm.search.filter.FilterType;
-import io.jans.orm.util.ArrayHelper;
-import io.jans.orm.util.Pair;
-import io.jans.orm.util.StringHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.couchbase.client.java.json.JsonObject;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.jans.orm.couchbase.model.ConvertedExpression;
+import io.jans.orm.couchbase.operation.CouchbaseOperationService;
 
 /**
- * Filter to Couchbase expressions convert
+ * Filter to N1QL parameterized Couchbase query converter
  *
- * @author Yuriy Movchan Date: 05/15/2018
+ * @author Yuriy Movchan Date: 05/26/2022
  */
 public class CouchbaseFilterConverter {
 
     private static final Logger LOG = LoggerFactory.getLogger(CouchbaseFilterConverter.class);
     
     private LdapFilterConverter ldapFilterConverter = new LdapFilterConverter();
+	private static final ObjectMapper JSON_OBJECT_MAPPER = new ObjectMapper();
 
-	private CouchbaseEntryManager couchbaseEntryManager;
+	private CouchbaseOperationService operationService;
 
-    public CouchbaseFilterConverter(CouchbaseEntryManager couchbaseEntryManager) {
-    	this.couchbaseEntryManager = couchbaseEntryManager;
+    public CouchbaseFilterConverter(CouchbaseOperationService operationService) {
+    	this.operationService = operationService;
 	}
 
 	public ConvertedExpression convertToCouchbaseFilter(Filter genericFilter, Map<String, PropertyAnnotation> propertiesAnnotationsMap) throws SearchException {
@@ -55,12 +56,22 @@ public class CouchbaseFilterConverter {
     }
 
     public ConvertedExpression convertToCouchbaseFilter(Filter genericFilter, Map<String, PropertyAnnotation> propertiesAnnotationsMap, Function<? super Filter, Boolean> processor) throws SearchException {
-        Filter currentGenericFilter = genericFilter;
+		JsonObject queryParameters = JsonObject.create();
+		return convertToCouchbaseFilter(genericFilter, propertiesAnnotationsMap, queryParameters, processor);
+	}
+
+    public ConvertedExpression convertToCouchbaseFilter(Filter genericFilter, Map<String, PropertyAnnotation> propertiesAnnotationsMap, JsonObject queryParameters, Function<? super Filter, Boolean> processor) throws SearchException {
+		if (genericFilter == null) {
+			return null;
+		}
+
+		Filter currentGenericFilter = genericFilter;
 
         FilterType type = currentGenericFilter.getType();
         if (FilterType.RAW == type) {
-        	LOG.warn("RAW Ldap filter to Couchbase convertion will be removed in new version!!!");
+        	LOG.warn("RAW Ldap filter to N1QL convertion will be removed in new version!!!");
         	currentGenericFilter = ldapFilterConverter.convertRawLdapFilterToFilter(currentGenericFilter.getFilterString());
+        	LOG.debug(String.format("Converted RAW filter: %s", currentGenericFilter));
         	type = currentGenericFilter.getType();
         }
 
@@ -80,16 +91,11 @@ public class CouchbaseFilterConverter {
             	String joinOrAttributeName = null;
                 for (int i = 0; i < genericFilters.length; i++) {
                 	Filter tmpFilter = genericFilters[i];
-                    expFilters[i] = convertToCouchbaseFilter(tmpFilter, propertiesAnnotationsMap, processor);
+                    expFilters[i] = convertToCouchbaseFilter(tmpFilter, propertiesAnnotationsMap, queryParameters, processor);
 
                     // Check if we can replace OR with IN
                 	if (!canJoinOrFilters) {
                 		continue;
-                	}
-                	
-                	if (tmpFilter.getMultiValued() != null) {
-                		canJoinOrFilters = false;
-                    	continue;
                 	}
 
                 	if ((FilterType.EQUALITY != tmpFilter.getType()) || (tmpFilter.getFilters() != null)) {
@@ -97,10 +103,17 @@ public class CouchbaseFilterConverter {
                     	continue;
                     }
 
+                	if (tmpFilter.getMultiValued() != null) {
+                		canJoinOrFilters = false;
+                    	continue;
+                	}
+
                     Boolean isMultiValuedDetected = determineMultiValuedByType(tmpFilter.getAttributeName(), propertiesAnnotationsMap);
-                	if (!Boolean.FALSE.equals(isMultiValuedDetected) && !Boolean.FALSE.equals(currentGenericFilter.getMultiValued())) {
-            			canJoinOrFilters = false;
-            			continue;
+                	if (!Boolean.FALSE.equals(isMultiValuedDetected)) {
+                		if (!Boolean.FALSE.equals(currentGenericFilter.getMultiValued())) { 
+	                		canJoinOrFilters = false;
+	                    	continue;
+                		}
                 	}
                 	
             		if (joinOrAttributeName == null) {
@@ -116,107 +129,102 @@ public class CouchbaseFilterConverter {
                 }
 
                 if (FilterType.NOT == type) {
-                    return ConvertedExpression.build(Expression.par(expFilters[0].expression().not()), expFilters[0].consistency());
+                    return ConvertedExpression.build("NOT ( " + expFilters[0].expression() + " )", queryParameters, expFilters[0].consistency());
                 } else if (FilterType.AND == type) {
                     for (int i = 0; i < expFilters.length; i++) {
                         requiredConsistency |= expFilters[i].consistency();
                     }
 
-                    Expression result = expFilters[0].expression();
+                    StringBuilder result = new StringBuilder("( ").append(expFilters[0].expression());
                     for (int i = 1; i < expFilters.length; i++) {
-                        result = result.and(expFilters[i].expression());
+                        result = result.append(" AND ").append(expFilters[i].expression());
                     }
-                    return ConvertedExpression.build(Expression.par(result), requiredConsistency);
+                    result.append(" )");
+
+                    return ConvertedExpression.build(result.toString(), queryParameters, requiredConsistency);
                 } else if (FilterType.OR == type) {
                     for (int i = 0; i < expFilters.length; i++) {
                         requiredConsistency |= expFilters[i].consistency();
                     }
 
                     if (canJoinOrFilters) {
-                		JsonArray jsonArrayValues = JsonArray.create();
-                    	Filter lastEqFilter = null;
-                		for (Filter eqFilter : joinOrFilters) {
-                			lastEqFilter = eqFilter;
-
-                			jsonArrayValues.add(eqFilter.getAssertionValue());
+                		List<Object> assertionValues = new ArrayList<Object>();
+                		for (ConvertedExpression eqFilter : expFilters) {
+                			assertionValues.addAll(eqFilter.getSingleLevelParameters());
             			}
 
-                		Expression exp = Expression
-                                .par(buildPath(lastEqFilter, propertiesAnnotationsMap, processor).getFirst().in(jsonArrayValues));
-                        return ConvertedExpression.build(exp, requiredConsistency);
+                		StringBuilder result = new StringBuilder(buildLeftExpressionPart(genericFilters[0], false, propertiesAnnotationsMap, queryParameters, processor))
+                				.append(" IN [ $").append(assertionValues.get(0));
+                		
+                        for (int i = 1; i < assertionValues.size(); i++) {
+                        	Object assertionValue = assertionValues.get(i);
+                			result.append(", $").append(assertionValue);
+                		}
+                		result.append(" ]");
+                		
+                        return ConvertedExpression.build(result.toString(), queryParameters, requiredConsistency);
                 	} else {
-	                    Expression result = expFilters[0].expression();
+                		StringBuilder result = new StringBuilder("( ").append(expFilters[0].expression());
 	                    for (int i = 1; i < expFilters.length; i++) {
-	                        result = result.or(expFilters[i].expression());
+	                        result = result.append(" OR ").append(expFilters[i].expression());
 	                    }
+	                    result.append(" )");
 
-	                    return ConvertedExpression.build(Expression.par(result), requiredConsistency);
+	                    return ConvertedExpression.build(result.toString(), queryParameters, requiredConsistency);
                 	}
             	}
             }
         }
 
-        if (FilterType.EQUALITY == type) {
-        	boolean hasSubFilters = ArrayHelper.isNotEmpty(currentGenericFilter.getFilters());
-        	Boolean isMultiValuedDetected = determineMultiValuedByType(currentGenericFilter.getAttributeName(), propertiesAnnotationsMap);
+        // Generic part for rest of expression types
+    	Boolean multiValuedWithUnknown = isMultiValue(currentGenericFilter, propertiesAnnotationsMap);
+    	boolean multiValued = Boolean.TRUE.equals(multiValuedWithUnknown);
 
-        	String internalAttribute = toInternalAttribute(currentGenericFilter);
-			Pair<Expression, Expression> pairExpression = buildPath(currentGenericFilter, propertiesAnnotationsMap, processor);
-    		if (Boolean.TRUE.equals(currentGenericFilter.getMultiValued()) || Boolean.TRUE.equals(isMultiValuedDetected)) {
-            	return ConvertedExpression.build(
-            			Collections.anyIn(internalAttribute + "_", pairExpression.getFirst()).
-            			satisfies(pairExpression.getSecond().eq(buildTypedExpression(currentGenericFilter))),
-            			requiredConsistency);
-            } else if (Boolean.FALSE.equals(currentGenericFilter.getMultiValued()) || Boolean.FALSE.equals(isMultiValuedDetected) ||
-            			(hasSubFilters && (isMultiValuedDetected == null))) {
-            	return ConvertedExpression.build(pairExpression.getSecond().eq(buildTypedExpression(currentGenericFilter)), requiredConsistency);
-            } else {
-            	Expression nameExpression = pairExpression.getSecond();
-                Expression exp1 = Expression
-                        .par(Expression.path(nameExpression).eq(buildTypedExpression(currentGenericFilter)));
-                Expression exp2 = Expression
-                        .par(Expression.path(buildTypedExpression(currentGenericFilter)).in(nameExpression));
-                return ConvertedExpression.build(Expression.par(exp1.or(exp2)), requiredConsistency);
-            }
-        }
+    	String internalAttribute = toInternalAttribute(currentGenericFilter);
 
-        if (FilterType.LESS_OR_EQUAL == type) {
-        	String internalAttribute = toInternalAttribute(currentGenericFilter);
-			Pair<Expression, Expression> pairExpression = buildPath(currentGenericFilter, propertiesAnnotationsMap, processor);
-            if (isMultiValue(currentGenericFilter, propertiesAnnotationsMap)) {
-            	return ConvertedExpression.build(
-            			Collections.anyIn(internalAttribute + "_", pairExpression.getFirst()).
-            			satisfies(pairExpression.getSecond().lte(buildTypedExpression(currentGenericFilter))),
-            			requiredConsistency);
-            } else {
-            	return ConvertedExpression.build(pairExpression.getSecond().lte(buildTypedExpression(currentGenericFilter)), requiredConsistency);
-            }
-        }
+    	if ((FilterType.EQUALITY == type) || (FilterType.LESS_OR_EQUAL == type) || (FilterType.GREATER_OR_EQUAL == type)) {
+        	String variableExpression = buildVariableExpression(internalAttribute, multiValued, currentGenericFilter.getAssertionValue(), queryParameters);
+			String leftExpressionPart = buildLeftExpressionPart(currentGenericFilter, multiValued, propertiesAnnotationsMap, queryParameters, processor);
 
-        if (FilterType.GREATER_OR_EQUAL == type) {
-        	String internalAttribute = toInternalAttribute(currentGenericFilter);
-			Pair<Expression, Expression> pairExpression = buildPath(currentGenericFilter, propertiesAnnotationsMap, processor);
-            if (isMultiValue(currentGenericFilter, propertiesAnnotationsMap)) {
-            	return ConvertedExpression.build(
-            			Collections.anyIn(internalAttribute + "_", pairExpression.getFirst()).
-            			satisfies(pairExpression.getSecond().gte(buildTypedExpression(currentGenericFilter))),
-            			requiredConsistency);
-            } else {
-            	return ConvertedExpression.build(pairExpression.getSecond().gte(buildTypedExpression(currentGenericFilter)), requiredConsistency);
+			if (multiValued) {
+    			// ANY mail_ IN mail SATISFIES mail_ = "test@gluu.org" END
+    			String result = String.format("ANY %s_ IN %s SATISFIES %s %s $%s END",
+    					internalAttribute, internalAttribute, leftExpressionPart, type.getSign(), variableExpression);
+    			
+        		return ConvertedExpression.build(result, queryParameters, variableExpression, requiredConsistency);
             }
+			
+			boolean hasSubFilters = ArrayHelper.isNotEmpty(genericFilter.getFilters());
+			if (FilterType.EQUALITY == type) {
+				if ((Boolean.FALSE.equals(multiValuedWithUnknown)) || (hasSubFilters && (multiValuedWithUnknown == null))) {
+		    		String result = String.format("%s %s $%s", leftExpressionPart, type.getSign(), variableExpression);
+		    		return ConvertedExpression.build(result, queryParameters, variableExpression, requiredConsistency);
+				} else {
+	    			// uid == "test" OR "test" in uid
+	    			String result = String.format("( ( %s = $%s ) OR ( $%s IN %s ) )",
+	    					leftExpressionPart, variableExpression, variableExpression, internalAttribute);
+	    			
+	        		return ConvertedExpression.build(result, queryParameters, variableExpression, requiredConsistency);
+				}
+			}
+
+    		String result = String.format("%s %s $%s", leftExpressionPart, type.getSign(), variableExpression);
+    		return ConvertedExpression.build(result, queryParameters, variableExpression, requiredConsistency);
         }
 
         if (FilterType.PRESENCE == type) {
-        	String internalAttribute = toInternalAttribute(currentGenericFilter);
-			Pair<Expression, Expression> pairExpression = buildPath(currentGenericFilter, propertiesAnnotationsMap, processor);
-            if (isMultiValue(currentGenericFilter, propertiesAnnotationsMap)) {
-            	return ConvertedExpression.build(
-            			Collections.anyIn(internalAttribute + "_", pairExpression.getFirst()).
-            			satisfies(pairExpression.getSecond().isNotMissing()),
-            			requiredConsistency);
-            } else {
-            	return ConvertedExpression.build(pairExpression.getSecond().isNotMissing(), requiredConsistency);
+			String leftExpressionPart = buildLeftExpressionPart(currentGenericFilter, multiValued, propertiesAnnotationsMap, queryParameters, processor);
+
+			if (multiValued) {
+    			// ANY mail_ IN mail SATISFIES mail_ = "test@gluu.org" END
+    			String result = String.format("ANY %s_ IN %s SATISFIES %s IS NOT MISSING END",
+    					internalAttribute, internalAttribute, leftExpressionPart);
+    			
+        		return ConvertedExpression.build(result, queryParameters, requiredConsistency);
             }
+
+    		String result = String.format("%s IS NOT MISSING", leftExpressionPart);
+    		return ConvertedExpression.build(result, queryParameters, requiredConsistency);
         }
 
         if (FilterType.APPROXIMATE_MATCH == type) {
@@ -224,37 +232,56 @@ public class CouchbaseFilterConverter {
         }
 
         if (FilterType.SUBSTRING == type) {
-            StringBuilder like = new StringBuilder();
+			String leftExpressionPart = buildLeftExpressionPart(currentGenericFilter, multiValued, propertiesAnnotationsMap, queryParameters, processor);
+			Set<String> filterParameters = new HashSet<String>();
+
+			StringBuilder like = new StringBuilder();
             if (currentGenericFilter.getSubInitial() != null) {
-                like.append(currentGenericFilter.getSubInitial());
+            	String subInital = currentGenericFilter.getSubInitial() + "%";
+            	String variableExpressionInitial = buildVariableExpression(internalAttribute + "_i", multiValued, subInital, queryParameters);
+            	filterParameters.add(variableExpressionInitial);
+                like.append("$" + variableExpressionInitial);
             }
-            like.append("%");
 
             String[] subAny = currentGenericFilter.getSubAny();
             if ((subAny != null) && (subAny.length > 0)) {
+    			StringBuilder anyBuilder = new StringBuilder("%");
                 for (String any : subAny) {
-                    like.append(any);
-                    like.append("%");
+                	anyBuilder.append(any);
+                	anyBuilder.append("%");
                 }
+            	String variableExpressionAny = buildVariableExpression(internalAttribute + "_any", multiValued, anyBuilder.toString(), queryParameters);
+                like.append("$" + variableExpressionAny);
+            	filterParameters.add(variableExpressionAny);
             }
 
             if (currentGenericFilter.getSubFinal() != null) {
-                like.append(currentGenericFilter.getSubFinal());
+            	String subFinal = "%" + currentGenericFilter.getSubFinal();
+            	String variableExpressionFinal = buildVariableExpression(internalAttribute + "_f", multiValued, subFinal, queryParameters);
+            	filterParameters.add(variableExpressionFinal);
+                like.append("$" + variableExpressionFinal);
             }
-        	String internalAttribute = toInternalAttribute(currentGenericFilter);
-			Pair<Expression, Expression> pairExpression = buildPath(currentGenericFilter, propertiesAnnotationsMap, processor);
-            if (isMultiValue(currentGenericFilter, propertiesAnnotationsMap)) {
-            	return ConvertedExpression.build(
-            			Collections.anyIn(internalAttribute + "_", pairExpression.getFirst()).
-            			satisfies(pairExpression.getSecond().like(Expression.s(escapeValue(like.toString())))),
-            			requiredConsistency);
-            } else {
-            	return ConvertedExpression.build(pairExpression.getSecond().like(Expression.s(escapeValue(like.toString()))), requiredConsistency);
+
+			if (multiValued) {
+    			// ANY mail_ IN mail SATISFIES mail_ LIKE "%test%" END
+    			String result = String.format("ANY %s_ IN %s SATISFIES %s LIKE %s END",
+    					internalAttribute, internalAttribute, leftExpressionPart, like.toString());
+    			
+    			ConvertedExpression convertedExpression = ConvertedExpression.build(result, queryParameters, requiredConsistency);
+    			convertedExpression.getSingleLevelParameters().addAll(filterParameters);
+    			
+    			return convertedExpression;
             }
+
+    		String result = String.format("%s LIKE %s", leftExpressionPart, like.toString());
+    		return ConvertedExpression.build(result, queryParameters, requiredConsistency);
         }
 
         if (FilterType.LOWERCASE == type) {
-        	return ConvertedExpression.build(StringFunctions.lower(currentGenericFilter.getAttributeName()), requiredConsistency);
+			String leftExpressionPart = buildLeftExpressionPart(currentGenericFilter, multiValued, propertiesAnnotationsMap, queryParameters, processor);
+
+			String result = String.format("LOWER( %s )", leftExpressionPart);
+        	return ConvertedExpression.build(result, queryParameters, requiredConsistency);
         }
 
         throw new SearchException(String.format("Unknown filter type '%s'", type));
@@ -264,9 +291,11 @@ public class CouchbaseFilterConverter {
 		Boolean isMultiValuedDetected = determineMultiValuedByType(currentGenericFilter.getAttributeName(), propertiesAnnotationsMap);
 		if (Boolean.TRUE.equals(currentGenericFilter.getMultiValued()) || Boolean.TRUE.equals(isMultiValuedDetected)) {
 			return true;
+		} else if (Boolean.FALSE.equals(currentGenericFilter.getMultiValued()) || Boolean.FALSE.equals(isMultiValuedDetected)) {
+			return false;
 		}
 
-		return false;
+		return null;
 	}
 
 	private String toInternalAttribute(Filter filter) {
@@ -282,56 +311,73 @@ public class CouchbaseFilterConverter {
 			}
 		}
 
-		return toInternalAttribute(attributeName);
-	}
-
-	private String toInternalAttribute(String attributeName) {
-		if (couchbaseEntryManager == null) {
+		if (operationService == null) {
 			return attributeName;
 		}
 
-		return couchbaseEntryManager.toInternalAttribute(attributeName);
+		return operationService.toInternalAttribute(attributeName);
 	}
 
-	private Expression buildTypedExpression(Filter currentGenericFilter) {
-		if (currentGenericFilter.getAssertionValue() instanceof Boolean) {
-			return Expression.x((Boolean) currentGenericFilter.getAssertionValue());
-		} else if (currentGenericFilter.getAssertionValue() instanceof Integer) {
-			return Expression.x((Integer) currentGenericFilter.getAssertionValue());
-		} else if (currentGenericFilter.getAssertionValue() instanceof Long) {
-			return Expression.x((Long) currentGenericFilter.getAssertionValue());
+	private String buildVariableExpression(String attributeName, boolean multiValued, Object assertionValue, JsonObject queryParameters) throws SearchException {
+		String usedAttributeName = attributeName;
+
+		int idx = 0;
+		while (queryParameters.containsKey(usedAttributeName) && (idx < 100)) {
+			usedAttributeName = "_" + attributeName + "_" + Integer.toString(idx++);
 		}
 
-		return Expression.s(escapeValue(currentGenericFilter.getAssertionValue()));
+		if (multiValued) {
+			// TODO: Check if we really not need to special case for multivalued here
+			addQueryParameter(assertionValue, queryParameters, usedAttributeName);
+		} else {
+			addQueryParameter(assertionValue, queryParameters, usedAttributeName);
+		}
+
+		return usedAttributeName;
 	}
 
-	private Pair<Expression, Expression> buildPath(Filter genericFilter, Map<String, PropertyAnnotation> propertiesAnnotationsMap, Function<? super Filter, Boolean> processor) throws SearchException {
+	private void addQueryParameter(Object assertionValue, JsonObject queryParameters, String usedAttributeName) {
+		if (assertionValue instanceof AttributeEnum) {
+			queryParameters.put(usedAttributeName, ((AttributeEnum) assertionValue).getValue());
+		} else if (assertionValue instanceof Boolean) {
+			queryParameters.put(usedAttributeName, (Boolean) assertionValue);
+		} else if (assertionValue instanceof Integer) {
+			queryParameters.put(usedAttributeName, (Integer) assertionValue);
+		} else if (assertionValue instanceof Long) {
+			queryParameters.put(usedAttributeName, (Long) assertionValue);
+		} else if (assertionValue instanceof Long) {
+			queryParameters.put(usedAttributeName, (Long) assertionValue);
+		} else if (assertionValue instanceof Date) {
+			queryParameters.put(usedAttributeName, operationService.encodeTime((Date) assertionValue));
+		} else {
+			queryParameters.put(usedAttributeName, assertionValue);
+		}
+	}
+
+	private String buildLeftExpressionPart(Filter genericFilter, boolean multiValued, Map<String, PropertyAnnotation> propertiesAnnotationsMap, JsonObject queryParameters, Function<? super Filter, Boolean> processor) throws SearchException {
 		boolean hasSubFilters = ArrayHelper.isNotEmpty(genericFilter.getFilters());
-		boolean isMultiValue = isMultiValue(genericFilter, propertiesAnnotationsMap);
 		String internalAttribute = toInternalAttribute(genericFilter);
 
-		Expression expression = Expression.path(Expression.path(internalAttribute));
-		Expression innerExpression = null;
-		if (isMultiValue) {
-			expression = Expression.path(Expression.path(internalAttribute));
-			innerExpression = null;
+		String innerExpression = null;
+		if (multiValued) {
 			if (hasSubFilters) {
-	    		Filter clonedFilter = genericFilter.getFilters()[0].clone();
-	    		clonedFilter.setAttributeName(internalAttribute + "_");
+	    		Filter subFilter = genericFilter.getFilters()[0].clone();
+	    		subFilter.setAttributeName(internalAttribute + "_");
 	
-	    		innerExpression = convertToCouchbaseFilter(clonedFilter, propertiesAnnotationsMap, processor).expression();
+	    		innerExpression = convertToCouchbaseFilter(subFilter, propertiesAnnotationsMap, queryParameters, processor).expression();
 			} else {
-				innerExpression = Expression.path(Expression.path(internalAttribute + "_"));
+				innerExpression = internalAttribute + "_";
 			}
 		} else {
 			if (hasSubFilters) {
-				innerExpression = convertToCouchbaseFilter(genericFilter.getFilters()[0], propertiesAnnotationsMap, processor).expression();
+				Filter subFilter = genericFilter.getFilters()[0];
+				innerExpression = convertToCouchbaseFilter(subFilter, propertiesAnnotationsMap, queryParameters, processor).expression();
 			} else {
-				innerExpression = Expression.path(Expression.path(internalAttribute));
+				innerExpression = internalAttribute;
 			}
 		}
 		
-		return new Pair<>(expression, innerExpression);
+		return innerExpression;
 	}
 
 	private Boolean determineMultiValuedByType(String attributeName, Map<String, PropertyAnnotation> propertiesAnnotationsMap) {
@@ -375,13 +421,15 @@ public class CouchbaseFilterConverter {
 		return false;
 	}
 
-	public static String escapeValue(Object str) {
-		String result = StringHelper.escapeJson(str);
-		
-		// Workaround for Couchbase 6.6
-		result = result.replace("\\\\", "\\u005c");
-		
-		return result;
+	protected String convertValueToJson(Object propertyValue) throws SearchException {
+		try {
+			String value = JSON_OBJECT_MAPPER.writeValueAsString(propertyValue);
+
+			return value;
+		} catch (Exception ex) {
+			LOG.error("Failed to convert '{}' to json value:", propertyValue, ex);
+			throw new SearchException(String.format("Failed to convert '%s' to json value", propertyValue));
+		}
 	}
 
 }

@@ -9,14 +9,12 @@ package io.jans.as.client.ws.rs.uma;
 import io.jans.as.client.BaseTest;
 import io.jans.as.client.TokenClient;
 import io.jans.as.client.TokenResponse;
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.client.uma.wrapper.UmaClient;
-import io.jans.as.model.uma.UmaTestUtil;
+import io.jans.as.test.UmaTestUtil;
 import io.jans.as.model.uma.wrapper.Token;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
-
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
 
 /**
  * Test cases for the obtaining UMA PAT token flow (HTTP)
@@ -52,11 +50,8 @@ public class ObtainPatTokenFlowHttpTest extends BaseTest {
         TokenResponse response1 = tokenClient1.execRefreshToken(pat.getScope(), pat.getRefreshToken(), umaPatClientId, umaPatClientSecret);
 
         showClient(tokenClient1);
-        assertEquals(response1.getStatus(), 200, "Unexpected response code: " + response1.getStatus());
-        assertNotNull(response1.getEntity(), "The entity is null");
-        assertNotNull(response1.getAccessToken(), "The access token is null");
-        assertNotNull(response1.getTokenType(), "The token type is null");
-        assertNotNull(response1.getRefreshToken(), "The refresh token is null");
-        assertNotNull(response1.getScope(), "The scope is null");
+        AssertBuilder.tokenResponse(response1)
+                .notNullRefreshToken()
+                .check();
     }
 }

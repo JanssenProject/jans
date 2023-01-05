@@ -1,0 +1,62 @@
+{
+  "jans-auth": {
+    "memory": {
+      "max_allowed_mb": 2048,
+      "jvm_heap_ration": 0.7,
+      "ratio": 0.25
+    },
+    "jetty": {
+      "modules": "server,deploy,annotations,resources,http,http-forwarded,threadpool,console-capture,jsp,websocket"
+    },
+    "installed": false,
+    "name": "jans-auth"
+  },
+  "jans-fido2": {
+    "memory": {
+      "max_allowed_mb": 512,
+      "jvm_heap_ration": 0.7,
+      "ratio": 0.20
+    },
+    "jetty": {
+      "modules": "server,deploy,resources,http,http-forwarded,threadpool,console-capture,jsp"
+    },
+    "installed": false,
+    "name": "jans-fido2"
+  },
+  "jans-scim": {
+    "memory": {
+      "max_allowed_mb": 1024,
+      "jvm_heap_ration": 0.7,
+      "ratio": 0.2
+    },
+    "jetty": {
+      "modules": "server,deploy,resources,http,http-forwarded,console-capture,jsp,websocket"
+    },
+    "installed": false,
+    "name": "jans-scim"
+  },
+  "jans-eleven": {
+    "memory": {
+      "max_allowed_mb": 1024,
+      "jvm_heap_ration": 0.7,
+      "ratio": 0.15
+    },
+    "jetty": {
+      "modules": "server,deploy,resources,http,http-forwarded,console-capture,jsp,websocket"
+    },
+    "installed": false,
+    "name": "jans-eleven"
+  },
+  "jans-config-api": {
+    "memory": {
+      "max_allowed_mb": 1024,
+      "jvm_heap_ration": 0.7,
+      "ratio": 0.20
+    },
+    "jetty": {
+      "modules": "server,deploy,resources,http,http-forwarded,console-capture,jsp,websocket"
+    },
+    "installed": false,
+    "name": "jans-config-api"
+  }
+}

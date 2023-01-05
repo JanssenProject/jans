@@ -1,6 +1,6 @@
 package io.jans.orm.search.filter;
 /*
- * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * Janssen Project software is available under the Apache License (2004). See http://www.apache.org/licenses/ for full text.
  *
  * Copyright (c) 2021, Janssen Project
  */
@@ -43,9 +43,9 @@ public class FilterProcessor {
 				return null;
 			}
 
-			Filter resultFilter = new Filter(type, resultFilters.toArray(new Filter[0]));
-			resultFilter.setAssertionValue(genericFilter.getAssertionValue());
-
+			Filter resultFilter = genericFilter.clone();
+			resultFilter.setFilters(resultFilters.toArray(new Filter[0]));
+			
 			return resultFilter;
 		}
 

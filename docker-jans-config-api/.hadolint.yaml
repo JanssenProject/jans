@@ -1,0 +1,5 @@
+ignored:
+  - DL3018    # Pin versions in apk add
+  - DL3013    # Pin versions in pip
+  - DL3003    # Use WORKDIR to switch to a directory
+  - SC2016

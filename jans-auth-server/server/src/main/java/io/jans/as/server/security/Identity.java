@@ -7,14 +7,14 @@
 package io.jans.as.server.security;
 
 import io.jans.as.common.model.common.User;
-import io.jans.as.server.model.common.SessionId;
+import io.jans.as.common.model.session.SessionId;
 import io.jans.as.server.model.session.SessionClient;
 
-import javax.annotation.Priority;
-import javax.enterprise.context.RequestScoped;
-import javax.enterprise.inject.Alternative;
-import javax.inject.Named;
-import javax.interceptor.Interceptor;
+import jakarta.annotation.Priority;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.enterprise.inject.Alternative;
+import jakarta.inject.Named;
+import jakarta.interceptor.Interceptor;
 
 /**
  * @version August 9, 2017

@@ -7,18 +7,18 @@
 package io.jans.scim.service;
 
 import java.io.Serializable;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.time.Instant;
 import java.util.UUID;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import org.slf4j.Logger;
 
+import io.jans.as.model.common.IdType;
 import io.jans.model.GluuAttribute;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.operation.DuplicateEntryException;
@@ -27,16 +27,16 @@ import io.jans.orm.model.SearchScope;
 import io.jans.orm.model.base.SimpleBranch;
 import io.jans.orm.model.base.SimpleUser;
 import io.jans.orm.search.filter.Filter;
-import io.jans.util.ArrayHelper;
-import io.jans.util.OxConstants;
-import io.jans.util.StringHelper;
-import org.slf4j.Logger;
-
 import io.jans.scim.exception.DuplicateEmailException;
 import io.jans.scim.model.GluuCustomAttribute;
 import io.jans.scim.model.GluuCustomPerson;
 import io.jans.scim.model.User;
 import io.jans.scim.util.OxTrustConstants;
+import io.jans.util.ArrayHelper;
+import io.jans.util.OxConstants;
+import io.jans.util.StringHelper;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 /**
  * Provides operations with persons
@@ -60,6 +60,9 @@ public class PersonService implements Serializable {
 	@Inject
 	private OrganizationService organizationService;
 
+	@Inject
+	private ExternalIdGeneratorService idGeneratorService;
+	
 	private List<GluuCustomAttribute> mandatoryAttributes;
 
 	public void addCustomObjectClass(GluuCustomPerson person) {
@@ -88,6 +91,8 @@ public class PersonService implements Serializable {
 			if (persons == null || persons.size() == 0) {
 				person.setCreationDate(new Date());
 				attributeService.applyMetaData(person.getCustomAttributes());
+
+				ignoreCustomObjectClassesForNonLDAP(person);
 				persistenceEntryManager.persist(person);
 			} else {
 				throw new DuplicateEntryException("Duplicate UID value: " + person.getUid());
@@ -101,6 +106,19 @@ public class PersonService implements Serializable {
 		}
 
 	}
+
+    private GluuCustomPerson ignoreCustomObjectClassesForNonLDAP(GluuCustomPerson person) {
+        String persistenceType = persistenceEntryManager.getPersistenceType();
+        log.debug("persistenceType: {}", persistenceType);
+        if (!PersistenceEntryManager.PERSITENCE_TYPES.ldap.name().equals(persistenceType)) {
+        	log.debug(
+                    "Setting CustomObjectClasses :{} to null as it's used only for LDAP and current persistenceType is {} ",
+                    person.getCustomObjectClasses(), persistenceType);
+        	person.setCustomObjectClasses(null);
+        }
+
+        return person;
+    }
 
 	public void updatePerson(GluuCustomPerson person) throws Exception {
 		try {
@@ -274,7 +292,19 @@ public class PersonService implements Serializable {
 	 * @throws Exception
 	 */
 	private String generateInumForNewPersonImpl() {
-		return UUID.randomUUID().toString();
+
+	    String id = null;
+	    if (idGeneratorService.isEnabled()) {
+	        id = idGeneratorService.executeExternalGenerateIdMethod(
+	            //Use the first enabled script only
+	            idGeneratorService.getCustomScriptConfigurations().stream().findFirst().orElse(null)
+	            , ""    //appId 
+	            , IdType.PEOPLE.getType()    //idType
+	            , ""    //idPrefix
+            );
+	    }
+        return id == null ? UUID.randomUUID().toString() : id;
+
 	}
 
 	public String getDnForPerson(String inum) {

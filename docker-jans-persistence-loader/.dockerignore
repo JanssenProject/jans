@@ -3,7 +3,6 @@
 
 # include required files/directories
 !scripts
-!static
 !templates
 !LICENSE
 !requirements.txt

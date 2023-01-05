@@ -1,0 +1,1 @@
+[{ "op": "replace", "path": "/responseTypes", "value":["code","token"]}] 

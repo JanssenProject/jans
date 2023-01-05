@@ -8,8 +8,8 @@ package io.jans.notify.service;
 
 import java.io.UnsupportedEncodingException;
 
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 import org.apache.commons.codec.binary.Base64;
 import io.jans.notify.model.conf.ClientConfiguration;

@@ -10,10 +10,14 @@ import io.jans.as.client.BaseTest;
 import io.jans.as.client.RegisterClient;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
+
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.StringUtils;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
+
+
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -37,11 +41,7 @@ public class RegistrationLoadTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
 
         showClient(registerClient);
-        assertEquals(response.getStatus(), 201, "Unexpected response code: " + response.getEntity());
-        assertNotNull(response.getClientId());
-        assertNotNull(response.getClientSecret());
-        assertNotNull(response.getRegistrationAccessToken());
-        assertNotNull(response.getClientSecretExpiresAt());
+        AssertBuilder.registerResponse(response).created().check();
 
         RegisterRequest readClientRequest = new RegisterRequest(response.getRegistrationAccessToken());
 
@@ -50,10 +50,6 @@ public class RegistrationLoadTest extends BaseTest {
         RegisterResponse readClientResponse = readClient.exec();
 
         showClient(readClient);
-        assertEquals(readClientResponse.getStatus(), 200, "Unexpected response code: " + readClientResponse.getEntity());
-        assertNotNull(readClientResponse.getClientId());
-        assertNotNull(readClientResponse.getClientSecret());
-        assertNotNull(readClientResponse.getClientIdIssuedAt());
-        assertNotNull(readClientResponse.getClientSecretExpiresAt());
+        AssertBuilder.registerResponse(readClientResponse).ok().check();
     }
 }

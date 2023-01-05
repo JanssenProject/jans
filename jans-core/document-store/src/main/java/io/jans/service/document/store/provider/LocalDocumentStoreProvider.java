@@ -12,11 +12,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.List;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import io.jans.service.document.store.conf.DocumentStoreConfiguration;
 import io.jans.service.document.store.conf.LocalDocumentStoreConfiguration;
@@ -56,6 +57,11 @@ public class LocalDocumentStoreProvider extends DocumentStoreProvider<LocalDocum
     	log.debug("Starting LocalDocumentStoreProvider ...");
 
     	if (StringHelper.isEmpty(localDocumentStoreConfiguration.getBaseLocation())) {
+    		String osName = System.getProperty("os.name");
+    		if (StringHelper.isNotEmpty(osName) && osName.toLowerCase().startsWith("windows")) {
+    			baseLocation = "";
+    			return;
+    		}
         	throw new IllegalArgumentException("Base location should not be empty");
     	}
     	
@@ -94,7 +100,7 @@ public class LocalDocumentStoreProvider extends DocumentStoreProvider<LocalDocum
 	}
 
 	@Override
-	public boolean saveDocument(String path, String documentContent, Charset charset) {
+	public boolean saveDocument(String path, String documentContent, Charset charset, List<String> moduleList) {
 		log.debug("Save document: '{}'", path);
 
 		File file = buildFilePath(path);
@@ -115,7 +121,7 @@ public class LocalDocumentStoreProvider extends DocumentStoreProvider<LocalDocum
 	}
 
 	@Override
-	public boolean saveDocumentStream(String path, InputStream documentStream) {
+	public boolean saveDocumentStream(String path, InputStream documentStream, List<String> moduleList) {
 		log.debug("Save document from stream: '{}'", path);
 
 		File file = buildFilePath(path);

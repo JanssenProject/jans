@@ -1,5 +1,3 @@
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/479526395cc74cb69f2f7c09296b9417)](https://www.codacy.com/gh/JanssenProject/jans-scim/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=JanssenProject/jans-scim&amp;utm_campaign=Badge_Grade)
-
 # Jans-SCIM
 
 A component of the Janssen Project that implements a standards-compliant SCIM service.
@@ -34,7 +32,7 @@ Depending on the scopes associated to a token, you will be granted (or denied) a
 |`https://jans.io/scim/all-resources.search`|Access the root .search endpoint| 
 |`https://jans.io/scim/bulk`|Send requests to the bulk endpoint|
 
-In order to facilitate the process of getting an access token, your Janssen installation already bundles an OAuth client named "SCIM client" with support for all of the scopes above. This client uses the `client_credentials` grant type and `client_secret_basic` mechanism to authenticate to the token endpoint.
+In order to facilitate the process of getting an access token, your Janssen installation already bundles an OAuth client named "SCIM client" with support for all the scopes above. This client uses the `client_credentials` grant type and `client_secret_basic` mechanism to authenticate to the token endpoint.
 
 To exercise a finer grained control over access, you may register multiple clients with limited scopes and deliver the client credentials as needed to your developers. 
 
@@ -71,7 +69,7 @@ curl -k -G -H 'Authorization: Bearer ACCESS_TOKEN' --data-urlencode 'filter=disp
 https://your-jans-server/jans-scim/restv1/v2/Users
 ```
 
-The ouput should show valid SCIM (JSON) output. Account the access token is short lived: once it expires you will get a status response of 401 and need to re-request the token as in the previous step.
+The output should show valid SCIM (JSON) output. Account the access token is short-lived: once it expires you will get a status response of 401 and need to re-request the token as in the previous step.
 
 ## API documentation and clients
 
@@ -83,9 +81,9 @@ There is a Java-based [client](https://github.com/JanssenProject/jans-scim/tree/
 
 Usage examples follow:
 
-#### Prereqs
+#### Prerequisites
 
-- Import the SSL certificate of your Jans server to the `cacerts` keystore of your local Java installation. A utility called [KeyStore Explorer](https://keystore-explorer.org/) makes this task super easy. By default Janssen uses a self-signed certificate that can be found at `/etc/certs/httpd.crt`.
+- Import the SSL certificate of your Jans server to the `cacerts` keystore of your local Java installation. A utility called [KeyStore Explorer](https://keystore-explorer.org/) makes this task super easy. By default, Janssen uses a self-signed certificate that can be found at `/etc/certs/httpd.crt`.
 
 - Maven build tool installed
 
@@ -165,3 +163,4 @@ This code performs a search using a filter based on username. It is recommended 
 The `client` instance resembles quite close the SCIM specification, so it is generally easy to map the operations described in the standard versus the Java methods available. It can be useful to have some javadocs at hand though, specifically those from `model` and `client` folders of this repository. You may clone this repo and run `mvn javadoc:javadoc` inside the two directories mentioned.
 
 Note that `ScimClientFactory` provides several methods that allow you to use OAuth clients which employ mechanisms other than the default (`client_secret_basic`) to request tokens. Also, you can make `client` belong to more restrictive interfaces limiting the operations available in your code.
+

@@ -1,5 +1,5 @@
 /*
- * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * Janssen Project software is available under the Apache License (2004). See http://www.apache.org/licenses/ for full text.
  *
  * Copyright (c) 2020, Janssen Project
  */
@@ -129,16 +129,16 @@ public class SpannerFilterConverter {
                 	if (!canJoinOrFilters) {
                 		continue;
                 	}
-                	
-                	if (tmpFilter.getMultiValued() != null) {
-                		canJoinOrFilters = false;
-                    	continue;
-                	}
 
                 	if ((FilterType.EQUALITY != tmpFilter.getType()) || (tmpFilter.getFilters() != null)) {
                     	canJoinOrFilters = false;
                     	continue;
                     }
+                	
+                	if (tmpFilter.getMultiValued() != null) {
+                		canJoinOrFilters = false;
+                    	continue;
+                	}
 
                     Boolean isMultiValuedDetected = determineMultiValuedByType(tmpFilter.getAttributeName(), propertiesAnnotationsMap);
                 	if (!Boolean.FALSE.equals(isMultiValuedDetected)) {
@@ -338,7 +338,7 @@ public class SpannerFilterConverter {
 				structField = childTableMapping.getColumTypes().get(attributeNameLower);
 			}
 		}
-		
+
 		if (structField == null) {
 	        throw new SearchException(String.format("Unknown column name '%s' in table/child table '%s'", attributeName, tableMapping.getTableName()));
 		}

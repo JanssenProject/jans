@@ -2,33 +2,6 @@ package io.jans.ca.plugin.adminui.model.auth;
 
 public class LicenseRequest {
     private String licenseKey;
-    private String validityPeriod;
-    private Integer maxActivations;
-    private Boolean licenseActive;
-
-    public String getValidityPeriod() {
-        return validityPeriod;
-    }
-
-    public void setValidityPeriod(String validityPeriod) {
-        this.validityPeriod = validityPeriod;
-    }
-
-    public Integer getMaxActivations() {
-        return maxActivations;
-    }
-
-    public void setMaxActivations(Integer maxActivations) {
-        this.maxActivations = maxActivations;
-    }
-
-    public Boolean getLicenseActive() {
-        return licenseActive;
-    }
-
-    public void setLicenseActive(Boolean licenseActive) {
-        this.licenseActive = licenseActive;
-    }
 
     public String getLicenseKey() {
         return licenseKey;
@@ -42,9 +15,6 @@ public class LicenseRequest {
     public String toString() {
         return "LicenseRequest{" +
                 "licenseKey='" + licenseKey + '\'' +
-                ", validityPeriod='" + validityPeriod + '\'' +
-                ", maxActivations=" + maxActivations +
-                ", licenseActive=" + licenseActive +
                 '}';
     }
 }

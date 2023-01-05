@@ -8,11 +8,12 @@ package io.jans.service.document.store.provider;
 
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.List;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import io.jans.service.document.store.conf.DocumentStoreConfiguration;
 import io.jans.service.document.store.conf.WebDavDocumentStoreConfiguration;
@@ -70,13 +71,13 @@ public class WebDavDocumentStoreProvider extends DocumentStoreProvider<WebDavDoc
 	}
 
 	@Override
-	public boolean saveDocument(String path, String documentContent, Charset charset) {
+	public boolean saveDocument(String path, String documentContent, Charset charset, List<String> moduleList) {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
-	public boolean saveDocumentStream(String path, InputStream documentStream) {
+	public boolean saveDocumentStream(String path, InputStream documentStream, List<String> moduleList) {
 		// TODO Auto-generated method stub
 		return false;
 	}

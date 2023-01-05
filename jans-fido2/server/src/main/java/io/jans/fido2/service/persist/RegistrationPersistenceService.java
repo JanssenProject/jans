@@ -15,15 +15,15 @@ import java.util.Optional;
 import java.util.TimeZone;
 import java.util.UUID;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import io.jans.orm.model.fido2.Fido2RegistrationData;
+import io.jans.orm.model.fido2.Fido2RegistrationEntry;
+import io.jans.orm.model.fido2.Fido2RegistrationStatus;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import org.apache.commons.lang.StringUtils;
 import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.conf.AppConfiguration;
-import io.jans.fido2.model.entry.Fido2RegistrationData;
-import io.jans.fido2.model.entry.Fido2RegistrationEntry;
-import io.jans.fido2.model.entry.Fido2RegistrationStatus;
 import io.jans.fido2.service.shared.UserService;
 import io.jans.as.common.model.common.User;
 import io.jans.as.model.config.StaticConfiguration;
@@ -37,6 +37,7 @@ import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
 /**
+ * Every registration is persisted under Person Entry
  * @author Yuriy Movchan
  * @version May 08, 2020
  */

@@ -7,16 +7,21 @@
 package io.jans.as.server.ws.rs;
 
 import io.jans.as.client.RegisterRequest;
-import io.jans.as.client.client.ResponseAsserter;
-import io.jans.as.client.ws.rs.ClientTestUtil;
 import io.jans.as.model.authorize.AuthorizeResponseParam;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.register.RegisterResponseParam;
+import io.jans.as.model.util.QueryStringDecoder;
 import io.jans.as.model.util.StringUtils;
 import io.jans.as.server.BaseTest;
+import io.jans.as.server.util.ResponseAsserter;
 import io.jans.as.server.util.ServerUtil;
+import io.jans.as.server.util.TestUtil;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.Invocation.Builder;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.json.JSONException;
@@ -24,24 +29,12 @@ import org.json.JSONObject;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import static io.jans.as.client.AuthorizationRequest.NO_REDIRECT_HEADER;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
+import static org.testng.Assert.*;
 
 /**
  * Functional tests for Authorize Web Services (embedded)
@@ -60,7 +53,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
     @Parameters({"registerPath", "redirectUris"})
     @Test
     public void dynamicClientRegistration(final String registerPath, final String redirectUris) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath).request();
         String registerRequestContent = null;
         try {
             List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.TOKEN,
@@ -86,7 +79,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
         assertNotNull(entity, "Unexpected result: " + entity);
         try {
             final io.jans.as.client.RegisterResponse registerResponse = io.jans.as.client.RegisterResponse.valueOf(entity);
-            ClientTestUtil.assert_(registerResponse);
+            TestUtil.assert_(registerResponse);
 
             clientId1 = registerResponse.getClientId();
         } catch (Exception e) {
@@ -112,7 +105,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
         authorizationRequest.setAuthPassword(userSecret);
 
         Builder request = ResteasyClientBuilder.newClient()
-                .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
         request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
         request.header("Accept", MediaType.TEXT_PLAIN);
 
@@ -128,7 +121,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
             URI uri = new URI(response.getLocation().toString());
             assertNotNull(uri.getQuery(), "Query string is null");
 
-            Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getQuery());
+            Map<String, String> params = QueryStringDecoder.decode(uri.getQuery());
 
             assertNotNull(params.get(AuthorizeResponseParam.CODE), "The code is null");
             assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
@@ -157,7 +150,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
         authorizationRequest.setAuthPassword(userSecret);
 
         Builder request = ResteasyClientBuilder.newClient()
-                .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
         request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
         request.header("Accept", MediaType.TEXT_PLAIN);
         request.header(NO_REDIRECT_HEADER, "");
@@ -176,7 +169,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
             URI uri = new URI(jsonObj.getString("redirect"));
             assertNotNull(uri.getQuery(), "Query string is null");
 
-            Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getQuery());
+            Map<String, String> params = QueryStringDecoder.decode(uri.getQuery());
 
             assertNotNull(params.get(AuthorizeResponseParam.CODE), "The code is null");
             assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
@@ -201,7 +194,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
         authorizationRequest.setAuthPassword(userSecret);
 
         Builder request = ResteasyClientBuilder.newClient()
-                .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
         request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
         request.header("Accept", MediaType.TEXT_PLAIN);
 
@@ -239,7 +232,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
         authorizationRequest.setAuthPassword(userSecret);
 
         Builder request = ResteasyClientBuilder.newClient()
-                .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
         request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
         request.header("Accept", MediaType.TEXT_PLAIN);
 
@@ -280,7 +273,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
         authorizationRequest.setAuthPassword(userSecret);
 
         Builder request = ResteasyClientBuilder.newClient()
-                .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
         request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
         request.header("Accept", MediaType.TEXT_PLAIN);
 
@@ -321,7 +314,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
         authorizationRequest.setAuthPassword(userSecret);
 
         Builder request = ResteasyClientBuilder.newClient()
-                .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
         request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
         request.header("Accept", MediaType.TEXT_PLAIN);
 
@@ -338,7 +331,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getFragment(), "Fragment is null");
 
-                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
+                Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
 
                 assertNotNull(params.get("access_token"), "The access token is null");
                 assertNotNull(params.get("state"), "The state is null");
@@ -372,7 +365,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
         authorizationRequest.setAuthPassword(userSecret);
 
         Builder request = ResteasyClientBuilder.newClient()
-                .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
         request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
         request.header("Accept", MediaType.TEXT_PLAIN);
 
@@ -413,7 +406,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
         authorizationRequest.setAuthPassword(userSecret);
 
         Builder request = ResteasyClientBuilder.newClient()
-                .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
         request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
         request.header("Accept", MediaType.TEXT_PLAIN);
 
@@ -430,7 +423,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getFragment(), "Fragment is null");
 
-                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
+                Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
 
                 assertNotNull(params.get("error"), "The error value is null");
                 assertNotNull(params.get("error_description"), "The errorDescription value is null");
@@ -461,7 +454,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
         authorizationRequest.setAuthPassword(userSecret);
 
         Builder request = ResteasyClientBuilder.newClient()
-                .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
         request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
         request.header("Accept", MediaType.TEXT_PLAIN);
 
@@ -478,7 +471,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getFragment(), "Fragment is null");
 
-                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
+                Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
 
                 assertNotNull(params.get(AuthorizeResponseParam.ACCESS_TOKEN), "The access token is null");
                 assertNotNull(params.get(AuthorizeResponseParam.TOKEN_TYPE), "The token type is null");
@@ -512,7 +505,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
         authorizationRequest.setAuthPassword(userSecret);
 
         Builder request = ResteasyClientBuilder.newClient()
-                .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
         request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
         request.header("Accept", MediaType.TEXT_PLAIN);
 
@@ -528,7 +521,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
             URI uri = new URI(response.getLocation().toString());
             assertNotNull(uri.getFragment(), "Query string is null");
 
-            Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
+            Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
 
             assertNotNull(params.get(AuthorizeResponseParam.CODE), "The code is null");
             assertNotNull(params.get(AuthorizeResponseParam.ID_TOKEN), "The id token is null");
@@ -558,7 +551,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
         authorizationRequest.setAuthPassword(userSecret);
 
         Builder request = ResteasyClientBuilder.newClient()
-                .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
         request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
         request.header("Accept", MediaType.TEXT_PLAIN);
 
@@ -575,7 +568,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getFragment(), "Fragment is null");
 
-                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
+                Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
 
                 assertNotNull(params.get(AuthorizeResponseParam.CODE), "The code is null");
                 assertNotNull(params.get(AuthorizeResponseParam.ACCESS_TOKEN), "The access token is null");
@@ -607,7 +600,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
         authorizationRequest.setAuthPassword(userSecret);
 
         Builder request = ResteasyClientBuilder.newClient()
-                .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
         request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
         request.header("Accept", MediaType.TEXT_PLAIN);
 
@@ -624,7 +617,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getFragment(), "Fragment is null");
 
-                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
+                Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
 
                 assertNotNull(params.get(AuthorizeResponseParam.CODE), "The code is null");
                 assertNotNull(params.get(AuthorizeResponseParam.ACCESS_TOKEN), "The access token is null");
@@ -657,7 +650,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
         authorizationRequest.setAuthPassword(userSecret);
 
         Builder request = ResteasyClientBuilder.newClient()
-                .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
         request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
         request.header("Accept", MediaType.TEXT_PLAIN);
 
@@ -674,7 +667,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getFragment(), "Fragment is null");
 
-                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
+                Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
 
                 assertNotNull(params.get(AuthorizeResponseParam.ID_TOKEN), "The id token is null");
                 assertNotNull(params.get(AuthorizeResponseParam.STATE), "The state is null");
@@ -703,7 +696,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
         authorizationRequest.setAuthPassword(userSecret);
 
         Builder request = ResteasyClientBuilder.newClient()
-                .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
         request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
 
         Response response = request.get();
@@ -719,7 +712,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getQuery(), "The query string is null");
 
-                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getQuery());
+                Map<String, String> params = QueryStringDecoder.decode(uri.getQuery());
 
                 assertNotNull(params.get(AuthorizeResponseParam.CODE), "The code is null");
                 assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
@@ -750,7 +743,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
         authorizationRequest.getPrompts().add(Prompt.NONE);
 
         Builder request = ResteasyClientBuilder.newClient()
-                .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
 
         Response response = request.get();
         String entity = response.readEntity(String.class);
@@ -765,7 +758,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getQuery(), "Query is null");
 
-                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getQuery());
+                Map<String, String> params = QueryStringDecoder.decode(uri.getQuery());
 
                 assertNotNull(params.get("error"), "The error value is null");
                 assertNotNull(params.get("error_description"), "The errorDescription value is null");
@@ -795,7 +788,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
         authorizationRequest.setAuthPassword(userSecret);
 
         Builder request = ResteasyClientBuilder.newClient()
-                .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
         request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
 
         Response response = request.get();
@@ -810,7 +803,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
             try {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getQuery(), "The query string is null");
-                assertEquals(uri.getPath(), url.getPath() + "authorize.htm");
+                assertEquals(uri.getPath(), getApiTargetPath(url, "authorize.htm"));
             } catch (URISyntaxException e) {
                 e.printStackTrace();
                 fail("Response URI is not well formed");
@@ -838,7 +831,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
         authorizationRequest.setAuthPassword(userSecret);
 
         Builder request = ResteasyClientBuilder.newClient()
-                .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
         request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
 
         Response response = request.get();
@@ -853,7 +846,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
             try {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getQuery(), "The query string is null");
-                assertEquals(uri.getPath(), url.getPath() + "authorize.htm");
+                assertEquals(uri.getPath(), getApiTargetPath(url, "authorize.htm"));
             } catch (URISyntaxException e) {
                 e.printStackTrace();
                 fail("Response URI is not well formed");
@@ -882,7 +875,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
         authorizationRequest.setAuthPassword(userSecret);
 
         Builder request = ResteasyClientBuilder.newClient()
-                .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
         request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
 
         Response response = request.get();
@@ -897,7 +890,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
             try {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getQuery(), "The query string is null");
-                assertEquals(uri.getPath(), url.getPath() + "authorize.htm");
+                assertEquals(uri.getPath(), getApiTargetPath(url, "authorize.htm"));
             } catch (URISyntaxException e) {
                 e.printStackTrace();
                 fail("Response URI is not well formed");
@@ -927,7 +920,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
         authorizationRequest.setAuthPassword(userSecret);
 
         Builder request = ResteasyClientBuilder.newClient()
-                .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
         request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
 
         Response response = request.get();
@@ -943,7 +936,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getQuery(), "Query is null");
 
-                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getQuery());
+                Map<String, String> params = QueryStringDecoder.decode(uri.getQuery());
 
                 assertNotNull(params.get("error"), "The error value is null");
                 assertNotNull(params.get("error_description"), "The errorDescription value is null");
@@ -960,7 +953,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
     @Test
     public void requestAuthorizationCodeWithoutRedirectUriStep1(final String registerPath, final String redirectUri)
             throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + registerPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + registerPath).request();
 
         String registerRequestContent = null;
         try {
@@ -1003,7 +996,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
         authorizationRequest.setAuthPassword(userSecret);
 
         Builder request = ResteasyClientBuilder.newClient()
-                .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
         request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
         request.header("Accept", MediaType.TEXT_PLAIN);
 
@@ -1020,7 +1013,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
             URI uri = new URI(response.getLocation().toString());
             assertNotNull(uri.getQuery(), "Query string is null");
 
-            Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getQuery());
+            Map<String, String> params = QueryStringDecoder.decode(uri.getQuery());
 
             assertNotNull(params.get(AuthorizeResponseParam.CODE), "The code is null");
             assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
@@ -1049,7 +1042,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
         authorizationRequest.setAuthPassword(userSecret);
 
         Builder request = ResteasyClientBuilder.newClient()
-                .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
         request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
         request.header("Accept", MediaType.TEXT_PLAIN);
 
@@ -1089,7 +1082,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
         authorizationRequest.setAuthPassword(userSecret);
 
         Builder request = ResteasyClientBuilder.newClient()
-                .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
         request.header("Authorization", "Basic " + authorizationRequest.getEncodedCredentials());
         request.header("Accept", MediaType.TEXT_PLAIN);
 
@@ -1106,7 +1099,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getFragment(), "Fragment is null");
 
-                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getFragment());
+                Map<String, String> params = QueryStringDecoder.decode(uri.getFragment());
 
                 assertNotNull(params.get(AuthorizeResponseParam.ACCESS_TOKEN), "The access token is null");
                 assertNotNull(params.get(AuthorizeResponseParam.STATE), "The state is null");
@@ -1140,7 +1133,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
         authorizationRequest.setAccessToken(accessToken2);
 
         Builder request = ResteasyClientBuilder.newClient()
-                .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
         request.header("Accept", MediaType.TEXT_PLAIN);
 
         Response response = request.get();
@@ -1156,7 +1149,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getQuery(), "The query string is null");
 
-                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getQuery());
+                Map<String, String> params = QueryStringDecoder.decode(uri.getQuery());
 
                 assertNotNull(params.get(AuthorizeResponseParam.CODE), "The code is null");
                 assertNotNull(params.get(AuthorizeResponseParam.SCOPE), "The scope is null");
@@ -1188,7 +1181,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
         authorizationRequest.setAccessToken("INVALID_ACCESS_TOKEN");
 
         Builder request = ResteasyClientBuilder.newClient()
-                .target(url.toString() + authorizePath + "?" + authorizationRequest.getQueryString()).request();
+                .target(getApiTagetURL(url) + authorizePath + "?" + authorizationRequest.getQueryString()).request();
         request.header("Accept", MediaType.TEXT_PLAIN);
 
         Response response = request.get();
@@ -1204,7 +1197,7 @@ public class AuthorizeRestWebServiceEmbeddedTest extends BaseTest {
                 URI uri = new URI(response.getLocation().toString());
                 assertNotNull(uri.getQuery(), "The query string is null");
 
-                Map<String, String> params = io.jans.as.client.QueryStringDecoder.decode(uri.getQuery());
+                Map<String, String> params = QueryStringDecoder.decode(uri.getQuery());
 
                 assertNotNull(params.get("error"), "The error value is null");
                 assertNotNull(params.get("error_description"), "The errorDescription value is null");

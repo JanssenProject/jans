@@ -1,0 +1,101 @@
+dn: inum=1200.2B7428,ou=scopes,o=jans
+description: Query user resources
+displayName: SCIM https://jans.io/scim/users.read
+inum: 1200.2B7428
+jansDefScope: false
+jansId: https://jans.io/scim/users.read
+jansScopeTyp: oauth
+objectClass: top
+objectClass: jansScope
+jansAttrs: {"spontaneousClientId":null,"spontaneousClientScopes":null,"showInConfigurationEndpoint":true}
+
+dn: inum=1200.0A0198,ou=scopes,o=jans
+description: Modify user resources
+displayName: SCIM https://jans.io/scim/users.write
+inum: 1200.0A0198
+jansDefScope: false
+jansId: https://jans.io/scim/users.write
+jansScopeTyp: oauth
+objectClass: top
+objectClass: jansScope
+jansAttrs: {"spontaneousClientId":null,"spontaneousClientScopes":null,"showInConfigurationEndpoint":true}
+
+dn: inum=1200.E14714,ou=scopes,o=jans
+description: Query group resources
+displayName: SCIM https://jans.io/scim/groups.read
+inum: 1200.E14714
+jansDefScope: false
+jansId: https://jans.io/scim/groups.read
+jansScopeTyp: oauth
+objectClass: top
+objectClass: jansScope
+
+dn: inum=1200.178DAF,ou=scopes,o=jans
+description: Modify group resources
+displayName: SCIM https://jans.io/scim/groups.write
+inum: 1200.178DAF
+jansDefScope: false
+jansId: https://jans.io/scim/groups.write
+jansScopeTyp: oauth
+objectClass: top
+objectClass: jansScope
+
+dn: inum=1200.57E5E9,ou=scopes,o=jans
+description: Query fido resources
+displayName: SCIM https://jans.io/scim/fido.read
+inum: 1200.57E5E9
+jansDefScope: false
+jansId: https://jans.io/scim/fido.read
+jansScopeTyp: oauth
+objectClass: top
+objectClass: jansScope
+
+dn: inum=1200.D0F7EB,ou=scopes,o=jans
+description: Modify fido resources
+displayName: SCIM https://jans.io/scim/fido.write
+inum: 1200.D0F7EB
+jansDefScope: false
+jansId: https://jans.io/scim/fido.write
+jansScopeTyp: oauth
+objectClass: top
+objectClass: jansScope
+
+dn: inum=1200.99AD30,ou=scopes,o=jans
+description: Query fido 2 resources
+displayName: SCIM https://jans.io/scim/fido2.read
+inum: 1200.99AD30
+jansDefScope: false
+jansId: https://jans.io/scim/fido2.read
+jansScopeTyp: oauth
+objectClass: top
+objectClass: jansScope
+
+dn: inum=1200.D5527D,ou=scopes,o=jans
+description: Modify fido 2 resources
+displayName: SCIM https://jans.io/scim/fido2.write
+inum: 1200.D5527D
+jansDefScope: false
+jansId: https://jans.io/scim/fido2.write
+jansScopeTyp: oauth
+objectClass: top
+objectClass: jansScope
+
+dn: inum=1200.83383D,ou=scopes,o=jans
+description: Access the root .search endpoint
+displayName: SCIM https://jans.io/scim/all-resources.search
+inum: 1200.83383D
+jansDefScope: false
+jansId: https://jans.io/scim/all-resources.search
+jansScopeTyp: oauth
+objectClass: top
+objectClass: jansScope
+
+dn: inum=1200.0D9EB4,ou=scopes,o=jans
+description: Send requests to the bulk endpoint
+displayName: SCIM https://jans.io/scim/bulk
+inum: 1200.0D9EB4
+jansDefScope: false
+jansId: https://jans.io/scim/bulk
+jansScopeTyp: oauth
+objectClass: top
+objectClass: jansScope

@@ -1,0 +1,98 @@
+# This workflow enforces each PR has an issue created.
+# It makes sure each PR is targeting an open issue.
+# If the PR does not target an issue , it will open an issue, write a comment and attempt to edit the PR to link it to the issue
+# The author would be asked to update the issues details.
+
+name: issue->PR
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+    paths-ignore:
+      - "docs/**"
+    branches:
+      - main
+  workflow_dispatch:
+jobs:
+  check-prs-issue:
+    if:  startsWith(github.head_ref, 'release-please') || startsWith(github.head_ref, 'dependabot/' || startsWith(github.head_ref, 'snyk-')
+    name: Check PRs issue
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+      - name: Wait for 25 seconds so that GH can attach issue to the PR if already mentioned by author
+        run: sleep 25s
+        shell: bash
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+          sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+          sudo apt-get update
+          sudo apt-get -y install gh
+      - name: Add a comment to a PR and create an issue if the PR does not reference an open issue
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_USER: ${{ github.event.pull_request.user.login }}
+          REPO_FULL_NAME: ${{ github.event.pull_request.base.repo.full_name }}
+        run: |
+          git config --global user.name "mo-auto"
+          git config --global user.email "54212639+mo-auto@users.noreply.github.com"
+          echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
+
+          issue_found=""
+
+          for issue in $( echo "$PR_TITLE $PR_BODY" | grep -o '#[0-9][0-9]*' ); do
+            if check_issue="$( gh api "repos/$REPO_FULL_NAME/issues/${issue#"#"}" )" \
+                && [ "$( echo "$check_issue" | python3 -c "import sys, json; data = json.load(sys.stdin); print(
+                  'node_id' in data and 'state' in data and data['node_id'].find('I_') == 0 and data['state'] == 'open'
+                )" )" = "True" ]; then
+              issue_found="$issue"
+              break
+            fi
+          done
+
+          if [ -n "$issue_found" ]; then
+            echo "OK: An open issue ($issue_found) is referenced in your PR ($PR_NUMBER)"
+          else
+            echo "Failed: No open issues referenced in your PR ($PR_NUMBER)" >&2
+            echo "Creating an issue..."
+
+            if ISSUE_NUMBER="$( echo "{ \"title\": \"fix: $PR_TITLE -autocreated \", \"body\": \"This issue was created because no open issues were referenced in your PR (#$PR_NUMBER).\" }" \
+                | gh api "repos/$REPO_FULL_NAME/issues" \
+                -X POST \
+                -H "Content-Type: application/json" \
+                --input - \
+                --jq '.number'
+            )"; then
+              echo "Issue number $ISSUE_NUMBER created"
+            else
+              echo "Error: Failed to create an issue" >&2
+              exit 1
+            fi
+
+            echo "Creating a comment..."
+            printf "%b" "Error: Hi @$PR_USER, You did not reference an open issue in your [PR]($PR_NUMBER). I attempted to create an [issue](#$ISSUE_NUMBER) for you.\
+              \n Please update that [issues'](#$ISSUE_NUMBER) title and body and make sure I correctly referenced it in the above PRs body." \
+              | gh issue comment "$PR_NUMBER" \
+              --body-file - \
+              --repo "$REPO_FULL_NAME"
+
+            if [ -z "$PR_BODY" ]; then
+              PR_BODY="Please edit this."
+            fi
+
+            echo "Editing PR $PR_NUMBER..."
+            printf "%b" "$PR_BODY\nCloses #$ISSUE_NUMBER, " | gh pr edit "$PR_NUMBER" \
+              --body-file - \
+              --repo "$REPO_FULL_NAME"
+            # Report bad practice
+            curl -X POST -H 'Content-Type: application/json' --data '{"alias":"Mo-Auto","emoji":":robot:","text":":x: :cry: It seems like @${{github.actor}} did not follow the structure flow in GH Issue --> PR. Hi @${{github.actor}} . You did not reference an open issue in your [PR](https://github.com/${{github.repository}}/pull/${{ github.event.pull_request.number }}) body before opening it. :x: ","attachments":[{"title":"GitHub user behavior reporter","title_link":"https://docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue","text":"We are not too happy with your PR practices. Always open a detailed issue before opening a PR. Make sure to reference that PR.","color":"#764FA5"}]}' ${{ secrets.GITHUBUSERBEHAVIORROCKETCHATREPORTER }}
+            exit 0
+          fi

@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
 import io.jans.as.model.common.HasParamName;
 import io.jans.orm.annotation.AttributeEnum;
+import io.jans.orm.model.base.LocalizedString;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -29,24 +30,13 @@ import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
+import java.util.*;
 
 /**
  * @author Yuriy Zabrovarnyy
  * @author Javier Rojas Blum
- * @version September 4, 2019
+ * @version April 25, 2022
  */
-
 public class Util {
 
     private static final Logger LOG = LoggerFactory.getLogger(Util.class);
@@ -165,6 +155,20 @@ public class Util {
     public static void addToJSONObjectIfNotNull(JSONObject jsonObject, String key, String[] value) throws JSONException {
         if (jsonObject != null && value != null && StringUtils.isNotBlank(key)) {
             jsonObject.put(key, new JSONArray(Arrays.asList(value)));
+        }
+    }
+
+    public static void addToJSONObjectIfNotNullOrEmpty(JSONObject jsonObject, String key, String[] value) throws JSONException {
+        if (jsonObject != null && value != null && value.length > 0 && StringUtils.isNotBlank(key)) {
+            jsonObject.put(key, new JSONArray(Arrays.asList(value)));
+        }
+    }
+
+    public static void addToJSONObjectIfNotNull(JSONObject jsonObject, String key, LocalizedString localizedString) throws JSONException {
+        if (jsonObject != null && localizedString != null && StringUtils.isNotBlank(key)) {
+            localizedString.getLanguageTags()
+                    .forEach(languageTag -> jsonObject.put(key + (StringUtils.isBlank(languageTag) ? "" : "#" + languageTag),
+                            localizedString.getValue(languageTag)));
         }
     }
 
@@ -288,10 +292,22 @@ public class Util {
     }
 
     public static int parseIntSilently(String intString) {
+        return parseIntSilently(intString, -1);
+    }
+
+    public static int parseIntSilently(String intString, int defaultValue) {
         try {
             return Integer.parseInt(intString);
         } catch (Exception e) {
-            return -1;
+            return defaultValue;
+        }
+    }
+
+    public static Integer parseIntegerSilently(String intString) {
+        try {
+            return Integer.parseInt(intString);
+        } catch (Exception e) {
+            return null;
         }
     }
 
@@ -314,20 +330,6 @@ public class Util {
             result.append(Integer.toString((value & 0xff) + 0x100, 16).substring(1));
         }
         return result.toString();
-    }
-
-    public static Integer getNumberOfSecondFromNow(Date date) {
-        if (date == null) {
-            return 0;
-        }
-
-        long now = new Date().getTime();
-        final long time = date.getTime();
-        if (time > now) {
-            return (int) (time - now) / 1000;
-        }
-
-        return null;
     }
 
     public static Date createExpirationDate(Integer lifetimeInSeconds) {
@@ -357,5 +359,18 @@ public class Util {
             }
         }
         return result;
+    }
+
+    public static void putArray(JSONObject jsonObj, List<String> list, String key) {
+        if (list == null || list.isEmpty()) {
+            return;
+        }
+        JSONArray jsonArray = new JSONArray();
+        for (String alg : list) {
+            jsonArray.put(alg);
+        }
+        if (jsonArray.length() > 0) {
+            jsonObj.put(key, jsonArray);
+        }
     }
 }

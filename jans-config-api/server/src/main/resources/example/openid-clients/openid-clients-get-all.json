@@ -1,0 +1,716 @@
+{
+    "start": 0,
+    "totalEntriesCount": 9,
+    "entriesCount": 9,
+    "entries": [
+        {
+            "dn": "inum=1800.768b3d38-a6e8-4be4-93d1-72df33d34fd6,ou=clients,o=jans",
+            "deletable": false,
+            "clientSecret": "vA2TTjAOTfQY",
+            "frontChannelLogoutSessionRequired": false,
+            "redirectUris": [
+                "https://jans.server2/admin-ui",
+                "http://localhost:4100"
+            ],
+            "responseTypes": [
+                "code"
+            ],
+            "grantTypes": [
+                "authorization_code",
+                "refresh_token",
+                "client_credentials"
+            ],
+            "applicationType": "web",
+            "clientName": "Jans Config Api Client",
+            "logoUri": "",
+            "clientUri": "",
+            "policyUri": "",
+            "tosUri": "",
+            "subjectType": "pairwise",
+            "idTokenSignedResponseAlg": "RS256",
+            "tokenEndpointAuthMethod": "client_secret_basic",
+            "scopes": [
+                "inum=C4F7,ou=scopes,o=jans",
+                "inum=1200.487800,ou=scopes,o=jans",
+                "inum=1200.9CEE5C,ou=scopes,o=jans",
+                "inum=1800.FFE5C0,ou=scopes,o=jans",
+                "inum=1800.472951,ou=scopes,o=jans",
+                "inum=1800.556F45,ou=scopes,o=jans",
+                "inum=1800.77FB4F,ou=scopes,o=jans",
+                "inum=1800.AA8DFE,ou=scopes,o=jans",
+                "inum=1800.CD5B72,ou=scopes,o=jans",
+                "inum=1800.CBCF52,ou=scopes,o=jans",
+                "inum=1800.12284F,ou=scopes,o=jans",
+                "inum=1800.141B26,ou=scopes,o=jans",
+                "inum=1800.A018AC,ou=scopes,o=jans",
+                "inum=1800.6E4456,ou=scopes,o=jans",
+                "inum=1800.55499D,ou=scopes,o=jans",
+                "inum=1800.E730AA,ou=scopes,o=jans",
+                "inum=1800.097318,ou=scopes,o=jans",
+                "inum=1800.04CF24,ou=scopes,o=jans",
+                "inum=1800.F963F9,ou=scopes,o=jans",
+                "inum=1800.31F580,ou=scopes,o=jans",
+                "inum=1800.E512E3,ou=scopes,o=jans",
+                "inum=1800.E65DC6,ou=scopes,o=jans",
+                "inum=1800.3C1F46,ou=scopes,o=jans",
+                "inum=1800.20D48C,ou=scopes,o=jans",
+                "inum=1800.4601AA,ou=scopes,o=jans",
+                "inum=1800.A9B842,ou=scopes,o=jans",
+                "inum=1800.864485,ou=scopes,o=jans",
+                "inum=1800.F0B654,ou=scopes,o=jans",
+                "inum=1800.45F1D7,ou=scopes,o=jans",
+                "inum=1800.B78FA5,ou=scopes,o=jans",
+                "inum=1800.E3D7E0,ou=scopes,o=jans",
+                "inum=1800.E212DC,ou=scopes,o=jans",
+                "inum=1800.94F80F,ou=scopes,o=jans",
+                "inum=1800.9F96F3,ou=scopes,o=jans",
+                "inum=1800.CB50EC,ou=scopes,o=jans",
+                "inum=1800.1CA946,ou=scopes,o=jans",
+                "inum=1800.18231E,ou=scopes,o=jans",
+                "inum=1800.C25D78,ou=scopes,o=jans",
+                "inum=1800.12B340,ou=scopes,o=jans",
+                "inum=1800.7A78C3,ou=scopes,o=jans",
+                "inum=1800.ECB839,ou=scopes,o=jans",
+                "inum=1800.62579C,ou=scopes,o=jans",
+                "inum=1800.29B156,ou=scopes,o=jans",
+                "inum=1800.9DC774,ou=scopes,o=jans",
+                "inum=1800.71BA21,ou=scopes,o=jans",
+                "inum=1800.FC35D2,ou=scopes,o=jans",
+                "inum=1800.F8CA5F,ou=scopes,o=jans",
+                "inum=1800.D92553,ou=scopes,o=jans",
+                "inum=1800.08CB80,ou=scopes,o=jans",
+                "inum=1800.DF434B,ou=scopes,o=jans",
+                "inum=1800.127954,ou=scopes,o=jans",
+                "inum=1800.E7CB8C,ou=scopes,o=jans"
+            ],
+            "trustedClient": false,
+            "persistClientAuthorizations": true,
+            "includeClaimsInIdToken": false,
+            "customAttributes": [
+                {
+                    "name": "displayName",
+                    "multiValued": false,
+                    "values": [
+                        "Jans Config Api Client"
+                    ],
+                    "value": "Jans Config Api Client",
+                    "displayValue": "Jans Config Api Client"
+                }
+            ],
+            "customObjectClasses": [
+                "top"
+            ],
+            "rptAsJwt": false,
+            "accessTokenAsJwt": false,
+            "accessTokenSigningAlg": "RS256",
+            "disabled": false,
+            "attributes": {
+                "runIntrospectionScriptBeforeJwtCreation": false,
+                "keepClientAuthorizationAfterExpiration": false,
+                "allowSpontaneousScopes": false,
+                "backchannelLogoutSessionRequired": false,
+                "parLifetime": 600,
+                "requirePar": false,
+                "jansDefaultPromptLogin": false
+            },
+            "tokenBindingSupported": false,
+            "authenticationMethod": "client_secret_basic",
+            "displayName": "Jans Config Api Client",
+            "baseDn": "inum=1800.768b3d38-a6e8-4be4-93d1-72df33d34fd6,ou=clients,o=jans",
+            "inum": "1800.768b3d38-a6e8-4be4-93d1-72df33d34fd6"
+        },
+        {
+            "dn": "inum=1802.db19d013-bb63-42c4-8ce9-79a4aa58aa7b,ou=clients,o=jans",
+            "deletable": false,
+            "clientSecret": "dpus42KsYjda",
+            "frontChannelLogoutSessionRequired": false,
+            "responseTypes": [
+                "code"
+            ],
+            "grantTypes": [
+                "authorization_code",
+                "client_credentials",
+                "refresh_token"
+            ],
+            "applicationType": "web",
+            "clientName": "Jans Config Api Client",
+            "logoUri": "",
+            "clientUri": "",
+            "policyUri": "",
+            "tosUri": "",
+            "subjectType": "pairwise",
+            "idTokenSignedResponseAlg": "RS256",
+            "tokenEndpointAuthMethod": "client_secret_basic",
+            "scopes": [
+                "inum=1800.FFE5C0,ou=scopes,o=jans",
+                "inum=1800.472951,ou=scopes,o=jans",
+                "inum=1800.556F45,ou=scopes,o=jans",
+                "inum=1800.77FB4F,ou=scopes,o=jans",
+                "inum=1800.AA8DFE,ou=scopes,o=jans",
+                "inum=1800.CD5B72,ou=scopes,o=jans",
+                "inum=1800.CBCF52,ou=scopes,o=jans",
+                "inum=1800.12284F,ou=scopes,o=jans",
+                "inum=1800.141B26,ou=scopes,o=jans",
+                "inum=1800.A018AC,ou=scopes,o=jans",
+                "inum=1800.6E4456,ou=scopes,o=jans",
+                "inum=1800.55499D,ou=scopes,o=jans",
+                "inum=1800.E730AA,ou=scopes,o=jans",
+                "inum=1800.097318,ou=scopes,o=jans",
+                "inum=1800.04CF24,ou=scopes,o=jans",
+                "inum=1800.F963F9,ou=scopes,o=jans",
+                "inum=1800.31F580,ou=scopes,o=jans",
+                "inum=1800.E512E3,ou=scopes,o=jans",
+                "inum=1800.E65DC6,ou=scopes,o=jans",
+                "inum=1800.3C1F46,ou=scopes,o=jans",
+                "inum=1800.20D48C,ou=scopes,o=jans",
+                "inum=1800.4601AA,ou=scopes,o=jans",
+                "inum=1800.A9B842,ou=scopes,o=jans",
+                "inum=1800.864485,ou=scopes,o=jans",
+                "inum=1800.F0B654,ou=scopes,o=jans",
+                "inum=1800.45F1D7,ou=scopes,o=jans",
+                "inum=1800.B78FA5,ou=scopes,o=jans",
+                "inum=1800.E3D7E0,ou=scopes,o=jans",
+                "inum=1800.E212DC,ou=scopes,o=jans",
+                "inum=1800.94F80F,ou=scopes,o=jans",
+                "inum=1800.9F96F3,ou=scopes,o=jans",
+                "inum=1800.CB50EC,ou=scopes,o=jans",
+                "inum=1800.1CA946,ou=scopes,o=jans",
+                "inum=1800.18231E,ou=scopes,o=jans",
+                "inum=1800.C25D78,ou=scopes,o=jans",
+                "inum=1800.12B340,ou=scopes,o=jans",
+                "inum=1800.7A78C3,ou=scopes,o=jans",
+                "inum=1800.ECB839,ou=scopes,o=jans",
+                "inum=1800.62579C,ou=scopes,o=jans",
+                "inum=1800.29B156,ou=scopes,o=jans",
+                "inum=1800.9DC774,ou=scopes,o=jans",
+                "inum=1800.71BA21,ou=scopes,o=jans",
+                "inum=1800.FC35D2,ou=scopes,o=jans",
+                "inum=1800.F8CA5F,ou=scopes,o=jans",
+                "inum=1800.D92553,ou=scopes,o=jans",
+                "inum=1800.08CB80,ou=scopes,o=jans",
+                "inum=1800.DF434B,ou=scopes,o=jans",
+                "inum=1800.127954,ou=scopes,o=jans",
+                "inum=1800.E7CB8C,ou=scopes,o=jans",
+                "inum=C4F7,ou=scopes,o=jans"
+            ],
+            "trustedClient": false,
+            "persistClientAuthorizations": true,
+            "includeClaimsInIdToken": false,
+            "customAttributes": [
+                {
+                    "name": "displayName",
+                    "multiValued": false,
+                    "values": [
+                        "Jans Config Api Client"
+                    ],
+                    "value": "Jans Config Api Client",
+                    "displayValue": "Jans Config Api Client"
+                }
+            ],
+            "customObjectClasses": [
+                "top"
+            ],
+            "rptAsJwt": false,
+            "accessTokenAsJwt": false,
+            "accessTokenSigningAlg": "RS256",
+            "disabled": false,
+            "attributes": {
+                "runIntrospectionScriptBeforeJwtCreation": false,
+                "keepClientAuthorizationAfterExpiration": false,
+                "allowSpontaneousScopes": false,
+                "backchannelLogoutSessionRequired": false,
+                "parLifetime": 600,
+                "requirePar": false,
+                "jansDefaultPromptLogin": false
+            },
+            "tokenBindingSupported": false,
+            "authenticationMethod": "client_secret_basic",
+            "displayName": "Jans Config Api Client",
+            "baseDn": "inum=1802.db19d013-bb63-42c4-8ce9-79a4aa58aa7b,ou=clients,o=jans",
+            "inum": "1802.db19d013-bb63-42c4-8ce9-79a4aa58aa7b"
+        },
+        {
+            "dn": "inum=1201.1d010784-b5bf-4813-8f49-cfea00f50498,ou=clients,o=jans",
+            "clientSecret": "3r2aX1TUEEyX",
+            "frontChannelLogoutSessionRequired": false,
+            "redirectUris": [
+                "https://jans.server2/.well-known/scim-configuration"
+            ],
+            "grantTypes": [
+                "client_credentials"
+            ],
+            "applicationType": "native",
+            "clientName": "SCIM client",
+            "logoUri": "",
+            "clientUri": "",
+            "policyUri": "",
+            "tosUri": "",
+            "subjectType": "pairwise",
+            "tokenEndpointAuthMethod": "client_secret_basic",
+            "scopes": [
+                "inum=1200.487800,ou=scopes,o=jans",
+                "inum=1200.9CEE5C,ou=scopes,o=jans",
+                "inum=1200.B6AE14,ou=scopes,o=jans",
+                "inum=1200.2F4765,ou=scopes,o=jans",
+                "inum=1200.5BFEE9,ou=scopes,o=jans",
+                "inum=1200.E05ED3,ou=scopes,o=jans",
+                "inum=1200.37F617,ou=scopes,o=jans",
+                "inum=1200.585BE3,ou=scopes,o=jans",
+                "inum=1200.CFB1B5,ou=scopes,o=jans",
+                "inum=1200.B29D76,ou=scopes,o=jans"
+            ],
+            "trustedClient": false,
+            "persistClientAuthorizations": false,
+            "includeClaimsInIdToken": false,
+            "customAttributes": [
+                {
+                    "name": "displayName",
+                    "multiValued": false,
+                    "values": [
+                        "SCIM client"
+                    ],
+                    "value": "SCIM client",
+                    "displayValue": "SCIM client"
+                }
+            ],
+            "customObjectClasses": [
+                "top"
+            ],
+            "rptAsJwt": false,
+            "accessTokenAsJwt": false,
+            "accessTokenSigningAlg": "RS256",
+            "disabled": false,
+            "attributes": {
+                "runIntrospectionScriptBeforeJwtCreation": false,
+                "keepClientAuthorizationAfterExpiration": false,
+                "allowSpontaneousScopes": false,
+                "backchannelLogoutSessionRequired": false,
+                "parLifetime": 600,
+                "requirePar": false,
+                "jansDefaultPromptLogin": false
+            },
+            "tokenBindingSupported": false,
+            "authenticationMethod": "client_secret_basic",
+            "displayName": "SCIM client",
+            "baseDn": "inum=1201.1d010784-b5bf-4813-8f49-cfea00f50498,ou=clients,o=jans",
+            "inum": "1201.1d010784-b5bf-4813-8f49-cfea00f50498"
+        },
+        {
+            "dn": "inum=2000.7810d591-69d3-458c-9309-4268085fe71c,ou=clients,o=jans",
+            "deletable": false,
+            "clientSecret": "M7plxxzCRxDN",
+            "frontChannelLogoutUri": "http://localhost:4100/logout",
+            "frontChannelLogoutSessionRequired": false,
+            "redirectUris": [
+                "https://jans.server2/admin",
+                "http://localhost:4100"
+            ],
+            "responseTypes": [
+                "code"
+            ],
+            "grantTypes": [
+                "authorization_code",
+                "refresh_token",
+                "client_credentials",
+                "urn:ietf:params:oauth:grant-type:device_code"
+            ],
+            "applicationType": "web",
+            "clientName": "Jans Role Based Client",
+            "logoUri": "",
+            "clientUri": "",
+            "policyUri": "",
+            "tosUri": "",
+            "subjectType": "pairwise",
+            "idTokenSignedResponseAlg": "RS256",
+            "userInfoSignedResponseAlg": "RS256",
+            "tokenEndpointAuthMethod": "client_secret_basic",
+            "postLogoutRedirectUris": [
+                "http://localhost:4100",
+                "https://jans.server2/admin"
+            ],
+            "scopes": [
+                "inum=C4F7,ou=scopes,o=jans",
+                "inum=C4F6,ou=scopes,o=jans",
+                "inum=43F1,ou=scopes,o=jans",
+                "inum=764C,ou=scopes,o=jans",
+                "inum=F0C4,ou=scopes,o=jans"
+            ],
+            "trustedClient": false,
+            "persistClientAuthorizations": true,
+            "includeClaimsInIdToken": false,
+            "accessTokenLifetime": 2592000,
+            "customAttributes": [
+                {
+                    "name": "displayName",
+                    "multiValued": false,
+                    "values": [
+                        "Jans Role Based Client"
+                    ],
+                    "value": "Jans Role Based Client",
+                    "displayValue": "Jans Role Based Client"
+                }
+            ],
+            "customObjectClasses": [
+                "top"
+            ],
+            "rptAsJwt": false,
+            "accessTokenAsJwt": true,
+            "accessTokenSigningAlg": "RS256",
+            "disabled": false,
+            "attributes": {
+                "runIntrospectionScriptBeforeJwtCreation": true,
+                "keepClientAuthorizationAfterExpiration": false,
+                "allowSpontaneousScopes": false,
+                "backchannelLogoutSessionRequired": false,
+                "introspectionScripts": [
+                    "inum=A44E-4F3D,ou=scripts,o=jans"
+                ],
+                "parLifetime": 600,
+                "requirePar": false,
+                "jansDefaultPromptLogin": false
+            },
+            "tokenBindingSupported": false,
+            "authenticationMethod": "client_secret_basic",
+            "displayName": "Jans Role Based Client",
+            "baseDn": "inum=2000.7810d591-69d3-458c-9309-4268085fe71c,ou=clients,o=jans",
+            "inum": "2000.7810d591-69d3-458c-9309-4268085fe71c"
+        },
+        {
+            "dn": "inum=FF81-2D39,ou=clients,o=jans",
+            "clientSecret": "FF81-2D39-jans",
+            "frontChannelLogoutSessionRequired": false,
+            "redirectUris": [
+                "https://jans.server2/jans-auth-rp/home.htm",
+                "https://client.example.com/cb",
+                "https://client.example.com/cb1",
+                "https://client.example.com/cb2"
+            ],
+            "claimRedirectUris": [
+                "https://jans.server2/jans-auth/restv1/uma/gather_claims"
+            ],
+            "responseTypes": [
+                "token",
+                "code",
+                "id_token"
+            ],
+            "grantTypes": [
+                "authorization_code",
+                "implicit",
+                "refresh_token",
+                "client_credentials"
+            ],
+            "applicationType": "web",
+            "clientName": "Jans Test Client (don't remove)",
+            "logoUri": "",
+            "clientUri": "",
+            "policyUri": "",
+            "tosUri": "",
+            "subjectType": "public",
+            "idTokenSignedResponseAlg": "RS256",
+            "tokenEndpointAuthMethod": "client_secret_basic",
+            "scopes": [
+                "inum=F0C4,ou=scopes,o=jans",
+                "inum=10B2,ou=scopes,o=jans",
+                "inum=764C,ou=scopes,o=jans",
+                "inum=43F1,ou=scopes,o=jans",
+                "inum=341A,ou=scopes,o=jans",
+                "inum=6D99,ou=scopes,o=jans"
+            ],
+            "trustedClient": true,
+            "persistClientAuthorizations": false,
+            "includeClaimsInIdToken": false,
+            "customAttributes": [
+                {
+                    "name": "displayName",
+                    "multiValued": false,
+                    "values": [
+                        "Jans Test Client (don't remove)"
+                    ],
+                    "value": "Jans Test Client (don't remove)",
+                    "displayValue": "Jans Test Client (don't remove)"
+                }
+            ],
+            "customObjectClasses": [
+                "top"
+            ],
+            "rptAsJwt": false,
+            "accessTokenAsJwt": false,
+            "disabled": false,
+            "attributes": {
+                "runIntrospectionScriptBeforeJwtCreation": false,
+                "keepClientAuthorizationAfterExpiration": false,
+                "allowSpontaneousScopes": false,
+                "backchannelLogoutSessionRequired": false,
+                "parLifetime": 600,
+                "requirePar": false,
+                "jansDefaultPromptLogin": false
+            },
+            "tokenBindingSupported": false,
+            "authenticationMethod": "client_secret_basic",
+            "displayName": "Jans Test Client (don't remove)",
+            "baseDn": "inum=FF81-2D39,ou=clients,o=jans",
+            "inum": "FF81-2D39"
+        },
+        {
+            "dn": "inum=AB77-1A2B,ou=clients,o=jans",
+            "clientSecret": "AB77-1A2B-jans",
+            "frontChannelLogoutSessionRequired": false,
+            "redirectUris": [
+                "https://client.example.com/cb"
+            ],
+            "claimRedirectUris": [
+                "https://jans.server2/jans-auth/restv1/uma/gather_claims"
+            ],
+            "responseTypes": [
+                "code",
+                "id_token"
+            ],
+            "grantTypes": [
+                "authorization_code",
+                "implicit",
+                "refresh_token",
+                "client_credentials"
+            ],
+            "applicationType": "web",
+            "clientName": "Jans Test Resource Server Client (don't remove)",
+            "logoUri": "",
+            "clientUri": "",
+            "policyUri": "",
+            "tosUri": "",
+            "subjectType": "public",
+            "idTokenSignedResponseAlg": "RS256",
+            "tokenEndpointAuthMethod": "client_secret_basic",
+            "scopes": [
+                "inum=6D99,ou=scopes,o=jans",
+                "inum=7D90,ou=scopes,o=jans"
+            ],
+            "trustedClient": true,
+            "persistClientAuthorizations": false,
+            "includeClaimsInIdToken": false,
+            "customAttributes": [
+                {
+                    "name": "displayName",
+                    "multiValued": false,
+                    "values": [
+                        "Jans Test Resource Server Client (don't remove)"
+                    ],
+                    "value": "Jans Test Resource Server Client (don't remove)",
+                    "displayValue": "Jans Test Resource Server Client (don't remove)"
+                }
+            ],
+            "customObjectClasses": [
+                "top"
+            ],
+            "rptAsJwt": false,
+            "accessTokenAsJwt": false,
+            "disabled": false,
+            "attributes": {
+                "runIntrospectionScriptBeforeJwtCreation": false,
+                "keepClientAuthorizationAfterExpiration": false,
+                "allowSpontaneousScopes": false,
+                "backchannelLogoutSessionRequired": false,
+                "parLifetime": 600,
+                "requirePar": false,
+                "jansDefaultPromptLogin": false
+            },
+            "tokenBindingSupported": false,
+            "authenticationMethod": "client_secret_basic",
+            "displayName": "Jans Test Resource Server Client (don't remove)",
+            "baseDn": "inum=AB77-1A2B,ou=clients,o=jans",
+            "inum": "AB77-1A2B"
+        },
+        {
+            "dn": "inum=3E20,ou=clients,o=jans",
+            "clientSecret": "3E20-jans",
+            "frontChannelLogoutSessionRequired": false,
+            "redirectUris": [
+                "https://client.example.com/cb"
+            ],
+            "responseTypes": [
+                "code",
+                "id_token"
+            ],
+            "grantTypes": [
+                "authorization_code",
+                "implicit",
+                "refresh_token",
+                "client_credentials"
+            ],
+            "applicationType": "web",
+            "clientName": "Jans Test Requesting Party Client (don't remove)",
+            "logoUri": "",
+            "clientUri": "",
+            "policyUri": "",
+            "tosUri": "",
+            "subjectType": "public",
+            "idTokenSignedResponseAlg": "RS256",
+            "tokenEndpointAuthMethod": "client_secret_basic",
+            "trustedClient": true,
+            "persistClientAuthorizations": false,
+            "includeClaimsInIdToken": false,
+            "customAttributes": [
+                {
+                    "name": "displayName",
+                    "multiValued": false,
+                    "values": [
+                        "Jans Test Requesting Party Client (don't remove)"
+                    ],
+                    "value": "Jans Test Requesting Party Client (don't remove)",
+                    "displayValue": "Jans Test Requesting Party Client (don't remove)"
+                }
+            ],
+            "customObjectClasses": [
+                "top"
+            ],
+            "rptAsJwt": false,
+            "accessTokenAsJwt": false,
+            "disabled": false,
+            "attributes": {
+                "runIntrospectionScriptBeforeJwtCreation": false,
+                "keepClientAuthorizationAfterExpiration": false,
+                "allowSpontaneousScopes": false,
+                "backchannelLogoutSessionRequired": false,
+                "parLifetime": 600,
+                "requirePar": false,
+                "jansDefaultPromptLogin": false
+            },
+            "tokenBindingSupported": false,
+            "authenticationMethod": "client_secret_basic",
+            "displayName": "Jans Test Requesting Party Client (don't remove)",
+            "baseDn": "inum=3E20,ou=clients,o=jans",
+            "inum": "3E20"
+        },
+        {
+            "dn": "inum=b3c1d295-42e5-425e-b021-7b2fd3206437,ou=clients,o=jans",
+            "deletable": false,
+            "clientSecret": "be8af842-28c7-4894-b942-15df1325bc9b",
+            "frontChannelLogoutSessionRequired": false,
+            "redirectUris": [
+                "https://abc,com"
+            ],
+            "responseTypes": [
+                "code"
+            ],
+            "grantTypes": [
+                "refresh_token",
+                "authorization_code"
+            ],
+            "applicationType": "web",
+            "clientName": "test1234",
+            "logoUri": "",
+            "clientUri": "",
+            "policyUri": "",
+            "tosUri": "",
+            "subjectType": "public",
+            "tokenEndpointAuthMethod": "client_secret_basic",
+            "scopes": [
+                "inum=764C,ou=scopes,o=jans",
+                "inum=43F1,ou=scopes,o=jans",
+                "inum=C17A,ou=scopes,o=jans"
+            ],
+            "trustedClient": false,
+            "persistClientAuthorizations": false,
+            "includeClaimsInIdToken": false,
+            "customAttributes": [
+                {
+                    "name": "displayName",
+                    "multiValued": false,
+                    "values": [
+                        "test1234"
+                    ],
+                    "value": "test1234",
+                    "displayValue": "test1234"
+                }
+            ],
+            "customObjectClasses": [
+                "top",
+                "jansClntCustomAttributes"
+            ],
+            "rptAsJwt": false,
+            "accessTokenAsJwt": false,
+            "disabled": false,
+            "attributes": {
+                "runIntrospectionScriptBeforeJwtCreation": false,
+                "keepClientAuthorizationAfterExpiration": false,
+                "allowSpontaneousScopes": false,
+                "backchannelLogoutSessionRequired": false,
+                "parLifetime": 600,
+                "requirePar": false,
+                "jansDefaultPromptLogin": false
+            },
+            "backchannelUserCodeParameter": false,
+            "description": "test1234",
+            "tokenBindingSupported": false,
+            "authenticationMethod": "client_secret_basic",
+            "displayName": "test1234",
+            "baseDn": "inum=b3c1d295-42e5-425e-b021-7b2fd3206437,ou=clients,o=jans",
+            "inum": "b3c1d295-42e5-425e-b021-7b2fd3206437"
+        },
+        {
+            "dn": "inum=1bb91a73-6899-440f-ac27-c04429671522,ou=clients,o=jans",
+            "deletable": false,
+            "clientSecret": "745950bb-4e07-4d3b-ae7d-82d03ee070cd",
+            "frontChannelLogoutSessionRequired": false,
+            "redirectUris": [
+                "https://abc,com"
+            ],
+            "responseTypes": [
+                "code"
+            ],
+            "grantTypes": [
+                "refresh_token",
+                "authorization_code"
+            ],
+            "applicationType": "web",
+            "clientName": "test12345",
+            "logoUri": "",
+            "clientUri": "",
+            "policyUri": "",
+            "tosUri": "",
+            "subjectType": "public",
+            "tokenEndpointAuthMethod": "client_secret_basic",
+            "scopes": [
+                "inum=764C,ou=scopes,o=jans",
+                "inum=43F1,ou=scopes,o=jans",
+                "inum=C17A,ou=scopes,o=jans"
+            ],
+            "trustedClient": false,
+            "persistClientAuthorizations": false,
+            "includeClaimsInIdToken": false,
+            "customAttributes": [
+                {
+                    "name": "displayName",
+                    "multiValued": false,
+                    "values": [
+                        "test12345"
+                    ],
+                    "value": "test12345",
+                    "displayValue": "test12345"
+                }
+            ],
+            "customObjectClasses": [
+                "top",
+                "jansClntCustomAttributes"
+            ],
+            "rptAsJwt": false,
+            "accessTokenAsJwt": false,
+            "disabled": false,
+            "attributes": {
+                "runIntrospectionScriptBeforeJwtCreation": false,
+                "keepClientAuthorizationAfterExpiration": false,
+                "allowSpontaneousScopes": false,
+                "backchannelLogoutSessionRequired": false,
+                "parLifetime": 600,
+                "requirePar": false,
+                "jansDefaultPromptLogin": false
+            },
+            "backchannelUserCodeParameter": false,
+            "description": "test12345",
+            "tokenBindingSupported": false,
+            "authenticationMethod": "client_secret_basic",
+            "displayName": "test12345",
+            "baseDn": "inum=1bb91a73-6899-440f-ac27-c04429671522,ou=clients,o=jans",
+            "inum": "1bb91a73-6899-440f-ac27-c04429671522"
+        }
+    ]
+}

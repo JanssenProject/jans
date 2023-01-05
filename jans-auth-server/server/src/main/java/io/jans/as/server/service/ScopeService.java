@@ -26,8 +26,8 @@ import org.apache.commons.lang.StringUtils;
 import org.json.JSONArray;
 import org.slf4j.Logger;
 
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;

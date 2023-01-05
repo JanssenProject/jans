@@ -1,0 +1,30 @@
+{{- if or (eq .Values.global.cnPersistenceType "ldap") (eq .Values.global.cnPersistenceType "hybrid") }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $.Values.global.opendj.ldapServiceName }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+{{ include "opendj.labels" $ | indent 4}}
+{{- if $.Values.additionalLabels }}
+{{ toYaml $.Values.additionalLabels | indent 4 }}
+{{- end }}
+{{- if $.Values.additionalAnnotations }}
+  annotations:
+{{ toYaml $.Values.additionalAnnotations | indent 4 }}
+{{- end }}
+spec:
+  ports:
+    {{- range $key, $value := $.Values.ports }}
+    - port: {{ $value.port }}
+      name: {{ $key }}
+      targetPort: {{ $value.targetPort }}
+      protocol: {{ $value.protocol}}
+      {{- if $value.nodePort }}
+      nodePort: {{ $value.nodePort }}
+      {{- end }}
+    {{- end }}
+  clusterIP: None
+  selector:
+    app: {{ include "opendj.name" $ }}
+{{- end }}

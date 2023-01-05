@@ -7,7 +7,6 @@
 package io.jans.as.server.model.uma;
 
 import io.jans.as.client.AuthorizationRequest;
-import io.jans.as.client.QueryStringDecoder;
 import io.jans.as.client.TokenRequest;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
@@ -18,8 +17,9 @@ import io.jans.as.model.uma.RPTResponse;
 import io.jans.as.model.uma.RptIntrospectionResponse;
 import io.jans.as.model.uma.UmaConstants;
 import io.jans.as.model.uma.UmaScopeType;
-import io.jans.as.model.uma.UmaTestUtil;
+import io.jans.as.test.UmaTestUtil;
 import io.jans.as.model.uma.wrapper.Token;
+import io.jans.as.model.util.QueryStringDecoder;
 import io.jans.as.server.BaseTest;
 import io.jans.as.server.util.ServerUtil;
 import org.apache.commons.lang.StringUtils;
@@ -28,12 +28,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.testng.Assert;
 
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.Form;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.Invocation.Builder;
+import jakarta.ws.rs.core.Form;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.MultivaluedHashMap;
+import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;

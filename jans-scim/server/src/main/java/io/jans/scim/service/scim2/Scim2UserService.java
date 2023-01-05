@@ -16,13 +16,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import javax.management.InvalidAttributeValueException;
-import javax.ws.rs.Path;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response.Status;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response.Status;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -382,7 +382,7 @@ public class Scim2UserService implements Serializable {
 
 		res.setEntitlements(getAttributeListValue(person, Entitlement.class, "jansEntitlements"));
 		res.setRoles(getAttributeListValue(person, Role.class, "jansRole"));
-		res.setX509Certificates(getAttributeListValue(person, X509Certificate.class, "jansx509Certificate"));
+		res.setX509Certificates(getAttributeListValue(person, X509Certificate.class, "jans509Certificate"));
 
 		res.setPairwiseIdentifiers(person.getPpid());
 

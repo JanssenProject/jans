@@ -6,16 +6,16 @@
 
 package io.jans.as.persistence.model;
 
+import io.jans.as.model.common.CreatorType;
 import io.jans.as.model.common.ScopeType;
 import io.jans.orm.annotation.AttributeName;
-import io.jans.orm.annotation.DN;
 import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.JsonObject;
 import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.model.base.DeletableEntity;
 
 import java.io.Serializable;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Javier Rojas Blum Date: 07.05.2012
@@ -27,8 +27,6 @@ public class Scope extends DeletableEntity implements Serializable {
 
     private static final long serialVersionUID = 4308826784917052508L;
 
-    @DN
-    private String dn;
     @AttributeName(ignoreDuringUpdate = true)
     private String inum;
 
@@ -66,6 +64,30 @@ public class Scope extends DeletableEntity implements Serializable {
     @JsonObject
     private ScopeAttributes attributes;
 
+    @AttributeName(name = "creatorId")
+    private String creatorId;
+
+    @AttributeName(name = "creatorTyp")
+    private CreatorType creatorType;
+
+    @AttributeName(name = "creationDate")
+    private Date creationDate = new Date();
+
+    @JsonObject // store creator attributes for case when object is deleted (e.g. user creates scope but then removed, we need display name to show on UI)
+    @AttributeName(name = "creatorAttrs")
+    private Map<String, String> creatorAttributes;
+
+    public Map<String, String> getCreatorAttributes() {
+        if (creatorAttributes == null) {
+            creatorAttributes = new HashMap<>();
+        }
+        return creatorAttributes;
+    }
+
+    public void setCreatorAttributes(Map<String, String> creatorAttributes) {
+        this.creatorAttributes = creatorAttributes;
+    }
+
     public ScopeAttributes getAttributes() {
         if (attributes == null) {
             attributes = new ScopeAttributes();
@@ -77,12 +99,28 @@ public class Scope extends DeletableEntity implements Serializable {
         this.attributes = attributes;
     }
 
-    public String getDn() {
-        return dn;
+    public String getCreatorId() {
+        return creatorId;
     }
 
-    public void setDn(String dn) {
-        this.dn = dn;
+    public void setCreatorId(String creatorId) {
+        this.creatorId = creatorId;
+    }
+
+    public CreatorType getCreatorType() {
+        return creatorType;
+    }
+
+    public void setCreatorType(CreatorType creatorType) {
+        this.creatorType = creatorType;
+    }
+
+    public Date getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(Date creationDate) {
+        this.creationDate = creationDate;
     }
 
     public String getInum() {
@@ -169,10 +207,6 @@ public class Scope extends DeletableEntity implements Serializable {
         this.umaAuthorizationPolicies = umaAuthorizationPolicies;
     }
 
-    public Boolean getOxAuthGroupClaims() {
-        return groupClaims;
-    }
-
     public Boolean getDefaultScope() {
         return defaultScope;
     }
@@ -188,7 +222,7 @@ public class Scope extends DeletableEntity implements Serializable {
     @Override
     public String toString() {
         return "Scope{" +
-                "dn='" + dn + '\'' +
+                "dn='" + getDn() + '\'' +
                 ", inum='" + inum + '\'' +
                 ", displayName='" + displayName + '\'' +
                 ", id='" + id + '\'' +
@@ -200,6 +234,10 @@ public class Scope extends DeletableEntity implements Serializable {
                 ", groupClaims=" + groupClaims +
                 ", dynamicScopeScripts=" + dynamicScopeScripts +
                 ", umaAuthorizationPolicies=" + umaAuthorizationPolicies +
+                ", creatorId=" + creatorId +
+                ", creatorType=" + creatorType +
+                ", creationDate=" + creationDate +
+                ", creatorAttributes=" + creatorAttributes +
                 ", deletable=" + isDeletable() +
                 ", expirationDate=" + getExpirationDate() +
                 ", attributes=" + attributes +

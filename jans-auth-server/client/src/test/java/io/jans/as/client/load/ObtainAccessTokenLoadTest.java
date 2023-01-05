@@ -17,6 +17,8 @@ import io.jans.as.client.RegisterResponse;
 import io.jans.as.client.TokenClient;
 import io.jans.as.client.TokenRequest;
 import io.jans.as.client.TokenResponse;
+
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.Prompt;
@@ -30,6 +32,7 @@ import org.testng.annotations.Test;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -66,11 +69,7 @@ public class ObtainAccessTokenLoadTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(response.getStatus(), 201, "Unexpected response code: " + response.getEntity());
-        assertNotNull(response.getClientId());
-        assertNotNull(response.getClientSecret());
-        assertNotNull(response.getRegistrationAccessToken());
-        assertNotNull(response.getClientSecretExpiresAt());
+        AssertBuilder.registerResponse(response).created().check();
 
         final String clientId = response.getClientId();
         final String clientSecret = response.getClientSecret();

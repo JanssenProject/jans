@@ -10,7 +10,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 
@@ -112,7 +112,7 @@ public abstract class AbstractCustomScriptService implements Serializable {
 
     public List<CustomScript> findCustomAuthScripts(String pattern, int sizeLimit) {
     	String baseDn = baseDn();
-        boolean useLowercaseFilter = !PersistenceEntryManager.PERSITENCE_TYPES.ldap.name().equals(persistenceEntryManager.getPersistenceType(baseDn));
+        boolean useLowercaseFilter = isLowercaseFilter(baseDn);
 
         String[] targetArray = new String[]{pattern};
 
@@ -160,7 +160,7 @@ public abstract class AbstractCustomScriptService implements Serializable {
 
     public List<CustomScript> findOtherCustomScripts(String pattern, int sizeLimit) {
     	String baseDn = baseDn();
-        boolean useLowercaseFilter = !PersistenceEntryManager.PERSITENCE_TYPES.ldap.name().equals(persistenceEntryManager.getPersistenceType(baseDn));
+        boolean useLowercaseFilter = isLowercaseFilter(baseDn);
 
         String[] targetArray = new String[]{pattern};
 
@@ -209,7 +209,7 @@ public abstract class AbstractCustomScriptService implements Serializable {
     }
 
 	private Filter buildFindByPatterAndTypeFilter(String baseDn, String pattern, CustomScriptType type) {
-        boolean useLowercaseFilter = !PersistenceEntryManager.PERSITENCE_TYPES.ldap.name().equals(persistenceEntryManager.getPersistenceType(baseDn));
+        boolean useLowercaseFilter = isLowercaseFilter(baseDn);
 
         String[] targetArray = new String[] { pattern };
 
@@ -229,6 +229,10 @@ public abstract class AbstractCustomScriptService implements Serializable {
 		return filter;
 	}
 
+	protected boolean isLowercaseFilter(String baseDn) {	    
+	    return !PersistenceEntryManager.PERSITENCE_TYPES.ldap.name().equals(persistenceEntryManager.getPersistenceType(baseDn));
+	}
+	
     public List<CustomScript> findOtherCustomScripts(int sizeLimit) {
         Filter searchFilter = Filter.createNOTFilter(
                 Filter.createEqualityFilter(OxConstants.SCRIPT_TYPE, CustomScriptType.PERSON_AUTHENTICATION));

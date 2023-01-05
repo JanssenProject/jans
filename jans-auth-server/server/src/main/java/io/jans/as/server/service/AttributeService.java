@@ -8,8 +8,8 @@ package io.jans.as.server.service;
 
 import io.jans.as.model.configuration.AppConfiguration;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 /**
  * @author Javier Rojas Blum

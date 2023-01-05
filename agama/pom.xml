@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>io.jans</groupId>
+	<artifactId>agama</artifactId>
+	<packaging>pom</packaging>
+	<version>1.0.6-SNAPSHOT</version>
+	<name>agama parent</name>
+
+    <prerequisites>
+        <maven>${maven.min-version}</maven>
+    </prerequisites>
+    <distributionManagement>
+	  <repository>
+          <id>github</id>
+          <name>GitHub Packages</name>
+          <url>https://maven.pkg.github.com/JanssenProject/jans</url>
+      </repository>
+    </distributionManagement>
+
+    <properties>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.min-version>3.6.3</maven.min-version>
+        <jans.version>${project.version}</jans.version>
+
+        <sonar.projectKey>janssenproject_jans-agama</sonar.projectKey>
+        <sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
+        <sonar.organization>janssenproject</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+    </properties>
+
+    <repositories>
+        <repository>
+            <id>jans</id>
+            <name>Janssen project repository</name>
+            <url>https://maven.jans.io/maven</url>
+        </repository>
+    </repositories>
+
+    <modules>
+        <module>transpiler</module>
+    </modules>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.jans</groupId>
+                <artifactId>jans-bom</artifactId>
+                <version>${jans.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+
+            <!-- JAX-RS -->
+            <dependency>
+                <groupId>org.jboss.spec.javax.ws.rs</groupId>
+                <artifactId>jboss-jaxrs-api_3.0_spec</artifactId>
+                <version>1.0.1.Final</version>
+                <scope>provided</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+</project>

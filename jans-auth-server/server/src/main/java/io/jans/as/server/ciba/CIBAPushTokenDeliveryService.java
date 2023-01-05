@@ -13,8 +13,8 @@ import io.jans.as.model.common.TokenType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ejb.Stateless;
-import javax.inject.Named;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Named;
 
 /**
  * @author Javier Rojas Blum

@@ -18,15 +18,15 @@ import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.model.SortOrder;
 import io.jans.orm.search.filter.Filter;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.annotation.PostConstruct;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 import static io.jans.scim.model.scim2.Constants.UTF8_CHARSET_FRAGMENT;
 
@@ -219,68 +219,10 @@ public class ScimResourcesUpdatedWebService extends BaseScimWebService {
 
     @PostConstruct
     private void init() {
+        init(ScimResourcesUpdatedWebService.class);
         ldapBackend = scimFilterParserService.isLdapBackend();
         attributeDataTypes = new HashMap<>();
         attributeService.getAllAttributes().forEach(ga -> attributeDataTypes.put(ga.getName(), ga.getDataType()));
     }
-
-/*
-    //Groups endpoint not necessary, but if needed, we need to guarantee first that excludeMetaLastMod is refreshed
-    //whenever the group is updated in GUI or via SCIM (or cust script)
-    //@Path("UpdatedGroups")
-    //@GET
-    @Produces(MediaType.APPLICATION_JSON + UTF8_CHARSET_FRAGMENT)
-    @ProtectedApi
-    public Response groupsChangedAfter(@QueryParam("timeStamp") String isoDate) {
-
-        Response response;
-        log.debug("Executing web service method. groupsChangedAfter");
-
-        try {
-            String date = ZonedDateTime.parse(isoDate).format(DateTimeFormatter.ISO_INSTANT);
-            //In database, excludeMetaLastMod is just a string (not date)
-
-            Filter filter = Filter.createORFilter(
-                    Filter.createNOTFilter(Filter.createPresenceFilter("jansMetaLastMod")),
-                    Filter.createGreaterOrEqualFilter("jansMetaLastMod", date));
-            List<GluuGroup> list = entryManager.findEntries(groupService.getDnForGroup(null), GluuGroup.class, filter);
-            response = Response.ok(getGroupResultsAsJson(list)).build();
-
-        } catch (DateTimeParseException e) {
-            response = getErrorResponse(Response.Status.BAD_REQUEST, e.getMessage());
-        } catch (Exception e1) {
-            log.error("Failure at groupsChangedAfter method", e1);
-            response = getErrorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Unexpected error: " + e1.getMessage());
-        }
-        return response;
-
-    }
-
-    private String getGroupResultsAsJson(List<GluuGroup> list) throws Exception {
-
-        List<BaseScimResource> resources = new ArrayList<>();
-        long fresher = 0;
-
-        for (GluuGroup group : list) {
-            GroupResource jsScimGrp = new GroupResource();
-            scim2GroupService.transferAttributesToGroupResource(group, jsScimGrp, userWebService.getEndpointUrl(), groupWebService.getEndpointUrl());
-            resources.add(jsScimGrp);
-
-            String modified = group.getAttribute("jansMetaLastMod");
-            try {
-                if (modified != null) {
-                    long updatedAt = ZonedDateTime.parse(modified).toInstant().toEpochMilli();
-                    if (fresher < updatedAt) {
-                        fresher = updatedAt;
-                    }
-                }
-            } catch (Exception e) {
-                log.error("Error parsing supposed ISO date {}", modified);
-            }
-        }
-        return  getResultsAsJson(resources, fresher);
-
-    }
-    */
 
 }

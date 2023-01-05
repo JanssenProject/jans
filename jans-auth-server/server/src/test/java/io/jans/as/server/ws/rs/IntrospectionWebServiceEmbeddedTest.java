@@ -7,7 +7,7 @@
 package io.jans.as.server.ws.rs;
 
 import io.jans.as.model.common.IntrospectionResponse;
-import io.jans.as.model.uma.UmaTestUtil;
+import io.jans.as.test.UmaTestUtil;
 import io.jans.as.model.uma.wrapper.Token;
 import io.jans.as.server.BaseTest;
 import io.jans.as.server.model.uma.TUma;
@@ -17,10 +17,10 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.Form;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.Invocation.Builder;
+import jakarta.ws.rs.core.Form;
+import jakarta.ws.rs.core.Response;
 import java.net.URI;
 
 import static org.testng.Assert.assertEquals;
@@ -44,7 +44,7 @@ public class IntrospectionWebServiceEmbeddedTest extends BaseTest {
             "umaRedirectUri"})
     public void requestAuthorization(String authorizePath, String tokenPath, String umaUserId, String umaUserSecret,
                                      String umaPatClientId, String umaPatClientSecret, String umaRedirectUri) {
-        authorization = TUma.requestPat(url, authorizePath, tokenPath, umaUserId, umaUserSecret, umaPatClientId,
+        authorization = TUma.requestPat(getApiTagetURI(url), authorizePath, tokenPath, umaUserId, umaUserSecret, umaPatClientId,
                 umaPatClientSecret, umaRedirectUri);
         UmaTestUtil.assertIt(authorization);
     }
@@ -54,7 +54,7 @@ public class IntrospectionWebServiceEmbeddedTest extends BaseTest {
             "umaRedirectUri"})
     public void requestTokenToIntrospect(String authorizePath, String tokenPath, String umaUserId, String umaUserSecret,
                                          String umaPatClientId, String umaPatClientSecret, String umaRedirectUri) {
-        tokenToIntrospect = TUma.requestPat(url, authorizePath, tokenPath, umaUserId, umaUserSecret, umaPatClientId,
+        tokenToIntrospect = TUma.requestPat(getApiTagetURI(url), authorizePath, tokenPath, umaUserId, umaUserSecret, umaPatClientId,
                 umaPatClientSecret, umaRedirectUri);
         UmaTestUtil.assertIt(tokenToIntrospect);
     }
@@ -62,7 +62,7 @@ public class IntrospectionWebServiceEmbeddedTest extends BaseTest {
     @Test(dependsOnMethods = "requestTokenToIntrospect")
     @Parameters({"introspectionPath"})
     public void introspection(final String introspectionPath) throws Exception {
-        Builder request = ResteasyClientBuilder.newClient().target(url.toString() + introspectionPath).request();
+        Builder request = ResteasyClientBuilder.newClient().target(getApiTagetURL(url) + introspectionPath).request();
 
         request.header("Accept", "application/json");
         request.header("Authorization", "Bearer " + authorization.getAccessToken());

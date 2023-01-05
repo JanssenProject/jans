@@ -1,5 +1,3 @@
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/002d76c3ba8b4cf39b066fa6eab9d75d)](https://www.codacy.com/gh/JanssenProject/jans-eleven/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=JanssenProject/jans-eleven&amp;utm_campaign=Badge_Grade)
-
 # oxEleven
 
 Java web application providing REST API's for a PKCS #11 interface.
@@ -90,7 +88,7 @@ signatureAlgorithm=ES256&expirationTime=1462916947752
 
 #### Sample Response - ES256
 
-```
+```json
 {
     "kty": "EC",
     "kid": "f6ade591-4230-4114-8147-316dde969395",
@@ -108,12 +106,12 @@ signatureAlgorithm=ES256&expirationTime=1462916947752
 - **Media Type:** application/json
 - **Data Params**
     - accessToken [string]
-```javascript
+```json
 {
-    "signingInput": [string], 
-    "signatureAlgorithm": [string],
-    "alias": [string],
-    "sharedSecret": [string]
+    "signingInput": ["string"],
+    "signatureAlgorithm": ["string"],
+    "alias": ["string"],
+    "sharedSecret": ["string"]
 }
 ```
 
@@ -153,7 +151,7 @@ Authorization: Bearer xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 
 #### Sample Response - HS256
 
-```
+```json
 {
     "sig": "CZag3MkkRmJXCnDbE43k6gRit_7ZIPzzpBMHXiNNHBg"
 }
@@ -179,7 +177,7 @@ String rs256Signature = response.getSignature();
 
 #### Sample Request - RS256
 
-```
+```bash
 POST /oxeleven/rest/oxeleven/sign HTTP/1.1
 Host: ce.gluu.info:8443
 Content-Type: application/json
@@ -195,7 +193,7 @@ Authorization: Bearer xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 
 #### Sample Response - RS256
 
-```
+```json
 {
     "sig": "TharYC_SVPb_PDWyLM2d1_XsAAiePEMom0Wja8R9aWZpP2mRrzMJKuLUcOG7QE7JxnVgQmGGnEV8QPKguGDca5S2EU9NiodFBzg6N4JEFC5FvrpDyZPRhtQP3OKshGWyLKa37KddUWGVRTwfluUhirMRgFmTMYjv6Wuhj_Dx7DoBvMY5KbEkIcBm1tqvqT2U02RNo8ts0PSW3z3hkdygCAcwqmzb0ICBxZ6aCePmVtSXaicEX0Z8FuZY0t4b-PjkuCIUIPLdb5043HFdGX1dwErEi3Y1j-osALnamS8LCqvogjMxbx_MJt6QaUkW952JT0Tk1Xvc_J81ZekzvMpptw"
 }
@@ -250,26 +248,26 @@ Authorization: Bearer xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 - **Media Type:** application/json
 - **Data Params**
     - accessToken [string]
-```javascript
+```json
 {
-    "signingInput": [string],
-    "signature": [string],
-    "alias": [string],
+    "signingInput": ["string"],
+    "signature": ["string"],
+    "alias": ["string"],
     "jwksRequestParam": { 
         "keyRequestParams": [{
-            "alg": [string],
-            "kid": [string],
-            "use": [string],
-            "kty": [string],
-            "n": [string],
-            "e": [string],
-            "crv": [string],
-            "x": [string],
-            "y": [string]
-        }],
+            "alg": ["string"],
+            "kid": ["string"],
+            "use": ["string"],
+            "kty": ["string"],
+            "n": ["string"],
+            "e": ["string"],
+            "crv": ["string"],
+            "x": ["string"],
+            "y": ["string"]
+        }]
     },
-    "sharedSecret": [string],
-    "signatureAlgorithm": [string]
+    "sharedSecret": ["string"],
+    "signatureAlgorithm": ["string"]
 }
 ```
 
@@ -668,7 +666,7 @@ kid=f6ade591-4230-4114-8147-316dde969395
 
   3. Edit the configuration file $CATALINA_HOME/conf/oxeleven-config.json
 
-  ```javascript
+  ```json
   {
     "pkcs11Config": {
       "name": "SoftHSM",
@@ -682,21 +680,21 @@ kid=f6ade591-4230-4114-8147-316dde969395
   }
   ```
   
-  Attribute     | Value                                 | Description
-  ------------  | -------------                         | -------------
-  name          | Name suffix of this provider instance | This string is concatenated with the prefix SunPKCS11- to produce this provider instance's name (that is, the string returned by its Provider.getName() method). For example, if the name attribute is "SoftHSM", then the provider instance's name will be "SunPKCS11-SoftHSM".
-  library       | Pathname of PKCS#11 implementation    | This is the full pathname (including extension) of the PKCS#11 implementation; the format of the pathname is platform dependent. For example, /opt/foo/lib/libpkcs11.so might be the pathname of a PKCS#11 implementation on Solaris and Linux while C:\foo\mypkcs11.dll might be one on Windows.
-  slot          | Slot ID                               | This is the id of the slot that this provider instance is to be associated with. For example, you would use 1 for the slot with the id 1 under PKCS#11. At most one of slot or slotListIndex may be specified. If neither is specified, the default is a slotListIndex of 0.
-  showinfo      | boolean                               | Whether to print debug info during startup.
-  pkcs11Pin     | Personal Identification Number        | Certain PKCS#11 operations, such as accessing private keys, require a login using a Personal Identification Number, or PIN, before the operations can proceed. The most common type of operations that require login are those that deal with keys on the token.
-  dnName        | DN of certificate issuer              | DN of certificate issuer.
-  testModeToken | Access Token                          | Token used to consume the rest services.
+| Attribute     | Value                                 | Description                                                                                                                                                                                                                                                                                       |
+|---------------|---------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| name          | Name suffix of this provider instance | This string is concatenated with the prefix SunPKCS11- to produce this provider instance's name (that is, the string returned by its Provider.getName() method). For example, if the name attribute is "SoftHSM", then the provider instance's name will be "SunPKCS11-SoftHSM".                  |
+| library       | Pathname of PKCS#11 implementation    | This is the full pathname (including extension) of the PKCS#11 implementation; the format of the pathname is platform dependent. For example, /opt/foo/lib/libpkcs11.so might be the pathname of a PKCS#11 implementation on Solaris and Linux while C:\foo\mypkcs11.dll might be one on Windows. |
+| slot          | Slot ID                               | This is the id of the slot that this provider instance is to be associated with. For example, you would use 1 for the slot with the id 1 under PKCS#11. At most one of slot or slotListIndex may be specified. If neither is specified, the default is a slotListIndex of 0.                      |
+| showinfo      | boolean                               | Whether to print debug info during startup.                                                                                                                                                                                                                                                       |
+| pkcs11Pin     | Personal Identification Number        | Certain PKCS#11 operations, such as accessing private keys, require a login using a Personal Identification Number, or PIN, before the operations can proceed. The most common type of operations that require login are those that deal with keys on the token.                                  |
+| dnName        | DN of certificate issuer              | DN of certificate issuer.                                                                                                                                                                                                                                                                         |
+| testModeToken | Access Token                          | Token used to consume the rest services.                                                                                                                                                                                                                                                          |
 
-  4. Deploy oxEleven.war in Tomcat
+4. Deploy `oxEleven.war` in Tomcat
   
 ## Test
 
-  1. Ensure oxEleven is deployed an running.
+  1. Ensure oxEleven is deployed and running.
   
   2. Edit the file Client/src/test/Resources/testng.xml to point to your oxEleven deployment.
   

@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>jans-auth-model</artifactId>
 	<name>jans-auth-model</name>
@@ -10,7 +8,7 @@
 	<parent>
 		<groupId>io.jans</groupId>
 		<artifactId>jans-auth-server-parent</artifactId>
-		<version>1.0.0-SNAPSHOT</version>
+		<version>1.0.6-SNAPSHOT</version>
 	</parent>
 
 	<properties>
@@ -85,6 +83,11 @@
 			<groupId>io.jans</groupId>
 			<artifactId>jans-core-model</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>agama-model</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
@@ -101,7 +104,7 @@
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.module</groupId>
-			<artifactId>jackson-module-jaxb-annotations</artifactId>
+			<artifactId>jackson-module-jakarta-xmlbind-annotations</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>commons-codec</groupId>
@@ -131,6 +134,19 @@
 			<artifactId>testng</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-testng</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-inline</artifactId>
+		</dependency>
+
+		<dependency>
 			<groupId>org.bouncycastle</groupId>
 			<artifactId>bcprov-jdk15on</artifactId>
 			<scope>provided</scope>
@@ -151,8 +167,8 @@
 		</dependency>
 
 		<dependency>
-			<groupId>javax.validation</groupId>
-			<artifactId>validation-api</artifactId>
+            <groupId>jakarta.validation</groupId>
+            <artifactId>jakarta.validation-api</artifactId>
 		</dependency>
         <dependency>
             <groupId>org.jetbrains</groupId>
@@ -163,6 +179,11 @@
 		<dependency>
 			<groupId>com.wordnik</groupId>
 			<artifactId>swagger-annotations</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-doc</artifactId>
+			<version>${jans-core.version}</version>
 		</dependency>
 
 	</dependencies>

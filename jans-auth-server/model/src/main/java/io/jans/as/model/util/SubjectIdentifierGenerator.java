@@ -10,6 +10,9 @@ import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.crypto.CryptoProviderFactory;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.exception.CryptoProviderException;
+
+import java.security.KeyStoreException;
 
 /**
  * @author Javier Rojas Blum
@@ -21,7 +24,7 @@ public class SubjectIdentifierGenerator {
     }
 
     public static String generatePairwiseSubjectIdentifier(String sectorIdentifier, String localAccountId, String key,
-                                                           String salt, AppConfiguration configuration) throws Exception {
+                                                           String salt, AppConfiguration configuration) throws KeyStoreException, CryptoProviderException {
         AbstractCryptoProvider cryptoProvider = CryptoProviderFactory.getCryptoProvider(configuration);
 
         String signingInput = sectorIdentifier + localAccountId + salt;

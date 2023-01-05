@@ -13,7 +13,7 @@ import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 
 /**
  * Represents a token response received from the authorization server.
@@ -30,6 +30,7 @@ public class TokenResponse extends BaseResponseWithErrors<TokenErrorResponseType
     private String refreshToken;
     private String scope;
     private String idToken;
+    private String deviceToken;
 
     public TokenResponse() {
     }
@@ -75,12 +76,20 @@ public class TokenResponse extends BaseResponseWithErrors<TokenErrorResponseType
                 if (jsonObj.has("id_token")) {
                     setIdToken(jsonObj.getString("id_token"));
                 }
+                setDeviceToken(jsonObj.optString("device_token"));
             } catch (JSONException e) {
                 LOG.error(e.getMessage(), e);
             }
         }
     }
 
+    public String getDeviceToken() {
+        return deviceToken;
+    }
+
+    public void setDeviceToken(String deviceToken) {
+        this.deviceToken = deviceToken;
+    }
 
     /**
      * Returns the access token issued by the authorization server.

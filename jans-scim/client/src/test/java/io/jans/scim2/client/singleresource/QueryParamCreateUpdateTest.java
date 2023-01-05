@@ -14,7 +14,7 @@ import io.jans.scim2.client.UserBaseTest;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 
 import java.util.Collections;
 import java.util.Date;
@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static io.jans.scim.model.scim2.Constants.*;
-import static javax.ws.rs.core.Response.Status.*;
+import static jakarta.ws.rs.core.Response.Status.*;
 
 import static org.testng.Assert.*;
 

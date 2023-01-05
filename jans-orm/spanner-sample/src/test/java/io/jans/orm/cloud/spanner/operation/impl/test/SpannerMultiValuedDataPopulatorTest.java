@@ -16,7 +16,7 @@ public class SpannerMultiValuedDataPopulatorTest {
 
 	public static void main(String[] args) {
 		Properties props = new Properties();
-		props.setProperty("connection.project", "gluu-server-184620");
+		props.setProperty("connection.project", "jans-server-184620");
 		props.setProperty("connection.instance", "movchan");
 		props.setProperty("connection.database", "test_interleave");
 		props.setProperty("connection.client.create-max-wait-time-millis", "15");

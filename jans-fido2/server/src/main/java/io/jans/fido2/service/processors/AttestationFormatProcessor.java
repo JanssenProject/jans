@@ -21,10 +21,14 @@ package io.jans.fido2.service.processors;
 import io.jans.fido2.ctap.AttestationFormat;
 import io.jans.fido2.model.auth.AuthData;
 import io.jans.fido2.model.auth.CredAndCounterData;
-import io.jans.fido2.model.entry.Fido2RegistrationData;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import io.jans.orm.model.fido2.Fido2RegistrationData;
 
+/**
+ * Interface class for AttestationFormatProcessor
+ *
+ */
 public interface AttestationFormatProcessor {
     AttestationFormat getAttestationFormat();
 

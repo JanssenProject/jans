@@ -1,8 +1,0 @@
-{
-  "modelPackage" : "io.swagger.client.model",
-  "apiPackage"   : "io.swagger.client.api",
-  "invokerPackage" : "io.swagger.client",
-  "groupId" : "org.gluu.oxd",
-  "artifactId"  : "oxd-client",
-  "dateLibrary" : "java8"
-}

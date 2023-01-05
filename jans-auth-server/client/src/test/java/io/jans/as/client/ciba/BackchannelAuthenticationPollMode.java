@@ -22,6 +22,8 @@ import io.jans.as.client.TokenRequest;
 import io.jans.as.client.TokenResponse;
 import io.jans.as.client.UserInfoClient;
 import io.jans.as.client.UserInfoResponse;
+
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.BackchannelTokenDeliveryMode;
@@ -32,11 +34,9 @@ import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
 import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
 import io.jans.as.model.crypto.signature.AsymmetricSignatureAlgorithm;
 import io.jans.as.model.crypto.signature.ECDSAPublicKey;
-import io.jans.as.model.crypto.signature.RSAPublicKey;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.jwe.Jwe;
 import io.jans.as.model.jws.ECDSASigner;
-import io.jans.as.model.jws.RSASigner;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.jwt.JwtHeaderName;
@@ -54,9 +54,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import static io.jans.as.model.register.RegisterRequestParam.BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG;
-import static io.jans.as.model.register.RegisterRequestParam.BACKCHANNEL_TOKEN_DELIVERY_MODE;
-import static io.jans.as.model.register.RegisterRequestParam.BACKCHANNEL_USER_CODE_PARAMETER;
+import static io.jans.as.client.client.Asserter.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
@@ -112,18 +110,11 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
-
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_USER_CODE_PARAMETER.toString()));
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()), BackchannelTokenDeliveryMode.POLL.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()), AsymmetricSignatureAlgorithm.RS256.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_USER_CODE_PARAMETER.toString()), Boolean.toString(true));
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -148,10 +139,8 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertEquals(backchannelAuthenticationResponse.getStatus(), 200, "Unexpected response code: " + backchannelAuthenticationResponse.getEntity());
-        assertNotNull(backchannelAuthenticationResponse.getAuthReqId());
-        assertNotNull(backchannelAuthenticationResponse.getExpiresIn());
-        assertNotNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .check();
 
         //String authReqId = backchannelAuthenticationResponse.getAuthReqId();
 
@@ -190,8 +179,11 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         showClient(userInfoClient);
         assertEquals(userInfoResponse.getStatus(), 200, "Unexpected response code: " + userInfoResponse.getStatus());
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
+        assertUserInfoPersonalDataNotNull(userInfoResponse);
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NICKNAME));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.MIDDLE_NAME));
+        assertNotNull(userInfoResponse.getClaim(JwtClaimName.PHONE_NUMBER));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.WEBSITE));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ZONEINFO));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.BIRTHDATE));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.EMAIL_VERIFIED));
@@ -199,16 +191,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.PROFILE));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.PHONE_NUMBER_VERIFIED));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.PREFERRED_USERNAME));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.GIVEN_NAME));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.MIDDLE_NAME));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.LOCALE));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.PICTURE));
         assertNotNull(userInfoResponse.getClaim(JwtClaimName.UPDATED_AT));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NAME));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NICKNAME));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.PHONE_NUMBER));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.FAMILY_NAME));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
         */
     }
 
@@ -232,18 +215,11 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
-
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_USER_CODE_PARAMETER.toString()));
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()), BackchannelTokenDeliveryMode.POLL.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()), AsymmetricSignatureAlgorithm.RS256.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_USER_CODE_PARAMETER.toString()), Boolean.toString(true));
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -265,10 +241,8 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertEquals(backchannelAuthenticationResponse.getStatus(), 200, "Unexpected response code: " + backchannelAuthenticationResponse.getEntity());
-        assertNotNull(backchannelAuthenticationResponse.getAuthReqId());
-        assertNotNull(backchannelAuthenticationResponse.getExpiresIn());
-        assertNotNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .check();
     }
 
     @Parameters({"clientJwksUri", "userInum", "backchannelUserCode"})
@@ -291,18 +265,11 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
-
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_USER_CODE_PARAMETER.toString()));
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()), BackchannelTokenDeliveryMode.POLL.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()), AsymmetricSignatureAlgorithm.RS256.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_USER_CODE_PARAMETER.toString()), Boolean.toString(true));
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -324,10 +291,8 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertEquals(backchannelAuthenticationResponse.getStatus(), 200, "Unexpected response code: " + backchannelAuthenticationResponse.getEntity());
-        assertNotNull(backchannelAuthenticationResponse.getAuthReqId());
-        assertNotNull(backchannelAuthenticationResponse.getExpiresIn());
-        assertNotNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .check();
     }
 
     @Parameters({"clientJwksUri", "userId", "backchannelUserCode"})
@@ -367,18 +332,11 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
-
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_USER_CODE_PARAMETER.toString()));
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()), BackchannelTokenDeliveryMode.POLL.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()), AsymmetricSignatureAlgorithm.RS256.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_USER_CODE_PARAMETER.toString()), Boolean.toString(true));
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         return registerResponse;
     }
@@ -405,10 +363,8 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertEquals(backchannelAuthenticationResponse.getStatus(), 200, "Unexpected response code: " + backchannelAuthenticationResponse.getEntity());
-        assertNotNull(backchannelAuthenticationResponse.getAuthReqId());
-        assertNotNull(backchannelAuthenticationResponse.getExpiresIn());
-        assertNotNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .check();
 
         String authReqId = backchannelAuthenticationResponse.getAuthReqId();
 
@@ -430,11 +386,8 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
             showClient(tokenClient);
             pollCount++;
         } while (tokenResponse.getStatus() == 400 && pollCount < 5);
-
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity(), "The entity is null");
-        assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
-        assertNotNull(tokenResponse.getTokenType(), "The token type is null");
+        AssertBuilder.tokenResponse(tokenResponse)
+                .check();
 
         String accessToken = tokenResponse.getAccessToken();
         String idToken = tokenResponse.getIdToken();
@@ -444,46 +397,22 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         UserInfoResponse userInfoResponse = userInfoClient.execUserInfo(accessToken);
 
         showClient(userInfoClient);
-        assertEquals(userInfoResponse.getStatus(), 200, "Unexpected response code: " + userInfoResponse.getStatus());
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.WEBSITE));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ZONEINFO));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.ADDRESS));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.BIRTHDATE));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.EMAIL_VERIFIED));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.GENDER));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.PROFILE));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.PHONE_NUMBER_VERIFIED));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.PREFERRED_USERNAME));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.GIVEN_NAME));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.MIDDLE_NAME));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.LOCALE));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.PICTURE));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.UPDATED_AT));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NAME));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.NICKNAME));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.PHONE_NUMBER));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.FAMILY_NAME));
-        assertNotNull(userInfoResponse.getClaim(JwtClaimName.EMAIL));
+        AssertBuilder.userInfoResponse(userInfoResponse)
+                .claimsPresence(JwtClaimName.ISSUER, JwtClaimName.AUDIENCE)
+                .notNullClaimsPersonalData()
+                .claimsPresence(JwtClaimName.EMAIL, JwtClaimName.WEBSITE, JwtClaimName.ADDRESS, JwtClaimName.EMAIL_VERIFIED)
+                .claimsPresence(JwtClaimName.GENDER, JwtClaimName.PROFILE, JwtClaimName.PHONE_NUMBER_VERIFIED)
+                .claimsPresence(JwtClaimName.PREFERRED_USERNAME, JwtClaimName.MIDDLE_NAME, JwtClaimName.UPDATED_AT)
+                .claimsPresence(JwtClaimName.NICKNAME, JwtClaimName.PHONE_NUMBER)
+                .check();
 
         // Validate id_token
         Jwt jwt = Jwt.parse(idToken);
-        assertNotNull(jwt);
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
-
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS256, publicKey);
-
-        assertTrue(rsaSigner.validate(jwt));
+        AssertBuilder.jwt(jwt)
+                .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS256)
+                .notNullAccesTokenHash()
+                .notNullAuthenticationTime()
+                .check();
 
         String sub = jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER);
 
@@ -514,18 +443,11 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
-
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_USER_CODE_PARAMETER.toString()));
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()), BackchannelTokenDeliveryMode.POLL.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()), AsymmetricSignatureAlgorithm.RS256.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_USER_CODE_PARAMETER.toString()), Boolean.toString(true));
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
 
@@ -551,10 +473,8 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertEquals(backchannelAuthenticationResponse.getStatus(), 200, "Unexpected response code: " + backchannelAuthenticationResponse.getEntity());
-        assertNotNull(backchannelAuthenticationResponse.getAuthReqId());
-        assertNotNull(backchannelAuthenticationResponse.getExpiresIn());
-        assertNotNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .check();
     }
 
     @Parameters({"clientJwksUri", "backchannelUserCode",
@@ -581,18 +501,11 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
-
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_USER_CODE_PARAMETER.toString()));
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()), BackchannelTokenDeliveryMode.POLL.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()), AsymmetricSignatureAlgorithm.RS384.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_USER_CODE_PARAMETER.toString()), Boolean.toString(true));
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS384)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
 
@@ -618,10 +531,8 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertEquals(backchannelAuthenticationResponse.getStatus(), 200, "Unexpected response code: " + backchannelAuthenticationResponse.getEntity());
-        assertNotNull(backchannelAuthenticationResponse.getAuthReqId());
-        assertNotNull(backchannelAuthenticationResponse.getExpiresIn());
-        assertNotNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .check();
     }
 
     @Parameters({"clientJwksUri", "backchannelUserCode",
@@ -648,18 +559,11 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
-
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_USER_CODE_PARAMETER.toString()));
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()), BackchannelTokenDeliveryMode.POLL.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()), AsymmetricSignatureAlgorithm.RS512.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_USER_CODE_PARAMETER.toString()), Boolean.toString(true));
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS512)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
 
@@ -685,10 +589,8 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertEquals(backchannelAuthenticationResponse.getStatus(), 200, "Unexpected response code: " + backchannelAuthenticationResponse.getEntity());
-        assertNotNull(backchannelAuthenticationResponse.getAuthReqId());
-        assertNotNull(backchannelAuthenticationResponse.getExpiresIn());
-        assertNotNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .check();
     }
 
     @Parameters({"clientJwksUri", "backchannelUserCode",
@@ -715,18 +617,11 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
-
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_USER_CODE_PARAMETER.toString()));
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()), BackchannelTokenDeliveryMode.POLL.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()), AsymmetricSignatureAlgorithm.ES256.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_USER_CODE_PARAMETER.toString()), Boolean.toString(true));
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.ES256)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
 
@@ -752,10 +647,8 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertEquals(backchannelAuthenticationResponse.getStatus(), 200, "Unexpected response code: " + backchannelAuthenticationResponse.getEntity());
-        assertNotNull(backchannelAuthenticationResponse.getAuthReqId());
-        assertNotNull(backchannelAuthenticationResponse.getExpiresIn());
-        assertNotNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .check();
     }
 
     @Parameters({"clientJwksUri", "backchannelUserCode",
@@ -782,18 +675,11 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
-
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_USER_CODE_PARAMETER.toString()));
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()), BackchannelTokenDeliveryMode.POLL.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()), AsymmetricSignatureAlgorithm.ES384.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_USER_CODE_PARAMETER.toString()), Boolean.toString(true));
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.ES384)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
 
@@ -819,10 +705,8 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertEquals(backchannelAuthenticationResponse.getStatus(), 200, "Unexpected response code: " + backchannelAuthenticationResponse.getEntity());
-        assertNotNull(backchannelAuthenticationResponse.getAuthReqId());
-        assertNotNull(backchannelAuthenticationResponse.getExpiresIn());
-        assertNotNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .check();
     }
 
     @Parameters({"clientJwksUri", "backchannelUserCode",
@@ -849,18 +733,11 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
-
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_USER_CODE_PARAMETER.toString()));
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()), BackchannelTokenDeliveryMode.POLL.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()), AsymmetricSignatureAlgorithm.ES512.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_USER_CODE_PARAMETER.toString()), Boolean.toString(true));
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.ES512)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
 
@@ -886,10 +763,8 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertEquals(backchannelAuthenticationResponse.getStatus(), 200, "Unexpected response code: " + backchannelAuthenticationResponse.getEntity());
-        assertNotNull(backchannelAuthenticationResponse.getAuthReqId());
-        assertNotNull(backchannelAuthenticationResponse.getExpiresIn());
-        assertNotNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .check();
     }
 
     @Parameters({"clientJwksUri", "backchannelUserCode",
@@ -916,18 +791,11 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
-
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_USER_CODE_PARAMETER.toString()));
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()), BackchannelTokenDeliveryMode.POLL.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()), AsymmetricSignatureAlgorithm.PS256.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_USER_CODE_PARAMETER.toString()), Boolean.toString(true));
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.PS256)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
 
@@ -953,10 +821,8 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertEquals(backchannelAuthenticationResponse.getStatus(), 200, "Unexpected response code: " + backchannelAuthenticationResponse.getEntity());
-        assertNotNull(backchannelAuthenticationResponse.getAuthReqId());
-        assertNotNull(backchannelAuthenticationResponse.getExpiresIn());
-        assertNotNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .check();
     }
 
     @Parameters({"clientJwksUri", "backchannelUserCode",
@@ -983,18 +849,11 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
-
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_USER_CODE_PARAMETER.toString()));
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()), BackchannelTokenDeliveryMode.POLL.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()), AsymmetricSignatureAlgorithm.PS384.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_USER_CODE_PARAMETER.toString()), Boolean.toString(true));
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.PS384)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
 
@@ -1020,10 +879,8 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertEquals(backchannelAuthenticationResponse.getStatus(), 200, "Unexpected response code: " + backchannelAuthenticationResponse.getEntity());
-        assertNotNull(backchannelAuthenticationResponse.getAuthReqId());
-        assertNotNull(backchannelAuthenticationResponse.getExpiresIn());
-        assertNotNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .check();
     }
 
     @Parameters({"clientJwksUri", "backchannelUserCode",
@@ -1050,18 +907,11 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
-
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_USER_CODE_PARAMETER.toString()));
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()), BackchannelTokenDeliveryMode.POLL.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()), AsymmetricSignatureAlgorithm.PS512.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_USER_CODE_PARAMETER.toString()), Boolean.toString(true));
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.PS512)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
 
@@ -1087,10 +937,8 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertEquals(backchannelAuthenticationResponse.getStatus(), 200, "Unexpected response code: " + backchannelAuthenticationResponse.getEntity());
-        assertNotNull(backchannelAuthenticationResponse.getAuthReqId());
-        assertNotNull(backchannelAuthenticationResponse.getExpiresIn());
-        assertNotNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .check();
     }
 
     @Parameters({"clientJwksUri", "backchannelUserCode"})
@@ -1113,18 +961,11 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
-
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_USER_CODE_PARAMETER.toString()));
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()), BackchannelTokenDeliveryMode.POLL.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()), AsymmetricSignatureAlgorithm.RS256.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_USER_CODE_PARAMETER.toString()), Boolean.toString(true));
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1146,10 +987,8 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertEquals(backchannelAuthenticationResponse.getStatus(), 200, "Unexpected response code: " + backchannelAuthenticationResponse.getEntity());
-        assertNotNull(backchannelAuthenticationResponse.getAuthReqId());
-        assertNotNull(backchannelAuthenticationResponse.getExpiresIn());
-        assertNotNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .check();
     }
 
     @Parameters({"clientJwksUri", "backchannelUserCode"})
@@ -1172,18 +1011,11 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
-
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_USER_CODE_PARAMETER.toString()));
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()), BackchannelTokenDeliveryMode.POLL.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()), AsymmetricSignatureAlgorithm.RS256.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_USER_CODE_PARAMETER.toString()), Boolean.toString(true));
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1205,10 +1037,8 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertEquals(backchannelAuthenticationResponse.getStatus(), 200, "Unexpected response code: " + backchannelAuthenticationResponse.getEntity());
-        assertNotNull(backchannelAuthenticationResponse.getAuthReqId());
-        assertNotNull(backchannelAuthenticationResponse.getExpiresIn());
-        assertNotNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .check();
     }
 
     @Parameters({"clientJwksUri", "backchannelUserCode"})
@@ -1231,18 +1061,11 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
-
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_USER_CODE_PARAMETER.toString()));
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()), BackchannelTokenDeliveryMode.POLL.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()), AsymmetricSignatureAlgorithm.RS256.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_USER_CODE_PARAMETER.toString()), Boolean.toString(true));
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1264,10 +1087,8 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertEquals(backchannelAuthenticationResponse.getStatus(), 200, "Unexpected response code: " + backchannelAuthenticationResponse.getEntity());
-        assertNotNull(backchannelAuthenticationResponse.getAuthReqId());
-        assertNotNull(backchannelAuthenticationResponse.getExpiresIn());
-        assertNotNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .check();
     }
 
     @Parameters({"clientJwksUri", "backchannelUserCode"})
@@ -1290,18 +1111,11 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
-
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_USER_CODE_PARAMETER.toString()));
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()), BackchannelTokenDeliveryMode.POLL.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()), AsymmetricSignatureAlgorithm.RS256.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_USER_CODE_PARAMETER.toString()), Boolean.toString(true));
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1323,10 +1137,8 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertEquals(backchannelAuthenticationResponse.getStatus(), 200, "Unexpected response code: " + backchannelAuthenticationResponse.getEntity());
-        assertNotNull(backchannelAuthenticationResponse.getAuthReqId());
-        assertNotNull(backchannelAuthenticationResponse.getExpiresIn());
-        assertNotNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .check();
     }
 
     @Parameters({"clientJwksUri", "backchannelUserCode"})
@@ -1349,18 +1161,11 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
-
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_USER_CODE_PARAMETER.toString()));
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()), BackchannelTokenDeliveryMode.POLL.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()), AsymmetricSignatureAlgorithm.RS256.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_USER_CODE_PARAMETER.toString()), Boolean.toString(true));
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1382,10 +1187,8 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertEquals(backchannelAuthenticationResponse.getStatus(), 200, "Unexpected response code: " + backchannelAuthenticationResponse.getEntity());
-        assertNotNull(backchannelAuthenticationResponse.getAuthReqId());
-        assertNotNull(backchannelAuthenticationResponse.getExpiresIn());
-        assertNotNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .check();
     }
 
     @Parameters({"clientJwksUri", "backchannelUserCode"})
@@ -1408,18 +1211,11 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
-
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_USER_CODE_PARAMETER.toString()));
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()), BackchannelTokenDeliveryMode.POLL.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()), AsymmetricSignatureAlgorithm.RS256.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_USER_CODE_PARAMETER.toString()), Boolean.toString(true));
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1441,10 +1237,8 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertEquals(backchannelAuthenticationResponse.getStatus(), 200, "Unexpected response code: " + backchannelAuthenticationResponse.getEntity());
-        assertNotNull(backchannelAuthenticationResponse.getAuthReqId());
-        assertNotNull(backchannelAuthenticationResponse.getExpiresIn());
-        assertNotNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .check();
     }
 
     @Parameters({"clientJwksUri", "backchannelUserCode"})
@@ -1467,18 +1261,11 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
-
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_USER_CODE_PARAMETER.toString()));
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()), BackchannelTokenDeliveryMode.POLL.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()), AsymmetricSignatureAlgorithm.RS384.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_USER_CODE_PARAMETER.toString()), Boolean.toString(true));
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS384)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1500,10 +1287,8 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertEquals(backchannelAuthenticationResponse.getStatus(), 200, "Unexpected response code: " + backchannelAuthenticationResponse.getEntity());
-        assertNotNull(backchannelAuthenticationResponse.getAuthReqId());
-        assertNotNull(backchannelAuthenticationResponse.getExpiresIn());
-        assertNotNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .check();
     }
 
     @Parameters({"clientJwksUri", "backchannelUserCode"})
@@ -1526,18 +1311,11 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
-
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_USER_CODE_PARAMETER.toString()));
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()), BackchannelTokenDeliveryMode.POLL.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()), AsymmetricSignatureAlgorithm.RS512.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_USER_CODE_PARAMETER.toString()), Boolean.toString(true));
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS512)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1559,10 +1337,8 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertEquals(backchannelAuthenticationResponse.getStatus(), 200, "Unexpected response code: " + backchannelAuthenticationResponse.getEntity());
-        assertNotNull(backchannelAuthenticationResponse.getAuthReqId());
-        assertNotNull(backchannelAuthenticationResponse.getExpiresIn());
-        assertNotNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .check();
     }
 
     @Parameters({"clientJwksUri", "backchannelUserCode"})
@@ -1585,18 +1361,11 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
-
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_USER_CODE_PARAMETER.toString()));
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()), BackchannelTokenDeliveryMode.POLL.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()), AsymmetricSignatureAlgorithm.ES256.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_USER_CODE_PARAMETER.toString()), Boolean.toString(true));
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.ES256)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1618,10 +1387,8 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertEquals(backchannelAuthenticationResponse.getStatus(), 200, "Unexpected response code: " + backchannelAuthenticationResponse.getEntity());
-        assertNotNull(backchannelAuthenticationResponse.getAuthReqId());
-        assertNotNull(backchannelAuthenticationResponse.getExpiresIn());
-        assertNotNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .check();
     }
 
     @Parameters({"clientJwksUri", "backchannelUserCode"})
@@ -1644,18 +1411,11 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
-
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_USER_CODE_PARAMETER.toString()));
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()), BackchannelTokenDeliveryMode.POLL.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()), AsymmetricSignatureAlgorithm.ES384.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_USER_CODE_PARAMETER.toString()), Boolean.toString(true));
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.ES384)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1677,10 +1437,8 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertEquals(backchannelAuthenticationResponse.getStatus(), 200, "Unexpected response code: " + backchannelAuthenticationResponse.getEntity());
-        assertNotNull(backchannelAuthenticationResponse.getAuthReqId());
-        assertNotNull(backchannelAuthenticationResponse.getExpiresIn());
-        assertNotNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .check();
     }
 
     @Parameters({"clientJwksUri", "backchannelUserCode"})
@@ -1703,18 +1461,11 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
-
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_USER_CODE_PARAMETER.toString()));
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()), BackchannelTokenDeliveryMode.POLL.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()), AsymmetricSignatureAlgorithm.ES512.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_USER_CODE_PARAMETER.toString()), Boolean.toString(true));
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.ES512)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1736,10 +1487,8 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertEquals(backchannelAuthenticationResponse.getStatus(), 200, "Unexpected response code: " + backchannelAuthenticationResponse.getEntity());
-        assertNotNull(backchannelAuthenticationResponse.getAuthReqId());
-        assertNotNull(backchannelAuthenticationResponse.getExpiresIn());
-        assertNotNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .check();
     }
 
     @Parameters({"clientJwksUri", "backchannelUserCode"})
@@ -1762,18 +1511,11 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
-
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_USER_CODE_PARAMETER.toString()));
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()), BackchannelTokenDeliveryMode.POLL.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()), AsymmetricSignatureAlgorithm.PS256.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_USER_CODE_PARAMETER.toString()), Boolean.toString(true));
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.PS256)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1795,10 +1537,8 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertEquals(backchannelAuthenticationResponse.getStatus(), 200, "Unexpected response code: " + backchannelAuthenticationResponse.getEntity());
-        assertNotNull(backchannelAuthenticationResponse.getAuthReqId());
-        assertNotNull(backchannelAuthenticationResponse.getExpiresIn());
-        assertNotNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .check();
     }
 
     @Parameters({"clientJwksUri", "backchannelUserCode"})
@@ -1821,18 +1561,11 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
-
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_USER_CODE_PARAMETER.toString()));
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()), BackchannelTokenDeliveryMode.POLL.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()), AsymmetricSignatureAlgorithm.PS384.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_USER_CODE_PARAMETER.toString()), Boolean.toString(true));
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.PS384)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1854,10 +1587,8 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertEquals(backchannelAuthenticationResponse.getStatus(), 200, "Unexpected response code: " + backchannelAuthenticationResponse.getEntity());
-        assertNotNull(backchannelAuthenticationResponse.getAuthReqId());
-        assertNotNull(backchannelAuthenticationResponse.getExpiresIn());
-        assertNotNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .check();
     }
 
     @Parameters({"clientJwksUri", "backchannelUserCode"})
@@ -1880,18 +1611,11 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
-
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_USER_CODE_PARAMETER.toString()));
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()), BackchannelTokenDeliveryMode.POLL.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()), AsymmetricSignatureAlgorithm.PS512.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_USER_CODE_PARAMETER.toString()), Boolean.toString(true));
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.PS512)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -1913,10 +1637,8 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertEquals(backchannelAuthenticationResponse.getStatus(), 200, "Unexpected response code: " + backchannelAuthenticationResponse.getEntity());
-        assertNotNull(backchannelAuthenticationResponse.getAuthReqId());
-        assertNotNull(backchannelAuthenticationResponse.getExpiresIn());
-        assertNotNull(backchannelAuthenticationResponse.getInterval()); // This parameter will only be present if the Client is registered to use the Poll or Ping modes.
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).ok()
+                        .check();
     }
 
     @Parameters({"clientJwksUri"})
@@ -1938,18 +1660,11 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
-
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_USER_CODE_PARAMETER.toString()));
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()), BackchannelTokenDeliveryMode.POLL.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()), AsymmetricSignatureAlgorithm.RS256.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_USER_CODE_PARAMETER.toString()), Boolean.toString(true));
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         // 2. Authentication Request
         BackchannelAuthenticationRequest backchannelAuthenticationRequest = new BackchannelAuthenticationRequest();
@@ -1959,11 +1674,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertEquals(backchannelAuthenticationResponse.getStatus(), 400, "Unexpected response code: " + backchannelAuthenticationResponse.getEntity());
-        assertNotNull(backchannelAuthenticationResponse.getEntity(), "The entity is null");
-        assertNotNull(backchannelAuthenticationResponse.getErrorType(), "The error type is null");
-        assertEquals(BackchannelAuthenticationErrorResponseType.INVALID_REQUEST, backchannelAuthenticationResponse.getErrorType());
-        assertNotNull(backchannelAuthenticationResponse.getErrorDescription(), "The error description is null");
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).bad(BackchannelAuthenticationErrorResponseType.INVALID_REQUEST).check();
     }
 
     @Parameters({"clientJwksUri"})
@@ -1985,18 +1696,11 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
-
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_USER_CODE_PARAMETER.toString()));
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()), BackchannelTokenDeliveryMode.POLL.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()), AsymmetricSignatureAlgorithm.RS256.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_USER_CODE_PARAMETER.toString()), Boolean.toString(true));
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
 
@@ -2010,11 +1714,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertEquals(backchannelAuthenticationResponse.getStatus(), 401, "Unexpected response code: " + backchannelAuthenticationResponse.getEntity());
-        assertNotNull(backchannelAuthenticationResponse.getEntity(), "The entity is null");
-        assertNotNull(backchannelAuthenticationResponse.getErrorType(), "The error type is null");
-        assertEquals(BackchannelAuthenticationErrorResponseType.INVALID_CLIENT, backchannelAuthenticationResponse.getErrorType());
-        assertNotNull(backchannelAuthenticationResponse.getErrorDescription(), "The error description is null");
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).unauthorized(BackchannelAuthenticationErrorResponseType.INVALID_CLIENT).check();
     }
 
     @Parameters({"clientJwksUri"})
@@ -2036,18 +1736,11 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
-
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_USER_CODE_PARAMETER.toString()));
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()), BackchannelTokenDeliveryMode.POLL.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()), AsymmetricSignatureAlgorithm.RS256.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_USER_CODE_PARAMETER.toString()), Boolean.toString(true));
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -2063,11 +1756,8 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertEquals(backchannelAuthenticationResponse.getStatus(), 400, "Unexpected response code: " + backchannelAuthenticationResponse.getEntity());
-        assertNotNull(backchannelAuthenticationResponse.getEntity(), "The entity is null");
-        assertNotNull(backchannelAuthenticationResponse.getErrorType(), "The error type is null");
-        assertEquals(BackchannelAuthenticationErrorResponseType.UNKNOWN_USER_ID, backchannelAuthenticationResponse.getErrorType());
-        assertNotNull(backchannelAuthenticationResponse.getErrorDescription(), "The error description is null");
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).bad(BackchannelAuthenticationErrorResponseType.UNKNOWN_USER_ID)
+                .check();
     }
 
     @Parameters({"clientJwksUri"})
@@ -2089,18 +1779,11 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
-
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_USER_CODE_PARAMETER.toString()));
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()), BackchannelTokenDeliveryMode.POLL.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()), AsymmetricSignatureAlgorithm.RS256.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_USER_CODE_PARAMETER.toString()), Boolean.toString(true));
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -2119,11 +1802,8 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertEquals(backchannelAuthenticationResponse.getStatus(), 400, "Unexpected response code: " + backchannelAuthenticationResponse.getEntity());
-        assertNotNull(backchannelAuthenticationResponse.getEntity(), "The entity is null");
-        assertNotNull(backchannelAuthenticationResponse.getErrorType(), "The error type is null");
-        assertEquals(BackchannelAuthenticationErrorResponseType.UNKNOWN_USER_ID, backchannelAuthenticationResponse.getErrorType());
-        assertNotNull(backchannelAuthenticationResponse.getErrorDescription(), "The error description is null");
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).bad(BackchannelAuthenticationErrorResponseType.UNKNOWN_USER_ID)
+                .check();
     }
 
     @Parameters({"clientJwksUri", "userId"})
@@ -2145,18 +1825,11 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
-
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_USER_CODE_PARAMETER.toString()));
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()), BackchannelTokenDeliveryMode.POLL.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()), AsymmetricSignatureAlgorithm.RS256.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_USER_CODE_PARAMETER.toString()), Boolean.toString(true));
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -2174,11 +1847,8 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertEquals(backchannelAuthenticationResponse.getStatus(), 400, "Unexpected response code: " + backchannelAuthenticationResponse.getEntity());
-        assertNotNull(backchannelAuthenticationResponse.getEntity(), "The entity is null");
-        assertNotNull(backchannelAuthenticationResponse.getErrorType(), "The error type is null");
-        assertEquals(BackchannelAuthenticationErrorResponseType.INVALID_USER_CODE, backchannelAuthenticationResponse.getErrorType());
-        assertNotNull(backchannelAuthenticationResponse.getErrorDescription(), "The error description is null");
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).bad(BackchannelAuthenticationErrorResponseType.INVALID_USER_CODE)
+                .check();
     }
 
     @Parameters({"clientJwksUri", "userId"})
@@ -2200,18 +1870,11 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
-
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_USER_CODE_PARAMETER.toString()));
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()), BackchannelTokenDeliveryMode.POLL.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()), AsymmetricSignatureAlgorithm.RS256.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_USER_CODE_PARAMETER.toString()), Boolean.toString(true));
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -2232,11 +1895,8 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertEquals(backchannelAuthenticationResponse.getStatus(), 400, "Unexpected response code: " + backchannelAuthenticationResponse.getEntity());
-        assertNotNull(backchannelAuthenticationResponse.getEntity(), "The entity is null");
-        assertNotNull(backchannelAuthenticationResponse.getErrorType(), "The error type is null");
-        assertEquals(BackchannelAuthenticationErrorResponseType.INVALID_USER_CODE, backchannelAuthenticationResponse.getErrorType());
-        assertNotNull(backchannelAuthenticationResponse.getErrorDescription(), "The error description is null");
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).bad(BackchannelAuthenticationErrorResponseType.INVALID_USER_CODE)
+                .check();
     }
 
     @Parameters({"clientJwksUri", "userId", "backchannelUserCode"})
@@ -2259,18 +1919,11 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
-
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()));
-        assertTrue(registerResponse.getClaims().containsKey(BACKCHANNEL_USER_CODE_PARAMETER.toString()));
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_TOKEN_DELIVERY_MODE.toString()), BackchannelTokenDeliveryMode.POLL.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_AUTHENTICATION_REQUEST_SIGNING_ALG.toString()), AsymmetricSignatureAlgorithm.RS256.getValue());
-        assertEquals(registerResponse.getClaims().get(BACKCHANNEL_USER_CODE_PARAMETER.toString()), Boolean.toString(true));
+        AssertBuilder.registerResponse(registerResponse).created()
+                .backchannelTokenDeliveryMode(BackchannelTokenDeliveryMode.POLL)
+                .backchannelRequestSigningAlgorithm(AsymmetricSignatureAlgorithm.RS256)
+                .backchannelUserCodeParameter(true)
+                .check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -2294,11 +1947,9 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         BackchannelAuthenticationResponse backchannelAuthenticationResponse = backchannelAuthenticationClient.exec();
 
         showClient(backchannelAuthenticationClient);
-        assertEquals(backchannelAuthenticationResponse.getStatus(), 400, "Unexpected response code: " + backchannelAuthenticationResponse.getEntity());
-        assertNotNull(backchannelAuthenticationResponse.getEntity(), "The entity is null");
-        assertNotNull(backchannelAuthenticationResponse.getErrorType(), "The error type is null");
-        assertEquals(BackchannelAuthenticationErrorResponseType.INVALID_BINDING_MESSAGE, backchannelAuthenticationResponse.getErrorType());
-        assertNotNull(backchannelAuthenticationResponse.getErrorDescription(), "The error description is null");
+        AssertBuilder.backchannelAuthenticationResponse(backchannelAuthenticationResponse).bad(BackchannelAuthenticationErrorResponseType.INVALID_BINDING_MESSAGE)
+                .check();
+
     }
 
     @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "sectorIdentifierUri"})
@@ -2322,12 +1973,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -2345,33 +1991,16 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertNotNull(authorizationResponse.getLocation(), "The location is null");
-        assertNotNull(authorizationResponse.getAccessToken(), "The accessToken is null");
-        assertNotNull(authorizationResponse.getTokenType(), "The tokenType is null");
-        assertNotNull(authorizationResponse.getIdToken(), "The idToken is null");
-        assertNotNull(authorizationResponse.getState(), "The state is null");
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
 
         // 3. Validate id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertNotNull(jwt);
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ACCESS_TOKEN_HASH));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
-
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS256, publicKey);
-
-        assertTrue(rsaSigner.validate(jwt));
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS256)
+                .notNullAccesTokenHash()
+                .notNullAuthenticationTime()
+                .check();
 
         idTokenHintRS256 = idToken;
     }
@@ -2397,12 +2026,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -2420,33 +2044,16 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertNotNull(authorizationResponse.getLocation(), "The location is null");
-        assertNotNull(authorizationResponse.getAccessToken(), "The accessToken is null");
-        assertNotNull(authorizationResponse.getTokenType(), "The tokenType is null");
-        assertNotNull(authorizationResponse.getIdToken(), "The idToken is null");
-        assertNotNull(authorizationResponse.getState(), "The state is null");
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
 
         // 3. Validate id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertNotNull(jwt);
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ACCESS_TOKEN_HASH));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
-
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS384, publicKey);
-
-        assertTrue(rsaSigner.validate(jwt));
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS384)
+                .notNullAccesTokenHash()
+                .notNullAuthenticationTime()
+                .check();
 
         idTokenHintRS384 = idToken;
     }
@@ -2472,12 +2079,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -2495,33 +2097,16 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertNotNull(authorizationResponse.getLocation(), "The location is null");
-        assertNotNull(authorizationResponse.getAccessToken(), "The accessToken is null");
-        assertNotNull(authorizationResponse.getTokenType(), "The tokenType is null");
-        assertNotNull(authorizationResponse.getIdToken(), "The idToken is null");
-        assertNotNull(authorizationResponse.getState(), "The state is null");
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
 
         // 3. Validate id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertNotNull(jwt);
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ACCESS_TOKEN_HASH));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
-
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS512, publicKey);
-
-        assertTrue(rsaSigner.validate(jwt));
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS512)
+                .notNullAccesTokenHash()
+                .notNullAuthenticationTime()
+                .check();
 
         idTokenHintRS512 = idToken;
     }
@@ -2547,12 +2132,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -2570,33 +2150,16 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertNotNull(authorizationResponse.getLocation(), "The location is null");
-        assertNotNull(authorizationResponse.getAccessToken(), "The accessToken is null");
-        assertNotNull(authorizationResponse.getTokenType(), "The tokenType is null");
-        assertNotNull(authorizationResponse.getIdToken(), "The idToken is null");
-        assertNotNull(authorizationResponse.getState(), "The state is null");
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
 
         // 3. Validate id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertNotNull(jwt);
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ACCESS_TOKEN_HASH));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
-
-        ECDSAPublicKey publicKey = JwkClient.getECDSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        ECDSASigner ecdsaSigner = new ECDSASigner(SignatureAlgorithm.ES256, publicKey);
-
-        assertTrue(ecdsaSigner.validate(jwt));
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureECDSA(jwksUri, SignatureAlgorithm.ES256)
+                .notNullAuthenticationTime()
+                .notNullAccesTokenHash()
+                .check();
 
         idTokenHintES256 = idToken;
     }
@@ -2622,12 +2185,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -2645,33 +2203,16 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertNotNull(authorizationResponse.getLocation(), "The location is null");
-        assertNotNull(authorizationResponse.getAccessToken(), "The accessToken is null");
-        assertNotNull(authorizationResponse.getTokenType(), "The tokenType is null");
-        assertNotNull(authorizationResponse.getIdToken(), "The idToken is null");
-        assertNotNull(authorizationResponse.getState(), "The state is null");
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
 
         // 3. Validate id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertNotNull(jwt);
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ACCESS_TOKEN_HASH));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
-
-        ECDSAPublicKey publicKey = JwkClient.getECDSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        ECDSASigner ecdsaSigner = new ECDSASigner(SignatureAlgorithm.ES384, publicKey);
-
-        assertTrue(ecdsaSigner.validate(jwt));
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureECDSA(jwksUri, SignatureAlgorithm.ES384)
+                .notNullAuthenticationTime()
+                .notNullAccesTokenHash()
+                .check();
 
         idTokenHintES384 = idToken;
     }
@@ -2697,12 +2238,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -2720,33 +2256,16 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertNotNull(authorizationResponse.getLocation(), "The location is null");
-        assertNotNull(authorizationResponse.getAccessToken(), "The accessToken is null");
-        assertNotNull(authorizationResponse.getTokenType(), "The tokenType is null");
-        assertNotNull(authorizationResponse.getIdToken(), "The idToken is null");
-        assertNotNull(authorizationResponse.getState(), "The state is null");
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
 
         // 3. Validate id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertNotNull(jwt);
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ACCESS_TOKEN_HASH));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
-
-        ECDSAPublicKey publicKey = JwkClient.getECDSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        ECDSASigner ecdsaSigner = new ECDSASigner(SignatureAlgorithm.ES512, publicKey);
-
-        assertTrue(ecdsaSigner.validate(jwt));
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureECDSA(jwksUri, SignatureAlgorithm.ES512)
+                .notNullAuthenticationTime()
+                .notNullAccesTokenHash()
+                .check();
 
         idTokenHintES512 = idToken;
     }
@@ -2772,12 +2291,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -2795,33 +2309,16 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertNotNull(authorizationResponse.getLocation(), "The location is null");
-        assertNotNull(authorizationResponse.getAccessToken(), "The accessToken is null");
-        assertNotNull(authorizationResponse.getTokenType(), "The tokenType is null");
-        assertNotNull(authorizationResponse.getIdToken(), "The idToken is null");
-        assertNotNull(authorizationResponse.getState(), "The state is null");
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
 
         // 3. Validate id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertNotNull(jwt);
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ACCESS_TOKEN_HASH));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
-
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.PS256, publicKey);
-
-        assertTrue(rsaSigner.validate(jwt));
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureRSA(jwksUri, SignatureAlgorithm.PS256)
+                .notNullAccesTokenHash()
+                .notNullAuthenticationTime()
+                .check();
 
         idTokenHintPS256 = idToken;
     }
@@ -2847,12 +2344,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -2870,33 +2362,16 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertNotNull(authorizationResponse.getLocation(), "The location is null");
-        assertNotNull(authorizationResponse.getAccessToken(), "The accessToken is null");
-        assertNotNull(authorizationResponse.getTokenType(), "The tokenType is null");
-        assertNotNull(authorizationResponse.getIdToken(), "The idToken is null");
-        assertNotNull(authorizationResponse.getState(), "The state is null");
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
 
         // 3. Validate id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertNotNull(jwt);
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ACCESS_TOKEN_HASH));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
-
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.PS384, publicKey);
-
-        assertTrue(rsaSigner.validate(jwt));
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureRSA(jwksUri, SignatureAlgorithm.PS384)
+                .notNullAccesTokenHash()
+                .notNullAuthenticationTime()
+                .check();
 
         idTokenHintPS384 = idToken;
     }
@@ -2922,12 +2397,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -2945,33 +2415,16 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertNotNull(authorizationResponse.getLocation(), "The location is null");
-        assertNotNull(authorizationResponse.getAccessToken(), "The accessToken is null");
-        assertNotNull(authorizationResponse.getTokenType(), "The tokenType is null");
-        assertNotNull(authorizationResponse.getIdToken(), "The idToken is null");
-        assertNotNull(authorizationResponse.getState(), "The state is null");
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
 
         // 3. Validate id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertNotNull(jwt);
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ACCESS_TOKEN_HASH));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
-
-        RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
-                jwksUri,
-                jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
-        RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.PS512, publicKey);
-
-        assertTrue(rsaSigner.validate(jwt));
+        AssertBuilder.jwtParse(idToken)
+                .validateSignatureRSA(jwksUri, SignatureAlgorithm.PS512)
+                .notNullAccesTokenHash()
+                .notNullAuthenticationTime()
+                .check();
 
         idTokenHintPS512 = idToken;
     }
@@ -2998,12 +2451,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -3022,25 +2470,15 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertNotNull(authorizationResponse.getLocation(), "The location is null");
-        assertNotNull(authorizationResponse.getAccessToken(), "The accessToken is null");
-        assertNotNull(authorizationResponse.getTokenType(), "The tokenType is null");
-        assertNotNull(authorizationResponse.getIdToken(), "The idToken is null");
-        assertNotNull(authorizationResponse.getState(), "The state is null");
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
 
         // 3. Validate id_token
         Jwe jwe = Jwe.parse(idToken, null, clientSecret.getBytes(StandardCharsets.UTF_8));
-        assertNotNull(jwe.getHeader().getClaimAsString(JwtHeaderName.TYPE));
-        assertNotNull(jwe.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ISSUER));
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ACCESS_TOKEN_HASH));
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
+        AssertBuilder.jwe(jwe)
+                .notNullAccesTokenHash()
+                .check();
 
         idTokenHintAlgA128KWEncA128GCM = idToken;
     }
@@ -3067,12 +2505,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
@@ -3091,25 +2524,15 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertNotNull(authorizationResponse.getLocation(), "The location is null");
-        assertNotNull(authorizationResponse.getAccessToken(), "The accessToken is null");
-        assertNotNull(authorizationResponse.getTokenType(), "The tokenType is null");
-        assertNotNull(authorizationResponse.getIdToken(), "The idToken is null");
-        assertNotNull(authorizationResponse.getState(), "The state is null");
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
 
         // 3. Validate id_token
         Jwe jwe = Jwe.parse(idToken, null, clientSecret.getBytes(StandardCharsets.UTF_8));
-        assertNotNull(jwe.getHeader().getClaimAsString(JwtHeaderName.TYPE));
-        assertNotNull(jwe.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ISSUER));
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ACCESS_TOKEN_HASH));
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
+        AssertBuilder.jwe(jwe)
+                .notNullAccesTokenHash()
+                .check();
 
         idTokenHintAlgA256KWEncA256GCM = idToken;
     }
@@ -3139,12 +2562,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -3162,11 +2580,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertNotNull(authorizationResponse.getLocation(), "The location is null");
-        assertNotNull(authorizationResponse.getAccessToken(), "The accessToken is null");
-        assertNotNull(authorizationResponse.getTokenType(), "The tokenType is null");
-        assertNotNull(authorizationResponse.getIdToken(), "The idToken is null");
-        assertNotNull(authorizationResponse.getState(), "The state is null");
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
 
@@ -3175,15 +2589,9 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
 
         Jwe jwe = Jwe.parse(idToken, privateKey, null);
-        assertNotNull(jwe.getHeader().getClaimAsString(JwtHeaderName.TYPE));
-        assertNotNull(jwe.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ISSUER));
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ACCESS_TOKEN_HASH));
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
+        AssertBuilder.jwe(jwe)
+                .notNullAccesTokenHash()
+                .check();
 
         idTokenHintAlgRSA15EncA128CBCPLUSHS256 = idToken;
     }
@@ -3213,12 +2621,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -3236,11 +2639,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertNotNull(authorizationResponse.getLocation(), "The location is null");
-        assertNotNull(authorizationResponse.getAccessToken(), "The accessToken is null");
-        assertNotNull(authorizationResponse.getTokenType(), "The tokenType is null");
-        assertNotNull(authorizationResponse.getIdToken(), "The idToken is null");
-        assertNotNull(authorizationResponse.getState(), "The state is null");
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
 
@@ -3249,15 +2648,9 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
 
         Jwe jwe = Jwe.parse(idToken, privateKey, null);
-        assertNotNull(jwe.getHeader().getClaimAsString(JwtHeaderName.TYPE));
-        assertNotNull(jwe.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ISSUER));
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ACCESS_TOKEN_HASH));
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
+        AssertBuilder.jwe(jwe)
+                .notNullAccesTokenHash()
+                .check();
 
         idTokenHintAlgRSA15EncA256CBCPLUSHS512 = idToken;
     }
@@ -3287,12 +2680,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
 
@@ -3310,11 +2698,7 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);
 
-        assertNotNull(authorizationResponse.getLocation(), "The location is null");
-        assertNotNull(authorizationResponse.getAccessToken(), "The accessToken is null");
-        assertNotNull(authorizationResponse.getTokenType(), "The tokenType is null");
-        assertNotNull(authorizationResponse.getIdToken(), "The idToken is null");
-        assertNotNull(authorizationResponse.getState(), "The state is null");
+        AssertBuilder.authorizationResponse(authorizationResponse).responseTypes(responseTypes).check();
 
         String idToken = authorizationResponse.getIdToken();
 
@@ -3323,15 +2707,9 @@ public class BackchannelAuthenticationPollMode extends BaseTest {
         PrivateKey privateKey = cryptoProvider.getPrivateKey(keyId);
 
         Jwe jwe = Jwe.parse(idToken, privateKey, null);
-        assertNotNull(jwe.getHeader().getClaimAsString(JwtHeaderName.TYPE));
-        assertNotNull(jwe.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ISSUER));
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.ACCESS_TOKEN_HASH));
-        assertNotNull(jwe.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
+        AssertBuilder.jwe(jwe)
+                .notNullAccesTokenHash()
+                .check();
 
         idTokenHintAlgRSAOAEPEncA256GCM = idToken;
     }

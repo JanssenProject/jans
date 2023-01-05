@@ -1,9 +1,0 @@
-<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
-
-<suite name="jans_client_api Common module Suite" parallel="tests">
-    <test name="ParamsSecurityTest" enabled="true">
-        <classes>
-            <class name="io.jans.ca.common.params.ParamsSecurityTest"/>
-        </classes>
-    </test>
-</suite>

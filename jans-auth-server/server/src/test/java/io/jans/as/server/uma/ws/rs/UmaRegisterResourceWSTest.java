@@ -8,7 +8,7 @@ package io.jans.as.server.uma.ws.rs;
 
 import io.jans.as.model.uma.UmaResource;
 import io.jans.as.model.uma.UmaResourceResponse;
-import io.jans.as.model.uma.UmaTestUtil;
+import io.jans.as.test.UmaTestUtil;
 import io.jans.as.model.uma.wrapper.Token;
 import io.jans.as.server.BaseTest;
 import io.jans.as.server.model.uma.TUma;
@@ -41,14 +41,14 @@ public class UmaRegisterResourceWSTest extends BaseTest {
             "umaRedirectUri", "umaRegisterResourcePath"})
     public void init(String authorizePath, String tokenPath, String umaUserId, String umaUserSecret,
                      String umaPatClientId, String umaPatClientSecret, String umaRedirectUri, String umaRegisterResourcePath) {
-        pat = TUma.requestPat(url, authorizePath, tokenPath, umaUserId, umaUserSecret, umaPatClientId,
+        pat = TUma.requestPat(getApiTagetURI(url), authorizePath, tokenPath, umaUserId, umaUserSecret, umaPatClientId,
                 umaPatClientSecret, umaRedirectUri);
         UmaRegisterResourceWSTest.umaRegisterResourcePath = umaRegisterResourcePath;
     }
 
     @Test(dependsOnMethods = {"init"})
     public void testRegisterResource() throws Exception {
-        resourceStatus = TUma.registerResource(url, pat, umaRegisterResourcePath,
+        resourceStatus = TUma.registerResource(getApiTagetURI(url), pat, umaRegisterResourcePath,
                 UmaTestUtil.createResource());
         UmaTestUtil.assertIt(resourceStatus);
     }
@@ -61,7 +61,7 @@ public class UmaRegisterResourceWSTest extends BaseTest {
         resource.setScopes(
                 Arrays.asList("http://photoz.example.com/dev/scopes/view", "http://photoz.example.com/dev/scopes/all"));
 
-        final UmaResourceResponse status = TUma.modifyResource(url, pat, umaRegisterResourcePath,
+        final UmaResourceResponse status = TUma.modifyResource(getApiTagetURI(url), pat, umaRegisterResourcePath,
                 resourceStatus.getId(), resource);
         UmaTestUtil.assertIt(status);
     }
@@ -71,7 +71,7 @@ public class UmaRegisterResourceWSTest extends BaseTest {
      */
     @Test(dependsOnMethods = {"testModifyResource"})
     public void testGetResources() throws Exception {
-        final List<String> list = TUma.getResourceList(url, pat, umaRegisterResourcePath);
+        final List<String> list = TUma.getResourceList(getApiTagetURI(url), pat, umaRegisterResourcePath);
 
         assertTrue(list != null && !list.isEmpty() && list.contains(resourceStatus.getId()),
                 "Resource list is empty");
@@ -82,6 +82,6 @@ public class UmaRegisterResourceWSTest extends BaseTest {
      */
     @Test(dependsOnMethods = {"testGetResources"})
     public void testDeleteResource() throws Exception {
-        TUma.deleteResource(url, pat, umaRegisterResourcePath, resourceStatus.getId());
+        TUma.deleteResource(getApiTagetURI(url), pat, umaRegisterResourcePath, resourceStatus.getId());
     }
 }

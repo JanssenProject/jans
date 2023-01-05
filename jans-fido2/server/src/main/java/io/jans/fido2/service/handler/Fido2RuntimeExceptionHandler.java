@@ -22,7 +22,7 @@ import io.jans.service.exception.ExceptionHandler;
 import io.jans.fido2.exception.Fido2RuntimeException;
 import org.slf4j.Logger;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 public class Fido2RuntimeExceptionHandler {
 

@@ -13,7 +13,9 @@ import io.jans.as.model.token.ClientAssertionType;
 import io.jans.as.model.uma.UmaScopeType;
 import io.jans.as.model.util.QueryBuilder;
 
-import javax.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.MediaType;
+import org.apache.commons.lang.StringUtils;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,7 +23,7 @@ import java.util.Map;
  * Represents a token request to send to the authorization server.
  *
  * @author Javier Rojas Blum
- * @version September 30, 2021
+ * @version April 25, 2022
  */
 public class TokenRequest extends ClientAuthnRequest {
 
@@ -36,6 +38,11 @@ public class TokenRequest extends ClientAuthnRequest {
     private String codeVerifier;
     private String authReqId;
     private String deviceCode;
+    private String subjectToken;
+    private String subjectTokenType;
+    private String actorToken;
+    private String actorTokenType;
+    private String requestedTokenType;
     private DPoP dpop;
 
     /**
@@ -59,6 +66,46 @@ public class TokenRequest extends ClientAuthnRequest {
 
     public static Builder umaBuilder() {
         return new Builder().grantType(GrantType.CLIENT_CREDENTIALS);
+    }
+
+    public String getSubjectToken() {
+        return subjectToken;
+    }
+
+    public void setSubjectToken(String subjectToken) {
+        this.subjectToken = subjectToken;
+    }
+
+    public String getSubjectTokenType() {
+        return subjectTokenType;
+    }
+
+    public void setSubjectTokenType(String subjectTokenType) {
+        this.subjectTokenType = subjectTokenType;
+    }
+
+    public String getActorToken() {
+        return actorToken;
+    }
+
+    public void setActorToken(String actorToken) {
+        this.actorToken = actorToken;
+    }
+
+    public String getActorTokenType() {
+        return actorTokenType;
+    }
+
+    public void setActorTokenType(String actorTokenType) {
+        this.actorTokenType = actorTokenType;
+    }
+
+    public String getRequestedTokenType() {
+        return requestedTokenType;
+    }
+
+    public void setRequestedTokenType(String requestedTokenType) {
+        this.requestedTokenType = requestedTokenType;
     }
 
     /**
@@ -267,6 +314,12 @@ public class TokenRequest extends ClientAuthnRequest {
         builder.append("refresh_token", refreshToken);
         builder.append("auth_req_id", authReqId);
         builder.append("device_code", deviceCode);
+        builder.append("audience", getAudience());
+        builder.append("subject_token", subjectToken);
+        builder.append("subject_token_type", subjectTokenType);
+        builder.append("actor_token", actorToken);
+        builder.append("actor_token_type", actorTokenType);
+        builder.append("requested_token_type", requestedTokenType);
         appendClientAuthnToQuery(builder);
         for (String key : getCustomParameters().keySet()) {
             builder.append(key, getCustomParameters().get(key));
@@ -295,6 +348,24 @@ public class TokenRequest extends ClientAuthnRequest {
         }
         if (username != null && !username.isEmpty()) {
             parameters.put("username", username);
+        }
+        if (StringUtils.isNotBlank(getAudience())) {
+            parameters.put("audience", getAudience());
+        }
+        if (StringUtils.isNotBlank(subjectToken)) {
+            parameters.put("subject_token", subjectToken);
+        }
+        if (StringUtils.isNotBlank(subjectTokenType)) {
+            parameters.put("subject_token_type", subjectTokenType);
+        }
+        if (StringUtils.isNotBlank(actorToken)) {
+            parameters.put("actor_token", actorToken);
+        }
+        if (StringUtils.isNotBlank(actorTokenType)) {
+            parameters.put("actor_token_type", actorTokenType);
+        }
+        if (StringUtils.isNotBlank(requestedTokenType)) {
+            parameters.put("requested_token_type", requestedTokenType);
         }
         if (password != null && !password.isEmpty()) {
             parameters.put("password", password);

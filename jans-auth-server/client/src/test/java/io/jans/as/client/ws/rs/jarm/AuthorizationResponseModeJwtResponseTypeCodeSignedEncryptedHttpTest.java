@@ -6,11 +6,10 @@
 package io.jans.as.client.ws.rs.jarm;
 
 import io.jans.as.client.*;
-import io.jans.as.client.model.authorize.Claim;
-import io.jans.as.client.model.authorize.ClaimValue;
 import io.jans.as.client.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.authorize.AuthorizeResponseParam;
+import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseMode;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.crypto.AuthCryptoProvider;
@@ -20,7 +19,6 @@ import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.jwe.Jwe;
 import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.jwt.Jwt;
-import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.util.JwtUtil;
 import org.json.JSONObject;
 import org.testng.annotations.Parameters;
@@ -39,20 +37,22 @@ import static org.testng.Assert.*;
  */
 public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest extends BaseTest {
 
-    @Parameters({"userId", "userSecret", "redirectUri", "redirectUris", "clientJwksUri", "RSA_OAEP_keyId",
-            "PS256_keyId", "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
-    @Test
-    public void authorizationRequestObjectPS256RSA_OAEPA256GCM(
-            final String userId, final String userSecret, final String redirectUri, final String redirectUris,
+	
+    @Parameters({ "redirectUri", "redirectUris", "clientJwksUri", "RSA_OAEP_keyId", "PS256_keyId", "dnName",
+            "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri" })
+    @Test(enabled = false) // Enable FAPI to run this test!
+    public void ensureRequestObjectWithUnregisteredRequestUrFails(final String redirectUri, final String redirectUris,
             final String clientJwksUri, final String encryptionKeyId, final String signingKeyId, final String dnName,
             final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
-        showTitle("authorizationRequestObjectPS256RSA_OAEPA256GCM");
+        showTitle("ensureRequestObjectWithUnregisteredRequestUrFails");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<GrantType> GrantTypes = Arrays.asList(GrantType.AUTHORIZATION_CODE);
 
         // 1. Dynamic Client Registration
-        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, sectorIdentifierUri, clientJwksUri,
-                SignatureAlgorithm.PS256, KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM);
+        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, GrantTypes, sectorIdentifierUri,
+                clientJwksUri, SignatureAlgorithm.PS256, KeyEncryptionAlgorithm.RSA_OAEP,
+                BlockEncryptionAlgorithm.A256GCM);
 
         String clientId = registerResponse.getClientId();
 
@@ -61,24 +61,26 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         String state = UUID.randomUUID().toString();
         String nonce = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scope, redirectUri, null);
-        authorizationRequest.setResponseMode(ResponseMode.JWT);
-        authorizationRequest.setState(state);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scope,
+                redirectUri + "987987", null);
 
         AuthCryptoProvider cryptoProvider1 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
 
-        JwtAuthorizationRequest jwsAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest, SignatureAlgorithm.PS256, cryptoProvider1);
+        JwtAuthorizationRequest jwsAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
+                SignatureAlgorithm.PS256, cryptoProvider1);
         jwsAuthorizationRequest.setKeyId(signingKeyId);
-        jwsAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NAME, ClaimValue.createNull()));
-        jwsAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.NICKNAME, ClaimValue.createEssential(false)));
-        jwsAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL, ClaimValue.createNull()));
-        jwsAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.EMAIL_VERIFIED, ClaimValue.createNull()));
-        jwsAuthorizationRequest.addUserInfoClaim(new Claim(JwtClaimName.PICTURE, ClaimValue.createEssential(false)));
-        jwsAuthorizationRequest.addIdTokenClaim(new Claim(JwtClaimName.AUTHENTICATION_TIME, ClaimValue.createNull()));
-        jwsAuthorizationRequest.getIdTokenMember().setMaxAge(86400);
+        jwsAuthorizationRequest.setAud("https://www.other1.example.com/"); // Added bad aud to request object claims
+        jwsAuthorizationRequest.setResponseMode(ResponseMode.JWT);
+        jwsAuthorizationRequest.setState(state);
         jwsAuthorizationRequest.setNonce(nonce); // FAPI: nonce param is required
-        jwsAuthorizationRequest.setNbf((int) Instant.now().getEpochSecond()); // FAPI: require the request object to contain an exp claim that has a lifetime of no longer than 60 minutes after the nbf claim
-        jwsAuthorizationRequest.setExp(jwsAuthorizationRequest.getNbf() + 3600); // FAPI: require the request object to contain an exp claim that has a lifetime of no longer than 60 minutes after the nbf claim
+        jwsAuthorizationRequest.setNbf((int) Instant.now().getEpochSecond()); // FAPI: require the request object to
+                                                                              // contain an exp claim that has a
+                                                                              // lifetime of no longer than 60 minutes
+                                                                              // after the nbf claim
+        jwsAuthorizationRequest.setExp(jwsAuthorizationRequest.getNbf() + 3600); // FAPI: require the request object to
+                                                                                 // contain an exp claim that has a
+                                                                                 // lifetime of no longer than 60
+                                                                                 // minutes after the nbf claim
         Jwt authJws = Jwt.parse(jwsAuthorizationRequest.getEncodedJwt());
 
         JwkClient jwkClient = new JwkClient(jwksUri);
@@ -91,27 +93,408 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         privateKey = cryptoProvider2.getPrivateKey(encryptionKeyId);
 
         JwtAuthorizationRequest jweAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
-                KeyEncryptionAlgorithm.RSA_OAEP, BlockEncryptionAlgorithm.A256GCM, cryptoProvider2);
+                SignatureAlgorithm.PS256, cryptoProvider2);
+
         jweAuthorizationRequest.setKeyId(serverKeyId);
         jweAuthorizationRequest.setNestedPayload(authJws);
+        jweAuthorizationRequest.setKeyId(signingKeyId);
+        jweAuthorizationRequest.setResponseMode(ResponseMode.JWT);
+        jweAuthorizationRequest.setState(state);
+        jweAuthorizationRequest.setScopes(scope);
+        jweAuthorizationRequest.setResponseTypes(responseTypes);
+        jweAuthorizationRequest.setRedirectUri(redirectUri + "987987");
+        jweAuthorizationRequest.setNonce(nonce); // FAPI: nonce param is required
+        jweAuthorizationRequest.setNbf((int) Instant.now().getEpochSecond()); // FAPI: require the request object to
+                                                                              // contain an exp claim that has a
+                                                                              // lifetime of no longer than 60 minutes
+                                                                              // after the nbf claim
+        jweAuthorizationRequest.setExp(jwsAuthorizationRequest.getNbf() + 3600); // Added invalid exp value to request
+                                                                                 // object which is 70 minutes in the
+                                                                                 // future
         String authJwe = jweAuthorizationRequest.getEncodedJwt(jwks);
 
         authorizationRequest.setRequest(authJwe);
 
-        AuthorizationResponse authorizationResponse = authorizationRequest(authorizationRequest, ResponseMode.QUERY_JWT, userId, userSecret);
+        AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
+        authorizeClient.setRequest(authorizationRequest);
+        AuthorizationResponse authorizationResponse = authorizeClient.exec();
+
+        showClient(authorizeClient);
         assertNotNull(authorizationResponse.getResponse());
 
         Jwe response = Jwe.parse(authorizationResponse.getResponse(), privateKey, null);
-
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.ISS));
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.AUD));
-        assertNotNull(response.getClaims().getClaimAsInteger(AuthorizeResponseParam.EXP));
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.CODE));
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.STATE));
+        assertJweResponse(response);
+        assertEquals(response.getClaims().getClaimAsString("error"), "invalid_request_object");
 
         privateKey = null; // Clear private key to do not affect to other tests
     }
 
+    @Parameters({ "redirectUri", "redirectUris", "clientJwksUri", "RSA_OAEP_keyId", "RS256_keyId", "dnName",
+            "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri" })
+    @Test(enabled = false) // Enable FAPI to run this test!
+    public void ensureRequestObjectSignedbyRS256AlgorithmFails(final String redirectUri, final String redirectUris,
+            final String clientJwksUri, final String encryptionKeyId, final String signingKeyId, final String dnName,
+            final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("ensureRequestObjectSignedbyRS256AlgorithmFails");
+
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<GrantType> GrantTypes = Arrays.asList(GrantType.AUTHORIZATION_CODE);
+
+        // 1. Dynamic Client Registration
+        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, GrantTypes, sectorIdentifierUri,
+                clientJwksUri, SignatureAlgorithm.RS256, KeyEncryptionAlgorithm.RSA_OAEP,
+                BlockEncryptionAlgorithm.A256GCM);
+
+        String clientId = registerResponse.getClientId();
+
+        // 2. Request authorization
+        List<String> scope = Arrays.asList("openid", "profile", "address", "email");
+        String state = UUID.randomUUID().toString();
+        String nonce = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scope,
+                redirectUri, null);
+
+        AuthCryptoProvider cryptoProvider1 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        JwtAuthorizationRequest jwsAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
+                SignatureAlgorithm.RS256, cryptoProvider1);
+        jwsAuthorizationRequest.setKeyId(signingKeyId);
+        jwsAuthorizationRequest.setAud("https://www.other1.example.com/"); // Added bad aud to request object claims
+        jwsAuthorizationRequest.setRedirectUri(redirectUri);
+        jwsAuthorizationRequest.setResponseMode(ResponseMode.JWT);
+        jwsAuthorizationRequest.setState(state);
+        jwsAuthorizationRequest.setNonce(nonce); // FAPI: nonce param is required
+        jwsAuthorizationRequest.setNbf((int) Instant.now().getEpochSecond()); // FAPI: require the request object to
+                                                                              // contain an exp claim that has a
+                                                                              // lifetime of no longer than 60 minutes
+                                                                              // after the nbf claim
+        jwsAuthorizationRequest.setExp(jwsAuthorizationRequest.getNbf() + 3600); // FAPI: require the request object to
+                                                                                 // contain an exp claim that has a
+                                                                                 // lifetime of no longer than 60
+                                                                                 // minutes after the nbf claim
+        Jwt authJws = Jwt.parse(jwsAuthorizationRequest.getEncodedJwt());
+
+        JwkClient jwkClient = new JwkClient(jwksUri);
+        JwkResponse jwkResponse = jwkClient.exec();
+        String serverKeyId = jwkResponse.getKeyId(Algorithm.RSA_OAEP);
+        assertNotNull(serverKeyId);
+
+        JSONObject jwks = JwtUtil.getJSONWebKeys(jwksUri);
+        AuthCryptoProvider cryptoProvider2 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        privateKey = cryptoProvider2.getPrivateKey(encryptionKeyId);
+
+        JwtAuthorizationRequest jweAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
+                SignatureAlgorithm.RS256, cryptoProvider2);
+        jweAuthorizationRequest.setKeyId(serverKeyId);
+        jweAuthorizationRequest.setNestedPayload(authJws);
+        jweAuthorizationRequest.setKeyId(signingKeyId);
+        jweAuthorizationRequest.setResponseMode(ResponseMode.JWT);
+        jweAuthorizationRequest.setState(state);
+        jweAuthorizationRequest.setScopes(scope);
+        jweAuthorizationRequest.setResponseTypes(responseTypes);
+        jweAuthorizationRequest.setRedirectUri(redirectUri);
+        jweAuthorizationRequest.setNonce(nonce); // FAPI: nonce param is required
+        jweAuthorizationRequest.setNbf((int) Instant.now().getEpochSecond()); // FAPI: require the request object to
+                                                                              // contain an exp claim that has a
+                                                                              // lifetime of no longer than 60 minutes
+                                                                              // after the nbf claim
+        jweAuthorizationRequest.setExp(jwsAuthorizationRequest.getNbf() + 3600); // Added invalid exp value to request
+                                                                                 // object which is 70 minutes in the
+                                                                                 // future
+
+        String authJwe = jweAuthorizationRequest.getEncodedJwt(jwks);
+        authorizationRequest.setRequest(authJwe);
+
+        AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
+        authorizeClient.setRequest(authorizationRequest);
+        AuthorizationResponse authorizationResponse = authorizeClient.exec();
+
+        showClient(authorizeClient);
+        assertNotNull(authorizationResponse.getResponse());
+
+        Jwe response = Jwe.parse(authorizationResponse.getResponse(), privateKey, null);
+        assertJweResponse(response);
+        assertEquals(response.getClaims().getClaimAsString("error"), "invalid_request_object");
+
+        privateKey = null; // Clear private key to do not affect to other tests
+    }
+
+    @Parameters({ "redirectUri", "redirectUris", "clientJwksUri", "RSA_OAEP_keyId", "PS256_keyId", "dnName",
+            "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri" })
+    @Test(enabled = false) // Enable FAPI to run this test!
+    public void ensureRequestObjectWithNoneSigningAlgorithmFails(final String redirectUri, final String redirectUris,
+            final String clientJwksUri, final String encryptionKeyId, final String signingKeyId, final String dnName,
+            final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("ensureRequestObjectWithNoneSigningAlgorithmFails");
+
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<GrantType> GrantTypes = Arrays.asList(GrantType.AUTHORIZATION_CODE);
+
+        // 1. Dynamic Client Registration
+        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, GrantTypes, sectorIdentifierUri,
+                clientJwksUri, SignatureAlgorithm.PS256, KeyEncryptionAlgorithm.RSA_OAEP,
+                BlockEncryptionAlgorithm.A256GCM);
+
+        String clientId = registerResponse.getClientId();
+
+        // 2. Request authorization
+        List<String> scope = Arrays.asList("openid", "profile", "address", "email");
+        String state = UUID.randomUUID().toString();
+        String nonce = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scope,
+                redirectUri, null);
+
+        AuthCryptoProvider cryptoProvider1 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        JwtAuthorizationRequest jwsAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
+                SignatureAlgorithm.PS256, cryptoProvider1);
+        jwsAuthorizationRequest.setKeyId(signingKeyId);
+        jwsAuthorizationRequest.setAud("https://www.other1.example.com/"); // Added bad aud to request object claims
+        jwsAuthorizationRequest.setRedirectUri(redirectUri);
+        jwsAuthorizationRequest.setResponseMode(ResponseMode.JWT);
+        jwsAuthorizationRequest.setState(state);
+        jwsAuthorizationRequest.setNonce(nonce); // FAPI: nonce param is required
+        jwsAuthorizationRequest.setNbf((int) Instant.now().getEpochSecond()); // FAPI: require the request object to
+                                                                              // contain an exp claim that has a
+                                                                              // lifetime of no longer than 60 minutes
+                                                                              // after the nbf claim
+        jwsAuthorizationRequest.setExp(jwsAuthorizationRequest.getNbf() + 3600); // FAPI: require the request object to
+                                                                                 // contain an exp claim that has a
+                                                                                 // lifetime of no longer than 60
+                                                                                 // minutes after the nbf claim
+        Jwt authJws = Jwt.parse(jwsAuthorizationRequest.getEncodedJwt());
+
+        JwkClient jwkClient = new JwkClient(jwksUri);
+        JwkResponse jwkResponse = jwkClient.exec();
+        String serverKeyId = jwkResponse.getKeyId(Algorithm.RSA_OAEP);
+        assertNotNull(serverKeyId);
+
+        JSONObject jwks = JwtUtil.getJSONWebKeys(jwksUri);
+        AuthCryptoProvider cryptoProvider2 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        privateKey = cryptoProvider2.getPrivateKey(encryptionKeyId);
+
+        JwtAuthorizationRequest jweAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
+                SignatureAlgorithm.NONE, cryptoProvider2);
+
+        jweAuthorizationRequest.setKeyId(serverKeyId);
+        jweAuthorizationRequest.setNestedPayload(authJws);
+        jweAuthorizationRequest.setKeyId(signingKeyId);
+        jweAuthorizationRequest.setResponseMode(ResponseMode.JWT);
+        jweAuthorizationRequest.setState(state);
+        jweAuthorizationRequest.setScopes(scope);
+        jweAuthorizationRequest.setResponseTypes(responseTypes);
+        jweAuthorizationRequest.setRedirectUri(redirectUri);
+        jweAuthorizationRequest.setNonce(nonce); // FAPI: nonce param is required
+        jweAuthorizationRequest.setNbf((int) Instant.now().getEpochSecond()); // FAPI: require the request object to
+                                                                              // contain an exp claim that has a
+                                                                              // lifetime of no longer than 60 minutes
+                                                                              // after the nbf claim
+        jweAuthorizationRequest.setExp(jwsAuthorizationRequest.getNbf() + 3600); // Added invalid exp value to request
+                                                                                 // object which is 70 minutes in the
+                                                                                 // future
+
+        String authJwe = jweAuthorizationRequest.getEncodedJwt(jwks);
+
+        authorizationRequest.setRequest(authJwe);
+
+        AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
+        authorizeClient.setRequest(authorizationRequest);
+        AuthorizationResponse authorizationResponse = authorizeClient.exec();
+
+        showClient(authorizeClient);
+        assertNotNull(authorizationResponse.getResponse());
+
+        Jwe response = Jwe.parse(authorizationResponse.getResponse(), privateKey, null);
+        assertJweResponse(response);
+        assertEquals(response.getClaims().getClaimAsString("error"), "invalid_request_object");
+
+        privateKey = null; // Clear private key to do not affect to other tests
+    }
+
+    @Parameters({ "redirectUri", "redirectUris", "clientJwksUri", "RSA_OAEP_keyId", "PS256_keyId", "dnName",
+            "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri" })
+    @Test(enabled = false) // Enable FAPI to run this test!
+    public void ensureRequestObjectWithInvalidSignatureFails(final String redirectUri, final String redirectUris,
+            final String clientJwksUri, final String encryptionKeyId, final String signingKeyId, final String dnName,
+            final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("ensureRequestObjectWithinvalidSignatureFails");
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<GrantType> GrantTypes = Arrays.asList(GrantType.AUTHORIZATION_CODE);
+
+        // 1. Dynamic Client Registration
+        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, GrantTypes, sectorIdentifierUri,
+                clientJwksUri, SignatureAlgorithm.PS256, KeyEncryptionAlgorithm.RSA_OAEP,
+                BlockEncryptionAlgorithm.A256GCM);
+
+        String clientId = registerResponse.getClientId();
+
+        // 2. Request authorization
+        List<String> scope = Arrays.asList("openid", "profile", "address", "email");
+        String state = UUID.randomUUID().toString();
+        String nonce = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scope,
+                redirectUri, null);
+
+        AuthCryptoProvider cryptoProvider1 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        JwtAuthorizationRequest jwsAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
+                SignatureAlgorithm.PS256, cryptoProvider1);
+        jwsAuthorizationRequest.setKeyId(signingKeyId);
+        jwsAuthorizationRequest.setAud("https://www.other1.example.com/"); // Added bad aud to request object claims
+        jwsAuthorizationRequest.setRedirectUri(redirectUri);
+        jwsAuthorizationRequest.setResponseMode(ResponseMode.JWT);
+        jwsAuthorizationRequest.setState(state);
+        jwsAuthorizationRequest.setNonce(nonce); // FAPI: nonce param is required
+        jwsAuthorizationRequest.setNbf((int) Instant.now().getEpochSecond()); // FAPI: require the request object to
+                                                                              // contain an exp claim that has a
+                                                                              // lifetime of no longer than 60 minutes
+                                                                              // after the nbf claim
+        jwsAuthorizationRequest.setExp(jwsAuthorizationRequest.getNbf() + 3600); // FAPI: require the request object to
+                                                                                 // contain an exp claim that has a
+                                                                                 // lifetime of no longer than 60
+                                                                                 // minutes after the nbf claim
+        Jwt authJws = Jwt.parse(jwsAuthorizationRequest.getEncodedJwt());
+
+        JwkClient jwkClient = new JwkClient(jwksUri);
+        JwkResponse jwkResponse = jwkClient.exec();
+        String serverKeyId = jwkResponse.getKeyId(Algorithm.RSA_OAEP);
+        assertNotNull(serverKeyId);
+
+        JSONObject jwks = JwtUtil.getJSONWebKeys(jwksUri);
+        AuthCryptoProvider cryptoProvider2 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        privateKey = cryptoProvider2.getPrivateKey(encryptionKeyId);
+        JwtAuthorizationRequest jweAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
+                SignatureAlgorithm.PS256, cryptoProvider2);
+        jweAuthorizationRequest.setKeyId(serverKeyId);
+        jweAuthorizationRequest.setNestedPayload(authJws);
+        jweAuthorizationRequest.setKeyId(signingKeyId);
+        jweAuthorizationRequest.setResponseMode(ResponseMode.JWT);
+        jweAuthorizationRequest.setState(state);
+        jweAuthorizationRequest.setScopes(scope);
+        jweAuthorizationRequest.setResponseTypes(responseTypes);
+        jweAuthorizationRequest.setRedirectUri(redirectUri);
+        jweAuthorizationRequest.setNonce(nonce); // FAPI: nonce param is required
+        jweAuthorizationRequest.setNbf((int) Instant.now().getEpochSecond()); // FAPI: require the request object to
+                                                                              // contain an exp claim that has a
+                                                                              // lifetime of no longer than 60 minutes
+                                                                              // after the nbf claim
+        jweAuthorizationRequest.setExp(jwsAuthorizationRequest.getNbf() + 3600); // Added invalid exp value to request
+                                                                                 // object which is 70 minutes in the
+                                                                                 // future
+
+        String authJwe = jweAuthorizationRequest.getEncodedJwt(jwks);
+
+        authorizationRequest.setRequest(authJwe + "wrongSignature");
+
+        AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
+        authorizeClient.setRequest(authorizationRequest);
+        AuthorizationResponse authorizationResponse = authorizeClient.exec();
+
+        showClient(authorizeClient);
+        assertNotNull(authorizationResponse.getResponse());
+
+        Jwe response = Jwe.parse(authorizationResponse.getResponse(), privateKey, null);
+        assertJweResponse(response);
+        assertEquals(response.getClaims().getClaimAsString("error"), "invalid_request_object");
+
+        privateKey = null; // Clear private key to do not affect to other tests
+    }
+
+    @Parameters({ "redirectUri", "redirectUris", "clientJwksUri", "RSA_OAEP_keyId", "PS256_keyId", "dnName",
+            "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri" })
+    @Test(enabled = false) // Enable FAPI to run this test!
+    public void ensureRequestObjectWithoutEncryptionFails(final String redirectUri, final String redirectUris,
+            final String clientJwksUri, final String encryptionKeyId, final String signingKeyId, final String dnName,
+            final String keyStoreFile, final String keyStoreSecret, final String sectorIdentifierUri) throws Exception {
+        showTitle("ensureRequestObjectWithoutEncryptionFails");
+
+        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<GrantType> GrantTypes = Arrays.asList(GrantType.AUTHORIZATION_CODE);
+
+        // 1. Dynamic Client Registration
+        RegisterResponse registerResponse = registerClient(redirectUris, responseTypes, GrantTypes, sectorIdentifierUri,
+                clientJwksUri, SignatureAlgorithm.PS256, KeyEncryptionAlgorithm.RSA_OAEP,
+                BlockEncryptionAlgorithm.A256GCM);
+
+        String clientId = registerResponse.getClientId();
+
+        // 2. Request authorization
+        List<String> scope = Arrays.asList("openid", "profile", "address", "email");
+        String state = UUID.randomUUID().toString();
+        String nonce = UUID.randomUUID().toString();
+
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scope,
+                redirectUri, null);
+
+        AuthCryptoProvider cryptoProvider1 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+
+        JwtAuthorizationRequest jwsAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
+                SignatureAlgorithm.PS256, cryptoProvider1);
+        jwsAuthorizationRequest.setKeyId(signingKeyId);
+        jwsAuthorizationRequest.setAud("https://www.other1.example.com/"); // Added bad aud to request object claims
+        jwsAuthorizationRequest.setRedirectUri(redirectUri);
+        jwsAuthorizationRequest.setResponseMode(ResponseMode.JWT);
+        jwsAuthorizationRequest.setState(state);
+        jwsAuthorizationRequest.setNonce(nonce); // FAPI: nonce param is required
+        jwsAuthorizationRequest.setNbf((int) Instant.now().getEpochSecond()); // FAPI: require the request object to
+                                                                              // contain an exp claim that has a
+                                                                              // lifetime of no longer than 60 minutes
+                                                                              // after the nbf claim
+        jwsAuthorizationRequest.setExp(jwsAuthorizationRequest.getNbf() + 3600); // FAPI: require the request object to
+                                                                                 // contain an exp claim that has a
+                                                                                 // lifetime of no longer than 60
+                                                                                 // minutes after the nbf claim
+        Jwt authJws = Jwt.parse(jwsAuthorizationRequest.getEncodedJwt());
+
+        JwkClient jwkClient = new JwkClient(jwksUri);
+        JwkResponse jwkResponse = jwkClient.exec();
+        String serverKeyId = jwkResponse.getKeyId(Algorithm.RSA_OAEP);
+        assertNotNull(serverKeyId);
+
+        JSONObject jwks = JwtUtil.getJSONWebKeys(jwksUri);
+        AuthCryptoProvider cryptoProvider2 = new AuthCryptoProvider(keyStoreFile, keyStoreSecret, dnName);
+        privateKey = cryptoProvider2.getPrivateKey(encryptionKeyId);
+
+        JwtAuthorizationRequest jweAuthorizationRequest = new JwtAuthorizationRequest(authorizationRequest,
+                SignatureAlgorithm.PS256, cryptoProvider2);
+
+        jweAuthorizationRequest.setKeyId(serverKeyId);
+        jweAuthorizationRequest.setNestedPayload(authJws);
+        jweAuthorizationRequest.setKeyId(signingKeyId);
+        jweAuthorizationRequest.setResponseMode(ResponseMode.JWT);
+        jweAuthorizationRequest.setState(state);
+        jweAuthorizationRequest.setScopes(scope);
+        jweAuthorizationRequest.setResponseTypes(responseTypes);
+        jweAuthorizationRequest.setRedirectUri(redirectUri);
+        jweAuthorizationRequest.setNonce(nonce); // FAPI: nonce param is required
+        jweAuthorizationRequest.setNbf((int) Instant.now().getEpochSecond()); // FAPI: require the request object to
+                                                                              // contain an exp claim that has a
+                                                                              // lifetime of no longer than 60 minutes
+                                                                              // after the nbf claim
+        jweAuthorizationRequest.setExp(jwsAuthorizationRequest.getNbf() + 3600); // Added invalid exp value to request
+                                                                                 // object which is 70 minutes in the
+                                                                                 // future
+        String authJwe = jweAuthorizationRequest.getEncodedJwt(jwks);
+
+        authorizationRequest.setRequest(authJwe);
+
+        AuthorizeClient authorizeClient = new AuthorizeClient(authorizationEndpoint);
+        authorizeClient.setRequest(authorizationRequest);
+        AuthorizationResponse authorizationResponse = authorizeClient.exec();
+
+        showClient(authorizeClient);
+        assertNotNull(authorizationResponse.getResponse());
+
+        Jwe response = Jwe.parse(authorizationResponse.getResponse(), privateKey, null);
+        assertJweResponse(response);
+        assertEquals(response.getClaims().getClaimAsString("error"), "invalid_request_object");
+
+        privateKey = null; // Clear private key to do not affect to other tests
+    }	
+    
     @Parameters({"redirectUri", "redirectUris", "clientJwksUri", "RSA_OAEP_keyId", "PS256_keyId",
             "dnName", "keyStoreFile", "keyStoreSecret", "sectorIdentifierUri"})
     @Test(enabled = false) // Enable FAPI to run this test!
@@ -173,14 +556,7 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertNotNull(authorizationResponse.getResponse());
 
         Jwe response = Jwe.parse(authorizationResponse.getResponse(), privateKey, null);
-
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.ISS));
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.AUD));
-        assertNotNull(response.getClaims().getClaimAsInteger(AuthorizeResponseParam.EXP));
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.STATE));
-        assertNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.CODE));
-        assertNotNull(response.getClaims().getClaimAsString("error"));
-        assertNotNull(response.getClaims().getClaimAsString("error_description"));
+        assertJweResponse(response);
         assertTrue(Arrays.asList("invalid_request", "invalid_request_object", "invalid_request_uri", "access_denied")
                 .contains(response.getClaims().getClaimAsString("error")));
 
@@ -250,14 +626,7 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertNotNull(authorizationResponse.getResponse());
 
         Jwe response = Jwe.parse(authorizationResponse.getResponse(), privateKey, null);
-
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.ISS));
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.AUD));
-        assertNotNull(response.getClaims().getClaimAsInteger(AuthorizeResponseParam.EXP));
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.STATE));
-        assertNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.CODE));
-        assertNotNull(response.getClaims().getClaimAsString("error"));
-        assertNotNull(response.getClaims().getClaimAsString("error_description"));
+        assertJweResponse(response);
         assertTrue(Arrays.asList("invalid_request", "invalid_request_object", "invalid_request_uri", "access_denied")
                 .contains(response.getClaims().getClaimAsString("error")));
 
@@ -326,14 +695,7 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertNotNull(authorizationResponse.getResponse());
 
         Jwe response = Jwe.parse(authorizationResponse.getResponse(), privateKey, null);
-
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.ISS));
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.AUD));
-        assertNotNull(response.getClaims().getClaimAsInteger(AuthorizeResponseParam.EXP));
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.STATE));
-        assertNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.CODE));
-        assertNotNull(response.getClaims().getClaimAsString("error"));
-        assertNotNull(response.getClaims().getClaimAsString("error_description"));
+        assertJweResponse(response);
         assertTrue(Arrays.asList("invalid_request", "invalid_request_object", "invalid_request_uri", "access_denied")
                 .contains(response.getClaims().getClaimAsString("error")));
 
@@ -402,14 +764,7 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertNotNull(authorizationResponse.getResponse());
 
         Jwe response = Jwe.parse(authorizationResponse.getResponse(), privateKey, null);
-
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.ISS));
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.AUD));
-        assertNotNull(response.getClaims().getClaimAsInteger(AuthorizeResponseParam.EXP));
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.STATE));
-        assertNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.CODE));
-        assertNotNull(response.getClaims().getClaimAsString("error"));
-        assertNotNull(response.getClaims().getClaimAsString("error_description"));
+        assertJweResponse(response);
         assertTrue(Arrays.asList("invalid_request", "invalid_request_object", "invalid_request_uri")
                 .contains(response.getClaims().getClaimAsString("error")));
 
@@ -477,14 +832,7 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertNotNull(authorizationResponse.getResponse());
 
         Jwe response = Jwe.parse(authorizationResponse.getResponse(), privateKey, null);
-
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.ISS));
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.AUD));
-        assertNotNull(response.getClaims().getClaimAsInteger(AuthorizeResponseParam.EXP));
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.STATE));
-        assertNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.CODE));
-        assertNotNull(response.getClaims().getClaimAsString("error"));
-        assertNotNull(response.getClaims().getClaimAsString("error_description"));
+        assertJweResponse(response);
         assertTrue(Arrays.asList("invalid_request", "invalid_request_object")
                 .contains(response.getClaims().getClaimAsString("error")));
 
@@ -552,14 +900,7 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertNotNull(authorizationResponse.getResponse());
 
         Jwe response = Jwe.parse(authorizationResponse.getResponse(), privateKey, null);
-
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.ISS));
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.AUD));
-        assertNotNull(response.getClaims().getClaimAsInteger(AuthorizeResponseParam.EXP));
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.STATE));
-        assertNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.CODE));
-        assertNotNull(response.getClaims().getClaimAsString("error"));
-        assertNotNull(response.getClaims().getClaimAsString("error_description"));
+        assertJweResponse(response);
         assertEquals(response.getClaims().getClaimAsString("error"), "invalid_request_object");
 
         privateKey = null; // Clear private key to do not affect to other tests
@@ -625,16 +966,8 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
 
         showClient(authorizeClient);
         assertNotNull(authorizationResponse.getResponse());
-
         Jwe response = Jwe.parse(authorizationResponse.getResponse(), privateKey, null);
-
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.ISS));
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.AUD));
-        assertNotNull(response.getClaims().getClaimAsInteger(AuthorizeResponseParam.EXP));
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.STATE));
-        assertNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.CODE));
-        assertNotNull(response.getClaims().getClaimAsString("error"));
-        assertNotNull(response.getClaims().getClaimAsString("error_description"));
+        assertJweResponse(response);
         assertEquals(response.getClaims().getClaimAsString("error"), "invalid_request_object");
 
         privateKey = null; // Clear private key to do not affect to other tests
@@ -701,14 +1034,7 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertNotNull(authorizationResponse.getResponse());
 
         Jwe response = Jwe.parse(authorizationResponse.getResponse(), privateKey, null);
-
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.ISS));
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.AUD));
-        assertNotNull(response.getClaims().getClaimAsInteger(AuthorizeResponseParam.EXP));
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.STATE));
-        assertNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.CODE));
-        assertNotNull(response.getClaims().getClaimAsString("error"));
-        assertNotNull(response.getClaims().getClaimAsString("error_description"));
+        assertJweResponse(response);
         assertEquals(response.getClaims().getClaimAsString("error"), "invalid_request_object");
 
         privateKey = null; // Clear private key to do not affect to other tests
@@ -775,14 +1101,7 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertNotNull(authorizationResponse.getResponse());
 
         Jwe response = Jwe.parse(authorizationResponse.getResponse(), privateKey, null);
-
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.ISS));
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.AUD));
-        assertNotNull(response.getClaims().getClaimAsInteger(AuthorizeResponseParam.EXP));
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.STATE));
-        assertNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.CODE));
-        assertNotNull(response.getClaims().getClaimAsString("error"));
-        assertNotNull(response.getClaims().getClaimAsString("error_description"));
+        assertJweResponse(response);
         assertEquals(response.getClaims().getClaimAsString("error"), "invalid_request_object");
 
         privateKey = null; // Clear private key to do not affect to other tests
@@ -855,14 +1174,7 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertNotNull(authorizationResponse.getResponse());
 
         Jwe response = Jwe.parse(authorizationResponse.getResponse(), privateKey, null);
-
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.ISS));
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.AUD));
-        assertNotNull(response.getClaims().getClaimAsInteger(AuthorizeResponseParam.EXP));
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.STATE));
-        assertNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.CODE));
-        assertNotNull(response.getClaims().getClaimAsString("error"));
-        assertNotNull(response.getClaims().getClaimAsString("error_description"));
+        assertJweResponse(response);
 
         privateKey = null; // Clear private key to do not affect to other tests
     }
@@ -934,15 +1246,7 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertNotNull(authorizationResponse.getResponse());
 
         Jwe response = Jwe.parse(authorizationResponse.getResponse(), privateKey, null);
-
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.ISS));
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.AUD));
-        assertNotNull(response.getClaims().getClaimAsInteger(AuthorizeResponseParam.EXP));
-        assertNotNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.STATE));
-        assertNull(response.getClaims().getClaimAsString(AuthorizeResponseParam.CODE));
-        assertNotNull(response.getClaims().getClaimAsString("error"));
-        assertNotNull(response.getClaims().getClaimAsString("error_description"));
-
+        assertJweResponse(response);
         privateKey = null; // Clear private key to do not affect to other tests
     }
 
@@ -1085,5 +1389,15 @@ public class AuthorizationResponseModeJwtResponseTypeCodeSignedEncryptedHttpTest
         assertEquals(authorizationResponse.getErrorType(), AuthorizeErrorResponseType.INVALID_REQUEST);
 
         privateKey = null; // Clear private key to do not affect to other tests
+    }
+
+    private void assertJweResponse(Jwe jwe){
+        assertNotNull(jwe.getClaims().getClaimAsString(AuthorizeResponseParam.ISS));
+        assertNotNull(jwe.getClaims().getClaimAsString(AuthorizeResponseParam.AUD));
+        assertNotNull(jwe.getClaims().getClaimAsInteger(AuthorizeResponseParam.EXP));
+        assertNotNull(jwe.getClaims().getClaimAsString(AuthorizeResponseParam.STATE));
+        assertNull(jwe.getClaims().getClaimAsString(AuthorizeResponseParam.CODE));
+        assertNotNull(jwe.getClaims().getClaimAsString("error"));
+        assertNotNull(jwe.getClaims().getClaimAsString("error_description"));
     }
 }

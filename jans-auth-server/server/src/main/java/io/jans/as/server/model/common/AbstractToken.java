@@ -16,6 +16,7 @@ import io.jans.orm.annotation.Expiration;
 import io.jans.orm.model.base.Deletable;
 
 import java.io.Serializable;
+import java.time.Duration;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
@@ -105,7 +106,8 @@ public abstract class AbstractToken implements Serializable, Deletable {
     }
 
     public void resetTtlFromExpirationDate() {
-        final Integer seconds = Util.getNumberOfSecondFromNow(getExpirationDate());
+        final Long duration = Duration.between(new Date().toInstant(), getExpirationDate().toInstant()).getSeconds();
+        final Integer seconds = duration.intValue();
         if (seconds != null) {
             this.ttl = seconds;
         }

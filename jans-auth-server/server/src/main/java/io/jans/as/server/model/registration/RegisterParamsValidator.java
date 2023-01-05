@@ -24,13 +24,13 @@ import org.apache.commons.lang.StringUtils;
 import org.json.JSONArray;
 import org.slf4j.Logger;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashSet;
@@ -80,7 +80,10 @@ public class RegisterParamsValidator {
 
         if (grantTypes != null &&
                 (grantTypes.contains(GrantType.AUTHORIZATION_CODE) || grantTypes.contains(GrantType.IMPLICIT)
-                        || (responseTypes.contains(ResponseType.CODE) && !grantTypes.contains(GrantType.DEVICE_CODE))
+                        || (responseTypes.contains(ResponseType.CODE) && (
+                        !grantTypes.contains(GrantType.DEVICE_CODE) &&
+                                !grantTypes.contains(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS) &&
+                                !grantTypes.contains(GrantType.CLIENT_CREDENTIALS)))
                         || responseTypes.contains(ResponseType.TOKEN) || responseTypes.contains(ResponseType.ID_TOKEN))) {
             if (redirectUris == null || redirectUris.isEmpty()) {
                 return new Pair<>(false, "Redirect uris are empty.");
@@ -109,6 +112,15 @@ public class RegisterParamsValidator {
             log.debug("Parameter id_token_signed_response_alg is not valid.");
             throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
                     RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter id_token_signed_response_alg is not valid.");
+        }
+
+        if (registerRequest.getAccessTokenSigningAlg() != null
+                && registerRequest.getAccessTokenSigningAlg() != SignatureAlgorithm.NONE &&
+                !appConfiguration.getAccessTokenSigningAlgValuesSupported().contains(
+                        registerRequest.getAccessTokenSigningAlg().toString())) {
+            log.debug("Parameter access_token_signed_alg is not valid.");
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
+                    RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter access_token_signed_alg is not valid.");
         }
 
         if (registerRequest.getIdTokenEncryptedResponseAlg() != null &&
@@ -275,7 +287,10 @@ public class RegisterParamsValidator {
                 }
             }
         } else valid = !grantTypes.contains(GrantType.AUTHORIZATION_CODE) && !grantTypes.contains(GrantType.IMPLICIT) &&
-                (!responseTypes.contains(ResponseType.CODE) || grantTypes.contains(GrantType.DEVICE_CODE))
+                (!responseTypes.contains(ResponseType.CODE) || (
+                        grantTypes.contains(GrantType.DEVICE_CODE) ||
+                                grantTypes.contains(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS) ||
+                                grantTypes.contains(GrantType.CLIENT_CREDENTIALS)))
                 && !responseTypes.contains(ResponseType.TOKEN) && !responseTypes.contains(ResponseType.ID_TOKEN);
 
 
@@ -304,7 +319,7 @@ public class RegisterParamsValidator {
                     valid = false;
                 }
 
-                javax.ws.rs.client.Client clientRequest = ClientBuilder.newClient();
+                jakarta.ws.rs.client.Client clientRequest = ClientBuilder.newClient();
                 String entity = null;
                 try {
                     Response clientResponse = clientRequest.target(sectorIdentifierUrl).request().buildGet().invoke();

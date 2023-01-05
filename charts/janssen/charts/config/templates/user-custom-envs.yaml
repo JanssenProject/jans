@@ -1,0 +1,64 @@
+{{ if .Values.global.usrEnvs.secret }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ .Release.Name }}-global-user-custom-envs
+  labels:
+    APP_NAME: configurator
+{{ include "config.labels" . | indent 4 }}
+{{- if .Values.additionalLabels }}
+{{ toYaml .Values.additionalLabels | indent 4 }}
+{{- end }}
+{{- if .Values.additionalAnnotations }}
+  annotations:
+{{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+type: Opaque
+data:
+  {{- range $key, $val := .Values.global.usrEnvs.secret }}
+  {{ $key }}: {{ $val | b64enc }}
+  {{- end}}
+{{- end}}
+{{ if .Values.global.usrEnvs.normal }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-global-user-custom-envs
+  labels:
+    APP_NAME: configurator
+{{ include "config.labels" . | indent 4 }}
+{{- if .Values.additionalLabels }}
+{{ toYaml .Values.additionalLabels | indent 4 }}
+{{- end }}
+{{- if .Values.additionalAnnotations }}
+  annotations:
+{{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+data:
+  {{- range $key, $val := .Values.global.usrEnvs.normal }}
+  {{ $key }}: {{ $val | quote }}
+  {{- end}}
+{{- end}}
+{{ if .Values.usrEnvs.secret }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ .Release.Name }}-{{ .Chart.Name }}-user-custom-envs
+  labels:
+    APP_NAME: configurator
+{{ include "config.labels" . | indent 4 }}
+{{- if .Values.additionalLabels }}
+{{ toYaml .Values.additionalLabels | indent 4 }}
+{{- end }}
+{{- if .Values.additionalAnnotations }}
+  annotations:
+{{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+type: Opaque
+data:
+  {{- range $key, $val := .Values.usrEnvs.secret }}
+  {{ $key }}: {{ $val | b64enc }}
+  {{- end}}
+{{- end}}

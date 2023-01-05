@@ -1,6 +1,4 @@
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns="http://maven.apache.org/POM/4.0.0"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>jans-scim-service</artifactId>
@@ -10,7 +8,7 @@
 	<parent>
 		<groupId>io.jans</groupId>
 		<artifactId>jans-scim</artifactId>
-		<version>1.0.0-SNAPSHOT</version>
+		<version>1.0.6-SNAPSHOT</version>
 	</parent>
 
 	<build>
@@ -50,7 +48,12 @@
 	</build>
 
 	<dependencies>
-		<!-- Gluu -->
+		<!-- Jans -->
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-scim-model</artifactId>
+            <version>${janssen.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>io.jans</groupId>
 			<artifactId>jans-core-model</artifactId>
@@ -98,13 +101,13 @@
 
 		<!-- Weld -->
 		<dependency>
-			<groupId>javax.enterprise</groupId>
-			<artifactId>cdi-api</artifactId>
+		    <groupId>jakarta.enterprise</groupId>
+		    <artifactId>jakarta.enterprise.cdi-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
+           <groupId>jakarta.servlet</groupId>
+        	<artifactId>jakarta.servlet-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -114,27 +117,27 @@
 		</dependency>
 
 		<dependency>
-			<groupId>javax.inject</groupId>
-			<artifactId>javax.inject</artifactId>
+            <groupId>jakarta.inject</groupId>
+        	<artifactId>jakarta.inject-api</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.glassfish</groupId>
 			<artifactId>jakarta.faces</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>javax.validation</groupId>
-			<artifactId>validation-api</artifactId>
+            <groupId>jakarta.validation</groupId>
+            <artifactId>jakarta.validation-api</artifactId>
 		</dependency>
 
 		<dependency>
-			<groupId>org.jboss.spec.javax.ejb</groupId>
-			<artifactId>jboss-ejb-api_3.2_spec</artifactId>
+            <groupId>jakarta.ejb</groupId>
+            <artifactId>jakarta.ejb-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 
 		<!-- Jython -->
 		<dependency>
-			<groupId>org.gluufederation</groupId>
+			<groupId>io.jans</groupId>
 			<artifactId>jython-standalone</artifactId>
 		</dependency>
 

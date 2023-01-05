@@ -24,11 +24,11 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Event;
+import jakarta.enterprise.event.Observes;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -68,6 +68,10 @@ public class KeyGeneratorTimer {
 
     private AtomicBoolean isActive;
     private long lastFinishedTime;
+
+    public long getLastFinishedTime() {
+        return lastFinishedTime;
+    }
 
     public void initTimer() {
         log.debug("Initializing Key Generator Timer");

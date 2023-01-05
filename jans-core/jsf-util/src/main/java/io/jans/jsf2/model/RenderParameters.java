@@ -9,8 +9,8 @@ package io.jans.jsf2.model;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.enterprise.context.RequestScoped;
-import javax.inject.Named;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Named;
 
 /**
  * Key/value store to render manually messages and JSF pages

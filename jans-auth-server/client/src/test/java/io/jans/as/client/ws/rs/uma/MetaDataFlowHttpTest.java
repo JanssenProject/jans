@@ -10,11 +10,11 @@ import io.jans.as.client.BaseTest;
 import io.jans.as.client.uma.UmaClientFactory;
 import io.jans.as.client.uma.UmaMetadataService;
 import io.jans.as.model.uma.UmaMetadata;
-import io.jans.as.model.uma.UmaTestUtil;
+import io.jans.as.test.UmaTestUtil;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import javax.ws.rs.ClientErrorException;
+import jakarta.ws.rs.ClientErrorException;
 
 /**
  * Test cases for getting meta data configuration flow (HTTP)

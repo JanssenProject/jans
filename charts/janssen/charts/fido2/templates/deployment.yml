@@ -1,0 +1,174 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "fido2.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    APP_NAME: fido2
+{{ include "fido2.labels" . | indent 4}}
+{{- if .Values.additionalLabels }}
+{{ toYaml .Values.additionalLabels | indent 4 }}
+{{- end }}
+{{- if .Values.additionalAnnotations }}
+  annotations:
+{{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+spec:
+  replicas: {{ .Values.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-{{ include "fido2.name" . }}
+  template:
+    metadata:
+      labels:
+        APP_NAME: fido2
+        app: {{ .Release.Name }}-{{ include "fido2.name" . }}
+      {{- if .Values.global.istio.ingress }}
+      annotations:
+        sidecar.istio.io/rewriteAppHTTPProbers: "true"
+      {{- end }}
+    spec:
+    {{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      dnsPolicy: {{ .Values.dnsPolicy | quote }}
+    {{- with .Values.dnsConfig }}
+      dnsConfig:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+      {{- if .Values.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- include "fido2.topology-spread-constraints" . | indent 8 }}
+      {{- end }}
+      containers:
+      - name: {{ include "fido2.name" . }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        securityContext:
+          runAsUser: 1000
+          runAsNonRoot: true
+        env:
+          {{- include "fido2.usr-envs" . | indent 12 }}
+          {{- include "fido2.usr-secret-envs" . | indent 12 }}
+        {{- if and (not .Values.global.isFqdnRegistered ) (or (eq .Values.global.storageClass.provisioner "kubernetes.io/aws-ebs") (eq .Values.global.storageClass.provisioner "openebs.io/local")) }}
+        command:
+          - /bin/sh
+          - -c
+          - |
+              /usr/bin/python3 /scripts/updatelbip.py &
+              /app/scripts/entrypoint.sh
+        {{- end}}
+        ports:
+        - name: {{ .Values.service.name }}
+          containerPort: {{ .Values.service.port }}
+        {{ if .Values.global.cnPrometheusPort }}
+        - name: prometheus-port
+          containerPort: {{ .Values.global.cnPrometheusPort }}
+        {{- end }}
+        envFrom:
+        - configMapRef:
+            name: {{ .Release.Name }}-config-cm
+        {{ if .Values.global.usrEnvs.secret }}
+        - secretRef:
+            name: {{ .Release.Name }}-global-user-custom-envs
+        {{- end }}
+        {{ if .Values.global.usrEnvs.normal }}
+        - configMapRef:
+            name: {{ .Release.Name }}-global-user-custom-envs
+        {{- end }}
+        volumeMounts:
+        {{- with .Values.volumeMounts }}
+{{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{ if or (eq .Values.global.configSecretAdapter "aws") (eq .Values.global.configAdapterName "aws") }}
+          - mountPath: {{ .Values.global.cnAwsSharedCredentialsFile }}
+            name: aws-shared-credential-file
+            subPath: aws_shared_credential_file
+          - mountPath: {{ .Values.global.cnAwsConfigFile }}
+            name: aws-config-file
+            subPath: aws_config_file
+          - mountPath: {{ .Values.global.cnAwsSecretsReplicaRegionsFile }}
+            name: aws-secrets-replica-regions
+            subPath: aws_secrets_replica_regions
+        {{- end }}
+        {{ if or (eq .Values.global.configSecretAdapter "google") (eq .Values.global.cnPersistenceType "spanner") }}
+          - mountPath: {{ .Values.global.cnGoogleApplicationCredentials }}
+            name: google-sa
+            subPath: google-credentials.json
+        {{- end }}
+
+        {{- if and (not .Values.global.isFqdnRegistered ) (or (eq .Values.global.storageClass.provisioner "kubernetes.io/aws-ebs") (eq .Values.global.storageClass.provisioner "openebs.io/local")) }}
+          - name: {{ include "fido2.fullname" .}}-updatelbip
+            mountPath: "/scripts"
+        {{- end }}
+        {{- if or (eq .Values.global.cnPersistenceType "couchbase") (eq .Values.global.cnPersistenceType "hybrid") }}
+
+          {{- if not .Values.global.istio.enabled }}
+          - name: cb-crt 
+            mountPath: "/etc/certs/couchbase.crt"
+            subPath: couchbase.crt
+          {{- end }}
+        {{- end }}
+        livenessProbe:
+{{- toYaml .Values.livenessProbe | nindent 10 }}
+        readinessProbe:
+{{- toYaml .Values.readinessProbe | nindent 10 }}
+        {{- if and ( .Values.global.opendj.enabled ) (or (eq .Values.global.storageClass.provisioner "microk8s.io/hostpath" ) (eq .Values.global.storageClass.provisioner "k8s.io/minikube-hostpath")) }}
+        resources: {}
+        {{- else if .Values.global.cloud.testEnviroment }}
+        resources: {}
+        {{- else }}
+        resources:
+{{- toYaml .Values.resources | nindent 10 }}
+        {{- end }}
+      {{- if not .Values.global.isFqdnRegistered  }}
+      hostAliases:
+      - ip: {{ .Values.global.lbIp }}
+        hostnames:
+        - {{ .Values.global.fqdn }}
+      {{- end }}
+      volumes:
+      {{- with .Values.volumes }}
+{{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{ if or (eq .Values.global.configSecretAdapter "aws") (eq .Values.global.configAdapterName "aws") }}
+        - name: aws-shared-credential-file
+          secret:
+            secretName: {{ .Release.Name }}-aws-config-creds
+            items:
+              - key: aws_shared_credential_file
+                path: aws_shared_credential_file
+        - name: aws-config-file
+          secret:
+            secretName: {{ .Release.Name }}-aws-config-creds
+            items:
+              - key: aws_config_file
+                path: aws_config_file
+        - name: aws-secrets-replica-regions
+          secret:
+            secretName: {{ .Release.Name }}-aws-config-creds
+            items:
+              - key: aws_secrets_replica_regions
+                path: aws_secrets_replica_regions
+      {{- end }}
+      {{ if or (eq .Values.global.configSecretAdapter "google") (eq .Values.global.cnPersistenceType "spanner") }}
+        - name: google-sa
+          secret:
+            secretName: {{ .Release.Name }}-google-sa
+      {{- end }}
+
+      {{- if or (eq .Values.global.cnPersistenceType "couchbase") (eq .Values.global.cnPersistenceType "hybrid") }}
+
+        {{- if not .Values.global.istio.enabled }}
+        - name: cb-crt 
+          secret:
+            secretName: {{ .Release.Name }}-cb-crt
+        {{- end }}
+      {{- end }}
+      {{- if and (not .Values.global.isFqdnRegistered ) (or (eq .Values.global.storageClass.provisioner "kubernetes.io/aws-ebs") (eq .Values.global.storageClass.provisioner "openebs.io/local")) }}
+        - name: {{ include "fido2.fullname" . }}-updatelbip
+          configMap:
+            name: {{ .Release.Name }}-updatelbip
+      {{- end }}
+      

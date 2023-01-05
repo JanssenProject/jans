@@ -6,6 +6,10 @@
 
 package io.jans.fido2.exception;
 
+/**
+ * Missing attestation certificate Exception
+ *
+ */
 public class Fido2MissingAttestationCertException extends Fido2RuntimeException {
 
 	private static final long serialVersionUID = 9114154955909766262L;

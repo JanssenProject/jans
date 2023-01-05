@@ -6,8 +6,8 @@
 
 package io.jans.fido2.service.shared;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import io.jans.fido2.model.conf.AppConfiguration;
 

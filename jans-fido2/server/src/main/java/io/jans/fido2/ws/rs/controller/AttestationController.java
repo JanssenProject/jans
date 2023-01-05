@@ -8,15 +8,15 @@ package io.jans.fido2.ws.rs.controller;
 
 import java.io.IOException;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.Response.Status;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.ResponseBuilder;
+import jakarta.ws.rs.core.Response.Status;
 
 import io.jans.fido2.exception.Fido2RpRuntimeException;
 import io.jans.fido2.model.conf.AppConfiguration;
@@ -26,6 +26,7 @@ import io.jans.fido2.service.operation.AttestationService;
 import com.fasterxml.jackson.databind.JsonNode;
 
 /**
+ * serves request for /attestation endpoint exposed by FIDO2 sever
  * @author Yuriy Movchan
  * @version May 08, 2020
  */

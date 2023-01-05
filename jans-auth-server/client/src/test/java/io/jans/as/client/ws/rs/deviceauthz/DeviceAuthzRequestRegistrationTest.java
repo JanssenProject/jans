@@ -13,6 +13,8 @@ import io.jans.as.client.DeviceAuthzResponse;
 import io.jans.as.client.RegisterClient;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
+
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.authorize.DeviceAuthzErrorResponseType;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
@@ -25,6 +27,7 @@ import org.testng.annotations.Test;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
 
 import static io.jans.as.model.util.StringUtils.EASY_TO_READ_CHARACTERS;
 import static org.testng.Assert.assertEquals;
@@ -56,12 +59,7 @@ public class DeviceAuthzRequestRegistrationTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         return registerResponse;
     }

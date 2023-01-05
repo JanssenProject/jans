@@ -35,13 +35,13 @@ public enum TokenBindingType {
         return byteValue;
     }
 
-    public static TokenBindingType valueOf(int byteValue) {
+    public static TokenBindingType valueOf(int byteValue) throws TokenBindingParseException{
         for (TokenBindingType v : values()) {
             if (v.getByteValue() == byteValue) {
                 return v;
             }
         }
-        throw new RuntimeException("Failed to identify TokenBindingType by byteValue");
+        throw new TokenBindingParseException("Failed to identify TokenBindingType, byteValue: " + byteValue);
     }
 
     @Override

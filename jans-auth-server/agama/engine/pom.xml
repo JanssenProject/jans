@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>agama-engine</artifactId>
+    <packaging>jar</packaging>
+
+    <parent>
+        <groupId>io.jans</groupId>
+        <artifactId>jans-auth-server-parent</artifactId>
+        <version>1.0.6-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+    
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+    </properties>
+
+    <repositories>
+        <repository>
+            <id>jans</id>
+            <name>Jans repository</name>
+            <url>https://maven.jans.io/maven</url>
+        </repository>
+    </repositories>
+
+    <build>
+        <filters>
+            <filter>profiles/${cfg}/config-agama-test.properties</filter>
+        </filters>
+
+        <testResources>
+            <testResource>
+                <directory>src/test/resources</directory>
+                <filtering>true</filtering>
+            </testResource>
+        </testResources>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.19.1</version>
+                <configuration>
+                    <suiteXmlFiles>
+                        <suiteXmlFile>target/test-classes/testng.xml</suiteXmlFile>
+                    </suiteXmlFiles>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>11</source>
+                    <target>11</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>set-configuration-name</id>
+            <activation>
+                <property>
+                    <name>!cfg</name>
+                </property>
+            </activation>
+            <properties>
+                <cfg>default</cfg>
+            </properties>
+        </profile>
+    </profiles>
+
+    <dependencies>
+        
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>agama-model</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>agama-transpiler</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        
+        <!-- SERVLET -->
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+        </dependency>
+        
+        <!-- JAX-RS -->
+        <dependency>
+            <groupId>org.jboss.spec.javax.ws.rs</groupId>
+            <artifactId>jboss-jaxrs-api_3.0_spec</artifactId>
+            <version>${jboss-jaxrs-api_3.0_spec.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- WELD -->
+        <dependency>
+            <groupId>org.jboss.weld.servlet</groupId>
+            <artifactId>weld-servlet-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.ejb</groupId>
+            <artifactId>jakarta.ejb-api</artifactId>
+        </dependency>
+        
+        <!-- FREEMARKER -->
+        <dependency>
+            <groupId>org.freemarker</groupId>
+            <artifactId>freemarker</artifactId>
+            <version>2.3.31</version>
+        </dependency>
+
+        <!-- LOGGING -->
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+        </dependency>
+        
+        <!-- JACKSON -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+        </dependency>
+
+     	<!-- Mozilla Rhino -->
+        <dependency>
+            <groupId>org.mozilla</groupId>
+            <artifactId>rhino</artifactId>
+            <version>1.7.14</version>
+        </dependency>
+        
+        <!-- Groovy -->
+        <dependency>
+            <groupId>org.apache.groovy</groupId>
+            <artifactId>groovy</artifactId>
+            <version>4.0.3</version>
+        </dependency>
+        
+        <!-- JANS -->
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-core-util</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-core-cdi</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-core-service</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-orm-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-auth-model</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-core-jsf-util</artifactId>
+        </dependency>
+
+        <!-- COMMONS -->
+        <dependency>
+            <groupId>commons-beanutils</groupId>
+            <artifactId>commons-beanutils</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+        </dependency>
+
+        <!-- SERIALIZATION -->
+        <dependency>
+            <groupId>com.esotericsoftware</groupId>
+            <artifactId>kryo</artifactId>
+            <version>5.3.0</version>
+        </dependency>
+        
+        <!-- ZIP4J -->
+        <dependency>
+            <groupId>net.lingala.zip4j</groupId>
+            <artifactId>zip4j</artifactId>
+            <version>2.11.2</version>
+        </dependency>
+
+        <!-- TESTS -->
+        <dependency>
+            <groupId>net.sourceforge.htmlunit</groupId>
+            <artifactId>htmlunit</artifactId>
+            <version>2.65.1</version>
+            <scope>test</scope>
+        </dependency>
+		<dependency>
+			<groupId>org.testng</groupId>
+			<artifactId>testng</artifactId>
+            <scope>test</scope>
+		</dependency>        
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>agama-inbound</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20220924</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- Needed for htmlunit <-> log4j2 intergration -->
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-jcl</artifactId>
+            <version>2.19.0</version>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+
+</project>

@@ -11,7 +11,7 @@ import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.common.UserService;
 import io.jans.as.model.common.BackchannelTokenDeliveryMode;
-import io.jans.as.model.common.ComponentType;
+import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.crypto.signature.AlgorithmFamily;
@@ -47,14 +47,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.Path;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
+import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.SecurityContext;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -139,7 +139,7 @@ public class BackchannelAuthorizeRestWebServiceImpl implements BackchannelAuthor
         log.debug("Attempting to request backchannel authorization: "
                 + "isSecure = {}", securityContext.isSecure());
 
-        errorResponseFactory.validateComponentEnabled(ComponentType.CIBA);
+        errorResponseFactory.validateFeatureEnabled(FeatureFlagType.CIBA);
 
         Response.ResponseBuilder builder = Response.ok();
 

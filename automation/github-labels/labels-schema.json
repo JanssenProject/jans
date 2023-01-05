@@ -1,0 +1,533 @@
+{
+  "1.0": {
+    "color": "0a8455",
+    "description": "Address in branch 1.0",
+    "auto-label": {
+      "branch": "1.0",
+      "paths": [],
+      "title-prefixes": []
+    }
+  },
+  "area-CI": {
+    "color": "0052CC",
+    "description": "Issue or changes required in automatic builds or CI infrastructure",
+    "auto-label": {
+      "branch": "",
+      "paths": [".github/workflows", ".github/dependabot.yml", "automation",  ".github/CODEOWNERS"],
+      "title-prefixes": ["ci", "test"]
+    }
+  },
+  "area-documentation": {
+    "color": "0052CC",
+    "description": "Documentation needs to change as part of issue or PR",
+    "auto-label": {
+      "branch": "",
+      "paths": [],
+      "title-prefixes": ["docs"]
+    }
+  },
+  "autorelease: pending": {
+    "color": "ededed",
+    "description": "Used by Google Release Please flow. This should not be set by anyone!",
+    "auto-label": {
+      "branch": "",
+      "paths": [],
+      "title-prefixes": []
+    }
+  },
+  "autorelease: tagged": {
+    "color": "ededed",
+    "description": "Used by Google Release Please flow. This should not be set by anyone!",
+    "auto-label": {
+      "branch": "",
+      "paths": [],
+      "title-prefixes": []
+    }
+  },
+  "bot": {
+    "color": "ededed",
+    "description": "Created, modified or reviewed by bot",
+    "auto-label": {
+      "branch": "",
+      "paths": [],
+      "title-prefixes": []
+    }
+  },
+  "backport/v1.0.0": {
+    "color": "E86DDD",
+    "description": "Backport to version 1.0.0",
+    "auto-label": {
+      "branch": "",
+      "paths": [],
+      "title-prefixes": []
+    }
+  },
+  "comp-charts-jans": {
+    "color": "0052CC",
+    "description": "Touching folder /charts",
+    "auto-label": {
+      "branch": "",
+      "paths": ["charts"],
+      "title-prefixes": []
+    }
+  },
+  "comp-docker-jans-auth-server": {
+    "color": "0052CC",
+    "description": "Touching folder /docker-jans-auth-server",
+    "auto-label": {
+      "branch": "",
+      "paths": ["docker-jans-auth-server"],
+      "title-prefixes": []
+    }
+  },
+  "comp-docker-jans-certmanager": {
+    "color": "0052CC",
+    "description": "Touching folder /docker-jans-certmanager",
+    "auto-label": {
+      "branch": "",
+      "paths": ["docker-jans-certmanager"],
+      "title-prefixes": []
+    }
+  },
+  "comp-docker-jans-config-api": {
+    "color": "0052CC",
+    "description": "Touching folder /docker-jans-config-api",
+    "auto-label": {
+      "branch": "",
+      "paths": ["docker-jans-config-api"],
+      "title-prefixes": []
+    }
+  },
+  "comp-docker-jans-configurator": {
+    "color": "0052CC",
+    "description": "Touching folder /docker-jans-configurator",
+    "auto-label": {
+      "branch": "",
+      "paths": ["docker-jans-configurator"],
+      "title-prefixes": []
+    }
+  },
+  "comp-docker-jans-fido2": {
+    "color": "0052CC",
+    "description": "Touching folder /docker-jans-fido2",
+    "auto-label": {
+      "branch": "",
+      "paths": ["docker-jans-fido2"],
+      "title-prefixes": []
+    }
+  },
+  "comp-docker-jans-persistence-loader": {
+    "color": "0052CC",
+    "description": "Touching folder /docker-jans-persistence-loader",
+    "auto-label": {
+      "branch": "",
+      "paths": ["docker-jans-persistence-loader"],
+      "title-prefixes": []
+    }
+  },
+  "comp-docker-jans-scim": {
+    "color": "0052CC",
+    "description": "Touching folder /docker-jans-scim",
+    "auto-label": {
+      "branch": "",
+      "paths": ["docker-jans-scim"],
+      "title-prefixes": []
+    }
+  },
+  "comp-jans-auth-server": {
+    "color": "0052CC",
+    "description": "Touching folder /jans-auth-server",
+    "auto-label": {
+      "branch": "",
+      "paths": ["jans-auth-server"],
+      "title-prefixes": []
+    }
+  },
+  "comp-jans-bom": {
+    "color": "0052CC",
+    "description": "Touching folder /jans-bom",
+    "auto-label": {
+      "branch": "",
+      "paths": ["jans-bom"],
+      "title-prefixes": []
+    }
+  },
+  "comp-jans-cli-tui": {
+    "color": "0052CC",
+    "description": "Touching folder /jans-cli-tui",
+    "auto-label": {
+      "branch": "",
+      "paths": ["jans-cli-tui"],
+      "title-prefixes": []
+    }
+  },
+  "comp-jans-config-api": {
+    "color": "0052CC",
+    "description": "Touching folder /jans-config-api",
+    "auto-label": {
+      "branch": "",
+      "paths": ["jans-config-api"],
+      "title-prefixes": []
+    }
+  },
+  "comp-jans-core": {
+    "color": "0052CC",
+    "description": "Touching folder /jans-core",
+    "auto-label": {
+      "branch": "",
+      "paths": ["jans-core"],
+      "title-prefixes": []
+    }
+  },
+  "comp-jans-eleven": {
+    "color": "0052CC",
+    "description": "Touching folder /jans-eleven",
+    "auto-label": {
+      "branch": "",
+      "paths": ["jans-eleven"],
+      "title-prefixes": []
+    }
+  },
+  "comp-jans-fido2": {
+    "color": "0052CC",
+    "description": "Touching folder /jans-fido2",
+    "auto-label": {
+      "branch": "",
+      "paths": ["jans-fido2"],
+      "title-prefixes": []
+    }
+  },
+  "comp-jans-linux-setup": {
+    "color": "0052CC",
+    "description": "Touching folder /jans-linux-setup",
+    "auto-label": {
+      "branch": "",
+      "paths": ["jans-linux-setup"],
+      "title-prefixes": []
+    }
+  },
+  "comp-jans-orm": {
+    "color": "0052CC",
+    "description": "Touching folder /jans-orm",
+    "auto-label": {
+      "branch": "",
+      "paths": ["jans-orm"],
+      "title-prefixes": []
+    }
+  },
+  "comp-jans-pycloudlib": {
+    "color": "0052CC",
+    "description": "Touching folder /jans-pycloudlib",
+    "auto-label": {
+      "branch": "",
+      "paths": ["jans-pycloudlib"],
+      "title-prefixes": []
+    }
+  },
+  "comp-jans-scim": {
+    "color": "0052CC",
+    "description": "Touching folder /jans-scim",
+    "auto-label": {
+      "branch": "",
+      "paths": ["jans-scim"],
+      "title-prefixes": []
+    }
+  },
+  "comp-super-jans": {
+    "color": "0052CC",
+    "description": "Touching folder /super-jans",
+    "auto-label": {
+      "branch": "",
+      "paths": ["super-jans"],
+      "title-prefixes": []
+    }
+  },
+  "comp-agama": {
+    "color": "0052CC",
+    "description": "Touching folder /agama",
+    "auto-label": {
+      "branch": "",
+      "paths": ["agama"],
+      "title-prefixes": []
+    }
+  },
+  "effort-1": {
+    "color": "FEF2C0",
+    "description": "Relative effort required for completion of issue or PR",
+    "auto-label": {
+      "branch": "",
+      "paths": [],
+      "title-prefixes": []
+    }
+  },
+  "effort-2": {
+    "color": "FEF2C0",
+    "description": "Relative effort required for completion of issue or PR",
+    "auto-label": {
+      "branch": "",
+      "paths": [],
+      "title-prefixes": []
+    }
+  },
+  "effort-3": {
+    "color": "FEF2C0",
+    "description": "Relative effort required for completion of issue or PR",
+    "auto-label": {
+      "branch": "",
+      "paths": [],
+      "title-prefixes": []
+    }
+  },
+  "effort-5": {
+    "color": "FBCA04",
+    "description": "Relative effort required for completion of issue or PR",
+    "auto-label": {
+      "branch": "",
+      "paths": [],
+      "title-prefixes": []
+    }
+  },
+  "effort-8": {
+    "color": "FBCA04",
+    "description": "Relative effort required for completion of issue or PR",
+    "auto-label": {
+      "branch": "",
+      "paths": [],
+      "title-prefixes": []
+    }
+  },
+  "effort-13": {
+    "color": "D93F0B",
+    "description": "Relative effort required for completion of issue or PR",
+    "auto-label": {
+      "branch": "",
+      "paths": [],
+      "title-prefixes": []
+    }
+  },
+  "effort-21": {
+    "color": "D93F0B",
+    "description": "Relative effort required for completion of issue or PR",
+    "auto-label": {
+      "branch": "",
+      "paths": [],
+      "title-prefixes": []
+    }
+  },
+  "enhancement": {
+    "color": "ededed",
+    "description": "Default label by Github",
+    "auto-label": {
+      "branch": "",
+      "paths": [],
+      "title-prefixes": []
+    }
+  },
+  "github_actions": {
+    "color": "000000",
+    "description": "Pull requests that update Github_actions code",
+    "auto-label": {
+      "branch": "",
+      "paths": [],
+      "title-prefixes": []
+    }
+  },
+  "good first issue": {
+    "color": "7057ff",
+    "description": "Good for newcomers",
+    "auto-label": {
+      "branch": "",
+      "paths": [],
+      "title-prefixes": []
+    }
+  },
+  "help wanted": {
+    "color": "008672",
+    "description": "Extra attention is needed",
+    "auto-label": {
+      "branch": "",
+      "paths": [],
+      "title-prefixes": []
+    }
+  },
+  "invalid": {
+    "color": "e4e669",
+    "description": " This doesn't seem right",
+    "auto-label": {
+      "branch": "",
+      "paths": [],
+      "title-prefixes": []
+    }
+  },
+  "java": {
+    "color": "ffa221",
+    "description": "Pull requests that update Java code. This is currently assigned and created by GitHub",
+    "auto-label": {
+      "branch": "",
+      "paths": [],
+      "title-prefixes": []
+    }
+  },
+  "kind-bug": {
+    "color": "800080",
+    "description": "Issue or PR is a bug in existing functionality",
+    "auto-label": {
+      "branch": "",
+      "paths": [],
+      "title-prefixes": ["fix"]
+    }
+  },
+  "kind-duplicate": {
+    "color": "800080",
+    "description": "This issue or pull request already exists",
+    "auto-label": {
+      "branch": "",
+      "paths": [],
+      "title-prefixes": []
+    }
+  },
+  "kind-dependencies": {
+    "color": "800080",
+    "description": "This issue or pull request already exists",
+    "auto-label": {
+      "branch": "",
+      "paths": [],
+      "title-prefixes": ["build", "chore", "Snyk"]
+    }
+  },
+  "kind-enhancement": {
+    "color": "800080",
+    "description": "Issue or PR is an enhancement to an existing functionality",
+    "auto-label": {
+      "branch": "",
+      "paths": [],
+      "title-prefixes": ["refactor", "perf", "style"]
+    }
+  },
+  "kind-feature": {
+    "color": "800080",
+    "description": "Issue or PR is a new feature request",
+    "auto-label": {
+      "branch": "",
+      "paths": [],
+      "title-prefixes": ["feat"]
+    }
+  },
+  "kind-question": {
+    "color": "800080",
+    "description": "Issue is a question that can be addressed via pointers to documentation or user education",
+    "auto-label": {
+      "branch": "",
+      "paths": [],
+      "title-prefixes": []
+    }
+  },
+  "needs-discussion": {
+    "color": "D93F0B",
+    "description": "Issue or PR needs discussion during triage meeting",
+    "auto-label": {
+      "branch": "",
+      "paths": [],
+      "title-prefixes": []
+    }
+  },
+  "needs-information": {
+    "color": "D93F0B",
+    "description": "Creator of the issue or PR needs to add more information in order to be meaningfully triaged",
+    "auto-label": {
+      "branch": "",
+      "paths": [],
+      "title-prefixes": []
+    }
+  },
+  "needs-triage": {
+    "color": "D93F0B",
+    "description": "Issue or PR yet to be triaged. Add more labels or details that will help during triage review",
+    "auto-label": {
+      "branch": "",
+      "paths": [],
+      "title-prefixes": []
+    }
+  },
+  "priority-0": {
+    "color": "B60205",
+    "description": "Causes full outage, breakage, or major function unavailability for everyone, without a workaround",
+    "auto-label": {
+      "branch": "",
+      "paths": [],
+      "title-prefixes": []
+    }
+  },
+  "priority-1": {
+    "color": "B60205",
+    "description": "Issue or PR significantly impacts majority of users; Workaround is partial or overly painful",
+    "auto-label": {
+      "branch": "",
+      "paths": [],
+      "title-prefixes": []
+    }
+  },
+  "priority-2": {
+    "color": "FBCA04",
+    "description": "Issue or PR is important to majority of users, Currently workaround exists",
+    "auto-label": {
+      "branch": "",
+      "paths": [],
+      "title-prefixes": []
+    }
+  },
+  "priority-3": {
+    "color": "FBCA04",
+    "description": "Issue or PR is relevant to core functions, but does not impede progress. Important, but not urgent",
+    "auto-label": {
+      "branch": "",
+      "paths": [],
+      "title-prefixes": []
+    }
+  },
+  "priority-4": {
+    "color": "FEF2C0",
+    "description": "Minor issue or PR is not relevant to core functions, or relates to the usability of system",
+    "auto-label": {
+      "branch": "",
+      "paths": [],
+      "title-prefixes": []
+    }
+  },
+  "priority-5": {
+    "color": "FEF2C0",
+    "description": "Issue or PR addresses a very minor concern. Not planned for active development. Will not be fixed.",
+    "auto-label": {
+      "branch": "",
+      "paths": [],
+      "title-prefixes": []
+    }
+  },
+  "ready-for-triage": {
+    "color": "FBCA04",
+    "description": "Issue or PR has sufficient details and it is ready for triage review",
+    "auto-label": {
+      "branch": "",
+      "paths": [],
+      "title-prefixes": []
+    }
+  },
+  "triaged": {
+    "color": "0E8A16",
+    "description": "Issue or PR is fully triaged",
+    "auto-label": {
+      "branch": "",
+      "paths": [],
+      "title-prefixes": []
+    }
+  },
+  "wontfix": {
+    "color": "ffffff",
+    "description": "This will not be worked on",
+    "auto-label": {
+      "branch": "",
+      "paths": [],
+      "title-prefixes": []
+    }
+  }
+}

@@ -16,6 +16,8 @@ import io.jans.as.client.RegisterResponse;
 import io.jans.as.client.TokenClient;
 import io.jans.as.client.TokenRequest;
 import io.jans.as.client.TokenResponse;
+
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.client.uma.UmaClientFactory;
 import io.jans.as.client.uma.UmaRptIntrospectionService;
 import io.jans.as.client.uma.UmaTokenService;
@@ -24,9 +26,7 @@ import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseType;
-import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
-import io.jans.as.model.jwt.JwtHeaderName;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.uma.UmaMetadata;
 import io.jans.as.model.uma.UmaNeedInfoResponse;
@@ -36,14 +36,14 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import javax.ws.rs.ClientErrorException;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.ClientErrorException;
+import jakarta.ws.rs.core.Response;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import static io.jans.as.model.uma.UmaTestUtil.assertIt;
+import static io.jans.as.test.UmaTestUtil.assertIt;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
@@ -111,11 +111,7 @@ public class ClientAuthenticationByAccessTokenHttpTest extends BaseTest {
         RegisterResponse response = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(response.getStatus(), 201, "Unexpected response code: " + response.getEntity());
-        assertNotNull(response.getClientId());
-        assertNotNull(response.getClientSecret());
-        assertNotNull(response.getRegistrationAccessToken());
-        assertNotNull(response.getClientSecretExpiresAt());
+        AssertBuilder.registerResponse(response).created().check();
 
         clientId = response.getClientId();
         clientSecret = response.getClientSecret();
@@ -157,16 +153,10 @@ public class ClientAuthenticationByAccessTokenHttpTest extends BaseTest {
         String idToken = authorizationResponse.getIdToken();
 
         // 2. Validate code and id_token
-        Jwt jwt = Jwt.parse(idToken);
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
-        assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.CODE_HASH));
-        assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
+        AssertBuilder.jwtParse(idToken)
+                .notNullAuthenticationTime()
+                .claimsPresence(JwtClaimName.CODE_HASH)
+                .check();
 
         // 3. Request access token using the authorization code.
         TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
@@ -182,12 +172,9 @@ public class ClientAuthenticationByAccessTokenHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        assertEquals(tokenResponse.getStatus(), 200, "Unexpected response code: " + tokenResponse.getStatus());
-        assertNotNull(tokenResponse.getEntity(), "The entity is null");
-        assertNotNull(tokenResponse.getAccessToken(), "The access token is null");
-        assertNotNull(tokenResponse.getExpiresIn(), "The expires in value is null");
-        assertNotNull(tokenResponse.getTokenType(), "The token type is null");
-        assertNotNull(tokenResponse.getRefreshToken(), "The refresh token is null");
+        AssertBuilder.tokenResponse(tokenResponse)
+                .notNullRefreshToken()
+                .check();
 
         userAccessToken = tokenResponse.getAccessToken();
     }

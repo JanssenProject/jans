@@ -12,14 +12,18 @@ import java.util.Map;
 import io.jans.orm.annotation.AttributeEnum;
 
 /**
- * @author Val Pecaoco
+ * Sort order
+ *
+ * @author Yuriy Movchan Date: 04/22/2021
  */
 public enum SortOrder implements AttributeEnum {
 
-    ASCENDING("ascending"),
-    DESCENDING("descending");
+    ASCENDING("ascending", "asc"),
+    DESCENDING("descending", "desc"),
+    DEFAULT("default", "def");
 
     private String value;
+    private String shortValue;
 
     private static Map<String, SortOrder> MAP_BY_VALUES = new HashMap<String, SortOrder>();
 
@@ -29,14 +33,19 @@ public enum SortOrder implements AttributeEnum {
         }
     }
 
-    SortOrder(String value) {
+    SortOrder(String value, String shortValue) {
         this.value = value;
+        this.shortValue = shortValue;
     }
 
     @Override
     public String getValue() {
         return value;
     }
+
+    public String getShortValue() {
+		return shortValue;
+	}
 
     public static SortOrder getByValue(String value) {
         return MAP_BY_VALUES.get(value);
