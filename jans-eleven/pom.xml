@@ -23,7 +23,7 @@
 		<jettison.version>1.5.2</jettison.version>
 		<bouncycastle.version>1.54</bouncycastle.version>
 
-		<httpcore.version>4.4.6</httpcore.version>
+		<httpcore.version>4.4.15</httpcore.version>
 		<httpclient.version>4.5.13</httpclient.version>
 
 		<jetty.version>11.0.8</jetty.version>
