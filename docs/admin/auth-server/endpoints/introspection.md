@@ -64,7 +64,9 @@ curl -X 'POST' \
   -d 'token=eyJra....3ZkB-Ajwg'  
   -H "Authorization: Bearer eyJra...BpKo7g"
 ```
-Response:
+
+**Response**
+
 ```
 {
     "sub": "",
