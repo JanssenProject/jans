@@ -1,0 +1,14 @@
+io.jans.as.common.claims
+io.jans.as.common.service
+io.jans.as.common.service.common
+io.jans.as.common.service.common.api
+io.jans.as.common.cert.validation
+io.jans.as.common.cert.validation.model
+io.jans.as.common.cert.fingerprint
+io.jans.as.common.model.event
+io.jans.as.common.model.common
+io.jans.as.common.model.ssa
+io.jans.as.common.model.session
+io.jans.as.common.model.registration
+io.jans.as.common.model.stat
+io.jans.as.common.util
