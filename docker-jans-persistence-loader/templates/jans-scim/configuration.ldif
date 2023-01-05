@@ -1,7 +1,0 @@
-dn: ou=jans-scim,ou=configuration,o=jans
-jansConfDyn::%(scim_dynamic_conf_base64)s
-jansConfStatic::%(scim_static_conf_base64)s
-jansRevision: 1
-objectClass: top
-objectClass: jansAppConf
-ou: scim

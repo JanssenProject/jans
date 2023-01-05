@@ -1,0 +1,7 @@
+Flow L.I.F.E
+    Basepath ""
+
+x = 1
+y = x--
+
+//Failure reason: -- not recognized. No arithmetic operators in Agama 

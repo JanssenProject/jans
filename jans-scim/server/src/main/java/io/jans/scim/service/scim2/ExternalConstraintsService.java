@@ -2,15 +2,17 @@ package io.jans.scim.service.scim2;
 
 import java.util.Optional;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.core.UriInfo;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
+import jakarta.ws.rs.core.UriInfo;
 
 import io.jans.orm.model.base.Entry;
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.scim.model.conf.AppConfiguration;
+import io.jans.scim.model.conf.ScimMode;
 import io.jans.scim.model.scim2.SearchRequest;
 import io.jans.scim.service.external.ExternalScimService;
 import io.jans.scim.service.external.OperationContext;
@@ -32,6 +34,9 @@ public class ExternalConstraintsService {
 
     @Inject
     private PersistenceEntryManager entryManager;
+
+    @Inject
+    private AppConfiguration appConfiguration;
 
     @Inject
     ExternalScimService externalScimService;
@@ -84,17 +89,20 @@ public class ExternalConstraintsService {
         ctx.setQueryParams(uriInfo.getQueryParameters());
         ctx.setRequestHeaders(httpHeaders.getRequestHeaders());
         
-        String token = Optional.ofNullable(httpHeaders.getHeaderString(HttpHeaders.AUTHORIZATION))
-                .map(authz -> authz.replaceFirst("Bearer\\s+", "")).orElse(null);
+        if (!ScimMode.BYPASS.equals(appConfiguration.getProtectionMode())) {
 
-        TokenDetails details = getDatabaseToken(token);
-        if (details == null) {
-            log.warn("Unable to get token details");
-            details = new TokenDetails();
+            String token = Optional.ofNullable(httpHeaders.getHeaderString(HttpHeaders.AUTHORIZATION))
+                    .map(authz -> authz.replaceFirst("Bearer\\s+", "")).orElse(null);
+
+            TokenDetails details = getDatabaseToken(token);
+            if (details == null) {
+                log.warn("Unable to get token details");
+                details = new TokenDetails();
+            }
+
+            details.setValue(token);
+            ctx.setTokenDetails(details);
         }
-
-        details.setValue(token);
-        ctx.setTokenDetails(details);
         return ctx;
 
     }
@@ -106,14 +114,8 @@ public class ExternalConstraintsService {
             return entryManager.find(TokenDetails.class,
                     String.format("tknCde=%s,%s", hashedToken, TOKENS_DN));
         } catch (Exception e) {
-            try {
-                log.error(e.getMessage());
-                return entryManager.find(TokenDetails.class,
-                    String.format("tknCde=%s,%s", hashedToken, "ou=uma_rpt," + TOKENS_DN));
-            } catch (Exception e2) {
-                log.error(e2.getMessage());
-                return null;
-            }
+            log.warn(e.getMessage());
+            return null;
         }
         
     }

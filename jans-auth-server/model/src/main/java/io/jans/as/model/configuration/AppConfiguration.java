@@ -8,14 +8,14 @@ package io.jans.as.model.configuration;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.common.collect.Lists;
-import io.jans.as.model.common.ComponentType;
-import io.jans.as.model.common.GrantType;
-import io.jans.as.model.common.ResponseMode;
-import io.jans.as.model.common.ResponseType;
-import io.jans.as.model.common.SoftwareStatementValidationType;
-import io.jans.as.model.common.WebKeyStorage;
+import io.jans.agama.model.EngineConfig;
+import io.jans.as.model.common.*;
 import io.jans.as.model.error.ErrorHandlingMethod;
 import io.jans.as.model.jwk.KeySelectionStrategy;
+import io.jans.as.model.ssa.SsaConfiguration;
+import io.jans.as.model.ssa.SsaValidationConfig;
+import io.jans.as.model.userinfo.UserInfoConfiguration;
+import io.jans.doc.annotation.DocProperty;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -28,7 +28,7 @@ import java.util.Set;
  * @author Javier Rojas Blum
  * @author Yuriy Zabrovarnyy
  * @author Yuriy Movchan
- * @version September 30, 2021
+ * @version March 15, 2022
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AppConfiguration implements Configuration {
@@ -37,280 +37,789 @@ public class AppConfiguration implements Configuration {
     public static final KeySelectionStrategy DEFAULT_KEY_SELECTION_STRATEGY = KeySelectionStrategy.OLDER;
     public static final String DEFAULT_STAT_SCOPE = "jans_stat";
 
+    @DocProperty(description = "URL using the https scheme that OP asserts as Issuer identifier")
     private String issuer;
+
+    @DocProperty(description = "The base URL for endpoints")
     private String baseEndpoint;
+
+    @DocProperty(description = "The authorization endpoint URL")
     private String authorizationEndpoint;
+
+    @DocProperty(description = "The token endpoint URL")
     private String tokenEndpoint;
+
+    @DocProperty(description = "The URL for the access_token or refresh_token revocation endpoint")
     private String tokenRevocationEndpoint;
+
+    @DocProperty(description = "The User Info endpoint URL")
     private String userInfoEndpoint;
+
+    @DocProperty(description = "The Client Info endpoint URL")
     private String clientInfoEndpoint;
+
+    @DocProperty(description = "URL for an OP IFrame that supports cross-origin communications for session state information with the RP Client using the HTML5 postMessage API")
     private String checkSessionIFrame;
+
+    @DocProperty(description = "URL at the OP to which an RP can perform a redirect to request that the end user be logged out at the OP")
     private String endSessionEndpoint;
+
+    @DocProperty(description = "URL of the OP's JSON Web Key Set (JWK) document. This contains the signing key(s) the RP uses to validate signatures from the OP")
     private String jwksUri;
+
+    @DocProperty(description = "Registration endpoint URL")
     private String registrationEndpoint;
+
+    @DocProperty(description = "Discovery endpoint URL")
     private String openIdDiscoveryEndpoint;
+
+    @DocProperty(description = "URL for the Open ID Connect Configuration Endpoint")
     private String openIdConfigurationEndpoint;
+
+    @DocProperty(description = "ID Generation endpoint URL")
     private String idGenerationEndpoint;
+
+    @DocProperty(description = "Introspection endpoint URL")
     private String introspectionEndpoint;
+
+    @DocProperty(description = "URL for Pushed Authorisation Request (PAR) Endpoint")
     private String parEndpoint;
+
+    @DocProperty(description = "Boolean value to indicate of Pushed Authorisation Request(PAR)is required", defaultValue = "false")
     private Boolean requirePar = false;
+
+    @DocProperty(description = "URL for the Device Authorization")
     private String deviceAuthzEndpoint;
 
+    @DocProperty(description = "URL for Mutual TLS (mTLS) Client Authentication and Certificate-Bound Access Tokens (MTLS) Endpoint")
     private String mtlsAuthorizationEndpoint;
+
+    @DocProperty(description = "URL for Mutual TLS (mTLS) Authorization token Endpoint")
     private String mtlsTokenEndpoint;
+
+    @DocProperty(description = "URL for Mutual TLS (mTLS) Authorization token revocation endpoint")
     private String mtlsTokenRevocationEndpoint;
+
+    @DocProperty(description = "Mutual TLS (mTLS) user info endpoint URL")
     private String mtlsUserInfoEndpoint;
+
+    @DocProperty(description = "URL for Mutual TLS (mTLS) Client Info endpoint")
     private String mtlsClientInfoEndpoint;
+
+    @DocProperty(description = "URL for Mutual TLS (mTLS) IFrame that supports cross-origin communications for session state information with the RP Client using the HTML5 postMessage API")
     private String mtlsCheckSessionIFrame;
+
+    @DocProperty(description = "URL for Mutual TLS (mTLS) to which an RP can perform a redirect to request that the end user be logged out at the OP")
     private String mtlsEndSessionEndpoint;
+
+    @DocProperty(description = "URL for Mutual TLS (mTLS) of the OP's JSON Web Key Set (JWK) document")
     private String mtlsJwksUri;
+
+    @DocProperty(description = "Mutual TLS (mTLS) registration endpoint URL")
     private String mtlsRegistrationEndpoint;
+
+    @DocProperty(description = "Mutual TLS (mTLS) ID generation endpoint URL")
     private String mtlsIdGenerationEndpoint;
+
+    @DocProperty(description = "Mutual TLS (mTLS) introspection endpoint URL")
     private String mtlsIntrospectionEndpoint;
+
+    @DocProperty(description = "Mutual TLS (mTLS) Pushed Authorization Requests(PAR) endpoint URL")
     private String mtlsParEndpoint;
+
+    @DocProperty(description = "Mutual TLS (mTLS) device authorization endpoint URL")
     private String mtlsDeviceAuthzEndpoint;
 
-    private Boolean sessionAsJwt = false;
+    @DocProperty(description = "Boolean value true encrypts request object", defaultValue = "false")
     private Boolean requireRequestObjectEncryption = false;
+
+    @DocProperty(description = "Boolean value true check for Proof Key for Code Exchange (PKCE)", defaultValue = "false")
     private Boolean requirePkce = false;
 
+    @DocProperty(description = "Boolean value true allow all value for revoke endpoint", defaultValue = "false")
     private Boolean allowAllValueForRevokeEndpoint = false;
 
+    @DocProperty(description = "Sector Identifier cache lifetime in minutes", defaultValue = "1440")
     private int sectorIdentifierCacheLifetimeInMinutes = 1440;
 
+    @DocProperty(description = "UMA Configuration endpoint URL")
     private String umaConfigurationEndpoint;
+
+    @DocProperty(description = "Issue RPT as JWT or as random string", defaultValue = "false")
     private Boolean umaRptAsJwt = false;
+
+    @DocProperty(description = "UMA RPT lifetime")
     private int umaRptLifetime;
+
+    @DocProperty(description = "UMA ticket lifetime")
     private int umaTicketLifetime;
+
+    @DocProperty(description = "UMA PCT lifetime")
     private int umaPctLifetime;
+
+    @DocProperty(description = "UMA Resource lifetime")
     private int umaResourceLifetime;
+
+    @DocProperty(description = "Add UMA scopes automatically if it is not registered yet")
     private Boolean umaAddScopesAutomatically;
+
+    @DocProperty(description = "Validate claim_token as id_token assuming it is issued by local id", defaultValue = "false")
     private Boolean umaValidateClaimToken = false;
+
+    @DocProperty(description = "Specify whether to grant access to resources if there is no any policies associated with scopes", defaultValue = "false")
     private Boolean umaGrantAccessIfNoPolicies = false;
+
+    @DocProperty(description = "Restrict access to resource by associated client", defaultValue = "false")
     private Boolean umaRestrictResourceToAssociatedClient = false;
 
+    @DocProperty(description = "Statistical data capture time interval")
     private int statTimerIntervalInSeconds;
-    private int statWebServiceIntervalLimitInSeconds;
+
+    @DocProperty(description = "Scope required for Statistical Authorization")
     private String statAuthorizationScope;
 
+    @DocProperty(description = "Specifies whether to allow spontaneous scopes")
+    private Boolean allowSpontaneousScopes;
+
+    @DocProperty(description = "The lifetime of spontaneous scope in seconds")
     private int spontaneousScopeLifetime;
+
+    @DocProperty(description = "Specifies which LDAP attribute is used for the subject identifier claim")
     private String openidSubAttribute;
+
+    @DocProperty(description = "Specifies whether public subject identifier is allowed per client", defaultValue = "false")
+    private Boolean publicSubjectIdentifierPerClientEnabled = false;
+
+    @DocProperty(description = "A list of the subject identifiers supported per client")
+    private List<String> subjectIdentifiersPerClientSupported;
+
+    @DocProperty(description = "This list details which OAuth 2.0 response_type values are supported by this OP.", defaultValue = "By default, every combination of code, token and id_token is supported.")
     private Set<Set<ResponseType>> responseTypesSupported;
+
+    @DocProperty(description = "This list details which OAuth 2.0 response modes are supported by this OP")
     private Set<ResponseMode> responseModesSupported;
+
+    @DocProperty(description = "This list details which OAuth 2.0 grant types are supported by this OP")
     private Set<GrantType> grantTypesSupported;
+
+    @DocProperty(description = "This list details which Subject Identifier types that the OP supports. Valid types include pairwise and public.")
     private List<String> subjectTypesSupported;
+
+    @DocProperty(description = "The default subject type used for dynamic client registration")
     private String defaultSubjectType;
+
+    @DocProperty(description = "List of authorization signing algorithms supported by this OP")
     private List<String> authorizationSigningAlgValuesSupported;
+
+    @DocProperty(description = "List of authorization encryption algorithms supported by this OP")
     private List<String> authorizationEncryptionAlgValuesSupported;
+
+    @DocProperty(description = "A list of the authorization encryption algorithms supported")
     private List<String> authorizationEncryptionEncValuesSupported;
+
+    @DocProperty(description = "This JSON Array lists which JWS signing algorithms (alg values) [JWA] can be used by for the UserInfo endpoint to encode the claims in a JWT")
     private List<String> userInfoSigningAlgValuesSupported;
+
+    @DocProperty(description = "This JSON Array lists which JWS encryption algorithms (alg values) [JWA] can be used by for the UserInfo endpoint to encode the claims in a JWT")
     private List<String> userInfoEncryptionAlgValuesSupported;
+
+    @DocProperty(description = "This JSON Array lists which JWS encryption algorithms (enc values) [JWA] can be used by for the UserInfo endpoint to encode the claims in a JWT")
     private List<String> userInfoEncryptionEncValuesSupported;
+
+    @DocProperty(description = "A list of the JWS signing algorithms (alg values) supported by the OP for the ID Token to encode the Claims in a JWT")
     private List<String> idTokenSigningAlgValuesSupported;
+
+    @DocProperty(description = "A list of the JWE encryption algorithms (alg values) supported by the OP for the ID Token to encode the Claims in a JWT")
     private List<String> idTokenEncryptionAlgValuesSupported;
+
+    @DocProperty(description = "A list of the JWE encryption algorithms (enc values) supported by the OP for the ID Token to encode the Claims in a JWT")
     private List<String> idTokenEncryptionEncValuesSupported;
+
+    @DocProperty(description = "A list of the JWS signing algorithms (alg values) supported by the OP for the access token to encode the Claims in a JWT")
+    private List<String> accessTokenSigningAlgValuesSupported;
+
+    @DocProperty(description = "Boolean value true indicates that signed request object is mandatory", defaultValue = "false")
+    private Boolean forceSignedRequestObject = false;
+
+    @DocProperty(description = "A list of the JWS signing algorithms (alg values) supported by the OP for Request Objects")
     private List<String> requestObjectSigningAlgValuesSupported;
+
+    @DocProperty(description = "A list of the JWE encryption algorithms (alg values) supported by the OP for Request Objects")
     private List<String> requestObjectEncryptionAlgValuesSupported;
+
+    @DocProperty(description = "A list of the JWE encryption algorithms (enc values) supported by the OP for Request Objects")
     private List<String> requestObjectEncryptionEncValuesSupported;
+
+    @DocProperty(description = "A list of Client Authentication methods supported by this Token Endpoint")
     private List<String> tokenEndpointAuthMethodsSupported;
+
+    @DocProperty(description = "A list of the JWS signing algorithms (alg values) supported by the Token Endpoint for the signature on the JWT used to authenticate the Client at the Token Endpoint for the private_key_jwt and client_secret_jwt authentication methods")
     private List<String> tokenEndpointAuthSigningAlgValuesSupported;
+
+    @DocProperty(description = "This list details the custom attributes for dynamic registration")
     private List<String> dynamicRegistrationCustomAttributes;
+
+    @DocProperty(description = "A list of the display parameter values that the OpenID Provider supports")
     private List<String> displayValuesSupported;
+
+    @DocProperty(description = "A list of the Claim Types that the OpenID Provider supports")
     private List<String> claimTypesSupported;
+
+    @DocProperty(description = "A list of algorithms that will be used in JWKS endpoint")
     private List<String> jwksAlgorithmsSupported;
+
+    @DocProperty(description = "URL of a page containing human-readable information that developers might want or need to know when using the OpenID Provider")
     private String serviceDocumentation;
+
+    @DocProperty(description = "This list details the languages and scripts supported for values in the claims being returned")
     private List<String> claimsLocalesSupported;
+
+    @DocProperty(description = "Array containing a list of the JWT Confirmation Method member names supported by the OP for Token Binding of ID Tokens. The presence of this parameter indicates that the OpenID Provider supports Token Binding of ID Tokens. If omitted, the default is that the OpenID Provider does not support Token Binding of ID Tokens")
     private List<String> idTokenTokenBindingCnfValuesSupported;
+
+    @DocProperty(description = "This list details the languages and scripts supported for the user interface")
     private List<String> uiLocalesSupported;
+
+    @DocProperty(description = "Specifies whether the OP supports use of the claims parameter")
     private Boolean claimsParameterSupported;
+
+    @DocProperty(description = "Boolean value specifying whether the OP supports use of the request parameter")
     private Boolean requestParameterSupported;
+
+    @DocProperty(description = "Boolean value specifying whether the OP supports use of the request_uri parameter")
     private Boolean requestUriParameterSupported;
+
+    @DocProperty(description = "Boolean value specifying whether the OP supports use of the request_uri hash verification")
     private Boolean requestUriHashVerificationEnabled;
+
+    @DocProperty(description = "Boolean value specifying whether the OP requires any request_uri values used to be pre-registered using the request_uris registration parameter")
     private Boolean requireRequestUriRegistration;
+
+    @DocProperty(description = "Block list for requestUri that can come to Authorization Endpoint (e.g. localhost)")
+    private List<String> requestUriBlockList;
+
+    @DocProperty(description = "URL that the OpenID Provider provides to the person registering the Client to read about the OP's requirements on how the Relying Party can use the data provided by the OP")
     private String opPolicyUri;
+
+    @DocProperty(description = "URL that the OpenID Provider provides to the person registering the Client to read about OpenID Provider's terms of service")
     private String opTosUri;
+
+    @DocProperty(description = "The lifetime of the Authorization Code")
     private int authorizationCodeLifetime;
+
+    @DocProperty(description = "The lifetime of the Refresh Token")
     private int refreshTokenLifetime;
+
+    @DocProperty(description = "The lifetime of the ID Token")
     private int idTokenLifetime;
+
+    @DocProperty(description = "Boolean value specifying whether idToken filters claims based on accessToken")
     private Boolean idTokenFilterClaimsBasedOnAccessToken;
+
+    @DocProperty(description = "The lifetime of the short lived Access Token")
     private int accessTokenLifetime;
 
+    @DocProperty(description = "Time interval for the Clean Service in seconds")
     private int cleanServiceInterval;
+
+    @DocProperty(description = "Clean service chunk size which is used during clean up", defaultValue = "100")
     private int cleanServiceBatchChunkSize = 100;
 
+    @DocProperty(description = "Boolean value specifying whether to regenerate keys")
     private Boolean keyRegenerationEnabled;
+
+    @DocProperty(description = "The interval for key regeneration in hours")
     private int keyRegenerationInterval;
+
+    @DocProperty(description = "The default signature algorithm to sign ID Tokens")
     private String defaultSignatureAlgorithm;
-    private String oxOpenIdConnectVersion;
-    private String oxId;
+
+    @DocProperty(description = "OpenID Connect Version")
+    private String jansOpenIdConnectVersion;
+
+    @DocProperty(description = "URL for the Inum generator Service")
+    private String jansId;
+
+    @DocProperty(description = "Expiration time in seconds for clients created with dynamic registration, 0 or -1 means never expire", defaultValue = "-1")
     private int dynamicRegistrationExpirationTime = -1;
+
+    @DocProperty(description = "Boolean value specifying whether to persist client authorizations")
     private Boolean dynamicRegistrationPersistClientAuthorizations;
+
+    @DocProperty(description = "Boolean value specifying whether a client is trusted and no authorization is required")
     private Boolean trustedClientEnabled;
+
+    @DocProperty(description = "Choose whether to skip authorization if a client has an OpenId scope and a pairwise ID", defaultValue = "false")
     private Boolean skipAuthorizationForOpenIdScopeAndPairwiseId = false;
+
+    @DocProperty(description = "Boolean value specifying whether to enable scopes parameter in dynamic registration")
     private Boolean dynamicRegistrationScopesParamEnabled;
+
+    @DocProperty(description = "Boolean value specifying whether to enable Password Grant Type during Dynamic Registration", defaultValue = "false")
     private Boolean dynamicRegistrationPasswordGrantTypeEnabled = false;
+
+    @DocProperty(description = "List of grant scopes for dynamic registration")
     private List<String> dynamicRegistrationAllowedPasswordGrantScopes;
+
+    @DocProperty(description = "LDAP custom object class for dynamic registration")
     private String dynamicRegistrationCustomObjectClass;
+
+    @DocProperty(description = "This list details LDAP custom object classes for dynamic person enrollment")
     private List<String> personCustomObjectClassList;
 
+    @DocProperty(description = "Specifies whether to persist id_token into LDAP (otherwise saves into cache)", defaultValue = "false")
     private Boolean persistIdTokenInLdap = false;
+
+    @DocProperty(description = "Specifies whether to persist refresh_token into LDAP (otherwise saves into cache)", defaultValue = "true")
     private Boolean persistRefreshTokenInLdap = true;
+
+    @DocProperty(description = "Allows post-logout redirect without validation for the End Session endpoint (still AS validates it against clientWhiteList url pattern property)", defaultValue = "false")
     private Boolean allowPostLogoutRedirectWithoutValidation = false;
+
+    @DocProperty(description = "Boolean value to specify whether to invalidate session_id and consent_session_id cookies right after successful or unsuccessful authorization", defaultValue = "false")
     private Boolean invalidateSessionCookiesAfterAuthorizationFlow = false;
+
+    @DocProperty(description = "Boolean value specifying whether a client_secret is returned on client GET or PUT. Set to true by default which means to return secret", defaultValue = "false")
     private Boolean returnClientSecretOnRead = false;
+
+    @DocProperty(description = "Boolean value specifying whether reject JWT requested or validated with algorithm None. Default value is true", defaultValue = "true")
     private Boolean rejectJwtWithNoneAlg = true;
+
+    @DocProperty(description = "Boolean value specifying whether expiration notificator is enabled (used to identify expiration for persistence that support TTL, like Couchbase)", defaultValue = "false")
     private Boolean expirationNotificatorEnabled = false;
+
+    @DocProperty(description = "Boolean value specifying whether to use nested Jwt during encryption", defaultValue = "true")
     private Boolean useNestedJwtDuringEncryption = true;
+
+    @DocProperty(description = "The expiration notificator maximum size limit")
     private int expirationNotificatorMapSizeLimit = 100000;
+
+    @DocProperty(description = "The expiration notificator interval in second")
     private int expirationNotificatorIntervalInSeconds = 600;
 
+
+
+    //feature flags
+    @DocProperty(description = "Enable/Disable redirect uris validation using regular expression", defaultValue = "false")
+    private Boolean redirectUrisRegexEnabled = false;
+
+    @DocProperty(description = "Enable/Disable usage of highest level script in case ACR script does not exist", defaultValue = "true")
+    private Boolean useHighestLevelScriptIfAcrScriptNotFound = true;
+
+    @DocProperty(description = "Boolean value specifying whether to enable user authentication filters")
     private Boolean authenticationFiltersEnabled;
+
+    @DocProperty(description = "Boolean value specifying whether to enable client authentication filters")
     private Boolean clientAuthenticationFiltersEnabled;
+
+    @DocProperty(description = "Boolean value specifying whether to add Authorization Code Flow with Refresh grant during client registratio")
     private Boolean clientRegDefaultToCodeFlowWithRefresh;
+
+    @DocProperty(description = "Boolean value specifying whether to Grant types and Response types can be auto fixed")
     private Boolean grantTypesAndResponseTypesAutofixEnabled;
+
+    @DocProperty(description = "This list details filters for user authentication")
     private List<AuthenticationFilter> authenticationFilters;
+
+    @DocProperty(description = "This list details filters for client authentication")
     private List<ClientAuthenticationFilter> clientAuthenticationFilters;
+
+    @DocProperty(description = "This list specifies the CORS configuration filters")
     private List<CorsConfigurationFilter> corsConfigurationFilters;
 
+    @DocProperty(description = "The lifetime for unused session states")
     private int sessionIdUnusedLifetime;
+
+    @DocProperty(description = "The lifetime for unused unauthenticated session states")
     private int sessionIdUnauthenticatedUnusedLifetime = 120; // 120 seconds
+
+    @DocProperty(description = "Boolean value specifying whether to persist session ID on prompt none")
     private Boolean sessionIdPersistOnPromptNone;
+
+    @DocProperty(description = "Boolean value specifying whether to enable session_id HTTP request parameter", defaultValue = "false")
     private Boolean sessionIdRequestParameterEnabled = false; // #1195
+
+    @DocProperty(description = "Boolean value specifying whether change session_id on authentication. Default value is true", defaultValue = "true")
     private Boolean changeSessionIdOnAuthentication = true;
+
+    @DocProperty(description = "Boolean value specifying whether to persist session_id in cache", defaultValue = "false")
     private Boolean sessionIdPersistInCache = false;
+
+    @DocProperty(description = "Boolean value specifying whether to include sessionId in response", defaultValue = "false")
     private Boolean includeSidInResponse = false;
+
+
     /**
      * SessionId will be expired after sessionIdLifetime seconds
      */
+    @DocProperty(description = "The lifetime of session id in seconds. If 0 or -1 then expiration is not set. session_id cookie expires when browser session ends")
     private Integer sessionIdLifetime = DEFAULT_SESSION_ID_LIFETIME;
+
+    @DocProperty(description = "Dedicated property to control lifetime of the server side OP session object in seconds. Overrides sessionIdLifetime. By default value is 0, so object lifetime equals sessionIdLifetime (which sets both cookie and object expiration). It can be useful if goal is to keep different values for client cookie and server object")
     private Integer serverSessionIdLifetime = sessionIdLifetime; // by default same as sessionIdLifetime
+
+    @DocProperty(description = "Authorization Scope for active session")
     private String activeSessionAuthorizationScope;
+
+    @DocProperty(description = "The interval for configuration update in seconds")
     private int configurationUpdateInterval;
 
+    @DocProperty(description = "Choose if client can update Grant Type values")
     private Boolean enableClientGrantTypeUpdate;
+
+    @DocProperty(description = "This list details which OAuth 2.0 grant types can be set up with the client registration API")
     private Set<GrantType> dynamicGrantTypeDefault;
 
+    @DocProperty(description = "The location for CSS files")
     private String cssLocation;
+
+    @DocProperty(description = "The location for JavaScript files")
     private String jsLocation;
+
+    @DocProperty(description = "The location for image files")
     private String imgLocation;
+
+    @DocProperty(description = "The interval for metric reporter in seconds")
     private int metricReporterInterval;
+
+    @DocProperty(description = "The days to keep metric reported data")
     private int metricReporterKeepDataDays;
+
+    @DocProperty(description = "the pairwise ID type")
     private String pairwiseIdType; // persistent, algorithmic
+
+    @DocProperty(description = "Key to calculate algorithmic pairwise IDs")
     private String pairwiseCalculationKey;
+
+    @DocProperty(description = "Salt to calculate algorithmic pairwise IDs")
     private String pairwiseCalculationSalt;
+
+    @DocProperty(description = "When true, clients with the same Sector ID also share the same Subject ID", defaultValue = "false")
     private Boolean shareSubjectIdBetweenClientsWithSameSectorId = false;
 
+    @DocProperty(description = "Web Key Storage Type")
     private WebKeyStorage webKeysStorage;
+
+    @DocProperty(description = "DN of certificate issuer")
     private String dnName;
+
+    @DocProperty(description = "The Key Store File (JKS)")
     // Jans Auth KeyStore
     private String keyStoreFile;
+
+    @DocProperty(description = "The Key Store password")
     private String keyStoreSecret;
+
+    @DocProperty(description = "Key Selection Strategy : OLDER, NEWER, FIRST", defaultValue = "OLDER")
     private KeySelectionStrategy keySelectionStrategy = DEFAULT_KEY_SELECTION_STRATEGY;
+
+    @DocProperty(description = "List of algorithm allowed to be used for key generation")
     private List<String> keyAlgsAllowedForGeneration = new ArrayList<>();
+
+    @DocProperty(description = "Specifies if signing to be done with same key but apply different algorithms")
     private Boolean keySignWithSameKeyButDiffAlg; // https://github.com/JanssenProject/jans-auth-server/issues/95
+
+    @DocProperty(description = "Specifies static Kid")
     private String staticKid;
+
+    @DocProperty(description = "Specifies static decryption Kid")
     private String staticDecryptionKid;
 
-    //oxEleven
-    private String oxElevenTestModeToken;
-    private String oxElevenGenerateKeyEndpoint;
-    private String oxElevenSignEndpoint;
-    private String oxElevenVerifySignatureEndpoint;
-    private String oxElevenDeleteKeyEndpoint;
 
+
+    //oxEleven
+    @DocProperty(description = "oxEleven Test Mode Token")
+    private String jansElevenTestModeToken;
+
+    @DocProperty(description = "oxEleven Generate Key endpoint URL")
+    private String jansElevenGenerateKeyEndpoint;
+
+    @DocProperty(description = "oxEleven Sign endpoint UR")
+    private String jansElevenSignEndpoint;
+
+    @DocProperty(description = "oxEleven Verify Signature endpoint URL")
+    private String jansElevenVerifySignatureEndpoint;
+
+    @DocProperty(description = "oxEleven Delete Key endpoint URL")
+    private String jansElevenDeleteKeyEndpoint;
+
+    @DocProperty(description = "If True, rejects introspection requests if access_token does not have the uma_protection scope in its authorization header", defaultValue = "false")
     private Boolean introspectionAccessTokenMustHaveUmaProtectionScope = false;
+
+    @DocProperty(description = "Specifies if authorization to be skipped for introspection")
     private Boolean introspectionSkipAuthorization;
 
+    @DocProperty(description = "Choose whether to accept access tokens to call end_session endpoint")
     private Boolean endSessionWithAccessToken;
+
+    @DocProperty(description = "Sets cookie domain for all cookies created by OP")
     private String cookieDomain;
+
+    @DocProperty(description = "enable OAuth Audit Logging")
     private Boolean enabledOAuthAuditLogging;
+
+    @DocProperty(description = "JMS Broker URI Set")
     private Set<String> jmsBrokerURISet;
+
+    @DocProperty(description = "JMS UserName")
     private String jmsUserName;
+
+    @DocProperty(description = "JMS Password")
     private String jmsPassword;
+
+    @DocProperty(description = "This list specifies which external URIs can be called by AS (if empty any URI can be called)")
+    private List<String> externalUriWhiteList;
+
+    @DocProperty(description = "This list specifies which client redirection URIs are white-listed")
     private List<String> clientWhiteList;
+
+    @DocProperty(description = "This list specified which client redirection URIs are black-listed")
     private List<String> clientBlackList;
+
+    @DocProperty(description = "Choose whether to include claims in ID tokens")
     private Boolean legacyIdTokenClaims;
+
+    @DocProperty(description = "Choose whether to enable the custom response header parameter to return custom headers with the authorization response")
     private Boolean customHeadersWithAuthorizationResponse;
+
+    @DocProperty(description = "Choose whether to support front channel session logout")
     private Boolean frontChannelLogoutSessionSupported;
+
+    @DocProperty(description = "Specify the logging level for oxAuth loggers")
     private String loggingLevel;
+
+    @DocProperty(description = "Logging layout used for Jans Authorization Server loggers")
     private String loggingLayout;
+
+    @DocProperty(description = "Choose if application should update oxLastLogonTime attribute upon user authentication")
     private Boolean updateUserLastLogonTime;
+
+    @DocProperty(description = "Choose if application should update oxLastAccessTime/oxLastLogonTime attributes upon client authentication")
     private Boolean updateClientAccessTime;
+
+    @DocProperty(description = "Choose if application should log the Client ID on client authentication")
     private Boolean logClientIdOnClientAuthentication;
+
+    @DocProperty(description = "Choose if application should log the Client Name on client authentication")
     private Boolean logClientNameOnClientAuthentication;
+
+    @DocProperty(description = "Choose whether to disable JDK loggers", defaultValue = "true")
     private Boolean disableJdkLogger = true;
-    private Set<String> authorizationRequestCustomAllowedParameters;
+
+    @DocProperty(description = "This list details the allowed custom parameters for authorization requests")
+    private Set<AuthorizationRequestCustomParameter> authorizationRequestCustomAllowedParameters;
+
+    @DocProperty(description = "Set to false to only allow token endpoint request for openid scope with grant type equals to authorization_code, restrict access to userinfo to scope openid and only return id_token if scope contains openid", defaultValue = "false")
     private Boolean openidScopeBackwardCompatibility = false;
+
+    @DocProperty(description = "Choose whether to disable U2F endpoints", defaultValue = "false")
     private Boolean disableU2fEndpoint = false;
 
+    // Token Exchange
+    @DocProperty(description = "", defaultValue = "false")
+    private Boolean rotateDeviceSecret = false;
+
+    @DocProperty(description = "", defaultValue = "false")
+    private Boolean returnDeviceSecretFromAuthzEndpoint = false;
+
+    // DCR
+    @DocProperty(description = "Boolean value enables DCR signature validation. Default is false", defaultValue = "false")
     private Boolean dcrSignatureValidationEnabled = false;
+
+    @DocProperty(description = "Specifies shared secret for Dynamic Client Registration")
     private String dcrSignatureValidationSharedSecret;
+
+    @DocProperty(description = "Specifies claim name inside software statement. Value of claim should point to JWKS URI")
     private String dcrSignatureValidationSoftwareStatementJwksURIClaim;
+
+    @DocProperty(description = "Specifies claim name inside software statement. Value of claim should point to inlined JWKS")
     private String dcrSignatureValidationSoftwareStatementJwksClaim;
+
+    @DocProperty(description = "Specifies JWKS for all DCR's validations")
     private String dcrSignatureValidationJwks;
+
+    @DocProperty(description = "Specifies JWKS URI for all DCR's validations")
     private String dcrSignatureValidationJwksUri;
+
+    @DocProperty(description = "Boolean value indicating if DCR authorization to be performed using client credentials", defaultValue = "false")
     private Boolean dcrAuthorizationWithClientCredentials = false;
-    private Boolean dcrSkipSignatureValidation = false;
+
+    @DocProperty(description = "Boolean value indicating if DCR authorization allowed with MTLS", defaultValue = "false")
     private Boolean dcrAuthorizationWithMTLS = false;
+
+    @DocProperty(description = "List of DCR issuers")
     private List<String> dcrIssuers = new ArrayList<>();
 
+    @DocProperty(description = "Cache in local memory cache attributes, scopes, clients and organization entry with expiration 60 seconds", defaultValue = "false")
     private Boolean useLocalCache = false;
+
+    @DocProperty(description = "Boolean value specifying whether to turn on FAPI compatibility mode. If true AS behaves in more strict mode", defaultValue = "false")
     private Boolean fapiCompatibility = false;
+
+    @DocProperty(description = "Boolean value specifying whether force id_token_hint parameter presence", defaultValue = "false")
     private Boolean forceIdTokenHintPrecense = false;
+
+    @DocProperty(description = "default value false. If true and id_token is not found in db, request is rejected", defaultValue = "false")
+    private Boolean rejectEndSessionIfIdTokenExpired = false;
+
+    @DocProperty(description = "default value false. If true, sid check will be skipped", defaultValue = "false")
+    private Boolean allowEndSessionWithUnmatchedSid = false;
+
+    @DocProperty(description = "Boolean value specifying whether force offline_access scope to enable refresh_token grant type. Default value is true", defaultValue = "true")
     private Boolean forceOfflineAccessScopeToEnableRefreshToken = true;
+
+    @DocProperty(description = "Boolean value specifying whether to return detailed reason of the error from AS. Default value is false", defaultValue = "false")
     private Boolean errorReasonEnabled = false;
+
+    @DocProperty(description = "Boolean value specifying whether to remove Refresh Tokens on logout. Default value is false", defaultValue = "true")
     private Boolean removeRefreshTokensForClientOnLogout = true;
+
+    @DocProperty(description = "Boolean value specifying whether to skip refreshing tokens on refreshing", defaultValue = "false")
     private Boolean skipRefreshTokenDuringRefreshing = false;
+
+    @DocProperty(description = "Boolean value specifying whether to extend refresh tokens on rotation", defaultValue = "false")
     private Boolean refreshTokenExtendLifetimeOnRotation = false;
+
+    @DocProperty(description = "Check whether user exists and is active before creating RefreshToken. Set it to true if check is needed(Default value is false - don't check.", defaultValue = "false")
+    private Boolean checkUserPresenceOnRefreshToken = false;
+
+    @DocProperty(description = "Boolean value specifying whether to turn on Consent Gathering Script backward compatibility mode. If true AS will pick up script with higher level globally. If false (default) AS will pick up script based on client configuration", defaultValue = "false")
     private Boolean consentGatheringScriptBackwardCompatibility = false; // means ignore client configuration (as defined in 4.2) and determine it globally (as in 4.1 and earlier)
+
+    @DocProperty(description = "Boolean value specifying whether switch off client's introspection scripts (true value) and run all scripts that exists on server. Default value is false", defaultValue = "false")
     private Boolean introspectionScriptBackwardCompatibility = false; // means ignore client configuration (as defined in 4.2) and determine it globally (as in 4.1 and earlier)
+
+    @DocProperty(description = "Boolean value specifying introspection response backward compatibility mode", defaultValue = "false")
     private Boolean introspectionResponseScopesBackwardCompatibility = false;
 
+    @DocProperty(description = "Validation type used for software statement")
     private String softwareStatementValidationType = SoftwareStatementValidationType.DEFAULT.getValue();
+
+    @DocProperty(description = "Validation claim name for software statement")
     private String softwareStatementValidationClaimName;
 
+    @DocProperty(description = "Authentication Brute Force Protection Configuration")
     private AuthenticationProtectionConfiguration authenticationProtectionConfiguration;
 
+    @DocProperty(description = "A list of possible error handling methods")
     private ErrorHandlingMethod errorHandlingMethod = ErrorHandlingMethod.INTERNAL;
 
-    private Boolean keepAuthenticatorAttributesOnAcrChange = false;
-    private int deviceAuthzRequestExpiresIn;
-    private int deviceAuthzTokenPollInterval;
-    private String deviceAuthzResponseTypeToProcessAuthz;
+    @DocProperty(description = "Boolean value specifying whether to disable authentication when max_age=0", defaultValue = "false")
+    private Boolean disableAuthnForMaxAgeZero;
 
+    @DocProperty(description = "Boolean value specifying whether to keep authenticator attributes on ACR change", defaultValue = "false")
+    private Boolean keepAuthenticatorAttributesOnAcrChange = false;
+
+    @DocProperty(description = "Expiration time given for device authorization requests")
+    private int deviceAuthzRequestExpiresIn;
+
+    @DocProperty(description = "Default interval returned to the client to process device token requests")
+    private int deviceAuthzTokenPollInterval;
+
+    @DocProperty(description = "Response type used to process device authz requests")
+    private String deviceAuthzResponseTypeToProcessAuthz;
     // CIBA
+    @DocProperty(description = "Backchannel Client Id")
     private String backchannelClientId;
+
+    @DocProperty(description = "Backchannel Redirect Uri")
     private String backchannelRedirectUri;
+
+    @DocProperty(description = "Backchannel Authentication Endpoint")
     private String backchannelAuthenticationEndpoint;
+
+    @DocProperty(description = "Backchannel Device Registration Endpoint")
     private String backchannelDeviceRegistrationEndpoint;
+
+    @DocProperty(description = "Backchannel Token Delivery Modes Supported")
     private List<String> backchannelTokenDeliveryModesSupported;
+
+    @DocProperty(description = "Backchannel Authentication Request Signing Alg Values Supported")
     private List<String> backchannelAuthenticationRequestSigningAlgValuesSupported;
+
+    @DocProperty(description = "Backchannel User Code Parameter Supported")
     private Boolean backchannelUserCodeParameterSupported;
+
+    @DocProperty(description = "Backchannel Binding Message Pattern")
     private String backchannelBindingMessagePattern;
+
+    @DocProperty(description = "Backchannel Authentication Response Expires In")
     private int backchannelAuthenticationResponseExpiresIn;
+
+    @DocProperty(description = "Backchannel Authentication Response Interval")
     private int backchannelAuthenticationResponseInterval;
+
+    @DocProperty(description = "Backchannel Login Hint Claims")
     private List<String> backchannelLoginHintClaims;
+
+    @DocProperty(description = "CIBA End User Notification Config")
     private CIBAEndUserNotificationConfig cibaEndUserNotificationConfig;
+
+    @DocProperty(description = "Specifies the allowable elapsed time in seconds backchannel request processor executes")
     private int backchannelRequestsProcessorJobIntervalSec;
+
+    @DocProperty(description = "Each backchannel request processor iteration fetches chunk of data to be processed")
     private int backchannelRequestsProcessorJobChunkSize;
+
+    @DocProperty(description = "Specifies the CIBA Grant life extra time in seconds")
     private int cibaGrantLifeExtraTimeSec;
+
+    @DocProperty(description = "Specifies the CIBA token expiration time in seconds")
     private int cibaMaxExpirationTimeAllowedSec;
 
     // DPoP
+    @DocProperty(description = "Demonstration of Proof-of-Possession (DPoP) authorization signing algorithms supported")
     private List<String> dpopSigningAlgValuesSupported;
+
+    @DocProperty(description = "Demonstration of Proof-of-Possession (DPoP) timeout", defaultValue = "5")
     private int dpopTimeframe = 5;
+
+    @DocProperty(description = "Demonstration of Proof-of-Possession (DPoP) cache time", defaultValue = "3600")
     private int dpopJtiCacheTime = 3600;
 
+    @DocProperty(description = "Specifies if a token without implicit grant types is allowed")
     private Boolean allowIdTokenWithoutImplicitGrantType;
 
+    @DocProperty(description = "Lifetime of discovery cache", defaultValue = "60")
     private int discoveryCacheLifetimeInMinutes = 60;
+
+    @DocProperty(description = "List of configuration response claim allowed to be displayed in discovery endpoint")
     private List<String> discoveryAllowedKeys;
 
-    private List<String> enabledComponents;
+    @DocProperty(description = "List of configuration response claims which must not be displayed in discovery endpoint response")
+    private List<String> discoveryDenyKeys;
 
+    @DocProperty(description = "List of enabled feature flags")
+    private List<String> featureFlags;
+
+    @DocProperty(description = "Enable/disable request/response logging filter")
     private Boolean httpLoggingEnabled; // Used in ServletLoggingFilter to enable http request/response logging.
-    private Set<String> httpLoggingExludePaths; // Used in ServletLoggingFilter to exclude some paths from logger. Paths example: ["/jans-auth/img", "/jans-auth/stylesheet"]
+
+    @DocProperty(description = "This list details the base URIs for which the request/response logging filter will not record activity")
+    private Set<String> httpLoggingExcludePaths; // Used in ServletLoggingFilter to exclude some paths from logger. Paths example: ["/jans-auth/img", "/jans-auth/stylesheet"]
+
+    @DocProperty(description = "The path to the external log4j2 logging configuration")
     private String externalLoggerConfiguration; // Path to external log4j2 configuration file. This property might be configured from oxTrust: /identity/logviewer/configure
+
+    @DocProperty(description = "Engine Config which offers an alternative way to build authentication flows in Janssen server")
+    private EngineConfig agamaConfiguration;
+
+    @DocProperty(description = "DCR SSA Validation configurations used to perform validation of SSA or DCR")
+    private List<SsaValidationConfig> dcrSsaValidationConfigs;
+
+    @DocProperty(description = "SSA Configuration")
+    private SsaConfiguration ssaConfiguration;
+
+    @DocProperty(description = "Enable/Disable block authorizations that originate from Webview (Mobile apps).", defaultValue = "false")
+    private Boolean blockWebviewAuthorizationEnabled = false;
+
+    @DocProperty(description = "UserInfo Configuration")
+    private UserInfoConfiguration userInfoConfiguration;
+
+    public List<SsaValidationConfig> getDcrSsaValidationConfigs() {
+        if (dcrSsaValidationConfigs == null) dcrSsaValidationConfigs = new ArrayList<>();
+        return dcrSsaValidationConfigs;
+    }
 
     public Boolean getRequireRequestObjectEncryption() {
         if (requireRequestObjectEncryption == null) requireRequestObjectEncryption = false;
@@ -328,6 +837,23 @@ public class AppConfiguration implements Configuration {
 
     public void setAllowAllValueForRevokeEndpoint(Boolean allowAllValueForRevokeEndpoint) {
         this.allowAllValueForRevokeEndpoint = allowAllValueForRevokeEndpoint;
+    }
+
+    public Boolean getReturnDeviceSecretFromAuthzEndpoint() {
+        return returnDeviceSecretFromAuthzEndpoint;
+    }
+
+    public void setReturnDeviceSecretFromAuthzEndpoint(Boolean returnDeviceSecretFromAuthzEndpoint) {
+        this.returnDeviceSecretFromAuthzEndpoint = returnDeviceSecretFromAuthzEndpoint;
+    }
+
+    public Boolean getRotateDeviceSecret() {
+        if (rotateDeviceSecret == null) rotateDeviceSecret = false;
+        return rotateDeviceSecret;
+    }
+
+    public void setRotateDeviceSecret(Boolean rotateDeviceSecret) {
+        this.rotateDeviceSecret = rotateDeviceSecret;
     }
 
     public Boolean getRequirePkce() {
@@ -348,6 +874,15 @@ public class AppConfiguration implements Configuration {
         this.allowIdTokenWithoutImplicitGrantType = allowIdTokenWithoutImplicitGrantType;
     }
 
+    public List<String> getDiscoveryDenyKeys() {
+        if (discoveryDenyKeys == null) discoveryDenyKeys = new ArrayList<>();
+        return discoveryDenyKeys;
+    }
+
+    public void setDiscoveryDenyKeys(List<String> discoveryDenyKeys) {
+        this.discoveryDenyKeys = discoveryDenyKeys;
+    }
+
     public List<String> getDiscoveryAllowedKeys() {
         if (discoveryAllowedKeys == null) discoveryAllowedKeys = new ArrayList<>();
         return discoveryAllowedKeys;
@@ -357,28 +892,37 @@ public class AppConfiguration implements Configuration {
         this.discoveryAllowedKeys = discoveryAllowedKeys;
     }
 
-    public Set<ComponentType> getEnabledComponentTypes() {
-        return ComponentType.fromValues(getEnabledComponents());
+    public Boolean getCheckUserPresenceOnRefreshToken() {
+        if (checkUserPresenceOnRefreshToken == null) checkUserPresenceOnRefreshToken = false;
+        return checkUserPresenceOnRefreshToken;
     }
 
-    public boolean isEnabledComponent(ComponentType componentType) {
-        final Set<ComponentType> enabledComponentTypes = getEnabledComponentTypes();
-        if (enabledComponentTypes.isEmpty())
+    public void setCheckUserPresenceOnRefreshToken(Boolean checkUserPresenceOnRefreshToken) {
+        this.checkUserPresenceOnRefreshToken = checkUserPresenceOnRefreshToken;
+    }
+
+    public Set<FeatureFlagType> getEnabledFeatureFlags() {
+        return FeatureFlagType.fromValues(getFeatureFlags());
+    }
+
+    public boolean isFeatureEnabled(FeatureFlagType flagType) {
+        final Set<FeatureFlagType> flags = getEnabledFeatureFlags();
+        if (flags.isEmpty())
             return true;
 
-        return enabledComponentTypes.contains(componentType);
+        return flags.contains(flagType);
     }
 
-    public List<String> getEnabledComponents() {
-        if (enabledComponents == null) enabledComponents = new ArrayList<>();
-        return enabledComponents;
+    public List<String> getFeatureFlags() {
+        if (featureFlags == null) featureFlags = new ArrayList<>();
+        return featureFlags;
     }
 
-    public void setEnabledComponents(List<String> enabledComponents) {
-        this.enabledComponents = enabledComponents;
+    public void setFeatureFlags(List<String> featureFlags) {
+        this.featureFlags = featureFlags;
     }
 
-    public Boolean getUseNestedJwtDuringEncryption() {
+    public Boolean isUseNestedJwtDuringEncryption() {
         if (useNestedJwtDuringEncryption == null) useNestedJwtDuringEncryption = true;
         return useNestedJwtDuringEncryption;
     }
@@ -614,15 +1158,6 @@ public class AppConfiguration implements Configuration {
         this.fapiCompatibility = fapiCompatibility;
     }
 
-    public Boolean getDcrSkipSignatureValidation() {
-        if (dcrSkipSignatureValidation == null) dcrSkipSignatureValidation = false;
-        return dcrSkipSignatureValidation;
-    }
-
-    public void setDcrSkipSignatureValidation(Boolean dcrSkipSignatureValidation) {
-        this.dcrSkipSignatureValidation = dcrSkipSignatureValidation;
-    }
-
     public Boolean getDcrAuthorizationWithClientCredentials() {
         if (dcrAuthorizationWithClientCredentials == null) dcrAuthorizationWithClientCredentials = false;
         return dcrAuthorizationWithClientCredentials;
@@ -708,6 +1243,22 @@ public class AppConfiguration implements Configuration {
         this.forceIdTokenHintPrecense = forceIdTokenHintPrecense;
     }
 
+    public Boolean getRejectEndSessionIfIdTokenExpired() {
+        return rejectEndSessionIfIdTokenExpired;
+    }
+
+    public void setRejectEndSessionIfIdTokenExpired(Boolean rejectEndSessionIfIdTokenExpired) {
+        this.rejectEndSessionIfIdTokenExpired = rejectEndSessionIfIdTokenExpired;
+    }
+
+    public Boolean getAllowEndSessionWithUnmatchedSid() {
+        return allowEndSessionWithUnmatchedSid;
+    }
+
+    public void setAllowEndSessionWithUnmatchedSid(Boolean allowEndSessionWithUnmatchedSid) {
+        this.allowEndSessionWithUnmatchedSid = allowEndSessionWithUnmatchedSid;
+    }
+
     public Boolean getRemoveRefreshTokensForClientOnLogout() {
         if (removeRefreshTokensForClientOnLogout == null) removeRefreshTokensForClientOnLogout = true;
         return removeRefreshTokensForClientOnLogout;
@@ -757,14 +1308,6 @@ public class AppConfiguration implements Configuration {
 
     public void setUmaRptAsJwt(Boolean umaRptAsJwt) {
         this.umaRptAsJwt = umaRptAsJwt;
-    }
-
-    public Boolean getSessionAsJwt() {
-        return sessionAsJwt;
-    }
-
-    public void setSessionAsJwt(Boolean sessionAsJwt) {
-        this.sessionAsJwt = sessionAsJwt;
     }
 
     public Boolean getUmaAddScopesAutomatically() {
@@ -1029,6 +1572,30 @@ public class AppConfiguration implements Configuration {
         this.openidSubAttribute = openidSubAttribute;
     }
 
+    public Boolean getPublicSubjectIdentifierPerClientEnabled() {
+        if (publicSubjectIdentifierPerClientEnabled == null) {
+            publicSubjectIdentifierPerClientEnabled = false;
+        }
+
+        return publicSubjectIdentifierPerClientEnabled;
+    }
+
+    public void setPublicSubjectIdentifierPerClientEnabled(Boolean publicSubjectIdentifierPerClientEnabled) {
+        this.publicSubjectIdentifierPerClientEnabled = publicSubjectIdentifierPerClientEnabled;
+    }
+
+    public List<String> getSubjectIdentifiersPerClientSupported() {
+        if (subjectIdentifiersPerClientSupported == null) {
+            subjectIdentifiersPerClientSupported = new ArrayList<>();
+        }
+
+        return subjectIdentifiersPerClientSupported;
+    }
+
+    public void setSubjectIdentifiersPerClientSupported(List<String> subjectIdentifiersPerClientSupported) {
+        this.subjectIdentifiersPerClientSupported = subjectIdentifiersPerClientSupported;
+    }
+
     public String getIdGenerationEndpoint() {
         return idGenerationEndpoint;
     }
@@ -1160,14 +1727,6 @@ public class AppConfiguration implements Configuration {
         this.userInfoEncryptionAlgValuesSupported = userInfoEncryptionAlgValuesSupported;
     }
 
-    public int getStatWebServiceIntervalLimitInSeconds() {
-        return statWebServiceIntervalLimitInSeconds;
-    }
-
-    public void setStatWebServiceIntervalLimitInSeconds(int statWebServiceIntervalLimitInSeconds) {
-        this.statWebServiceIntervalLimitInSeconds = statWebServiceIntervalLimitInSeconds;
-    }
-
     public int getStatTimerIntervalInSeconds() {
         return statTimerIntervalInSeconds;
     }
@@ -1215,6 +1774,26 @@ public class AppConfiguration implements Configuration {
 
     public void setIdTokenEncryptionEncValuesSupported(List<String> idTokenEncryptionEncValuesSupported) {
         this.idTokenEncryptionEncValuesSupported = idTokenEncryptionEncValuesSupported;
+    }
+
+    public List<String> getAccessTokenSigningAlgValuesSupported() {
+        return accessTokenSigningAlgValuesSupported;
+    }
+
+    public void setAccessTokenSigningAlgValuesSupported(List<String> accessTokenSigningAlgValuesSupported) {
+        this.accessTokenSigningAlgValuesSupported = accessTokenSigningAlgValuesSupported;
+    }
+
+    public Boolean getForceSignedRequestObject() {
+        if (forceSignedRequestObject == null) {
+            return false;
+        }
+
+        return forceSignedRequestObject;
+    }
+
+    public void setForceSignedRequestObject(Boolean forceSignedRequestObject) {
+        this.forceSignedRequestObject = forceSignedRequestObject;
     }
 
     public List<String> getRequestObjectSigningAlgValuesSupported() {
@@ -1356,6 +1935,15 @@ public class AppConfiguration implements Configuration {
         this.requireRequestUriRegistration = requireRequestUriRegistration;
     }
 
+    public List<String> getRequestUriBlockList() {
+        if (requestUriBlockList == null) requestUriBlockList = Lists.newArrayList();
+        return requestUriBlockList;
+    }
+
+    public void setRequestUriBlockList(List<String> requestUriBlockList) {
+        this.requestUriBlockList = requestUriBlockList;
+    }
+
     public String getOpPolicyUri() {
         return opPolicyUri;
     }
@@ -1436,6 +2024,15 @@ public class AppConfiguration implements Configuration {
         this.umaPctLifetime = umaPctLifetime;
     }
 
+    public Boolean getAllowSpontaneousScopes() {
+        if (allowSpontaneousScopes == null) allowSpontaneousScopes = false;
+        return allowSpontaneousScopes;
+    }
+
+    public void setAllowSpontaneousScopes(Boolean allowSpontaneousScopes) {
+        this.allowSpontaneousScopes = allowSpontaneousScopes;
+    }
+
     public int getSpontaneousScopeLifetime() {
         return spontaneousScopeLifetime;
     }
@@ -1484,20 +2081,20 @@ public class AppConfiguration implements Configuration {
         this.defaultSignatureAlgorithm = defaultSignatureAlgorithm;
     }
 
-    public String getOxOpenIdConnectVersion() {
-        return oxOpenIdConnectVersion;
+    public String getJansOpenIdConnectVersion() {
+        return jansOpenIdConnectVersion;
     }
 
-    public void setOxOpenIdConnectVersion(String oxOpenIdConnectVersion) {
-        this.oxOpenIdConnectVersion = oxOpenIdConnectVersion;
+    public void setJansOpenIdConnectVersion(String jansOpenIdConnectVersion) {
+        this.jansOpenIdConnectVersion = jansOpenIdConnectVersion;
     }
 
-    public String getOxId() {
-        return oxId;
+    public String getJansId() {
+        return jansId;
     }
 
-    public void setOxId(String oxId) {
-        this.oxId = oxId;
+    public void setJansId(String jansId) {
+        this.jansId = jansId;
     }
 
     public int getDynamicRegistrationExpirationTime() {
@@ -1780,44 +2377,44 @@ public class AppConfiguration implements Configuration {
         this.keyStoreSecret = keyStoreSecret;
     }
 
-    public String getOxElevenTestModeToken() {
-        return oxElevenTestModeToken;
+    public String getJansElevenTestModeToken() {
+        return jansElevenTestModeToken;
     }
 
-    public void setOxElevenTestModeToken(String oxElevenTestModeToken) {
-        this.oxElevenTestModeToken = oxElevenTestModeToken;
+    public void setJansElevenTestModeToken(String jansElevenTestModeToken) {
+        this.jansElevenTestModeToken = jansElevenTestModeToken;
     }
 
-    public String getOxElevenGenerateKeyEndpoint() {
-        return oxElevenGenerateKeyEndpoint;
+    public String getJansElevenGenerateKeyEndpoint() {
+        return jansElevenGenerateKeyEndpoint;
     }
 
-    public void setOxElevenGenerateKeyEndpoint(String oxElevenGenerateKeyEndpoint) {
-        this.oxElevenGenerateKeyEndpoint = oxElevenGenerateKeyEndpoint;
+    public void setJansElevenGenerateKeyEndpoint(String jansElevenGenerateKeyEndpoint) {
+        this.jansElevenGenerateKeyEndpoint = jansElevenGenerateKeyEndpoint;
     }
 
-    public String getOxElevenSignEndpoint() {
-        return oxElevenSignEndpoint;
+    public String getJansElevenSignEndpoint() {
+        return jansElevenSignEndpoint;
     }
 
-    public void setOxElevenSignEndpoint(String oxElevenSignEndpoint) {
-        this.oxElevenSignEndpoint = oxElevenSignEndpoint;
+    public void setJansElevenSignEndpoint(String jansElevenSignEndpoint) {
+        this.jansElevenSignEndpoint = jansElevenSignEndpoint;
     }
 
-    public String getOxElevenVerifySignatureEndpoint() {
-        return oxElevenVerifySignatureEndpoint;
+    public String getJansElevenVerifySignatureEndpoint() {
+        return jansElevenVerifySignatureEndpoint;
     }
 
-    public void setOxElevenVerifySignatureEndpoint(String oxElevenVerifySignatureEndpoint) {
-        this.oxElevenVerifySignatureEndpoint = oxElevenVerifySignatureEndpoint;
+    public void setJansElevenVerifySignatureEndpoint(String jansElevenVerifySignatureEndpoint) {
+        this.jansElevenVerifySignatureEndpoint = jansElevenVerifySignatureEndpoint;
     }
 
-    public String getOxElevenDeleteKeyEndpoint() {
-        return oxElevenDeleteKeyEndpoint;
+    public String getJansElevenDeleteKeyEndpoint() {
+        return jansElevenDeleteKeyEndpoint;
     }
 
-    public void setOxElevenDeleteKeyEndpoint(String oxElevenDeleteKeyEndpoint) {
-        this.oxElevenDeleteKeyEndpoint = oxElevenDeleteKeyEndpoint;
+    public void setJansElevenDeleteKeyEndpoint(String jansElevenDeleteKeyEndpoint) {
+        this.jansElevenDeleteKeyEndpoint = jansElevenDeleteKeyEndpoint;
     }
 
     public Boolean getEndSessionWithAccessToken() {
@@ -1866,6 +2463,15 @@ public class AppConfiguration implements Configuration {
 
     public void setJmsPassword(String jmsPassword) {
         this.jmsPassword = jmsPassword;
+    }
+
+    public List<String> getExternalUriWhiteList() {
+        if (externalUriWhiteList == null) externalUriWhiteList = new ArrayList<>();
+        return externalUriWhiteList;
+    }
+
+    public void setExternalUriWhiteList(List<String> externalUriWhiteList) {
+        this.externalUriWhiteList = externalUriWhiteList;
     }
 
     public List<String> getClientWhiteList() {
@@ -1928,12 +2534,12 @@ public class AppConfiguration implements Configuration {
         this.httpLoggingEnabled = httpLoggingEnabled;
     }
 
-    public Set<String> getHttpLoggingExludePaths() {
-        return httpLoggingExludePaths;
+    public Set<String> getHttpLoggingExcludePaths() {
+        return httpLoggingExcludePaths;
     }
 
-    public void setHttpLoggingExludePaths(Set<String> httpLoggingExludePaths) {
-        this.httpLoggingExludePaths = httpLoggingExludePaths;
+    public void setHttpLoggingExcludePaths(Set<String> httpLoggingExcludePaths) {
+        this.httpLoggingExcludePaths = httpLoggingExcludePaths;
     }
 
     public String getLoggingLevel() {
@@ -2019,11 +2625,11 @@ public class AppConfiguration implements Configuration {
         this.externalLoggerConfiguration = externalLoggerConfiguration;
     }
 
-    public Set<String> getAuthorizationRequestCustomAllowedParameters() {
+    public Set<AuthorizationRequestCustomParameter> getAuthorizationRequestCustomAllowedParameters() {
         return authorizationRequestCustomAllowedParameters;
     }
 
-    public void setAuthorizationRequestCustomAllowedParameters(Set<String> authorizationRequestCustomAllowedParameters) {
+    public void setAuthorizationRequestCustomAllowedParameters(Set<AuthorizationRequestCustomParameter> authorizationRequestCustomAllowedParameters) {
         this.authorizationRequestCustomAllowedParameters = authorizationRequestCustomAllowedParameters;
     }
 
@@ -2073,6 +2679,14 @@ public class AppConfiguration implements Configuration {
 
     public void setKeepAuthenticatorAttributesOnAcrChange(Boolean keepAuthenticatorAttributesOnAcrChange) {
         this.keepAuthenticatorAttributesOnAcrChange = keepAuthenticatorAttributesOnAcrChange;
+    }
+
+    public Boolean getDisableAuthnForMaxAgeZero() {
+        return disableAuthnForMaxAgeZero;
+    }
+
+    public void setDisableAuthnForMaxAgeZero(Boolean disableAuthnForMaxAgeZero) {
+        this.disableAuthnForMaxAgeZero = disableAuthnForMaxAgeZero;
     }
 
     public String getBackchannelClientId() {
@@ -2446,5 +3060,53 @@ public class AppConfiguration implements Configuration {
 
     public void setDpopJtiCacheTime(int dpopJtiCacheTime) {
         this.dpopJtiCacheTime = dpopJtiCacheTime;
+    }
+
+    public Boolean getRedirectUrisRegexEnabled() {
+        return redirectUrisRegexEnabled != null && redirectUrisRegexEnabled;
+    }
+
+    public void setRedirectUrisRegexEnabled(Boolean redirectUrisRegexEnabled) {
+        this.redirectUrisRegexEnabled = redirectUrisRegexEnabled;
+    }
+
+    public Boolean getUseHighestLevelScriptIfAcrScriptNotFound() {
+        return useHighestLevelScriptIfAcrScriptNotFound != null && useHighestLevelScriptIfAcrScriptNotFound;
+    }
+
+    public void setUseHighestLevelScriptIfAcrScriptNotFound(Boolean useHighestLevelScriptIfAcrScriptNotFound) {
+        this.useHighestLevelScriptIfAcrScriptNotFound = useHighestLevelScriptIfAcrScriptNotFound;
+    }
+
+    public EngineConfig getAgamaConfiguration() {
+        return agamaConfiguration;
+    }
+
+    public void setAgamaConfiguration(EngineConfig agamaConfiguration) {
+        this.agamaConfiguration = agamaConfiguration;
+    }
+
+    public SsaConfiguration getSsaConfiguration() {
+        return ssaConfiguration;
+    }
+
+    public void setSsaConfiguration(SsaConfiguration ssaConfiguration) {
+        this.ssaConfiguration = ssaConfiguration;
+    }
+
+    public Boolean getBlockWebviewAuthorizationEnabled() {
+        return blockWebviewAuthorizationEnabled;
+    }
+
+    public void setBlockWebviewAuthorizationEnabled(Boolean blockWebviewAuthorizationEnabled) {
+        this.blockWebviewAuthorizationEnabled = blockWebviewAuthorizationEnabled;
+    }
+
+    public UserInfoConfiguration getUserInfoConfiguration() {
+        return userInfoConfiguration;
+    }
+
+    public void setUserInfoConfiguration(UserInfoConfiguration userInfoConfiguration) {
+        this.userInfoConfiguration = userInfoConfiguration;
     }
 }

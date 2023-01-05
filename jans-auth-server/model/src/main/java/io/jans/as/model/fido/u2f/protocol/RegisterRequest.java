@@ -26,7 +26,7 @@ public class RegisterRequest implements Serializable {
      * For the version of the protocol described herein, must be "U2F_V2"
      */
     @JsonProperty
-    private final String version = U2fConstants.U2F_PROTOCOL_VERSION;
+    private static final String VERSION = U2fConstants.U2F_PROTOCOL_VERSION;
 
     /**
      * The websafe-base64-encoded challenge.
@@ -64,7 +64,7 @@ public class RegisterRequest implements Serializable {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("RegisterRequest [version=").append(version).append(", challenge=").append(challenge).append(", appId=").append(appId).append("]");
+        builder.append("RegisterRequest [version=").append(VERSION).append(", challenge=").append(challenge).append(", appId=").append(appId).append("]");
         return builder.toString();
     }
 

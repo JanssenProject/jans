@@ -1,84 +1,47 @@
-# import itertools
-import hashlib
 import json
 import logging.config
-import os
 import re
-from collections import OrderedDict
 from collections import defaultdict
-
-from ldif import LDIFParser
+from pathlib import Path
 
 from jans.pycloudlib.persistence.spanner import SpannerClient
 
 from settings import LOGGING_CONFIG
 from utils import prepare_template_ctx
-from utils import render_ldif
 from utils import get_ldif_mappings
-from utils import doc_id_from_dn
 
 FIELD_RE = re.compile(r"[^0-9a-zA-Z\s]+")
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("entrypoint")
+logger = logging.getLogger("spanner_setup")
 
 
 class SpannerBackend:
     def __init__(self, manager):
         self.manager = manager
-        self.db_dialect = "spanner"
-
-        self.schema_files = [
-            "/app/static/jans_schema.json",
-            "/app/static/custom_schema.json",
-        ]
-
-        self.client = SpannerClient()
-
-        with open("/app/static/sql/sql_data_types.json") as f:
-            self.sql_data_types = json.loads(f.read())
-
-        self.attr_types = []
-        for fn in self.schema_files:
-            with open(fn) as f:
-                schema = json.loads(f.read())
-            self.attr_types += schema["attributeTypes"]
-
-        with open("/app/static/sql/opendj_attributes_syntax.json") as f:
-            self.opendj_attr_types = json.loads(f.read())
-
-        with open("/app/static/sql/ldap_sql_data_type_mapping.json") as f:
-            self.sql_data_types_mapping = json.loads(f.read())
+        self.client = SpannerClient(manager)
 
         index_fn = "spanner_index.json"
-        with open(f"/app/static/sql/{index_fn}") as f:
+        with open(f"/app/static/rdbm/{index_fn}") as f:
             self.sql_indexes = json.loads(f.read())
 
-        # with open("/app/static/couchbase/index.json") as f:
-        #     # prefix = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
-        #     txt = f.read()  # .replace("!bucket_prefix!", prefix)
-        #     self.cb_indexes = json.loads(txt)
+        # add missing index determined from opendj indexes
+        with open("/app/static/opendj/index.json") as f:
+            opendj_indexes = [attr["attribute"] for attr in json.loads(f.read())]
 
-        with open("/app/static/sql/sub_tables.json") as f:
-            self.sub_tables = json.loads(f.read()).get(self.db_dialect) or {}
-
-    def get_attr_syntax(self, attr):
-        for attr_type in self.attr_types:
-            if attr not in attr_type["names"]:
+        for attr in self.client.attr_types:
+            if not attr.get("multivalued"):
                 continue
-            if attr_type.get("multivalued"):
-                return "JSON"
-            return attr_type["syntax"]
-
-        # fallback to OpenDJ attribute type
-        return self.opendj_attr_types.get(attr) or "1.3.6.1.4.1.1466.115.121.1.15"
+            for attr_name in attr["names"]:
+                if attr_name in opendj_indexes and attr_name not in self.sql_indexes["__common__"]["fields"]:
+                    self.sql_indexes["__common__"]["fields"].append(attr_name)
 
     def get_data_type(self, attr, table=None):
         # check from SQL data types first
-        type_def = self.sql_data_types.get(attr)
+        type_def = self.client.sql_data_types.get(attr)
 
         if type_def:
-            type_ = type_def.get(self.db_dialect)  # or type_def["mysql"]
+            type_ = type_def.get(self.client.dialect)
 
             if table in type_.get("tables", {}):
                 type_ = type_["tables"][table]
@@ -89,35 +52,19 @@ class SpannerBackend:
             return data_type
 
         # data type is undefined, hence check from syntax
-        syntax = self.get_attr_syntax(attr)
-        syntax_def = self.sql_data_types_mapping[syntax]
-        type_ = syntax_def.get(self.db_dialect)  # or syntax_def["mysql"]
+        syntax = self.client.get_attr_syntax(attr)
+        syntax_def = self.client.sql_data_types_mapping[syntax]
+        type_ = syntax_def.get(self.client.dialect)
 
-        # char_type = "VARCHAR"
-        # if self.db_dialect == "spanner":
         char_type = "STRING"
 
         if type_["type"] != char_type:
             # not STRING
             data_type = type_["type"]
         else:
-            # if "size" in type_:
-            #     size = type_["size"]
-            #     # data_type = f"{char_type}(type['size'])"
-            # else:
-            #     # data_type = "STRING(MAX)"
-            #     size = "MAX"
             size = type_.get("size") or "MAX"
             data_type = f"{char_type}({size})"
-            # if type_["size"] <= 127:
-            #     data_type = f"{char_type}({type_['size']})"
-            # elif type_["size"] <= 255:
-            #     data_type = "TINYTEXT" if self.db_dialect == "mysql" else "TEXT"
-            # else:
-            #     data_type = "TEXT"
 
-        # if data_type == "TEXT" and self.db_dialect == "spanner":
-        #     data_type = "STRING(MAX)"
         return data_type
 
     def create_tables(self):
@@ -126,7 +73,7 @@ class SpannerBackend:
         # cached schemas that holds table's column and its type
         table_columns = defaultdict(dict)
 
-        for fn in self.schema_files:
+        for fn in self.client.schema_files:
             with open(fn) as f:
                 schema = json.loads(f.read())
 
@@ -175,32 +122,9 @@ class SpannerBackend:
         #     sql_cmd = f"ALTER TABLE {table} ADD {col_def};"
         #     logger.info(sql_cmd)
 
-    # def _fields_from_cb_indexes(self):
-    #     fields = []
-
-    #     for _, data in self.cb_indexes.items():
-    #         # extract and flatten
-    #         attrs = list(itertools.chain.from_iterable(data["attributes"]))
-    #         fields += attrs
-
-    #         for static in data["static"]:
-    #             attrs = [
-    #                 attr for attr in static[0]
-    #                 if "(" not in attr
-    #             ]
-    #             fields += attrs
-
-    #     fields = list(set(fields))
-    #     # exclude objectClass
-    #     if "objectClass" in fields:
-    #         fields.remove("objectClass")
-    #     return fields
-
     def get_index_fields(self, table_name):
-        # cb_fields = self._fields_from_cb_indexes()
         fields = self.sql_indexes.get(table_name, {}).get("fields", [])
         fields += self.sql_indexes["__common__"]["fields"]
-        # fields += cb_fields
 
         # make unique fields
         return list(set(fields))
@@ -214,7 +138,7 @@ class SpannerBackend:
 
             index_name = f"{table_name}_{FIELD_RE.sub('_', column_name)}"
 
-            if column_type.lower() != "array":
+            if not column_type.lower().startswith("array"):
                 query = f"CREATE INDEX {self.client.quoted_id(index_name)} ON {self.client.quoted_id(table_name)} ({self.client.quoted_id(column_name)})"
                 self.client.create_index(query)
             else:
@@ -232,25 +156,13 @@ class SpannerBackend:
             # run the callback
             self.create_spanner_indexes(table_name, column_mapping)
 
-    def import_ldif(self):
+    def import_builtin_ldif(self, ctx):
         optional_scopes = json.loads(self.manager.config.get("optional_scopes", "[]"))
-        ldif_mappings = get_ldif_mappings(optional_scopes)
-
-        ctx = prepare_template_ctx(self.manager)
+        ldif_mappings = get_ldif_mappings("spanner", optional_scopes)
 
         for _, files in ldif_mappings.items():
             for file_ in files:
-                logger.info(f"Importing {file_} file")
-                src = f"/app/templates/{file_}"
-                dst = f"/app/tmp/{file_}"
-                os.makedirs(os.path.dirname(dst), exist_ok=True)
-
-                render_ldif(src, dst, ctx)
-
-                for table_name, column_mapping in self.data_from_ldif(dst):
-                    self.client.insert_into(table_name, column_mapping)
-                    # inject rows into subtable (if any)
-                    self.insert_into_subtable(table_name, column_mapping)
+                self._import_ldif(f"/app/templates/{file_}", ctx)
 
     def initialize(self):
         logger.info("Creating tables (if not exist)")
@@ -263,94 +175,16 @@ class SpannerBackend:
         logger.info("Creating indexes (if not exist)")
         self.create_indexes()
 
-        self.import_ldif()
+        ctx = prepare_template_ctx(self.manager)
 
-    def transform_value(self, key, values):
-        type_ = self.sql_data_types.get(key)
+        logger.info("Importing builtin LDIF files")
+        self.import_builtin_ldif(ctx)
 
-        if not type_:
-            attr_syntax = self.get_attr_syntax(key)
-            type_ = self.sql_data_types_mapping[attr_syntax]
-
-        type_ = type_.get(self.db_dialect)  # or type_["mysql"]
-        data_type = type_["type"]
-
-        if data_type in ("SMALLINT", "BOOL",):
-            if values[0].lower() in ("1", "on", "true", "yes", "ok"):
-                return 1 if data_type == "SMALLINT" else True
-            return 0 if data_type == "SMALLINT" else False
-
-        if data_type == "INT":
-            return int(values[0])
-
-        if data_type in ("DATETIME(3)", "TIMESTAMP",):
-            dval = values[0].strip("Z")
-            # sep = " "
-            # postfix = ""
-            # if self.db_dialect == "spanner":
-            sep = "T"
-            postfix = "Z"
-            # return "{}-{}-{} {}:{}:{}{}".format(dval[0:4], dval[4:6], dval[6:8], dval[8:10], dval[10:12], dval[12:14], dval[14:17])
-            return "{}-{}-{}{}{}:{}:{}{}{}".format(
-                dval[0:4],
-                dval[4:6],
-                dval[6:8],
-                sep,
-                dval[8:10],
-                dval[10:12],
-                dval[12:14],
-                dval[14:17],
-                postfix,
-            )
-
-        if data_type == "JSON":
-            # return json.dumps({"v": values})
-            return {"v": values}
-
-        if data_type == "ARRAY<STRING(MAX)>":
-            return values
-
-        # fallback
-        return values[0]
-
-    def data_from_ldif(self, filename):
-        with open(filename, "rb") as fd:
-            parser = LDIFParser(fd)
-
-            for dn, entry in parser.parse():
-                doc_id = doc_id_from_dn(dn)
-
-                oc = entry.get("objectClass") or entry.get("objectclass")
-                if oc:
-                    if "top" in oc:
-                        oc.remove("top")
-
-                    if len(oc) == 1 and oc[0].lower() in ("organizationalunit", "organization"):
-                        continue
-
-                table_name = oc[-1]
-
-                # entry.pop(rdn_name)
-
-                if "objectClass" in entry:
-                    entry.pop("objectClass")
-                elif "objectclass" in entry:
-                    entry.pop("objectclass")
-
-                attr_mapping = OrderedDict({
-                    "doc_id": doc_id,
-                    "objectClass": table_name,
-                    "dn": dn,
-                })
-
-                for attr in entry:
-                    # TODO: check if attr in sub table
-                    value = self.transform_value(attr, entry[attr])
-                    attr_mapping[attr] = value
-                yield table_name, attr_mapping
+        logger.info("Importing custom LDIF files (if any)")
+        self.import_custom_ldif(ctx)
 
     def create_subtables(self):
-        for table_name, columns in self.sub_tables.items():
+        for table_name, columns in self.client.sub_tables.items():
             for column_name, column_type in columns:
                 subtable_name = f"{table_name}_{column_name}"
                 self.client.create_subtable(
@@ -369,48 +203,20 @@ class SpannerBackend:
                 query = f"CREATE INDEX {self.client.quoted_id(index_name)} ON {self.client.quoted_id(subtable_name)} ({self.client.quoted_id(column_name)})"
                 self.client.create_index(query)
 
-    def column_in_subtable(self, table_name, column):
-        exists = False
-
-        # column_mapping is a list
-        column_mapping = self.sub_tables.get(table_name, [])
-        for cm in column_mapping:
-            if column == cm[0]:
-                exists = True
-                break
-        return exists
-
-    def insert_into_subtable(self, table_name, column_mapping):
-        for column, value in column_mapping.items():
-            if not self.column_in_subtable(table_name, column):
-                continue
-
-            for item in value:
-                hashed = hashlib.sha256()
-                hashed.update(item.encode())
-                dict_doc_id = hashed.digest().hex()
-
-                self.client.insert_into(
-                    f"{table_name}_{column}",
-                    {
-                        "doc_id": column_mapping["doc_id"],
-                        "dict_doc_id": dict_doc_id,
-                        column: item
-                    },
-                )
-
     def update_schema(self):
+        """Updates schema (may include data migration)"""
+
         table_mapping = self.client.get_table_mapping()
 
-        # 1 - jansDefAcrValues is changed to multivalued (JSON type)
-        table_name = "jansClnt"
-        col_name = "jansDefAcrValues"
-        old_data_type = table_mapping[table_name][col_name]
-        data_type = self.get_data_type(col_name, table_name)
+        def column_to_array(table_name, col_name):
+            old_data_type = table_mapping[table_name][col_name]
+            data_type = self.get_data_type(col_name, table_name)
 
-        if not old_data_type.startswith("ARRAY"):
+            if data_type == old_data_type:
+                return
+
             # get the value first before updating column type
-            acr_values = {
+            values = {
                 row["doc_id"]: row[col_name]
                 for row in self.client.search(table_name, ["doc_id", col_name])
             }
@@ -424,23 +230,216 @@ class SpannerBackend:
                 f"ALTER TABLE {self.client.quoted_id(table_name)} ADD COLUMN {self.client.quoted_id(col_name)} {data_type}"
             ])
 
-            for doc_id, value in acr_values.items():
+            # pre-populate the modified column
+            for doc_id, value in values.items():
                 if not value:
                     value_list = []
                 else:
                     value_list = [value]
+
                 self.client.update(
                     table_name,
                     doc_id,
-                    {col_name: self.transform_value(col_name, value_list)}
+                    {col_name: self.client._transform_value(col_name, value_list)}
                 )
 
-        # 2 - jansUsrDN column must be in jansToken table
-        table_name = "jansToken"
-        col_name = "jansUsrDN"
+        def add_column(table_name, col_name):
+            if col_name in table_mapping[table_name]:
+                return
 
-        if col_name not in table_mapping[table_name]:
             data_type = self.get_data_type(col_name, table_name)
             self.client.database.update_ddl([
                 f"ALTER TABLE {self.client.quoted_id(table_name)} ADD COLUMN {self.client.quoted_id(col_name)} {data_type}"
             ])
+
+        def change_column_type(table_name, col_name):
+            old_data_type = table_mapping[table_name][col_name]
+            data_type = self.get_data_type(col_name, table_name)
+
+            if data_type == old_data_type:
+                return
+
+            query = f"ALTER TABLE {self.client.quoted_id(table_name)} " \
+                    f"ALTER COLUMN {self.client.quoted_id(col_name)} {data_type}"
+            self.client.database.update_ddl([query])
+
+        def column_from_array(table_name, col_name):
+            old_data_type = table_mapping[table_name][col_name]
+            data_type = self.get_data_type(col_name, table_name)
+
+            if data_type == old_data_type:
+                return
+
+            # get the value first before updating column type
+            values = {
+                row["doc_id"]: row[col_name]
+                for row in self.client.search(table_name, ["doc_id", col_name])
+            }
+
+            # to change the storage format of a JSON column, drop the column and
+            # add the column back specifying the new storage format
+            self.client.database.update_ddl([
+                f"ALTER TABLE {self.client.quoted_id(table_name)} DROP COLUMN {self.client.quoted_id(col_name)}"
+            ])
+            self.client.database.update_ddl([
+                f"ALTER TABLE {self.client.quoted_id(table_name)} ADD COLUMN {self.client.quoted_id(col_name)} {data_type}"
+            ])
+
+            # pre-populate the modified column
+            for doc_id, value in values.items():
+                # pass the list as its value and let transform_value
+                # determines the actual value
+                if value:
+                    new_value = value
+                else:
+                    new_value = [""]
+                self.client.update(
+                    table_name,
+                    doc_id,
+                    {col_name: self.client._transform_value(col_name, new_value)}
+                )
+
+        def column_int_to_string(table_name, col_name):
+            old_data_type = table_mapping[table_name][col_name]
+            data_type = self.get_data_type(col_name, table_name)
+
+            if data_type == old_data_type:
+                return
+
+            # get the value first before updating column type
+            values = {
+                row["doc_id"]: row[col_name]
+                for row in self.client.search(table_name, ["doc_id", col_name])
+            }
+
+            # to change the storage format of a JSON column, drop the column and
+            # add the column back specifying the new storage format
+            self.client.database.update_ddl([
+                f"ALTER TABLE {self.client.quoted_id(table_name)} DROP COLUMN {self.client.quoted_id(col_name)}"
+            ])
+            self.client.database.update_ddl([
+                f"ALTER TABLE {self.client.quoted_id(table_name)} ADD COLUMN {self.client.quoted_id(col_name)} {data_type}"
+            ])
+
+            # pre-populate the modified column
+            for doc_id, value in values.items():
+                # pass the list as its value and let transform_value
+                # determines the actual value
+                if value:
+                    new_value = [value]
+                else:
+                    new_value = [""]
+
+                self.client.update(
+                    table_name,
+                    doc_id,
+                    {col_name: self.client._transform_value(col_name, new_value)}
+                )
+
+        # the following columns are changed to multivalued (ARRAY type)
+        for mod in [
+            ("jansClnt", "jansDefAcrValues"),
+            ("jansClnt", "jansLogoutURI"),
+            ("jansPerson", "role"),
+            ("jansPerson", "mobile"),
+            ("jansCustomScr", "jansAlias"),
+            ("jansClnt", "jansReqURI"),
+            ("jansClnt", "jansClaimRedirectURI"),
+            ("jansClnt", "jansAuthorizedOrigins"),
+        ]:
+            column_to_array(mod[0], mod[1])
+
+        # the following columns must be added to respective tables
+        for mod in [
+            ("jansToken", "jansUsrDN"),
+            ("jansPerson", "jansTrustedDevices"),
+            ("jansUmaRPT", "dpop"),
+            ("jansUmaPCT", "dpop"),
+            ("jansClnt", "o"),
+            ("jansClnt", "jansGrp"),
+            ("jansScope", "creatorId"),
+            ("jansScope", "creatorTyp"),
+            ("jansScope", "creatorAttrs"),
+            ("jansScope", "creationDate"),
+            ("jansStatEntry", "jansData"),
+            ("jansSessId", "deviceSecret"),
+            ("jansSsa", "jansState"),
+            ("jansClnt", "jansClntURILocalized"),
+            ("jansClnt", "jansLogoURILocalized"),
+            ("jansClnt", "jansPolicyURILocalized"),
+            ("jansClnt", "jansTosURILocalized"),
+            ("jansClnt", "displayNameLocalized"),
+        ]:
+            add_column(mod[0], mod[1])
+
+        # change column type (except from/to multivalued)
+        for mod in [
+            ("jansPerson", "givenName"),
+            ("jansPerson", "sn"),
+            ("jansPerson", "userPassword"),
+            ("jansAppConf", "userPassword"),
+            ("jansPerson", "jansStatus"),
+            ("jansPerson", "cn"),
+            ("jansPerson", "secretAnswer"),
+            ("jansPerson", "secretQuestion"),
+            ("jansPerson", "street"),
+            ("jansPerson", "address"),
+            ("jansPerson", "picture"),
+            ("jansPerson", "mail"),
+            ("jansPerson", "gender"),
+            ("jansPerson", "jansNameFormatted"),
+            ("jansPerson", "jansExtId"),
+            ("jansGrp", "jansStatus"),
+            ("jansOrganization", "jansStatus"),
+            ("jansOrganization", "street"),
+            ("jansOrganization", "postalCode"),
+            ("jansOrganization", "mail"),
+            ("jansAppConf", "jansStatus"),
+            ("jansAttr", "jansStatus"),
+            ("jansUmaResourcePermission", "jansStatus"),
+            ("jansUmaResourcePermission", "jansUmaScope"),
+            ("jansDeviceRegistration", "jansStatus"),
+            ("jansFido2AuthnEntry", "jansStatus"),
+            ("jansFido2RegistrationEntry", "jansStatus"),
+            ("jansCibaReq", "jansStatus"),
+            ("jansInumMap", "jansStatus"),
+            ("jansDeviceRegistration", "jansDeviceKeyHandle"),
+            ("jansUmaResource", "jansUmaScope"),
+            ("jansU2fReq", "jansReq"),
+            ("jansFido2AuthnEntry", "jansAuthData"),
+            ("agmFlowRun", "agFlowEncCont"),
+            ("agmFlowRun", "agFlowSt"),
+            ("agmFlowRun", "jansCustomMessage"),
+            ("agmFlow", "agFlowMeta"),
+            ("agmFlow", "agFlowTrans"),
+            ("agmFlow", "jansCustomMessage"),
+            ("jansOrganization", "jansCustomMessage"),
+        ]:
+            change_column_type(mod[0], mod[1])
+
+        # columns are changed from multivalued
+        for mod in [
+            ("jansPerson", "jansMobileDevices"),
+            ("jansPerson", "jansOTPDevices"),
+            ("jansToken", "clnId"),
+            ("jansUmaRPT", "clnId"),
+            ("jansUmaPCT", "clnId"),
+            ("jansCibaReq", "clnId"),
+        ]:
+            column_from_array(mod[0], mod[1])
+
+        # int64 to string
+        for mod in [
+            ("jansFido2RegistrationEntry", "jansCodeChallengeHash"),
+        ]:
+            column_int_to_string(mod[0], mod[1])
+
+    def import_custom_ldif(self, ctx):
+        custom_dir = Path("/app/custom_ldif")
+
+        for file_ in custom_dir.rglob("*.ldif"):
+            self._import_ldif(file_, ctx)
+
+    def _import_ldif(self, path, ctx):
+        logger.info(f"Importing {path} file")
+        self.client.create_from_ldif(path, ctx)

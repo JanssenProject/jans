@@ -1,1 +1,3 @@
-__version__ = "1.0.0-beta.15"
+"""This module contains version-related info."""
+
+__version__ = "1.0.6-dev"  # pragma: no cover

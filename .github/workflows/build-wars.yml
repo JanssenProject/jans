@@ -1,0 +1,90 @@
+name: Build Wars
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'agama/**'
+      - 'jans-auth-server/**'
+      - 'jans-bom/**'
+      - 'jans-config-api/**'
+      - 'jans-core/**'
+      - 'jans-eleven/**'
+      - 'jans-fido2/**'
+      - 'jans-notify/**'
+      - 'jans-orm/**'
+      - 'jans-scim/**'
+
+  push:
+   branches:
+      - main
+   paths:
+      - 'agama/**'
+      - 'jans-auth-server/**'
+      - 'jans-bom/**'
+      - 'jans-config-api/**'
+      - 'jans-core/**'
+      - 'jans-eleven/**'
+      - 'jans-fido2/**'
+      - 'jans-notify/**'
+      - 'jans-orm/**'
+      - 'jans-scim/**'
+jobs:
+  build:
+    name: Build wars
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    strategy:
+      max-parallel: 11
+      matrix:
+        fldrpath: ['jans-bom','agama','jans-fido2','jans-core','jans-eleven','jans-notify','jans-auth-server','jans-orm','jans-config-api','jans-scim']
+    steps:
+    - name : Variables
+      run: |
+         echo ${{ github.repository }}
+         echo ${{ github.actor }}
+
+    - uses: actions/checkout@v3
+      with:
+          repository: ${{ github.repository }}
+
+    - name: find changed directories
+      run: |
+        if [ $GITHUB_BASE_REF ]; then
+          # Pull Request
+          echo "Triggerring event: pull request"
+          echo Pull request base ref: $GITHUB_BASE_REF
+          git fetch origin $GITHUB_BASE_REF --depth=1
+          if [ ${{ github.event.action }} = "opened" ]; then
+            echo "Triggerring action: opened"
+            echo "DIRECTORIES_CHANGED=$( git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }}  | cut -d/ -f1 | sort -u | sed -z 's/\n/,/g;s/^/[/;s/,$/]/;s/$/\n/')" >> ${GITHUB_ENV}
+          fi
+          if [ ${{ github.event.action }} = "synchronize" ]; then
+            echo "Triggerring action: synchronize"
+            echo "DIRECTORIES_CHANGED=$( git diff --name-only ${{ github.event.before }} ${{ github.event.pull_request.head.sha }}  | cut -d/ -f1 | sort -u | sed -z 's/\n/,/g;s/^/[/;s/,$/]/;s/$/\n/')" >> ${GITHUB_ENV}
+          fi
+        else
+          # Push
+          echo "Triggerring event: push"
+          git fetch origin ${{ github.event.before }} --depth=1
+          echo "DIRECTORIES_CHANGED=$( git diff --name-only ${{ github.event.before }} ${{ github.sha }}  | cut -d/ -f1 | sort -u | sed -z 's/\n/,/g;s/^/[/;s/,$/]/;s/$/\n/')" >> ${GITHUB_ENV}
+        fi
+        echo "$DIRECTORIES_CHANGED"
+
+    - uses: actions/setup-java@v3
+      if: contains(env.DIRECTORIES_CHANGED, matrix.fldrpath)
+      with:
+          java-version: '11'
+          distribution: 'zulu'
+
+    - name: Publish package
+      if: contains(env.DIRECTORIES_CHANGED, matrix.fldrpath)
+      env:
+           GITHUB_USERNAME: ${{ github.actor }}
+           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+          pwd
+          mvn clean install -DskipTests --file ${{ matrix.fldrpath }}
+          mvn -B package --file ${{ matrix.fldrpath }}/pom.xml -Dmaven.test.skip=true
+          mvn --file ${{ matrix.fldrpath }}/pom.xml deploy -Dmaven.test.skip=true

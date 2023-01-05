@@ -16,8 +16,14 @@ import io.jans.as.model.ciba.PushErrorResponseType;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseMode;
 import io.jans.as.model.common.ResponseType;
+import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.crypto.AbstractCryptoProvider;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.as.model.exception.CryptoProviderException;
+import io.jans.as.model.jwk.Algorithm;
+import io.jans.as.model.jwk.Use;
 import io.jans.as.persistence.model.Scope;
 import io.jans.as.server.auth.Authenticator;
 import io.jans.as.server.ciba.CIBAPingCallbackService;
@@ -26,20 +32,22 @@ import io.jans.as.server.model.common.CibaRequestCacheControl;
 import io.jans.as.server.model.common.CibaRequestStatus;
 import io.jans.as.server.model.common.DeviceAuthorizationCacheControl;
 import io.jans.as.server.model.common.DeviceAuthorizationStatus;
-import io.jans.as.server.model.common.SessionId;
+import io.jans.as.common.model.session.SessionId;
 import io.jans.as.server.security.Identity;
 import io.jans.as.server.service.ciba.CibaRequestService;
 import io.jans.jsf2.message.FacesMessages;
 import io.jans.jsf2.service.FacesService;
+import io.jans.util.security.StringEncrypter;
+
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
-import javax.enterprise.context.RequestScoped;
-import javax.faces.application.FacesMessage;
-import javax.faces.context.ExternalContext;
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.faces.application.FacesMessage;
+import jakarta.faces.context.ExternalContext;
+import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
@@ -107,7 +115,13 @@ public class AuthorizeService {
 
     @Inject
     private DeviceAuthorizationService deviceAuthorizationService;
+    
+    @Inject
+    private AbstractCryptoProvider cryptoProvider;
 
+    @Inject
+    private WebKeysConfiguration webKeysConfiguration;
+    
     public SessionId getSession() {
         return getSession(null);
     }
@@ -192,7 +206,7 @@ public class AuthorizeService {
             authenticationFailedSessionInvalid();
             return;
         }
-
+        
         String baseRedirectUri = session.getSessionAttributes().get(AuthorizeRequestParam.REDIRECT_URI);
         String state = session.getSessionAttributes().get(AuthorizeRequestParam.STATE);
         ResponseMode responseMode = ResponseMode.fromString(session.getSessionAttributes().get(AuthorizeRequestParam.RESPONSE_MODE));
@@ -243,9 +257,46 @@ public class AuthorizeService {
             processDeviceAuthDeniedResponse(sessionAttribute);
         }
 
-        facesService.redirectToExternalURL(redirectUri.toString());
+		if (responseMode == ResponseMode.JWT) {
+			String clientId = session.getSessionAttributes().get(AuthorizeRequestParam.CLIENT_ID);
+			Client client = clientService.getClient(clientId);
+			facesService.redirectToExternalURL(createJarmRedirectUri(redirectUri, client, session));
+        }   
+        else 
+        	facesService.redirectToExternalURL(redirectUri.toString());
     }
+    
+    private String createJarmRedirectUri(RedirectUri redirectUri, Client client, final SessionId session)
+    {
+		String jarmRedirectUri = redirectUri.toString();
+		SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm
+				.fromString(client.getAttributes().getAuthorizationSignedResponseAlg());
+		redirectUri.setSignatureAlgorithm(signatureAlgorithm);
+		redirectUri.addResponseParameter("error", "access_denied");
+		redirectUri.addResponseParameter("error_description", "User Denied the Access");
+		redirectUri.setIssuer(appConfiguration.getIssuer());
+		redirectUri.setAudience(client.getClientId());
+		redirectUri.setCryptoProvider(cryptoProvider);
+		String keyId = null;
+		try {
+			String clientSecret = clientService.decryptSecret(client.getClientSecret());
+			redirectUri.setSharedSecret(clientSecret);
+			keyId = new ServerCryptoProvider(cryptoProvider).getKeyId(webKeysConfiguration,
+					Algorithm.fromString(signatureAlgorithm.getName()), Use.SIGNATURE);
+		} catch (CryptoProviderException e) {
+			log.error(e.getMessage(), e);
+		} catch (StringEncrypter.EncryptionException e) {
+			log.error(e.getMessage(), e);
+		}
+		redirectUri.setKeyId(keyId);
 
+		String jarmQueryString = redirectUri.getQueryString();
+		log.info("The JARM Query Response:" + jarmQueryString);
+		jarmRedirectUri = jarmRedirectUri + jarmQueryString;
+
+		return jarmRedirectUri;
+    }
+    
     private void authenticationFailedSessionInvalid() {
         facesMessages.add(FacesMessage.SEVERITY_ERROR, "login.errorSessionInvalidMessage");
         facesService.redirect("/error.xhtml");

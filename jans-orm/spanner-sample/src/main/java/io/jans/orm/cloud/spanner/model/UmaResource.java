@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.google.common.collect.Lists;
 
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DN;
@@ -137,7 +138,7 @@ public class UmaResource implements Serializable {
 
     public List<String> getClients() {
         if (clients == null) {
-            clients = new ArrayList<>();
+            clients = new ArrayList<String>();
         }
         return clients;
     }
@@ -171,7 +172,7 @@ public class UmaResource implements Serializable {
     }
 
     public List<String> getScopes() {
-        if (scopes == null) scopes = new ArrayList<>();
+        if (scopes == null) scopes = Lists.newArrayList();
         return scopes;
     }
 

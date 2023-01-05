@@ -37,10 +37,6 @@ public class JsonLogic {
         loadScript("json_logic.js");
     }
 
-    private void loadJsonLogicJs() {
-        loadScript("json_logic.js");
-    }
-
     private void loadScript(String scriptName) {
         Preconditions.checkState(StringUtils.isNotBlank(scriptName));
 

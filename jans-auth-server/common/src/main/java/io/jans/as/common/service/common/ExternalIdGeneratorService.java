@@ -12,8 +12,8 @@ import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.custom.script.type.id.IdGeneratorType;
 import io.jans.service.custom.script.ExternalScriptService;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Named;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Named;
 import java.util.Map;
 
 /**

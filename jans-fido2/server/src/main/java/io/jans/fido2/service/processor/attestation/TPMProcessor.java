@@ -33,15 +33,15 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import io.jans.fido2.ctap.AttestationFormat;
 import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.auth.AuthData;
 import io.jans.fido2.model.auth.CredAndCounterData;
-import io.jans.fido2.model.entry.Fido2RegistrationData;
+import io.jans.orm.model.fido2.Fido2RegistrationData;
 import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.CertificateService;
 import io.jans.fido2.service.DataMapperService;
@@ -59,6 +59,10 @@ import tss.tpm.TPMS_CERTIFY_INFO;
 import tss.tpm.TPMT_PUBLIC;
 import tss.tpm.TPM_GENERATED;
 
+/**
+ * Attestation processor for attestations of fmt = tpm
+ *
+ */
 @ApplicationScoped
 public class TPMProcessor implements AttestationFormatProcessor {
 

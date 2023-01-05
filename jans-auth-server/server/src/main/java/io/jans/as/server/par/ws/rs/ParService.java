@@ -3,17 +3,19 @@ package io.jans.as.server.par.ws.rs;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.util.Util;
 import io.jans.as.persistence.model.Par;
+import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
 import io.jans.orm.PersistenceEntryManager;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.util.Date;
 import java.util.UUID;
 
@@ -103,15 +105,30 @@ public class ParService {
                     .build());
         }
 
+        validate(par, state);
+        return par;
+    }
+
+    private void validate(Par par, String state) {
         Date now = new Date();
         if (par.isExpired(now)) {
-            log.debug("PAR is expired, id: {}, exp: {}, now: {}", id, par.getExpirationDate(), now);
+            log.debug("PAR is expired, id: {}, exp: {}, now: {}", par.getId(), par.getExpirationDate(), now);
             throw new WebApplicationException(Response
                     .status(Response.Status.BAD_REQUEST)
                     .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST_URI, state, "PAR is expired"))
                     .type(MediaType.APPLICATION_JSON_TYPE)
                     .build());
         }
-        return par;
+
+        try {
+            JwtAuthorizationRequest.validateExp((int) (par.getExpirationDate().getTime() / 1000));
+            JwtAuthorizationRequest.validateNbf(par.getAttributes().getNbf());
+        } catch (InvalidJwtException e) {
+            throw new WebApplicationException(Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST, state, "Failed to validate exp or nbf"))
+                    .type(MediaType.APPLICATION_JSON_TYPE)
+                    .build());
+        }
     }
 }

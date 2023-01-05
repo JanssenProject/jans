@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.collect.Lists;
 import io.jans.orm.annotation.AttributeEnum;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -136,6 +137,9 @@ public enum ResponseType implements HasParamName, AttributeEnum {
     }
 
     public static boolean isImplicitFlow(String responseTypes) {
+        if (StringUtils.isBlank(responseTypes)) {
+            return false;
+        }
         return !responseTypes.contains("code") && (responseTypes.contains("id_token") || responseTypes.contains("token"));
     }
 
@@ -148,7 +152,7 @@ public enum ResponseType implements HasParamName, AttributeEnum {
 
     public static String[] toStringArray(ResponseType[] responseTypes) {
         if (responseTypes == null) {
-            return null;
+            return new String[0];
         }
 
         String[] resultResponseTypes = new String[responseTypes.length];

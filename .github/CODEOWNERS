@@ -8,6 +8,8 @@
 /automation/ @moabu
 /charts/ @moabu
 /.github/ @moabu
+/jans-*/version.txt @moabu
+/jans-*/CHANGELOG.md @moabu
 /jans-pycloudlib/ @moabu
 /docker-jans-*/requirments.txt @mo-auto
 /jans-bom/ @yurem @yuriyz
@@ -18,7 +20,9 @@
 /jans-auth-server/ @yurem @yuriyz
 /jans-fido2/ @yurem
 /jans-scim/ @jgomer2001
-/jans-client-api/ @duttarnab @yuriyz
-/jans-config-api/ @pujavs @yuriyz
-/jans-cli/ @mbaser
-/jans-ce-setup/ @mbaser @smansoft
+/jans-config-api/ @pujavs @yuriyz @yurem
+/jans-cli-tui/ @devrimyatar
+/jans-linux-setup/ @devrimyatar @smansoft @yuriyz @yurem
+/jans-linux-setup/jans_setup/setup_app/version.py @moabu
+/jans-linux-setup/static/scripts/admin_ui_plugin.py @devrimyatar @duttarnab
+/agama/ @jgomer2001

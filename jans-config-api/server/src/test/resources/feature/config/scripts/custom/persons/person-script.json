@@ -4,7 +4,7 @@
 	"enabled": false,
 	"internal": false,
 	"level": 30,
-	"locationType": "LDAP",
+	"locationType": "ldap",
 	"modified": false,
 	"moduleProperties": [
 		{
@@ -19,8 +19,8 @@
 		}
 	],
 	"name": "QAAddedPersonScript",
-	"programmingLanguage": "PYTHON",
+	"programmingLanguage": "python",
 	"revision": 1,
 	"script": "QaAdded Person Script Content",
-	"scriptType": "PERSON_AUTHENTICATION"
+	"scriptType": "person_authentication"
 }

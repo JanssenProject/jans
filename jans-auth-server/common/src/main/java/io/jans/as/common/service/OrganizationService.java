@@ -13,7 +13,7 @@ import io.jans.service.CacheService;
 import io.jans.service.LocalCacheService;
 import io.jans.util.OxConstants;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 public abstract class OrganizationService extends io.jans.service.OrganizationService {
 

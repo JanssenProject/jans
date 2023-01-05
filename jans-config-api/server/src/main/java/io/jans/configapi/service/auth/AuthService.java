@@ -2,8 +2,8 @@ package io.jans.configapi.service.auth;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import io.jans.configapi.security.client.AuthClientFactory;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 
@@ -16,10 +16,10 @@ public class AuthService {
     @Inject
     AuthClientFactory authClientFactory;
 
-    public JsonNode getStat(String url, String token, String month, String format) {
-        return AuthClientFactory.getStatResponse(url, token, month, format);
+    public JsonNode getStat(String url, String token, String month, String startMonth, String endMonth, String format) {
+        return AuthClientFactory.getStatResponse(url, token, month, startMonth, endMonth, format);
     }
-    
+
     public JsonNode getHealthCheckResponse(String url) {
         return AuthClientFactory.getHealthCheckResponse(url);
     }

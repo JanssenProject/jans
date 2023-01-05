@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<f:view transient="true" xmlns:f="http://xmlns.jcp.org/jsf/core">
+	<f:metadata>
+		<f:viewAction action="#{authenticator.prepareAuthenticationForStep}" if="#{not identity.loggedIn}" />
+	</f:metadata>
+</f:view>

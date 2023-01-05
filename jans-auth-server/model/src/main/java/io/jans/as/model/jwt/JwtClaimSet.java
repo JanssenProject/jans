@@ -16,14 +16,7 @@ import org.json.JSONObject;
 
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Javier Rojas Blum
@@ -156,6 +149,8 @@ public abstract class JwtClaimSet {
         if (claim != null) {
             if (claim instanceof Long) {
                 return (Long) claim;
+            } else if (claim instanceof Integer) {
+                return Long.valueOf((Integer) claim);
             } else {
                 return null;
             }
@@ -182,16 +177,7 @@ public abstract class JwtClaimSet {
         if (value == null) {
             setNullClaim(key);
         } else if (value instanceof String) {
-            if (overrideValue) {
-                setClaim(key, (String) value);
-            } else {
-                Object currentValue = getClaim(key);
-                if (currentValue != null) {
-                    setClaim(key, Lists.newArrayList(currentValue.toString(), (String) value));
-                } else {
-                    setClaim(key, (String) value);
-                }
-            }
+            setClaimString(key, value, overrideValue);
         } else if (value instanceof Date) {
             setClaim(key, (Date) value);
         } else if (value instanceof Boolean) {
@@ -212,6 +198,29 @@ public abstract class JwtClaimSet {
             setClaim(key, (JSONArray) value);
         } else {
             throw new UnsupportedOperationException("Claim value is not supported, key: " + key + ", value :" + value);
+        }
+    }
+
+    private void setClaimString(String key, Object value, boolean overrideValue) {
+        if (overrideValue) {
+            setClaim(key, (String) value);
+            return;
+        }
+
+        Object currentValue = getClaim(key);
+        String valueAsString = (String) value;
+
+        if (currentValue instanceof String) {
+            if (!currentValue.equals(value)) {
+                setClaim(key, Lists.newArrayList(currentValue.toString(), valueAsString));
+            } else {
+                setClaim(key, (String) value);
+            }
+        } else if (currentValue instanceof List) {
+            List<String> currentValueAsList = (List) currentValue;
+            if (!currentValueAsList.contains(valueAsString)) {
+                currentValueAsList.add(valueAsString);
+            }
         }
     }
 
@@ -243,7 +252,7 @@ public abstract class JwtClaimSet {
         claims.put(key, value);
     }
 
-    public void setClaim(String key, List values) {
+    public void setClaim(String key, List<?> values) {
         claims.put(key, values);
     }
 
@@ -267,8 +276,7 @@ public abstract class JwtClaimSet {
         if (attribute instanceof JSONArray) {
             claims.put(key, JsonApplier.getStringList((JSONArray) attribute));
         } else {
-            String value = (String) attribute;
-            claims.put(key, value);
+            claims.put(key, attribute);
         }
     }
 
@@ -288,7 +296,7 @@ public abstract class JwtClaimSet {
                     JwtSubClaimObject subClaimObject = (JwtSubClaimObject) claim.getValue();
                     jsonObject.put(subClaimObject.getName(), subClaimObject.toJsonObject());
                 } else if (claim.getValue() instanceof List) {
-                    List claimObjectList = (List) claim.getValue();
+                    List<?> claimObjectList = (List<?>) claim.getValue();
                     JSONArray claimsJSONArray = new JSONArray();
                     for (Object claimObj : claimObjectList) {
                         claimsJSONArray.put(claimObj);

@@ -1,0 +1,133 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "config.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    APP_NAME: configurator
+{{ include "config.labels" . | indent 4 }}
+{{- if .Values.additionalLabels }}
+{{ toYaml .Values.additionalLabels | indent 4 }}
+{{- end }}
+{{- if .Values.additionalAnnotations }}
+  annotations:
+{{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+spec:
+  ttlSecondsAfterFinished: {{ .Values.global.jobTtlSecondsAfterFinished }}
+  template:
+    metadata:
+      name: {{ include "config.name" . }}-job
+      labels:
+        APP_NAME: configurator
+        app: {{ .Release.Name }}-{{ include "config.name" . }}-init-load
+    spec:
+    {{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      dnsPolicy: {{ .Values.dnsPolicy | quote }}
+    {{- with .Values.dnsConfig }}
+      dnsConfig:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+      volumes:
+      {{- with .Values.volumes }}
+{{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{ if or (eq .Values.global.configSecretAdapter "aws") (eq .Values.global.configAdapterName "aws") }}
+        - name: aws-shared-credential-file
+          secret:
+            secretName: {{ .Release.Name }}-aws-config-creds
+            items:
+              - key: aws_shared_credential_file
+                path: aws_shared_credential_file
+        - name: aws-config-file
+          secret:
+            secretName: {{ .Release.Name }}-aws-config-creds
+            items:
+              - key: aws_config_file
+                path: aws_config_file
+        - name: aws-secrets-replica-regions
+          secret:
+            secretName: {{ .Release.Name }}-aws-config-creds
+            items:
+              - key: aws_secrets_replica_regions
+                path: aws_secrets_replica_regions
+      {{- end }}
+        - name: {{ include "config.fullname" . }}-mount-gen-file
+          secret:
+            secretName: {{ include "config.fullname" . }}-gen-json-file
+        - name: {{ include "config.fullname" . }}-tls-script
+          configMap:
+            name: {{ include "config.fullname" . }}-tls-script
+        {{ if or (eq .Values.global.configSecretAdapter "google") (eq .Values.global.cnPersistenceType "spanner") }}
+        - name: google-sa
+          secret:
+            secretName: {{ .Release.Name }}-google-sa
+        {{- end }}
+      containers:
+      - name: {{ include "config.name" . }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        securityContext:
+          runAsUser: 1000
+          runAsNonRoot: true
+        env:
+          {{- include "config.usr-envs" . | indent 12 }}
+          {{- include "config.usr-secret-envs" . | indent 12 }}
+        volumeMounts:
+          {{- with .Values.volumeMounts }}
+{{- toYaml . | nindent 10 }}
+          {{- end }}
+        {{ if or (eq .Values.global.configSecretAdapter "aws") (eq .Values.global.configAdapterName "aws") }}
+          - mountPath: {{ .Values.global.cnAwsSharedCredentialsFile }}
+            name: aws-shared-credential-file
+            subPath: aws_shared_credential_file
+          - mountPath: {{ .Values.global.cnAwsConfigFile }}
+            name: aws-config-file
+            subPath: aws_config_file
+          - mountPath: {{ .Values.global.cnAwsSecretsReplicaRegionsFile }}
+            name: aws-secrets-replica-regions
+            subPath: aws_secrets_replica_regions
+        {{- end }}
+          - mountPath: /app/db/generate.json
+            name: {{ include "config.fullname" . }}-mount-gen-file
+            subPath: generate.json
+          - mountPath: /scripts/tls_generator.py
+            name: {{ include "config.fullname" . }}-tls-script
+            subPath: tls_generator.py
+          {{ if or (eq .Values.global.configSecretAdapter "google") (eq .Values.global.cnPersistenceType "spanner") }}
+          - mountPath: {{ .Values.global.cnGoogleApplicationCredentials }}
+            name: google-sa
+            subPath: google-credentials.json
+          {{- end }}
+        envFrom:
+        - configMapRef:
+            name: {{ .Release.Name }}-config-cm
+        {{ if .Values.global.usrEnvs.secret }}
+        - secretRef:
+            name: {{ .Release.Name }}-global-user-custom-envs
+        {{- end }}
+        {{ if .Values.global.usrEnvs.normal }}
+        - configMapRef:
+            name: {{ .Release.Name }}-global-user-custom-envs
+        {{- end }}
+        resources:
+{{- toYaml .Values.resources | nindent 10 }}
+        command:
+          - tini
+          - -g
+          - --
+          - /bin/sh
+          - -c
+          - |
+              {{- if .Values.migration.enabled }}
+               /app/scripts/entrypoint.sh migrate --migration-dir {{ .Values.migration.migrationDir | quote }} --data-format {{ .Values.migration.migrationDataFormat | quote }}
+               {{- else }}
+               /app/scripts/entrypoint.sh load
+               {{- end }}
+               /usr/bin/python3 /scripts/tls_generator.py
+               {{- if .Values.global.istio.enabled }}
+               curl -X POST http://localhost:15020/quitquitquit
+               {{- end }}
+      restartPolicy: Never

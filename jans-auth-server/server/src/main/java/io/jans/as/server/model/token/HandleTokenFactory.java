@@ -40,4 +40,8 @@ public class HandleTokenFactory {
     public static String generateHandleToken() {
         return UUID.randomUUID().toString();
     }
+
+    public static String generateDeviceSecret() {
+        return UUID.randomUUID().toString();
+    }
 }

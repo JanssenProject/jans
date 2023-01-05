@@ -6,12 +6,12 @@ import io.jans.scim2.client.UserBaseTest;
 
 import org.testng.annotations.Test;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import static javax.ws.rs.core.Response.Status.OK;
+import static jakarta.ws.rs.core.Response.Status.OK;
 
 import static org.testng.Assert.*;
 

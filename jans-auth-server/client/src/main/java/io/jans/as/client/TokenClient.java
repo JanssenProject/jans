@@ -10,22 +10,11 @@ import io.jans.as.model.common.GrantType;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation.Builder;
+import jakarta.ws.rs.HttpMethod;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.Invocation.Builder;
 
-import static io.jans.as.model.token.TokenRequestParam.ASSERTION;
-import static io.jans.as.model.token.TokenRequestParam.AUTH_REQ_ID;
-import static io.jans.as.model.token.TokenRequestParam.CODE;
-import static io.jans.as.model.token.TokenRequestParam.CODE_VERIFIER;
-import static io.jans.as.model.token.TokenRequestParam.DEVICE_CODE;
-import static io.jans.as.model.token.TokenRequestParam.DPOP;
-import static io.jans.as.model.token.TokenRequestParam.GRANT_TYPE;
-import static io.jans.as.model.token.TokenRequestParam.PASSWORD;
-import static io.jans.as.model.token.TokenRequestParam.REDIRECT_URI;
-import static io.jans.as.model.token.TokenRequestParam.REFRESH_TOKEN;
-import static io.jans.as.model.token.TokenRequestParam.SCOPE;
-import static io.jans.as.model.token.TokenRequestParam.USERNAME;
+import static io.jans.as.model.token.TokenRequestParam.*;
 
 /**
  * Encapsulates functionality to make token request calls to an authorization
@@ -244,6 +233,12 @@ public class TokenClient extends BaseClient<TokenRequest, TokenResponse> {
             addFormParameterIfNotBlank(REFRESH_TOKEN, getRequest().getRefreshToken());
             addFormParameterIfNotBlank(AUTH_REQ_ID, getRequest().getAuthReqId());
             addFormParameterIfNotBlank(DEVICE_CODE, getRequest().getDeviceCode());
+            addFormParameterIfNotBlank(AUDIENCE, getRequest().getAudience());
+            addFormParameterIfNotBlank(SUBJECT_TOKEN, getRequest().getSubjectToken());
+            addFormParameterIfNotBlank(SUBJECT_TOKEN_TYPE, getRequest().getSubjectTokenType());
+            addFormParameterIfNotBlank(ACTOR_TOKEN, getRequest().getActorToken());
+            addFormParameterIfNotBlank(ACTOR_TOKEN_TYPE, getRequest().getActorTokenType());
+            addFormParameterIfNotBlank(REQUESTED_TOKEN_TYPE, getRequest().getRequestedTokenType());
 
             for (String key : getRequest().getCustomParameters().keySet()) {
                 addFormParameterIfNotBlank(key, getRequest().getCustomParameters().get(key));

@@ -22,10 +22,18 @@ import io.jans.as.server.uma.ws.rs.UmaRptIntrospectionWS;
 import io.jans.as.server.uma.ws.rs.UmaScopeWS;
 import io.jans.as.server.userinfo.ws.rs.UserInfoRestWebServiceImpl;
 
-import javax.ws.rs.core.Application;
-import javax.ws.rs.ext.Provider;
+import io.jans.as.server.util.TestUtil;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.ws.rs.core.Application;
+import jakarta.ws.rs.ext.Provider;
+
+import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
+
+import static org.omnifaces.util.Faces.getServletContext;
 
 /**
  * Integration with Resteasy
@@ -40,6 +48,9 @@ public class TestResteasyInitializer extends Application {
     @Override
     public Set<Class<?>> getClasses() {
         HashSet<Class<?>> classes = new HashSet<Class<?>>();
+        if (TestUtil.testWithExternalApiUrl()) {
+            return classes;
+        }
         classes.add(AuthorizeRestWebServiceImpl.class);
         classes.add(TokenRestWebServiceImpl.class);
         classes.add(RegisterRestWebServiceImpl.class);

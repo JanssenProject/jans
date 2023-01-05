@@ -5,32 +5,14 @@ on:
   pull_request:
     branches-ignore:
       - "update-pycloud-in-**"
+      - "release-please-**"
+      - "snyk-**"
+      - "dependabot/**"
     types:
       - opened
       - edited
       - reopened
       - synchronize
-    paths:
-      - "!docker-jans-**/CHANGELOG.md"
-      - "!docker-jans-**/version.txt"
-      - "!jans-pycloudlib/CHANGELOG.md"
-      - "!jans-pycloudlib/jans/pycloudlib/version.py"
-  pull_request_target:
-    branches-ignore:
-      - "update-pycloud-in-**"
-    types:
-      - opened
-      - edited
-      - reopened
-      - synchronize
-    paths:
-      - "!docker-jans-**/CHANGELOG.md"
-      - "!docker-jans-**/version.txt"
-      - "!jans-pycloudlib/CHANGELOG.md"
-      - "!jans-pycloudlib/jans/pycloudlib/version.py"
-  push:
-    branches-ignore:
-      - "update-pycloud-in-**"
     paths:
       - "!docker-jans-**/CHANGELOG.md"
       - "!docker-jans-**/version.txt"
@@ -43,12 +25,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Project
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           # We need to fetch with a depth of 2 for pull_request so we can do HEAD^2
           fetch-depth: 2
 
-      - uses: actions/setup-node@v2.5.1
+      - uses: actions/setup-node@v3
         with:
           node-version: 14
       - run: |
@@ -83,6 +65,6 @@ jobs:
       - name: "[Pull Request] Report Commit Standard Status"
         if: steps.pr_get_commit_message.outcome != 'success' && github.event_name == 'pull_request'
         run: |
-          curl -X POST -H 'Content-Type: application/json' --data '{"alias":"Mo-Auto","emoji":":robot:","text":":x: :cry: I am reporting a bad [commit](https://github.com/${{github.repository}}/tree/${{github.head_ref}}) by :thinking_face: @${{github.actor}} :x:","attachments":[{"title":"GitHub user behavior reporter","title_link":"https://www.conventionalcommits.org","text":"We are not too happy with your last commit merging into https://github.com/${{github.repository}}/tree/${{github.base_ref}}. Here is why : ${{ steps.pr_get_commit_message.outputs.errormsg }}","color":"#764FA5"}]}' ${{ secrets.GITHUBUSERBEHAVIORROCKETCHATREPORTER }}
+          curl -X POST -H 'Content-Type: application/json' --data '{"alias":"Mo-Auto","emoji":":robot:","text":":x: :cry: I am reporting a bad [commit](https://github.com/${{github.repository}}/tree/$GITHUB_HEAD_REF) by :thinking_face: @${{github.actor}} :x:","attachments":[{"title":"GitHub user behavior reporter","title_link":"https://www.conventionalcommits.org","text":"We are not too happy with your last commit merging into https://github.com/${{github.repository}}/tree/${{github.base_ref}}. Here is why : ${{ steps.pr_get_commit_message.outputs.errormsg }}","color":"#764FA5"}]}' ${{ secrets.GITHUBUSERBEHAVIORROCKETCHATREPORTER }}
           exit 1
 

@@ -12,7 +12,7 @@ import io.jans.as.model.error.IErrorType;
  * Error codes for register error responses.
  *
  * @author Javier Rojas Blum
- * @version 0.9 May 18, 2015
+ * @version February 10, 2022
  */
 public enum RegisterErrorResponseType implements IErrorType {
 
@@ -50,7 +50,11 @@ public enum RegisterErrorResponseType implements IErrorType {
     /**
      * The authorization server denied the request.
      */
-    ACCESS_DENIED("access_denied");
+    ACCESS_DENIED("access_denied"),
+
+    INVALID_PUBLIC_SUBJECT_IDENTIFIER_ATTRIBUTE("invalid_public_subject_identifier_attribute"),
+
+    INVALID_REDIRECT_URIS_REGEX("invalid_redirect_uris_regex");
 
     private final String paramName;
 

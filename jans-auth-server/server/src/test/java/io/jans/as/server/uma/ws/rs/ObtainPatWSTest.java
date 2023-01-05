@@ -6,7 +6,7 @@
 
 package io.jans.as.server.uma.ws.rs;
 
-import io.jans.as.model.uma.UmaTestUtil;
+import io.jans.as.test.UmaTestUtil;
 import io.jans.as.model.uma.wrapper.Token;
 import io.jans.as.server.BaseTest;
 import io.jans.as.server.model.uma.TUma;
@@ -33,7 +33,7 @@ public class ObtainPatWSTest extends BaseTest {
             "umaRedirectUri"})
     public void requestPat(String authorizePath, String tokenPath, String umaUserId, String umaUserSecret,
                            String umaPatClientId, String umaPatClientSecret, String umaRedirectUri) {
-        pat = TUma.requestPat(url, authorizePath, tokenPath, umaUserId, umaUserSecret, umaPatClientId,
+        pat = TUma.requestPat(getApiTagetURI(url), authorizePath, tokenPath, umaUserId, umaUserSecret, umaPatClientId,
                 umaPatClientSecret, umaRedirectUri);
         UmaTestUtil.assertIt(pat);
     }
@@ -41,7 +41,7 @@ public class ObtainPatWSTest extends BaseTest {
     @Test(dependsOnMethods = "requestPat")
     @Parameters({"tokenPath", "umaPatClientId", "umaPatClientSecret"})
     public void requestNewPatByRefreshTokne(String tokenPath, String umaPatClientId, String umaPatClientSecret) {
-        final Token newPat = TUma.newTokenByRefreshToken(url, tokenPath, pat, umaPatClientId, umaPatClientSecret);
+        final Token newPat = TUma.newTokenByRefreshToken(getApiTagetURI(url), tokenPath, pat, umaPatClientId, umaPatClientSecret);
         UmaTestUtil.assertIt(newPat);
     }
 }

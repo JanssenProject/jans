@@ -1,0 +1,867 @@
+openapi: 3.0.1
+info:
+  title: Jans Config API - User-Mgt
+  contact:
+    name: Gluu Support
+    url: https://support.gluu.org
+    email: xxx@gluu.org
+  license:
+    name: Apache 2.0
+    url: https://github.com/JanssenProject/jans/blob/main/LICENSE
+  version: 1.0.0
+servers:
+- url: https://jans.io/
+  description: The Jans server
+  variables: {}
+tags:
+- name: Configuration – User Management
+paths:
+  /mgt/configuser:
+    get:
+      tags:
+      - Configuration – User Management
+      summary: Gets list of users
+      description: Gets list of users
+      operationId: get-user
+      parameters:
+      - name: limit
+        in: query
+        schema:
+          type: integer
+          format: int32
+          default: 50
+      - name: pattern
+        in: query
+        schema:
+          type: string
+          default: ""
+      - name: startIndex
+        in: query
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - name: sortBy
+        in: query
+        schema:
+          type: string
+      - name: sortOrder
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPagedResult'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    {
+                        "start": 0,
+                        "totalEntriesCount": 23,
+                        "entriesCount": 2,
+                        "entries": [
+                            {
+                                "dn": "inum=XXXX.DDDD-4444,ou=people,o=jans",
+                                "userId": "dddd4444",
+                                "customAttributes": [
+                                    {
+                                        "name": "sn",
+                                        "multiValued": false,
+                                        "values": [
+                                            "FilterTest"
+                                        ],
+                                        "value": "FilterTest",
+                                        "displayValue": "FilterTest"
+                                    }
+                                ],
+                                "customObjectClasses": [
+                                    "top",
+                                    "jansCustomPerson"
+                                ],
+                                "inum": "XXXX.DDDD-4444",
+                                "displayName": "Test Dddd 4444",
+                                "jansStatus": "active",
+                                "givenName": "(special chars\\)/*",
+                                "baseDn": "inum=XXXX.DDDD-4444,ou=people,o=jans"
+                            },
+                            {
+                                "dn": "inum=XXXX.EEEE-1111,ou=people,o=jans",
+                                "userId": "eeee1111",
+                                "customObjectClasses": [
+                                    "top",
+                                    "jansCustomPerson"
+                                ],
+                                "inum": "XXXX.EEEE-1111",
+                                "jansStatus": "active",
+                                "baseDn": "inum=XXXX.EEEE-1111,ou=people,o=jans"
+                            }
+                        ]
+                    }
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/user.readonly
+    put:
+      tags:
+      - Configuration – User Management
+      summary: Update User
+      description: Update User
+      operationId: put-user
+      requestBody:
+        description: User object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomUser'
+            examples:
+              Request json example:
+                description: Request json example
+                value: |
+                  {
+                      "dn": "inum=559a7e26-7a33-4e11-9d42-13266d33261e,ou=people,o=jans",
+                      "userId": "testUser1",
+                      "createdAt": "2022-10-27T22:45:48",
+                      "customAttributes": [
+                          {
+                              "name": "birthdate",
+                              "multiValued": false,
+                              "values": [
+                                  "20001231041508.553Z"
+                              ],
+                              "value": "20001231041508.553Z",
+                              "displayValue": "20001231041508.553Z"
+                          },
+                          {
+                              "name": "emailVerified",
+                              "multiValued": false,
+                              "values": [
+                                  "TRUE"
+                              ],
+                              "value": "TRUE",
+                              "displayValue": "TRUE"
+                          },
+                          {
+                              "name": "jansAdminUIRole",
+                              "multiValued": false,
+                              "values": [
+                                  "api-admin"
+                              ],
+                              "value": "api-admin",
+                              "displayValue": "api-admin"
+                          },
+                          {
+                              "name": "memberOf",
+                              "multiValued": false,
+                              "values": [
+                                  "inum=60B7,ou=groups,o=jans"
+                              ],
+                              "value": "inum=60B7,ou=groups,o=jans",
+                              "displayValue": "inum=60B7,ou=groups,o=jans"
+                          },
+                          {
+                              "name": "middleName",
+                              "multiValued": false,
+                              "values": [
+                                  "Test USer 3"
+                              ],
+                              "value": "Test USer 3",
+                              "displayValue": "Test USer 3"
+                          },
+                          {
+                              "name": "nickname",
+                              "multiValued": false,
+                              "values": [
+                                  "Test USer 3"
+                              ],
+                              "value": "Test USer 3",
+                              "displayValue": "Test USer 3"
+                          },
+                          {
+                              "name": "sn",
+                              "multiValued": false,
+                              "values": [
+                                  "User3"
+                              ],
+                              "value": "User3",
+                              "displayValue": "User3"
+                          }
+                      ],
+                      "customObjectClasses": [
+                          "top",
+                          "jansCustomPerson"
+                      ],
+                      "inum": "559a7e26-7a33-4e11-9d42-13266d33261e",
+                      "mail": "test3@jans.server",
+                      "displayName": "Default Test User 32",
+                      "jansStatus": "active",
+                      "givenName": "Test3",
+                      "baseDn": "inum=559a7e26-7a33-4e11-9d42-13266d33261e,ou=people,o=jans"
+                  }
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomUser'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    {
+                        "dn": "inum=559a7e26-7a33-4e11-9d42-13266d33261e,ou=people,o=jans",
+                        "userId": "testUser1",
+                        "createdAt": "2022-10-27T22:45:48",
+                        "customAttributes": [
+                            {
+                                "name": "birthdate",
+                                "multiValued": false,
+                                "values": [
+                                    "20001231041508.553Z"
+                                ],
+                                "value": "20001231041508.553Z",
+                                "displayValue": "20001231041508.553Z"
+                            },
+                            {
+                                "name": "emailVerified",
+                                "multiValued": false,
+                                "values": [
+                                    "TRUE"
+                                ],
+                                "value": "TRUE",
+                                "displayValue": "TRUE"
+                            },
+                            {
+                                "name": "jansAdminUIRole",
+                                "multiValued": false,
+                                "values": [
+                                    "api-admin"
+                                ],
+                                "value": "api-admin",
+                                "displayValue": "api-admin"
+                            },
+                            {
+                                "name": "memberOf",
+                                "multiValued": false,
+                                "values": [
+                                    "inum=60B7,ou=groups,o=jans"
+                                ],
+                                "value": "inum=60B7,ou=groups,o=jans",
+                                "displayValue": "inum=60B7,ou=groups,o=jans"
+                            },
+                            {
+                                "name": "middleName",
+                                "multiValued": false,
+                                "values": [
+                                    "Test USer 3"
+                                ],
+                                "value": "Test USer 3",
+                                "displayValue": "Test USer 3"
+                            },
+                            {
+                                "name": "nickname",
+                                "multiValued": false,
+                                "values": [
+                                    "Test USer 3"
+                                ],
+                                "value": "Test USer 3",
+                                "displayValue": "Test USer 3"
+                            },
+                            {
+                                "name": "sn",
+                                "multiValued": false,
+                                "values": [
+                                    "User3"
+                                ],
+                                "value": "User3",
+                                "displayValue": "User3"
+                            }
+                        ],
+                        "customObjectClasses": [
+                            "top",
+                            "jansCustomPerson"
+                        ],
+                        "inum": "559a7e26-7a33-4e11-9d42-13266d33261e",
+                        "mail": "test3@jans.server",
+                        "displayName": "Default Test User 32",
+                        "jansStatus": "active",
+                        "givenName": "Test3",
+                        "baseDn": "inum=559a7e26-7a33-4e11-9d42-13266d33261e,ou=people,o=jans"
+                    }
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/user.write
+    post:
+      tags:
+      - Configuration – User Management
+      summary: Create new User
+      description: Create new User
+      operationId: post-user
+      requestBody:
+        description: User object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomUser'
+            examples:
+              Request json example:
+                description: Request json example
+                value: |
+                  {
+                      "userId": "testUser1",
+                      "createdAt": "2022-05-30T20:06:57",
+                      "customAttributes": [
+                          {
+                              "name": "emailVerified",
+                              "multiValued": false,
+                              "values": [
+                                  "TRUE"
+                              ],
+                              "value": "TRUE",
+                              "displayValue": "TRUE"
+                          },
+                          {
+                              "name": "jansAdminUIRole",
+                              "multiValued": false,
+                              "values": [
+                                  "api-admin"
+                              ],
+                              "value": "api-admin",
+                              "displayValue": "api-admin"
+                          },
+                          {
+                              "name": "memberOf",
+                              "multiValued": false,
+                              "values": [
+                                  "inum=60B7,ou=groups,o=jans"
+                              ],
+                              "value": "inum=60B7,ou=groups,o=jans",
+                              "displayValue": "inum=60B7,ou=groups,o=jans"
+                          },
+                          {
+                              "name": "middleName",
+                              "multiValued": false,
+                              "values": [
+                                  "Test USer 3"
+                              ],
+                              "value": "Test USer 3",
+                              "displayValue": "Test USer 3"
+                          },
+                          {
+                              "name": "nickname",
+                              "multiValued": false,
+                              "values": [
+                                  "Test USer 3"
+                              ],
+                              "value": "Test USer 3",
+                              "displayValue": "Test USer 3"
+                          },
+                          {
+                              "name": "sn",
+                              "multiValued": false,
+                              "values": [
+                                  "User3"
+                              ],
+                              "value": "User3",
+                              "displayValue": "User3"
+                          },{
+                                  "name": "birthdate",
+                                  "multiValued": false,
+                                  "values": [
+                                      "20001231041508.553Z"
+                                  ],
+                                  "value": "20001231041508.553Z",
+                                  "displayValue": "20001231041508.553Z"
+                              }
+                      ],
+                      "customObjectClasses": [
+                          "top",
+                          "jansCustomPerson"
+                      ],
+                      "mail": "test3@jans.server",
+                      "displayName": "Default Test User 32",
+                      "jansStatus": "active",
+                      "givenName": "Test3",
+                      "userPassword": "test123"
+                  }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomUser'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    {
+                        "dn": "inum=559a7e26-7a33-4e11-9d42-13266d33261e,ou=people,o=jans",
+                        "userId": "testUser1",
+                        "createdAt": "2022-10-27T22:45:48",
+                        "customAttributes": [
+                            {
+                                "name": "birthdate",
+                                "multiValued": false,
+                                "values": [
+                                    "20001231041508.553Z"
+                                ],
+                                "value": "20001231041508.553Z",
+                                "displayValue": "20001231041508.553Z"
+                            },
+                            {
+                                "name": "emailVerified",
+                                "multiValued": false,
+                                "values": [
+                                    "TRUE"
+                                ],
+                                "value": "TRUE",
+                                "displayValue": "TRUE"
+                            },
+                            {
+                                "name": "jansAdminUIRole",
+                                "multiValued": false,
+                                "values": [
+                                    "api-admin"
+                                ],
+                                "value": "api-admin",
+                                "displayValue": "api-admin"
+                            },
+                            {
+                                "name": "memberOf",
+                                "multiValued": false,
+                                "values": [
+                                    "inum=60B7,ou=groups,o=jans"
+                                ],
+                                "value": "inum=60B7,ou=groups,o=jans",
+                                "displayValue": "inum=60B7,ou=groups,o=jans"
+                            },
+                            {
+                                "name": "middleName",
+                                "multiValued": false,
+                                "values": [
+                                    "Test USer 3"
+                                ],
+                                "value": "Test USer 3",
+                                "displayValue": "Test USer 3"
+                            },
+                            {
+                                "name": "nickname",
+                                "multiValued": false,
+                                "values": [
+                                    "Test USer 3"
+                                ],
+                                "value": "Test USer 3",
+                                "displayValue": "Test USer 3"
+                            },
+                            {
+                                "name": "sn",
+                                "multiValued": false,
+                                "values": [
+                                    "User3"
+                                ],
+                                "value": "User3",
+                                "displayValue": "User3"
+                            }
+                        ],
+                        "customObjectClasses": [
+                            "top",
+                            "jansCustomPerson"
+                        ],
+                        "inum": "559a7e26-7a33-4e11-9d42-13266d33261e",
+                        "mail": "test3@jans.server",
+                        "displayName": "Default Test User 32",
+                        "jansStatus": "active",
+                        "givenName": "Test3",
+                        "baseDn": "inum=559a7e26-7a33-4e11-9d42-13266d33261e,ou=people,o=jans"
+                    }
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/user.write
+  /mgt/configuser/{inum}:
+    get:
+      tags:
+      - Configuration – User Management
+      summary: Get User by Inum
+      description: Get User by Inum
+      operationId: get-user-by-inum
+      parameters:
+      - name: inum
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomUser'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    {
+                        "dn": "inum=559a7e26-7a33-4e11-9d42-13266d33261e,ou=people,o=jans",
+                        "userId": "testUser1",
+                        "createdAt": "2022-10-27T22:45:48",
+                        "customAttributes": [
+                            {
+                                "name": "birthdate",
+                                "multiValued": false,
+                                "values": [
+                                    "20001231041508.553Z"
+                                ],
+                                "value": "20001231041508.553Z",
+                                "displayValue": "20001231041508.553Z"
+                            },
+                            {
+                                "name": "emailVerified",
+                                "multiValued": false,
+                                "values": [
+                                    "TRUE"
+                                ],
+                                "value": "TRUE",
+                                "displayValue": "TRUE"
+                            },
+                            {
+                                "name": "jansAdminUIRole",
+                                "multiValued": false,
+                                "values": [
+                                    "api-admin"
+                                ],
+                                "value": "api-admin",
+                                "displayValue": "api-admin"
+                            },
+                            {
+                                "name": "memberOf",
+                                "multiValued": false,
+                                "values": [
+                                    "inum=60B7,ou=groups,o=jans"
+                                ],
+                                "value": "inum=60B7,ou=groups,o=jans",
+                                "displayValue": "inum=60B7,ou=groups,o=jans"
+                            },
+                            {
+                                "name": "middleName",
+                                "multiValued": false,
+                                "values": [
+                                    "Test USer 3"
+                                ],
+                                "value": "Test USer 3",
+                                "displayValue": "Test USer 3"
+                            },
+                            {
+                                "name": "nickname",
+                                "multiValued": false,
+                                "values": [
+                                    "Test USer 3"
+                                ],
+                                "value": "Test USer 3",
+                                "displayValue": "Test USer 3"
+                            },
+                            {
+                                "name": "sn",
+                                "multiValued": false,
+                                "values": [
+                                    "User3"
+                                ],
+                                "value": "User3",
+                                "displayValue": "User3"
+                            }
+                        ],
+                        "customObjectClasses": [
+                            "top",
+                            "jansCustomPerson"
+                        ],
+                        "inum": "559a7e26-7a33-4e11-9d42-13266d33261e",
+                        "mail": "test3@jans.server",
+                        "displayName": "Default Test User 32",
+                        "jansStatus": "active",
+                        "givenName": "Test3",
+                        "baseDn": "inum=559a7e26-7a33-4e11-9d42-13266d33261e,ou=people,o=jans"
+                    }
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/user.readonly
+    delete:
+      tags:
+      - Configuration – User Management
+      summary: Delete User
+      description: Delete User
+      operationId: delete-user
+      parameters:
+      - name: inum
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/user.delete
+    patch:
+      tags:
+      - Configuration – User Management
+      summary: Patch user properties by Inum
+      description: Patch user properties by Inum
+      operationId: patch-user-by-inum
+      parameters:
+      - name: inum
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: UserPatchRequest
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserPatchRequest'
+            examples:
+              Request json example:
+                description: Request json example
+                value: "{\n   \"jsonPatchString\": \"[ {\\\"op\\\":\\\"add\\\", \\\
+                  \"path\\\": \\\"/userId\\\", \\\"value\\\":\\\"config_test_user_100_final_patch\\\
+                  \" } ]\",\n   \"customAttributes\": [{\n            \"name\": \"\
+                  emailVerified\",\n            \"multiValued\": false,\n        \
+                  \    \"values\": [\n                \"TRUE\"\n            ],\n \
+                  \           \"value\": \"TRUE\",\n            \"displayValue\":\
+                  \ \"TRUE\"\n        },\n\t\t{\n            \"name\": \"secretAnswer\"\
+                  ,\n            \"multiValued\": false,\n            \"values\":\
+                  \ [\n                \"james-bond@123\"\n            ],\n      \
+                  \      \"value\": \"james-bond@123\",\n            \"displayValue\"\
+                  : \"james-bond@123\"\n        },\n        {\n            \"name\"\
+                  : \"jansImsValue\",\n            \"multiValued\": true,\n      \
+                  \      \"values\": [{\n\t\t\t  \"value\": \"123456\",\n\t\t\t  \"\
+                  display\": \"Home phone\",\n\t\t\t  \"type\": \"home\",\n\t\t\t\
+                  \  \"primary\": true\t\t\t\n\t\t\t},\n\t\t\t{\n\t\t\t  \"value\"\
+                  : \"9821789\",\n\t\t\t  \"display\": \"Work phone\",\n\t\t\t  \"\
+                  type\": \"work\",\n\t\t\t  \"primary\": false\t\t\t\n\t\t\t}\n \
+                  \               \n            ]\n        }\n        ]\n}\n"
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomUser'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    {
+                        "dn": "inum=559a7e26-7a33-4e11-9d42-13266d33261e,ou=people,o=jans",
+                        "userId": "testUser1",
+                        "createdAt": "2022-10-27T22:45:48",
+                        "customAttributes": [
+                            {
+                                "name": "birthdate",
+                                "multiValued": false,
+                                "values": [
+                                    "20001231041508.553Z"
+                                ],
+                                "value": "20001231041508.553Z",
+                                "displayValue": "20001231041508.553Z"
+                            },
+                            {
+                                "name": "emailVerified",
+                                "multiValued": false,
+                                "values": [
+                                    "TRUE"
+                                ],
+                                "value": "TRUE",
+                                "displayValue": "TRUE"
+                            },
+                            {
+                                "name": "jansAdminUIRole",
+                                "multiValued": false,
+                                "values": [
+                                    "api-admin"
+                                ],
+                                "value": "api-admin",
+                                "displayValue": "api-admin"
+                            },
+                            {
+                                "name": "memberOf",
+                                "multiValued": false,
+                                "values": [
+                                    "inum=60B7,ou=groups,o=jans"
+                                ],
+                                "value": "inum=60B7,ou=groups,o=jans",
+                                "displayValue": "inum=60B7,ou=groups,o=jans"
+                            },
+                            {
+                                "name": "middleName",
+                                "multiValued": false,
+                                "values": [
+                                    "Test USer 3"
+                                ],
+                                "value": "Test USer 3",
+                                "displayValue": "Test USer 3"
+                            },
+                            {
+                                "name": "nickname",
+                                "multiValued": false,
+                                "values": [
+                                    "Test USer 3"
+                                ],
+                                "value": "Test USer 3",
+                                "displayValue": "Test USer 3"
+                            },
+                            {
+                                "name": "sn",
+                                "multiValued": false,
+                                "values": [
+                                    "User3"
+                                ],
+                                "value": "User3",
+                                "displayValue": "User3"
+                            }
+                        ],
+                        "customObjectClasses": [
+                            "top",
+                            "jansCustomPerson"
+                        ],
+                        "inum": "559a7e26-7a33-4e11-9d42-13266d33261e",
+                        "mail": "test3@jans.server",
+                        "displayName": "Default Test User 32",
+                        "jansStatus": "active",
+                        "givenName": "Test3",
+                        "baseDn": "inum=559a7e26-7a33-4e11-9d42-13266d33261e,ou=people,o=jans"
+                    }
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/user.write
+components:
+  schemas:
+    CustomObjectAttribute:
+      type: object
+      properties:
+        name:
+          type: string
+        multiValued:
+          type: boolean
+        values:
+          type: array
+          items:
+            type: object
+        value:
+          type: object
+        displayValue:
+          type: string
+    CustomUser:
+      type: object
+      properties:
+        dn:
+          type: string
+        userId:
+          type: string
+        updatedAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        oxAuthPersistentJwt:
+          type: array
+          items:
+            type: string
+        customAttributes:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomObjectAttribute'
+        customObjectClasses:
+          type: array
+          items:
+            type: string
+        inum:
+          type: string
+        mail:
+          type: string
+        displayName:
+          type: string
+        jansStatus:
+          type: string
+        givenName:
+          type: string
+        userPassword:
+          type: string
+        status:
+          type: string
+        baseDn:
+          type: string
+    UserPagedResult:
+      type: object
+      properties:
+        start:
+          type: integer
+          format: int32
+        totalEntriesCount:
+          type: integer
+          format: int32
+        entriesCount:
+          type: integer
+          format: int32
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomUser'
+    UserPatchRequest:
+      type: object
+      properties:
+        jsonPatchString:
+          type: string
+        customAttributes:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomObjectAttribute'
+  securitySchemes:
+    oauth2:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: "https://{op-hostname}/.../token"
+          scopes:
+            https://jans.io/oauth/config/user.readonly: View user related information
+            https://jans.io/oauth/config/user.write: Manage user related information
+            https://jans.io/oauth/config/user.delete: Delete user related information

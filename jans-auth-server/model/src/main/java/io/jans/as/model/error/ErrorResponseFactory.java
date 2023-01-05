@@ -11,28 +11,29 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType;
 import io.jans.as.model.clientinfo.ClientInfoErrorResponseType;
-import io.jans.as.model.common.ComponentType;
+import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.config.Constants;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.configuration.Configuration;
 import io.jans.as.model.fido.u2f.U2fErrorResponseType;
 import io.jans.as.model.register.RegisterErrorResponseType;
 import io.jans.as.model.session.EndSessionErrorResponseType;
+import io.jans.as.model.ssa.SsaErrorResponseType;
 import io.jans.as.model.token.TokenErrorResponseType;
 import io.jans.as.model.token.TokenRevocationErrorResponseType;
 import io.jans.as.model.uma.UmaErrorResponseType;
 import io.jans.as.model.userinfo.UserInfoErrorResponseType;
 import io.jans.as.model.util.Util;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.BooleanUtils;
 import org.apache.logging.log4j.ThreadContext;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -98,25 +99,25 @@ public class ErrorResponseFactory implements Configuration {
 
     public String errorAsJson(IErrorType type, String reason) {
         final DefaultErrorResponse error = getErrorResponse(type);
-        error.setReason(appConfiguration.getErrorReasonEnabled() ? reason : "");
+        error.setReason(BooleanUtils.isTrue(appConfiguration.getErrorReasonEnabled()) ? reason : "");
         return error.toJSonString();
     }
 
-    public void validateComponentEnabled(ComponentType componentType) {
-        final Set<ComponentType> enabledComponents = appConfiguration.getEnabledComponentTypes();
-        if (enabledComponents.isEmpty()) { // no restrictions
+    public void validateFeatureEnabled(FeatureFlagType flagType) {
+        final Set<FeatureFlagType> enabledFlags = appConfiguration.getEnabledFeatureFlags();
+        if (enabledFlags.isEmpty()) { // no restrictions
             return;
         }
 
-        if (enabledComponents.contains(componentType)) { // component is enabled
+        if (enabledFlags.contains(flagType)) { // component is enabled
             return;
         }
 
-        log.info("Component is disabled, type: {}", componentType);
+        log.info("Feature flag is disabled, type: {}", flagType);
 
         throw new WebApplicationException(Response
                 .status(Response.Status.FORBIDDEN)
-                .entity(errorAsJson(TokenErrorResponseType.ACCESS_DENIED, "Component is disabled on server."))
+                .entity(errorAsJson(TokenErrorResponseType.ACCESS_DENIED, "Feature flag is disabled on server."))
                 .type(MediaType.APPLICATION_JSON_TYPE)
                 .build());
     }
@@ -190,6 +191,8 @@ public class ErrorResponseFactory implements Configuration {
                 list = messages.getFido();
             } else if (type instanceof BackchannelAuthenticationErrorResponseType) {
                 list = messages.getBackchannelAuthentication();
+            } else if (type instanceof SsaErrorResponseType) {
+                list = messages.getSsa();
             }
 
             if (list != null) {

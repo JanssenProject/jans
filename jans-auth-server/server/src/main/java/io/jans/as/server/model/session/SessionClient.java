@@ -8,7 +8,7 @@ package io.jans.as.server.model.session;
 
 import io.jans.as.common.model.registration.Client;
 
-import javax.inject.Named;
+import jakarta.inject.Named;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 

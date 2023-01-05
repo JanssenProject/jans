@@ -6,8 +6,8 @@
 
 package io.jans.as.server.auth;
 
-import com.google.common.base.Strings;
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.common.util.CommonUtils;
 import io.jans.as.model.authorize.AuthorizeRequestParam;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.Prompt;
@@ -19,9 +19,8 @@ import io.jans.as.model.jwk.JSONWebKeySet;
 import io.jans.as.model.token.TokenErrorResponseType;
 import io.jans.as.model.util.CertUtils;
 import io.jans.as.model.util.HashUtil;
-import io.jans.as.model.util.JwtUtil;
-import io.jans.as.server.model.common.SessionId;
-import io.jans.as.server.model.common.SessionIdState;
+import io.jans.as.common.model.session.SessionId;
+import io.jans.as.common.model.session.SessionIdState;
 import io.jans.as.server.service.SessionIdService;
 import io.jans.as.server.service.external.ExternalDynamicClientRegistrationService;
 import io.jans.as.server.service.external.context.DynamicClientRegistrationContext;
@@ -31,15 +30,15 @@ import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
-import javax.ejb.DependsOn;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.FilterChain;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
+import jakarta.ejb.DependsOn;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 import java.security.PublicKey;
 import java.security.cert.X509Certificate;
 import java.util.List;
@@ -130,9 +129,7 @@ public class MTLSService {
             final PublicKey publicKey = cert.getPublicKey();
             final byte[] encodedKey = publicKey.getEncoded();
 
-            JSONObject jsonWebKeys = Strings.isNullOrEmpty(client.getJwks())
-                    ? JwtUtil.getJSONWebKeys(client.getJwksUri())
-                    : new JSONObject(client.getJwks());
+            JSONObject jsonWebKeys = CommonUtils.getJwks(client);
 
             if (jsonWebKeys == null) {
                 log.debug("Unable to load json web keys for client: {}, jwks_uri: {}, jks: {}", client.getClientId(),

@@ -1,0 +1,266 @@
+openapi: 3.0.1
+info:
+  title: Jans Config API - Fido2
+  contact:
+    name: Gluu Support
+    url: https://support.gluu.org
+    email: xxx@gluu.org
+  license:
+    name: Apache 2.0
+    url: https://github.com/JanssenProject/jans/blob/main/LICENSE
+  version: 1.0.0
+servers:
+- url: https://jans.io/
+  description: The Jans server
+  variables: {}
+tags:
+- name: Fido2 - Configuration
+paths:
+  /fido2/config:
+    get:
+      tags:
+      - Fido2 - Configuration
+      summary: Gets Jans Authorization Server Fido2 configuration properties
+      description: Gets Jans Authorization Server Fido2 configuration properties
+      operationId: get-properties-fido2
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppConfiguration'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/fido2.readonly
+    put:
+      tags:
+      - Fido2 - Configuration
+      summary: Updates Fido2 configuration properties
+      description: Updates Fido2 configuration properties
+      operationId: put-properties-fido2
+      requestBody:
+        description: Fido2Config
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AppConfiguration'
+      responses:
+        "200":
+          description: Fido2Config
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppConfiguration'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/fido2.write
+  /fido2/registration/entries/{username}:
+    get:
+      tags:
+      - Fido2 - Registration
+      summary: Get details of connected FIDO2 devices registered to user
+      description: Get details of connected FIDO2 devices registered to user
+      operationId: get-registration-entries-fido2
+      parameters:
+      - name: username
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Fido2RegistrationEntry'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/fido2.readonly
+components:
+  schemas:
+    AppConfiguration:
+      type: object
+      properties:
+        issuer:
+          type: string
+        baseEndpoint:
+          type: string
+        cleanServiceInterval:
+          type: integer
+          format: int32
+        cleanServiceBatchChunkSize:
+          type: integer
+          format: int32
+        useLocalCache:
+          type: boolean
+        disableJdkLogger:
+          type: boolean
+        loggingLevel:
+          type: string
+        loggingLayout:
+          type: string
+        externalLoggerConfiguration:
+          type: string
+        metricReporterInterval:
+          type: integer
+          format: int32
+        metricReporterKeepDataDays:
+          type: integer
+          format: int32
+        metricReporterEnabled:
+          type: boolean
+        personCustomObjectClassList:
+          type: array
+          items:
+            type: string
+        fido2Configuration:
+          $ref: '#/components/schemas/Fido2Configuration'
+    Fido2Configuration:
+      type: object
+      properties:
+        authenticatorCertsFolder:
+          type: string
+        mdsAccessToken:
+          type: string
+        mdsCertsFolder:
+          type: string
+        mdsTocsFolder:
+          type: string
+        checkU2fAttestations:
+          type: boolean
+        userAutoEnrollment:
+          type: boolean
+        unfinishedRequestExpiration:
+          type: integer
+          format: int32
+        authenticationHistoryExpiration:
+          type: integer
+          format: int32
+        serverMetadataFolder:
+          type: string
+        requestedCredentialTypes:
+          type: array
+          items:
+            type: string
+        requestedParties:
+          type: array
+          items:
+            $ref: '#/components/schemas/RequestedParty'
+    RequestedParty:
+      type: object
+      properties:
+        name:
+          type: string
+        domains:
+          type: array
+          items:
+            type: string
+    Fido2RegistrationData:
+      type: object
+      properties:
+        createdDate:
+          type: string
+          format: date-time
+        updatedDate:
+          type: string
+          format: date-time
+        createdBy:
+          type: string
+        updatedBy:
+          type: string
+        username:
+          type: string
+        domain:
+          type: string
+        userId:
+          type: string
+        challenge:
+          type: string
+        attenstationRequest:
+          type: string
+        attenstationResponse:
+          type: string
+        uncompressedECPoint:
+          type: string
+        publicKeyId:
+          type: string
+        type:
+          type: string
+        status:
+          type: string
+          enum:
+          - pending
+          - registered
+          - compromised
+        counter:
+          type: integer
+          format: int32
+        attestationType:
+          type: string
+        signatureAlgorithm:
+          type: integer
+          format: int32
+        applicationId:
+          type: string
+    Fido2RegistrationEntry:
+      type: object
+      properties:
+        dn:
+          type: string
+        id:
+          type: string
+        challange:
+          type: string
+        creationDate:
+          type: string
+          format: date-time
+        userInum:
+          type: string
+        publicKeyId:
+          type: string
+        displayName:
+          type: string
+        registrationData:
+          $ref: '#/components/schemas/Fido2RegistrationData'
+        counter:
+          type: integer
+          format: int32
+        registrationStatus:
+          type: string
+          enum:
+          - pending
+          - registered
+          - compromised
+        deviceNotificationConf:
+          type: string
+        challangeHash:
+          type: string
+        baseDn:
+          type: string
+  securitySchemes:
+    oauth2:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: "https://{op-hostname}/.../token"
+          scopes:
+            https://jans.io/oauth/config/fido2.readonly: View fido2 configuration
+              related information
+            https://jans.io/oauth/config/fido2.write: Manage fido2 configuration related
+              information

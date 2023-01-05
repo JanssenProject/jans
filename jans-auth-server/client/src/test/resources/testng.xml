@@ -3,7 +3,7 @@
 <suite name="jansAuthClient" parallel="tests" thread-count="4">
 
     <listeners>
-        <listener class-name="io.jans.as.client.RetryListener" />
+        <listener class-name="io.jans.as.client.RetryListener"/>
     </listeners>
 
     <test name="JsonApplier Client test" enabled="true">
@@ -22,6 +22,12 @@
         </classes>
     </test>
 
+    <test name="Native SSO Client test (HTTP)" enabled="true">
+        <classes>
+            <class name="io.jans.as.client.ws.rs.token.NativeSsoHttpTest"/>
+        </classes>
+    </test>
+
     <!-- Address claims test -->
     <test name="Address claims test (HTTP)" enabled="true">
         <classes>
@@ -36,8 +42,13 @@
         </classes>
     </test>
 
-    <!-- Token binding -->
+    <test name="Authn Script Aliases Test" enabled="true">
+        <classes>
+            <class name="io.jans.as.client.ws.rs.AuthnScriptAliasesTest"/>
+        </classes>
+    </test>
 
+    <!-- Token binding -->
     <test name="Token Binding test (HTTP)" enabled="true">
         <classes>
             <class name="io.jans.as.client.ws.rs.TokenBindingHttpTest"/>
@@ -90,10 +101,28 @@
         </classes>
     </test>
 
+    <test name="Authorization Support Custom Params" enabled="true">
+        <classes>
+            <class name="io.jans.as.client.ws.rs.AuthorizationSupportCustomParams"/>
+        </classes>
+    </test>
+
+    <test name="Authorized Acr Values Test" enabled="true">
+        <classes>
+            <class name="io.jans.as.client.ws.rs.AuthorizedAcrValuesTest"/>
+        </classes>
+    </test>
+
     <!-- Authorize test -->
     <test name="Authorize test (HTTP)" enabled="true">
         <classes>
             <class name="io.jans.as.client.ws.rs.AuthorizeRestWebServiceHttpTest"/>
+        </classes>
+    </test>
+
+    <test name="Authorize regex redirect uris validation test" enabled="true">
+        <classes>
+            <class name="io.jans.as.client.ws.rs.AuthorizationRedirectUrisRegexTest"/>
         </classes>
     </test>
 
@@ -125,6 +154,12 @@
         </classes>
     </test>
 
+    <test name="Client Language Metadata Test" enabled="true">
+        <classes>
+            <class name="io.jans.as.client.ws.rs.ClientLanguageMetadataTest"/>
+        </classes>
+    </test>
+
     <!-- Client Secret Basic test -->
     <test name="Client Secret Basic test" enabled="true">
         <classes>
@@ -153,6 +188,12 @@
         </classes>
     </test>
 
+    <test name="Default Prompt Login True Test" enabled="false">
+        <classes>
+            <class name="io.jans.as.client.ws.rs.DefaultPromptLoginTest"/>
+        </classes>
+    </test>
+
     <test name="Enable Client to restrict JavaScript Origins" enabled="true">
         <classes>
             <class name="io.jans.as.client.ws.rs.EnableClientToRestrictJavascriptOrigin"/>
@@ -169,6 +210,12 @@
     <test name="End Session test (HTTP)" enabled="true">
         <classes>
             <class name="io.jans.as.client.ws.rs.EndSessionRestWebServiceHttpTest"/>
+        </classes>
+    </test>
+
+    <test name="Force Signed Request Object Test" enabled="true">
+        <classes>
+            <class name="io.jans.as.client.ws.rs.ForceSignedRequestObjectTest"></class>
         </classes>
     </test>
 
@@ -232,6 +279,12 @@
         </classes>
     </test>
 
+    <test name="set Public Subject Identifier per Client" enabled="true">
+        <classes>
+            <class name="io.jans.as.client.ws.rs.SetPublicSubjectIdentifierPerClientTest"/>
+        </classes>
+    </test>
+
     <!-- SSO with Multiple Backend Services test -->
     <test name="SSO with Multiple Backend Services test (HTTP)" enabled="true">
         <classes>
@@ -271,6 +324,12 @@
     <test name="Token Signatures test (HTTP)" enabled="true">
         <classes>
             <class name="io.jans.as.client.ws.rs.TokenSignaturesHttpTest"/>
+        </classes>
+    </test>
+
+    <test name="Turn off consent for pairwise / openid-only scope" enabled="true">
+        <classes>
+            <class name="io.jans.as.client.ws.rs.TurnOffConsentForPairwiseOpenIdOnlyConsentTest"/>
         </classes>
     </test>
 
@@ -869,7 +928,8 @@
             <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeFormPostJwtResponseTypeCodeIdTokenSignedHttpTest"/>
         </classes>
     </test>
-    <test name="Test Authorization Response Mode form_post.jwt Response Type code id_token token Encrypted" enabled="true">
+    <test name="Test Authorization Response Mode form_post.jwt Response Type code id_token token Encrypted"
+          enabled="true">
         <classes>
             <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeFormPostJwtResponseTypeCodeIdTokenTokenEncryptedHttpTest"/>
         </classes>
@@ -930,7 +990,8 @@
             <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeFragmentJwtResponseTypeCodeIdTokenSignedHttpTest"/>
         </classes>
     </test>
-    <test name="Test Authorization Response Mode fragment.jwt Response Type code id_token token Encrypted" enabled="true">
+    <test name="Test Authorization Response Mode fragment.jwt Response Type code id_token token Encrypted"
+          enabled="true">
         <classes>
             <class name="io.jans.as.client.ws.rs.jarm.AuthorizationResponseModeFragmentJwtResponseTypeCodeIdTokenTokenEncryptedHttpTest"/>
         </classes>
@@ -1107,5 +1168,31 @@
             <class name="io.jans.as.client.ws.rs.jarm.AuthorizationServerMetadataHttpTest"/>
         </classes>
     </test>
+    <test name="Test Authorization ACR values" enabled="true">
+        <classes>
+            <class name="io.jans.as.client.ws.rs.AuthorizationAcrValuesTest"/>
+        </classes>
+    </test>
 
+    <!-- SSA -->
+    <test name="SSA create test (HTTP)" enabled="true">
+        <classes>
+            <class name="io.jans.as.client.ssa.SsaCreateTest"/>
+        </classes>
+    </test>
+    <test name="SSA get test (HTTP)" enabled="true">
+        <classes>
+            <class name="io.jans.as.client.ssa.SsaGetTest"/>
+        </classes>
+    </test>
+    <test name="SSA validate test (HTTP)" enabled="true">
+        <classes>
+            <class name="io.jans.as.client.ssa.SsaValidateTest"/>
+        </classes>
+    </test>
+    <test name="SSA revoke test (HTTP)" enabled="true">
+        <classes>
+            <class name="io.jans.as.client.ssa.SsaRevokeTest"/>
+        </classes>
+    </test>
 </suite>

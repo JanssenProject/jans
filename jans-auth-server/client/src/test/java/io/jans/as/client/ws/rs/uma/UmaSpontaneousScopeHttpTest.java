@@ -11,6 +11,7 @@ import io.jans.as.client.BaseTest;
 import io.jans.as.client.RegisterClient;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.client.uma.UmaClientFactory;
 import io.jans.as.client.uma.UmaRptIntrospectionService;
 import io.jans.as.client.uma.UmaTokenService;
@@ -33,10 +34,8 @@ import java.security.UnrecoverableKeyException;
 import java.util.Arrays;
 import java.util.List;
 
-import static io.jans.as.model.uma.UmaTestUtil.assertIt;
+import static io.jans.as.test.UmaTestUtil.assertIt;
 import static org.junit.Assert.assertTrue;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -74,12 +73,7 @@ public class UmaSpontaneousScopeHttpTest extends BaseTest {
         clientResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(clientResponse.getStatus(), 201, "Unexpected response code: " + clientResponse.getEntity());
-        assertNotNull(clientResponse.getClientId());
-        assertNotNull(clientResponse.getClientSecret());
-        assertNotNull(clientResponse.getRegistrationAccessToken());
-        assertNotNull(clientResponse.getClientIdIssuedAt());
-        assertNotNull(clientResponse.getClientSecretExpiresAt());
+        AssertBuilder.registerResponse(clientResponse).created().check();
     }
 
     @BeforeClass

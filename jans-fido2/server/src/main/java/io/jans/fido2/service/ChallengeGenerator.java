@@ -20,9 +20,13 @@ package io.jans.fido2.service;
 
 import java.security.SecureRandom;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
+/**
+ * Challenge generator class
+ *
+ */
 @ApplicationScoped
 public class ChallengeGenerator {
 

@@ -2,7 +2,7 @@ package io.jans.as.server.service.stat;
 
 import io.jans.as.common.model.stat.Stat;
 import io.jans.as.common.model.stat.StatEntry;
-import io.jans.as.model.common.ComponentType;
+import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
@@ -14,11 +14,11 @@ import net.agkn.hll.HLL;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
-import javax.annotation.PostConstruct;
-import javax.ejb.DependsOn;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.annotation.PostConstruct;
+import jakarta.ejb.DependsOn;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import java.text.SimpleDateFormat;
 import java.util.Base64;
 import java.util.Date;
@@ -73,8 +73,8 @@ public class StatService {
 
     public boolean init() {
         try {
-            final Set<ComponentType> enabledComponents = appConfiguration.getEnabledComponentTypes();
-            if (!enabledComponents.isEmpty() && !enabledComponents.contains(ComponentType.STAT)) {
+            final Set<FeatureFlagType> featureFlags = appConfiguration.getEnabledFeatureFlags();
+            if (!featureFlags.isEmpty() && !featureFlags.contains(FeatureFlagType.STAT)) {
                 log.trace("Stat service is not enabled.");
                 return false;
             }
@@ -147,6 +147,10 @@ public class StatService {
                 tokenCounters = new ConcurrentHashMap<>(entryFromPersistence.getStat().getTokenCountPerGrantType());
                 currentEntry = entryFromPersistence;
                 log.trace("Stat entry loaded.");
+
+                if (currentEntry != null && StringUtils.isBlank(currentEntry.getMonth()) && currentEntry.getStat() != null) {
+                    currentEntry.setMonth(currentEntry.getStat().getMonth());
+                }
                 return;
             }
         } catch (EntryPersistenceException e) {
@@ -157,12 +161,15 @@ public class StatService {
             log.trace("Creating stat entry ...");
             hll = newHll();
             tokenCounters = new ConcurrentHashMap<>();
+            final String monthString = periodDateFormat.format(new Date());
 
             currentEntry = new StatEntry();
             currentEntry.setId(nodeId);
             currentEntry.setDn(dn);
             currentEntry.setUserHllData(Base64.getEncoder().encodeToString(hll.toBytes()));
-            currentEntry.getStat().setMonth(periodDateFormat.format(new Date()));
+
+            currentEntry.getStat().setMonth(monthString);
+            currentEntry.setMonth(monthString);
             entryManager.persist(currentEntry);
             log.trace("Created stat entry.");
         }

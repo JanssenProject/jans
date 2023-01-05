@@ -7,7 +7,7 @@
 package io.jans.as.server.uma.ws.rs;
 
 import io.jans.as.model.uma.UmaMetadata;
-import io.jans.as.model.uma.UmaTestUtil;
+import io.jans.as.test.UmaTestUtil;
 import io.jans.as.server.BaseTest;
 import io.jans.as.server.model.uma.TUma;
 import org.jboss.arquillian.test.api.ArquillianResource;
@@ -29,7 +29,7 @@ public class UmaConfigurationWSTest extends BaseTest {
     @Parameters({"umaConfigurationPath"})
     @Test
     public void configurationPresence(final String umaConfigurationPath) throws Exception {
-        final UmaMetadata c = TUma.requestConfiguration(url, umaConfigurationPath);
+        final UmaMetadata c = TUma.requestConfiguration(getApiTagetURI(url), umaConfigurationPath);
         UmaTestUtil.assertIt(c);
     }
 }

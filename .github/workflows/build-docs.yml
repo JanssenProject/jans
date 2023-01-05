@@ -1,0 +1,200 @@
+name: Publish docs via GitHub Pages
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'docs/**'
+      - 'charts/**'
+      - 'mkdocs.yml'
+      - 'docker-jans-**/README.md'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'docs/**'
+      - 'charts/**'
+      - 'mkdocs.yml'
+      - 'docker-jans-**/README.md'
+  release:
+    types:
+      - published
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag (e.g."v1.0.5")'
+        default: "v1.0.5"
+        required: false
+concurrency:
+  group: run-once
+  cancel-in-progress: false
+jobs:
+  build:
+    if: github.repository_owner == 'JanssenProject'
+    name: Deploy docs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+          cache: pip
+          cache-dependency-path: docs/requirements.txt
+
+      - name: Install dependencies
+        run: |
+          pip install --require-hashes -r docs/requirements.txt
+          cp mkdocs.yml ../
+
+      - name: Checkout jans ${{ github.event.inputs.version }}
+        if: >-
+          github.event_name == 'workflow_dispatch'
+        uses: actions/checkout@v3
+        with:
+          ref: '${{ github.event.inputs.version }}'
+          fetch-depth: 0
+          token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+
+      - name: Copy files from main to ${{ github.event.inputs.version }}
+        if: >-
+          github.event_name == 'workflow_dispatch'
+        run: |
+          mv ../mkdocs.yml mkdocs.yml
+
+      - name: Copy generated chart from main
+        run: |
+          helm package charts/janssen/
+          cp janssen-*.tgz ../
+
+      - name: Import GPG key
+        id: import_gpg
+        uses: crazy-max/ghaction-import-gpg@v5
+        with:
+          gpg_private_key: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY_PASSPHRASE }}
+          git_user_signingkey: true
+          git_commit_gpgsign: true
+
+      - name: Configure Git
+        run: |
+          git config user.name "mo-auto"
+          git config user.email "54212639+mo-auto@users.noreply.github.com"
+          git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
+
+      - name: Generate docs
+        continue-on-error: true
+        env:
+          VERSION: ${{ github.event.release.tag_name }}
+        run: |
+         echo "Custom work on generating docs can go here."
+          
+         # Run cn docs 
+         sudo bash ./automation/docs/generated-cn-docs.sh
+          
+         echo "Generating property docs and push to main"
+         sudo bash ./automation/docs/generate-property-docs.sh 
+         cd docs
+         git add . || echo "Nothing to add"
+         git commit -a -S -m "docs: automated property doc generation" || echo "Nothing to commit"
+         cd ..
+          
+         echo "Replacing release number markers with actual release number"
+         if [ ! -z "$VERSION" ]; then
+          MVERSION="${VERSION:1}"
+           cd docs
+           egrep -lRZ --exclude=CONTRIBUTING.md . | xargs -0 -l sed -i -e "s/replace-janssen-version/$VERSION/g"
+           # strip v from v1.x.x
+           egrep -lRZ --exclude=CONTRIBUTING.md . | xargs -0 -l sed -i -e "s/replace-janssen-image-version/${VERSION:1}/g"
+           git add . || echo "Nothing to add"
+           git commit -a -S -m "docs: replace release marker with release number" || echo "Nothing to commit"
+           cd ..
+         fi
+          
+         echo "Generating javadocs"
+         sudo bash ./automation/docs/generate-javadocs.sh
+         cd docs
+         git add . || echo "Nothing to add"
+         git commit -a -S -m "docs: generate and add javadocs" || echo "Nothing to commit"
+         cd ..
+         
+         git push
+
+
+      - name: mike deploy ${{ github.event.inputs.version }}
+        if: >-
+          github.event_name == 'workflow_dispatch'
+        run: |
+          mike deploy --push --force ${{ github.event.inputs.version }}
+
+      # This deploys the current docs into gh-pages/head on merges to main
+      # The old "main" gets deleted if it exists, head is more descriptive
+      - name: mike deploy head
+        if: contains(github.ref, 'refs/heads/main') && github.event_name != 'workflow_dispatch'
+        run: |
+          mike deploy --push head
+
+      # If a release has been published, deploy it as a new version
+      - name: mike deploy new version
+        if: >-
+          github.event_name == 'release' &&
+          github.event.action == 'published' &&
+          startsWith(github.event.release.name, 'v') &&
+          !github.event.release.draft &&
+          !github.event.release.prerelease
+        env:
+          VERSION: ${{ github.event.release.tag_name }}
+        run: |
+          mike deploy --push "$VERSION"
+
+      - name: Update mike version aliases
+        #if: >-
+        # github.event_name != 'workflow_dispatch'
+        id: set_versions
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAGS=$(gh release list -L 1000 -R ${{ github.repository }} | grep -o '^\v.*'| grep -v Draft | cut -f 1 | sed '/-/!{s/$/_/}' | sort -V | sed 's/_$//')
+          LATEST=$(echo "${TAGS}" | tail -1)
+          STABLE=$(echo "${TAGS}" | grep -v -- "-" | tail -1)
+          # remove below two lines after first release
+          LATEST="head"
+          STABLE="head"
+          mike alias -u head main
+          mike alias -u "${STABLE}" stable
+          mike set-default --push stable
+          echo ::set-output name=LATEST::${LATEST}
+          echo ::set-output name=STABLE::${STABLE}
+
+      # Ensures the current branch is gh-pages,
+      # Creates / updates the "stable" and "latest" plain text files with the corresponding versions
+      # Commits if the files were changed
+      # Finally pushes if there are unpushed commits
+      - name: Create version files
+        #if: >-
+        #  github.event_name != 'workflow_dispatch'
+        run: |
+          LATEST=${{ steps.set_versions.outputs.LATEST }}
+          STABLE=${{ steps.set_versions.outputs.STABLE }}
+          git checkout gh-pages
+          git pull origin gh-pages
+          # move generated chart from a previous step
+          mv ../janssen-*.tgz ./charts/
+          cd ./charts
+          git add janssen-*.tgz && git update-index --refresh
+          helm repo index .
+          git add index.yaml && git update-index --refresh
+          cd ..
+          # END move generated chart from a previous step
+          echo "${STABLE}" > stable.txt
+          git add stable.txt && git update-index --refresh
+          git diff-index --quiet HEAD -- || git commit -S -m "Set stable to ${STABLE}"
+          echo "${LATEST}" > latest.txt
+          git add latest.txt && git update-index --refresh
+          git diff-index --quiet HEAD -- || git commit -S -m "Set latest to ${LATEST}"
+          git push origin gh-pages

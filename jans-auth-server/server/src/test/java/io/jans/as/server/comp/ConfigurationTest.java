@@ -11,18 +11,15 @@ import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorMessages;
-import io.jans.as.server.ConfigurableTest;
-import io.jans.as.server.model.config.ConfigurationFactory;
+import io.jans.as.server.BaseComponentTest;
 import io.jans.as.server.util.ServerUtil;
-import io.jans.orm.PersistenceEntryManager;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Unmarshaller;
 import org.apache.commons.io.IOUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import javax.inject.Inject;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
 import java.io.File;
 import java.io.FileInputStream;
 
@@ -31,13 +28,7 @@ import java.io.FileInputStream;
  * @version 0.9, 03/01/2013
  */
 
-public class ConfigurationTest extends ConfigurableTest {
-
-    @Inject
-    private ConfigurationFactory configurationFactory;
-
-    @Inject
-    private PersistenceEntryManager ldapEntryManager;
+public class ConfigurationTest extends BaseComponentTest {
 
     /*
      * Configuration must be present, otherwise server will not start
@@ -46,12 +37,12 @@ public class ConfigurationTest extends ConfigurableTest {
      */
     @Test
     public void configurationPresence() {
-        Assert.assertTrue((configurationFactory != null) && (configurationFactory.getBaseConfiguration() != null)
-                && (configurationFactory.getPersistenceConfiguration().getConfiguration() != null)
-                && (configurationFactory.getAppConfiguration() != null)
-                && (configurationFactory.getErrorResponseFactory() != null)
-                && (configurationFactory.getStaticConfiguration() != null)
-                && (configurationFactory.getWebKeysConfiguration() != null));
+        Assert.assertTrue((getConfigurationFactory() != null) && (getConfigurationFactory().getBaseConfiguration() != null)
+                && (getConfigurationFactory().getPersistenceConfiguration().getConfiguration() != null)
+                && (getConfigurationFactory().getAppConfiguration() != null)
+                && (getConfigurationFactory().getErrorResponseFactory() != null)
+                && (getConfigurationFactory().getStaticConfiguration() != null)
+                && (getConfigurationFactory().getWebKeysConfiguration() != null));
     }
 
     /*
@@ -83,7 +74,7 @@ public class ConfigurationTest extends ConfigurableTest {
         c.setErrors(errorConf);
         c.setStatics(staticConf);
         c.setWebKeys(webKeys);
-        ldapEntryManager.persist(c);
+        getPersistenceEntryManager().persist(c);
     }
 
     private static AppConfiguration loadConfFromFile(String filePath) throws JAXBException {

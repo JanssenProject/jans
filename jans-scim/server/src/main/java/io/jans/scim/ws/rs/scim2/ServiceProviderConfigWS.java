@@ -11,14 +11,14 @@ import static io.jans.scim.model.scim2.Constants.UTF8_CHARSET_FRAGMENT;
 
 import java.util.Collections;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Named;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Response;
+import jakarta.annotation.PostConstruct;
+import jakarta.inject.Named;
+import jakarta.ws.rs.DefaultValue;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.HeaderParam;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.Response;
 
 import io.jans.scim.model.scim2.Meta;
 import io.jans.scim.model.scim2.provider.config.AuthenticationScheme;
@@ -39,6 +39,8 @@ public class ServiceProviderConfigWS extends BaseScimWebService {
         try {
             ServiceProviderConfig serviceProviderConfig = new ServiceProviderConfig();
             serviceProviderConfig.getFilter().setMaxResults(appConfiguration.getMaxCount());
+            serviceProviderConfig.getBulk().setMaxOperations(appConfiguration.getBulkMaxOperations());
+            serviceProviderConfig.getBulk().setMaxPayloadSize(appConfiguration.getBulkMaxPayloadSize());
 
             Meta meta = new Meta();
             meta.setLocation(endpointUrl);

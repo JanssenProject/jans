@@ -9,7 +9,7 @@ package io.jans.as.client.ciba.push;
 import io.jans.as.client.BaseResponse;
 import org.apache.log4j.Logger;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 
 /**
  * @author Javier Rojas Blum

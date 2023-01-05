@@ -16,19 +16,31 @@ get_debug_opt() {
 }
 
 move_builtin_jars() {
-    # move twilio lib
-    if [ ! -f /opt/jans/jetty/jans-auth/custom/libs/twilio.jar ]; then
-        cp /usr/share/java/twilio.jar /opt/jans/jetty/jans-auth/custom/libs/twilio.jar
-    fi
+    #twilio, jsmpp, casa-config, jans-fido2-client
+    for src in /usr/share/java/*.jar; do
+        fname=$(basename "$src")
+        cp "$src" "/opt/jans/jetty/jans-auth/custom/libs/$fname"
+    done
+}
 
-    # move jsmpp lib
-    if [ ! -f /opt/jans/jetty/jans-auth/custom/libs/jsmpp.jar ]; then
-        cp /usr/share/java/jsmpp.jar /opt/jans/jetty/jans-auth/custom/libs/jsmpp.jar
-    fi
+get_prometheus_opt() {
+    prom_opt=""
 
-    # move casa-config lib
-    if [ ! -f /opt/jans/jetty/jans-auth/custom/libs/casa-config.jar ]; then
-        cp /usr/share/java/casa-config.jar /opt/jans/jetty/jans-auth/custom/libs/casa-config.jar
+    if [ -n "${CN_PROMETHEUS_PORT}" ]; then
+        prom_opt="
+            -javaagent:/opt/prometheus/jmx_prometheus_javaagent.jar=${CN_PROMETHEUS_PORT}:/opt/prometheus/prometheus-config.yaml
+        "
+    fi
+    echo "${prom_opt}"
+}
+
+get_prometheus_lib() {
+    if [ -n "${CN_PROMETHEUS_PORT}" ]; then
+        prom_agent_version="0.17.2"
+
+        if [ ! -f /opt/prometheus/jmx_prometheus_javaagent.jar ]; then
+            wget -q https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/${prom_agent_version}/jmx_prometheus_javaagent-${prom_agent_version}.jar -O /opt/prometheus/jmx_prometheus_javaagent.jar
+        fi
     fi
 }
 
@@ -37,19 +49,15 @@ move_builtin_jars() {
 # ==========
 
 move_builtin_jars
+get_prometheus_lib
 python3 /app/scripts/wait.py
-
-if [ ! -f /deploy/touched ]; then
-    python3 /app/scripts/bootstrap.py
-    touch /deploy/touched
-fi
-
+python3 /app/scripts/bootstrap.py
 python3 /app/scripts/jks_sync.py &
-python3 /app/scripts/mod_context.py
+python3 /app/scripts/mod_context.py jans-auth
+python3 /app/scripts/auth_conf.py
 
 # run auth-server
 cd /opt/jans/jetty/jans-auth
-mkdir -p /opt/jetty/temp
 exec java \
     -server \
     -XX:+DisableExplicitGC \
@@ -59,8 +67,12 @@ exec java \
     -Dserver.base=/opt/jans/jetty/jans-auth \
     -Dlog.base=/opt/jans/jetty/jans-auth \
     -Dpython.home=/opt/jython \
-    -Djava.io.tmpdir=/opt/jetty/temp \
+    -Djava.io.tmpdir=/tmp \
     -Dlog4j2.configurationFile=resources/log4j2.xml \
     $(get_debug_opt) \
+    $(get_prometheus_opt) \
     ${CN_JAVA_OPTIONS} \
-    -jar /opt/jetty/start.jar
+    -jar /opt/jetty/start.jar \
+        jetty.deploy.scanInterval=0 \
+        jetty.httpConfig.sendServerVersion=false \
+        jetty.httpConfig.requestHeaderSize=$CN_JETTY_REQUEST_HEADER_SIZE

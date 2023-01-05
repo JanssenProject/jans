@@ -1,28 +1,44 @@
 name: release
 on:
-  push:
-    branches:
-      - master
-      - main
-      # below branch is triggered by jenkins which triggers dev image
-      - update-source-build-date
   workflow_dispatch:
+    inputs:
+      simple_release_as:
+        description: 'Release version for docs'
+        required: true
+        default: '1.0.6'
+      java_release_as:
+        description: 'Release version for the java projects jans-*'
+        required: true
+        default: '1.0.6'
+      docker_release_as:
+        description: 'Release version for the docker images docker-*'
+        required: true
+        default: '1.0.6-1'
+      python_release_as:
+        description: 'Release version for the python projects'
+        required: true
+        default: '1.0.6'
+      mega_release_as:
+        description: 'Mega release version'
+        required: true
+        default: '1.0.6'
 jobs:
-  release-docker-pr:
+  release-simple-pr:
     runs-on: ubuntu-latest
     strategy:
+      #max-parallel: 1
       fail-fast: false
       matrix:
-        docker-images: [ "docker-jans-auth-server", "docker-jans-certmanager", "docker-jans-config-api", "docker-jans-client-api", "docker-jans-configurator", "docker-jans-fido2", "docker-jans-persistence-loader", "docker-jans-scim" ]
+        simple: [ "docs" ]
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         fetch-depth: 0
 
     - name: Import GPG key
       id: import_gpg
-      uses: crazy-max/ghaction-import-gpg@v4
+      uses: crazy-max/ghaction-import-gpg@v5
       with:
         gpg_private_key: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY }}
         passphrase: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY_PASSPHRASE }}
@@ -35,29 +51,32 @@ jobs:
         git config user.email "54212639+mo-auto@users.noreply.github.com"
         git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
 
-    - uses: google-github-actions/release-please-action@v3.0.1
+    - uses: google-github-actions/release-please-action@v3.7
       id: release-please
       with:
-         path: ${{ matrix.docker-images }}
-         token: ${{ secrets.MOWORKFLOWTOKEN }}
+         path: ${{ matrix.simple }}
+         token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
          release-type: simple
-         package-name: ${{ matrix.docker-images }}
+         package-name: ${{ matrix.simple }}
          monorepo-tags: true
-  release-python-pr:
+         release-as: ${{ github.event.inputs.simple_release_as }}
+  release-java-pr:
+    needs: release-simple-pr
     runs-on: ubuntu-latest
     strategy:
+      #max-parallel: 1
       fail-fast: false
       matrix:
-        python-projects: ["jans-pycloudlib", "jans-cli"]
+        maven: [ "jans-scim", "jans-orm", "jans-notify", "jans-fido2", "jans-eleven", "jans-core", "jans-config-api", "jans-bom", "jans-auth-server", "agama" ]
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         fetch-depth: 0
 
     - name: Import GPG key
       id: import_gpg
-      uses: crazy-max/ghaction-import-gpg@v4
+      uses: crazy-max/ghaction-import-gpg@v5
       with:
         gpg_private_key: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY }}
         passphrase: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY_PASSPHRASE }}
@@ -70,11 +89,119 @@ jobs:
         git config user.email "54212639+mo-auto@users.noreply.github.com"
         git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
 
-    - uses: google-github-actions/release-please-action@v3.0.1
+    - uses: google-github-actions/release-please-action@v3.7
+      id: release-please
+      with:
+         path: ${{ matrix.maven }}
+         token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
+         release-type: maven
+         package-name: ${{ matrix.maven }}
+         monorepo-tags: true
+         release-as: ${{ github.event.inputs.java_release_as }}
+  release-docker-pr:
+    needs: release-java-pr
+    runs-on: ubuntu-latest
+    strategy:
+      #max-parallel: 1
+      fail-fast: false
+      matrix:
+        simple: [ "docker-jans-auth-server", "docker-jans-certmanager", "docker-jans-config-api", "docker-jans-configurator", "docker-jans-fido2", "docker-jans-persistence-loader", "docker-jans-scim", "docker-jans-monolith" ]
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Import GPG key
+      id: import_gpg
+      uses: crazy-max/ghaction-import-gpg@v5
+      with:
+        gpg_private_key: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY }}
+        passphrase: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY_PASSPHRASE }}
+        git_user_signingkey: true
+        git_commit_gpgsign: true
+
+    - name: Configure Git
+      run: |
+        git config user.name "mo-auto"
+        git config user.email "54212639+mo-auto@users.noreply.github.com"
+        git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
+
+    - uses: google-github-actions/release-please-action@v3.7
+      id: release-please
+      with:
+         path: ${{ matrix.simple }}
+         token: ${{ secrets.MOAUTO2_WORKFLOW_TOKEN }}
+         release-type: simple
+         package-name: ${{ matrix.simple }}
+         monorepo-tags: true
+         release-as: ${{ github.event.inputs.docker_release_as }}
+  release-python-pr:
+    needs: release-docker-pr
+    runs-on: ubuntu-latest
+    strategy:
+      #max-parallel: 1
+      fail-fast: false
+      matrix:
+        python-projects: ["jans-pycloudlib", "jans-cli-tui", "jans-linux-setup"]
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Import GPG key
+      id: import_gpg
+      uses: crazy-max/ghaction-import-gpg@v5
+      with:
+        gpg_private_key: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY }}
+        passphrase: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY_PASSPHRASE }}
+        git_user_signingkey: true
+        git_commit_gpgsign: true
+
+    - name: Configure Git
+      run: |
+        git config user.name "mo-auto"
+        git config user.email "54212639+mo-auto@users.noreply.github.com"
+        git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
+
+    - uses: google-github-actions/release-please-action@v3.7
       id: release-please
       with:
          path: ${{ matrix.python-projects }}
-         token: ${{ secrets.MOWORKFLOWTOKEN }}
+         token: ${{ secrets.MOAUTO3_WORKFLOW_TOKEN }}
          release-type: python
          package-name: ${{ matrix.python-projects }}
          monorepo-tags: true
+         release-as: ${{ github.event.inputs.python_release_as }}
+  mega-release-pr:
+    needs: release-python-pr
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Import GPG key
+      id: import_gpg
+      uses: crazy-max/ghaction-import-gpg@v5
+      with:
+        gpg_private_key: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY }}
+        passphrase: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY_PASSPHRASE }}
+        git_user_signingkey: true
+        git_commit_gpgsign: true
+
+    - name: Configure Git
+      run: |
+        git config user.name "mo-auto"
+        git config user.email "54212639+mo-auto@users.noreply.github.com"
+        git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
+
+
+    - uses: google-github-actions/release-please-action@v3.7
+      id: release-please
+      with:
+         token: ${{ secrets.MOAUTO3_WORKFLOW_TOKEN }}
+         release-type: simple
+         release-as: ${{ github.event.inputs.mega_release_as }}

@@ -4,34 +4,31 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import io.jans.as.client.TokenRequest;
+import io.jans.as.common.service.common.EncryptionService;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaims;
-import io.jans.ca.plugin.adminui.model.config.AUIConfiguration;
-import io.jans.ca.plugin.adminui.model.exception.ApplicationException;
 import io.jans.ca.plugin.adminui.model.auth.TokenResponse;
 import io.jans.ca.plugin.adminui.model.auth.UserInfoRequest;
 import io.jans.ca.plugin.adminui.model.auth.UserInfoResponse;
+import io.jans.ca.plugin.adminui.model.config.AUIConfiguration;
+import io.jans.ca.plugin.adminui.model.exception.ApplicationException;
 import io.jans.ca.plugin.adminui.rest.auth.OAuth2Resource;
 import io.jans.ca.plugin.adminui.service.config.AUIConfigurationService;
+import io.jans.ca.plugin.adminui.utils.ClientFactory;
 import io.jans.ca.plugin.adminui.utils.CommonUtils;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
-import org.jboss.resteasy.client.jaxrs.ResteasyClient;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
-import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.Invocation;
+import jakarta.ws.rs.core.MultivaluedHashMap;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.Response;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriBuilder;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.List;
@@ -46,23 +43,25 @@ public class OAuth2Service {
     @Inject
     AUIConfigurationService auiConfigurationService;
 
+    @Inject
+    EncryptionService encryptionService;
     /**
      * Calls token endpoint from the Identity Provider and returns a valid Access Token.
      */
-    public TokenResponse getAccessToken(String code) throws ApplicationException {
+    public TokenResponse getAccessToken(String code, String appType) throws ApplicationException {
         try {
             log.debug("Getting access token with code");
             if (Strings.isNullOrEmpty(code)) {
                 log.error(ErrorResponse.AUTHORIZATION_CODE_BLANK.getDescription());
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.AUTHORIZATION_CODE_BLANK.getDescription());
             }
-            AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
+            AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration(appType);
 
             TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
             tokenRequest.setCode(code);
 
             tokenRequest.setAuthUsername(auiConfiguration.getAuthServerClientId());
-            tokenRequest.setAuthPassword(auiConfiguration.getAuthServerClientSecret());
+            tokenRequest.setAuthPassword(encryptionService.decrypt(auiConfiguration.getAuthServerClientSecret()));
             tokenRequest.setGrantType(GrantType.AUTHORIZATION_CODE);
             tokenRequest.setRedirectUri(auiConfiguration.getAuthServerRedirectUrl());
             tokenRequest.setScope(auiConfiguration.getAuthServerScope());
@@ -86,15 +85,15 @@ public class OAuth2Service {
     /**
      * Calls token endpoint from the Identity Provider and returns a valid Access Token.
      */
-    public TokenResponse getApiProtectionToken(String userInfoJwt) throws ApplicationException {
+    public TokenResponse getApiProtectionToken(String userInfoJwt, String appType) throws ApplicationException {
         try {
             log.debug("Getting api-protection token");
 
-            AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
+            AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration(appType);
 
             TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
             tokenRequest.setAuthUsername(auiConfiguration.getTokenServerClientId());
-            tokenRequest.setAuthPassword(auiConfiguration.getTokenServerClientSecret());
+            tokenRequest.setAuthPassword(encryptionService.decrypt(auiConfiguration.getTokenServerClientSecret()));
             tokenRequest.setGrantType(GrantType.CLIENT_CREDENTIALS);
             tokenRequest.setRedirectUri(auiConfiguration.getTokenServerRedirectUrl());
 
@@ -135,11 +134,30 @@ public class OAuth2Service {
         }
     }
 
-    public UserInfoResponse getUserInfo(UserInfoRequest userInfoRequest) throws ApplicationException {
-        ApacheHttpClient43Engine engine = new ApacheHttpClient43Engine();
+    public Map<String, Object> introspectToken(String accessToken, String appType) {
+        log.info("Token introspection from auth-server.");
+        AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration(appType);
+        Invocation.Builder request = ClientFactory.instance().getClientBuilder(auiConfiguration.getAuthServerIntrospectionEndpoint());
+        request.header("Authorization", "Bearer " + accessToken);
+
+        MultivaluedMap<String, String> body = new MultivaluedHashMap<>();
+        body.putSingle("token", accessToken);
+
+        Response response = request.post(Entity.form(body));
+
+        log.info("Introspection response status code: {}", response.getStatus());
+
+        if (response.getStatus() == 200) {
+            Map<String, Object> entity = response.readEntity(Map.class);
+            log.info("Introspection response entity: {}", entity);
+            return entity;
+        }
+        return null;
+    }
+    public UserInfoResponse getUserInfo(UserInfoRequest userInfoRequest, String appType) throws ApplicationException {
         try {
             log.debug("Getting User-Info from auth-server: {}", userInfoRequest.getAccessToken());
-            AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
+            AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration(appType);
 
             String accessToken = org.apache.logging.log4j.util.Strings.isNotBlank(userInfoRequest.getAccessToken()) ? userInfoRequest.getAccessToken() : null;
 
@@ -149,18 +167,19 @@ public class OAuth2Service {
             }
 
             if (org.apache.logging.log4j.util.Strings.isNotBlank(userInfoRequest.getCode()) && org.apache.logging.log4j.util.Strings.isBlank(accessToken)) {
-                TokenResponse tokenResponse = getAccessToken(userInfoRequest.getCode());
+                TokenResponse tokenResponse = getAccessToken(userInfoRequest.getCode(), appType);
                 accessToken = tokenResponse.getAccessToken();
             }
             log.debug("Access Token : {}", accessToken);
+            Map<String, Object> introspectionResponse = introspectToken(accessToken, appType);
+
             MultivaluedMap<String, String> body = new MultivaluedHashMap<>();
             body.putSingle("access_token", accessToken);
 
-            ResteasyClient client = ((ResteasyClientBuilder) ClientBuilder.newBuilder()).httpEngine(engine).build();
-            ResteasyWebTarget target = client.target(UriBuilder.fromPath(auiConfiguration.getAuthServerUserInfoEndpoint()));
+            Invocation.Builder request = ClientFactory.instance().getClientBuilder(auiConfiguration.getAuthServerUserInfoEndpoint());
+            request.header("Authorization", "Bearer " + accessToken);
 
-            Response response = target.request()
-                    .header("Authorization", "Bearer " + accessToken)
+            Response response = request
                     .post(Entity.form(body));
 
             log.debug("User-Info response status code: {}", response.getStatus());
@@ -175,9 +194,11 @@ public class OAuth2Service {
                 UserInfoResponse userInfoResponse = new UserInfoResponse();
                 userInfoResponse.setClaims(getClaims(jwtUserInfo));
                 userInfoResponse.setJwtUserInfo(entity);
+                if(introspectionResponse.get("customClaims") != null) {
+                    userInfoResponse.addClaims("customClaims", introspectionResponse.get("customClaims"));
+                }
 
                 log.debug("User-Info response userInfoResponse: {}", userInfoResponse);
-
                 return userInfoResponse;
             }
 
@@ -187,10 +208,6 @@ public class OAuth2Service {
         } catch (Exception e) {
             log.error(ErrorResponse.GET_USER_INFO_ERROR.getDescription(), e);
             throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), ErrorResponse.GET_USER_INFO_ERROR.getDescription());
-        } finally {
-            if (engine != null) {
-                engine.close();
-            }
         }
         return null;
     }
@@ -204,10 +221,8 @@ public class OAuth2Service {
     }
 
     public io.jans.as.client.TokenResponse getToken(TokenRequest tokenRequest, String tokenEndpoint, String userInfoJwt) {
-        ApacheHttpClient43Engine engine = new ApacheHttpClient43Engine();
-        try {
-            engine.setFollowRedirects(false);
 
+        try {
             MultivaluedMap<String, String> body = new MultivaluedHashMap<>();
             if (!Strings.isNullOrEmpty(tokenRequest.getCode())) {
                 body.putSingle("code", tokenRequest.getCode());
@@ -225,10 +240,8 @@ public class OAuth2Service {
             body.putSingle("redirect_uri", tokenRequest.getRedirectUri());
             body.putSingle("client_id", tokenRequest.getAuthUsername());
 
-            ResteasyClient client = ((ResteasyClientBuilder) ClientBuilder.newBuilder()).httpEngine(engine).build();
-            ResteasyWebTarget target = client.target(UriBuilder.fromPath(tokenEndpoint));
-
-            Response response = target.request()
+            Invocation.Builder request = ClientFactory.instance().getClientBuilder(tokenEndpoint);
+            Response response = request
                     .header("Authorization", "Basic " + tokenRequest.getEncodedCredentials())
                     .post(Entity.form(body));
 
@@ -247,8 +260,6 @@ public class OAuth2Service {
             log.error("Problems processing token call");
             throw e;
 
-        } finally {
-                engine.close();
         }
         return null;
     }

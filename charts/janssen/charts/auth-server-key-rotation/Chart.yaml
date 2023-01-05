@@ -1,0 +1,18 @@
+
+apiVersion: v2
+name: auth-server-key-rotation
+version: 1.0.6-dev
+kubeVersion: ">=v1.21.0-0"
+description: Responsible for regenerating auth-keys per x hours
+type: application
+keywords:
+  - Auth keys Rotation
+home: https://jans.io
+sources:
+  - https://github.com/JanssenProject/docker-jans-certmanager
+maintainers:
+  - name: Mohammad Abudayyeh
+    email: support@jans.io
+    url: https://github.com/moabu
+icon: https://github.com/JanssenProject/jans/raw/main/docs/assets/logo/janssen_project_favicon_transparent_50px_50px.png
+appVersion: "1.0.6-dev"

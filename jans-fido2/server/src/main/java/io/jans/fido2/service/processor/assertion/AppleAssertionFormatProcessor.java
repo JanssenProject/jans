@@ -15,8 +15,9 @@ package io.jans.fido2.service.processor.assertion;
 
 import java.security.PublicKey;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import io.jans.orm.model.fido2.Fido2RegistrationData;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -30,7 +31,6 @@ import io.jans.fido2.exception.Fido2CompromisedDevice;
 import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.auth.AuthData;
 import io.jans.fido2.model.entry.Fido2AuthenticationData;
-import io.jans.fido2.model.entry.Fido2RegistrationData;
 import io.jans.fido2.service.AuthenticatorDataParser;
 import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.CoseService;
@@ -40,6 +40,14 @@ import io.jans.fido2.service.verifier.AuthenticatorDataVerifier;
 import io.jans.fido2.service.verifier.CommonVerifiers;
 import io.jans.fido2.service.verifier.UserVerificationVerifier;
 
+/**
+ * Processor class for Assertions from Apple Platform authenticator - reference
+ * -
+ * https://medium.com/webauthnworks/webauthn-fido2-verifying-apple-anonymous-attestation-5eaff334c849
+ * 
+ * @author madhumitas
+ *
+ */
 @ApplicationScoped
 public class AppleAssertionFormatProcessor implements AssertionFormatProcessor {
 
@@ -73,13 +81,14 @@ public class AppleAssertionFormatProcessor implements AssertionFormatProcessor {
 	}
 
 	@Override
-	public void process(String base64AuthenticatorData, String signature, String clientDataJson, Fido2RegistrationData registration,
-			Fido2AuthenticationData authenticationEntity) {
+	public void process(String base64AuthenticatorData, String signature, String clientDataJson,
+			Fido2RegistrationData registration, Fido2AuthenticationData authenticationEntity) {
 		AuthData authData = authenticatorDataParser.parseAssertionData(base64AuthenticatorData);
 		commonVerifiers.verifyRpIdHash(authData, registration.getDomain());
 
 		log.info("User verification option {}", authenticationEntity.getUserVerificationOption());
-		userVerificationVerifier.verifyUserVerificationOption(authenticationEntity.getUserVerificationOption(), authData);
+		userVerificationVerifier.verifyUserVerificationOption(authenticationEntity.getUserVerificationOption(),
+				authData);
 
 		byte[] clientDataHash = DigestUtils.getSha256Digest().digest(base64Service.urlDecode(clientDataJson));
 

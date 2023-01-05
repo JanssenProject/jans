@@ -1,0 +1,13 @@
+[Unit]
+Description=Janssen Auth Server
+After=opendj.service
+
+[Service]
+Type=forking
+ExecStart=/opt/dist/scripts/jans-auth start
+ExecStop=/opt/dist/scripts/jans-auth stop
+User=jetty
+Group=jetty
+
+[Install]
+WantedBy=multi-user.target

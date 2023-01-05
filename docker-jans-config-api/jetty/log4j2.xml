@@ -1,36 +1,141 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<Configuration packages="io.jans.log">
+<Configuration status="ERROR">
+    <Properties>
+        <Property name="log.console.prefix" value="config-api" />
+    </Properties>
     <Appenders>
-        <Console name="STDOUT" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d{dd-MM HH:mm:ss.SSS} %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="$log_prefix%d{dd-MM HH:mm:ss.SSS} %-5p %C{4} %F:%L- %m%n" />
         </Console>
 
         <RollingFile name="FILE" fileName="${sys:log.base}/logs/configapi.log" filePattern="${sys:log.base}/logs/configapi-%d{yyyy-MM-dd}-%i.log">
-            <PatternLayout pattern="%d{dd-MM HH:mm:ss.SSS} %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
+            <PatternLayout pattern="%d{dd-MM HH:mm:ss.SSS} %-5p [%t] %C{4} %F:%L- %m%n" />
+
+            <Policies>
+                <SizeBasedTriggeringPolicy size="5 MB" />
+            </Policies>
+            <DefaultRolloverStrategy max="30" />
+        </RollingFile>
+
+        <RollingFile name="AUDIT_FILE" fileName="${sys:log.base}/logs/configapi-audit.log" filePattern="${sys:log.base}/logs/configapi-%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout pattern="%d{dd-MM HH:mm:ss.SSS} %-5p [%t] %C{4} %F:%L- %m%n" />
+
+            <Policies>
+                <SizeBasedTriggeringPolicy size="5 MB" />
+            </Policies>
+            <DefaultRolloverStrategy max="30" />
+        </RollingFile>
+
+        <RollingFile name="JANS_CONFIGAPI_PERSISTENCE_FILE" fileName="${sys:log.base}/logs/configapi_persistence.log" filePattern="${sys:log.base}/logs/configapi_persistence-%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout pattern="%d %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
 
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1" modulate="true" />
-                <SizeBasedTriggeringPolicy size="250 MB" />
+                <SizeBasedTriggeringPolicy size="5 MB" />
             </Policies>
-
-            <DefaultRolloverStrategy max="15" />
+            <DefaultRolloverStrategy max="30" />
         </RollingFile>
 
+        <RollingFile name="JANS_CONFIGAPI_PERSISTENCE_DURATION_FILE" fileName="${sys:log.base}/logs/configapi_persistence_duration.log" filePattern="${sys:log.base}/logs/configapi_persistence_duration-%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout pattern="%d %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
 
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true" />
+                <SizeBasedTriggeringPolicy size="5 MB" />
+            </Policies>
+            <DefaultRolloverStrategy max="30" />
+        </RollingFile>
+
+        <RollingFile name="JANS_CONFIGAPI_PERSISTENCE_LDAP_STATISTICS_FILE" fileName="${sys:log.base}/logs/configapi_persistence_ldap_statistics.log" filePattern="${sys:log.base}/logs/configapi_persistence_ldap_statistics-%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout pattern="%d %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
+
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true" />
+                <SizeBasedTriggeringPolicy size="5 MB" />
+            </Policies>
+            <DefaultRolloverStrategy max="30" />
+        </RollingFile>
+
+        <RollingFile name="JANS_CONFIGAPI_SCRIPT_LOG_FILE" fileName="${sys:log.base}/logs/configapi_script.log" filePattern="${sys:log.base}/logs/configapi_script-%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout pattern="%d %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
+
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true" />
+                <SizeBasedTriggeringPolicy size="5 MB" />
+            </Policies>
+            <DefaultRolloverStrategy max="30" />
+        </RollingFile>
     </Appenders>
 
     <Loggers>
-		<!-- ############### Jans ################# -->
-        <Logger name="io.jans" level="INFO" />
-
         <Logger name="io.jans.configapi" level="$config_api_log_level" additivity="false">
             <AppenderRef ref="$config_api_log_target" />
         </Logger>
 
+        <Logger name="audit" level="$audit_log_level" additivity="false">
+            <Property name="log.console.group">-audit</Property>
+            <AppenderRef ref="$audit_log_target" />
+        </Logger>
+
+        <Logger name="io.jans.orm" level="$persistence_log_level" additivity="false">
+            <Property name="log.console.group">-persistence</Property>
+            <AppenderRef ref="$persistence_log_target" />
+        </Logger>
+
+        <Logger name="com.unboundid.ldap.sdk.LDAPConnection" level="$persistence_log_level" additivity="false">
+            <Property name="log.console.group">-persistence</Property>
+            <AppenderRef ref="$persistence_log_target" />
+        </Logger>
+
+        <Logger name="com.couchbase.client" level="$persistence_log_level" additivity="false">
+            <Property name="log.console.group">-persistence</Property>
+            <AppenderRef ref="$persistence_log_target" />
+        </Logger>
+
+        <Logger name="io.jans.orm.ldap.operation.watch" level="$persistence_duration_log_level" additivity="false">
+            <Property name="log.console.group">-persistence-duration</Property>
+            <AppenderRef ref="$persistence_duration_log_target" />
+        </Logger>
+
+        <Logger name="io.jans.orm.couchbase.operation.watch" level="$persistence_duration_log_level" additivity="false">
+            <Property name="log.console.group">-persistence-duration</Property>
+            <AppenderRef ref="$persistence_duration_log_target" />
+        </Logger>
+
+        <Logger name="io.jans.orm.watch" level="$persistence_duration_log_level" additivity="false">
+            <Property name="log.console.group">-persistence-duration</Property>
+            <AppenderRef ref="$persistence_duration_log_target" />
+        </Logger>
+
+        <Logger name="io.jans.as.server.service.status.ldap" level="$ldap_stats_log_level" additivity="false">
+            <Property name="log.console.group">-ldap-stats</Property>
+            <AppenderRef ref="$ldap_stats_log_target" />
+        </Logger>
+
+        <Logger name="io.jans.service.PythonService" level="$script_log_level" additivity="false">
+            <Property name="log.console.group">-script</Property>
+            <AppenderRef ref="$script_log_target" />
+        </Logger>
+
+        <Logger name="io.jans.service.custom.script" level="$script_log_level" additivity="false">
+            <Property name="log.console.group">-script</Property>
+            <AppenderRef ref="$script_log_target" />
+        </Logger>
+
+        <Logger name="io.jans.as.server.service.custom" level="$script_log_level" additivity="false">
+            <Property name="log.console.group">-script</Property>
+            <AppenderRef ref="$script_log_target" />
+        </Logger>
+
+        <Logger name="io.jans.service.external" level="$script_log_level" additivity="false">
+            <Property name="log.console.group">-script</Property>
+            <AppenderRef ref="$script_log_target" />
+        </Logger>
+
         <Root level="INFO">
-			<AppenderRef ref="STDOUT" />
+            <AppenderRef ref="Console" />
         </Root>
+
     </Loggers>
 
 </Configuration>

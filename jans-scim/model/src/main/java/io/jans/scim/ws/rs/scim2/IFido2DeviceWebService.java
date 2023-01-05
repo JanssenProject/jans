@@ -11,9 +11,9 @@ import io.jans.scim.model.scim2.patch.PatchRequest;
 import io.jans.scim.model.scim2.SearchRequest;
 import io.jans.scim.model.scim2.fido.Fido2DeviceResource;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 import static io.jans.scim.model.scim2.Constants.*;
 

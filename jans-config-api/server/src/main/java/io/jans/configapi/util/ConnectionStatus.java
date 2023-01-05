@@ -16,8 +16,8 @@ import io.jans.util.security.PropertiesDecrypter;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -34,23 +34,37 @@ public class ConnectionStatus {
     ConfigurationFactory configurationFactory;
 
     public boolean isUp(GluuLdapConfiguration ldapConfiguration) {
+
         FileConfiguration configuration = loadFileConfiguration();
+        logger.debug(
+                " configuration:{}, ldapConfiguration:{}, ldapConfiguration.getBindDN():{}, ldapConfiguration.getBindPassword()):{}, ldapConfiguration.isUseSSL():{} ",
+                configuration, ldapConfiguration, ldapConfiguration.getBindDN(), ldapConfiguration.getBindPassword(),
+                ldapConfiguration.isUseSSL());
 
         Properties properties = configuration.getProperties();
         properties.setProperty("bindDN", ldapConfiguration.getBindDN());
         properties.setProperty("bindPassword", ldapConfiguration.getBindPassword());
         properties.setProperty("servers", buildServersString(getServers(ldapConfiguration)));
         properties.setProperty("useSSL", Boolean.toString(ldapConfiguration.isUseSSL()));
-
+        Properties ldapDecryptedProperties = PropertiesDecrypter.decryptProperties(properties,
+                configurationFactory.getCryptoConfigurationSalt());
+       
+        logger.trace("Attempting to create LDAP connection with properties: {}", ldapDecryptedProperties);
+        
         LdapConnectionProvider connectionProvider = new LdapConnectionProvider(
                 PropertiesDecrypter.decryptProperties(properties, configurationFactory.getCryptoConfigurationSalt()));
 
-        if (connectionProvider.getConnectionPool() != null) {
-            boolean isConnected = connectionProvider.isConnected();
+        logger.trace("connectionProvider: {}", connectionProvider);
+        connectionProvider.create(ldapDecryptedProperties);
+        
+        logger.debug("Connection status connectionProvider.isConnected(): {}", connectionProvider.isConnected());
+        
+        if (connectionProvider.isConnected()) {
+            logger.trace("Connect to LDAP");
             connectionProvider.closeConnectionPool();
-            return isConnected;
+            return true;
         }
-
+       
         return false;
     }
 

@@ -1,0 +1,5 @@
+ignored:
+  - SC1083
+  - DL3008  # Pin versions in apt-get
+  - DL3013  # Pin versions in pip
+  - DL3015  # Specify --no-install-recommends

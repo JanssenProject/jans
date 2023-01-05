@@ -16,29 +16,12 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import io.jans.orm.ldap.exception.InvalidSimplePageControlException;
-import io.jans.orm.ldap.impl.LdapBatchOperationWraper;
-import io.jans.orm.ldap.operation.watch.OperationDurationUtil;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
-
-import io.jans.orm.exception.AuthenticationException;
-import io.jans.orm.exception.MappingException;
-import io.jans.orm.exception.extension.PersistenceExtension;
-import io.jans.orm.exception.operation.ConnectionException;
-import io.jans.orm.exception.operation.DuplicateEntryException;
-import io.jans.orm.exception.operation.SearchException;
-import io.jans.orm.ldap.operation.LdapOperationService;
-import io.jans.orm.model.BatchOperation;
-import io.jans.orm.model.PagedResult;
-import io.jans.orm.model.SortOrder;
-import io.jans.orm.operation.auth.PasswordEncryptionHelper;
-import io.jans.orm.operation.auth.PasswordEncryptionMethod;
-import io.jans.orm.util.ArrayHelper;
-import io.jans.orm.util.Pair;
-import io.jans.orm.util.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,16 +43,34 @@ import com.unboundid.ldap.sdk.ResultCode;
 import com.unboundid.ldap.sdk.SearchRequest;
 import com.unboundid.ldap.sdk.SearchResult;
 import com.unboundid.ldap.sdk.SearchResultEntry;
-import com.unboundid.ldap.sdk.SearchResultReference;
 import com.unboundid.ldap.sdk.SearchScope;
-import com.unboundid.ldap.sdk.controls.ServerSideSortRequestControl;
 import com.unboundid.ldap.sdk.controls.SimplePagedResultsControl;
-import com.unboundid.ldap.sdk.controls.SortKey;
 import com.unboundid.ldap.sdk.controls.SubtreeDeleteRequestControl;
-import com.unboundid.ldap.sdk.controls.VirtualListViewRequestControl;
-import com.unboundid.ldap.sdk.controls.VirtualListViewResponseControl;
 import com.unboundid.ldap.sdk.schema.AttributeTypeDefinition;
 import com.unboundid.ldif.LDIFChangeRecord;
+import com.unboundid.util.StaticUtils;
+
+import io.jans.orm.exception.AuthenticationException;
+import io.jans.orm.exception.MappingException;
+import io.jans.orm.exception.SearchEntryException;
+import io.jans.orm.exception.operation.ConnectionException;
+import io.jans.orm.exception.operation.DuplicateEntryException;
+import io.jans.orm.exception.operation.SearchException;
+import io.jans.orm.extension.PersistenceExtension;
+import io.jans.orm.ldap.exception.InvalidSimplePageControlException;
+import io.jans.orm.ldap.impl.LdapBatchOperationWraper;
+import io.jans.orm.ldap.operation.LdapOperationService;
+import io.jans.orm.ldap.operation.watch.OperationDurationUtil;
+import io.jans.orm.model.AttributeData;
+import io.jans.orm.model.BatchOperation;
+import io.jans.orm.model.EntryData;
+import io.jans.orm.model.PagedResult;
+import io.jans.orm.model.SortOrder;
+import io.jans.orm.operation.auth.PasswordEncryptionHelper;
+import io.jans.orm.operation.auth.PasswordEncryptionMethod;
+import io.jans.orm.util.ArrayHelper;
+import io.jans.orm.util.Pair;
+import io.jans.orm.util.StringHelper;
 
 /**
  * OperationsFacade is the base class that performs all the ldap operations
@@ -88,8 +89,9 @@ public class LdapOperationServiceImpl implements LdapOperationService {
 	private PersistenceExtension persistenceExtension;
 
     private static Map<String, Class<?>> ATTRIBUTE_DATA_TYPES = new HashMap<String, Class<?>>();
-    private static List<String> OBJECT_CLASSES = new ArrayList<String>();
     private static final Map<String, Class<?>> OID_SYNTAX_CLASS_MAPPING;
+
+    protected static final String[] NO_STRINGS = new String[0];
 
     static {
         //Populates the mapping of syntaxes that will support comparison of attribute values.
@@ -156,7 +158,9 @@ public class LdapOperationServiceImpl implements LdapOperationService {
 
     @Override
     public void releaseConnection(LDAPConnection connection) {
-        connectionProvider.releaseConnection(connection);
+    	if (connection != null) {
+    		connectionProvider.releaseConnection(connection);
+    	}
     }
 
     @Override
@@ -176,12 +180,24 @@ public class LdapOperationServiceImpl implements LdapOperationService {
         // Try to authenticate if the password was encrypted with additional mechanism
         List<PasswordEncryptionMethod> additionalPasswordMethods = this.connectionProvider.getAdditionalPasswordMethods();
         if ((persistenceExtension != null) || !additionalPasswordMethods.isEmpty()) {
-            SearchResultEntry searchResult = lookup(bindDn, USER_PASSWORD);
-            if (searchResult == null) {
-                throw new ConnectionException("Failed to find use by dn");
+        	EntryData entryData = lookup(bindDn, USER_PASSWORD);
+            if (entryData == null) {
+                throw new ConnectionException("Failed to find user by dn");
             }
 
-			String userPassword = searchResult.getAttribute(USER_PASSWORD).getValue();
+            Object userPasswordObj = null;
+	        for (AttributeData attribute : entryData.getAttributeData()) {
+	        	if (StringHelper.equalsIgnoreCase(attribute.getName(), USER_PASSWORD)) {
+	        		userPasswordObj = attribute.getValue();
+	        	}
+	        	
+	        }
+	
+	        String userPassword = null;
+	        if (userPasswordObj instanceof String) {
+	            userPassword = (String) userPasswordObj;
+	        }
+
 	        if (userPassword != null) {
 				if (persistenceExtension != null) {
 					result = persistenceExtension.compareHashedPasswords(password, userPassword);
@@ -248,63 +264,52 @@ public class LdapOperationServiceImpl implements LdapOperationService {
     }
 
     @Override
-    public <T> SearchResult search(String dn, Filter filter, SearchScope scope, LdapBatchOperationWraper<T> batchOperationWraper, int start,
-                                   int searchLimit, int count, Control[] controls, String... attributes) throws SearchException {
+    public <T> PagedResult<EntryData> search(String dn, Filter filter, SearchScope scope, LdapBatchOperationWraper<T> batchOperationWraper, int start,
+            int count, int pageSize, Control[] controls, String... attributes) throws SearchException {
         Instant startTime = OperationDurationUtil.instance().now();
         
-        SearchResult result = searchImpl(dn, filter, scope, batchOperationWraper, start, searchLimit, count, controls, attributes);
+        PagedResult<EntryData> result = searchImpl(dn, filter, scope, batchOperationWraper, start, count, pageSize, controls, attributes);
 
         Duration duration = OperationDurationUtil.instance().duration(startTime);
-        OperationDurationUtil.instance().logDebug("LDAP operation: search, duration: {}, dn: {}, filter: {}, scope: {}, batchOperationWraper: {}, start: {}, searchLimit: {}, count: {}, controls: {}, attributes: {}", duration, dn, filter, scope, batchOperationWraper, start, searchLimit, count, controls, attributes);
+        OperationDurationUtil.instance().logDebug("LDAP operation: search, duration: {}, dn: {}, filter: {}, scope: {}, batchOperationWraper: {}, start: {}, searchLimit: {}, count: {}, controls: {}, attributes: {}", duration, dn, filter, scope, batchOperationWraper, start, pageSize, count, controls, attributes);
 
         return result;
     }
 
-    private <T> SearchResult searchImpl(String dn, Filter filter, SearchScope scope, LdapBatchOperationWraper<T> batchOperationWraper, int start,
-            int searchLimit, int count, Control[] controls, String... attributes) throws SearchException {
-        SearchRequest searchRequest;
-
-        BatchOperation<T> ldapBatchOperation = null;
+    private <T> PagedResult<EntryData> searchImpl(String dn, Filter filter, SearchScope scope, LdapBatchOperationWraper<T> batchOperationWraper, int start,
+            int count, int pageSize, Control[] controls, String... attributes) throws SearchException {
+        BatchOperation<T> batchOperation = null;
         if (batchOperationWraper != null) {
-            ldapBatchOperation = (BatchOperation<T>) batchOperationWraper.getBatchOperation();
+            batchOperation = (BatchOperation<T>) batchOperationWraper.getBatchOperation();
         }
 
         if (LOG.isTraceEnabled()) {
             // Find whole tree search. This can be very slow
-            if (StringHelper.equalsIgnoreCase(dn, "o=jans")) {
+            if (StringHelper.equalsIgnoreCase(dn, "o=gluu")) {
                 LOG.trace("Search in whole LDAP tree", new Exception());
             }
         }
 
+        SearchRequest searchRequest;
         if (attributes == null) {
             searchRequest = new SearchRequest(dn, scope, filter);
         } else {
             searchRequest = new SearchRequest(dn, scope, filter, attributes);
         }
 
-        boolean useSizeLimit = count > 0;
-
-        if (useSizeLimit) {
-            // Use paged result to limit search
-            searchLimit = count;
-        }
+        List<EntryData> searchResultList = new LinkedList<EntryData>();
 
         SearchResult searchResult = null;
-        List<SearchResult> searchResultList = new ArrayList<SearchResult>();
-        List<SearchResultEntry> searchResultEntries = new ArrayList<SearchResultEntry>();
-        List<SearchResultReference> searchResultReferences = new ArrayList<SearchResultReference>();
 
-        if ((searchLimit > 0) || (start > 0)) {
-            if (searchLimit == 0) {
+        if ((pageSize > 0) || (start > 0)) {
+            if (pageSize == 0) {
                 // Default page size
-                searchLimit = 100;
+                pageSize = 100;
             }
-
-            boolean collectSearchResult;
 
             LDAPConnection ldapConnection = null;
             try {
-                ldapConnection = getConnectionPool().getConnection();
+                ldapConnection = getConnection();
                 ASN1OctetString cookie = null;
                 SimplePagedResponse simplePagedResponse = null;
                 if (start > 0) {
@@ -319,30 +324,48 @@ public class LdapOperationServiceImpl implements LdapOperationService {
                 }
                 
                 if ((cookie != null) && (cookie.getValueLength() == 0)) {
-                    SearchResult searchResultTemp = simplePagedResponse.getLastSearchResult();
-                    return new SearchResult(searchResultTemp.getMessageID(), searchResultTemp.getResultCode(), searchResultTemp.getDiagnosticMessage(),
-                            searchResultTemp.getMatchedDN(), searchResultTemp.getReferralURLs(), searchResultEntries, searchResultReferences,
-                            searchResultEntries.size(), searchResultReferences.size(), searchResultTemp.getResponseControls());
+                    PagedResult<EntryData> result = new PagedResult<EntryData>();
+                    result.setEntries(searchResultList);
+                    result.setEntriesCount(searchResultList.size());
+                    result.setStart(start);
+
+                    return result;
                 }
 
-                do {
-                    collectSearchResult = true;
-                    searchRequest.setControls(new Control[] {new SimplePagedResultsControl(searchLimit, cookie)});
-                    setControls(searchRequest, controls);
-                    searchResult = ldapConnection.search(searchRequest);
+                boolean collectSearchResult;
 
-                    if (ldapBatchOperation != null) {
-                        collectSearchResult = ldapBatchOperation.collectSearchResult(searchResult.getEntryCount());
+            	List<EntryData> lastResult = null;
+	            int currentLimit;
+                int resultCount = 0;
+                int lastCountRows = 0;
+                do {
+                    currentLimit = pageSize;
+                    if (count > 0) {
+                        currentLimit = Math.min(pageSize, count - resultCount);
+                    }
+
+                    searchRequest.setControls(new Control[] {new SimplePagedResultsControl(currentLimit, cookie)});
+                    setControls(searchRequest, controls);
+
+                    searchResult = ldapConnection.search(searchRequest);
+                    if (!ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
+                        throw new SearchEntryException(String.format("Failed to search entries with baseDN: %s, filter: %s", dn, filter));
+                    }
+
+                    lastResult = getEntryDataList(searchResult);
+	    			lastCountRows = lastResult.size();
+
+                    collectSearchResult = true;
+                    if (batchOperation != null) {
+                        collectSearchResult = batchOperation.collectSearchResult(searchResult.getEntryCount());
                     }
                     if (collectSearchResult) {
-                        searchResultList.add(searchResult);
-                        searchResultEntries.addAll(searchResult.getSearchEntries());
-                        searchResultReferences.addAll(searchResult.getSearchReferences());
+                        searchResultList.addAll(lastResult);
                     }
 
-                    if (ldapBatchOperation != null) {
-                        List<T> entries = batchOperationWraper.createEntities(searchResult);
-                        ldapBatchOperation.performAction(entries);
+                    if (batchOperation != null) {
+                        List<T> entries = batchOperationWraper.createEntities(lastResult);
+                        batchOperation.performAction(entries);
                     }
                     cookie = null;
                     try {
@@ -354,40 +377,48 @@ public class LdapOperationServiceImpl implements LdapOperationService {
                         LOG.error("Error while accessing cookies" + ex.getMessage());
                     }
 
-                    if (useSizeLimit) {
+                    if (((count > 0) && (resultCount >= count)) || (lastCountRows < currentLimit)) {
                         break;
                     }
-                } while ((cookie != null) && (cookie.getValueLength() > 0));
+                } while ((cookie != null) && (cookie.getValueLength() > 0) && (lastCountRows > 0));
             } catch (LDAPException ex) {
                 throw new SearchException("Failed to scroll to specified start", ex, ex.getResultCode().intValue());
             } finally {
-                if (ldapConnection != null) {
-                    getConnectionPool().releaseConnection(ldapConnection);
-                }
-            }
-
-            if (!collectSearchResult) {
-                return new SearchResult(searchResult.getMessageID(), searchResult.getResultCode(), searchResult.getDiagnosticMessage(),
-                        searchResult.getMatchedDN(), searchResult.getReferralURLs(), searchResultEntries, searchResultReferences,
-                        searchResultEntries.size(), searchResultReferences.size(), searchResult.getResponseControls());
-            }
-
-            if (!searchResultList.isEmpty()) {
-                SearchResult searchResultTemp = searchResultList.get(0);
-                return new SearchResult(searchResultTemp.getMessageID(), searchResultTemp.getResultCode(), searchResultTemp.getDiagnosticMessage(),
-                        searchResultTemp.getMatchedDN(), searchResultTemp.getReferralURLs(), searchResultEntries, searchResultReferences,
-                        searchResultEntries.size(), searchResultReferences.size(), searchResultTemp.getResponseControls());
+            	releaseConnection(ldapConnection);
             }
         } else {
             setControls(searchRequest, controls);
             try {
                 searchResult = getConnectionPool().search(searchRequest);
+                if (!ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
+                    throw new SearchEntryException(String.format("Failed to ssearch entries with baseDN: %s, filter: %s", dn, filter));
+                }
+
+                List<EntryData> lastResult = getEntryDataList(searchResult);
+
+                boolean collectSearchResult = true;
+                if (batchOperation != null) {
+                    collectSearchResult = batchOperation.collectSearchResult(searchResult.getEntryCount());
+                }
+                if (collectSearchResult) {
+                    searchResultList.addAll(lastResult);
+                }
+
+                if (batchOperation != null) {
+                    List<T> entries = batchOperationWraper.createEntities(lastResult);
+                    batchOperation.performAction(entries);
+                }
             } catch (LDAPSearchException ex) {
                 throw new SearchException(ex.getMessage(), ex, ex.getResultCode().intValue());
             }
         }
 
-        return searchResult;
+        PagedResult<EntryData> result = new PagedResult<EntryData>();
+        result.setEntries(searchResultList);
+        result.setEntriesCount(searchResultList.size());
+        result.setStart(start);
+
+        return result;
     }
 
     private SimplePagedResponse scrollSimplePagedResultsControl(LDAPConnection ldapConnection, String dn, Filter filter, SearchScope scope,
@@ -419,89 +450,93 @@ public class LdapOperationServiceImpl implements LdapOperationService {
     }
 
     @Override
-    public List<SearchResultEntry> searchSearchResultEntryList(String dn, Filter filter, SearchScope scope, int startIndex,
+    public <T> PagedResult<EntryData> searchPagedEntries(String dn, Filter filter, SearchScope scope, int startIndex,
                                                                int count, int pageSize, String sortBy, SortOrder sortOrder,
-                                                               PagedResult vlvResponse, String... attributes) throws Exception {
+                                                               String... attributes) throws Exception {
         Instant startTime = OperationDurationUtil.instance().now();
         
-        List<SearchResultEntry> result = searchSearchResultEntryListImpl(dn, filter, scope, startIndex, count, pageSize, sortBy, sortOrder, vlvResponse, attributes);
+		PagedResult<EntryData> result = searchSearchResultEntryListImpl(dn, filter, scope, startIndex, count, pageSize, sortBy, sortOrder, attributes);
 
         Duration duration = OperationDurationUtil.instance().duration(startTime);
-        OperationDurationUtil.instance().logDebug("LDAP operation: search_result_list, duration: {}, dn: {}, filter: {}, scope: {}, startIndex: {}, count: {}, pageSize: {}, sortBy: {}, sortOrder: {}, vlvResponse: {}, attributes: {}", duration, dn, filter, scope, startIndex, count, pageSize, sortBy, sortOrder, vlvResponse, attributes);
+        OperationDurationUtil.instance().logDebug("LDAP operation: search_result_list, duration: {}, dn: {}, filter: {}, scope: {}, startIndex: {}, count: {}, pageSize: {}, sortBy: {}, sortOrder: {}, attributes: {}, result: {}", duration, dn, filter, scope, startIndex, count, pageSize, sortBy, sortOrder, attributes, result);
 
         return result;
     }
 
-    private List<SearchResultEntry> searchSearchResultEntryListImpl(String dn, Filter filter, SearchScope scope, int start, int count,
-            int pageSize, String sortBy, SortOrder sortOrder, PagedResult vlvResponse, String... attributes) throws LDAPException, Exception {
+    private PagedResult<EntryData> searchSearchResultEntryListImpl(String dn, Filter filter, SearchScope scope, int start, int count,
+            int pageSize, String sortBy, SortOrder sortOrder, String... attributes) throws LDAPException, Exception {
         //This method does not assume that count <= pageSize as occurs in SCIM, but it's more general
 
-        //Why this?
-        if (StringHelper.equalsIgnoreCase(dn, "o=jans")) {
-            (new Exception()).printStackTrace();
-        }
-
+        List<SearchResultEntry> searchResultEntryList = new ArrayList<SearchResultEntry>();
         List<SearchResultEntry> searchEntries;
-        ASN1OctetString resumeCookie = null;
-        LDAPConnection conn = getConnection();
-        SearchRequest searchRequest = new SearchRequest(dn, scope, filter, attributes);
-
         int totalResults = 0;
 
-        do {
-            //Keep searching while we reach start index...
-            SearchResult searchResult = nextSearchResult(conn, searchRequest, pageSize, resumeCookie);
-            searchEntries = searchResult.getSearchEntries();
-            totalResults += searchEntries.size();
-
-            resumeCookie = getSearchResultCookie(searchResult);
-        } while (totalResults < start && resumeCookie != null);
-
-        List<SearchResultEntry> searchResultEntryList = new ArrayList<SearchResultEntry>();
-
-        if (totalResults > start) {
-            //Take the interesting ones, ie. skip [0, start) interval
-            int lowerBound = searchEntries.size() - (totalResults - start);
-            int upperBound = Math.min(searchEntries.size(), lowerBound + count);
-            searchResultEntryList.addAll(searchEntries.subList(lowerBound, upperBound));
+        ASN1OctetString resumeCookie = null;
+        LDAPConnection conn = null;
+        try {
+        	conn = getConnection();
+	        SearchRequest searchRequest = new SearchRequest(dn, scope, filter, attributes);
+	
+	
+	        do {
+	            //Keep searching while we reach start index...
+	            SearchResult searchResult = nextSearchResult(conn, searchRequest, pageSize, resumeCookie);
+	            searchEntries = searchResult.getSearchEntries();
+	            totalResults += searchEntries.size();
+	
+	            resumeCookie = getSearchResultCookie(searchResult);
+	        } while (totalResults < start && resumeCookie != null);
+	
+	
+	        if (totalResults > start) {
+	            //Take the interesting ones, ie. skip [0, start) interval
+	            int lowerBound = searchEntries.size() - (totalResults - start);
+	            int upperBound = Math.min(searchEntries.size(), lowerBound + count);
+	            searchResultEntryList.addAll(searchEntries.subList(lowerBound, upperBound));
+	        }
+	
+	        //Continue adding results till reaching count if needed
+	        while (resumeCookie != null && totalResults < count + start) {
+	            SearchResult searchResult = nextSearchResult(conn, searchRequest, pageSize, resumeCookie);
+	            searchEntries = searchResult.getSearchEntries();
+	            searchResultEntryList.addAll(searchEntries);
+	            totalResults += searchEntries.size();
+	
+	            resumeCookie = getSearchResultCookie(searchResult);
+	        }
+	
+	        if (totalResults > count + start) {
+	            //Remove the uninteresting tail
+	            searchResultEntryList = searchResultEntryList.subList(0, count);
+	        }
+	
+	        //skip the rest and update the number of total results only
+	        while (resumeCookie != null) {
+	            SearchResult searchResult = nextSearchResult(conn, searchRequest, pageSize, resumeCookie);
+	            searchEntries = searchResult.getSearchEntries();
+	            totalResults += searchEntries.size();
+	
+	            resumeCookie = getSearchResultCookie(searchResult);
+	        }
+	
+	        if (StringUtils.isNotEmpty(sortBy)) {
+	            boolean ascending = sortOrder == null || sortOrder.equals(SortOrder.ASCENDING);
+	            searchResultEntryList = sortListByAttributes(searchResultEntryList, SearchResultEntry.class, false, ascending, sortBy);
+	        }
+        } finally {
+        	releaseConnection(conn);
         }
 
-        //Continue adding results till reaching count if needed
-        while (resumeCookie != null && totalResults < count + start) {
-            SearchResult searchResult = nextSearchResult(conn, searchRequest, pageSize, resumeCookie);
-            searchEntries = searchResult.getSearchEntries();
-            searchResultEntryList.addAll(searchEntries);
-            totalResults += searchEntries.size();
 
-            resumeCookie = getSearchResultCookie(searchResult);
-        }
+        List<EntryData> entryDataList = getEntryDataList(searchResultEntryList);
 
-        if (totalResults > count + start) {
-            //Remove the uninteresting tail
-            searchResultEntryList = searchResultEntryList.subList(0, count);
-        }
+        PagedResult<EntryData> result = new PagedResult<EntryData>();
+        result.setEntries(entryDataList);
+        result.setEntriesCount(entryDataList.size());
+        result.setTotalEntriesCount(totalResults);
+        result.setStart(start);
 
-        //skip the rest and update the number of total results only
-        while (resumeCookie != null) {
-            SearchResult searchResult = nextSearchResult(conn, searchRequest, pageSize, resumeCookie);
-            searchEntries = searchResult.getSearchEntries();
-            totalResults += searchEntries.size();
-
-            resumeCookie = getSearchResultCookie(searchResult);
-        }
-
-        if (StringUtils.isNotEmpty(sortBy)) {
-            boolean ascending = sortOrder == null || sortOrder.equals(SortOrder.ASCENDING);
-            searchResultEntryList = sortListByAttributes(searchResultEntryList, SearchResultEntry.class, false, ascending, sortBy);
-        }
-
-        // Get results info
-        vlvResponse.setEntriesCount(searchResultEntryList.size());
-        vlvResponse.setTotalEntriesCount(totalResults);
-        vlvResponse.setStart(start);
-
-        releaseConnection(conn);
-        return searchResultEntryList;
+        return result;
     }
 
     private ASN1OctetString getSearchResultCookie(SearchResult searchResult) throws Exception {
@@ -524,68 +559,6 @@ public class LdapOperationServiceImpl implements LdapOperationService {
 
     }
 
-    @Deprecated
-    public SearchResult searchVirtualListView(String dn, Filter filter, SearchScope scope, int start, int count, String sortBy,
-            SortOrder sortOrder, PagedResult vlvResponse, String... attributes) throws Exception {
-        Instant startTime = OperationDurationUtil.instance().now();
-
-        SearchResult result = searchVirtualListViewImpl(dn, filter, scope, start, count, sortBy, sortOrder, vlvResponse, attributes);
-
-        Duration duration = OperationDurationUtil.instance().duration(startTime);
-        OperationDurationUtil.instance().logDebug("LDAP operation: search_virtual_list_view, duration: {}, dn: {}, filter: {}, scope: {}, start: {}, count: {}, sortBy: {}, sortOrder: {}, vlvResponse: {}, attributes: {}", duration, dn, filter, scope, start, count, sortBy, sortOrder, vlvResponse, attributes);
-
-        return result;
-    }
-
-    private SearchResult searchVirtualListViewImpl(String dn, Filter filter, SearchScope scope, int start, int count, String sortBy,
-            SortOrder sortOrder, PagedResult vlvResponse, String... attributes) throws LDAPSearchException, LDAPException {
-        if (StringHelper.equalsIgnoreCase(dn, "o=jans")) {
-            (new Exception()).printStackTrace();
-        }
-
-        SearchRequest searchRequest;
-
-        if (attributes == null) {
-            searchRequest = new SearchRequest(dn, scope, filter);
-        } else {
-            searchRequest = new SearchRequest(dn, scope, filter, attributes);
-        }
-
-        // start and count should be "cleansed" before arriving here
-        int targetOffset = start;
-        int beforeCount = 0;
-        int afterCount = (count > 0) ? (count - 1) : 0;
-        int contentCount = 0;
-
-        boolean reverseOrder = false;
-        if (sortOrder != null) {
-            reverseOrder = sortOrder.equals(SortOrder.DESCENDING) ? true : false;
-        }
-
-        // Note that the VLV control always requires the server-side sort control.
-        searchRequest.setControls(new ServerSideSortRequestControl(new SortKey(sortBy, reverseOrder)),
-                new VirtualListViewRequestControl(targetOffset, beforeCount, afterCount, contentCount, null));
-
-        SearchResult searchResult = getConnectionPool().search(searchRequest);
-
-        /*
-         * for (SearchResultEntry searchResultEntry : searchResult.getSearchEntries()) {
-         * log.info("##### searchResultEntry = " + searchResultEntry.toString()); }
-         */
-
-        // LDAPTestUtils.assertHasControl(searchResult,
-        // VirtualListViewResponseControl.VIRTUAL_LIST_VIEW_RESPONSE_OID);
-
-        VirtualListViewResponseControl vlvResponseControl = VirtualListViewResponseControl.get(searchResult);
-
-        // Get results info
-        vlvResponse.setEntriesCount(searchResult.getEntryCount());
-        vlvResponse.setTotalEntriesCount(vlvResponseControl.getContentCount());
-        vlvResponse.setStart(vlvResponseControl.getTargetPosition());
-
-        return searchResult;
-    }
-
     private void setControls(SearchRequest searchRequest, Control... controls) {
         if (!ArrayHelper.isEmpty(controls)) {
             Control[] newControls;
@@ -600,10 +573,10 @@ public class LdapOperationServiceImpl implements LdapOperationService {
     }
 
     @Override
-    public SearchResultEntry lookup(String dn, String... attributes) throws ConnectionException, SearchException {
+    public EntryData lookup(String dn, String... attributes) throws ConnectionException, SearchException {
         Instant startTime = OperationDurationUtil.instance().now();
         
-        SearchResultEntry result = lookupImpl(dn, attributes);
+        EntryData result = lookupImpl(dn, attributes);
 
         Duration duration = OperationDurationUtil.instance().duration(startTime);
         OperationDurationUtil.instance().logDebug("LDAP operation: lookup, duration: {}, dn: {}, attributes: {}", duration, dn, attributes);
@@ -611,15 +584,16 @@ public class LdapOperationServiceImpl implements LdapOperationService {
         return result;
     }
 
-    private SearchResultEntry lookupImpl(String dn, String... attributes) throws SearchException {
+    private EntryData lookupImpl(String dn, String... attributes) throws SearchException {
         try {
-        	SearchResultEntry result;
+        	SearchResultEntry searchResultEntry;
             if (attributes == null) {
-            	result = getConnectionPool().getEntry(dn);
+            	searchResultEntry = getConnectionPool().getEntry(dn);
             } else {
-            	result = getConnectionPool().getEntry(dn, attributes);
+            	searchResultEntry = getConnectionPool().getEntry(dn, attributes);
             }
 
+            EntryData result = getEntryData(searchResultEntry);
             if (result != null) {
             	return result;
             }
@@ -837,6 +811,142 @@ public class LdapOperationServiceImpl implements LdapOperationService {
         return result;
     }
 
+    private EntryData getEntryData(SearchResultEntry entry) {
+    	List<AttributeData> attributeData = getAttributeDataList(entry);
+    	if (attributeData == null) {
+    		return null;
+    	}
+
+    	EntryData result = new EntryData(entry.getDN(), attributeData);
+
+    	return result;
+    }
+
+    private List<AttributeData> getAttributeDataList(SearchResultEntry entry) {
+        if (entry == null) {
+            return null;
+        }
+
+        List<AttributeData> result = new ArrayList<AttributeData>();
+        for (Attribute attribute : entry.getAttributes()) {
+            Object[] attributeValues = NO_STRINGS;
+            String attributeName = attribute.getName();
+
+        	if (LOG.isTraceEnabled()) {
+                if (attribute.needsBase64Encoding()) {
+                    LOG.trace("Found binary attribute: " + attributeName + ". Is defined in LDAP config: "
+                            + isBinaryAttribute(attributeName));
+                }
+            }
+
+            if (attribute.needsBase64Encoding()) {
+                boolean binaryAttribute = isBinaryAttribute(attributeName);
+                boolean certificateAttribute = isCertificateAttribute(attributeName);
+
+                if (binaryAttribute || certificateAttribute) {
+                    byte[][] attributeValuesByteArrays = attribute.getValueByteArrays();
+                    if (attributeValuesByteArrays != null) {
+                        attributeValues = new String[attributeValuesByteArrays.length];
+                        for (int i = 0; i < attributeValuesByteArrays.length; i++) {
+                            attributeValues[i] = Base64.encodeBase64String(attributeValuesByteArrays[i]);
+                            LOG.trace("Binary attribute: " + attribute.getName() + " value (hex): "
+                                    + org.apache.commons.codec.binary.Hex.encodeHexString(attributeValuesByteArrays[i]) + " value (base64): "
+                                    + attributeValues[i]);
+                        }
+                    }
+                } else {
+                    attributeValues = attribute.getValues();
+                }
+                if (certificateAttribute) {
+                    attributeName = getCertificateAttributeName(attributeName);
+                }
+            } else {
+                attributeValues = attribute.getValues();
+
+                String attributeNameLower = attribute.getName().toLowerCase();
+                Class<?> attributeType = ATTRIBUTE_DATA_TYPES.get(attributeNameLower);
+                if (attributeType != null) {
+                	// Attempt to convert values to required java types
+                    if (attributeType.equals(Integer.class)) {
+                    	Integer[] attributeValuesTyped = new Integer[attributeValues.length];
+                    	for (int i = 0; i < attributeValues.length; i++) {
+							try {
+								if (attributeValues[i] != null) {
+									attributeValuesTyped[i] = Integer.valueOf(((String) attributeValues[i]));
+								}
+							} catch (final NumberFormatException ex) {
+								attributeValuesTyped[i] = null;
+								LOG.debug("Failed to parse integer", ex);
+							}
+						}
+                    	attributeValues = attributeValuesTyped;
+                    } else if (attributeType.equals(Boolean.class)) {
+                    	Boolean[] attributeValuesTyped = new Boolean[attributeValues.length];
+                    	for (int i = 0; i < attributeValues.length; i++) {
+							if (attributeValues[i] != null) {
+								String lowerValue = StringHelper.toLowerCase((String) attributeValues[i]);
+								if (lowerValue.equals("true") || lowerValue.equals("t") || lowerValue.equals("yes")
+										|| lowerValue.equals("y") || lowerValue.equals("on")
+										|| lowerValue.equals("1")) {
+									attributeValuesTyped[i] = Boolean.TRUE;
+								} else if (lowerValue.equals("false") || lowerValue.equals("f")
+										|| lowerValue.equals("no") || lowerValue.equals("n") || lowerValue.equals("off")
+										|| lowerValue.equals("0")) {
+									attributeValuesTyped[i] = Boolean.FALSE;
+								} else {
+									attributeValuesTyped[i] = null;
+								}
+							}
+                    	}
+                    	attributeValues = attributeValuesTyped;
+                    } else if (attributeType.equals(Date.class)) {
+                    	Date[] attributeValuesTyped = new Date[attributeValues.length];
+                    	for (int i = 0; i < attributeValues.length; i++) {
+                    		if (attributeValues[i] != null) {
+                    			try {
+                    				attributeValuesTyped[i] = StaticUtils.decodeGeneralizedTime((String) attributeValues[i]);
+								} catch (Exception ex) {
+									attributeValuesTyped[i] = null;
+									LOG.debug("Failed to parse date", ex);
+								}
+                    		}
+                    	}
+                    	attributeValues = attributeValuesTyped;
+                    }
+                }
+            }
+
+            boolean multiValued = attributeValues.length > 1;
+            AttributeData tmpAttribute = new AttributeData(attributeName, attributeValues, multiValued);
+            result.add(tmpAttribute);
+        }
+
+        return result;
+    }
+
+    private List<EntryData> getEntryDataList(SearchResult searchResult) {
+    	List<SearchResultEntry> searchResultEntries = searchResult.getSearchEntries();
+
+    	List<EntryData> entryDataList = getEntryDataList(searchResultEntries);
+
+    	return entryDataList;
+	}
+
+	private List<EntryData> getEntryDataList(List<SearchResultEntry> searchResultEntries) {
+		List<EntryData> entryDataList = new LinkedList<>();
+        for (SearchResultEntry entry : searchResultEntries) {
+        	List<AttributeData> attributeDataList = getAttributeDataList(entry);
+    		if (attributeDataList == null) {
+    			break;
+    		}
+
+    		EntryData entryData = new EntryData(entry.getDN(), attributeDataList);
+    		entryDataList.add(entryData);
+    	}
+
+        return entryDataList;
+	}
+
     @Override
     public boolean isBinaryAttribute(String attributeName) {
         return this.connectionProvider.isBinaryAttribute(attributeName);
@@ -920,11 +1030,10 @@ public class LdapOperationServiceImpl implements LdapOperationService {
     }
 
     private void populateAttributeDataTypesMapping(String schemaEntryDn) {
-
         try {
             if (ATTRIBUTE_DATA_TYPES.size() == 0) {
                 //schemaEntryDn="ou=schema";
-                SearchResultEntry entry = lookup(schemaEntryDn, "attributeTypes");
+                SearchResultEntry entry = getConnectionPool().getEntry(schemaEntryDn, "attributeTypes");
                 Attribute attrAttributeTypes = entry.getAttribute("attributeTypes");
 
                 Map<String, Pair<String, String>> tmpMap = new HashMap<String, Pair<String, String>>();
@@ -961,7 +1070,7 @@ public class LdapOperationServiceImpl implements LdapOperationService {
                     if (syntaxOID != null) {
                         Class<?> cls = OID_SYNTAX_CLASS_MAPPING.get(syntaxOID);
                         if (cls != null) {
-                            ATTRIBUTE_DATA_TYPES.put(name, cls);
+                            ATTRIBUTE_DATA_TYPES.put(name.toLowerCase(), cls);
                         }
                     }
                 }
@@ -1043,25 +1152,25 @@ public class LdapOperationServiceImpl implements LdapOperationService {
                             Class<?> cls = ATTRIBUTE_DATA_TYPES.get(attributeName);
 
                             if (cls != null) {
-                                if (cls.equals(String.class)) {
-                                    if (caseSensitive) {
-                                        result = value1.compareTo(value2);
-                                    } else {
-                                        result = value1.toLowerCase().compareTo(value2.toLowerCase());
-                                    }
-                                } else
                                 if (cls.equals(Integer.class)) {
-                                    result = resultEntry1.getAttributeValueAsInteger(attributeName)
+                                    return resultEntry1.getAttributeValueAsInteger(attributeName)
                                             .compareTo(resultEntry2.getAttributeValueAsInteger(attributeName));
                                 } else
                                 if (cls.equals(Boolean.class)) {
-                                    result = resultEntry1.getAttributeValueAsBoolean(attributeName)
+                                    return resultEntry1.getAttributeValueAsBoolean(attributeName)
                                             .compareTo(resultEntry2.getAttributeValueAsBoolean(attributeName));
                                 } else
                                 if (cls.equals(Date.class)) {
-                                    result = resultEntry1.getAttributeValueAsDate(attributeName)
+                                    return resultEntry1.getAttributeValueAsDate(attributeName)
                                             .compareTo(resultEntry2.getAttributeValueAsDate(attributeName));
                                 }
+                            }
+
+                            // Default comparision
+                            if (caseSensitive) {
+                                result = value1.compareTo(value2);
+                            } else {
+                                result = value1.toLowerCase().compareTo(value2.toLowerCase());
                             }
                         }
                     }

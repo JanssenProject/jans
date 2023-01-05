@@ -14,13 +14,14 @@ import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.jwe.Jwe;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.util.JwtUtil;
+import io.jans.as.model.util.QueryStringDecoder;
 import io.jans.as.model.util.Util;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -30,19 +31,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import static io.jans.as.model.authorize.AuthorizeResponseParam.ACCESS_TOKEN;
-import static io.jans.as.model.authorize.AuthorizeResponseParam.AUD;
-import static io.jans.as.model.authorize.AuthorizeResponseParam.CODE;
-import static io.jans.as.model.authorize.AuthorizeResponseParam.EXP;
-import static io.jans.as.model.authorize.AuthorizeResponseParam.EXPIRES_IN;
-import static io.jans.as.model.authorize.AuthorizeResponseParam.ID_TOKEN;
-import static io.jans.as.model.authorize.AuthorizeResponseParam.ISS;
-import static io.jans.as.model.authorize.AuthorizeResponseParam.RESPONSE;
-import static io.jans.as.model.authorize.AuthorizeResponseParam.SCOPE;
-import static io.jans.as.model.authorize.AuthorizeResponseParam.SESSION_ID;
-import static io.jans.as.model.authorize.AuthorizeResponseParam.SID;
-import static io.jans.as.model.authorize.AuthorizeResponseParam.STATE;
-import static io.jans.as.model.authorize.AuthorizeResponseParam.TOKEN_TYPE;
+import static io.jans.as.model.authorize.AuthorizeResponseParam.*;
 
 /**
  * Represents an authorization response received from the authorization server.
@@ -63,6 +52,7 @@ public class AuthorizationResponse extends BaseResponse {
     private String state;
     private String sessionId;
     private String sid;
+    private String deviceSecret;
     private Map<String, String> customParams;
     private ResponseMode responseMode;
 
@@ -202,6 +192,7 @@ public class AuthorizationResponse extends BaseResponse {
         }
     }
 
+    @SuppressWarnings("java:S3776")
     private void loadParams(Map<String, String> params) throws UnsupportedEncodingException {
         if (params.containsKey(CODE)) {
             code = params.get(CODE);
@@ -214,6 +205,10 @@ public class AuthorizationResponse extends BaseResponse {
         if (params.containsKey(SID)) {
             sid = params.get(SID);
             params.remove(SID);
+        }
+        if (params.containsKey(DEVICE_SECRET)) {
+            deviceSecret = params.get(DEVICE_SECRET);
+            params.remove(DEVICE_SECRET);
         }
         if (params.containsKey(ACCESS_TOKEN)) {
             accessToken = params.get(ACCESS_TOKEN);
@@ -316,6 +311,14 @@ public class AuthorizationResponse extends BaseResponse {
 
     public void setSid(String sid) {
         this.sid = sid;
+    }
+
+    public String getDeviceSecret() {
+        return deviceSecret;
+    }
+
+    public void setDeviceSecret(String deviceSecret) {
+        this.deviceSecret = deviceSecret;
     }
 
     /**

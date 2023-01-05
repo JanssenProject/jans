@@ -9,8 +9,9 @@ package io.jans.as.client;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.token.ClientAssertionType;
 
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.core.Form;
+import jakarta.ws.rs.client.Invocation.Builder;
+import jakarta.ws.rs.core.Form;
+import org.apache.commons.lang.StringUtils;
 
 
 /**
@@ -45,10 +46,12 @@ public class ClientAuthnEnabler {
         if (request.getAuthenticationMethod() == AuthenticationMethod.CLIENT_SECRET_JWT ||
                 request.getAuthenticationMethod() == AuthenticationMethod.PRIVATE_KEY_JWT) {
             requestForm.param("client_assertion_type", ClientAssertionType.JWT_BEARER.toString());
-            if (request.getClientAssertion() != null) {
-                requestForm.param("client_assertion", request.getClientAssertion());
+
+            final String clientAssertion = request.getClientAssertion();
+            if (clientAssertion != null) {
+                requestForm.param("client_assertion", clientAssertion);
             }
-            if (request.getAuthUsername() != null && !request.getAuthUsername().isEmpty()) {
+            if (StringUtils.isNotBlank(request.getAuthUsername())) {
                 requestForm.param("client_id", request.getAuthUsername());
             }
         }

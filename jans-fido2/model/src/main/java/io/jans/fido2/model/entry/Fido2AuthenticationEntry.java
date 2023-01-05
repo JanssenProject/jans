@@ -12,6 +12,7 @@ import java.util.Date;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.JsonObject;
 import io.jans.orm.annotation.ObjectClass;
+import io.jans.orm.model.fido2.Fido2Entry;
 
 /**
  * Fido2 registration entry

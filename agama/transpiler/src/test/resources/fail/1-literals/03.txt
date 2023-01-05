@@ -1,0 +1,6 @@
+Flow flow
+    Basepath ""
+
+x = 'hello'
+
+//Failure reason: string literals are surrounded by double quotes only

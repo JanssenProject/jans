@@ -1,0 +1,16 @@
+<!DOCTYPE suite SYSTEM "http://beust.com/testng/testng-1.0.dtd" >
+<suite name="agama-syntax-flows" parallel="false">
+
+    <test name="Malformed syntax" enabled="true">
+        <classes>
+            <class name="io.jans.agama.test.MalformedFlowsTest" />
+        </classes>
+    </test>
+
+    <test name="OK syntax" enabled="true">
+        <classes>
+            <class name="io.jans.agama.test.ValidFlowsTest" />
+        </classes>
+    </test>
+
+</suite>

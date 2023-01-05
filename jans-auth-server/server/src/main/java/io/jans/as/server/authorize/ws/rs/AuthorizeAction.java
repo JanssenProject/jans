@@ -27,21 +27,14 @@ import io.jans.as.server.model.authorize.Claim;
 import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.server.model.authorize.ScopeChecker;
 import io.jans.as.server.model.common.CibaRequestCacheControl;
-import io.jans.as.server.model.common.SessionId;
-import io.jans.as.server.model.common.SessionIdState;
+import io.jans.as.server.model.common.DefaultScope;
+import io.jans.as.common.model.session.SessionId;
+import io.jans.as.common.model.session.SessionIdState;
 import io.jans.as.server.model.config.Constants;
 import io.jans.as.server.model.exception.AcrChangedException;
 import io.jans.as.server.model.ldap.ClientAuthorization;
 import io.jans.as.server.security.Identity;
-import io.jans.as.server.service.AuthenticationService;
-import io.jans.as.server.service.AuthorizeService;
-import io.jans.as.server.service.ClientAuthorizationsService;
-import io.jans.as.server.service.ClientService;
-import io.jans.as.server.service.CookieService;
-import io.jans.as.server.service.ErrorHandlerService;
-import io.jans.as.server.service.RedirectionUriService;
-import io.jans.as.server.service.RequestParameterService;
-import io.jans.as.server.service.SessionIdService;
+import io.jans.as.server.service.*;
 import io.jans.as.server.service.ciba.CibaRequestService;
 import io.jans.as.server.service.external.ExternalAuthenticationService;
 import io.jans.as.server.service.external.ExternalConsentGatheringService;
@@ -56,34 +49,27 @@ import io.jans.service.net.NetworkService;
 import io.jans.util.StringHelper;
 import io.jans.util.ilocale.LocaleUtil;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 
-import javax.enterprise.context.RequestScoped;
-import javax.faces.application.FacesMessage;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.faces.application.FacesMessage;
+import jakarta.faces.context.ExternalContext;
+import jakarta.faces.context.FacesContext;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static io.jans.as.server.service.DeviceAuthorizationService.SESSION_USER_CODE;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
@@ -91,7 +77,7 @@ import static org.apache.commons.lang3.BooleanUtils.isTrue;
 /**
  * @author Javier Rojas Blum
  * @author Yuriy Movchan
- * @version March 4, 2020
+ *  @version January 24, 2022
  */
 @RequestScoped
 @Named
@@ -414,7 +400,16 @@ public class AuthorizeAction {
             final boolean isTrusted = isTrue(appConfiguration.getTrustedClientEnabled()) && client.getTrustedClient();
             final boolean canGrantAccess = isTrue(appConfiguration.getSkipAuthorizationForOpenIdScopeAndPairwiseId())
                     && SubjectType.PAIRWISE.equals(client.getSubjectType()) && hasOnlyOpenidScope();
-            if (isTrusted || canGrantAccess) {
+            // There is no need to present the consent page:
+            // If Client is a Trusted Client.
+            // If a client is configured for pairwise identifiers, and the openid scope is the only scope requested.
+            // Also, we should make sure that the claims request is not enabled.
+            final boolean isPairwiseWithOnlyOpenIdScope = client.getSubjectType() == SubjectType.PAIRWISE
+                    && grantedScopes.size() == 1
+                    && grantedScopes.contains(DefaultScope.OPEN_ID.toString())
+                    && scope.equals(DefaultScope.OPEN_ID.toString())
+                    && claims == null && request == null;
+            if (isTrusted || canGrantAccess || isPairwiseWithOnlyOpenIdScope) {
                 permissionGranted(session);
                 return;
             }
@@ -490,7 +485,7 @@ public class AuthorizeAction {
                 String reqUriHash = reqUri.getFragment();
                 String reqUriWithoutFragment = reqUri.getScheme() + ":" + reqUri.getSchemeSpecificPart();
 
-                javax.ws.rs.client.Client clientRequest = ClientBuilder.newClient();
+                jakarta.ws.rs.client.Client clientRequest = ClientBuilder.newClient();
                 try {
                     Response clientResponse = clientRequest.target(reqUriWithoutFragment).request().buildGet().invoke();
                     clientRequest.close();
@@ -741,7 +736,7 @@ public class AuthorizeAction {
     }
 
     public void setLoginHint(String loginHint) {
-        this.loginHint = loginHint;
+        this.loginHint = StringEscapeUtils.escapeEcmaScript(loginHint);
     }
 
     public String getAcrValues() {

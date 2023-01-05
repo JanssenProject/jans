@@ -1,0 +1,6 @@
+Flow D.I.Y
+    Basepath "diy"
+
+Call var [1, 2 , 4]
+
+//Failure reason: List literals not allowed in a Call

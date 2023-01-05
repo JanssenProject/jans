@@ -1,21 +1,26 @@
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns="http://maven.apache.org/POM/4.0.0"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.jans</groupId>
 	<artifactId>jans-orm-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>1.0.6-SNAPSHOT</version>
 	<name>orm</name>
 
 	<prerequisites>
 		<maven>${maven.min-version}</maven>
 	</prerequisites>
 
+    <distributionManagement>
+	  <repository>
+          <id>github</id>
+          <name>GitHub Packages</name>
+          <url>https://maven.pkg.github.com/JanssenProject/jans</url>
+      </repository>
+    </distributionManagement>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.min-version>3.0.3</maven.min-version>
-		<janssen.version>1.0.0-SNAPSHOT</janssen.version>
+		<janssen.version>1.0.6-SNAPSHOT</janssen.version>
 
 		<jacoco.version>0.8.7</jacoco.version>
 
@@ -39,8 +44,10 @@
 		<module>core</module>
 		<module>ldap</module>
 		<module>couchbase</module>
+		<module>couchbase-libs</module>
  		<module>sql</module>
  		<module>spanner</module>
+ 		<module>spanner-libs</module>
 		<module>hybrid</module>
 		<module>cdi</module>
 		<module>standalone</module>
@@ -64,7 +71,7 @@
 		<repository>
 			<id>bouncycastle</id>
 			<name>Bouncy Castle</name>
-			<url>https://repo2.maven.org/maven2/org/bouncycastle</url>
+			<url>https://repo1.maven.org/maven2/org/bouncycastle</url>
 		</repository>
 	</repositories>
 
@@ -122,6 +129,11 @@
 					<groupId>org.jacoco</groupId>
 					<artifactId>jacoco-maven-plugin</artifactId>
 					<version>${jacoco.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-assembly-plugin</artifactId>
+					<version>3.3.0</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>

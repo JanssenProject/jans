@@ -1,5 +1,5 @@
 /*
- * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * Janssen Project software is available under the Apache License (2004). See http://www.apache.org/licenses/ for full text.
  *
  * Copyright (c) 2020, Janssen Project
  */
@@ -12,11 +12,15 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +36,7 @@ import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.SubQueryExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.Wildcard;
 import com.querydsl.sql.RelationalPathBase;
@@ -42,27 +47,30 @@ import com.querydsl.sql.dml.SQLInsertClause;
 import com.querydsl.sql.dml.SQLUpdateClause;
 
 import io.jans.orm.exception.MappingException;
-import io.jans.orm.exception.extension.PersistenceExtension;
 import io.jans.orm.exception.operation.DeleteException;
 import io.jans.orm.exception.operation.DuplicateEntryException;
 import io.jans.orm.exception.operation.EntryConvertationException;
 import io.jans.orm.exception.operation.EntryNotFoundException;
 import io.jans.orm.exception.operation.PersistenceException;
 import io.jans.orm.exception.operation.SearchException;
+import io.jans.orm.extension.PersistenceExtension;
 import io.jans.orm.model.AttributeData;
 import io.jans.orm.model.AttributeDataModification;
-import io.jans.orm.model.AttributeDataModification.AttributeModificationType;
+import io.jans.orm.model.AttributeType;
 import io.jans.orm.model.BatchOperation;
 import io.jans.orm.model.EntryData;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SearchScope;
+import io.jans.orm.model.AttributeDataModification.AttributeModificationType;
 import io.jans.orm.operation.auth.PasswordEncryptionHelper;
 import io.jans.orm.sql.impl.SqlBatchOperationWraper;
 import io.jans.orm.sql.model.ConvertedExpression;
 import io.jans.orm.sql.model.JsonAttributeValue;
+import io.jans.orm.sql.model.JsonString;
 import io.jans.orm.sql.model.SearchReturnDataType;
 import io.jans.orm.sql.model.TableMapping;
 import io.jans.orm.sql.operation.SqlOperationService;
+import io.jans.orm.sql.operation.SupportedDbType;
 import io.jans.orm.sql.operation.watch.OperationDurationUtil;
 import io.jans.orm.util.ArrayHelper;
 import io.jans.orm.util.StringHelper;
@@ -83,6 +91,8 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 
 	private boolean disableAttributeMapping = false;
 
+	private boolean mariaDb = false;
+
 	private PersistenceExtension persistenceExtension;
 
 	private SQLQueryFactory sqlQueryFactory;
@@ -90,6 +100,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 	private String schemaName;
 
 	private Path<String> docAlias = ExpressionUtils.path(String.class, DOC_ALIAS);
+	private Path<String> docInnerAlias = ExpressionUtils.path(String.class, DOC_INNER_ALIAS);
 
     @SuppressWarnings("unused")
     private SqlOperationServiceImpl() {
@@ -104,6 +115,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 	private void init() {
 		this.sqlQueryFactory = connectionProvider.getSqlQueryFactory();
 		this.schemaName = connectionProvider.getSchemaName();
+		this.mariaDb = connectionProvider.isMariaDb();
 	}
 
     @Override
@@ -123,7 +135,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
         if (password != null) {
 	        try {
 		        List<AttributeData> attributes = lookup(key, objectClass, USER_PASSWORD);
-		        
+
 		        Object userPasswordObj = null;
 		        for (AttributeData attribute : attributes) {
 		        	if (StringHelper.equalsIgnoreCase(attribute.getName(), USER_PASSWORD)) {
@@ -172,19 +184,24 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 
 	private boolean addEntryImpl(TableMapping tableMapping, String key, Collection<AttributeData> attributes) throws PersistenceException {
 		try {
-			Map<String, String> columTypes = tableMapping.getColumTypes();
+			Map<String, AttributeType> columTypes = tableMapping.getColumTypes();
 
 			RelationalPathBase<Object> tableRelationalPath = buildTableRelationalPath(tableMapping);
 			SQLInsertClause sqlInsertQuery = this.sqlQueryFactory.insert(tableRelationalPath);
 
 			for (AttributeData attribute : attributes) {
-				String attributeType = columTypes.get(attribute.getName().toLowerCase());
-				boolean multiValued = (attributeType != null) && "json".equals(attributeType);
+				AttributeType attributeType = getAttributeType(columTypes, attribute);
+				if (attributeType == null) {
+		            throw new PersistenceException(String.format("Failed to find attribute type for '%s'", attribute.getName()));
+				}
 
-				sqlInsertQuery.columns(Expressions.stringPath(attribute.getName()));
+				boolean multiValued = (attributeType != null) && isJsonColumn(tableMapping.getTableName(), attributeType.getType());
+
 				if (multiValued || Boolean.TRUE.equals(attribute.getMultiValued())) {
+					sqlInsertQuery.columns(Expressions.path(Object.class, attribute.getName()));
 					sqlInsertQuery.values(convertValueToDbJson(attribute.getValues()));
 				} else {
+					sqlInsertQuery.columns(Expressions.stringPath(attribute.getName()));
 					sqlInsertQuery.values(attribute.getValue());
 				}
 			}
@@ -212,7 +229,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 
 	private boolean updateEntryImpl(TableMapping tableMapping, String key, List<AttributeDataModification> mods) throws PersistenceException {
 		try {
-			Map<String, String> columTypes = tableMapping.getColumTypes();
+			Map<String, AttributeType> columTypes = tableMapping.getColumTypes();
 
 			RelationalPathBase<Object> tableRelationalPath = buildTableRelationalPath(tableMapping);
 			SQLUpdateClause sqlUpdateQuery = this.sqlQueryFactory.update(tableRelationalPath);
@@ -221,8 +238,12 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 				AttributeData attribute = attributeMod.getAttribute();
 				Path path = Expressions.stringPath(attribute.getName());
 
-				String attributeType = columTypes.get(attribute.getName().toLowerCase());
-				boolean multiValued = (attributeType != null) && "json".equals(attributeType);
+				AttributeType attributeType = getAttributeType(columTypes, attribute);
+				if (attributeType == null) {
+		            throw new PersistenceException(String.format("Failed to find attribute type for '%s'", attribute.getName()));
+				}
+
+				boolean multiValued = (attributeType != null) && isJsonColumn(tableMapping.getTableName(), attributeType.getType());
 				
 				AttributeModificationType type = attributeMod.getModificationType();
                 if ((AttributeModificationType.ADD == type) || (AttributeModificationType.FORCE_UPDATE == type)) {
@@ -300,15 +321,26 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 
     private long deleteImpl(TableMapping tableMapping, ConvertedExpression expression, int count) throws DeleteException {
 		try {
-			RelationalPathBase<Object> tableRelationalPath = buildTableRelationalPath(tableMapping);
-			SQLDeleteClause sqlDeleteQuery = this.sqlQueryFactory.delete(tableRelationalPath);
-
 			Predicate exp = (Predicate) expression.expression();
-			sqlDeleteQuery.where(exp);
+			SQLDeleteClause sqlDeleteQuery;
 
-			if (count > 0) {
-				sqlDeleteQuery = sqlDeleteQuery.limit(count);
-            }
+			RelationalPathBase<Object> tableRelationalPath = buildTableRelationalPath(tableMapping);
+			if ((count > 0) && (SupportedDbType.POSTGRESQL == connectionProvider.getDbType())) {
+				// Workaround because PostgreSQL not supports limit in delete request
+
+				// Inner query
+				RelationalPathBase<Object> innerTableRelationalPath = new RelationalPathBase<>(Object.class, DOC_INNER_ALIAS, this.schemaName, tableMapping.getTableName());
+				SubQueryExpression<String> sqlSelectQuery = this.sqlQueryFactory.select(Expressions.path(String.class, docInnerAlias, DOC_ID)).from(innerTableRelationalPath)
+						.where(exp).limit(count);
+
+				Predicate deleteExp = ExpressionUtils.in(Expressions.stringPath(DOC_ID), sqlSelectQuery);
+				sqlDeleteQuery = this.sqlQueryFactory.delete(tableRelationalPath).where(deleteExp);
+			} else {
+				sqlDeleteQuery = this.sqlQueryFactory.delete(tableRelationalPath).where(exp);
+				if (count > 0) {
+					sqlDeleteQuery = sqlDeleteQuery.limit(count);
+	            }
+			}
 
 			long rowDeleted = sqlDeleteQuery.execute();
 
@@ -362,7 +394,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 					.where(whereExp).limit(1);
 			
 			try (ResultSet resultSet = sqlSelectQuery.getResults();) {
-				List<AttributeData> result = getAttributeDataList(resultSet, true);
+				List<AttributeData> result = getAttributeDataList(tableMapping, resultSet, true);
 				if (result != null) {
 					return result;
 				}
@@ -423,13 +455,12 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 	            boolean collectSearchResult;
 	
 	            SQLQuery<?> query;
+	            ResultSet resultSet = null;
 	            int currentLimit;
 	    		try {
 	                int resultCount = 0;
 	                int lastCountRows = 0;
 	                do {
-	                    collectSearchResult = true;
-	
 	                    currentLimit = pageSize;
 	                    if (count > 0) {
 	                        currentLimit = Math.min(pageSize, count - resultCount);
@@ -440,12 +471,12 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 	                    queryStr = query.getSQL().getSQL();
 	                    LOG.debug("Executing query: '" + queryStr + "'");
 
-	                    try (ResultSet resultSet = query.getResults()) {
-	                    	lastResult = getEntryDataList(resultSet);
-	                    }
+	                    resultSet = query.getResults();
+	                    lastResult = getEntryDataList(tableMapping, resultSet);
 
 		    			lastCountRows = lastResult.size();
 		    			
+	                    collectSearchResult = true;
 	                    if (batchOperation != null) {
 	                        collectSearchResult = batchOperation.collectSearchResult(lastCountRows);
 	                    }
@@ -468,6 +499,14 @@ public class SqlOperationServiceImpl implements SqlOperationService {
         			throw new SearchException(String.format("Failed to build search entries query. Key: '%s', expression: '%s'", key, expression.expression()), ex);
 	    		} catch (SQLException | EntryConvertationException ex) {
 	    			throw new SearchException(String.format("Failed to execute query '%s'  with key: '%s'", queryStr, key), ex);
+	    		} finally {
+	    			if (resultSet != null) {
+	    				try {
+							resultSet.close();
+						} catch (SQLException ex) {
+			    			throw new SearchException(String.format("Failed to close query after paged result collection. Query '%s'  with key: '%s'", queryStr, key), ex);
+						}
+	    			}
 	    		}
 	        } else {
 	    		try {
@@ -484,7 +523,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
                     LOG.debug("Execution query: '" + queryStr + "'");
 
                     try (ResultSet resultSet = query.getResults()) {
-		    			lastResult = getEntryDataList(resultSet);
+		    			lastResult = getEntryDataList(tableMapping, resultSet);
 		    			searchResultList.addAll(lastResult);
                     }
         		} catch (QueryException ex) {
@@ -551,7 +590,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
         return results;
     }
 
-    private List<AttributeData> getAttributeDataList(ResultSet resultSet, boolean skipDn) throws EntryConvertationException {
+    private List<AttributeData> getAttributeDataList(TableMapping tableMapping, ResultSet resultSet, boolean skipDn) throws EntryConvertationException {
         try {
             if ((resultSet == null)) {
                 return null;
@@ -593,7 +632,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 	                	continue;
 	                }
 	            } else {
-	            	if ("json".equals(columnTypeName)) {
+	            	if (isJsonColumn(tableMapping.getTableName(), columnTypeName)) {
 	            		attributeValueObjects = convertDbJsonToValue(attributeObject.toString());
 	            		multiValued = Boolean.TRUE;
 	            	} else if (attributeObject instanceof Integer) {
@@ -611,15 +650,18 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 						attributeValueObjects = new Object[] { attributeObject };
 					} else if (attributeObject instanceof String) {
 						Object value = attributeObject.toString();
-						try {
-							SimpleDateFormat jsonDateFormat = new SimpleDateFormat(SQL_DATA_FORMAT);
-							value = jsonDateFormat.parse(attributeObject.toString());
-						} catch (Exception ex) {
+						Date dateValue = decodeTime(attributeObject.toString(), true);
+						if (dateValue != null) {
+							value = dateValue;
 						}
+
 						attributeValueObjects = new Object[] { value };
 					} else if (attributeObject instanceof Timestamp) {
 						attributeValueObjects = new Object[] {
 								new java.util.Date(((Timestamp) attributeObject).getTime()) };
+					} else if (attributeObject instanceof LocalDateTime) {
+						attributeValueObjects = new Object[] {
+								new java.util.Date(Timestamp.valueOf((LocalDateTime) attributeObject).getTime()) };
 					} else {
 						Object value = attributeObject.toString();
 						attributeValueObjects = new Object[] { value };
@@ -641,12 +683,11 @@ public class SqlOperationServiceImpl implements SqlOperationService {
         }
     }
 
-    private List<EntryData> getEntryDataList(ResultSet resultSet) throws EntryConvertationException, SQLException {
+    private List<EntryData> getEntryDataList(TableMapping tableMapping, ResultSet resultSet) throws EntryConvertationException, SQLException {
     	List<EntryData> entryDataList = new LinkedList<>();
 
-    	List<AttributeData> attributeDataList = null;
     	while (!resultSet.isLast()) {
-    		attributeDataList = getAttributeDataList(resultSet, false);
+    		List<AttributeData> attributeDataList = getAttributeDataList(tableMapping, resultSet, false);
     		if (attributeDataList == null) {
     			break;
     		}
@@ -702,6 +743,13 @@ public class SqlOperationServiceImpl implements SqlOperationService {
     public DatabaseMetaData getMetadata() {
         return connectionProvider.getDatabaseMetaData();
     }
+
+	@Override
+	public TableMapping getTabeMapping(String key, String objectClass) {
+    	TableMapping tableMapping = connectionProvider.getTableMappingByKey(key, objectClass);
+    	
+    	return tableMapping;
+	}
 
 	@Override
 	public void setPersistenceExtension(PersistenceExtension persistenceExtension) {
@@ -827,24 +875,73 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 //		return resultAttributeNames;
 	}
 
-	private String convertValueToDbJson(Object propertyValue) {
+	@Override
+    public String encodeTime(Date date) {
+        if (date == null) {
+            return null;
+        }
+
+        SimpleDateFormat jsonDateFormat = new SimpleDateFormat(SqlOperationService.SQL_DATA_FORMAT);
+        return jsonDateFormat.format(date);
+    }
+
+    @Override
+    public Date decodeTime(String date, boolean silent) {
+        if (StringHelper.isEmpty(date)) {
+            return null;
+        }
+
+        // Add ending Z if necessary
+        String dateZ = date.endsWith("Z") ? date : date + "Z";
+        try {
+            return new Date(Instant.parse(dateZ).toEpochMilli());
+        } catch (DateTimeParseException ex) {
+	        try {
+	            SimpleDateFormat jsonDateFormat = new SimpleDateFormat(SqlOperationService.SQL_DATA_FORMAT);
+	            return jsonDateFormat.parse(date);
+	        } catch (ParseException ex2) {
+	        	if (!silent) {
+		            LOG.error("Failed to decode generalized time '{}'", date, ex2);
+	        	}
+	
+	        	return null;
+	        }
+        }
+    }
+
+	private Object convertValueToDbJson(Object propertyValue) {
 		try {
-//			String value = JSON_OBJECT_MAPPER.writeValueAsString(propertyValue);
-
-			JsonAttributeValue attributeValue;
-			if (propertyValue == null) {
-				attributeValue = new JsonAttributeValue();
-			} if (propertyValue instanceof List) {
-				attributeValue = new JsonAttributeValue(((List) propertyValue).toArray());
-			} else if (propertyValue.getClass().isArray()) {
-				attributeValue = new JsonAttributeValue((Object[]) propertyValue);
+			if (SupportedDbType.POSTGRESQL == connectionProvider.getDbType()) {
+				Object[] attributeValue;
+				if (propertyValue == null) {
+					attributeValue = new Object[0];
+				} if (propertyValue instanceof List) {
+					attributeValue = ((List<?>) propertyValue).toArray();
+				} else if (propertyValue.getClass().isArray()) {
+					attributeValue = (Object[]) propertyValue;
+				} else {
+					attributeValue = new Object[] { propertyValue };
+				}
+	
+				String value = JSON_OBJECT_MAPPER.writeValueAsString(attributeValue);
+	
+				return new JsonString(value);
 			} else {
-				attributeValue = new JsonAttributeValue(new Object[] { propertyValue });
+				JsonAttributeValue attributeValue;
+				if (propertyValue == null) {
+					attributeValue = new JsonAttributeValue();
+				} if (propertyValue instanceof List) {
+					attributeValue = new JsonAttributeValue(((List<?>) propertyValue).toArray());
+				} else if (propertyValue.getClass().isArray()) {
+					attributeValue = new JsonAttributeValue((Object[]) propertyValue);
+				} else {
+					attributeValue = new JsonAttributeValue(new Object[] { propertyValue });
+				}
+
+				String value = JSON_OBJECT_MAPPER.writeValueAsString(attributeValue);
+
+				return value;
 			}
-
-			String value = JSON_OBJECT_MAPPER.writeValueAsString(attributeValue);
-
-			return value;
 		} catch (Exception ex) {
 			LOG.error("Failed to convert '{}' to json value:", propertyValue, ex);
 			throw new MappingException(String.format("Failed to convert '%s' to json value", propertyValue));
@@ -854,19 +951,46 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 	private Object[] convertDbJsonToValue(String jsonValue) {
 		try {
 //			Object[] values = JSON_OBJECT_MAPPER.readValue(jsonValue, Object[].class);
+			if (SupportedDbType.POSTGRESQL == connectionProvider.getDbType()) {
+				Object[] values = JSON_OBJECT_MAPPER.readValue(jsonValue, Object[].class);
 
-			JsonAttributeValue attributeValue = JSON_OBJECT_MAPPER.readValue(jsonValue, JsonAttributeValue.class);
-			
-			Object[] values = null;
-			if (attributeValue != null) {
-				values = attributeValue.getValues();
+				return values;
+			} else {
+				JsonAttributeValue attributeValue = JSON_OBJECT_MAPPER.readValue(jsonValue, JsonAttributeValue.class);
+				
+				Object[] values = null;
+				if (attributeValue != null) {
+					values = attributeValue.getValues();
+				}
+	
+				return values;
 			}
-
-			return values;
 		} catch (Exception ex) {
 			LOG.error("Failed to convert json value '{}' to array:", jsonValue, ex);
 			throw new MappingException(String.format("Failed to convert json value '%s' to array", jsonValue));
 		}
+	}
+
+	public boolean isJsonColumn(String tableName, String columnTypeName) {
+		if (columnTypeName == null) {
+			return false;
+		}
+
+		if (mariaDb && SqlOperationService.LONGTEXT_TYPE_NAME.equals(columnTypeName)) {
+			return true;
+		}
+		
+//		String engineType = connectionProvider.getEngineType(tableName);
+//		if ((engineType != null) && engineType.equalsIgnoreCase("mariadb")) {
+//			return "longtext".equals(columnTypeName);
+//		}
+
+		return SqlOperationService.JSON_TYPE_NAME.equals(columnTypeName) || SqlOperationService.JSONB_TYPE_NAME.equals(columnTypeName);
+		
+	}
+
+	private AttributeType getAttributeType(Map<String, AttributeType> columTypes, AttributeData attribute) {
+		return columTypes.get(attribute.getName().toLowerCase());
 	}
 
 }

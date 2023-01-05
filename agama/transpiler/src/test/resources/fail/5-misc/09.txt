@@ -1,0 +1,6 @@
+Flow D.I.D
+    Basepath "dad"
+
+x.a = Call java.lang.Math#min 1 (Call java.lang.Math#max 2 3)
+
+//Failure reason: parenthesis not supported in Agama

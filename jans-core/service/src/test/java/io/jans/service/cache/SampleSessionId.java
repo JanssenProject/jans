@@ -6,14 +6,13 @@
 
 package io.jans.service.cache;
 
-import com.couchbase.client.java.cluster.User;
 import com.google.common.collect.Maps;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DN;
 import io.jans.orm.annotation.JsonObject;
+import jakarta.persistence.Transient;
 
 import javax.annotation.Nonnull;
-import javax.persistence.Transient;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;
@@ -69,9 +68,6 @@ public class SampleSessionId implements Serializable {
 
     @Transient
     private transient boolean persisted;
-
-    @Transient
-    private User user;
 
     public SampleSessionId() {
     }
@@ -153,14 +149,6 @@ public class SampleSessionId implements Serializable {
 
     public void setUserDn(String p_userDn) {
         userDn = p_userDn != null ? p_userDn : "";
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
     }
 
     public Date getAuthenticationTime() {

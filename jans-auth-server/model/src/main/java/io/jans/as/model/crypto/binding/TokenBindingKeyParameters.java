@@ -36,13 +36,13 @@ public enum TokenBindingKeyParameters {
         return byteValue;
     }
 
-    public static TokenBindingKeyParameters valueOf(int byteValue) {
+    public static TokenBindingKeyParameters valueOf(int byteValue) throws TokenBindingParseException {
         for (TokenBindingKeyParameters v : values()) {
             if (v.getByteValue() == byteValue) {
                 return v;
             }
         }
-        throw new RuntimeException("Failed to identify TokenBindingKeyParameters by byteValue");
+        throw new TokenBindingParseException("Failed to identify TokenBindingKeyParameters, byteValue: " + byteValue);
     }
 
     @Override

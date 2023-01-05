@@ -1,7 +1,6 @@
 package io.jans.as.persistence.model;
 
 import io.jans.orm.annotation.AttributeName;
-import io.jans.orm.annotation.DN;
 import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.Expiration;
 import io.jans.orm.annotation.JsonObject;
@@ -21,9 +20,6 @@ import java.util.Date;
 public class Par extends DeletableEntity implements Serializable {
 
     private static final long serialVersionUID = -3332496019942067971L;
-
-    @DN
-    private String dn;
 
     @AttributeName(name = "jansId", consistency = true)
     private String id;
@@ -57,16 +53,6 @@ public class Par extends DeletableEntity implements Serializable {
         return exp == null || exp.before(now);
     }
 
-    @Override
-    public String getDn() {
-        return dn;
-    }
-
-    @Override
-    public void setDn(String dn) {
-        this.dn = dn;
-    }
-
     public String getId() {
         return id;
     }
@@ -86,7 +72,7 @@ public class Par extends DeletableEntity implements Serializable {
     @Override
     public String toString() {
         return "Par{" +
-                "dn='" + dn + '\'' +
+                "dn='" + getDn() + '\'' +
                 ", id='" + id + '\'' +
                 ", attributes=" + attributes +
                 "} " + super.toString();

@@ -1,0 +1,1301 @@
+dn: inum=29DA,ou=attributes,o=jans
+description: XRI i-number, persistent non-reassignable identifier
+displayName: Inum
+inum: 29DA
+jansAttrEditTyp: admin
+jansAttrName: inum
+jansAttrOrigin: jansPerson
+jansAttrTyp: string
+jansAttrViewTyp: user
+jansAttrViewTyp: admin
+jansClaimName: inum
+jansSAML1URI: urn:mace:dir:attribute-def:inum
+jansSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.117
+jansStatus: active
+objectClass: top
+objectClass: jansAttr
+urn: urn:jans:dir:attribute-def:inum
+
+dn: inum=B4B0,ou=attributes,o=jans
+description: Given name(s) or first name(s) of the End-User.Note that in some cultures, people can have multiple given names;all can be present, with the names being separated by space characters.
+displayName: First Name
+inum: B4B0
+jansAttrEditTyp: user
+jansAttrEditTyp: admin
+jansAttrName: givenName
+jansAttrOrigin: jansPerson
+jansAttrTyp: string
+jansAttrViewTyp: user
+jansAttrViewTyp: admin
+jansClaimName: given_name
+jansSAML1URI: urn:mace:dir:attribute-def:givenName
+jansSAML2URI: urn:oid:2.5.4.42
+jansStatus: active
+objectClass: top
+objectClass: jansAttr
+urn: urn:mace:dir:attribute-def:givenName
+
+dn: inum=42E0,ou=attributes,o=jans
+description: A domain issued and managed identifier for the person.Subject - Identifier for the End-User at the Issuer.
+displayName: Username
+inum: 42E0
+jansAttrEditTyp: admin
+jansAttrName: uid
+jansAttrOrigin: jansPerson
+jansAttrTyp: string
+jansAttrViewTyp: user
+jansAttrViewTyp: admin
+jansClaimName: user_name
+jansSAML1URI: urn:mace:dir:attribute-def:uid
+jansSAML2URI: urn:oid:0.9.2342.19200300.100.1.1
+jansStatus: active
+objectClass: top
+objectClass: jansAttr
+urn: urn:mace:dir:attribute-def:uid
+
+dn: inum=B52A,ou=attributes,o=jans
+description: A domain issued and managed identifier for the person.Subject - Identifier for the End-User at the Issuer.
+displayName: Preferred Username
+inum: B52A
+jansAttrEditTyp: admin
+jansAttrName: jansPrefUsrName
+jansAttrOrigin: jansPerson
+jansAttrTyp: string
+jansAttrViewTyp: user
+jansAttrViewTyp: admin
+jansClaimName: preferred_username
+jansSAML1URI: urn:mace:dir:attribute-def:preferredUsername
+jansSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.320
+jansStatus: active
+objectClass: top
+objectClass: jansAttr
+urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/preferred_username
+
+dn: inum=64A0,ou=attributes,o=jans
+description: URL of the End-User's profile page. The contents of this Web page SHOULD be about the End-User.
+displayName: Profile URL
+inum: 64A0
+jansAttrEditTyp: user
+jansAttrEditTyp: admin
+jansAttrName: profile
+jansAttrOrigin: jansPerson
+jansAttrTyp: string
+jansAttrViewTyp: user
+jansAttrViewTyp: admin
+jansClaimName: profile
+jansSAML1URI: urn:mace:dir:attribute-def:profile
+jansSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.321
+jansStatus: active
+objectClass: top
+objectClass: jansAttr
+urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/profile
+
+dn: inum=3B47,ou=attributes,o=jans
+description: URL of the End-User's Web page or blog.
+displayName: Website URL
+inum: 3B47
+jansAttrEditTyp: user
+jansAttrEditTyp: admin
+jansAttrName: website
+jansAttrOrigin: jansPerson
+jansAttrTyp: string
+jansAttrViewTyp: user
+jansAttrViewTyp: admin
+jansClaimName: website
+jansSAML1URI: urn:mace:dir:attribute-def:website
+jansSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.323
+jansStatus: active
+objectClass: top
+objectClass: jansAttr
+urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/website
+
+dn: inum=8F88,ou=attributes,o=jans
+description: True if the End-User's e-mail address has been verified; otherwise false
+displayName: Email Verified
+inum: 8F88
+jansAttrEditTyp: admin
+jansAttrName: emailVerified
+jansAttrOrigin: jansPerson
+jansAttrTyp: boolean
+jansAttrViewTyp: user
+jansAttrViewTyp: admin
+jansClaimName: email_verified
+jansSAML1URI: urn:mace:dir:attribute-def:emailVerified
+jansSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.324
+jansStatus: active
+objectClass: top
+objectClass: jansAttr
+urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/email_verified
+
+dn: inum=B17A,ou=attributes,o=jans
+description: True if the End-User's phone number has been verified; otherwise false
+displayName: Phone Number Verified
+inum: B17A
+jansAttrEditTyp: admin
+jansAttrName: phoneNumberVerified
+jansAttrOrigin: jansPerson
+jansAttrTyp: boolean
+jansAttrViewTyp: user
+jansAttrViewTyp: admin
+jansClaimName: phone_number_verified
+jansSAML1URI: urn:mace:dir:attribute-def:phoneNumberVerified
+jansSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.329
+jansStatus: active
+objectClass: top
+objectClass: jansAttr
+urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/phone_number_verified
+
+dn: inum=C8D5,ou=attributes,o=jans
+description: End-User's preferred postal address. The value of the address member is aJSON [RFC4627] structure containing some or all of the members defined inOpenID Connect 1.0 Core Standard Section 5.1.1
+displayName: OpenID Connect JSON formatted address
+inum: C8D5
+jansAttrEditTyp: admin
+jansAttrName: address
+jansAttrOrigin: jansPerson
+jansAttrTyp: string
+jansAttrViewTyp: user
+jansAttrViewTyp: admin
+jansClaimName: address
+jansSAML1URI: urn:mace:dir:attribute-def:address
+jansSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.330
+jansStatus: active
+objectClass: top
+objectClass: jansAttr
+urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/address
+
+dn: inum=BE64,ou=attributes,o=jans
+description: Time the End-User's information was last updated. Its value isaJSON number representing the number of seconds from 1970-01-01T0:0:0Z as measured inUTC until the date/time.
+displayName: Last Updated
+inum: BE64
+jansAttrEditTyp: admin
+jansAttrName: updatedAt
+jansAttrOrigin: jansPerson
+jansAttrTyp: generalizedTime
+jansAttrViewTyp: user
+jansAttrViewTyp: admin
+jansClaimName: updated_at
+jansSAML1URI: urn:mace:dir:attribute-def:updatedAt
+jansSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.331
+jansStatus: active
+objectClass: top
+objectClass: jansAttr
+urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/address
+
+dn: inum=3692,ou=attributes,o=jans
+description: Gender of the person, either male or female
+displayName: Gender, male or female
+inum: 3692
+jansAttrEditTyp: user
+jansAttrEditTyp: admin
+jansAttrName: gender
+jansAttrOrigin: jansPerson
+jansAttrTyp: string
+jansAttrViewTyp: user
+jansAttrViewTyp: admin
+jansClaimName: gender
+jansSAML1URI: urn:mace:dir:attribute-def:gender
+jansSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.325
+jansStatus: active
+objectClass: top
+objectClass: jansAttr
+urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/gender
+
+dn: inum=98FC,ou=attributes,o=jans
+description: End-User's birthday, represented as an ISO 8601:2004 [ISO8601-2004] YYYY-MM-DD format.
+displayName: Birthdate
+inum: 98FC
+jansAttrEditTyp: user
+jansAttrEditTyp: admin
+jansAttrName: birthdate
+jansAttrOrigin: jansPerson
+jansAttrTyp: string
+jansAttrViewTyp: user
+jansAttrViewTyp: admin
+jansClaimName: birthdate
+jansSAML1URI: urn:mace:dir:attribute-def:birthdate
+jansSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.326
+jansStatus: active
+objectClass: top
+objectClass: jansAttr
+urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/birthdate
+
+dn: inum=D2E0,ou=attributes,o=jans
+description: memberOf
+displayName: memberOf
+inum: D2E0
+jansAttrEditTyp: admin
+jansAttrName: memberOf
+jansAttrOrigin: jansPerson
+jansAttrTyp: string
+jansAttrViewTyp: admin
+jansClaimName: member_of
+jansMultivaluedAttr: true
+jansSAML1URI: urn:mace:dir:attribute-def:memberOf
+jansSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.121
+jansStatus: active
+objectClass: top
+objectClass: jansAttr
+urn: urn:jans:dir:attribute-def:memberOf
+
+dn: inum=A901,ou=attributes,o=jans
+description: String from time zone database representing the End-User's time zone. For example,Europe/Paris or America/Los_Angeles.
+displayName: Time zone info
+inum: A901
+jansAttrEditTyp: user
+jansAttrEditTyp: admin
+jansAttrName: zoneinfo
+jansAttrOrigin: jansPerson
+jansAttrTyp: string
+jansAttrViewTyp: user
+jansAttrViewTyp: admin
+jansClaimName: zoneinfo
+jansSAML1URI: urn:mace:dir:attribute-def:zoneinfo
+jansSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.327
+jansStatus: active
+objectClass: top
+objectClass: jansAttr
+urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/zoneinfo
+
+dn: inum=36D9,ou=attributes,o=jans
+description:: RW5kLVVzZXIncyBsb2NhbGUsIHJlcHJlc2VudGVkIGFzIGEgQkNQNDcgKFJGQzU2NDYpIGxhbmd1YWdlIHRhZy4gVGhpcyBpcyB0eXBpY2FsbHkgYW5JU08gNjM5LTEgQWxwaGEtMiBbSVNPNjM54oCRMV0gbGFuZ3VhZ2UgY29kZSBpbiBsb3dlcmNhc2UgYW5kIGFuIElTTyAzMTY2LTEgQWxwaGEtMmNvdW50cnkgY29kZSBpbiB1cHBlcmNhc2UsIHNlcGFyYXRlZCBieSBhIGRhc2guIEZvciBleGFtcGxlLCBlbi1VUyBvciBmci1DQS4gQXMgYSBjb21wYXRpYmlsaXR5IG5vdGUsc29tZSBpbXBsZW1lbnRhdGlvbnMgaGF2ZSB1c2VkIGFuIHVuZGVyc2NvcmUgYXMgdGhlIHNlcGFyYXRvciByYXRoZXIgdGhhbiBhIGRhc2gsIGZvciBleGFtcGxlLCBlbl9VUztSZWx5aW5nIFBhcnRpZXMgTUFZIGNob29zZSB0byBhY2NlcHQgdGhpcyBsb2NhbGUgc3ludGF4IGFzIHdlbGwu
+displayName: Locale
+inum: 36D9
+jansAttrEditTyp: user
+jansAttrEditTyp: admin
+jansAttrName: locale
+jansAttrOrigin: jansPerson
+jansAttrTyp: string
+jansAttrViewTyp: user
+jansAttrViewTyp: admin
+jansClaimName: locale
+jansSAML1URI: urn:mace:dir:attribute-def:locale
+jansSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.328
+jansStatus: active
+objectClass: top
+objectClass: jansAttr
+urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/locale
+
+dn: inum=8A11,ou=attributes,o=jans
+description: Secret Question
+displayName: Secret Question
+inum: 8A11
+jansAttrEditTyp: user
+jansAttrEditTyp: admin
+jansAttrName: secretQuestion
+jansAttrOrigin: jansPerson
+jansAttrTyp: string
+jansAttrViewTyp: user
+jansAttrViewTyp: admin
+jansClaimName: secret_question
+jansSAML1URI: urn:mace:dir:attribute-def:secretQuestion
+jansSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.306
+jansStatus: active
+objectClass: top
+objectClass: jansAttr
+urn: urn:jans:dir:attribute-def:secretQuestion
+
+dn: inum=C703,ou=attributes,o=jans
+description: Secret Answer
+displayName: Secret Answer
+inum: C703
+jansAttrEditTyp: user
+jansAttrEditTyp: admin
+jansAttrName: secretAnswer
+jansAttrOrigin: jansPerson
+jansAttrTyp: string
+jansAttrViewTyp: user
+jansAttrViewTyp: admin
+jansClaimName: secret_answer
+jansSAML1URI: urn:mace:dir:attribute-def:secretAnswer
+jansSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.305
+jansStatus: active
+objectClass: top
+objectClass: jansAttr
+urn: urn:jans:dir:attribute-def:secretAnswer
+
+dn: inum=6493,ou=attributes,o=jans
+description: Preferred Language
+displayName: Preferred Language
+inum: 6493
+jansAttrEditTyp: user
+jansAttrEditTyp: admin
+jansAttrName: preferredLanguage
+jansAttrOrigin: jansPerson
+jansAttrTyp: string
+jansAttrViewTyp: user
+jansAttrViewTyp: admin
+jansAttrViewTyp: whitePages
+jansClaimName: preferred_language
+jansSAML1URI: urn:mace:dir:attribute-def:preferredLanguage
+jansSAML2URI: urn:oid:2.16.840.1.113730.3.1.39
+jansStatus: active
+objectClass: top
+objectClass: jansAttr
+urn: urn:mace:dir:attribute-def:preferredLanguage
+
+dn: inum=CAE3,ou=attributes,o=jans
+description: Primary Email Address
+displayName: Email
+inum: CAE3
+jansAttrEditTyp: user
+jansAttrEditTyp: admin
+jansAttrName: mail
+jansAttrOrigin: jansPerson
+jansAttrTyp: string
+jansAttrViewTyp: user
+jansAttrViewTyp: admin
+jansClaimName: email
+jansSAML1URI: urn:mace:dir:attribute-def:mail
+jansSAML2URI: urn:oid:0.9.2342.19200300.100.1.3
+jansStatus: active
+objectClass: top
+objectClass: jansAttr
+urn: urn:mace:dir:attribute-def:mail
+
+dn: inum=A0E8,ou=attributes,o=jans
+description: Middle name(s) of the End-User. Note that in some cultures,people can have multiple middle names; all can be present, with the namesbeingseparated by space characters. Also note that in some cultures,middle names are not used.
+displayName: Middle Name
+inum: A0E8
+jansAttrEditTyp: user
+jansAttrEditTyp: admin
+jansAttrName: middleName
+jansAttrOrigin: jansPerson
+jansAttrTyp: string
+jansAttrViewTyp: user
+jansAttrViewTyp: admin
+jansClaimName: middle_name
+jansSAML1URI: urn:mace:dir:attribute-def:middleName
+jansSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.318
+jansStatus: active
+objectClass: top
+objectClass: jansAttr
+urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/middle_username
+
+dn: inum=5EC6,ou=attributes,o=jans
+description: Casual name of the End-User that may or may not be the same asthe given_name.For instance, a nickname value of Mike might be returned alongside a given_name value of Michael.
+displayName: Nickname
+inum: 5EC6
+jansAttrEditTyp: user
+jansAttrEditTyp: admin
+jansAttrName: nickname
+jansAttrOrigin: jansPerson
+jansAttrTyp: string
+jansAttrViewTyp: user
+jansAttrViewTyp: admin
+jansClaimName: nickname
+jansSAML1URI: urn:mace:dir:attribute-def:nickname
+jansSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.319
+jansStatus: active
+objectClass: top
+objectClass: jansAttr
+urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/nickname
+
+dn: inum=0C85,ou=attributes,o=jans
+description: Last Name
+description: Surname(s) or last name(s) of the End-User. Note that in somecultures, people can have multiple family names or no family name; all canbepresent, with the names being separated by space characters.
+displayName: Last Name
+inum: 0C85
+jansAttrEditTyp: user
+jansAttrEditTyp: admin
+jansAttrName: sn
+jansAttrOrigin: jansPerson
+jansAttrTyp: string
+jansAttrViewTyp: user
+jansAttrViewTyp: admin
+jansClaimName: family_name
+jansSAML1URI: urn:mace:dir:attribute-def:sn
+jansSAML2URI: urn:oid:2.5.4.4
+jansStatus: active
+objectClass: top
+objectClass: jansAttr
+urn: urn:mace:dir:attribute-def:sn
+
+dn: inum=BCA8,ou=attributes,o=jans
+description: TransientId
+displayName: TransientId
+inum: BCA8
+jansAttrEditTyp: user
+jansAttrEditTyp: admin
+jansAttrName: transientId
+jansAttrOrigin: jansPerson
+jansAttrTyp: string
+jansAttrViewTyp: user
+jansAttrViewTyp: admin
+jansClaimName: transient_id
+jansSAML1URI: urn:mace:dir:attribute-def:transientId
+jansSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.312
+jansStatus: active
+objectClass: top
+objectClass: jansAttr
+urn: mace:shibboleth:1.0:nameIdentifier
+
+dn: inum=BCB8,ou=attributes,o=jans
+description: PersistentId
+displayName: PersistentId
+inum: BCB8
+jansAttrEditTyp: user
+jansAttrEditTyp: admin
+jansAttrName: persistentId
+jansAttrOrigin: jansPerson
+jansAttrTyp: string
+jansAttrViewTyp: user
+jansAttrViewTyp: admin
+jansClaimName: persistent_id
+jansSAML1URI: urn:mace:dir:attribute-def:persistentId
+jansSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.291
+jansStatus: active
+objectClass: top
+objectClass: jansAttr
+urn: mace:shibboleth:1.0:nameIdentifier
+
+dn: inum=BCE8,ou=attributes,o=jans
+description: Country
+displayName: Country
+inum: BCE8
+jansAttrEditTyp: user
+jansAttrEditTyp: admin
+jansAttrName: c
+jansAttrOrigin: jansPerson
+jansAttrTyp: string
+jansAttrViewTyp: user
+jansAttrViewTyp: admin
+jansClaimName: country
+jansSAML1URI: urn:mace:dir:attribute-def:c
+jansSAML2URI: urn:oid:2.5.4.6
+jansStatus: active
+objectClass: top
+objectClass: jansAttr
+urn: urn:jans:dir:attribute-def:c
+
+dn: inum=2B29,ou=attributes,o=jans
+description: End-User's full name in displayable formincluding all name parts, possibly including titles andsuffixes, ordered according to the End-User's locale and preferences.
+displayName: Display Name
+inum: 2B29
+jansAttrEditTyp: user
+jansAttrEditTyp: admin
+jansAttrName: displayName
+jansAttrOrigin: jansPerson
+jansAttrTyp: string
+jansAttrViewTyp: user
+jansAttrViewTyp: admin
+jansClaimName: name
+jansSAML1URI: urn:mace:dir:attribute-def:displayName
+jansSAML2URI: urn:oid:2.16.840.1.113730.3.1.241
+jansStatus: active
+objectClass: top
+objectClass: jansAttr
+urn: urn:mace:dir:attribute-def:displayName
+
+dn: inum=EC3A,ou=attributes,o=jans
+description: URL of the End-User's profile picture
+displayName: Picture URL
+inum: EC3A
+jansAttrEditTyp: user
+jansAttrEditTyp: admin
+jansAttrName: picture
+jansAttrOrigin: jansPerson
+jansAttrTyp: string
+jansAttrViewTyp: user
+jansAttrViewTyp: admin
+jansClaimName: picture
+jansSAML1URI: urn:mace:dir:attribute-def:picture
+jansSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.322
+jansStatus: active
+objectClass: top
+objectClass: jansAttr
+urn: http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/picture
+
+dn: inum=D03E,ou=attributes,o=jans
+description: Organization
+displayName: Organization
+inum: D03E
+jansAttrEditTyp: admin
+jansAttrName: o
+jansAttrOrigin: jansPerson
+jansAttrTyp: string
+jansAttrViewTyp: admin
+jansClaimName: o
+jansSAML1URI: urn:mace:dir:attribute-def:o
+jansSAML2URI: urn:oid:2.5.4.10
+jansStatus: active
+objectClass: top
+objectClass: jansAttr
+urn: urn:mace:dir:attribute-def:o
+
+dn: inum=AAEE,ou=attributes,o=jans
+description: User secret string
+displayName: Password
+inum: AAEE
+jansAttrEditTyp: user
+jansAttrEditTyp: admin
+jansAttrName: userPassword
+jansAttrOrigin: jansPerson
+jansAttrTyp: string
+jansAttrViewTyp: user
+jansAttrViewTyp: admin
+jansClaimName: user_password
+jansSAML1URI: urn:mace:dir:attribute-def:userPassword
+jansSAML2URI: urn:oid:2.5.4.35
+jansStatus: active
+objectClass: top
+objectClass: jansAttr
+urn: urn:jans:dir:attribute-def:userPassword
+
+dn: inum=C001,ou=attributes,o=jans
+description: Organizational Title
+displayName: Title
+inum: C001
+jansAttrEditTyp: admin
+jansAttrName: title
+jansAttrOrigin: jansCustomPerson
+jansAttrTyp: string
+jansAttrViewTyp: user
+jansAttrViewTyp: admin
+jansClaimName: title
+jansSAML1URI: urn:mace:dir:attribute-def:title
+jansSAML2URI: urn:oid:2.5.4.12
+jansStatus: inactive
+objectClass: top
+objectClass: jansAttr
+urn: urn:mace:dir:attribute-def:title
+
+dn: inum=4502,ou=attributes,o=jans
+description: Vehicle License Plate Number
+displayName: License Plate
+inum: 4502
+jansAttrEditTyp: user
+jansAttrEditTyp: admin
+jansAttrName: carLicense
+jansAttrOrigin: jansCustomPerson
+jansAttrTyp: string
+jansAttrViewTyp: user
+jansAttrViewTyp: admin
+jansClaimName: car_license
+jansSAML1URI: urn:mace:dir:attribute-def:carLicense
+jansSAML2URI: urn:oid:2.16.840.1.113730.3.1.1
+jansStatus: inactive
+objectClass: top
+objectClass: jansAttr
+urn: urn:mace:dir:attribute-def:carLicense
+
+dn: inum=BD22,ou=attributes,o=jans
+description: Fax Telephone Number
+displayName: Fax Number
+inum: BD22
+jansAttrEditTyp: user
+jansAttrEditTyp: admin
+jansAttrName: facsimileTelephoneNumber
+jansAttrOrigin: jansCustomPerson
+jansAttrTyp: string
+jansAttrViewTyp: user
+jansAttrViewTyp: admin
+jansClaimName: facsimile_telephone_number
+jansSAML1URI: urn:mace:dir:attribute-def:facsimileTelephoneNumber
+jansSAML2URI: urn:oid:2.5.4.23
+jansStatus: inactive
+objectClass: top
+objectClass: jansAttr
+urn: urn:mace:dir:attribute-def:facsimileTelephoneNumber
+
+dn: inum=08E2,ou=attributes,o=jans
+description: Organizational Department
+displayName: Department
+inum: 08E2
+jansAttrEditTyp: admin
+jansAttrName: departmentNumber
+jansAttrOrigin: jansCustomPerson
+jansAttrTyp: string
+jansAttrViewTyp: user
+jansAttrViewTyp: admin
+jansClaimName: department_number
+jansSAML1URI: urn:mace:dir:attribute-def:departmentNumber
+jansSAML2URI: urn:oid:2.16.840.1.113730.3.1.2
+jansStatus: inactive
+objectClass: top
+objectClass: jansAttr
+urn: urn:mace:dir:attribute-def:departmentNumber
+
+dn: inum=3D44,ou=attributes,o=jans
+description: Employee Type
+displayName: Employee Type
+inum: 3D44
+jansAttrEditTyp: admin
+jansAttrName: employeeType
+jansAttrOrigin: jansCustomPerson
+jansAttrTyp: string
+jansAttrViewTyp: admin
+jansClaimName: employee_type
+jansSAML1URI: urn:mace:dir:attribute-def:employeeType
+jansSAML2URI: urn:oid:2.16.840.1.113730.3.1.4
+jansStatus: inactive
+objectClass: top
+objectClass: jansAttr
+urn: urn:mace:dir:attribute-def:employeeType
+
+dn: inum=D054,ou=attributes,o=jans
+description: Name search keywords
+displayName: Name search keywords
+inum: D054
+jansAttrEditTyp: user
+jansAttrEditTyp: admin
+jansAttrName: cn
+jansAttrOrigin: jansCustomPerson
+jansAttrTyp: string
+jansAttrViewTyp: user
+jansAttrViewTyp: admin
+jansClaimName: cn
+jansSAML1URI: urn:mace:dir:attribute-def:cn
+jansSAML2URI: urn:oid:2.5.4.3
+jansStatus: inactive
+objectClass: top
+objectClass: jansAttr
+urn: urn:mace:dir:attribute-def:cn
+
+dn: inum=6DA6,ou=attributes,o=jans
+description: Mobile Telephone Number
+displayName: Mobile Telephone Number
+inum: 6DA6
+jansAttrEditTyp: user
+jansAttrEditTyp: admin
+jansAttrName: mobile
+jansAttrOrigin: jansCustomPerson
+jansAttrTyp: string
+jansAttrViewTyp: user
+jansAttrViewTyp: admin
+jansClaimName: phone_mobile_number
+jansMultivaluedAttr: true
+jansSAML1URI: urn:mace:dir:attribute-def:mobile
+jansSAML2URI: urn:oid:0.9.2342.19200300.100.1.41
+jansStatus: inactive
+objectClass: top
+objectClass: jansAttr
+urn: urn:mace:dir:attribute-def:mobile
+
+dn: inum=0C18,ou=attributes,o=jans
+description: Home Telephone Number
+displayName: Home Telephone Number
+inum: 0C18
+jansAttrEditTyp: user
+jansAttrEditTyp: admin
+jansAttrName: telephoneNumber
+jansAttrOrigin: jansCustomPerson
+jansAttrTyp: string
+jansAttrViewTyp: user
+jansAttrViewTyp: admin
+jansClaimName: phone_number
+jansSAML1URI: urn:mace:dir:attribute-def:telephoneNumber
+jansSAML2URI: urn:oid:2.5.4.20
+jansStatus: inactive
+objectClass: top
+objectClass: jansAttr
+urn: urn:mace:dir:attribute-def:phone_number
+
+dn: inum=E6B8,ou=attributes,o=jans
+description: State or Province
+displayName: State or Province
+inum: E6B8
+jansAttrEditTyp: user
+jansAttrEditTyp: admin
+jansAttrName: st
+jansAttrOrigin: jansCustomPerson
+jansAttrTyp: string
+jansAttrViewTyp: user
+jansAttrViewTyp: admin
+jansClaimName: region
+jansSAML1URI: urn:mace:dir:attribute-def:st
+jansSAML2URI: urn:oid:2.5.4.8
+jansStatus: inactive
+objectClass: top
+objectClass: jansAttr
+urn: urn:mace:dir:attribute-def:st
+
+dn: inum=42D8,ou=attributes,o=jans
+description: Manager
+displayName: Manager
+inum: 42D8
+jansAttrEditTyp: admin
+jansAttrName: manager
+jansAttrOrigin: jansCustomPerson
+jansAttrTyp: string
+jansAttrViewTyp: admin
+jansClaimName: manager
+jansSAML1URI: urn:mace:dir:attribute-def:manager
+jansSAML2URI: urn:oid:0.9.2342.19200300.100.1.10
+jansStatus: inactive
+objectClass: top
+objectClass: jansAttr
+urn: urn:mace:dir:attribute-def:manager
+
+dn: inum=6609,ou=attributes,o=jans
+description: Street
+displayName: Street
+inum: 6609
+jansAttrEditTyp: user
+jansAttrEditTyp: admin
+jansAttrName: street
+jansAttrOrigin: jansCustomPerson
+jansAttrTyp: string
+jansAttrViewTyp: user
+jansAttrViewTyp: admin
+jansClaimName: street_address
+jansSAML1URI: urn:mace:dir:attribute-def:street
+jansSAML2URI: urn:oid:2.5.4.9
+jansStatus: inactive
+objectClass: top
+objectClass: jansAttr
+urn: urn:mace:dir:attribute-def:street
+
+dn: inum=E999,ou=attributes,o=jans
+description: Postal Box
+displayName: PO Box
+inum: E999
+jansAttrEditTyp: user
+jansAttrEditTyp: admin
+jansAttrName: postOfficeBox
+jansAttrOrigin: jansCustomPerson
+jansAttrTyp: string
+jansAttrViewTyp: user
+jansAttrViewTyp: admin
+jansClaimName: post_office_box
+jansSAML1URI: urn:mace:dir:attribute-def:postOfficeBox
+jansSAML2URI: urn:oid:2.5.4.18
+jansStatus: inactive
+objectClass: top
+objectClass: jansAttr
+urn: urn:mace:dir:attribute-def:postOfficeBox
+
+dn: inum=D0C9,ou=attributes,o=jans
+description: Employee Number
+displayName: Employee Number
+inum: D0C9
+jansAttrEditTyp: admin
+jansAttrName: employeeNumber
+jansAttrOrigin: jansCustomPerson
+jansAttrTyp: string
+jansAttrViewTyp: admin
+jansClaimName: employee_number
+jansSAML1URI: urn:mace:dir:attribute-def:employeeNumber
+jansSAML2URI: urn:oid:2.16.840.1.113730.3.1.3
+jansStatus: inactive
+objectClass: top
+objectClass: jansAttr
+urn: urn:mace:dir:attribute-def:employeeNumber
+
+dn: inum=894A,ou=attributes,o=jans
+description: Preferred Delivery Method
+displayName: Preferred Delivery Method
+inum: 894A
+jansAttrEditTyp: admin
+jansAttrName: preferredDeliveryMethod
+jansAttrOrigin: jansCustomPerson
+jansAttrTyp: string
+jansAttrViewTyp: admin
+jansClaimName: preferred_delivery_method
+jansSAML1URI: urn:mace:dir:attribute-def:preferredDeliveryMethod
+jansSAML2URI: urn:oid:2.5.4.28
+jansStatus: inactive
+objectClass: top
+objectClass: jansAttr
+urn: urn:jans:dir:attribute-def:preferredDeliveryMethod
+
+dn: inum=D90B,ou=attributes,o=jans
+description: Room Number
+displayName: Room Number
+inum: D90B
+jansAttrEditTyp: user
+jansAttrEditTyp: admin
+jansAttrName: roomNumber
+jansAttrOrigin: jansCustomPerson
+jansAttrTyp: string
+jansAttrViewTyp: user
+jansAttrViewTyp: admin
+jansClaimName: room_number
+jansSAML1URI: urn:mace:dir:attribute-def:roomNumber
+jansSAML2URI: urn:oid:0.9.2342.19200300.100.1.6
+jansStatus: inactive
+objectClass: top
+objectClass: jansAttr
+urn: urn:mace:dir:attribute-def:roomNumber
+
+dn: inum=AC0B,ou=attributes,o=jans
+description: Secretary
+displayName: Secretary
+inum: AC0B
+jansAttrEditTyp: admin
+jansAttrName: secretary
+jansAttrOrigin: jansCustomPerson
+jansAttrTyp: string
+jansAttrViewTyp: admin
+jansClaimName: secretary
+jansSAML1URI: urn:mace:dir:attribute-def:secretary
+jansSAML2URI: urn:oid:0.9.2342.19200300.100.1.21
+jansStatus: inactive
+objectClass: top
+objectClass: jansAttr
+urn: urn:jans:dir:attribute-def:secretary
+
+dn: inum=4649,ou=attributes,o=jans
+description: User status to allow/disable user access
+displayName: User Status
+inum: 4649
+jansAttrEditTyp: admin
+jansAttrName: jansStatus
+jansAttrOrigin: jansPerson
+jansAttrTyp: string
+jansAttrViewTyp: admin
+jansAttrViewTyp: user
+jansClaimName: jans_status
+jansSAML1URI: urn:mace:dir:attribute-def:jansStatus
+jansSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.97
+jansStatus: active
+objectClass: top
+objectClass: jansAttr
+urn: urn:jans:dir:attribute-def:status
+
+dn: inum=27DB,ou=attributes,o=jans
+description: Home Address
+displayName: Home Address
+inum: 27DB
+jansAttrEditTyp: user
+jansAttrEditTyp: admin
+jansAttrName: homePostalAddress
+jansAttrOrigin: jansCustomPerson
+jansAttrTyp: string
+jansAttrViewTyp: user
+jansAttrViewTyp: admin
+jansClaimName: formatted
+jansSAML1URI: urn:mace:dir:attribute-def:homePostalAddress
+jansSAML2URI: urn:oid:0.9.2342.19200300.100.1.39
+jansStatus: inactive
+objectClass: top
+objectClass: jansAttr
+urn: urn:mace:dir:attribute-def:homePostalAddress
+
+dn: inum=6EEB,ou=attributes,o=jans
+description: City
+displayName: City
+inum: 6EEB
+jansAttrEditTyp: user
+jansAttrEditTyp: admin
+jansAttrName: l
+jansAttrOrigin: jansCustomPerson
+jansAttrTyp: string
+jansAttrViewTyp: user
+jansAttrViewTyp: admin
+jansClaimName: locality
+jansSAML1URI: urn:mace:dir:attribute-def:l
+jansSAML2URI: urn:oid:2.5.4.7
+jansStatus: inactive
+objectClass: top
+objectClass: jansAttr
+urn: urn:mace:dir:attribute-def:l
+
+dn: inum=2A3D,ou=attributes,o=jans
+description: Postal or Zip Code
+displayName: Postal Code
+inum: 2A3D
+jansAttrEditTyp: user
+jansAttrEditTyp: admin
+jansAttrName: postalCode
+jansAttrOrigin: jansCustomPerson
+jansAttrTyp: string
+jansAttrViewTyp: user
+jansAttrViewTyp: admin
+jansClaimName: postal_code
+jansSAML1URI: urn:mace:dir:attribute-def:postalCode
+jansSAML2URI: urn:oid:2.5.4.17
+jansStatus: inactive
+objectClass: top
+objectClass: jansAttr
+urn: urn:mace:dir:attribute-def:postalCode
+
+dn: inum=48EE,ou=attributes,o=jans
+description: Description
+displayName: Description
+inum: 48EE
+jansAttrEditTyp: user
+jansAttrEditTyp: admin
+jansAttrName: description
+jansAttrOrigin: jansCustomPerson
+jansAttrTyp: string
+jansAttrViewTyp: user
+jansAttrViewTyp: admin
+jansClaimName: description
+jansSAML1URI: urn:mace:dir:attribute-def:description
+jansSAML2URI: urn:oid:2.5.4.13
+jansStatus: inactive
+objectClass: top
+objectClass: jansAttr
+urn: urn:mace:dir:attribute-def:description
+
+dn: inum=4E0C,ou=attributes,o=jans
+description: Specifies the person's relationship(s) to the institutionin broad categories such as student, faculty, staff, alum, etc.
+displayName: eduPersonAffiliation
+inum: 4E0C
+jansAttrEditTyp: admin
+jansAttrName: eduPersonAffiliation
+jansAttrOrigin: eduPerson
+jansAttrTyp: string
+jansAttrViewTyp: admin
+jansClaimName: edu_person_affiliation
+jansSAML1URI: urn:mace:dir:attribute-def:eduPersonAffiliation
+jansSAML2URI: urn:oid:1.3.6.1.4.1.5923.1.1.1.1
+jansStatus: inactive
+objectClass: top
+objectClass: jansAttr
+urn: oid:1.3.6.1.4.1.5923.1.1.1.1
+
+dn: inum=E7BC,ou=attributes,o=jans
+description: Person's nickname, or the informal name by which the End-User is accustomedto be hailed. A casual name that may or may not be the same asthe given_name. For instance,a nickname value of Mike might be returned alongside a given_name value of Michael.
+displayName: eduPersonNickName
+inum: E7BC
+jansAttrEditTyp: admin
+jansAttrName: eduPersonNickName
+jansAttrOrigin: eduPerson
+jansAttrTyp: string
+jansAttrViewTyp: admin
+jansClaimName: edu_person_nick_name
+jansSAML1URI: urn:mace:dir:attribute-def:eduPersonNickName
+jansSAML2URI: urn:oid:1.3.6.1.4.1.5923.1.1.1.2
+jansStatus: inactive
+objectClass: top
+objectClass: jansAttr
+urn: oid:1.3.6.1.4.1.5923.1.1.1.2
+
+dn: inum=6366,ou=attributes,o=jans
+description: The distinguished name (DN) of the directory entryrepresentingthe institution with which the person is associated.
+displayName: eduPersonOrgDN
+inum: 6366
+jansAttrEditTyp: admin
+jansAttrName: eduPersonOrgDN
+jansAttrOrigin: eduPerson
+jansAttrTyp: string
+jansAttrViewTyp: admin
+jansClaimName: edu_person_org_dn
+jansSAML1URI: urn:mace:dir:attribute-def:eduPersonOrgDN
+jansSAML2URI: urn:oid:1.3.6.1.4.1.5923.1.1.1.3
+jansStatus: inactive
+objectClass: top
+objectClass: jansAttr
+urn: oid:1.3.6.1.4.1.5923.1.1.1.3
+
+dn: inum=ED0D,ou=attributes,o=jans
+description: The distinguished name(s) (DN) of the directory entriesrepresenting the person's Organizational Unit(s). May be multivalued,as for example, in the case of a faculty member with appointments inmultiple departmentsor a person who is a student in one departmentand an employee in another.
+displayName: eduPersonOrgUnitDN
+inum: ED0D
+jansAttrEditTyp: admin
+jansAttrName: eduPersonOrgUnitDN
+jansAttrOrigin: eduPerson
+jansAttrTyp: string
+jansAttrViewTyp: admin
+jansClaimName: edu_person_org_unit_dn
+jansSAML1URI: urn:mace:dir:attribute-def:eduPersonOrgUnitDN
+jansSAML2URI: urn:oid:1.3.6.1.4.1.5923.1.1.1.4
+jansStatus: inactive
+objectClass: top
+objectClass: jansAttr
+urn: oid:1.3.6.1.4.1.5923.1.1.1.4
+
+dn: inum=91E7,ou=attributes,o=jans
+description: Specifies the person's primary relationship to theinstitution in broad categories such as student, faculty, staff,alum, etc. (See controlled vocabulary).
+displayName: eduPersonPrimaryAffiliation
+inum: 91E7
+jansAttrEditTyp: admin
+jansAttrName: eduPersonPrimaryAffiliation
+jansAttrOrigin: eduPerson
+jansAttrTyp: string
+jansAttrViewTyp: admin
+jansClaimName: edu_person_primary_affiliation
+jansSAML1URI: urn:mace:dir:attribute-def:eduPersonPrimaryAffiliation
+jansSAML2URI: urn:oid:1.3.6.1.4.1.5923.1.1.1.5
+jansStatus: inactive
+objectClass: top
+objectClass: jansAttr
+urn: oid:1.3.6.1.4.1.5923.1.1.1.5
+
+dn: inum=096B,ou=attributes,o=jans
+description: A scoped identifier for a person. It should berepresented in the form "user@scope" where 'user' is aname-based identifier for the person and where 'scope'defines a local security domain. Each value of 'scope' definesa namespace within which the assigned identifiers MUST be unique.Given this rule, if two eduPersonPrincipalName (ePPN) values arethe same at a given point in time, they refer to the same person.
+displayName: eduPersonPrincipalName
+inum: 096B
+jansAttrEditTyp: admin
+jansAttrName: eduPersonPrincipalName
+jansAttrOrigin: eduPerson
+jansAttrTyp: string
+jansAttrViewTyp: admin
+jansClaimName: edu_person_principal_name
+jansSAML1URI: urn:mace:dir:attribute-def:eduPersonPrincipalName
+jansSAML2URI: urn:oid:1.3.6.1.4.1.5923.1.1.1.6
+jansStatus: inactive
+objectClass: top
+objectClass: jansAttr
+urn: oid:1.3.6.1.4.1.5923.1.1.1.6
+
+dn: inum=BF03,ou=attributes,o=jans
+description: URI (either URN or URL) that indicates a set of rights to specific resources.
+displayName: eduPersonEntitlement
+inum: BF03
+jansAttrEditTyp: admin
+jansAttrName: eduPersonEntitlement
+jansAttrOrigin: eduPerson
+jansAttrTyp: string
+jansAttrViewTyp: admin
+jansClaimName: edu_person_entitlement
+jansSAML1URI: urn:mace:dir:attribute-def:eduPersonEntitlement
+jansSAML2URI: urn:oid:1.3.6.1.4.1.5923.1.1.1.7
+jansStatus: inactive
+objectClass: top
+objectClass: jansAttr
+urn: oid:1.3.6.1.4.1.5923.1.1.1.7
+
+dn: inum=0247,ou=attributes,o=jans
+description: The distinguished name (DN) of the directory entry representingthe person's primary Organizational Unit(s).
+displayName: eduPersonPrimaryOrgUnitDN
+inum: 0247
+jansAttrEditTyp: admin
+jansAttrName: eduPersonPrimaryOrgUnitDN
+jansAttrOrigin: eduPerson
+jansAttrTyp: string
+jansAttrViewTyp: admin
+jansClaimName: edu_person_primary_org_unit_dn
+jansSAML1URI: urn:mace:dir:attribute-def:eduPersonPrimaryOrgUnitDN
+jansSAML2URI: urn:oid:1.3.6.1.4.1.5923.1.1.1.8
+jansStatus: inactive
+objectClass: top
+objectClass: jansAttr
+urn: oid:1.3.6.1.4.1.5923.1.1.1.8
+
+dn: inum=002A,ou=attributes,o=jans
+description: Specifies the person's affiliation within a particular security domainin broad categories such as student, faculty, staff, alum, etc. Thevalues consistof a left and right component separated by an "@" sign. The left component is one ofthe values from the eduPersonAffiliation controlledvocabulary.This right-hand side syntaxof eduPersonScopedAffiliation intentionally matches that used for the right-hand sidevalues for eduPersonPrincipalName since both identify a security domain. Multiple "@" signsare not recommended, but in any case, the first occurrence of the "@" sign starting from theleft is to be taken as the delimiter between components. Thus, user identifier is to the left,security domain to the right of the first "@".
+displayName: eduPersonScopedAffiliation
+inum: 002A
+jansAttrEditTyp: admin
+jansAttrName: eduPersonScopedAffiliation
+jansAttrOrigin: eduPerson
+jansAttrTyp: string
+jansAttrViewTyp: admin
+jansClaimName: edu_person_scoped_affiliation
+jansSAML1URI: urn:mace:dir:attribute-def:eduPersonScopedAffiliation
+jansSAML2URI: urn:oid:1.3.6.1.4.1.5923.1.1.1.9
+jansStatus: inactive
+objectClass: top
+objectClass: jansAttr
+urn: oid:1.3.6.1.4.1.5923.1.1.1.9
+
+dn: inum=8FF3,ou=attributes,o=jans
+description: A persistent, non-reassigned, opaque identifier for a principal.
+displayName: eduPersonTargetedID
+inum: 8FF3
+jansAttrEditTyp: admin
+jansAttrName: eduPersonTargetedID
+jansAttrOrigin: eduPerson
+jansAttrTyp: string
+jansAttrViewTyp: admin
+jansClaimName: edu_person_targeted_id
+jansSAML1URI: urn:mace:dir:attribute-def:eduPersonTargetedID
+jansSAML2URI: urn:oid:1.3.6.1.4.1.5923.1.1.1.10
+jansStatus: inactive
+objectClass: top
+objectClass: jansAttr
+urn: oid:1.3.6.1.4.1.5923.1.1.1.10
+
+dn: inum=4B0F,ou=attributes,o=jans
+description: Set of URIs that assert compliance with specific standardsfor identity assurance.
+displayName: eduPersonAssurance
+inum: 4B0F
+jansAttrEditTyp: admin
+jansAttrName: eduPersonAssurance
+jansAttrOrigin: eduPerson
+jansAttrTyp: string
+jansAttrViewTyp: admin
+jansClaimName: edu_person_assurance
+jansSAML1URI: urn:mace:dir:attribute-def:eduPersonAssurance
+jansSAML2URI: urn:oid:1.3.6.1.4.1.5923.1.1.1.11
+jansStatus: inactive
+objectClass: top
+objectClass: jansAttr
+urn: oid:1.3.6.1.4.1.5923.1.1.1.11
+
+dn: inum=4A0A,ou=attributes,o=jans
+description: Person principal name prior
+displayName: eduPersonPrincipalNamePrior
+inum: 4A0A
+jansAttrEditTyp: admin
+jansAttrName: eduPersonPrincipalNamePrior
+jansAttrOrigin: eduPerson
+jansAttrTyp: string
+jansAttrViewTyp: admin
+jansClaimName: edu_person_principal_name_prior
+jansSAML1URI: urn:mace:dir:attribute-def:eduPersonPrincipalNamePrior
+jansSAML2URI: urn:oid:1.3.6.1.4.1.5923.1.1.1.12
+jansStatus: inactive
+objectClass: top
+objectClass: jansAttr
+urn: oid:1.3.6.1.4.1.5923.1.1.1.12
+
+dn: inum=4A0B,ou=attributes,o=jans
+description: Person unique Id
+displayName: eduPersonUniqueId
+inum: 4A0B
+jansAttrEditTyp: admin
+jansAttrName: eduPersonUniqueId
+jansAttrOrigin: eduPerson
+jansAttrTyp: string
+jansAttrViewTyp: admin
+jansClaimName: edu_person_unique_id
+jansSAML1URI: urn:mace:dir:attribute-def:eduPersonUniqueId
+jansSAML2URI: urn:oid:1.3.6.1.4.1.5923.1.1.1.13
+jansStatus: inactive
+objectClass: top
+objectClass: jansAttr
+urn: oid:1.3.6.1.4.1.5923.1.1.1.13
+
+dn: inum=4A0C,ou=attributes,o=jans
+description: ORCID researcher identifiers belonging to the principal
+displayName: eduPersonOrcid
+inum: 4A0C
+jansAttrEditTyp: admin
+jansAttrName: eduPersonOrcid
+jansAttrOrigin: eduPerson
+jansAttrTyp: string
+jansAttrViewTyp: admin
+jansClaimName: edu_person_orcid
+jansSAML1URI: urn:mace:dir:attribute-def:eduPersonOrcid
+jansSAML2URI: urn:oid:1.3.6.1.4.1.5923.1.1.1.16
+jansStatus: inactive
+objectClass: top
+objectClass: jansAttr
+urn: oid:1.3.6.1.4.1.5923.1.1.1.16
+
+dn: inum=5039,ou=attributes,o=jans
+description: jansEnrollmentCode
+description: Enrollment code, non-reassignable code
+displayName: Enrollment code
+inum: 5039
+jansAttrEditTyp: admin
+jansAttrName: jansEnrollmentCode
+jansAttrOrigin: jansPerson
+jansAttrTyp: string
+jansAttrViewTyp: admin
+jansClaimName: jans_enrollment_code
+jansSAML1URI: urn:mace:dir:attribute-def:jansEnrollmentCode
+jansSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.239
+jansScimCustomAttr: true
+jansStatus: active
+objectClass: top
+objectClass: jansAttr
+urn: urn:jans:dir:attribute-def:jansEnrollmentCode
+
+dn: inum=42E1,ou=attributes,o=jans
+description: IMAP Data
+displayName: IMAP Data
+inum: 42E1
+jansAttrEditTyp: admin
+jansAttrEditTyp: user
+jansAttrName: jansIMAPData
+jansAttrOrigin: jansPerson
+jansAttrTyp: json
+jansAttrViewTyp: admin
+jansAttrViewTyp: user
+jansClaimName: imap_data
+jansSAML1URI: urn:mace:dir:attribute-def:jansIMAPData
+jansSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.355
+jansStatus: active
+objectClass: top
+objectClass: jansAttr
+urn: urn:mace:dir:attribute-def:jansIMAPData
+
+dn: inum=6049,ou=attributes,o=jans
+description: jansPermission
+description: User permission or role
+displayName: User Permission
+inum: 6049
+jansAttrEditTyp: admin
+jansAttrName: role
+jansAttrOrigin: jansPerson
+jansAttrTyp: string
+jansAttrViewTyp: admin
+jansClaimName: user_permission
+jansMultivaluedAttr: true
+jansSAML1URI: urn:mace:dir:attribute-def:role
+jansSAML2URI: urn:oid:1.3.6.1.4.1.48710.1.3.299
+jansStatus: active
+objectClass: top
+objectClass: jansAttr
+urn: urn:jans:dir:attribute-def:role
+
+dn: inum=CACA,ou=attributes,o=jans
+description: User certificate
+displayName: User certificate
+inum: CACA
+jansAttrEditTyp: admin
+jansAttrEditTyp: user
+jansAttrName: userCertificate
+jansAttrOrigin: jansPerson
+jansAttrTyp: certificate
+jansAttrViewTyp: admin
+jansAttrViewTyp: user
+jansClaimName: user_certificate
+jansSAML1URI: urn:mace:dir:attribute-def:userCertificate
+jansSAML2URI: urn:oid:2.5.4.36
+jansStatus: active
+jansValidation: {"minLength":null,"maxLength":2048,"regexp":""}
+objectClass: top
+objectClass: jansAttr
+urn: urn:mace:dir:attribute-def:userCertificate
+
+dn: inum=11AA,ou=attributes,o=jans
+description: CIBA Device Registration Token
+displayName: CIBA Device Registration Token
+inum: 11AA
+jansAttrEditTyp: admin
+jansAttrEditTyp: user
+jansAttrName: jansBackchannelDeviceRegistrationTkn
+jansAttrOrigin: jansPerson
+jansAttrTyp: string
+jansAttrViewTyp: admin
+jansAttrViewTyp: user
+jansClaimName: jans_backchannel_device_registration_tkn
+jansStatus: active
+objectClass: top
+objectClass: jansAttr
+urn: urn:mace:dir:attribute-def:jansBackchannelDeviceRegistrationTkn
+
+dn: inum=11AB,ou=attributes,o=jans
+description: CIBA User code
+displayName: CIBA User code
+inum: 11AB
+jansAttrEditTyp: admin
+jansAttrEditTyp: user
+jansAttrName: jansBackchannelUsrCode
+jansAttrOrigin: jansPerson
+jansAttrTyp: string
+jansAttrViewTyp: admin
+jansAttrViewTyp: user
+jansClaimName: jans_backchannel_usr_code
+jansStatus: active
+objectClass: top
+objectClass: jansAttr
+urn: urn:mace:dir:attribute-def:jansBackchannelUsrCode
+
+dn: inum=4CF1,ou=attributes,o=jans
+description: jansAdminUIRole
+displayName: jansAdminUIRole
+inum: 4CF1
+jansAttrEditTyp: admin
+jansAttrEditTyp: user
+jansAttrName: jansAdminUIRole
+jansAttrOrigin: jansCustomPerson
+jansAttrSystemEditTyp: admin
+jansAttrSystemEditTyp: user
+jansAttrTyp: string
+jansAttrViewTyp: admin
+jansAttrViewTyp: user
+jansClaimName: jansAdminUIRole
+jansMultivaluedAttr: true
+jansSAML1URI: urn:mace:dir:attribute-def:jansAdminUIRole
+jansSAML2URI: urn:mace:dir:attribute-def:jansAdminUIRole
+jansStatus: active
+objectClass: top
+objectClass: jansAttr
+urn: sampleurn
+

@@ -22,7 +22,8 @@ public enum ApplicationType implements AttributeEnum {
     OX_TRUST("oxtrust", "oxTrust"),
     FIDO2("fido2", "FIDO2"),
     SCIM("scim", "SCIM"),
-    JANS_CONFIG_API("jans_config_api", "Jans Config API");
+    JANS_CONFIG_API("jans_config_api", "Jans Config API"),
+    JANS_CLIENT_API("jans_client_api", "Jans Client API");
 
     private String value;
     private String displayName;

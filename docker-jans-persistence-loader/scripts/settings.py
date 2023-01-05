@@ -22,6 +22,27 @@ LOGGING_CONFIG = {
             "level": "INFO",
             "propagate": False,
         },
+        "ldap_setup": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "sql_setup": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "spanner_setup": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "couchbase_setup": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+
     },
     # "root": {
     #     "level": "INFO",

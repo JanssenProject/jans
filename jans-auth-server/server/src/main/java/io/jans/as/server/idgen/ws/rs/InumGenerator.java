@@ -6,9 +6,13 @@
 
 package io.jans.as.server.idgen.ws.rs;
 
+import io.jans.as.common.model.common.User;
+import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.common.IdType;
 import io.jans.as.model.config.BaseDnConfiguration;
 import io.jans.as.model.config.StaticConfiguration;
+import io.jans.as.persistence.model.configuration.GluuConfiguration;
+import io.jans.model.GluuAttribute;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.base.DummyEntry;
 import io.jans.orm.search.filter.Filter;
@@ -16,9 +20,9 @@ import io.jans.util.INumGenerator;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -103,9 +107,25 @@ public class InumGenerator {
     public boolean contains(String inum, IdType type) {
         final String baseDn = baseDn(type);
         final Filter filter = Filter.createEqualityFilter("inum", inum);
-        final List<DummyEntry> entries = ldapEntryManager.findEntries(baseDn, DummyEntry.class, filter);
+        Class<?> entryClass = getEntryClass(type);
+        final List<?> entries = ldapEntryManager.findEntries(baseDn, entryClass, filter);
         return entries != null && !entries.isEmpty();
     }
+
+    private Class<?> getEntryClass(IdType type) {
+		switch (type) {
+			case CLIENTS:
+				return Client.class;
+			case CONFIGURATION:
+				return GluuConfiguration.class;
+			case ATTRIBUTE:
+				return GluuAttribute.class;
+			case PEOPLE:
+				return User.class;
+		}
+
+       return DummyEntry.class;
+	}
 
     public String baseDn(IdType type) {
         final BaseDnConfiguration baseDn = staticConfiguration.getBaseDn();

@@ -1,15 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.jans</groupId>
 	<artifactId>jans-config-api-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>1.0.6-SNAPSHOT</version>
 	<name>jans-config-api-parent</name>
 
+	<distributionManagement>
+		<repository>
+			<id>github</id>
+			<name>GitHub Packages</name>
+			<url>https://maven.pkg.github.com/JanssenProject/jans</url>
+		</repository>
+	</distributionManagement>
 	<properties>
 		<maven.min-version>3.3.9</maven.min-version>
 		<compiler-plugin.version>3.8.1</compiler-plugin.version>
@@ -21,24 +26,36 @@
 		</project.reporting.outputEncoding>
 		<surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
 
-		<jans.version>1.0.0-SNAPSHOT</jans.version>
-		<weld.version>3.1.2.Final</weld.version>
-		<jetty.version>9.4.44.v20210927</jetty.version>
-		<resteasy.version>4.5.10.Final</resteasy.version>
-		<jackson.version>2.10.1</jackson.version>
-		<microprofile.version>3.0</microprofile.version>
-		<smallrye.version>2.2.0</smallrye.version>
-		<log4j.version>2.17.1</log4j.version>
-		<slf4j.version>1.7.25</slf4j.version>
-		<rest-assured.version>4.3.3</rest-assured.version>
+		<jans.version>${project.version}</jans.version>
+
+		<jackson.version>2.13.2</jackson.version>
+		<jetty.version>11.0.10</jetty.version>
+		<weld.version>4.0.3.Final</weld.version>	
+
+		<microprofile.config.version>3.0.1</microprofile.config.version>
+		<microprofile.health.version>4.0</microprofile.health.version>
+		<microprofile.metrics.version>4.0</microprofile.metrics.version>
+		<microprofile.rest.client.version>3.0</microprofile.rest.client.version>
+		<smallrye.config.version>3.0.0-RC1</smallrye.config.version>
+		<smallrye.health.version>3.0.1</smallrye.health.version>
+		<smallrye.metrics.version>4.0.0-RC1</smallrye.metrics.version>
+		<org.jboss.resteasy.client.microprofile.version>4.7.5.Final</org.jboss.resteasy.client.microprofile.version>
+
+		<rest-assured.version>5.0.1</rest-assured.version>
 		<karate.version>0.9.5</karate.version>
+		<snake.version>1.33</snake.version>
 		<jupiter.version>5.7.0</jupiter.version>
 		<cucumber.version>3.8.0</cucumber.version>
 		<jacoco.version>0.8.5</jacoco.version>
+		<swagger.version>2.2.7</swagger.version>
+
 		<sonar.projectKey>JanssenProject_jans-config-api</sonar.projectKey>
 		<sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
 		<sonar.organization>janssenproject</sonar.organization>
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
+
+		<swagger-maven-plugin-jakarta>2.2.2</swagger-maven-plugin-jakarta>
+		<swagger-models-jakarta>2.2.2</swagger-models-jakarta>
 	</properties>
 
 	<prerequisites>
@@ -47,9 +64,9 @@
 
 	<modules>
 		<module>common</module>
+		<module>shared</module>
 		<module>server</module>
 		<module>plugins</module>
-		<module>shared</module>
 	</modules>
 
 	<repositories>
@@ -98,7 +115,6 @@
 				<scope>import</scope>
 				<type>pom</type>
 			</dependency>
-
 			<!-- Weld -->
 			<dependency>
 				<groupId>org.jboss.weld</groupId>
@@ -118,6 +134,11 @@
 				<groupId>io.jans</groupId>
 				<artifactId>jans-config-api-server</artifactId>
 				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.jans</groupId>
+				<artifactId>jans-config-api-shared</artifactId>
+				<version>${jans.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
@@ -188,26 +209,36 @@
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
-				<artifactId>jans-client-api</artifactId>
+				<artifactId>jans-orm-annotation</artifactId>
 				<version>${jans.version}</version>
-				<exclusions>
-					<exclusion>
-						<artifactId>org.jboss.resteasy</artifactId>
-						<groupId>*</groupId>
-					</exclusion>
-				</exclusions>
 			</dependency>
+			<dependency>
+				<groupId>io.jans</groupId>
+				<artifactId>uma-rs-core</artifactId>
+				<version>${jans.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.jans</groupId>
+				<artifactId>agama-model</artifactId>
+				<version>${jans.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.jans</groupId>
+				<artifactId>agama-transpiler</artifactId>
+				<version>${jans.version}</version>
+			</dependency>
+
 
 			<!-- Security -->
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
 				<artifactId>bcprov-jdk15on</artifactId>
-				<version>1.67</version>
+				<version>1.69</version>
 			</dependency>
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
 				<artifactId>bcpkix-jdk15on</artifactId>
-				<version>1.67</version>
+				<version>1.69</version>
 			</dependency>
 			<dependency>
 				<groupId>com.nimbusds</groupId>
@@ -223,74 +254,46 @@
 
 			<!-- Microprofile -->
 			<dependency>
-				<groupId>org.eclipse.microprofile.metrics</groupId>
-				<artifactId>microprofile-metrics-api</artifactId>
-				<version>${microprofile.version}</version>
+				<groupId>org.eclipse.microprofile.config</groupId>
+				<artifactId>microprofile-config-api</artifactId>
+				<version>${microprofile.config.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>io.smallrye</groupId>
-				<artifactId>smallrye-metrics</artifactId>
-				<version>3.0.3</version>
+				<groupId>org.eclipse.microprofile.health</groupId>
+				<artifactId>microprofile-health-api</artifactId>
+				<version>${microprofile.health.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.microprofile.metrics</groupId>
+				<artifactId>microprofile-metrics-api</artifactId>
+				<version>${microprofile.metrics.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.eclipse.microprofile.rest.client</groupId>
+				<artifactId>microprofile-rest-client-api</artifactId>
+				<version>${microprofile.rest.client.version}</version>
+			</dependency>
+
+			<!-- Microprofile implementation smallrye -->
+			<dependency>
+				<groupId>io.smallrye.config</groupId>
+				<artifactId>smallrye-config</artifactId>
+				<version>${smallrye.config.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.smallrye</groupId>
 				<artifactId>smallrye-health</artifactId>
-				<version>3.0.1</version>
+				<version>${smallrye.health.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.smallrye</groupId>
-				<artifactId>smallrye-rest-client</artifactId>
-				<version>1.2.2</version>
-			</dependency>
-
-			<!-- Validation -->
-			<dependency>
-				<groupId>org.hibernate</groupId>
-				<artifactId>hibernate-validator-cdi</artifactId>
-				<version>7.0.1.Final</version>
-			</dependency>
-			<dependency>
-				<groupId>org.hibernate.validator</groupId>
-				<artifactId>hibernate-validator</artifactId>
-				<version>7.0.1.Final</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.glassfish</groupId>
-				<artifactId>jakarta.el</artifactId>
-				<version>3.0.3</version>
-			</dependency>
-
-			<!-- Resteasy -->
-			<dependency>
-				<groupId>org.jboss.resteasy</groupId>
-				<artifactId>resteasy-cdi</artifactId>
-				<version>${resteasy.version}</version>
+				<artifactId>smallrye-metrics</artifactId>
+				<version>${smallrye.metrics.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.jboss.resteasy</groupId>
-				<artifactId>resteasy-client</artifactId>
-				<version>${resteasy.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.jboss.resteasy</groupId>
-				<artifactId>resteasy-servlet-initializer</artifactId>
-				<version>${resteasy.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.jboss.resteasy</groupId>
-				<artifactId>resteasy-jaxb-provider</artifactId>
-				<version>${resteasy.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.jboss.resteasy</groupId>
-				<artifactId>resteasy-jackson2-provider</artifactId>
-				<version>${resteasy.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.jboss.resteasy</groupId>
-				<artifactId>resteasy-json-p-provider</artifactId>
-				<version>${resteasy.version}</version>
+				<artifactId>resteasy-client-microprofile</artifactId>
+				<version>${org.jboss.resteasy.client.microprofile.version}</version>
 			</dependency>
 
 			<!-- jetty -->
@@ -319,13 +322,6 @@
 				<scope>provided</scope>
 			</dependency>
 
-			<!-- Logging -->
-			<dependency>
-				<groupId>org.apache.logging.log4j</groupId>
-				<artifactId>log4j-api</artifactId>
-				<version>${log4j.version}</version>
-			</dependency>
-
 			<!-- Testing -->
 			<dependency>
 				<groupId>io.rest-assured</groupId>
@@ -338,12 +334,23 @@
 				<artifactId>karate-junit5</artifactId>
 				<version>${karate.version}</version>
 				<scope>test</scope>
+				<exclusions>
+					<exclusion>
+						<artifactId>snakeyaml</artifactId>
+						<groupId>*</groupId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>com.intuit.karate</groupId>
 				<artifactId>karate-apache</artifactId>
 				<version>${karate.version}</version>
 				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.yaml</groupId>
+				<artifactId>snakeyaml</artifactId>
+				<version>${snake.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.junit.jupiter</groupId>
@@ -365,11 +372,11 @@
 			</dependency>
 
 			<!-- Others -->
-			<dependency>
+			<!--<dependency>
 				<groupId>com.github.fge</groupId>
 				<artifactId>json-patch</artifactId>
 				<version>1.9</version>
-			</dependency>
+			</dependency>-->
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-collections4</artifactId>
@@ -379,6 +386,13 @@
 				<groupId>org.json</groupId>
 				<artifactId>json</artifactId>
 				<version>20210307</version>
+			</dependency>
+
+			<!-- Swagger -->
+			<dependency>
+				<groupId>io.swagger.core.v3</groupId>
+				<artifactId>swagger-core-jakarta</artifactId>
+				<version>${swagger.version}</version>
 			</dependency>
 
 		</dependencies>
@@ -543,6 +557,35 @@
 						</execution>
 					</executions>
 				</plugin>
+
+				<!-- swagger -->
+				<plugin>
+					<groupId>io.swagger.core.v3</groupId>
+					<artifactId>swagger-maven-plugin-jakarta</artifactId>
+					<version>${swagger-maven-plugin-jakarta}</version>
+					<executions>
+						<execution>
+							<configuration>
+								<outputFormat>YAML</outputFormat>
+								<outputPath>${project.parent.basedir}/docs</outputPath>
+								<prettyPrint>true</prettyPrint>
+								<filterClass>io.jans.configapi.filters.SpecFilter</filterClass>
+							</configuration>
+							<phase>compile</phase>
+							<goals>
+								<goal>resolve</goal>
+							</goals>
+						</execution>
+					</executions>
+					<dependencies>
+						<dependency>
+							<groupId>io.swagger.core.v3</groupId>
+							<artifactId>swagger-models-jakarta</artifactId>
+							<version>${swagger-models-jakarta}</version>
+						</dependency>
+					</dependencies>
+				</plugin>
+
 			</plugins>
 
 		</pluginManagement>

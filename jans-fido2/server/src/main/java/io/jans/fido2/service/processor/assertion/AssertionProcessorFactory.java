@@ -21,15 +21,19 @@ package io.jans.fido2.service.processor.assertion;
 import java.util.EnumMap;
 import java.util.Map;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Instance;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
 
 import io.jans.fido2.ctap.AttestationFormat;
 import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.service.processors.AssertionFormatProcessor;
 
+/**
+ * Factory Class that returns Processor based on the attestationType value in Fido2RegistrationData
+ *
+ */
 @ApplicationScoped
 public class AssertionProcessorFactory {
 

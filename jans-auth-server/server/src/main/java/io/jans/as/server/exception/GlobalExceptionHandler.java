@@ -7,17 +7,19 @@
 package io.jans.as.server.exception;
 
 import io.jans.as.server.model.exception.InvalidSessionStateException;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.faces.FacesException;
-import javax.faces.context.ExceptionHandler;
-import javax.faces.context.ExceptionHandlerWrapper;
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.faces.event.ExceptionQueuedEvent;
-import javax.faces.event.ExceptionQueuedEventContext;
+import jakarta.faces.FacesException;
+import jakarta.faces.context.ExceptionHandler;
+import jakarta.faces.context.ExceptionHandlerWrapper;
+import jakarta.faces.context.ExternalContext;
+import jakarta.faces.context.FacesContext;
+import jakarta.faces.event.ExceptionQueuedEvent;
+import jakarta.faces.event.ExceptionQueuedEventContext;
 import java.util.Iterator;
 
 /**
@@ -48,19 +50,29 @@ public class GlobalExceptionHandler extends ExceptionHandlerWrapper {
             final FacesContext fc = FacesContext.getCurrentInstance();
             final ExternalContext externalContext = fc.getExternalContext();
             try {
-                if (isInvalidSessionStateException(t)) {
-                    log.error(t.getMessage(), t);
-                    performRedirect(externalContext, "/error_session.htm");
-                } else {
-                    log.error(t.getMessage(), t);
-                    performRedirect(externalContext, "/error_service.htm");
-                }
+                logExceptionAsError(t);
+                performRedirect(externalContext, isInvalidSessionStateException(t) ? "/error_session.htm" : "/error_service.htm");
                 fc.renderResponse();
             } finally {
                 i.remove();
             }
         }
         getWrapped().handle();
+    }
+
+    private void logExceptionAsError(Throwable t) {
+        if (!log.isErrorEnabled()) {
+            return;
+        }
+
+        if (t instanceof WebApplicationException) {
+            Response response = ((WebApplicationException) t).getResponse();
+            if (response != null && response.getStatus() == 302) {
+                return;
+            }
+        }
+
+        log.error(t.getMessage(), t);
     }
 
     private boolean isInvalidSessionStateException(Throwable t) {

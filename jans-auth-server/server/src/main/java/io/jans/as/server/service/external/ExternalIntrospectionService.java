@@ -13,13 +13,14 @@ import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.custom.script.type.introspection.IntrospectionType;
 import io.jans.service.custom.script.ExternalScriptService;
+import jakarta.ejb.DependsOn;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.ws.rs.WebApplicationException;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 
-import javax.ejb.DependsOn;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.inject.Named;
 import java.util.List;
 
 /**
@@ -93,7 +94,10 @@ public class ExternalIntrospectionService extends ExternalScriptService {
             final boolean result = script.modifyResponse(responseAsJsonObject, context);
             log.trace("Finished external 'executeExternalModifyResponse' method, script name: {}, responseAsJsonObject: {} , context: {}, result: {}",
                     scriptConf.getName(), responseAsJsonObject, context, result);
+            context.throwWebApplicationExceptionIfSet();
             return result;
+        } catch (WebApplicationException e) {
+            throw e;
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
             saveScriptError(scriptConf.getCustomScript(), ex);

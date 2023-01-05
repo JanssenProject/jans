@@ -1,10 +1,4 @@
-"""
-jans.pycloudlib.cli.encoding
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-This module contains CLI commands for encoding/decoding text.
-
-"""
+"""This module contains CLI commands for encoding/decoding text."""
 
 import click
 
@@ -26,7 +20,8 @@ from jans.pycloudlib.utils import decode_text
     "--salt-literal",
     help="Salt string (overrides salt from secrets/file)",
 )
-def decode_file(path, salt_file, salt_literal):
+def decode_file(path: str, salt_file: str, salt_literal: str) -> None:
+    """Decode text from a file."""
     salt = ""
     if salt_literal:
         salt = salt_literal
@@ -62,7 +57,8 @@ def decode_file(path, salt_file, salt_literal):
     "--salt-literal",
     help="Salt string (overrides salt from secrets/file)",
 )
-def decode_string(text, salt_file, salt_literal):
+def decode_string(text: str, salt_file: str, salt_literal: str) -> None:
+    """Decode text string."""
     salt = ""
     if salt_literal:
         salt = salt_literal

@@ -9,7 +9,7 @@ package io.jans.model.config;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.Transient;
+import jakarta.persistence.Transient;
 
 import io.jans.model.AuthenticationScriptUsageType;
 import io.jans.model.SimpleCustomProperty;

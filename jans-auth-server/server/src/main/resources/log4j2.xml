@@ -140,6 +140,10 @@
 			<AppenderRef ref="JANS_AUTH_SCRIPT_LOG_FILE" />
 		</Logger>
 
+		<Logger name="io.jans.agama.engine.script.LogUtils" level="${log4j.default.log.level}" additivity="false">
+			<AppenderRef ref="JANS_AUTH_SCRIPT_LOG_FILE" />
+		</Logger>
+
 		<Logger name="io.jans.as.server.audit.ApplicationAuditLogger" level="${log4j.default.log.level}" additivity="false">
 			<AppenderRef ref="JANS_AUTH_AUDIT_LOG_FILE" />
 		</Logger>

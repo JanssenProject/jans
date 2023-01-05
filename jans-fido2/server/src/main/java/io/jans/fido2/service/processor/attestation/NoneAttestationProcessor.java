@@ -18,19 +18,34 @@
 
 package io.jans.fido2.service.processor.attestation;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import io.jans.fido2.ctap.AttestationFormat;
 import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.auth.AuthData;
 import io.jans.fido2.model.auth.CredAndCounterData;
-import io.jans.fido2.model.entry.Fido2RegistrationData;
+import io.jans.orm.model.fido2.Fido2RegistrationData;
 import io.jans.fido2.service.processors.AttestationFormatProcessor;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+/**
+ * Attestation processor for attestations of fmt = none One of the attestation
+ * formats called 'none'. When you getting it, that means two things:
+ * 
+ * 1. You really don't need attestation, and so you are deliberately ignoring
+ * it.
+ * 
+ * 2. You forgot to set attestation flag to 'direct' when making credential.
+ * 
+ * If you are getting attestation with fmt set to none, then no attestation
+ * is provided, and you don't have anything to verify. Simply extract user
+ * relevant information as specified below and save it to the database.
+ *
+ * 
+ */
 @ApplicationScoped
 public class NoneAttestationProcessor implements AttestationFormatProcessor {
 

@@ -1,0 +1,10 @@
+# editable install of jans-pycloudlib
+-e .
+
+# type-checker; run it with 'mypy --install-types jans'
+mypy>=0.971
+
+# internal docs generator
+mkdocstrings-python>=0.7.1
+mkdocs-material>=8.4.0
+mkdocs-click>=0.8.0

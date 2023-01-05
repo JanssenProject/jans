@@ -1,0 +1,48 @@
+
+# -- Responsible for regenerating auth-keys per x hours
+# -- Add custom normal and secret envs to the service
+usrEnvs:
+  # -- Add custom normal envs to the service
+  # variable1: value1
+  normal: {}
+  # -- Add custom secret envs to the service
+  # variable1: value1
+  secret: {}
+# -- Add custom dns policy
+dnsPolicy: ""
+# -- Add custom dns config
+dnsConfig: {}
+image:
+  # -- Image pullPolicy to use for deploying.
+  pullPolicy: IfNotPresent
+  # -- Image  to use for deploying.
+  repository: janssenproject/certmanager
+  # -- Image  tag to use for deploying.
+  tag: 1.0.6_dev
+  # -- Image Pull Secrets
+  pullSecrets: [ ]
+# -- Auth server key rotation keys life in hours
+keysLife: 48
+# -- Resource specs.
+resources:
+  limits:
+    cpu: 300m
+    memory: 300Mi
+  requests:
+    cpu: 300m
+    memory: 300Mi
+# -- Configure any additional volumes that need to be attached to the pod
+volumes: []
+# -- Configure any additional volumesMounts that need to be attached to the containers
+volumeMounts: []
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# -- Additional labels that will be added across all resources definitions in the format of {mylabel: "myapp"}
+additionalLabels: { }
+# -- Additional annotations that will be added across all resources  in the format of {cert-manager.io/issuer: "letsencrypt-prod"}. key app is taken
+additionalAnnotations: { }

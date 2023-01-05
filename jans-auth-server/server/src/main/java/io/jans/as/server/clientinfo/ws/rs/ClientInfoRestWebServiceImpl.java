@@ -9,7 +9,7 @@ package io.jans.as.server.clientinfo.ws.rs;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.AttributeService;
 import io.jans.as.model.clientinfo.ClientInfoErrorResponseType;
-import io.jans.as.model.common.ComponentType;
+import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.config.Constants;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.persistence.model.Scope;
@@ -22,21 +22,21 @@ import io.jans.as.server.service.ScopeService;
 import io.jans.as.server.service.token.TokenService;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.model.GluuAttribute;
-import org.json.JSONException;
+import io.jans.orm.model.base.LocalizedString;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.SecurityContext;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
-import javax.inject.Inject;
-import javax.ws.rs.Path;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 import java.util.Set;
 
 /**
  * Provides interface for Client Info REST web services
  *
  * @author Javier Rojas Blum
- * @version 0.9 March 27, 2015
+ * @version April 25, 2022
  */
 @Path("/")
 public class ClientInfoRestWebServiceImpl implements ClientInfoRestWebService {
@@ -78,7 +78,7 @@ public class ClientInfoRestWebServiceImpl implements ClientInfoRestWebService {
         }
         log.debug("Attempting to request Client Info, Access token = {}, Is Secure = {}", accessToken, securityContext.isSecure());
 
-        errorResponseFactory.validateComponentEnabled(ComponentType.CLIENTINFO);
+        errorResponseFactory.validateFeatureEnabled(FeatureFlagType.CLIENTINFO);
         Response.ResponseBuilder builder = Response.ok();
 
         if (!ClientInfoParamsValidator.validateParams(accessToken)) {
@@ -124,12 +124,16 @@ public class ClientInfoRestWebServiceImpl implements ClientInfoRestWebService {
                         Object attributeValue = clientService.getAttribute(client, ldapName);
 
                         String claimName = attribute.getClaimName();
-                        jsonObj.put(claimName, attributeValue);
+
+                        if (attributeValue instanceof LocalizedString) {
+                            LocalizedString localizedString = (LocalizedString) attributeValue;
+                            localizedString.addToJSON(jsonObj, claimName);
+                        } else {
+                            jsonObj.put(claimName, attributeValue);
+                        }
                     }
                 }
             }
-        } catch (JSONException e) {
-            log.error(e.getMessage(), e);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }

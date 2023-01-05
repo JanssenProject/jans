@@ -9,14 +9,14 @@ package io.jans.as.server.model;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
-import io.jans.as.client.ws.rs.ClientTestUtil;
+import io.jans.as.server.util.TestUtil;
 import io.jans.as.server.BaseTest;
 import io.jans.as.server.register.ws.rs.RegisterRestWebService;
 import io.jans.as.server.util.ServerUtil;
 
-import javax.ejb.Stateless;
-import javax.inject.Named;
-import javax.ws.rs.core.Response;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Named;
+import jakarta.ws.rs.core.Response;
 import java.net.URI;
 
 import static org.testng.Assert.assertEquals;
@@ -33,8 +33,8 @@ public class TClientService {
     private TClientService() {
     }
 
-    public static RegisterResponse register(RegisterRequest registerRequest, URI uri) throws JsonProcessingException {
-        RegisterRestWebService registerWs = WebServiceFactory.instance().createRegisterWs(uri.toString());
+    public static RegisterResponse register(RegisterRequest registerRequest, String url) throws JsonProcessingException {
+        RegisterRestWebService registerWs = WebServiceFactory.instance().createRegisterWs(url);
         Response response = registerWs.requestRegister(ServerUtil.toPrettyJson(registerRequest.getJSONParameters()), null, null);
         String entity = response.readEntity(String.class);
 
@@ -43,7 +43,7 @@ public class TClientService {
         assertEquals(response.getStatus(), 201, "Unexpected response code. " + entity);
         assertNotNull(entity, "Unexpected result: " + entity);
         final RegisterResponse registerResponse = RegisterResponse.valueOf(entity);
-        ClientTestUtil.assert_(registerResponse);
+        TestUtil.assert_(registerResponse);
         return registerResponse;
     }
 }

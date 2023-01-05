@@ -1,5 +1,7 @@
 {
   "applicationType": "web",
+  "description":"Description for test client",
+  "customObjectClasses":["top"],
   "accessTokenAsJwt": false,
   "claimRedirectUris": [
   ],
@@ -21,7 +23,7 @@
   "accessTokenSigningAlg": "RS256",
   "attributes": {
   	"tlsClientAuthSubjectDn":"",
-  	"runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims":false,
+  	"runIntrospectionScriptBeforeJwtCreation":false,
   	"keepClientAuthorizationAfterExpiration":false,
   	"allowSpontaneousScopes":false,
   	"spontaneousScopes":[],"spontaneousScopeScriptDns":[],
@@ -36,6 +38,7 @@
   "postLogoutRedirectUris": [
   ],
   "redirectUris": [
+  "http://localhost:8080"
   ],
   "scopes": [
   ],
@@ -43,5 +46,10 @@
   "includeClaimsInIdToken": false,
   "rptAsJwt": false,
   "subjectType": "pairwise",
-  "tokenEndpointAuthMethod": "client_secret_basic"   
+  "tokenEndpointAuthMethod": "client_secret_basic",
+  "dynamicRegistrationCustomObjectClass": "MyDynamicRegistrationCustomObject", 
+  "dynamicRegistrationCustomAttributes": [
+    "jansTrustedClnt",
+    "myAttr1"
+  ]  
 }

@@ -1,0 +1,9 @@
+Flow S.L.E.E.P
+    Basepath ""
+
+punk = Trigger co.co.nut
+    Override templates "path/form.ftl" "myform.ftl" 
+    "formly.ftl"
+    "dreary.ftl"
+
+//Failure reason: every pair of paths must be supplied in the same line 

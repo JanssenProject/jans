@@ -44,10 +44,10 @@ import org.apache.commons.lang.StringUtils;
 import org.python.google.common.collect.Iterables;
 import org.slf4j.Logger;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.ws.rs.core.Response;
+import jakarta.ejb.Stateless;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.ws.rs.core.Response;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -70,8 +70,8 @@ import static io.jans.as.model.uma.UmaErrorResponseType.INVALID_SCOPE;
 import static io.jans.as.model.uma.UmaErrorResponseType.INVALID_TICKET;
 import static io.jans.as.model.uma.UmaErrorResponseType.UNAUTHORIZED_CLIENT;
 import static io.jans.as.model.util.Util.escapeLog;
-import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
-import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
+import static jakarta.ws.rs.core.Response.Status.BAD_REQUEST;
+import static jakarta.ws.rs.core.Response.Status.UNAUTHORIZED;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 /**
@@ -498,7 +498,7 @@ public class UmaValidationService {
     public void validateResource(io.jans.as.model.uma.UmaResource resource) {
         validateScopeExpression(resource.getScopeExpression());
 
-        List<String> scopeDNs = umaScopeService.getScopeDNsByIdsAndAddToLdapIfNeeded(resource.getScopes());
+        List<String> scopeDNs = umaScopeService.getScopeDNsByIdsAndAddToPersistenceIfNeeded(resource.getScopes());
         if (scopeDNs.isEmpty() && StringUtils.isBlank(resource.getScopeExpression())) {
             log.error("Invalid resource. Both `scope` and `scope_expression` are blank.");
             throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, UmaErrorResponseType.INVALID_SCOPE, "Invalid resource. Both `scope` and `scope_expression` are blank.");

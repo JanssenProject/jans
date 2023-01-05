@@ -43,7 +43,7 @@ public class CustomObjectAttribute implements Serializable, Comparable<CustomObj
             return null;
         }
 
-        if (this.values.size() > 0) {
+        if (!this.values.isEmpty()) {
             return this.values.get(0);
         }
 
@@ -51,7 +51,7 @@ public class CustomObjectAttribute implements Serializable, Comparable<CustomObj
     }
 
     public void setValue(Object value) {
-        this.values = new ArrayList<Object>();
+        this.values = new ArrayList<>();
         this.values.add(value);
         this.multiValued = false;
     }
@@ -89,12 +89,16 @@ public class CustomObjectAttribute implements Serializable, Comparable<CustomObj
         }
 
         if (values.size() == 1) {
-            return values.get(0).toString();
+            return (values.get(0)!=null ? values.get(0).toString() : "");
         }
 
-        StringBuilder sb = new StringBuilder(values.get(0).toString());
-        for (int i = 1; i < values.size(); i++) {
-            sb.append(", ").append(values.get(i).toString());
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < values.size(); i++) {
+            if(i==0) {
+                sb.append(values.get(i).toString());
+            }else {
+                sb.append(", ").append(values.get(i).toString());
+            }
         }
 
         return sb.toString();

@@ -1,18 +1,20 @@
 package io.jans.ca.plugin.adminui.rest.logging;
 
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
+import io.swagger.v3.oas.annotations.Hidden;
 import org.slf4j.Logger;
 
-import javax.inject.Inject;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.util.Map;
 
+@Hidden
 @Path("/admin-ui/logging")
 public class AuditLoggerResource {
 

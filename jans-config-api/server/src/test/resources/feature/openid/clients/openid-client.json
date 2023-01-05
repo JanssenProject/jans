@@ -10,7 +10,7 @@
         "keepClientAuthorizationAfterExpiration": false,
         "postAuthnScripts": [],
         "rptClaimsScripts": [],
-        "runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims": false,
+        "runIntrospectionScriptBeforeJwtCreation": false,
         "spontaneousScopeScriptDns": [],
         "spontaneousScopes": []
     },

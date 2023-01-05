@@ -1,0 +1,27 @@
+{
+    "baseDN":"o=jans",
+
+    "applicationUrl":"https://%(hostname)s",
+    "baseEndpoint":"https://%(hostname)s/jans-scim/restv1",
+
+    "personCustomObjectClass":"jansCustomPerson",
+
+    "oxAuthIssuer":"https://%(hostname)s",
+    "umaIssuer":"https://%(hostname)s",
+
+    "maxCount": 200,
+    "bulkMaxOperations": 30,
+    "bulkMaxPayloadSize": 3072000,
+    "userExtensionSchemaURI": "urn:ietf:params:scim:schemas:extension:gluu:2.0:User",
+
+    "useLocalCache":true,
+
+    "disableJdkLogger":true,
+    "loggingLevel":"INFO",
+    "loggingLayout":"text",
+    "externalLoggerConfiguration":"",
+
+    "metricReporterInterval":300,
+    "metricReporterKeepDataDays":15,
+    "metricReporterEnabled":true
+}

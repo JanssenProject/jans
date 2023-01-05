@@ -1,0 +1,1 @@
+This folder contains Agama projects maintained by the Jans core team.

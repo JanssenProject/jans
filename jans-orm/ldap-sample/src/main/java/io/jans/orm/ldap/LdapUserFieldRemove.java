@@ -35,7 +35,7 @@ public final class LdapUserFieldRemove {
 
         // Find all users which have specified object classes defined in SimpleUser
         Filter filter = Filter.createEqualityFilter("uid", "admin");
-        List<SimpleUser> users = ldapEntryManager.findEntries("o=gluu", SimpleUser.class, filter);
+        List<SimpleUser> users = ldapEntryManager.findEntries("o=jans", SimpleUser.class, filter);
         if (users.size() == 0) {
             LOG.error("Failed to find user by filter: " + filter);
             return;
@@ -45,7 +45,7 @@ public final class LdapUserFieldRemove {
 
         // Add dummy oxEnrollmentCode attribute
         SimpleUser user = users.get(0);
-        user.setAttribute("oxEnrollmentCode", "test-enrollment-code", false);
+        user.setAttribute("jansEnrollmentCode", "test-enrollment-code", false);
         ldapEntryManager.merge(user);
 
         // Reload user by DN
@@ -56,7 +56,7 @@ public final class LdapUserFieldRemove {
         }
 
         // Clean dummy oxEnrollmentCode attribute
-        userWithEnrollment.setAttribute("oxEnrollmentCode", "", false);
+        userWithEnrollment.setAttribute("jansEnrollmentCode", "", false);
         ldapEntryManager.merge(userWithEnrollment);
 
         // Reload user by DN
@@ -66,8 +66,8 @@ public final class LdapUserFieldRemove {
             return;
         }
         
-        String enrollmentCode = userWithoutEnrollment.getAttribute("oxEnrollmentCode");
-        LOG.debug("oxEnrollmentCode: " + enrollmentCode);
+        String enrollmentCode = userWithoutEnrollment.getAttribute("jansEnrollmentCode");
+        LOG.debug("jansEnrollmentCode: " + enrollmentCode);
     }
 
 }

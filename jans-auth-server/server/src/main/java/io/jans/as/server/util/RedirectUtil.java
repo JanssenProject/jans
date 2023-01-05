@@ -15,12 +15,12 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.core.CacheControl;
-import javax.ws.rs.core.GenericEntity;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.CacheControl;
+import jakarta.ws.rs.core.GenericEntity;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.ResponseBuilder;
 import java.net.MalformedURLException;
 import java.net.URI;
 
@@ -31,11 +31,14 @@ import static io.jans.as.client.AuthorizationRequest.NO_REDIRECT_HEADER;
  */
 public class RedirectUtil {
 
-    private final static Logger log = LoggerFactory.getLogger(RedirectUtil.class);
+    private static final Logger log = LoggerFactory.getLogger(RedirectUtil.class);
 
-    static String JSON_REDIRECT_PROPNAME = "redirect";
+    public static final String JSON_REDIRECT_PROPNAME = "redirect";
 
-    static int HTTP_REDIRECT = 302;
+    public static final int HTTP_REDIRECT = 302;
+
+    private RedirectUtil() {
+    }
 
     public static ResponseBuilder getRedirectResponseBuilder(RedirectUri redirectUriResponse, HttpServletRequest httpRequest) {
         ResponseBuilder builder;
@@ -48,14 +51,11 @@ public class RedirectUtil {
                 String jsonResp = jsonObject.toString();
                 jsonResp = jsonResp.replace("\\/", "/");
                 builder = Response.ok(
-                        new GenericEntity<String>(jsonResp, String.class),
+                        new GenericEntity<>(jsonResp, String.class),
                         MediaType.APPLICATION_JSON_TYPE
                 );
 
-            } catch (MalformedURLException e) {
-                builder = Response.serverError();
-                log.debug(e.getMessage(), e);
-            } catch (JSONException e) {
+            } catch (MalformedURLException | JSONException e) {
                 builder = Response.serverError();
                 log.debug(e.getMessage(), e);
             }

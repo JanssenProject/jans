@@ -9,6 +9,8 @@ package io.jans.fido2.model.cert;
 import java.security.cert.Certificate;
 
 /**
+ * A holding class for certificate
+ * 
  * @author Yuriy Movchan
  * @version May 08, 2020
  */

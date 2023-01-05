@@ -1,0 +1,32 @@
+[tool.pydocstyle]
+convention = "google"
+inherit = false
+match = '(?!test_|setup|conf).*\.py'
+# match_dir = '[^\.].*'
+add_ignore = "D107"
+
+[tool.mypy]
+strict = true
+follow_imports = "silent"
+implicit_reexport = true
+show_error_context = true
+pretty = true
+show_column_numbers = true
+show_error_codes = true
+
+[[tool.mypy.overrides]]
+module = [
+    "consul",
+    "hvac",
+    "kubernetes.*",
+    # "urllib3",
+    "docker.*",
+    # "google.cloud",
+    "ldap3.*",
+    "ldif",
+    "sqlalchemy.*",
+    "requests_toolbelt.*",
+    "boto3",
+    "botocore.*",
+]
+ignore_missing_imports = true

@@ -8,11 +8,11 @@ package io.jans.as.model.error;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlElementWrapper;
+import jakarta.xml.bind.annotation.XmlRootElement;
 import java.util.List;
 
 /**
@@ -57,6 +57,10 @@ public class ErrorMessages {
     @XmlElementWrapper(name = "backchannelAuthentication")
     @XmlElement(name = "error")
     private List<ErrorMessage> backchannelAuthentication;
+
+    @XmlElementWrapper(name = "ssa")
+    @XmlElement(name = "error")
+    private List<ErrorMessage> ssa;
 
     public List<ErrorMessage> getAuthorize() {
         return authorize;
@@ -136,5 +140,13 @@ public class ErrorMessages {
 
     public void setBackchannelAuthentication(List<ErrorMessage> backchannelAuthentication) {
         this.backchannelAuthentication = backchannelAuthentication;
+    }
+
+    public List<ErrorMessage> getSsa() {
+        return ssa;
+    }
+
+    public void setSsa(List<ErrorMessage> ssa) {
+        this.ssa = ssa;
     }
 }

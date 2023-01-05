@@ -1,0 +1,6 @@
+Flow D.I.Y
+    Basepath "diy"
+
+x.a | x.b = Call var arg1 arg2 arg3
+
+//Failure reason: only a simple variable expression (e.g. x, myvar_2) can be used to catch a Java Throwable if any, in a Call

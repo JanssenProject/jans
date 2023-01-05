@@ -17,7 +17,7 @@ public class Logging {
     private boolean disableJdkLogger;
     private boolean enabledOAuthAuditLogging;
     private String externalLoggerConfiguration;
-    private Set<String> httpLoggingExludePaths = new HashSet<String>();
+    private Set<String> httpLoggingExcludePaths = new HashSet<String>();
 
     public Logging() {
     }
@@ -70,11 +70,11 @@ public class Logging {
         this.externalLoggerConfiguration = externalLoggerConfiguration;
     }
 
-    public Set<String> getHttpLoggingExludePaths() {
-        return httpLoggingExludePaths;
+    public Set<String> getHttpLoggingExcludePaths() {
+        return httpLoggingExcludePaths;
     }
 
-    public void setHttpLoggingExludePaths(Set<String> httpLoggingExludePaths) {
-        this.httpLoggingExludePaths = httpLoggingExludePaths;
+    public void setHttpLoggingExcludePaths(Set<String> httpLoggingExcludePaths) {
+        this.httpLoggingExcludePaths = httpLoggingExcludePaths;
     }
 }

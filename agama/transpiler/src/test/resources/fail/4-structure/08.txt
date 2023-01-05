@@ -1,0 +1,9 @@
+Flow flow
+    Basepath ""
+
+Repeat k times max
+    Quit When there is cold
+    Log me
+    Quit When there is heat
+
+//Failure reason: unexpected (second) Quit-When

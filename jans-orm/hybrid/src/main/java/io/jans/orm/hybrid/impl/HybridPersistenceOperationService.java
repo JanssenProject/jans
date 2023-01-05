@@ -9,9 +9,9 @@ package io.jans.orm.hybrid.impl;
 import java.util.List;
 
 import io.jans.orm.exception.AuthenticationException;
-import io.jans.orm.exception.extension.PersistenceExtension;
 import io.jans.orm.exception.operation.ConnectionException;
 import io.jans.orm.exception.operation.SearchException;
+import io.jans.orm.extension.PersistenceExtension;
 import io.jans.orm.operation.PersistenceOperationService;
 
 /**

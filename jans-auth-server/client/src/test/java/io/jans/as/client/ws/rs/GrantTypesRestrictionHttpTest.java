@@ -22,6 +22,8 @@ import io.jans.as.client.TokenRequest;
 import io.jans.as.client.TokenResponse;
 import io.jans.as.client.UserInfoClient;
 import io.jans.as.client.UserInfoResponse;
+
+import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
@@ -38,11 +40,12 @@ import org.testng.ITestContext;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import javax.ws.rs.HttpMethod;
+import jakarta.ws.rs.HttpMethod;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import static io.jans.as.client.client.Asserter.*;
 import static io.jans.as.model.register.RegisterRequestParam.APPLICATION_TYPE;
 import static io.jans.as.model.register.RegisterRequestParam.SCOPE;
 import static org.testng.Assert.assertEquals;
@@ -83,12 +86,7 @@ public class GrantTypesRestrictionHttpTest extends BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201);
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        AssertBuilder.registerResponse(registerResponse).created().check();
         assertNotNull(registerResponse.getResponseTypes());
         assertTrue(registerResponse.getResponseTypes().containsAll(expectedResponseTypes));
         assertNotNull(registerResponse.getGrantTypes());
@@ -108,14 +106,10 @@ public class GrantTypesRestrictionHttpTest extends BaseTest {
         RegisterResponse readResponse = readClient.exec();
 
         showClient(readClient);
-        assertEquals(readResponse.getStatus(), 200);
-        assertNotNull(readResponse.getClientId());
-        assertNotNull(readResponse.getClientSecret());
-        assertNotNull(readResponse.getRegistrationAccessToken());
-        assertNotNull(readResponse.getRegistrationClientUri());
-        assertNotNull(readResponse.getClientSecretExpiresAt());
-        assertNotNull(readResponse.getClaims().get(APPLICATION_TYPE.toString()));
-        assertNotNull(readResponse.getClaims().get(SCOPE.toString()));
+        AssertBuilder.registerResponse(readResponse).ok()
+                .notNullRegistrationClientUri()
+                .check();
+        assertRegisterResponseClaimsNotNull(readResponse, APPLICATION_TYPE, SCOPE);
         assertNotNull(readResponse.getResponseTypes());
         assertTrue(readResponse.getResponseTypes().containsAll(expectedResponseTypes));
         assertNotNull(readResponse.getGrantTypes());
@@ -172,21 +166,15 @@ public class GrantTypesRestrictionHttpTest extends BaseTest {
 
             // 4. Validate id_token
             Jwt jwt = Jwt.parse(idToken);
-            assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.TYPE));
-            assertNotNull(jwt.getHeader().getClaimAsString(JwtHeaderName.ALGORITHM));
-            assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUER));
-            assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUDIENCE));
-            assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.EXPIRATION_TIME));
-            assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.ISSUED_AT));
-            assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.SUBJECT_IDENTIFIER));
-            assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.AUTHENTICATION_TIME));
+            AssertBuilder.jwt(jwt)
+                    .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS256)
+                    .notNullAuthenticationTime()
+                    .check();
 
             RSAPublicKey publicKey = JwkClient.getRSAPublicKey(
                     jwksUri,
                     jwt.getHeader().getClaimAsString(JwtHeaderName.KEY_ID));
             RSASigner rsaSigner = new RSASigner(SignatureAlgorithm.RS256, publicKey);
-
-            assertTrue(rsaSigner.validate(jwt));
 
             if (expectedResponseTypes.contains(ResponseType.CODE)) {
                 assertNotNull(jwt.getClaims().getClaimAsString(JwtClaimName.CODE_HASH));
@@ -212,11 +200,8 @@ public class GrantTypesRestrictionHttpTest extends BaseTest {
             TokenResponse tokenResponse = tokenClient.exec();
 
             showClient(tokenClient);
-            assertEquals(tokenResponse.getStatus(), 200);
-            assertNotNull(tokenResponse.getEntity());
-            assertNotNull(tokenResponse.getAccessToken());
-            assertNotNull(tokenResponse.getExpiresIn());
-            assertNotNull(tokenResponse.getTokenType());
+            AssertBuilder.tokenResponse(tokenResponse)
+                    .check();
 
             if (expectedGrantTypes.contains(GrantType.REFRESH_TOKEN)) {
                 assertNotNull(tokenResponse.getRefreshToken());
@@ -228,12 +213,9 @@ public class GrantTypesRestrictionHttpTest extends BaseTest {
                 TokenResponse refreshTokenResponse = refreshTokenClient.execRefreshToken(scope, refreshToken, clientId, clientSecret);
 
                 showClient(refreshTokenClient);
-                assertEquals(refreshTokenResponse.getStatus(), 200);
-                assertNotNull(refreshTokenResponse.getEntity());
-                assertNotNull(refreshTokenResponse.getAccessToken());
-                assertNotNull(refreshTokenResponse.getTokenType());
-                assertNotNull(refreshTokenResponse.getRefreshToken());
-                assertNotNull(refreshTokenResponse.getScope());
+                AssertBuilder.tokenResponse(refreshTokenResponse)
+                        .notNullRefreshToken()
+                        .check();
 
                 accessToken = refreshTokenResponse.getAccessToken();
             } else {

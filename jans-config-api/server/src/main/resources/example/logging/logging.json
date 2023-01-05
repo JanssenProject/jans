@@ -1,0 +1,7 @@
+{
+    "loggingLevel": "TRACE",
+    "loggingLayout": "text",
+    "httpLoggingEnabled": false,
+    "disableJdkLogger": true,
+    "enabledOAuthAuditLogging": false
+}

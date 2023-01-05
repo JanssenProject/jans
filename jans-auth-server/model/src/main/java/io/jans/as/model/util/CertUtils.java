@@ -6,6 +6,7 @@
 
 package io.jans.as.model.util;
 
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
@@ -23,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URLDecoder;
+import java.security.AlgorithmParameters;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -35,6 +37,53 @@ public class CertUtils {
     private static final Logger log = LoggerFactory.getLogger(CertUtils.class);
 
     private CertUtils() {
+    }
+
+    public static SignatureAlgorithm getSignatureAlgorithm(X509Certificate cert) {
+        String signAlgName = cert.getSigAlgName();
+
+        for (SignatureAlgorithm sa : SignatureAlgorithm.values()) {
+            if (signAlgName.equalsIgnoreCase(sa.getAlgorithm())) {
+                return sa;
+            }
+        }
+
+        /*
+        Ensures that SignatureAlgorithms `PS256`, `PS384`, and `PS512` work properly on JDK 11 and later without the need
+        for BouncyCastle.  Previous releases referenced a BouncyCastle-specific
+        algorithm name instead of the Java Security Standard Algorithm Name of
+        [`RSASSA-PSS`](https://docs.oracle.com/en/java/javase/11/docs/specs/security/standard-names.html#signature-algorithms).
+        This release ensures the standard name is used moving forward.
+         */
+        if ("RSASSA-PSS".equals(signAlgName)) {
+            AlgorithmParameters algorithmParameters = CertUtils.getAlgorithmParameters(cert);
+            if (algorithmParameters == null) {
+                return null;
+            }
+
+            String algParamString = algorithmParameters.toString();
+            if (algParamString.contains("SHA-256")) {
+                return SignatureAlgorithm.PS256;
+            }
+            if (algParamString.contains("SHA-384")) {
+                return SignatureAlgorithm.PS384;
+            }
+            if (algParamString.contains("SHA-512")) {
+                return SignatureAlgorithm.PS512;
+            }
+        }
+        return null;
+    }
+
+    public static AlgorithmParameters getAlgorithmParameters(X509Certificate cert) {
+        try {
+            AlgorithmParameters result = AlgorithmParameters.getInstance(cert.getSigAlgName());
+            result.init(cert.getSigAlgParams());
+            return result;
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+        return null;
     }
 
     public static X509Certificate x509CertificateFromBytes(byte[] cert) {

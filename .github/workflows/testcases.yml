@@ -3,7 +3,7 @@ name: testcases
 on:
   push:
     branches:
-      - master
+      - main
     paths:
       - "jans-pycloudlib/jans/**"
       - "jans-pycloudlib/tests/**"
@@ -11,7 +11,7 @@ on:
       - "!**.md"
   pull_request:
     branches:
-      - master
+      - main
     paths:
       - "jans-pycloudlib/jans/**"
       - "jans-pycloudlib/tests/**"
@@ -26,9 +26,9 @@ jobs:
       matrix:
         python-version: [3.6, 3.7, 3.8]
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2.3.1
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
@@ -40,7 +40,7 @@ jobs:
         cd ./jans-pycloudlib
         tox
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v2.1.0
+      uses: codecov/codecov-action@v3
       with:
         file: ./jans-pycloudlib/coverage.xml
         files: ./jans-pycloudlib/coverage1.xml,./jans-pycloudlib/coverage2.xml

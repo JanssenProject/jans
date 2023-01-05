@@ -1,13 +1,13 @@
-package io.jans.orm.cloud.spanner.model;
-
-import java.io.Serializable;
-import java.util.Date;
-
 /*
  * Janssen Project software is available under the Apache License (2004). See http://www.apache.org/licenses/ for full text.
  *
  * Copyright (c) 2020, Janssen Project
  */
+package io.jans.orm.cloud.spanner.model;
+
+import java.io.Serializable;
+import java.util.Date;
+
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DN;
 import io.jans.orm.annotation.DataEntry;

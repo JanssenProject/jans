@@ -147,3 +147,15 @@ PyCharm
 # Mac
 .DS_STORE
 tmp
+/.metadata/
+
+# DBeaver
+credentials-config.json
+.credentials-config.json.bak
+data-sources.json
+.data-sources.json.bak
+
+# Eclipse
+.settings
+.classpath
+.project

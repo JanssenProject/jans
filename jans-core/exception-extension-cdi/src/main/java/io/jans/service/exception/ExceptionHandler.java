@@ -6,7 +6,8 @@
 
 package io.jans.service.exception;
 
-import javax.interceptor.InterceptorBinding;
+import jakarta.enterprise.util.Nonbinding;
+import jakarta.interceptor.InterceptorBinding;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -26,6 +27,7 @@ public @interface ExceptionHandler {
 	/**
      * @return The list of exceptions which exception handler can catch
      */
+    @Nonbinding
 	Class<? extends Throwable>[] value();
 
 }

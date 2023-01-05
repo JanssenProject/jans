@@ -79,6 +79,11 @@ public enum GrantType implements HasParamName, AttributeEnum {
     OXAUTH_UMA_TICKET("urn:ietf:params:oauth:grant-type:uma-ticket"),
 
     /**
+     * Token exchange grant type for OAuth 2.0
+     */
+    TOKEN_EXCHANGE("urn:ietf:params:oauth:grant-type:token-exchange"),
+
+    /**
      * CIBA (Client Initiated Backchannel Authentication) Grant Type.
      */
     CIBA("urn:openid:params:grant-type:ciba"),
@@ -145,7 +150,7 @@ public enum GrantType implements HasParamName, AttributeEnum {
 
     public static String[] toStringArray(GrantType[] grantTypes) {
         if (grantTypes == null) {
-            return null;
+            return new String[0];
         }
 
         String[] resultGrantTypes = new String[grantTypes.length];

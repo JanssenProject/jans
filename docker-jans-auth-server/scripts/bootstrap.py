@@ -16,10 +16,11 @@ from jans.pycloudlib.persistence import sync_couchbase_truststore
 from jans.pycloudlib.persistence import sync_ldap_truststore
 from jans.pycloudlib.persistence import render_sql_properties
 from jans.pycloudlib.persistence import render_spanner_properties
+from jans.pycloudlib.persistence.utils import PersistenceMapper
 from jans.pycloudlib.utils import cert_to_truststore
 from jans.pycloudlib.utils import get_server_certificate
-# from jans.pycloudlib.utils import as_boolean
 from jans.pycloudlib.utils import generate_keystore
+from jans.pycloudlib.utils import as_boolean
 
 from keystore_mod import modify_keystore_path
 
@@ -72,7 +73,13 @@ def main():
     render_salt(manager, "/app/templates/salt.tmpl", "/etc/jans/conf/salt")
     render_base_properties("/app/templates/jans.properties.tmpl", "/etc/jans/conf/jans.properties")
 
-    if persistence_type in ("ldap", "hybrid"):
+    mapper = PersistenceMapper()
+    persistence_groups = mapper.groups().keys()
+
+    if persistence_type == "hybrid":
+        render_hybrid_properties("/etc/jans/conf/jans-hybrid.properties")
+
+    if "ldap" in persistence_groups:
         render_ldap_properties(
             manager,
             "/app/templates/jans-ldap.properties.tmpl",
@@ -80,7 +87,7 @@ def main():
         )
         sync_ldap_truststore(manager)
 
-    if persistence_type in ("couchbase", "hybrid"):
+    if "couchbase" in persistence_groups:
         render_couchbase_properties(
             manager,
             "/app/templates/jans-couchbase.properties.tmpl",
@@ -90,17 +97,16 @@ def main():
         # sync_couchbase_cert(manager)
         sync_couchbase_truststore(manager)
 
-    if persistence_type == "hybrid":
-        render_hybrid_properties("/etc/jans/conf/jans-hybrid.properties")
+    if "sql" in persistence_groups:
+        db_dialect = os.environ.get("CN_SQL_DB_DIALECT", "mysql")
 
-    if persistence_type == "sql":
         render_sql_properties(
             manager,
-            "/app/templates/jans-sql.properties.tmpl",
+            f"/app/templates/jans-{db_dialect}.properties.tmpl",
             "/etc/jans/conf/jans-sql.properties",
         )
 
-    if persistence_type == "spanner":
+    if "spanner" in persistence_groups:
         render_spanner_properties(
             manager,
             "/app/templates/jans-spanner.properties.tmpl",
@@ -113,7 +119,7 @@ def main():
     cert_to_truststore(
         "web_https",
         "/etc/certs/web_https.crt",
-        "/usr/lib/jvm/default-jvm/jre/lib/security/cacerts",
+        "/usr/java/latest/jre/lib/security/cacerts",
         "changeit",
     )
 
@@ -124,7 +130,6 @@ def main():
     #                        decode=True, binary_mode=True)
 
     modify_jetty_xml()
-    modify_server_ini()
     modify_webdefault_xml()
     configure_logging()
 
@@ -160,14 +165,14 @@ def main():
         cert_to_truststore(
             "OpenBankingJwksUri",
             "/etc/certs/obextjwksuri.crt",
-            "/usr/lib/jvm/default-jvm/jre/lib/security/cacerts",
+            "/usr/java/latest/jre/lib/security/cacerts",
             "changeit",
         )
 
         cert_to_truststore(
             ob_ext_alias,
             ext_cert,
-            "/usr/lib/jvm/default-jvm/jre/lib/security/cacerts",
+            "/usr/java/latest/jre/lib/security/cacerts",
             "changeit",
         )
 
@@ -191,7 +196,7 @@ def main():
             cert_to_truststore(
                 ob_transport_alias,
                 ob_transport_cert,
-                "/usr/lib/jvm/default-jvm/jre/lib/security/cacerts",
+                "/usr/java/latest/jre/lib/security/cacerts",
                 "changeit",
             )
 
@@ -214,8 +219,6 @@ def main():
         keystore_path = "/etc/certs/ob-ext-signing.jks"
         jwks_uri = ext_jwks_uri
     else:
-        # sync_enabled = as_boolean(os.environ.get("CN_SYNC_JKS_ENABLED", False))
-        # if not sync_enabled:
         manager.secret.to_file(
             "auth_jks_base64",
             "/etc/certs/auth-keys.jks",
@@ -230,18 +233,6 @@ def main():
 
     # ensure we're using correct JKS file and JWKS uri
     modify_keystore_path(manager, keystore_path, jwks_uri)
-
-
-def modify_server_ini():
-    with open("/opt/jans/jetty/jans-auth/start.d/server.ini", "a") as f:
-        req_header_size = os.environ.get("CN_JETTY_REQUEST_HEADER_SIZE", "8192")
-        updates = "\n".join([
-            # disable server version info
-            "jetty.httpConfig.sendServerVersion=false",
-            # customize request header size
-            f"jetty.httpConfig.requestHeaderSize={req_header_size}",
-        ])
-        f.write(updates)
 
 
 def configure_logging():
@@ -261,6 +252,7 @@ def configure_logging():
         "script_log_level": "INFO",
         "audit_log_target": "FILE",
         "audit_log_level": "INFO",
+        "log_prefix": "",
     }
 
     # pre-populate custom config; format is JSON string of ``dict``
@@ -310,10 +302,13 @@ def configure_logging():
         if config[key] == "FILE":
             config[key] = value
 
-    logfile = "/opt/jans/jetty/jans-auth/resources/log4j2.xml"
-    with open(logfile) as f:
+    if as_boolean(custom_config.get("enable_stdout_log_prefix")):
+        config["log_prefix"] = "${sys:log.console.prefix}%X{log.console.group} - "
+
+    with open("/app/templates/log4j2.xml") as f:
         txt = f.read()
 
+    logfile = "/opt/jans/jetty/jans-auth/resources/log4j2.xml"
     tmpl = Template(txt)
     with open(logfile, "w") as f:
         f.write(tmpl.safe_substitute(config))

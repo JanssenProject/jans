@@ -6,25 +6,24 @@
 
 package io.jans.model.custom.script.model;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-import javax.persistence.Transient;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
-
 import io.jans.model.ProgrammingLanguage;
 import io.jans.model.ScriptLocationType;
 import io.jans.model.SimpleCustomProperty;
 import io.jans.model.SimpleExtendedCustomProperty;
-import io.jans.util.StringHelper;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.JsonObject;
 import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.model.base.BaseEntry;
+import io.jans.util.StringHelper;
+import jakarta.persistence.Transient;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Custom script configuration
@@ -114,7 +113,7 @@ public class CustomScript extends BaseEntry {
         this.internal = customScript.internal;
         
         if (customScript.aliases != null) {
-        	this.aliases = new ArrayList<String>(customScript.aliases);
+        	this.aliases = new ArrayList<>(customScript.aliases);
         }
     }
 
@@ -151,12 +150,10 @@ public class CustomScript extends BaseEntry {
     }
 
     public String getScript() {
-
-        if(script==null && scriptType==CustomScriptType.PERSON_AUTHENTICATION){
-            script=ScriptTemplate.AUTHEN.getValue();
-        }
-        else if(script==null && scriptType!=CustomScriptType.PERSON_AUTHENTICATION){
-            script=ScriptTemplate.NO_AUTHEN.getValue();
+        if (script == null) {
+            script = scriptType == CustomScriptType.PERSON_AUTHENTICATION ?
+                    ScriptTemplate.AUTHEN.getValue() :
+                    ScriptTemplate.NO_AUTHEN.getValue();
         }
         return script;
     }
@@ -268,8 +265,8 @@ public class CustomScript extends BaseEntry {
     protected SimpleCustomProperty getModuleProperty(final String modulePropertyName) {
         SimpleCustomProperty result = null;
 
-        List<SimpleCustomProperty> moduleProperties = getModuleProperties();
-        if (moduleProperties == null) {
+        List<SimpleCustomProperty> modulePropertiesList = getModuleProperties();
+        if (modulePropertiesList == null) {
             return result;
         }
 
@@ -299,13 +296,13 @@ public class CustomScript extends BaseEntry {
     }
 
     public void removeModuleProperty(final String modulePropertyName) {
-        List<SimpleCustomProperty> moduleProperties = getModuleProperties();
-        if (moduleProperties == null) {
+        List<SimpleCustomProperty> modulePropertiesList = getModuleProperties();
+        if (modulePropertiesList == null) {
             return;
         }
 
-        for (Iterator<SimpleCustomProperty> it = moduleProperties.iterator(); it.hasNext();) {
-            SimpleCustomProperty moduleProperty = (SimpleCustomProperty) it.next();
+        for (Iterator<SimpleCustomProperty> it = modulePropertiesList.iterator(); it.hasNext();) {
+            SimpleCustomProperty moduleProperty = it.next();
             if (StringHelper.equalsIgnoreCase(moduleProperty.getValue1(), modulePropertyName)) {
                 it.remove();
                 break;
@@ -321,4 +318,17 @@ public class CustomScript extends BaseEntry {
         this.scriptError = scriptError;
     }
 
+    
+    @Override
+    public String toString() {
+        return "CustomScript [inum=" + inum
+                + ", name=" + name 
+                + ", description=" + description
+                + ", programmingLanguage=" + programmingLanguage
+                + ", scriptType=" + scriptType
+                + ", level=" + level
+                + ", revision=" + revision
+                + ", enabled=" + enabled
+                + "]";
+    }
 }

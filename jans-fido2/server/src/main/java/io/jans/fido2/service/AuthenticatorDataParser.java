@@ -22,8 +22,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import org.apache.commons.codec.binary.Hex;
 import io.jans.fido2.exception.Fido2RuntimeException;
@@ -39,6 +39,11 @@ import com.fasterxml.jackson.dataformat.cbor.CBORParser;
 /**
  * @author Yuriy Movchan
  * @version March 9, 2020
+ */
+/**
+ * authData — a raw buffer struct containing user info.
+ * Parser for authData or authenticatorData
+ *
  */
 @ApplicationScoped
 public class AuthenticatorDataParser {

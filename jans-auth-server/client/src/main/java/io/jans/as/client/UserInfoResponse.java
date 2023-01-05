@@ -8,7 +8,7 @@ package io.jans.as.client;
 
 import io.jans.as.model.userinfo.UserInfoErrorResponseType;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 
 /**
  * Represents an user info response received from the authorization server.

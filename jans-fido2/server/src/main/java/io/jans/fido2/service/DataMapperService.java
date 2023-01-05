@@ -9,9 +9,9 @@ package io.jans.fido2.service;
 import java.io.BufferedReader;
 import java.io.IOException;
 
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 
@@ -23,6 +23,7 @@ import com.fasterxml.jackson.dataformat.cbor.CBORFactory;
 import com.fasterxml.jackson.dataformat.cbor.CBORParser;
 
 /**
+ * Conversions to/from JSON format and to/from CBOR format
  * @author Yuriy Movchan
  * @version May 08, 2020
  */

@@ -2,6 +2,8 @@ import json
 import logging.config
 import os
 import re
+import typing as _t
+from functools import cached_property
 from string import Template
 
 from jans.pycloudlib import get_manager
@@ -14,7 +16,14 @@ from jans.pycloudlib.persistence import sync_couchbase_truststore
 from jans.pycloudlib.persistence import sync_ldap_truststore
 from jans.pycloudlib.persistence import render_sql_properties
 from jans.pycloudlib.persistence import render_spanner_properties
+from jans.pycloudlib.persistence.couchbase import CouchbaseClient
+from jans.pycloudlib.persistence.ldap import LdapClient
+from jans.pycloudlib.persistence.spanner import SpannerClient
+from jans.pycloudlib.persistence.sql import SqlClient
+from jans.pycloudlib.persistence.utils import PersistenceMapper
 from jans.pycloudlib.utils import cert_to_truststore
+from jans.pycloudlib.utils import generate_base64_contents
+from jans.pycloudlib.utils import as_boolean
 
 from settings import LOGGING_CONFIG
 
@@ -64,7 +73,13 @@ def main():
     render_salt(manager, "/app/templates/salt.tmpl", "/etc/jans/conf/salt")
     render_base_properties("/app/templates/jans.properties.tmpl", "/etc/jans/conf/jans.properties")
 
-    if persistence_type in ("ldap", "hybrid"):
+    mapper = PersistenceMapper()
+    persistence_groups = mapper.groups()
+
+    if persistence_type == "hybrid":
+        render_hybrid_properties("/etc/jans/conf/jans-hybrid.properties")
+
+    if "ldap" in persistence_groups:
         render_ldap_properties(
             manager,
             "/app/templates/jans-ldap.properties.tmpl",
@@ -72,7 +87,7 @@ def main():
         )
         sync_ldap_truststore(manager)
 
-    if persistence_type in ("couchbase", "hybrid"):
+    if "couchbase" in persistence_groups:
         render_couchbase_properties(
             manager,
             "/app/templates/jans-couchbase.properties.tmpl",
@@ -80,17 +95,16 @@ def main():
         )
         sync_couchbase_truststore(manager)
 
-    if persistence_type == "hybrid":
-        render_hybrid_properties("/etc/jans/conf/jans-hybrid.properties")
+    if "sql" in persistence_groups:
+        db_dialect = os.environ.get("CN_SQL_DB_DIALECT", "mysql")
 
-    if persistence_type == "sql":
         render_sql_properties(
             manager,
-            "/app/templates/jans-sql.properties.tmpl",
+            f"/app/templates/jans-{db_dialect}.properties.tmpl",
             "/etc/jans/conf/jans-sql.properties",
         )
 
-    if persistence_type == "spanner":
+    if "spanner" in persistence_groups:
         render_spanner_properties(
             manager,
             "/app/templates/jans-spanner.properties.tmpl",
@@ -103,23 +117,16 @@ def main():
     cert_to_truststore(
         "web_https",
         "/etc/certs/web_https.crt",
-        "/usr/lib/jvm/default-jvm/jre/lib/security/cacerts",
+        "/usr/java/latest/jre/lib/security/cacerts",
         "changeit",
     )
 
     modify_jetty_xml()
     modify_webdefault_xml()
-    modify_server_ini()
     configure_logging()
 
-
-def modify_server_ini():
-    with open("/opt/jans/jetty/jans-fido2/start.d/server.ini", "a") as f:
-        updates = "\n".join([
-            # disable server version info
-            "jetty.httpConfig.sendServerVersion=false",
-        ])
-        f.write(updates)
+    persistence_setup = PersistenceSetup(manager)
+    persistence_setup.import_ldif_files()
 
 
 def configure_logging():
@@ -129,6 +136,7 @@ def configure_logging():
         "fido2_log_level": "INFO",
         "persistence_log_target": "FILE",
         "persistence_log_level": "INFO",
+        "log_prefix": "",
     }
 
     # pre-populate custom config; format is JSON string of ``dict``
@@ -173,13 +181,61 @@ def configure_logging():
         if config[key] == "FILE":
             config[key] = value
 
-    logfile = "/opt/jans/jetty/jans-fido2/resources/log4j2.xml"
-    with open(logfile) as f:
+    if as_boolean(custom_config.get("enable_stdout_log_prefix")):
+        config["log_prefix"] = "${sys:log.console.prefix}%X{log.console.group} - "
+
+    with open("/app/templates/log4j2.xml") as f:
         txt = f.read()
 
+    logfile = "/opt/jans/jetty/jans-fido2/resources/log4j2.xml"
     tmpl = Template(txt)
     with open(logfile, "w") as f:
         f.write(tmpl.safe_substitute(config))
+
+
+class PersistenceSetup:
+    def __init__(self, manager) -> None:
+        self.manager = manager
+
+        client_classes = {
+            "ldap": LdapClient,
+            "couchbase": CouchbaseClient,
+            "spanner": SpannerClient,
+            "sql": SqlClient,
+        }
+
+        # determine persistence type
+        mapper = PersistenceMapper()
+        self.persistence_type = mapper.mapping["default"]
+
+        # determine persistence client
+        client_cls = client_classes.get(self.persistence_type)
+        self.client = client_cls(manager)
+
+    @cached_property
+    def ctx(self) -> dict[str, _t.Any]:
+        ctx = {
+            "hostname": self.manager.config.get("hostname"),
+            "fido2ConfigFolder": "/etc/jans/conf/fido2",
+        }
+
+        # pre-populate fido2_dynamic_conf_base64
+        with open("/app/templates/jans-fido2/dynamic-conf.json") as f:
+            ctx["fido2_dynamic_conf_base64"] = generate_base64_contents(f.read() % ctx)
+
+        # pre-populate fido2_static_conf_base64
+        with open("/app/templates/jans-fido2/static-conf.json") as f:
+            ctx["fido2_static_conf_base64"] = generate_base64_contents(f.read())
+        return ctx
+
+    @cached_property
+    def ldif_files(self) -> list[str]:
+        return ["/app/templates/jans-fido2/fido2.ldif"]
+
+    def import_ldif_files(self) -> None:
+        for file_ in self.ldif_files:
+            logger.info(f"Importing {file_}")
+            self.client.create_from_ldif(file_, self.ctx)
 
 
 if __name__ == "__main__":

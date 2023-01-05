@@ -1,0 +1,11 @@
+//This flow appeared originally in the demos of the authentication-trees project
+Flow org.gluu.flow1 
+    Basepath "f1" 
+    
+data = RRF "index.ftl"
+
+data = Trigger org.gluu.flow2 data.secret[0]
+
+Log "@debug Subflow finished successfully?" data.success
+
+Finish data

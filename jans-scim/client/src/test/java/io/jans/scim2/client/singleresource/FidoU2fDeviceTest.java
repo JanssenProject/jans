@@ -9,9 +9,9 @@ import io.jans.scim2.client.BaseTest;
 import org.testng.annotations.Test;
 
 import java.util.Optional;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 
-import static javax.ws.rs.core.Response.Status.*;
+import static jakarta.ws.rs.core.Response.Status.*;
 
 import static org.testng.Assert.*;
 

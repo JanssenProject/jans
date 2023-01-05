@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project
- 	xmlns="http://maven.apache.org/POM/4.0.0"
- 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
- 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>jans-fido2-model</artifactId>
@@ -13,7 +10,7 @@
 	<parent>
 		<groupId>io.jans</groupId>
 		<artifactId>jans-fido2-parent</artifactId>
-		<version>1.0.0-SNAPSHOT</version>
+		<version>1.0.6-SNAPSHOT</version>
 	</parent>
 
 	<dependencies>
@@ -30,11 +27,30 @@
                 <groupId>io.jans</groupId>
                 <artifactId>jans-auth-model</artifactId>
             </dependency>
-
+		
 			<!-- Jackson -->
 			<dependency>
 				<groupId>com.fasterxml.jackson.core</groupId>
 				<artifactId>jackson-annotations</artifactId>
+			</dependency>
+			<!-- Weld -->
+	        <dependency>
+	            <groupId>org.jboss.weld.servlet</groupId>
+	            <artifactId>weld-servlet-core</artifactId>
+	        </dependency>
+	        <dependency>
+	            <groupId>org.jboss.weld</groupId>
+	            <artifactId>weld-core-impl</artifactId>
+	        </dependency>
+			<dependency>
+				<groupId>jakarta.servlet</groupId>
+				<artifactId>jakarta.servlet-api</artifactId>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>io.jans</groupId>
+				<artifactId>jans-doc</artifactId>
+				<version>${project.version}</version>
 			</dependency>
 	</dependencies>
 	

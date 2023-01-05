@@ -7,11 +7,16 @@
 package io.jans.as.client;
 
 import com.google.common.collect.Maps;
+import io.jans.as.client.client.AssertBuilder;
+import io.jans.as.client.client.Asserter;
 import io.jans.as.client.dev.HostnameVerifierType;
 import io.jans.as.client.page.AbstractPage;
 import io.jans.as.client.page.PageConfig;
 import io.jans.as.client.par.ParClient;
 import io.jans.as.client.par.ParRequest;
+import io.jans.as.client.ssa.create.SsaCreateClient;
+import io.jans.as.client.ssa.create.SsaCreateResponse;
+import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseMode;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.common.SubjectType;
@@ -22,6 +27,7 @@ import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.error.IErrorType;
 import io.jans.as.model.register.ApplicationType;
+import io.jans.as.model.util.DateUtil;
 import io.jans.as.model.util.SecurityProviderUtility;
 import io.jans.as.model.util.Util;
 import io.jans.util.StringHelper;
@@ -44,12 +50,8 @@ import org.apache.http.ssl.SSLContexts;
 import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
 import org.jetbrains.annotations.Nullable;
-import org.openqa.selenium.By;
-import org.openqa.selenium.Cookie;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.FluentWait;
@@ -66,25 +68,14 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.UnrecoverableKeyException;
+import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.time.Duration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Properties;
-import java.util.UUID;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
+import static org.testng.Assert.*;
 
 /**
  * @author Javier Rojas Blum
@@ -113,6 +104,7 @@ public abstract class BaseTest {
     protected String backchannelAuthenticationEndpoint;
     protected String revokeSessionEndpoint;
     protected String parEndpoint;
+    protected String ssaEndpoint;
     protected Map<String, List<String>> scopeToClaimsMapping;
     protected String issuer;
     protected String sharedKey;
@@ -247,6 +239,14 @@ public abstract class BaseTest {
 
     public void setParEndpoint(String parEndpoint) {
         this.parEndpoint = parEndpoint;
+    }
+
+    public String getSsaEndpoint() {
+        return ssaEndpoint;
+    }
+
+    public void setSsaEndpoint(String ssaEndpoint) {
+        this.ssaEndpoint = ssaEndpoint;
     }
 
     public String getBackchannelAuthenticationEndpoint() {
@@ -455,6 +455,10 @@ public abstract class BaseTest {
     protected String acceptAuthorization(WebDriver currentDriver, String redirectUri) {
         String authorizationResponseStr = currentDriver.getCurrentUrl();
 
+        if ((authorizationResponseStr.contains("code=") || authorizationResponseStr.contains("access_token=")) && !authorizationResponseStr.contains("user_code")) {
+            return authorizationResponseStr;
+        }
+
         // Check for authorization form if client has no persistent authorization
         if (!authorizationResponseStr.contains("#")) {
             WebElement allowButton = waitForRequredElementLoad(currentDriver, authorizeFormAllowButton);
@@ -482,7 +486,10 @@ public abstract class BaseTest {
                 authorizationResponseStr = waitForPageSwitch(currentDriver, authorizationResponseStr);
             }
         } else {
-            fail("The authorization form was expected to be shown.");
+            if (authorizationResponseStr.contains("code=") || authorizationResponseStr.contains("access_token=")) {
+                return authorizationResponseStr;
+            }
+            fail("The authorization form was expected to be shown. authorizationResponseStr:" + authorizationResponseStr);
         }
 
         return authorizationResponseStr;
@@ -821,25 +828,7 @@ public abstract class BaseTest {
             OpenIdConfigurationResponse response = client.execOpenIdConfiguration();
 
             showClient(client);
-            assertEquals(response.getStatus(), 200, "Unexpected response code");
-            assertNotNull(response.getIssuer(), "The issuer is null");
-            assertNotNull(response.getAuthorizationEndpoint(), "The authorizationEndpoint is null");
-            assertNotNull(response.getTokenEndpoint(), "The tokenEndpoint is null");
-            assertNotNull(response.getRevocationEndpoint(), "The revocationEndpoint is null");
-            assertNotNull(response.getUserInfoEndpoint(), "The userInfoEndPoint is null");
-            assertNotNull(response.getJwksUri(), "The jwksUri is null");
-            assertNotNull(response.getRegistrationEndpoint(), "The registrationEndpoint is null");
-
-            assertTrue(response.getScopesSupported().size() > 0, "The scopesSupported is empty");
-            assertTrue(response.getScopeToClaimsMapping().size() > 0, "The scope to claims mapping is empty");
-            assertTrue(response.getResponseTypesSupported().size() > 0, "The responseTypesSupported is empty");
-            assertTrue(response.getGrantTypesSupported().size() > 0, "The grantTypesSupported is empty");
-            assertTrue(response.getAcrValuesSupported().size() >= 0, "The acrValuesSupported is empty");
-            assertTrue(response.getSubjectTypesSupported().size() > 0, "The subjectTypesSupported is empty");
-            assertTrue(response.getIdTokenSigningAlgValuesSupported().size() > 0, "The idTokenSigningAlgValuesSupported is empty");
-            assertTrue(response.getRequestObjectSigningAlgValuesSupported().size() > 0, "The requestObjectSigningAlgValuesSupported is empty");
-            assertTrue(response.getTokenEndpointAuthMethodsSupported().size() > 0, "The tokenEndpointAuthMethodsSupported is empty");
-            assertTrue(response.getClaimsSupported().size() > 0, "The claimsSupported is empty");
+            Asserter.assertOpenIdConfigurationResponse(response);
 
             authorizationEndpoint = response.getAuthorizationEndpoint();
             tokenEndpoint = response.getTokenEndpoint();
@@ -858,6 +847,7 @@ public abstract class BaseTest {
             scopeToClaimsMapping = response.getScopeToClaimsMapping();
             gluuConfigurationEndpoint = determineGluuConfigurationEndpoint(openIdConnectDiscoveryResponse.getLinks().get(0).getHref());
             issuer = response.getIssuer();
+            ssaEndpoint = response.getSsaEndpoint();
         } else {
             showTitle("Loading configuration endpoints from properties file");
 
@@ -877,6 +867,7 @@ public abstract class BaseTest {
             revokeSessionEndpoint = context.getCurrentXmlTest().getParameter("revokeSessionEndpoint");
             scopeToClaimsMapping = new HashMap<String, List<String>>();
             issuer = context.getCurrentXmlTest().getParameter("issuer");
+            ssaEndpoint = context.getCurrentXmlTest().getParameter("ssaEndpoint");
         }
 
         authorizationPageEndpoint = determineAuthorizationPageEndpoint(authorizationEndpoint);
@@ -1124,12 +1115,24 @@ public abstract class BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        AssertBuilder.registerResponse(registerResponse).created().check();
+        return registerResponse;
+    }
+
+    public RegisterResponse registerClient(final String redirectUris, List<ResponseType> responseTypes, List<GrantType> grantTypes, List<String> scopes, String sectorIdentifierUri) {
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
+                io.jans.as.model.util.StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setScope(scopes);
+        registerRequest.setGrantTypes(grantTypes);
+        registerRequest.setSubjectType(SubjectType.PAIRWISE);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+
+        RegisterClient registerClient = newRegisterClient(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        AssertBuilder.registerResponse(registerResponse).created().check();
         return registerResponse;
     }
 
@@ -1157,12 +1160,37 @@ public abstract class BaseTest {
         RegisterResponse registerResponse = registerClient.exec();
 
         showClient(registerClient);
-        assertEquals(registerResponse.getStatus(), 201, "Unexpected response code: " + registerResponse.getEntity());
-        assertNotNull(registerResponse.getClientId());
-        assertNotNull(registerResponse.getClientSecret());
-        assertNotNull(registerResponse.getRegistrationAccessToken());
-        assertNotNull(registerResponse.getClientIdIssuedAt());
-        assertNotNull(registerResponse.getClientSecretExpiresAt());
+        AssertBuilder.registerResponse(registerResponse).created().check();
+
+        return registerResponse;
+    }
+
+    public RegisterResponse registerClient(final String redirectUris, final List<ResponseType> responseTypes,
+                                           final List<GrantType> grantTypes, final String sectorIdentifierUri, final String clientJwksUri,
+                                           final SignatureAlgorithm signatureAlgorithm, final KeyEncryptionAlgorithm keyEncryptionAlgorithm,
+                                           final BlockEncryptionAlgorithm blockEncryptionAlgorithm) {
+        RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
+                io.jans.as.model.util.StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setGrantTypes(grantTypes);
+        registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setAuthorizationSignedResponseAlg(signatureAlgorithm);
+        registerRequest.setAuthorizationEncryptedResponseAlg(keyEncryptionAlgorithm);
+        registerRequest.setAuthorizationEncryptedResponseEnc(blockEncryptionAlgorithm);
+        registerRequest.setRequestObjectSigningAlg(signatureAlgorithm);
+        registerRequest.setRequestObjectEncryptionAlg(keyEncryptionAlgorithm);
+        registerRequest.setRequestObjectEncryptionEnc(blockEncryptionAlgorithm);
+        registerRequest.setUserInfoSignedResponseAlg(signatureAlgorithm);
+        registerRequest.setUserInfoEncryptedResponseAlg(keyEncryptionAlgorithm);
+        registerRequest.setUserInfoEncryptedResponseEnc(blockEncryptionAlgorithm);
+
+        RegisterClient registerClient = new RegisterClient(registrationEndpoint);
+        registerClient.setRequest(registerRequest);
+        RegisterResponse registerResponse = registerClient.exec();
+
+        showClient(registerClient);
+        AssertBuilder.registerResponse(registerResponse).created().check();
 
         return registerResponse;
     }
@@ -1209,5 +1237,42 @@ public abstract class BaseTest {
         }
 
         return authorizationResponse;
+    }
+
+    public TokenResponse tokenClientCredentialsGrant(String scope, String clientId, String clientSecret) {
+        TokenClient tokenClient = new TokenClient(tokenEndpoint);
+        TokenResponse tokenResponse = tokenClient.execClientCredentialsGrant(scope, clientId, clientSecret);
+        showClient(tokenClient);
+        AssertBuilder.tokenResponse(tokenResponse).ok().check();
+        return tokenResponse;
+    }
+
+    public SsaCreateResponse createSsaWithDefaultValues(String accessToken, Long orgId, Long expiration, Boolean oneTimeUse) {
+        Long orgIdAux = orgId != null ? orgId : 1000L;
+        String descriptionAux = "test description";
+        String softwareIdAux = "gluu-scan-api";
+        Long expirationAux;
+        if (expiration == null) {
+            Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+            calendar.add(Calendar.HOUR, 24);
+            expirationAux = DateUtil.dateToUnixEpoch(calendar.getTime());
+        } else {
+            expirationAux = expiration;
+        }
+        List<String> softwareRolesAux = Collections.singletonList("password");
+        List<String> grantTypesAux = Collections.singletonList("client_credentials");
+        return createSsa(accessToken, orgIdAux, expirationAux, descriptionAux, softwareIdAux, softwareRolesAux,
+                grantTypesAux, oneTimeUse, Boolean.TRUE);
+    }
+
+    public SsaCreateResponse createSsa(String accessToken, Long orgId, Long expiration, String description,
+                                       String softwareId, List<String> softwareRoles, List<String> grantTypes,
+                                       Boolean oneTimeUse, Boolean rotateSsa) {
+        SsaCreateClient ssaCreateClient = new SsaCreateClient(ssaEndpoint);
+        SsaCreateResponse response = ssaCreateClient.execSsaCreate(accessToken, orgId, expiration, description, softwareId,
+                softwareRoles, grantTypes, oneTimeUse, rotateSsa);
+        showClient(ssaCreateClient);
+        AssertBuilder.ssaCreate(ssaCreateClient.getRequest(), response);
+        return response;
     }
 }

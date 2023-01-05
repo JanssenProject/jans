@@ -12,7 +12,6 @@ on:
       - "!**.md"
   pull_request:
     branches:
-      - master
       - main
       # below branch is triggered by jenkins which triggers dev image
       - update-source-build-dates
@@ -21,16 +20,20 @@ on:
       - "!docker-jans-**/CHANGELOG.md"
       - "!docker-jans-**/version.txt"
       - "!**.md"
-  pull_request_target:
-    branches:
-      # below protected branches prefix only allows internal teams to push to it
-      - cn-*
   workflow_dispatch:
     inputs:
       services:
-        description: 'One or set of the docker images. Format as following: "docker-jans-auth-server docker-jans-certmanager docker-jans-client-api docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim"'
+        description: 'One or set of the docker images. Format as following: "docker-jans-auth-server docker-jans-certmanager docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim docker-jans-monolith docker-jans-loadtesting-jmeter"'
         required: true
-        default: 'docker-jans-auth-server docker-jans-certmanager docker-jans-client-api docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim'
+        default: 'docker-jans-auth-server docker-jans-certmanager docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim docker-jans-monolith docker-jans-loadtesting-jmeter'
+      cn_version:
+        description: 'The war version to build the image off'
+        required: false
+        default: ''
+      image_tag:
+        description: 'The manual image tag to post'
+        required: false
+        default: ''
       tags:
         description: 'Tags'
         required: false
@@ -41,10 +44,10 @@ jobs:
     strategy:
       max-parallel: 8
       matrix:
-        docker-images: ["auth-server", "certmanager", "config-api", "client-api", "configurator", "fido2", "persistence-loader", "scim"]
+        docker-images: ["auth-server", "certmanager", "config-api", "configurator", "fido2", "persistence-loader", "scim", "monolith", "loadtesting-jmeter"]
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
@@ -55,14 +58,15 @@ jobs:
           DEFAULT_ALL=${{ github.event.inputs.services }}
           if [ -z "$DEFAULT_ALL" ]
           then
-            DEFAULT_ALL="docker-jans-auth-server docker-jans-certmanager docker-jans-client-api docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim"
+            DEFAULT_ALL="docker-jans-auth-server docker-jans-certmanager docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim docker-jans-monolith docker-jans-loadtesting-jmeter"
           else
             echo "$DEFAULT_ALL"
           fi
           # Detect actual docker folders that changed if error arises default to all images
-          DIRECTORIES_CHANGED=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | cut -d/ -f1 | sort -u | grep "docker-jans" || echo "$DEFAULT_ALL")
+          pull_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
+          DIRECTORIES_CHANGED=$(gh pr view $pull_number --json files --jq '.files.[].path' | cut -d/ -f1 | sort -u | grep "docker-jans" || echo "$DEFAULT_ALL")
           if [[ "$DIRECTORIES_CHANGED" =~ "${{ matrix.docker-images }}" ]]; then
-            echo "A change in this images directory has occured"
+            echo "A change in this images directory has occurred"
             echo ::set-output name=build::${BUILD}
           fi
 
@@ -80,7 +84,11 @@ jobs:
         if: steps.build_docker_image.outputs.build || github.event_name == 'tags'
         id: prep
         run: |
-          MAIN_VERSION=$(python3 -c "from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('./docker-jans-${{ matrix.docker-images }}') ; print(dfparser.labels['version'])")
+          DOCKER_FILE_LOCATION=./docker-jans-${{ matrix.docker-images }}
+          if [[ "loadtesting-jmeter" =~ "${{ matrix.docker-images }}" ]]; then
+            DOCKER_FILE_LOCATION=./demos/benchmarking/docker-jans-loadtesting-jmeter
+          fi
+          MAIN_VERSION=$(python3 -c "from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('$DOCKER_FILE_LOCATION') ; print(dfparser.labels['version'])")
           DOCKER_IMAGE=janssenproject/${{ matrix.docker-images }}
           VERSION=${MAIN_VERSION}_dev
           BUILD=true
@@ -94,18 +102,37 @@ jobs:
           if [[ $VERSION =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\_[a-b]{1}[0-9]{1,3}$ ]]; then
             TAGS="$TAGS,${DOCKER_IMAGE}:${MAIN_VERSION}_dev"
           fi
+          # If the user passed a manual image tag to build a custom manual image
+          MANUAL_IMAGE_TAG=${{ github.event.inputs.image_tag }}
+          if [ ! -z "$MANUAL_IMAGE_TAG" ]
+          then
+            TAGS="$TAGS,${DOCKER_IMAGE}:${MANUAL_IMAGE_TAG}"
+            echo "Manual image tag has been inputted by the user"
+          else
+            echo "$TAGS"
+          fi
+          # If the user passed a war version to build off ,change this war version.
+          CN_VERSION=${{ github.event.inputs.cn_version }}
+          if [ ! -z "$CN_VERSION" ]
+          then
+            python3 -c "from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('./docker-jans-${{ matrix.docker-images }}') ; dfparser.envs['CN_VERSION'] = '${{ github.event.inputs.cn_version }}'"
+            echo "War version has been modified."
+          else
+            echo "$CN_VERSION"
+          fi
           echo ::set-output name=tags::${TAGS}
           echo ::set-output name=build::${BUILD}
+          echo ::set-output name=dockerfilelocation::${DOCKER_FILE_LOCATION}
 
       # UPDATE BUILD DATES INSIDE THE DOCKERFILE BEFORE BUILDING THE DEV IMAGES TRIGGERED BY JENKINS
       - name: Setup Python 3.7
-        if: github.event_name == 'workflow_dispatch'
-        uses: actions/setup-python@v2.3.1
+        if: github.event_name == 'workflow_dispatch' && ${{ matrix.docker-images }} != 'loadtesting-jmeter'
+        uses: actions/setup-python@v4
         with:
           python-version: 3.7
 
       - name: Install Python dependencies
-        if: github.event_name == 'workflow_dispatch'
+        if: github.event_name == 'workflow_dispatch' && ${{ matrix.docker-images }} != 'loadtesting-jmeter'
         run: |
           sudo apt-get update
           sudo python3 -m pip install --upgrade pip
@@ -115,7 +142,7 @@ jobs:
           sudo apt-get install jq
 
       - name: Update Build date in Dockerfile
-        if: github.event_name == 'workflow_dispatch'
+        if: github.event_name == 'workflow_dispatch' && ${{ matrix.docker-images }} != 'loadtesting-jmeter'
         id: update_build_date_in_dockerfile
         run: |
           sudo python3 ./automation/auto_update_build_date.py
@@ -131,11 +158,11 @@ jobs:
       - name: Set up Docker Buildx
         if: steps.build_docker_image.outputs.build && steps.prep.outputs.build
         id: buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v2
 
       - name: Cache Docker layers
         if: steps.build_docker_image.outputs.build && steps.prep.outputs.build
-        uses: actions/cache@v2.1.7
+        uses: actions/cache@v3
         with:
           path: /tmp/.buildx-cache
           key: ${{ runner.os }}-buildx-${{ github.sha }}
@@ -144,7 +171,7 @@ jobs:
 
       - name: Login to Docker Hub
         if: github.event_name != 'pull_request'
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         with:
           username: ${{ secrets.MOAUTO_DOCKERHUB_USERNAME }}
           password: ${{ secrets.MOAUTO_DOCKERHUB_TOKEN }}
@@ -152,11 +179,11 @@ jobs:
       - name: Build and push
         if: steps.build_docker_image.outputs.build && steps.prep.outputs.build
         id: docker_build
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           builder: ${{ steps.buildx.outputs.name }}
-          context: ./docker-jans-${{ matrix.docker-images }}
-          file: ./docker-jans-${{ matrix.docker-images }}/Dockerfile
+          context: ${{ steps.prep.outputs.dockerfilelocation }}
+          file: ${{ steps.prep.outputs.dockerfilelocation }}/Dockerfile
           #target: prod
           # add to platforms comma seperated linux/ppc64leL Issue: py3-grpcio
           # add to platforms comma seperated linux/386 : Issue: openjdk11-jre-headless alpine package not

@@ -45,16 +45,16 @@ public class StringUtils {
         }
     }
 
+    /**
+     * Check if first and second String Params are equals, even if both are null.
+     * @param str1 first String param
+     * @param str2 second String param
+     * @return true if both are null, true if both are equals, false in other cases
+     * @deprecated it is possible to use directly:   org.apache.commons.lang.StringUtils.equals(str1, str2);
+     */
+    @Deprecated
     public static boolean equals(String str1, String str2) {
-        if (str1 == null && str2 == null) {
-            return true;
-        } else if (str1 == null && str2 != null) {//note: str2!=null is always NOT null, see previous 'if' statement*/
-            return false;
-        } else if (str1 != null && str2 == null) {  //note: str1!=null is ALWAYS true
-            return false;
-        } else {
-            return str1 != null && str1.equals(str2);
-        }
+        return org.apache.commons.lang.StringUtils.equals(str1, str2);
     }
 
     public static boolean equalsIgnoringSpaces(String a, String b) {
@@ -95,7 +95,7 @@ public class StringUtils {
      * @param glueString String between each array element
      * @return String containing all array elements separated by glue string.
      */
-    public static String implode(Collection collection, String glueString) {
+    public static String implode(Collection<? extends Object> collection, String glueString) {
         String output = EMPTY_STRING;
 
         if (collection != null && !collection.isEmpty()) {
@@ -139,7 +139,7 @@ public class StringUtils {
         return list;
     }
 
-    public static JSONArray toJSONArray(List inputList) {
+    public static JSONArray toJSONArray(List<? extends Object> inputList) {
         JSONArray jsonArray = new JSONArray();
 
         if (inputList != null && !inputList.isEmpty()) {
@@ -220,4 +220,5 @@ public class StringUtils {
     public static String base64urlencode(String string) {
         return Base64Util.base64urlencode(string.getBytes(StandardCharsets.UTF_8));
     }
+
 }

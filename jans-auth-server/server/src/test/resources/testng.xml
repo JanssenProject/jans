@@ -8,10 +8,25 @@
 
     <test name="Unit Tests" enabled="true">
         <classes>
-            <class name="io.jans.as.server.service.MTLSServiceTest" />
+            <class name="io.jans.as.server.model.CIBAGrantTest" />
             <class name="io.jans.as.server.model.authorize.JwtAuthorizationRequestTest" />
-			<class name="io.jans.as.server.service.ScopeServiceTest" />
-			<class name="io.jans.as.server.model.CIBAGrantTest" />
+            <class name="io.jans.as.server.model.registration.RegisterParamsValidatorTest" />
+
+            <class name="io.jans.as.server.service.MTLSServiceTest" />
+            <class name="io.jans.as.server.service.ScopeServiceTest" />
+            <class name="io.jans.as.server.service.SpontaneousScopeServiceTest" />
+            <class name="io.jans.as.server.service.RedirectionUriServiceTest" />
+            <class name="io.jans.as.server.service.external.ExternalAuthenticationServiceTest" />
+            <class name="io.jans.as.server.servlet.OpenIdConfigurationTest" />
+            <class name="io.jans.as.server.service.net.UriServiceTest" />
+
+            <class name="io.jans.as.server.token.ws.rs.TokenExchangeServiceTest" />
+            <class name="io.jans.as.server.token.ws.rs.TokenRestWebServiceValidatorTest" />
+            <class name="io.jans.as.server.ws.rs.stat.MonthsTest" />
+            <class name="io.jans.as.server.authorize.ws.rs.AuthorizeRestWebServiceValidatorTest" />
+            <class name="io.jans.as.server.authorize.ws.rs.AuthorizeRestWebServiceImplTest" />
+            <class name="io.jans.as.server.register.ws.rs.SsaValidationConfigServiceTest" />
+            <class name="io.jans.as.server.session.ws.rs.EndSessionRestWebServiceImplTest" />
         </classes>
     </test>
 
@@ -21,8 +36,8 @@
         </classes>
     </test>
 
-	<!-- Application Type Restriction (embedded) -->
-	<test name="Application Type Restriction (embedded)" enabled="true">
+<!--	 Application Type Restriction (embedded) -->
+	<test name="Application Type Restriction (embedded)" enabled="false">
 		<classes>
 			<class name="io.jans.as.server.ws.rs.ApplicationTypeRestrictionEmbeddedTest" />
 		</classes>
@@ -158,7 +173,7 @@
 		</classes>
 	</test>
 
-	<!-- Signature test -->
+<!--	 Signature test-->
 	<test name="Signature test (embedded)" enabled="true">
 		<classes>
 			<class name="io.jans.as.server.comp.SignatureTest" />
@@ -232,7 +247,7 @@
 			<class name="io.jans.as.server.uma.ws.rs.RegisterPermissionWSTest" />
 		</classes>
 	</test>
-	<test name="UMA. Workflow test" enabled="false">
+	<test name="UMA. Workflow test" enabled="true">
 		<classes>
 			<class name="io.jans.as.server.uma.ws.rs.AccessProtectedResourceFlowWSTest" />
 		</classes>
@@ -259,14 +274,7 @@
 		</classes>
 	</test>
 
-	<test name="Fido U2F test (embedded)" enabled="true">
-		<classes>
-			<class name="io.jans.as.server.service.fido.u2f.RawAuthenticationServiceTest" />
-			<class name="io.jans.as.server.service.fido.u2f.RawRegistrationServiceTest" />
-		</classes>
-	</test>
-
-    <test name="Cleaner timer test" enabled="false">
+    <test name="Cleaner timer test" enabled="true">
         <classes>
             <class name="io.jans.as.server.comp.CleanerTimerTest" />
         </classes>
@@ -279,7 +287,7 @@
 	</test>
 
     <!-- Enable it when client jks is regenerated -->
-    <test name="JWT cross-check test" enabled="false">
+    <test name="JWT cross-check test" enabled="true">
         <classes>
             <class name="io.jans.as.server.comp.JwtCrossCheckTest" />
         </classes>

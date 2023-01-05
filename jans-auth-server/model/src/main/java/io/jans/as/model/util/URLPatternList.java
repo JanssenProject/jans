@@ -22,31 +22,33 @@ import java.util.regex.Pattern;
 public class URLPatternList {
 
     private static final Logger LOG = Logger.getLogger(URLPatternList.class);
+    private static final String URL_PATTERN_PARTS_1 = "^((\\*|[A-Za-z-]+):(//)?)?";
+    private static final String URL_PATTERN_PARTS_2 = "(\\*|((\\*\\.)?[^*/:]+))?(:(\\d+))?(/.*)?";
 
-    private List<URLPattern> urlPatternList;
+    private List<URLPattern> patternList;
 
     public URLPatternList() {
-        this.urlPatternList = new ArrayList<>();
+        this.patternList = new ArrayList<>();
     }
 
-    public URLPatternList(List<String> urlPatternList) {
+    public URLPatternList(List<String> patternList) {
         this();
 
-        if (urlPatternList != null) {
-            for (String urlPattern : urlPatternList) {
+        if (patternList != null) {
+            for (String urlPattern : patternList) {
                 addListEntry(urlPattern);
             }
         }
     }
 
     public boolean isUrlListed(String uri) {
-        if (urlPatternList == null) {
+        if (patternList == null) {
             return true;
         }
 
         URI parsedUri = URI.create(uri);
 
-        for (URLPattern pattern : urlPatternList) {
+        for (URLPattern pattern : patternList) {
             if (pattern.matches(parsedUri)) {
                 return true;
             }
@@ -56,31 +58,38 @@ public class URLPatternList {
     }
 
     public void addListEntry(String urlPattern) {
-        if (urlPatternList != null) {
-            try {
-                if (urlPattern.compareTo("*") == 0) {
-                    LOG.debug("Unlimited access to network resources");
-                    urlPatternList = null;
-                } else { // specific access
-                    Pattern parts = Pattern.compile("^((\\*|[A-Za-z-]+):(//)?)?(\\*|((\\*\\.)?[^*/:]+))?(:(\\d+))?(/.*)?");
-                    Matcher m = parts.matcher(urlPattern);
-                    if (m.matches()) {
-                        String scheme = m.group(2);
-                        String host = m.group(4);
-                        // Special case for two urls which are allowed to have empty hosts
-                        if (("file".equals(scheme) || "content".equals(scheme)) && host == null) host = "*";
-                        String port = m.group(8);
-                        String path = m.group(9);
-                        if (scheme == null) {
-                            urlPatternList.add(new URLPattern("http", host, port, path));
-                            urlPatternList.add(new URLPattern("https", host, port, path));
-                        } else {
-                            urlPatternList.add(new URLPattern(scheme, host, port, path));
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                LOG.debug("Failed to add origin " + urlPattern);
+        if (patternList == null) {
+            return;
+        }
+        if (urlPattern.compareTo("*") == 0) {
+            LOG.debug("Unlimited access to network resources");
+            patternList = null;
+            return;
+        }
+
+        // specific access
+        try {
+            Pattern parts = Pattern.compile(URL_PATTERN_PARTS_1 + URL_PATTERN_PARTS_2);
+            Matcher m = parts.matcher(urlPattern);
+            addOriginURLMatcher(m);
+        } catch (Exception e) {
+            LOG.debug("Failed to add origin " + urlPattern);
+        }
+    }
+
+    private void addOriginURLMatcher(Matcher m) throws MalformedURLException {
+        if (m != null && m.matches()) {
+            String scheme = m.group(2);
+            String host = m.group(4);
+            // Special case for two urls which are allowed to have empty hosts
+            if (("file".equals(scheme) || "content".equals(scheme)) && host == null) host = "*";
+            String port = m.group(8);
+            String path = m.group(9);
+            if (scheme == null) {
+                patternList.add(new URLPattern("http", host, port, path));
+                patternList.add(new URLPattern("https", host, port, path));
+            } else {
+                patternList.add(new URLPattern(scheme, host, port, path));
             }
         }
     }
@@ -147,4 +156,5 @@ public class URLPatternList {
             return regex.toString();
         }
     }
+
 }

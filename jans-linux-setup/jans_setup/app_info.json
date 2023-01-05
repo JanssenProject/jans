@@ -1,0 +1,16 @@
+{
+  "JANS_APP_VERSION": "1.0.6",
+  "JANS_BUILD": "-SNAPSHOT",
+  "JETTY_VERSION": "11.0.11",
+  "AMAZON_CORRETTO_VERSION": "11.0.15.9.1",
+  "JYTHON_VERSION": "2.7.3",
+  "OPENDJ_VERSION": "4.4.12",
+  "JANS_MAVEN": "https://jenkins.jans.io",
+  "EXTERNAL_LIBS": "https://ox.gluu.org/icrby8xcvbcv/",
+  "APPLE_WEBAUTHN": "https://www.apple.com/certificateauthority/Apple_WebAuthn_Root_CA.pem",
+  "SQLALCHEMY": "https://github.com/sqlalchemy/sqlalchemy/archive/rel_1_3_23.zip",
+  "PYJWT": "https://github.com/jpadilla/pyjwt/archive/refs/tags/2.3.0.zip",
+  "PROMPT_TOOLKIT": "https://github.com/prompt-toolkit/python-prompt-toolkit/archive/refs/tags/3.0.33.zip",
+  "WCWIDTH": "https://github.com/jquast/wcwidth/archive/refs/tags/0.2.5.zip",
+  "PYGMENTS": "https://github.com/pygments/pygments/archive/refs/tags/2.13.0.zip"
+}
