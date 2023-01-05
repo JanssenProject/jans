@@ -8,23 +8,36 @@ tags:
   - introspectionScriptBackwardCompatibility
 ---
 
-### Introspection endpoint
+# Overview
 
-The URI to invoke the [Introspection Endpoint](https://datatracker.ietf.org/doc/html/rfc7662) in Janssen Auth Server can be found by checking the `introspection_endpoint` claim of the OpenID Connect configuration response, typically deployed at `https://<my.jans.server>/.well-known/openid-configuration`
+Introspection endpoint allows a protected resource to query an OAuth 2.0 authorization server to determine the active 
+state of an OAuth 2.0 token and to determine meta-information about this token. This endpoint can be used to introspect
+both opaque token (i.e reference tokens) and structured tokens(i.e value tokens). This token conforms to [OAuth2 token
+introspection](https://datatracker.ietf.org/doc/html/rfc7662) specifications.
 
-` "introspection_endpoint" : "https://<my.jans.server>/jans-auth/restv1/introspection" `
+The URI to invoke the introspection endpoint in Janssen Auth Server 
+can be found by checking the `introspection_endpoint` claim of the OpenID Connect configuration response, typically deployed at `https://janssen.server.host/.well-known/openid-configuration`
 
-#### A. GET:
+` "introspection_endpoint" : "https://janssen.server.host/jans-auth/restv1/introspection" `
+
+More information about request and response of the clientinfo endpoint can be found in
+the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/replace-janssen-version/jans-auth-server/docs/swagger.yaml#/Token/get-introspection).
+
+
+## Sample GET Request
+
+**Request**
 
 ```
-curl -X 'GET'   'https://<my.jans.server>/jans-auth/restv1/introspection?token=368fea2b-be14-4d30-bd57-bcc4cde2033c&response_as_jwt=false'   -H 'accept: application/json' -H   "Authorization: Bearer 111d51a4-2828-4b47-abce-77034cddcfb5"
-
+curl -X 'GET'   'https://janssen.server.host/jans-auth/restv1/introspection?token=368fea2b-be14-4d30-bd57-bcc4cde2033c&response_as_jwt=false'   -H 'accept: application/json' -H   "Authorization: Bearer 111d51a4-2828-4b47-abce-77034cddcfb5"
 ```
-Response:
+
+**Response**
+
 ```
 {
     "sub": "",
-    "iss": "https://<my.jans.server>",
+    "iss": "https://janssen.server.host",
     "active": true,
     "token_type": "Bearer",
     "client_id": "1800.df1bb233-10b8-40ed-bbb9-07da50892a35",
@@ -39,13 +52,13 @@ Response:
     "username": null
 }
 ```
-#### B. POST:
+## Sample POST Request
 
+**Request**
 
-Example:
 ```
 curl -X 'POST' \
-  'https://<my.jans.server>/jans-auth/restv1/introspection' \
+  'https://janssen.server.host/jans-auth/restv1/introspection' \
   -H 'accept: application/json' \
   -H 'Content-Type: application/x-www-form-urlencoded' \
   -d 'token=eyJra....3ZkB-Ajwg'  
@@ -55,7 +68,7 @@ Response:
 ```
 {
     "sub": "",
-    "iss": "https://<my.jans.server>",
+    "iss": "https://janssen.server.host",
     "active": true,
     "token_type": "Bearer",
     "client_id": "3000.5829c1f8-7554-41ab-a7d6-3513a5e9c4ad",
