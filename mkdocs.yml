@@ -257,6 +257,11 @@ nav:
             - 'OpenID id_token': 'admin/auth-server/tokens/openid-id-token.md'
             - 'OpenID Userinfo Token': 'admin/auth-server/tokens/openid-userinfo-token.md'
             - 'UMA RPT Token': 'admin/auth-server/tokens/uma-rpt-token.md'
+        - 'Scopes':
+            - 'admin/auth-server/scopes/README.md'
+            - 'OAuth Scopes': 'admin/auth-server/scopes/oauth.md'
+            - 'OpenID Scopes': 'admin/auth-server/scopes/openid.md'
+            - 'UMA Scopes': 'admin/auth-server/scopes/uma.md'
         - 'Endpoints':
             - 'admin/auth-server/endpoints/README.md'
             - 'OpenID Configuration': 'admin/auth-server/endpoints/configuration.md'
