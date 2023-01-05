@@ -44,7 +44,7 @@ class Crypto64:
         csr = '%s/%s.csr' % (Config.certFolder, suffix)
         public_certificate = '%s/%s.crt' % (Config.certFolder, suffix)
         if not truststore_fn:
-            truststore_fn = Config.defaultTrustStoreFN
+            truststore_fn = Config.default_trust_store_fn
 
         self.run([paths.cmd_openssl,
                   'genrsa',
@@ -95,6 +95,9 @@ class Crypto64:
         self.run([paths.cmd_chmod, '700', key_with_password])
         self.run([paths.cmd_chown, '%s:%s' % (user, user), key])
         self.run([paths.cmd_chmod, '700', key])
+        
+        alias = "%s_%s" % (Config.hostname, suffix)        
+        self.delete_key(alias, truststore_fn)        
 
         self.run([Config.cmd_keytool, "-import", "-trustcacerts", "-alias", "%s_%s" % (Config.hostname, suffix), \
                   "-file", public_certificate, "-keystore", truststore_fn, \
@@ -412,3 +415,41 @@ class Crypto64:
                 alias = ls.split(',')[0]
                 if alias in keys:
                     self.run([Config.cmd_keytool, '-delete', '-alias', alias, '-keystore', 'NONE', '-storetype', 'PKCS11', '-storepass', 'changeit'])
+
+    def delete_key(self, alias, truststore_fn=None):
+        if not truststore_fn:
+            truststore_fn = Config.default_trust_store_fn
+
+        if truststore_fn == Config.default_trust_store_fn and alias in Config.non_setup_properties['java_truststore_aliases']:
+            self.run([Config.cmd_keytool, "-delete", "-trustcacerts", "-alias", alias,
+                    "-keystore", truststore_fn,
+                    "-storepass", "changeit", "-noprompt"])
+
+    def export_cert_from_store(self, alias, truststore_fn, storepass, target_fn):
+        self.logIt("Exporting certificate from {} to {} with alias {}".format(truststore_fn, target_fn, alias))
+        cmd = [Config.cmd_keytool, "-exportcert", "-rfc",
+                    "-alias", alias,
+                    "-keystore", truststore_fn,
+                    "-storepass", storepass,
+                    "-file", target_fn]
+
+        cmd += self.get_keytool_provider(as_list=True)
+        self.run(cmd)
+
+    def import_cert_to_java_truststore(self, alias, cert_fn):
+        self.run([Config.cmd_keytool, '-import', '-trustcacerts',
+                    '-keystore', Config.default_trust_store_fn,
+                    '-storepass', 'changeit','-noprompt',
+                    '-alias', alias,
+                    '-file', cert_fn])
+
+    def obtain_java_cacert_aliases(self):
+        output = self.run([Config.cmd_keytool, '-list',
+                    '-keystore', Config.default_trust_store_fn,
+                    '-storepass', 'changeit', '-noprompt'])
+
+        for l in output.splitlines():
+            ls = l.strip().rstrip(',')
+            if ls.endswith('trustedCertEntry'):
+                sep = ls.split(',')
+                Config.non_setup_properties['java_truststore_aliases'].append(sep[0])

@@ -377,6 +377,8 @@ def main():
 
                 jansInstaller.copy_output()
                 jansInstaller.setup_init_scripts()
+                
+                jansInstaller.obtain_java_cacert_aliases()                
 
                 # Installing jans components
                 if Config.profile == SetupProfiles.JANS or Config.profile == SetupProfiles.DISA_STIG:

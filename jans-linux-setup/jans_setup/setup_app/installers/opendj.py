@@ -441,9 +441,13 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
 
         # Import OpenDJ certificate into java truststore
         self.logIt("Import OpenDJ certificate")
-
-        self.run([Config.cmd_keytool, "-import", "-trustcacerts", "-alias", "%s_opendj" % Config.hostname, \
-                  "-file", Config.opendj_cert_fn, "-keystore", Config.defaultTrustStoreFN, \
+        
+        alias = '{}_opendj'.format(Config.hostname)        
+        self.delete_key(alias)  
+        self.import_cert_to_java_truststore(alias, Config.opendj_cert_fn)
+        
+        self.run([Config.cmd_keytool, "-import", "-trustcacerts", "-alias", alias, \
+                  "-file", Config.opendj_cert_fn, "-keystore", Config.default_trust_store_fn, \
                   "-storepass", "changeit", "-noprompt"])
 
     def index_opendj(self):

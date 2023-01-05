@@ -176,7 +176,13 @@ class Config:
             self.cmd_keytool = os.path.join(self.jre_home, 'bin/keytool')
             self.cmd_jar = os.path.join(self.jre_home, 'bin/jar') 
 
+        # java commands
+        self.cmd_java = os.path.join(self.jre_home, 'bin/java')
+        self.cmd_keytool = os.path.join(self.jre_home, 'bin/keytool')
+        self.cmd_jar = os.path.join(self.jre_home, 'bin/jar')
         os.environ['OPENDJ_JAVA_HOME'] =  self.jre_home
+
+#        os.environ['OPENDJ_JAVA_HOME'] =  self.jre_home
 
         if self.profile == OPENBANKING_PROFILE:
             self.use_external_key = True
@@ -327,8 +333,8 @@ class Config:
         self.redhat_services = ['httpd', 'rsyslog']
         self.debian_services = ['apache2', 'rsyslog']
 
-        self.defaultTrustStoreFN = os.path.join(self.jre_home, 'jre/lib/security/cacerts')
-        self.defaultTrustStorePW = 'changeit'
+        self.default_trust_store_fn = os.path.join(self.jre_home, 'jre/lib/security/cacerts')
+        self.default_trust_store_pw = 'changeit'
 
         # Stuff that gets rendered; filename is necessary. Full path should
         # reflect final path if the file must be copied after its rendered.
@@ -466,6 +472,7 @@ class Config:
             self.mapping_locations = { group: 'ldap' for group in self.couchbaseBucketDict }
 
         self.non_setup_properties = {
+            'java_truststore_aliases': [],
             'jans_auth_client_jar_fn': os.path.join(self.dist_jans_dir, 'jans-auth-client-jar-with-dependencies.jar'),
             'jans_auth_client_noprivder_jar_fn': os.path.join(self.dist_jans_dir, 'jans-auth-client-jar-without-provider-dependencies.jar')
                 }

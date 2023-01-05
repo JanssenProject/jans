@@ -191,7 +191,7 @@ class JansAuthInstaller(JettyInstaller):
             tmp_fn = os.path.join(tmp_dir, jwks_addr+'.crt')
             self.writeFile(tmp_fn, open_banking_cert)
             self.run([Config.cmd_keytool, '-import', '-trustcacerts', '-keystore', 
-                      Config.defaultTrustStoreFN, '-storepass', 'changeit', 
+                      Config.default_trust_store_fn, '-storepass', 'changeit', 
                       '-noprompt', '-alias', alias, '-file', tmp_fn])
 
 
