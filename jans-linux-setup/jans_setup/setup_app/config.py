@@ -333,7 +333,7 @@ class Config:
         self.redhat_services = ['httpd', 'rsyslog']
         self.debian_services = ['apache2', 'rsyslog']
 
-        self.default_trust_store_fn = os.path.join(self.jre_home, 'jre/lib/security/cacerts')
+        self.default_trust_store_fn = os.path.join(self.jre_home, 'lib/security/cacerts')
         self.default_trust_store_pw = 'changeit'
 
         # Stuff that gets rendered; filename is necessary. Full path should

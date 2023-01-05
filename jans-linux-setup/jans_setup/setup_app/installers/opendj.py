@@ -448,9 +448,9 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
         self.delete_key(alias)  
         self.import_cert_to_java_truststore(alias, Config.opendj_cert_fn)
         
-        self.run([Config.cmd_keytool, "-import", "-trustcacerts", "-alias", alias, \
-                  "-file", Config.opendj_cert_fn, "-keystore", Config.default_trust_store_fn, \
-                  "-storepass", "changeit", "-noprompt"])
+#        self.run([Config.cmd_keytool, "-import", "-trustcacerts", "-alias", alias, \
+#                  "-file", Config.opendj_cert_fn, "-keystore", Config.default_trust_store_fn, \
+#                  "-storepass", "changeit", "-noprompt"])
 
     def index_opendj(self):
 
