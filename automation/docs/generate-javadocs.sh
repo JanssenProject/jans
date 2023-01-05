@@ -1,6 +1,6 @@
 #!/bin/bash
 set -euo pipefail
-
+JVM_PROJECTS="jans-auth-server jans-orm jans-config-api jans-scim jans-core jans-notify jans-fido2 jans-eleven agama"
 for module in $JVM_PROJECTS
  do
    echo "Generating javadocs for module: $module and all it's sub-modules"
