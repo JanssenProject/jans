@@ -7301,13 +7301,13 @@ components:
           type: boolean
         adminCanView:
           type: boolean
-        adminCanEdit:
+        userCanEdit:
           type: boolean
         userCanAccess:
           type: boolean
         userCanView:
           type: boolean
-        userCanEdit:
+        adminCanEdit:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -8501,6 +8501,8 @@ components:
             - STAT
             - PAR
             - SSA
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8510,8 +8512,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
