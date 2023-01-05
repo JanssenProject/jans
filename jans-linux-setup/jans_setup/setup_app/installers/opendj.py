@@ -422,22 +422,24 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
         with open(Config.opendj_cert_fn,'w') as w:
             w.write(opendj_cert)
 
-        # Convert OpenDJ certificate to PKCS12
-        self.logIt("Importing OpenDJ certificate to truststore")
-        self.run([Config.cmd_keytool,
-                  '-importcert',
-                  '-noprompt',
-                  '-alias',
-                  'server-cert',
-                  '-file',
-                  Config.opendj_cert_fn,
-                  '-keystore',
-                  Config.opendj_trust_store_fn,
-                  '-storetype',
-                  Config.opendj_truststore_format.upper(),
-                  '-storepass',
-                  Config.opendj_truststore_pass
-                  ])
+        if Config.profile != SetupProfiles.DISA_STIG:
+
+            # Convert OpenDJ certificate to PKCS12
+            self.logIt("Importing OpenDJ certificate to truststore")
+            self.run([Config.cmd_keytool,
+                      '-importcert',
+                      '-noprompt',
+                      '-alias',
+                      'server-cert',
+                      '-file',
+                      Config.opendj_cert_fn,
+                      '-keystore',
+                      Config.opendj_trust_store_fn,
+                      '-storetype',
+                      Config.opendj_truststore_format.upper(),
+                      '-storepass',
+                      Config.opendj_truststore_pass
+                      ])
 
         # Import OpenDJ certificate into java truststore
         self.logIt("Import OpenDJ certificate")
