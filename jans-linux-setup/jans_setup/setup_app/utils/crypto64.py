@@ -37,24 +37,49 @@ class Crypto64:
         decrypted = cipher.decrypt(base64.b64decode(data), padmode=PAD_PKCS5)
         return decrypted.decode('utf-8')
 
-    def gen_cert(self, suffix, password, user='root', cn=None, truststore_fn=None, truststore_pw='changeit'):
+    def gen_cert(self, suffix, password, user='root', cn=None, truststore_fn=None):
         self.logIt('Generating Certificate for %s' % suffix)
-        key_with_password = '%s/%s.key.orig' % (Config.certFolder, suffix)
+        key_with_password = os.path.join(Config.certFolder, suffix + '.key.orig')
+        key_without_password = os.path.join(Config.certFolder, suffix + '.key.noenc')
         key = '%s/%s.key' % (Config.certFolder, suffix)
         csr = '%s/%s.csr' % (Config.certFolder, suffix)
         public_certificate = '%s/%s.crt' % (Config.certFolder, suffix)
         if not truststore_fn:
             truststore_fn = Config.default_trust_store_fn
 
-        self.run([paths.cmd_openssl,
+        if Config.profile == static.SetupProfiles.DISA_STIG:
+            self.run([paths.cmd_openssl,
                   'genrsa',
-                  '-des3',
+                  '-out',
+                  key_without_password,
+                  ])
+
+            self.run([paths.cmd_openssl,
+                  'pkey',
+                  '-in',
+                  key_without_password,
                   '-out',
                   key_with_password,
+                  '-des3',
                   '-passout',
                   'pass:%s' % password,
-                  '2048'
                   ])
+
+            # remove unencrypted key
+            os.remove(key_without_password)
+
+        else:
+
+            self.run([paths.cmd_openssl,
+                      'genrsa',
+                      '-des3',
+                      '-out',
+                      key_with_password,
+                      '-passout',
+                      'pass:%s' % password,
+                      '2048'
+                      ])
+
         self.run([paths.cmd_openssl,
                   'rsa',
                   '-in',
@@ -95,15 +120,10 @@ class Crypto64:
         self.run([paths.cmd_chmod, '700', key_with_password])
         self.run([paths.cmd_chown, '%s:%s' % (user, user), key])
         self.run([paths.cmd_chmod, '700', key])
-        
-        alias = "%s_%s" % (Config.hostname, suffix)        
-        self.delete_key(alias, truststore_fn)        
 
-        self.run([Config.cmd_keytool, "-import", "-trustcacerts", "-alias", "%s_%s" % (Config.hostname, suffix), \
-                  "-file", public_certificate, "-keystore", truststore_fn, \
-                  "-storepass", truststore_pw, "-noprompt"])
-
-        return key, csr, public_certificate
+        alias = "%s_%s" % (Config.hostname, suffix)
+        self.delete_key(alias, truststore_fn)
+        self.import_cert_to_java_truststore(alias, public_certificate)
 
     def gen_ca(self, ca_suffix='ca'):
         self.logIt('Generating CA Certificate')
@@ -453,3 +473,78 @@ class Crypto64:
             if ls.endswith('trustedCertEntry'):
                 sep = ls.split(',')
                 Config.non_setup_properties['java_truststore_aliases'].append(sep[0])
+
+    def get_keytool_provider(self, as_list=False):
+        provider_dict  = OrderedDict([('-storetype', Config.default_store_type)])
+
+        if Config.profile == static.SetupProfiles.DISA_STIG:
+            provider_dict['-providername'] = 'BCFIPS'
+            provider_dict['-providerpath'] = '{}:{}'.format(Config.bc_fips_jar, Config.bcpkix_fips_jar)
+            provider_dict['-providerclass'] = 'org.bouncycastle.jcajce.provider.BouncyCastleFipsProvider'
+
+        if as_list:
+            ret_val = []
+            for item in provider_dict.items():
+                ret_val.append(item[0])
+                ret_val.append(item[1])
+            return ret_val
+
+        return provider_dict
+
+    def get_key_gen_client_cmd(self):
+        if Config.profile == static.SetupProfiles.DISA_STIG:
+            client_cmd = '{}:{}:{}'.format(
+                        Config.non_setup_properties['jans_auth_client_noprivder_jar_fn'],
+                        Config.bc_fips_jar,
+                        Config.bcpkix_fips_jar
+                        )
+        else:
+            client_cmd = Config.non_setup_properties['jans_auth_client_jar_fn']
+
+        return client_cmd
+
+    def get_key_gen_client_provider_cmd(self):
+        return Config.non_setup_properties['jans_auth_client_jar_fn']
+
+    def gen_openid_data_store_keys(self, data_store_path, data_store_pwd, key_expiration=None, dn_name=None, key_algs=None, enc_keys=None):
+        self.logIt("Generating oxAuth OpenID Connect keys")
+
+        if dn_name == None:
+            dn_name = Config.default_openid_dstore_dn_name
+
+        if key_algs == None:
+            key_algs = Config.default_sig_key_algs
+
+        if key_expiration == None:
+            key_expiration = Config.default_key_expiration
+
+        if not enc_keys:
+            enc_keys = Config.default_enc_key_algs
+
+        client_cmd = self.get_key_gen_client_cmd()
+
+        args = [Config.cmd_java,
+                        "-Dlog4j.defaultInitOverride=true",
+                        "-cp", client_cmd,
+                        Config.non_setup_properties['key_gen_path'],
+                        "-keystore",
+                        data_store_path,
+                        "-keypasswd",
+                        data_store_pwd,
+                        "-sig_keys",
+                        "%s" % key_algs,
+                        "-enc_keys",
+                        "%s" % enc_keys,
+                        "-dnname",
+                        '"%s"' % dn_name,
+                        "-expiration",
+                        "%s" % key_expiration]
+
+        if not data_store_path.endswith('.jks'):
+            args += ['-keystore_type', Config.default_store_type]
+
+        output = self.run([' '.join(args)], shell=True)
+
+        if output:
+            return output.splitlines()
+
