@@ -11,7 +11,6 @@ import io.jans.configapi.plugin.mgt.util.Constants;
 import io.jans.configapi.plugin.mgt.util.MgtUtil;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
-import io.jans.configapi.core.interceptor.RequestInterceptor;
 import io.jans.configapi.core.model.SearchRequest;
 
 import io.jans.orm.model.PagedResult;
@@ -26,6 +25,7 @@ import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -77,11 +77,11 @@ public class UserResource extends BaseResource {
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.USER_READ_ACCESS })
     public Response getUsers(
-            @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
-            @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
-            @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
-            @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
-            @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder)
+            @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
+            @Parameter(description = "Search pattern") @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
+            @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
+            @Parameter(description = "Attribute whose value will be used to order the returned response") @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
+            @Parameter(description = "Order in which the sortBy param is applied. Allowed values are \"ascending\" and \"descending\"") @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder)
             throws IllegalAccessException, InvocationTargetException {
         if (logger.isDebugEnabled()) {
             logger.debug("User search param - limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}",
@@ -105,7 +105,7 @@ public class UserResource extends BaseResource {
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.USER_READ_ACCESS })
     @Path(ApiConstants.INUM_PATH)
-    public Response getUserByInum(@PathParam(ApiConstants.INUM) @NotNull String inum)
+    public Response getUserByInum(@Parameter(description = "User identifier") @PathParam(ApiConstants.INUM) @NotNull String inum)
             throws IllegalAccessException, InvocationTargetException {
         if (logger.isDebugEnabled()) {
             logger.debug("User search by inum:{}", escapeLog(inum));
@@ -224,7 +224,7 @@ public class UserResource extends BaseResource {
     @PATCH
     @ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS })
     @Path(ApiConstants.INUM_PATH)
-    public Response patchUser(@PathParam(ApiConstants.INUM) @NotNull String inum,
+    public Response patchUser(@Parameter(description = "User identifier") @PathParam(ApiConstants.INUM) @NotNull String inum,
             @NotNull UserPatchRequest userPatchRequest)
             throws IllegalAccessException, InvocationTargetException, JsonPatchException, IOException {
         if (logger.isDebugEnabled()) {
@@ -262,7 +262,7 @@ public class UserResource extends BaseResource {
     @DELETE
     @Path(ApiConstants.INUM_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.USER_DELETE_ACCESS })
-    public Response deleteUser(@PathParam(ApiConstants.INUM) @NotNull String inum) {
+    public Response deleteUser(@Parameter(description = "User identifier") @PathParam(ApiConstants.INUM) @NotNull String inum) {
         if (logger.isDebugEnabled()) {
             logger.debug("User to be deleted - inum:{} ", escapeLog(inum));
         }

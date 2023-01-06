@@ -84,7 +84,7 @@ public class RequestReaderInterceptor {
                 info, request, httpHeaders, resourceInfo, persistenceEntryManager);
         try {
             // perform data conversion if enabled and method is not ignored
-            if (isDataFormatConversionEnaled() || !ignoreMethod(context)) {
+            if (isDataFormatConversionEnaled() || !isIgnoreMethod(context)) {
                 logger.error("=======================  DataType Conversion Start ============================");
                 processRequest(context);
                 logger.error("=======================  DataType Conversion End ============================");
@@ -123,7 +123,7 @@ public class RequestReaderInterceptor {
                         clazz.isPrimitive());
 
                 Object obj = ctxParameters[i];
-                if (!clazz.isPrimitive()) {
+                if (!clazz.isPrimitive() && obj != null) {
                     processCustomAttributes(obj);
                     logger.error("Request object post processing -  propertyName:{}, obj:{} ", propertyName, obj);
                 }
@@ -261,23 +261,10 @@ public class RequestReaderInterceptor {
         return getDataFormatConversionConf().isEnabled();
     }
 
-    private boolean ignoreMethod(InvocationContext context) {
-        logger.error(
-                "context.getMethod():{}, getDataFormatConversionConf().getIgnoreHttpMethod():{}, getDataFormatConversionConf().getIgnoreHttpMethod().contains(context.getMethod()):{}",
-                context.getMethod(), getDataFormatConversionConf().getIgnoreHttpMethod(),
-                getDataFormatConversionConf().getIgnoreHttpMethod().contains(context.getMethod()));
-        boolean ignoreFlag = false;
-        if (getDataFormatConversionConf() != null && getDataFormatConversionConf().getIgnoreHttpMethod() != null
-                && getDataFormatConversionConf().getIgnoreHttpMethod().contains(context.getMethod())) {
-            ignoreFlag = true;
-        }
-
-        return ignoreFlag;
-
-    }
+    
 
     private boolean isDateAttributes(String propertyName) {
-        logger.error("Check if date attribute  - propertyName:{}, getDataFormatConversionConf()", propertyName,
+        logger.error("Check if date attribute  - propertyName:{}, getDataFormatConversionConf():{}", propertyName,
                 getDataFormatConversionConf());
         boolean flag = false;
         if (getDataFormatConversionConf() != null && getDataFormatConversionConf().getConversionAttributes() != null
@@ -287,6 +274,24 @@ public class RequestReaderInterceptor {
         }
 
         return flag;
+    }
+    
+    private boolean isIgnoreMethod(InvocationContext context) {
+        logger.error("Checking if method to be ignored");
+        if(context.getMethod().getAnnotations()==null || context.getMethod().getAnnotations().length<=0) {
+            return false;            
+        }
+        
+        for(int i=0; i<context.getMethod().getAnnotations().length;i++) {
+            logger.error("======RequestReaderInterceptor - context.getMethod().getAnnotations()[i]:{} ",context.getMethod().getAnnotations()[i]);
+            
+            if (context.getMethod().getAnnotations()[i]!=null && getDataFormatConversionConf() != null && getDataFormatConversionConf().getIgnoreHttpMethod() != null
+                    && getDataFormatConversionConf().getIgnoreHttpMethod().contains(context.getMethod().getAnnotations()[i].toString())) {
+                return true;  
+            }
+          
+        }
+        return false;
     }
 
 }
