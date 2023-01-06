@@ -16,22 +16,33 @@ warnings.filterwarnings("ignore")
 
 from setup_app import static
 from setup_app.config import Config
-from setup_app.static import InstallTypes, BackendTypes, colors
+from setup_app.static import InstallTypes, BackendTypes, colors, SetupProfiles
 from setup_app.utils import base
 from setup_app.utils.cbm import CBM
 from setup_app.utils import ldif_utils
 from setup_app.utils.attributes import attribDataTypes
-if base.current_app.profile == 'jans' or base.current_app.profile == 'disa-stig':
+
+#if base.current_app.profile == 'jans' or base.current_app.profile == 'disa-stig':
+#    from setup_app.utils.spanner import Spanner
+
+#my_path = PurePath(os.path.dirname(os.path.realpath(__file__)))
+#sys.path.append(my_path.parent.joinpath('pylib/sqlalchemy'))
+
+if base.current_app.profile != 'disa-stig':
+    import pymysql
+    from setup_app.utils.cbm import CBM
     from setup_app.utils.spanner import Spanner
 
-my_path = PurePath(os.path.dirname(os.path.realpath(__file__)))
-sys.path.append(my_path.parent.joinpath('pylib/sqlalchemy'))
+    my_path = PurePath(os.path.dirname(os.path.realpath(__file__)))
+    sys.path.append(my_path.parent.joinpath('pylib/sqlalchemy'))
 
+    import sqlalchemy
+    import sqlalchemy.orm
+    import sqlalchemy.ext.automap
 
-import sqlalchemy
-import sqlalchemy.orm
-import sqlalchemy.ext.automap
-
+#import sqlalchemy
+#import sqlalchemy.orm
+#import sqlalchemy.ext.automap
 
 class DBUtils:
 
@@ -69,7 +80,7 @@ class DBUtils:
         if not hasattr(self, 'ldap_conn') or force:
             for group in Config.mapping_locations:
                 if Config.mapping_locations[group] == 'ldap':
-                    base.logIt("Making LDAP Conncetion")
+                    base.logIt("Making LDAP Connection")
                     ldap_server = ldap3.Server(Config.ldap_hostname, port=int(Config.ldaps_port), use_ssl=use_ssl)
                     self.ldap_conn = ldap3.Connection(
                                 ldap_server,
@@ -90,9 +101,9 @@ class DBUtils:
                             print("{}FATAL: {}{}".format(colors.FAIL, result[1], colors.ENDC))
                         break
 
-        self.set_cbm()
+        if Config.profile != SetupProfiles.DISA_STIG:
+            self.set_cbm()
         self.default_bucket = Config.get('couchbase_bucket_prefix', 'jans')
-
 
     def sqlconnection(self, log=True):
         base.logIt("Making {} Connection to {}:{}/{} with user {}".format(Config.rdbm_type.upper(), Config.rdbm_host, Config.rdbm_port, Config.rdbm_db, Config.rdbm_user))

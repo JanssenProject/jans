@@ -9,5 +9,5 @@ ldapsPort                       =%(ldaps_port)s
 adminConnectorPort              =%(ldap_admin_port)s
 rootUserDN                      =%(ldap_binddn)s
 rootUserPasswordFile            =%(ldapPassFn)s
-baseDN                          =o=gluu
+baseDN                          =o=jans
 backendType                     =%(ldap_backend_type)s

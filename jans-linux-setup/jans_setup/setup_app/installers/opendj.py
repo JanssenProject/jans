@@ -5,6 +5,7 @@ import ssl
 import json
 import ldap3
 import sys
+import time
 
 from pathlib import Path
 
@@ -102,7 +103,19 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
             self.prepare_opendj_schema()
 
         # it is time to bind OpenDJ
-        self.dbUtils.bind()
+        for i in range(1, 5):
+            time.sleep(i*2)
+            try:
+                self.dbUtils.bind()
+                self.logIt("LDAP Connection was successful")
+                break
+            except ldap3.core.exceptions.LDAPSocketOpenError:
+                self.logIt("Failed to connect LDAP. Trying once more")
+        else:
+            self.logIt("Four attempt to connection to LDAP failed. Exiting ...", True, True)
+
+        # it is time to bind OpenDJ
+#        self.dbUtils.bind()
 
         if Config.opendj_install:
             Config.pbar.progress(self.service_name, "Creating OpenDJ backends", False)
@@ -348,11 +361,73 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
                     ['create-backend', '--backend-name', 'metric', '--set', 'base-dn:o=metric', '--type %s' % Config.ldap_backend_type, '--set', 'enabled:true', '--set', 'db-cache-percent:20'],
                     ]
 
+        if Config.mapping_locations['site'] == 'ldap':
+            backends.append(['create-backend', '--backend-name', 'site', '--set', 'base-dn:o=site', '--type %s' % Config.ldap_backend_type, '--set', 'enabled:true', '--set', 'db-cache-percent:20'])
+
+        if Config.profile == SetupProfiles.DISA_STIG:
+            dsconfig_cmd = [
+                            self.ldapDsconfigCommand,
+                            '--no-prompt',
+                            '--hostname',
+                            Config.ldap_hostname,
+                            '--port',
+                            Config.ldap_admin_port,
+                            '--bindDN',
+                            '"%s"' % Config.ldap_binddn,
+                            '--bindPasswordFile', Config.ldapPassFn,
+                            ]
+            if Config.opendj_truststore_format.upper() == 'PKCS11':
+                dsconfig_cmd += [
+                            '--trustStorePath', self.opendj_admin_truststore_fn,
+                            '--keyStorePassword', self.opendj_key_store_password_fn,
+                            ]
+        else:
+            dsconfig_cmd = [
+                            self.ldapDsconfigCommand,
+                            '--trustAll',
+                            '--no-prompt',
+                            '--hostname',
+                            Config.ldap_hostname,
+                            '--port',
+                            Config.ldap_admin_port,
+                            '--bindDN',
+                            '"%s"' % Config.ldap_binddn,
+                            '--bindPasswordFile',
+                            Config.ldapPassFn
+                            ]
+
+        self.logIt("Checking if LDAP admin interface is ready")
+        ldap_server = ldap3.Server(Config.ldap_hostname, port=int(Config.ldap_admin_port), use_ssl=True) 
+        ldap_conn = ldap3.Connection(ldap_server, user=Config.ldap_binddn, password=Config.ldapPass)
+        for i in range(1, 5):
+            time.sleep(i*2)
+            try:
+                ldap_conn.bind()
+                break
+            except ldap3.core.exceptions.LDAPSocketOpenError:
+                self.logIt("Failed to connect LDAP admin port. Trying once more")
+        else:
+            self.logIt("Four attempt to connection to LDAP admin port failed. Exiting ...", True, True)
+
+        for changes in backends:
+            cwd = os.path.join(Config.ldap_bin_dir)
+            self.run(' '.join(dsconfig_cmd + changes), shell=True, cwd=cwd, env={'OPENDJ_JAVA_HOME': Config.jre_home})
+
+        # rebind after creating backends
+        self.dbUtils.ldap_conn.unbind()
+        self.dbUtils.ldap_conn.bind()
+
+    def create_backends_src(self):
+        backends = [
+                    ['create-backend', '--backend-name', 'metric', '--set', 'base-dn:o=metric', '--type %s' % Config.ldap_backend_type, '--set', 'enabled:true', '--set', 'db-cache-percent:20'],
+                    ]
+
         if Config.mapping_locations['site'] == self.ldap_str:
             backends.append(['create-backend', '--backend-name', 'site', '--set', 'base-dn:o=site', '--type %s' % Config.ldap_backend_type, '--set', 'enabled:true', '--set', 'db-cache-percent:20'])
 
         for changes in backends:
             cwd = os.path.join(Config.ldap_bin_dir )
+
             dsconfigCmd = " ".join([
                                     self.ldapDsconfigCommand,
                                     '--trustAll',
@@ -365,6 +440,7 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
                                     '"%s"' % Config.ldap_binddn,
                                     '--bindPasswordFile',
                                     Config.ldapPassFn] + changes)
+                                    
             if base.snap:
                 self.run(dsconfigCmd, shell=True)
             else:
@@ -461,8 +537,8 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
 
         index_backends = ['userRoot']
 
-        if Config.mapping_locations['site'] == self.ldap_str:
-            index_backends.append('site')
+#        if Config.mapping_locations['site'] == self.ldap_str:
+#            index_backends.append('site')
 
         for attrDict in index_json:
             attr_name = attrDict['attribute']
