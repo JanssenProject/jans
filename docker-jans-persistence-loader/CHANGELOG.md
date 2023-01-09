@@ -1,5 +1,26 @@
 # Changelog
 
+## 1.0.6-1 (2023-01-09)
+
+
+### Features
+
+* **docker-jans:** add admin-ui scopes ([#3530](https://github.com/JanssenProject/jans/issues/3530)) ([bc62673](https://github.com/JanssenProject/jans/commit/bc626739bf7a2ed10e7551eda6ea4cc45e7ea49a))
+* **image:** add token-exchange and device secret ([#2788](https://github.com/JanssenProject/jans/issues/2788)) ([87c4676](https://github.com/JanssenProject/jans/commit/87c467631a60567d6de8d3ed8d9815be85f4f1d0))
+* **image:** preserve attribute's values in jans-auth config ([#3013](https://github.com/JanssenProject/jans/issues/3013)) ([3e9e7fc](https://github.com/JanssenProject/jans/commit/3e9e7fc56c8d7890920d5e99f8c28f291afcf207))
+* jans cli to jans-cli-tui ([#3063](https://github.com/JanssenProject/jans/issues/3063)) ([fc20e28](https://github.com/JanssenProject/jans/commit/fc20e287feb4cc1b7bb983c44e25a8ae936580f0))
+* **jans-pycloudlib:** add AWS Secrets Manager support for configuration layers ([#3112](https://github.com/JanssenProject/jans/issues/3112)) ([0522e61](https://github.com/JanssenProject/jans/commit/0522e61809b9052adce4fdb0db77e2d71558144e))
+
+
+### Bug Fixes
+
+* getting ready for a release ([0bda832](https://github.com/JanssenProject/jans/commit/0bda832ebc1da7017231deb38fe9aa6c7c51360a))
+* **image:** missing configuration for openbanking discovery ([#2796](https://github.com/JanssenProject/jans/issues/2796)) ([ba664f0](https://github.com/JanssenProject/jans/commit/ba664f012a39d5e43df6e0d42993f4a1a5ba5d3a))
+* **image:** multiple dynamic scopes created when using 2 replicas ([#2871](https://github.com/JanssenProject/jans/issues/2871)) ([5e0f1e6](https://github.com/JanssenProject/jans/commit/5e0f1e69023da264333e3786fcf994539054be71))
+* modify clnId column type ([#3459](https://github.com/JanssenProject/jans/issues/3459)) ([701394c](https://github.com/JanssenProject/jans/commit/701394c3d7463ffb2bd223daf9662921244ad34d))
+* prepare for 1.0.6 release ([9e4c8fb](https://github.com/JanssenProject/jans/commit/9e4c8fb4c0a1ef4779934558e8d8d40d8fedbabf))
+* **pycloudlib:** searching values from spanner returns empty set ([#2833](https://github.com/JanssenProject/jans/issues/2833)) ([861a065](https://github.com/JanssenProject/jans/commit/861a0657233f271ffa41c908ce68a2206ed970fd))
+
 ## [1.0.5-1](https://github.com/JanssenProject/jans/compare/docker-jans-persistence-loader-v1.0.4-1...docker-jans-persistence-loader-v1.0.5-1) (2022-12-01)
 
 
