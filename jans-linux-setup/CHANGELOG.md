@@ -1,5 +1,38 @@
 # Changelog
 
+## [1.0.6](https://github.com/JanssenProject/jans/compare/jans-linux-setup-v1.0.5...jans-linux-setup-v1.0.6) (2023-01-09)
+
+
+### Features
+
+* add attributes and branch for ADS deployments [#3095](https://github.com/JanssenProject/jans/issues/3095) ([#3228](https://github.com/JanssenProject/jans/issues/3228)) ([2dc9267](https://github.com/JanssenProject/jans/commit/2dc9267423f464414b19718e5c2daa9f58283863))
+* add benchmark demo ([#3325](https://github.com/JanssenProject/jans/issues/3325)) ([26bbb0c](https://github.com/JanssenProject/jans/commit/26bbb0ca2ef9ec5ac72f80ee3641d222036d55b2))
+* **config-api:** audit log, agama ADS spec, fix for 0 index search ([#3369](https://github.com/JanssenProject/jans/issues/3369)) ([ea04e2c](https://github.com/JanssenProject/jans/commit/ea04e2ce5d83d4840638cd2e137fcbc67ee69c81))
+* **config-api:** client claim enhancement, manual spec removed ([#3413](https://github.com/JanssenProject/jans/issues/3413)) ([bd2cdf8](https://github.com/JanssenProject/jans/commit/bd2cdf8501d60959498078bbb31650965c321c73))
+* **jans-auth-server:** block authentication flow originating from a webview ([#3204](https://github.com/JanssenProject/jans/issues/3204)) ([e48380e](https://github.com/JanssenProject/jans/commit/e48380e68653cd4bd25ec2265225e4900e20bec1))
+* **jans-auth-server:** new configuration for userinfo has been added ([#3349](https://github.com/JanssenProject/jans/issues/3349)) ([3ccc4a9](https://github.com/JanssenProject/jans/commit/3ccc4a9ad8486a0795d733bf8961999bad319438))
+* **jans-auth-server:** remove ox properties name ([#3285](https://github.com/JanssenProject/jans/issues/3285)) ([f70b207](https://github.com/JanssenProject/jans/commit/f70b207ecff565ff53e3efb13d897937d9aeaee0))
+* jans-linux-setup script for adding sequenced users to rdbm backend ([#3311](https://github.com/JanssenProject/jans/issues/3311)) ([63c74ec](https://github.com/JanssenProject/jans/commit/63c74ecd05f4be9bac2caaa281e10157b3e6ea37))
+
+
+### Bug Fixes
+
+* app_info.json value of JANS_BUILD ([#3199](https://github.com/JanssenProject/jans/issues/3199)) ([fe35e85](https://github.com/JanssenProject/jans/commit/fe35e855b91eac0a63903199f96dd4c6996cdce0))
+* fix token indexes and clnId type ([#3434](https://github.com/JanssenProject/jans/issues/3434)) ([4a18904](https://github.com/JanssenProject/jans/commit/4a18904ebfc3c3562a3e2308ae3a7bf200c0d1bc))
+* jans-linux setup enable couchbase for packages ([#3249](https://github.com/JanssenProject/jans/issues/3249)) ([8f72ea6](https://github.com/JanssenProject/jans/commit/8f72ea6b111925b5aa262c6a96c665cb6ffa0709))
+* jans-linux-setup agama test data file locations ([#3313](https://github.com/JanssenProject/jans/issues/3313)) ([a39fc69](https://github.com/JanssenProject/jans/commit/a39fc6979117cdb173e60af57a3e78c467670c18))
+* jans-linux-setup centos/rhel pgsql installation ([#3404](https://github.com/JanssenProject/jans/issues/3404)) ([f168fbc](https://github.com/JanssenProject/jans/commit/f168fbcbf98fb70ddbd4a0e4cb9854484579ac3c))
+* jans-linux-setup copy libs directory of agama test data ([#3376](https://github.com/JanssenProject/jans/issues/3376)) ([6a5322d](https://github.com/JanssenProject/jans/commit/6a5322d2fb8362d6ceaab589707b61ffcf89140b))
+* jans-linux-setup enable mysqld on boot for el8 ([#3456](https://github.com/JanssenProject/jans/issues/3456)) ([30d082a](https://github.com/JanssenProject/jans/commit/30d082a60817e7b17bdbb2a05afa3abe7ea39880))
+* jans-linux-setup load test data with jans-auth only ([#3432](https://github.com/JanssenProject/jans/issues/3432)) ([f696fee](https://github.com/JanssenProject/jans/commit/f696fee7b82c417a6cfce03c31e50fcf969b37b5))
+* jans-linux-setup longtext for pgsql ([#3266](https://github.com/JanssenProject/jans/issues/3266)) ([547cee8](https://github.com/JanssenProject/jans/commit/547cee89a40763c847244d770ea07366efa051a1))
+* jans-linux-setup opPolicyUri and opTosUri ([#3411](https://github.com/JanssenProject/jans/issues/3411)) ([67e1d22](https://github.com/JanssenProject/jans/commit/67e1d22c1a2de2576d7891ff89bb0a964b149c6a))
+* jans-linux-setup remove dependency to removed dependency yaml ([#3422](https://github.com/JanssenProject/jans/issues/3422)) ([8385c96](https://github.com/JanssenProject/jans/commit/8385c962895e668ae5b6b499ee9d3091574d4209))
+* jans-linux-setup set db component based on dn ([#3290](https://github.com/JanssenProject/jans/issues/3290)) ([8d743f2](https://github.com/JanssenProject/jans/commit/8d743f21c0f723c2891155711a13ec8f5300b08a))
+* jans-linux-setup start mysql server before jans-auth on SUSE ([#3500](https://github.com/JanssenProject/jans/issues/3500)) ([3822975](https://github.com/JanssenProject/jans/commit/382297560c344ebd1559c4c3f89595450a98fffa))
+* prepare for 1.0.6 release ([9e4c8fb](https://github.com/JanssenProject/jans/commit/9e4c8fb4c0a1ef4779934558e8d8d40d8fedbabf))
+* TUI client pre-authorized ([#3399](https://github.com/JanssenProject/jans/issues/3399)) ([ab30953](https://github.com/JanssenProject/jans/commit/ab3095340d82c0b5b5b5342b0e21273b03017524))
+
 ## [1.0.5](https://github.com/JanssenProject/jans/compare/jans-linux-setup-v1.0.4...jans-linux-setup-v1.0.5) (2022-12-01)
 
 
