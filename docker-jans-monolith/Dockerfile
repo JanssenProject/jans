@@ -77,7 +77,7 @@ LABEL name="janssenproject/monolith" \
     maintainer="Janssen Project <support@jans.io>" \
     vendor="Janssen Project" \
     version="1.0.6" \
-    release="dev" \
+    release="1" \
     summary="Janssen Monolith Image" \
     description="Janssen Authorization server"
 
