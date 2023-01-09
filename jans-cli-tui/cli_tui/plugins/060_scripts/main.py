@@ -56,7 +56,7 @@ class Plugin():
                     VSplit([
                         self.app.getButton(text=_("Get Scripts"), name='scripts:get', jans_help=_("Retreive first %d Scripts") % (20), handler=self.get_scripts),
                         self.app.getTitledText(_("Search"), name='scripts:search', jans_help=_("Press enter to perform search"), accept_handler=self.search_scripts, style='class:outh_containers_scopes.text'),
-                        self.app.getButton(text=_("Add Sscript"), name='scripts:add', jans_help=_("To add a new scope press this button"), handler=self.add_script_dialog),
+                        self.app.getButton(text=_("Add Script"), name='scripts:add', jans_help=_("To add a new scope press this button"), handler=self.add_script_dialog),
                         ],
                         padding=3,
                         width=D(),
