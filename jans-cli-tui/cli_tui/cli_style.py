@@ -1,4 +1,5 @@
 from prompt_toolkit.styles import Style
+from types import SimpleNamespace
 
 style = Style.from_dict(
     {
@@ -130,8 +131,28 @@ style = Style.from_dict(
         "date-picker-time":"bg:#bab1b1",
         "dialog-titled-widget":"bg:#ffffff fg:green",
 
+        ####tab
+        "tab-nav-background": "fg:#b0e0e6 bg:#a9a9a9",
+        "tab-unselected": "fg:#b0e0e6 bg:#a9a9a9 underline",
+        "tab-selected": "fg:#000080 bg:#d3d3d3",
+
     }
 )
+
+
+def get_color_for_style(style_name:str)->SimpleNamespace:
+    ret_val = SimpleNamespace()
+    ret_val.fg = '#000000'
+    ret_val.bg = '#ffffff'
+
+    for pstyle in style.class_names_and_attrs:
+        if pstyle[0].__contains__(style_name):
+            if pstyle[1].color:
+                ret_val.fg = '#'+pstyle[1].color
+            if pstyle[1].bgcolor:
+                ret_val.bg = '#'+pstyle[1].bgcolor
+
+    return ret_val
 
 ## jans nav bar
 main_navbar_bgcolor = "DimGray"

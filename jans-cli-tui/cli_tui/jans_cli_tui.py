@@ -570,6 +570,7 @@ class JansCliApp(Application):
             focusable: Optional[bool] = None,
             width: AnyDimension = None,
             style: AnyFormattedText = '',
+            widget_style: AnyFormattedText = '',
             scrollbar: Optional[bool] = False,
             line_numbers: Optional[bool] = False,
             lexer: PygmentsLexer = None,
@@ -578,13 +579,15 @@ class JansCliApp(Application):
 
         title += ': '
 
+        open('/tmp/w.txt', 'a').write(widget_style+'\n')
+
         ta = TextArea(
                 text=str(value),
                 multiline=height > 1,
                 height=height,
                 width=width,
                 read_only=read_only,
-                style=self.styles['textarea-readonly'] if read_only else self.styles['textarea'],
+                style=widget_style or (self.styles['textarea-readonly'] if read_only else self.styles['textarea']),
                 accept_handler=accept_handler,
                 focusable=not read_only if focusable is None else focusable,
                 scrollbar=scrollbar,
@@ -599,7 +602,7 @@ class JansCliApp(Application):
         ta.window.jans_name = name
         ta.window.jans_help = jans_help
 
-        v = VSplit([Window(FormattedTextControl(title), width=len(title)+1, style=style, height=height), ta], padding=1)
+        v = VSplit([Window(FormattedTextControl(title), width=len(title)+1, style=style, height=height), ta])
         v.me = ta
 
         return v
@@ -612,6 +615,7 @@ class JansCliApp(Application):
         current_values: Optional[list] = [],
         jans_help: AnyFormattedText= "",
         style: AnyFormattedText= "",
+        widget_style: AnyFormattedText = '',
         ) -> AnyContainer:
 
         title += ': '
@@ -621,9 +625,8 @@ class JansCliApp(Application):
         cbl.current_values = current_values
         cbl.window.jans_name = name
         cbl.window.jans_help = jans_help
-        #li, cd, width = self.handle_long_string(title, values, cbl)
 
-        v = VSplit([Window(FormattedTextControl(title), width=len(title)+1, style=style,), cbl], padding=1)
+        v = VSplit([Window(FormattedTextControl(title), width=len(title)+1, style=style,), cbl], style=widget_style)
         v.me = cbl
 
         return v
@@ -637,6 +640,7 @@ class JansCliApp(Application):
             on_selection_changed: Callable= None,
             jans_help: AnyFormattedText= "",
             style: AnyFormattedText= "",
+            widget_style: AnyFormattedText = '',
             ) -> AnyContainer:
 
         title += ': '
@@ -653,9 +657,7 @@ class JansCliApp(Application):
         if on_selection_changed:
             cb._handle_enter = custom_handler
 
-        #li, cd, width = self.handle_long_string(title, text, cb)
-
-        v = VSplit([Window(FormattedTextControl(title), width=len(title)+1, style=style,), cb], padding=1)
+        v = VSplit([Window(FormattedTextControl(title), width=len(title)+1, style=style,), cb], style=widget_style)
 
         v.me = cb
 
@@ -670,6 +672,7 @@ class JansCliApp(Application):
             on_selection_changed: Callable= None,
             jans_help: AnyFormattedText= "",
             style: AnyFormattedText= "",
+            widget_style: AnyFormattedText = '',
             ) -> AnyContainer:
 
         title += ': '
@@ -690,7 +693,7 @@ class JansCliApp(Application):
         if on_selection_changed:
             rl._handle_enter = custom_handler
 
-        v = VSplit([Window(FormattedTextControl(title), width=len(title)+1, style=style,), rl], padding=1)
+        v = VSplit([Window(FormattedTextControl(title), width=len(title)+1, style=style,), rl])
 
         v.me = rl
 
