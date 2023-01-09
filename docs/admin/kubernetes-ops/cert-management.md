@@ -40,7 +40,7 @@ Rotating Certificates and Keys in Kubernetes setup
           restartPolicy: Never
           containers:
             - name: web-key-rotation
-              image: janssenproject/certmanager:1.0.5-1
+              image: janssenproject/certmanager:replace-janssen-image-version-1
               envFrom:
               - configMapRef:
                   name: janssen-config-cm # This may be differnet in Helm
@@ -92,7 +92,7 @@ Rotating Certificates and Keys in Kubernetes setup
                   path: web_https.key                              
           containers:
             - name: load-web-key-rotation
-              image: janssenproject/certmanager:1.0.5-1
+              image: janssenproject/certmanager:replace-janssen-image-version-1
               envFrom:
               - configMapRef:
                   name: janssen-config-cm  #This may be differnet in Helm
@@ -141,7 +141,7 @@ kubectl apply -f load-web-key-rotation.yaml -n <jans-namespace>
             spec:
               containers:
                 - name: auth-key-rotation
-                  image: janssenproject/certmanager:1.0.5-1
+                  image: janssenproject/certmanager:replace-janssen-image-version-1
                   resources:
                     requests:
                       memory: "300Mi"
@@ -191,7 +191,7 @@ kubectl apply -f load-web-key-rotation.yaml -n <jans-namespace>
           restartPolicy: Never
           containers:
             - name: ldap-key-rotation
-              image: janssenproject/certmanager:1.0.5-1
+              image: janssenproject/certmanager:replace-janssen-image-version-1
               envFrom:
               - configMapRef:
                   name: janssen-config-cm
