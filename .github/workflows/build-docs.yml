@@ -109,7 +109,7 @@ jobs:
           MVERSION="${VERSION:1}"
            cd docs
            egrep -lRZ --exclude=CONTRIBUTING.md . | xargs -0 -l sed -i -e "s/replace-janssen-version/$VERSION/g"
-           # strip v from v1.x.x
+           # strip v from v1.x.x. Remove the above line once all replace-janssen-versions in docs is prefixed with v where appropriate
            egrep -lRZ --exclude=CONTRIBUTING.md . | xargs -0 -l sed -i -e "s/replace-janssen-image-version/${VERSION:1}/g"
            git add . || echo "Nothing to add"
            git commit -a -S -m "docs: replace release marker with release number" || echo "Nothing to commit"
@@ -163,8 +163,8 @@ jobs:
           LATEST=$(echo "${TAGS}" | tail -1)
           STABLE=$(echo "${TAGS}" | grep -v -- "-" | tail -1)
           # remove below two lines after first release
-          LATEST="head"
-          STABLE="head"
+          #LATEST="head"
+          #STABLE="head"
           mike alias -u head main
           mike alias -u "${STABLE}" stable
           mike set-default --push stable

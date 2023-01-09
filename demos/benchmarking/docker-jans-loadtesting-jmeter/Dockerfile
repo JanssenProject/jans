@@ -70,7 +70,7 @@ LABEL name="janssenproject/demo_loadtesting" \
     maintainer="Janssen Project <support@jans.io>" \
     vendor="Janssen Project" \
     version="1.0.6" \
-    release="dev" \
+    release="1" \
     summary="Janssen Jmeter tests" \
     description="Janssen Jmeter and user loader image"
 
