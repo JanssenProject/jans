@@ -1,0 +1,16 @@
+{
+   "client_1":{
+      "client_inum":"client_inum_1",
+      "user_group":[
+         "group_dn_1",
+         "group_dn_2"
+      ]
+   },
+   "client_2":{
+      "client_inum":"client_inum_2",
+      "user_group":[
+         "group_dn_1",
+         "group_dn_2"
+      ]
+   }
+}
