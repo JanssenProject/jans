@@ -22,7 +22,7 @@
 
 		<maven.min-version>3.0.3</maven.min-version>
 
-		<janssen.version1.0.6</janssen.version>
+		<janssen.version>1.0.6</janssen.version>
 		<jacoco.version>0.8.7</jacoco.version>
 		
 		<sonar.projectKey>JanssenProject_jans-core</sonar.projectKey>
