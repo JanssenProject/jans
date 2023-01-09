@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.0.6 (2023-01-09)
+
+
+### Bug Fixes
+
+* add 'java' to the list of restricted variable names [#3533](https://github.com/JanssenProject/jans/issues/3533) ([#3534](https://github.com/JanssenProject/jans/issues/3534)) ([a970d88](https://github.com/JanssenProject/jans/commit/a970d88d81f920973f3ba812db97448f135090a9))
+* **agama:** fix agama auth dependency which blocks build process [#3149](https://github.com/JanssenProject/jans/issues/3149) ([#3244](https://github.com/JanssenProject/jans/issues/3244)) ([8f9fee3](https://github.com/JanssenProject/jans/commit/8f9fee31c66ce08046258694e5e2d83a31e38b5d))
+* avoid NPE when configuration is missing [#2857](https://github.com/JanssenProject/jans/issues/2857) ([#2863](https://github.com/JanssenProject/jans/issues/2863)) ([4a27091](https://github.com/JanssenProject/jans/commit/4a2709185bd7ba84c3230cb94d4efea940681742))
+* ensure non-empty array is generated [#2672](https://github.com/JanssenProject/jans/issues/2672) ([#3047](https://github.com/JanssenProject/jans/issues/3047)) ([47902bd](https://github.com/JanssenProject/jans/commit/47902bd8a5c7fe60cbac6f819787ee90726ac4a0))
+* prepare for 1.0.6 release ([9e4c8fb](https://github.com/JanssenProject/jans/commit/9e4c8fb4c0a1ef4779934558e8d8d40d8fedbabf))
+
 ## [1.0.4](https://github.com/JanssenProject/jans/compare/agama-v1.0.3...agama-v1.0.4) (2022-11-08)
 
 
