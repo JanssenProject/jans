@@ -8868,6 +8868,8 @@ For bleeding-edge/unstable version, use <code>janssenproject/fido2:1.0.1_dev</co
 <li><code>CN_CONFIG_KUBERNETES_NAMESPACE</code>: Kubernetes namespace (default to <code>default</code>).</li>
 <li><code>CN_CONFIG_KUBERNETES_CONFIGMAP</code>: Kubernetes configmaps name (default to <code>jans</code>).</li>
 <li><code>CN_CONFIG_KUBERNETES_USE_KUBE_CONFIG</code>: Load credentials from <code>$HOME/.kube/config</code>, only useful for non-container environment (default to <code>false</code>).</li>
+<li><code>CN_CONFIG_GOOGLE_SECRET_VERSION_ID</code>: Janssen configuration secret version ID in Google Secret Manager. Defaults to <code>latest</code>, which is recommended.</li>
+<li><code>CN_CONFIG_GOOGLE_SECRET_NAME_PREFIX</code>: Prefix for Janssen configuration secret in Google Secret Manager. Defaults to <code>jans</code>. If left intact <code>jans-configuration</code> secret will be created.</li>
 <li><code>CN_SECRET_ADAPTER</code>: The secrets' adapter, can be <code>vault</code> (default), <code>kubernetes</code>, or <code>google</code>.</li>
 <li><code>CN_SECRET_VAULT_SCHEME</code>: supported Vault scheme (<code>http</code> or <code>https</code>).</li>
 <li><code>CN_SECRET_VAULT_HOST</code>: hostname or IP of Vault (default to <code>localhost</code>).</li>
@@ -8881,6 +8883,9 @@ For bleeding-edge/unstable version, use <code>janssenproject/fido2:1.0.1_dev</co
 <li><code>CN_SECRET_KUBERNETES_NAMESPACE</code>: Kubernetes namespace (default to <code>default</code>).</li>
 <li><code>CN_SECRET_KUBERNETES_SECRET</code>: Kubernetes secrets name (default to <code>jans</code>).</li>
 <li><code>CN_SECRET_KUBERNETES_USE_KUBE_CONFIG</code>: Load credentials from <code>$HOME/.kube/config</code>, only useful for non-container environment (default to <code>false</code>).</li>
+<li><code>CN_SECRET_GOOGLE_SECRET_VERSION_ID</code>:  Janssen secret version ID in Google Secret Manager. Defaults to <code>latest</code>, which is recommended.</li>
+<li><code>CN_SECRET_GOOGLE_SECRET_MANAGER_PASSPHRASE</code>: Passphrase for Janssen secret in Google Secret Manager. This is recommended to be changed and defaults to <code>secret</code>.</li>
+<li><code>CN_SECRET_GOOGLE_SECRET_NAME_PREFIX</code>: Prefix for Janssen secret in Google Secret Manager. Defaults to <code>jans</code>. If left <code>jans-secret</code> secret will be created.</li>
 <li><code>CN_WAIT_MAX_TIME</code>: How long the startup "health checks" should run (default to <code>300</code> seconds).</li>
 <li><code>CN_WAIT_SLEEP_DURATION</code>: Delay between startup "health checks" (default to <code>10</code> seconds).</li>
 <li><code>CN_MAX_RAM_PERCENTAGE</code>: Value passed to Java option <code>-XX:MaxRAMPercentage</code>.</li>
@@ -8900,11 +8905,8 @@ For bleeding-edge/unstable version, use <code>janssenproject/fido2:1.0.1_dev</co
 <li><code>CN_COUCHBASE_KEEPALIVE_INTERVAL</code>: Keep-alive interval for Couchbase connection (default to <code>30000</code> milliseconds).</li>
 <li><code>CN_COUCHBASE_KEEPALIVE_TIMEOUT</code>: Keep-alive timeout for Couchbase connection (default to <code>2500</code> milliseconds).</li>
 <li><code>CN_JAVA_OPTIONS</code>: Java options passed to entrypoint, i.e. <code>-Xmx1024m</code> (default to empty-string).</li>
-<li><code>GOOGLE_APPLICATION_CREDENTIALS</code>: JSON file (contains Google credentials) that should be injected into container.</li>
-<li><code>GOOGLE_PROJECT_ID</code>: ID of Google project.</li>
-<li><code>CN_GOOGLE_SECRET_VERSION_ID</code>: Janssen secret version ID in Google Secret Manager. Defaults to <code>latest</code>, which is recommended.</li>
-<li><code>CN_GOOGLE_SECRET_NAME_PREFIX</code>: Prefix for Janssen secret in Google Secret Manager. Defaults to <code>jans</code>. If left <code>jans-secret</code> secret will be created.</li>
-<li><code>CN_GOOGLE_SECRET_MANAGER_PASSPHRASE</code>: Passphrase for Janssen secret in Google Secret Manager. This is recommended to be changed and defaults to <code>secret</code>.</li>
+<li><code>GOOGLE_PROJECT_ID</code>: Google Project ID (default to empty string). Used when <code>CN_CONFIG_ADAPTER</code> or <code>CN_SECRET_ADAPTER</code> set to <code>google</code>.</li>
+<li><code>GOOGLE_APPLICATION_CREDENTIALS</code>: Path to Google credentials JSON file (default to <code>/etc/jans/conf/google-credentials.json</code>). Used when <code>CN_CONFIG_ADAPTER</code> or <code>CN_SECRET_ADAPTER</code> set to <code>google</code>.</li>
 <li><code>CN_FIDO2_APP_LOGGERS</code>: Custom logging configuration in JSON-string format with hash type (see <a href="#configure-app-loggers">Configure app loggers</a> section for details).</li>
 <li><code>CN_PROMETHEUS_PORT</code>: Port used by Prometheus JMX agent (default to empty string). To enable Prometheus JMX agent, set the value to a number. See <a href="#exposing-metrics">Exposing metrics</a> for details.</li>
 <li><code>CN_SQL_DB_HOST</code>: Hostname of the SQL database (default to <code>localhost</code>).</li>
@@ -8991,7 +8993,7 @@ To customize the config, mount custom config file to <code>/opt/prometheus/prome
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-09T14:20:44+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-09</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-03T12:19:19+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-03</span>
       
         <br>
         Created:
