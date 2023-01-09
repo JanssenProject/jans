@@ -391,9 +391,12 @@ def revoke(self, ssaList, context):
 - `ssaList` — SSA revoked list.
 - `context` — Contains, SSA global configuration class, client, execution context, etc.
 
-## SSA Global settings
+## Configuration Properties
 
-The following fields are used to configure parameters globally.
+SSA endpoint can be further configured using Janssen Server configuration property `ssaConfiguration`. When using
+[Janssen Text-based UI(TUI)](../../config-guide/tui.md) to configure the properties,
+navigate via `Auth Server`->`Properties` to update value for this property. This property take JSON configuration with
+parameters as described below:
 
 ```
 "ssaConfiguration": {
