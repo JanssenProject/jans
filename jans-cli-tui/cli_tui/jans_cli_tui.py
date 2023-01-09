@@ -643,6 +643,10 @@ class JansCliApp(Application):
 
         title += ': '
         cb = Checkbox(text)
+        if widget_style:
+            cb.default_style = widget_style
+            cb.checked_style = widget_style
+            cb.selected_style = widget_style
         cb.checked = checked
         cb.window.jans_name = name
         cb.window.jans_help = jans_help
