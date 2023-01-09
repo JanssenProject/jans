@@ -1,10 +1,43 @@
+---
+tags:
+- administration
+- auth-server
+- SSA
+- endpoint
+---
+
 # Software Statement Assertion (SSA)
 
-The SSA is a JSON Web Token (JWT) containing client metadata and some custom attributes.
+Janssen Server provides SSA endpoint that enables management of SSAs. The SSA is a JSON Web Token (JWT) containing 
+client metadata and some custom attributes. Specification for SSAs has been outlined as part of 
+[Dynamic Client Registration Protocol](https://www.rfc-editor.org/rfc/rfc7591#section-2.3).
 
-You can check the following
-[Swagger](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/main/jans-auth-server/docs/swagger.yaml)
-for more details of the endpoints.
+URL to access revocation endpoint on Janssen Server is listed in the response of Janssen Server's well-known
+[configuration endpoint](./configuration.md) given below.
+
+```text
+https://janssen.server.host/jans-auth/.well-known/openid-configuration
+```
+
+`ssa_endpoint` claim in the response specifies the URL for revocation endpoint. By default, revocation endpoint
+looks like below:
+
+```
+https://janssen.server.host/jans-auth/restv1/ssa
+```
+
+More information about request and response of the revocation endpoint can be found in
+the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/replace-janssen-version/jans-auth-server/docs/swagger.yaml#/SSA).
+
+## Disabling The Endpoint Using Feature Flag
+
+`/ssa` endpoint can be enabled or disable using [SSA feature flag](../../reference/json/feature-flags/janssenauthserver-feature-flags.md#ssa).
+Use [Janssen Text-based UI(TUI)](../../config-guide/tui.md) or [Janssen command-line interface](../../config-guide/jans-cli/README.md) to perform this task.
+
+When using TUI, navigate via `Auth Server`->`Properties`->`enabledFeatureFlags` to screen below. From here, enable or
+disable `SSA` flag as required.
+
+![](../../../assets/image-tui-enable-components.png)
 
 ## SSA Security
 
