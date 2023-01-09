@@ -1,26 +1,20 @@
 import json
 import asyncio
 from functools import partial
+from typing import Optional, Sequence
 
 from prompt_toolkit.application import Application
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.formatted_text import AnyFormattedText
+from prompt_toolkit.layout.containers import HSplit
+from prompt_toolkit.widgets import Button, Dialog
+
 from cli import config_cli
-from prompt_toolkit.layout.containers import (
-    HSplit,
-    DynamicContainer,
-)
-from prompt_toolkit.widgets import (
-    Button,
-    RadioList,
-    Dialog,
- )
 from utils.static import DialogResult, cli_style
 from utils.utils import DialogUtils
 from wui_components.jans_cli_dialog import JansGDialog
 from wui_components.jans_tab import JansTab
 
-from typing import Optional, Sequence
 from utils.multi_lang import _
 
 class ViewProperty(JansGDialog, DialogUtils):
