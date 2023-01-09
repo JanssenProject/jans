@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#this-content-is-in-progress" class="md-skip">
+        <a href="#sequence-diagram" class="md-skip">
           Skip to content
         </a>
       
@@ -3997,22 +3997,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#this-content-is-in-progress" class="md-nav__link">
-    This content is in progress
+  <a href="#sequence-diagram" class="md-nav__link">
+    Sequence Diagram
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#have-questions-in-the-meantime" class="md-nav__link">
-    Have questions in the meantime?
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#want-to-contribute" class="md-nav__link">
-    Want to contribute?
+  <a href="#testing" class="md-nav__link">
+    Testing
   </a>
   
 </li>
@@ -8732,22 +8725,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#this-content-is-in-progress" class="md-nav__link">
-    This content is in progress
+  <a href="#sequence-diagram" class="md-nav__link">
+    Sequence Diagram
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#have-questions-in-the-meantime" class="md-nav__link">
-    Have questions in the meantime?
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#want-to-contribute" class="md-nav__link">
-    Want to contribute?
+  <a href="#testing" class="md-nav__link">
+    Testing
   </a>
   
 </li>
@@ -8801,19 +8787,35 @@
 
   <h1>Client Credential Grant</h1>
 
-<h2 id="this-content-is-in-progress">This content is in progress<a class="headerlink" href="#this-content-is-in-progress" title="Permanent link">#</a></h2>
-<p>The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.</p>
-<h2 id="have-questions-in-the-meantime">Have questions in the meantime?<a class="headerlink" href="#have-questions-in-the-meantime" title="Permanent link">#</a></h2>
-<p>While this documentation is in progress, you can ask questions through <a href="https://github.com/JanssenProject/jans/discussion">GitHub Discussions</a> or the <a href="https://gitter.im/JanssenProject/Lobby">community chat on Gitter</a>. Any questions you have will help determine what information our documentation should cover.</p>
-<h2 id="want-to-contribute">Want to contribute?<a class="headerlink" href="#want-to-contribute" title="Permanent link">#</a></h2>
-<p>If you have content you'd like to contribute to this page in the meantime, you can get started with our <a href="https://docs.jans.io/head/CONTRIBUTING/">Contribution guide</a>.</p>
+<h3 id="sequence-diagram">Sequence Diagram<a class="headerlink" href="#sequence-diagram" title="Permanent link">#</a></h3>
+<pre class="mermaid"><code>sequenceDiagram
+title Client credentials flow
+autonumber 1
+
+activate Resource owner - Client
+Resource owner - Client-&gt;&gt;Jans AS:Client Authentication
+activate Jans AS
+Jans AS--&gt;&gt;Resource owner - Client:Access Token
+deactivate Jans AS</code></pre>
+<h3 id="testing">Testing<a class="headerlink" href="#testing" title="Permanent link">#</a></h3>
+<ol>
+<li>
+<p>https://github.com/JanssenProject/jans/blob/main/jans-auth-server/client/src/test/java/io/jans/as/client/ws/rs/ClientCredentialsGrantHttpTest.java</p>
+</li>
+<li>
+<p>CURL Command:
+<div class="highlight"><pre><span></span><code>curl -k -u &quot;put_client_id:put_client_secret&quot; https://jans-ui.jans.io/jans-auth/restv1/token \ 
+      -d  &quot;grant_type=client_credentials&amp;scope=put_scope_name_here&quot; 
+</code></pre></div></p>
+</li>
+</ol>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-08T20:20:00+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-08</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-09T16:24:50+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-09</span>
       
         <br>
         Created:
