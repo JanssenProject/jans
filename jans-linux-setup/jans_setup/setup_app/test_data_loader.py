@@ -30,26 +30,55 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         self.install_type = static.InstallOption.OPTONAL
         self.install_var = 'loadTestData'
         self.register_progess()
+
         self.template_base = os.path.join(Config.templateFolder, 'test')
+        self.test_client_keystore_fn = os.path.join(Config.output_dir, 'test/jans-auth/client', self.get_client_test_keystore_fn('client_keystore'))
+        Config.templateRenderingDict['test_client_keystore_base_fn'] = os.path.basename(self.test_client_keystore_fn)
+        
+    def create_test_client_keystore_(self):
+
+        self.logIt("Creating {}".format(Config.templateRenderingDict['test_client_keystore_base_fn']))
+        keys_json_fn =  os.path.join(Config.outputFolder, 'test/oxauth/client/keys_client_keystore.json')
+
+        client_cmd = self.get_key_gen_client_provider_cmd()
+
+        args = [Config.cmd_java, '-Dlog4j.defaultInitOverride=true',
+                "-cp", client_cmd,
+                Config.non_setup_properties['key_gen_path'],
+                '-keystore', self.test_client_keystore_fn,
+                '-keystore_type', Config.default_store_type,
+                '-keypasswd', 'secret',
+                '-sig_keys', Config.default_sig_key_algs,
+                '-enc_keys', Config.default_enc_key_algs,
+                '-dnname', "'{}'".format(Config.default_openid_dstore_dn_name),
+                '-expiration', '365','>', keys_json_fn]
+
+        cmd = ' '.join(args)
+
+        self.run(cmd, shell=True)
+
+        self.copyFile(self.test_client_keystore_fn, os.path.join(Config.outputFolder, 'test/oxauth/server'))
+        self.copyFile(keys_json_fn, os.path.join(Config.outputFolder, 'test/oxauth/server'))
 
     def create_test_client_keystore(self):
-        self.logIt("Creating client_keystore.p12")
+        self.logIt("Creating {}".format(Config.templateRenderingDict['test_client_keystore_base_fn']))
+#        self.logIt("Creating client_keystore.p12")
 #        client_keystore_fn = os.path.join(Config.output_dir, 'test/jans-auth/client/client_keystore.p12')
-        client_keystore_fn = os.path.join(Config.output_dir, 'test/jans-auth/client', self.get_client_test_keystore_fn('client_keystore'))
+#        client_keystore_fn = os.path.join(Config.output_dir, 'test/jans-auth/client', self.get_client_test_keystore_fn('client_keystore'))
         keys_json_fn =  os.path.join(Config.output_dir, 'test/jans-auth/client/keys_client_keystore.json')
 
-        args = [Config.cmd_keytool, '-genkey', '-alias', 'dummy', '-keystore', 
-                    client_keystore_fn, '-storepass', 'secret', '-keypass', 
-                    'secret', '-dname', 
-                    "'{}'".format(Config.default_openid_jks_dn_name),
-                    '-storetype', 'PKCS12'
-                    ]
+#        args = [Config.cmd_keytool, '-genkey', '-alias', 'dummy', '-keystore', 
+#                    client_keystore_fn, '-storepass', 'secret', '-keypass', 
+#                    'secret', '-dname', 
+#                    "'{}'".format(Config.default_openid_jks_dn_name),
+#                    '-storetype', 'PKCS12'
+#                    ]
 
-        self.run(' '.join(args), shell=True)
+#        self.run(' '.join(args), shell=True)
 
         args = [Config.cmd_java, '-Dlog4j.defaultInitOverride=true',
                 '-cp', Config.non_setup_properties['jans_auth_client_jar_fn'], Config.non_setup_properties['key_gen_path'],
-                '-keystore', client_keystore_fn,
+                '-keystore', self.test_client_keystore_fn,
                 '-keypasswd', 'secret',
                 '-sig_keys', Config.default_sig_key_algs,
                 '-enc_keys', Config.default_enc_key_algs,
@@ -60,9 +89,8 @@ class TestDataLoader(BaseInstaller, SetupUtils):
 
         self.run(cmd, shell=True)
 
-        self.copyFile(client_keystore_fn, os.path.join(Config.output_dir, 'test/jans-auth/server'))
+        self.copyFile(self.test_client_keystore_fn, os.path.join(Config.output_dir, 'test/jans-auth/server'))
         self.copyFile(keys_json_fn, os.path.join(Config.output_dir, 'test/jans-auth/server'))
-
 
     def enable_cusom_scripts(self):
         self.logIt("Enabling custom scripts")
@@ -338,6 +366,9 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                     ldif_writer.unparse(dn, entry)
 
             self.copyFile(tmp_fn, openDjSchemaFolder)
+
+            for test_schema in ('102-oxauth_test.ldif', '103-scim_test.ldif', '77-customAttributes.ldif'):
+                self.run([paths.cmd_chown, '{0}:{0}'.format(Config.ldap_user), os.path.join(openDjSchemaFolder, test_schema)])
 
             self.logIt("Making opndj listen all interfaces")
             ldap_operation_result = self.dbUtils.ldap_conn.modify(
