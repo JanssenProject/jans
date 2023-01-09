@@ -688,21 +688,22 @@ class Plugin(DialogUtils):
             _type_: bool value to check the status code response
         """
 
+        async def coroutine():
+            self.app.start_progressing(_("Saving clinet ..."))
+            operation_id='put-oauth-openid-client' if dialog.data.get('inum') else 'post-oauth-openid-client'
+            cli_args = {'operation_id': operation_id, 'data': dialog.data}
+            response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
 
-        response = self.app.cli_object.process_command_by_id(
-            operation_id='put-oauth-openid-client' if dialog.data.get('inum') else 'post-oauth-openid-client',
-            url_suffix='',
-            endpoint_args='',
-            data_fn='',
-            data=dialog.data
-        )
-  
-        self.app.stop_progressing()
-        if response.status_code in (200, 201):
-            self.oauth_update_clients()
-            return None
+            dialog.future.set_result(DialogResult.ACCEPT)
+            self.app.stop_progressing()
 
-        self.app.show_message(_("Error!"), _("An error ocurred while saving client:\n") + str(response.text))
+            if response.status_code in (200, 201):
+                self.oauth_update_clients()
+            else:
+                self.app.show_message(_("Error!"), _("An error ocurred while saving client:\n") + str(response.text), tobefocused=self.app.center_frame)
+
+        asyncio.ensure_future(coroutine())
+
 
     def save_scope(self, dialog: Dialog) -> None:
         """This method to save the client data to server

@@ -145,11 +145,9 @@ class EditClientDialog(JansGDialog, DialogUtils):
             if ditem in self.data and self.data[ditem] is None:
                 self.data.pop(ditem)
 
-        close_me = True
         if self.save_handler:
-            close_me = self.save_handler(self)
-        if close_me:
-            self.future.set_result(DialogResult.ACCEPT)
+            self.save_handler(self)
+
 
     def cancel(self) -> None:
         """method to invoked when canceling changes in the dialog (Cancel button is pressed)
