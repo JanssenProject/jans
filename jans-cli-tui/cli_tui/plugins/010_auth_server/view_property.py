@@ -185,8 +185,8 @@ class ViewProperty(JansGDialog, DialogUtils):
         """
 
         tab_name = '#{}'.format(len(self.tab_widget.tabs)+1)
-        tab_widgets = self.get_widgets(properties, values=values, styles={'widget_style': 'class:tab-selected', 'string':'class:tab-selected', 'boolean':'class:tab-selected'})
-        self.tab_widget.add_tab(tab_name, HSplit(tab_widgets, style='class:tab-selected'))
+        tab_widgets = self.get_widgets(properties, values=values, styles={'widget_style': cli_style.tab_selected, 'string': cli_style.tab_selected, 'boolean': cli_style.tab_selected})
+        self.tab_widget.add_tab(tab_name, HSplit(tab_widgets, style=cli_style.tab_selected))
         if not values:
             self.tab_widget.set_tab(tab_name)
 
