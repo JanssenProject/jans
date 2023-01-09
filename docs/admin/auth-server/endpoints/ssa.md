@@ -39,6 +39,30 @@ disable `SSA` flag as required.
 
 ![](../../../assets/image-tui-enable-components.png)
 
+## Configuration Properties
+
+SSA endpoint can be further configured using Janssen Server configuration property `ssaConfiguration`. When using
+[Janssen Text-based UI(TUI)](../../config-guide/tui.md) to configure the properties,
+navigate via `Auth Server`->`Properties` to update value for this property. This property take JSON configuration with
+parameters as described below:
+
+```
+"ssaConfiguration": {
+    "ssaEndpoint": "{{your-url}}/ssa",
+    "ssaCustomAttributes": [
+        "myCustomAttr1",
+        "myCustomAttr2"
+    ],
+    "ssaSigningAlg": "RS512",
+    "ssaExpirationInDays": 30
+}
+```
+
+- `ssaEndpoint` — Base endpoint for SSA.
+- `ssaCustomAttributes` — List of custom attributes, which are received in the request when creating an SSA.
+- `ssaSigningAlg` — Algorithm to sign the JWT that is returned after creating an SSA.
+- `ssaExpirationInDays` — Expiration expressed in days, when an SSA is created and the expiration is not sent.
+
 ## SSA Security
 
 To call SSA services, a token of type `client_credentials` must be generated with the following scopes enabled:
@@ -390,30 +414,6 @@ def revoke(self, ssaList, context):
 
 - `ssaList` — SSA revoked list.
 - `context` — Contains, SSA global configuration class, client, execution context, etc.
-
-## Configuration Properties
-
-SSA endpoint can be further configured using Janssen Server configuration property `ssaConfiguration`. When using
-[Janssen Text-based UI(TUI)](../../config-guide/tui.md) to configure the properties,
-navigate via `Auth Server`->`Properties` to update value for this property. This property take JSON configuration with
-parameters as described below:
-
-```
-"ssaConfiguration": {
-    "ssaEndpoint": "{{your-url}}/ssa",
-    "ssaCustomAttributes": [
-        "myCustomAttr1",
-        "myCustomAttr2"
-    ],
-    "ssaSigningAlg": "RS512",
-    "ssaExpirationInDays": 30
-}
-```
-
-- `ssaEndpoint` — Base endpoint for SSA.
-- `ssaCustomAttributes` — List of custom attributes, which are received in the request when creating an SSA.
-- `ssaSigningAlg` — Algorithm to sign the JWT that is returned after creating an SSA.
-- `ssaExpirationInDays` — Expiration expressed in days, when an SSA is created and the expiration is not sent.
 
 ## SSA Class structure
 
