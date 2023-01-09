@@ -470,7 +470,6 @@ class Plugin(DialogUtils):
                 preferred_size=[0],
                 data=missing_properties_data,
                 on_enter=add_property,
-                #on_display=self.properties_display_dialog,
                 get_help=(self.get_help,'AppConfiguration'),
                 selectes=0,
                 headerColor=cli_style.navbar_headcolor,

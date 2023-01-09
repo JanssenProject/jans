@@ -38,6 +38,7 @@ import json
 
 ERROR_GETTING_CLIENTS = _("Error getting clients")
 ATTRIBUTE_SCHEMA_PATH = '#/components/schemas/ClientAttributes'
+URL_SUFFIX_FORMATTER = 'inum:{}'
 
 class EditClientDialog(JansGDialog, DialogUtils):
     """The Main Client Dialog that contain every thing related to The Client
@@ -190,10 +191,8 @@ class EditClientDialog(JansGDialog, DialogUtils):
                         headers=['baseDn','displayName'],
                         preferred_size= [50,0],
                         data=self.data.get('scopes', []),
-                        # on_enter=self.edit_client_dialog,
                         on_display=self.myparent.data_display_dialog,
                         on_delete=self.delete_scope,
-                        # get_help=(self.get_help,'Client'),
                         selectes=0,
                         headerColor=cli_style.navbar_headcolor,
                         entriesColor=cli_style.navbar_entriescolor,
@@ -310,14 +309,6 @@ class EditClientDialog(JansGDialog, DialogUtils):
                                     'redirectUrisRegex'),
                             style=cli_style.check_box), 
 
-
-                        # self.myparent.getTitledText(
-                        #             _("add scopes"), 
-                        #             name='__search_scopes__',
-                        #             style='class:outh-scope-textsearch',width=10,
-                        #             jans_help=_("Press enter to add Scopes"),
-                        #             accept_handler=self.add_scopes,
-                        #             ),
                         self.myparent.getButton(
                             text=_("add scopes"), 
                             name='oauth:logging:save', 
@@ -816,18 +807,15 @@ class EditClientDialog(JansGDialog, DialogUtils):
         self,
         data:list,
         scopes_name:str
-        ) -> list:
+        ) -> dict:
 
-        for i in data:
-            if i.get('displayName') == scopes_name:
-                return i
-        
-        return None
+        for datum in data:
+            if datum.get('displayName') == scopes_name:
+                return datum
 
-    def add_scopes(
-        self, 
-        # textbuffer: Buffer,
-        ) -> None:
+        return {}
+
+    def add_scopes(self) -> None:
 
         try :
             response = self.myparent.cli_object.process_command_by_id(
@@ -852,22 +840,22 @@ class EditClientDialog(JansGDialog, DialogUtils):
                 self.scopes_data.append(item[0])
 
         current_data = result['entries'] 
-        scopes_displayNames = []
+        scopes_display_names = []
 
         for i in range(len(current_data)):
-            scopes_displayNames.append(current_data[i].get('displayName',''))  
+            scopes_display_names.append(current_data[i].get('displayName', ''))
 
 
         values_uniqe= []
         values = []
-        for i in scopes_displayNames:
+        for i in scopes_display_names:
             if i:
-                current_scope = self.get_scope_by_name(result['entries'],i)
+                current_scope = self.get_scope_by_name(result['entries'], i)
                 dn = current_scope.get('dn','')
-                displayName = current_scope.get('displayName','')
-                values.append(([dn, displayName], displayName) )
+                display_name = current_scope.get('displayName', '')
+                values.append(([dn, display_name], display_name) )
 
-        scopes_dn = [ i[0] for i in self.data.get('scopes',[])]
+        scopes_dn = [ i[0] for i in self.data.get('scopes', []) ]
 
         for k in values:
             if k[0][0] not in scopes_dn:
@@ -909,7 +897,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
                 result = self.myparent.cli_object.process_command_by_id(
                     operation_id='patch-oauth-openid-client-by-inum',
-                    url_suffix='inum:{}'.format(inum),
+                    url_suffix=URL_SUFFIX_FORMATTER.format(inum),
                     endpoint_args='',
                     data_fn='',
                     data=[{ "op": "replace", "path": "scopes","value":scopes_to_patch}]
@@ -931,7 +919,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                 inum = i.split(',')[0][5:]
                 rsponse = self.myparent.cli_object.process_command_by_id(
                     operation_id='get-oauth-scopes-by-inum',
-                    url_suffix='inum:{}'.format(inum),
+                    url_suffix=URL_SUFFIX_FORMATTER.format(inum),
                     endpoint_args="",
                     data_fn=None,
                     data={}
@@ -1039,7 +1027,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                 try :
                     scope_response = self.myparent.cli_object.process_command_by_id(
                         operation_id='get-oauth-scopes-by-inum',
-                        url_suffix='inum:{}'.format(inum),
+                        url_suffix=URL_SUFFIX_FORMATTER.format(inum),
                         endpoint_args='',
                         data_fn=None,
                         data={}

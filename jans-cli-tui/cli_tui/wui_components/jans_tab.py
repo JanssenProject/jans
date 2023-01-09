@@ -119,7 +119,7 @@ class JansTab():
             shorcut_key:str,
             )-> None:
         """Key bindings for tab widget"""
-        r = os.urandom(3).hex()
+
         for binding in self.myparent.bindings.bindings:
             if len(binding.keys) == 2 and binding.keys[0].value == 'escape' and binding.keys[1].lower() == shorcut_key:
                 return
@@ -134,9 +134,7 @@ class JansTab():
         """
 
         result = [HTML('<style fg="Blue">|</style>')]
-        nitems = len(self.tabs)
-        total_text_lenght = 0
-        
+
         for i, tab in enumerate(self.tabs):
 
             if i == self.cur_tab:
