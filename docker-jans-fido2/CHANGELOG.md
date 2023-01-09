@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.0.6-1](https://github.com/JanssenProject/jans/compare/docker-jans-fido2-v1.0.5-1...docker-jans-fido2-v1.0.6-1) (2023-01-09)
+
+
+### Features
+
+* **docker-jans:** enable prefix and group for stdout logs ([#3481](https://github.com/JanssenProject/jans/issues/3481)) ([e7684e7](https://github.com/JanssenProject/jans/commit/e7684e7f6da7c789d03311fe2df855c687aa7fa6))
+
+
+### Bug Fixes
+
+* modify clnId column type ([#3459](https://github.com/JanssenProject/jans/issues/3459)) ([701394c](https://github.com/JanssenProject/jans/commit/701394c3d7463ffb2bd223daf9662921244ad34d))
+* prepare for 1.0.6 release ([9e4c8fb](https://github.com/JanssenProject/jans/commit/9e4c8fb4c0a1ef4779934558e8d8d40d8fedbabf))
+
 ## [1.0.5-1](https://github.com/JanssenProject/jans/compare/docker-jans-fido2-v1.0.4-1...docker-jans-fido2-v1.0.5-1) (2022-12-01)
 
 
