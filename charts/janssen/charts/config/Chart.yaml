@@ -1,7 +1,7 @@
 
 apiVersion: v2
 name: config
-version: 1.0.6
+version: 1.0.7-dev
 kubeVersion: ">=v1.21.0-0"
 description: Configuration parameters for setup and initial configuration secret and config layers used by Janssen services.
 type: application
@@ -17,4 +17,4 @@ maintainers:
     email: support@jans.io
     url: https://github.com/moabu
 icon: https://github.com/JanssenProject/jans/raw/main/docs/assets/logo/janssen_project_favicon_transparent_50px_50px.png
-appVersion: "1.0.6"
+appVersion: "1.0.7-dev"
