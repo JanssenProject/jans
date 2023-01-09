@@ -38,7 +38,7 @@ kubectl get secret cn -n <namespace> -o yaml > secret-backup.yaml
 helm list -n <namespace>
 ```
 
-Keep note of the chart version. For example: `1.0.5`
+Keep note of the chart version. For example: `replace-janssen-image-version`
 
 ### Manual Restore
 
