@@ -1,5 +1,5 @@
 ## Overview  
-By overriding the interface methods in [`UpdateTokenType`](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/token/UpdateTokenType.java) inside a custom script you can
+By overriding the interface methods in [`UpdateTokenType`](https://github.com/JanssenProject/jans/blob/replace-janssen-version/jans-core/script/src/main/java/io/jans/model/custom/script/type/token/UpdateTokenType.java) inside a custom script you can
 
 1. Enable transformation of claims and values in id_token and Access token e.g. add a custom claim to an `id_token`, change a token expiry, change the `sub` value, or remove the `nonce`.
    <br/>Example use-case:  
@@ -35,7 +35,7 @@ Jans AS->>RP: return token(s) (Access token, ID token or Refresh Token) reflecti
  *  Configure any parameters that the script may use.
  *  `name` field should reflect the use case
  *  `script_type` should be `UPDATE_TOKEN`
- *  `script.py` can have contents similar to [Sample Script](https://github.com/JanssenProject/jans/blob/main/docs/script-catalog/update_token/sample-script/sample_script.py)) and is present in jans-cli's host machine.
+ *  `script.py` can have contents similar to [Sample Script](https://github.com/JanssenProject/jans/blob/replace-janssen-version/docs/script-catalog/update_token/sample-script/sample_script.py)) and is present in jans-cli's host machine.
 
 ```
 
@@ -149,7 +149,7 @@ Pseudocode and example :
 #### a. Granularity of access control:
 An UpdateTokenType script is great for adding scopes or removing scopes to/from the Access token. By doing so you can tailor build the granularity of access control according to business need.
 
-[`context.overwriteAccessTokenScopes`](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/service/external/context/ExternalUpdateTokenContext.java) is ready to use method of the `context` variable
+[`context.overwriteAccessTokenScopes`](https://github.com/JanssenProject/jans/blob/replace-janssen-version/jans-auth-server/server/src/main/java/io/jans/as/server/service/external/context/ExternalUpdateTokenContext.java) is ready to use method of the `context` variable
 
 ```
     def modifyAccessToken(self, accessToken, context):
@@ -225,7 +225,7 @@ Used to modify claims in a Refresh Token
 ```
 ## IntrospectionType script vs UpdateTokenType script 
 
-|   | [`IntrospectionType`](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/introspection/IntrospectionType.java)| [`UpdateTokenType`](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/token/UpdateTokenType.java) |
+|   | [`IntrospectionType`](https://github.com/JanssenProject/jans/blob/replace-janssen-version/jans-core/script/src/main/java/io/jans/model/custom/script/type/introspection/IntrospectionType.java)| [`UpdateTokenType`](https://github.com/JanssenProject/jans/blob/replace-janssen-version/jans-core/script/src/main/java/io/jans/model/custom/script/type/token/UpdateTokenType.java) |
 |---|---|---|
 | Client configuration parameter  |Introspection script is invoked only when **`accessTokenAsJwt`=`true`**   | Update token script is invoked irrespective of whether `accessTokenAsJwt` is `true` or `false`   |
 | Core Purpose	 | Used to return access token meta information like current validity, approved scopes, and information about the context in which the token was issued when a Resource Server which queries the [Introspection endpoint](https://datatracker.ietf.org/doc/html/rfc7662)     | used to enable transformation of claims and values in id_token and Access token, set a specific token lifetime, change granularity of access control (up-scoping, down-scoping), audit logging for each token response, forbid the creation of AT based on a criteria. |
@@ -235,7 +235,7 @@ Used to modify claims in a Refresh Token
 
 ## Testing
 
-1. Use this: [Reference for testing](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/client/src/test/java/io/jans/as/client/ws/rs/AuthorizationCodeFlowHttpTest.java)
+1. Use this: [Reference for testing](https://github.com/JanssenProject/jans/blob/replace-janssen-version/jans-auth-server/client/src/test/java/io/jans/as/client/ws/rs/AuthorizationCodeFlowHttpTest.java)
 2. Inspect the tokens. Use [jwt.io](https://jwt.io) to inspect the contents of a JWT. 
 
 ## FAQ

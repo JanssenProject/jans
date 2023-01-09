@@ -37,6 +37,7 @@ Use [Janssen Text-based UI(TUI)](../../config-guide/tui.md) or [Janssen command-
 When using TUI, navigate via `Auth Server`->`Properties`->`enabledFeatureFlags` to screen below. From here, enable or
 disable `SSA` flag as required.
 
+
 ![](../../../assets/image-tui-enable-components.png)
 
 ## Configuration Properties
@@ -62,6 +63,7 @@ parameters as described below:
 - `ssaCustomAttributes` — List of custom attributes, which are received in the request when creating an SSA.
 - `ssaSigningAlg` — Algorithm to sign the JWT that is returned after creating an SSA.
 - `ssaExpirationInDays` — Expiration expressed in days, when an SSA is created and the expiration is not sent.
+
 
 ## SSA Security
 

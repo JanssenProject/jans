@@ -1,4 +1,4 @@
-Script contents [here](https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/extension/person_authentication/other/uaf/UafExternalAuthenticator.py)
+Script contents [here](https://github.com/JanssenProject/jans/blob/replace-janssen-version/jans-linux-setup/jans_setup/static/extension/person_authentication/other/uaf/UafExternalAuthenticator.py)
 
 This is a person authentication script for jans-auth-server that enables [UAF](https://www.noknok.com) for user authentication.
 
