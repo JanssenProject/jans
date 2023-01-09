@@ -186,8 +186,8 @@ class EditClientDialog(JansGDialog, DialogUtils):
         self.tabs = OrderedDict()
         self.client_scopes = JansVerticalNav(
                         myparent=self.myparent,
-                        headers=['baseDn','displayName'],
-                        preferred_size= [50,0],
+                        headers=['displayName','baseDn'],
+                        preferred_size= [0,0],
                         data=self.data.get('scopes', []),
                         on_display=self.myparent.data_display_dialog,
                         on_delete=self.delete_scope,
@@ -307,11 +307,16 @@ class EditClientDialog(JansGDialog, DialogUtils):
                                     'redirectUrisRegex'),
                             style=cli_style.check_box), 
 
-                        self.myparent.getButton(
-                            text=_("add scopes"), 
-                            name='oauth:logging:save', 
-                            jans_help=_("Add Scopes"), 
-                            handler=self.add_scopes),
+                        VSplit([
+
+                            Label(text=_("Scopes"),style=cli_style.label),
+                            self.myparent.getButton(
+                                text=_("add scope"), 
+                                name='oauth:logging:save', 
+                                jans_help=_("Add Scopes"), 
+                                handler=self.add_scopes),
+                        ]),
+
 
                         self.client_scopes, 
 
