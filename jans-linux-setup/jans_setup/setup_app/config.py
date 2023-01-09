@@ -396,7 +396,7 @@ class Config:
 
         if self.profile != OPENBANKING_PROFILE:
             self.ce_templates[self.ox_ldap_properties] = True
-            self.ce_templates[self.ldap_setup_properties] = False
+#            self.ce_templates[self.ldap_setup_properties] = False
 
 
         self.service_requirements = {

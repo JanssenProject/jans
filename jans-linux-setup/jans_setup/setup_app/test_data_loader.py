@@ -34,7 +34,8 @@ class TestDataLoader(BaseInstaller, SetupUtils):
 
     def create_test_client_keystore(self):
         self.logIt("Creating client_keystore.p12")
-        client_keystore_fn = os.path.join(Config.output_dir, 'test/jans-auth/client/client_keystore.p12')
+#        client_keystore_fn = os.path.join(Config.output_dir, 'test/jans-auth/client/client_keystore.p12')
+        client_keystore_fn = os.path.join(Config.output_dir, 'test/jans-auth/client', self.get_client_test_keystore_fn('client_keystore'))
         keys_json_fn =  os.path.join(Config.output_dir, 'test/jans-auth/client/keys_client_keystore.json')
 
         args = [Config.cmd_keytool, '-genkey', '-alias', 'dummy', '-keystore', 

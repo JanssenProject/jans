@@ -248,7 +248,6 @@ class Crypto64:
 
         self.run(import_cmd)
 
-
     def gen_openid_jwks_jks_keys(self, jks_path, jks_pwd, jks_create=True, key_expiration=None, dn_name=None, key_algs=None, enc_keys=None):
         self.logIt("Generating oxAuth OpenID Connect keys")
 
@@ -315,6 +314,48 @@ class Crypto64:
                         "%s" % key_expiration])
 
         output = self.run([cmd], shell=True)
+
+        if output:
+            return output.splitlines()
+
+    def gen_openid_data_store_keys(self, data_store_path, data_store_pwd, key_expiration=None, dn_name=None, key_algs=None, enc_keys=None):
+        self.logIt("Generating oxAuth OpenID Connect keys")
+
+        if dn_name == None:
+            dn_name = Config.default_openid_jks_dn_name
+
+        if key_algs == None:
+            key_algs = Config.default_sig_key_algs
+
+        if key_expiration == None:
+            key_expiration = Config.default_key_expiration
+
+        if not enc_keys:
+            enc_keys = Config.default_enc_key_algs
+
+        client_cmd = self.get_key_gen_client_cmd()
+
+        args = [Config.cmd_java,
+                        "-Dlog4j.defaultInitOverride=true",
+                        "-cp", client_cmd,
+                        Config.non_setup_properties['key_gen_path'],
+                        "-keystore",
+                        data_store_path,
+                        "-keypasswd",
+                        data_store_pwd,
+                        "-sig_keys",
+                        "%s" % key_algs,
+                        "-enc_keys",
+                        "%s" % enc_keys,
+                        "-dnname",
+                        '"%s"' % dn_name,
+                        "-expiration",
+                        "%s" % key_expiration]
+
+#        if not data_store_path.endswith('.jks'):
+#            args += ['-keystore_type', Config.default_store_type]
+
+        output = self.run([' '.join(args)], shell=True)
 
         if output:
             return output.splitlines()
@@ -475,7 +516,8 @@ class Crypto64:
                 Config.non_setup_properties['java_truststore_aliases'].append(sep[0])
 
     def get_keytool_provider(self, as_list=False):
-        provider_dict  = OrderedDict([('-storetype', Config.default_store_type)])
+#        provider_dict  = OrderedDict([('-storetype', Config.default_store_type)])
+        provider_dict  = OrderedDict()
 
         if Config.profile == static.SetupProfiles.DISA_STIG:
             provider_dict['-providername'] = 'BCFIPS'
@@ -510,7 +552,7 @@ class Crypto64:
         self.logIt("Generating oxAuth OpenID Connect keys")
 
         if dn_name == None:
-            dn_name = Config.default_openid_dstore_dn_name
+            dn_name = Config.default_openid_jks_dn_name
 
         if key_algs == None:
             key_algs = Config.default_sig_key_algs
@@ -540,8 +582,8 @@ class Crypto64:
                         "-expiration",
                         "%s" % key_expiration]
 
-        if not data_store_path.endswith('.jks'):
-            args += ['-keystore_type', Config.default_store_type]
+#        if not data_store_path.endswith('.jks'):
+#            args += ['-keystore_type', Config.default_store_type]
 
         output = self.run([' '.join(args)], shell=True)
 

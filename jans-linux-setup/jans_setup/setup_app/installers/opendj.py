@@ -224,39 +224,39 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
 
         if Config.profile == SetupProfiles.DISA_STIG:
             self.generate_opendj_certs()
-            
+
 #        some_command = "touch"
-        
+
 #        some_command_exec = [some_command,
 #                                './some_file.dat'
 #                                ]
-            
+
 #        self.logIt("Running: {}".format(some_command_exec))
 #        self.run_1(some_command_exec,
 #                  useWait=True
 #                  )
-                  
+
 #        self.logIt("After Running: {}".format(some_command_exec))                  
 
-        some_command = "./_init.sh"
-        
-        some_command_exec = [some_command,
-                                '/opt/opendj/some_file.1.dat',
-                                '/opt/opendj/some_file.2.dat'
-                                ]
-            
-        self.logIt("Running: {}".format(some_command_exec))
-        self.run_1(some_command_exec,
-                  useWait=False
-                  )
-                  
-        self.logIt("After Running: {}".format(some_command_exec))
-        
-        self.logIt("Before Reading file: {}".format('/opt/opendj/some_file.2.dat'))        
-        
-        result_reading = self.readFile('/opt/opendj/some_file.2.dat')
+#        some_command = "./_init.sh"
 
-        self.logIt("result_reading = {}".format(result_reading))
+#        some_command_exec = [some_command,
+#                                '/opt/opendj/some_file.1.dat',
+#                                '/opt/opendj/some_file.2.dat'
+#                                ]
+
+#        self.logIt("Running: {}".format(some_command_exec))
+#        self.run_1(some_command_exec,
+#                  useWait=False
+#                  )
+
+#        self.logIt("After Running: {}".format(some_command_exec))
+
+#        self.logIt("Before Reading file: {}".format('/opt/opendj/some_file.2.dat'))        
+
+#        result_reading = self.readFile('/opt/opendj/some_file.2.dat')
+
+#        self.logIt("result_reading = {}".format(result_reading))
 
         ldap_setup_command = os.path.join(Config.ldap_base_dir, 'setup')
 
@@ -350,11 +350,13 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
         self.writeFile(opendj_java_properties_fn, '\n'.join(opendj_java_properties_list))
 
     def post_install_opendj(self):
-        self.logIt("Error deleting OpenDJ properties. Make sure %s/opendj-setup.properties is deleted" % Config.ldap_base_dir)
+        ldap_setup_properties_dir, ldap_setup_properties_fn = os.path.split(Config.ldap_setup_properties)
+        setup_props_ldap_fn = os.path.join(Config.ldap_base_dir, ldap_setup_properties_fn)
+        self.logIt("Removing: {}".format(setup_props_ldap_fn))
         try:
-            os.remove(os.path.join(Config.ldap_base_dir, 'opendj-setup.properties'))
+            os.remove(setup_props_ldap_fn)
         except:
-            self.logIt("Error deleting OpenDJ properties. Make sure %s/opendj-setup.properties is deleted" % Config.ldap_base_dir)
+            self.logIt("Error deleting OpenDJ properties. Make sure {} is deleted".format(setup_props_ldap_fn))
 
     def create_backends(self):
         backends = [
