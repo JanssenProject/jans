@@ -3,7 +3,7 @@
 	<groupId>io.jans</groupId>
 	<artifactId>jans-orm-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>1.0.6</version>
+	<version>1.0.7-SNAPSHOT</version>
 	<name>orm</name>
 
 	<prerequisites>
@@ -20,7 +20,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.min-version>3.0.3</maven.min-version>
-		<janssen.version>1.0.6</janssen.version>
+		<janssen.version>1.0.7-SNAPSHOT</janssen.version>
 
 		<jacoco.version>0.8.7</jacoco.version>
 
