@@ -6,12 +6,12 @@
 
 package io.jans.fido2.service.shared;
 
+import io.jans.fido2.model.conf.AppConfiguration;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 
-import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.model.ApplicationType;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.common.service.common.ApplicationFactory;

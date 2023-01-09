@@ -6,11 +6,11 @@
 
 package io.jans.fido2.service.u2f;
 
-import io.jans.as.common.service.common.UserService;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.fido2.model.u2f.DeviceRegistrationStatus;
 import io.jans.as.model.util.Base64Util;
 import io.jans.fido2.model.u2f.DeviceRegistration;
+import io.jans.fido2.service.shared.UserService;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.BatchOperation;
 import io.jans.orm.model.SearchScope;

@@ -8,19 +8,13 @@ package io.jans.fido2.service.shared;
 
 import java.util.List;
 
+import io.jans.fido2.model.conf.AppConfiguration;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
-import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.as.common.util.AttributeConstants;
 import io.jans.as.model.config.StaticConfiguration;
 
-/**
- * Provides operations with users.
- *
- * @author Yuriy Movchan
- * @version @version May 20, 2020
- */
 @ApplicationScoped
 public class UserService extends io.jans.as.common.service.common.UserService {
 

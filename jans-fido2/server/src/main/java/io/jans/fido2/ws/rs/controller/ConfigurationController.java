@@ -6,6 +6,7 @@
 
 package io.jans.fido2.ws.rs.controller;
 
+import io.jans.fido2.model.conf.AppConfiguration;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
@@ -15,7 +16,6 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
 import jakarta.ws.rs.core.Response.Status;
 
-import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.service.DataMapperService;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -48,6 +48,9 @@ public class ConfigurationController {
         
         response.put("version", "1.1");
         response.put("issuer", appConfiguration.getIssuer());
+
+        response.put("registration_endpoint_u2f", baseEndpointUri + "/fido/u2f/registration");
+        response.put("authentication_endpoint_u2f", baseEndpointUri + "/fido/u2f/authentication");
 
         ObjectNode attestation = dataMapperService.createObjectNode();
         response.set("attestation", attestation);

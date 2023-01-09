@@ -12,10 +12,6 @@ import jakarta.inject.Named;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
-/**
- * @author Javier Rojas Blum Date: 03.20.2012
- */
-@Named
 public class SessionClient {
 
     private Client client;

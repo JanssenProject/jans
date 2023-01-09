@@ -7,6 +7,14 @@
 package io.jans.fido2.service.app;
 
 import com.google.common.collect.Lists;
+import io.jans.as.persistence.model.configuration.GluuConfiguration;
+import io.jans.as.persistence.model.configuration.IDPAuthConf;
+import io.jans.model.SimpleProperty;
+import io.jans.model.ldap.GluuLdapConfiguration;
+import io.jans.orm.PersistenceEntryManagerFactory;
+import io.jans.orm.exception.BasePersistenceException;
+import io.jans.orm.ldap.impl.LdapEntryManagerFactory;
+import io.jans.service.external.ExternalPersistenceExtensionService;
 import io.jans.service.timer.QuartzSchedulerManager;
 import io.jans.exception.ConfigurationException;
 import io.jans.fido2.service.shared.LoggerService;
@@ -43,6 +51,7 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.ServletContext;
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
@@ -74,6 +83,10 @@ public class AppInitializer {
 	private Instance<PersistenceEntryManager> persistenceMetricEntryManagerInstance;
 
 	@Inject
+	@Named(ApplicationFactory.PERSISTENCE_AUTH_ENTRY_MANAGER_NAME)
+	private Instance<List<PersistenceEntryManager>> persistenceAuthEntryManagerInstance;
+
+	@Inject
 	private ApplicationFactory applicationFactory;
 
 	@Inject
@@ -89,6 +102,9 @@ public class AppInitializer {
 	private CustomScriptManager customScriptManager;
 
 	@Inject
+	private ExternalPersistenceExtensionService externalPersistenceExtensionService;
+
+	@Inject
 	private ConfigurationFactory configurationFactory;
 
 	@Inject
@@ -102,6 +118,7 @@ public class AppInitializer {
 
 	@Inject
 	private MDS3UpdateTimer mds3UpdateTimer;
+	private List<GluuLdapConfiguration> persistenceAuthConfigs;
 
 	@PostConstruct
 	public void createApplicationComponents() {
@@ -120,6 +137,10 @@ public class AppInitializer {
 		PersistenceEntryManager localPersistenceEntryManager = persistenceEntryManagerInstance.get();
 		log.trace("Attempting to use {}: {}", ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME,
 				localPersistenceEntryManager.getOperationService());
+
+		GluuConfiguration newConfiguration = loadConfiguration(localPersistenceEntryManager, "jansDbAuth", "jansAuthMode");
+
+		this.persistenceAuthConfigs = loadPersistenceAuthConfigs(newConfiguration);
 
 		// Initialize python interpreter
 		pythonService
@@ -156,6 +177,41 @@ public class AppInitializer {
 			quartzSchedulerManager.standby();
 			return;
 		}
+	}
+
+	@Produces
+	@ApplicationScoped
+	@Named(ApplicationFactory.PERSISTENCE_AUTH_CONFIG_NAME)
+	public List<GluuLdapConfiguration> createPersistenceAuthConfigs() {
+		return persistenceAuthConfigs;
+	}
+
+	@Produces
+	@ApplicationScoped
+	@Named(ApplicationFactory.PERSISTENCE_AUTH_ENTRY_MANAGER_NAME)
+	public List<PersistenceEntryManager> createPersistenceAuthEntryManager() {
+		List<PersistenceEntryManager> persistenceAuthEntryManagers = new ArrayList<>();
+		if (this.persistenceAuthConfigs.size() == 0) {
+			return persistenceAuthEntryManagers;
+		}
+
+		PersistenceEntryManagerFactory persistenceEntryManagerFactory = applicationFactory.getPersistenceEntryManagerFactory(LdapEntryManagerFactory.class);
+
+		List<Properties> persistenceAuthProperties = prepareAuthConnectionProperties(this.persistenceAuthConfigs, persistenceEntryManagerFactory.getPersistenceType());
+		log.trace("Attempting to create LDAP auth PersistenceEntryManager with properties: {}", persistenceAuthProperties);
+
+		for (int i = 0; i < persistenceAuthProperties.size(); i++) {
+			PersistenceEntryManager persistenceAuthEntryManager =
+					persistenceEntryManagerFactory.createEntryManager(persistenceAuthProperties.get(i));
+			log.debug("Created {}#{}: {}", ApplicationFactory.PERSISTENCE_AUTH_ENTRY_MANAGER_NAME, i,
+					persistenceAuthEntryManager);
+
+			persistenceAuthEntryManagers.add(persistenceAuthEntryManager);
+
+			externalPersistenceExtensionService.executePersistenceExtensionAfterCreate(persistenceAuthProperties.get(i), persistenceAuthEntryManager);
+		}
+
+		return persistenceAuthEntryManagers;
 	}
 
 	@Produces
@@ -284,6 +340,138 @@ public class AppInitializer {
 
 		PersistenceEntryManager persistenceEntryManager = persistenceEntryManagerInstance.get();
 		closePersistenceEntryManager(persistenceEntryManager, ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME);
+
+		List<PersistenceEntryManager> persistenceAuthEntryManagers = persistenceAuthEntryManagerInstance.get();
+		closePersistenceEntryManagers(persistenceAuthEntryManagers);
 	}
+
+	private List<GluuLdapConfiguration> loadPersistenceAuthConfigs(GluuConfiguration configuration) {
+		List<GluuLdapConfiguration> config = new ArrayList<>();
+
+		List<IDPAuthConf> persistenceIdpAuthConfigs = loadLdapIdpAuthConfigs(configuration);
+		if (persistenceIdpAuthConfigs == null) {
+			return config;
+		}
+
+		for (IDPAuthConf persistenceIdpAuthConfig : persistenceIdpAuthConfigs) {
+			GluuLdapConfiguration persistenceAuthConfig = persistenceIdpAuthConfig.asLdapConfiguration();
+			if ((persistenceAuthConfig != null) && persistenceAuthConfig.isEnabled()) {
+				config.add(persistenceAuthConfig);
+			}
+		}
+
+		return config;
+	}
+
+	private List<IDPAuthConf> loadLdapIdpAuthConfigs(GluuConfiguration configuration) {
+		if ((configuration == null) || (configuration.getIdpAuthn() == null)) {
+			return null;
+		}
+
+		List<IDPAuthConf> configurations = new ArrayList<>();
+		for (IDPAuthConf authConf : configuration.getIdpAuthn()) {
+			if (authConf.getType().equalsIgnoreCase("ldap") || authConf.getType().equalsIgnoreCase("auth")) {
+				configurations.add(authConf);
+			}
+		}
+
+		return configurations;
+	}
+
+	private GluuConfiguration loadConfiguration(PersistenceEntryManager localPersistenceEntryManager,
+												String... persistenceReturnAttributes) {
+		String configurationDn = configurationFactory.getBaseDn().getConfiguration();
+		if (StringHelper.isEmpty(configurationDn)) {
+			return null;
+		}
+
+		GluuConfiguration configuration = null;
+		try {
+			configuration = localPersistenceEntryManager.find(configurationDn, GluuConfiguration.class,
+					persistenceReturnAttributes);
+		} catch (BasePersistenceException ex) {
+			log.error("Failed to load global configuration entry from Ldap", ex);
+			return null;
+		}
+
+		return configuration;
+	}
+
+	private List<Properties> prepareAuthConnectionProperties(List<GluuLdapConfiguration> persistenceAuthConfigs, String persistenceType) {
+		List<Properties> result = new ArrayList<>();
+
+		// Prepare connection providers per LDAP authentication configuration
+		for (GluuLdapConfiguration persistenceAuthConfig : persistenceAuthConfigs) {
+			Properties decrypytedConnectionProperties = prepareAuthConnectionProperties(persistenceAuthConfig, persistenceType);
+
+			result.add(decrypytedConnectionProperties);
+		}
+
+		return result;
+	}
+	private Properties prepareAuthConnectionProperties(GluuLdapConfiguration persistenceAuthConfig, String persistenceType) {
+		String prefix = persistenceType + "#";
+		FileConfiguration configuration = configurationFactory.getPersistenceConfiguration().getConfiguration();
+
+		Properties properties = (Properties) configuration.getProperties().clone();
+		if (persistenceAuthConfig != null) {
+			properties.setProperty(prefix + "servers", buildServersString(persistenceAuthConfig.getServers()));
+
+			String bindDn = persistenceAuthConfig.getBindDN();
+			if (StringHelper.isNotEmpty(bindDn)) {
+				properties.setProperty(prefix + "bindDN", bindDn);
+				properties.setProperty(prefix + "bindPassword", persistenceAuthConfig.getBindPassword());
+			}
+			properties.setProperty(prefix + "useSSL", Boolean.toString(persistenceAuthConfig.isUseSSL()));
+			properties.setProperty(prefix + "maxconnections", Integer.toString(persistenceAuthConfig.getMaxConnections()));
+
+			// Remove internal DB trustStoreFile property
+			properties.remove(prefix + "ssl.trustStoreFile");
+			properties.remove(prefix + "ssl.trustStorePin");
+			properties.remove(prefix + "ssl.trustStoreFormat");
+		}
+
+		EncryptionService securityService = encryptionServiceInstance.get();
+		return securityService.decryptAllProperties(properties);
+	}
+
+	private String buildServersString(List<?> servers) {
+		StringBuilder sb = new StringBuilder();
+
+		if (servers == null) {
+			return sb.toString();
+		}
+
+		boolean first = true;
+		for (Object server : servers) {
+			if (first) {
+				first = false;
+			} else {
+				sb.append(",");
+			}
+
+			if (server instanceof SimpleProperty) {
+				sb.append(((SimpleProperty) server).getValue());
+			} else {
+				sb.append(server);
+			}
+		}
+
+		return sb.toString();
+	}
+
+	private void closePersistenceEntryManagers(List<PersistenceEntryManager> oldPersistenceEntryManagers) {
+		// Close existing connections
+		for (PersistenceEntryManager oldPersistenceEntryManager : oldPersistenceEntryManagers) {
+			log.debug("Attempting to destroy {}: {}", ApplicationFactory.PERSISTENCE_AUTH_ENTRY_MANAGER_NAME,
+					oldPersistenceEntryManager);
+			oldPersistenceEntryManager.destroy();
+			log.debug("Destroyed {}: {}", ApplicationFactory.PERSISTENCE_AUTH_ENTRY_MANAGER_NAME,
+					oldPersistenceEntryManager);
+
+			externalPersistenceExtensionService.executePersistenceExtensionAfterDestroy(oldPersistenceEntryManager);
+		}
+	}
+
 
 }

@@ -75,7 +75,6 @@ public class RegistrationService extends RequestService {
     private DeviceRegistrationService deviceRegistrationService;
 
     @Inject
-    @Named("randomChallengeGenerator")
     private ChallengeGenerator challengeGenerator;
 
     @Inject

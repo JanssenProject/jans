@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<web-app xmlns="https://jakarta.ee/xml/ns/jakartaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_5_0.xsd"
+         version="5.0">
+
+	<description>Fido2 server</description>
+
+	<!-- Jetty -->
+	<context-param>
+		<param-name>org.eclipse.jetty.servlet.Default.dirAllowed</param-name>
+		<param-value>false</param-value>
+	</context-param>
+
+	<!-- Weld -->
+	<context-param>
+		<param-name>org.jboss.weld.development</param-name>
+		<param-value>${weld.debug}</param-value>
+	</context-param>
+
+	<!-- JSF -->
+	<context-param>
+		<param-name>jakarta.faces.PROJECT_STAGE</param-name>
+		<param-value>Production</param-value>
+	</context-param>
+	<context-param>
+		<param-name>jakarta.faces.DEFAULT_SUFFIX</param-name>
+		<param-value>.xhtml</param-value>
+	</context-param>
+	<context-param>
+		<param-name>jakarta.faces.FACELETS_RESOURCE_RESOLVER</param-name>
+		<param-value>io.jans.service.ExternalResourceHandler</param-value>
+	</context-param>
+	<!-- Change to -1 when you don't want the compiler should check for changes -->
+	<context-param>
+		<param-name>jakarta.faces.FACELETS_REFRESH_PERIOD</param-name>
+		<param-value>${jakarta.faces.FACELETS_REFRESH_PERIOD}</param-value>
+	</context-param>
+	<context-param>
+		<param-name>jakarta.faces.STATE_SAVING_METHOD</param-name>
+		<param-value>client</param-value>
+	</context-param>
+
+	<!-- Weld -->
+	<listener>
+		<listener-class>org.jboss.weld.environment.servlet.Listener</listener-class>
+	</listener>
+
+	<!-- JSF -->
+	<listener>
+		<listener-class>com.sun.faces.config.ConfigureListener</listener-class>
+	</listener>
+
+	<servlet>
+		<servlet-name>Faces Servlet</servlet-name>
+		<servlet-class>jakarta.faces.webapp.FacesServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>Faces Servlet</servlet-name>
+		<url-pattern>*.htm</url-pattern>
+	</servlet-mapping>
+
+	<session-config>
+		<session-timeout>1</session-timeout>
+		<tracking-mode>COOKIE</tracking-mode>
+	</session-config>
+
+	<security-constraint>
+		<display-name>Restrict raw XHTML Documents</display-name>
+		<web-resource-collection>
+			<web-resource-name>XHTML</web-resource-name>
+			<url-pattern>*.xhtml</url-pattern>
+		</web-resource-collection>
+		<auth-constraint />
+	</security-constraint>
+
+	<!-- Weld -->
+	<resource-env-ref>
+		<description>Object factory for the CDI Bean Manager</description>
+		<resource-env-ref-name>BeanManager</resource-env-ref-name>
+		<resource-env-ref-type>jakarta.enterprise.inject.spi.BeanManager</resource-env-ref-type>
+	</resource-env-ref>
+
+</web-app>

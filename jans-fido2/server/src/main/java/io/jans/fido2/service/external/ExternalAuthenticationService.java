@@ -7,7 +7,7 @@
 package io.jans.fido2.service.external;
 
 import io.jans.as.common.service.common.ApplicationFactory;
-import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.model.ldap.GluuLdapConfiguration;
 import io.jans.fido2.service.cdi.event.ReloadAuthScript;
 import io.jans.fido2.service.external.internal.InternalDefaultPersonAuthenticationType;
 import io.jans.model.AuthenticationScriptUsageType;
@@ -16,7 +16,6 @@ import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.custom.script.model.CustomScript;
 import io.jans.model.custom.script.model.auth.AuthenticationCustomScript;
 import io.jans.model.custom.script.type.auth.PersonAuthenticationType;
-import io.jans.model.ldap.GluuLdapConfiguration;
 import io.jans.service.custom.script.ExternalScriptService;
 import io.jans.util.OxConstants;
 import io.jans.util.StringHelper;
@@ -48,9 +47,6 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 
     @Inject
     private InternalDefaultPersonAuthenticationType internalDefaultPersonAuthenticationType;
-
-    @Inject
-    private AppConfiguration appConfiguration;
 
     private static final long serialVersionUID = 7339887464253044927L;
 

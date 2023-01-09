@@ -12,7 +12,7 @@ import io.jans.as.common.model.session.SessionId;
 import io.jans.as.common.model.session.SessionIdState;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.config.StaticConfiguration;
-import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.util.Pair;
 import io.jans.fido2.security.Identity;
@@ -26,7 +26,6 @@ import io.jans.service.LocalCacheService;
 import io.jans.util.StringHelper;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
-import jakarta.inject.Named;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -36,6 +35,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static io.jans.as.model.configuration.AppConfiguration.DEFAULT_SESSION_ID_LIFETIME;
 import static org.apache.commons.lang.BooleanUtils.isTrue;
 
 /**
@@ -45,7 +45,6 @@ import static org.apache.commons.lang.BooleanUtils.isTrue;
  * @version December 8, 2018
  */
 @RequestScoped
-@Named
 public class SessionIdService {
 
     private static final int MAX_MERGE_ATTEMPTS = 3;
@@ -66,8 +65,8 @@ public class SessionIdService {
     @Inject
     private StaticConfiguration staticConfiguration;
 
-    @Inject
-    private CookieService cookieService;
+//    @Inject
+//    private CookieService cookieService;
 
     @Inject
     private Identity identity;
@@ -95,12 +94,12 @@ public class SessionIdService {
     }
 
     public SessionId getSessionId() {
-        String sessionId = cookieService.getSessionIdFromCookie();
-
-        if (StringHelper.isEmpty(sessionId) && identity.getSessionId() != null) {
-            sessionId = identity.getSessionId().getId();
-        }
-
+//        String sessionId = cookieService.getSessionIdFromCookie();
+//
+//        if (StringHelper.isEmpty(sessionId) && identity.getSessionId() != null) {
+//            sessionId = identity.getSessionId().getId();
+//        }
+        String sessionId = identity.getSessionId().getId();
         if (StringHelper.isNotEmpty(sessionId)) {
             return getSessionId(sessionId);
         } else {
@@ -189,7 +188,7 @@ public class SessionIdService {
             return Integer.MAX_VALUE;
         }
         log.debug("Session id lifetime configuration is null.");
-        return AppConfiguration.DEFAULT_SESSION_ID_LIFETIME;
+        return DEFAULT_SESSION_ID_LIFETIME;
     }
 
     private Pair<Date, Integer> expirationDate(Date creationDate, SessionIdState state) {

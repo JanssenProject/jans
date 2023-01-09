@@ -75,7 +75,6 @@ public class AuthenticationService extends RequestService {
     private UserService userService;
 
     @Inject
-    @Named("randomChallengeGenerator")
     private ChallengeGenerator challengeGenerator;
 
     @Inject

@@ -22,12 +22,14 @@ import java.security.SecureRandom;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 /**
  * Challenge generator class
  *
  */
 @ApplicationScoped
+@Named("randomChallengeGenerator")
 public class ChallengeGenerator {
 
     @Inject

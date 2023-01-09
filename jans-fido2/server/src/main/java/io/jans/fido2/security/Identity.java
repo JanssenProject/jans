@@ -15,9 +15,6 @@ import jakarta.enterprise.inject.Alternative;
 import jakarta.inject.Named;
 import jakarta.interceptor.Interceptor;
 
-/**
- * @version August 9, 2017
- */
 @Alternative
 @Priority(Interceptor.Priority.APPLICATION + 20)
 @RequestScoped

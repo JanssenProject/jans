@@ -21,6 +21,42 @@
         <listener-class>org.jboss.weld.environment.servlet.Listener</listener-class>
     </listener>
 
+    <!-- JSF -->
+    <context-param>
+        <param-name>jakarta.faces.FACELETS_RESOURCE_RESOLVER</param-name>
+        <param-value>io.jans.service.ExternalResourceHandler</param-value>
+    </context-param>
+
+    <listener>
+        <listener-class>com.sun.faces.config.ConfigureListener</listener-class>
+    </listener>
+
+    <servlet>
+        <servlet-name>Faces Servlet</servlet-name>
+        <servlet-class>jakarta.faces.webapp.FacesServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>Faces Servlet</servlet-name>
+        <url-pattern>*.htm</url-pattern>
+    </servlet-mapping>
+
+    <session-config>
+        <session-timeout>1</session-timeout>
+        <tracking-mode>COOKIE</tracking-mode>
+    </session-config>
+
+    <security-constraint>
+        <display-name>Restrict raw XHTML Documents</display-name>
+        <web-resource-collection>
+            <web-resource-name>XHTML</web-resource-name>
+            <url-pattern>*.xhtml</url-pattern>
+        </web-resource-collection>
+        <auth-constraint />
+    </security-constraint>
+
+
     <resource-env-ref>
         <description>Object factory for the CDI Bean Manager</description>
         <resource-env-ref-name>BeanManager</resource-env-ref-name>

@@ -10,15 +10,15 @@ import io.jans.as.common.model.common.SimpleUser;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.session.SessionId;
 import io.jans.as.common.service.common.ApplicationFactory;
-import io.jans.as.common.service.common.UserService;
 import io.jans.as.common.util.AttributeConstants;
-import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.fido2.model.conf.AppConfiguration;
+import io.jans.fido2.service.shared.UserService;
+import io.jans.model.ldap.GluuLdapConfiguration;
 import io.jans.fido2.service.u2f.util.Constants;
 import io.jans.fido2.security.Identity;
 import io.jans.fido2.service.shared.MetricService;
 import io.jans.model.GluuStatus;
 import io.jans.model.SimpleProperty;
-import io.jans.model.ldap.GluuLdapConfiguration;
 import io.jans.model.metric.MetricType;
 import io.jans.model.security.Credentials;
 import io.jans.orm.PersistenceEntryManager;
@@ -43,7 +43,7 @@ import java.util.*;
  * @version November 23, 2017
  */
 @RequestScoped
-public class AuthenticationService {
+public class AuthenticationServiceJansServer {
 
     @Inject
     private Logger log;

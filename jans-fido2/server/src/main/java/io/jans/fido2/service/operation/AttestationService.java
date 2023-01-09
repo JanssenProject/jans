@@ -10,6 +10,7 @@ import java.security.SecureRandom;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.orm.model.fido2.Fido2RegistrationData;
 import io.jans.orm.model.fido2.Fido2RegistrationEntry;
 import io.jans.orm.model.fido2.Fido2RegistrationStatus;
@@ -24,7 +25,6 @@ import io.jans.fido2.ctap.UserVerification;
 import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.auth.CredAndCounterData;
 import io.jans.fido2.model.auth.PublicKeyCredentialDescriptor;
-import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.conf.RequestedParty;
 import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.ChallengeGenerator;

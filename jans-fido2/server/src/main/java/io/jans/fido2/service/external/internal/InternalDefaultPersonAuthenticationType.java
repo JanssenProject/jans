@@ -6,7 +6,7 @@
 
 package io.jans.fido2.service.external.internal;
 
-import io.jans.fido2.service.AuthenticationService;
+import io.jans.fido2.service.AuthenticationServiceJansServer;
 import io.jans.model.SimpleCustomProperty;
 import io.jans.model.custom.script.type.auth.DummyPersonAuthenticationType;
 import io.jans.model.security.Credentials;
@@ -26,7 +26,7 @@ import java.util.Map;
 public class InternalDefaultPersonAuthenticationType extends DummyPersonAuthenticationType {
 
     @Inject
-    private AuthenticationService authenticationService;
+    private AuthenticationServiceJansServer authenticationService;
 
     @Inject
     private Credentials credentials;

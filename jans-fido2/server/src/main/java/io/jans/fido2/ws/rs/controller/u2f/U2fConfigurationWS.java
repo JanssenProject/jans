@@ -6,25 +6,21 @@
 
 package io.jans.fido2.ws.rs.controller.u2f;
 
-import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.config.Constants;
-import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.fido2.model.conf.AppConfiguration;
+
+import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.fido2.model.u2f.U2fConfiguration;
 import io.jans.fido2.model.u2f.U2fErrorResponseType;
 import io.jans.fido2.model.u2f.util.ServerUtil;
 import jakarta.enterprise.context.ApplicationScoped;
-import org.slf4j.Logger;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.POST;
+import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.FormParam;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
+import org.slf4j.Logger;
 
 
 /**

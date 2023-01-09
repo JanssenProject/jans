@@ -121,6 +121,14 @@
             <groupId>io.jans</groupId>
             <artifactId>jans-core-timer-weld</artifactId>
         </dependency>
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-core-util</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-orm-core</artifactId>
+		</dependency>
         <dependency>
             <groupId>io.jans</groupId>
             <artifactId>jans-core-exception-extension-cdi</artifactId>
@@ -162,6 +170,21 @@
 			<artifactId>testng</artifactId>
 			<scope>test</scope>
 		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/jakarta.websocket/jakarta.websocket-api -->
+		<dependency>
+			<groupId>jakarta.websocket</groupId>
+			<artifactId>jakarta.websocket-api</artifactId>
+			<version>2.1.0</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/jakarta.websocket/jakarta.websocket-client-api -->
+		<dependency>
+			<groupId>jakarta.websocket</groupId>
+			<artifactId>jakarta.websocket-client-api</artifactId>
+			<version>2.1.0</version>
+		</dependency>
+
+
 	</dependencies>
 	<reporting>
         <plugins>

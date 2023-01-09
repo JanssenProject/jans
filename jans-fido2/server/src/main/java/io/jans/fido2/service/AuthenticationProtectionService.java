@@ -6,9 +6,9 @@
 
 package io.jans.fido2.service;
 
-import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.configuration.AuthenticationProtectionConfiguration;
 import io.jans.service.cdi.event.ConfigurationUpdate;
+import io.jans.fido2.model.conf.AppConfiguration;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;

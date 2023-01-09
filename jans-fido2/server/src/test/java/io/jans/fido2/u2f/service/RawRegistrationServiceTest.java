@@ -13,8 +13,6 @@ import io.jans.fido2.u2f.BaseTest;
 import org.python.bouncycastle.util.encoders.Hex;
 import org.testng.annotations.Test;
 
-import javax.inject.Inject;
-
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 

@@ -8,39 +8,31 @@ package io.jans.fido2.ws.rs.controller.u2f;
 
 import io.jans.as.common.service.common.UserService;
 import io.jans.as.model.common.FeatureFlagType;
-import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.model.error.ErrorResponseFactory;
-import io.jans.fido2.model.u2f.U2fErrorResponseType;
-import io.jans.fido2.model.u2f.exception.BadInputException;
-import io.jans.fido2.model.u2f.protocol.AuthenticateRequestMessage;
-import io.jans.fido2.model.u2f.protocol.AuthenticateResponse;
-import io.jans.fido2.model.u2f.protocol.AuthenticateStatus;
+import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.as.model.util.Base64Util;
-import io.jans.fido2.model.u2f.exception.DeviceCompromisedException;
-import io.jans.fido2.model.u2f.exception.InvalidKeyHandleDeviceException;
-import io.jans.fido2.model.u2f.exception.NoEligableDevicesException;
-import io.jans.fido2.service.u2f.util.Constants;
 import io.jans.fido2.model.u2f.AuthenticateRequestMessageLdap;
 import io.jans.fido2.model.u2f.DeviceRegistration;
 import io.jans.fido2.model.u2f.DeviceRegistrationResult;
+import io.jans.fido2.model.u2f.U2fErrorResponseType;
+import io.jans.fido2.model.u2f.exception.BadInputException;
+import io.jans.fido2.model.u2f.exception.DeviceCompromisedException;
+import io.jans.fido2.model.u2f.exception.InvalidKeyHandleDeviceException;
+import io.jans.fido2.model.u2f.exception.NoEligableDevicesException;
+import io.jans.fido2.model.u2f.protocol.AuthenticateRequestMessage;
+import io.jans.fido2.model.u2f.protocol.AuthenticateResponse;
+import io.jans.fido2.model.u2f.protocol.AuthenticateStatus;
+import io.jans.fido2.model.u2f.util.ServerUtil;
 import io.jans.fido2.service.u2f.AuthenticationService;
 import io.jans.fido2.service.u2f.DeviceRegistrationService;
 import io.jans.fido2.service.u2f.UserSessionIdService;
 import io.jans.fido2.service.u2f.ValidationService;
-import io.jans.fido2.model.u2f.util.ServerUtil;
+import io.jans.fido2.service.u2f.util.Constants;
 import io.jans.util.StringHelper;
 import jakarta.enterprise.context.ApplicationScoped;
-import org.slf4j.Logger;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.FormParam;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.QueryParam;
-import jakarta.ws.rs.WebApplicationException;
+import org.slf4j.Logger;
 /**
  * The endpoint allows to start and finish U2F authentication process
  *
@@ -53,9 +45,6 @@ public class U2fAuthenticationWS {
 
     @Inject
     private Logger log;
-
-    @Inject
-    private AppConfiguration appConfiguration;
 
     @Inject
     private UserService userService;

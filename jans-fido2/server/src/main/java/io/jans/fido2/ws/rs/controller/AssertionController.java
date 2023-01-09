@@ -8,6 +8,7 @@ package io.jans.fido2.ws.rs.controller;
 
 import java.io.IOException;
 
+import io.jans.fido2.model.conf.AppConfiguration;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
@@ -19,7 +20,6 @@ import jakarta.ws.rs.core.Response.ResponseBuilder;
 import jakarta.ws.rs.core.Response.Status;
 
 import io.jans.fido2.exception.Fido2RpRuntimeException;
-import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.service.DataMapperService;
 import io.jans.fido2.service.operation.AssertionService;
 

@@ -9,6 +9,7 @@ package io.jans.fido2.service.app;
 import java.io.File;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import io.jans.fido2.model.error.ErrorResponseFactory;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
@@ -107,6 +108,7 @@ public class ConfigurationFactory {
     private PersistenceConfiguration persistenceConfiguration;
 	private AppConfiguration dynamicConf;
 	private StaticConfiguration staticConf;
+	private ErrorResponseFactory errorResponseFactory;
 	private String cryptoConfigurationSalt;
 
 	private AtomicBoolean isActive;
@@ -324,6 +326,9 @@ public class ConfigurationFactory {
 		}
 		if (conf.getStaticConf() != null) {
 			staticConf = conf.getStaticConf();
+		}
+		if (conf.getErrors() != null) {
+			errorResponseFactory = new ErrorResponseFactory(conf.getErrors(), conf.getDynamicConf());
 		}
 	}
 
