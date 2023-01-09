@@ -12,7 +12,6 @@ import io.jans.configapi.plugin.mgt.util.MgtUtil;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.core.model.SearchRequest;
-
 import io.jans.orm.model.PagedResult;
 import io.jans.util.StringHelper;
 import jakarta.enterprise.context.ApplicationScoped;

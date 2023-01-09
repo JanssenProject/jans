@@ -76,35 +76,33 @@ public class RequestReaderInterceptor {
     @SuppressWarnings({ "all" })
     @AroundInvoke
     public Object aroundReadFrom(InvocationContext context) throws Exception {
-        logger.error(
-                "\n\n RequestReaderInterceptor::aroundReadFrom() - Request Interceptor info:{}, request:{}, httpHeaders:{}, resourceInfo:{}, persistenceEntryManager:{}, getDataFormatConversionConf():{}",
+        logger.debug(
+                " RequestReaderInterceptor::aroundReadFrom() - Request Interceptor info:{}, request:{}, httpHeaders:{}, resourceInfo:{}, persistenceEntryManager:{}, getDataFormatConversionConf():{}",
                 info, request, httpHeaders, resourceInfo, persistenceEntryManager, getDataFormatConversionConf());
-        logger.error(
-                "Request Interceptor info:{}, request:{}, httpHeaders:{}, resourceInfo:{}, persistenceEntryManager:{}",
-                info, request, httpHeaders, resourceInfo, persistenceEntryManager);
+        
         try {
             // perform data conversion if enabled and method is not ignored
             if (isDataFormatConversionEnaled() || !isIgnoreMethod(context)) {
-                logger.error("=======================  DataType Conversion Start ============================");
+                logger.debug("=======================  DataType Conversion Start ============================");
                 processRequest(context);
-                logger.error("=======================  DataType Conversion End ============================");
+                logger.debug("=======================  DataType Conversion End ============================");
             }
 
         } catch (Exception ex) {
             ex.printStackTrace();
-            logger.error("Exception while data conversion:{}", ex.getMessage());
+            logger.debug("Exception while data conversion:{}", ex.getMessage());
         }
         return context.proceed();
     }
 
     private void processRequest(InvocationContext context) {
-        logger.error(
+        logger.debug(
                 " Process Request Data -  context:{} , context.getClass():{}, context.getContextData():{}, context.getMethod():{} , context.getParameters():{} , context.getTarget():{} ",
                 context, context.getClass(), context.getContextData(), context.getMethod(), context.getParameters(),
                 context.getTarget());
 
         Object[] ctxParameters = context.getParameters();
-        logger.error(" Request  Parameters -  ctxParameters:{} ", ctxParameters);
+        logger.debug(" Request  Parameters -  ctxParameters:{} ", ctxParameters);
 
         Method method = context.getMethod();
 
@@ -112,32 +110,32 @@ public class RequestReaderInterceptor {
         Parameter[] parameters = method.getParameters();
         Class[] clazzArray = method.getParameterTypes();
 
-        logger.error("Parameter  Data -  paramCount:{} , parameters:{}, clazzArray:{} ", paramCount, parameters,
+        logger.debug("Parameter  Data -  paramCount:{} , parameters:{}, clazzArray:{} ", paramCount, parameters,
                 clazzArray);
 
         if (clazzArray != null && clazzArray.length > 0) {
             for (int i = 0; i < clazzArray.length; i++) {
                 Class<?> clazz = clazzArray[i];
                 String propertyName = parameters[i].getName();
-                logger.error("propertyName:{}, clazz:{} , clazz.isPrimitive():{} ", propertyName, clazz,
+                logger.debug("propertyName:{}, clazz:{} , clazz.isPrimitive():{} ", propertyName, clazz,
                         clazz.isPrimitive());
 
                 Object obj = ctxParameters[i];
                 if (!clazz.isPrimitive() && obj != null) {
                     processCustomAttributes(obj);
-                    logger.error("Request object post processing -  propertyName:{}, obj:{} ", propertyName, obj);
+                    logger.debug("Request object post processing -  propertyName:{}, obj:{} ", propertyName, obj);
                 }
             }
         }
     }
 
     private <T> void processCustomAttributes(T obj) {
-        logger.error("Object for custom attribute obj:{}", obj);
+        logger.debug("Object for custom attribute obj:{}", obj);
 
         Class<?> entryClass = obj.getClass();
         List<PropertyAnnotation> propertiesAnnotations = persistenceEntryManager
                 .getEntryPropertyAnnotations(entryClass);
-        logger.error("propertiesAnnotations:{}", propertiesAnnotations);
+        logger.debug("propertiesAnnotations:{}", propertiesAnnotations);
 
         for (PropertyAnnotation propertiesAnnotation : propertiesAnnotations) {
             try {
@@ -146,7 +144,7 @@ public class RequestReaderInterceptor {
                 // Process properties with @AttributesList annotation
                 Annotation ldapAttribute = ReflectHelper.getAnnotationByType(propertiesAnnotation.getAnnotations(),
                         AttributesList.class);
-                logger.error("Custom attributes - ldapAttribute:{}", ldapAttribute);
+                logger.debug("Custom attributes - ldapAttribute:{}", ldapAttribute);
                 if (ldapAttribute == null) {
                     continue;
                 }
@@ -154,9 +152,9 @@ public class RequestReaderInterceptor {
                 List<AttributeData> listAttributes = persistenceEntryManager
                         .getAttributeDataListFromCustomAttributesList(obj, (AttributesList) ldapAttribute,
                                 propertyName);
-                logger.error("Custom AttributesList before conversion listAttributes:{}", listAttributes);
+                logger.debug("Custom AttributesList before conversion listAttributes:{}", listAttributes);
                 processAttributeData(obj, propertyName, ldapAttribute, listAttributes);
-                logger.error("Custom AttributesList after conversion listAttributes:{}", listAttributes);
+                logger.debug("Custom AttributesList after conversion listAttributes:{}", listAttributes);
 
             } catch (Exception ex) {
                 logger.error("Error while processing Custom Attributes", ex);
@@ -167,26 +165,26 @@ public class RequestReaderInterceptor {
     private List<AttributeData> processAttributeData(Object obj, String propertyName, Annotation ldapAttribute,
             List<AttributeData> listAttributes)
             throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-        logger.error("Attribute Data for processing obj:{}, propertyName:{}, ldapAttribute:{}, listAttributes:{}", obj,
+        logger.debug("Attribute Data for processing obj:{}, propertyName:{}, ldapAttribute:{}, listAttributes:{}", obj,
                 propertyName, ldapAttribute, listAttributes);
 
         if (listAttributes != null && !listAttributes.isEmpty()) {
             for (AttributeData attData : listAttributes) {
-                logger.error("AttributeData - attData:{}", attData);
+                logger.debug("AttributeData - attData:{}", attData);
                 GluuAttribute gluuAttribute = attributeService.getByLdapName(attData.getName());
 
-                logger.error("AttributeData details - attData.getName():{}, attData.getValue():{},gluuAttribute:{}",
+                logger.debug("AttributeData details - attData.getName():{}, attData.getValue():{},gluuAttribute:{}",
                         attData.getName(), attData.getValue(), gluuAttribute);
 
                 if (attData.getValue() != null && gluuAttribute != null) {
                     AttributeDataType attributeDataType = gluuAttribute.getDataType();
-                    logger.error(
+                    logger.debug(
                             "AttributeDataType - attData.getName():{}, attributeDataType:{}, AttributeDataType.DATE.getValue():{}, isDateAttributes(attData.getName()):{}",
                             attData.getName(), attributeDataType, AttributeDataType.DATE.getValue(),
                             isDateAttributes(attData.getName()));
                     if (AttributeDataType.DATE.getValue().equalsIgnoreCase(attributeDataType.getValue())
                             || isDateAttributes(attData.getName())) {
-                        logger.error(" Calling decodeTime() - attData.getValue():{}", attData.getValue());
+                        logger.debug(" Calling decodeTime() - attData.getValue():{}", attData.getValue());
                         AttributeData attributeData = decodeTime(attData);
                         listAttributes.remove(attData);
                         listAttributes.add(attributeData);
@@ -194,17 +192,17 @@ public class RequestReaderInterceptor {
                 }
             }
 
-            logger.error("Getting updated custom attribute list for propertyName:{} , listAttributes:{} ", propertyName,
+            logger.debug("Getting updated custom attribute list for propertyName:{} , listAttributes:{} ", propertyName,
                     listAttributes);
             List<Object> data = persistenceEntryManager.getCustomAttributesListFromAttributeDataList(obj,
                     (AttributesList) ldapAttribute, propertyName, listAttributes);
-            logger.error("updated custom attribute data:{}", data);
+            logger.debug("updated custom attribute data:{}", data);
 
-            logger.error("Setting the custom attribute in request object propertyName:{}, data:{} ", propertyName,
+            logger.debug("Setting the custom attribute in request object propertyName:{}, data:{} ", propertyName,
                     data);
             // set data
             setObjectData(obj, propertyName, data);
-            logger.error("After setting the custom attribute in request object propertyName:{}, data:{} ", propertyName,
+            logger.debug("After setting the custom attribute in request object propertyName:{}, data:{} ", propertyName,
                     data);
 
         }
@@ -212,7 +210,7 @@ public class RequestReaderInterceptor {
     }
 
     private AttributeData decodeTime(AttributeData attributeData) {
-        logger.error("Date data to decode attributeData:{}", attributeData);
+        logger.debug("Date data to decode attributeData:{}", attributeData);
         AttributeData atrData = attributeData;
         if (atrData == null || atrData.getValue() == null) {
             return atrData;
@@ -221,10 +219,10 @@ public class RequestReaderInterceptor {
         Object attValue = atrData.getValue();
         if (attValue != null) {
             Date date = authUtil.parseStringToDateObj(attValue.toString());
-            logger.error("\n\n\n Date data to decode date:{}", date);
+            logger.debug(" Date data to decode date:{}", date);
             if (date != null) {
                 date = persistenceEntryManager.decodeTime(null, date.toString());
-                logger.error("\n\n\n Set decoded date atrData.getName():{}, date:{}", atrData.getName(), date);
+                logger.debug(" Set decoded date atrData.getName():{}, date:{}", atrData.getName(), date);
                 atrData = new AttributeData(atrData.getName(), date);
                 atrData.setMultiValued(attributeData.getMultiValued());
             }
@@ -236,20 +234,20 @@ public class RequestReaderInterceptor {
 
     private void setObjectData(Object obj, String propertyName, Object propertyValue)
             throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-        logger.error("Data to set new value - obj:{}, propertyName:{}, propertyValue:{}", obj, propertyName,
+        logger.debug("Data to set new value - obj:{}, propertyName:{}, propertyValue:{}", obj, propertyName,
                 propertyValue);
         Setter setterMethod = DataUtil.getSetterMethod(obj.getClass(), propertyName);
         propertyValue = setterMethod.getMethod().invoke(obj, propertyValue);
-        logger.error("After setterMethod invoked key:{}, propertyValue:{} ", propertyName, propertyValue);
+        logger.debug("After setterMethod invoked key:{}, propertyValue:{} ", propertyName, propertyValue);
 
         Getter getterMethod = DataUtil.getGetterMethod(obj.getClass(), propertyName);
         propertyValue = getterMethod.get(obj);
-        logger.error("Verify new value key:{}, propertyValue:{} ", propertyName, propertyValue);
+        logger.debug("Verify new value key:{}, propertyValue:{} ", propertyName, propertyValue);
 
     }
 
     private DataFormatConversionConf getDataFormatConversionConf() {
-        logger.error("authUtil.getDataFormatConversionConf():{}", authUtil.getDataFormatConversionConf());
+        logger.debug("authUtil.getDataFormatConversionConf():{}", authUtil.getDataFormatConversionConf());
         return this.authUtil.getDataFormatConversionConf();
     }
 
@@ -257,14 +255,14 @@ public class RequestReaderInterceptor {
         if (getDataFormatConversionConf() == null) {
             return false;
         }
-        logger.error("getDataFormatConversionConf().isEnabled():{}", getDataFormatConversionConf().isEnabled());
+        logger.debug("getDataFormatConversionConf().isEnabled():{}", getDataFormatConversionConf().isEnabled());
         return getDataFormatConversionConf().isEnabled();
     }
 
     
 
     private boolean isDateAttributes(String propertyName) {
-        logger.error("Check if date attribute  - propertyName:{}, getDataFormatConversionConf():{}", propertyName,
+        logger.debug("Check if date attribute  - propertyName:{}, getDataFormatConversionConf():{}", propertyName,
                 getDataFormatConversionConf());
         boolean flag = false;
         if (getDataFormatConversionConf() != null && getDataFormatConversionConf().getConversionAttributes() != null
@@ -277,13 +275,13 @@ public class RequestReaderInterceptor {
     }
     
     private boolean isIgnoreMethod(InvocationContext context) {
-        logger.error("Checking if method to be ignored");
+        logger.debug("Checking if method to be ignored");
         if(context.getMethod().getAnnotations()==null || context.getMethod().getAnnotations().length<=0) {
             return false;            
         }
         
         for(int i=0; i<context.getMethod().getAnnotations().length;i++) {
-            logger.error("======RequestReaderInterceptor - context.getMethod().getAnnotations()[i]:{} ",context.getMethod().getAnnotations()[i]);
+            logger.debug("======RequestReaderInterceptor - context.getMethod().getAnnotations()[i]:{} ",context.getMethod().getAnnotations()[i]);
             
             if (context.getMethod().getAnnotations()[i]!=null && getDataFormatConversionConf() != null && getDataFormatConversionConf().getIgnoreHttpMethod() != null
                     && getDataFormatConversionConf().getIgnoreHttpMethod().contains(context.getMethod().getAnnotations()[i].toString())) {
