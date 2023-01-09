@@ -96,7 +96,7 @@ RUN wget -q https://jenkins.jans.io/maven/io/jans/jans-fido2-client/${FIDO2_CLIE
 # Casa external scripts
 # =====================
 
-ARG FLEX_SOURCE_VERSION=48418cd351655a48c650075a6d60601c368a403d
+ARG FLEX_SOURCE_VERSION=5f065b7fb931199a26817ee22ffe5c2a9cc1e3f9
 ARG CASA_EXTRAS_DIR=casa/extras
 
 RUN mkdir -p /opt/jans/python/libs
@@ -118,7 +118,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/agama/fl \
     ${JETTY_BASE}/jans-auth/agama/scripts
 
 # janssenproject/jans SHA commit
-ENV JANS_SOURCE_VERSION=d95fc492ca00ccee0ecc88132376c128203faefb
+ENV JANS_SOURCE_VERSION=a970d88d81f920973f3ba812db97448f135090a9
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the agama code

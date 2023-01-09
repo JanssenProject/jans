@@ -18,3 +18,4 @@ The application can be deployed on web server like jetty and can be now runnable
 
 ## Documentation
 Learn more in the [jans-config-api documentation](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/main/jans-config-api/docs/jans-config-api-swagger-auto.yaml).
+
