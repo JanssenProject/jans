@@ -8881,7 +8881,7 @@
 <p>An Internet accessible (non-internal or localhost) Janssen Server with DNS pointing at the public Internet address of the server </p>
 </li>
 <li>
-<p><a href="https://github.com/JanssenProject/jans/blob/replace-janssen-version/docs/script-catalog/person_authentication/super-gluu-external-authenticator/SuperGluuExternalAuthenticator.py">Super Gluu interception script</a> (included in the default Janssen Server distribution)</p>
+<p><a href="https://github.com/JanssenProject/jans/blob/v1.0.6/docs/script-catalog/person_authentication/super-gluu-external-authenticator/SuperGluuExternalAuthenticator.py">Super Gluu interception script</a> (included in the default Janssen Server distribution)</p>
 </li>
 <li>
 <p>An Android or iOS device with Super Gluu installed </p>
@@ -8899,7 +8899,7 @@
 <p>The Janssen Server and Super Gluu can work in the same network, without a DNS server hostname and with a self-signed certificate. There is only one limitation: both components should belong to the same network. Instead of assigning a hostname during Janssen Server installation, an IP address can be specified. In the Super Gluu mobile app, enable <code>Trust all (SSL)</code>.    </p>
 </div>
 <h3 id="authentication-workflows">Authentication Workflows<a class="headerlink" href="#authentication-workflows" title="Permanent link">#</a></h3>
-<p>The authentication workflow for Super Gluu is defined in the <a href="https://github.com/JanssenProject/jans/blob/replace-janssen-version/docs/script-catalog/person_authentication/super-gluu-external-authenticator/SuperGluuExternalAuthenticator.py">Super Gluu interception script</a> (included in the default Janssen Server distribution). </p>
+<p>The authentication workflow for Super Gluu is defined in the <a href="https://github.com/JanssenProject/jans/blob/v1.0.6/docs/script-catalog/person_authentication/super-gluu-external-authenticator/SuperGluuExternalAuthenticator.py">Super Gluu interception script</a> (included in the default Janssen Server distribution). </p>
 <h3 id="a-default-two-step-flow">A. Default Two step flow:<a class="headerlink" href="#a-default-two-step-flow" title="Permanent link">#</a></h3>
 <h4 id="enrollment">Enrollment:<a class="headerlink" href="#enrollment" title="Permanent link">#</a></h4>
 <p>By default, users are put through a two-step, two-factor authentication process with username and password first, and then push notification via Super Gluu second. 
@@ -9072,7 +9072,7 @@ Now Sign-in with Super-Gluu is an available authentication mechanism for your Ja
 </ol>
 <p>!!! Note To make sure <code>super_gluu</code> has been enabled successfully, you can check your Janssen's Auth Server OpenID Connect configuration by navigating to the following URL: https://<hostname>/.well-known/openid-configuration. Find "acr_values_supported": and you should see "super_gluu".</p>
 <h3 id="make-sign-in-with-super-gluu-script-as-default-authentication-script">Make Sign-in with Super-Gluu Script as default authentication script:<a class="headerlink" href="#make-sign-in-with-super-gluu-script-as-default-authentication-script" title="Permanent link">#</a></h3>
-<p>Use this <a href="https://github.com/JanssenProject/jans-cli-tui/blob/replace-janssen-version/docs/cli/cli-default-authentication-method.md">link</a> as a reference.</p>
+<p>Use this <a href="https://github.com/JanssenProject/jans-cli-tui/blob/v1.0.6/docs/cli/cli-default-authentication-method.md">link</a> as a reference.</p>
 <p>Steps:
 1. Create a file say <code>sg-auth-default.json</code> with the following contents
 <div class="highlight"><pre><span></span><code>{
@@ -9088,8 +9088,8 @@ Now Sign-in with Super-Gluu is an available authentication mechanism for your Ja
 <div class="highlight"><pre><span></span><code>https://&lt;your.jans.server&gt;/jans-auth/authorize.htm?response_type=code&amp;redirect_uri=https://&lt;your.jans.server&gt;/admin&amp;client_id=&lt;replace_with_inum_client_id&gt;&amp;scope=openid+profile+email+user_name&amp;state=faad2cdjfdddjfkdf&amp;nonce=dajdffdfsdcfff
 </code></pre></div></p>
 <h3 id="customizations-to-super-gluu-login-pages">Customizations to Super Gluu Login Pages<a class="headerlink" href="#customizations-to-super-gluu-login-pages" title="Permanent link">#</a></h3>
-<p>The Gluu Server includes a <a href="https://github.com/JanssenProject/jans/blob/replace-janssen-version/jans-auth-server/server/src/main/webapp/auth/super-gluu/login.xhtml">default public-facing pages for Super Gluu </a> for enrollment and authentication.</p>
-<p>To customize the look and feel of the pages, follow the <a href="https://github.com/JanssenProject/jans/blob/replace-janssen-version/docs/admin/developer/customization/customize-web-pages.md">customization guide</a>. </p>
+<p>The Gluu Server includes a <a href="https://github.com/JanssenProject/jans/blob/v1.0.6/jans-auth-server/server/src/main/webapp/auth/super-gluu/login.xhtml">default public-facing pages for Super Gluu </a> for enrollment and authentication.</p>
+<p>To customize the look and feel of the pages, follow the <a href="https://github.com/JanssenProject/jans/blob/v1.0.6/docs/admin/developer/customization/customize-web-pages.md">customization guide</a>. </p>
 <h3 id="self-service">Self-service<a class="headerlink" href="#self-service" title="Permanent link">#</a></h3>
 <p>To offer end-users a portal where they can manage their own account security preferences, including two-factor authentication credentials like Super Gluu, check out our new app, <a href="https://casa.gluu.org">Gluu Casa</a>. </p>
 <h3 id="manual-device-management">Manual Device Management<a class="headerlink" href="#manual-device-management" title="Permanent link">#</a></h3>

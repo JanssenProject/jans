@@ -8932,7 +8932,7 @@ introspection</a> specifications.</p>
 can be found by checking the <code>introspection_endpoint</code> claim of the OpenID Connect configuration response, typically deployed at <code>https://janssen.server.host/.well-known/openid-configuration</code></p>
 <p><code>"introspection_endpoint" : "https://janssen.server.host/jans-auth/restv1/introspection"</code></p>
 <p>More information about request and response of the clientinfo endpoint can be found in
-the OpenAPI specification of <a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/replace-janssen-version/jans-auth-server/docs/swagger.yaml#/Token/get-introspection">jans-auth-server module</a>.</p>
+the OpenAPI specification of <a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/v1.0.6/jans-auth-server/docs/swagger.yaml#/Token/get-introspection">jans-auth-server module</a>.</p>
 <h2 id="sample-get-request">Sample GET Request<a class="headerlink" href="#sample-get-request" title="Permanent link">#</a></h2>
 <h3 id="request">Request<a class="headerlink" href="#request" title="Permanent link">#</a></h3>
 <div class="highlight"><pre><span></span><code>curl -X &#39;GET&#39;   &#39;https://janssen.server.host/jans-auth/restv1/introspection?token=368fea2b-be14-4d30-bd57-bcc4cde2033c&amp;response_as_jwt=false&#39;   -H &#39;accept: application/json&#39; -H   &quot;Authorization: Bearer 111d51a4-2828-4b47-abce-77034cddcfb5&quot;
