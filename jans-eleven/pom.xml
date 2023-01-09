@@ -5,7 +5,7 @@
 	<groupId>io.jans</groupId>
 	<artifactId>jans-eleven-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>1.0.6-SNAPSHOT</version>
+	<version>1.0.6</version>
 	<name>eleven</name>
 
     <distributionManagement>
@@ -20,11 +20,11 @@
 
 		<jans.bom.version>${project.version}</jans.bom.version>
 
-		<jettison.version>1.5.1</jettison.version>
+		<jettison.version>1.5.2</jettison.version>
 		<bouncycastle.version>1.54</bouncycastle.version>
 
-		<httpcore.version>4.4.6</httpcore.version>
-		<httpclient.version>4.5.3</httpclient.version>
+		<httpcore.version>4.4.15</httpcore.version>
+		<httpclient.version>4.5.13</httpclient.version>
 
 		<jetty.version>11.0.8</jetty.version>
 
