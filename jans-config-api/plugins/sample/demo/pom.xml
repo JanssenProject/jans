@@ -3,7 +3,7 @@
 
 	<groupId>io.jans.jans-config-api.plugins</groupId>
 	<artifactId>${plugin.id}</artifactId>
-	<version1.0.6</version>
+	<version>1.0.6</version>
 	<packaging>jar</packaging>
 	<name>demo</name>
 

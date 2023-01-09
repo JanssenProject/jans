@@ -3,7 +3,7 @@
     <parent>
         <artifactId>jans-core-parent</artifactId>
         <groupId>io.jans</groupId>
-        <version1.0.6</version>
+        <version>1.0.6</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
