@@ -8766,7 +8766,7 @@
   <h1>Person authentication faq</h1>
 
 <h3 id="1-display-error-messages-on-a-web-page">1. Display error messages on a web page?<a class="headerlink" href="#1-display-error-messages-on-a-web-page" title="Permanent link">#</a></h3>
-<p>1.<a href="https://github.com/JanssenProject/jans/blob/main/jans-core/jsf-util/src/main/java/io/jans/jsf2/message/FacesMessages.java">FacesMessages</a> bean is used for this purpose.
+<p>1.<a href="https://github.com/JanssenProject/jans/blob/replace-janssen-version/jans-core/jsf-util/src/main/java/io/jans/jsf2/message/FacesMessages.java">FacesMessages</a> bean is used for this purpose.
     <div class="highlight"><pre><span></span><code>from org.jans.jsf2.message import FacesMessages
 from org.jans.service.cdi.util import CdiUtil
 from javax.faces.application import FacesMessage
@@ -8781,7 +8781,7 @@ facesMessages.add(FacesMessage.SEVERITY_ERROR, &quot;Please enter a valid userna
 &lt;h:messages /&gt;
 ...
 </code></pre></div>
-    See an example <a href="https://github.com/JanssenProject/jans/blob/685a1593fb53e2310cfa38fcd49db94f3453042f/jans-auth-server/server/src/main/webapp/WEB-INF/incl/layout/template.xhtml#L41">here</a></p>
+    See an example <a href="https://github.com/JanssenProject/jans/blob/replace-janssen-version/jans-auth-server/server/src/main/webapp/WEB-INF/incl/layout/template.xhtml#L41">here</a></p>
 <h3 id="2-redirection-to-a-third-party-application-for-authentication">2. Redirection to a third party application for authentication<a class="headerlink" href="#2-redirection-to-a-third-party-application-for-authentication" title="Permanent link">#</a></h3>
 <p>For user authentication or consent gathering, there might be a need to redirect to a third party application to perform some operation and return the control back to authentication steps of the custom script. Please apply these steps to a person authentication script in such a scenario:</p>
 <ul>
@@ -8837,7 +8837,7 @@ The <code>&lt;f:viewAction action="#{authenticator.authenticateWithOutcome}" /&g
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-29T15:53:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-29</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-09T12:38:51+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-09</span>
       
         <br>
         Created:
