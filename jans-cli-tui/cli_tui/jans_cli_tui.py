@@ -579,8 +579,6 @@ class JansCliApp(Application):
 
         title += ': '
 
-        open('/tmp/w.txt', 'a').write(widget_style+'\n')
-
         ta = TextArea(
                 text=str(value),
                 multiline=height > 1,
