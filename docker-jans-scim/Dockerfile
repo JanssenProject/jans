@@ -80,7 +80,7 @@ COPY conf/prometheus-config.yaml /opt/prometheus/
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_SOURCE_VERSION=d95fc492ca00ccee0ecc88132376c128203faefb
+ENV JANS_SOURCE_VERSION=a970d88d81f920973f3ba812db97448f135090a9
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCIM_RESOURCE_DIR=jans-scim/server/src/main/resources
 
