@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.0.6-1 (2023-01-09)
+
+
+### Features
+
+* **docker-jans:** enable prefix and group for stdout logs ([#3481](https://github.com/JanssenProject/jans/issues/3481)) ([e7684e7](https://github.com/JanssenProject/jans/commit/e7684e7f6da7c789d03311fe2df855c687aa7fa6))
+* **image:** add custom libs for couchbase and spanner persistence ([#2784](https://github.com/JanssenProject/jans/issues/2784)) ([db559dd](https://github.com/JanssenProject/jans/commit/db559ddc5e74cc7387720af7f084766c054541b5))
+* **jans-pycloudlib:** add AWS Secrets Manager support for configuration layers ([#3112](https://github.com/JanssenProject/jans/issues/3112)) ([0522e61](https://github.com/JanssenProject/jans/commit/0522e61809b9052adce4fdb0db77e2d71558144e))
+
+
+### Bug Fixes
+
+* getting ready for a release ([0bda832](https://github.com/JanssenProject/jans/commit/0bda832ebc1da7017231deb38fe9aa6c7c51360a))
+* **image:** add missing write access in filesystem ([#2846](https://github.com/JanssenProject/jans/issues/2846)) ([db4670d](https://github.com/JanssenProject/jans/commit/db4670d3adabc38b42411fe11bdcb6d6a9b4a0bd)), closes [#2844](https://github.com/JanssenProject/jans/issues/2844)
+* **image:** multiple dynamic scopes created when using 2 replicas ([#2871](https://github.com/JanssenProject/jans/issues/2871)) ([5e0f1e6](https://github.com/JanssenProject/jans/commit/5e0f1e69023da264333e3786fcf994539054be71))
+* modify clnId column type ([#3459](https://github.com/JanssenProject/jans/issues/3459)) ([701394c](https://github.com/JanssenProject/jans/commit/701394c3d7463ffb2bd223daf9662921244ad34d))
+* prepare for 1.0.6 release ([9e4c8fb](https://github.com/JanssenProject/jans/commit/9e4c8fb4c0a1ef4779934558e8d8d40d8fedbabf))
+* **pycloudlib:** searching values from spanner returns empty set ([#2833](https://github.com/JanssenProject/jans/issues/2833)) ([861a065](https://github.com/JanssenProject/jans/commit/861a0657233f271ffa41c908ce68a2206ed970fd))
+
 ## [1.0.5-1](https://github.com/JanssenProject/jans/compare/docker-jans-scim-v1.0.4-1...docker-jans-scim-v1.0.5-1) (2022-12-01)
 
 
