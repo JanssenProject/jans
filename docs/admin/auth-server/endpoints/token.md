@@ -14,7 +14,7 @@ Token endpoint is defined in the [OAuth 2.0 framework](https://datatracker.ietf.
 to them. 
 
 Tokens granted by this endpoint depends on grant type and scopes that are specified in the token request. The token
-endpoint is used with every authorization grant except for the implicit grant type (since an access token is issued 
+endpoint is used with every authorization grant type except for the implicit grant type (since an access token is issued 
 directly). 
 
 Based on request, this endpoint can grant following types of tokens:
@@ -65,56 +65,49 @@ sample response. Actual response can greatly vary in its contents based on reque
   }
 ```
 
-## Disabling The Endpoint Using Feature Flag
-
-`userinfo` endpoint can be enabled or disable using [USERINFO feature flag](../../reference/json/feature-flags/janssenauthserver-feature-flags.md#userinfo).
-Use [Janssen Text-based UI(TUI)](../../config-guide/tui.md) or [Janssen command-line interface](../../config-guide/jans-cli/README.md) to perform this task.
-
-When using TUI, navigate via `Auth Server`->`Properties`->`enabledFeatureFlags` to screen below. From here, enable or
-disable `USERINFO` flag as required.
-
-![](../../../assets/image-tui-enable-components.png)
+More information about request and response of the token endpoint can be found in
+the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/replace-janssen-version/jans-auth-server/docs/swagger.yaml#/Token/post-token).
 
 ## Configuration Properties
 
-Userinfo endpoint can be further configured using Janssen Server configuration properties listed below. When using
+Token endpoint and tokens issued by token endpoint can be further configured using Janssen Server configuration properties listed below. When using
 [Janssen Text-based UI(TUI)](../../config-guide/tui.md) to configure the properties,
 navigate via `Auth Server`->`Properties`.
 
-- [mtlsUserInfoEndpoint](../../reference/json/properties/janssenauthserver-properties.md#mtlsuserinfoendpoint)
-- [userInfoConfiguration](../../reference/json/properties/janssenauthserver-properties.md#userinfoconfiguration)
-- [userInfoEncryptionAlgValuesSupported](../../reference/json/properties/janssenauthserver-properties.md#userinfoencryptionalgvaluessupported)
-- [userInfoEncryptionEncValuesSupported](../../reference/json/properties/janssenauthserver-properties.md#userinfoencryptionencvaluessupported)
-- [userInfoEndpoint](../../reference/json/properties/janssenauthserver-properties.md#userinfoendpoint)
-- [userInfoSigningAlgValuesSupported](../../reference/json/properties/janssenauthserver-properties.md#userinfosigningalgvaluessupported)
+- [tokenEndpoint](../../reference/json/properties/janssenauthserver-properties.md#tokenendpoint)
+- [tokenEndpointAuthMethodsSupported](../../reference/json/properties/janssenauthserver-properties.md#tokenendpointauthmethodssupported)
+- [tokenEndpointAuthSigningAlgValuesSupported](../../reference/json/properties/janssenauthserver-properties.md#tokenendpointauthsigningalgvaluessupported)
+- [accessTokenLifetime](../../reference/json/properties/janssenauthserver-properties.md#accesstokenlifetime)
+- [checkUserPresenceOnRefreshToken](../../reference/json/properties/janssenauthserver-properties.md#checkuserpresenceonrefreshtoken)
+- [defaultSignatureAlgorithm](../../reference/json/properties/janssenauthserver-properties.md#defaultsignaturealgorithm)
+- [forceOfflineAccessScopeToEnableRefreshToken](../../reference/json/properties/janssenauthserver-properties.md#forceofflineaccessscopetoenablerefreshtoken)
+- [grantTypesSupported](../../reference/json/properties/janssenauthserver-properties.md#granttypessupported)
+- [accessTokenSigningAlgValuesSupported](../../reference/json/properties/janssenauthserver-properties.md#accesstokensigningalgvaluessupported)
+- [idTokenEncryptionAlgValuesSupported](../../reference/json/properties/janssenauthserver-properties.md#idtokenencryptionalgvaluessupported)
+- [idTokenEncryptionEncValuesSupported](../../reference/json/properties/janssenauthserver-properties.md#idtokenencryptionencvaluessupported)
+- [idTokenFilterClaimsBasedOnAccessToken](../../reference/json/properties/janssenauthserver-properties.md#idtokenfilterclaimsbasedonaccesstoken)
+- [idTokenLifetime](../../reference/json/properties/janssenauthserver-properties.md#idtokenlifetime)
+- [idTokenSigningAlgValuesSupported](../../reference/json/properties/janssenauthserver-properties.md#idtokensigningalgvaluessupported)
+- [accessTokenSigningAlgValuesSupported](../../reference/json/properties/janssenauthserver-properties.md#accesstokensigningalgvaluessupported)
+- [legacyIdTokenClaims](../../reference/json/properties/janssenauthserver-properties.md#legacyidtokenclaims)
+- [mtlsTokenEndpoint](../../reference/json/properties/janssenauthserver-properties.md#mtlstokenendpoint)
+- [openidScopeBackwardCompatibility](../../reference/json/properties/janssenauthserver-properties.md#openidscopebackwardcompatibility)
+- [persistIdTokenInLdap](../../reference/json/properties/janssenauthserver-properties.md#persistidtokeninldap)
+- [persistRefreshTokenInLdap](../../reference/json/properties/janssenauthserver-properties.md#persistrefreshtokeninldap)
+- [refreshTokenExtendLifetimeOnRotation](../../reference/json/properties/janssenauthserver-properties.md#refreshtokenextendlifetimeonrotation)
+- [refreshTokenLifetime](../../reference/json/properties/janssenauthserver-properties.md#refreshtokenlifetime)
+- [responseTypesSupported](../../reference/json/properties/janssenauthserver-properties.md#responsetypessupported)
+- [skipRefreshTokenDuringRefreshing](../../reference/json/properties/janssenauthserver-properties.md#skiprefreshtokenduringrefreshing)
+- [refreshTokenLifetime](../../reference/json/properties/janssenauthserver-properties.md#refreshtokenlifetime)
 
-## Using Scopes To Control Claim Release
+## Client Authentication
 
-### Standard Scopes
+Token Endpoint requires 
+[Client Authentication](https://openid.net/specs/openid-connect-core-1_0.html#ClientAuthentication) methods to 
+authenticate clients to the authorization server.
 
-In context of OpenID Connect specification, claim information released by userinfo endpoint can be controlled using
-scopes. Janssen Server supports all [standard scopes](https://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims)
-and releases corresponding claims as per OpenID Connect specification. Administrator can customise standard scopes and
-define claims to be linked to each standard scope.
+TODO: add more details here
 
-When using [Janssen Text-based UI(TUI)](../../config-guide/tui.md) to configure the scopes, navigate via
-`Auth Server`->`Scopes`->`Add Scopes`->`Scope Type` as `OpenID`->search for a standard scope like `address`
+## Supported Grant Types
 
-### Dynamic Scopes
-
-In addition to standard scopes, Janssen server allows defining custom scopes which can be associated to user-defined
-list of claims. This allows administrators to create custom groupings of claims.
-
-When using [Janssen Text-based UI(TUI)](../../config-guide/tui.md), navigate via
-`Auth Server`->`Scopes`->`Add Scopes`->`Scope Type` as `Dynamic`
-
-### Interception Scripts
-
-Response from userinfo can be further customized using [dynamic scope](../../developer/scripts/dynamic-scope.md) interception script.
-
-Administrator can attach a dynamic scope script to a dynamic scope using [Janssen Text-based UI(TUI)](../../config-guide/tui.md).
-Navigate to `Auth Server`->`Scopes`->`Add Scopes`->`Scope Type` as `Dynamic`->`Dynamic Scope Script`
-
-## Want to contribute?
-
-If you have content you'd like to contribute to this page in the meantime, you can get started with our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/).
+TODO: add more details here
