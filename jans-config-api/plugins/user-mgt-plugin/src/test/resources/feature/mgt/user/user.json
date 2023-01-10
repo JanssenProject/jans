@@ -2,15 +2,6 @@
     "userId": "testUser4",
     "customAttributes": [
         {
-            "name": "birthdate",
-            "multiValued": false,
-            "values": [
-                "20001231041508.553Z"
-            ],
-            "value": "20001231041508.553Z",
-            "displayValue": "20001231041508.553Z"
-        },
-        {
             "name": "emailVerified",
             "multiValued": false,
             "values": [

@@ -22,6 +22,7 @@ import io.jans.orm.model.PagedResult;
 import io.jans.util.StringHelper;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -64,11 +65,11 @@ public class CustomScriptResource extends ConfigBaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.SCRIPTS_READ_ACCESS }, groupScopes = {
             ApiAccessConstants.SCRIPTS_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getAllCustomScripts(
-            @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
-            @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
-            @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
-            @DefaultValue(ApiConstants.INUM) @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
-            @DefaultValue(ApiConstants.ASCENDING) @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder) {
+            @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
+            @Parameter(description = "Search pattern") @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
+            @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
+            @Parameter(description = "Attribute whose value will be used to order the returned response") @DefaultValue(ApiConstants.INUM) @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
+            @Parameter(description = "Order in which the sortBy param is applied. Allowed values are \"ascending\" and \"descending\"") @DefaultValue(ApiConstants.ASCENDING) @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder) {
 
         if (logger.isDebugEnabled()) {
             logger.debug(
@@ -92,7 +93,7 @@ public class CustomScriptResource extends ConfigBaseResource {
     @Path(PATH_SEPARATOR + ApiConstants.NAME + ApiConstants.NAME_PARAM_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.SCRIPTS_READ_ACCESS }, groupScopes = {
             ApiAccessConstants.SCRIPTS_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
-    public Response getCustomScriptByName(@PathParam(ApiConstants.NAME) @NotNull String name) {
+    public Response getCustomScriptByName(@Parameter(description = "Script name") @PathParam(ApiConstants.NAME) @NotNull String name) {
 
         if (logger.isDebugEnabled()) {
             logger.debug("Custom Script to be fetched based on type - name:{} ", escapeLog(name));
@@ -117,12 +118,12 @@ public class CustomScriptResource extends ConfigBaseResource {
     @Path(PATH_SEPARATOR + ApiConstants.TYPE + ApiConstants.TYPE_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.SCRIPTS_READ_ACCESS }, groupScopes = {
             ApiAccessConstants.SCRIPTS_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
-    public Response getCustomScriptsByTypePattern(@PathParam(ApiConstants.TYPE) @NotNull String type,
-            @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
-            @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
-            @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
-            @DefaultValue(ApiConstants.INUM) @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
-            @DefaultValue(ApiConstants.ASCENDING) @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder) {
+    public Response getCustomScriptsByTypePattern(@Parameter(description = "Script type") @PathParam(ApiConstants.TYPE) @NotNull String type,
+            @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
+            @Parameter(description = "Search pattern") @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
+            @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
+            @Parameter(description = "Attribute whose value will be used to order the returned response") @DefaultValue(ApiConstants.INUM) @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
+            @Parameter(description = "Order in which the sortBy param is applied. Allowed values are \"ascending\" and \"descending\"") @DefaultValue(ApiConstants.ASCENDING) @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder) {
 
         if (logger.isDebugEnabled()) {
             logger.debug(
@@ -147,7 +148,7 @@ public class CustomScriptResource extends ConfigBaseResource {
     @Path(PATH_SEPARATOR + ApiConstants.INUM + PATH_SEPARATOR + ApiConstants.INUM_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.SCRIPTS_READ_ACCESS }, groupScopes = {
             ApiAccessConstants.SCRIPTS_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
-    public Response getCustomScriptByInum(@PathParam(ApiConstants.INUM) @NotNull String inum) {
+    public Response getCustomScriptByInum(@Parameter(description = "Script identifier") @PathParam(ApiConstants.INUM) @NotNull String inum) {
         if (logger.isDebugEnabled()) {
             logger.debug("Custom Script to be fetched - inum:{} ", escapeLog(inum));
         }
@@ -222,7 +223,7 @@ public class CustomScriptResource extends ConfigBaseResource {
     @Path(ApiConstants.INUM_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.SCRIPTS_DELETE_ACCESS }, groupScopes = {}, superScopes = {
             ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
-    public Response deleteScript(@PathParam(ApiConstants.INUM) @NotNull String inum) {
+    public Response deleteScript(@Parameter(description = "Script identifier") @PathParam(ApiConstants.INUM) @NotNull String inum) {
         try {
             if (logger.isDebugEnabled()) {
                 logger.debug("Custom Script Resource to delete - inum:{}", escapeLog(inum));
@@ -250,7 +251,7 @@ public class CustomScriptResource extends ConfigBaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.SCRIPTS_WRITE_ACCESS }, groupScopes = {}, superScopes = {
             ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @Path(ApiConstants.INUM_PATH)
-    public Response patchAtribute(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString)
+    public Response patchAtribute(@Parameter(description = "Script identifier") @PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString)
             throws JsonPatchException, IOException {
         if (logger.isDebugEnabled()) {
             logger.debug("Custom Script Resource to patch - inum:{} , pathString:{}", escapeLog(inum),

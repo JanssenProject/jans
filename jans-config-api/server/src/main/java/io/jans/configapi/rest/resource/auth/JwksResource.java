@@ -18,6 +18,7 @@ import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.core.util.Jackson;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -149,7 +150,7 @@ public class JwksResource extends ConfigBaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.JWKS_READ_ACCESS } , groupScopes = {
             ApiAccessConstants.JWKS_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Path(ApiConstants.KID_PATH)
-    public Response getKeyById(@PathParam(ApiConstants.KID) @NotNull String kid) {
+    public Response getKeyById(@Parameter(description = "The unique identifier for the key") @PathParam(ApiConstants.KID) @NotNull String kid) {
         log.debug("Fetch JWK details by kid:{}", kid);
         WebKeysConfiguration webkeys = configurationService.findConf().getWebKeys();
         log.debug("WebKeysConfiguration before addding new key:{}", webkeys);
@@ -170,7 +171,7 @@ public class JwksResource extends ConfigBaseResource {
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { ApiAccessConstants.JWKS_WRITE_ACCESS }, groupScopes = {}, superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @Path(ApiConstants.KID_PATH)
-    public Response patch(@PathParam(ApiConstants.KID) @NotNull String kid, @NotNull String requestString)
+    public Response patch(@Parameter(description = "The unique identifier for the key") @PathParam(ApiConstants.KID) @NotNull String kid, @NotNull String requestString)
             throws JsonPatchException, IOException {
         log.debug("JWKS details to be patched for kid:{}, requestString:{}", kid ,requestString);
         Conf conf = configurationService.findConf();
@@ -205,7 +206,7 @@ public class JwksResource extends ConfigBaseResource {
     @DELETE
     @ProtectedApi(scopes = { ApiAccessConstants.JWKS_DELETE_ACCESS } , groupScopes = {}, superScopes = { ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
     @Path(ApiConstants.KID_PATH)
-    public Response deleteKey(@PathParam(ApiConstants.KID) @NotNull String kid) {
+    public Response deleteKey(@Parameter(description = "The unique identifier for the key") @PathParam(ApiConstants.KID) @NotNull String kid) {
         log.debug("Key to be to be deleted - kid:{}", kid);
         final Conf conf = configurationService.findConf();
         WebKeysConfiguration webkeys = configurationService.findConf().getWebKeys();

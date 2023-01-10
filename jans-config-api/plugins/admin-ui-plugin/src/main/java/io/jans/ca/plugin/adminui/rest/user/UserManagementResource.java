@@ -9,6 +9,7 @@ import io.jans.ca.plugin.adminui.utils.AppConstants;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -147,7 +148,7 @@ public class UserManagementResource {
     @Path(ROLES + ROLE_PATH_VARIABLE)
     @Produces(MediaType.APPLICATION_JSON)
     @ProtectedApi(scopes = {SCOPE_ROLE_READ}, groupScopes = {SCOPE_ROLE_WRITE}, superScopes = {AppConstants.SCOPE_ADMINUI_READ})
-    public Response getRole(@PathParam(ROLE_CONST) @NotNull String adminUIRole) {
+    public Response getRole(@Parameter(description = "Admin UI role") @PathParam(ROLE_CONST) @NotNull String adminUIRole) {
         try {
             log.info("Get all Admin-UI roles.");
             AdminRole roleObj = userManagementService.getRoleObjByName(adminUIRole);
@@ -174,7 +175,7 @@ public class UserManagementResource {
     @Path(ROLES + ROLE_PATH_VARIABLE)
     @Produces(MediaType.APPLICATION_JSON)
     @ProtectedApi(scopes = {SCOPE_ROLE_DELETE}, superScopes = {AppConstants.SCOPE_ADMINUI_DELETE})
-    public Response deleteRole(@PathParam(ROLE_CONST) @NotNull String adminUIRole) {
+    public Response deleteRole(@Parameter(description = "Admin UI role") @PathParam(ROLE_CONST) @NotNull String adminUIRole) {
         try {
             log.info("Deleting Admin-UI role.");
             List<AdminRole> roles = userManagementService.deleteRole(adminUIRole);
@@ -284,7 +285,7 @@ public class UserManagementResource {
     @Path(PERMISSIONS + PERMISSION_PATH_VARIABLE)
     @Produces(MediaType.APPLICATION_JSON)
     @ProtectedApi(scopes = {SCOPE_PERMISSION_READ}, groupScopes = {SCOPE_PERMISSION_WRITE}, superScopes = {AppConstants.SCOPE_ADMINUI_READ})
-    public Response getPermission(@PathParam(PERMISSION_CONST) @NotNull String adminUIPermission) {
+    public Response getPermission(@Parameter(description = "Admin UI Permission") @PathParam(PERMISSION_CONST) @NotNull String adminUIPermission) {
         try {
             log.info("Get Admin-UI permission.");
             AdminPermission permissionObj = userManagementService.getPermissionObjByName(adminUIPermission);
@@ -311,7 +312,7 @@ public class UserManagementResource {
     @Path(PERMISSIONS + PERMISSION_PATH_VARIABLE)
     @Produces(MediaType.APPLICATION_JSON)
     @ProtectedApi(scopes = {SCOPE_PERMISSION_DELETE}, superScopes = {AppConstants.SCOPE_ADMINUI_DELETE})
-    public Response deletePermission(@PathParam(PERMISSION_CONST) @NotNull String adminUIPermission) {
+    public Response deletePermission(@Parameter(description = "Admin UI Permission") @PathParam(PERMISSION_CONST) @NotNull String adminUIPermission) {
         try {
             log.info("Deleting Admin-UI permission.");
             List<AdminPermission> permissions = userManagementService.deletePermission(adminUIPermission);
@@ -421,7 +422,7 @@ public class UserManagementResource {
     @Path(ROLE_PERMISSIONS_MAPPING + ROLE_PATH_VARIABLE)
     @Produces(MediaType.APPLICATION_JSON)
     @ProtectedApi(scopes = {SCOPE_ROLE_PERMISSION_MAPPING_READ}, groupScopes = {SCOPE_ROLE_PERMISSION_MAPPING_WRITE}, superScopes = {AppConstants.SCOPE_ADMINUI_READ})
-    public Response getAdminUIRolePermissionsMapping(@PathParam(ROLE_CONST) @NotNull String adminUIRole) {
+    public Response getAdminUIRolePermissionsMapping(@Parameter(description = "Admin UI Role") @PathParam(ROLE_CONST) @NotNull String adminUIRole) {
         try {
             log.info("Get Admin-UI role-permissions mapping by role-name.");
             RolePermissionMapping roleScopeMapping = userManagementService.getAdminUIRolePermissionsMapping(adminUIRole);
@@ -448,7 +449,7 @@ public class UserManagementResource {
     @Path(ROLE_PERMISSIONS_MAPPING + ROLE_PATH_VARIABLE)
     @Produces(MediaType.APPLICATION_JSON)
     @ProtectedApi(scopes = {SCOPE_ROLE_PERMISSION_MAPPING_DELETE}, superScopes = {AppConstants.SCOPE_ADMINUI_DELETE})
-    public Response removePermissionsFromRole(@PathParam(ROLE_CONST) @NotNull String role) {
+    public Response removePermissionsFromRole(@Parameter(description = "role") @PathParam(ROLE_CONST) @NotNull String role) {
         try {
             log.info("Removing permissions to Admin-UI role.");
             List<RolePermissionMapping> roleScopeMapping = userManagementService.removePermissionsFromRole(role);

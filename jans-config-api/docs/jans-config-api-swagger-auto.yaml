@@ -326,33 +326,40 @@ paths:
       parameters:
       - name: pattern
         in: query
+        description: Search pattern
         schema:
           type: string
           default: ""
       - name: limit
         in: query
+        description: Search size - max size of the results to return
         schema:
           type: integer
           format: int32
           default: 50
       - name: startIndex
         in: query
+        description: The 1-based index of the first query result
         schema:
           type: integer
           format: int32
           default: 0
       - name: sortBy
         in: query
+        description: Attribute whose value will be used to order the returned response
         schema:
           type: string
           default: agFlowQname
       - name: sortOrder
         in: query
+        description: Order in which the sortBy param is applied. Allowed values are
+          "ascending" and "descending"
         schema:
           type: string
           default: ascending
       - name: includeSource
         in: query
+        description: Boolean flag to indicate agama source is to be included
         schema:
           type: boolean
           default: false
@@ -448,11 +455,13 @@ paths:
       parameters:
       - name: qname
         in: path
+        description: Agama Flow name
         required: true
         schema:
           type: string
       - name: includeSource
         in: query
+        description: Boolean flag to indicate agama source is to be included
         schema:
           type: boolean
           default: false
@@ -495,6 +504,7 @@ paths:
       parameters:
       - name: qname
         in: path
+        description: Agama Flow name
         required: true
         schema:
           type: string
@@ -544,6 +554,7 @@ paths:
       parameters:
       - name: qname
         in: path
+        description: Agama Flow name
         required: true
         schema:
           type: string
@@ -568,6 +579,7 @@ paths:
       parameters:
       - name: qname
         in: path
+        description: Agama Flow name
         required: true
         schema:
           type: string
@@ -619,6 +631,7 @@ paths:
       parameters:
       - name: qname
         in: path
+        description: Agama Flow name
         required: true
         schema:
           type: string
@@ -653,6 +666,7 @@ paths:
       parameters:
       - name: qname
         in: path
+        description: Agama Flow name
         required: true
         schema:
           type: string
@@ -703,33 +717,40 @@ paths:
       parameters:
       - name: limit
         in: query
+        description: Search size - max size of the results to return
         schema:
           type: integer
           format: int32
           default: 50
       - name: pattern
         in: query
+        description: Search pattern
         schema:
           type: string
           default: ""
       - name: status
         in: query
+        description: Status of the attribute
         schema:
           type: string
           default: all
       - name: startIndex
         in: query
+        description: The 1-based index of the first query result
         schema:
           type: integer
           format: int32
           default: 0
       - name: sortBy
         in: query
+        description: Attribute whose value will be used to order the returned response
         schema:
           type: string
           default: inum
       - name: sortOrder
         in: query
+        description: Order in which the sortBy param is applied. Allowed values are
+          "ascending" and "descending"
         schema:
           type: string
           default: ascending
@@ -1010,6 +1031,7 @@ paths:
       parameters:
       - name: inum
         in: path
+        description: Attribute Id
         required: true
         schema:
           type: string
@@ -1073,6 +1095,7 @@ paths:
       parameters:
       - name: inum
         in: path
+        description: Attribute Id
         required: true
         schema:
           type: string
@@ -1097,6 +1120,7 @@ paths:
       parameters:
       - name: inum
         in: path
+        description: Attribute Id
         required: true
         schema:
           type: string
@@ -1789,27 +1813,33 @@ paths:
       parameters:
       - name: limit
         in: query
+        description: Search size - max size of the results to return
         schema:
           type: integer
           format: int32
           default: 50
       - name: pattern
         in: query
+        description: Search pattern
         schema:
           type: string
           default: ""
       - name: startIndex
         in: query
+        description: The 1-based index of the first query result
         schema:
           type: integer
           format: int32
           default: 0
       - name: sortBy
         in: query
+        description: Attribute whose value will be used to order the returned response
         schema:
           type: string
       - name: sortOrder
         in: query
+        description: Order in which the sortBy param is applied. Allowed values are
+          "ascending" and "descending"
         schema:
           type: string
       responses:
@@ -2985,6 +3015,7 @@ paths:
       parameters:
       - name: inum
         in: path
+        description: Client identifier
         required: true
         schema:
           type: string
@@ -3131,6 +3162,7 @@ paths:
       parameters:
       - name: inum
         in: path
+        description: Client identifier
         required: true
         schema:
           type: string
@@ -3155,6 +3187,7 @@ paths:
       parameters:
       - name: inum
         in: path
+        description: Client identifier
         required: true
         schema:
           type: string
@@ -3582,28 +3615,34 @@ paths:
       parameters:
       - name: limit
         in: query
+        description: Search size - max size of the results to return
         schema:
           type: integer
           format: int32
           default: 50
       - name: pattern
         in: query
+        description: Search pattern
         schema:
           type: string
           default: ""
       - name: startIndex
         in: query
+        description: The 1-based index of the first query result
         schema:
           type: integer
           format: int32
           default: 0
       - name: sortBy
         in: query
+        description: Attribute whose value will be used to order the returned response
         schema:
           type: string
           default: inum
       - name: sortOrder
         in: query
+        description: Order in which the sortBy param is applied. Allowed values are
+          "ascending" and "descending"
         schema:
           type: string
           default: ascending
@@ -3838,6 +3877,7 @@ paths:
       parameters:
       - name: inum
         in: path
+        description: Script identifier
         required: true
         schema:
           type: string
@@ -3862,6 +3902,7 @@ paths:
       parameters:
       - name: inum
         in: path
+        description: Script identifier
         required: true
         schema:
           type: string
@@ -3905,6 +3946,7 @@ paths:
       parameters:
       - name: inum
         in: path
+        description: Script identifier
         required: true
         schema:
           type: string
@@ -3960,6 +4002,7 @@ paths:
       parameters:
       - name: name
         in: path
+        description: Script name
         required: true
         schema:
           type: string
@@ -4015,33 +4058,40 @@ paths:
       parameters:
       - name: type
         in: path
+        description: Script type
         required: true
         schema:
           type: string
       - name: limit
         in: query
+        description: Search size - max size of the results to return
         schema:
           type: integer
           format: int32
           default: 50
       - name: pattern
         in: query
+        description: Search pattern
         schema:
           type: string
           default: ""
       - name: startIndex
         in: query
+        description: The 1-based index of the first query result
         schema:
           type: integer
           format: int32
           default: 0
       - name: sortBy
         in: query
+        description: Attribute whose value will be used to order the returned response
         schema:
           type: string
           default: inum
       - name: sortOrder
         in: query
+        description: Order in which the sortBy param is applied. Allowed values are
+          "ascending" and "descending"
         schema:
           type: string
           default: ascending
@@ -4128,6 +4178,7 @@ paths:
       parameters:
       - name: kid
         in: path
+        description: The unique identifier for the key
         required: true
         schema:
           type: string
@@ -4170,6 +4221,7 @@ paths:
       parameters:
       - name: kid
         in: path
+        description: The unique identifier for the key
         required: true
         schema:
           type: string
@@ -4194,6 +4246,7 @@ paths:
       parameters:
       - name: kid
         in: path
+        description: The unique identifier for the key
         required: true
         schema:
           type: string
@@ -4685,6 +4738,7 @@ paths:
       parameters:
       - name: name
         in: path
+        description: Name of LDAP configuration
         required: true
         schema:
           type: string
@@ -4762,6 +4816,7 @@ paths:
       parameters:
       - name: name
         in: path
+        description: Name of LDAP configuration
         required: true
         schema:
           type: string
@@ -5030,36 +5085,45 @@ paths:
       parameters:
       - name: type
         in: query
+        description: Scope type
         schema:
           type: string
           default: ""
       - name: limit
         in: query
+        description: Search size - max size of the results to return
         schema:
           type: integer
           format: int32
           default: 50
       - name: pattern
         in: query
+        description: Search pattern
         schema:
           type: string
           default: ""
       - name: startIndex
         in: query
+        description: The 1-based index of the first query result
         schema:
           type: integer
           format: int32
           default: 0
       - name: sortBy
         in: query
+        description: Attribute whose value will be used to order the returned response
         schema:
           type: string
       - name: sortOrder
         in: query
+        description: Order in which the sortBy param is applied. Allowed values are
+          "ascending" and "descending"
         schema:
           type: string
       - name: withAssociatedClients
         in: query
+        description: Boolean fag to indicate if clients associated with the scope
+          are to be returned
         schema:
           type: boolean
           default: false
@@ -5303,6 +5367,7 @@ paths:
       parameters:
       - name: inum
         in: path
+        description: Scope identifier
         required: true
         schema:
           type: string
@@ -5681,6 +5746,7 @@ paths:
       parameters:
       - name: inum
         in: path
+        description: Scope identifier
         required: true
         schema:
           type: string
@@ -5705,6 +5771,7 @@ paths:
       parameters:
       - name: inum
         in: path
+        description: Scope identifier
         required: true
         schema:
           type: string
@@ -5774,6 +5841,8 @@ paths:
       parameters:
       - name: creatorId
         in: path
+        description: Id of the scope creator. If creator is client then client_id
+          if user then user_id
         required: true
         schema:
           type: string
@@ -6148,6 +6217,7 @@ paths:
       parameters:
       - name: type
         in: path
+        description: Type of the scope
         required: true
         schema:
           type: string
@@ -6548,6 +6618,7 @@ paths:
       parameters:
       - name: userDn
         in: path
+        description: User domain name
         required: true
         schema:
           type: string
@@ -6574,22 +6645,29 @@ paths:
       parameters:
       - name: Authorization
         in: header
+        description: Authorization code
         schema:
           type: string
       - name: month
         in: query
+        description: Month for which the stat report is to be fetched. The parameter
+          is mandatory if start_month and end_month parameters are not present.
         schema:
           type: string
+        example: 202012
       - name: start_month
         in: query
+        description: Start-Month for which the stat report is to be fetched
         schema:
           type: string
       - name: end_month
         in: query
+        description: End-Month for which the stat report is to be fetched
         schema:
           type: string
       - name: format
         in: query
+        description: Report format
         schema:
           type: string
       responses:
@@ -6619,27 +6697,33 @@ paths:
       parameters:
       - name: limit
         in: query
+        description: Search size - max size of the results to return
         schema:
           type: integer
           format: int32
           default: 50
       - name: pattern
         in: query
+        description: Search pattern
         schema:
           type: string
           default: ""
       - name: startIndex
         in: query
+        description: The 1-based index of the first query result
         schema:
           type: integer
           format: int32
           default: 0
       - name: sortBy
         in: query
+        description: Attribute whose value will be used to order the returned response
         schema:
           type: string
       - name: sortOrder
         in: query
+        description: Order in which the sortBy param is applied. Allowed values are
+          "ascending" and "descending"
         schema:
           type: string
       responses:
@@ -6845,6 +6929,7 @@ paths:
       parameters:
       - name: id
         in: path
+        description: Resource description ID
         required: true
         schema:
           type: string
@@ -6891,6 +6976,7 @@ paths:
       parameters:
       - name: id
         in: path
+        description: Resource description ID
         required: true
         schema:
           type: string
@@ -6915,6 +7001,7 @@ paths:
       parameters:
       - name: id
         in: path
+        description: Resource description ID
         required: true
         schema:
           type: string
@@ -6974,6 +7061,7 @@ paths:
       parameters:
       - name: clientId
         in: path
+        description: Client ID
         required: true
         schema:
           type: string
@@ -7299,11 +7387,11 @@ components:
           type: string
         whitePagesCanView:
           type: boolean
-        userCanAccess:
+        adminCanAccess:
           type: boolean
         adminCanView:
           type: boolean
-        adminCanAccess:
+        userCanAccess:
           type: boolean
         userCanEdit:
           type: boolean
@@ -8161,6 +8249,8 @@ components:
           type: boolean
         includeSidInResponse:
           type: boolean
+        disablePromptLogin:
+          type: boolean
         sessionIdLifetime:
           type: integer
           format: int32
@@ -8266,6 +8356,10 @@ components:
           type: string
         jmsPassword:
           type: string
+        externalUriWhiteList:
+          type: array
+          items:
+            type: string
         clientWhiteList:
           type: array
           items:
@@ -9204,10 +9298,6 @@ components:
           type: string
         permissionGranted:
           type: boolean
-        isJwt:
-          type: boolean
-        jwt:
-          type: string
         permissionGrantedMap:
           $ref: '#/components/schemas/SessionIdAccessMap'
         sessionAttributes:

@@ -17,6 +17,7 @@ import io.jans.configapi.core.util.Jackson;
 import io.jans.model.ldap.GluuLdapConfiguration;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -73,7 +74,7 @@ public class LdapConfigurationResource extends ConfigBaseResource {
     @Path(ApiConstants.NAME_PARAM_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_LDAP_READ_ACCESS } , groupScopes = {
             ApiAccessConstants.DATABASE_LDAP_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
-    public Response getLdapConfigurationByName(@PathParam(ApiConstants.NAME) String name) {
+    public Response getLdapConfigurationByName(@Parameter(description = "Name of LDAP configuration") @PathParam(ApiConstants.NAME) String name) {
         GluuLdapConfiguration ldapConfiguration = findLdapConfigurationByName(name);
         return Response.ok(ldapConfiguration).build();
     }
@@ -156,7 +157,7 @@ public class LdapConfigurationResource extends ConfigBaseResource {
     @Path(ApiConstants.NAME_PARAM_PATH)
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { ApiAccessConstants.DATABASE_LDAP_WRITE_ACCESS }, groupScopes = {}, superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
-    public Response patchLdapConfigurationByName(@PathParam(ApiConstants.NAME) String name,
+    public Response patchLdapConfigurationByName(@Parameter(description = "Name of LDAP configuration") @PathParam(ApiConstants.NAME) String name,
             @NotNull String requestString) throws JsonPatchException, IOException {
         logger.debug("LDAP configuration to be patched - name:{}, requestString:{} ", name, requestString);
         GluuLdapConfiguration ldapConfiguration = findLdapConfigurationByName(name);
