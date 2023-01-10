@@ -187,7 +187,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
         self.client_scopes = JansVerticalNav(
                         myparent=self.myparent,
                         headers=['displayName','baseDn'],
-                        preferred_size= [0,0],
+                        preferred_size= [50,0],
                         data=self.data.get('scopes', []),
                         on_display=self.myparent.data_display_dialog,
                         on_delete=self.delete_scope,
@@ -309,7 +309,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
                         VSplit([
 
-                            Label(text=_("Scopes"),style=cli_style.label),
+                            Label(text=_("Scopes"),style=cli_style.check_box,width=(len(_("Scopes")*2))),
                             self.myparent.getButton(
                                 text=_("add scope"), 
                                 name='oauth:logging:save', 

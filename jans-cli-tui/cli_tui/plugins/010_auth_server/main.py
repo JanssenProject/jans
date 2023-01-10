@@ -308,11 +308,17 @@ class Plugin(DialogUtils):
                 data_display_name.append(d.get('displayName',d.get('baseDn')))
                 data_base_dn.append(d.get('baseDn'))
 
-            for k in range(len(client_data)) : 
-                if client_data[k].get('scopes',[]) !=[]:
-                    for i in range(len(client_data[k]['scopes'])) :  ### Scopes of the client
-                        if client_data[k]['scopes'][i] in data_base_dn:
-                            client_data[k]['scopes'][i] = [data_display_name[data_base_dn.index(client_data[k]['scopes'][i])],  client_data[k]['scopes'][i][0:client_data[k]['scopes'][i].index(',')]   ]
+
+
+            for client_num in range(len(client_data)):
+
+                for scope_dn_num in range(len(client_data[client_num]['scopes'])):
+                    if client_data[client_num]['scopes'][scope_dn_num] in data_base_dn:
+
+                        index = data_base_dn.index(client_data[client_num]['scopes'][scope_dn_num])
+
+                        client_data[client_num]['scopes'][scope_dn_num] = [data_display_name[index],data_base_dn[index].replace(',ou=scopes,o=jans','')]
+
 
         asyncio.ensure_future(coroutine())
         return client_data
