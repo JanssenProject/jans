@@ -20,7 +20,7 @@ can be found by checking the `introspection_endpoint` claim of the OpenID Connec
 
 ` "introspection_endpoint" : "https://janssen.server.host/jans-auth/restv1/introspection" `
 
-More information about request and response of the clientinfo endpoint can be found in
+More information about request and response of the Introspection endpoint can be found in
 the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/replace-janssen-version/jans-auth-server/docs/swagger.yaml#/Token/get-introspection).
 
 
@@ -109,7 +109,7 @@ navigate via `Auth Server`->`Properties`.
 - [introspectionAccessTokenMustHaveUmaProtectionScope](../../reference/json/properties/janssenauthserver-properties.md#introspectionaccesstokenmusthaveumaprotectionscope)
 - [introspectionResponseScopesBackwardCompatibility](../../reference/json/properties/janssenauthserver-properties.md#introspectionresponsescopesbackwardcompatibility)
 
-## Customising Introspection Endpoint Behaviour
+## Customising Introspection Endpoint Behaviour using Custom script:
 
 Customizing certain aspects of endpoint behaviour, for example, one can modify claims of an access token as JWT, using
 [introspection scripts](../../../script-catalog/introspection/README.md). Use
@@ -129,3 +129,8 @@ navigate to
 `Auth Server`->`Clients`->select the client->`Tokens`->enable `Run Introspection Script before JWT access token creation`
 
 ![](../../../assets/image-tui-client-config-token-screen.png)
+
+### References for custom scripts
+1. Interface - [IntrospectionType](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/introspection/IntrospectionType.java)
+2. [Introspection scripts](../../../script-catalog/introspection/README.md)
+3. [Introspection script vs Update Token Script](https://github.com/JanssenProject/jans/blob/main/docs/admin/developer/scripts/update-token.md#introspectiontype-script-vs-updatetokentype-script)
