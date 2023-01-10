@@ -24,7 +24,9 @@ import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.core.model.SearchRequest;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.model.PagedResult;
+
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -70,12 +72,12 @@ public class AgamaResource extends ConfigBaseResource {
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_READ_ACCESS }, groupScopes = {
             ApiAccessConstants.AGAMA_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
-    public Response getFlows(@DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
-            @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
-            @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
-            @DefaultValue("agFlowQname") @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
-            @DefaultValue(ApiConstants.ASCENDING) @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder,
-            @DefaultValue("false") @QueryParam(value = ApiConstants.INCLUDE_SOURCE) boolean includeSource) {
+    public Response getFlows(@Parameter(description = "Search pattern") @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
+            @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
+            @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
+            @Parameter(description = "Attribute whose value will be used to order the returned response") @DefaultValue("agFlowQname") @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
+            @Parameter(description = "Order in which the sortBy param is applied. Allowed values are \"ascending\" and \"descending\"") @DefaultValue(ApiConstants.ASCENDING) @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder,
+            @Parameter(description = "Boolean flag to indicate agama source is to be included") @DefaultValue("false") @QueryParam(value = ApiConstants.INCLUDE_SOURCE) boolean includeSource) {
 
         if (logger.isDebugEnabled()) {
             logger.debug(
@@ -102,8 +104,8 @@ public class AgamaResource extends ConfigBaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_READ_ACCESS }, groupScopes = {
             ApiAccessConstants.AGAMA_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Path(ApiConstants.QNAME_PATH)
-    public Response getFlowByName(@PathParam(ApiConstants.QNAME) @NotNull String flowName,
-            @DefaultValue("false") @QueryParam(value = ApiConstants.INCLUDE_SOURCE) boolean includeSource) {
+    public Response getFlowByName(@Parameter(description = "Agama Flow name") @PathParam(ApiConstants.QNAME) @NotNull String flowName,
+            @Parameter(description = "Boolean flag to indicate agama source is to be included")  @DefaultValue("false") @QueryParam(value = ApiConstants.INCLUDE_SOURCE) boolean includeSource) {
         if (logger.isDebugEnabled()) {
             logger.debug("Search Agama with flowName:{}, includeSource:{}", escapeLog(flowName),
                     escapeLog(includeSource));
@@ -161,7 +163,7 @@ public class AgamaResource extends ConfigBaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_READ_ACCESS }, groupScopes = {
             ApiAccessConstants.AGAMA_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Path("/syntax-check/" + ApiConstants.QNAME_PATH)
-    public Response doSyntaxCheck(@PathParam(ApiConstants.QNAME) String qname, String source) {
+    public Response doSyntaxCheck(@Parameter(description = "Agama Flow name") @PathParam(ApiConstants.QNAME) String qname, String source) {
 
         Exception e = null;
         try {
@@ -190,7 +192,7 @@ public class AgamaResource extends ConfigBaseResource {
     @Path(ApiConstants.QNAME_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_WRITE_ACCESS }, superScopes = {
             ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
-    public Response createFlowFromSource(@PathParam(ApiConstants.QNAME) @NotNull String flowName, @Valid String source)
+    public Response createFlowFromSource(@Parameter(description = "Agama Flow name") @PathParam(ApiConstants.QNAME) @NotNull String flowName, @Valid String source)
             throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         logger.debug(" Flow to be created flowName:{}, source:{}", flowName, source);
 
@@ -232,7 +234,7 @@ public class AgamaResource extends ConfigBaseResource {
     @Path(ApiConstants.SOURCE + ApiConstants.QNAME_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_WRITE_ACCESS }, superScopes = {
             ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
-    public Response updateFlowSource(@PathParam(ApiConstants.QNAME) @NotNull String flowName, @Valid String source)
+    public Response updateFlowSource(@Parameter(description = "Agama Flow name") @PathParam(ApiConstants.QNAME) @NotNull String flowName, @Valid String source)
             throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         logger.debug(" Flow to be updated flowName:{}, source:{}", flowName, source);
 
@@ -269,7 +271,7 @@ public class AgamaResource extends ConfigBaseResource {
     @Path(ApiConstants.QNAME_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_WRITE_ACCESS }, superScopes = {
             ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
-    public Response patchFlow(@PathParam(ApiConstants.QNAME) @NotNull String flowName, @NotNull JsonPatch jsonPatch)
+    public Response patchFlow(@Parameter(description = "Agama Flow name") @PathParam(ApiConstants.QNAME) @NotNull String flowName, @NotNull JsonPatch jsonPatch)
             throws JsonPatchException, IOException, NoSuchMethodException, IllegalAccessException,
             InvocationTargetException {
         if (logger.isDebugEnabled()) {
@@ -305,7 +307,7 @@ public class AgamaResource extends ConfigBaseResource {
     @Path(ApiConstants.QNAME_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_DELETE_ACCESS }, superScopes = {
             ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
-    public Response delete(@PathParam(ApiConstants.QNAME) @NotNull String flowName) {
+    public Response delete(@Parameter(description = "Agama Flow name") @PathParam(ApiConstants.QNAME) @NotNull String flowName) {
         logger.debug(" Flow to delete - flowName:{}", flowName);
         String decodedFlowName = getURLDecodedValue(flowName);
         logger.trace(" Agama Decoded flow name is:{}", decodedFlowName);

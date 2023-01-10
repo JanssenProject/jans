@@ -20,6 +20,7 @@ import io.jans.configapi.core.util.Jackson;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.model.PagedResult;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -70,11 +71,11 @@ public class UmaResourcesResource extends ConfigBaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.UMA_RESOURCES_READ_ACCESS } , groupScopes = {
             ApiAccessConstants.UMA_RESOURCES_WRITE_ACCESS, ApiAccessConstants.UMA_READ_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response fetchUmaResources(
-            @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
-            @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
-            @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
-            @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
-            @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder) {
+            @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
+            @Parameter(description = "Search pattern") @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
+            @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
+            @Parameter(description = "Attribute whose value will be used to order the returned response") @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
+            @Parameter(description = "Order in which the sortBy param is applied. Allowed values are \"ascending\" and \"descending\"") @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder) {
         logger.debug("UMA_RESOURCE to be fetched - limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}", limit,
                 pattern, startIndex, sortBy, sortOrder);
         SearchRequest searchReq = createSearchRequest(umaResourceService.getBaseDnForResource(), pattern, sortBy,
@@ -95,7 +96,7 @@ public class UmaResourcesResource extends ConfigBaseResource {
     @Path(ApiConstants.ID_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.UMA_RESOURCES_READ_ACCESS }, groupScopes = {
             ApiAccessConstants.UMA_RESOURCES_WRITE_ACCESS, ApiAccessConstants.UMA_READ_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
-    public Response getUmaResourceByInum(@PathParam(value = ApiConstants.ID) @NotNull String id) {
+    public Response getUmaResourceByInum(@Parameter(description = "Resource description ID") @PathParam(value = ApiConstants.ID) @NotNull String id) {
         logger.debug("UMA_RESOURCE to fetch by id:{}", id);
         return Response.ok(findOrThrow(id)).build();
     }
@@ -112,7 +113,7 @@ public class UmaResourcesResource extends ConfigBaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.UMA_RESOURCES_READ_ACCESS }, groupScopes = {
             ApiAccessConstants.UMA_RESOURCES_WRITE_ACCESS, ApiAccessConstants.UMA_READ_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getUmaResourceByAssociatedClient(
-            @PathParam(value = ApiConstants.CLIENTID) @NotNull String associatedClientId) {
+            @Parameter(description = "Client ID") @PathParam(value = ApiConstants.CLIENTID) @NotNull String associatedClientId) {
         logger.debug("UMA_RESOURCE to fetch by associatedClientId:{} ", associatedClientId);
 
         return Response.ok(getUmaResourceByClient(associatedClientId)).build();
@@ -187,7 +188,7 @@ public class UmaResourcesResource extends ConfigBaseResource {
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { ApiAccessConstants.UMA_RESOURCES_WRITE_ACCESS }, groupScopes = { ApiAccessConstants.UMA_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @Path(ApiConstants.ID_PATH)
-    public Response patchResource(@PathParam(ApiConstants.ID) @NotNull String id, @NotNull String pathString)
+    public Response patchResource(@Parameter(description = "Resource description ID") @PathParam(ApiConstants.ID) @NotNull String id, @NotNull String pathString)
             throws JsonPatchException, IOException {
         logger.debug("Patch for  id:{} , pathString:{}", id, pathString);
         UmaResource existingResource = findOrThrow(id);
@@ -207,7 +208,7 @@ public class UmaResourcesResource extends ConfigBaseResource {
     @DELETE
     @Path(ApiConstants.ID_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.UMA_RESOURCES_DELETE_ACCESS }, groupScopes = { ApiAccessConstants.UMA_DELETE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
-    public Response deleteUmaResource(@PathParam(value = ApiConstants.ID) @NotNull String id) {
+    public Response deleteUmaResource(@Parameter(description = "Resource description ID") @PathParam(value = ApiConstants.ID) @NotNull String id) {
         logger.debug("UMA_RESOURCE to delete - id:{}", id);
         UmaResource umaResource = findOrThrow(id);
         umaResourceService.remove(umaResource);

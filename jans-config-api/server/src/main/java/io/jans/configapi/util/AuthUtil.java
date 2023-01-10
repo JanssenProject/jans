@@ -11,6 +11,7 @@ import io.jans.as.model.util.Util;
 import io.jans.as.persistence.model.Scope;
 import io.jans.configapi.model.configuration.AgamaConfiguration;
 import io.jans.configapi.model.configuration.AuditLogConf;
+import io.jans.configapi.model.configuration.DataFormatConversionConf;
 import io.jans.configapi.security.api.ApiProtectionCache;
 import io.jans.configapi.security.client.AuthClientFactory;
 import io.jans.configapi.configuration.ConfigurationFactory;
@@ -22,10 +23,13 @@ import io.jans.configapi.service.auth.ScopeService;
 import io.jans.util.security.StringEncrypter.EncryptionException;
 
 import java.lang.reflect.Method;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -71,6 +75,10 @@ public class AuthUtil {
     
     public AuditLogConf getAuditLogConf() {
         return this.configurationFactory.getApiAppConfiguration().getAuditLogConf();
+    }
+    
+    public DataFormatConversionConf getDataFormatConversionConf() {
+        return this.configurationFactory.getApiAppConfiguration().getDataFormatConversionConf();
     }
 
     public String getIssuer() {
@@ -415,6 +423,19 @@ public class AuthUtil {
         log.debug("Get all scopeList:{} ", scopeList);
         return scopeList;
 
+    }
+    
+    public Date parseStringToDateObj(String dateString) {
+        String DATE_PATTERN_YYYY_MM_DD = "yyyy-MM-dd";
+        SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_PATTERN_YYYY_MM_DD);
+        log.debug("parseStringToDateObj:{} ", dateString);
+        Date date = null;
+        try {
+            date = dateFormat.parse(dateString);
+        } catch (ParseException e) {
+            log.error("Error in parsing string to date. Allowed Date Format : {},  Date-String : {} ", DATE_PATTERN_YYYY_MM_DD, dateString);
+        }
+        return date;
     }
 
 }
