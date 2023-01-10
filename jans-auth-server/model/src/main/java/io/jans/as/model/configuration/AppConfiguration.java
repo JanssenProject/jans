@@ -7,6 +7,7 @@
 package io.jans.as.model.configuration;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Lists;
 import io.jans.agama.model.EngineConfig;
 import io.jans.as.model.common.*;
@@ -256,8 +257,11 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "A list of the JWS signing algorithms (alg values) supported by the Token Endpoint for the signature on the JWT used to authenticate the Client at the Token Endpoint for the private_key_jwt and client_secret_jwt authentication methods")
     private List<String> tokenEndpointAuthSigningAlgValuesSupported;
 
-    @DocProperty(description = "This list details the custom attributes for dynamic registration")
+    @DocProperty(description = "This list details the custom attributes allowed for dynamic registration")
     private List<String> dynamicRegistrationCustomAttributes;
+
+    @DocProperty(description = "This map provides default custom attributes with values for dynamic registration")
+    private JsonNode dynamicRegistrationDefaultCustomAttributes;
 
     @DocProperty(description = "A list of the display parameter values that the OpenID Provider supports")
     private List<String> displayValuesSupported;
@@ -1842,6 +1846,14 @@ public class AppConfiguration implements Configuration {
 
     public void setTokenEndpointAuthSigningAlgValuesSupported(List<String> tokenEndpointAuthSigningAlgValuesSupported) {
         this.tokenEndpointAuthSigningAlgValuesSupported = tokenEndpointAuthSigningAlgValuesSupported;
+    }
+
+    public JsonNode getDynamicRegistrationDefaultCustomAttributes() {
+        return dynamicRegistrationDefaultCustomAttributes;
+    }
+
+    public void setDynamicRegistrationDefaultCustomAttributes(JsonNode dynamicRegistrationDefaultCustomAttributes) {
+        this.dynamicRegistrationDefaultCustomAttributes = dynamicRegistrationDefaultCustomAttributes;
     }
 
     public List<String> getDynamicRegistrationCustomAttributes() {
