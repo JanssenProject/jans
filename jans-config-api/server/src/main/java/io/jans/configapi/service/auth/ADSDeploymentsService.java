@@ -75,7 +75,7 @@ public class ADSDeploymentsService {
         }
         
         DeploymentDetails dd = new DeploymentDetails();
-        dd.setProjectName(name);
+        dd.getProjectMetadata().setProjectName(name);
 
         if (!existing) {
             d = new Deployment();        

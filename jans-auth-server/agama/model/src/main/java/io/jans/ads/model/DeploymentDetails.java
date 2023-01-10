@@ -8,17 +8,17 @@ import java.util.Map;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DeploymentDetails {
 
-    private String projectName;
     private List<String> folders;
     private Map<String, String> flowsError;
     private String error;
-
-    public String getProjectName() {
-        return projectName;
+    private ProjectMetadata metadata = new ProjectMetadata();
+    
+    public ProjectMetadata getProjectMetadata() {
+        return metadata;
     }
 
-    public void setProjectName(String projectName) {
-        this.projectName = projectName;
+    public void setProjectMetadata(ProjectMetadata metadata) {
+        this.metadata = metadata;
     }
 
     public List<String> getFolders() {
