@@ -259,6 +259,8 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         self.run([paths.cmd_unzip, '-o', '/var/www/html/jans_test_client_keys.zip', '-d', '/var/www/html/'])
         self.run([paths.cmd_rm, '-rf', 'jans_test_client_keys.zip'])
         self.run([paths.cmd_chown, '-R', 'root:'+apache_user, '/var/www/html/jans-auth-client'])
+        self.run([paths.cmd_chmod, '-R', '660', '/var/www/html/jans-auth-client'])
+        self.run([paths.cmd_chmod, 'ug+X', '/var/www/html/jans-auth-client'])
 
         Config.pbar.progress(self.service_name, "Updating oxauth config", False)
         oxAuthConfDynamic_changes = {
