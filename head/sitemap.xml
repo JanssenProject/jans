@@ -251,6 +251,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://jans.io/docs/head/admin/auth-server/oauth-features/auth-code-grant/</loc>
+         <lastmod>2023-01-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://jans.io/docs/head/admin/auth-server/oauth-features/client-credential-grant/</loc>
          <lastmod>2023-01-10</lastmod>
          <changefreq>daily</changefreq>
