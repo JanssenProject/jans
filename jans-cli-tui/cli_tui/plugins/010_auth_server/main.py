@@ -673,7 +673,7 @@ class Plugin(DialogUtils):
         """This Method show the scopes dialog for edit
         """
         selected_line_data = params['data']  
-        title = _("Edit user Data (Clients)")
+        title = _("Edit Clients")
 
         self.EditClientDialog = EditClientDialog(self.app, title=title, data=selected_line_data, save_handler=self.save_client, delete_uma_resource=self.delete_uma_resource)
         self.app.show_jans_dialog(self.EditClientDialog)
