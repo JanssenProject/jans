@@ -55,10 +55,17 @@
      ]
   },
   "auditLogConf": {
-     "enabled": true,
-     "headerAttributes": [
-	  "User-inum"
-     ]
+    "enabled": true,
+    "ignoreHttpMethod": [],
+    "headerAttributes": [
+      "User-inum"
+    ]
+  },
+  "dataFormatConversionConf": {
+    "enabled": true,
+    "ignoreHttpMethod": [
+      "@jakarta.ws.rs.GET()"
+    ]
   }
 }
 

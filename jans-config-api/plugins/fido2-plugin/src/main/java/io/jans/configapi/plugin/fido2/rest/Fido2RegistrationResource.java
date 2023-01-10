@@ -9,6 +9,7 @@ import io.jans.configapi.util.ApiConstants;
 import io.jans.orm.model.fido2.Fido2RegistrationEntry;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -47,7 +48,7 @@ public class Fido2RegistrationResource extends BaseResource {
     @GET
     @Path(Constants.ENTRIES + ApiConstants.USERNAME_PATH)
     @ProtectedApi(scopes = {ApiAccessConstants.FIDO2_CONFIG_READ_ACCESS})
-    public Response findAllRegisteredByUsername(@PathParam("username") @NotNull String username) {
+    public Response findAllRegisteredByUsername(@Parameter(description = "User name") @PathParam("username") @NotNull String username) {
         logger.debug("FIDO2 registration entries by username.");
         List<Fido2RegistrationEntry> entries = fido2RegistrationService.findAllRegisteredByUsername(username);
         return Response.ok(entries).build();

@@ -20,6 +20,7 @@ import io.jans.model.GluuAttribute;
 import io.jans.orm.model.PagedResult;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -71,12 +72,12 @@ public class AttributesResource extends ConfigBaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.ATTRIBUTES_READ_ACCESS }, groupScopes = {
             ApiAccessConstants.ATTRIBUTES_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getAttributes(
-            @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
-            @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
-            @DefaultValue(ApiConstants.ALL) @QueryParam(value = ApiConstants.STATUS) String status,
-            @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
-            @DefaultValue(ApiConstants.INUM) @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
-            @DefaultValue(ApiConstants.ASCENDING) @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder) {
+            @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
+            @Parameter(description = "Search pattern") @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
+            @Parameter(description = "Status of the attribute") @DefaultValue(ApiConstants.ALL) @QueryParam(value = ApiConstants.STATUS) String status,
+            @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
+            @Parameter(description = "Attribute whose value will be used to order the returned response") @DefaultValue(ApiConstants.INUM) @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
+            @Parameter(description = "Order in which the sortBy param is applied. Allowed values are \"ascending\" and \"descending\"") @DefaultValue(ApiConstants.ASCENDING) @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder) {
 
         if (logger.isDebugEnabled()) {
             logger.debug(
@@ -102,7 +103,7 @@ public class AttributesResource extends ConfigBaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.ATTRIBUTES_READ_ACCESS }, groupScopes = {
             ApiAccessConstants.ATTRIBUTES_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Path(ApiConstants.INUM_PATH)
-    public Response getAttributeByInum(@PathParam(ApiConstants.INUM) @NotNull String inum) {
+    public Response getAttributeByInum(@Parameter(description = "Attribute Id") @PathParam(ApiConstants.INUM) @NotNull String inum) {
         GluuAttribute attribute = attributeService.getAttributeByInum(inum);
         checkResourceNotNull(attribute, GLUU_ATTRIBUTE);
         return Response.ok(attribute).build();
@@ -173,7 +174,7 @@ public class AttributesResource extends ConfigBaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.ATTRIBUTES_WRITE_ACCESS }, groupScopes = {}, superScopes = {
             ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @Path(ApiConstants.INUM_PATH)
-    public Response patchAtribute(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString)
+    public Response patchAtribute(@Parameter(description = "Attribute Id") @PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString)
             throws JsonPatchException, IOException {
         log.debug(" GluuAttribute details to patch - inum:{}, pathString:{}", inum, pathString);
         GluuAttribute existingAttribute = attributeService.getAttributeByInum(inum);
@@ -195,7 +196,7 @@ public class AttributesResource extends ConfigBaseResource {
     @Path(ApiConstants.INUM_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.ATTRIBUTES_DELETE_ACCESS }, groupScopes = {}, superScopes = {
             ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
-    public Response deleteAttribute(@PathParam(ApiConstants.INUM) @NotNull String inum) {
+    public Response deleteAttribute(@Parameter(description = "Attribute Id") @PathParam(ApiConstants.INUM) @NotNull String inum) {
         log.debug(" GluuAttribute details to delete - inum:{}", inum);
         GluuAttribute attribute = attributeService.getAttributeByInum(inum);
         checkResourceNotNull(attribute, GLUU_ATTRIBUTE);

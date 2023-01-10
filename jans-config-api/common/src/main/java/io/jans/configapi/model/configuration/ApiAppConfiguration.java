@@ -37,6 +37,7 @@ public class ApiAppConfiguration implements Configuration {
     private List<String> userMandatoryAttributes;
     private AgamaConfiguration agamaConfiguration;
     private AuditLogConf auditLogConf;
+    private DataFormatConversionConf dataFormatConversionConf;
 
     public boolean isConfigOauthEnabled() {
         return configOauthEnabled;
@@ -239,6 +240,14 @@ public class ApiAppConfiguration implements Configuration {
     public void setAuditLogConf(AuditLogConf auditLogConf) {
         this.auditLogConf = auditLogConf;
     }
+    
+    public DataFormatConversionConf getDataFormatConversionConf() {
+        return dataFormatConversionConf;
+    }
+
+    public void setDataFormatConversionConf(DataFormatConversionConf dataFormatConversionConf) {
+        this.dataFormatConversionConf = dataFormatConversionConf;
+    }
 
     @Override
     public String toString() {
@@ -256,6 +265,7 @@ public class ApiAppConfiguration implements Configuration {
                 + " , userMandatoryAttributes="+ userMandatoryAttributes
                 + " , agamaConfiguration="+ agamaConfiguration
                 + " , auditLogConf="+ auditLogConf
+                + " , dataFormatConversionConf="+ dataFormatConversionConf
                 + "]";
     }
 
