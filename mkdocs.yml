@@ -310,6 +310,8 @@ nav:
                 - 'Forcing Logout on Browser Exit': 'admin/auth-server/openid-features/logout/forcing-logout.md'
         - 'OAuth Features':
             - 'admin/auth-server/oauth-features/README.md'
+            - 'Authorization Code Grant': 'admin/auth-server/oauth-features/auth-code-grant.md'
+            - 'Implicit Grant': 'admin/auth-server/oauth-features/implicit-grant.md'
             - 'Password Grant': 'admin/auth-server/oauth-features/password-grant.md'
             - 'Device Grant': 'admin/auth-server/oauth-features/device-grant.md'
             - 'Client Credential Grant': 'admin/auth-server/oauth-features/client-credential-grant.md'
