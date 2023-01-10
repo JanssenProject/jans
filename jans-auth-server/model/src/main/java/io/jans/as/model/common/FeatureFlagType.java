@@ -1,5 +1,6 @@
 package io.jans.as.model.common;
 
+import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.doc.annotation.DocFeatureFlag;
 import org.apache.commons.lang3.StringUtils;
 
@@ -76,6 +77,10 @@ public enum FeatureFlagType {
         }
 
         return UNKNOWN;
+    }
+
+    public static Set<FeatureFlagType> from(AppConfiguration appConfiguration) {
+        return fromValues(appConfiguration.getFeatureFlags());
     }
 
     public static Set<FeatureFlagType> fromValues(List<String> values) {

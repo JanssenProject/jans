@@ -104,7 +104,7 @@ public class ErrorResponseFactory implements Configuration {
     }
 
     public void validateFeatureEnabled(FeatureFlagType flagType) {
-        final Set<FeatureFlagType> enabledFlags = appConfiguration.getEnabledFeatureFlags();
+        final Set<FeatureFlagType> enabledFlags = FeatureFlagType.from(appConfiguration);
         if (enabledFlags.isEmpty()) { // no restrictions
             return;
         }
