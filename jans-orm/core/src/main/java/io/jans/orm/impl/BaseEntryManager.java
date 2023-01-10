@@ -1744,7 +1744,7 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 		return getCustomAttributesListFromAttributeData(entryClass, attributesList, propertyName, attributes, null);
 	}
 
-	protected <T> List<PropertyAnnotation> getEntryPropertyAnnotations(Class<T> entryClass) {
+	public <T> List<PropertyAnnotation> getEntryPropertyAnnotations(Class<T> entryClass) {
         final List<PropertyAnnotation> annotations = getEntryClassAnnotations(entryClass, "property_", LDAP_ENTRY_PROPERTY_ANNOTATIONS);
 //        KeyShortcuter.initIfNeeded(entryClass, annotations);
         return annotations;
