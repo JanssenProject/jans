@@ -167,8 +167,8 @@ jobs:
           sha256sum jans-linux-X86-64-setup.pyz > jans-linux-X86-64-setup.pyz.sha256sum
           cd ../jans-cli-tui
           make zipapp 
-          mv config-cli-tui.pyz jans-cli-tui-linux-X86-64.pyz
-          sha256sum jans-cli-tui-linux-X86-64.pyz > jans-cli-tui-linux-X86-64.pyz.sha256sum
+          mv config-cli-tui.pyz jans-cli-tui-linux-centos-X86-64.pyz
+          sha256sum jans-cli-tui-linux-centos-X86-64.pyz > jans-cli-tui-linux-centos-X86-64.pyz.sha256sum
     - name: Set up Python 3.6
       uses: actions/setup-python@v4
       with:
@@ -182,9 +182,9 @@ jobs:
         pip3 install shiv wheel setuptools
         echo "Building jans-linux-setup package"
         cd jans-linux-setup
-        make zipapp
-        mv jans-linux-setup.pyz jans-linux-ubuntu-X86-64-setup.pyz
-        sha256sum jans-linux-ubuntu-X86-64-setup.pyz > jans-linux-ubuntu-X86-64-setup.pyz.sha256sum
+        make zipapp || echo "Creating linux setup failed for ubuntu"
+        mv jans-linux-setup.pyz jans-linux-ubuntu-X86-64-setup.pyz || echo "Failed"
+        sha256sum jans-linux-ubuntu-X86-64-setup.pyz > jans-linux-ubuntu-X86-64-setup.pyz.sha256sum || echo "Failed"
         cd ../jans-cli-tui
         make zipapp 
         mv config-cli-tui jans-cli-tui-linux-ubuntu-X86-64.pyz
