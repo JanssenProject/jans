@@ -271,6 +271,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://jans.io/docs/head/admin/auth-server/oauth-features/implicit-grant/</loc>
+         <lastmod>2023-01-10</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://jans.io/docs/head/admin/auth-server/oauth-features/mtls/</loc>
          <lastmod>2023-01-10</lastmod>
          <changefreq>daily</changefreq>
