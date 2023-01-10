@@ -76,8 +76,10 @@ class TestDataLoader(BaseInstaller, SetupUtils):
 
 #        self.run(' '.join(args), shell=True)
 
+        client_cmd = self.get_key_gen_client_provider_cmd()
+
         args = [Config.cmd_java, '-Dlog4j.defaultInitOverride=true',
-                '-cp', Config.non_setup_properties['jans_auth_client_jar_fn'], Config.non_setup_properties['key_gen_path'],
+                '-cp', client_cmd, Config.non_setup_properties['key_gen_path'],
                 '-keystore', self.test_client_keystore_fn,
                 '-keypasswd', 'secret',
                 '-sig_keys', Config.default_sig_key_algs,
@@ -255,7 +257,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         # Client keys deployment
         #base.download('https://raw.githubusercontent.com/JanssenProject/jans-auth-server/master/client/src/test/resources/jans_test_client_keys.zip', '/var/www/html/jans_test_client_keys.zip')
         base.download('https://raw.githubusercontent.com/JanssenProject/jans/a970d88d81f920973f3ba812db97448f135090a9/jans-auth-server/client/src/test/resources/jans_test_client_keys.zip', '/var/www/html/jans_test_client_keys.zip')
-        
+
         self.run([paths.cmd_unzip, '-o', '/var/www/html/jans_test_client_keys.zip', '-d', '/var/www/html/'])
         self.run([paths.cmd_rm, '-rf', 'jans_test_client_keys.zip'])
         self.run([paths.cmd_chown, '-R', 'root:'+apache_user, '/var/www/html/jans-auth-client'])
