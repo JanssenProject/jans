@@ -17,11 +17,6 @@ public class DataFormatConversionConf {
      */
     private Collection<String> ignoreHttpMethod;
 
-    /**
-     * attributes for data conversion
-     */
-    private ConversionAttributes conversionAttributes;
-
     public boolean isEnabled() {
         return enabled;
     }
@@ -38,18 +33,9 @@ public class DataFormatConversionConf {
         this.ignoreHttpMethod = ignoreHttpMethod;
     }
 
-    public ConversionAttributes getConversionAttributes() {
-        return conversionAttributes;
-    }
-
-    public void setConversionAttributes(ConversionAttributes conversionAttributes) {
-        this.conversionAttributes = conversionAttributes;
-    }
-
     @Override
     public String toString() {
-        return "DataFormatConversionConf [enabled=" + enabled + ", ignoreHttpMethod=" + ignoreHttpMethod
-                + ", conversionAttributes=" + conversionAttributes + "]";
+        return "DataFormatConversionConf [enabled=" + enabled + ", ignoreHttpMethod=" + ignoreHttpMethod + "]";
     }
 
 }

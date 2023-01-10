@@ -326,33 +326,40 @@ paths:
       parameters:
       - name: pattern
         in: query
+        description: Search pattern
         schema:
           type: string
           default: ""
       - name: limit
         in: query
+        description: Search size - max size of the results to return
         schema:
           type: integer
           format: int32
           default: 50
       - name: startIndex
         in: query
+        description: The 1-based index of the first query result
         schema:
           type: integer
           format: int32
           default: 0
       - name: sortBy
         in: query
+        description: Attribute whose value will be used to order the returned response
         schema:
           type: string
           default: agFlowQname
       - name: sortOrder
         in: query
+        description: Order in which the sortBy param is applied. Allowed values are
+          "ascending" and "descending"
         schema:
           type: string
           default: ascending
       - name: includeSource
         in: query
+        description: Boolean flag to indicate agama source is to be included
         schema:
           type: boolean
           default: false
@@ -448,11 +455,13 @@ paths:
       parameters:
       - name: qname
         in: path
+        description: Agama Flow name
         required: true
         schema:
           type: string
       - name: includeSource
         in: query
+        description: Boolean flag to indicate agama source is to be included
         schema:
           type: boolean
           default: false
@@ -495,6 +504,7 @@ paths:
       parameters:
       - name: qname
         in: path
+        description: Agama Flow name
         required: true
         schema:
           type: string
@@ -544,6 +554,7 @@ paths:
       parameters:
       - name: qname
         in: path
+        description: Agama Flow name
         required: true
         schema:
           type: string
@@ -568,6 +579,7 @@ paths:
       parameters:
       - name: qname
         in: path
+        description: Agama Flow name
         required: true
         schema:
           type: string
@@ -619,6 +631,7 @@ paths:
       parameters:
       - name: qname
         in: path
+        description: Agama Flow name
         required: true
         schema:
           type: string
@@ -653,6 +666,7 @@ paths:
       parameters:
       - name: qname
         in: path
+        description: Agama Flow name
         required: true
         schema:
           type: string
@@ -7373,17 +7387,17 @@ components:
           type: string
         whitePagesCanView:
           type: boolean
+        adminCanAccess:
+          type: boolean
         adminCanView:
           type: boolean
-        userCanEdit:
-          type: boolean
         userCanAccess:
+          type: boolean
+        userCanEdit:
           type: boolean
         adminCanEdit:
           type: boolean
         userCanView:
-          type: boolean
-        adminCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -8550,17 +8564,6 @@ components:
           type: boolean
         userInfoConfiguration:
           $ref: '#/components/schemas/UserInfoConfiguration'
-        fapi:
-          type: boolean
-        allResponseTypesSupported:
-          uniqueItems: true
-          type: array
-          items:
-            type: string
-            enum:
-            - code
-            - token
-            - id_token
         enabledFeatureFlags:
           uniqueItems: true
           type: array
@@ -8588,6 +8591,17 @@ components:
             - STAT
             - PAR
             - SSA
+        allResponseTypesSupported:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+            enum:
+            - code
+            - token
+            - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn

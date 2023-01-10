@@ -77,12 +77,13 @@ public class RequestReaderInterceptor {
     @AroundInvoke
     public Object aroundReadFrom(InvocationContext context) throws Exception {
         logger.debug(
-                " RequestReaderInterceptor::aroundReadFrom() - Request Interceptor info:{}, request:{}, httpHeaders:{}, resourceInfo:{}, persistenceEntryManager:{}, getDataFormatConversionConf():{}",
-                info, request, httpHeaders, resourceInfo, persistenceEntryManager, getDataFormatConversionConf());
-        
+                " Request Interceptor info:{}, request:{}, httpHeaders:{}, resourceInfo:{}, persistenceEntryManager:{}, getDataFormatConversionConf():{}, isDataFormatConversionEnaled():{}, isIgnoreMethod(context):{}",
+                info, request, httpHeaders, resourceInfo, persistenceEntryManager, getDataFormatConversionConf(),
+                isDataFormatConversionEnaled(), isIgnoreMethod(context));
+
         try {
             // perform data conversion if enabled and method is not ignored
-            if (isDataFormatConversionEnaled() || !isIgnoreMethod(context)) {
+            if (isDataFormatConversionEnaled() && !isIgnoreMethod(context)) {
                 logger.debug("=======================  DataType Conversion Start ============================");
                 processRequest(context);
                 logger.debug("=======================  DataType Conversion End ============================");
@@ -90,7 +91,7 @@ public class RequestReaderInterceptor {
 
         } catch (Exception ex) {
             ex.printStackTrace();
-            logger.debug("Exception while data conversion:{}", ex.getMessage());
+            logger.error("Exception while data conversion:{}", ex.getMessage());
         }
         return context.proceed();
     }
@@ -179,11 +180,9 @@ public class RequestReaderInterceptor {
                 if (attData.getValue() != null && gluuAttribute != null) {
                     AttributeDataType attributeDataType = gluuAttribute.getDataType();
                     logger.debug(
-                            "AttributeDataType - attData.getName():{}, attributeDataType:{}, AttributeDataType.DATE.getValue():{}, isDateAttributes(attData.getName()):{}",
-                            attData.getName(), attributeDataType, AttributeDataType.DATE.getValue(),
-                            isDateAttributes(attData.getName()));
-                    if (AttributeDataType.DATE.getValue().equalsIgnoreCase(attributeDataType.getValue())
-                            || isDateAttributes(attData.getName())) {
+                            "AttributeDataType - attData.getName():{}, attributeDataType:{}, AttributeDataType.DATE.getValue():{}",
+                            attData.getName(), attributeDataType, AttributeDataType.DATE.getValue());
+                    if (AttributeDataType.DATE.getValue().equalsIgnoreCase(attributeDataType.getValue())) {
                         logger.debug(" Calling decodeTime() - attData.getValue():{}", attData.getValue());
                         AttributeData attributeData = decodeTime(attData);
                         listAttributes.remove(attData);
@@ -252,42 +251,35 @@ public class RequestReaderInterceptor {
     }
 
     private boolean isDataFormatConversionEnaled() {
-        if (getDataFormatConversionConf() == null) {
+        DataFormatConversionConf dataFormatConversionConf = getDataFormatConversionConf();
+        if (dataFormatConversionConf == null) {
             return false;
         }
-        logger.debug("getDataFormatConversionConf().isEnabled():{}", getDataFormatConversionConf().isEnabled());
-        return getDataFormatConversionConf().isEnabled();
+        logger.debug("dataFormatConversionConf:{}, dataFormatConversionConf.isEnabled():{}", dataFormatConversionConf,
+                dataFormatConversionConf.isEnabled());
+        return dataFormatConversionConf.isEnabled();
     }
 
-    
-
-    private boolean isDateAttributes(String propertyName) {
-        logger.debug("Check if date attribute  - propertyName:{}, getDataFormatConversionConf():{}", propertyName,
-                getDataFormatConversionConf());
-        boolean flag = false;
-        if (getDataFormatConversionConf() != null && getDataFormatConversionConf().getConversionAttributes() != null
-                && getDataFormatConversionConf().getConversionAttributes().getDateAttributes() != null
-                && getDataFormatConversionConf().getConversionAttributes().getDateAttributes().contains(propertyName)) {
-            flag = true;
-        }
-
-        return flag;
-    }
-    
     private boolean isIgnoreMethod(InvocationContext context) {
         logger.debug("Checking if method to be ignored");
-        if(context.getMethod().getAnnotations()==null || context.getMethod().getAnnotations().length<=0) {
-            return false;            
+        if (context.getMethod().getAnnotations() == null || context.getMethod().getAnnotations().length <= 0) {
+            return false;
         }
-        
-        for(int i=0; i<context.getMethod().getAnnotations().length;i++) {
-            logger.debug("======RequestReaderInterceptor - context.getMethod().getAnnotations()[i]:{} ",context.getMethod().getAnnotations()[i]);
-            
-            if (context.getMethod().getAnnotations()[i]!=null && getDataFormatConversionConf() != null && getDataFormatConversionConf().getIgnoreHttpMethod() != null
-                    && getDataFormatConversionConf().getIgnoreHttpMethod().contains(context.getMethod().getAnnotations()[i].toString())) {
-                return true;  
+
+        for (int i = 0; i < context.getMethod().getAnnotations().length; i++) {
+            DataFormatConversionConf dataFormatConversionConf = getDataFormatConversionConf();
+            if (dataFormatConversionConf == null) {
+                return false;
             }
-          
+            logger.debug("====== Verifying  - dataFormatConversionConf:{}, context.getMethod().getAnnotations()[i]:{} ",
+                    dataFormatConversionConf, context.getMethod().getAnnotations()[i]);
+
+            if (context.getMethod().getAnnotations()[i] != null
+                    && dataFormatConversionConf.getIgnoreHttpMethod() != null && dataFormatConversionConf
+                            .getIgnoreHttpMethod().contains(context.getMethod().getAnnotations()[i].toString())) {
+                return true;
+            }
+
         }
         return false;
     }

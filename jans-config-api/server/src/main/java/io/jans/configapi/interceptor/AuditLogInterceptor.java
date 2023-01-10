@@ -60,10 +60,10 @@ public class AuditLogInterceptor {
 
             // Get Audit config
             AuditLogConf auditLogConf = getAuditLogConf();
-            LOG.info("auditLogConf:{}, ignoreMethod():{}", auditLogConf, ignoreMethod());
+            LOG.info("auditLogConf:{}, ignoreMethod(context):{}", auditLogConf, ignoreMethod(context, auditLogConf));
 
             // Log if enabled
-            if (!ignoreMethod()) {
+            if (!ignoreMethod(context, auditLogConf)) {
                 AUDIT_LOG.info("\n ********************** Audit Request Detail Start ********************** ");
                 // Request audit
                 String beanClassName = context.getClass().getName();
@@ -96,18 +96,18 @@ public class AuditLogInterceptor {
         Parameter[] parameters = method.getParameters();
         Class[] clazzArray = method.getParameterTypes();
 
-        AUDIT_LOG.debug("RequestReaderInterceptor - Processing  Data -  paramCount:{} , parameters:{}, clazzArray:{} ",
+        AUDIT_LOG.info("RequestReaderInterceptor - Processing  Data -  paramCount:{} , parameters:{}, clazzArray:{} ",
                 paramCount, parameters, clazzArray);
 
         if (clazzArray != null && clazzArray.length > 0) {
             for (int i = 0; i < clazzArray.length; i++) {
                 Class<?> clazz = clazzArray[i];
                 String propertyName = parameters[i].getName();
-                AUDIT_LOG.debug("propertyName:{}, clazz:{} , clazz.isPrimitive():{} ", propertyName, clazz,
+                AUDIT_LOG.info("propertyName:{}, clazz:{} , clazz.isPrimitive():{} ", propertyName, clazz,
                         clazz.isPrimitive());
 
                 Object obj = ctxParameters[i];
-                AUDIT_LOG.debug("RequestReaderInterceptor final - obj -  obj:{} ", obj);
+                AUDIT_LOG.info("RequestReaderInterceptor final - obj -  obj:{} ", obj);
 
             }
         }
@@ -117,17 +117,26 @@ public class AuditLogInterceptor {
         return this.authUtil.getAuditLogConf();
     }
 
-    private boolean ignoreMethod() {
-        LOG.debug(
-                "request.getMethod():{}, getAuditLogConf().getIgnoreHttpMethod():{}, getAuditLogConf().getIgnoreHttpMethod().contains(request.getMethod()):{}",
-                request.getMethod(), getAuditLogConf().getIgnoreHttpMethod(),
-                getAuditLogConf().getIgnoreHttpMethod().contains(request.getMethod()));
-        boolean flag = false;
-        if (getAuditLogConf() != null && getAuditLogConf().getIgnoreHttpMethod() != null
-                && getAuditLogConf().getIgnoreHttpMethod().contains(request.getMethod())) {
-            flag = true;
+    private boolean ignoreMethod(InvocationContext context, AuditLogConf auditLogConf) {
+        LOG.debug("Checking if method to be ignored - context:{}, auditLogConf:{}", context, auditLogConf);
+
+        if (auditLogConf == null || context.getMethod().getAnnotations() == null
+                || context.getMethod().getAnnotations().length <= 0) {
+            return false;
         }
-        return flag;
+
+        for (int i = 0; i < context.getMethod().getAnnotations().length; i++) {
+            LOG.debug("Check if method is to be ignored - context.getMethod().getAnnotations()[i]:{} ",
+                    context.getMethod().getAnnotations()[i]);
+
+            if (context.getMethod().getAnnotations()[i] != null && auditLogConf.getIgnoreHttpMethod() != null
+                    && auditLogConf.getIgnoreHttpMethod()
+                            .contains(context.getMethod().getAnnotations()[i].toString())) {
+                return true;
+            }
+
+        }
+        return false;
     }
 
     private Map<String, String> getAuditHeaderAttributes(AuditLogConf auditLogConf) {
