@@ -904,12 +904,8 @@ public class AppConfiguration implements Configuration {
         this.checkUserPresenceOnRefreshToken = checkUserPresenceOnRefreshToken;
     }
 
-    public Set<FeatureFlagType> getEnabledFeatureFlags() {
-        return FeatureFlagType.fromValues(getFeatureFlags());
-    }
-
     public boolean isFeatureEnabled(FeatureFlagType flagType) {
-        final Set<FeatureFlagType> flags = getEnabledFeatureFlags();
+        final Set<FeatureFlagType> flags = FeatureFlagType.from(this);
         if (flags.isEmpty())
             return true;
 
