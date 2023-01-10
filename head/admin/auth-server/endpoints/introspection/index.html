@@ -3361,9 +3361,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#customising-introspection-endpoint-behaviour" class="md-nav__link">
-    Customising Introspection Endpoint Behaviour
+  <a href="#customising-introspection-endpoint-behaviour-using-custom-script" class="md-nav__link">
+    Customising Introspection Endpoint Behaviour using Custom script:
   </a>
+  
+    <nav class="md-nav" aria-label="Customising Introspection Endpoint Behaviour using Custom script:">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#references-for-custom-scripts" class="md-nav__link">
+    References for custom scripts
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -8860,9 +8873,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#customising-introspection-endpoint-behaviour" class="md-nav__link">
-    Customising Introspection Endpoint Behaviour
+  <a href="#customising-introspection-endpoint-behaviour-using-custom-script" class="md-nav__link">
+    Customising Introspection Endpoint Behaviour using Custom script:
   </a>
+  
+    <nav class="md-nav" aria-label="Customising Introspection Endpoint Behaviour using Custom script:">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#references-for-custom-scripts" class="md-nav__link">
+    References for custom scripts
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -8931,7 +8957,7 @@ introspection</a> specifications.</p>
 <p>The URI to invoke the introspection endpoint in Janssen Server 
 can be found by checking the <code>introspection_endpoint</code> claim of the OpenID Connect configuration response, typically deployed at <code>https://janssen.server.host/.well-known/openid-configuration</code></p>
 <p><code>"introspection_endpoint" : "https://janssen.server.host/jans-auth/restv1/introspection"</code></p>
-<p>More information about request and response of the clientinfo endpoint can be found in
+<p>More information about request and response of the Introspection endpoint can be found in
 the OpenAPI specification of <a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/replace-janssen-version/jans-auth-server/docs/swagger.yaml#/Token/get-introspection">jans-auth-server module</a>.</p>
 <h2 id="sample-get-request">Sample GET Request<a class="headerlink" href="#sample-get-request" title="Permanent link">#</a></h2>
 <h3 id="request">Request<a class="headerlink" href="#request" title="Permanent link">#</a></h3>
@@ -9000,7 +9026,7 @@ navigate via <code>Auth Server</code>-&gt;<code>Properties</code>.</p>
 <li><a href="../../../reference/json/properties/janssenauthserver-properties/#introspectionaccesstokenmusthaveumaprotectionscope">introspectionAccessTokenMustHaveUmaProtectionScope</a></li>
 <li><a href="../../../reference/json/properties/janssenauthserver-properties/#introspectionresponsescopesbackwardcompatibility">introspectionResponseScopesBackwardCompatibility</a></li>
 </ul>
-<h2 id="customising-introspection-endpoint-behaviour">Customising Introspection Endpoint Behaviour<a class="headerlink" href="#customising-introspection-endpoint-behaviour" title="Permanent link">#</a></h2>
+<h2 id="customising-introspection-endpoint-behaviour-using-custom-script">Customising Introspection Endpoint Behaviour using Custom script:<a class="headerlink" href="#customising-introspection-endpoint-behaviour-using-custom-script" title="Permanent link">#</a></h2>
 <p>Customizing certain aspects of endpoint behaviour, for example, one can modify claims of an access token as JWT, using
 <a href="../../../../script-catalog/introspection/">introspection scripts</a>. Use
 <a href="../../../developer/scripts/update-token/">update token</a> introspection script for transformation of claims and values in
@@ -9017,13 +9043,19 @@ navigate to</p>
 </ul>
 <p><code>Auth Server</code>-&gt;<code>Clients</code>-&gt;select the client-&gt;<code>Tokens</code>-&gt;enable <code>Run Introspection Script before JWT access token creation</code></p>
 <p><img alt="" src="../../../../assets/image-tui-client-config-token-screen.png" /></p>
+<h3 id="references-for-custom-scripts">References for custom scripts<a class="headerlink" href="#references-for-custom-scripts" title="Permanent link">#</a></h3>
+<ol>
+<li>Interface - <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/introspection/IntrospectionType.java">IntrospectionType</a></li>
+<li><a href="../../../../script-catalog/introspection/">Introspection scripts</a></li>
+<li><a href="https://github.com/JanssenProject/jans/blob/main/docs/admin/developer/scripts/update-token.md#introspectiontype-script-vs-updatetokentype-script">Introspection script vs Update Token Script</a></li>
+</ol>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-06T09:17:11+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-06</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-10T13:29:39+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-10</span>
       
         <br>
         Created:
