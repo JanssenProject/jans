@@ -113,7 +113,7 @@ jobs:
         asset_name: jans${{ matrix.asset_prefix }}${{ steps.previoustag.outputs.version }}${{ matrix.asset_suffix }}.sha256sum
         tag: ${{ steps.previoustag.outputs.tag }}
   build_python_packages:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -209,7 +209,7 @@ jobs:
 
   upload_python_packages:
     needs: build_python_packages
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     strategy:
       matrix:
         name: [centos, ubuntu, suse]
