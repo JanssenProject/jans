@@ -60,6 +60,9 @@ parser.add_argument('--import-ldif', help="Render ldif templates from directory 
 parser.add_argument('-enable-script', action='append', help="inum of script to enable", required=False)
 parser.add_argument('-disable-script', action='append', help="inum of script to enable", required=False)
 
+parser.add_argument('-jans-auth-api-prefix', help="Sets Jans AS api endpoint prefix", default='/jans-auth')
+
+
 if PROFILE != OPENBANKING_PROFILE:
 
     parser.add_argument('-stm', '--enable-scim-test-mode', help="Enable Scim Test Mode", action='store_true')

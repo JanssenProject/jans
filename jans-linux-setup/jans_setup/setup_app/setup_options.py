@@ -157,8 +157,6 @@ def get_setup_options():
         if base.argsp.no_external_key:
             setupOptions['use_external_key'] = False
 
-
-
     if base.argsp.ip_address:
         setupOptions['ip'] = base.argsp.ip_address
 
@@ -185,5 +183,11 @@ def get_setup_options():
     if base.argsp.no_httpd:
         setupOptions['installHTTPD'] = False
 
+    if base.argsp.jans_auth_api_prefix:
+        setupOptions['jans_auth_api_prefix'] = base.argsp.jans_auth_api_prefix
+        if not setupOptions['jans_auth_api_prefix'].startswith('/'):
+            setupOptions['jans_auth_api_prefix'] = '/' + setupOptions['jans_auth_api_prefix']
+        if not setupOptions['jans_auth_api_prefix'].endswith('/'):
+            setupOptions['jans_auth_api_prefix'] = setupOptions['jans_auth_api_prefix']+'/'
 
     return setupOptions

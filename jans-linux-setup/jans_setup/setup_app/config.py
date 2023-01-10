@@ -268,6 +268,8 @@ class Config:
         self.ldapPassFn = os.path.join(self.ldap_user_home, '.pw')
         self.ldap_backend_type = 'je'
 
+        self.jans_auth_api_prefix = '/jans-auth'
+
         self.jansScriptFiles = [
                             os.path.join(self.install_dir, 'static/scripts/logmanager.sh'),
                             os.path.join(self.install_dir, 'static/scripts/testBind.py')
