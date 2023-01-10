@@ -20,6 +20,7 @@ from wui_components.jans_vetrical_nav import JansVerticalNav
 from edit_script_dialog import EditScriptDialog
 from prompt_toolkit.application import Application
 from utils.multi_lang import _
+from utils.static import DialogResult, cli_style, common_strings
 
 class Plugin():
     """This is a general class for plugins 
@@ -129,8 +130,8 @@ class Plugin():
                 get_help=(self.get_help,'Scripts'),
                 on_delete=self.delete_script,
                 selectes=0,
-                headerColor='class:outh-verticalnav-headcolor',
-                entriesColor='class:outh-verticalnav-entriescolor',
+                headerColor=cli_style.navbar_headcolor,
+                entriesColor=cli_style.navbar_entriescolor,
                 all_data=self.data['entries']
             )
 

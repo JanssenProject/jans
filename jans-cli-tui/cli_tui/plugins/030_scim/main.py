@@ -23,6 +23,7 @@ class Plugin(DialogUtils):
         self.pid = 'scim'
         self.name = '[S]CIM'
         self.app_config = {}
+        self.bg_color='black'
         self.widgets_ready = False
         self.container = Frame(
                             body=HSplit([Button(text=_("Get Scim Configuration"), handler=self.get_app_config)], width=D()),
@@ -42,16 +43,16 @@ class Plugin(DialogUtils):
         self.save_button = Button(_("Save"), handler=self.save_app_config)
         schema = self.app.cli_object.get_schema_from_reference('SCIM', '#/components/schemas/AppConfiguration')
         self.container = HSplit([
-                                    self.app.getTitledText(_("Base DN"), name='baseDN', value=self.app_config.get('baseDN',''), jans_help=self.app.get_help_from_schema(schema, 'baseDN'), read_only=True, style='class:outh-scope-text'),
-                                    self.app.getTitledText(_("Application Url"), name='applicationUrl', value=self.app_config.get('applicationUrl',''), jans_help=self.app.get_help_from_schema(schema, 'applicationUrl'), style='class:outh-scope-text'),
-                                    self.app.getTitledText(_("Base Endpoint"), name='baseEndpoint', value=self.app_config.get('baseEndpoint',''), jans_help=self.app.get_help_from_schema(schema, 'baseEndpoint'), style='class:outh-scope-text'),
-                                    self.app.getTitledText(_("Person Custom Object Class"), name='personCustomObjectClass', value=self.app_config.get('personCustomObjectClass',''), jans_help=self.app.get_help_from_schema(schema, 'personCustomObjectClass'), style='class:outh-scope-text'),
-                                    self.app.getTitledText(_("Auth Issuer"), name='oxAuthIssuer', value=self.app_config.get('oxAuthIssuer',''), jans_help=self.app.get_help_from_schema(schema, 'oxAuthIssuer'), style='class:outh-scope-text'),
-                                    self.app.getTitledRadioButton(_("Protection Mode"), name='protectionMode', values=[('OAUTH', 'OAUTH'),('BYPASS', 'BYPASS')], current_value=self.app_config.get('protectionMode'), jans_help=self.app.get_help_from_schema(schema, 'protectionMode'), style='class:outh-client-radiobutton'),
-                                    self.app.getTitledText(_("Max Count"), name='maxCount', value=self.app_config.get('maxCount',''), jans_help=self.app.get_help_from_schema(schema, 'maxCount'), text_type='integer', style='class:outh-scope-text'),
-                                    self.app.getTitledText(_("Bulk Max Operations"), name='bulkMaxOperations', value=self.app_config.get('bulkMaxOperations',''), jans_help=self.app.get_help_from_schema(schema, 'bulkMaxOperations'), text_type='integer', style='class:outh-scope-text'),
-                                    self.app.getTitledText(_("Bulk Max Payload Size"), name='bulkMaxPayloadSize', value=self.app_config.get('bulkMaxPayloadSize',''), jans_help=self.app.get_help_from_schema(schema, 'bulkMaxPayloadSize'), text_type='integer', style='class:outh-scope-text'),
-                                    self.app.getTitledText(_("User Extension Schema URI"), name='userExtensionSchemaURI', value=self.app_config.get('userExtensionSchemaURI',''), jans_help=self.app.get_help_from_schema(schema, 'userExtensionSchemaURI'), style='class:outh-scope-text'),
+                                    self.app.getTitledText(_("Base DN"), name='baseDN', value=self.app_config.get('baseDN',''), jans_help=self.app.get_help_from_schema(schema, 'baseDN'), read_only=True, style='class:outh-scope-text',widget_style='bg:{} fg:white'.format(self.bg_color)),
+                                    self.app.getTitledText(_("Application Url"), name='applicationUrl', value=self.app_config.get('applicationUrl',''), jans_help=self.app.get_help_from_schema(schema, 'applicationUrl'), style='class:outh-scope-text',widget_style='bg:{} fg:white'.format(self.bg_color)),
+                                    self.app.getTitledText(_("Base Endpoint"), name='baseEndpoint', value=self.app_config.get('baseEndpoint',''), jans_help=self.app.get_help_from_schema(schema, 'baseEndpoint'), style='class:outh-scope-text',widget_style='bg:{} fg:white'.format(self.bg_color)),
+                                    self.app.getTitledText(_("Person Custom Object Class"), name='personCustomObjectClass', value=self.app_config.get('personCustomObjectClass',''), jans_help=self.app.get_help_from_schema(schema, 'personCustomObjectClass'), style='class:outh-scope-text',widget_style='bg:{} fg:white'.format(self.bg_color)),
+                                    self.app.getTitledText(_("Auth Issuer"), name='oxAuthIssuer', value=self.app_config.get('oxAuthIssuer',''), jans_help=self.app.get_help_from_schema(schema, 'oxAuthIssuer'), style='class:outh-scope-text',widget_style='bg:{} fg:white'.format(self.bg_color)),
+                                    self.app.getTitledRadioButton(_("Protection Mode"), name='protectionMode', values=[('OAUTH', 'OAUTH'),('BYPASS', 'BYPASS')], current_value=self.app_config.get('protectionMode'), jans_help=self.app.get_help_from_schema(schema, 'protectionMode'), style='class:outh-client-radiobutton',widget_style='bg:{} fg:white'.format(self.bg_color)),
+                                    self.app.getTitledText(_("Max Count"), name='maxCount', value=self.app_config.get('maxCount',''), jans_help=self.app.get_help_from_schema(schema, 'maxCount'), text_type='integer', style='class:outh-scope-text',widget_style='bg:{} fg:white'.format(self.bg_color)),
+                                    self.app.getTitledText(_("Bulk Max Operations"), name='bulkMaxOperations', value=self.app_config.get('bulkMaxOperations',''), jans_help=self.app.get_help_from_schema(schema, 'bulkMaxOperations'), text_type='integer', style='class:outh-scope-text',widget_style='bg:{} fg:white'.format(self.bg_color)),
+                                    self.app.getTitledText(_("Bulk Max Payload Size"), name='bulkMaxPayloadSize', value=self.app_config.get('bulkMaxPayloadSize',''), jans_help=self.app.get_help_from_schema(schema, 'bulkMaxPayloadSize'), text_type='integer', style='class:outh-scope-text',widget_style='bg:{} fg:white'.format(self.bg_color)),
+                                    self.app.getTitledText(_("User Extension Schema URI"), name='userExtensionSchemaURI', value=self.app_config.get('userExtensionSchemaURI',''), jans_help=self.app.get_help_from_schema(schema, 'userExtensionSchemaURI'), style='class:outh-scope-text',widget_style='bg:{} fg:white'.format(self.bg_color)),
                                     self.app.getTitledWidget(
                                         _("Logging Level"),
                                         name='loggingLevel',
@@ -62,19 +63,19 @@ class Plugin(DialogUtils):
                                         jans_help=self.app.get_help_from_schema(schema, 'loggingLevel'),
                                         style='class:outh-client-dropdown'
                                         ),
-                                    self.app.getTitledText(_("Logging Layout"), name='loggingLayout', value=self.app_config.get('loggingLayout',''), jans_help=self.app.get_help_from_schema(schema, 'loggingLayout'), style='class:outh-scope-text'),
-                                    self.app.getTitledText(_("External Logger Configuration"), name='externalLoggerConfiguration', value=self.app_config.get('externalLoggerConfiguration',''), jans_help=self.app.get_help_from_schema(schema, 'externalLoggerConfiguration'), style='class:outh-scope-text'),
-                                    self.app.getTitledText(_("Metric Reporter Interval"), name='metricReporterInterval', value=self.app_config.get('metricReporterInterval',''), jans_help=self.app.get_help_from_schema(schema, 'metricReporterInterval'), style='class:outh-scope-text', text_type='integer'),
-                                    self.app.getTitledText(_("Metric Reporter Keep Data Days"), name='metricReporterKeepDataDays', value=self.app_config.get('metricReporterKeepDataDays',''), jans_help=self.app.get_help_from_schema(schema, 'metricReporterKeepDataDays'), style='class:outh-scope-text', text_type='integer'),
-                                    self.app.getTitledCheckBox(_("Metric Reporter Enabled"), name='metricReporterEnabled', checked=self.app_config.get('metricReporterEnabled'), jans_help=self.app.get_help_from_schema(schema, 'metricReporterEnabled'), style='class:outh-client-checkbox'),
-                                    self.app.getTitledCheckBox(_("Disable Jdk Logger"), name='disableJdkLogger', checked=self.app_config.get('disableJdkLogger'), jans_help=self.app.get_help_from_schema(schema, 'disableJdkLogger'), style='class:outh-client-checkbox'),
-                                    self.app.getTitledCheckBox(_("Use Local Cache"), name='useLocalCache', checked=self.app_config.get('useLocalCache'), jans_help=self.app.get_help_from_schema(schema, 'useLocalCache'), style='class:outh-client-checkbox'),
+                                    self.app.getTitledText(_("Logging Layout"), name='loggingLayout', value=self.app_config.get('loggingLayout',''), jans_help=self.app.get_help_from_schema(schema, 'loggingLayout'), style='class:outh-scope-text',widget_style='bg:{} fg:white'.format(self.bg_color)),
+                                    self.app.getTitledText(_("External Logger Configuration"), name='externalLoggerConfiguration', value=self.app_config.get('externalLoggerConfiguration',''), jans_help=self.app.get_help_from_schema(schema, 'externalLoggerConfiguration'), style='class:outh-scope-text',widget_style='bg:{} fg:white'.format(self.bg_color)),
+                                    self.app.getTitledText(_("Metric Reporter Interval"), name='metricReporterInterval', value=self.app_config.get('metricReporterInterval',''), jans_help=self.app.get_help_from_schema(schema, 'metricReporterInterval'), style='class:outh-scope-text', text_type='integer',widget_style='bg:{} fg:white'.format(self.bg_color)),
+                                    self.app.getTitledText(_("Metric Reporter Keep Data Days"), name='metricReporterKeepDataDays', value=self.app_config.get('metricReporterKeepDataDays',''), jans_help=self.app.get_help_from_schema(schema, 'metricReporterKeepDataDays'), style='class:outh-scope-text', text_type='integer',widget_style='bg:{} fg:white'.format(self.bg_color)),
+                                    self.app.getTitledCheckBox(_("Metric Reporter Enabled"), name='metricReporterEnabled', checked=self.app_config.get('metricReporterEnabled'), jans_help=self.app.get_help_from_schema(schema, 'metricReporterEnabled'), style='class:outh-client-checkbox',widget_style='bg:{} fg:white'.format(self.bg_color)),
+                                    self.app.getTitledCheckBox(_("Disable Jdk Logger"), name='disableJdkLogger', checked=self.app_config.get('disableJdkLogger'), jans_help=self.app.get_help_from_schema(schema, 'disableJdkLogger'), style='class:outh-client-checkbox',widget_style='bg:{} fg:white'.format(self.bg_color)),
+                                    self.app.getTitledCheckBox(_("Use Local Cache"), name='useLocalCache', checked=self.app_config.get('useLocalCache'), jans_help=self.app.get_help_from_schema(schema, 'useLocalCache'), style='class:outh-client-checkbox',widget_style='bg:{} fg:white'.format(self.bg_color)),
                                     VSplit([Window(), self.save_button, Window()])
                                 ],
                                 width=D()
                             )
 
-        self.app.center_container = self.container
+        self.app.center_container = HSplit([ self.container],style='bg:{}'.format(self.bg_color),height=D()) 
 
     def get_app_config(self) -> None:
         """Gets SCIM application configurations from server.

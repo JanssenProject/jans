@@ -14,6 +14,7 @@ from utils.static import DialogResult
 from utils.multi_lang import _
 from wui_components.jans_cli_dialog import JansGDialog
 from prompt_toolkit.eventloop import get_event_loop
+from utils.static import DialogResult, cli_style, common_strings
 
 common_data.users = SimpleNamespace()
 
@@ -83,8 +84,8 @@ class Plugin(DialogUtils):
                 #get_help=(self.get_help,'User'),
                 change_password=self.change_password,
                 selectes=0,
-                headerColor='class:outh-verticalnav-headcolor',
-                entriesColor='class:outh-verticalnav-entriescolor',
+                headerColor=cli_style.navbar_headcolor,
+                entriesColor=cli_style.navbar_entriescolor,
                 all_data=self.users['entries'],
                 jans_help = "Press p to change password"
             )
