@@ -1,7 +1,10 @@
 package io.jans.ads;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.jans.ads.model.Deployment;
 import io.jans.ads.model.DeploymentDetails;
+import io.jans.ads.model.ProjectMetadata;
 import io.jans.agama.dsl.TranspilationResult;
 import io.jans.agama.dsl.Transpiler;
 import io.jans.agama.dsl.TranspilerException;
@@ -62,6 +65,10 @@ public class Deployer {
     private static final String[] ASSETS_SUBDIRS = { "ftl", "fl" };
     private static final String[] TEMPLATES_EXTENSIONS = new String[] { "ftl", "ftlh" };
     private static final String FLOW_EXT = "flow";
+    private static final String METADATA_FILE = "project.json";
+    
+    @Inject
+    private ObjectMapper mapper;
     
     @Inject
     private Logger logger;
@@ -98,7 +105,8 @@ public class Deployer {
         if (deployment == null) {
             updateFlowsAndAssets(depls);
         } else {
-            deployProject(deployment.getDn(), deployment.getId(), deployment.getDetails().getProjectName());
+            deployProject(deployment.getDn(), deployment.getId(),
+                    deployment.getDetails().getProjectMetadata().getProjectName());
         }
 
     }
@@ -107,7 +115,6 @@ public class Deployer {
 
         logger.info("Deploying project {}", name);
         DeploymentDetails dd = new DeploymentDetails();
-        dd.setProjectName(name);
 
         Deployment dep = entryManager.find(dn, Deployment.class, null);
         String b64EncodedAssets = dep.getAssets();
@@ -121,7 +128,9 @@ public class Deployer {
         
         //Check the zip has the expected layout        
         Path p = extractGamaFile(b64EncodedAssets);
-        String tmpdir = p.toString(); 
+        String tmpdir = p.toString();
+        dd.setProjectMetadata(computeMetadata(name, tmpdir));
+
         Path pcode = Paths.get(tmpdir, "code");
         Path pweb = Paths.get(tmpdir, "web");
 
@@ -156,7 +165,7 @@ public class Deployer {
             logger.warn("This does not seem to be a .gama file");
             dd.setError("Archive missing web and/or code subdirectories");
         }
-        
+
         dep.setDetails(dd);
         //Mark as finished
         dep.setTaskActive(false);
@@ -320,7 +329,7 @@ public class Deployer {
             //In this case d only has id, start date, and end date populated
             String prjId = d.getId();
             actualPrjIds.add(prjId);
-            String name = d.getDetails().getProjectName();
+            String name = d.getDetails().getProjectMetadata().getProjectName();
 
             Long finishedAt = projectsFinishTimes.get(prjId);
             
@@ -400,6 +409,25 @@ public class Deployer {
                 logger.error("Error removing flow " + flow, e);
             }
         }
+        
+    }
+    
+    private ProjectMetadata computeMetadata(String name, String path) {
+        
+        ProjectMetadata meta = new ProjectMetadata();
+        Path p = Paths.get(path, METADATA_FILE);
+
+        if (!Files.isRegularFile(p)) {
+            logger.warn("Archive has no metadata file");
+        } else {
+            try {            
+                meta =  mapper.readValue(Files.readString(p, UTF_8), ProjectMetadata.class);
+            } catch (IOException e) {
+                logger.error("Unable to read archive metadata", e);
+            }
+        }
+        meta.setProjectName(name);
+        return meta;
         
     }
 
