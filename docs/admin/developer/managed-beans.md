@@ -56,7 +56,7 @@ authenticationService = CdiUtil.bean(AuthenticationService)
 logged_in = authenticationService.authenticate(user_name, user_password)
 
 # 2. authenticate method without passing password parameter
-logged_in = authenticationService.authenticate(user_name, user_password)
+logged_in = authenticationService.authenticate(user_name)
 
 #3. obtain an authenticated user
 user = authenticationService.getAuthenticatedUser()
