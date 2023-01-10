@@ -13,10 +13,10 @@ sequenceDiagram
 title Client credentials flow
 autonumber 1
 
-activate Resource owner - Client
-Resource owner - Client->>Jans AS:Client Authentication
+activate Resource owner Client
+Resource owner Client->>Jans AS:Client Authentication
 activate Jans AS
-Jans AS-->>Resource owner - Client:Access Token
+Jans AS-->>Resource owner Client:Access Token
 deactivate Jans AS
 ```
 ### Testing
