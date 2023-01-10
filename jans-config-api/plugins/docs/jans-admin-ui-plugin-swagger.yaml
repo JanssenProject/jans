@@ -412,6 +412,7 @@ paths:
       parameters:
       - name: adminUIPermission
         in: path
+        description: Admin UI Permission
         required: true
         schema:
           type: string
@@ -442,6 +443,7 @@ paths:
       parameters:
       - name: adminUIPermission
         in: path
+        description: Admin UI Permission
         required: true
         schema:
           type: string
@@ -473,6 +475,7 @@ paths:
       parameters:
       - name: adminUIRole
         in: path
+        description: Admin UI role
         required: true
         schema:
           type: string
@@ -503,6 +506,7 @@ paths:
       parameters:
       - name: adminUIRole
         in: path
+        description: Admin UI role
         required: true
         schema:
           type: string
@@ -534,6 +538,7 @@ paths:
       parameters:
       - name: adminUIRole
         in: path
+        description: Admin UI Role
         required: true
         schema:
           type: string
@@ -564,6 +569,7 @@ paths:
       parameters:
       - name: adminUIRole
         in: path
+        description: role
         required: true
         schema:
           type: string

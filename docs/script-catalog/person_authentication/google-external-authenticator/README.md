@@ -10,8 +10,8 @@ An out-of-the-box feature, the Google Authentication script is a `PersonAuthenti
 
 ## Prerequisites
 
-- A Jans-auth Server (installation instructions [here](https://github.com/JanssenProject/jans/tree/main/jans-linux-setup#readme))    
-- The [Google authentication script](https://github.com/JanssenProject/jans/tree/main/jans-linux-setup/jans_setup/static/extension/person_authentication/GoogleExternalAuthenticator.py) (included in the default Jans-auth Server distribution);   
+- A Jans-auth Server (installation instructions [here](https://github.com/JanssenProject/jans/tree/replace-janssen-version/jans-linux-setup#readme))    
+- The [Google authentication script](https://github.com/JanssenProject/jans/tree/replace-janssen-version/jans-linux-setup/jans_setup/static/extension/person_authentication/GoogleExternalAuthenticator.py) (included in the default Jans-auth Server distribution);   
 - A [Google account](https://accounts.google.com/).     
 - Google API jars namely [google-api-client](https://repo1.maven.org/maven2/com/google/api-client/google-api-client/1.33.2/google-api-client-1.33.2.jar), [google-oauth-client](https://repo1.maven.org/maven2/com/google/oauth-client/google-oauth-client/1.33.1/google-oauth-client-1.33.1.jar) and [google-http-client-jackson2](https://repo1.maven.org/maven2/com/google/http-client/google-http-client-jackson2/1.41.5/google-http-client-jackson2-1.41.5.jar) added to jans-auth-server
 
@@ -60,7 +60,7 @@ The custom script has the following properties:
 |-----------------------|-------------------------------|---------------|
 |`google_creds_file`		|Details of the client created on https://console.cloud.google.com/apis/credentials. See [this](https://github.com/maduvena/jans-docs/wiki/Google-Authentication-Script/_edit#download-google-client-json-file) step.		| `/etc/certs/google_client_secret.json`|
 
-To update this setting in Jans persistence, follow this [link](https://github.com/JanssenProject/jans-cli/blob/main/docs/cli/cli-custom-scripts.md#update-an-existing-custom-script)
+To update this setting in Jans persistence, follow this [link](https://github.com/JanssenProject/jans-cli/blob/replace-janssen-version/docs/cli/cli-custom-scripts.md#update-an-existing-custom-script)
 
 ### Enable Sign-in with Google Authentication script
 By default, users will get the default authentication mechanism as specified above. However, using the OpenID Connect acr_values parameter, web and mobile clients can request any enabled authentication mechanism.
@@ -76,7 +76,7 @@ Now Google is an available authentication mechanism for your Janssen Server. Thi
 
 ### Make Sign-in with Google Script as default authentication script:
 
-Use this [link](https://github.com/JanssenProject/jans-cli/blob/main/docs/cli/cli-default-authentication-method.md) as a reference.
+Use this [link](https://github.com/JanssenProject/jans-cli-tui/blob/replace-janssen-version/docs/cli/cli-default-authentication-method.md) as a reference.
 
 Steps:
 1. Create a file say `google-auth-default.json` with the following contents

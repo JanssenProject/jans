@@ -12,7 +12,7 @@ User and Developer Guides can be found on the [Super Gluu docs site](https://glu
 ### Prerequisites 
 - An Internet accessible (non-internal or localhost) Janssen Server with DNS pointing at the public Internet address of the server 
 
-- [Super Gluu interception script](https://github.com/JanssenProject/jans/blob/main/docs/script-catalog/person_authentication/super-gluu-external-authenticator/SuperGluuExternalAuthenticator.py) (included in the default Janssen Server distribution)
+- [Super Gluu interception script](https://github.com/JanssenProject/jans/blob/replace-janssen-version/docs/script-catalog/person_authentication/super-gluu-external-authenticator/SuperGluuExternalAuthenticator.py) (included in the default Janssen Server distribution)
 
 - An Android or iOS device with Super Gluu installed 
     - [Super Gluu for iOS](https://itunes.apple.com/us/app/super-gluu/id1093479646?mt=8)     
@@ -24,7 +24,7 @@ User and Developer Guides can be found on the [Super Gluu docs site](https://glu
     The Janssen Server and Super Gluu can work in the same network, without a DNS server hostname and with a self-signed certificate. There is only one limitation: both components should belong to the same network. Instead of assigning a hostname during Janssen Server installation, an IP address can be specified. In the Super Gluu mobile app, enable `Trust all (SSL)`.    
 
 ### Authentication Workflows
-The authentication workflow for Super Gluu is defined in the [Super Gluu interception script](https://github.com/JanssenProject/jans/blob/main/docs/script-catalog/person_authentication/super-gluu-external-authenticator/SuperGluuExternalAuthenticator.py) (included in the default Janssen Server distribution). 
+The authentication workflow for Super Gluu is defined in the [Super Gluu interception script](https://github.com/JanssenProject/jans/blob/replace-janssen-version/docs/script-catalog/person_authentication/super-gluu-external-authenticator/SuperGluuExternalAuthenticator.py) (included in the default Janssen Server distribution). 
 ### A. Default Two step flow:
 #### Enrollment:
 By default, users are put through a two-step, two-factor authentication process with username and password first, and then push notification via Super Gluu second. 
@@ -181,7 +181,7 @@ Now Sign-in with Super-Gluu is an available authentication mechanism for your Ja
 
 ### Make Sign-in with Super-Gluu Script as default authentication script:
 
-Use this [link](https://github.com/JanssenProject/jans-cli/blob/main/docs/cli/cli-default-authentication-method.md) as a reference.
+Use this [link](https://github.com/JanssenProject/jans-cli-tui/blob/replace-janssen-version/docs/cli/cli-default-authentication-method.md) as a reference.
 
 Steps:
 1. Create a file say `sg-auth-default.json` with the following contents
@@ -205,9 +205,9 @@ https://<your.jans.server>/jans-auth/authorize.htm?response_type=code&redirect_u
 
 ### Customizations to Super Gluu Login Pages
 
-The Gluu Server includes a [default public-facing pages for Super Gluu ](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/webapp/auth/super-gluu/login.xhtml) for enrollment and authentication.
+The Gluu Server includes a [default public-facing pages for Super Gluu ](https://github.com/JanssenProject/jans/blob/replace-janssen-version/jans-auth-server/server/src/main/webapp/auth/super-gluu/login.xhtml) for enrollment and authentication.
 
-To customize the look and feel of the pages, follow the [customization guide](https://github.com/JanssenProject/jans/blob/main/docs/admin/developer/customization/customize-web-pages.md). 
+To customize the look and feel of the pages, follow the [customization guide](https://github.com/JanssenProject/jans/blob/replace-janssen-version/docs/admin/developer/customization/customize-web-pages.md). 
  
 ### Self-service 
 To offer end-users a portal where they can manage their own account security preferences, including two-factor authentication credentials like Super Gluu, check out our new app, [Gluu Casa](https://casa.gluu.org). 

@@ -73,6 +73,7 @@ paths:
       parameters:
       - name: username
         in: path
+        description: User name
         required: true
         schema:
           type: string

@@ -15,7 +15,7 @@ RUN apk update \
 # Jetty
 # =====
 
-ARG JETTY_VERSION=11.0.11
+ARG JETTY_VERSION=11.0.13
 ARG JETTY_HOME=/opt/jetty
 ARG JETTY_BASE=/opt/jans/jetty
 ARG JETTY_USER_HOME_LIB=/home/jetty/lib
@@ -42,8 +42,8 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # Config API
 # ==========
 
-ENV CN_VERSION=1.0.6-SNAPSHOT
-ENV CN_BUILD_DATE='2022-12-25 08:17'
+ENV CN_VERSION=1.0.7-SNAPSHOT
+ENV CN_BUILD_DATE='2023-01-09 12:22'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api-server/${CN_VERSION}/jans-config-api-server-${CN_VERSION}.war
 
 # Install Jans Config API
@@ -54,7 +54,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-config-api/webapps \
     && zip -d jans-config-api.war WEB-INF/jetty-web.xml \
     && zip -r jans-config-api.war WEB-INF/jetty-env.xml \
     && cp jans-config-api.war ${JETTY_BASE}/jans-config-api/webapps/jans-config-api.war \
-    && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-config-api --add-module=server,deploy,annotations,resources,http,http-forwarded,threadpool,jsp,websocket,cdi-decorate,jmx,stats \
+    && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-config-api --add-module=server,deploy,annotations,resources,http,http-forwarded,threadpool,jsp,websocket,cdi-decorate,jmx,stats,logging-log4j2 --approve-all-licenses \
     && rm -rf /tmp/jans-config-api.war /tmp/WEB-INF
 
 # Ports exposed by config-api
@@ -74,19 +74,19 @@ RUN wget -q https://github.com/GluuFederation/gluu-snap/raw/${PYFACTER_VERSION}/
 
 RUN mkdir -p /usr/share/java
 
-ENV SCIM_PLUGIN_BUILD_DATE='2022-12-22 12:53'
+ENV SCIM_PLUGIN_BUILD_DATE='2023-01-09 12:23'
 ENV SCIM_PLUGIN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/scim-plugin/${CN_VERSION}/scim-plugin-${CN_VERSION}-distribution.jar
 RUN wget -q ${SCIM_PLUGIN_SOURCE_URL} -O /usr/share/java/scim-plugin.jar
 
-ENV ADMIN_UI_PLUGIN_BUILD_DATE='2022-12-22 12:53'
+ENV ADMIN_UI_PLUGIN_BUILD_DATE='2023-01-09 12:22'
 ENV ADMIN_UI_PLUGIN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/admin-ui-plugin/${CN_VERSION}/admin-ui-plugin-${CN_VERSION}-distribution.jar
 RUN wget -q ${ADMIN_UI_PLUGIN_SOURCE_URL} -O /usr/share/java/admin-ui-plugin.jar
 
-ENV FIDO2_PLUGIN_BUILD_DATE='2022-12-22 12:53'
+ENV FIDO2_PLUGIN_BUILD_DATE='2023-01-09 12:23'
 ENV FIDO2_PLUGIN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/fido2-plugin/${CN_VERSION}/fido2-plugin-${CN_VERSION}-distribution.jar
 RUN wget -q ${FIDO2_PLUGIN_SOURCE_URL} -O /usr/share/java/fido2-plugin.jar
 
-ENV USER_MGT_PLUGIN_BUILD_DATE='2022-12-22 12:53'
+ENV USER_MGT_PLUGIN_BUILD_DATE='2023-01-09 12:23'
 ENV USER_MGT_PLUGIN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/user-mgt-plugin/${CN_VERSION}/user-mgt-plugin-${CN_VERSION}-distribution.jar
 RUN wget -q ${USER_MGT_PLUGIN_SOURCE_URL} -O /usr/share/java/user-mgt-plugin.jar
 
@@ -96,7 +96,7 @@ RUN wget -q ${USER_MGT_PLUGIN_SOURCE_URL} -O /usr/share/java/user-mgt-plugin.jar
 
 COPY requirements.txt /app/requirements.txt
 RUN python3 -m ensurepip \
-    && pip3 install --no-cache-dir -U pip wheel \
+    && pip3 install --no-cache-dir -U pip wheel setuptools \
     && pip3 install --no-cache-dir --default-timeout=300 -r /app/requirements.txt \
     && pip3 uninstall -y pip wheel
 
@@ -110,7 +110,7 @@ COPY conf/prometheus-config.yaml /opt/prometheus/
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_SOURCE_VERSION=bd2cdf8501d60959498078bbb31650965c321c73
+ENV JANS_SOURCE_VERSION=a970d88d81f920973f3ba812db97448f135090a9
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
 
@@ -171,9 +171,7 @@ ENV CN_CONFIG_ADAPTER=consul \
     CN_CONFIG_CONSUL_NAMESPACE=jans \
     CN_CONFIG_KUBERNETES_NAMESPACE=default \
     CN_CONFIG_KUBERNETES_CONFIGMAP=jans \
-    CN_CONFIG_KUBERNETES_USE_KUBE_CONFIG=false \
-    CN_CONFIG_GOOGLE_SECRET_VERSION_ID=latest \
-    CN_CONFIG_GOOGLE_SECRET_NAME_PREFIX=jans
+    CN_CONFIG_KUBERNETES_USE_KUBE_CONFIG=false
 
 # ==========
 # Secret ENV
@@ -192,10 +190,7 @@ ENV CN_SECRET_ADAPTER=vault \
     CN_SECRET_VAULT_NAMESPACE=jans \
     CN_SECRET_KUBERNETES_NAMESPACE=default \
     CN_SECRET_KUBERNETES_SECRET=jans \
-    CN_SECRET_KUBERNETES_USE_KUBE_CONFIG=false \
-    CN_SECRET_GOOGLE_SECRET_MANAGER_PASSPHRASE=secret \
-    CN_SECRET_GOOGLE_SECRET_VERSION_ID=latest \
-    CN_SECRET_GOOGLE_SECRET_NAME_PREFIX=jans
+    CN_SECRET_KUBERNETES_USE_KUBE_CONFIG=false
 
 # ===============
 # Persistence ENV
@@ -229,6 +224,9 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_JAVA_OPTIONS="" \
     GOOGLE_PROJECT_ID="" \
     GOOGLE_APPLICATION_CREDENTIALS=/etc/jans/conf/google-credentials.json \
+    CN_GOOGLE_SECRET_MANAGER_PASSPHRASE=secret \
+    CN_GOOGLE_SECRET_VERSION_ID=latest \
+    CN_GOOGLE_SECRET_NAME_PREFIX=jans \
     CN_PROMETHEUS_PORT="" \
     CN_AWS_SECRETS_ENDPOINT_URL="" \
     CN_AWS_SECRETS_PREFIX=jans \
@@ -241,7 +239,7 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
 LABEL name="janssenproject/config-api" \
     maintainer="Janssen Project <support@jans.io>" \
     vendor="Janssen Project" \
-    version="1.0.6" \
+    version="1.0.7" \
     release="dev" \
     summary="Janssen Config API" \
     description=""
@@ -256,7 +254,7 @@ RUN mkdir -p /etc/certs \
     ${JETTY_BASE}/common/libs/couchbase
 
 RUN touch /etc/hosts.back
-COPY jetty/log4j2.xml ${JETTY_BASE}/jans-config-api/resources/
+COPY jetty/log4j2.xml /app/templates/
 COPY conf/*.tmpl /app/templates/
 COPY plugins /app/plugins
 COPY templates /app/templates
@@ -273,7 +271,7 @@ COPY --chown=1000:0 jetty/jans-config-api.xml ${JETTY_BASE}/jans-config-api/weba
 
 # adjust ownership and permission
 RUN chmod -R g=u ${JETTY_BASE}/jans-config-api/custom \
-    && chmod -R g=u ${JETTY_BASE}/jans-config-api/resources \
+    && chmod 664 ${JETTY_BASE}/jans-config-api/resources/log4j2.xml \
     && chmod -R g=u ${JETTY_BASE}/jans-config-api/logs \
     && chmod -R g=u /etc/certs \
     && chmod -R g=u /etc/jans \
@@ -284,7 +282,8 @@ RUN chmod -R g=u ${JETTY_BASE}/jans-config-api/custom \
     && chmod -R g=u /app/templates/jans-config-api \
     && chown -R 1000:0 ${JETTY_BASE}/common/libs \
     && chown -R 1000:0 /usr/share/java \
-    && chown -R 1000:0 /opt/prometheus
+    && chown -R 1000:0 /opt/prometheus \
+    && chown -R 1000:0 /app/plugins
 
 USER 1000
 

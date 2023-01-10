@@ -9,12 +9,12 @@
 	<parent>
 		<artifactId>jans-notify-parent</artifactId>
 		<groupId>io.jans</groupId>
-		<version>1.0.6-SNAPSHOT</version>
+		<version>1.0.7-SNAPSHOT</version>
 	</parent>
 
 	<properties>
 		<httpcore.version>4.3.3</httpcore.version>
-		<httpclient.version>4.3.6</httpclient.version>
+		<httpclient.version>4.5.13</httpclient.version>
 	</properties>
 
 	<dependencies>

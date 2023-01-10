@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.0.6 (2023-01-09)
+
+
+### Bug Fixes
+
+* getting ready for a release ([0bda832](https://github.com/JanssenProject/jans/commit/0bda832ebc1da7017231deb38fe9aa6c7c51360a))
+* prepare for 1.0.6 release ([9e4c8fb](https://github.com/JanssenProject/jans/commit/9e4c8fb4c0a1ef4779934558e8d8d40d8fedbabf))
+
+
+### Documentation
+
+* prepare for 1.0.4 release ([c23a2e5](https://github.com/JanssenProject/jans/commit/c23a2e505b7eb325a293975d60bbc65d5e367c7d))
+
 ## [1.0.5](https://github.com/JanssenProject/jans/compare/jans-notify-v1.0.4...jans-notify-v1.0.5) (2022-12-01)
 
 

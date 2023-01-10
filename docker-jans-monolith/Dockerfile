@@ -38,7 +38,7 @@ EXPOSE 443 8080 1636
 # jans-linux-setup
 # =====================
 
-ENV JANS_SOURCE_VERSION=bd2cdf8501d60959498078bbb31650965c321c73
+ENV JANS_SOURCE_VERSION=a970d88d81f920973f3ba812db97448f135090a9
 
 # cleanup
 RUN rm -rf /tmp/jans
@@ -76,7 +76,7 @@ ENV CN_HOSTNAME="demoexample.jans.io" \
 LABEL name="janssenproject/monolith" \
     maintainer="Janssen Project <support@jans.io>" \
     vendor="Janssen Project" \
-    version="1.0.6" \
+    version="1.0.7" \
     release="dev" \
     summary="Janssen Monolith Image" \
     description="Janssen Authorization server"

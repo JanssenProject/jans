@@ -4,11 +4,12 @@ tags:
   - developer
   - bean
   - CdiUtil
+
 ---
 
 ## Ready-to-use code in Custom script:  
 Jans-auth server uses Weld 3.0 (JSR-365 aka CDI 2.0) for managed beans.
-The most important aspects of business logic are implemented through a set of beans
+The most useful functions are implemented through a set of beans which can be re-used in all custom scripts.
 
 ### Obtaining a bean inside a custom script:
 [CdiUtil](https://github.com/JanssenProject/jans/blob/main/jans-core/service/src/main/java/io/jans/service/cdi/util/CdiUtil.java) used to obtain managed beans inside a custom script.
@@ -23,8 +24,8 @@ Usage (jython code):
 Suppose UserService and AuthenticationService beans have to be referenced in the code, it can be done as below:
 
 ```
-from org.gluu.oxauth.service import UserService
-from org.gluu.oxauth.service import AuthenticationService
+from io.jans.as.server.service import UserService
+from io.jans.as.server.service import AuthenticationService
 ...
 userService = CdiUtil.bean(UserService)
 authenticationService = CdiUtil.bean(AuthenticationService)
@@ -55,7 +56,7 @@ authenticationService = CdiUtil.bean(AuthenticationService)
 logged_in = authenticationService.authenticate(user_name, user_password)
 
 # 2. authenticate method without passing password parameter
-logged_in = authenticationService.authenticate(user_name, user_password)
+logged_in = authenticationService.authenticate(user_name)
 
 #3. obtain an authenticated user
 user = authenticationService.getAuthenticatedUser()
@@ -141,15 +142,61 @@ A class employed to represent a user entry in the persistence. Provides getters 
 ### 5. [CustomAttribute](https://github.com/JanssenProject/jans/blob/main/jans-orm/model/src/main/java/io/jans/orm/model/base/CustomAttribute.java)
 A class that models an attribute. An attribute has a name and a collection of associated values
 
-### 6. [Identity](https://github.com/JanssenProject/jans/blob/main/jans-core/service/src/main/java/io/jans/model/security/Identity.java)
-Mainly used to carry data between steps of authentication flows.
+### 6. [Identity](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/security/Identity.java)
+The authentication flow in jans-auth server is stateless and the instance is preserved because the Identity parameters (another name for session parameters) are persisted in databases.
+A function in the `PersonAuthenticationType` script called `getExtraParametersForStep` should be overridden to include any new session variable. The underlying Jans-auth server takes care of retrieving it, persisting it etc.
 
+```
+def getExtraParametersForStep(self, configurationAttributes, step):
+	   return Arrays.asList("sessionParamName1", "sessionParamName2", "sessionParamName3")
+
+```
+Bean details:
 |Signature|Description|
 |-|-|
 |`Object getWorkingParameter(String name)`|Retrieves a working parameter by name previously set via `setWorkingParameter`|
 |`void setWorkingParameter(String name, Object value)`|Binds data to a name for further use in an authentication flow. Recommended values to store are `String`s|
 |`SessionId getSessionId()`|Retrieves a reference to the associated server session object, see [SessionId](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/model/common/SessionId.java)|
 
+Usage
+```
+from io.jans.as.server.security import Identity
+identity = CdiUtil.bean(Identity)
+
+#1.
+newExpDate = identity.getWorkingParameter("expDate")
+
+#2.
+identity.setWorkingParameter("expDate", expDate)
+
+#3.
+session_attributes = identity.getSessionId().getSessionAttributes()
+session_attributes.containsKey("remote_ip")
+```
+
+### 8. [SessionIdService](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/service/SessionIdService.java)
+
+```
+#1. get session
+sessionIdservice = CdiUtil.bean(SessionIdService).getSessionId()
+
+#2. update session
+
+sessionIdservice.getSessionAttributes().put(key, value)
+sessionIdservice.updateSessionId(session)
+```
+
+### 9. [GrantService](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/service/GrantService.java)
+
+### 10. [ClientService](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/service/ClientService.java) : Provides operations with clients.
+
+Usage:
+```
+from io.jans.as.server.service import ClientService
+
+clientService = CdiUtil.bean(ClientService)
+client = clientService.getClient(clientId)
+```
 ### 7. HttpService: [HttpService](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/service/net/HttpService.java)
 
 Provides utility methods to execute HTTP requests, manipulate responses, etc
@@ -259,7 +306,7 @@ pwd_decrypted = encryptionService.decrypt("stringtobedecrypted")
 
 ```
 
-14. [Base64Util](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/model/src/main/java/io/jans/as/model/util/Base64Util.java)
+### 14. [Base64Util](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/model/src/main/java/io/jans/as/model/util/Base64Util.java)
 
 Usage:
 

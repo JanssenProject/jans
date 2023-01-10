@@ -22,6 +22,7 @@ import io.jans.configapi.util.AttributeNames;
 import io.jans.configapi.core.util.Jackson;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -82,13 +83,13 @@ public class ScopesResource extends ConfigBaseResource {
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_READ_ACCESS }  , groupScopes = {
             ApiAccessConstants.SCOPES_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
-    public Response getScopes(@DefaultValue("") @QueryParam(ApiConstants.TYPE) String type,
-            @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
-            @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
-            @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
-            @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
-            @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder,
-            @DefaultValue("false") @QueryParam(value = ApiConstants.WITH_ASSOCIATED_CLIENTS) boolean withAssociatedClients) {
+    public Response getScopes(@Parameter(description = "Scope type") @DefaultValue("") @QueryParam(ApiConstants.TYPE) String type,
+            @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
+            @Parameter(description = "Search pattern") @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
+            @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
+            @Parameter(description = "Attribute whose value will be used to order the returned response") @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
+            @Parameter(description = "Order in which the sortBy param is applied. Allowed values are \"ascending\" and \"descending\"") @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder,
+            @Parameter(description = "Boolean fag to indicate if clients associated with the scope are to be returned") @DefaultValue("false") @QueryParam(value = ApiConstants.WITH_ASSOCIATED_CLIENTS) boolean withAssociatedClients) {
         log.debug(
                 "SCOPES to be fetched based on type:{}, limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}, withAssociatedClients:{}",
                 type, limit, pattern, startIndex, sortBy, sortOrder, withAssociatedClients);
@@ -110,7 +111,7 @@ public class ScopesResource extends ConfigBaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_READ_ACCESS } , groupScopes = {
             ApiAccessConstants.SCOPES_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Path(ApiConstants.INUM_PATH)
-    public Response getScopeById(@NotNull @PathParam(ApiConstants.INUM) String inum,
+    public Response getScopeById(@Parameter(description = "Scope identifier") @NotNull @PathParam(ApiConstants.INUM) String inum,
             @DefaultValue("false") @QueryParam(value = ApiConstants.WITH_ASSOCIATED_CLIENTS) boolean withAssociatedClients) {
         log.debug("SCOPES to be fetched by inum:{}", inum);
         CustomScope scope = scopeService.getScopeByInum(inum, withAssociatedClients);
@@ -129,7 +130,7 @@ public class ScopesResource extends ConfigBaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_READ_ACCESS }, groupScopes = {
             ApiAccessConstants.SCOPES_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Path(ApiConstants.CREATOR + ApiConstants.CREATORID_PATH)
-    public Response getScopeByClientId(@NotNull @PathParam(ApiConstants.CREATORID) String creatorId) {
+    public Response getScopeByClientId(@Parameter(description = "Id of the scope creator. If creator is client then client_id if user then user_id") @NotNull @PathParam(ApiConstants.CREATORID) String creatorId) {
         log.debug("SCOPES to be fetched by creatorId:{}", creatorId);
         SearchRequest searchReq = new SearchRequest();
         searchReq.setFilterAttributeName(Arrays.asList("creatorId"));
@@ -150,7 +151,7 @@ public class ScopesResource extends ConfigBaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_READ_ACCESS } , groupScopes = {
             ApiAccessConstants.SCOPES_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Path(ApiConstants.TYPE + ApiConstants.TYPE_PATH)
-    public Response getScopeByType(@NotNull @PathParam(ApiConstants.TYPE) String type) {
+    public Response getScopeByType(@Parameter(description = "Type of the scope") @NotNull @PathParam(ApiConstants.TYPE) String type) {
         log.debug("SCOPES to be fetched by type:{}", type);
         SearchRequest searchReq = new SearchRequest();
         searchReq.setFilterAttributeName(Arrays.asList("jansScopeTyp"));
@@ -232,7 +233,7 @@ public class ScopesResource extends ConfigBaseResource {
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_WRITE_ACCESS }, groupScopes = {}, superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @Path(ApiConstants.INUM_PATH)
-    public Response patchScope(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString)
+    public Response patchScope(@Parameter(description = "Scope identifier") @PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString)
             throws JsonPatchException, IOException {
         log.debug("SCOPES patch details - inum:{}, pathString:{}", inum, pathString);
         Scope existingScope = scopeService.getScopeByInum(inum);
@@ -256,7 +257,7 @@ public class ScopesResource extends ConfigBaseResource {
     @DELETE
     @Path(ApiConstants.INUM_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_DELETE_ACCESS }, groupScopes = {}, superScopes = { ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
-    public Response deleteScope(@PathParam(ApiConstants.INUM) @NotNull String inum) {
+    public Response deleteScope(@Parameter(description = "Scope identifier") @PathParam(ApiConstants.INUM) @NotNull String inum) {
         log.debug("SCOPES to be deleted - inum:{}", inum);
         Scope scope = scopeService.getScopeByInum(inum);
         checkResourceNotNull(scope, SCOPE);

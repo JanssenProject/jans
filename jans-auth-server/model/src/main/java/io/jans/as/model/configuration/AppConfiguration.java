@@ -448,6 +448,9 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Boolean value specifying whether to include sessionId in response", defaultValue = "false")
     private Boolean includeSidInResponse = false;
 
+    @DocProperty(description = "Boolean value specifying whether to disable prompt=login", defaultValue = "false")
+    private Boolean disablePromptLogin = false;
+
 
     /**
      * SessionId will be expired after sessionIdLifetime seconds
@@ -901,12 +904,8 @@ public class AppConfiguration implements Configuration {
         this.checkUserPresenceOnRefreshToken = checkUserPresenceOnRefreshToken;
     }
 
-    public Set<FeatureFlagType> getEnabledFeatureFlags() {
-        return FeatureFlagType.fromValues(getFeatureFlags());
-    }
-
     public boolean isFeatureEnabled(FeatureFlagType flagType) {
-        final Set<FeatureFlagType> flags = getEnabledFeatureFlags();
+        final Set<FeatureFlagType> flags = FeatureFlagType.from(this);
         if (flags.isEmpty())
             return true;
 
@@ -1107,6 +1106,15 @@ public class AppConfiguration implements Configuration {
 
     public void setForceOfflineAccessScopeToEnableRefreshToken(Boolean forceOfflineAccessScopeToEnableRefreshToken) {
         this.forceOfflineAccessScopeToEnableRefreshToken = forceOfflineAccessScopeToEnableRefreshToken;
+    }
+
+    public Boolean getDisablePromptLogin() {
+        if (disablePromptLogin == null) disablePromptLogin = false;
+        return disablePromptLogin;
+    }
+
+    public void setDisablePromptLogin(Boolean disablePromptLogin) {
+        this.disablePromptLogin = disablePromptLogin;
     }
 
     public Boolean getIncludeSidInResponse() {

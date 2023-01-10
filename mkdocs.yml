@@ -184,14 +184,14 @@ nav:
         - 'FAQ': 'admin/vm-ops/faq.md'
     - 'Configuration Guide':
         - 'Config API':
-            - 'admin/config-api/README.md'
-            - 'Settings': 'admin/config-api/config.md'
-            - 'Attributes': 'admin/config-api/attribute.md'
-            - 'OpenID Client': 'admin/config-api/openid-client.md'
-            - 'Security': 'admin/config-api/security.md'
-            - 'Logs': 'admin/config-api/logs.md'
-            - 'Monitoring': 'admin/config-api/monitoring.md'
-            - 'Plugins': 'admin/config-api/plugins.md'
+            - 'admin/config-guide/config-api/README.md'
+            - 'Settings': 'admin/config-guide/config-api/config.md'
+            - 'Attributes': 'admin/config-guide/config-api/attribute.md'
+            - 'OpenID Client': 'admin/config-guide/config-api/openid-client.md'
+            - 'Security': 'admin/config-guide/config-api/security.md'
+            - 'Logs': 'admin/config-guide/config-api/logs.md'
+            - 'Monitoring': 'admin/config-guide/config-api/monitoring.md'
+            - 'Plugins': 'admin/config-guide/config-api/plugins.md'
         - 'CURL Guide': 'admin/config-guide/curl.md'
         - 'Text-Based User Interface (TUI)': 'admin/config-guide/tui.md'
         - 'Command Line Interface (CLI)':
@@ -247,7 +247,6 @@ nav:
         - 'Auth Server Config': 'admin/auth-server/config.md'
         - 'Session Management':
             - 'admin/auth-server/session-management/README.md'
-            - 'What is a session?': 'admin/auth-server/session-management/what-is.md'
             - 'IDP v RP Sessions': 'admin/auth-server/session-management/idp-v-rp.md'
             - 'Multiple Sessions in One Browser': 'admin/auth-server/session-management/multiple-sessions-one-browser.md'
             - 'Multiple Browser Sessions': 'admin/auth-server/session-management/multiple-browser-sessions.md'
@@ -258,6 +257,11 @@ nav:
             - 'OpenID id_token': 'admin/auth-server/tokens/openid-id-token.md'
             - 'OpenID Userinfo Token': 'admin/auth-server/tokens/openid-userinfo-token.md'
             - 'UMA RPT Token': 'admin/auth-server/tokens/uma-rpt-token.md'
+        - 'Scopes':
+            - 'admin/auth-server/scopes/README.md'
+            - 'OAuth Scopes': 'admin/auth-server/scopes/oauth.md'
+            - 'OpenID Scopes': 'admin/auth-server/scopes/openid.md'
+            - 'UMA Scopes': 'admin/auth-server/scopes/uma.md'
         - 'Endpoints':
             - 'admin/auth-server/endpoints/README.md'
             - 'OpenID Configuration': 'admin/auth-server/endpoints/configuration.md'
@@ -306,6 +310,8 @@ nav:
                 - 'Forcing Logout on Browser Exit': 'admin/auth-server/openid-features/logout/forcing-logout.md'
         - 'OAuth Features':
             - 'admin/auth-server/oauth-features/README.md'
+            - 'Authorization Code Grant': 'admin/auth-server/oauth-features/auth-code-grant.md'
+            - 'Implicit Grant': 'admin/auth-server/oauth-features/implicit-grant.md'
             - 'Password Grant': 'admin/auth-server/oauth-features/password-grant.md'
             - 'Device Grant': 'admin/auth-server/oauth-features/device-grant.md'
             - 'Client Credential Grant': 'admin/auth-server/oauth-features/client-credential-grant.md'
@@ -382,7 +388,6 @@ nav:
             - 'Person Authentication': 'admin/developer/scripts/person-authentication.md'
             - 'Consent Gathering': 'admin/developer/scripts/consent-gathering.md'
             - 'Post Authentication': 'admin/developer/scripts/post-authentication.md'
-            - 'id_token': 'admin/developer/scripts/id-token.md'
             - 'Resource Owner Password Credentials': 'admin/developer/scripts/ropc.md'
             - 'CIBA End User Notification': 'admin/developer/scripts/ciba.md'
             - 'OpenID Configuration': 'admin/developer/scripts/openid-config.md'
@@ -452,6 +457,7 @@ nav:
         - 'Adding Custom Attributes': 'admin/scim/custom-attributes.md'
     - 'Janssen Recipes':
         - 'admin/recipes/README.md'
+        - 'Benchmark': 'admin/recipes/benchmark.md'
         - 'Returning Group/Role User Information': 'admin/recipes/returning-group.md'
         - 'Passwordless': 'admin/recipes/passwordless.md'
         - 'Forcing Re-Authentication': 'admin/recipes/forcing-reauthn.md'

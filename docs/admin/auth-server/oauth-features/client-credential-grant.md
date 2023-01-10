@@ -6,14 +6,25 @@ tags:
   - feature
 ---
 
-## This content is in progress
+### Sequence Diagram
 
-The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.
+```mermaid
+sequenceDiagram
+title Client credentials flow
+autonumber 1
 
-## Have questions in the meantime?
+activate Resource owner Client
+Resource owner Client->>Jans AS:Client Authentication
+activate Jans AS
+Jans AS-->>Resource owner Client:Access Token
+deactivate Jans AS
+```
+### Testing
 
-While this documentation is in progress, you can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussion) or the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). Any questions you have will help determine what information our documentation should cover.
+1. https://github.com/JanssenProject/jans/blob/main/jans-auth-server/client/src/test/java/io/jans/as/client/ws/rs/ClientCredentialsGrantHttpTest.java
 
-## Want to contribute?
-
-If you have content you'd like to contribute to this page in the meantime, you can get started with our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/).
+2. CURL Command:
+```
+curl -k -u "put_client_id:put_client_secret" https://jans-ui.jans.io/jans-auth/restv1/token \ 
+      -d  "grant_type=client_credentials&scope=put_scope_name_here" 
+```

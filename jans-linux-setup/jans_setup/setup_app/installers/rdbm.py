@@ -65,6 +65,26 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
         self.dbUtils.session.commit()
         self.dbUtils.metadata.clear()
 
+    def fix_unit_file(self, service_name):
+        unit_fn_ = self.run(['systemctl', 'show', '-P', 'FragmentPath', service_name])
+        if unit_fn_ and unit_fn_.strip():
+            unit_fn = unit_fn_.strip()
+            if os.path.exists(unit_fn):
+                unit_file_content = self.readFile(unit_fn.strip())
+                unit_file_content_list = unit_file_content.splitlines()
+                unit_content = False
+
+                for i, l in enumerate(unit_file_content_list[:]):
+                    if l.strip().lower() == '[unit]':
+                        unit_content = True
+                    if not l.strip() and unit_content:
+                        unit_file_content_list.insert(i, 'Before=jans-auth.service')
+                        break
+
+                unit_file_content_list.append('')
+                self.writeFile(unit_fn, '\n'.join(unit_file_content_list))
+                self.run(['systemctl', 'daemon-reload'])
+
     def local_install(self):
         if not Config.rdbm_password:
             Config.rdbm_password = self.getPW()
@@ -78,7 +98,9 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
             if Config.rdbm_type == 'mysql':
                 if base.os_type == 'suse':
                     self.restart('mariadb')
+                    self.fix_unit_file('mariadb')
                     self.enable('mariadb')
+
                 elif base.clone_type == 'rpm':
                     self.restart('mysqld')
                     self.enable('mysqld')

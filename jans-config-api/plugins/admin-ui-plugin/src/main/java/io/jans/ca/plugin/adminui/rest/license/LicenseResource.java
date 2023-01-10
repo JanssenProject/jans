@@ -5,9 +5,11 @@ import io.jans.ca.plugin.adminui.model.auth.LicenseApiResponse;
 import io.jans.ca.plugin.adminui.model.auth.LicenseRequest;
 import io.jans.ca.plugin.adminui.model.auth.LicenseResponse;
 import io.jans.ca.plugin.adminui.service.license.LicenseDetailsService;
+import io.jans.ca.plugin.adminui.utils.AppConstants;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
 import io.jans.configapi.core.rest.ProtectedApi;
 
+import io.jans.configapi.util.ApiAccessConstants;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -44,16 +46,16 @@ public class LicenseResource {
     LicenseDetailsService licenseDetailsService;
 
     @Operation(summary = "Check if admin-ui license is active", description = "Check if admin-ui license is active", operationId = "is-license-active", tags = {
-            "Admin UI - License" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    SCOPE_LICENSE_READ }))
+            "Admin UI - License"}, security = @SecurityRequirement(name = "oauth2", scopes = {
+            SCOPE_LICENSE_READ}))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LicenseApiResponse.class, description = "License response"))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LicenseApiResponse.class, description = "License response"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LicenseApiResponse.class, description = "License response"))) })
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LicenseApiResponse.class, description = "License response")))})
     @GET
     @Path(IS_ACTIVE)
-    @ProtectedApi(scopes = { SCOPE_LICENSE_READ })
+    @ProtectedApi(scopes = {SCOPE_LICENSE_READ}, groupScopes = {SCOPE_LICENSE_WRITE}, superScopes = { AppConstants.SCOPE_ADMINUI_READ })
     @Produces(MediaType.APPLICATION_JSON)
     public Response isActive() {
         LicenseApiResponse licenseResponse = null;
@@ -69,17 +71,17 @@ public class LicenseResource {
     }
 
     @Operation(summary = "Activate license using license-key", description = "Activate license using license-key", operationId = "activate-adminui-license", tags = {
-            "Admin UI - License" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    SCOPE_LICENSE_WRITE }))
+            "Admin UI - License"}, security = @SecurityRequirement(name = "oauth2", scopes = {
+            SCOPE_LICENSE_WRITE}))
     @RequestBody(description = "LicenseRequest object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LicenseRequest.class)))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LicenseApiResponse.class, description = "License response"))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LicenseApiResponse.class, description = "License response"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LicenseApiResponse.class, description = "License response"))) })
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LicenseApiResponse.class, description = "License response")))})
     @POST
     @Path(ACTIVATE_LICENSE)
-    @ProtectedApi(scopes = { SCOPE_LICENSE_WRITE })
+    @ProtectedApi(scopes = {SCOPE_LICENSE_WRITE}, superScopes = { AppConstants.SCOPE_ADMINUI_WRITE })
     @Produces(MediaType.APPLICATION_JSON)
     public Response activateLicense(@Valid @NotNull LicenseRequest licenseRequest) {
         LicenseApiResponse licenseResponse = null;
@@ -95,17 +97,17 @@ public class LicenseResource {
     }
 
     @Operation(summary = "Save license api credentials", description = "Save license api credentials", operationId = "save-license-api-credentials", tags = {
-            "Admin UI - License" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    SCOPE_LICENSE_WRITE }))
+            "Admin UI - License"}, security = @SecurityRequirement(name = "oauth2", scopes = {
+            SCOPE_LICENSE_WRITE}))
     @RequestBody(description = "LicenseSpringCredentials object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LicenseSpringCredentials.class)))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LicenseApiResponse.class, description = "License response"))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LicenseApiResponse.class, description = "License response"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LicenseApiResponse.class, description = "License response"))) })
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LicenseApiResponse.class, description = "License response")))})
     @POST
     @Path(SAVE_API_CREDENTIALS)
-    @ProtectedApi(scopes = { SCOPE_LICENSE_WRITE })
+    @ProtectedApi(scopes = {SCOPE_LICENSE_WRITE}, superScopes = { AppConstants.SCOPE_ADMINUI_WRITE })
     @Produces(MediaType.APPLICATION_JSON)
     public Response saveLicenseCredentials(@Valid @NotNull LicenseSpringCredentials licenseSpringCredentials) {
         LicenseApiResponse licenseResponse = null;
@@ -121,16 +123,16 @@ public class LicenseResource {
     }
 
     @Operation(summary = "Get admin ui license details", description = "Get admin ui license details", operationId = "get-adminui-license", tags = {
-            "Admin UI - License" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    SCOPE_LICENSE_READ }))
+            "Admin UI - License"}, security = @SecurityRequirement(name = "oauth2", scopes = {
+            SCOPE_LICENSE_READ}))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LicenseResponse.class, description = "License Response"))),
             @ApiResponse(responseCode = "400", description = "Bad Request"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "500", description = "InternalServerError") })
+            @ApiResponse(responseCode = "500", description = "InternalServerError")})
     @GET
     @Path(LICENSE_DETAILS)
-    @ProtectedApi(scopes = { SCOPE_LICENSE_READ })
+    @ProtectedApi(scopes = {SCOPE_LICENSE_READ}, groupScopes = {SCOPE_LICENSE_WRITE}, superScopes = { AppConstants.SCOPE_ADMINUI_READ })
     @Produces(MediaType.APPLICATION_JSON)
     public Response getLicenseDetails() {
         try {

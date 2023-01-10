@@ -9,6 +9,7 @@ import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -48,9 +49,11 @@ public class StatResource extends ConfigBaseResource {
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.STATS_USER_READ_ACCESS, ApiAccessConstants.JANS_STAT } , groupScopes = {}, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getStatistics(@HeaderParam("Authorization") String authorization,
-            @QueryParam(value = "month") String month, @QueryParam(value = "start_month") String startMonth,
-            @QueryParam(value = "end_month") String endMonth, @QueryParam(value = "format") String format) {
+    public Response getStatistics(@Parameter(description = "Authorization code") @HeaderParam("Authorization") String authorization,
+            @Parameter(description = "Month for which the stat report is to be fetched. The parameter is mandatory if start_month and end_month parameters are not present.", example="202012 (2020 Dec) 202101 (2021 Jan)") @QueryParam(value = "month") String month,
+            @Parameter(description = "Start-Month for which the stat report is to be fetched") @QueryParam(value = "start_month") String startMonth,
+            @Parameter(description = "End-Month for which the stat report is to be fetched") @QueryParam(value = "end_month") String endMonth,
+            @Parameter(description = "Report format") @QueryParam(value = "format") String format) {
         if (StringUtils.isBlank(format)) {
             format = "";
         }

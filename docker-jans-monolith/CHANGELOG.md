@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.6-1](https://github.com/JanssenProject/jans/compare/docker-jans-monolith-v1.0.5-1...docker-jans-monolith-v1.0.6-1) (2023-01-09)
+
+
+### Bug Fixes
+
+* modify clnId column type ([#3459](https://github.com/JanssenProject/jans/issues/3459)) ([701394c](https://github.com/JanssenProject/jans/commit/701394c3d7463ffb2bd223daf9662921244ad34d))
+* prepare for 1.0.6 release ([9e4c8fb](https://github.com/JanssenProject/jans/commit/9e4c8fb4c0a1ef4779934558e8d8d40d8fedbabf))
+
 ## [1.0.5-1](https://github.com/JanssenProject/jans/compare/docker-jans-monolith-v1.0.3-1...docker-jans-monolith-v1.0.5-1) (2022-12-01)
 
 

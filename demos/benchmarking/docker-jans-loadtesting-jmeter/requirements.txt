@@ -1,0 +1,14 @@
+# pinned to py3-grpcio version to avoid failure on native extension build
+joblib
+ldap3
+pygtail
+psycopg2-binary
+PyMySQL
+# =======================
+# Install Spanner package
+# =======================
+google-cloud-spanner
+# ===============
+# Install Couchbase Client
+# ===============
+couchbase

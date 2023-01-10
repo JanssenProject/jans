@@ -17,7 +17,7 @@ URL to access authorization endpoint on Janssen Server is listed in the response
 [configuration endpoint](./configuration.md) given below.
 
 ```text
-https://<jans-server-host>/jans-auth/.well-known/openid-configuration
+https://janssen.server.host/jans-auth/.well-known/openid-configuration
 ```
 
 `authorization_endpoint` claim in the response specifies the URL for authorization endpoint. By default, authorization 
@@ -41,25 +41,23 @@ Authorization endpoint can be further configured using Janssen Server configurat
 [Janssen Text-based UI(TUI)](../../config-guide/tui.md) to configure the properties,
 navigate via `Auth Server`->`Properties`.
 
-- [issuer](https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#issuer)
-- [requirePkce](https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#requirepkce)
-- [fapiCompatibility](https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#fapicompatibility)
-- [forceSignedRequestObject](https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#forcesignedrequestobject)
-- [authorizationCodeLifetime](https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#authorizationcodelifetime)
-- [returnDeviceSecretFromAuthzEndpoint](https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#returndevicesecretfromauthzendpoint)
-- [requestUriBlockList](https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#requesturiblocklist)
-- [requireRequestObjectEncryption](https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#requirerequestobjectencryption)
-- [staticDecryptionKid](https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#staticdecryptionkid)
-- [requestUriHashVerificationEnabled](https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#requesturihashverificationenabled)
-- [legacyIdTokenClaims](https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#legacyidtokenclaims)
-- [customHeadersWithAuthorizationResponse](https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#customheaderswithauthorizationresponse)
-- [includeSidInResponse](https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#includesidinresponse)
-- [sessionIdRequestParameterEnabled](https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#sessionidrequestparameterenabled)
-- [returnDeviceSecretFromAuthzEndpoint](https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#returndevicesecretfromauthzendpoint)
-- [requirePar](https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#requirepar)
-- [cibaMaxExpirationTimeAllowedSec](https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#cibamaxexpirationtimeallowedsec)
-
-TODO: can we organise above properties in logical groupings? Like pertaining to request, response etc?
+- [issuer](../../reference/json/properties/janssenauthserver-properties.md#issuer)
+- [requirePkce](../../reference/json/properties/janssenauthserver-properties.md#requirepkce)
+- [fapiCompatibility](../../reference/json/properties/janssenauthserver-properties.md#fapicompatibility)
+- [forceSignedRequestObject](../../reference/json/properties/janssenauthserver-properties.md#forcesignedrequestobject)
+- [authorizationCodeLifetime](../../reference/json/properties/janssenauthserver-properties.md#authorizationcodelifetime)
+- [returnDeviceSecretFromAuthzEndpoint](../../reference/json/properties/janssenauthserver-properties.md#returndevicesecretfromauthzendpoint)
+- [requestUriBlockList](../../reference/json/properties/janssenauthserver-properties.md#requesturiblocklist)
+- [requireRequestObjectEncryption](../../reference/json/properties/janssenauthserver-properties.md#requirerequestobjectencryption)
+- [staticDecryptionKid](../../reference/json/properties/janssenauthserver-properties.md#staticdecryptionkid)
+- [requestUriHashVerificationEnabled](../../reference/json/properties/janssenauthserver-properties.md#requesturihashverificationenabled)
+- [legacyIdTokenClaims](../../reference/json/properties/janssenauthserver-properties.md#legacyidtokenclaims)
+- [customHeadersWithAuthorizationResponse](../../reference/json/properties/janssenauthserver-properties.md#customheaderswithauthorizationresponse)
+- [includeSidInResponse](../../reference/json/properties/janssenauthserver-properties.md#includesidinresponse)
+- [sessionIdRequestParameterEnabled](../../reference/json/properties/janssenauthserver-properties.md#sessionidrequestparameterenabled)
+- [returnDeviceSecretFromAuthzEndpoint](../../reference/json/properties/janssenauthserver-properties.md#returndevicesecretfromauthzendpoint)
+- [requirePar](../../reference/json/properties/janssenauthserver-properties.md#requirepar)
+- [cibaMaxExpirationTimeAllowedSec](../../reference/json/properties/janssenauthserver-properties.md#cibamaxexpirationtimeallowedsec)
 
 ## Required Client Configuration
 
@@ -74,17 +72,15 @@ navigating to `Auth-Server`->`Clients`->`Add Client`
 Janssen Server [supports PKCE](../oauth-features/pkce.md), which recommended and more secure method for using `code`
 grant. 
 
-PKCE can be enabled/disable by setting [requirePkce](https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#requirepkce)
+PKCE can be enabled/disable by setting [requirePkce](../../reference/json/properties/janssenauthserver-properties.md#requirepkce)
 property. Janssen server supports `plain` as well as `s256` code challenge methods. 
 
 ## Using PAR
 
-TODO: PAR is a separate endpoint, should it be part of this document for authorization endpoint?
-
-Janssen Server [supports PAR](../oauth-features/par.md)(Pushed Authorization Requests) to enable authorization using 
+As a separate endpoint, Janssen Server [supports PAR](../oauth-features/par.md)(Pushed Authorization Requests) to enable authorization using 
 more complex authorization requests and making it more secure at the same time. 
 
-Use Janssen Server configuration property [requirePar](https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#requirepar)
+Use Janssen Server configuration property [requirePar](../../reference/json/properties/janssenauthserver-properties.md#requirepar)
 to accept only PAR requests. 
 
 ## Using JARM
@@ -94,13 +90,50 @@ JARM makes authorization responses more secure and compliant to be used in FAPI 
 
 Janssen Server supports all response modes as defined in [JARM specification](https://openid.net//specs/openid-financial-api-jarm.html#response-encoding) 
 
+## Using Prompt Parameter
+
+`prompt` request parameter is an ASCII string value that specifies whether the Authorization Server prompts the End-User
+for re-authentication and consent. Janssen Server supports `none`, `login`, `consent` and `select_account` values for
+`prompt` parameter. Multiple values can be specified by separating them with single space. Based on value/s of this 
+request parameter Authorization Server prompts the End-User for re-authentication and consent. 
+
+### none
+
+`none` value will instruct Janssen Server NOT to display any authentication or consent user interface pages. 
+An error is returned if the End-User is not already authenticated or the Client does not have pre-configured consent for
+the requested scopes. This can be used as a method to check for existing authentication and/or consent.
+
+### login
+
+`login` value will instruct Janssen Server to prompt the End-User for re-authentication.
+
+### consent
+
+`consent` value will instruct Janssen Server to prompt the End-User for consent before returning information to the 
+Client.
+
+### select_account
+
+`select_account` value will instruct Janssen Server to prompt the End-User to select a user account. This allows a user
+who has multiple accounts at the Authorization Server to select amongst the multiple accounts that they may have current
+sessions for.
+
 ## Configuring Authentication Methods
 
-TODO: Elaborate on interception scripts
+`acr_values` request parameter is used to specify authentication methods to be used by Janssen Server to authenticate
+the end user. Multiple acr values can be specified by separating them with a space.
 
-## Authorization Flows
+In order to use a particular acr value, the client needs to be authorized to use all the acr values in the list. If no
+the request doesn't specify any acr value then the default acr value configured for respective client is used by Janssen
+server for end user authentication.
 
-TODO: Flows should be elaborated in separate documents if needed. Just add link here.
+## Customizing using Interception Scripts
+
+[Interception scripts](../../developer/interception-scripts.md) allows
+flexibility to configure and customize multiple aspects in Janssen Server. For example, see this documentation to learn
+how [person authentication](../../developer/scripts/person-authentication.md)
+and [consent gathering](../../developer/scripts/consent-gathering.md) can be 
+customized using interception scripts.
 
 ## Want to contribute?
 

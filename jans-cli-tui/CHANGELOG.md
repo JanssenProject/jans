@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.0.6](https://github.com/JanssenProject/jans/compare/jans-cli-tui-v1.0.5...jans-cli-tui-v1.0.6) (2023-01-09)
+
+
+### Bug Fixes
+
+* jans-cli-tui ([#3287](https://github.com/JanssenProject/jans/issues/3287)) ([27e7518](https://github.com/JanssenProject/jans/commit/27e7518922aff6434bf9a87392e246af8f44d9ac))
+* jans-cli-tui refactor mouse operations ([#3482](https://github.com/JanssenProject/jans/issues/3482)) ([39dc0c7](https://github.com/JanssenProject/jans/commit/39dc0c7b3e0b66e1180e5b8c8c165f992c711555))
+* prepare for 1.0.6 release ([9e4c8fb](https://github.com/JanssenProject/jans/commit/9e4c8fb4c0a1ef4779934558e8d8d40d8fedbabf))
+
 ## 1.0.5 (2022-12-01)
 
 

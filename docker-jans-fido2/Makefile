@@ -1,4 +1,4 @@
-CN_VERSION?=1.0.6-SNAPSHOT
+CN_VERSION?=1.0.7-SNAPSHOT
 IMAGE_NAME=janssenproject/fido2
 DEV_VERSION?=$(shell echo ${CN_VERSION} | cut -d '-' -f 1)_dev
 
