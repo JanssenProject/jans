@@ -138,7 +138,7 @@ jobs:
           sha256sum jans-linux-suse-X86-64-setup.pyz > jans-linux-suse-X86-64-setup.pyz.sha256sum
           cd ../jans-cli-tui
           make zipapp 
-          mv config-cli.pyz jans-cli-tui-linux-suse-X86-64.pyz
+          mv jans-cli-tui.pyz jans-cli-tui-linux-suse-X86-64.pyz
           sha256sum jans-cli-tui-linux-suse-X86-64.pyz > jans-cli-tui-linux-suse-X86-64.pyz.sha256sum
     # To be removed once we get SUSE build working
     - uses: addnab/docker-run-action@v3
@@ -167,7 +167,7 @@ jobs:
           sha256sum jans-linux-X86-64-setup.pyz > jans-linux-X86-64-setup.pyz.sha256sum
           cd ../jans-cli-tui
           make zipapp 
-          mv config-cli.pyz jans-cli-tui-linux-X86-64.pyz
+          mv jans-cli-tui.pyz jans-cli-tui-linux-X86-64.pyz
           sha256sum jans-cli-tui-linux-X86-64.pyz > jans-cli-tui-linux-X86-64.pyz.sha256sum
     - name: Set up Python 3.6
       uses: actions/setup-python@v4
@@ -179,7 +179,7 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y python3 build-essential ca-certificates dbus systemd iproute2 gpg python3-pip python3-dev libpq-dev gcc
         python3 -m pip install --upgrade pip
-        pip3 install shiv
+        pip3 install shiv wheel
         echo "Building jans-linux-setup package"
         cd jans-linux-setup
         make zipapp
@@ -187,7 +187,7 @@ jobs:
         sha256sum jans-linux-ubuntu-X86-64-setup.pyz > jans-linux-ubuntu-X86-64-setup.pyz.sha256sum
         cd ../jans-cli-tui
         make zipapp 
-        mv config-cli.pyz jans-cli-tui-linux-ubuntu-X86-64.pyz
+        mv jans-cli-tui jans-cli-tui-linux-ubuntu-X86-64.pyz
         sha256sum jans-cli-tui-linux-ubuntu-X86-64.pyz > jans-cli-tui-linux-ubuntu-X86-64.pyz.sha256sum
     - uses: actions/cache@v3
       id: cache-installers
