@@ -92,6 +92,28 @@ public class AssertionController {
         return builder.build();
     }
 
+    /* Example for one_step:
+     *  - request:
+     *             username: null
+     *             keyhandle: r4AIBCT_CEi8SWThJ-T5gsxjfZMqzqMdqCeDuK_xTvz_kr5FNNs2j6Tb2dvoXgculthxTzXF5-FI1KWsA_dRLA
+     *             application: https://yurem-emerging-pig.gluu.info/identity/authcode.htm
+     *             session_id: 2994e597-3dc9-4d96-ae7e-84cfcf049db6
+     *  - response:
+     *             {"authenticateRequests":[{"challenge":"EELAH05XTUfPHrvpqVYhXB8pEmOMaRWY9mBurdhicBU",
+     *             "appId":"https://yurem-emerging-pig.gluu.info/identity/authcode.htm",
+     *             "keyHandle":"r4AIBCT_CEi8SWThJ-T5gsxjfZMqzqMdqCeDuK_xTvz_kr5FNNs2j6Tb2dvoXgculthxTzXF5-FI1KWsA_dRLA","version":"U2F_V2"}]}
+     *            
+     * Example for two_step:
+     *  - request:
+     *             username: test1
+     *             keyhandle: null
+     *             application: https://yurem-emerging-pig.gluu.info/identity/authcode.htm
+     *             session_id: 850ff665-02b6-435b-baf8-b018b13043c3
+     *  - response:
+     *             {"authenticateRequests":[{"challenge":"5QoRtudmej5trcrMRgFBoI5rZ6pzIZiYP3u3bXCvvAE",
+     *             "appId":"https://yurem-emerging-pig.gluu.info/identity/authcode.htm",
+     *             "keyHandle":"YJvWD9n40eIurInJvPKUoxpKzrleUMWgu9w3v_NUBu7BiGAclgkH_Zg88_T5y6Rh78imTxTh0djWFYG4jxOixw","version":"U2F_V2"}]}
+     */
     @GET
     @Produces({ "application/json" })
     @Path("/authentication")
@@ -113,6 +135,29 @@ public class AssertionController {
         return builder.build();
     }
 
+    /* Example for one_step:
+     *  - request:
+     *             username: null
+     *             tokenResponse: {"signatureData":"AQAAAAEwRQIhANrCm98JCTz6cqSZ_vwGHdF9uqe3b4z1nCrNIPCObwc-AiAblGdWyky
+     *             LeaTJPzLtbWHMoN9MsKUlgmbfSRsINJEVeA","clientData":"eyJ0eXAiOiJuYXZpZ2F0b3IuaWQuZ2V0QXNzZXJ0aW9uIiwiY
+     *             2hhbGxlbmdlIjoiRUVMQUgwNVhUVWZQSHJ2cHFWWWhYQjhwRW1PTWFSV1k5bUJ1cmRoaWNCVSIsIm9yaWdpbiI6Imh0dHBzOlwvX
+     *             C95dXJlbS1lbWVyZ2luZy1waWcuZ2x1dS5pbmZvXC9pZGVudGl0eVwvYXV0aGNvZGUuaHRtIn0","keyHandle":"r4AIBCT_CEi
+     *             8SWThJ-T5gsxjfZMqzqMdqCeDuK_xTvz_kr5FNNs2j6Tb2dvoXgculthxTzXF5-FI1KWsA_dRLA"}
+     *  - response:
+     *             {"status":"success","challenge":"EELAH05XTUfPHrvpqVYhXB8pEmOMaRWY9mBurdhicBU"}
+     *            
+    * Example for two_step:
+     *  - request:
+     *             username: test1
+     *             tokenResponse: {"signatureData":"AQAAAAEwRgIhAN4auE9-U2YDhi8ByxIIv3G2hvDeFjEGU_x5SvfcIQyUAiEA4I_xMin
+     *             mYAmH5qk5KMaYATFAryIpoVwARGvEFQTWE2Q","clientData":"eyJ0eXAiOiJuYXZpZ2F0b3IuaWQuZ2V0QXNzZXJ0aW9uIiwi
+     *             Y2hhbGxlbmdlIjoiNVFvUnR1ZG1lajV0cmNyTVJnRkJvSTVyWjZweklaaVlQM3UzYlhDdnZBRSIsIm9yaWdpbiI6Imh0dHBzOlwv
+     *             XC95dXJlbS1lbWVyZ2luZy1waWcuZ2x1dS5pbmZvXC9pZGVudGl0eVwvYXV0aGNvZGUuaHRtIn0","keyHandle":"YJvWD9n40e
+     *             IurInJvPKUoxpKzrleUMWgu9w3v_NUBu7BiGAclgkH_Zg88_T5y6Rh78imTxTh0djWFYG4jxOixw"}
+     *  - response:
+     *             {"status":"success","challenge":"5QoRtudmej5trcrMRgFBoI5rZ6pzIZiYP3u3bXCvvAE"}
+     *            
+     */
     @GET
     @Produces({ "application/json" })
     @Path("/authentication")
