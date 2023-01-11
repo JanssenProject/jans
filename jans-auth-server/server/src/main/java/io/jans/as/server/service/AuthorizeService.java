@@ -151,13 +151,18 @@ public class AuthorizeService {
         try {
             final User user = sessionIdService.getUser(session);
             if (user == null) {
-                log.debug("Permission denied. Failed to find session user: userDn = " + session.getUserDn() + ".");
+                log.debug("Permission denied. Failed to find session user: userDn = {}", session.getUserDn());
                 permissionDenied(session);
                 return;
             }
 
             String clientId = session.getSessionAttributes().get(AuthorizeRequestParam.CLIENT_ID);
             final Client client = clientService.getClient(clientId);
+            if (client == null) {
+                log.debug("Permission denied. Failed to find client by id: {}", clientId);
+                permissionDenied(session);
+                return;
+            }
 
             String scope = session.getSessionAttributes().get(AuthorizeRequestParam.SCOPE);
             String responseType = session.getSessionAttributes().get(AuthorizeRequestParam.RESPONSE_TYPE);
