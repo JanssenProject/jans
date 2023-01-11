@@ -102,11 +102,22 @@ navigate via `Auth Server`->`Properties`.
 
 ## Client Authentication
 
-Token Endpoint requires 
-[Client Authentication](https://openid.net/specs/openid-connect-core-1_0.html#ClientAuthentication) methods to 
-authenticate clients to the authorization server.
+Janssen Server Token Endpoint requires confidential clients to authenticate using one of the supported client
+authentication method listed below:
 
-TODO: add more details here
+- client_secret_basic
+- client_secret_post
+- client_secret_jwt
+- private_key_jwt
+
+Refer to [Client Authentication](https://openid.net/specs/openid-connect-core-1_0.html#ClientAuthentication) section of OpenID
+Connect core specification for more details on these authentication methods.
+
+Client can specify the default authentication method. To set default authentication method using
+[Janssen Text-based UI(TUI)](../../config-guide/tui.md),
+navigate via `Auth Server`->`Clients`->`Add Client`->`Basic`-> `Authn Method Token Endpoint`.
+
+![](../../../assets/image-tui-client-registration-basic.png)
 
 ## Supported Grant Types
 
