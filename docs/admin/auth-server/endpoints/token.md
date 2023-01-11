@@ -136,3 +136,15 @@ navigate via `Auth Server`->`Clients`->`Add Client`/`search client`->`Basic`-> `
 
 ![](../../../assets/image-tui-client-registration-basic.png)
 
+## Interception Scripts
+
+Token endpoint response can be further customized using [interception scripts](../../developer/interception-scripts.md).
+Following interception scripts are relevant to token endpoint:
+
+- [Update Token](../../developer/scripts/update-token.md)
+
+Client can configure a particular script to be executed using client configuration. To update configuration using
+[Janssen Text-based UI(TUI)](../../config-guide/tui.md) navigate via `Auth Server`->`Clients`->`Add Client`/`search`->
+`Client Scripts`
+
+![](../../../assets/image-tui-client-registration-scripts.png)
