@@ -451,9 +451,7 @@
         }
     },
     "blockWebviewAuthorizationEnabled": false,
-    "userInfoConfiguration": {
-        "dateFormatterPattern": {
-            "birthdate": "yyyy-MM-dd"
-        }
+    "dateFormatterPatterns": {
+        "birthdate": "yyyy-MM-dd"
     }
 }

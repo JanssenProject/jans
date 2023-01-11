@@ -58,8 +58,8 @@ you should see the [Dynamic Scopes](../developer/scripts/dynamic-scope.md) inter
 
 ## Userinfo formatter
 
-There is a configuration property `userInfoConfiguration` which has a default
-value of `{'dateFormatterPattern': {'birthdate':'yyyy-MM-dd'}}`.
+There is a configuration property `dateFormatterPatterns` which can be used for format date claims.
+Example: `{'dateFormatterPatterns': {'userinfo':'yyyy-MM-dd'}}`.
 
 ## Language support
 
