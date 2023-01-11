@@ -50,6 +50,8 @@ public class AppConfiguration implements Configuration {
     private boolean metricReporterEnabled = true;
 	@DocProperty(description = "Custom object class list for dynamic person enrolment")
     private List<String> personCustomObjectClassList;
+	@DocProperty(description = "Boolean value to enable disable Super Gluu extension")
+    private boolean useSuperGluu;
 
     private Fido2Configuration fido2Configuration;
 
@@ -163,6 +165,14 @@ public class AppConfiguration implements Configuration {
 
 	public void setFido2Configuration(Fido2Configuration fido2Configuration) {
 		this.fido2Configuration = fido2Configuration;
+	}
+
+	public boolean isUseSuperGluu() {
+		return useSuperGluu;
+	}
+
+	public void setUseSuperGluu(boolean useSuperGluu) {
+		this.useSuperGluu = useSuperGluu;
 	}
 
 }
