@@ -66,7 +66,7 @@ tags:
 | corsConfigurationFilters | This list specifies the CORS configuration filters | [Details](#corsconfigurationfilters) |
 | cssLocation | The location for CSS files | [Details](#csslocation) |
 | customHeadersWithAuthorizationResponse | Choose whether to enable the custom response header parameter to return custom headers with the authorization response | [Details](#customheaderswithauthorizationresponse) |
-| dateFormatterPattern | List of key value, e.g. 'birthdate: 'yyyy-MM-dd', etc. | [Details](#dateformatterpattern) |
+| dateFormatterPatterns | List of key value, e.g. 'birthdate: 'yyyy-MM-dd', etc. | [Details](#dateformatterpattern) |
 | dcrAuthorizationWithClientCredentials | Boolean value indicating if DCR authorization to be performed using client credentials | [Details](#dcrauthorizationwithclientcredentials) |
 | dcrAuthorizationWithMTLS | Boolean value indicating if DCR authorization allowed with MTLS | [Details](#dcrauthorizationwithmtls) |
 | dcrIssuers | List of DCR issuers | [Details](#dcrissuers) |
@@ -772,7 +772,7 @@ tags:
 - Default value: None
 
 
-### dateFormatterPattern
+### dateFormatterPatterns
 
 - Description: List of key value, e.g. 'birthdate: 'yyyy-MM-dd', etc.
 
