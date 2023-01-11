@@ -411,7 +411,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
             else:
                 auth_cred_target_fn = os.path.join(Config.configFolder, 'google_application_credentials.json')
                 shutil.copy(Config.google_application_credentials, auth_cred_target_fn)
-                Config.templateRenderingDict['spanner_creds'] = 'auth.credentials-file={}'.format(auth_cred_target_fn)
+                Config.templateRenderingDict['spanner_creds'] = 'connection.credentials-file={}'.format(auth_cred_target_fn)
 
             self.renderTemplateInOut(Config.jansSpannerProperties, Config.templateFolder, Config.configFolder)
 
