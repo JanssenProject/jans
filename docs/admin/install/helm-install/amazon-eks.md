@@ -28,10 +28,9 @@ Use the listing below for detailed estimation of minimum required resources. Tab
 | scim              | 1.0      | 1.0GB | N/A        | 64 Bit         | No                                 |
 | config - job      | 0.5      | 0.5GB | N/A        | 64 Bit         | Yes on fresh installs              |
 | persistence - job | 0.5      | 0.5GB | N/A        | 64 Bit         | Yes on fresh installs              |
-| client-api        | 1        | 0.4GB | N/A        | 64 Bit         | No                                 |
 | nginx             | 1        | 1GB   | N/A        | 64 Bit         | Yes if not ALB                     |
 | auth-key-rotation | 0.3      | 0.3GB | N/A        | 64 Bit         | No [Strongly recommended]          |
-| config-api        | 0.5      | 0.5GB | N/A        | 64 Bit         | No                                 |
+| config-api        | 1        | 1GB   | N/A        | 64 Bit         | No                                 |
 
 Releases of images are in style 1.0.0-beta.0, 1.0.0-0
 
