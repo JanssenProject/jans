@@ -121,4 +121,18 @@ navigate via `Auth Server`->`Clients`->`Add Client`->`Basic`-> `Authn Method Tok
 
 ## Supported Grant Types
 
-TODO: add more details here
+Token endpoint supports below mentioned grant types. 
+
+- [Authorization Code](../oauth-features/auth-code-grant.md)
+- [Refresh Token](../oauth-features/refresh-token-grant.md)
+- [Client Credentials](../oauth-features/client-credential-grant.md)
+- [UMA Ticket](../uma-features/uma-ticket-grant.md)
+- [Password](../oauth-features/password-grant.md)
+
+Client can configure all the possible grant types it can request from token endpoint during client configuration.
+To select the available grant types using
+[Janssen Text-based UI(TUI)](../../config-guide/tui.md),
+navigate via `Auth Server`->`Clients`->`Add Client`/`search client`->`Basic`-> `Grant`. 
+
+![](../../../assets/image-tui-client-registration-basic.png)
+
