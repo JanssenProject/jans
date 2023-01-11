@@ -42,160 +42,162 @@ import com.google.common.collect.Sets;
 @Named
 public class CleanerTimer {
 
-	public final static int BATCH_SIZE = 1000;
-	private final static int DEFAULT_INTERVAL = 30; // 30 seconds
-
-	@Inject
-	private Logger log;
-
-	@Inject
-	private PersistenceEntryManager persistenceEntryManager;
-
-	@Inject
-	private CacheProvider cacheProvider;
-
-	@Inject
-	private AppConfiguration appConfiguration;
-
-	@Inject
-	private AuthenticationPersistenceService authenticationPersistenceService;
-
-	@Inject
-	private RegistrationPersistenceService registrationPersistenceService;
+    public final static int BATCH_SIZE = 1000;
+    private final static int DEFAULT_INTERVAL = 30; // 30 seconds
 
     @Inject
-	@Named("u2fRequestService")
-	private RequestService u2fRequestService;
+    private Logger log;
+
+    @Inject
+    private PersistenceEntryManager persistenceEntryManager;
+
+    @Inject
+    private CacheProvider cacheProvider;
+
+    @Inject
+    private AppConfiguration appConfiguration;
+
+    @Inject
+    private AuthenticationPersistenceService authenticationPersistenceService;
+
+    @Inject
+    private RegistrationPersistenceService registrationPersistenceService;
+
+    @Inject
+    @Named("u2fRequestService")
+    private RequestService u2fRequestService;
 
     @Inject
     private StaticConfiguration staticConfiguration;
-    
-	@Inject
-	private Event<TimerEvent> cleanerEvent;
 
-	private long lastFinishedTime;
+    @Inject
+    private Event<TimerEvent> cleanerEvent;
 
-	private AtomicBoolean isActive;
+    private long lastFinishedTime;
 
-	public void initTimer() {
-		log.debug("Initializing Cleaner Timer");
-		this.isActive = new AtomicBoolean(false);
+    private AtomicBoolean isActive;
 
-		// Schedule to start cleaner every 1 minute
-		cleanerEvent.fire(
-				new TimerEvent(new TimerSchedule(DEFAULT_INTERVAL, DEFAULT_INTERVAL), new CleanerEvent(), Scheduled.Literal.INSTANCE));
+    public void initTimer() {
+        log.debug("Initializing Cleaner Timer");
+        this.isActive = new AtomicBoolean(false);
 
-		this.lastFinishedTime = System.currentTimeMillis();
-	}
+        // Schedule to start cleaner every 1 minute
+        cleanerEvent.fire(
+                new TimerEvent(new TimerSchedule(DEFAULT_INTERVAL, DEFAULT_INTERVAL), new CleanerEvent(), Scheduled.Literal.INSTANCE));
 
-	@Asynchronous
-	public void process(@Observes @Scheduled CleanerEvent cleanerEvent) {
-		if (this.isActive.get()) {
-			return;
-		}
+        this.lastFinishedTime = System.currentTimeMillis();
+    }
 
-		if (!this.isActive.compareAndSet(false, true)) {
-			return;
-		}
+    @Asynchronous
+    public void process(@Observes @Scheduled CleanerEvent cleanerEvent) {
+        if (this.isActive.get()) {
+            return;
+        }
 
-		try {
-			processImpl();
-		} finally {
-			this.isActive.set(false);
-		}
-	}
+        if (!this.isActive.compareAndSet(false, true)) {
+            return;
+        }
 
-	private boolean isStartProcess() {
-		int interval = appConfiguration.getCleanServiceInterval();
-		if (interval < 0) {
-			log.info("Cleaner Timer is disabled.");
-			log.warn("Cleaner Timer Interval (cleanServiceInterval in oxauth configuration) is negative which turns OFF internal clean up by the server. Please set it to positive value if you wish internal clean up timer run.");
-			return false;
-		}
+        try {
+            processImpl();
+        } finally {
+            this.isActive.set(false);
+        }
+    }
 
-		long cleaningInterval = interval * 1000;
+    private boolean isStartProcess() {
+        int interval = appConfiguration.getCleanServiceInterval();
+        if (interval < 0) {
+            log.info("Cleaner Timer is disabled.");
+            log.warn("Cleaner Timer Interval (cleanServiceInterval in oxauth configuration) is negative which turns OFF internal clean up by the server. Please set it to positive value if you wish internal clean up timer run.");
+            return false;
+        }
 
-		long timeDiffrence = System.currentTimeMillis() - this.lastFinishedTime;
+        long cleaningInterval = interval * 1000;
 
-		return timeDiffrence >= cleaningInterval;
-	}
+        long timeDiffrence = System.currentTimeMillis() - this.lastFinishedTime;
 
-	public void processImpl() {
-		try {
-			if (!isStartProcess()) {
-				log.trace("Starting conditions aren't reached");
-				return;
-			}
+        return timeDiffrence >= cleaningInterval;
+    }
 
-			int chunkSize = appConfiguration.getCleanServiceBatchChunkSize();
-			if (chunkSize <= 0)
-				chunkSize = BATCH_SIZE;
+    public void processImpl() {
+        try {
+            if (!isStartProcess()) {
+                log.trace("Starting conditions aren't reached");
+                return;
+            }
 
-			Date now = new Date();
+            int chunkSize = appConfiguration.getCleanServiceBatchChunkSize();
+            if (chunkSize <= 0)
+                chunkSize = BATCH_SIZE;
 
-			// it's unused because createCleanServiceBaseDns returns empty list 
-			for (String baseDn : createCleanServiceBaseDns()) {
-				try {
-					if (persistenceEntryManager.hasExpirationSupport(baseDn)) {
-						continue;
-					}
+            Date now = new Date();
 
-					log.debug("Start clean up for baseDn: " + baseDn);
-					final Stopwatch started = Stopwatch.createStarted();
+            // it's unused because createCleanServiceBaseDns returns empty list
+            for (String baseDn : createCleanServiceBaseDns()) {
+                try {
+                    if (persistenceEntryManager.hasExpirationSupport(baseDn)) {
+                        continue;
+                    }
 
-					int removed = cleanup(baseDn, now, chunkSize);
+                    log.debug("Start clean up for baseDn: " + baseDn);
+                    final Stopwatch started = Stopwatch.createStarted();
 
-					log.debug("Finished clean up for baseDn: {}, takes: {}ms, removed items: {}", baseDn,
-							started.elapsed(TimeUnit.MILLISECONDS), removed);
-				} catch (Exception e) {
-					log.error("Failed to process clean up for baseDn: " + baseDn, e);
-				}
-			}
+                    int removed = cleanup(baseDn, now, chunkSize);
 
-			processCache(now);
+                    log.debug("Finished clean up for baseDn: {}, takes: {}ms, removed items: {}", baseDn,
+                            started.elapsed(TimeUnit.MILLISECONDS), removed);
+                } catch (Exception e) {
+                    log.error("Failed to process clean up for baseDn: " + baseDn, e);
+                }
+            }
 
-			registrationPersistenceService.cleanup(now, chunkSize);
-			authenticationPersistenceService.cleanup(now, chunkSize);
+            processCache(now);
 
-			this.lastFinishedTime = System.currentTimeMillis();
-		} catch (Exception e) {
-			log.error("Failed to process clean up.", e);
-		}
-	}
+            registrationPersistenceService.cleanup(now, chunkSize);
+            authenticationPersistenceService.cleanup(now, chunkSize);
 
-	public Set<String> createCleanServiceBaseDns() {
-		final Set<String> cleanServiceBaseDns = Sets.newHashSet();
-		final String u2fBase = staticConfiguration.getBaseDn().getU2fBase();
+            this.lastFinishedTime = System.currentTimeMillis();
+        } catch (Exception e) {
+            log.error("Failed to process clean up.", e);
+        }
+    }
+
+    public Set<String> createCleanServiceBaseDns() {
+        final Set<String> cleanServiceBaseDns = Sets.newHashSet();
+        final String u2fBase = staticConfiguration.getBaseDn().getU2fBase();
 /*
 		cleanServiceBaseDns.add(staticConfiguration.getBaseDn().getPeople());
 
 		log.debug("Built-in base dns: " + cleanServiceBaseDns);
 */
-		cleanServiceBaseDns.add(String.format("ou=registration_requests,%s", u2fBase));
-        cleanServiceBaseDns.add(String.format("ou=registered_devices,%s", u2fBase));
-		return cleanServiceBaseDns;
-	}
+        if (u2fBase != null) {
+            cleanServiceBaseDns.add(String.format("ou=registration_requests,%s", u2fBase));
+            cleanServiceBaseDns.add(String.format("ou=registered_devices,%s", u2fBase));
+        }
+        return cleanServiceBaseDns;
+    }
 
-	public int cleanup(final String baseDn, final Date now, final int batchSize) {
-		try {
-			Filter filter = Filter.createANDFilter(Filter.createEqualityFilter("del", true),
-					Filter.createLessOrEqualFilter("exp", persistenceEntryManager.encodeTime(baseDn, now)));
+    public int cleanup(final String baseDn, final Date now, final int batchSize) {
+        try {
+            Filter filter = Filter.createANDFilter(Filter.createEqualityFilter("del", true),
+                    Filter.createLessOrEqualFilter("exp", persistenceEntryManager.encodeTime(baseDn, now)));
 
-			return persistenceEntryManager.remove(baseDn, DeletableEntity.class, filter, batchSize);
-		} catch (Exception e) {
-			log.error("Failed to perform clean up.", e);
-		}
+            return persistenceEntryManager.remove(baseDn, DeletableEntity.class, filter, batchSize);
+        } catch (Exception e) {
+            log.error("Failed to perform clean up.", e);
+        }
 
-		return 0;
-	}
+        return 0;
+    }
 
-	private void processCache(Date now) {
-		try {
-			// TODO: Enable when shared cache will be splitted by applications 
+    private void processCache(Date now) {
+        try {
+            // TODO: Enable when shared cache will be splitted by applications
 //			cacheProvider.cleanup(now);
-		} catch (Exception e) {
-			log.error("Failed to clean up cache.", e);
-		}
-	}
+        } catch (Exception e) {
+            log.error("Failed to clean up cache.", e);
+        }
+    }
 
 }
