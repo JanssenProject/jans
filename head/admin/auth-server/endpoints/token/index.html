@@ -3215,6 +3215,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#interception-scripts" class="md-nav__link">
+    Interception Scripts
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -8790,6 +8797,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#interception-scripts" class="md-nav__link">
+    Interception Scripts
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -8917,19 +8931,51 @@ navigate via <code>Auth Server</code>-&gt;<code>Properties</code>.</p>
 <li><a href="../../../reference/json/properties/janssenauthserver-properties/#refreshtokenlifetime">refreshTokenLifetime</a></li>
 </ul>
 <h2 id="client-authentication">Client Authentication<a class="headerlink" href="#client-authentication" title="Permanent link">#</a></h2>
-<p>Token Endpoint requires 
-<a href="https://openid.net/specs/openid-connect-core-1_0.html#ClientAuthentication">Client Authentication</a> methods to 
-authenticate clients to the authorization server.</p>
-<p>TODO: add more details here</p>
+<p>Janssen Server Token Endpoint requires confidential clients to authenticate using one of the supported client
+authentication method listed below:</p>
+<ul>
+<li>client_secret_basic</li>
+<li>client_secret_post</li>
+<li>client_secret_jwt</li>
+<li>private_key_jwt</li>
+</ul>
+<p>Refer to <a href="https://openid.net/specs/openid-connect-core-1_0.html#ClientAuthentication">Client Authentication</a> section of OpenID
+Connect core specification for more details on these authentication methods.</p>
+<p>Client can specify the default authentication method. To set default authentication method using
+<a href="../../../config-guide/tui/">Janssen Text-based UI(TUI)</a>,
+navigate via <code>Auth Server</code>-&gt;<code>Clients</code>-&gt;<code>Add Client</code>-&gt;<code>Basic</code>-&gt; <code>Authn Method Token Endpoint</code>.</p>
+<p><img alt="" src="../../../../assets/image-tui-client-registration-basic.png" /></p>
 <h2 id="supported-grant-types">Supported Grant Types<a class="headerlink" href="#supported-grant-types" title="Permanent link">#</a></h2>
-<p>TODO: add more details here</p>
+<p>Token endpoint supports below mentioned grant types. </p>
+<ul>
+<li><a href="../../oauth-features/auth-code-grant/">Authorization Code</a></li>
+<li><a href="../oauth-features/refresh-token-grant.md">Refresh Token</a></li>
+<li><a href="../../oauth-features/client-credential-grant/">Client Credentials</a></li>
+<li><a href="../uma-features/uma-ticket-grant.md">UMA Ticket</a></li>
+<li><a href="../../oauth-features/password-grant/">Password</a></li>
+</ul>
+<p>Client can configure all the possible grant types it can request from token endpoint during client configuration.
+To select the available grant types using
+<a href="../../../config-guide/tui/">Janssen Text-based UI(TUI)</a>,
+navigate via <code>Auth Server</code>-&gt;<code>Clients</code>-&gt;<code>Add Client</code>/<code>search client</code>-&gt;<code>Basic</code>-&gt; <code>Grant</code>. </p>
+<p><img alt="" src="../../../../assets/image-tui-client-registration-basic.png" /></p>
+<h2 id="interception-scripts">Interception Scripts<a class="headerlink" href="#interception-scripts" title="Permanent link">#</a></h2>
+<p>Token endpoint response can be further customized using <a href="../../../developer/interception-scripts/">interception scripts</a>.
+Following interception scripts are relevant to token endpoint:</p>
+<ul>
+<li><a href="../../../developer/scripts/update-token/">Update Token</a></li>
+</ul>
+<p>Client can configure a particular script to be executed using client configuration. To update configuration using
+<a href="../../../config-guide/tui/">Janssen Text-based UI(TUI)</a> navigate via <code>Auth Server</code>-&gt;<code>Clients</code>-&gt;<code>Add Client</code>/<code>search</code>-&gt;
+<code>Client Scripts</code></p>
+<p><img alt="" src="../../../../assets/image-tui-client-registration-scripts.png" /></p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-10T18:51:05+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-10</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-11T12:49:46+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-11</span>
       
         <br>
         Created:
