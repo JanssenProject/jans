@@ -591,10 +591,8 @@ It returns all the information of the Jans Authorization server.
     "ssaExpirationInDays": 30
   },
   "blockWebviewAuthorizationEnabled": false,
-  "userInfoConfiguration": {
-    "dateFormatterPattern": {
-      "birthdate": "yyyy-MM-dd"
-    }
+  "dateFormatterPatterns": {
+        "userinfo": "yyyy-MM-dd"
   },
   "fapi": false,
   "allResponseTypesSupported": [

@@ -15,13 +15,9 @@ import io.jans.as.model.error.ErrorHandlingMethod;
 import io.jans.as.model.jwk.KeySelectionStrategy;
 import io.jans.as.model.ssa.SsaConfiguration;
 import io.jans.as.model.ssa.SsaValidationConfig;
-import io.jans.as.model.userinfo.UserInfoConfiguration;
 import io.jans.doc.annotation.DocProperty;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Represents the configuration JSON file.
@@ -820,8 +816,16 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Enable/Disable block authorizations that originate from Webview (Mobile apps).", defaultValue = "false")
     private Boolean blockWebviewAuthorizationEnabled = false;
 
-    @DocProperty(description = "UserInfo Configuration")
-    private UserInfoConfiguration userInfoConfiguration;
+    @DocProperty(description = "List of key value date formatters, e.g. 'userinfo: 'yyyy-MM-dd', etc.")
+    private Map<String, String> dateFormatterPatterns = new HashMap<>();
+
+    public Map<String, String> getDateFormatterPatterns() {
+        return dateFormatterPatterns;
+    }
+
+    public void setDateFormatterPatterns(Map<String, String> dateFormatterPatterns) {
+        this.dateFormatterPatterns = dateFormatterPatterns;
+    }
 
     public List<SsaValidationConfig> getDcrSsaValidationConfigs() {
         if (dcrSsaValidationConfigs == null) dcrSsaValidationConfigs = new ArrayList<>();
@@ -3120,13 +3124,5 @@ public class AppConfiguration implements Configuration {
 
     public void setBlockWebviewAuthorizationEnabled(Boolean blockWebviewAuthorizationEnabled) {
         this.blockWebviewAuthorizationEnabled = blockWebviewAuthorizationEnabled;
-    }
-
-    public UserInfoConfiguration getUserInfoConfiguration() {
-        return userInfoConfiguration;
-    }
-
-    public void setUserInfoConfiguration(UserInfoConfiguration userInfoConfiguration) {
-        this.userInfoConfiguration = userInfoConfiguration;
     }
 }

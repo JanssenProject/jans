@@ -40,36 +40,32 @@ import io.jans.as.server.audit.ApplicationAuditLogger;
 import io.jans.as.server.model.audit.Action;
 import io.jans.as.server.model.audit.OAuth2AuditLog;
 import io.jans.as.server.model.authorize.Claim;
-import io.jans.as.server.model.common.AbstractToken;
-import io.jans.as.server.model.common.AuthorizationGrant;
-import io.jans.as.server.model.common.AuthorizationGrantList;
-import io.jans.as.server.model.common.AuthorizationGrantType;
-import io.jans.as.server.model.common.DefaultScope;
-import io.jans.as.server.model.common.UnmodifiableAuthorizationGrant;
+import io.jans.as.server.model.common.*;
 import io.jans.as.server.model.userinfo.UserInfoParamsValidator;
 import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.ScopeService;
 import io.jans.as.server.service.ServerCryptoProvider;
 import io.jans.as.server.service.UserService;
+import io.jans.as.server.service.date.DateFormatterService;
 import io.jans.as.server.service.external.ExternalDynamicScopeService;
 import io.jans.as.server.service.external.context.DynamicScopeExternalContext;
 import io.jans.as.server.service.token.TokenService;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.model.GluuAttribute;
 import io.jans.orm.exception.EntryPersistenceException;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.SecurityContext;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+
+import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.security.PublicKey;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -119,6 +115,9 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
 
     @Inject
     private TokenService tokenService;
+
+    @Inject
+    private DateFormatterService dateFormatterService;
 
     @Override
     public Response requestUserInfoGet(String accessToken, String authorization, HttpServletRequest request, SecurityContext securityContext) {
@@ -362,13 +361,8 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                     } else if (value instanceof Boolean) {
                         jsonWebResponse.getClaims().setClaim(key, (Boolean) value);
                     } else if (value instanceof Date) {
-                        Date casteValue = (Date) value;
-                        Optional<String> optionalValue = getFormattedValueFromUserInfoConfiguration(key, casteValue);
-                        if (optionalValue.isPresent()) {
-                            jsonWebResponse.getClaims().setClaim(key, optionalValue.get());
-                        } else {
-                            jsonWebResponse.getClaims().setClaim(key, casteValue.getTime() / 1000);
-                        }
+                        Serializable formattedValue = dateFormatterService.formatClaim((Date) value, key);
+                        jsonWebResponse.getClaims().setClaimObject(key, formattedValue, true);
                     } else {
                         jsonWebResponse.getClaims().setClaim(key, String.valueOf(value));
                     }
@@ -450,18 +444,5 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         }
 
         return false;
-    }
-
-    private Optional<String> getFormattedValueFromUserInfoConfiguration(String key, Date value) {
-        String patternValue = appConfiguration.getUserInfoConfiguration().getDateFormatterPattern().get(key);
-        if (patternValue != null) {
-            try {
-                SimpleDateFormat simpleDateFormat = new SimpleDateFormat(patternValue);
-                return Optional.of(simpleDateFormat.format(value));
-            } catch (Exception e) {
-                log.warn("Error during SimpleDateFormat instance: {}", e.getMessage());
-            }
-        }
-        return Optional.empty();
     }
 }
