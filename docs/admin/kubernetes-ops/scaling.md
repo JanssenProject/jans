@@ -36,6 +36,28 @@ The default configuration scales in and out based on the CPU utilization of the 
       behavior: {}
 ```
 
+  In order for `hpa` to work, you have to:
+
+  1.  Install metrics server
+
+      ```yaml
+      kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+      ```
+
+  2.  Define `requests`for the metric used
+
+      Since the default jans components scales the pod based on CPU utilization metric, it has the cpu `requests` configured:
+
+      ```yaml
+      <component-name>:
+        resources:
+          requests:
+            # -- CPU request.
+            cpu: 2500m
+            # -- Memory request.
+            memory: 2500Mi
+      ```
+
 #### Cluster Autoscaler
 Cluster Autoscaler automatically resizes the number of `nodes` in a given node pool, based on the demands of your workloads. 
 
