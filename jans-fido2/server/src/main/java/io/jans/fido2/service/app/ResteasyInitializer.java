@@ -6,20 +6,16 @@
 
 package io.jans.fido2.service.app;
 
-import java.util.HashSet;
-
-import java.util.Set;
-
-import jakarta.ws.rs.ApplicationPath;
-import jakarta.ws.rs.core.Application;
-
 import io.jans.fido2.ws.rs.controller.AssertionController;
 import io.jans.fido2.ws.rs.controller.AttestationController;
 import io.jans.fido2.ws.rs.controller.ConfigurationController;
-
 import io.jans.fido2.ws.rs.controller.u2f.U2fAuthenticationWS;
-import io.jans.fido2.ws.rs.controller.u2f.U2fConfigurationWS;
 import io.jans.fido2.ws.rs.controller.u2f.U2fRegistrationWS;
+import jakarta.ws.rs.ApplicationPath;
+import jakarta.ws.rs.core.Application;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Integration with Resteasy
@@ -37,7 +33,6 @@ public class ResteasyInitializer extends Application {
         classes.add(AssertionController.class);
         classes.add(AttestationController.class);
 
-        classes.add(U2fConfigurationWS.class);
         classes.add(U2fAuthenticationWS.class);
         classes.add(U2fRegistrationWS.class);
         return classes;
