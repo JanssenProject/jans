@@ -19,21 +19,6 @@ def download_jans_acrhieve():
             verbose=True
             )
 
-def get_grpcio_package(data):
-
-    pyversion = 'cp{0}{1}'.format(sys.version_info.major, sys.version_info.minor)
-
-    package = {}
-
-    for package_ in data['urls']:
-
-        if package_['python_version'] == pyversion and 'manylinux' in package_['filename'] and package_['filename'].endswith('x86_64.whl'):
-            if package_['upload_time'] > package.get('upload_time',''):
-                package = package_
-                break
-
-    return package
-
 
 def download_sqlalchemy():
     sqlalchemy_dir = os.path.join(base.pylib_dir, 'sqlalchemy')
@@ -47,9 +32,30 @@ def download_sqlalchemy():
         base.extract_subdir(sqlalchemy_zip_file, 'lib/sqlalchemy', sqlalchemy_dir)
 
 
+def download_cryptography():
+    cryptography_dir = os.path.join(base.pylib_dir, 'cryptography')
+
+    if os.path.exists(cryptography_dir) and not base.argsp.force_download:
+        return
+
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        cryptography_zip_file = os.path.join(tmp_dir, os.path.basename(base.current_app.app_info['CRYPTOGRAPHY']))
+        base.download(base.current_app.app_info['CRYPTOGRAPHY'], cryptography_zip_file, verbose=True)
+        base.extract_subdir(cryptography_zip_file, 'cryptography', cryptography_dir, par_dir='')
+
+def download_pyjwt():
+    pyjwt_dir = os.path.join(base.pylib_dir, 'jwt')
+
+    if os.path.exists(pyjwt_dir) and not base.argsp.force_download:
+        return
+
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        pyjwt_dir_zip_file = os.path.join(tmp_dir, os.path.basename(base.current_app.app_info['PYJWT']))
+        base.download(base.current_app.app_info['PYJWT'], pyjwt_dir_zip_file, verbose=True)
+        base.extract_subdir(pyjwt_dir_zip_file, 'jwt', pyjwt_dir)
+
 def download_all():
     download_files = []
-    sys.path.insert(0, os.path.join(base.pylib_dir, 'gcs'))
     modules = glob.glob(os.path.join(base.ces_dir, 'installers/*.py'))
 
     for installer in modules:
@@ -71,3 +77,5 @@ def download_all():
 def download_apps():
     download_jans_acrhieve()
     download_sqlalchemy()
+    download_cryptography()
+    download_pyjwt()

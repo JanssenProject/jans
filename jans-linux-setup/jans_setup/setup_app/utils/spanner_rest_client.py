@@ -1,28 +1,88 @@
 import os
+import time
+import json
+import jwt
 import requests
 import logging
+
 import http.client
 from http.client import HTTPConnection
 
+
 class SpannerClient:
 
-    def __init__(self, project_id, instance_id, database_id, emulator_host=None, log_dir='.', emulator_port=9020):
+    def __init__(self, project_id, instance_id, database_id, google_application_credentials=None, emulator_host=None, log_dir='.', emulator_port=9020):
         self.project_id = project_id
         self.instance_id = instance_id
         self.database_id = database_id
+        self.google_application_credentials = google_application_credentials
         self.emulator_host = emulator_host
         self.log_dir = log_dir
         self.emulator_port = emulator_port
         self.sessioned_url = None
+        self.headers = {}
+
         if emulator_host:
             self.spanner_base_url = 'http://{}:{}/v1/'.format(emulator_host, emulator_port)
-            self.spanner_database_url = os.path.join(
-                        self.spanner_base_url, 
-                        'projects/{}/instances/{}/databases/{}/'.format(self.project_id, self.instance_id, self.database_id)
-                        )
+            self.set_spanner_database_url()
+        else:
+            self.spanner_base_url = 'https://spanner.googleapis.com/v1/'
+            self.set_spanner_database_url()
+            with open(self.google_application_credentials) as f:
+                self.google_creds = json.load(f)
+                self.get_google_cloud_spanner_id_token()
+
+
         self.set_logging()
         self.get_session()
 
+    def set_spanner_database_url(self):
+        self.spanner_database_url = os.path.join(
+                        self.spanner_base_url, 
+                        'projects/{}/instances/{}/databases/{}/'.format(self.project_id, self.instance_id, self.database_id)
+                        )
+
+    def get_google_cloud_spanner_id_token(self):
+        aud = 'https://oauth2.googleapis.com/token'
+        scopes = ['https://www.googleapis.com/auth/cloud-platform', 'https://www.googleapis.com/auth/spanner.data']
+        grant_type = 'urn:ietf:params:oauth:grant-type:jwt-bearer'
+
+        liftetime = 3600
+        iat = int(time.time())
+        exp = iat + liftetime
+
+        payload = {
+            'iat': iat, 
+            'exp': exp, 
+            'iss': self.google_creds['client_email'], 
+            'aud': aud, 
+            'scope': ' '.join(scopes)
+            }
+
+        headers = {
+            'typ': 'JWT',
+            'alg': 'RS256',
+            'kid': self.google_creds['private_key_id']
+            }
+
+        assertion = jwt.encode(
+            payload,
+            self.google_creds['private_key'],
+            headers=headers,
+            algorithm='RS256'
+            )
+
+        req = requests.post(
+            url=aud,
+            data={
+                'assertion': [assertion],
+                'grant_type': [grant_type]
+                }
+           )
+
+        response = req.json()
+        self.id_token = response['access_token']
+        self.headers = {'Authorization': 'Bearer {}'.format(self.id_token)}
 
     def set_logging(self):
         self.logger = logging.getLogger("urllib3")
@@ -41,7 +101,7 @@ class SpannerClient:
 
     def get_session(self):
         session_url = os.path.join(self.spanner_database_url, 'sessions')
-        request = requests.post(session_url)
+        request = requests.post(session_url, headers=self.headers)
         result = request.json()
         self.sessioned_url = os.path.join(self.spanner_base_url, result['name'])
 
@@ -50,16 +110,17 @@ class SpannerClient:
 
         if 'select' in sql_cmd.lower().split():
             request = requests.post(
-                        url = self.sessioned_url + ':executeSql',
-                        json = {"sql": sql_cmd}
+                        url=self.sessioned_url + ':executeSql',
+                        json={"sql": sql_cmd},
+                        headers=self.headers
                     )
 
         else:
             request = requests.patch(
-                    url = os.path.join(self.spanner_database_url, 'ddl'),
-                    json = {"statements": [sql_cmd]}
+                    url=os.path.join(self.spanner_database_url, 'ddl'),
+                    json={"statements": [sql_cmd]},
+                    headers=self.headers
                     )
-
 
         return request.json()
 
@@ -86,7 +147,8 @@ class SpannerClient:
 
         request = requests.post(
                     url=self.sessioned_url+':commit',
-                    json=data
+                    json=data,
+                    headers=self.headers
                     )
 
         return  request.json()
@@ -111,7 +173,8 @@ class SpannerClient:
 
         request = requests.post(
                     url=self.sessioned_url+':commit',
-                    json=data
+                    json=data,
+                    headers=self.headers
                     )
 
         return  request.json()
@@ -121,8 +184,8 @@ class SpannerClient:
         result = self.exec_sql(sql_cmd)
         data = []
         if result.get('rows'):
-            row_data = {}
             for row in result['rows']:
+                row_data = {}
                 for i, field in enumerate(result.get('metadata', {}).get('rowType', {}).get('fields', [])):
                     row_data[field['name']] = int(row[i]) if field['type']['code'] == 'INT64' else row[i]
                 data.append(row_data)
@@ -145,7 +208,7 @@ class SpannerClient:
     def __del__(self):
         if self.sessioned_url:
             try:
-                requests.delete(self.sessioned_url)
+                requests.delete(self.sessioned_url, headers=self.headers)
             except Exception as e:
                 pass
 
