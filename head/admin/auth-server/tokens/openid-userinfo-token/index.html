@@ -8915,8 +8915,8 @@ the privacy protection of the OpenID scopes construct.</p>
 <p>If you need to call an API to render scopes or scope values on the fly,
 you should see the <a href="../developer/scripts/dynamic-scope.md">Dynamic Scopes</a> interception script.</p>
 <h2 id="userinfo-formatter">Userinfo formatter<a class="headerlink" href="#userinfo-formatter" title="Permanent link">#</a></h2>
-<p>There is a configuration property <code>userInfoConfiguration</code> which has a default
-value of <code>{'dateFormatterPattern': {'birthdate':'yyyy-MM-dd'}}</code>.</p>
+<p>There is a configuration property <code>dateFormatterPatterns</code> which can be used for format date claims.
+Example: <code>{'dateFormatterPatterns': {'userinfo':'yyyy-MM-dd'}}</code>.</p>
 <h2 id="language-support">Language support<a class="headerlink" href="#language-support" title="Permanent link">#</a></h2>
 <p>The default value for the configuration parameter <code>claimsLocalesSupported</code> is <code>['en']</code>. Currently, only the name and description supports localization. You
 will also need to make a proper request and provide the associated values for
@@ -8927,7 +8927,7 @@ the claim in the database.</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-02T22:06:07+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-02</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-11T15:52:43+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-11</span>
       
         <br>
         Created:
