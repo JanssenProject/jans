@@ -8,6 +8,7 @@ package io.jans.configapi.core.rest;
 
 import static io.jans.as.model.util.Util.escapeLog;
 
+import io.jans.configapi.core.interceptor.RequestAuditInterceptor;
 import io.jans.configapi.core.interceptor.RequestInterceptor;
 import io.jans.configapi.core.model.ApiError;
 import io.jans.configapi.core.model.SearchRequest;
@@ -15,14 +16,10 @@ import io.jans.configapi.core.util.Util;
 import io.jans.orm.model.SortOrder;
 
 import jakarta.inject.Inject;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.NotFoundException;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.UriInfo;
 
 import java.util.List;
 import java.util.Map;
@@ -33,6 +30,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@RequestAuditInterceptor
 @RequestInterceptor
 public class BaseResource {
    

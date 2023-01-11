@@ -41,7 +41,7 @@ public class AuditLogInterceptor {
     @Context
     UriInfo info;
 
-    @Context
+    @Inject
     HttpServletRequest request;
 
     @Context
@@ -61,10 +61,10 @@ public class AuditLogInterceptor {
             // Get Audit config
             AuditLogConf auditLogConf = getAuditLogConf();
             LOG.info("auditLogConf:{}, ignoreMethod(context):{}", auditLogConf, ignoreMethod(context, auditLogConf));
-
+            
             // Log if enabled
             if (!ignoreMethod(context, auditLogConf)) {
-                AUDIT_LOG.info("\n ********************** Audit Request Detail Start ********************** ");
+                AUDIT_LOG.info("\n I AM NEW ********************** Audit Request Detail Start ********************** ");
                 // Request audit
                 String beanClassName = context.getClass().getName();
                 String method = context.getMethod().getName();

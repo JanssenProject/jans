@@ -7188,8 +7188,6 @@ components:
     DeploymentDetails:
       type: object
       properties:
-        projectName:
-          type: string
         folders:
           type: array
           items:
@@ -7199,6 +7197,19 @@ components:
           additionalProperties:
             type: string
         error:
+          type: string
+        projectMetadata:
+          $ref: '#/components/schemas/ProjectMetadata'
+    ProjectMetadata:
+      type: object
+      properties:
+        projectName:
+          type: string
+        author:
+          type: string
+        type:
+          type: string
+        description:
           type: string
     PagedResult:
       type: object
@@ -7387,17 +7398,17 @@ components:
           type: string
         whitePagesCanView:
           type: boolean
-        adminCanAccess:
-          type: boolean
-        adminCanView:
-          type: boolean
         userCanAccess:
           type: boolean
-        userCanEdit:
+        userCanView:
           type: boolean
         adminCanEdit:
           type: boolean
-        userCanView:
+        adminCanAccess:
+          type: boolean
+        userCanEdit:
+          type: boolean
+        adminCanView:
           type: boolean
         baseDn:
           type: string
@@ -8089,6 +8100,8 @@ components:
           type: array
           items:
             type: string
+        dynamicRegistrationDefaultCustomAttributes:
+          $ref: '#/components/schemas/JsonNode'
         displayValuesSupported:
           type: array
           items:
@@ -8564,33 +8577,8 @@ components:
           type: boolean
         userInfoConfiguration:
           $ref: '#/components/schemas/UserInfoConfiguration'
-        enabledFeatureFlags:
-          uniqueItems: true
-          type: array
-          items:
-            type: string
-            enum:
-            - UNKNOWN
-            - HEALTH_CHECK
-            - USERINFO
-            - CLIENTINFO
-            - ID_GENERATION
-            - REGISTRATION
-            - INTROSPECTION
-            - REVOKE_TOKEN
-            - REVOKE_SESSION
-            - ACTIVE_SESSION
-            - END_SESSION
-            - STATUS_SESSION
-            - JANS_CONFIGURATION
-            - CIBA
-            - UMA
-            - U2F
-            - DEVICE_AUTHZ
-            - METRIC
-            - STAT
-            - PAR
-            - SSA
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8600,8 +8588,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -8741,6 +8727,8 @@ components:
           type: object
           additionalProperties:
             type: string
+    JsonNode:
+      type: object
     SsaConfiguration:
       type: object
       properties:
@@ -8902,13 +8890,13 @@ components:
           type: boolean
         internal:
           type: boolean
-        locationPath:
-          type: string
         locationType:
           type: string
           enum:
           - ldap
           - file
+        locationPath:
+          type: string
         baseDn:
           type: string
     ScriptError:
@@ -8939,8 +8927,6 @@ components:
           type: boolean
         description:
           type: string
-    JsonNode:
-      type: object
     JSONWebKey:
       type: object
       properties:
