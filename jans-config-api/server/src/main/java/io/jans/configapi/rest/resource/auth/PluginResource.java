@@ -28,12 +28,10 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.Optional;
 
-import java.io.IOException;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
@@ -50,33 +48,36 @@ public class PluginResource extends ConfigBaseResource {
 
     @Operation(summary = "Gets list of Plugins", description = "Gets list of Plugins", operationId = "get-plugins", tags = {
             "Plugins" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }))
+                    ApiAccessConstants.PLUGIN_READ_ACCESS }))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = PluginConf.class)), examples = @ExampleObject(name = "Response example", value = "example/plugins/plugins-get-all.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.PLUGIN_READ_ACCESS }, groupScopes = {}, superScopes = {
+            ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getPlugins() {
         return Response.ok(getPluginNames()).build();
     }
 
     @Operation(summary = "Gets list of Plugins", description = "Gets list of Plugins", operationId = "get-plugins", tags = {
             "Plugins" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }))
+                    ApiAccessConstants.PLUGIN_READ_ACCESS }))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Boolean.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    @Path(ApiConstants.PLUGIN_NAME_PATH)
+    @ProtectedApi(scopes = { ApiAccessConstants.PLUGIN_READ_ACCESS }, groupScopes = {}, superScopes = {
+            ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response isPluginDeployed(
             @Parameter(description = "Plugin name") @NotNull @PathParam(ApiConstants.PLUGIN_NAME) String pluginName) {
 
         List<String> plugins = getPluginNames();
         Boolean deployed = false;
         logger.debug("plugins:{} ", plugins);
-        if (StringUtils.isNotBlank(pluginName) && plugins != null && !plugins.isEmpty()) {
+        if (StringUtils.isNotBlank(pluginName) && !plugins.isEmpty()) {
             Optional<String> pluginNameOptional = plugins.stream().findAny()
                     .filter(name -> pluginName.equalsIgnoreCase(name));
             logger.debug("pluginNameOptional:{} ", pluginNameOptional);
@@ -91,10 +92,20 @@ public class PluginResource extends ConfigBaseResource {
     private List<String> getPluginNames() {
 
         List<PluginConf> plugins = this.authUtil.getPluginConf();
-        List<String> pluginNames = Collections.emptyList();
+
         logger.debug("plugins:{} ", plugins);
-        if (plugins != null && !plugins.isEmpty()) {
-            pluginNames = plugins.stream().map(PluginConf::getName).collect(Collectors.toList());
+
+        List<String> pluginNames = new ArrayList<>();
+        for (PluginConf pluginConf : plugins) {
+            logger.debug("pluginConf:{} ", pluginConf);
+            if (StringUtils.isNotBlank(pluginConf.getClassName())) {
+                try {
+                    Class.forName(pluginConf.getClassName());
+                    pluginNames.add(pluginConf.getName());
+                } catch (ClassNotFoundException ex) {
+                    logger.error("'{}` plugin not deployed", pluginConf.getName());
+                }
+            }
 
         }
         logger.debug("pluginNames:{} ", pluginNames);
