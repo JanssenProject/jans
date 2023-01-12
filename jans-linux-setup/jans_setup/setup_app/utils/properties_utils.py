@@ -25,7 +25,7 @@ from setup_app.utils.db_utils import dbUtils
 from setup_app.pylib.jproperties import Properties
 
 if base.current_app.profile == 'jans':
-    from setup_app.utils.spanner import Spanner
+    from setup_app.utils.spanner_rest_client import SpannerClient
 
 
 class PropertiesUtils(SetupUtils):
@@ -808,8 +808,14 @@ class PropertiesUtils(SetupUtils):
 
             print("  Checking spanner connection")
             try:
-                spanner = Spanner()
-                spanner.get_session()
+                SpannerClient(
+                            project_id=Config.spanner_project,
+                            instance_id=Config.spanner_instance,
+                            database_id=Config.spanner_database,
+                            google_application_credentials=Config.google_application_credentials,
+                            emulator_host=Config.spanner_emulator_host,
+                            log_dir=os.path.join(Config.install_dir, 'logs')
+                    )
                 print("  {}Spanner connection was successfull{}".format(colors.OKGREEN, colors.ENDC))
             except Exception as e:
                 print("{}ERROR getting session from spanner: {}{}".format(colors.DANGER, e, colors.ENDC))
