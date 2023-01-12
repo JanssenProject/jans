@@ -14,7 +14,7 @@ tags:
 
 
 ### 1. Display error messages on a web page?
-1.[FacesMessages](https://github.com/JanssenProject/jans/blob/replace-janssen-version/jans-core/jsf-util/src/main/java/io/jans/jsf2/message/FacesMessages.java) bean is used for this purpose.
+1.[FacesMessages](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-core/jsf-util/src/main/java/io/jans/jsf2/message/FacesMessages.java) bean is used for this purpose.
 	```
 	from org.jans.jsf2.message import FacesMessages
 	from org.jans.service.cdi.util import CdiUtil
@@ -32,7 +32,7 @@ tags:
 	<h:messages />
 	...
 	```
-	See an example [here](https://github.com/JanssenProject/jans/blob/replace-janssen-version/jans-auth-server/server/src/main/webapp/WEB-INF/incl/layout/template.xhtml#L41)
+	See an example [here](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-auth-server/server/src/main/webapp/WEB-INF/incl/layout/template.xhtml#L41)
 
 ### 2. Redirection to a third party application for authentication
 

@@ -49,7 +49,7 @@ Download the compose file
 
 ```bash
 
-wget https://raw.githubusercontent.com/JanssenProject/jans/replace-janssen-version/docker-jans-monolith/jans-mysql-compose.yml 
+wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/docker-jans-monolith/jans-mysql-compose.yml 
 ```
 
 This docker compose file runs two containers, the janssen monolith container and mysql container.

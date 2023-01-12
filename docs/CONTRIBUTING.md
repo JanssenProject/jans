@@ -216,16 +216,16 @@ tags:
 
 ### Referencing Janssen Project Release in Documents
 
-When a reference to the current release is required in the documentation content, use the text `replace-janssen-version`
+When a reference to the current release is required in the documentation content, use the text `vreplace-janssen-version`
 instead of mentioning the current release number. Janssen Project build system will replace `replace-janssen-version`
 text with the current release number at the time of every release. i.e. at the time of releasing documentation for the Janssen Project release of v1.0.5, all occurrences of
-`replace-janssen-version` will be replaced by `v1.0.5`.
+`replace-janssen-version` will be replaced by `1.0.5` resulting into string `v1.0.5`.
 
 For example, below is the URL used in the documentation to point to the specification of API for corresponding Janssen 
 Project release. It is important that this link points to corresponding specification of that release.
 
 ```
-https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/replace-janssen-version/jans-auth-server/docs/swagger.yaml
+https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml
 ```
 
 In every new release of Janssen Project (and corresponding Janssen documentation) only the `replace-janssen-version` part
