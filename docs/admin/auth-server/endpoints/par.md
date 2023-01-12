@@ -3,100 +3,75 @@ tags:
 - administration
 - auth-server
 - par
+- pushed authorization requests
 - endpoint
 ---
 
-# Overview
+# Pushed Authorization Request(PAR) Endpoint
 
-Userinfo endpoint is an OAuth2 protected endpoint that is used to retrieve claims about an authenticated end-user.
-Userinfo endpoint is defined in the [OpenID Connect specification](https://openid.net/specs/openid-connect-core-1_0.html#UserInfo).
+PAR endpoint is used by client to send authorization request directly to the Janssen Server without using the usual
+redirection mechanism via user agent. When PAR endpoint receives a valid request, it responds with a request URI. 
+The request URI is a reference created and stored by Janssen Server. It is a reference to  authorization request and 
+the metadata sent with it by the client. Client can send this request uri to the Janssen Server in a authorization
+request using user agent redirect mechanism. There are multiple benefits of using this flow which are described along 
+with other details in [PAR specification](https://datatracker.ietf.org/doc/html/rfc9126). Janssen Server PAR implementation 
+conforms to PAR specification.
 
-URL to access userinfo endpoint on Janssen Server is listed in the response of Janssen Server's well-known
+URL to access PAR endpoint on Janssen Server is listed in the response of Janssen Server's well-known
 [configuration endpoint](./configuration.md) given below.
 
 ```text
 https://janssen.server.host/jans-auth/.well-known/openid-configuration
 ```
 
-`userinfo_endpoint` claim in the response specifies the URL for userinfo endpoint. By default, userinfo endpoint looks
+`pushed_authorization_request_endpoint` claim in the response specifies the URL for PAR endpoint. By default, PAR endpoint looks
 like below:
 
 ```
-https://janssen.server.host/jans-auth/restv1/userinfo
+https://jans-dynamic-ldap/jans-auth/restv1/par
 ```
 
-In response to a valid request, the userinfo endpoint returns user information in JSON format similar to below:
+In response to a valid request, the PAR endpoint returns `request_uri` in response similar to below:
 
 ```
-  HTTP/1.1 200 OK
-  Content-Type: application/json
+ HTTP/1.1 201 Created
+ Content-Type: application/json
+ Cache-Control: no-cache, no-store
 
-  {
-   "sub": "3482897610054",
-   "name": "Chad Wick",
-   "given_name": "Chad",
-   "family_name": "Wick",
-   "preferred_username": "c.wick",
-   "email": "cwick@jans.com",
-   "picture": "http://mysite.com/mypic.jpg"
-  }
+ {
+  "request_uri":
+    "urn:ietf:params:oauth:request_uri:6esc_11ACC5bwc014ltc14eY22c",
+  "expires_in": 60
+ }
 ```
 
-Since userinfo endpoint is an OAuth2 protected resource, a valid access token with appropriate scope is required to
-access the endpoint. More information about request and response of the userinfo endpoint can be found in
-the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/replace-janssen-version/jans-auth-server/docs/swagger.yaml#/User_Info).
+Since PAR endpoint is a protected resource. The client has to authenticate itself to the endpoint. Authentication 
+methods used are same as the once used for client authentication at [token endpoint](./token.md#client-authentication). 
 
-
+More information about request and response of the PAR endpoint can be found in
+the OpenAPI specification of 
+[jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/replace-janssen-version/jans-auth-server/docs/swagger.yaml#/Authorization/post_par).
 
 ## Disabling The Endpoint Using Feature Flag
 
-`userinfo` endpoint can be enabled or disable using [USERINFO feature flag](../../reference/json/feature-flags/janssenauthserver-feature-flags.md#userinfo).
+`PAR` endpoint can be enabled or disable using [PAR feature flag](../../reference/json/feature-flags/janssenauthserver-feature-flags.md#par).
 Use [Janssen Text-based UI(TUI)](../../config-guide/tui.md) or [Janssen command-line interface](../../config-guide/jans-cli/README.md) to perform this task.
 
 When using TUI, navigate via `Auth Server`->`Properties`->`enabledFeatureFlags` to screen below. From here, enable or
-disable `USERINFO` flag as required.
+disable `PAR` flag as required.
 
 ![](../../../assets/image-tui-enable-components.png)
 
 ## Configuration Properties
 
-Userinfo endpoint can be further configured using Janssen Server configuration properties listed below. When using
+PAR endpoint can be further configured using Janssen Server configuration properties listed below. When using
 [Janssen Text-based UI(TUI)](../../config-guide/tui.md) to configure the properties,
 navigate via `Auth Server`->`Properties`.
 
-- [mtlsUserInfoEndpoint](../../reference/json/properties/janssenauthserver-properties.md#mtlsuserinfoendpoint)
-- [userInfoConfiguration](../../reference/json/properties/janssenauthserver-properties.md#userinfoconfiguration)
-- [userInfoEncryptionAlgValuesSupported](../../reference/json/properties/janssenauthserver-properties.md#userinfoencryptionalgvaluessupported)
-- [userInfoEncryptionEncValuesSupported](../../reference/json/properties/janssenauthserver-properties.md#userinfoencryptionencvaluessupported)
-- [userInfoEndpoint](../../reference/json/properties/janssenauthserver-properties.md#userinfoendpoint)
-- [userInfoSigningAlgValuesSupported](../../reference/json/properties/janssenauthserver-properties.md#userinfosigningalgvaluessupported)
-
-## Using Scopes To Control Claim Release
-
-### Standard Scopes
-
-In context of OpenID Connect specification, claim information released by userinfo endpoint can be controlled using
-scopes. Janssen Server supports all [standard scopes](https://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims)
-and releases corresponding claims as per OpenID Connect specification. Administrator can customise standard scopes and
-define claims to be linked to each standard scope.
-
-When using [Janssen Text-based UI(TUI)](../../config-guide/tui.md) to configure the scopes, navigate via
-`Auth Server`->`Scopes`->`Add Scopes`->`Scope Type` as `OpenID`->search for a standard scope like `address`
-
-### Dynamic Scopes
-
-In addition to standard scopes, Janssen server allows defining custom scopes which can be associated to user-defined
-list of claims. This allows administrators to create custom groupings of claims.
-
-When using [Janssen Text-based UI(TUI)](../../config-guide/tui.md), navigate via
-`Auth Server`->`Scopes`->`Add Scopes`->`Scope Type` as `Dynamic`
-
-### Interception Scripts
-
-Response from userinfo can be further customized using [dynamic scope](../../developer/scripts/dynamic-scope.md) interception script.
-
-Administrator can attach a dynamic scope script to a dynamic scope using [Janssen Text-based UI(TUI)](../../config-guide/tui.md).
-Navigate to `Auth Server`->`Scopes`->`Add Scopes`->`Scope Type` as `Dynamic`->`Dynamic Scope Script`
+- [mtlsParEndpoint](../../reference/json/properties/janssenauthserver-properties.md#mtlsparendpoint)
+- [parEndpoint](../../reference/json/properties/janssenauthserver-properties.md#parendpoint)
+- [requirePar](../../reference/json/properties/janssenauthserver-properties.md#requirepar)
+- [requestUriParameterSupported](../../reference/json/properties/janssenauthserver-properties.md#requesturiparametersupported)
 
 ## Want to contribute?
 
