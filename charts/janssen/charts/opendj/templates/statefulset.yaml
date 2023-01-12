@@ -28,6 +28,40 @@ spec:
         sidecar.istio.io/rewriteAppHTTPProbers: "true"
       {{- end }}
     spec:
+      securityContext:
+        runAsUser: 1000
+        runAsNonRoot: true
+        fsGroup: 1000
+        #fsGroupChangePolicy: "OnRootMismatch" enable once 1.23 is the lowest version
+      {{- if $.Values.global.upgrade.enabled }}
+      initContainers:
+      - command:
+        - /bin/chown
+        - -R
+        - 1000:1000
+        - /opt/opendj/logs
+        image: busybox:latest
+        imagePullPolicy: Always
+        name: change-logs-ownership
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /opt/opendj/logs
+          name: opendj-volume
+          subPath: logs
+      - command:
+        - /bin/chown
+        - -R
+        - 1000:1000
+        - /opt/opendj/db
+        image: busybox:latest
+        imagePullPolicy: Always
+        name: change-db-ownership
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+    {{- end }}
     {{- with $.Values.image.pullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
