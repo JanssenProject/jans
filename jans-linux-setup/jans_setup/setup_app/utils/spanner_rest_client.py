@@ -188,7 +188,7 @@ class SpannerClient:
             for row in result['rows']:
                 row_data = {}
                 for i, field in enumerate(result.get('metadata', {}).get('rowType', {}).get('fields', [])):
-                    row_data[field['name']] = int(row[i]) if field['type']['code'] == 'INT64' else row[i]
+                    row_data[field['name']] = int(row[i]) if row[i] and field['type']['code'] == 'INT64' else row[i]
                 data.append(row_data)
 
         return data
