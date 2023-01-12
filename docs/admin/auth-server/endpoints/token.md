@@ -102,12 +102,48 @@ navigate via `Auth Server`->`Properties`.
 
 ## Client Authentication
 
-Token Endpoint requires 
-[Client Authentication](https://openid.net/specs/openid-connect-core-1_0.html#ClientAuthentication) methods to 
-authenticate clients to the authorization server.
+Janssen Server Token Endpoint requires confidential clients to authenticate using one of the supported client
+authentication method listed below:
 
-TODO: add more details here
+- client_secret_basic
+- client_secret_post
+- client_secret_jwt
+- private_key_jwt
+
+Refer to [Client Authentication](https://openid.net/specs/openid-connect-core-1_0.html#ClientAuthentication) section of OpenID
+Connect core specification for more details on these authentication methods.
+
+Client can specify the default authentication method. To set default authentication method using
+[Janssen Text-based UI(TUI)](../../config-guide/tui.md),
+navigate via `Auth Server`->`Clients`->`Add Client`->`Basic`-> `Authn Method Token Endpoint`.
+
+![](../../../assets/image-tui-client-registration-basic.png)
 
 ## Supported Grant Types
 
-TODO: add more details here
+Token endpoint supports below mentioned grant types. 
+
+- [Authorization Code](../oauth-features/auth-code-grant.md)
+- [Refresh Token](../oauth-features/refresh-token-grant.md)
+- [Client Credentials](../oauth-features/client-credential-grant.md)
+- [Password](../oauth-features/password-grant.md)
+
+Client can configure all the possible grant types it can request from token endpoint during client configuration.
+To select the available grant types using
+[Janssen Text-based UI(TUI)](../../config-guide/tui.md),
+navigate via `Auth Server`->`Clients`->`Add Client`/`search client`->`Basic`-> `Grant`. 
+
+![](../../../assets/image-tui-client-registration-basic.png)
+
+## Interception Scripts
+
+Token endpoint response can be further customized using [interception scripts](../../developer/interception-scripts.md).
+Following interception scripts are relevant to token endpoint:
+
+- [Update Token](../../developer/scripts/update-token.md)
+
+Client can configure a particular script to be executed using client configuration. To update configuration using
+[Janssen Text-based UI(TUI)](../../config-guide/tui.md) navigate via `Auth Server`->`Clients`->`Add Client`/`search`->
+`Client Scripts`
+
+![](../../../assets/image-tui-client-registration-scripts.png)
