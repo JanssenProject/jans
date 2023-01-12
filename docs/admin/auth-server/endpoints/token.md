@@ -126,7 +126,6 @@ Token endpoint supports below mentioned grant types.
 - [Authorization Code](../oauth-features/auth-code-grant.md)
 - [Refresh Token](../oauth-features/refresh-token-grant.md)
 - [Client Credentials](../oauth-features/client-credential-grant.md)
-- [UMA Ticket](../uma-features/uma-ticket-grant.md)
 - [Password](../oauth-features/password-grant.md)
 
 Client can configure all the possible grant types it can request from token endpoint during client configuration.
