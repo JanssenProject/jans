@@ -23,7 +23,8 @@ class SpannerClient:
         self.headers = {}
 
         if emulator_host:
-            self.spanner_base_url = 'http://{}:{}/v1/'.format(emulator_host, emulator_port)
+            schema = 'http'
+            self.spanner_base_url = '{}://{}:{}/v1/'.format(schema, emulator_host, emulator_port)
             self.set_spanner_database_url()
         else:
             self.spanner_base_url = 'https://spanner.googleapis.com/v1/'
@@ -209,6 +210,6 @@ class SpannerClient:
         if self.sessioned_url:
             try:
                 requests.delete(self.sessioned_url, headers=self.headers)
-            except Exception as e:
+            except Exception:
                 pass
 

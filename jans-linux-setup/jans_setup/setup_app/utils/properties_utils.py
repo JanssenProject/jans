@@ -808,7 +808,7 @@ class PropertiesUtils(SetupUtils):
 
             print("  Checking spanner connection")
             try:
-                spanner_client = SpannerClient(
+                SpannerClient(
                             project_id=Config.spanner_project,
                             instance_id=Config.spanner_instance,
                             database_id=Config.spanner_database,
