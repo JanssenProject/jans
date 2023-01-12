@@ -103,7 +103,7 @@ public class ApiConstants {
     public static final String CREATORID = "creatorId";
     public static final String SESSIONID = "sessionId";
     public static final String USERDN = "userDn";
-    
+    public static final String PLUGIN_NAME = "pluginName";
 
     public static final String ALL = "all";
     public static final String ACTIVE = "active";

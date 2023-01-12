@@ -41,8 +41,6 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 
-import static io.jans.as.model.util.Util.escapeLog;
-
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;

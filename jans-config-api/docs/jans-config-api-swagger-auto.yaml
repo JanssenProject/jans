@@ -5075,6 +5075,34 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/organization.write
+  /api/v1/plugin:
+    get:
+      tags:
+      - Plugins
+      summary: Gets list of Plugins
+      description: Gets list of Plugins
+      operationId: get-plugins_1
+      parameters:
+      - name: pluginName
+        in: path
+        description: Plugin name
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: boolean
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/read-all
   /api/v1/scopes:
     get:
       tags:
@@ -7396,19 +7424,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        whitePagesCanView:
-          type: boolean
-        userCanAccess:
-          type: boolean
         userCanView:
-          type: boolean
-        adminCanEdit:
-          type: boolean
-        adminCanAccess:
           type: boolean
         userCanEdit:
           type: boolean
+        userCanAccess:
+          type: boolean
         adminCanView:
+          type: boolean
+        adminCanAccess:
+          type: boolean
+        adminCanEdit:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -8575,10 +8603,10 @@ components:
           $ref: '#/components/schemas/SsaConfiguration'
         blockWebviewAuthorizationEnabled:
           type: boolean
-        userInfoConfiguration:
-          $ref: '#/components/schemas/UserInfoConfiguration'
-        fapi:
-          type: boolean
+        dateFormatterPatterns:
+          type: object
+          additionalProperties:
+            type: string
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8588,6 +8616,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -8780,13 +8810,6 @@ components:
           type: string
         sharedSecret:
           type: string
-    UserInfoConfiguration:
-      type: object
-      properties:
-        dateFormatterPattern:
-          type: object
-          additionalProperties:
-            type: string
     PersistenceConfiguration:
       type: object
       properties:
@@ -8890,13 +8913,13 @@ components:
           type: boolean
         internal:
           type: boolean
+        locationPath:
+          type: string
         locationType:
           type: string
           enum:
           - ldap
           - file
-        locationPath:
-          type: string
         baseDn:
           type: string
     ScriptError:
@@ -9112,6 +9135,13 @@ components:
         jsFaviconPath:
           type: string
         baseDn:
+          type: string
+    PluginConf:
+      type: object
+      properties:
+        name:
+          type: string
+        className:
           type: string
     Scope:
       type: object

@@ -38,6 +38,7 @@ public class ApiAppConfiguration implements Configuration {
     private AgamaConfiguration agamaConfiguration;
     private AuditLogConf auditLogConf;
     private DataFormatConversionConf dataFormatConversionConf;
+    private List<PluginConf> plugins;
 
     public boolean isConfigOauthEnabled() {
         return configOauthEnabled;
@@ -247,6 +248,14 @@ public class ApiAppConfiguration implements Configuration {
 
     public void setDataFormatConversionConf(DataFormatConversionConf dataFormatConversionConf) {
         this.dataFormatConversionConf = dataFormatConversionConf;
+    }    
+
+    public List<PluginConf> getPlugins() {
+        return plugins;
+    }
+
+    public void setPlugins(List<PluginConf> plugins) {
+        this.plugins = plugins;
     }
 
     @Override
@@ -266,7 +275,9 @@ public class ApiAppConfiguration implements Configuration {
                 + " , agamaConfiguration="+ agamaConfiguration
                 + " , auditLogConf="+ auditLogConf
                 + " , dataFormatConversionConf="+ dataFormatConversionConf
+                + " , plugins="+ plugins
                 + "]";
     }
 
 }
+

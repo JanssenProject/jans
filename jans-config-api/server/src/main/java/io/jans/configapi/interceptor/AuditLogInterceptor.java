@@ -61,7 +61,7 @@ public class AuditLogInterceptor {
             // Get Audit config
             AuditLogConf auditLogConf = getAuditLogConf();
             LOG.info("auditLogConf:{}, ignoreMethod(context):{}", auditLogConf, ignoreMethod(context, auditLogConf));
-            
+
             // Log if enabled
             if (!ignoreMethod(context, auditLogConf)) {
                 AUDIT_LOG.info("\n I AM NEW ********************** Audit Request Detail Start ********************** ");
