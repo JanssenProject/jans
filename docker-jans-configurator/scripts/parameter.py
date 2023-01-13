@@ -81,6 +81,8 @@ class ParamSchema(Schema):
 
     auth_enc_keys = Str(missing="")
 
+    salt = Str(validate=Length(equal=24), missing="", default="")
+
     @validates("hostname")
     def validate_fqdn(self, value):
         fqdn = FQDN(value)
