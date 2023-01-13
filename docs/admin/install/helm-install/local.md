@@ -39,7 +39,7 @@ Start a fresh ubuntu `18.04` or `20.04` 4 CPU, 16 GB RAM, and 50GB SSD VM with p
 sudo su -
 ```
 ```bash
-wget https://raw.githubusercontent.com/JanssenProject/jans/replace-janssen-version/automation/startjanssendemo.sh && chmod u+x startjanssendemo.sh && ./startjanssendemo.sh
+wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/startjanssendemo.sh && chmod u+x startjanssendemo.sh && ./startjanssendemo.sh
 ```
 
 This will install docker, microk8s, helm and Janssen with the default settings that can be found inside [values.yaml](https://github.com/JanssenProject/jans/blob/main/charts/janssen/values.yaml).  
