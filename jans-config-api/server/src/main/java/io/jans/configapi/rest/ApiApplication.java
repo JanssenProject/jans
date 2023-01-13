@@ -43,7 +43,7 @@ import jakarta.ws.rs.core.Application;
                 @Tag(name = "Agama - Configuration"), @Tag(name = "Agama - Developer Studio"),
                 @Tag(name = "Statistics - User"), @Tag(name = "Health - Check"), @Tag(name = "Server Stats"),
                 @Tag(name = "Auth - Session Management"), @Tag(name = "Organization Configuration"),
-                @Tag(name = "Auth Server Health - Check") },
+                @Tag(name = "Auth Server Health - Check"), @Tag(name = "Plugins")},
 
         servers = { @Server(url = "https://jans.io/", description = "The Jans server") })
 
@@ -119,6 +119,7 @@ public class ApiApplication extends Application {
         classes.add(AgamaResource.class);
         classes.add(ADSDeploymentsResource.class);
         classes.add(SessionResource.class);
+        classes.add(PluginResource.class);
 
         return classes;
     }

@@ -8,6 +8,7 @@ package io.jans.configapi.core.rest;
 
 import static io.jans.as.model.util.Util.escapeLog;
 
+import io.jans.configapi.core.interceptor.RequestAuditInterceptor;
 import io.jans.configapi.core.interceptor.RequestInterceptor;
 import io.jans.configapi.core.model.ApiError;
 import io.jans.configapi.core.model.SearchRequest;
@@ -33,11 +34,33 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@RequestAuditInterceptor
 @RequestInterceptor
 public class BaseResource {
    
     @Inject
     Util util;
+    
+    @Context
+    UriInfo uriInfo;
+    
+    @Context
+    private HttpServletRequest httpRequest;
+
+    @Context
+    private HttpHeaders httpHeaders;
+    
+    public UriInfo getUriInfo() {
+        return uriInfo;
+    }
+
+    public HttpServletRequest getHttpRequest() {
+        return httpRequest;
+    }
+    
+    public HttpHeaders getHttpHeaders() {
+        return httpHeaders;
+    }    
 
     private static Logger log = LoggerFactory.getLogger(BaseResource.class);
 
