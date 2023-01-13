@@ -25,6 +25,7 @@ import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.server.model.common.*;
 import io.jans.as.server.service.ScopeService;
 import io.jans.as.server.service.SessionIdService;
+import io.jans.as.server.service.date.DateFormatterService;
 import io.jans.as.server.service.external.ExternalAuthenticationService;
 import io.jans.as.server.service.external.ExternalDynamicScopeService;
 import io.jans.as.server.service.external.ExternalUpdateTokenService;
@@ -42,6 +43,7 @@ import org.apache.logging.log4j.util.Strings;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
+import java.io.Serializable;
 import java.util.*;
 
 import static io.jans.as.model.common.ScopeType.DYNAMIC;
@@ -91,6 +93,9 @@ public class IdTokenFactory {
 
     @Inject
     private SessionIdService sessionIdService;
+
+    @Inject
+    private DateFormatterService dateFormatterService;
 
     private void setAmrClaim(JsonWebResponse jwt, String acrValues) {
         List<String> amrList = Lists.newArrayList();
@@ -224,7 +229,8 @@ public class IdTokenFactory {
                         } else if (value instanceof Boolean) {
                             jwr.getClaims().setClaim(key, (Boolean) value);
                         } else if (value instanceof Date) {
-                            jwr.getClaims().setClaim(key, ((Date) value).getTime() / 1000);
+                            Serializable formattedValue = dateFormatterService.formatClaim((Date) value, key);
+                            jwr.getClaims().setClaimObject(key, formattedValue, true);
                         } else {
                             jwr.setClaim(key, (String) value);
                         }
