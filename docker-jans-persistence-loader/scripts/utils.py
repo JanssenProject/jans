@@ -253,9 +253,9 @@ def get_ldif_mappings(group, optional_scopes=None):
             ]
 
         files += [
-            "jans-auth/configuration.ldif",
             "jans-auth/role-scope-mappings.ldif",
             "jans-cli/client.ldif",
+            "jans-auth/configuration.ldif",
         ]
 
         return files
