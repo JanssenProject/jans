@@ -2118,6 +2118,29 @@
           ]
         }
       ]
+    },
+    {
+      "path": "/jans-config-api/api/v1/plugin",
+      "conditions": [
+        {
+          "httpMethods": [
+            "GET"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.49",
+              "name": "https://jans.io/oauth/config/plugin.readonly"
+            }
+          ],
+          "groupScopes": [],
+          "superScopes": [
+            {
+              "inum": "1800.03.1",
+              "name": "https://jans.io/oauth/config/read-all"
+            }
+          ]
+        }
+      ]
     }
   ]
 }

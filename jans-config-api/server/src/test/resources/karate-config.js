@@ -62,6 +62,7 @@ function() {
         user_url: baseUrl + '/jans-config-api/api/v1/user',
 		agama_url: baseUrl + '/jans-config-api/api/v1/agama',
 		session_url: baseUrl + '/jans-config-api/api/v1/jans-auth-server/session',
+        plugin_url: baseUrl + '/jans-config-api/api/v1/plugin',
     };
 
     karate.configure('connectTimeout', 30000);

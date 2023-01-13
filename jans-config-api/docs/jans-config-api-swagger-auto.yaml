@@ -38,6 +38,7 @@ tags:
 - name: Auth - Session Management
 - name: Organization Configuration
 - name: Auth Server Health - Check
+- name: Plugins
 paths:
   /api/v1/health:
     get:
@@ -5075,6 +5076,75 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/organization.write
+  /api/v1/plugin:
+    get:
+      tags:
+      - Plugins
+      summary: Gets list of Plugins
+      description: Gets list of Plugins
+      operationId: get-plugins
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PluginConf'
+              examples:
+                Response example:
+                  description: Response example
+                  value: |
+                    [
+                        {
+                            "name": "fido2",
+                            "description": "fido2 plugin"
+                        },
+                        {
+                            "name": "scim",
+                            "description": "scim plugin"
+                        },
+                        {
+                            "name": "user-management",
+                            "description": "user-management plugin"
+                        }
+                    ]
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/plugin.readonly
+  /api/v1/plugin/{pluginName}:
+    get:
+      tags:
+      - Plugins
+      summary: Gets list of Plugins
+      description: Gets list of Plugins
+      operationId: get-plugins_1
+      parameters:
+      - name: pluginName
+        in: path
+        description: Plugin name
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: boolean
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/plugin.readonly
   /api/v1/scopes:
     get:
       tags:
@@ -7188,8 +7258,6 @@ components:
     DeploymentDetails:
       type: object
       properties:
-        projectName:
-          type: string
         folders:
           type: array
           items:
@@ -7199,6 +7267,19 @@ components:
           additionalProperties:
             type: string
         error:
+          type: string
+        projectMetadata:
+          $ref: '#/components/schemas/ProjectMetadata'
+    ProjectMetadata:
+      type: object
+      properties:
+        projectName:
+          type: string
+        author:
+          type: string
+        type:
+          type: string
+        description:
           type: string
     PagedResult:
       type: object
@@ -7385,19 +7466,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        whitePagesCanView:
-          type: boolean
-        adminCanAccess:
-          type: boolean
         adminCanView:
-          type: boolean
-        userCanAccess:
-          type: boolean
-        userCanEdit:
           type: boolean
         adminCanEdit:
           type: boolean
+        adminCanAccess:
+          type: boolean
         userCanView:
+          type: boolean
+        userCanEdit:
+          type: boolean
+        userCanAccess:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -8089,6 +8170,8 @@ components:
           type: array
           items:
             type: string
+        dynamicRegistrationDefaultCustomAttributes:
+          $ref: '#/components/schemas/JsonNode'
         displayValuesSupported:
           type: array
           items:
@@ -8562,35 +8645,12 @@ components:
           $ref: '#/components/schemas/SsaConfiguration'
         blockWebviewAuthorizationEnabled:
           type: boolean
-        userInfoConfiguration:
-          $ref: '#/components/schemas/UserInfoConfiguration'
-        enabledFeatureFlags:
-          uniqueItems: true
-          type: array
-          items:
+        dateFormatterPatterns:
+          type: object
+          additionalProperties:
             type: string
-            enum:
-            - UNKNOWN
-            - HEALTH_CHECK
-            - USERINFO
-            - CLIENTINFO
-            - ID_GENERATION
-            - REGISTRATION
-            - INTROSPECTION
-            - REVOKE_TOKEN
-            - REVOKE_SESSION
-            - ACTIVE_SESSION
-            - END_SESSION
-            - STATUS_SESSION
-            - JANS_CONFIGURATION
-            - CIBA
-            - UMA
-            - U2F
-            - DEVICE_AUTHZ
-            - METRIC
-            - STAT
-            - PAR
-            - SSA
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8600,8 +8660,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -8741,6 +8799,8 @@ components:
           type: object
           additionalProperties:
             type: string
+    JsonNode:
+      type: object
     SsaConfiguration:
       type: object
       properties:
@@ -8792,13 +8852,6 @@ components:
           type: string
         sharedSecret:
           type: string
-    UserInfoConfiguration:
-      type: object
-      properties:
-        dateFormatterPattern:
-          type: object
-          additionalProperties:
-            type: string
     PersistenceConfiguration:
       type: object
       properties:
@@ -8902,13 +8955,13 @@ components:
           type: boolean
         internal:
           type: boolean
-        locationPath:
-          type: string
         locationType:
           type: string
           enum:
           - ldap
           - file
+        locationPath:
+          type: string
         baseDn:
           type: string
     ScriptError:
@@ -8939,8 +8992,6 @@ components:
           type: boolean
         description:
           type: string
-    JsonNode:
-      type: object
     JSONWebKey:
       type: object
       properties:
@@ -9126,6 +9177,15 @@ components:
         jsFaviconPath:
           type: string
         baseDn:
+          type: string
+    PluginConf:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        className:
           type: string
     Scope:
       type: object
