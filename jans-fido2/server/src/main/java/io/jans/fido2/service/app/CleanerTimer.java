@@ -20,7 +20,7 @@ import io.jans.as.model.config.StaticConfiguration;
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.service.persist.AuthenticationPersistenceService;
 import io.jans.fido2.service.persist.RegistrationPersistenceService;
-import io.jans.fido2.service.u2f.RequestService;
+import io.jans.fido2.legacy.service.RequestService;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.base.DeletableEntity;
 import io.jans.orm.search.filter.Filter;

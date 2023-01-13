@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.fido2.ws.rs.controller.u2f;
+package io.jans.fido2.legacy.ws.rs;
 
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.service.common.UserService;
@@ -18,16 +18,16 @@ import io.jans.fido2.model.u2f.exception.RegistrationNotAllowed;
 import io.jans.fido2.model.u2f.protocol.RegisterRequestMessage;
 import io.jans.fido2.model.u2f.protocol.RegisterResponse;
 import io.jans.fido2.model.u2f.protocol.RegisterStatus;
-import io.jans.fido2.service.SessionIdService;
-import io.jans.fido2.service.external.ExternalAuthenticationService;
-import io.jans.fido2.service.u2f.util.Constants;
+import io.jans.fido2.legacy.service.SessionIdService;
+import io.jans.fido2.legacy.service.external.ExternalAuthenticationService;
+import io.jans.fido2.legacy.service.util.Constants;
 import io.jans.fido2.model.u2f.DeviceRegistration;
 import io.jans.fido2.model.u2f.DeviceRegistrationResult;
 import io.jans.fido2.model.u2f.RegisterRequestMessageLdap;
-import io.jans.fido2.service.u2f.DeviceRegistrationService;
-import io.jans.fido2.service.u2f.RegistrationService;
-import io.jans.fido2.service.u2f.UserSessionIdService;
-import io.jans.fido2.service.u2f.ValidationService;
+import io.jans.fido2.legacy.service.DeviceRegistrationService;
+import io.jans.fido2.legacy.service.RegistrationService;
+import io.jans.fido2.legacy.service.UserSessionIdService;
+import io.jans.fido2.legacy.service.ValidationService;
 import io.jans.fido2.model.u2f.util.ServerUtil;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.util.StringHelper;
@@ -88,6 +88,11 @@ public class U2fRegistrationWS {
     @GET
     @Produces({"application/json"})
     public Response startRegistration(@QueryParam("username") String userName, @QueryParam("application") String appId, @QueryParam("session_id") String sessionId, @QueryParam("enrollment_code") String enrollmentCode) {
+        // Verify useSuperGluu Param
+        if ((appConfiguration.getFido2Configuration() == null) && !appConfiguration.isUseSuperGluu()) {
+            return Response.status(Response.Status.FORBIDDEN).build();
+        }
+
         // Parameter username is deprecated. We uses it only to determine is it's one or two step workflow
         try {
             //errorResponseFactory.validateComponentEnabled(ComponentType.U2F);
@@ -162,6 +167,11 @@ public class U2fRegistrationWS {
     @POST
     @Produces({"application/json"})
     public Response finishRegistration(@FormParam("username") String userName, @FormParam("tokenResponse") String registerResponseString) {
+        // Verify useSuperGluu Param
+        if ((appConfiguration.getFido2Configuration() == null) && !appConfiguration.isUseSuperGluu()) {
+            return Response.status(Response.Status.FORBIDDEN).build();
+        }
+
         String sessionId = null;
         try {
             errorResponseFactory.validateFeatureEnabled(FeatureFlagType.U2F);

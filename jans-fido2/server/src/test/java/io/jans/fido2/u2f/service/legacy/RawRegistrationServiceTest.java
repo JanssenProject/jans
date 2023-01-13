@@ -4,11 +4,11 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.fido2.u2f.service;
+package io.jans.fido2.u2f.service.legacy;
 
 import io.jans.as.model.util.Base64Util;
 import io.jans.fido2.model.u2f.message.RawRegisterResponse;
-import io.jans.fido2.service.u2f.RawRegistrationService;
+import io.jans.fido2.legacy.service.RawRegistrationService;
 import io.jans.fido2.u2f.BaseTest;
 import org.python.bouncycastle.util.encoders.Hex;
 import org.testng.annotations.Test;

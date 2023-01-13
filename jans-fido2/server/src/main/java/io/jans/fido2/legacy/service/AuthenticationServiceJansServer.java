@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.fido2.service;
+package io.jans.fido2.legacy.service;
 
 import io.jans.as.common.model.common.SimpleUser;
 import io.jans.as.common.model.common.User;
@@ -12,9 +12,10 @@ import io.jans.as.common.model.session.SessionId;
 import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.as.common.util.AttributeConstants;
 import io.jans.fido2.model.conf.AppConfiguration;
+import io.jans.fido2.service.AuthenticationProtectionService;
 import io.jans.fido2.service.shared.UserService;
 import io.jans.model.ldap.GluuLdapConfiguration;
-import io.jans.fido2.service.u2f.util.Constants;
+import io.jans.fido2.legacy.service.util.Constants;
 import io.jans.fido2.security.Identity;
 import io.jans.fido2.service.shared.MetricService;
 import io.jans.model.GluuStatus;

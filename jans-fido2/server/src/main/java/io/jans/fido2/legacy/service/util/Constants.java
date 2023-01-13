@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.fido2.service.u2f.util;
+package io.jans.fido2.legacy.service.util;
 
 /**
  * Constants

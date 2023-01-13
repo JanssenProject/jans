@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.fido2.service;
+package io.jans.fido2.legacy.service;
 
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
@@ -16,9 +16,9 @@ import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.util.Pair;
 import io.jans.fido2.security.Identity;
-import io.jans.fido2.service.external.ExternalApplicationSessionService;
-import io.jans.fido2.service.external.session.SessionEvent;
-import io.jans.fido2.service.external.session.SessionEventType;
+import io.jans.fido2.legacy.service.external.ExternalApplicationSessionService;
+import io.jans.fido2.legacy.service.external.session.SessionEvent;
+import io.jans.fido2.legacy.service.external.session.SessionEventType;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.service.CacheService;

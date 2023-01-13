@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.fido2.service.external.session;
+package io.jans.fido2.legacy.service.external.session;
 
 import io.jans.as.common.model.session.SessionId;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;

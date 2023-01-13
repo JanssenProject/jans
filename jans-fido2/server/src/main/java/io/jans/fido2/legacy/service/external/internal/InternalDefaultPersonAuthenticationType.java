@@ -4,9 +4,9 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.fido2.service.external.internal;
+package io.jans.fido2.legacy.service.external.internal;
 
-import io.jans.fido2.service.AuthenticationServiceJansServer;
+import io.jans.fido2.legacy.service.AuthenticationServiceJansServer;
 import io.jans.model.SimpleCustomProperty;
 import io.jans.model.custom.script.type.auth.DummyPersonAuthenticationType;
 import io.jans.model.security.Credentials;

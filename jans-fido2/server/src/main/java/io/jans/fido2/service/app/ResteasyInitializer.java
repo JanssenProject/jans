@@ -9,8 +9,8 @@ package io.jans.fido2.service.app;
 import io.jans.fido2.ws.rs.controller.AssertionController;
 import io.jans.fido2.ws.rs.controller.AttestationController;
 import io.jans.fido2.ws.rs.controller.ConfigurationController;
-import io.jans.fido2.ws.rs.controller.u2f.U2fAuthenticationWS;
-import io.jans.fido2.ws.rs.controller.u2f.U2fRegistrationWS;
+import io.jans.fido2.legacy.ws.rs.U2fAuthenticationWS;
+import io.jans.fido2.legacy.ws.rs.U2fRegistrationWS;
 import jakarta.ws.rs.ApplicationPath;
 import jakarta.ws.rs.core.Application;
 

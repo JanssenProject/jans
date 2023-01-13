@@ -4,10 +4,11 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.fido2.ws.rs.controller.u2f;
+package io.jans.fido2.legacy.ws.rs;
 
 import io.jans.as.common.service.common.UserService;
 import io.jans.as.model.common.FeatureFlagType;
+import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.as.model.util.Base64Util;
 import io.jans.fido2.model.u2f.AuthenticateRequestMessageLdap;
@@ -22,11 +23,11 @@ import io.jans.fido2.model.u2f.protocol.AuthenticateRequestMessage;
 import io.jans.fido2.model.u2f.protocol.AuthenticateResponse;
 import io.jans.fido2.model.u2f.protocol.AuthenticateStatus;
 import io.jans.fido2.model.u2f.util.ServerUtil;
-import io.jans.fido2.service.u2f.AuthenticationService;
-import io.jans.fido2.service.u2f.DeviceRegistrationService;
-import io.jans.fido2.service.u2f.UserSessionIdService;
-import io.jans.fido2.service.u2f.ValidationService;
-import io.jans.fido2.service.u2f.util.Constants;
+import io.jans.fido2.legacy.service.AuthenticationService;
+import io.jans.fido2.legacy.service.DeviceRegistrationService;
+import io.jans.fido2.legacy.service.UserSessionIdService;
+import io.jans.fido2.legacy.service.ValidationService;
+import io.jans.fido2.legacy.service.util.Constants;
 import io.jans.util.StringHelper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -64,9 +65,17 @@ public class U2fAuthenticationWS {
     @Inject
     private ErrorResponseFactory errorResponseFactory;
 
+    @Inject
+    private AppConfiguration appConfiguration;
+
     @GET
     @Produces({"application/json"})
     public Response startAuthentication(@QueryParam("username") String userName, @QueryParam("keyhandle") String keyHandle, @QueryParam("application") String appId, @QueryParam("session_id") String sessionId) {
+        // Verify useSuperGluu Param
+        if ((appConfiguration.getFido2Configuration() == null) && !appConfiguration.isUseSuperGluu()) {
+            return Response.status(Response.Status.FORBIDDEN).build();
+        }
+
         // Parameter username is deprecated. We uses it only to determine is it's one or two step workflow
         try {
             
@@ -125,6 +134,11 @@ public class U2fAuthenticationWS {
     @POST
     @Produces({"application/json"})
     public Response finishAuthentication(@FormParam("username") String userName, @FormParam("tokenResponse") String authenticateResponseString) {
+        // Verify useSuperGluu Param
+        if ((appConfiguration.getFido2Configuration() == null) && !appConfiguration.isUseSuperGluu()) {
+            return Response.status(Response.Status.FORBIDDEN).build();
+        }
+
         String sessionId = null;
         try {
             errorResponseFactory.validateFeatureEnabled(FeatureFlagType.U2F);

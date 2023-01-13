@@ -1,4 +1,4 @@
-package io.jans.fido2.u2f.service;
+package io.jans.fido2.u2f.service.legacy;
 
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
@@ -6,7 +6,7 @@ import io.jans.as.model.exception.SignatureException;
 import io.jans.as.model.util.SecurityProviderUtility;
 import io.jans.fido2.model.u2f.message.RawAuthenticateResponse;
 import io.jans.fido2.model.u2f.protocol.ClientData;
-import io.jans.fido2.service.u2f.RawAuthenticationService;
+import io.jans.fido2.legacy.service.RawAuthenticationService;
 import io.jans.fido2.u2f.signature.SHA256withECDSASignatureVerification;
 import io.jans.fido2.u2f.signature.SignatureVerification;
 import org.apache.commons.codec.DecoderException;

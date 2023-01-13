@@ -4,12 +4,12 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.fido2.service.u2f;
+package io.jans.fido2.legacy.service;
 
 import io.jans.fido2.model.u2f.exception.BadConfigurationException;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 

@@ -8,19 +8,19 @@
 
     <test name="RawAuthenticationServiceTest" enabled="true">
         <classes>
-            <class name="io.jans.fido2.u2f.service.RawAuthenticationServiceTest" />
+            <class name="io.jans.fido2.u2f.service.legacy.RawAuthenticationServiceTest" />
         </classes>
     </test>
 
 	<test name="RawAuthenticationServiceUnitTest" enabled="false">
 		<classes>
-			<class name="io.jans.fido2.u2f.service.RawAuthenticationServiceUnitTest" />
+			<class name="io.jans.fido2.u2f.service.legacy.RawAuthenticationServiceUnitTest" />
 		</classes>
 	</test>
 
 	<test name="RawRegistrationServiceTest" enabled="true">
 		<classes>
-			<class name="io.jans.fido2.u2f.service.RawRegistrationServiceTest" />
+			<class name="io.jans.fido2.u2f.service.legacy.RawRegistrationServiceTest" />
 		</classes>
 	</test>
 

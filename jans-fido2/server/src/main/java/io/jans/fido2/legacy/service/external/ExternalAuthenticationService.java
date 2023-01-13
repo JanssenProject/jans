@@ -4,12 +4,12 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.fido2.service.external;
+package io.jans.fido2.legacy.service.external;
 
 import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.model.ldap.GluuLdapConfiguration;
 import io.jans.fido2.service.cdi.event.ReloadAuthScript;
-import io.jans.fido2.service.external.internal.InternalDefaultPersonAuthenticationType;
+import io.jans.fido2.legacy.service.external.internal.InternalDefaultPersonAuthenticationType;
 import io.jans.model.AuthenticationScriptUsageType;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;

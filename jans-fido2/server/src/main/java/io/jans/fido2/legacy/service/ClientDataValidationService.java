@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.fido2.service.u2f;
+package io.jans.fido2.legacy.service;
 
 import io.jans.fido2.model.u2f.exception.BadInputException;
 import io.jans.fido2.model.u2f.protocol.ClientData;
