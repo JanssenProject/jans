@@ -26,7 +26,7 @@ https://janssen.server.host/jans-auth/restv1/clientinfo
 
 Since clientinfo endpoint is an OAuth2 protected resource, a valid access token with appropriate scope is required to
 access the endpoint. More information about request and response of the clientinfo endpoint can be found in
-the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/replace-janssen-version/jans-auth-server/docs/swagger.yaml#/Client_Info).
+the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/Client_Info).
 
 ## Disabling The Endpoint Using Feature Flag
 

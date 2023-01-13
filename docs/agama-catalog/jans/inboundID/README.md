@@ -42,7 +42,7 @@ To facilitate administrators' work, the following flows are already implemented:
 
 ### Main flow
 
-The actual process of inbound identity occurs here. This flow is already [implemented](https://github.com/JanssenProject/jans/raw/replace-janssen-version/docs/script-catalog/agama/inboundID/io.jans.inbound.ExternalSiteLogin) and ready to use. The following is a summary of the steps involved:
+The actual process of inbound identity occurs here. This flow is already [implemented](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/docs/script-catalog/agama/inboundID/io.jans.inbound.ExternalSiteLogin) and ready to use. The following is a summary of the steps involved:
 
 1. A provider selection page is displayed. The list includes all (*enabled*) providers defined in the configuration of this flow. Additionally an option to use an existing local account is displayed (i.e. no inbound identity)
 
@@ -75,7 +75,7 @@ To start, let's add the required libraries to the authentication server:
 
 The basic authentication flow is employed when no provider is picked from the list (step 1 [here](#main-flow)) but the option to use an existing local account is taken. This flow is detailed in the Agama sample flows [page](https://jans.io/docs/admin/developer/agama/samples/#basic-authentication), however those contents can be skipped for the purpose of this setup.
 
-- Ensure Agama engine is [enabled](https://jans.io/docs/admin/developer/agama/quick-start/#enable-the-engine). Download the basic flow [source](https://github.com/JanssenProject/jans/raw/replace-janssen-version/docs/admin/developer/agama/basic/io.jans.flow.sample.basic) file
+- Ensure Agama engine is [enabled](https://jans.io/docs/admin/developer/agama/quick-start/#enable-the-engine). Download the basic flow [source](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/docs/admin/developer/agama/basic/io.jans.flow.sample.basic) file
 
 - Use the API for adding flows as explained [here](https://jans.io/docs/admin/developer/agama/quick-start/#getting-an-access-token) and [here](https://jans.io/docs/admin/developer/agama/quick-start/#add-the-flow-to-the-server). A sample `curl` command would look like this: 
 
@@ -86,17 +86,17 @@ The basic authentication flow is employed when no provider is picked from the li
     ```
 - In the server, navigate to `/opt/jans/jetty/jans-auth/agama/ftl`. Create the folder hierarchy `samples/basic` there
 
-- Download the login [template](https://github.com/JanssenProject/jans/raw/replace-janssen-version/docs/admin/developer/agama/basic/login.ftlh) to `basic` directory 
+- Download the login [template](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/docs/admin/developer/agama/basic/login.ftlh) to `basic` directory 
 
 ### Add the main inbound flow
 
-- Download the flow [source](https://github.com/JanssenProject/jans/raw/replace-janssen-version/docs/script-catalog/agama/inboundID/io.jans.inbound.ExternalSiteLogin) and add it as you did with the basic flow, ensure you use `io.jans.inbound.ExternalSiteLogin` this time
+- Download the flow [source](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/docs/script-catalog/agama/inboundID/io.jans.inbound.ExternalSiteLogin) and add it as you did with the basic flow, ensure you use `io.jans.inbound.ExternalSiteLogin` this time
 
 - In the server, navigate to `/opt/jans/jetty/jans-auth/agama`. Create folders named `inboundID` inside existing `ftl` and `fl` subdirectories
 
-- Download the default [logo](https://github.com/JanssenProject/jans/raw/replace-janssen-version/docs/script-catalog/agama/inboundID/none.png) and place it inside `/opt/jans/jetty/jans-auth/agama/fl/inboundID` folder
+- Download the default [logo](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/docs/script-catalog/agama/inboundID/none.png) and place it inside `/opt/jans/jetty/jans-auth/agama/fl/inboundID` folder
 
-- Download the provider selector [template](https://github.com/JanssenProject/jans/raw/replace-janssen-version/docs/script-catalog/agama/inboundID/login-chooser.ftlh) and place it inside `/opt/jans/jetty/jans-auth/agama/ftl/inboundID` folder. Note templates go under **ftl**, not **fl**. Do the same with the e-mail prompt [template](https://github.com/JanssenProject/jans/raw/replace-janssen-version/docs/script-catalog/agama/inboundID/email-prompt.ftlh)
+- Download the provider selector [template](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/docs/script-catalog/agama/inboundID/login-chooser.ftlh) and place it inside `/opt/jans/jetty/jans-auth/agama/ftl/inboundID` folder. Note templates go under **ftl**, not **fl**. Do the same with the e-mail prompt [template](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/docs/script-catalog/agama/inboundID/email-prompt.ftlh)
 
 ### Add a provider flow
 
@@ -104,9 +104,9 @@ For simplicity, we'll illustrate here how to add one of the already implemented 
 
 - Download the [utility flows](#utility-flows). Add them to the server as you did with the main flow
 
-- Download the Facebook flow [code](https://github.com/JanssenProject/jans/raw/replace-janssen-version/docs/script-catalog/agama/inboundID/facebook/io.jans.inbound.Facebook). Add it using the API as well
+- Download the Facebook flow [code](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/docs/script-catalog/agama/inboundID/facebook/io.jans.inbound.Facebook). Add it using the API as well
 
-- Download the [logo](https://github.com/JanssenProject/jans/raw/replace-janssen-version/docs/script-catalog/agama/inboundID/facebook/facebook.png) image and place it in `/opt/jans/jetty/jans-auth/agama/fl/inboundID`
+- Download the [logo](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/docs/script-catalog/agama/inboundID/facebook/facebook.png) image and place it in `/opt/jans/jetty/jans-auth/agama/fl/inboundID`
 
 - Login to Facebook and [register](https://developers.facebook.com/docs/development/register) as developer. Create an application with *Facebook login* capabilities. In the *Facebook login* settings add  `https://<your-host>/jans-auth/fl/callback` as a valid OAuth redirect URI. Finally grab the app Id and secret from the app settings page
 
@@ -180,7 +180,7 @@ Launch the main flow (learn about this topic [here](https://jans.io/docs/admin/d
     
 ### Main flow configurations
 
-Configuration is supplied in a JSON object whose keys are the identifiers of the existing identity providers. The associated value for a key is a JSON object itself and follows the structure represented by [this](https://github.com/JanssenProject/jans/blob/replace-janssen-version/jans-auth-server/agama/inboundID/src/main/java/io/jans/inbound/Provider.java) Java class.
+Configuration is supplied in a JSON object whose keys are the identifiers of the existing identity providers. The associated value for a key is a JSON object itself and follows the structure represented by [this](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-auth-server/agama/inboundID/src/main/java/io/jans/inbound/Provider.java) Java class.
 
 This is an example of a configuration for a couple of identity providers:
 

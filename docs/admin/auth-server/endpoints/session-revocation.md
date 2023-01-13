@@ -27,7 +27,7 @@ https://janssen.server.host/jans-auth/restv1/revoke_session
 ```
 
 More information about request and response of the revocation endpoint can be found in
-the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/replace-janssen-version/jans-auth-server/docs/swagger.yaml#/Session_Management/revoke-session).
+the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/Session_Management/revoke-session).
 
 ## Usage
 
