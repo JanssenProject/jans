@@ -118,7 +118,7 @@ public class AssertionController {
     @Produces({ "application/json" })
     @Path("/authentication")
     public Response startAuthentication(@QueryParam("username") String userName, @QueryParam("keyhandle") String keyHandle, @QueryParam("application") String appId, @QueryParam("session_id") String sessionId) {
-        if ((appConfiguration.getFido2Configuration() == null) && !appConfiguration.isUseSuperGluu()) {
+        if ((appConfiguration.getFido2Configuration() == null) && !appConfiguration.isSuperGluuEnabled()) {
             return Response.status(Status.FORBIDDEN).build();
         }
 
@@ -162,7 +162,7 @@ public class AssertionController {
     @Produces({ "application/json" })
     @Path("/authentication")
     public Response finishAuthentication(@FormParam("username") String userName, @FormParam("tokenResponse") String authenticateResponseString) {
-        if ((appConfiguration.getFido2Configuration() == null) && !appConfiguration.isUseSuperGluu()) {
+        if ((appConfiguration.getFido2Configuration() == null) && !appConfiguration.isSuperGluuEnabled()) {
             return Response.status(Status.FORBIDDEN).build();
         }
 

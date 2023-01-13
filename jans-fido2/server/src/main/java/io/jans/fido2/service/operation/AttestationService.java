@@ -80,7 +80,7 @@ public class AttestationService {
 	 * mandatory parameters: authenticatorSelection, documentDomain, extensions,
 	 * timeout
 	 */
-	public JsonNode options(JsonNode params) {
+	public ObjectNode options(JsonNode params) {
 		log.debug("Attestation options {}", params);
 
 		// Verify request parameters
@@ -168,7 +168,7 @@ public class AttestationService {
 		return optionsResponseNode;
 	}
 
-	public JsonNode verify(JsonNode params) {
+	public ObjectNode verify(JsonNode params) {
 		log.debug("Attestation verify {}", params);
 
 		// Verify if there are mandatory request parameters

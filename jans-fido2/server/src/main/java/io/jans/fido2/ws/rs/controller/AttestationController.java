@@ -7,7 +7,37 @@
 package io.jans.fido2.ws.rs.controller;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateEncodingException;
 
+import com.fasterxml.jackson.databind.AnnotationIntrospector;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.type.TypeFactory;
+import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
+
+import io.jans.as.model.fido.u2f.message.RawRegisterResponse;
+import io.jans.as.model.fido.u2f.protocol.ClientData;
+import io.jans.as.model.fido.u2f.protocol.RegisterResponse;
+import io.jans.fido2.ctap.AttestationFormat;
+import io.jans.fido2.exception.Fido2RpRuntimeException;
+import io.jans.fido2.exception.Fido2RuntimeException;
+import io.jans.fido2.model.conf.AppConfiguration;
+import io.jans.fido2.service.AuthenticatorDataParser;
+import io.jans.fido2.service.Base64Service;
+import io.jans.fido2.service.CoseService;
+import io.jans.fido2.service.DataMapperService;
+import io.jans.fido2.service.operation.AttestationService;
+import io.jans.fido2.service.sg.RawRegistrationService;
+import io.jans.fido2.service.verifier.CommonVerifiers;
+import io.jans.service.net.NetworkService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
@@ -20,15 +50,6 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
 import jakarta.ws.rs.core.Response.Status;
-
-import io.jans.fido2.exception.Fido2RpRuntimeException;
-import io.jans.fido2.model.conf.AppConfiguration;
-import io.jans.fido2.service.DataMapperService;
-import io.jans.fido2.service.operation.AttestationService;
-import io.jans.fido2.service.verifier.CommonVerifiers;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
  * serves request for /attestation endpoint exposed by FIDO2 sever
@@ -46,6 +67,20 @@ public class AttestationController {
     private DataMapperService dataMapperService;
 
     @Inject
+    private CommonVerifiers commonVerifiers;
+
+    @Inject
+    private Base64Service base64Service;
+    
+    @Inject
+    private RawRegistrationService rawRegistrationService;
+
+	@Inject
+	private CoseService coseService;
+	
+	@Inject NetworkService networkService;
+
+    @Inject
     private AppConfiguration appConfiguration;
 
     @POST
@@ -60,6 +95,11 @@ public class AttestationController {
         JsonNode params;
         try {
         	params = dataMapperService.readTree(content);
+        	
+        	// Don't accept request with super_gluu_request parameter
+            if (commonVerifiers.hasSuperGluu(params)) {
+                throw new Fido2RpRuntimeException("Failed to parse options attestation request");
+            }
         } catch (IOException ex) {
             throw new Fido2RpRuntimeException("Failed to parse options attestation request", ex);
         }
@@ -82,6 +122,11 @@ public class AttestationController {
         JsonNode params;
         try {
         	params = dataMapperService.readTree(content);
+
+        	// Don't accept request with super_gluu_request parameter
+            if (commonVerifiers.hasSuperGluu(params)) {
+                throw new Fido2RpRuntimeException("Failed to parse options attestation request");
+            }
         } catch (IOException ex) {
             throw new Fido2RpRuntimeException("Failed to parse finish attestation request", ex) ;
         }
@@ -116,18 +161,32 @@ public class AttestationController {
     @Produces({ "application/json" })
     @Path("/registration")
     public Response startRegistration(@QueryParam("username") String userName, @QueryParam("application") String appId, @QueryParam("session_id") String sessionId, @QueryParam("enrollment_code") String enrollmentCode) {
-        if ((appConfiguration.getFido2Configuration() == null) && !appConfiguration.isUseSuperGluu()) {
+        if ((appConfiguration.getFido2Configuration() == null) && !appConfiguration.isSuperGluuEnabled()) {
             return Response.status(Status.FORBIDDEN).build();
         }
 
         ObjectNode params = dataMapperService.createObjectNode();
         // Add all required parameters from request to allow process U2F request 
         params.put(CommonVerifiers.SUPER_GLUU_REQUEST, true);
+        
+        // TODO: Validate input parameters
+        params.put("username", userName);
+        
+        // TODO: Get displayName from user entry 
+        params.put("displayName", userName);
 
-        JsonNode result = attestationService.options(params);
+        // Required parameters
+        params.put("attestation", "direct");
+
+        ObjectNode result = attestationService.options(params);
 
         // Build start registration response  
-        JsonNode superGluuResult = result;
+        ObjectNode superGluuResult = result;
+        if (superGluuResult.has("rp")) {
+        	JsonNode rp = superGluuResult.get("rp");
+        	superGluuResult.put("appId", rp.get("name").asText());
+        }
+        
 
         ResponseBuilder builder = Response.ok().entity(superGluuResult.toString());
         return builder.build();
@@ -176,25 +235,130 @@ public class AttestationController {
      *             {"status":"success","challenge":"raPfmqZOHlHF4gXbprd29uwX-bs3Ff5v03quxBD4FkM"}
      *            
      */
-    @GET
+    @POST
     @Produces({ "application/json" })
     @Path("/registration")
     public Response finishRegistration(@FormParam("username") String userName, @FormParam("tokenResponse") String registerResponseString) {
-        if ((appConfiguration.getFido2Configuration() == null) && !appConfiguration.isUseSuperGluu()) {
+        if ((appConfiguration.getFido2Configuration() == null) && !appConfiguration.isSuperGluuEnabled()) {
             return Response.status(Status.FORBIDDEN).build();
+        }
+
+        RegisterResponse registerResponse;
+        try {
+            registerResponse = jsonMapperWithWrapRoot().readValue(registerResponseString, RegisterResponse.class);
+        } catch (IOException ex) {
+            throw new Fido2RpRuntimeException("Failed to parse options attestation request", ex);
+        }
+
+        if (!registerResponse.getClientData().getTyp().equals("navigator.id.finishEnrollment")) {
+            throw new Fido2RuntimeException("Invalid options attestation request type");
         }
 
         ObjectNode params = dataMapperService.createObjectNode();
         // Add all required parameters from request to allow process U2F request 
         params.put(CommonVerifiers.SUPER_GLUU_REQUEST, true);
 
-        JsonNode result = attestationService.verify(params);
+        // Manadatory parameter
+        params.put("type", "public-key");
+        params.put("id", "id");
 
-        // Build finish registration response
-        JsonNode superGluuResult = result;
+        // Add response node
+        ObjectNode response = dataMapperService.createObjectNode();
+        params.set("response", response);
+        
+        // Convert clientData node to new format
+        ObjectNode clientData = dataMapperService.createObjectNode();
+        clientData.put("challenge", registerResponse.getClientData().getChallenge());
+        clientData.put("origin", registerResponse.getClientData().getOrigin());
+        clientData.put("type", "webauthn.create");
+		response.put("clientDataJSON", base64Service.urlEncodeToString(clientData.toString().getBytes(Charset.forName("UTF-8"))));
 
-        ResponseBuilder builder = Response.ok().entity(superGluuResult.toString());
+		// Prepare attestationObject
+        RawRegisterResponse rawRegisterResponse = rawRegistrationService.parseRawRegisterResponse(registerResponse.getRegistrationData());
+
+        ObjectNode attestationObject = dataMapperService.createObjectNode();
+        ObjectNode attStmt = dataMapperService.createObjectNode();
+        
+        try {
+			ArrayNode x5certs = attStmt.putArray("x5c");
+			x5certs.add(base64Service.encodeToString(rawRegisterResponse.getAttestationCertificate().getEncoded()));
+	        attStmt.put("sig", rawRegisterResponse.getSignature());
+
+	        attestationObject.put("fmt", AttestationFormat.fido_u2f_super_gluu.getFmt());
+	        attestationObject.set("attStmt", attStmt);
+
+	        byte[] authData = generateAuthData(registerResponse.getClientData(), rawRegisterResponse);
+	        attestationObject.put("authData", authData);
+
+	        response.put("attestationObject", base64Service.urlEncodeToString(dataMapperService.cborWriteAsBytes(attestationObject)));
+		} catch (CertificateEncodingException e) {
+		} catch (IOException e) {
+            throw new Fido2RuntimeException("Failed to prepare attestationObject");
+		}
+
+        ObjectNode result = attestationService.verify(params);
+        
+        result.put("status", "success");
+        result.put("challenge", registerResponse.getClientData().getChallenge());
+
+        ResponseBuilder builder = Response.ok().entity(result.toString());
         return builder.build();
+    }
+
+    private byte[] generateAuthData(ClientData clientData, RawRegisterResponse rawRegisterResponse) throws IOException {
+    	byte[] rpIdHash = hash(clientData.getOrigin());
+    	byte[] flags = new byte[] { AuthenticatorDataParser.FLAG_USER_PRESENT | AuthenticatorDataParser.FLAG_ATTESTED_CREDENTIAL_DATA_INCLUDED };
+    	byte[] counter = ByteBuffer.allocate(4).putInt(0).array();
+
+        byte[] aaguid = ByteBuffer.allocate(16).array();
+        
+        byte[] credIDBuffer = rawRegisterResponse.getKeyHandle();
+
+        byte[] credIDLenBuffer = ByteBuffer.allocate(2).putShort((short) credIDBuffer.length).array();
+
+
+		JsonNode uncompressedECPoint = coseService.convertECKeyToUncompressedPoint(
+				rawRegisterResponse.getUserPublicKey());
+
+		byte[] cosePublicKeyBuffer = dataMapperService.cborWriteAsBytes(uncompressedECPoint);
+        
+		byte[] authData = ByteBuffer
+				.allocate(rpIdHash.length + flags.length + counter.length + aaguid.length + credIDLenBuffer.length
+						+ credIDBuffer.length + cosePublicKeyBuffer.length)
+				.put(rpIdHash).put(flags).put(counter).put(aaguid).put(credIDLenBuffer).put(credIDBuffer)
+				.put(cosePublicKeyBuffer).array();
+		
+		return authData;
+    }
+
+    public byte[] hash(byte[] bytes) {
+        try {
+            return MessageDigest.getInstance("SHA-256").digest(bytes);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public byte[] hash(String str) {
+        return hash(str.getBytes());
+    }
+    
+
+    // TODO: User ServerUtil
+    public static ObjectMapper createJsonMapper() {
+        final AnnotationIntrospector jaxb = new JaxbAnnotationIntrospector(TypeFactory.defaultInstance());
+        final AnnotationIntrospector jackson = new JacksonAnnotationIntrospector();
+
+        final AnnotationIntrospector pair = AnnotationIntrospector.pair(jackson, jaxb);
+
+        final ObjectMapper mapper = new ObjectMapper();
+        mapper.getDeserializationConfig().with(pair);
+        mapper.getSerializationConfig().with(pair);
+        return mapper;
+    }
+
+    public static ObjectMapper jsonMapperWithWrapRoot() {
+        return createJsonMapper().configure(SerializationFeature.WRAP_ROOT_VALUE, true);
     }
 
 }

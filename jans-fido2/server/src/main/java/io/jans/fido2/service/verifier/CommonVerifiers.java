@@ -11,13 +11,13 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
-
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+
+import com.fasterxml.jackson.databind.JsonNode;
+
 import io.jans.fido2.ctap.AttestationConveyancePreference;
 import io.jans.fido2.ctap.AuthenticatorAttachment;
 import io.jans.fido2.ctap.TokenBindingSupport;
@@ -32,9 +32,9 @@ import io.jans.fido2.service.DataMapperService;
 import io.jans.fido2.service.processors.AttestationFormatProcessor;
 import io.jans.service.net.NetworkService;
 import io.jans.util.StringHelper;
-import org.slf4j.Logger;
-
-import com.fasterxml.jackson.databind.JsonNode;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
 
 /**
  * @author Yuriy Movchan
@@ -463,5 +463,14 @@ public class CommonVerifiers {
             throw new Fido2RuntimeException("Invalid parameters in metadata");
         }
     }
+
+	public boolean hasSuperGluu(JsonNode params) {
+        if (params.hasNonNull(SUPER_GLUU_REQUEST)) {
+        	JsonNode node = params.get(SUPER_GLUU_REQUEST);
+        	return node.isBoolean() && node.asBoolean();
+        }
+
+        return false;
+	}
 
 }
