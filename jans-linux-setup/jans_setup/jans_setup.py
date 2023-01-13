@@ -13,8 +13,9 @@ import code
 import site
 
 from pathlib import Path
-
 from queue import Queue
+
+warnings.filterwarnings("ignore")
 
 __STATIC_SETUP_DIR__ = '/opt/jans/jans-setup/'
 queue = Queue()
