@@ -74,12 +74,12 @@ public class PluginResource extends ConfigBaseResource {
     public Response isPluginDeployed(
             @Parameter(description = "Plugin name") @NotNull @PathParam(ApiConstants.PLUGIN_NAME) String pluginName) {
 
-        List<String> plugins = getPluginNames();
+        List<PluginConf> plugins = getPluginNames();
         Boolean deployed = false;
-        logger.debug("plugins:{} ", plugins);
+        logger.debug("All plugins:{} ", plugins);
         if (StringUtils.isNotBlank(pluginName) && !plugins.isEmpty()) {
-            Optional<String> pluginNameOptional = plugins.stream().findAny()
-                    .filter(name -> pluginName.equalsIgnoreCase(name));
+            Optional<PluginConf> pluginNameOptional = plugins.stream().findAny()
+                    .filter(plugin -> pluginName.equalsIgnoreCase(plugin.getName()));
             logger.debug("pluginNameOptional:{} ", pluginNameOptional);
             if (pluginNameOptional.isPresent()) {
                 deployed = true;
@@ -89,27 +89,26 @@ public class PluginResource extends ConfigBaseResource {
         return Response.ok(deployed).build();
     }
 
-    private List<String> getPluginNames() {
+    private List<PluginConf> getPluginNames() {
 
         List<PluginConf> plugins = this.authUtil.getPluginConf();
-
         logger.debug("plugins:{} ", plugins);
-
-        List<String> pluginNames = new ArrayList<>();
+        List<PluginConf> pluginInfo = new ArrayList<>();
         for (PluginConf pluginConf : plugins) {
             logger.debug("pluginConf:{} ", pluginConf);
             if (StringUtils.isNotBlank(pluginConf.getClassName())) {
                 try {
                     Class.forName(pluginConf.getClassName());
-                    pluginNames.add(pluginConf.getName());
+                    pluginConf.setClassName("");
+                    pluginInfo.add(pluginConf);
                 } catch (ClassNotFoundException ex) {
-                    logger.error("'{}` plugin not deployed", pluginConf.getName());
+                    logger.error("'{}' plugin not deployed", pluginConf.getName());
                 }
             }
 
         }
-        logger.debug("pluginNames:{} ", pluginNames);
-        return pluginNames;
+        logger.debug("pluginInfo:{} ", pluginInfo);
+        return pluginInfo;
     }
 
 }

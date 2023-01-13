@@ -16,10 +16,14 @@ import io.jans.configapi.core.util.Util;
 import io.jans.orm.model.SortOrder;
 
 import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
 
 import java.util.List;
 import java.util.Map;
@@ -36,6 +40,27 @@ public class BaseResource {
    
     @Inject
     Util util;
+    
+    @Context
+    UriInfo uriInfo;
+    
+    @Context
+    private HttpServletRequest httpRequest;
+
+    @Context
+    private HttpHeaders httpHeaders;
+    
+    public UriInfo getUriInfo() {
+        return uriInfo;
+    }
+
+    public HttpServletRequest getHttpRequest() {
+        return httpRequest;
+    }
+    
+    public HttpHeaders getHttpHeaders() {
+        return httpHeaders;
+    }    
 
     private static Logger log = LoggerFactory.getLogger(BaseResource.class);
 

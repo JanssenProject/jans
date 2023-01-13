@@ -7,12 +7,13 @@
 package io.jans.configapi.interceptor;
 
 import io.jans.configapi.core.interceptor.RequestAuditInterceptor;
+import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.model.configuration.AuditLogConf;
 import io.jans.configapi.util.AuthUtil;
+
 import jakarta.annotation.Priority;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.UriInfo;
 
@@ -38,15 +39,6 @@ public class AuditLogInterceptor {
     private static final Logger AUDIT_LOG = LoggerFactory.getLogger("audit");
     private static final Logger LOG = LoggerFactory.getLogger(AuditLogInterceptor.class);
 
-    @Context
-    UriInfo info;
-
-    @Inject
-    HttpServletRequest request;
-
-    @Context
-    private HttpHeaders httpHeaders;
-
     @Inject
     AuthUtil authUtil;
 
@@ -55,30 +47,34 @@ public class AuditLogInterceptor {
     public Object aroundReadFrom(InvocationContext context) throws Exception {
 
         try {
-            LOG.info("Audit Log Interceptor - context:{}, info:{}, request:{}, httpHeaders:{}, AUDIT_LOG:{}", context,
-                    info, request, httpHeaders, AUDIT_LOG);
+            LOG.debug("Audit Log Interceptor - context:{}, AUDIT_LOG:{}", context, AUDIT_LOG);
+
+            HttpServletRequest request = ((BaseResource) context.getTarget()).getHttpRequest();
+            HttpHeaders httpHeaders = ((BaseResource) context.getTarget()).getHttpHeaders();
+            UriInfo uriInfo = ((BaseResource) context.getTarget()).getUriInfo();
+            LOG.debug("Audit Log Interceptor -request:{}, httpHeaders:{}, uriInfo:{}", request, httpHeaders, uriInfo);
 
             // Get Audit config
             AuditLogConf auditLogConf = getAuditLogConf();
-            LOG.info("auditLogConf:{}, ignoreMethod(context):{}", auditLogConf, ignoreMethod(context, auditLogConf));
+            LOG.debug("auditLogConf:{}, ignoreMethod(context):{}", auditLogConf, ignoreMethod(context, auditLogConf));
 
             // Log if enabled
             if (!ignoreMethod(context, auditLogConf)) {
-                AUDIT_LOG.info("\n I AM NEW ********************** Audit Request Detail Start ********************** ");
+                AUDIT_LOG.info("\n ********************** Audit Request Detail Start ********************** ");
                 // Request audit
                 String beanClassName = context.getClass().getName();
                 String method = context.getMethod().getName();
 
-                AUDIT_LOG.info("endpoint:{}, beanClassName:{}, method:{}, from:{}, user:{} ", info.getPath(),
+                AUDIT_LOG.info("endpoint:{}, beanClassName:{}, method:{}, from:{}, user:{} ", uriInfo.getPath(),
                         beanClassName, method, request.getRemoteAddr(), httpHeaders.getHeaderString("User-inum"));
 
                 // Header attribute audit
-                Map<String, String> headerData = getAuditHeaderAttributes(auditLogConf);
+                Map<String, String> headerData = getAuditHeaderAttributes(auditLogConf, httpHeaders);
                 AUDIT_LOG.info("headerData:{} ", headerData);
 
                 // Request object audit
                 processRequest(context, auditLogConf);
-                AUDIT_LOG.info("\n ********************** Audit Request Detail End ********************** ");
+                AUDIT_LOG.info("********************** Audit Request Detail End ********************** ");
             }
 
         } catch (Exception ex) {
@@ -139,8 +135,9 @@ public class AuditLogInterceptor {
         return false;
     }
 
-    private Map<String, String> getAuditHeaderAttributes(AuditLogConf auditLogConf) {
-        LOG.info("AuditLogInterceptor::getAuditHeaderAttributes() - auditLogConf:{}", auditLogConf);
+    private Map<String, String> getAuditHeaderAttributes(AuditLogConf auditLogConf, HttpHeaders httpHeaders) {
+        LOG.info("AuditLogInterceptor::getAuditHeaderAttributes() - auditLogConf:{}, httpHeaders:{}", auditLogConf,
+                httpHeaders);
         if (auditLogConf == null) {
             return Collections.emptyMap();
         }
