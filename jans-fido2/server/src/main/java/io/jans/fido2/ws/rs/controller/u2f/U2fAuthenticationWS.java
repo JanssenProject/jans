@@ -40,7 +40,7 @@ import org.slf4j.Logger;
  * @version August 9, 2017
  */
 @ApplicationScoped
-@Path("/fido/u2f/authentication")
+@Path("/authentication")
 public class U2fAuthenticationWS {
 
     @Inject

@@ -30,27 +30,24 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 @Path("/configuration")
 public class ConfigurationController {
 
-	@Inject
-	private AppConfiguration appConfiguration;
+    @Inject
+    private AppConfiguration appConfiguration;
 
     @Inject
     private DataMapperService dataMapperService;
 
-	@GET
-	@Produces({ "application/json" })
-	public Response getConfiguration() {
+    @GET
+    @Produces({"application/json"})
+    public Response getConfiguration() {
         if (appConfiguration.getFido2Configuration() == null) {
             return Response.status(Status.FORBIDDEN).build();
         }
 
-	    final String baseEndpointUri = appConfiguration.getBaseEndpoint();
-	    ObjectNode response = dataMapperService.createObjectNode();
-        
+        final String baseEndpointUri = appConfiguration.getBaseEndpoint();
+        ObjectNode response = dataMapperService.createObjectNode();
+
         response.put("version", "1.1");
         response.put("issuer", appConfiguration.getIssuer());
-
-        response.put("registration_endpoint_u2f", baseEndpointUri + "/fido/u2f/registration");
-        response.put("authentication_endpoint_u2f", baseEndpointUri + "/fido/u2f/authentication");
 
         ObjectNode attestation = dataMapperService.createObjectNode();
         response.set("attestation", attestation);
@@ -64,8 +61,13 @@ public class ConfigurationController {
         assertion.put("options_enpoint", baseEndpointUri + "/assertion/options");
         assertion.put("result_enpoint", baseEndpointUri + "/assertion/result");
 
+        if (appConfiguration.isUseSuperGluu()) {
+            response.put("super_gluu_registration_endpoint", baseEndpointUri + "/registration");
+            response.put("super_gluu_authentication_endpoint", baseEndpointUri + "/authentication");
+        }
+
         ResponseBuilder builder = Response.ok().entity(response.toString());
         return builder.build();
-	}
+    }
 
 }

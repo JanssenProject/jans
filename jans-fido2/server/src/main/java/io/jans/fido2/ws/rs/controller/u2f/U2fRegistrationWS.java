@@ -52,7 +52,7 @@ import java.util.List;
  * @version August 9, 2017
  */
 @ApplicationScoped
-@Path("/fido/u2f/registration")
+@Path("/registration")
 public class U2fRegistrationWS {
 
     @Inject

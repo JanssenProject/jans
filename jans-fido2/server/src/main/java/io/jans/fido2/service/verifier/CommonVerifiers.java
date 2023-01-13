@@ -43,6 +43,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 @ApplicationScoped
 public class CommonVerifiers {
 
+    public static final String SUPER_GLUU_REQUEST = "super_gluu_request";
+
     @Inject
     private Logger log;
 

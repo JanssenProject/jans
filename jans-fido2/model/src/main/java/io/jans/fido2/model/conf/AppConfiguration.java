@@ -77,6 +77,8 @@ public class AppConfiguration implements Configuration {
 	private Boolean errorReasonEnabled = false;
 	@DocProperty(description = "List of enabled feature flags")
 	private List<String> featureFlags;
+	@DocProperty(description = "Boolean value to enable disable Super Gluu extension")
+	private boolean useSuperGluu;
     private Fido2Configuration fido2Configuration;
 
 	public String getIssuer() {
@@ -279,6 +281,14 @@ public class AppConfiguration implements Configuration {
 
 	public void setFeatureFlags(List<String> featureFlags) {
 		this.featureFlags = featureFlags;
+	}
+
+	public boolean isUseSuperGluu() {
+		return useSuperGluu;
+	}
+
+	public void setUseSuperGluu(boolean useSuperGluu) {
+		this.useSuperGluu = useSuperGluu;
 	}
 
 }
