@@ -11,6 +11,7 @@ import shutil
 import traceback
 import code
 import site
+import warnings
 
 from pathlib import Path
 from queue import Queue
