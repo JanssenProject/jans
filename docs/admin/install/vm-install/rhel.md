@@ -24,7 +24,7 @@ You can disbale SELinux temporarly by executing `setenforce 0`. To disable perma
   [Releases](https://github.com/JanssenProject/jans/releases)
 
 ```
-wget https://github.com/JanssenProject/jans/releases/download/replace-janssen-version/jans-replace-janssen-image-version-el8.x86_64.rpm -P ~/
+wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-el8.x86_64.rpm -P ~/
 ```
 
 - Verify integrity of the downloaded package using published `sha256sum`.
@@ -32,13 +32,13 @@ wget https://github.com/JanssenProject/jans/releases/download/replace-janssen-ve
     Download `sha256sum` file for the package
 
     ```shell
-    wget https://github.com/JanssenProject/jans/releases/download/replace-janssen-version/jans-replace-janssen-image-version-el8.x86_64.rpm.sha256sum -P ~/
+    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-el8.x86_64.rpm.sha256sum -P ~/
     ```
 
     Check the hash if it is matching.
 
     ```shell
-    sha256sum -c jans-replace-janssen-image-version-el8.x86_64.rpm.sha256sum
+    sha256sum -c jans-replace-janssen-version-el8.x86_64.rpm.sha256sum
     ```
 
     Output similar to below should confirm the integrity of the downloaded package.
@@ -50,7 +50,7 @@ wget https://github.com/JanssenProject/jans/releases/download/replace-janssen-ve
 - Install the package
 
 ```
-yum install ~/jans-replace-janssen-image-version-el8.x86_64.rpm
+yum install ~/jans-replace-janssen-version-el8.x86_64.rpm
 ```
 
 ## Run the setup script
