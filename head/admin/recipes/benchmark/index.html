@@ -9139,7 +9139,7 @@ sudo snap <span class="nb">alias</span> microk8s.kubectl kubectl
 <p>Make sure <a href="https://helm.sh/docs/intro/install/">helm</a> is installed.</p>
 </li>
 <li>
-<p>Prepare your <a href="../../install/helm-install/">override.yaml</a>. Copy the below into a file named override.yaml. At the time of writing this we are using image tags <code>replace-janssen-image-version_dev</code> which are the bleeding edge images for release <code>replace-janssen-image-version</code>. Stable images such as <code>replace-janssen-image-version-1</code> should be used.</p>
+<p>Prepare your <a href="../../install/helm-install/">override.yaml</a>. Copy the below into a file named override.yaml. At the time of writing this we are using image tags <code>replace-janssen-version_dev</code> which are the bleeding edge images for release <code>replace-janssen-version</code>. Stable images such as <code>replace-janssen-version-1</code> should be used.</p>
 </li>
 </ol>
 <div class="highlight"><pre><span></span><code><span class="nt">config</span><span class="p">:</span><span class="w"></span>
@@ -9227,7 +9227,7 @@ sudo snap <span class="nb">alias</span> microk8s.kubectl kubectl
 <p>Create a folder called <code>add_users</code>.</p>
 <p><div class="highlight"><pre><span></span><code>mkdir add_users <span class="o">&amp;&amp;</span> <span class="nb">cd</span> add_users
 </code></pre></div>
-2. Copy the following <a href="https://github.com/JanssenProject/jans/blob/replace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-users/load_users_rdbms_job.yaml">yaml</a> into the folder under the name <code>load_users.yaml</code>.</p>
+2. Copy the following <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-users/load_users_rdbms_job.yaml">yaml</a> into the folder under the name <code>load_users.yaml</code>.</p>
 </li>
 <li>
 <p>Open the file and modify the sql connection parameters. To speed the loading process increase the CPU requests and limits.</p>
@@ -9323,7 +9323,7 @@ cat <span class="s">&lt;&lt; EOF &gt; auth_code_client.json</span>
 <span class="s">}</span>
 <span class="s">EOF</span>
 </code></pre></div>
-3. Copy the following <a href="https://github.com/JanssenProject/jans/blob/replace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/load_test_auth_code.yaml">yaml</a> into the folder.</p>
+3. Copy the following <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/load_test_auth_code.yaml">yaml</a> into the folder.</p>
 </li>
 <li>
 <p>Download or build <a href="../../config-guide/tui/">config-cli-tui</a> and run:</p>
@@ -9356,7 +9356,7 @@ cat <span class="s">&lt;&lt; EOF &gt; auth_code_client.json</span>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-09T15:58:20+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-09</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-13T08:34:37+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-13</span>
       
         <br>
         Created:

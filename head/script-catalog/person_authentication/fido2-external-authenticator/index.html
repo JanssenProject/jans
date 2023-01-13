@@ -8843,12 +8843,12 @@
 <p><a href="https://fidoalliance.org/fido2/">FIDO 2.0 (FIDO2)</a> , an open authentication standard that enables people to leverage common devices to authenticate to online services in both mobile and desktop environments. The Janssen server includes a FIDO2 server implementation. This enables authentications by using  platform authenticators embedded into a person's device or  physical USB, NFC or Bluetooth security keys that are inserted into a USB slot of a computer.</p>
 <p>FIDO2 is comprised of the <a href="https://www.w3.org/TR/webauthn/">W3C’s Web Authentication specification (WebAuthn)</a> and FIDO’s corresponding <a href="https://fidoalliance.org/specs/fido-v2.0-ps-20170927/fido-client-to-authenticator-protocol-v2.0-ps-20170927.html">Client-to-Authenticator Protocol (CTAP)</a>. WebAuthn defines a standard web API that can be built into browsers and related web platform infrastructure to enable online services to use FIDO Authentication. CTAP enables external devices such as mobile handsets or FIDO Security Keys to work with WebAuthn and serve as authenticators to desktop applications and web services.</p>
 <p>This document explains how to use the Janssen Auth Server's built-in 
-<a href="https://github.com/JanssenProject/jans/blob/replace-janssen-version/jans-linux-setup/jans_setup/static/extension/person_authentication/Fido2ExternalAuthenticator.py">FIDO2 interception script</a>
+<a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-linux-setup/jans_setup/static/extension/person_authentication/Fido2ExternalAuthenticator.py">FIDO2 interception script</a>
 to implement a two-step, two-factor authentication (2FA) with username / password as the first step, and any FIDO2 device as the second step.</p>
 <h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">#</a></h2>
 <ul>
 <li>A Janssen Server (<a href="https://github.com/JanssenProject/jans#installation">installation instructions</a>)      </li>
-<li><a href="https://github.com/JanssenProject/jans/blob/replace-janssen-version/docs/script-catalog/person_authentication/fido2-external-authenticator/Fido2ExternalAuthenticator.py">FIDO2 interception script</a> (included in the default Janssen Server distribution);     </li>
+<li><a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/script-catalog/person_authentication/fido2-external-authenticator/Fido2ExternalAuthenticator.py">FIDO2 interception script</a> (included in the default Janssen Server distribution);     </li>
 <li>At least one FIDO2 device for testing, like one of the devices <a href="#fido2-devices">listed below</a>.</li>
 </ul>
 <h3 id="fido2-devices">FIDO2 devices<a class="headerlink" href="#fido2-devices" title="Permanent link">#</a></h3>
@@ -8887,7 +8887,7 @@ to implement a two-step, two-factor authentication (2FA) with username / passwor
 </ol>
 <p>e.g : <code>/opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts-by-type --url-suffix type:PERSON_AUTHENTICATION</code> , <code>/opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts-by-inum --url-suffix inum:6122281b-b55d-4dd0-8115-b098eeeee2b7</code></p>
 <ol>
-<li><a href="https://github.com/JanssenProject/jans-cli/blob/replace-janssen-version/docs/cli/cli-custom-scripts.md#update-an-existing-custom-script">Update the custom script</a> and change the <code>enabled</code> attribute to <code>true</code>  </li>
+<li><a href="https://github.com/JanssenProject/jans-cli/blob/vreplace-janssen-version/docs/cli/cli-custom-scripts.md#update-an-existing-custom-script">Update the custom script</a> and change the <code>enabled</code> attribute to <code>true</code>  </li>
 </ol>
 <p>Now FIDO2 is an available authentication mechanism for your Janssen Server. This means that, using OpenID Connect <code>acr_values</code>, applications can now request FIDO2 authentication for users.</p>
 <div class="admonition note">
@@ -8897,7 +8897,7 @@ configuration by navigating to the following URL: <code>https://&lt;hostname&gt;
 Find <code>"acr_values_supported":</code> and you should see <code>"fido2"</code>.</p>
 </div>
 <h2 id="enable-fido2-script-as-default-authentication-script">Enable FIDO2 Script as default authentication script:<a class="headerlink" href="#enable-fido2-script-as-default-authentication-script" title="Permanent link">#</a></h2>
-<p>Use this <a href="https://github.com/JanssenProject/jans-cli-tui/blob/replace-janssen-version/docs/cli/cli-default-authentication-method.md">link</a> as a reference.
+<p>Use this <a href="https://github.com/JanssenProject/jans-cli-tui/blob/vreplace-janssen-version/docs/cli/cli-default-authentication-method.md">link</a> as a reference.
 Follow the steps below to enable FIDO2 authentication:
 1. Create a file say <code>fido2-auth-default.json</code> with the following contents
 <div class="highlight"><pre><span></span><code>{
@@ -8918,8 +8918,8 @@ Follow the steps below to enable FIDO2 authentication:
 </code></pre></div></p>
 <h2 id="fido2-login-page">FIDO2 login page<a class="headerlink" href="#fido2-login-page" title="Permanent link">#</a></h2>
 <p>Below is an illustration of the Janssen Server's default FIDO2 login page:</p>
-<p><img alt="fido2" src="https://github.com/JanssenProject/jans/raw/replace-janssen-version/docs/assets/image_fido2.png" /></p>
-<p>The design is being rendered from the <a href="https://github.com/JanssenProject/jans/blob/replace-janssen-version/jans-auth-server/server/src/main/webapp/auth/fido2/login.xhtml">FIDO2 xhtml page</a>. To customize the look and feel of this page, follow the <a href="https://jans.io/docs/admin/developer/customization/customize-web-pages/">customization guide</a>.</p>
+<p><img alt="fido2" src="https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/docs/assets/image_fido2.png" /></p>
+<p>The design is being rendered from the <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-auth-server/server/src/main/webapp/auth/fido2/login.xhtml">FIDO2 xhtml page</a>. To customize the look and feel of this page, follow the <a href="https://jans.io/docs/admin/developer/customization/customize-web-pages/">customization guide</a>.</p>
 <h2 id="using-fido2-tokens">Using FIDO2 tokens<a class="headerlink" href="#using-fido2-tokens" title="Permanent link">#</a></h2>
 <h3 id="credential-enrollment">Credential enrollment<a class="headerlink" href="#credential-enrollment" title="Permanent link">#</a></h3>
 <p>FIDO2 device enrollment happens during the first authentication attempt.</p>
@@ -8927,7 +8927,7 @@ Follow the steps below to enable FIDO2 authentication:
 <p>All subsequent FIDO2 authentications for that user account will require the enrolled FIDO2 key.</p>
 <h3 id="fido2-credential-management">FIDO2 credential management<a class="headerlink" href="#fido2-credential-management" title="Permanent link">#</a></h3>
 <p>A user's FIDO2 devices can be removed by a Janssen administrator in LDAP under the user entry as shown in the below screenshot.</p>
-<p><img alt="fido2" src="https://github.com/JanssenProject/jans/raw/replace-janssen-version/docs/assets/image-fido2-ldap-structure.png" />
+<p><img alt="fido2" src="https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/docs/assets/image-fido2-ldap-structure.png" />
 Diagram source in mermaid.live
 <div class="highlight"><pre><span></span><code>graph TD
 
@@ -8973,7 +8973,7 @@ Diagram source in mermaid.live
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-09T12:38:51+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-09</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-13T08:34:37+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-13</span>
       
         <br>
         Created:

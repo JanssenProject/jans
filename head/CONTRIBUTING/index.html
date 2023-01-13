@@ -8920,23 +8920,28 @@ The flow consists of creating a new branch, cherry-picking the changes of the or
 <span class="mi">---</span><span class="w"></span>
 </code></pre></div>
 <h3 id="referencing-janssen-project-release-in-documents">Referencing Janssen Project Release in Documents<a class="headerlink" href="#referencing-janssen-project-release-in-documents" title="Permanent link">#</a></h3>
-<p>When a reference to the current release is required in the documentation content, use the text <code>replace-janssen-version</code>
-instead of mentioning the current release number. Janssen Project build system will replace <code>replace-janssen-version</code>
-text with the current release number at the time of every release. i.e. at the time of releasing documentation for the Janssen Project release of v1.0.5, all occurrences of
-<code>replace-janssen-version</code> will be replaced by <code>v1.0.5</code>.</p>
-<p>For example, below is the URL used in the documentation to point to the specification of API for corresponding Janssen 
-Project release. It is important that this link points to corresponding specification of that release.</p>
-<div class="highlight"><pre><span></span><code>https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/replace-janssen-version/jans-auth-server/docs/swagger.yaml
+<p>We often need to reference release numbers in the documentation. For example, <a href="../admin/install/vm-install/ubuntu/">Ubuntu package installation guide</a>.
+In this guide, the following command is documented:</p>
+<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/releases/download/v1.0.5/jans_1.0.5.ubuntu20.04_amd64.deb -P /tmp
 </code></pre></div>
-<p>In every new release of Janssen Project (and corresponding Janssen documentation) only the <code>replace-janssen-version</code> part
-of the URL changes. So, at the time of releasing the documentation for <code>v1.0.4</code>, the build system will update the 
-<code>replace-janssen-version</code> in the URL so the URL becomes</p>
-<div class="highlight"><pre><span></span><code>https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/v1.0.4/jans-auth-server/docs/swagger.yaml
+<p>Above command contains references to the release number at two places. <code>v1.0.5</code> in the URL and <code>1.0.5</code> as part of the file
+name. There are many such places throughout the documentation when release numbers need to be mentioned. Whenever we
+make a new release, these numbers need to change as they point to the latest release number. This becomes a manual task.</p>
+<p>To avoid this manual, error-prone approach the Janssen Project uses a release marker, <code>replace-janssen-version</code> instead
+of writing actual release numbers in the <code>head</code>(latest) documentation branch. So, when there is a need to mention the release number, instead of
+writing the actual release number, use the release marker. Let's see how to document the above command (at the <code>head</code> version)
+so that it stays up-to-date release after release.</p>
+<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version.ubuntu20.04_amd64.deb -P /tmp
 </code></pre></div>
-<p>At the time of releasing <code>v1.0.5</code>, the build system will update the same URL as below</p>
-<div class="highlight"><pre><span></span><code>https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/v1.0.5/jans-auth-server/docs/swagger.yaml
-</code></pre></div>
-<p>This way, URL always points to the specification in corresponding release without updating it manually everytime before release.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+</div>
+<ul>
+<li><code>head</code> version of documentation may contain the release marker at various places. URLs, commands etc. So, URLs, and commands
+might not work as it is. Users will have to manually replace the marker or use the most recent stable release documentation.</li>
+<li>Release marker should be used only when contributing to the latest documentation. Not when updating documentation
+for previous releases.</li>
+</ul>
 <h3 id="general-text">General Text<a class="headerlink" href="#general-text" title="Permanent link">#</a></h3>
 <ul>
 <li>Allow long lines to wrap, rather than manually breaking them. For example, the Introduction paragraph is a single line</li>
@@ -9176,7 +9181,7 @@ docs: no docs modification
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-16T14:46:35+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-16</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-13T08:34:37+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-13</span>
       
         <br>
         Created:

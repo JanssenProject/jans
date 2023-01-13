@@ -8930,7 +8930,7 @@
 <li><a href="./google">Google</a></li>
 </ul>
 <h3 id="main-flow">Main flow<a class="headerlink" href="#main-flow" title="Permanent link">#</a></h3>
-<p>The actual process of inbound identity occurs here. This flow is already <a href="https://github.com/JanssenProject/jans/raw/replace-janssen-version/docs/script-catalog/agama/inboundID/io.jans.inbound.ExternalSiteLogin">implemented</a> and ready to use. The following is a summary of the steps involved:</p>
+<p>The actual process of inbound identity occurs here. This flow is already <a href="https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/docs/script-catalog/agama/inboundID/io.jans.inbound.ExternalSiteLogin">implemented</a> and ready to use. The following is a summary of the steps involved:</p>
 <ol>
 <li>
 <p>A provider selection page is displayed. The list includes all (<em>enabled</em>) providers defined in the configuration of this flow. Additionally an option to use an existing local account is displayed (i.e. no inbound identity)</p>
@@ -8966,7 +8966,7 @@
 <p>The basic authentication flow is employed when no provider is picked from the list (step 1 <a href="#main-flow">here</a>) but the option to use an existing local account is taken. This flow is detailed in the Agama sample flows <a href="https://jans.io/docs/admin/developer/agama/samples/#basic-authentication">page</a>, however those contents can be skipped for the purpose of this setup.</p>
 <ul>
 <li>
-<p>Ensure Agama engine is <a href="https://jans.io/docs/admin/developer/agama/quick-start/#enable-the-engine">enabled</a>. Download the basic flow <a href="https://github.com/JanssenProject/jans/raw/replace-janssen-version/docs/admin/developer/agama/basic/io.jans.flow.sample.basic">source</a> file</p>
+<p>Ensure Agama engine is <a href="https://jans.io/docs/admin/developer/agama/quick-start/#enable-the-engine">enabled</a>. Download the basic flow <a href="https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/docs/admin/developer/agama/basic/io.jans.flow.sample.basic">source</a> file</p>
 </li>
 <li>
 <p>Use the API for adding flows as explained <a href="https://jans.io/docs/admin/developer/agama/quick-start/#getting-an-access-token">here</a> and <a href="https://jans.io/docs/admin/developer/agama/quick-start/#add-the-flow-to-the-server">here</a>. A sample <code>curl</code> command would look like this: </p>
@@ -8977,22 +8977,22 @@
 - In the server, navigate to <code>/opt/jans/jetty/jans-auth/agama/ftl</code>. Create the folder hierarchy <code>samples/basic</code> there</p>
 </li>
 <li>
-<p>Download the login <a href="https://github.com/JanssenProject/jans/raw/replace-janssen-version/docs/admin/developer/agama/basic/login.ftlh">template</a> to <code>basic</code> directory </p>
+<p>Download the login <a href="https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/docs/admin/developer/agama/basic/login.ftlh">template</a> to <code>basic</code> directory </p>
 </li>
 </ul>
 <h3 id="add-the-main-inbound-flow">Add the main inbound flow<a class="headerlink" href="#add-the-main-inbound-flow" title="Permanent link">#</a></h3>
 <ul>
 <li>
-<p>Download the flow <a href="https://github.com/JanssenProject/jans/raw/replace-janssen-version/docs/script-catalog/agama/inboundID/io.jans.inbound.ExternalSiteLogin">source</a> and add it as you did with the basic flow, ensure you use <code>io.jans.inbound.ExternalSiteLogin</code> this time</p>
+<p>Download the flow <a href="https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/docs/script-catalog/agama/inboundID/io.jans.inbound.ExternalSiteLogin">source</a> and add it as you did with the basic flow, ensure you use <code>io.jans.inbound.ExternalSiteLogin</code> this time</p>
 </li>
 <li>
 <p>In the server, navigate to <code>/opt/jans/jetty/jans-auth/agama</code>. Create folders named <code>inboundID</code> inside existing <code>ftl</code> and <code>fl</code> subdirectories</p>
 </li>
 <li>
-<p>Download the default <a href="https://github.com/JanssenProject/jans/raw/replace-janssen-version/docs/script-catalog/agama/inboundID/none.png">logo</a> and place it inside <code>/opt/jans/jetty/jans-auth/agama/fl/inboundID</code> folder</p>
+<p>Download the default <a href="https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/docs/script-catalog/agama/inboundID/none.png">logo</a> and place it inside <code>/opt/jans/jetty/jans-auth/agama/fl/inboundID</code> folder</p>
 </li>
 <li>
-<p>Download the provider selector <a href="https://github.com/JanssenProject/jans/raw/replace-janssen-version/docs/script-catalog/agama/inboundID/login-chooser.ftlh">template</a> and place it inside <code>/opt/jans/jetty/jans-auth/agama/ftl/inboundID</code> folder. Note templates go under <strong>ftl</strong>, not <strong>fl</strong>. Do the same with the e-mail prompt <a href="https://github.com/JanssenProject/jans/raw/replace-janssen-version/docs/script-catalog/agama/inboundID/email-prompt.ftlh">template</a></p>
+<p>Download the provider selector <a href="https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/docs/script-catalog/agama/inboundID/login-chooser.ftlh">template</a> and place it inside <code>/opt/jans/jetty/jans-auth/agama/ftl/inboundID</code> folder. Note templates go under <strong>ftl</strong>, not <strong>fl</strong>. Do the same with the e-mail prompt <a href="https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/docs/script-catalog/agama/inboundID/email-prompt.ftlh">template</a></p>
 </li>
 </ul>
 <h3 id="add-a-provider-flow">Add a provider flow<a class="headerlink" href="#add-a-provider-flow" title="Permanent link">#</a></h3>
@@ -9002,10 +9002,10 @@
 <p>Download the <a href="#utility-flows">utility flows</a>. Add them to the server as you did with the main flow</p>
 </li>
 <li>
-<p>Download the Facebook flow <a href="https://github.com/JanssenProject/jans/raw/replace-janssen-version/docs/script-catalog/agama/inboundID/facebook/io.jans.inbound.Facebook">code</a>. Add it using the API as well</p>
+<p>Download the Facebook flow <a href="https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/docs/script-catalog/agama/inboundID/facebook/io.jans.inbound.Facebook">code</a>. Add it using the API as well</p>
 </li>
 <li>
-<p>Download the <a href="https://github.com/JanssenProject/jans/raw/replace-janssen-version/docs/script-catalog/agama/inboundID/facebook/facebook.png">logo</a> image and place it in <code>/opt/jans/jetty/jans-auth/agama/fl/inboundID</code></p>
+<p>Download the <a href="https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/docs/script-catalog/agama/inboundID/facebook/facebook.png">logo</a> image and place it in <code>/opt/jans/jetty/jans-auth/agama/fl/inboundID</code></p>
 </li>
 <li>
 <p>Login to Facebook and <a href="https://developers.facebook.com/docs/development/register">register</a> as developer. Create an application with <em>Facebook login</em> capabilities. In the <em>Facebook login</em> settings add  <code>https://&lt;your-host&gt;/jans-auth/fl/callback</code> as a valid OAuth redirect URI. Finally grab the app Id and secret from the app settings page</p>
@@ -9071,7 +9071,7 @@
 <p>Launch the main flow (learn about this topic <a href="https://jans.io/docs/admin/developer/agama/quick-start/#craft-an-authentication-request">here</a>). If everything was setup correctly, a screen with a "Sign in using" heading will be shown and next to it a link titled "Facebook". When clicking on the link, the browser will be taken to the Facebook website for authentication. A prompt for consent of release of personal information may appear as well. Finally, the browser is taken back to your server and then to the target application as described <a href="#main-flow">here</a>. </p>
 <h2 id="configuration-parameters-of-flows">Configuration parameters of flows<a class="headerlink" href="#configuration-parameters-of-flows" title="Permanent link">#</a></h2>
 <h3 id="main-flow-configurations">Main flow configurations<a class="headerlink" href="#main-flow-configurations" title="Permanent link">#</a></h3>
-<p>Configuration is supplied in a JSON object whose keys are the identifiers of the existing identity providers. The associated value for a key is a JSON object itself and follows the structure represented by <a href="https://github.com/JanssenProject/jans/blob/replace-janssen-version/jans-auth-server/agama/inboundID/src/main/java/io/jans/inbound/Provider.java">this</a> Java class.</p>
+<p>Configuration is supplied in a JSON object whose keys are the identifiers of the existing identity providers. The associated value for a key is a JSON object itself and follows the structure represented by <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-auth-server/agama/inboundID/src/main/java/io/jans/inbound/Provider.java">this</a> Java class.</p>
 <p>This is an example of a configuration for a couple of identity providers:</p>
 <div class="highlight"><pre><span></span><code>{
 
@@ -9279,7 +9279,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-09T12:38:51+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-09</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-13T08:34:37+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-13</span>
       
         <br>
         Created:

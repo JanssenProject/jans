@@ -8876,16 +8876,16 @@
 <li>Download the release package from the Github Janssen Project
 <a href="https://github.com/JanssenProject/jans/releases">Releases</a></li>
 </ul>
-<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/releases/download/replace-janssen-version/jans_replace-janssen-image-version.ubuntu20.04_amd64.deb -P /tmp
+<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version.ubuntu20.04_amd64.deb -P /tmp
 </code></pre></div>
 <ul>
 <li>
 <p>Verify integrity of the downloaded package by verifying published <code>sha256sum</code>.   </p>
 <p>Download <code>sha256sum</code> file for the package</p>
-<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/releases/download/replace-janssen-version/jans_replace-janssen-image-version.ubuntu20.04_amd64.deb.sha256sum -P /tmp
+<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version.ubuntu20.04_amd64.deb.sha256sum -P /tmp
 </code></pre></div>
 <p>Check the hash if it is matching. </p>
-<div class="highlight"><pre><span></span><code>sha256sum -c /tmp/jans_replace-janssen-image-version.ubuntu20.04_amd64.deb.sha256sum
+<div class="highlight"><pre><span></span><code>sha256sum -c /tmp/jans_replace-janssen-version.ubuntu20.04_amd64.deb.sha256sum
 </code></pre></div>
 <p>Output similar to below should confirm the integrity of the downloaded package.</p>
 <div class="highlight"><pre><span></span><code>&lt;package-name&gt;: OK
@@ -8895,7 +8895,7 @@
 <p>Install the package</p>
 </li>
 </ul>
-<div class="highlight"><pre><span></span><code>apt install -y /tmp/jans_replace-janssen-image-version.ubuntu20.04_amd64.deb
+<div class="highlight"><pre><span></span><code>apt install -y /tmp/jans_replace-janssen-version.ubuntu20.04_amd64.deb
 </code></pre></div>
 <h2 id="run-the-setup-script">Run the setup script<a class="headerlink" href="#run-the-setup-script" title="Permanent link">#</a></h2>
 <ul>
@@ -8968,7 +8968,7 @@ The following packages will be REMOVED:
 After this operation, 1,257 MB disk space will be freed.
 Do you want to continue? [Y/n] y
 (Reading database ... 166839 files and directories currently installed.)
-Removing jans (replace-janssen-image-version~ubuntu20.04) ...
+Removing jans (replace-janssen-version~ubuntu20.04) ...
 Checking to make sure service is down...
 </code></pre></div>
 
@@ -8977,7 +8977,7 @@ Checking to make sure service is down...
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-09T12:38:51+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-09</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-13T08:34:37+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-13</span>
       
         <br>
         Created:
