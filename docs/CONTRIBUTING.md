@@ -216,33 +216,31 @@ tags:
 
 ### Referencing Janssen Project Release in Documents
 
-When a reference to the current release is required in the documentation content, use the text `vreplace-janssen-version`
-instead of mentioning the current release number. Janssen Project build system will replace `replace-janssen-version`
-text with the current release number at the time of every release. i.e. at the time of releasing documentation for the Janssen Project release of v1.0.5, all occurrences of
-`replace-janssen-version` will be replaced by `1.0.5` resulting into string `v1.0.5`.
-
-For example, below is the URL used in the documentation to point to the specification of API for corresponding Janssen 
-Project release. It is important that this link points to corresponding specification of that release.
+We often need to reference release numbers in the documentation. For example, [Ubuntu package installation guide](admin/install/vm-install/ubuntu.md).
+In this guide, the following command is documented:
 
 ```
-https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml
+wget https://github.com/JanssenProject/jans/releases/download/v1.0.5/jans_1.0.5.ubuntu20.04_amd64.deb -P /tmp
 ```
 
-In every new release of Janssen Project (and corresponding Janssen documentation) only the `replace-janssen-version` part
-of the URL changes. So, at the time of releasing the documentation for `v1.0.4`, the build system will update the 
-`replace-janssen-version` in the URL so the URL becomes
+Above command contains references to the release number at two places. `v1.0.5` in the URL and `1.0.5` as part of the file
+name. There are many such places throughout the documentation when release numbers need to be mentioned. Whenever we
+make a new release, these numbers need to change as they point to the latest release number. This becomes a manual task.
+
+To avoid this manual, error-prone approach the Janssen Project uses a release marker, `replace-janssen-version` instead
+of writing actual release numbers in the `head`(latest) documentation branch. So, when there is a need to mention the release number, instead of
+writing the actual release number, use the release marker. Let's see how to document the above command (at the `head` version)
+so that it stays up-to-date release after release.
 
 ```
-https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/v1.0.4/jans-auth-server/docs/swagger.yaml
+wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version.ubuntu20.04_amd64.deb -P /tmp
 ```
 
-At the time of releasing `v1.0.5`, the build system will update the same URL as below
-
-```
-https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/v1.0.5/jans-auth-server/docs/swagger.yaml
-```
-
-This way, URL always points to the specification in corresponding release without updating it manually everytime before release.
+!!! Warning
+- `head` version of documentation may contain the release marker at various places. URLs, commands etc. So, URLs, and commands
+might not work as it is. Users will have to manually replace the marker or use the most recent stable release documentation.
+- Release marker should be used only when contributing to the latest documentation. Not when updating documentation
+for previous releases.
 
 ### General Text
  - Allow long lines to wrap, rather than manually breaking them. For example, the Introduction paragraph is a single line
