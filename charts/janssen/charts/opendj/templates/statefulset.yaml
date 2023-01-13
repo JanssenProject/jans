@@ -61,6 +61,17 @@ spec:
         resources: {}
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
+      - command:
+        - /bin/chown
+        - -R
+        - 1000:1000
+        - /opt/opendj/config
+        image: busybox:latest
+        imagePullPolicy: Always
+        name: change-config-ownership
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
     {{- end }}
     {{- with $.Values.image.pullSecrets }}
       imagePullSecrets:
