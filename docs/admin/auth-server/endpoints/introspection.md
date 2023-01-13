@@ -21,7 +21,7 @@ can be found by checking the `introspection_endpoint` claim of the OpenID Connec
 ` "introspection_endpoint" : "https://janssen.server.host/jans-auth/restv1/introspection" `
 
 More information about request and response of the Introspection endpoint can be found in
-the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/replace-janssen-version/jans-auth-server/docs/swagger.yaml#/Token/get-introspection).
+the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/Token/get-introspection).
 
 
 ## Sample GET Request

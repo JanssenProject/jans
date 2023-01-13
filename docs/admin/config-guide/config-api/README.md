@@ -7,10 +7,10 @@ tags:
 # config-api
 
 ## Overview
-[Jans Config Api](https://github.com/JanssenProject/jans/tree/replace-janssen-version/jans-config-api) provides a central place to manage and configure jans modules.
+[Jans Config Api](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-config-api) provides a central place to manage and configure jans modules.
 It helps in configuring auth-server, users, fido2 and scim modules.
 
-Config API is a REST application that is developed using Weld 4.x (JSR-365) and JAX-RS. Its endpoints can be used to manage configuration and other properties of [Jans Auth Server](https://github.com/JanssenProject/jans/tree/replace-janssen-version/jans-auth-server), which is an open-source OpenID Connect Provider (OP) and UMA Authorization Server (AS)
+Config API is a REST application that is developed using Weld 4.x (JSR-365) and JAX-RS. Its endpoints can be used to manage configuration and other properties of [Jans Auth Server](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-auth-server), which is an open-source OpenID Connect Provider (OP) and UMA Authorization Server (AS)
 
 ![Config-API-Architecture](../../../assets/config-api-architecture.png)
 

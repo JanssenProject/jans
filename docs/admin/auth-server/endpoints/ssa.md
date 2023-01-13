@@ -27,7 +27,7 @@ https://janssen.server.host/jans-auth/restv1/ssa
 ```
 
 More information about request and response of the revocation endpoint can be found in
-the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/replace-janssen-version/jans-auth-server/docs/swagger.yaml#/SSA).
+the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/SSA).
 
 ## Disabling The Endpoint Using Feature Flag
 
