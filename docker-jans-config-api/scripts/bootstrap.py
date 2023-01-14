@@ -53,7 +53,9 @@ def main():
     persistence_groups = mapper.groups().keys()
 
     if persistence_type == "hybrid":
-        render_hybrid_properties("/etc/jans/conf/jans-hybrid.properties")
+        hybrid_prop = "etc/jans/conf/jans-hybrid.properties"
+        if not os.path.exists(hybrid_prop):
+            render_hybrid_properties(hybrid_prop)
 
     if "ldap" in persistence_groups:
         render_ldap_properties(
