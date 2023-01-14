@@ -1,0 +1,78 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                template="/WEB-INF/incl/layout/login-template.xhtml">
+    <f:metadata>
+        <f:viewAction action="#{authenticator.prepareAuthenticationForStep}" if="#{not identity.loggedIn}"/>
+    </f:metadata>
+    <ui:define name="head">
+        <meta name="description" content="Gluu, Inc." />
+    </ui:define>
+    <ui:define name="pageTitle">
+        <h:outputText value="Github Repository Path" />
+    </ui:define>
+
+
+    <ui:define name="body">
+        <div class="container">
+            <h:panelGroup rendered="true">
+                <div class="login_bx_1"
+                     style="border-radius: 10px; margin-top: 0px; background: white; border: 1px solid #008b8b;">
+                    <div class="row">
+                        <h:messages class="text-center"
+                                    style="color:#8b0000;margin:5px;margin-left:20px; font-size:2vw;"
+                                    infoClass="text-center" errorClass="text-center" />
+                    </div>
+                    <h:form id="GithubDetailsForm" style="padding:30px;">
+
+                        <div class="row">
+                            <div class="col-sm-3 col-md-3">
+                                <h:outputText value="Github Repository Path" />
+                            </div>
+                            <div class="col-sm-9 col-md-9">
+
+                                <h:inputText placeholder="Enter Github Repository Path"
+                                             id="repositoryPath" name="repositoryPath" required="true" colMd="10"
+                                             labelColMd="2" autocomplete="off"
+                                             styleClass="form-control"
+                                             style="width:100%"
+                                             value="#{repositoryPath}">
+                                </h:inputText>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <div class="col-sm-offset-2 offset-md-2 col-sm-8 col-md-8">
+                                <h:commandButton id="nextButton"
+                                                 style="background-color: #00BE79; color:white;"
+                                                 styleClass="btn col-sm-12" value="Next"
+                                                 iconAwesome="fa-sign-in"
+                                                 action="#{authenticator.authenticate}"
+                                />
+                            </div>
+                        </div>
+
+                        <h:panelGroup layout="block" rendered="#{not empty facesContext.messageList and cookie['X-Correlation-Id'] != null}">
+                            <br/>
+                            <p style="font-size: 0.7em">
+                                <strong>Correlation Id: </strong> <h:outputText value="#{cookie['X-Correlation-Id'].value}" />
+                            </p>
+                        </h:panelGroup>
+                        <h:inputHidden id="platform" />
+                    </h:form>
+
+                </div>
+            </h:panelGroup>
+        </div>
+        <script type="text/javascript">
+            $(document).ready(function () {
+                var repositoryPath = '${identity.getWorkingParameter('github_repository_Path')}';
+                document.getElementById("GithubDetailsForm:repositoryPath").value = repositoryPath;
+            });
+          </script>
+
+    </ui:define>
+</ui:composition>
