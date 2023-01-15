@@ -1,6 +1,7 @@
 # Janssen Project software is available under the Apache 2.0 License (2004). See http://www.apache.org/licenses/ for full text.
 # Copyright (c) 2020, Janssen Project
 #
+# Author: Arnab Dutta
 #
 
 from io.jans.as.common.model.common import User
@@ -98,12 +99,35 @@ class PersonAuthentication(PersonAuthenticationType):
 
             print "GitHub: Successfully authenticated"
 
-        loggedIn = authenticationService.authenticate(foundUser.getUserId())
-        print "GitHub: Authentication: %s" % str(loggedIn)
-        return loggedIn
+            loggedIn = authenticationService.authenticate(foundUser.getUserId())
+            print "GitHub: Authentication: %s" % str(loggedIn)
+            return loggedIn
+        elif step == 2:
+            # The second step is used for storing GitHub Repository path from xhtml form to `adsUserGithubRepo` custom User attribute in persistence
+            print requestParameters
+            repositoryPath = ServerUtil.getFirstValue(requestParameters, "GithubDetailsForm:repositoryPath")
+            print repositoryPath
+            if repositoryPath is None:
+                print "GitHub repository path is blank"
+                return False
+
+            print "GitHub. Trying to save GitHub repository path %s" % repositoryPath
+
+            authenticationService = CdiUtil.bean(AuthenticationService)
+            user = authenticationService.getAuthenticatedUser()
+            user.setAttribute("adsUserGithubRepo", repositoryPath)
+
+            userService = CdiUtil.bean(UserService)
+            userService.updateUser(user)
+
+            identity.setWorkingParameter("github_repository_Path", user.getAttribute("adsUserGithubRepo"))
+            return True
+
+
 
     def prepareForStep(self, configurationAttributes, requestParameters, step):
         print "GitHub: prepareForStep called for step %s"  % str(step)
+        identity = CdiUtil.bean(Identity)
         if step == 1:
             # redirect to external OIDC server
 
@@ -114,8 +138,6 @@ class PersonAuthentication(PersonAuthenticationType):
             "&redirect_uri=", self.redirect_uri]
             redirect_url = "".join(redirect_url_elements)
 
-            identity = CdiUtil.bean(Identity)
-
             if self.auto_redirect:
                 facesService = CdiUtil.bean(FacesService)
                 facesService.redirectToExternalURL(redirect_url)
@@ -123,20 +145,31 @@ class PersonAuthentication(PersonAuthenticationType):
                 identity.setWorkingParameter("oidc_redirect_uri", redirect_url)
                 identity.setWorkingParameter("oidc_title", self.title)
 
+        elif step == 2:
+            authenticationService = CdiUtil.bean(AuthenticationService)
+            user = authenticationService.getAuthenticatedUser()
+            if user == None:
+                print "GitHub. Authenticate for step 2. Failed to determine username"
+                return False
+            if user.getAttribute("adsUserGithubRepo") is not None and len(user.getAttribute("adsUserGithubRepo")) > 0:
+                identity.setWorkingParameter("github_repository_Path", user.getAttribute("adsUserGithubRepo").replace("[", "").replace("]", ""))
+
         return True
 
     def getExtraParametersForStep(self, configurationAttributes, step):
         print "GitHub: getExtraParametersForStep called for step %s" % str(step)
-        return Arrays.asList("gihub_username", "gihub_access_token")
+        return Arrays.asList("gihub_username", "gihub_access_token", "github_repository_Path")
 
     def getCountAuthenticationSteps(self, configurationAttributes):
         print "GitHub: getCountAuthenticationSteps called"
-        return 1
+        return 2
 
     def getPageForStep(self, configurationAttributes, step):
         print "GitHub: getPageForStep called for step %s" % str(step)
         if(step == 1):
             return "/auth/github/login.xhtml"
+        elif(step == 2):
+            return "/auth/github/detailsForm.xhtml"
         return ""
 
     def getNextStep(self, configurationAttributes, requestParameters, step):
