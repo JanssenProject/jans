@@ -97,6 +97,18 @@ For fresh installation, generate the initial configuration and secret by creatin
 - `couchbase_superuser_pw`: superusers password to access Couchbase database (only used if `optional_scopes` list contains `couchbase` scope)
 - `salt`: user-defined salt (24 characters length); if omitted, salt will be generated automatically
 
+Example of generating `salt` value:
+
+```
+# using shell script
+cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 24 | head -n 1
+# output: NFAG5g4R0NSkAZXHL8t2DScL
+
+# using python oneliner
+python -c 'import random, string; print("".join(random.choices(string.ascii_letters + string.digits, k=24)))'
+# ouput: HsPzqiPkRzNySWlOVui8Ilmw
+```
+
 #### Docker
 
 1. Mount the `generate.json` into container:
