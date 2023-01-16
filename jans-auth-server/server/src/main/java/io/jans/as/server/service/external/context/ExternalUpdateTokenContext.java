@@ -6,18 +6,20 @@
 
 package io.jans.as.server.service.external.context;
 
+import com.google.common.collect.Lists;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.AttributeService;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.jwt.Jwt;
+import io.jans.as.model.jwt.JwtClaims;
 import io.jans.as.server.model.common.AccessToken;
 import io.jans.as.server.model.common.AuthorizationGrant;
 import io.jans.as.server.model.common.ExecutionContext;
+import io.jans.as.server.model.token.JwtSigner;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
-import org.jetbrains.annotations.Nullable;
-
 import jakarta.servlet.http.HttpServletRequest;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,6 +41,7 @@ public class ExternalUpdateTokenContext extends ExternalScriptContext {
     private CustomScriptConfiguration script;
     @Nullable
     private ExecutionContext executionContext;
+    private JwtSigner jwtSigner;
 
     public ExternalUpdateTokenContext(HttpServletRequest httpRequest, AuthorizationGrant grant,
                                       Client client, AppConfiguration appConfiguration, AttributeService attributeService) {
@@ -50,8 +53,13 @@ public class ExternalUpdateTokenContext extends ExternalScriptContext {
     }
 
     public static ExternalUpdateTokenContext of(ExecutionContext executionContext) {
+        return of(executionContext, null);
+    }
+
+    public static ExternalUpdateTokenContext of(ExecutionContext executionContext, JwtSigner jwtSigner) {
         ExternalUpdateTokenContext context = new ExternalUpdateTokenContext(executionContext.getHttpRequest(), executionContext.getGrant(), executionContext.getClient(), executionContext.getAppConfiguration(), executionContext.getAttributeService());
         context.setExecutionContext(executionContext);
+        context.setJwtSigner(jwtSigner);
         return context;
     }
 
@@ -70,6 +78,23 @@ public class ExternalUpdateTokenContext extends ExternalScriptContext {
         result.setAttributeService(attributeService);
         result.setScript(script);
         return result;
+    }
+
+    public JwtClaims getClaims() {
+        Jwt jwt = getJwt();
+        return jwt != null ? jwt.getClaims() : null;
+    }
+
+    public Jwt getJwt() {
+        return jwtSigner != null ? jwtSigner.getJwt() : null;
+    }
+
+    public JwtSigner getJwtSigner() {
+        return jwtSigner;
+    }
+
+    public void setJwtSigner(JwtSigner jwtSigner) {
+        this.jwtSigner = jwtSigner;
     }
 
     public CustomScriptConfiguration getScript() {
@@ -117,13 +142,9 @@ public class ExternalUpdateTokenContext extends ExternalScriptContext {
 
         grant.setScopes(newScopes);
 
-        // re-generate access token jwt to put new scopes into jwt
-        if (isValidJwt(accessToken.getCode())) {
-            try {
-                accessToken.setCode(grant.createAccessTokenAsJwt(accessToken, executionContext));
-            } catch (Exception e) {
-                log.error("Failed to generate access token jwt", e);
-            }
+        final Jwt jwt = getJwt();
+        if (jwt != null) {
+            jwt.getClaims().setClaim("scope", Lists.newArrayList(newScopes));
         }
     }
 
