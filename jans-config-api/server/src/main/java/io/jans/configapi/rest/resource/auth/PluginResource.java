@@ -60,7 +60,7 @@ public class PluginResource extends ConfigBaseResource {
         return Response.ok(getPluginNames()).build();
     }
 
-    @Operation(summary = "Gets list of Plugins", description = "Gets list of Plugins", operationId = "get-plugins", tags = {
+    @Operation(summary = "Get plugin by name", description = "Get plugin by name", operationId = "get-plugin-by-name", tags = {
             "Plugins" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.PLUGIN_READ_ACCESS }))
     @ApiResponses(value = {
@@ -78,8 +78,9 @@ public class PluginResource extends ConfigBaseResource {
         Boolean deployed = false;
         logger.debug("All plugins:{} ", plugins);
         if (StringUtils.isNotBlank(pluginName) && !plugins.isEmpty()) {
-            Optional<PluginConf> pluginNameOptional = plugins.stream().findAny()
-                    .filter(plugin -> pluginName.equalsIgnoreCase(plugin.getName()));
+            Optional<PluginConf> pluginNameOptional = plugins.stream()
+                    .filter(plugin -> pluginName.equalsIgnoreCase(plugin.getName())).findAny();
+
             logger.debug("pluginNameOptional:{} ", pluginNameOptional);
             if (pluginNameOptional.isPresent()) {
                 deployed = true;
@@ -92,15 +93,18 @@ public class PluginResource extends ConfigBaseResource {
     private List<PluginConf> getPluginNames() {
 
         List<PluginConf> plugins = this.authUtil.getPluginConf();
-        logger.debug("plugins:{} ", plugins);
+        logger.debug("Config plugins:{} ", plugins);
         List<PluginConf> pluginInfo = new ArrayList<>();
         for (PluginConf pluginConf : plugins) {
             logger.debug("pluginConf:{} ", pluginConf);
             if (StringUtils.isNotBlank(pluginConf.getClassName())) {
                 try {
+                    logger.debug("pluginConf.getClassName():{} ", pluginConf.getClassName());
                     Class.forName(pluginConf.getClassName());
-                    pluginConf.setClassName("");
-                    pluginInfo.add(pluginConf);
+                    PluginConf conf = new PluginConf();
+                    conf.setName(pluginConf.getName());
+                    conf.setDescription(pluginConf.getDescription());
+                    pluginInfo.add(conf);
                 } catch (ClassNotFoundException ex) {
                     logger.error("'{}' plugin not deployed", pluginConf.getName());
                 }
