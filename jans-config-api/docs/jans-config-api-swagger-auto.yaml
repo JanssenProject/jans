@@ -5121,9 +5121,9 @@ paths:
     get:
       tags:
       - Plugins
-      summary: Gets list of Plugins
-      description: Gets list of Plugins
-      operationId: get-plugins_1
+      summary: Get plugin by name
+      description: Get plugin by name
+      operationId: get-plugin-by-name
       parameters:
       - name: pluginName
         in: path
@@ -7466,17 +7466,17 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        adminCanView:
-          type: boolean
-        adminCanEdit:
+        userCanAccess:
           type: boolean
         adminCanAccess:
           type: boolean
-        userCanView:
+        adminCanEdit:
           type: boolean
         userCanEdit:
           type: boolean
-        userCanAccess:
+        adminCanView:
+          type: boolean
+        userCanView:
           type: boolean
         whitePagesCanView:
           type: boolean
