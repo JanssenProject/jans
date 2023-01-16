@@ -191,14 +191,24 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
                 log.trace("Failed to create access token with negative expiration time");
                 return null;
             }
+
+            JwtSigner jwtSigner = null;
             if (getClient().isAccessTokenAsJwt()) {
-                accessToken.setCode(createAccessTokenAsJwt(accessToken, context));
+                jwtSigner = createAccessTokenAsJwt(accessToken, context);
             }
 
-            boolean externalOk = externalUpdateTokenService.modifyAccessToken(accessToken, ExternalUpdateTokenContext.of(context));
+            boolean externalOk = externalUpdateTokenService.modifyAccessToken(accessToken, ExternalUpdateTokenContext.of(context, jwtSigner));
             if (!externalOk) {
                 log.trace("External script forbids access token creation.");
                 return null;
+            }
+
+            if (getClient().isAccessTokenAsJwt() && jwtSigner != null) {
+                final String accessTokenCode = jwtSigner.sign().toString();
+                if (log.isTraceEnabled())
+                    log.trace("Created access token JWT: {}", accessTokenCode + ", claims: " + jwtSigner.getJwt().getClaims().toJsonString());
+
+                accessToken.setCode(accessTokenCode);
             }
 
             final TokenEntity tokenEntity = asToken(accessToken);
@@ -218,7 +228,7 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
         }
     }
 
-    public String createAccessTokenAsJwt(AccessToken accessToken, ExecutionContext context) throws Exception {
+    public JwtSigner createAccessTokenAsJwt(AccessToken accessToken, ExecutionContext context) throws Exception {
         final User user = getUser();
         final Client client = getClient();
 
@@ -257,11 +267,7 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
             runIntrospectionScriptAndInjectValuesIntoJwt(jwt, context);
         }
 
-        final String accessTokenCode = jwtSigner.sign().toString();
-        if (log.isTraceEnabled())
-            log.trace("Created access token JWT: {}", accessTokenCode + ", claims: " + jwt.getClaims().toJsonString());
-
-        return accessTokenCode;
+        return jwtSigner;
     }
 
     private void runIntrospectionScriptAndInjectValuesIntoJwt(Jwt jwt, ExecutionContext executionContext) {
