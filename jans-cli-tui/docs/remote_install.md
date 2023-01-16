@@ -15,10 +15,11 @@ Get Credidentials for CLI
 On Jans server
 
 ```
-# cat /opt/jans/jans-setup/setup.properties.last | grep role
-role_based_client_encoded_pw=dDpwNN3lv94JF+ibgVFT7A\=\=
-role_based_client_id=2000.076aa5d9-fa8d-42a0-90d2-b83b5ea535d5
-role_based_client_pw=mrF8tcBd6m9Q
+# cat /opt/jans/jans-setup/setup.properties.last | grep tui
+tui_client_encoded_pw=4j858txd4OfXV1Kkx92YNA\=\=
+tui_client_id=2000.114cd953-3365-4208-ae5f-97237a01d334
+tui_client_pw=bhizfR4cwC1h
+
 ```
 
-`role_based_client_id` wile go **Client ID** and `role_based_client_pw` will go **Client Secret**
+`tui_client_id` will go **Client ID** and `tui_client_pw` will go **Client Secret**
