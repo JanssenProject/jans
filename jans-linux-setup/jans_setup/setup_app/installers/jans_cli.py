@@ -87,7 +87,7 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
 
 
     def generate_configuration(self):
-        self.check_clients([('role_based_client_id', '2000.')])
+        self.check_clients([('tui_client_id', '2000.')])
 
     def configure(self, options={}):
         config = configparser.ConfigParser()
@@ -107,8 +107,8 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
             config['DEFAULT'][key_] = options[key_]
 
         if Config.install_config_api:
-            config['DEFAULT']['jca_client_id'] = Config.role_based_client_id
-            config['DEFAULT']['jca_client_secret_enc'] = Config.role_based_client_encoded_pw
+            config['DEFAULT']['jca_client_id'] = Config.tui_client_id
+            config['DEFAULT']['jca_client_secret_enc'] = Config.tui_client_encoded_pw
             if base.argsp.cli_test_client:
                 config['DEFAULT']['jca_test_client_id'] = Config.jca_client_id
                 config['DEFAULT']['jca_test_client_secret_enc'] = Config.jca_client_encoded_pw
