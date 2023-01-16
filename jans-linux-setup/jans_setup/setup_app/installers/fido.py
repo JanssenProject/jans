@@ -53,8 +53,6 @@ class FidoInstaller(JettyInstaller):
 
         self.renderTemplateInOut(self.ldif_fido2, self.template_folder, self.output_folder)
 
-        self.write_webapps_xml()
-
         ldif_files = [self.ldif_fido2]
         self.dbUtils.import_ldif(ldif_files)
 
