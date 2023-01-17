@@ -12,5 +12,5 @@
   "PROMPT_TOOLKIT": "https://github.com/prompt-toolkit/python-prompt-toolkit/archive/refs/tags/3.0.33.zip",
   "WCWIDTH": "https://github.com/jquast/wcwidth/archive/refs/tags/0.2.5.zip",
   "PYGMENTS": "https://github.com/pygments/pygments/archive/refs/tags/2.13.0.zip",
-  "CRYPTOGRAPHY": "https://files.pythonhosted.org/packages/7a/46/8b58d6b8244ff613ecb983b9428d1168dd0b014a34e13fb19737b9ba1fc1/cryptography-39.0.0-cp36-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+  "CRYPTOGRAPHY": "https://files.pythonhosted.org/packages/20/8b/66600f5851ec7893ace9b74445d7eaf3499571b347e339d18c76c876b0f9/cryptography-37.0.4-cp36-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
 }
