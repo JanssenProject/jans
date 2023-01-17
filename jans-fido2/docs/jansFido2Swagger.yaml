@@ -4,7 +4,7 @@
 openapi: 3.0.1
 info:
   title: Janssen Fido2
-  description: Janssen Fido2 - FIDO 2.0 is an open authentication standard that enables leveraging common devices to authenticate to online services in both mobile and desktop environments. Fido U2F support.
+  description: Janssen Fido2 - FIDO 2.0 is an open authentication standard that enables leveraging common devices to authenticate to online services in both mobile and desktop environments. Fido Super Gluu support.
   contact:
     email: xx@gluu.org
   license:
@@ -13,11 +13,11 @@ info:
   version: 1.0.0-SNAPSHOT
 tags:
   - name: developers
-    description: Janssen includes a FIDO2 component to implement a two-step, two-factor authentication (2FA) with username / password as the first step, and any FIDO2 device as the second step. Fido U2F support.
+    description: Janssen includes a FIDO2 component to implement a two-step, two-factor authentication (2FA) with username / password as the first step, and any FIDO2 device as the second step. Fido Super Gluu support.
   - name: FIDO2 configuration
   - name: FIDO2 Assertion
   - name: FIDO2 Attestation
-  - name: FIDO U2F
+  - name: FIDO Super Gluu
 paths:
   /fido2/configuration:
     get:
@@ -45,12 +45,12 @@ paths:
                   issuer:
                     type: string
                     description: A URI indicating the party operating the FIDO U2F server.
-                  registration_endpoint_u2f:
+                  super_gluu_registration_endpoint:
                     type: string
-                    description: Endpoint for U2F registration operation.
-                  authentication_endpoint_u2f:
+                    description: Endpoint for Super Gluu registration operation.
+                  super_gluu_authentication_endpoint:
                     type: string
-                    description: Endpoint for U2F authentication operation.
+                    description: Endpoint for Super Gluu authentication operation.
                   attestation:
                     type: array
                     items:
@@ -470,63 +470,13 @@ paths:
         500:
           $ref: '#/components/responses/InternalServerError'
 
-  /fido-configuration:
+  /fido2/registration:
     get:
       tags:
-        - FIDO U2F
-      summary: Performs FIDO configuration data.
-      description: Performs FIDO configuration data.
-      operationId: fido-configuration
-      responses:
-        200:
-          description: OK
-          content:
-            application/json:
-              schema:
-                title: U2fConfiguration
-                description: FIDO U2F Configuration.
-                required:
-                  - version
-                  - issuer
-                properties:
-                  version:
-                    type: string
-                    description: The version of the FIDO U2F core protocol to which this server conforms. The value MUST be the string 1.0.
-                  issuer:
-                    type: string
-                    description: A URI indicating the party operating the FIDO U2F server.
-                  registration_endpoint:
-                    type: string
-                  authentication_endpoint:
-                    type: string
-        403:
-          $ref: '#/components/responses/AccessDenied'
-        500:
-          description: Invalid parameters provided to endpoint.
-          content:
-            application/json:
-              schema:
-                type: object
-                required:
-                  - error
-                  - error_description
-                properties:
-                  error:
-                    type: string
-                    format: enum
-                    example:
-                      - server_error
-                  error_description:
-                    type: string
-                  details:
-                    type: string
-  /fido/u2f/registration:
-    get:
-      tags:
-        - FIDO U2F
-      summary: U2F device registration.
-      description: U2F device registration.
-      operationId: get-fido-u2f-registration
+        - FIDO SuperGluu
+      summary: SuperGluu device registration.
+      description: SuperGluu device registration.
+      operationId: get-fido-supergluu-registration
       parameters:
         - name: username
           in: query
@@ -636,10 +586,10 @@ paths:
                     type: string
     post:
       tags:
-        - FIDO U2F
-      summary: U2F device registration.
-      description: U2F device registration.
-      operationId: post-fido-u2f-registration
+        - FIDO SuperGluu
+      summary: SuperGluu device registration.
+      description: SuperGluu device registration.
+      operationId: post-fido-supergluu-registration
       requestBody:
         content:
           application/json:
@@ -733,13 +683,13 @@ paths:
                     type: string
                   details:
                     type: string
-  /fido/u2f/authentication:
+  /fido2/authentication:
     get:
       tags:
-        - FIDO U2F
-      summary: Performs FIDO U2F authentication of end-user.
-      description: Performs FIDO U2F authentication of end-user.
-      operationId: get-fido-u2f-authentication
+        - FIDO SuperGluu
+      summary: Performs FIDO SuperGluu authentication of end-user.
+      description: Performs FIDO SuperGluu authentication of end-user.
+      operationId: get-fido-supergluu-authentication
       parameters:
         - name: username
           in: query
@@ -830,10 +780,10 @@ paths:
                     type: string
     post:
       tags:
-        - FIDO U2F
-      summary: Performs FIDO U2F authentication of end-user.
-      description: Performs FIDO U2F authentication of end-user.
-      operationId: post-fido-u2f-authentication
+        - FIDO SuperGluu
+      summary: Performs FIDO SuperGluu authentication of end-user.
+      description: Performs FIDO SuperGluu authentication of end-user.
+      operationId: post-fido-supergluu-authentication
       requestBody:
         content:
           application/json:
