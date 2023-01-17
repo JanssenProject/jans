@@ -18,7 +18,7 @@ class JansGDialog:
         title: Optional[str]= '',
         buttons: Optional[Sequence[Button]]=[],
         width: AnyDimension=None
-        )-> Dialog:  
+        )-> Dialog:
         
         """init for JansGDialog
 

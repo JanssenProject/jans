@@ -23,6 +23,8 @@ from prompt_toolkit.widgets import (
 from prompt_toolkit.lexers import PygmentsLexer, DynamicLexer
 from utils.static import DialogResult, cli_style, common_strings
 from utils.utils import DialogUtils
+from utils.utils import common_data
+
 from wui_components.jans_nav_bar import JansNavBar
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from wui_components.jans_drop_down import DropDownWidget
@@ -66,6 +68,9 @@ class Plugin(DialogUtils):
         self.app.create_background_task(self.get_appconfiguration())
         self.schema = self.app.cli_object.get_schema_from_reference('', '#/components/schemas/AppConfiguration')
 
+        if not hasattr(common_data, 'scopes'):
+            self.app.create_background_task(self.retrieve_sopes())
+
     async def get_appconfiguration(self) -> None:
         'Coroutine for getting application configuration.'
 
@@ -78,6 +83,16 @@ class Plugin(DialogUtils):
 
         self.app_configuration = response.json()
         self.oauth_logging()
+
+
+    async def retrieve_sopes(self) -> None:
+        """asyncio corotune for retreiving scopes
+        """
+        self.app.logger.debug("retreiving scopes")
+        cli_args = {'operation_id': 'get-oauth-scopes', 'endpoint_args': 'limit:200,startIndex:0'}
+        response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+        common_data.scopes = response.json()['entries']
+        self.app.logger.debug("scopes retreived")
 
     def process(self):
         """No pre-processing for this plugin.
@@ -240,7 +255,6 @@ class Plugin(DialogUtils):
                     ]
                 )
 
-            res = self.get_scopes(result['entries'])
             if data:
                 clients = JansVerticalNav(
                     myparent=self.app,
@@ -254,7 +268,7 @@ class Plugin(DialogUtils):
                     selectes=0,
                     headerColor=cli_style.navbar_headcolor,
                     entriesColor=cli_style.navbar_entriescolor,
-                    all_data=res
+                    all_data=result['entries']
                 )
                 buttons = []
                 if start_index > 0:
@@ -283,7 +297,7 @@ class Plugin(DialogUtils):
         asyncio.ensure_future(coroutine())
 
 
-    def get_scopes(self,client_data) -> None:
+    def get_scopes(self, client_data) -> None:
 
         async def coroutine():
             cli_args = {'operation_id': 'get-oauth-scopes', 'endpoint_args':'limit:200,startIndex:0'}
@@ -670,7 +684,7 @@ class Plugin(DialogUtils):
     def edit_scope_dialog(self, **params: Any) -> None:
         """This Method show the scopes dialog for edit
         """
-        selected_line_data = params['data']  
+        selected_line_data = params['data']
 
         dialog = EditScopeDialog(self.app, title=_("Edit Scopes"), data=selected_line_data, save_handler=self.save_scope)
         self.app.show_jans_dialog(dialog)
@@ -678,11 +692,18 @@ class Plugin(DialogUtils):
     def edit_client_dialog(self, **params: Any) -> None:
         """This Method show the scopes dialog for edit
         """
-        selected_line_data = params['data']  
+        selected_line_data = params['data']
         title = _("Edit Clients")
 
-        self.EditClientDialog = EditClientDialog(self.app, title=title, data=selected_line_data, save_handler=self.save_client, delete_uma_resource=self.delete_uma_resource)
-        self.app.show_jans_dialog(self.EditClientDialog)
+        self.edit_client_dialog = EditClientDialog(
+                                parent=self.app,
+                                title=title,
+                                data=selected_line_data,
+                                save_handler=self.save_client,
+                                delete_uma_resource=self.delete_uma_resource
+                                )
+
+        self.app.show_jans_dialog(self.edit_client_dialog)
 
     def save_client(self, dialog: Dialog) -> None:
         """This method to save the client data to server
@@ -735,7 +756,7 @@ class Plugin(DialogUtils):
 
         asyncio.ensure_future(coroutine())
 
-    def search_scope(self, tbuffer:Buffer,) -> None:
+    def search_scope(self, tbuffer:Buffer) -> None:
         """This method handel the search for Scopes
 
         Args:
@@ -744,7 +765,7 @@ class Plugin(DialogUtils):
 
         self.oauth_get_scopes(pattern=tbuffer.text)
 
-    def search_clients(self, tbuffer:Buffer,) -> None:
+    def search_clients(self, tbuffer:Buffer) -> None:
         """This method handel the search for Clients
 
         Args:
@@ -826,7 +847,7 @@ class Plugin(DialogUtils):
             try:
                 self.app.layout.focus(focused_before)
             except Exception:
-                self.app.layout.focus(self.EditClientDialog)
+                self.app.layout.focus(self.edit_client_dialog)
 
             if result.lower() == 'yes':
                 result = self.app.cli_object.process_command_by_id(
@@ -836,7 +857,7 @@ class Plugin(DialogUtils):
                     data_fn=None,
                     data={}
                     )
-                self.EditClientDialog.oauth_get_uma_resources()
+                self.edit_client_dialog.oauth_get_uma_resources()
 
             return result
 

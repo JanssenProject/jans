@@ -13,11 +13,14 @@ from prompt_toolkit.widgets import (
     Dialog,
     CheckboxList
 )
+from prompt_toolkit.layout import Window
+
 from prompt_toolkit.lexers import PygmentsLexer, DynamicLexer
 from prompt_toolkit.application.current import get_app
 from asyncio import Future, ensure_future
 from utils.static import DialogResult, cli_style
 from utils.multi_lang import _
+from utils.utils import common_data
 from wui_components.jans_dialog_with_nav import JansDialogWithNav
 from wui_components.jans_side_nav_bar import JansSideNavBar
 from wui_components.jans_cli_dialog import JansGDialog
@@ -25,6 +28,8 @@ from wui_components.jans_drop_down import DropDownWidget
 from wui_components.jans_date_picker import DateSelectWidget
 from utils.utils import DialogUtils
 from wui_components.jans_vetrical_nav import JansVerticalNav
+from wui_components.jans_label_container import JansLabelContainer
+
 from view_uma_dialog import ViewUMADialog
 import threading
 from prompt_toolkit.buffer import Buffer
@@ -66,14 +71,23 @@ class EditClientDialog(JansGDialog, DialogUtils):
             delete_uma_resource (method, optional): handler invoked when deleting UMA-resources
         """
         super().__init__(parent, title, buttons)
+
         self.save_handler = save_handler
         self.delete_uma_resource=delete_uma_resource
         self.data = data
-        self.title=title
-        self.scopes_data=[]
-        self.myparent.logger.debug('self.data in init: '+str(self.data))
+        self.title = title
+        self.scopes_data = []
+        self.nav_dialog_width = int(self.myparent.dialog_width*1.1)
         self.prepare_tabs()
         self.create_window()
+
+
+    def get_scope_by_inum(self, inum:str) -> dict:
+
+        for scope in common_data.scopes:
+            if scope['inum'] == inum or scope['dn'] == inum:
+                return scope
+        return {}
 
     def save(self) -> None:
         """method to invoked when saving the dialog (Save button is pressed)
@@ -97,8 +111,6 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
         if 'accessTokenAsJwt' in self.data:
             self.data['accessTokenAsJwt'] = self.data['accessTokenAsJwt'] == 'jwt'
-
-        self.myparent.logger.debug('self.data: '+str(self.data))
 
         if 'rptAsJwt' in self.data: 
             self.data['rptAsJwt'] = self.data['rptAsJwt'] == 'jwt'
@@ -137,7 +149,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
 
         cfr = self.check_required_fields()
-        self.myparent.logger.debug('CFR: '+str(cfr))
+
         if not cfr:
             return
 
@@ -172,10 +184,17 @@ class EditClientDialog(JansGDialog, DialogUtils):
                 (self.cancel, _("Cancel"))
             ],
             height=self.myparent.dialog_height,
-            width=self.myparent.dialog_width,
+            width=self.nav_dialog_width,
                    )
 
 
+    def fill_client_scopes(self):
+        self.client_scopes.entries = []
+        for scope_dn in self.data.get('scopes', []):
+            scope = self.get_scope_by_inum(scope_dn)
+            if scope:
+                label = scope.get('displayName') or scope.get('inum') or scope_dn
+                self.client_scopes.add_label(scope_dn, label)
 
     def prepare_tabs(self) -> None:
         """Prepare the tabs for Edil Client Dialogs
@@ -183,22 +202,11 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
         schema = self.myparent.cli_object.get_schema_from_reference('', '#/components/schemas/Client')
 
-        self.tabs = OrderedDict()
-        self.client_scopes = JansVerticalNav(
-                        myparent=self.myparent,
-                        headers=['displayName','baseDn'],
-                        preferred_size= [50,0],
-                        data=self.data.get('scopes', []),
-                        on_display=self.myparent.data_display_dialog,
-                        on_delete=self.delete_scope,
-                        selectes=0,
-                        headerColor=cli_style.navbar_headcolor,
-                        entriesColor=cli_style.navbar_entriescolor,
-                        all_data=self.data.get('scopes', []),
-                        jans_help = "Press Delete to delete a Scope"
-                    )
 
-        self.tabs['Basic'] = HSplit([
+        self.tabs = OrderedDict()
+
+
+        basic_tab_widgets = [
                         self.myparent.getTitledText(
                                 _("Client_ID"),
                                 name='inum',
@@ -305,24 +313,32 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             jans_help=self.myparent.get_help_from_schema(
                                     self.myparent.cli_object.get_schema_from_reference('', ATTRIBUTE_SCHEMA_PATH),
                                     'redirectUrisRegex'),
-                            style=cli_style.check_box), 
+                            style=cli_style.check_box)
+                        ]
 
-                        VSplit([
-
-                            Label(text=_("Scopes"),style=cli_style.check_box,width=(len(_("Scopes")*2))),
-                            self.myparent.getButton(
-                                text=_("add scope"), 
+        add_scope_button = VSplit([Window(), self.myparent.getButton(
+                                text=_("Add Scope"), 
                                 name='oauth:logging:save', 
                                 jans_help=_("Add Scopes"), 
-                                handler=self.add_scopes),
-                        ]),
+                                handler=self.add_scopes)
+                                ])
 
 
-                        self.client_scopes, 
-
-                        ],width=D(),
-                        style=cli_style.tabs
+        self.client_scopes = JansLabelContainer(
+                    title=_('Scopes'),
+                    width=self.nav_dialog_width - 26,
+                    #on_display=self.myparent.data_display_dialog
+                    on_delete=self.delete_scope,
+                    buttonbox=add_scope_button
                     )
+
+        self.fill_client_scopes()
+
+        basic_tab_widgets.append(self.client_scopes)
+
+
+        self.tabs['Basic'] = HSplit(basic_tab_widgets, width=D(), style=cli_style.tabs)
+
 
         self.tabs['Tokens'] = HSplit([
                         self.myparent.getTitledRadioButton(
@@ -645,7 +661,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                     style=cli_style.check_box)
 
 
-        self.tabs['Advanced Client Properties'] = HSplit([
+        self.tabs['Advanced Client Prop.'] = HSplit([
 
                         self.myparent.getTitledCheckBox(
                             _("Default Prompt login"), 
@@ -806,116 +822,75 @@ class EditClientDialog(JansGDialog, DialogUtils):
         self.left_nav = list(self.tabs.keys())[0]
 
 
-    def get_scope_by_name(
-        self,
-        data:list,
-        scopes_name:str
-        ) -> dict:
+    def scope_exists(self, scope_dn:str) -> bool:
+        for item_id, item_label in self.client_scopes.entries:
+            if item_id == scope_dn:
+                return True
+        return False
 
-        for datum in data:
-            if datum.get('displayName') == scopes_name:
-                return datum
-
-        return {}
 
     def add_scopes(self) -> None:
 
-        try :
-            response = self.myparent.cli_object.process_command_by_id(
-                        operation_id='get-oauth-scopes',
-                        url_suffix='',
-                        endpoint_args='limit:200,startIndex:0',
-                        data_fn=None,
-                        data={}
-                        )
-        except Exception as e:
-                    self.myparent.show_message(_("Error retreving scopes"), str(e))
-                    return
-
-        result = response.json() 
-
         def add_selected_claims(dialog):
             if 'scopes' not in self.data:
-                self.scopes_data = []
+                self.data['scopes'] = []
 
-            for item in dialog.body.current_values:
-                self.client_scopes.add_item(item)
-                self.scopes_data.append(item[0])
+            self.data['scopes'] += dialog.body.current_values
 
-        current_data = result['entries'] 
-        scopes_display_names = []
+            if self.data.get('inum'):
+                self.patch_for_scope()
 
-        for i in range(len(current_data)):
-            scopes_display_names.append(current_data[i].get('displayName', ''))
+            self.fill_client_scopes()
 
+        scopes_list = []
 
-        values_uniqe= []
-        values = []
-        for i in scopes_display_names:
-            if i:
-                current_scope = self.get_scope_by_name(result['entries'], i)
-                dn = current_scope.get('dn','')
-                display_name = current_scope.get('displayName', '')
-                values.append(([dn, display_name], display_name) )
+        for scope in common_data.scopes:
+            if not self.scope_exists(scope['dn']):
+                scopes_list.append((scope['dn'], scope.get('displayName', '') or scope['inum']))
 
-        scopes_dn = [ i[0] for i in self.data.get('scopes', []) ]
+        scopes_list.sort(key=lambda x: x[1])
 
-        for k in values:
-            if k[0][0] not in scopes_dn:
-                values_uniqe.append(k)
+        check_box_list = CheckboxList(values=scopes_list)
 
-        check_box_list = CheckboxList(
-            values=values_uniqe,
-            )
         buttons = [Button(_("Cancel")), Button(_("OK"), handler=add_selected_claims)]
         dialog = JansGDialog(self.myparent, title=_("Select Scopes to add"), body=check_box_list, buttons=buttons)
         self.myparent.show_jans_dialog(dialog)
 
-    def delete_scope(self, **kwargs: Any) -> None:
 
-        QUESTION_TEMP = "\n {} ?"
-
-        dialog = self.myparent.get_confirm_dialog(_("Are you sure want to delete Scope:")+QUESTION_TEMP.format(kwargs ['selected'][1]))
+    def patch_for_scope(self):
 
         async def coroutine():
-            
-            focused_before = self.myparent.layout.current_window
-            result = await self.myparent.show_dialog_as_float(dialog)
-            try:
-                self.myparent.layout.focus(focused_before)
-            except Exception:
-                self.myparent.stop_progressing()
-                self.myparent.layout.focus(self.myparent.center_frame)
+            self.myparent.start_progressing(_("Patching client scopes..."))
+            cli_args = {
+                        'operation_id': 'patch-oauth-openid-client-by-inum',
+                        'url_suffix': URL_SUFFIX_FORMATTER.format(self.data['inum']),
+                        'data': [{ "op": "replace", "path": "scopes", "value": self.data['scopes']}]
+                    }
 
-            if result.lower() == 'yes':
-
-                current_scopes = self.data['scopes']
-                inum = self.data['inum']
-                selected_scope = kwargs ['selected']
-
-                if selected_scope in current_scopes:
-                    current_scopes.remove(selected_scope)
-
-                scopes_to_patch = [ i[0] for i in current_scopes]
-
-                result = self.myparent.cli_object.process_command_by_id(
-                    operation_id='patch-oauth-openid-client-by-inum',
-                    url_suffix=URL_SUFFIX_FORMATTER.format(inum),
-                    endpoint_args='',
-                    data_fn='',
-                    data=[{ "op": "replace", "path": "scopes","value":scopes_to_patch}]
-                )
-
-                self.myparent.stop_progressing()
-                
-            return result
+            response = await get_event_loop().run_in_executor(self.myparent.executor, self.myparent.cli_requests, cli_args)
+            self.myparent.stop_progressing()
+            self.fill_client_scopes()
 
         asyncio.ensure_future(coroutine())
 
 
+    def delete_scope(self, scope: list) -> None:
+
+
+        def do_delete_scope(dialog):
+            self.data['scopes'].remove(scope[0])
+            self.patch_for_scope()
+
+        dialog = self.myparent.get_confirm_dialog(
+                    message=_("Are you sure want to delete Scope:\n {} ?".format(scope[1])),
+                    confirm_handler=do_delete_scope
+                    )
+
+        self.myparent.show_jans_dialog(dialog)
+
+
     def show_client_scopes(self) -> None:
         client_scopes = self.data.get('scopes')#[0]
-        self.myparent.logger.debug('client_scopes: '+str(client_scopes))
         data = []
         for i in client_scopes :
             try :
@@ -937,9 +912,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                 pass
             if rsponse.json().get('scopeType','') == 'spontaneous':
                 data.append(rsponse.json())
-            
 
-            self.myparent.logger.debug('datadata: '+str(data))
         if not data :
             data = "No Scope of type: Spontaneous"
 
@@ -995,7 +968,6 @@ class EditClientDialog(JansGDialog, DialogUtils):
         if pattern:
             endpoint_args +=',pattern:'+pattern
 
-        self.myparent.logger.debug('DATA endpoint_args: '+str(endpoint_args))
         try :
             rsponse = self.myparent.cli_object.process_command_by_id(
                 operation_id='get-oauth-uma-resources-by-clientid',

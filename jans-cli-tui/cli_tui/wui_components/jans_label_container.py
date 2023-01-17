@@ -4,28 +4,34 @@ from prompt_toolkit.application import get_app
 from prompt_toolkit.formatted_text import HTML, AnyFormattedText, merge_formatted_text
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.layout import FormattedTextControl, Window
-from prompt_toolkit.widgets import Label, Frame
-
+from prompt_toolkit.widgets import Label, Frame, Box, Button
+from prompt_toolkit.layout.containers import HSplit
 
 class JansLabelContainer:
     def __init__(
         self,
+        title: Optional[str]='',
         width: Optional[int]=50,
         on_enter: Optional[Callable]=None,
-        on_delete: Optional[Callable]=None
+        on_delete: Optional[Callable]=None,
+        on_display: Optional[Callable]=None,
+        buttonbox: Optional[Button]=None
         ) -> None:
 
         """Label container for Jans
 
         Args:
+            title (str, optional): title of frame
             width (int, optional): sets width of container, default is 50
-            on_enter (callable, optional): When enter this function is called.
-            on_delete (callable, optional): this function is called when an entry is deleted
+            on_enter (Callable, optional): When enter this function is called.
+            on_delete (Callable, optional): this function is called when an entry is deleted
+            on_display (Callable, optional): this function is called when user press d on keyboard
+            buttonbox (Button, optional): buntton box to be appended at the end
         """
-
         self.width = width
         self.on_enter = on_enter
         self.on_delete = on_delete
+        self.on_display = on_display
         self.height=2
         self.entries = []
         self.invalidate = False
@@ -36,11 +42,16 @@ class JansLabelContainer:
                 focusable=True,
                 key_bindings=self._get_key_bindings(),
             ),
-            width=self.width,
+            width=self.width-2,
             height=self.height
         )
         self.line_count = 1
-        self.container = Frame(self.body)
+        widgets = [self.body]
+        if buttonbox:
+            widgets.append(Window(height=1))
+            widgets.append(buttonbox)
+
+        self.container = Box(Frame(HSplit(widgets), title=title, width=self.width))
 
 
     def _get_formatted_text(self) -> AnyFormattedText:
@@ -119,9 +130,13 @@ class JansLabelContainer:
 
         @kb.add("delete")
         def _delete(event) -> None:
-           self.remove_label(self.entries[self.selected_entry][0])
            if self.on_delete:
-               self.on_delete()
+               self.on_delete(self.entries[self.selected_entry])
+
+        @kb.add('d')
+        def _display(event):
+           if self.on_display:
+               self.on_display(self.entries[self.selected_entry])
 
         return kb
 

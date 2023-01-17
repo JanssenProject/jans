@@ -721,9 +721,9 @@ class JansCliApp(Application):
 
     def getButton(
                 self, 
-                text: AnyFormattedText, 
-                name: AnyFormattedText, 
-                jans_help: AnyFormattedText, 
+                text: AnyFormattedText,
+                name: AnyFormattedText,
+                jans_help: AnyFormattedText,
                 handler: Callable= None, 
                 ) -> Button:
 
@@ -851,15 +851,14 @@ class JansCliApp(Application):
         self.layout.focus(dialog)
         self.invalidate()
 
-    def show_again(self) -> None:
-        self.show_message(_("Again"), _("Nasted Dialogs"),)
 
     def get_confirm_dialog(
-        self, 
-        message: AnyFormattedText
+            self,
+            message: AnyFormattedText,
+            confirm_handler: Optional[Callable]=None
         ) -> Dialog:
         body = VSplit([Label(message)], align=HorizontalAlign.CENTER)
-        buttons = [Button(_("No")), Button(_("Yes"))]
+        buttons = [Button(_("No")), Button(_("Yes"), handler=confirm_handler)]
         dialog = JansGDialog(self, title=_("Confirmation"), body=body, buttons=buttons)
         return dialog
 
