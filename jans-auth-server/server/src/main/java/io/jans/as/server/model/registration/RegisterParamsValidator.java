@@ -312,6 +312,7 @@ public class RegisterParamsValidator {
         }
 
         // Validate Sector Identifier URL
+        boolean noRedirectUriInSectorIdentifierUri = false;
         if (valid && StringUtils.isNotBlank(sectorIdentifierUrl)) {
             try {
                 URI uri = new URI(sectorIdentifierUrl);
@@ -337,12 +338,20 @@ public class RegisterParamsValidator {
             } catch (Exception e) {
                 log.debug(e.getMessage(), e);
                 valid = false;
+            } finally {
+                if (!valid) {
+                    noRedirectUriInSectorIdentifierUri = true;
+                }
             }
         }
 
         // Validate Redirect Uris checking the white list and black list
         if (valid) {
             valid = checkWhiteListRedirectUris(redirectUris) && checkBlackListRedirectUris(redirectUris);
+        }
+
+        if (noRedirectUriInSectorIdentifierUri) {
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Failed to validate redirect uris. No redirect_uri in sector_identifier_uri content.");
         }
 
         return valid;
