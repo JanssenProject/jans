@@ -17,7 +17,7 @@ tags:
   - name: FIDO2 configuration
   - name: FIDO2 Assertion
   - name: FIDO2 Attestation
-  - name: FIDO Super Gluu
+  - name: FIDO SuperGluu
 paths:
   /fido2/configuration:
     get:
