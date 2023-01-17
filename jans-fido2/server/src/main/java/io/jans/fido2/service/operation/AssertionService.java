@@ -6,6 +6,9 @@
 
 package io.jans.fido2.service.operation;
 
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -29,6 +32,7 @@ import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.entry.Fido2AuthenticationData;
 import io.jans.fido2.model.entry.Fido2AuthenticationEntry;
 import io.jans.fido2.model.entry.Fido2AuthenticationStatus;
+import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.ChallengeGenerator;
 import io.jans.fido2.service.DataMapperService;
 import io.jans.fido2.service.persist.AuthenticationPersistenceService;
@@ -88,12 +92,17 @@ public class AssertionService {
 	@Inject
 	private NetworkService networkService;
 
+    @Inject
+    private Base64Service base64Service;
+
 	/*
 	 * Requires mandatory parameters: username Support non mandatory parameters:
 	 * userVerification, documentDomain, extensions, timeout
 	 */
-	public JsonNode options(JsonNode params) {
+	public ObjectNode options(JsonNode params) {
 		log.debug("Assertion options {}", params);
+		
+		boolean superGluu = commonVerifiers.hasSuperGluu(params);
 
 		// Verify request parameters
 		commonVerifiers.verifyAssertionOptions(params);
@@ -121,11 +130,12 @@ public class AssertionService {
 		// TODO: Verify documentDomain
 
 		// Put allowCredentials
-		Pair<ArrayNode, String> allowedCredentialsPair = prepareAllowedCredentials(documentDomain, username);
+		Pair<ArrayNode, String> allowedCredentialsPair = prepareAllowedCredentials(documentDomain, username, superGluu);
 		ArrayNode allowedCredentials = allowedCredentialsPair.getLeft();
 		if (allowedCredentials.isEmpty()) {
 			throw new Fido2RuntimeException("Can't find associated key(s). Username: " + username);
 		}
+
 		optionsResponseNode.set("allowCredentials", allowedCredentials);
 		log.debug("Put allowedCredentials {}", allowedCredentials);
 
@@ -169,10 +179,9 @@ public class AssertionService {
 		authenticationPersistenceService.save(entity);
 
 		return optionsResponseNode;
-
 	}
 
-	public JsonNode verify(JsonNode params) {
+	public ObjectNode verify(JsonNode params) {
 		log.debug("authenticateResponse {}", params);
 
 		// Verify if there are mandatory request parameters
@@ -250,7 +259,7 @@ public class AssertionService {
 		return finishResponseNode;
 	}
 
-	private Pair<ArrayNode, String> prepareAllowedCredentials(String documentDomain, String username) {
+	private Pair<ArrayNode, String> prepareAllowedCredentials(String documentDomain, String username, boolean superGluu) {
 		// TODO: Add property to enable/disable U2F -> Fido2 migration
 		List<DeviceRegistration> existingFidoRegistrations = deviceRegistrationService.findAllRegisteredByUsername(username,
 				documentDomain);
@@ -263,23 +272,30 @@ public class AssertionService {
 				.filter(f -> StringHelper.equals(documentDomain, f.getRegistrationData().getDomain()))
 				.filter(f -> StringHelper.isNotEmpty(f.getRegistrationData().getPublicKeyId())).collect(Collectors.toList());
 
-		allowedFido2Registrations.forEach((value) -> {
-			log.debug("attestation request:" + value.getRegistrationData().getAttenstationRequest());
+		//  f.getRegistrationData().getAttenstationRequest() null check is added to maintain backward compatiblity with U2F devices when U2F devices are migrated to the FIDO2 server
+		List<JsonNode> allowedFido2Keys =  new ArrayList<>(allowedFido2Registrations.size());
+		allowedFido2Registrations.forEach((f) -> {
+			log.debug("attestation request:" + f.getRegistrationData().getAttenstationRequest());
+			String transports[]; 
+			if (superGluu) {
+				transports = new String[] { "net", "qr" };
+			} else {
+				transports = ((f.getRegistrationData().getAttestationType().equalsIgnoreCase(AttestationFormat.apple.getFmt())) || ( f.getRegistrationData().getAttenstationRequest() != null && 
+						f.getRegistrationData().getAttenstationRequest().contains(AuthenticatorAttachment.PLATFORM.getAttachment())))
+
+						? new String[] { "internal" }
+						: new String[] { "usb", "ble", "nfc" };
+			}
+			PublicKeyCredentialDescriptor descriptor = new PublicKeyCredentialDescriptor(
+					f.getRegistrationData().getType(), transports, f.getRegistrationData().getPublicKeyId());
+			
+			ObjectNode allowedFido2Key = dataMapperService.convertValue(descriptor, ObjectNode.class);
+			allowedFido2Keys.add(allowedFido2Key);
 		});
 		
-		//  f.getRegistrationData().getAttenstationRequest() null check is added to maintain backward compatiblity with U2F devices when U2F devices are migrated to the FIDO2 server
-		List<JsonNode> allowedFido2Keys = allowedFido2Registrations.parallelStream()
-				.map(f -> dataMapperService.convertValue(new PublicKeyCredentialDescriptor(f.getRegistrationData().getType(),
-						((f.getRegistrationData().getAttestationType().equalsIgnoreCase(AttestationFormat.apple.getFmt())) || ( f.getRegistrationData().getAttenstationRequest() != null && 
-								f.getRegistrationData().getAttenstationRequest().contains(AuthenticatorAttachment.PLATFORM.getAttachment())))
-
-										? new String[] { "internal" }
-										: new String[] { "usb", "ble", "nfc" },
-						f.getRegistrationData().getPublicKeyId()), JsonNode.class))
-				.collect(Collectors.toList());
-
 		Optional<Fido2RegistrationEntry> fidoRegistration = allowedFido2Registrations.parallelStream()
 				.filter(f -> StringUtils.isNotEmpty(f.getRegistrationData().getApplicationId())).findAny();
+		// TODO: Check value and which valuies to specify for Super Gluu
 		String applicationId = null;
 		if (fidoRegistration.isPresent()) {
 			applicationId = fidoRegistration.get().getRegistrationData().getApplicationId();

@@ -168,7 +168,7 @@ public class AttestationController {
         ObjectNode params = dataMapperService.createObjectNode();
         // Add all required parameters from request to allow process U2F request 
         params.put(CommonVerifiers.SUPER_GLUU_REQUEST, true);
-        
+
         // TODO: Validate input parameters
         params.put("username", userName);
         
@@ -181,11 +181,17 @@ public class AttestationController {
         ObjectNode result = attestationService.options(params);
 
         // Build start registration response  
-        ObjectNode superGluuResult = result;
-        if (superGluuResult.has("rp")) {
-        	JsonNode rp = superGluuResult.get("rp");
-        	superGluuResult.put("appId", rp.get("name").asText());
+        ObjectNode superGluuResult = dataMapperService.createObjectNode();
+        ArrayNode authenticateRequests = superGluuResult.putArray("authenticateRequests");
+        ArrayNode registerRequests = superGluuResult.putArray("registerRequests");
+
+        if (result.has("rp")) {
+        	JsonNode rp = result.get("rp");
+        	result.put("appId", rp.get("name").asText());
         }
+        registerRequests.add(result);
+
+        result.put("version", "U2F_V2");
         
 
         ResponseBuilder builder = Response.ok().entity(superGluuResult.toString());
@@ -260,6 +266,8 @@ public class AttestationController {
 
         // Manadatory parameter
         params.put("type", "public-key");
+        
+        // TODO: Fix id
         params.put("id", "id");
 
         // Add response node

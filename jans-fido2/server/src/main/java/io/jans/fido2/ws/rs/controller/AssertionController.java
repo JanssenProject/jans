@@ -28,6 +28,7 @@ import io.jans.fido2.service.operation.AssertionService;
 import io.jans.fido2.service.verifier.CommonVerifiers;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
@@ -126,10 +127,31 @@ public class AssertionController {
         // Add all required parameters from request to allow process U2F request 
         params.put(CommonVerifiers.SUPER_GLUU_REQUEST, true);
 
-        JsonNode result = assertionService.options(params);
+        // TODO: Validate input parameters
+        params.put("username", userName);
 
-        // Build start registration response  
-        JsonNode superGluuResult = result;
+        ObjectNode result = assertionService.options(params);
+
+        // Build start authentication response  
+        ObjectNode superGluuResult = dataMapperService.createObjectNode();
+        ArrayNode authenticateRequests = superGluuResult.putArray("authenticateRequests");
+
+        String rpId = result.get("rpId").asText();
+        String challenge = result.get("challenge").asText();
+        String userVerification = result.get("userVerification").asText();
+
+        if (result.has("allowCredentials")) {
+	        	result.get("allowCredentials").forEach((f) -> {
+	        		((ObjectNode) f).put("appId", "https://" + rpId);
+	        		((ObjectNode) f).put("userVerification", userVerification);
+	        		((ObjectNode) f).put("challenge", challenge);
+	        		((ObjectNode) f).put("keyHandle", f.get("id").asText());
+	        		((ObjectNode) f).remove("id");
+	        		((ObjectNode) f).put("version", "U2F_V2");
+
+	        		authenticateRequests.add(f);
+	        	});
+        }
 
         ResponseBuilder builder = Response.ok().entity(superGluuResult.toString());
         return builder.build();
@@ -158,7 +180,7 @@ public class AssertionController {
      *             {"status":"success","challenge":"5QoRtudmej5trcrMRgFBoI5rZ6pzIZiYP3u3bXCvvAE"}
      *            
      */
-    @GET
+    @POST
     @Produces({ "application/json" })
     @Path("/authentication")
     public Response finishAuthentication(@FormParam("username") String userName, @FormParam("tokenResponse") String authenticateResponseString) {

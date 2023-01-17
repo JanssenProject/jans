@@ -419,10 +419,10 @@ public class CommonVerifiers {
             throw new Fido2RuntimeException("Credential id attestationObject and response id mismatch");
         }
         
-//		String attestationDataCredId = attestationData.getCredId();
-//        if (!StringHelper.compare(attestationDataCredId, paramsKeyId)) {
-//            throw new Fido2RPRuntimeException("Credential id attestationObject and response id mismatch");
-//        }
+		String attestationDataCredId = attestationData.getCredId();
+        if (!StringHelper.compare(attestationDataCredId, paramsKeyId)) {
+            throw new Fido2RuntimeException("Credential id attestationObject and response id mismatch");
+        }
         
         return paramsKeyId;
 	}
