@@ -115,6 +115,7 @@ class JansCliApp(Application):
         self.styles = dict(style.style_rules)
         self._plugins = []
         self._load_plugins()
+        self.available_plugins = []
         self.cli_object_ok = False
         self.pbar_text = ""
         self.progressing_text = ""
@@ -217,8 +218,10 @@ class JansCliApp(Application):
                 self._plugins.append(plugin_object)
 
     def init_plugins(self) -> None:
+        """Initilizse plugins
+        """
         for plugin in self._plugins:
-            if hasattr(plugin, 'init_plugin'):
+            if hasattr(plugin, 'init_plugin') and plugin.pid in self.available_plugins:
                 plugin.init_plugin()
         self.plugins_initialised = True
 
@@ -317,27 +320,31 @@ class JansCliApp(Application):
                     self.stop_progressing()
 
                     self.cli_object_ok = True
-                    if not self.plugins_initialised:
-                        self.init_plugins()
-                    self.runtime_plugins()
+                    self.check_available_plugins()
 
                 asyncio.ensure_future(coroutine())
 
             else:
                 self.cli_object_ok = True
-                if not self.plugins_initialised:
-                    self.init_plugins()
 
-        self.runtime_plugins()
+        self.check_available_plugins()
 
 
-    def runtime_plugins(self) -> None:
+    def check_available_plugins(self) -> None:
         """Disables plugins when cli object is ready"""
 
         if self.cli_object_ok:
-            response = self.cli_requests({'operation_id': 'is-license-active'})
-            if response.status_code == 404:
-                self.disable_plugin('config_api')
+            response = self.cli_requests({'operation_id': 'get-plugins'})
+            if response.ok:
+                plugins = response.json()
+                for plugin in plugins:
+                    self.available_plugins.append(plugin['name'])
+
+                for pp in self._plugins:
+                    if getattr(pp, 'server_side_plugin', False) and pp.pid not in self.available_plugins:
+                        self.disable_plugin(pp.pid)
+
+                self.init_plugins()
 
     def disable_plugin(self, pid) -> None:
 
@@ -354,9 +361,6 @@ class JansCliApp(Application):
             self.jans_creds_dialog()
         else :
             self.create_cli()
-
-        if self.cli_object_ok and not self.plugins_initialised:
-            self.init_plugins()
 
 
     def jans_creds_dialog(self, *params: Any) -> None:

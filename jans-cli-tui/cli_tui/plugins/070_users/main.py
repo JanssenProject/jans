@@ -31,7 +31,8 @@ class Plugin(DialogUtils):
             app (Generic): The main Application class
         """
         self.app = app
-        self.pid = 'users'
+        self.pid = 'user-management'
+        self.server_side_plugin = True
         self.name = '[U]sers'
         self.users = {}
         self.widgets_ready = False

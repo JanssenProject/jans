@@ -26,8 +26,9 @@ class Plugin(DialogUtils):
             app (Generic): The main Application class
         """
         self.app = app
-        self.pid = 'fido'
+        self.pid = 'fido2'
         self.name = '[F]IDO'
+        self.server_side_plugin = True
         self.page_entered = False
         self.data = {}
         self.bg_color='black'

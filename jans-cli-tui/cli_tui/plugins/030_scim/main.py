@@ -22,6 +22,7 @@ class Plugin(DialogUtils):
         self.app = app
         self.pid = 'scim'
         self.name = '[S]CIM'
+        self.server_side_plugin = True
         self.app_config = {}
         self.bg_color='black'
         self.widgets_ready = False
