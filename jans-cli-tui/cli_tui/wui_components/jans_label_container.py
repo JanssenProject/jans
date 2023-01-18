@@ -136,7 +136,7 @@ class JansLabelContainer:
         @kb.add('d')
         def _display(event):
            if self.on_display:
-               self.on_display(self.entries[self.selected_entry])
+               self.on_display(selected=self.entries[self.selected_entry], data=self.entries[self.selected_entry])
 
         return kb
 

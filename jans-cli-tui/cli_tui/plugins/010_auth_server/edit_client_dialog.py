@@ -326,7 +326,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
         self.client_scopes = JansLabelContainer(
                     title=_('Scopes'),
                     width=self.nav_dialog_width - 26,
-                    #on_display=self.myparent.data_display_dialog
+                    on_display=self.myparent.data_display_dialog,
                     on_delete=self.delete_scope,
                     buttonbox=add_scope_button
                     )
@@ -1014,7 +1014,6 @@ class EditClientDialog(JansGDialog, DialogUtils):
                                     on_enter=self.view_uma_resources,
                                     on_display=self.myparent.data_display_dialog,
                                     on_delete=self.delete_uma_resource,
-                                    # selection_changed=self.data_selection_changed,
                                     selectes=0,
                                     headerColor='class:outh-client-navbar-headcolor',
                                     entriesColor='class:outh-client-navbar-entriescolor',
