@@ -13,11 +13,7 @@ import io.jans.as.model.crypto.signature.EllipticEdvardsCurve;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.exception.CryptoProviderException;
 import io.jans.as.model.exception.InvalidParameterException;
-import io.jans.as.model.jwk.Algorithm;
-import io.jans.as.model.jwk.JSONWebKey;
-import io.jans.as.model.jwk.JSONWebKeySet;
-import io.jans.as.model.jwk.JWKParameter;
-import io.jans.as.model.jwk.Use;
+import io.jans.as.model.jwk.*;
 import io.jans.as.model.util.Base64Util;
 import io.jans.eleven.model.JwksRequestParam;
 import io.jans.eleven.model.KeyRequestParam;
@@ -26,26 +22,13 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.math.BigInteger;
-import java.security.AlgorithmParameters;
 import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.spec.ECGenParameterSpec;
-import java.security.spec.ECParameterSpec;
-import java.security.spec.ECPoint;
-import java.security.spec.ECPublicKeySpec;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.InvalidParameterSpecException;
-import java.security.spec.RSAPublicKeySpec;
-import java.security.spec.X509EncodedKeySpec;
+import java.security.*;
+import java.security.spec.*;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.TimeZone;
+import java.util.*;
 
 /**
  * @author Javier Rojas Blum
@@ -65,6 +48,8 @@ public abstract class AbstractCryptoProvider {
     public abstract JSONObject generateKey(Algorithm algorithm, Long expirationTime) throws CryptoProviderException;
 
     public abstract JSONObject generateKey(Algorithm algorithm, Long expirationTime, int keyLength) throws CryptoProviderException;
+
+    public abstract JSONObject generateKey(Algorithm algorithm, Long expirationTime, int keyLength, KeyOps keyOps) throws CryptoProviderException;
 
     public abstract String sign(String signingInput, String keyId, String sharedSecret, SignatureAlgorithm signatureAlgorithm) throws CryptoProviderException;
 
