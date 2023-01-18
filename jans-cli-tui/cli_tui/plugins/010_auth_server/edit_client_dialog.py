@@ -76,7 +76,6 @@ class EditClientDialog(JansGDialog, DialogUtils):
         self.delete_uma_resource=delete_uma_resource
         self.data = data
         self.title = title
-        self.scopes_data = []
         self.nav_dialog_width = int(self.myparent.dialog_width*1.1)
         self.prepare_tabs()
         self.create_window()
@@ -107,7 +106,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
             if self.data[list_key]:
                 self.data[list_key] = self.data[list_key].splitlines()
 
-        self.data['scopes'] = self.scopes_data
+        self.data['scopes'] = [item[0] for item in self.client_scopes.entries]
 
         if 'accessTokenAsJwt' in self.data:
             self.data['accessTokenAsJwt'] = self.data['accessTokenAsJwt'] == 'jwt'
