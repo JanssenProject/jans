@@ -221,7 +221,6 @@ class JansCliApp(Application):
         """Initilizse plugins
         """
         for plugin in self._plugins:
-            initilize = True
             if hasattr(plugin, 'init_plugin'):
                 if getattr(plugin, 'server_side_plugin', False) and plugin.pid not in self.available_plugins:
                     continue
