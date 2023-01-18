@@ -835,10 +835,6 @@ class EditClientDialog(JansGDialog, DialogUtils):
                 self.data['scopes'] = []
 
             self.data['scopes'] += dialog.body.current_values
-
-            if self.data.get('inum'):
-                self.patch_for_scope()
-
             self.fill_client_scopes()
 
         scopes_list = []
@@ -856,29 +852,13 @@ class EditClientDialog(JansGDialog, DialogUtils):
         self.myparent.show_jans_dialog(dialog)
 
 
-    def patch_for_scope(self):
-
-        async def coroutine():
-            self.myparent.start_progressing(_("Patching client scopes..."))
-            cli_args = {
-                        'operation_id': 'patch-oauth-openid-client-by-inum',
-                        'url_suffix': URL_SUFFIX_FORMATTER.format(self.data['inum']),
-                        'data': [{ "op": "replace", "path": "scopes", "value": self.data['scopes']}]
-                    }
-
-            response = await get_event_loop().run_in_executor(self.myparent.executor, self.myparent.cli_requests, cli_args)
-            self.myparent.stop_progressing()
-            self.fill_client_scopes()
-
-        asyncio.ensure_future(coroutine())
-
 
     def delete_scope(self, scope: list) -> None:
 
 
         def do_delete_scope(dialog):
             self.data['scopes'].remove(scope[0])
-            self.patch_for_scope()
+            self.fill_client_scopes()
 
         dialog = self.myparent.get_confirm_dialog(
                     message=_("Are you sure want to delete Scope:\n {} ?".format(scope[1])),
