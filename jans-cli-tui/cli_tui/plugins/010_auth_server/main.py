@@ -261,7 +261,7 @@ class Plugin(DialogUtils):
                     headers=['Client ID', 'Client Name', 'Grant Types', 'Subject Type'],
                     preferred_size= [0,0,30,0],
                     data=data,
-                    on_enter=self.edit_client_dialog,
+                    on_enter=self.edit_client,
                     on_display=self.app.data_display_dialog,
                     on_delete=self.delete_client,
                     get_help=(self.get_help,'Client'),
@@ -689,7 +689,7 @@ class Plugin(DialogUtils):
         dialog = EditScopeDialog(self.app, title=_("Edit Scopes"), data=selected_line_data, save_handler=self.save_scope)
         self.app.show_jans_dialog(dialog)
 
-    def edit_client_dialog(self, **params: Any) -> None:
+    def edit_client(self, **params: Any) -> None:
         """This Method show the scopes dialog for edit
         """
         selected_line_data = params['data']
