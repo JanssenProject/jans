@@ -27,6 +27,16 @@
             </testResource>
         </testResources>
 
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+				<excludes>
+					<exclude>log4j2.xml</exclude>
+				</excludes>
+			</resource>
+		</resources>
+
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
