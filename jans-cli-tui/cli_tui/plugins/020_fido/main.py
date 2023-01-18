@@ -12,6 +12,8 @@ from wui_components.jans_vetrical_nav import JansVerticalNav
 from wui_components.jans_cli_dialog import JansGDialog
 from utils.multi_lang import _
 from utils.utils import DialogUtils
+from utils.static import cli_style
+
 
 class Plugin(DialogUtils):
     """This is a general class for plugins 
@@ -31,7 +33,6 @@ class Plugin(DialogUtils):
         self.server_side_plugin = True
         self.page_entered = False
         self.data = {}
-        self.bg_color='black'
         self.prepare_navbar()
         self.prepare_containers()
 
@@ -95,12 +96,12 @@ class Plugin(DialogUtils):
         self.schema = self.app.cli_object.get_schema_from_reference('Fido2', '#/components/schemas/AppConfiguration')
 
         self.tabs['configuration'] = HSplit([
-                                self.app.getTitledText(_("Issuer"), name='issuer', value=self.data.get('issuer',''), jans_help=self.app.get_help_from_schema(self.schema, 'issuer'), style='class:outh-scope-text',widget_style='bg:{} fg:white'.format(self.bg_color)),
-                                self.app.getTitledText(_("Base Endpoint"), name='baseEndpoint', value=self.data.get('baseEndpoint',''), jans_help=self.app.get_help_from_schema(self.schema, 'baseEndpoint'), style='class:outh-scope-text',widget_style='bg:{} fg:white'.format(self.bg_color)),
-                                self.app.getTitledText(_("Clean Service Interval"), name='cleanServiceInterval', value=self.data.get('cleanServiceInterval',''), jans_help=self.app.get_help_from_schema(self.schema, 'cleanServiceInterval'), style='class:outh-scope-text', text_type='integer',widget_style='bg:{} fg:white'.format(self.bg_color)),
-                                self.app.getTitledText(_("Clean Service Batch ChunkSize"), name='cleanServiceBatchChunkSize', value=self.data.get('cleanServiceBatchChunkSize',''), jans_help=self.app.get_help_from_schema(self.schema, 'cleanServiceBatchChunkSize'), style='class:outh-scope-text', text_type='integer',widget_style='bg:{} fg:white'.format(self.bg_color)),
-                                self.app.getTitledCheckBox(_("Use Local Cache"), name='useLocalCache', checked=self.data.get('useLocalCache'), jans_help=self.app.get_help_from_schema(self.schema, 'useLocalCache'), style='class:outh-client-checkbox',widget_style='bg:{} fg:white'.format(self.bg_color)),
-                                self.app.getTitledCheckBox(_("Disable Jdk Logger"), name='disableJdkLogger', checked=self.data.get('disableJdkLogger'), jans_help=self.app.get_help_from_schema(self.schema, 'disableJdkLogger'), style='class:outh-client-checkbox',widget_style='bg:{} fg:white'.format(self.bg_color)),
+                                self.app.getTitledText(_("Issuer"), name='issuer', value=self.data.get('issuer',''), jans_help=self.app.get_help_from_schema(self.schema, 'issuer'), style='class:outh-scope-text',widget_style=cli_style.scim_widget),
+                                self.app.getTitledText(_("Base Endpoint"), name='baseEndpoint', value=self.data.get('baseEndpoint',''), jans_help=self.app.get_help_from_schema(self.schema, 'baseEndpoint'), style='class:outh-scope-text',widget_style=cli_style.scim_widget),
+                                self.app.getTitledText(_("Clean Service Interval"), name='cleanServiceInterval', value=self.data.get('cleanServiceInterval',''), jans_help=self.app.get_help_from_schema(self.schema, 'cleanServiceInterval'), style='class:outh-scope-text', text_type='integer',widget_style=cli_style.scim_widget),
+                                self.app.getTitledText(_("Clean Service Batch ChunkSize"), name='cleanServiceBatchChunkSize', value=self.data.get('cleanServiceBatchChunkSize',''), jans_help=self.app.get_help_from_schema(self.schema, 'cleanServiceBatchChunkSize'), style='class:outh-scope-text', text_type='integer',widget_style=cli_style.scim_widget),
+                                self.app.getTitledCheckBox(_("Use Local Cache"), name='useLocalCache', checked=self.data.get('useLocalCache'), jans_help=self.app.get_help_from_schema(self.schema, 'useLocalCache'), style='cli_style.check_box',widget_style=cli_style.scim_widget),
+                                self.app.getTitledCheckBox(_("Disable Jdk Logger"), name='disableJdkLogger', checked=self.data.get('disableJdkLogger'), jans_help=self.app.get_help_from_schema(self.schema, 'disableJdkLogger'), style='cli_style.check_box',widget_style=cli_style.scim_widget),
                                 self.app.getTitledWidget(
                                     _("Logging Level"),
                                     name='loggingLevel',
@@ -109,13 +110,13 @@ class Plugin(DialogUtils):
                                         value=self.data.get('loggingLevel')
                                         ),
                                     jans_help=self.app.get_help_from_schema(self.schema, 'loggingLevel'),
-                                    style='bg:{} fg:green'.format(self.bg_color)
+                                    style=cli_style.edit_text
                                     ),
-                                self.app.getTitledText(_("Logging Layout"), name='loggingLayout', value=self.data.get('loggingLayout',''), jans_help=self.app.get_help_from_schema(self.schema, 'loggingLayout'), style='class:outh-scope-text',widget_style='bg:{} fg:white'.format(self.bg_color)),
-                                self.app.getTitledText(_("External Logger Configuration"), name='externalLoggerConfiguration', value=self.data.get('externalLoggerConfiguration',''), jans_help=self.app.get_help_from_schema(self.schema, 'externalLoggerConfiguration'), style='class:outh-scope-text',widget_style='bg:{} fg:white'.format(self.bg_color)),
-                                self.app.getTitledText(_("Metric Reporter Interval"), name='metricReporterInterval', value=self.data.get('metricReporterInterval',''), jans_help=self.app.get_help_from_schema(self.schema, 'metricReporterInterval'), style='class:outh-scope-text', text_type='integer',widget_style='bg:{} fg:white'.format(self.bg_color)),
-                                self.app.getTitledText(_("Metric Reporter Keep Data Days"), name='metricReporterKeepDataDays', value=self.data.get('metricReporterKeepDataDays',''), jans_help=self.app.get_help_from_schema(self.schema, 'metricReporterKeepDataDays'), style='class:outh-scope-text', text_type='integer',widget_style='bg:{} fg:white'.format(self.bg_color)),
-                                self.app.getTitledCheckBox(_("Metric Reporter Enabled"), name='metricReporterEnabled', checked=self.data.get('metricReporterEnabled'), jans_help=self.app.get_help_from_schema(self.schema, 'metricReporterEnabled'), style='class:outh-client-checkbox',widget_style='bg:{} fg:white'.format(self.bg_color)),
+                                self.app.getTitledText(_("Logging Layout"), name='loggingLayout', value=self.data.get('loggingLayout',''), jans_help=self.app.get_help_from_schema(self.schema, 'loggingLayout'), style='class:outh-scope-text',widget_style=cli_style.scim_widget),
+                                self.app.getTitledText(_("External Logger Configuration"), name='externalLoggerConfiguration', value=self.data.get('externalLoggerConfiguration',''), jans_help=self.app.get_help_from_schema(self.schema, 'externalLoggerConfiguration'), style='class:outh-scope-text',widget_style=cli_style.scim_widget),
+                                self.app.getTitledText(_("Metric Reporter Interval"), name='metricReporterInterval', value=self.data.get('metricReporterInterval',''), jans_help=self.app.get_help_from_schema(self.schema, 'metricReporterInterval'), style='class:outh-scope-text', text_type='integer',widget_style=cli_style.scim_widget),
+                                self.app.getTitledText(_("Metric Reporter Keep Data Days"), name='metricReporterKeepDataDays', value=self.data.get('metricReporterKeepDataDays',''), jans_help=self.app.get_help_from_schema(self.schema, 'metricReporterKeepDataDays'), style='class:outh-scope-text', text_type='integer',widget_style=cli_style.scim_widget),
+                                self.app.getTitledCheckBox(_("Metric Reporter Enabled"), name='metricReporterEnabled', checked=self.data.get('metricReporterEnabled'), jans_help=self.app.get_help_from_schema(self.schema, 'metricReporterEnabled'), style='cli_style.check_box',widget_style=cli_style.scim_widget),
                                 self.app.getTitledText(
                                             _("Person Custom Object Classes"),
                                             name='personCustomObjectClassList',
@@ -123,11 +124,11 @@ class Plugin(DialogUtils):
                                             height=3,
                                             jans_help=self.app.get_help_from_schema(self.schema, 'personCustomObjectClassList'),
                                             style='class:outh-scope-text'
-                                            ,widget_style='bg:{} fg:white'.format(self.bg_color)
+                                            ,widget_style=cli_style.scim_widget
                                             ),
                                 Window(height=1),
-                                VSplit([Window(), 
-                                HSplit([Button(_("Save"), handler=self.save_config),],style='bg:{}'.format(self.bg_color)),           
+                                VSplit([Window(),
+                                HSplit([Button(_("Save"), handler=self.save_config)]),
                                 Window()]),
                                 ],
                                 width=D()
@@ -165,17 +166,17 @@ class Plugin(DialogUtils):
                 )
 
         self.tabs['static'] = HSplit([
-                                self.app.getTitledText(_("Authenticator Certificates Folder"), name='authenticatorCertsFolder', value=fido2_static_config.get('authenticatorCertsFolder',''), jans_help=self.app.get_help_from_schema(static_schema, 'authenticatorCertsFolder'), style='class:outh-scope-text',widget_style='bg:{} fg:white'.format(self.bg_color)),
-                                self.app.getTitledText(_("MDS Access Token"), name='mdsAccessToken', value=fido2_static_config.get('mdsAccessToken',''), jans_help=self.app.get_help_from_schema(static_schema, 'mdsAccessToken'), style='class:outh-scope-text',widget_style='bg:{} fg:white'.format(self.bg_color)),
-                                self.app.getTitledText(_("MDS TOC Certificates Folder"), name='mdsCertsFolder', value=fido2_static_config.get('mdsCertsFolder',''), jans_help=self.app.get_help_from_schema(static_schema, 'mdsCertsFolder'), style='class:outh-scope-text',widget_style='bg:{} fg:white'.format(self.bg_color)),
-                                self.app.getTitledText(_("MDS TOC Files Folder"), name='mdsTocsFolder', value=fido2_static_config.get('mdsTocsFolder',''), jans_help=self.app.get_help_from_schema(static_schema, 'mdsTocsFolder'), style='class:outh-scope-text',widget_style='bg:{} fg:white'.format(self.bg_color)),
-                                self.app.getTitledCheckBox(_("Check U2f Attestations"), name='checkU2fAttestations', checked=fido2_static_config.get('checkU2fAttestations'), jans_help=self.app.get_help_from_schema(static_schema, 'checkU2fAttestations'), style='class:outh-client-checkbox',widget_style='bg:{} fg:white'.format(self.bg_color)),
-                                self.app.getTitledCheckBox(_("Check U2f Attestations"), name='checkU2fAttestations', checked=fido2_static_config.get('checkU2fAttestations'), jans_help=self.app.get_help_from_schema(static_schema, 'checkU2fAttestations'), style='class:outh-client-checkbox',widget_style='bg:{} fg:white'.format(self.bg_color)),
-                                self.app.getTitledText(_("Unfinished Request Expiration"), name='unfinishedRequestExpiration', value=fido2_static_config.get('unfinishedRequestExpiration',''), jans_help=self.app.get_help_from_schema(static_schema, 'unfinishedRequestExpiration'), style='class:outh-scope-text', text_type='integer',widget_style='bg:{} fg:white'.format(self.bg_color)),
-                                self.app.getTitledText(_("Authentication History Expiration"), name='authenticationHistoryExpiration', value=fido2_static_config.get('authenticationHistoryExpiration',''), jans_help=self.app.get_help_from_schema(static_schema, 'authenticationHistoryExpiration'), style='class:outh-scope-text', text_type='integer',widget_style='bg:{} fg:white'.format(self.bg_color)),
-                                self.app.getTitledText(_("Server Metadata Folder"), name='serverMetadataFolder', value=fido2_static_config.get('serverMetadataFolder',''), jans_help=self.app.get_help_from_schema(static_schema, 'serverMetadataFolder'), style='class:outh-scope-text',widget_style='bg:{} fg:white'.format(self.bg_color)),
+                                self.app.getTitledText(_("Authenticator Certificates Folder"), name='authenticatorCertsFolder', value=fido2_static_config.get('authenticatorCertsFolder',''), jans_help=self.app.get_help_from_schema(static_schema, 'authenticatorCertsFolder'), style='class:outh-scope-text',widget_style=cli_style.scim_widget),
+                                self.app.getTitledText(_("MDS Access Token"), name='mdsAccessToken', value=fido2_static_config.get('mdsAccessToken',''), jans_help=self.app.get_help_from_schema(static_schema, 'mdsAccessToken'), style='class:outh-scope-text',widget_style=cli_style.scim_widget),
+                                self.app.getTitledText(_("MDS TOC Certificates Folder"), name='mdsCertsFolder', value=fido2_static_config.get('mdsCertsFolder',''), jans_help=self.app.get_help_from_schema(static_schema, 'mdsCertsFolder'), style='class:outh-scope-text',widget_style=cli_style.scim_widget),
+                                self.app.getTitledText(_("MDS TOC Files Folder"), name='mdsTocsFolder', value=fido2_static_config.get('mdsTocsFolder',''), jans_help=self.app.get_help_from_schema(static_schema, 'mdsTocsFolder'), style='class:outh-scope-text',widget_style=cli_style.scim_widget),
+                                self.app.getTitledCheckBox(_("Check U2f Attestations"), name='checkU2fAttestations', checked=fido2_static_config.get('checkU2fAttestations'), jans_help=self.app.get_help_from_schema(static_schema, 'checkU2fAttestations'), style='cli_style.check_box',widget_style=cli_style.scim_widget),
+                                self.app.getTitledCheckBox(_("Check U2f Attestations"), name='checkU2fAttestations', checked=fido2_static_config.get('checkU2fAttestations'), jans_help=self.app.get_help_from_schema(static_schema, 'checkU2fAttestations'), style='cli_style.check_box',widget_style=cli_style.scim_widget),
+                                self.app.getTitledText(_("Unfinished Request Expiration"), name='unfinishedRequestExpiration', value=fido2_static_config.get('unfinishedRequestExpiration',''), jans_help=self.app.get_help_from_schema(static_schema, 'unfinishedRequestExpiration'), style='class:outh-scope-text', text_type='integer',widget_style=cli_style.scim_widget),
+                                self.app.getTitledText(_("Authentication History Expiration"), name='authenticationHistoryExpiration', value=fido2_static_config.get('authenticationHistoryExpiration',''), jans_help=self.app.get_help_from_schema(static_schema, 'authenticationHistoryExpiration'), style='class:outh-scope-text', text_type='integer',widget_style=cli_style.scim_widget),
+                                self.app.getTitledText(_("Server Metadata Folder"), name='serverMetadataFolder', value=fido2_static_config.get('serverMetadataFolder',''), jans_help=self.app.get_help_from_schema(static_schema, 'serverMetadataFolder'), style='class:outh-scope-text',widget_style=cli_style.scim_widget),
 
-                                self.app.getTitledCheckBox(_("User Auto Enrollment"), name='userAutoEnrollment', checked=fido2_static_config.get('userAutoEnrollment'), jans_help=self.app.get_help_from_schema(static_schema, 'userAutoEnrollment'), style='class:outh-client-checkbox',widget_style='bg:{} fg:white'.format(self.bg_color)),
+                                self.app.getTitledCheckBox(_("User Auto Enrollment"), name='userAutoEnrollment', checked=fido2_static_config.get('userAutoEnrollment'), jans_help=self.app.get_help_from_schema(static_schema, 'userAutoEnrollment'), style='cli_style.check_box',widget_style=cli_style.scim_widget),
                                 self.app.getTitledText(
                                             _("Requested Credential Types"),
                                             name='requestedCredentialTypes',
@@ -183,7 +184,7 @@ class Plugin(DialogUtils):
                                             height=3, 
                                             jans_help=self.app.get_help_from_schema(static_schema, 'requestedCredentialTypes'), 
                                             style='class:outh-scope-text'
-                                            ,widget_style='bg:{} fg:white'.format(self.bg_color)
+                                            ,widget_style=cli_style.scim_widget
                                             ),
 
                     VSplit([
@@ -193,7 +194,7 @@ class Plugin(DialogUtils):
                             Window(width=2),
                             HSplit([
                                 Window(height=1),
-                                HSplit([Button(text=add_party_title, width=len(add_party_title)+4, handler=partial(self.edit_requested_party, jans_name='editRequestedPary')),],style='bg:{}'.format(self.bg_color)),
+                                HSplit([Button(text=add_party_title, width=len(add_party_title)+4, handler=partial(self.edit_requested_party, jans_name='editRequestedPary'))]),
                                 
                                 ]),
                             ],
@@ -201,7 +202,7 @@ class Plugin(DialogUtils):
                             ),
 
                     VSplit([Window(), 
-                    HSplit([Button(_("Save"), handler=self.save_config),],style='bg:{}'.format(self.bg_color)),
+                    HSplit([Button(_("Save"), handler=self.save_config)]),
                     
                     Window()]),
                                 ],
@@ -272,7 +273,7 @@ class Plugin(DialogUtils):
         """
 
         if selection in self.tabs:
-            self.main_area = HSplit([self.tabs[selection]],style='bg:{}'.format(self.bg_color),height=D()) 
+            self.main_area = HSplit([self.tabs[selection]],height=D()) 
         else:
             self.main_area = self.app.not_implemented
 
