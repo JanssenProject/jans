@@ -217,7 +217,9 @@ public class Deployer {
         
         Set<Path> flowsPaths = flowsCode.keySet();
         for (Path p: flowsPaths) {
-            logger.debug("Reading {}", p.getFileName().toString());
+            if (logger.isDebugEnabled()) {
+                logger.debug("Reading {}", p.getFileName());
+            }
             flowsCode.put(p, Files.readString(p));
         }
         
@@ -345,10 +347,14 @@ public class Deployer {
         
         BiPredicate<Path, BasicFileAttributes> matcher = (path, attrs) -> attrs.isRegularFile() &&  
             Stream.of(SCRIPTS_EXTENSIONS).anyMatch(ext -> path.getFileName().toString().endsWith("." + ext));
+            
         if (Files.isDirectory(lib)) {
             String slib = lib.toString();
-            return Files.find(lib, 20, matcher).map(Path::toString)
-                    .map(s -> s.substring(slib.length() + 1)).collect(Collectors.toSet());
+
+            try (Stream<Path> stream = Files.find(lib, 20, matcher)) {
+                return stream.map(Path::toString)
+                        .map(s -> s.substring(slib.length() + 1)).collect(Collectors.toSet());
+            }
         }
         return Collections.emptySet();
         
@@ -363,7 +369,10 @@ public class Deployer {
             BiPredicate<Path, BasicFileAttributes> matcher = 
                 (path, attrs) -> attrs.isRegularFile() && path.getFileName().toString().endsWith(".jar");
 
-            List<Path> list = Files.find(lib, 1, matcher).collect(Collectors.toList());
+            List<Path> list = null;
+            try (Stream<Path> stream = Files.find(lib, 1, matcher)) {
+                list = stream.collect(Collectors.toList());
+            }
             logger.debug("Moving {} jar files to custom libs dir", list.size());
 
             for (Path jar : list) {
@@ -524,19 +533,19 @@ public class Deployer {
             }
         }
 
-        if (filesToRemove != null) {
-            for (String f : filesToRemove) {
-                Path p = null;
+        if (filesToRemove == null) return;
 
-                if (f.endsWith(".jar")) {
-                    p = Paths.get(CUST_LIBS_DIR, f);
-                } else {
-                    p = Paths.get(ASSETS_DIR, SCRIPTS_SUBDIR, f);
-                }
-    
-                logger.debug("Removing file {}", f);
-                Files.deleteIfExists(p);
+        for (String f : filesToRemove) {
+            Path p = null;
+
+            if (f.endsWith(".jar")) {
+                p = Paths.get(CUST_LIBS_DIR, f);
+            } else {
+                p = Paths.get(ASSETS_DIR, SCRIPTS_SUBDIR, f);
             }
+
+            logger.debug("Removing file {}", f);
+            Files.deleteIfExists(p);
         }
         
     }
