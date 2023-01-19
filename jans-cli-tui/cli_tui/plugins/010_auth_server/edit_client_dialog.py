@@ -10,13 +10,17 @@ from prompt_toolkit.widgets import (
     Button,
     Label,
     TextArea,
-    Dialog
+    Dialog,
+    CheckboxList
 )
+from prompt_toolkit.layout import Window
+
 from prompt_toolkit.lexers import PygmentsLexer, DynamicLexer
 from prompt_toolkit.application.current import get_app
 from asyncio import Future, ensure_future
 from utils.static import DialogResult, cli_style
 from utils.multi_lang import _
+from utils.utils import common_data
 from wui_components.jans_dialog_with_nav import JansDialogWithNav
 from wui_components.jans_side_nav_bar import JansSideNavBar
 from wui_components.jans_cli_dialog import JansGDialog
@@ -24,17 +28,22 @@ from wui_components.jans_drop_down import DropDownWidget
 from wui_components.jans_date_picker import DateSelectWidget
 from utils.utils import DialogUtils
 from wui_components.jans_vetrical_nav import JansVerticalNav
+from wui_components.jans_label_container import JansLabelContainer
+
 from view_uma_dialog import ViewUMADialog
 import threading
 from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.formatted_text import AnyFormattedText
 from typing import Optional, Sequence
 from typing import Callable
+from prompt_toolkit.eventloop import get_event_loop
+import asyncio
 
 import json
 
 ERROR_GETTING_CLIENTS = _("Error getting clients")
 ATTRIBUTE_SCHEMA_PATH = '#/components/schemas/ClientAttributes'
+URL_SUFFIX_FORMATTER = 'inum:{}'
 
 class EditClientDialog(JansGDialog, DialogUtils):
     """The Main Client Dialog that contain every thing related to The Client
@@ -62,13 +71,22 @@ class EditClientDialog(JansGDialog, DialogUtils):
             delete_uma_resource (method, optional): handler invoked when deleting UMA-resources
         """
         super().__init__(parent, title, buttons)
+
         self.save_handler = save_handler
         self.delete_uma_resource=delete_uma_resource
         self.data = data
-        self.title=title
-        self.myparent.logger.debug('self.data in init: '+str(self.data))
+        self.title = title
+        self.nav_dialog_width = int(self.myparent.dialog_width*1.1)
         self.prepare_tabs()
         self.create_window()
+
+
+    def get_scope_by_inum(self, inum:str) -> dict:
+
+        for scope in common_data.scopes:
+            if scope['inum'] == inum or scope['dn'] == inum:
+                return scope
+        return {}
 
     def save(self) -> None:
         """method to invoked when saving the dialog (Save button is pressed)
@@ -78,7 +96,6 @@ class EditClientDialog(JansGDialog, DialogUtils):
         self.data['disabled'] = not self.data['disabled']
         for list_key in (
                         'redirectUris',
-                        'scopes',
                         'postLogoutRedirectUris',
                         'contacts',
                         'authorizedOrigins',
@@ -89,10 +106,10 @@ class EditClientDialog(JansGDialog, DialogUtils):
             if self.data[list_key]:
                 self.data[list_key] = self.data[list_key].splitlines()
 
+        self.data['scopes'] = [item[0] for item in self.client_scopes.entries]
+
         if 'accessTokenAsJwt' in self.data:
             self.data['accessTokenAsJwt'] = self.data['accessTokenAsJwt'] == 'jwt'
-
-        self.myparent.logger.debug('self.data: '+str(self.data))
 
         if 'rptAsJwt' in self.data: 
             self.data['rptAsJwt'] = self.data['rptAsJwt'] == 'jwt'
@@ -131,7 +148,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
 
         cfr = self.check_required_fields()
-        self.myparent.logger.debug('CFR: '+str(cfr))
+
         if not cfr:
             return
 
@@ -139,11 +156,9 @@ class EditClientDialog(JansGDialog, DialogUtils):
             if ditem in self.data and self.data[ditem] is None:
                 self.data.pop(ditem)
 
-        close_me = True
         if self.save_handler:
-            close_me = self.save_handler(self)
-        if close_me:
-            self.future.set_result(DialogResult.ACCEPT)
+            self.save_handler(self)
+
 
     def cancel(self) -> None:
         """method to invoked when canceling changes in the dialog (Cancel button is pressed)
@@ -168,8 +183,17 @@ class EditClientDialog(JansGDialog, DialogUtils):
                 (self.cancel, _("Cancel"))
             ],
             height=self.myparent.dialog_height,
-            width=self.myparent.dialog_width,
+            width=self.nav_dialog_width,
                    )
+
+
+    def fill_client_scopes(self):
+        self.client_scopes.entries = []
+        for scope_dn in self.data.get('scopes', []):
+            scope = self.get_scope_by_inum(scope_dn)
+            if scope:
+                label = scope.get('displayName') or scope.get('inum') or scope_dn
+                self.client_scopes.add_label(scope_dn, label)
 
     def prepare_tabs(self) -> None:
         """Prepare the tabs for Edil Client Dialogs
@@ -177,9 +201,11 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
         schema = self.myparent.cli_object.get_schema_from_reference('', '#/components/schemas/Client')
 
+
         self.tabs = OrderedDict()
 
-        self.tabs['Basic'] = HSplit([
+
+        basic_tab_widgets = [
                         self.myparent.getTitledText(
                                 _("Client_ID"),
                                 name='inum',
@@ -286,18 +312,32 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             jans_help=self.myparent.get_help_from_schema(
                                     self.myparent.cli_object.get_schema_from_reference('', ATTRIBUTE_SCHEMA_PATH),
                                     'redirectUrisRegex'),
-                            style=cli_style.check_box), 
+                            style=cli_style.check_box)
+                        ]
 
-                        self.myparent.getTitledText(_("Scopes"), 
-                            name='scopes',
-                            value='\n'.join(self.data.get('scopes', [])),
-                            height=3, 
-                            jans_help=self.myparent.get_help_from_schema(schema, 'scopes'),
-                            style=cli_style.check_box),
+        add_scope_button = VSplit([Window(), self.myparent.getButton(
+                                text=_("Add Scope"), 
+                                name='oauth:logging:save', 
+                                jans_help=_("Add Scopes"), 
+                                handler=self.add_scopes)
+                                ])
 
-                        ],width=D(),
-                        style=cli_style.tabs
+
+        self.client_scopes = JansLabelContainer(
+                    title=_('Scopes'),
+                    width=self.nav_dialog_width - 26,
+                    on_display=self.myparent.data_display_dialog,
+                    on_delete=self.delete_scope,
+                    buttonbox=add_scope_button
                     )
+
+        self.fill_client_scopes()
+
+        basic_tab_widgets.append(self.client_scopes)
+
+
+        self.tabs['Basic'] = HSplit(basic_tab_widgets, width=D(), style=cli_style.tabs)
+
 
         self.tabs['Tokens'] = HSplit([
                         self.myparent.getTitledRadioButton(
@@ -620,7 +660,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                     style=cli_style.check_box)
 
 
-        self.tabs['Advanced Client Properties'] = HSplit([
+        self.tabs['Advanced Client Prop.'] = HSplit([
 
                         self.myparent.getTitledCheckBox(
                             _("Default Prompt login"), 
@@ -780,16 +820,63 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
         self.left_nav = list(self.tabs.keys())[0]
 
+
+    def scope_exists(self, scope_dn:str) -> bool:
+        for item_id, item_label in self.client_scopes.entries:
+            if item_id == scope_dn:
+                return True
+        return False
+
+
+    def add_scopes(self) -> None:
+
+        def add_selected_claims(dialog):
+            if 'scopes' not in self.data:
+                self.data['scopes'] = []
+
+            self.data['scopes'] += dialog.body.current_values
+            self.fill_client_scopes()
+
+        scopes_list = []
+
+        for scope in common_data.scopes:
+            if not self.scope_exists(scope['dn']):
+                scopes_list.append((scope['dn'], scope.get('displayName', '') or scope['inum']))
+
+        scopes_list.sort(key=lambda x: x[1])
+
+        check_box_list = CheckboxList(values=scopes_list)
+
+        buttons = [Button(_("Cancel")), Button(_("OK"), handler=add_selected_claims)]
+        dialog = JansGDialog(self.myparent, title=_("Select Scopes to add"), body=check_box_list, buttons=buttons)
+        self.myparent.show_jans_dialog(dialog)
+
+
+
+    def delete_scope(self, scope: list) -> None:
+
+
+        def do_delete_scope(dialog):
+            self.data['scopes'].remove(scope[0])
+            self.fill_client_scopes()
+
+        dialog = self.myparent.get_confirm_dialog(
+                    message=_("Are you sure want to delete Scope:\n {} ?".format(scope[1])),
+                    confirm_handler=do_delete_scope
+                    )
+
+        self.myparent.show_jans_dialog(dialog)
+
+
     def show_client_scopes(self) -> None:
-        client_scopes = self.data.get('scopes')
-        self.myparent.logger.debug('client_scopes: '+str(client_scopes))
+        client_scopes = self.data.get('scopes')#[0]
         data = []
         for i in client_scopes :
             try :
                 inum = i.split(',')[0][5:]
                 rsponse = self.myparent.cli_object.process_command_by_id(
                     operation_id='get-oauth-scopes-by-inum',
-                    url_suffix='inum:{}'.format(inum),
+                    url_suffix=URL_SUFFIX_FORMATTER.format(inum),
                     endpoint_args="",
                     data_fn=None,
                     data={}
@@ -804,9 +891,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                 pass
             if rsponse.json().get('scopeType','') == 'spontaneous':
                 data.append(rsponse.json())
-            
 
-            self.myparent.logger.debug('datadata: '+str(data))
         if not data :
             data = "No Scope of type: Spontaneous"
 
@@ -862,7 +947,6 @@ class EditClientDialog(JansGDialog, DialogUtils):
         if pattern:
             endpoint_args +=',pattern:'+pattern
 
-        self.myparent.logger.debug('DATA endpoint_args: '+str(endpoint_args))
         try :
             rsponse = self.myparent.cli_object.process_command_by_id(
                 operation_id='get-oauth-uma-resources-by-clientid',
@@ -897,7 +981,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                 try :
                     scope_response = self.myparent.cli_object.process_command_by_id(
                         operation_id='get-oauth-scopes-by-inum',
-                        url_suffix='inum:{}'.format(inum),
+                        url_suffix=URL_SUFFIX_FORMATTER.format(inum),
                         endpoint_args='',
                         data_fn=None,
                         data={}
@@ -930,7 +1014,6 @@ class EditClientDialog(JansGDialog, DialogUtils):
                                     on_enter=self.view_uma_resources,
                                     on_display=self.myparent.data_display_dialog,
                                     on_delete=self.delete_uma_resource,
-                                    # selection_changed=self.data_selection_changed,
                                     selectes=0,
                                     headerColor='class:outh-client-navbar-headcolor',
                                     entriesColor='class:outh-client-navbar-entriescolor',
