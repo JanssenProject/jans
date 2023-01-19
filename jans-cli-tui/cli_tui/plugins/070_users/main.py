@@ -12,6 +12,9 @@ from edit_user_dialog import EditUserDialog
 from utils.utils import DialogUtils, common_data
 from utils.static import DialogResult
 from utils.multi_lang import _
+from wui_components.jans_cli_dialog import JansGDialog
+from prompt_toolkit.eventloop import get_event_loop
+from utils.static import DialogResult, cli_style, common_strings
 
 common_data.users = SimpleNamespace()
 
@@ -28,7 +31,8 @@ class Plugin(DialogUtils):
             app (Generic): The main Application class
         """
         self.app = app
-        self.pid = 'users'
+        self.pid = 'user-management'
+        self.server_side_plugin = True
         self.name = '[U]sers'
         self.users = {}
         self.widgets_ready = False
@@ -79,10 +83,12 @@ class Plugin(DialogUtils):
                 on_display=self.app.data_display_dialog,
                 on_delete=self.delete_user,
                 #get_help=(self.get_help,'User'),
+                change_password=self.change_password,
                 selectes=0,
-                headerColor='class:outh-verticalnav-headcolor',
-                entriesColor='class:outh-verticalnav-entriescolor',
-                all_data=self.users['entries']
+                headerColor=cli_style.navbar_headcolor,
+                entriesColor=cli_style.navbar_entriescolor,
+                all_data=self.users['entries'],
+                jans_help = "Press p to change password"
             )
 
         self.user_list_container = self.users_list_box
@@ -141,6 +147,52 @@ class Plugin(DialogUtils):
 
         edit_user_dialog = EditUserDialog(self.app, title=title, data=data, save_handler=self.save_user)
         self.app.show_jans_dialog(edit_user_dialog)
+
+
+    def change_password(self, **kwargs: Any) -> None:
+        """Method to display the edit user dialog
+        """
+        if kwargs:
+            data = kwargs.get('data', {})
+        else:
+            data = {}
+
+        def save(dialog) -> None:
+            async def coroutine():
+                cli_args = {'operation_id': 'patch-user-by-inum', 'endpoint_args': '',
+                'url_suffix':'inum:{}'.format(data['inum']),
+                    'data':{"jsonPatchString": "",
+                        "customAttributes": [
+                                {"name": "userPassword",
+                                "multiValued": False,
+                                "value": "{}".format(self.new_password.me.text)}]}
+                    }
+                self.app.start_progressing(_("Changing Password ..."))
+                await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+                self.app.stop_progressing()
+            asyncio.ensure_future(coroutine())
+
+        self.new_password = self.app.getTitledText(
+                                        _('New Password'), 
+                                        name='passwd', 
+                                        value='', 
+                                        style='class:outh-scope-text',
+                                        )
+        body = HSplit([
+            self.new_password
+            ],style='class:jans-main-datadisplay')
+        buttons=[
+                Button(
+                    text=_("Cancel"),
+                ) ,
+                Button(
+                    text=_("Save"),
+                    handler=save,
+                ) ,            ]
+
+        dialog = JansGDialog(self.app, title="Change Password for {}".format(data['userId']), body=body, buttons=buttons)
+
+        self.app.show_jans_dialog(dialog)
 
     def delete_user(self, **kwargs: Any) -> None:
         """This method for the deletion of the User 

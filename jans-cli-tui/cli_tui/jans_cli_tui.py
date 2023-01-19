@@ -115,6 +115,7 @@ class JansCliApp(Application):
         self.styles = dict(style.style_rules)
         self._plugins = []
         self._load_plugins()
+        self.available_plugins = []
         self.cli_object_ok = False
         self.pbar_text = ""
         self.progressing_text = ""
@@ -217,9 +218,15 @@ class JansCliApp(Application):
                 self._plugins.append(plugin_object)
 
     def init_plugins(self) -> None:
+        """Initilizse plugins
+        """
         for plugin in self._plugins:
             if hasattr(plugin, 'init_plugin'):
+                if getattr(plugin, 'server_side_plugin', False) and plugin.pid not in self.available_plugins:
+                    continue
+                self.logger.debug('Initializing plugin {}'.format(plugin.pid))
                 plugin.init_plugin()
+
         self.plugins_initialised = True
 
     def plugin_enabled(self, pid: str) -> bool:
@@ -317,27 +324,31 @@ class JansCliApp(Application):
                     self.stop_progressing()
 
                     self.cli_object_ok = True
-                    if not self.plugins_initialised:
-                        self.init_plugins()
-                    self.runtime_plugins()
+                    self.check_available_plugins()
 
                 asyncio.ensure_future(coroutine())
 
             else:
                 self.cli_object_ok = True
-                if not self.plugins_initialised:
-                    self.init_plugins()
 
-        self.runtime_plugins()
+        self.check_available_plugins()
 
 
-    def runtime_plugins(self) -> None:
+    def check_available_plugins(self) -> None:
         """Disables plugins when cli object is ready"""
 
         if self.cli_object_ok:
-            response = self.cli_requests({'operation_id': 'is-license-active'})
-            if response.status_code == 404:
-                self.disable_plugin('config_api')
+            response = self.cli_requests({'operation_id': 'get-plugins'})
+            if response.ok:
+                plugins = response.json()
+                for plugin in plugins:
+                    self.available_plugins.append(plugin['name'])
+
+                for pp in self._plugins:
+                    if getattr(pp, 'server_side_plugin', False) and pp.pid not in self.available_plugins:
+                        self.disable_plugin(pp.pid)
+
+                self.init_plugins()
 
     def disable_plugin(self, pid) -> None:
 
@@ -354,9 +365,6 @@ class JansCliApp(Application):
             self.jans_creds_dialog()
         else :
             self.create_cli()
-
-        if self.cli_object_ok and not self.plugins_initialised:
-            self.init_plugins()
 
 
     def jans_creds_dialog(self, *params: Any) -> None:
@@ -387,6 +395,7 @@ class JansCliApp(Application):
         self.bindings.add('tab')(self.focus_next)
         self.bindings.add('s-tab')(self.focus_previous)
         self.bindings.add('c-c')(do_exit)
+        self.bindings.add('c-q')(do_exit)
         self.bindings.add('f1')(self.help)
         self.bindings.add('escape')(self.escape)
         self.bindings.add('s-up')(self.up)
@@ -569,6 +578,7 @@ class JansCliApp(Application):
             focusable: Optional[bool] = None,
             width: AnyDimension = None,
             style: AnyFormattedText = '',
+            widget_style: AnyFormattedText = '',
             scrollbar: Optional[bool] = False,
             line_numbers: Optional[bool] = False,
             lexer: PygmentsLexer = None,
@@ -583,7 +593,7 @@ class JansCliApp(Application):
                 height=height,
                 width=width,
                 read_only=read_only,
-                style=self.styles['textarea-readonly'] if read_only else self.styles['textarea'],
+                style=widget_style or (self.styles['textarea-readonly'] if read_only else self.styles['textarea']),
                 accept_handler=accept_handler,
                 focusable=not read_only if focusable is None else focusable,
                 scrollbar=scrollbar,
@@ -598,7 +608,7 @@ class JansCliApp(Application):
         ta.window.jans_name = name
         ta.window.jans_help = jans_help
 
-        v = VSplit([Window(FormattedTextControl(title), width=len(title)+1, style=style, height=height), ta], padding=1)
+        v = VSplit([Window(FormattedTextControl(title), width=len(title)+1, style=style, height=height), ta])
         v.me = ta
 
         return v
@@ -611,6 +621,7 @@ class JansCliApp(Application):
         current_values: Optional[list] = [],
         jans_help: AnyFormattedText= "",
         style: AnyFormattedText= "",
+        widget_style: AnyFormattedText = '',
         ) -> AnyContainer:
 
         title += ': '
@@ -620,9 +631,8 @@ class JansCliApp(Application):
         cbl.current_values = current_values
         cbl.window.jans_name = name
         cbl.window.jans_help = jans_help
-        #li, cd, width = self.handle_long_string(title, values, cbl)
 
-        v = VSplit([Window(FormattedTextControl(title), width=len(title)+1, style=style,), cbl], padding=1)
+        v = VSplit([Window(FormattedTextControl(title), width=len(title)+1, style=style,), cbl], style=widget_style)
         v.me = cbl
 
         return v
@@ -636,10 +646,15 @@ class JansCliApp(Application):
             on_selection_changed: Callable= None,
             jans_help: AnyFormattedText= "",
             style: AnyFormattedText= "",
+            widget_style: AnyFormattedText = '',
             ) -> AnyContainer:
 
         title += ': '
         cb = Checkbox(text)
+        if widget_style:
+            cb.default_style = widget_style
+            cb.checked_style = widget_style
+            cb.selected_style = widget_style
         cb.checked = checked
         cb.window.jans_name = name
         cb.window.jans_help = jans_help
@@ -652,9 +667,7 @@ class JansCliApp(Application):
         if on_selection_changed:
             cb._handle_enter = custom_handler
 
-        #li, cd, width = self.handle_long_string(title, text, cb)
-
-        v = VSplit([Window(FormattedTextControl(title), width=len(title)+1, style=style,), cb], padding=1)
+        v = VSplit([Window(FormattedTextControl(title), width=len(title)+1, style=style,), cb], style=widget_style)
 
         v.me = cb
 
@@ -669,6 +682,7 @@ class JansCliApp(Application):
             on_selection_changed: Callable= None,
             jans_help: AnyFormattedText= "",
             style: AnyFormattedText= "",
+            widget_style: AnyFormattedText = '',
             ) -> AnyContainer:
 
         title += ': '
@@ -689,7 +703,7 @@ class JansCliApp(Application):
         if on_selection_changed:
             rl._handle_enter = custom_handler
 
-        v = VSplit([Window(FormattedTextControl(title), width=len(title)+1, style=style,), rl], padding=1)
+        v = VSplit([Window(FormattedTextControl(title), width=len(title)+1, style=style,), rl])
 
         v.me = rl
 
@@ -715,9 +729,9 @@ class JansCliApp(Application):
 
     def getButton(
                 self, 
-                text: AnyFormattedText, 
-                name: AnyFormattedText, 
-                jans_help: AnyFormattedText, 
+                text: AnyFormattedText,
+                name: AnyFormattedText,
+                jans_help: AnyFormattedText,
                 handler: Callable= None, 
                 ) -> Button:
 
@@ -845,15 +859,14 @@ class JansCliApp(Application):
         self.layout.focus(dialog)
         self.invalidate()
 
-    def show_again(self) -> None:
-        self.show_message(_("Again"), _("Nasted Dialogs"),)
 
     def get_confirm_dialog(
-        self, 
-        message: AnyFormattedText
+            self,
+            message: AnyFormattedText,
+            confirm_handler: Optional[Callable]=None
         ) -> Dialog:
         body = VSplit([Label(message)], align=HorizontalAlign.CENTER)
-        buttons = [Button(_("No")), Button(_("Yes"))]
+        buttons = [Button(_("No")), Button(_("Yes"), handler=confirm_handler)]
         dialog = JansGDialog(self, title=_("Confirmation"), body=body, buttons=buttons)
         return dialog
 
