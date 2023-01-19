@@ -9138,7 +9138,7 @@
 </code></pre></div>
 </li>
 <li>
-<p>Applies a series of modifications to the flow <code>com.acme.myflow</code>: nullifies its description, sets the value of configuration properties, and modifies the creation timestamp to <em>Aug 8th 23:06:40 UTC</em></p>
+<p>Applies a series of modifications to the flow <code>com.acme.myflow</code>: nullifies its description, sets the value of configuration properties, and modifies the creation timestamp to <em>Aug 8th 2022 23:06:40 UTC</em></p>
 <div class="highlight"><pre><span></span><code>curl -k -i -H &#39;Authorization: Bearer &lt;token&gt;&#39; -H &#39;Content-Type: application/json-patch+json&#39;
      -X PATCH -d@patch.js
      https://&lt;your-host&gt;/jans-config-api/api/v1/agama/com.acme.myflow
@@ -9196,7 +9196,7 @@
 <p><strong>Notes:</strong></p>
 <ul>
 <li>Ensure the tokens used have scope <code>https://jans.io/oauth/config/agama.readonly</code></li>
-<li>The response of a successful operation returns a 200 status code with a JSON representation of the flow(s).  If some fields result unfamiliar to you, consult the swagger (open api) document linked <a href="#creating-a-flow">above</a> </li>
+<li>The response of a successful operation returns a 200 status code with a JSON representation of the flow(s). If some fields result unfamiliar to you, consult the swagger (open api) document linked <a href="#creating-a-flow">above</a> </li>
 <li>By default the source code is not included (this may clutter the output considerably). Append <code>?includeSource=true</code> to the endpoint URL to have the source in the output</li>
 </ul>
 <p>Example:</p>
@@ -9253,7 +9253,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-12T19:42:54+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-12</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-19T13:03:00+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-19</span>
       
         <br>
         Created:
