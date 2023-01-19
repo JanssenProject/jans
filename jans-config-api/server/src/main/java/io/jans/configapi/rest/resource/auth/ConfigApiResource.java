@@ -34,7 +34,7 @@ import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import org.slf4j.Logger;
 
-@Path(ApiConstants.CONFIG)
+@Path(ApiConstants.API_CONFIG)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class ConfigApiResource extends ConfigBaseResource {

@@ -3429,7 +3429,7 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/openid/clients.write
-  /api/v1/config:
+  /api/v1/api-config:
     get:
       tags:
       - Configuration – Config API
@@ -7520,7 +7520,11 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        whitePagesCanView:
+        userCanView:
+          type: boolean
+        userCanAccess:
+          type: boolean
+        adminCanAccess:
           type: boolean
         adminCanEdit:
           type: boolean
@@ -7528,11 +7532,7 @@ components:
           type: boolean
         adminCanView:
           type: boolean
-        adminCanAccess:
-          type: boolean
-        userCanAccess:
-          type: boolean
-        userCanView:
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -9117,13 +9117,13 @@ components:
           type: boolean
         internal:
           type: boolean
+        locationPath:
+          type: string
         locationType:
           type: string
           enum:
           - ldap
           - file
-        locationPath:
-          type: string
         baseDn:
           type: string
     ScriptError:
