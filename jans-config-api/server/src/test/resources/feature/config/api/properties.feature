@@ -33,7 +33,7 @@ Feature: Verify Auth configuration endpoint
     And header Content-Type = 'application/json-patch+json'
     And header Accept = 'application/json'
     And print 'response.loggingLevel = '+response.loggingLevel
-    And def request_body = (response.loggingLevel == null ? "[ {\"op\":\"add\", \"path\": \"/loggingLevel\", \"value\":"DEBUG" } ]" : "[ {\"op\":\"replace\", \"path\": \"/loggingLevel\", \"value\":"DEBUG" } ]")
+    And def request_body = (response.loggingLevel == null ? "[ {\"op\":\"add\", \"path\": \"/loggingLevel\", \"value\":\"DEBUG\" } ]" : "[ {\"op\":\"replace\", \"path\": \"/loggingLevel\", \"value\":\"DEBUG\" } ]")
     And print 'request_body ='+request_body
     And request request_body
     Then print request
