@@ -39,6 +39,7 @@ tags:
 - name: Organization Configuration
 - name: Auth Server Health - Check
 - name: Plugins
+- name: Configuration – Config API
 paths:
   /api/v1/health:
     get:
@@ -1185,6 +1186,93 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/attributes.write
+  /api/v1/jans-auth-server/config:
+    get:
+      tags:
+      - Configuration – Properties
+      summary: Gets all Jans authorization server configuration properties.
+      description: Gets all Jans authorization server configuration properties.
+      operationId: get-properties
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppConfiguration'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/properties.readonly
+    patch:
+      tags:
+      - Configuration – Properties
+      summary: Partially modifies Jans authorization server Application configuration
+        properties.
+      description: Partially modifies Jans authorization server AppConfiguration properties.
+      operationId: patch-properties
+      requestBody:
+        description: String representing patch-document.
+        content:
+          application/json-patch+json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/JsonPatch'
+            examples:
+              Request json example:
+                description: Request json example
+                value: |
+                  [
+                  {"op":"add","path":"/authenticationFilters","value":[{}]},
+                  {"op":"replace","path":"/useNestedJwtDuringEncryption","value":"true"},
+                  {"op":"add","path":"/loggingLevel","value":"TRACE"}
+                  ]
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppConfiguration'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/properties.write
+  /api/v1/jans-auth-server/config/persistence:
+    get:
+      tags:
+      - Configuration – Properties
+      summary: Returns persistence type configured for Jans authorization server.
+      description: Returns persistence type configured for Jans authorization server.
+      operationId: get-properties-persistence
+      responses:
+        "200":
+          description: Jans Authorization Server persistence type
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersistenceConfiguration'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    {
+                        "persistenceType": "ldap"
+                    }
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/properties.readonly
   /api/v1/config/cache:
     get:
       tags:
@@ -3341,34 +3429,33 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/openid/clients.write
-  /api/v1/jans-auth-server/config:
+  /api/v1/api-config:
     get:
       tags:
-      - Configuration – Properties
-      summary: Gets all Jans authorization server configuration properties.
-      description: Gets all Jans authorization server configuration properties.
-      operationId: get-properties
+      - Configuration – Config API
+      summary: Gets config-api configuration properties.
+      description: Gets config-api configuration properties.
+      operationId: get-config-api-properties
       responses:
         "200":
           description: Ok
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AppConfiguration'
+                $ref: '#/components/schemas/ApiAppConfiguration'
         "401":
           description: Unauthorized
         "500":
           description: InternalServerError
       security:
       - oauth2:
-        - https://jans.io/oauth/jans-auth-server/config/properties.readonly
+        - https://jans.io/oauth/config/properties.readonly
     patch:
       tags:
-      - Configuration – Properties
-      summary: Partially modifies Jans authorization server Application configuration
-        properties.
-      description: Partially modifies Jans authorization server AppConfiguration properties.
-      operationId: patch-properties
+      - Configuration – Config API
+      summary: Partially modifies config-api configuration properties.
+      description: Partially modifies config-api Configuration properties.
+      operationId: patch-config-api-properties
       requestBody:
         description: String representing patch-document.
         content:
@@ -3380,54 +3467,21 @@ paths:
             examples:
               Request json example:
                 description: Request json example
-                value: |
-                  [
-                  {"op":"add","path":"/authenticationFilters","value":[{}]},
-                  {"op":"replace","path":"/useNestedJwtDuringEncryption","value":"true"},
-                  {"op":"add","path":"/loggingLevel","value":"TRACE"}
-                  ]
+                value: ""
       responses:
         "200":
           description: Ok
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AppConfiguration'
+                $ref: '#/components/schemas/ApiAppConfiguration'
         "401":
           description: Unauthorized
         "500":
           description: InternalServerError
       security:
       - oauth2:
-        - https://jans.io/oauth/jans-auth-server/config/properties.write
-  /api/v1/jans-auth-server/config/persistence:
-    get:
-      tags:
-      - Configuration – Properties
-      summary: Returns persistence type configured for Jans authorization server.
-      description: Returns persistence type configured for Jans authorization server.
-      operationId: get-properties-persistence
-      responses:
-        "200":
-          description: Jans Authorization Server persistence type
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PersistenceConfiguration'
-              examples:
-                Response json example:
-                  description: Response json example
-                  value: |
-                    {
-                        "persistenceType": "ldap"
-                    }
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/jans-auth-server/config/properties.readonly
+        - https://jans.io/oauth/config/properties.write
   /api/v1/config/smtp:
     get:
       tags:
@@ -7466,17 +7520,17 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        userCanAccess:
-          type: boolean
-        adminCanAccess:
-          type: boolean
         adminCanEdit:
           type: boolean
         userCanEdit:
           type: boolean
         adminCanView:
           type: boolean
+        userCanAccess:
+          type: boolean
         userCanView:
+          type: boolean
+        adminCanAccess:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -7491,456 +7545,6 @@ components:
           type: string
         value:
           type: string
-    CacheConfiguration:
-      type: object
-      properties:
-        cacheProviderType:
-          type: string
-          enum:
-          - IN_MEMORY
-          - MEMCACHED
-          - REDIS
-          - NATIVE_PERSISTENCE
-        memcachedConfiguration:
-          $ref: '#/components/schemas/MemcachedConfiguration'
-        inMemoryConfiguration:
-          $ref: '#/components/schemas/InMemoryConfiguration'
-        redisConfiguration:
-          $ref: '#/components/schemas/RedisConfiguration'
-        nativePersistenceConfiguration:
-          $ref: '#/components/schemas/NativePersistenceConfiguration'
-    InMemoryConfiguration:
-      type: object
-      properties:
-        defaultPutExpiration:
-          type: integer
-          format: int32
-    MemcachedConfiguration:
-      type: object
-      properties:
-        servers:
-          type: string
-        maxOperationQueueLength:
-          type: integer
-          format: int32
-        bufferSize:
-          type: integer
-          format: int32
-        defaultPutExpiration:
-          type: integer
-          format: int32
-        connectionFactoryType:
-          type: string
-          enum:
-          - DEFAULT
-          - BINARY
-    NativePersistenceConfiguration:
-      type: object
-      properties:
-        defaultPutExpiration:
-          type: integer
-          format: int32
-        defaultCleanupBatchSize:
-          type: integer
-          format: int32
-        deleteExpiredOnGetRequest:
-          type: boolean
-        disableAttemptUpdateBeforeInsert:
-          type: boolean
-    RedisConfiguration:
-      type: object
-      properties:
-        redisProviderType:
-          type: string
-          enum:
-          - STANDALONE
-          - CLUSTER
-          - SHARDED
-          - SENTINEL
-        servers:
-          type: string
-        defaultPutExpiration:
-          type: integer
-          format: int32
-        sentinelMasterGroupName:
-          type: string
-        password:
-          type: string
-        useSSL:
-          type: boolean
-        sslTrustStoreFilePath:
-          type: string
-        sslTrustStorePassword:
-          type: string
-        sslKeyStoreFilePath:
-          type: string
-        sslKeyStorePassword:
-          type: string
-        maxIdleConnections:
-          type: integer
-          format: int32
-        maxTotalConnections:
-          type: integer
-          format: int32
-        connectionTimeout:
-          type: integer
-          format: int32
-        soTimeout:
-          type: integer
-          format: int32
-        maxRetryAttempts:
-          type: integer
-          format: int32
-    Client:
-      type: object
-      properties:
-        dn:
-          type: string
-        expirationDate:
-          type: string
-          format: date-time
-        deletable:
-          type: boolean
-        clientSecret:
-          type: string
-        frontChannelLogoutUri:
-          type: string
-        frontChannelLogoutSessionRequired:
-          type: boolean
-        registrationAccessToken:
-          type: string
-        clientIdIssuedAt:
-          type: string
-          format: date-time
-        clientSecretExpiresAt:
-          type: string
-          format: date-time
-        redirectUris:
-          type: array
-          items:
-            type: string
-        claimRedirectUris:
-          type: array
-          items:
-            type: string
-        responseTypes:
-          type: array
-          items:
-            type: string
-            enum:
-            - code
-            - token
-            - id_token
-        grantTypes:
-          type: array
-          items:
-            type: string
-            enum:
-            - none
-            - authorization_code
-            - implicit
-            - password
-            - client_credentials
-            - refresh_token
-            - urn:ietf:params:oauth:grant-type:uma-ticket
-            - urn:ietf:params:oauth:grant-type:token-exchange
-            - urn:openid:params:grant-type:ciba
-            - urn:ietf:params:oauth:grant-type:device_code
-        applicationType:
-          type: string
-          enum:
-          - native
-          - web
-        contacts:
-          type: array
-          items:
-            type: string
-        idTokenTokenBindingCnf:
-          type: string
-        clientName:
-          type: string
-        logoUri:
-          type: string
-        clientUri:
-          type: string
-        policyUri:
-          type: string
-        tosUri:
-          type: string
-        clientNameLocalized:
-          $ref: '#/components/schemas/LocalizedString'
-        logoUriLocalized:
-          $ref: '#/components/schemas/LocalizedString'
-        clientUriLocalized:
-          $ref: '#/components/schemas/LocalizedString'
-        policyUriLocalized:
-          $ref: '#/components/schemas/LocalizedString'
-        tosUriLocalized:
-          $ref: '#/components/schemas/LocalizedString'
-        jwksUri:
-          type: string
-        jwks:
-          type: string
-        sectorIdentifierUri:
-          type: string
-        subjectType:
-          type: string
-          enum:
-          - pairwise
-          - public
-        idTokenSignedResponseAlg:
-          type: string
-        idTokenEncryptedResponseAlg:
-          type: string
-        idTokenEncryptedResponseEnc:
-          type: string
-        userInfoSignedResponseAlg:
-          type: string
-        userInfoEncryptedResponseAlg:
-          type: string
-        userInfoEncryptedResponseEnc:
-          type: string
-        requestObjectSigningAlg:
-          type: string
-        requestObjectEncryptionAlg:
-          type: string
-        requestObjectEncryptionEnc:
-          type: string
-        tokenEndpointAuthMethod:
-          type: string
-        tokenEndpointAuthSigningAlg:
-          type: string
-        defaultMaxAge:
-          type: integer
-          format: int32
-        defaultAcrValues:
-          type: array
-          items:
-            type: string
-        initiateLoginUri:
-          type: string
-        postLogoutRedirectUris:
-          type: array
-          items:
-            type: string
-        requestUris:
-          type: array
-          items:
-            type: string
-        scopes:
-          type: array
-          items:
-            type: string
-        claims:
-          type: array
-          items:
-            type: string
-        trustedClient:
-          type: boolean
-        lastAccessTime:
-          type: string
-          format: date-time
-        lastLogonTime:
-          type: string
-          format: date-time
-        persistClientAuthorizations:
-          type: boolean
-        includeClaimsInIdToken:
-          type: boolean
-        refreshTokenLifetime:
-          type: integer
-          format: int32
-        accessTokenLifetime:
-          type: integer
-          format: int32
-        customAttributes:
-          type: array
-          items:
-            $ref: '#/components/schemas/CustomObjectAttribute'
-        customObjectClasses:
-          type: array
-          items:
-            type: string
-        rptAsJwt:
-          type: boolean
-        accessTokenAsJwt:
-          type: boolean
-        accessTokenSigningAlg:
-          type: string
-        disabled:
-          type: boolean
-        authorizedOrigins:
-          type: array
-          items:
-            type: string
-        softwareId:
-          type: string
-        softwareVersion:
-          type: string
-        softwareStatement:
-          type: string
-        attributes:
-          $ref: '#/components/schemas/ClientAttributes'
-        backchannelTokenDeliveryMode:
-          type: string
-          enum:
-          - poll
-          - ping
-          - push
-        backchannelClientNotificationEndpoint:
-          type: string
-        backchannelAuthenticationRequestSigningAlg:
-          type: string
-          enum:
-          - RS256
-          - RS384
-          - RS512
-          - ES256
-          - ES384
-          - ES512
-          - PS256
-          - PS384
-          - PS512
-        backchannelUserCodeParameter:
-          type: boolean
-        description:
-          type: string
-        organization:
-          type: string
-        groups:
-          type: array
-          items:
-            type: string
-        ttl:
-          type: integer
-          format: int32
-        displayName:
-          type: string
-        authenticationMethod:
-          type: string
-          enum:
-          - client_secret_basic
-          - client_secret_post
-          - client_secret_jwt
-          - private_key_jwt
-          - access_token
-          - tls_client_auth
-          - self_signed_tls_client_auth
-          - none
-        baseDn:
-          type: string
-        inum:
-          type: string
-    ClientAttributes:
-      type: object
-      properties:
-        tlsClientAuthSubjectDn:
-          type: string
-        runIntrospectionScriptBeforeJwtCreation:
-          type: boolean
-        keepClientAuthorizationAfterExpiration:
-          type: boolean
-        allowSpontaneousScopes:
-          type: boolean
-        spontaneousScopes:
-          type: array
-          items:
-            type: string
-        spontaneousScopeScriptDns:
-          type: array
-          items:
-            type: string
-        updateTokenScriptDns:
-          type: array
-          items:
-            type: string
-        backchannelLogoutUri:
-          type: array
-          items:
-            type: string
-        backchannelLogoutSessionRequired:
-          type: boolean
-        additionalAudience:
-          type: array
-          items:
-            type: string
-        postAuthnScripts:
-          type: array
-          items:
-            type: string
-        consentGatheringScripts:
-          type: array
-          items:
-            type: string
-        introspectionScripts:
-          type: array
-          items:
-            type: string
-        rptClaimsScripts:
-          type: array
-          items:
-            type: string
-        ropcScripts:
-          type: array
-          items:
-            type: string
-        parLifetime:
-          type: integer
-          format: int32
-        requirePar:
-          type: boolean
-        jansAuthSignedRespAlg:
-          type: string
-        jansAuthEncRespAlg:
-          type: string
-        jansAuthEncRespEnc:
-          type: string
-        jansSubAttr:
-          type: string
-        redirectUrisRegex:
-          type: string
-        jansAuthorizedAcr:
-          type: array
-          items:
-            type: string
-        jansDefaultPromptLogin:
-          type: boolean
-        idTokenLifetime:
-          type: integer
-          format: int32
-        allowOfflineAccessWithoutConsent:
-          type: boolean
-        minimumAcrLevel:
-          type: integer
-          format: int32
-        minimumAcrLevelAutoresolve:
-          type: boolean
-        minimumAcrPriorityList:
-          type: array
-          items:
-            type: string
-    CustomObjectAttribute:
-      type: object
-      properties:
-        name:
-          type: string
-        multiValued:
-          type: boolean
-        values:
-          type: array
-          items:
-            type: object
-        value:
-          type: object
-        displayValue:
-          type: string
-    LocalizedString:
-      type: object
-      properties:
-        values:
-          type: object
-          additionalProperties:
-            type: string
     AppConfiguration:
       type: object
       properties:
@@ -8857,6 +8461,564 @@ components:
       properties:
         persistenceType:
           type: string
+    CacheConfiguration:
+      type: object
+      properties:
+        cacheProviderType:
+          type: string
+          enum:
+          - IN_MEMORY
+          - MEMCACHED
+          - REDIS
+          - NATIVE_PERSISTENCE
+        memcachedConfiguration:
+          $ref: '#/components/schemas/MemcachedConfiguration'
+        inMemoryConfiguration:
+          $ref: '#/components/schemas/InMemoryConfiguration'
+        redisConfiguration:
+          $ref: '#/components/schemas/RedisConfiguration'
+        nativePersistenceConfiguration:
+          $ref: '#/components/schemas/NativePersistenceConfiguration'
+    InMemoryConfiguration:
+      type: object
+      properties:
+        defaultPutExpiration:
+          type: integer
+          format: int32
+    MemcachedConfiguration:
+      type: object
+      properties:
+        servers:
+          type: string
+        maxOperationQueueLength:
+          type: integer
+          format: int32
+        bufferSize:
+          type: integer
+          format: int32
+        defaultPutExpiration:
+          type: integer
+          format: int32
+        connectionFactoryType:
+          type: string
+          enum:
+          - DEFAULT
+          - BINARY
+    NativePersistenceConfiguration:
+      type: object
+      properties:
+        defaultPutExpiration:
+          type: integer
+          format: int32
+        defaultCleanupBatchSize:
+          type: integer
+          format: int32
+        deleteExpiredOnGetRequest:
+          type: boolean
+        disableAttemptUpdateBeforeInsert:
+          type: boolean
+    RedisConfiguration:
+      type: object
+      properties:
+        redisProviderType:
+          type: string
+          enum:
+          - STANDALONE
+          - CLUSTER
+          - SHARDED
+          - SENTINEL
+        servers:
+          type: string
+        defaultPutExpiration:
+          type: integer
+          format: int32
+        sentinelMasterGroupName:
+          type: string
+        password:
+          type: string
+        useSSL:
+          type: boolean
+        sslTrustStoreFilePath:
+          type: string
+        sslTrustStorePassword:
+          type: string
+        sslKeyStoreFilePath:
+          type: string
+        sslKeyStorePassword:
+          type: string
+        maxIdleConnections:
+          type: integer
+          format: int32
+        maxTotalConnections:
+          type: integer
+          format: int32
+        connectionTimeout:
+          type: integer
+          format: int32
+        soTimeout:
+          type: integer
+          format: int32
+        maxRetryAttempts:
+          type: integer
+          format: int32
+    Client:
+      type: object
+      properties:
+        dn:
+          type: string
+        expirationDate:
+          type: string
+          format: date-time
+        deletable:
+          type: boolean
+        clientSecret:
+          type: string
+        frontChannelLogoutUri:
+          type: string
+        frontChannelLogoutSessionRequired:
+          type: boolean
+        registrationAccessToken:
+          type: string
+        clientIdIssuedAt:
+          type: string
+          format: date-time
+        clientSecretExpiresAt:
+          type: string
+          format: date-time
+        redirectUris:
+          type: array
+          items:
+            type: string
+        claimRedirectUris:
+          type: array
+          items:
+            type: string
+        responseTypes:
+          type: array
+          items:
+            type: string
+            enum:
+            - code
+            - token
+            - id_token
+        grantTypes:
+          type: array
+          items:
+            type: string
+            enum:
+            - none
+            - authorization_code
+            - implicit
+            - password
+            - client_credentials
+            - refresh_token
+            - urn:ietf:params:oauth:grant-type:uma-ticket
+            - urn:ietf:params:oauth:grant-type:token-exchange
+            - urn:openid:params:grant-type:ciba
+            - urn:ietf:params:oauth:grant-type:device_code
+        applicationType:
+          type: string
+          enum:
+          - native
+          - web
+        contacts:
+          type: array
+          items:
+            type: string
+        idTokenTokenBindingCnf:
+          type: string
+        clientName:
+          type: string
+        logoUri:
+          type: string
+        clientUri:
+          type: string
+        policyUri:
+          type: string
+        tosUri:
+          type: string
+        clientNameLocalized:
+          $ref: '#/components/schemas/LocalizedString'
+        logoUriLocalized:
+          $ref: '#/components/schemas/LocalizedString'
+        clientUriLocalized:
+          $ref: '#/components/schemas/LocalizedString'
+        policyUriLocalized:
+          $ref: '#/components/schemas/LocalizedString'
+        tosUriLocalized:
+          $ref: '#/components/schemas/LocalizedString'
+        jwksUri:
+          type: string
+        jwks:
+          type: string
+        sectorIdentifierUri:
+          type: string
+        subjectType:
+          type: string
+          enum:
+          - pairwise
+          - public
+        idTokenSignedResponseAlg:
+          type: string
+        idTokenEncryptedResponseAlg:
+          type: string
+        idTokenEncryptedResponseEnc:
+          type: string
+        userInfoSignedResponseAlg:
+          type: string
+        userInfoEncryptedResponseAlg:
+          type: string
+        userInfoEncryptedResponseEnc:
+          type: string
+        requestObjectSigningAlg:
+          type: string
+        requestObjectEncryptionAlg:
+          type: string
+        requestObjectEncryptionEnc:
+          type: string
+        tokenEndpointAuthMethod:
+          type: string
+        tokenEndpointAuthSigningAlg:
+          type: string
+        defaultMaxAge:
+          type: integer
+          format: int32
+        defaultAcrValues:
+          type: array
+          items:
+            type: string
+        initiateLoginUri:
+          type: string
+        postLogoutRedirectUris:
+          type: array
+          items:
+            type: string
+        requestUris:
+          type: array
+          items:
+            type: string
+        scopes:
+          type: array
+          items:
+            type: string
+        claims:
+          type: array
+          items:
+            type: string
+        trustedClient:
+          type: boolean
+        lastAccessTime:
+          type: string
+          format: date-time
+        lastLogonTime:
+          type: string
+          format: date-time
+        persistClientAuthorizations:
+          type: boolean
+        includeClaimsInIdToken:
+          type: boolean
+        refreshTokenLifetime:
+          type: integer
+          format: int32
+        accessTokenLifetime:
+          type: integer
+          format: int32
+        customAttributes:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomObjectAttribute'
+        customObjectClasses:
+          type: array
+          items:
+            type: string
+        rptAsJwt:
+          type: boolean
+        accessTokenAsJwt:
+          type: boolean
+        accessTokenSigningAlg:
+          type: string
+        disabled:
+          type: boolean
+        authorizedOrigins:
+          type: array
+          items:
+            type: string
+        softwareId:
+          type: string
+        softwareVersion:
+          type: string
+        softwareStatement:
+          type: string
+        attributes:
+          $ref: '#/components/schemas/ClientAttributes'
+        backchannelTokenDeliveryMode:
+          type: string
+          enum:
+          - poll
+          - ping
+          - push
+        backchannelClientNotificationEndpoint:
+          type: string
+        backchannelAuthenticationRequestSigningAlg:
+          type: string
+          enum:
+          - RS256
+          - RS384
+          - RS512
+          - ES256
+          - ES384
+          - ES512
+          - PS256
+          - PS384
+          - PS512
+        backchannelUserCodeParameter:
+          type: boolean
+        description:
+          type: string
+        organization:
+          type: string
+        groups:
+          type: array
+          items:
+            type: string
+        ttl:
+          type: integer
+          format: int32
+        displayName:
+          type: string
+        authenticationMethod:
+          type: string
+          enum:
+          - client_secret_basic
+          - client_secret_post
+          - client_secret_jwt
+          - private_key_jwt
+          - access_token
+          - tls_client_auth
+          - self_signed_tls_client_auth
+          - none
+        baseDn:
+          type: string
+        inum:
+          type: string
+    ClientAttributes:
+      type: object
+      properties:
+        tlsClientAuthSubjectDn:
+          type: string
+        runIntrospectionScriptBeforeJwtCreation:
+          type: boolean
+        keepClientAuthorizationAfterExpiration:
+          type: boolean
+        allowSpontaneousScopes:
+          type: boolean
+        spontaneousScopes:
+          type: array
+          items:
+            type: string
+        spontaneousScopeScriptDns:
+          type: array
+          items:
+            type: string
+        updateTokenScriptDns:
+          type: array
+          items:
+            type: string
+        backchannelLogoutUri:
+          type: array
+          items:
+            type: string
+        backchannelLogoutSessionRequired:
+          type: boolean
+        additionalAudience:
+          type: array
+          items:
+            type: string
+        postAuthnScripts:
+          type: array
+          items:
+            type: string
+        consentGatheringScripts:
+          type: array
+          items:
+            type: string
+        introspectionScripts:
+          type: array
+          items:
+            type: string
+        rptClaimsScripts:
+          type: array
+          items:
+            type: string
+        ropcScripts:
+          type: array
+          items:
+            type: string
+        parLifetime:
+          type: integer
+          format: int32
+        requirePar:
+          type: boolean
+        jansAuthSignedRespAlg:
+          type: string
+        jansAuthEncRespAlg:
+          type: string
+        jansAuthEncRespEnc:
+          type: string
+        jansSubAttr:
+          type: string
+        redirectUrisRegex:
+          type: string
+        jansAuthorizedAcr:
+          type: array
+          items:
+            type: string
+        jansDefaultPromptLogin:
+          type: boolean
+        idTokenLifetime:
+          type: integer
+          format: int32
+        allowOfflineAccessWithoutConsent:
+          type: boolean
+        minimumAcrLevel:
+          type: integer
+          format: int32
+        minimumAcrLevelAutoresolve:
+          type: boolean
+        minimumAcrPriorityList:
+          type: array
+          items:
+            type: string
+    CustomObjectAttribute:
+      type: object
+      properties:
+        name:
+          type: string
+        multiValued:
+          type: boolean
+        values:
+          type: array
+          items:
+            type: object
+        displayValue:
+          type: string
+        value:
+          type: object
+    LocalizedString:
+      type: object
+      properties:
+        values:
+          type: object
+          additionalProperties:
+            type: string
+    AgamaConfiguration:
+      type: object
+      properties:
+        mandatoryAttributes:
+          type: array
+          items:
+            type: string
+        optionalAttributes:
+          type: array
+          items:
+            type: string
+    ApiAppConfiguration:
+      type: object
+      properties:
+        configOauthEnabled:
+          type: boolean
+        apiApprovedIssuer:
+          type: array
+          items:
+            type: string
+        apiProtectionType:
+          type: string
+        apiClientId:
+          type: string
+        apiClientPassword:
+          type: string
+        endpointInjectionEnabled:
+          type: boolean
+        authIssuerUrl:
+          type: string
+        authOpenidConfigurationUrl:
+          type: string
+        authOpenidIntrospectionUrl:
+          type: string
+        authOpenidTokenUrl:
+          type: string
+        authOpenidRevokeUrl:
+          type: string
+        smallryeHealthRootPath:
+          type: string
+        exclusiveAuthScopes:
+          type: array
+          items:
+            type: string
+        corsConfigurationFilters:
+          type: array
+          items:
+            $ref: '#/components/schemas/CorsConfigurationFilter'
+        loggingLevel:
+          type: string
+        loggingLayout:
+          type: string
+        externalLoggerConfiguration:
+          type: string
+        disableJdkLogger:
+          type: boolean
+        maxCount:
+          type: integer
+          format: int32
+        userExclusionAttributes:
+          type: array
+          items:
+            type: string
+        userMandatoryAttributes:
+          type: array
+          items:
+            type: string
+        agamaConfiguration:
+          $ref: '#/components/schemas/AgamaConfiguration'
+        auditLogConf:
+          $ref: '#/components/schemas/AuditLogConf'
+        dataFormatConversionConf:
+          $ref: '#/components/schemas/DataFormatConversionConf'
+        plugins:
+          type: array
+          items:
+            $ref: '#/components/schemas/PluginConf'
+    AuditLogConf:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+        ignoreHttpMethod:
+          type: array
+          items:
+            type: string
+        headerAttributes:
+          type: array
+          items:
+            type: string
+    DataFormatConversionConf:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+        ignoreHttpMethod:
+          type: array
+          items:
+            type: string
+    PluginConf:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        className:
+          type: string
     SmtpConfiguration:
       type: object
       properties:
@@ -9177,15 +9339,6 @@ components:
         jsFaviconPath:
           type: string
         baseDn:
-          type: string
-    PluginConf:
-      type: object
-      properties:
-        name:
-          type: string
-        description:
-          type: string
-        className:
           type: string
     Scope:
       type: object
@@ -9534,3 +9687,17 @@ components:
               related information
             https://jans.io/oauth/jans-auth-server/session.delete: Delete Session
               information
+            https://jans.io/oauth/config/read-all: Admin read scope
+            https://jans.io/oauth/config/write-all: Admin write scope
+            https://jans.io/oauth/config/delete-all: Admin delete scope
+            https://jans.io/oauth/config/openid-read: View OpenID functionality
+            https://jans.io/oauth/config/openid/openid-write: Manage OpenID functionality
+            https://jans.io/oauth/config/openid/openid-delete: Delete OpenID functionality
+            https://jans.io/oauth/config/uma-read: View UMA functionality
+            https://jans.io/oauth/config/uma-write: Manage UMA functionality
+            https://jans.io/oauth/config/uma-delete: Delete UMA functionality
+            https://jans.io/oauth/config/plugin.readonly: View Plugin information
+            https://jans.io/oauth/config/properties.readonly: View Config-API related
+              configuration properties
+            https://jans.io/oauth/config/properties.write: Manage Config-API related
+              configuration properties
