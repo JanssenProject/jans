@@ -184,7 +184,7 @@ public class ApiProtectionService {
                 scopeService.addScope(scope);
             } else {
                 // Update resource
-                log.debug("Scope - '{}' already exists, hence updating it.", rsScope.getName());
+                log.info("Scope - '{}' already exists, hence updating it.", rsScope.getName());
                 scope.setId(rsScope.getName());
                 scope.setScopeType(scopeType);
                 scopeService.updateScope(scope);
@@ -215,8 +215,8 @@ public class ApiProtectionService {
         try {
             Client client = this.clientService.getClientByInum(clientId);
             log.debug("updateScopeForClientIfNeeded() - Verify client:{} ", client);
-            log.debug("updateScopeForClientIfNeeded() - 1 - client.getClientSecret():{} ", client.getClientSecret());
             if (client != null) {
+                log.info("updateScopeForClientIfNeeded() - 1 - client.getClientSecret():{} ", client.getClientSecret());
                 // Assign scope
                 // Prepare scope array
                 List<String> scopes = getScopeWithDn(getAllScopes());
@@ -245,7 +245,7 @@ public class ApiProtectionService {
             client = this.clientService.getClientByInum(clientId);
             log.debug(" Verify scopes post assignment, clientId:{}, scopes:{}", clientId,
                     Arrays.asList(client.getScopes()));
-            log.debug("updateScopeForClientIfNeeded() - 2 - client.getClientSecret():{} ", client.getClientSecret());
+            log.info("updateScopeForClientIfNeeded() - 2 - client.getClientSecret():{} ", client.getClientSecret());
         } catch (Exception ex) {
             log.error("Error while searching internal client", ex);
         }

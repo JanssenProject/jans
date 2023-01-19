@@ -43,7 +43,8 @@ import jakarta.ws.rs.core.Application;
                 @Tag(name = "Agama - Configuration"), @Tag(name = "Agama - Developer Studio"),
                 @Tag(name = "Statistics - User"), @Tag(name = "Health - Check"), @Tag(name = "Server Stats"),
                 @Tag(name = "Auth - Session Management"), @Tag(name = "Organization Configuration"),
-                @Tag(name = "Auth Server Health - Check"), @Tag(name = "Plugins")},
+                @Tag(name = "Auth Server Health - Check"), @Tag(name = "Plugins"),
+                @Tag(name = "Configuration – Config API") },
 
         servers = { @Server(url = "https://jans.io/", description = "The Jans server") })
 
@@ -87,7 +88,19 @@ import jakarta.ws.rs.core.Application;
         @OAuthScope(name = ApiAccessConstants.AGAMA_WRITE_ACCESS, description = "Manage Agama Flow related information"),
         @OAuthScope(name = ApiAccessConstants.AGAMA_DELETE_ACCESS, description = "Delete Agama Flow related information"),
         @OAuthScope(name = ApiAccessConstants.JANS_AUTH_SESSION_READ_ACCESS, description = "View Session related information"),
-        @OAuthScope(name = ApiAccessConstants.JANS_AUTH_SESSION_DELETE_ACCESS, description = "Delete Session information") }
+        @OAuthScope(name = ApiAccessConstants.JANS_AUTH_SESSION_DELETE_ACCESS, description = "Delete Session information"),
+        @OAuthScope(name = ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, description = "Admin read scope"),
+        @OAuthScope(name = ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS, description = "Admin write scope"),
+        @OAuthScope(name = ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS, description = "Admin delete scope"),
+        @OAuthScope(name = ApiAccessConstants.OPENID_READ_ACCESS, description = "View OpenID functionality"),
+        @OAuthScope(name = ApiAccessConstants.OPENID_WRITE_ACCESS, description = "Manage OpenID functionality"),
+        @OAuthScope(name = ApiAccessConstants.OPENID_DELETE_ACCESS, description = "Delete OpenID functionality"),
+        @OAuthScope(name = ApiAccessConstants.UMA_READ_ACCESS, description = "View UMA functionality"),
+        @OAuthScope(name = ApiAccessConstants.UMA_WRITE_ACCESS, description = "Manage UMA functionality"),
+        @OAuthScope(name = ApiAccessConstants.UMA_DELETE_ACCESS, description = "Delete UMA functionality"),
+        @OAuthScope(name = ApiAccessConstants.PLUGIN_READ_ACCESS, description = "View Plugin information"),
+        @OAuthScope(name = ApiAccessConstants.CONFIG_READ_ACCESS, description = "View Config-API related configuration properties"),
+        @OAuthScope(name = ApiAccessConstants.CONFIG_WRITE_ACCESS, description = "Manage Config-API related configuration properties") }
 
 )))
 public class ApiApplication extends Application {
@@ -105,7 +118,7 @@ public class ApiApplication extends Application {
         classes.add(AttributesResource.class);
         classes.add(CacheConfigurationResource.class);
         classes.add(ClientsResource.class);
-        classes.add(ConfigResource.class);
+        classes.add(AuthConfigResource.class);
         classes.add(ConfigSmtpResource.class);
         classes.add(CustomScriptResource.class);
         classes.add(JwksResource.class);
@@ -120,6 +133,7 @@ public class ApiApplication extends Application {
         classes.add(ADSDeploymentsResource.class);
         classes.add(SessionResource.class);
         classes.add(PluginResource.class);
+        classes.add(ConfigApiResource.class);
 
         return classes;
     }

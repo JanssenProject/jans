@@ -19,7 +19,7 @@ public class AuditLogConf {
     private Collection<String> ignoreHttpMethod;
 
     /**
-     * List of header attributes
+     * List of header HTTP attributes whose value is to be logged
      */
     private List<String> headerAttributes;
 
