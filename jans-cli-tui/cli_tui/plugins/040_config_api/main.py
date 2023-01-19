@@ -31,8 +31,9 @@ class Plugin():
             app (Generic): The main Application class
         """
         self.app = app
-        self.pid = 'config_api'
+        self.pid = 'admin'
         self.name = '[C]onfig-API'
+        self.server_side_plugin = True
         self.page_entered = False
         self.role_type = 'api-viewer'
         self.admin_ui_roles_data = {}

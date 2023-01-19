@@ -13,8 +13,11 @@ class cli_style:
     tabs = 'class:plugin-tabs'
     label = 'class:plugin-label'
     container = 'class:plugin-container'
-    navbar_headcolor = "class:plugin-navbar-headcolor"
-    navbar_entriescolor = "class:plugin-navbar-entriescolor"
+    navbar_headcolor = 'class:plugin-navbar-headcolor'
+    navbar_entriescolor = 'class:plugin-navbar-entriescolor'
+    tab_selected = 'class:tab-selected'
+    scim_widget = 'class:scim-widget'
+    black_bg = 'class:plugin-black-bg'
 
 class common_strings:
     enter_to_search = "Press enter to perform search"
