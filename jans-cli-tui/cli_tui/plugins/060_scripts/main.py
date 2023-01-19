@@ -20,6 +20,7 @@ from wui_components.jans_vetrical_nav import JansVerticalNav
 from edit_script_dialog import EditScriptDialog
 from prompt_toolkit.application import Application
 from utils.multi_lang import _
+from utils.static import DialogResult, cli_style, common_strings
 
 class Plugin():
     """This is a general class for plugins 
@@ -56,7 +57,7 @@ class Plugin():
                     VSplit([
                         self.app.getButton(text=_("Get Scripts"), name='scripts:get', jans_help=_("Retreive first %d Scripts") % (20), handler=self.get_scripts),
                         self.app.getTitledText(_("Search"), name='scripts:search', jans_help=_("Press enter to perform search"), accept_handler=self.search_scripts, style='class:outh_containers_scopes.text'),
-                        self.app.getButton(text=_("Add Sscript"), name='scripts:add', jans_help=_("To add a new scope press this button"), handler=self.add_script_dialog),
+                        self.app.getButton(text=_("Add Script"), name='scripts:add', jans_help=_("To add a new scope press this button"), handler=self.add_script_dialog),
                         ],
                         padding=3,
                         width=D(),
@@ -129,8 +130,8 @@ class Plugin():
                 get_help=(self.get_help,'Scripts'),
                 on_delete=self.delete_script,
                 selectes=0,
-                headerColor='class:outh-verticalnav-headcolor',
-                entriesColor='class:outh-verticalnav-entriescolor',
+                headerColor=cli_style.navbar_headcolor,
+                entriesColor=cli_style.navbar_entriescolor,
                 all_data=self.data['entries']
             )
 

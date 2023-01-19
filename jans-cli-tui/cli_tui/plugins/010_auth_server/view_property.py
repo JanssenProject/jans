@@ -1,33 +1,32 @@
+import json
 import asyncio
+from functools import partial
+from typing import Optional, Sequence
+
+from prompt_toolkit.application import Application
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.formatted_text import AnyFormattedText
+from prompt_toolkit.layout.containers import HSplit
+from prompt_toolkit.widgets import Button, Dialog
+
 from cli import config_cli
-from prompt_toolkit.layout.containers import (
-    HSplit,
-    DynamicContainer,
-)
-from prompt_toolkit.widgets import (
-    Button,
-    RadioList,
-    Dialog,
- )
 from utils.static import DialogResult, cli_style
 from utils.utils import DialogUtils
 from wui_components.jans_cli_dialog import JansGDialog
-from typing import Optional, Sequence
+from wui_components.jans_tab import JansTab
+
 from utils.multi_lang import _
-import cli_style
 
 class ViewProperty(JansGDialog, DialogUtils):
     """The Main UMA-resources Dialog to view UMA Resource Details
     """
     def __init__(
             self,
-            app,
+            app: Application,
             parent,
             data:tuple,
-            title: AnyFormattedText= "",
-            buttons: Optional[Sequence[Button]]= []
+            title: AnyFormattedText='',
+            op_type: Optional[str]='replace'
             )-> None:
         """init for `ViewProperty`, inherits from two diffrent classes `JansGDialog` and `DialogUtils`
             
@@ -39,20 +38,19 @@ class ViewProperty(JansGDialog, DialogUtils):
             parent (widget): This is the parent widget for the dialog
             data (tuple): selected line data 
             title (AnyFormattedText, optional): The Main dialog title. Defaults to "".
-            button_functions (list, optional): Dialog main buttons with their handlers. Defaults to [].
         """
-        super().__init__(app, title, buttons)
-        self.property, self.value = data[0],data[1]
+        super().__init__(app)
+        self.property_name, self.value = data[0], data[1]
         self.app = app
         self.myparent = parent
+        self.op_type = op_type
         self.value_content = HSplit([],width=D())
-        self.tabs = {}
-        self.selected_tab = 'tab0'
-        self.schema = self.app.cli_object.get_schema_from_reference('', '#/components/schemas/AppConfiguration')
-
+        self.tab_widget = None
+        self.widgets = []
+        self.buttons = [Button(text=_("Cancel"), handler=self.cancel), Button(text=_("Save"), handler=self.save)]
         self.prepare_properties()
         self.create_window()
-        
+
     def cancel(self) -> None:
         """method to invoked when canceling changes in the dialog (Cancel button is pressed)
         """
@@ -63,328 +61,188 @@ class ViewProperty(JansGDialog, DialogUtils):
         """method to invoked when saving the dialog (Save button is pressed)
         """
 
-        data_dict = {}
-        list_data =[]
+        if len(self.widgets) == 1:
+            item_data = self.get_item_data(self.widgets[0])
+            data = item_data['value']
 
-        if type(self.value) in [str,bool,int] :
-            for wid in self.value_content.children:
-                prop_type = self.get_item_data(wid)
-            data = prop_type['value']
-
-        elif (type(self.value)==list and (type(self.value[0]) not in  [dict,list])):
-            
-            for wid in self.value_content.children:
-                prop_type = self.get_item_data(wid)
-            
-            if  self.get_type(prop_type['key']) != 'checkboxlist':
-                data = prop_type['value'].split('\n')
-            else:
-                data = prop_type['value']
-
-        elif type(self.value) == dict :
-            for wid in self.value_content.children:
-                for k in wid.children :
-                    prop_type = self.get_item_data(k)
-                    data_dict[prop_type['key']]=prop_type['value']
-            data = data_dict
-
-        elif type(self.value) == list  and type(self.value[0]) == dict:
-            for tab in self.tabs:
-                data_dict = {}
-                for k in self.tabs[tab].children :
-                    prop_type = self.get_item_data(k.children[0])
-                    data_dict[prop_type['key']]=prop_type['value']
-                list_data.append(data_dict)
-            data = list_data
-        else :
-            self.app.logger.debug("self.value: "+str(self.value))
-            self.app.logger.debug("type self.value: "+str(type(self.value)))
+        elif self.tab_widget:
             data = []
-                
-        # ------------------------------------------------------------#
-        # --------------------- Patch to server ----------------------#
-        # ------------------------------------------------------------#
-        if data :
-
-            cli_args = {'operation_id': 'patch-properties', 'data': [ {'op':'replace', 'path': self.property, 'value': data } ]}
-
-            async def coroutine():
-                self.app.start_progressing()
-                response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-                self.app.stop_progressing()
-                self.myparent.app_configuration = response
-                self.future.set_result(DialogResult.ACCEPT)
-                self.myparent.oauth_update_properties(start_index=self.myparent.oauth_update_properties_start_index)
-            asyncio.ensure_future(coroutine())
-
-    def get_type(self,prop):
-        """This Method get a property and get its type from schema to return the widget type to implement
-
-        Args:
-            prop (str): The property name 
-
-        Returns:
-            str: the widget type to implement
-        """
-        try :
-            proper = self.schema.get('properties', {})[prop]
-
-            if proper['type'] == 'string':
-                prop_type= 'TitledText'
-
-            elif proper['type'] == 'integer':
-                prop_type= 'int-TitledText'
-
-            elif proper['type'] == 'boolean':
-                prop_type= 'TitledCheckBox'
-
-            elif proper['type'] == 'object':
-                prop_type= 'dict'
-
-            elif proper['type'] == 'array':
-                if 'enum' in proper or ('enum' in proper['items']):
-                   prop_type= 'checkboxlist' 
+            tabn = []
+            for tab in self.tab_widget.tabs:
+                tabn.append(tab[0])
+                if self.tab_widget.tab_content_type == 'object':
+                    tab_data = self.make_data_from_dialog({tab[0]: tab[1]})
                 else:
-                    if type(self.value[0]) == dict:
-                        prop_type= 'list-dict'
-                    elif type(self.value[0]) == list:
-                        prop_type= 'list-list'
-                    else:
-                        prop_type= 'long-TitledText'
-        except Exception:
-            prop_type = None
+                    tab_data_tmp = self.make_data_from_dialog({tab[0]: tab[1]})
+                    tab_data = tab_data_tmp[self.property_name]
+                data.append(tab_data)
+        else:
+            data = {}
+            for widget in self.widgets:
+                item_data = self.get_item_data(widget)
+                data[item_data['key']] = item_data['value']
 
-        return prop_type
+        cli_args = {'operation_id': 'patch-properties', 'data': [ {'op':self.op_type, 'path': self.property_name, 'value': data } ]}
 
-    def get_listValues(self,prop,type=None):
-        """This method get list values for properties own Enum values
+        async def coroutine():
+            self.app.start_progressing()
+            response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+            self.app.stop_progressing()
+            self.myparent.app_configuration = response
+            self.future.set_result(DialogResult.ACCEPT)
+            self.myparent.oauth_update_properties(start_index=self.myparent.oauth_update_properties_start_index)
+        asyncio.ensure_future(coroutine())
+
+
+    def get_widgets(
+            self, 
+            properties:dict,
+            values: dict=None,
+            styles: dict=None
+            ) -> list:
+        """Returns list of widgets for properties
 
         Args:
-            prop (str): The property name
-            type (_type_, optional): If the Items in Property properties had a nasted Enum. Defaults to None.
-
-        Returns:
-            list: List of the properties enum to choose from
+            properties (dict): properties to get widget
+            values (dict): values of properties
+            styes (dict): styles for widgets
         """
-        try :
-            if type !='nasted':
-                list_values= self.schema.get('properties', {})[prop]['items']['enum']
-            else:
-                list_values= self.schema.get('properties', {})[prop]['items']['items']['enum']
 
-        except Exception:
-            list_values = []
+        if not values:
+            values = {self.property_name: self.value}
+        if not styles:
+            styles = {'widget_style':'', 'string': cli_style.edit_text, 'boolean': cli_style.check_box}
 
-        return list_values
+        widgets = []
+        for item_name in properties:
+            item = properties[item_name]
+            if item['type'] in ('integer', 'string'):
+                widgets.append(
+                    self.app.getTitledText(
+                        item_name,
+                        name=item_name,
+                        value=str(values.get(item_name,'')),
+                        text_type=item['type'],
+                        style=styles['string'],
+                        widget_style=styles['widget_style']
+                    )
+                )
+
+            elif item['type'] == 'boolean':
+                widgets.append(
+                    self.app.getTitledCheckBox(
+                        item_name,
+                        name=item_name,
+                        checked=values.get(item_name, False),
+                        style=styles['boolean'],
+                        widget_style=styles['widget_style']
+                        )
+                    )
+
+            elif item['type'] == 'array' and item['items'].get('enum'):
+                widgets.append(
+                    self.app.getTitledCheckBoxList(
+                        item_name, 
+                        name=item_name, 
+                        values=item['items']['enum'],
+                        current_values=values.get(item_name, []),
+                        style=styles['boolean'],
+                        widget_style=styles['widget_style']
+                        )
+                    )
+
+            elif item['type'] == 'array' and item['items'].get('type') in ('string', 'integer'):
+                titled_text = self.app.getTitledText(
+                                    item_name,
+                                    name=item_name,
+                                    height=4,
+                                    text_type = item['items']['type'],
+                                    value='\n'.join(values.get(item_name, [])),
+                                    style=styles['string'],
+                                    widget_style=styles['widget_style']
+                                )
+                titled_text.jans_list_type = True
+                widgets.append(titled_text)
+
+        return widgets
+
+
+    def add_tab_element(
+        self,
+        properties:dict,
+        values: dict
+        ) -> None:
+        """Adds element to tab widget
+            Args:
+            properties (dict): properties of element to add
+            values (dict): values of properties
+        """
+
+        tab_name = '#{}'.format(len(self.tab_widget.tabs)+1)
+        tab_widgets = self.get_widgets(properties, values=values, styles={'widget_style': cli_style.tab_selected, 'string': cli_style.tab_selected, 'boolean': cli_style.tab_selected})
+        self.tab_widget.add_tab(tab_name, HSplit(tab_widgets, style=cli_style.tab_selected))
+        if not values:
+            self.tab_widget.set_tab(tab_name)
+
+    def delete_tab_element(self) -> None:
+        """Deletes currenlt oelemnt form tab widget
+        """
+        cur_tab = self.tab_widget.cur_tab
+        cur_tab_name = self.tab_widget.tabs[cur_tab][0]
+        self.tab_widget.remove_tab(cur_tab_name)
 
     def prepare_properties(self):
         """This method build the main value_content to edit the properties
         """
 
-        tab_temp = 'tab{}'
-        prop_type = self.get_type(self.property)
+        properties = self.myparent.schema['properties'][self.property_name]
 
-        if prop_type == 'TitledText':
-                self.value_content= HSplit([self.app.getTitledText(
-                self.property, 
-                name=self.property, 
-                value=self.value, 
-                style=cli_style.edit_text
-                ),
-                ],width=D())
+        if properties['type'] in ('string', 'integer', 'boolean'):
+            self.widgets = self.get_widgets({self.property_name: properties})
 
-        elif prop_type == 'int-TitledText':
-                self.value_content= HSplit([self.app.getTitledText(
-                self.property, 
-                name=self.property, 
-                value=self.value, 
-                text_type='integer',
-                style=cli_style.edit_text
-                ),
-                ],width=D())
+        elif properties['type'] == 'array':
+            if properties['items'].get('type') in ('string', 'integer', 'boolean'):
+                self.widgets = self.get_widgets({self.property_name: properties})
 
-        elif prop_type == 'long-TitledText':
-            self.value_content= HSplit([self.app.getTitledText(
-                                self.property, 
-                                name=self.property, 
-                                height=3,
-                                value='\n'.join(self.value), 
-                                style=cli_style.edit_text
-                                ),
-                                ],width=D())
+            elif properties['items'].get('type') == 'array':
+                self.tab_widget = JansTab(self)
+                self.tab_widget.tab_content_type = 'array'
+                item_property = {self.property_name: properties['items']}
+                for entry_value in self.value:
+                    self.add_tab_element(item_property, {self.property_name: entry_value})
 
-        elif prop_type == 'list-list':
-            self.value_content= HSplit([
-                        self.app.getTitledCheckBoxList(
-                                self.property, 
-                                name=self.property, 
-                                values=self.get_listValues(self.property,'nasted'), 
-                                style='class:outh-client-checkboxlist'),
-                                ],width=D())
+                self.value_content = self.tab_widget
+                add_entry_partial = partial(self.add_tab_element, item_property, {})
+                self.buttons.append(Button(_("Add"), handler=add_entry_partial))
+                self.buttons.append(Button(_("Delete"), handler=self.delete_tab_element))
 
-        elif prop_type == 'checkboxlist':
-            self.value_content= HSplit([
-                        self.app.getTitledCheckBoxList(
-                                self.property, 
-                                name=self.property, 
-                                values=self.get_listValues(self.property), 
-                                style='class:outh-client-checkboxlist'),
-                                ],width=D())
+            elif properties.get('properties'):
+                self.tab_widget = JansTab(self)
+                self.tab_widget.tab_content_type = 'object'
+                for entry_value in self.value:
+                    self.add_tab_element(properties['properties'], entry_value)
+                self.value_content = self.tab_widget
+                add_entry_partial = partial(self.add_tab_element, properties['properties'], {})
+                self.buttons.append(Button(_("Add"), handler=add_entry_partial))
+                self.buttons.append(Button(_("Delete"), handler=self.delete_tab_element))
 
-        elif prop_type == 'list-dict':
-            tab_num = len(self.value)
-            tabs = []
-            for i in range(tab_num) :
-                tabs.append((tab_temp.format(i), tab_temp.format(i)))
+        elif properties['type'] == 'object':
+            self.widgets = self.get_widgets(properties['properties'], values=self.value)
 
+        if not self.tab_widget:
+            self.value_content = HSplit(self.widgets, width=D())
 
-            for tab in self.value:  
-                tab_list=[]
-                for item in tab:
-                    if type(tab[item]) == str:
-                        tab_list.append(HSplit([self.app.getTitledText(
-                            item ,
-                            name=item, 
-                            value=tab[item], 
-                            style=cli_style.edit_text
-                            ),
-                            ],width=D()))
+    def create_window(self) -> None:
+        """Creates dialog window
+        """
 
-                    if type(tab[item]) == int :
-                        tab_list.append(HSplit([self.app.getTitledText(
-                            item ,
-                            name=item, 
-                            value=tab[item], 
-                            text_type='integer',
-                            style=cli_style.edit_text
-                            ),
-                            ],width=D()))
-
-                    elif type(tab[item]) == list:
-                        tab_list.append(HSplit([self.app.getTitledText(
-                            item, 
-                            name=item, 
-                            height=3,
-                            value='\n'.join(tab[item]), 
-                            style=cli_style.edit_text
-                            ),
-                            ],width=D()))
-
-                    elif type(tab[item]) == bool:
-                        tab_list.append(HSplit([
-                            self.app.getTitledCheckBox(
-                                item,
-                                name=item,
-                                checked= tab[item],
-                                style=cli_style.checkbox),
-                        ],width=D()))  
-                                    
-                    self.tabs[tab_temp.format(self.value.index(tab))] = HSplit(tab_list,width=D())
-
-            self.value_content=HSplit([
-                            self.app.getTitledRadioButton(
-                                _("Tab Num"),
-                                name='tabNum',
-                                current_value=self.selected_tab,
-                                values=tabs,
-                                on_selection_changed=self.tab_selection_changed,
-                                style='class:outh-scope-radiobutton'),
-
-                            DynamicContainer(lambda: self.tabs[self.selected_tab]),     
-
-                ],width=D())
-                
-        elif prop_type == 'TitledCheckBox':
-            self.value_content= HSplit([
-                self.app.getTitledCheckBox(
-                    self.property, 
-                    name=self.property, 
-                    checked= self.value, 
-                    style=cli_style.checkbox),
-            ],width=D())
-
-        elif prop_type == 'dict':
-            dict_list=[]
-            for item in self.value:
-                if type(self.value[item]) == str:
-                        dict_list.append(HSplit([self.app.getTitledText(
-                        item ,
-                        name=item, 
-                        value=self.value[item], 
-                        style=cli_style.edit_text
-                        ),
-                        ],width=D()))
-
-                elif type(self.value[item]) == int :
-                        dict_list.append(HSplit([self.app.getTitledText(
-                        item ,
-                        name=item, 
-                        value=self.value[item], 
-                        text_type='integer',
-                        style=cli_style.edit_text
-                        ),
-                        ],width=D()))
-
-                elif type(self.value[item]) == list:
-                    dict_list.append(HSplit([self.app.getTitledText(
-                        item, 
-                        name=item, 
-                        height=3,
-                        value='\n'.join(self.value[item]), 
-                        style=cli_style.edit_text
-                        ),
-                        ],width=D()))
-
-                elif type(self.value[item]) == bool:
-                    dict_list.append(HSplit([
-                        self.app.getTitledCheckBox(
-                            item, 
-                            name=item, 
-                            checked= self.value[item], 
-                            style=cli_style.checkbox),
-                    ],width=D()))
-
-                else :
-                    dict_list.append(HSplit([self.app.getTitledText(
-                                            item, 
-                                            name=item, 
-                                            value="No Items Here", 
-                                            style=cli_style.edit_text,
-                                            read_only=True,
-                                            ),
-                                            ],width=D()))  
-            self.value_content= HSplit(dict_list,width=D())
-
-    def create_window(self):
-
-        self.dialog = Dialog(title=self.property,
-            body=     
-            HSplit([
-            self.value_content,
-        ], padding=1,width=100,style='class:outh-uma-tabs'
-        ),
-        buttons=[
-                Button(
-                    text=_("Cancel"),
-                    handler=self.cancel,
-                ) ,
-                Button(
-                    text=_("Save"),
-                    handler=self.save,
-                ) ,            ],
+        self.dialog = Dialog(
+            title=self.property_name,
+            body= HSplit([self.value_content], padding=1,width=100,style='class:outh-uma-tabs'),
+            buttons=self.buttons,
             with_background=False,
         )
 
-    def tab_selection_changed(
-        self, 
-        cb: RadioList,
-        ) -> None:
-        """This method for properties that implemented in multi tab
-
-        Args:
-            cb (RadioList): the New Value from the nasted tab
-        """
-        self.selected_tab = cb.current_value
 
     def __pt_container__(self)-> Dialog:
         """The container for the dialog itself
