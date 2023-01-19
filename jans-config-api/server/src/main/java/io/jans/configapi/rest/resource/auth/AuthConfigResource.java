@@ -39,7 +39,7 @@ import org.slf4j.Logger;
 @Path(ApiConstants.JANS_AUTH + ApiConstants.CONFIG)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class ConfigResource extends ConfigBaseResource {
+public class AuthConfigResource extends ConfigBaseResource {
 
     private static final String AGAMACONFIGURATION = "agamaConfiguration";
 
@@ -62,7 +62,7 @@ public class ConfigResource extends ConfigBaseResource {
                     ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getAppConfiguration() {
         AppConfiguration appConfiguration = configurationService.find();
-        log.debug("ConfigResource::getAppConfiguration() appConfiguration:{}", appConfiguration);
+        log.debug("AuthConfigResource::getAppConfiguration() appConfiguration:{}", appConfiguration);
         return Response.ok(appConfiguration).build();
     }
 
@@ -113,10 +113,10 @@ public class ConfigResource extends ConfigBaseResource {
     @Path(ApiConstants.PERSISTENCE)
     public Response getPersistenceDetails() {
         String persistenceType = configurationService.getPersistenceType();
-        log.debug("ConfigResource::getPersistenceDetails() - persistenceType:{}", persistenceType);
+        log.debug("AuthConfigResource::getPersistenceDetails() - persistenceType:{}", persistenceType);
         PersistenceConfiguration persistenceConfiguration = new PersistenceConfiguration();
         persistenceConfiguration.setPersistenceType(persistenceType);
-        log.debug("ConfigResource::getPersistenceDetails() - persistenceConfiguration:{}", persistenceConfiguration);
+        log.debug("AuthConfigResource::getPersistenceDetails() - persistenceConfiguration:{}", persistenceConfiguration);
         return Response.ok(persistenceConfiguration).build();
     }
 

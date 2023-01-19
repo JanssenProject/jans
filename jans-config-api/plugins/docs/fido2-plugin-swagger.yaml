@@ -16,7 +16,7 @@ servers:
 tags:
 - name: Fido2 - Configuration
 paths:
-  /fido2/config:
+  /fido2/fido2-config:
     get:
       tags:
       - Fido2 - Configuration
