@@ -372,6 +372,7 @@ nav:
             - 'DSL Reference': 'admin/developer/agama/dsl-full.md'
             - 'Java Classpath': 'admin/developer/agama/java-classpath.md'
             - 'A closer look to the engine': 'admin/developer/agama/hello-world-closer.md'
+            - '.gama files deployment': 'admin/developer/agama/gama-deployment.md'
             - 'FAQ': 'admin/developer/agama/faq.md'
         - 'Interception Script Overview': 'admin/developer/interception-scripts.md'
         - 'Script Debugging': 'admin/developer/interception-scripts-debug.md'
