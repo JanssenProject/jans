@@ -81,6 +81,15 @@ class ParamSchema(Schema):
 
     auth_enc_keys = Str(missing="")
 
+    salt = Str(
+        validate=[
+            Length(equal=24),
+            Predicate("isalnum", error="Only alphanumeric characters are allowed"),
+        ],
+        missing="",
+        default="",
+    )
+
     @validates("hostname")
     def validate_fqdn(self, value):
         fqdn = FQDN(value)

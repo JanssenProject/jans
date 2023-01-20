@@ -72,34 +72,46 @@ The following commands are supported by the container:
 
 The load command can be used either to generate or restore config and secret for the cluster.
 
+For fresh installation, generate the initial configuration and secret by creating `/path/to/host/volume/generate.json` similar to example below:
+```json
+{
+    "hostname": "demoexample.jans.io",
+    "country_code": "US",
+    "state": "TX",
+    "city": "Austin",
+    "admin_pw": "S3cr3t+pass",
+    "ldap_pw": "S3cr3t+pass",
+    "email": "s@jans.io",
+    "org_name": "Gluu Inc."
+}
+```
+
+**NOTE**: `generate.json` has optional attributes as seen below.
+
+- `auth_sig_keys`: space-separated key algorithm for signing (default to `RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512`)
+- `auth_enc_keys`: space-separated key algorithm for encryption (default to `RSA1_5 RSA-OAEP`)
+- `optional_scopes`: list of scopes that will be used (supported scopes are `ldap`, `scim`, `fido2`, `couchbase`, `redis`, `sql`, `casa`; default to empty list)
+- `ldap_pw`: user's password to access LDAP database (only used if `optional_scopes` list contains `ldap` scope)
+- `sql_pw`: user's password to access SQL database (only used if `optional_scopes` list contains `sql` scope)
+- `couchbase_pw`: user's password to access Couchbase database (only used if `optional_scopes` list contains `couchbase` scope)
+- `couchbase_superuser_pw`: superusers password to access Couchbase database (only used if `optional_scopes` list contains `couchbase` scope)
+- `salt`: user-defined salt (24 characters length); if omitted, salt will be generated automatically
+
+Example of generating `salt` value:
+
+```
+# using shell script
+cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 24 | head -n 1
+# output: NFAG5g4R0NSkAZXHL8t2DScL
+
+# using python oneliner
+python -c 'import random, string; print("".join(random.choices(string.ascii_letters + string.digits, k=24)))'
+# ouput: HsPzqiPkRzNySWlOVui8Ilmw
+```
+
 #### Docker
 
-1. To generate the initial configuration and secret, create `/path/to/host/volume/generate.json` similar to example below:
-
-    ```json
-    {
-        "hostname": "demoexample.jans.io",
-        "country_code": "US",
-        "state": "TX",
-        "city": "Austin",
-        "admin_pw": "S3cr3t+pass",
-        "ldap_pw": "S3cr3t+pass",
-        "email": "s@jans.io",
-        "org_name": "Gluu Inc."
-    }
-    ```
-
-    **NOTE**: `generate.json` has optional attributes to generate oxAuth signing and encryption keys based on specific algorithms.
-
-    - `auth_sig_keys`: space-separated key algorithm for signing (default to `RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512`)
-    - `auth_enc_keys`: space-separated key algorithm for encryption (default to `RSA1_5 RSA-OAEP`)
-    - `optional_scopes`: list of scopes that will be used (supported scopes are `ldap`, `scim`, `fido2`, `couchbase`, `redis`, `sql`, `casa`; default to empty list)
-    - `ldap_pw`: user's password to access LDAP database (only used if `optional_scopes` list contains `ldap` scope)
-    - `sql_pw`: user's password to access SQL database (only used if `optional_scopes` list contains `sql` scope)
-    - `couchbase_pw`: user's password to access Couchbase database (only used if `optional_scopes` list contains `couchbase` scope)
-    - `couchbase_superuser_pw`: superusers password to access Couchbase database (only used if `optional_scopes` list contains `couchbase` scope)
-
-2. Mount the volume into container:
+1. Mount the `generate.json` into container:
 
     ```sh
     docker run \
@@ -117,33 +129,13 @@ The load command can be used either to generate or restore config and secret for
 
 #### Kubernetes
 
-1. To generate the initial configuration and secret, create `/path/to/host/volume/generate.json` similar to example below:
-
-    ```json
-    {
-        "hostname": "demoexample.jans.io",
-        "country_code": "US",
-        "state": "TX",
-        "city": "Austin",
-        "admin_pw": "S3cr3t+pass",
-        "ldap_pw": "S3cr3t+pass",
-        "email": "s@gluu.local",
-        "org_name": "Gluu Inc."
-    }
-    ```
-
-    **NOTE**: `generate.json` has optional attributes to generate oxAuth signing and encryption keys based on specific algorithms.
-
-    - `auth_sig_keys`: space-separated key algorithm for signing (default to `RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512`)
-    - `auth_enc_keys`: space-separated key algorithm for encryption (default to `RSA1_5 RSA-OAEP`)
-
-2. Create config map `config-generate-params`
+1. Create config map `config-generate-params` to store the contents of `generate.json`
 
    ```sh
    kubectl create cm config-generate-params --from-file=generate.json
    ```
 
-3. Mount the configmap into container and apply the yaml:
+1. Mount the configmap into container and apply the yaml:
 
     ```yaml
     apiVersion: batch/v1
