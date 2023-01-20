@@ -14,7 +14,7 @@ from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from io.jans.as.server.model.config import ConfigurationFactory
 from io.jans.as.server.service import AuthenticationService
 from io.jans.as.server.service import SessionIdService
-from io.jans.as.server.service.fido.u2f import DeviceRegistrationService
+from io.jans.fido2.service.persist import RegistrationPersistenceService
 from io.jans.as.server.service.net import HttpService
 from io.jans.as.server.util import ServerUtil
 from io.jans.util import StringHelper
@@ -169,7 +169,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     return False
 
         userService = CdiUtil.bean(UserService)
-        deviceRegistrationService = CdiUtil.bean(DeviceRegistrationService)
+        registrationPersistenceService = CdiUtil.bean(RegistrationPersistenceService)
         if step == 1:
             print "Super-Gluu. Authenticate for step 1"
 
@@ -199,7 +199,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 user_inum = session_device_status['user_inum']
 
-                u2f_device = deviceRegistrationService.findUserDeviceRegistration(user_inum, u2f_device_id, "jansId")
+                u2f_device = registrationPersistenceService.findRegisteredUserDevice(user_inum, u2f_device_id, "jansId")
                 if u2f_device == None:
                     print "Super-Gluu. Authenticate for step 1. Failed to load u2f_device '%s'" % u2f_device_id
                     return False
@@ -241,7 +241,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 if auth_method == 'authenticate':
                     user_inum = userService.getUserInum(authenticated_user)
-                    u2f_devices_list = deviceRegistrationService.findUserDeviceRegistrations(user_inum, client_redirect_uri, "jansId")
+                    u2f_devices_list = registrationPersistenceService.findByRpRegisteredUserDevices(user_inum, client_redirect_uri, "jansId")
                     if u2f_devices_list.size() == 0:
                         auth_method = 'enroll'
                         print "Super-Gluu. Authenticate for step 1. There is no U2F '%s' user devices associated with application '%s'. Changing auth_method to '%s'" % (user_name, client_redirect_uri, auth_method)
@@ -273,7 +273,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
                     u2f_device_id = session_device_status['device_id']
 
-                    attach_result = deviceRegistrationService.attachUserDeviceRegistration(user_inum, u2f_device_id)
+                    attach_result = registrationPersistenceService.attachDeviceRegistrationToUser(user_inum, u2f_device_id)
 
                     print "Super-Gluu. Authenticate for step 2. Result after attaching u2f_device '%s' to user '%s': '%s'" % (u2f_device_id, user_inum, attach_result)
 
@@ -488,13 +488,13 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def validateSessionDeviceStatus(self, client_redirect_uri, session_device_status, user_name = None):
         userService = CdiUtil.bean(UserService)
-        deviceRegistrationService = CdiUtil.bean(DeviceRegistrationService)
+        registrationPersistenceService = CdiUtil.bean(RegistrationPersistenceService)
 
         u2f_device_id = session_device_status['device_id']
 
         u2f_device = None
         if session_device_status['enroll'] and session_device_status['one_step']:
-            u2f_device = deviceRegistrationService.findOneStepUserDeviceRegistration(u2f_device_id)
+            u2f_device = registrationPersistenceService.findOneStepUserDeviceRegistration(u2f_device_id)
             if u2f_device == None:
                 print "Super-Gluu. Validate session device status. There is no one step u2f_device '%s'" % u2f_device_id
                 return False
@@ -505,7 +505,7 @@ class PersonAuthentication(PersonAuthenticationType):
             if session_device_status['one_step']:
                 user_inum = session_device_status['user_inum']
 
-            u2f_device = deviceRegistrationService.findUserDeviceRegistration(user_inum, u2f_device_id)
+            u2f_device = registrationPersistenceService.findRegisteredUserDevice(user_inum, u2f_device_id)
             if u2f_device == None:
                 print "Super-Gluu. Validate session device status. There is no u2f_device '%s' associated with user '%s'" % (u2f_device_id, user_inum)
                 return False
@@ -774,13 +774,13 @@ class PersonAuthentication(PersonAuthenticationType):
         send_notification_result = True
 
         userService = CdiUtil.bean(UserService)
-        deviceRegistrationService = CdiUtil.bean(DeviceRegistrationService)
+        registrationPersistenceService = CdiUtil.bean(RegistrationPersistenceService)
 
         user_inum = userService.getUserInum(user_name)
 
         send_android = 0
         send_ios = 0
-        u2f_devices_list = deviceRegistrationService.findUserDeviceRegistrations(user_inum, client_redirect_uri, "oxId", "oxDeviceData", "oxDeviceNotificationConf")
+        u2f_devices_list = registrationPersistenceService.findByRpRegisteredUserDevices(user_inum, client_redirect_uri, "jansId", "jansDeviceData", "jansDeviceNotificationConf")
         if u2f_devices_list.size() > 0:
             for u2f_device in u2f_devices_list:
                 device_data = u2f_device.getDeviceData()
@@ -805,7 +805,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
                         if self.pushSnsMode or self.pushGluuMode:
                             pushSnsService = CdiUtil.bean(PushSnsService)
-                            targetEndpointArn = self.getTargetEndpointArn(deviceRegistrationService, pushSnsService, PushPlatform.APNS, user, u2f_device)
+                            targetEndpointArn = self.getTargetEndpointArn(registrationPersistenceService, pushSnsService, PushPlatform.APNS, user, u2f_device)
                             if targetEndpointArn == None:
                                 return
 
@@ -858,7 +858,7 @@ class PersonAuthentication(PersonAuthenticationType):
                         title = "Super-Gluu"
                         if self.pushSnsMode or self.pushGluuMode:
                             pushSnsService = CdiUtil.bean(PushSnsService)
-                            targetEndpointArn = self.getTargetEndpointArn(deviceRegistrationService, pushSnsService, PushPlatform.GCM, user, u2f_device)
+                            targetEndpointArn = self.getTargetEndpointArn(registrationPersistenceService, pushSnsService, PushPlatform.GCM, user, u2f_device)
                             if targetEndpointArn == None:
                                 return
 
@@ -892,7 +892,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         print "Super-Gluu. Send push notification. send_android: '%s', send_ios: '%s'" % (send_android, send_ios)
 
-    def getTargetEndpointArn(self, deviceRegistrationService, pushSnsService, platform, user, u2fDevice):
+    def getTargetEndpointArn(self, registrationPersistenceService, pushSnsService, platform, user, u2fDevice):
         targetEndpointArn = None
 
         # Return endpoint ARN if it created already
@@ -943,9 +943,9 @@ class PersonAuthentication(PersonAuthenticationType):
 
         # Store created endpoint ARN in device entry
         userInum = user.getAttribute("inum")
-        u2fDeviceUpdate = deviceRegistrationService.findUserDeviceRegistration(userInum, u2fDevice.getId())
+        u2fDeviceUpdate = registrationPersistenceService.findByRpRegisteredUserDevices(userInum, u2fDevice.getId())
         u2fDeviceUpdate.setDeviceNotificationConf('{"sns_endpoint_arn" : "%s"}' % targetEndpointArn)
-        deviceRegistrationService.updateDeviceRegistration(userInum, u2fDeviceUpdate)
+        registrationPersistenceService.update(u2fDeviceUpdate)
 
         return targetEndpointArn
 

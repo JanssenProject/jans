@@ -6,16 +6,18 @@
 
 package io.jans.fido2.service.operation;
 
+import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import io.jans.orm.model.fido2.Fido2DeviceData;
 import io.jans.orm.model.fido2.Fido2RegistrationData;
 import io.jans.orm.model.fido2.Fido2RegistrationEntry;
 import io.jans.orm.model.fido2.Fido2RegistrationStatus;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
+import io.jans.as.model.fido.u2f.protocol.DeviceData;
 import io.jans.fido2.ctap.AttestationConveyancePreference;
 import io.jans.fido2.ctap.AuthenticatorAttachment;
 import io.jans.fido2.ctap.CoseEC2Algorithm;
@@ -33,6 +35,7 @@ import io.jans.fido2.service.persist.RegistrationPersistenceService;
 import io.jans.fido2.service.verifier.AttestationVerifier;
 import io.jans.fido2.service.verifier.CommonVerifiers;
 import io.jans.fido2.service.verifier.DomainVerifier;
+import io.jans.fido2.ws.rs.controller.AttestationController;
 import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
@@ -212,6 +215,23 @@ public class AttestationService {
 		// Set actual counter value. Note: Fido2 not update initial value in
 		// Fido2RegistrationData to minimize DB updates
 		registrationData.setCounter(registrationEntry.getCounter());
+
+		JsonNode responseDeviceData = responseNode.get("deviceData");
+		if (responseDeviceData != null && responseDeviceData.isTextual()) {
+            try {
+				Fido2DeviceData deviceData = AttestationController.jsonMapperWithWrapRoot().readValue(
+						new String(base64Service.urlDecode(responseDeviceData.asText()), StandardCharsets.UTF_8),
+						Fido2DeviceData.class);
+                registrationEntry.setDeviceData(deviceData);
+            } catch (Exception ex) {
+                throw new Fido2RuntimeException(String.format("Device data is invalid: %s", responseDeviceData), ex);
+            }
+        }
+        
+        registrationEntry.setPublicKeyId(registrationData.getPublicKeyId());
+
+        int publicKeyIdHash = registrationPersistenceService.getPublicKeyIdHash(registrationData.getPublicKeyId());
+        registrationEntry.setPublicKeyIdHash(publicKeyIdHash);
 
 		registrationPersistenceService.update(registrationEntry);
 

@@ -44,8 +44,18 @@ public class Fido2RegistrationEntry extends Fido2Entry implements Serializable {
     @AttributeName(name = "jansDeviceNotificationConf")
     private String deviceNotificationConf;
 
+	@AttributeName(name = "jansApp")
+	private String rpId;
+
+	@AttributeName(name = "jansPublicKeyIdHash")
+	private Integer publicKeyIdHash;
+
+    @JsonObject
+	@AttributeName(name = "jansDeviceData")
+	private Fido2DeviceData deviceData;
+
     @AttributeName(name = "jansCodeChallengeHash")
-    private String challangeHash;
+    private String challengeHash;
 
     public Fido2RegistrationEntry() {
     }
@@ -104,19 +114,45 @@ public class Fido2RegistrationEntry extends Fido2Entry implements Serializable {
         this.displayName = displayName;
     }
 
-    public String getChallangeHash() {
-        return challangeHash;
+    public String getChallengeHash() {
+        return challengeHash;
     }
 
-    public void setChallangeHash(String challangeHash) {
-        this.challangeHash = challangeHash;
+    public void setChallengeHash(String challengeHash) {
+        this.challengeHash = challengeHash;
     }
 
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("Fido2RegistrationEntry [publicKeyId=").append(publicKeyId).append(", registrationData=").append(registrationData).append("]");
-        return builder.toString();
-    }
+    public String getRpId() {
+		return rpId;
+	}
+
+	public void setRpId(String rpId) {
+		this.rpId = rpId;
+	}
+
+	public Integer getPublicKeyIdHash() {
+		return publicKeyIdHash;
+	}
+
+	public void setPublicKeyIdHash(Integer publicKeyIdHash) {
+		this.publicKeyIdHash = publicKeyIdHash;
+	}
+
+	public Fido2DeviceData getDeviceData() {
+		return deviceData;
+	}
+
+	public void setDeviceData(Fido2DeviceData deviceData) {
+		this.deviceData = deviceData;
+	}
+
+	@Override
+	public String toString() {
+		return "Fido2RegistrationEntry [publicKeyId=" + publicKeyId + ", displayName=" + displayName
+				+ ", registrationData=" + registrationData + ", counter=" + counter + ", registrationStatus="
+				+ registrationStatus + ", deviceNotificationConf=" + deviceNotificationConf + ", rpId=" + rpId
+				+ ", publicKeyIdHash=" + publicKeyIdHash + ", deviceData=" + deviceData + ", challengeHash="
+				+ challengeHash + "]";
+	}
 
 }

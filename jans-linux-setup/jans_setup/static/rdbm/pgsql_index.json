@@ -203,7 +203,9 @@
     "fields": [
       "creationDate",
       "jansStatus",
-      "personInum"
+      "personInum",
+      "jansApp",
+      "jansPublicKeyIdHash"
     ],
     "custom": []
   },

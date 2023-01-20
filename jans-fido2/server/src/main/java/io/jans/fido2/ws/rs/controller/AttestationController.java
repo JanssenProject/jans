@@ -192,7 +192,6 @@ public class AttestationController {
         registerRequests.add(result);
 
         result.put("version", "U2F_V2");
-        
 
         ResponseBuilder builder = Response.ok().entity(superGluuResult.toString());
         return builder.build();
@@ -273,6 +272,7 @@ public class AttestationController {
         // Add response node
         ObjectNode response = dataMapperService.createObjectNode();
         params.set("response", response);
+        response.put("deviceData", registerResponse.getDeviceData());
         
         // Convert clientData node to new format
         ObjectNode clientData = dataMapperService.createObjectNode();

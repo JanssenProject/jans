@@ -295,7 +295,7 @@ public class AssertionService {
 		
 		Optional<Fido2RegistrationEntry> fidoRegistration = allowedFido2Registrations.parallelStream()
 				.filter(f -> StringUtils.isNotEmpty(f.getRegistrationData().getApplicationId())).findAny();
-		// TODO: Check value and which valuies to specify for Super Gluu
+		// TODO: Check value and which values to specify for Super Gluu
 		String applicationId = null;
 		if (fidoRegistration.isPresent()) {
 			applicationId = fidoRegistration.get().getRegistrationData().getApplicationId();
