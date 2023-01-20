@@ -19,7 +19,7 @@ As usual, several iterations will take place until you get it right.
 
 !!! Note
     Throughout this document it is assumed you have a standard single-VM Janssen installation
-    
+
 ## Design and code
 
 It is up to developers how to design. This will normally require identifying the several "steps" that make up a flow and the conditions upon which "branching" takes place. Also it is important to check already existing flows in the server that may be reused for the purpose.
@@ -34,7 +34,7 @@ Currently there are no IDE/editor plugins for coding in Agama available. We hope
 
 As a flow executes things can go wrong for reasons that developers cannot foresee. A database may have crashed, a connection to an external system may have failed, the flow engine may have some bug, etc. When an abnormal situation is presented, a flow simply crashes.
 
-If a flow crashes, its parent flows (or flow) if they exist, crash as well. Trying to handle crashes involves a lot of planning and work which is too costly and will unlikely account for the so many things that might fail in a real setting.  Thus, coding defensively is not recommended. While in Agama is possible to deal with Java exceptions, that feature should be used sparingly.
+If a flow crashes, its parent flows (or flow) if they exist, crash as well. Trying to handle crashes involves a lot of planning and work which is too costly and will unlikely account for the so many things that might fail in a real setting. Thus, coding defensively is not recommended. While in Agama is possible to deal with Java exceptions, that feature should be used sparingly.
 
 ## Creating a flow
 
@@ -263,3 +263,8 @@ By design Agama is a [transpiled language](./dsl.md#language-compiler) and trans
 - Otherwise, no error is shown and the flow will behave as if no changes had been applied to the flow's code. This helps preserve the last known "healthy" state of your flow so end-users are not impacted
 
 In any case, the cause of the error can be inspected by [retrieving](#flow-retrieval-and-removal) the flow's data and checking the property `codeError`.
+
+
+## `.gama` files: an alternative for deployment
+
+There is an alternative way to manage flows and is via deployment of `.gama` files. This is a more elaborate technique that allows bundling several flows and their required assets and classes for bulk deployment. Learn more about it [here](#gama-deployment.md).
