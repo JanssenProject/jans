@@ -424,6 +424,7 @@ class EditScriptDialog(JansGDialog, DialogUtils):
                 focusable=True,
                 scrollbar=True,
                 line_numbers=True,
+                wrap_lines=False,
                 lexer=PygmentsLexer(PythonLexer if self.cur_lang == 'PYTHON' else JavaLexer),
             )
 
