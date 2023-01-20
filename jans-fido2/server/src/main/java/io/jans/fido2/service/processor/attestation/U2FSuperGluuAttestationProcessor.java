@@ -19,6 +19,7 @@
 package io.jans.fido2.service.processor.attestation;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.security.PublicKey;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
@@ -116,7 +117,7 @@ public class U2FSuperGluuAttestationProcessor implements AttestationFormatProces
 //            List<X509Certificate> trustAnchorCertificates = attestationCertificateService.getAttestationRootCertificates((JsonNode) null, certificates);
 //				Certificate verifiedCert = certificateVerifier.verifyAttestationCertificates(certificates, trustAnchorCertificates);
 			Certificate verifiedCert = certificates.get(0);
-            byte[] challengeHash = DigestUtils.getSha256Digest().digest(registration.getChallenge().getBytes());
+            byte[] challengeHash = DigestUtils.getSha256Digest().digest(registration.getChallenge().getBytes(Charset.forName("UTF-8")));
 			
             authenticatorDataVerifier.verifyU2FAttestationSignature(authData, challengeHash, signature, verifiedCert, alg);
         }

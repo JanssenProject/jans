@@ -118,6 +118,12 @@ public class AuthenticatorDataVerifier {
 
         byte[] signatureBase = ByteBuffer.allocate(bufferSize).put(rpIdHash).put(flags).put(counters).put(extensionsBuffer).put(clientDataHash).array();
         byte[] signatureBytes = base64Service.urlDecode(signature.getBytes());
+        log.debug("RP hash {}", Hex.encodeHexString(rpIdHash));
+        log.debug("Flags {}", Hex.encodeHexString(flags));
+        log.debug("Counters {}", Hex.encodeHexString(counters));
+        log.debug("Extensions {}", Hex.encodeHexString(extensionsBuffer));
+        log.debug("Client(channlenge) data hash {}", Hex.encodeHexString(clientDataHash));
+
         log.debug("Signature {}", Hex.encodeHexString(signatureBytes));
         log.debug("Signature Base {}", Hex.encodeHexString(signatureBase));
         log.debug("Signature BaseLen {}", signatureBase.length);

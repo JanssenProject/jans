@@ -311,6 +311,14 @@ public class CommonVerifiers {
         return clientJsonNode;
     }
 
+    public JsonNode verifyClientRaw(JsonNode responseNode) {
+        if (!responseNode.hasNonNull("clientDataRaw")) {
+            throw new Fido2RuntimeException("Client data RAW is missing");
+        }
+
+        return responseNode.get("clientDataRaw");
+    }
+
     public void verifyTPMVersion(JsonNode ver) {
         if (!"2.0".equals(ver.asText())) {
             throw new Fido2RuntimeException("Invalid TPM Attestation version");

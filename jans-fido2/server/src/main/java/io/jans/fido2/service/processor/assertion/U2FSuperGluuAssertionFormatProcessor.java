@@ -18,6 +18,9 @@
 
 package io.jans.fido2.service.processor.assertion;
 
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.PublicKey;
 
 import io.jans.orm.model.fido2.Fido2RegistrationData;
@@ -83,9 +86,14 @@ public class U2FSuperGluuAssertionFormatProcessor implements AssertionFormatProc
             Fido2AuthenticationData authenticationEntity) {
         AuthData authData = authenticatorDataParser.parseAssertionData(base64AuthenticatorData);
 
+//        String clientDataRaw = commonVerifiers.verifyClientRaw(response).asText();
         userVerificationVerifier.verifyUserPresent(authData);
 
-        byte[] clientDataHash = DigestUtils.getSha256Digest().digest(base64Service.urlDecode(clientDataJson));
+        String clientDataJsonString = new String(base64Service.urlDecode(clientDataJson), StandardCharsets.UTF_8);
+        // Update to conform Super Gluu
+        clientDataJsonString = clientDataJsonString.replace("type", "typ").replaceAll("webauthn.get", "navigator.id.getAssertion");
+        
+        byte[] clientDataHash = DigestUtils.getSha256Digest().digest(clientDataJsonString.getBytes(StandardCharsets.UTF_8));
 
         try {
             int counter = authenticatorDataParser.parseCounter(authData.getCounters());
@@ -94,7 +102,6 @@ public class U2FSuperGluuAssertionFormatProcessor implements AssertionFormatProc
 
             JsonNode uncompressedECPointNode = dataMapperService.cborReadTree(base64Service.urlDecode(registration.getUncompressedECPoint()));
             PublicKey publicKey = coseService.createUncompressedPointFromCOSEPublicKey(uncompressedECPointNode);
-            int coseCurveCode = coseService.getCodeCurve(uncompressedECPointNode);
             log.debug("Uncompressed ECpoint node {}", uncompressedECPointNode.toString());
             log.debug("Public key hex {}", Hex.encodeHexString(publicKey.getEncoded()));
 
