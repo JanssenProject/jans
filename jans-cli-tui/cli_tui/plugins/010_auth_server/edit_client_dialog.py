@@ -92,8 +92,10 @@ class EditClientDialog(JansGDialog, DialogUtils):
         """method to invoked when saving the dialog (Save button is pressed)
         """
 
+        current_data = self.data
         self.data = self.make_data_from_dialog()
         self.data['disabled'] = not self.data['disabled']
+
         for list_key in (
                         'redirectUris',
                         'postLogoutRedirectUris',
@@ -118,6 +120,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
         self.data['attributes']={'redirectUrisRegex':self.data['redirectUrisRegex']}
         self.data['attributes']={'parLifetime':self.data['parLifetime']}
         self.data['attributes']={'requirePar':self.data['requirePar']}
+
         for list_key in (
 
                        'backchannelLogoutUri',
@@ -146,6 +149,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
             if self.data[list_key]:
                 self.data['attributes'][list_key] = self.data[list_key]
 
+        self.data['displayName'] = self.data['clientName']
 
         cfr = self.check_required_fields()
 
@@ -155,6 +159,10 @@ class EditClientDialog(JansGDialog, DialogUtils):
         for ditem in self.drop_down_select_first:
             if ditem in self.data and self.data[ditem] is None:
                 self.data.pop(ditem)
+
+        for prop in current_data:
+            if prop not in self.data:
+                self.data[prop] = current_data[prop]
 
         if self.save_handler:
             self.save_handler(self)
