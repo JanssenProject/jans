@@ -196,7 +196,10 @@ class CtxGenerator:
         return self.ctx_manager.get_secret(key, default)
 
     def base_ctx(self):
-        self.set_secret("encoded_salt", partial(get_random_chars, 24))
+        if self.params["salt"]:
+            self.set_secret("encoded_salt", self.params["salt"])
+        else:
+            self.set_secret("encoded_salt", partial(get_random_chars, 24))
         self.set_config("orgName", self.params["org_name"])
         self.set_config("country_code", self.params["country_code"])
         self.set_config("state", self.params["state"])
