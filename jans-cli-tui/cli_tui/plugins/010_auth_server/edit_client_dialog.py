@@ -398,7 +398,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                             style=cli_style.check_box),
 
                         self.myparent.getTitledText(
-                            _("Defult max authn age"), 
+                            _("Default max authn age"), 
                             name='defaultMaxAge', 
                             value=self.data.get('defaultMaxAge',''),
                             jans_help=self.myparent.get_help_from_schema(schema, 'defaultMaxAge'),

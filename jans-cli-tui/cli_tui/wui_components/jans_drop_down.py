@@ -158,7 +158,7 @@ class DropDownWidget:
         """init for DropDownWidget
         Args:
             values (list, optional): List of values to select one from them. Defaults to [].
-            value (str, optional): The defult selected value. Defaults to None.
+            value (str, optional): The defualt selected value. Defaults to None.
 
         Examples:
             widget=DropDownWidget(

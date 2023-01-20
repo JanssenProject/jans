@@ -172,7 +172,7 @@ date_picker_TimeTitle = "yellow"  ## only color >> HTML '<blue></blue>'
 date_picker_Time = "green"       ## only color
 date_picker_TimeSelected = "black"
 
-date_picker_calender_prevSelected = "red" #>black >> defult bold
+date_picker_calender_prevSelected = "red" #>black >> default bold
 date_picker_calenderNSelected = "blue"#>black
 date_picker_calenderSelected = "red"
 
