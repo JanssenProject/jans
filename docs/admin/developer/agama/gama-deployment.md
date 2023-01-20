@@ -1,3 +1,10 @@
+---
+tags:
+  - administration
+  - developer
+  - agama
+---
+
 # `.gama` files deployment
 
 Flows management often incurs several tasks such as manual upload of UI templates and web assets plus java source files, and interaction with a REST API for the CRUD of flows themselves. Here, an alternative mechanism for deployment is described where several flows can be supplied alongside their assets and metadata in a single bundle for bulk processing at the server.
@@ -100,10 +107,10 @@ Here is how the archive might look like:
 Once a `.gama` file is built the deployment process follows. Here is a typical workflow:
 
 1. Send (POST) the archive contents to the deployment endpoint. Normally a 202 response should be obtained meaning a task has been queued for processing
-2. Poll (via GET) the status of the deployment. When the archive has been effectively deployed a status of 200 should be obtained. It may take up to 30 seconds for the process to complete once the archive is sent
-3. Test the deployed flows and adjust the archive for any changes required
-4. Go to point 1 if needed
-5. If desired, a request can be sent to undeploy the flows (via DELETE)
+1. Poll (via GET) the status of the deployment. When the archive has been effectively deployed a status of 200 should be obtained. It may take up to 30 seconds for the process to complete once the archive is sent. This time may extend if there is another deployment in course
+1. Test the deployed flows and adjust the archive for any changes required
+1. Go to point 1 if needed
+1. If desired, a request can be sent to undeploy the flows (via DELETE)
 
 The following tables summarize the available endpoints. All URLs are relative to `/jans-config-api/api/v1`. An OpenAPI document is also available [here](https://github.com/JanssenProject/jans/blob/main/jans-config-api/docs/jans-config-api-swagger-auto.yaml#L-110-L254).
 
@@ -170,5 +177,30 @@ API operations are protected by Oauth2 scopes this way:
 
 ## Internals of deployment
 
-TODO
+This section offers details on how the server deploys a `.gama` file. In summary five steps take place once the deployment task is picked up:
 
+1. Input payload validation
+1. Flows transpilation
+1. Transfer of libraries
+1. Transfer of assets and source files
+1. Task finalization
+
+After the initial validation of structure takes place, the `code` directory is scanned for `flow` files and every flow is transpiled and added to the database if its transpilation was successful. 
+
+Next, `jar` files found are transferred to the server's custom libs directory - this only applies for VM-based installations.
+
+Then a transfer of templates and assets from `web` directory followed by copying Groovy/Java sources (from `lib`) takes place. Finally the deployment task is marked as finalized and a status summary saved to database for later retrieval.
+
+**Notes:**
+
+- Developers are required to restart the authentication server and possibly edit the server's XML descriptor for the classes in the jar files to be effectively picked up
+- Steps 3 and 4 are carried out only if all flows passed transpilation successfully
+- In Cloud Native environments only one node takes charge of processing a given deployment thoroughly. Other nodes will automatically sync with regards to the files of step 4.
+
+The API also offers undeployment capabilities. Here is how it works:
+
+1. Directories holding templates and assets are removed
+1. Source files and jar files are removed, if any
+1. Flows are removed from database
+
+The above applies only for the artifacts originally part of the deployment, of course. Again, nodes in Cloud Native installations will sync accordingly.
