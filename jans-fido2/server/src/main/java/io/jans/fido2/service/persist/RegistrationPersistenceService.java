@@ -16,26 +16,25 @@ import java.util.Optional;
 import java.util.TimeZone;
 import java.util.UUID;
 
-import io.jans.orm.model.fido2.Fido2RegistrationData;
-import io.jans.orm.model.fido2.Fido2RegistrationEntry;
-import io.jans.orm.model.fido2.Fido2RegistrationStatus;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+
+import io.jans.as.common.model.common.User;
+import io.jans.as.model.config.StaticConfiguration;
 import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.service.shared.UserService;
-import io.jans.as.common.model.common.User;
-import io.jans.as.model.config.StaticConfiguration;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.BatchOperation;
 import io.jans.orm.model.ProcessBatchOperation;
 import io.jans.orm.model.SearchScope;
 import io.jans.orm.model.base.SimpleBranch;
+import io.jans.orm.model.fido2.Fido2RegistrationData;
+import io.jans.orm.model.fido2.Fido2RegistrationEntry;
+import io.jans.orm.model.fido2.Fido2RegistrationStatus;
 import io.jans.orm.search.filter.Filter;
-import io.jans.util.StringHelper;
-import org.slf4j.Logger;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 /**
  * Every registration is persisted under Person Entry
@@ -43,7 +42,7 @@ import org.slf4j.Logger;
  * @version May 08, 2020
  */
 @ApplicationScoped
-public class RegistrationPersistenceService {
+public class RegistrationPersistenceService extends io.jans.as.common.service.common.fido2.BaseRegistrationPersistenceService {
 
     @Inject
     private Logger log;
@@ -98,46 +97,6 @@ public class RegistrationPersistenceService {
 
         return registrationEntry;
 	}
-
-    public void update(Fido2RegistrationEntry registrationEntry) {
-        prepareBranch(registrationEntry.getUserInum());
-
-        Date now = new GregorianCalendar(TimeZone.getTimeZone("UTC")).getTime();
-
-        Fido2RegistrationData registrationData = registrationEntry.getRegistrationData();
-        registrationData.setUpdatedDate(now);
-        registrationData.setUpdatedBy(registrationData.getUsername());
-
-        registrationEntry.setRegistrationStatus(registrationData.getStatus());
-
-        persistenceEntryManager.merge(registrationEntry);
-    }
-
-    public void addBranch(final String baseDn) {
-        SimpleBranch branch = new SimpleBranch();
-        branch.setOrganizationalUnitName("fido2_register");
-        branch.setDn(baseDn);
-
-        persistenceEntryManager.persist(branch);
-    }
-
-    public boolean containsBranch(final String baseDn) {
-        return persistenceEntryManager.contains(baseDn, SimpleBranch.class);
-    }
-
-    public String prepareBranch(final String userInum) {
-        String baseDn = getBaseDnForFido2RegistrationEntries(userInum);
-        if (!persistenceEntryManager.hasBranchesSupport(baseDn)) {
-        	return baseDn;
-        }
-
-        // Create Fido2 base branch for registration entries if needed
-        if (!containsBranch(baseDn)) {
-            addBranch(baseDn);
-        }
-        
-        return baseDn;
-    }
 
     public Optional<Fido2RegistrationEntry> findByPublicKeyId(String publicKeyId) {
         String baseDn = getBaseDnForFido2RegistrationEntries(null);
@@ -195,37 +154,6 @@ public class RegistrationPersistenceService {
 
         return fido2RegistrationnEntries;
     }
-
-    public Fido2RegistrationEntry findRegisteredUserDevice(String userInum, String deviceId, String... returnAttributes) {
-        String baseDn = getBaseDnForFido2RegistrationEntries(userInum);
-        if (persistenceEntryManager.hasBranchesSupport(baseDn)) {
-        	if (!containsBranch(baseDn)) {
-                return null;
-        	}
-        }
-
-    	String deviceDn = getDnForRegistrationEntry(userInum, deviceId);
-
-        return persistenceEntryManager.find(deviceDn, Fido2RegistrationEntry.class, returnAttributes);
-    }
-
-    public List<Fido2RegistrationEntry> findByRpRegisteredUserDevices(String userInum, String rpId, String ... returnAttributes) {
-        String baseDn = getBaseDnForFido2RegistrationEntries(userInum);
-        if (persistenceEntryManager.hasBranchesSupport(baseDn)) {
-        	if (!containsBranch(baseDn)) {
-                return Collections.emptyList();
-        	}
-        }
-
-        Filter userInumFilter = Filter.createEqualityFilter("personInum", userInum);
-        Filter registeredFilter = Filter.createEqualityFilter("jansStatus", Fido2RegistrationStatus.registered.getValue());
-		Filter appIdFilter = Filter.createEqualityFilter("jansApp", rpId);
-        Filter filter = Filter.createANDFilter(userInumFilter, registeredFilter, appIdFilter);
-
-        List<Fido2RegistrationEntry> fido2RegistrationnEntries = persistenceEntryManager.findEntries(baseDn, Fido2RegistrationEntry.class, filter, returnAttributes);
-
-        return fido2RegistrationnEntries;
-    }
     
     public List<Fido2RegistrationEntry> findByChallenge(String challenge) {
         String baseDn = getBaseDnForFido2RegistrationEntries(null);
@@ -238,42 +166,10 @@ public class RegistrationPersistenceService {
 
         return fido2RegistrationnEntries;
     }
-    
-    public void attachDeviceRegistrationToUser(String userInum, String deviceId) {
-    	throw new RuntimeException("TODO");
+
+    public String getBasedPeopleDn() {
+    	return staticConfiguration.getBaseDn().getPeople();
     }
-    
-    public Fido2RegistrationEntry findOneStepUserDeviceRegistration(String jansId) {
-        throw new RuntimeException("TODO");
-    }
-
-    public String getDnForRegistrationEntry(String userInum, String jsId) {
-        // Build DN string for Fido2 registration entry
-        String baseDn = getBaseDnForFido2RegistrationEntries(userInum);
-        if (StringHelper.isEmpty(jsId)) {
-            return baseDn;
-        }
-        return String.format("jansId=%s,%s", jsId, baseDn);
-    }
-
-    public String getBaseDnForFido2RegistrationEntries(String userInum) {
-        final String userBaseDn = getDnForUser(userInum); // "ou=fido2_register,inum=1234,ou=people,o=jans"
-        if (StringHelper.isEmpty(userInum)) {
-            return userBaseDn;
-        }
-
-        return String.format("ou=fido2_register,%s", userBaseDn);
-    }
-
-    public String getDnForUser(String userInum) {
-        String peopleDn = staticConfiguration.getBaseDn().getPeople();
-        if (StringHelper.isEmpty(userInum)) {
-            return peopleDn;
-        }
-
-        return String.format("inum=%s,%s", userInum, peopleDn);
-    }
-
 
     public void cleanup(Date now, int batchSize) {
         // Cleaning expired entries

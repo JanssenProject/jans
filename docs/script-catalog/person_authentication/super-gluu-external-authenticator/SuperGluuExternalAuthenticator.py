@@ -14,7 +14,7 @@ from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from io.jans.as.server.model.config import ConfigurationFactory
 from io.jans.as.server.service import AuthenticationService
 from io.jans.as.server.service import SessionIdService
-from io.jans.fido2.service.persist import RegistrationPersistenceService
+from io.jans.as.server.service.fido2 import RegistrationPersistenceService
 from io.jans.as.server.service.net import HttpService
 from io.jans.as.server.util import ServerUtil
 from io.jans.util import StringHelper
