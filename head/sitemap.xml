@@ -751,6 +751,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://jans.io/docs/head/admin/developer/agama/gama-deployment/</loc>
+         <lastmod>2023-01-20</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://jans.io/docs/head/admin/developer/agama/hello-world-closer/</loc>
          <lastmod>2023-01-20</lastmod>
          <changefreq>daily</changefreq>

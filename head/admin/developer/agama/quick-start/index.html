@@ -4879,6 +4879,8 @@
         
           
         
+          
+        
       
       
         
@@ -5186,6 +5188,20 @@
     <li class="md-nav__item">
       <a href="../hello-world-closer/" class="md-nav__link">
         A closer look to the engine
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../gama-deployment/" class="md-nav__link">
+        .gama files deployment
       </a>
     </li>
   
@@ -9171,6 +9187,7 @@
 <li>Create a directory <code>hello</code> under <code>/opt/jans/jetty/jans-auth/agama/ftl</code></li>
 <li>Upload the <a href="https://github.com/JanssenProject/jans/raw/main/docs/admin/developer/agama/index.ftlh">template</a> there</li>
 </ul>
+<p>There is an alternative way to manage flows and is via deployment of <code>.gama</code> files. This is a more elaborate technique that allows bundling several flows and their required assets and classes for bulk deployment. Learn more about it <a href="#gama-deployment.md">here</a>.</p>
 <h3 id="craft-an-authentication-request">Craft an authentication request<a class="headerlink" href="#craft-an-authentication-request" title="Permanent link">#</a></h3>
 <p>This section assumes your <a href="#client-application">client application</a> is ready, or at least you have made the configurations required so that you can trigger an (OpendId Connect) authentication request.</p>
 <p>This usually boils down to create and launch a URL looking like <code>https://&lt;your-host&gt;/jans-auth/restv1/authorize?acr_values=agama&amp;agama_flow=flow-qname&amp;scope=...&amp;response_type=...&amp;redirect_uri=https...&amp;client_id=...&amp;state=...</code>. You may like to check the <a href="https://openid.net/specs/openid-connect-core-1_0.html">spec</a> for more details, however, keep in mind that:</p>
@@ -9215,6 +9232,9 @@
 <p><a href="../flows-lifecycle/">Flows lifecycle</a></p>
 </li>
 <li>
+<p><a href="#gama-deployment.md"><code>.gama</code> files deployment</a></p>
+</li>
+<li>
 <p><a href="../engine-config/">Engine configuration</a></p>
 </li>
 <li>
@@ -9227,7 +9247,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-12T19:42:54+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-12</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-20T13:36:16+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-20</span>
       
         <br>
         Created:
