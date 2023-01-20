@@ -173,7 +173,7 @@ You may like to make modifications and enhancements to your flow. There are two 
          https://<your-host>/jans-config-api/api/v1/agama/source/com.acme.myflow
     ```
 
-- Applies a series of modifications to the flow `com.acme.myflow`: nullifies its description, sets the value of configuration properties, and modifies the creation timestamp to *Aug 8th 23:06:40 UTC*
+- Applies a series of modifications to the flow `com.acme.myflow`: nullifies its description, sets the value of configuration properties, and modifies the creation timestamp to *Aug 8th 2022 23:06:40 UTC*
 
     ```
     curl -k -i -H 'Authorization: Bearer <token>' -H 'Content-Type: application/json-patch+json'
@@ -221,7 +221,7 @@ There are two endpoints for retrieval:
 **Notes:**
 
 - Ensure the tokens used have scope `https://jans.io/oauth/config/agama.readonly`
-- The response of a successful operation returns a 200 status code with a JSON representation of the flow(s).  If some fields result unfamiliar to you, consult the swagger (open api) document linked [above](#creating-a-flow) 
+- The response of a successful operation returns a 200 status code with a JSON representation of the flow(s). If some fields result unfamiliar to you, consult the swagger (open api) document linked [above](#creating-a-flow) 
 - By default the source code is not included (this may clutter the output considerably). Append `?includeSource=true` to the endpoint URL to have the source in the output
 
 Example:

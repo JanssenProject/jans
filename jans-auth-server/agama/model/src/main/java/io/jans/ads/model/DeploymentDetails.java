@@ -9,6 +9,7 @@ import java.util.Map;
 public class DeploymentDetails {
 
     private List<String> folders;
+    private List<String> libs;
     private Map<String, String> flowsError;
     private String error;
     private ProjectMetadata metadata = new ProjectMetadata();
@@ -27,6 +28,14 @@ public class DeploymentDetails {
     
     public void setFolders(List<String> folders) {
         this.folders = folders;
+    }
+
+    public List<String> getLibs() {
+        return libs;
+    }
+    
+    public void setLibs(List<String> libs) {
+        this.libs = libs;
     }
 
     public String getError() {
