@@ -8891,6 +8891,25 @@
                   
   
 
+  <nav class="md-tags" >
+    
+      
+      
+        <span class="md-tag">administration</span>
+      
+    
+      
+      
+        <span class="md-tag">developer</span>
+      
+    
+      
+      
+        <span class="md-tag">agama</span>
+      
+    
+  </nav>
+
 
 
   <a href="https://github.com/JanssenProject/jans/edit/main/docs/admin/developer/agama/gama-deployment.md" title="Edit this page" class="md-content__button md-icon">
@@ -8980,7 +8999,7 @@ list = Call com.foods.RecipeUtils#retrieveIngredients choice.meal
 <p>Once a <code>.gama</code> file is built the deployment process follows. Here is a typical workflow:</p>
 <ol>
 <li>Send (POST) the archive contents to the deployment endpoint. Normally a 202 response should be obtained meaning a task has been queued for processing</li>
-<li>Poll (via GET) the status of the deployment. When the archive has been effectively deployed a status of 200 should be obtained. It may take up to 30 seconds for the process to complete once the archive is sent</li>
+<li>Poll (via GET) the status of the deployment. When the archive has been effectively deployed a status of 200 should be obtained. It may take up to 30 seconds for the process to complete once the archive is sent. This time may extend if there is another deployment in course</li>
 <li>Test the deployed flows and adjust the archive for any changes required</li>
 <li>Go to point 1 if needed</li>
 <li>If desired, a request can be sent to undeploy the flows (via DELETE)</li>
@@ -9184,14 +9203,37 @@ list = Call com.foods.RecipeUtils#retrieveIngredients choice.meal
 <li>Others:  <code>https://jans.io/oauth/config/agama.write</code></li>
 </ul>
 <h2 id="internals-of-deployment">Internals of deployment<a class="headerlink" href="#internals-of-deployment" title="Permanent link">#</a></h2>
-<p>TODO</p>
+<p>This section offers details on how the server deploys a <code>.gama</code> file. In summary five steps take place once the deployment task is picked up:</p>
+<ol>
+<li>Input payload validation</li>
+<li>Flows transpilation</li>
+<li>Transfer of libraries</li>
+<li>Transfer of assets and source files</li>
+<li>Task finalization</li>
+</ol>
+<p>After the initial validation of structure takes place, the <code>code</code> directory is scanned for <code>flow</code> files and every flow is transpiled and added to the database if its transpilation was successful. </p>
+<p>Next, <code>jar</code> files found are transferred to the server's custom libs directory - this only applies for VM-based installations.</p>
+<p>Then a transfer of templates and assets from <code>web</code> directory followed by copying Groovy/Java sources (from <code>lib</code>) takes place. Finally the deployment task is marked as finalized and a status summary saved to database for later retrieval.</p>
+<p><strong>Notes:</strong></p>
+<ul>
+<li>Developers are required to restart the authentication server and possibly edit the server's XML descriptor for the classes in the jar files to be effectively picked up</li>
+<li>Steps 3 and 4 are carried out only if all flows passed transpilation successfully</li>
+<li>In Cloud Native environments only one node takes charge of processing a given deployment thoroughly. Other nodes will automatically sync with regards to the files of step 4.</li>
+</ul>
+<p>The API also offers undeployment capabilities. Here is how it works:</p>
+<ol>
+<li>Directories holding templates and assets are removed</li>
+<li>Source files and jar files are removed, if any</li>
+<li>Flows are removed from database</li>
+</ol>
+<p>The above applies only for the artifacts originally part of the deployment, of course. Again, nodes in Cloud Native installations will sync accordingly.</p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-20T13:36:16+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-20</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-20T16:56:56+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-20</span>
       
         <br>
         Created:
