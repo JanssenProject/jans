@@ -36,9 +36,9 @@ Contact your administrator for credentials.
 
 ```
 cat /opt/jans/jans-setup/setup.properties.last | grep role
-role_based_client_encoded_pw=4jnkODv3KRV6xNm1oGQ8+g\=\=
-role_based_client_id=2000.eac308d1-95e3-4e38-87cf-1532af310a9e
-role_based_client_pw=GnEkCqg4Vsks
+tui_client_encoded_pw=4jnkODv3KRV6xNm1oGQ8+g\=\=
+tui_client_id=2000.eac308d1-95e3-4e38-87cf-1532af310a9e
+tui_client_pw=GnEkCqg4Vsks
 ```
 
 ### Installing with pip from GitHub
@@ -57,9 +57,9 @@ Obtain Credidentials for CLI from the Janssen server:
 
 ```
 # cat /opt/jans/jans-setup/setup.properties.last | grep role
-role_based_client_encoded_pw=dDpwNN3lv94JF+ibgVFT7A\=\=
-role_based_client_id=2000.076aa5d9-fa8d-42a0-90d2-b83b5ea535d5
-role_based_client_pw=mrF8tcBd6m9Q
+tui_client_encoded_pw=dDpwNN3lv94JF+ibgVFT7A\=\=
+tui_client_id=2000.076aa5d9-fa8d-42a0-90d2-b83b5ea535d5
+tui_client_pw=mrF8tcBd6m9Q
 ```
 
-`role_based_client_id` is the **Client ID** and `role_based_client_pw` is the **Client Secret**
+`tui_client_id` is the **Client ID** and `tui_client_pw` is the **Client Secret**
