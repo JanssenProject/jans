@@ -285,9 +285,8 @@ public class AssertionService {
 			deviceRegistrationService.migrateToFido2(existingFidoRegistrations, documentDomain, username);
 		}
 
-		List<Fido2RegistrationEntry> existingFido2Registrations = registrationPersistenceService.findAllRegisteredByUsername(username);
+		List<Fido2RegistrationEntry> existingFido2Registrations = registrationPersistenceService.findByRpRegisteredUserDevices(username, documentDomain);
 		List<Fido2RegistrationEntry> allowedFido2Registrations = existingFido2Registrations.parallelStream()
-				.filter(f -> StringHelper.equals(documentDomain, f.getRegistrationData().getDomain()))
 				.filter(f -> StringHelper.isNotEmpty(f.getRegistrationData().getPublicKeyId())).collect(Collectors.toList());
 
 		//  f.getRegistrationData().getAttenstationRequest() null check is added to maintain backward compatiblity with U2F devices when U2F devices are migrated to the FIDO2 server

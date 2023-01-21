@@ -403,12 +403,11 @@ public class AttestationService {
 
 	private ArrayNode prepareExcludeCredentials(String documentDomain, String username) {
 		List<Fido2RegistrationEntry> existingRegistrations = registrationPersistenceService
-				.findAllRegisteredByUsername(username);
+				.findByRpRegisteredUserDevices(username, documentDomain);
 		List<JsonNode> excludedKeys = existingRegistrations.parallelStream()
-				.filter(f -> StringHelper.equals(documentDomain, f.getRegistrationData().getDomain()))
 				.filter(f -> StringHelper.isNotEmpty(f.getRegistrationData().getPublicKeyId()))
 				.map(f -> dataMapperService.convertValue(new PublicKeyCredentialDescriptor(
-						f.getRegistrationData().getType(), new String[] { "usb", "ble", "nfc", "internal" },
+						f.getRegistrationData().getType(), new String[] { "usb", "ble", "nfc", "internal", "net", "qr" },
 						f.getRegistrationData().getPublicKeyId()), JsonNode.class))
 				.collect(Collectors.toList());
 
