@@ -62,6 +62,10 @@ public class RegistrationPersistenceService extends io.jans.as.common.service.co
     public void save(Fido2RegistrationData registrationData) {
         Fido2RegistrationEntry registrationEntry = buildFido2RegistrationEntry(registrationData);
 
+        save(registrationEntry);
+    }
+
+    public void save(Fido2RegistrationEntry registrationEntry) {
         prepareBranch(registrationEntry.getUserInum());
 
         persistenceEntryManager.persist(registrationEntry);

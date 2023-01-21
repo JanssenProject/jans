@@ -171,7 +171,8 @@ public class AttestationController {
 
         // TODO: Validate input parameters
         params.put("username", userName);
-        
+        params.put("session_id", sessionId);
+
         // TODO: Get displayName from user entry 
         params.put("displayName", userName);
 

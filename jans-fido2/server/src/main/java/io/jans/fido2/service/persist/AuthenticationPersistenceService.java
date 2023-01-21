@@ -18,9 +18,6 @@ import jakarta.inject.Inject;
 
 import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.conf.AppConfiguration;
-import io.jans.fido2.model.entry.Fido2AuthenticationData;
-import io.jans.fido2.model.entry.Fido2AuthenticationEntry;
-import io.jans.fido2.model.entry.Fido2AuthenticationStatus;
 import io.jans.fido2.service.shared.UserService;
 import io.jans.as.common.model.common.User;
 import io.jans.as.model.config.StaticConfiguration;
@@ -29,6 +26,9 @@ import io.jans.orm.model.BatchOperation;
 import io.jans.orm.model.ProcessBatchOperation;
 import io.jans.orm.model.SearchScope;
 import io.jans.orm.model.base.SimpleBranch;
+import io.jans.orm.model.fido2.Fido2AuthenticationData;
+import io.jans.orm.model.fido2.Fido2AuthenticationEntry;
+import io.jans.orm.model.fido2.Fido2AuthenticationStatus;
 import io.jans.orm.search.filter.Filter;
 import io.jans.util.StringHelper;
 import org.slf4j.Logger;
@@ -58,7 +58,19 @@ public class AuthenticationPersistenceService {
     private PersistenceEntryManager persistenceEntryManager;
 
     public void save(Fido2AuthenticationData authenticationData) {
-        String userName = authenticationData.getUsername();
+        Fido2AuthenticationEntry authenticationEntity = buildFido2AuthenticationEntry(authenticationData);
+
+        save(authenticationEntity);
+    }
+
+    public void save(Fido2AuthenticationEntry authenticationEntity) {
+        prepareBranch(authenticationEntity.getUserInum());
+
+        persistenceEntryManager.persist(authenticationEntity);
+    }
+
+    public Fido2AuthenticationEntry buildFido2AuthenticationEntry(Fido2AuthenticationData authenticationData) {
+		String userName = authenticationData.getUsername();
         
         User user = userService.getUser(userName, "inum");
         if (user == null) {
@@ -70,8 +82,6 @@ public class AuthenticationPersistenceService {
         }
         String userInum = userService.getUserInum(user);
 
-        prepareBranch(userInum);
-
         Date now = new GregorianCalendar(TimeZone.getTimeZone("UTC")).getTime();
         final String id = UUID.randomUUID().toString();
 
@@ -82,9 +92,8 @@ public class AuthenticationPersistenceService {
         authenticationData.setCreatedDate(now);
         authenticationData.setCreatedBy(userName);
 
-
-        persistenceEntryManager.persist(authenticationEntity);
-    }
+        return authenticationEntity;
+	}
 
     public void update(Fido2AuthenticationEntry authenticationEntity) {
         Date now = new GregorianCalendar(TimeZone.getTimeZone("UTC")).getTime();

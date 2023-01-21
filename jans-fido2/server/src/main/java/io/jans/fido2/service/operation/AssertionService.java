@@ -13,9 +13,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import io.jans.orm.model.fido2.Fido2AuthenticationData;
+import io.jans.orm.model.fido2.Fido2AuthenticationEntry;
+import io.jans.orm.model.fido2.Fido2AuthenticationStatus;
 import io.jans.orm.model.fido2.Fido2RegistrationData;
 import io.jans.orm.model.fido2.Fido2RegistrationEntry;
 import io.jans.orm.model.fido2.Fido2RegistrationStatus;
+import io.jans.orm.model.fido2.UserVerification;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -24,19 +28,16 @@ import org.apache.commons.lang3.tuple.Pair;
 import io.jans.entry.DeviceRegistration;
 import io.jans.fido2.ctap.AttestationFormat;
 import io.jans.fido2.ctap.AuthenticatorAttachment;
-import io.jans.fido2.ctap.UserVerification;
 import io.jans.fido2.exception.Fido2CompromisedDevice;
 import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.auth.PublicKeyCredentialDescriptor;
 import io.jans.fido2.model.conf.AppConfiguration;
-import io.jans.fido2.model.entry.Fido2AuthenticationData;
-import io.jans.fido2.model.entry.Fido2AuthenticationEntry;
-import io.jans.fido2.model.entry.Fido2AuthenticationStatus;
 import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.ChallengeGenerator;
 import io.jans.fido2.service.DataMapperService;
 import io.jans.fido2.service.persist.AuthenticationPersistenceService;
 import io.jans.fido2.service.persist.RegistrationPersistenceService;
+import io.jans.fido2.service.persist.UserSessionIdService;
 import io.jans.fido2.service.verifier.AssertionVerifier;
 import io.jans.fido2.service.verifier.CommonVerifiers;
 import io.jans.fido2.service.verifier.DomainVerifier;
@@ -76,6 +77,9 @@ public class AssertionService {
 
 	@Inject
 	private DeviceRegistrationService deviceRegistrationService;
+	
+	@Inject
+	private UserSessionIdService userSessionIdService;
 
 	@Inject
 	private AssertionVerifier assertionVerifier;
@@ -176,7 +180,12 @@ public class AssertionService {
 		// Store original request
 		entity.setAssertionRequest(params.toString());
 
-		authenticationPersistenceService.save(entity);
+		Fido2AuthenticationEntry authenticationEntity = authenticationPersistenceService.buildFido2AuthenticationEntry(entity);
+		if (params.hasNonNull("session_id")) {
+			authenticationEntity.setSessionStateId(params.get("session_id").asText());
+		}
+
+		authenticationPersistenceService.save(authenticationEntity);
 
 		return optionsResponseNode;
 	}
@@ -245,6 +254,15 @@ public class AssertionService {
 		// initial value in Fido2RegistrationData to minimize DB updates
 		registrationEntry.setCounter(registrationData.getCounter());
 		registrationPersistenceService.update(registrationEntry);
+		
+        // If SessionStateId is not empty update session
+		String sessionStateId = authenticationEntity.getSessionStateId();
+        if (StringHelper.isNotEmpty(sessionStateId)) {
+            log.debug("There is session id. Setting session id attributes");
+
+            boolean oneStep = /*StringHelper.isEmpty(userName);*/ false;
+            userSessionIdService.updateUserSessionIdOnFinishRequest(sessionStateId, registrationEntry.getUserInum(), registrationEntry, false, oneStep);
+        }
 
 		// Create result object
 		ObjectNode finishResponseNode = dataMapperService.createObjectNode();

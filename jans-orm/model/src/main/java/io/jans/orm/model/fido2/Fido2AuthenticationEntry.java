@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.fido2.model.entry;
+package io.jans.orm.model.fido2;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -12,7 +12,6 @@ import java.util.Date;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.JsonObject;
 import io.jans.orm.annotation.ObjectClass;
-import io.jans.orm.model.fido2.Fido2Entry;
 
 /**
  * Fido2 registration entry
@@ -32,6 +31,9 @@ public class Fido2AuthenticationEntry extends Fido2Entry implements Serializable
     @JsonObject
     @AttributeName(name = "jansStatus")
     private Fido2AuthenticationStatus authenticationStatus;
+    
+    @AttributeName(name = "jansSessStateId")
+    private String sessionStateId;
 
     public Fido2AuthenticationEntry() {
     }
@@ -57,10 +59,17 @@ public class Fido2AuthenticationEntry extends Fido2Entry implements Serializable
         this.authenticationStatus = authenticationStatus;
     }
 
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("Fido2AuthenticationEntry [authenticationData=").append(authenticationData).append("]");
-        return builder.toString();
-    }
+    public String getSessionStateId() {
+		return sessionStateId;
+	}
+
+	public void setSessionStateId(String sessionStateId) {
+		this.sessionStateId = sessionStateId;
+	}
+
+	@Override
+	public String toString() {
+		return "Fido2AuthenticationEntry [authenticationData=" + authenticationData + ", authenticationStatus="
+				+ authenticationStatus + ", sessionStateId=" + sessionStateId + "]";
+	}
 }

@@ -5,7 +5,6 @@
 #
 
 from com.google.android.gcm.server import Sender, Message
-from com.notnoop.apns import APNS
 from java.util import Arrays
 from org.apache.http.params import CoreConnectionPNames
 from io.jans.service.cdi.util import CdiUtil
@@ -28,6 +27,7 @@ from java.util import Arrays, HashMap, IdentityHashMap, Date
 from java.time import ZonedDateTime
 from java.time.format import DateTimeFormatter
 from io.jans.as.model.configuration import AppConfiguration
+from io.jans.service.net import NetworkService
 import datetime
 import urllib
 import sys
@@ -38,6 +38,15 @@ import urllib
 
 import sys
 import json
+from wsgiref.util import application_uri
+
+try:
+    from com.notnoop.apns import APNS
+    has_apns = True
+except ImportError:
+    print "Super-Gluu. Load. Native APNS will be disabled. There are missing libs needed to enable it"
+    has_apns = False
+
 
 class PersonAuthentication(PersonAuthenticationType):
     def __init__(self, currentTimeMillis):
@@ -152,6 +161,9 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Super-Gluu. Authenticate. redirect_uri is not set"
             return False
 
+        networkService = CdiUtil.bean(NetworkService)
+        applicationName = networkService.getHost(client_redirect_uri)
+
         self.setRequestScopedParameters(identity, step)
 
         # Validate form result code and initialize QR code regeneration if needed (retry_current_step = True)
@@ -181,7 +193,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 u2f_device_id = session_device_status['device_id']
 
-                validation_result = self.validateSessionDeviceStatus(client_redirect_uri, session_device_status)
+                validation_result = self.validateSessionDeviceStatus(applicationName, session_device_status)
                 if validation_result:
                     print "Super-Gluu. Authenticate for step 1. User successfully authenticated with u2f_device '%s'" % u2f_device_id
                 else:
@@ -241,10 +253,10 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 if auth_method == 'authenticate':
                     user_inum = userService.getUserInum(authenticated_user)
-                    u2f_devices_list = registrationPersistenceService.findByRpRegisteredUserDevices(user_inum, client_redirect_uri, "jansId")
+                    u2f_devices_list = registrationPersistenceService.findByRpRegisteredUserDevices(user_inum, applicationName, "jansId")
                     if u2f_devices_list.size() == 0:
                         auth_method = 'enroll'
-                        print "Super-Gluu. Authenticate for step 1. There is no U2F '%s' user devices associated with application '%s'. Changing auth_method to '%s'" % (user_name, client_redirect_uri, auth_method)
+                        print "Super-Gluu. Authenticate for step 1. There is no U2F '%s' user devices associated with application '%s'. Changing auth_method to '%s'" % (user_name, applicationName, auth_method)
 
                 print "Super-Gluu. Authenticate for step 1. auth_method: '%s'" % auth_method
 
@@ -298,13 +310,14 @@ class PersonAuthentication(PersonAuthenticationType):
                     print "Super-Gluu. Authenticate for step 2. Failed to determine user id"
                     return False
 
-                validation_result = self.validateSessionDeviceStatus(client_redirect_uri, session_device_status, user_name)
+                validation_result = self.validateSessionDeviceStatus(applicationName, session_device_status, user_name)
                 if validation_result:
                     print "Super-Gluu. Authenticate for step 2. User '%s' successfully authenticated with u2f_device '%s'" % (user_name, u2f_device_id)
                 else:
                     return False
-                print "super_gluu_request %s " % super_gluu_request
                 super_gluu_request = json.loads(session_device_status['super_gluu_request'])
+                print "super_gluu_request %s " % super_gluu_request
+
                 auth_method = super_gluu_request['method']
                 if auth_method in ['enroll', 'authenticate']:
                     if validation_result and self.use_audit_group:
@@ -486,7 +499,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         return find_user_by_uid
 
-    def validateSessionDeviceStatus(self, client_redirect_uri, session_device_status, user_name = None):
+    def validateSessionDeviceStatus(self, application_name, session_device_status, user_name = None):
         userService = CdiUtil.bean(UserService)
         registrationPersistenceService = CdiUtil.bean(RegistrationPersistenceService)
 
@@ -510,7 +523,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "Super-Gluu. Validate session device status. There is no u2f_device '%s' associated with user '%s'" % (u2f_device_id, user_inum)
                 return False
 
-        if not StringHelper.equalsIgnoreCase(client_redirect_uri, u2f_device.application):
+        if not StringHelper.equalsIgnoreCase(application_name, u2f_device.rpId):
             print "Super-Gluu. Validate session device status. u2f_device '%s' associated with other application '%s'" % (u2f_device_id, u2f_device.application)
             return False
 
@@ -594,7 +607,7 @@ class PersonAuthentication(PersonAuthenticationType):
             self.pushAndroidService = Sender(android_creds["api_key"])
             print "Super-Gluu. Initialize native notification services. Created Android notification service"
 
-        if ios_creds["enabled"]:
+        if has_apns and ios_creds["enabled"]:
             p12_file_path = ios_creds["p12_file_path"]
             p12_password = ios_creds["p12_password"]
 

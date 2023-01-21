@@ -153,6 +153,7 @@ public class AssertionController {
 
         // TODO: Validate input parameters
         params.put("username", userName);
+        params.put("session_id", sessionId);
 
         ObjectNode result = assertionService.options(params);
 

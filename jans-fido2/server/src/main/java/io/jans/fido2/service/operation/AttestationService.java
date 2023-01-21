@@ -21,7 +21,6 @@ import io.jans.fido2.ctap.AttestationConveyancePreference;
 import io.jans.fido2.ctap.AuthenticatorAttachment;
 import io.jans.fido2.ctap.CoseEC2Algorithm;
 import io.jans.fido2.ctap.CoseRSAAlgorithm;
-import io.jans.fido2.ctap.UserVerification;
 import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.auth.CredAndCounterData;
 import io.jans.fido2.model.auth.PublicKeyCredentialDescriptor;
@@ -31,14 +30,17 @@ import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.ChallengeGenerator;
 import io.jans.fido2.service.DataMapperService;
 import io.jans.fido2.service.persist.RegistrationPersistenceService;
+import io.jans.fido2.service.persist.UserSessionIdService;
 import io.jans.fido2.service.verifier.AttestationVerifier;
 import io.jans.fido2.service.verifier.CommonVerifiers;
 import io.jans.fido2.service.verifier.DomainVerifier;
 import io.jans.fido2.ws.rs.controller.AttestationController;
+import io.jans.orm.model.fido2.Fido2AuthenticationEntry;
 import io.jans.orm.model.fido2.Fido2DeviceData;
 import io.jans.orm.model.fido2.Fido2RegistrationData;
 import io.jans.orm.model.fido2.Fido2RegistrationEntry;
 import io.jans.orm.model.fido2.Fido2RegistrationStatus;
+import io.jans.orm.model.fido2.UserVerification;
 import io.jans.util.StringHelper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -62,6 +64,9 @@ public class AttestationService {
 
 	@Inject
 	private AttestationVerifier attestationVerifier;
+
+	@Inject
+	private UserSessionIdService userSessionIdService;
 
 	@Inject
 	private DomainVerifier domainVerifier;
@@ -164,7 +169,12 @@ public class AttestationService {
 		// Store original requests
 		entity.setAttenstationRequest(params.toString());
 
-		registrationPersistenceService.save(entity);
+		Fido2RegistrationEntry registrationEntry = registrationPersistenceService.buildFido2RegistrationEntry(entity);
+		if (params.hasNonNull("session_id")) {
+			registrationEntry.setSessionStateId(params.get("session_id").asText());
+		}
+
+		registrationPersistenceService.save(registrationEntry);
 
 		log.debug("Saved in LDAP");
 
@@ -234,6 +244,15 @@ public class AttestationService {
         registrationEntry.setPublicKeyIdHash(publicKeyIdHash);
 
 		registrationPersistenceService.update(registrationEntry);
+
+		// If SessionStateId is not empty update session
+		String sessionStateId = registrationEntry.getSessionStateId();
+        if (StringHelper.isNotEmpty(sessionStateId)) {
+            log.debug("There is session id. Setting session id attributes");
+
+            boolean oneStep = /*StringHelper.isEmpty(userName);*/ false;
+            userSessionIdService.updateUserSessionIdOnFinishRequest(sessionStateId, registrationEntry.getUserInum(), registrationEntry, false, oneStep);
+        }
 
 		// Create result object
 		ObjectNode finishResponseNode = dataMapperService.createObjectNode();
