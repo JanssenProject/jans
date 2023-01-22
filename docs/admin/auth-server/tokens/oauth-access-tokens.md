@@ -9,7 +9,7 @@ tags:
 
 ### Background
 
-When a software client calls a OAuth protected API, an access token is presented
+When a software client calls an OAuth protected API, an access token is presented
 in the HTTP Authorization header of the request. Following is an example of a
 bearer token:
 
@@ -24,9 +24,8 @@ a string that is included in the Authorization header of an HTTP request. The
 client presents the token to the resource server, which can trust the token,
 by validating it was issued by a trusted authorization server. Bearer tokens
 can be sent either by value or reference. A value token is a JWT, signed
-by the authorization server. A reference token is a short lived string--
-the client obtain the JSON for this reference token by calling the authorization
-server's introspection endpoint.
+by the authorization server. By calling Auth Server's [introspection endpoint],
+the client can trade the reference token for the plain JSON object.
 
 MAC tokens, are cryptographically signed tokens that include a nonce, timestamp,
 and other information to prevent replay attacks. They are typically used in
@@ -54,7 +53,7 @@ protect against replay attacks by including a nonce and timestamp in the token
 and using TLS for all communication between the client, the authorization
 server and the resource server.
 
-It is also important to rotate the access token, this is can be done by using
+It is also important to rotate the access token. This can be done by using
 short lived tokens and refresh tokens which will allow the client to obtain a
 new access token without re-prompting the user for their credentials. By
 default, Jans Auth Server access tokens expire after 5 minutes.
@@ -63,15 +62,15 @@ default, Jans Auth Server access tokens expire after 5 minutes.
 
 | claim         | Description           |
 | ------------- | ----------------------|
-| `active`      | `true` or `false`, whether the token is expired--relevant for reference tokens |  
+| `active`      | `true` or `false`.    |  
 | `iss`         | The URI of the issuer authorization server |
 | `aud`         | The audience, used by the client to verify it is the correct recipient. During registration, the client can specify `additional_audience` values |
 | `iat`         | When the client was issued, in seconds, e.g. *1514797822* |
 | `exp`         | When the token expires, in seconds, e.g. *1514797942* |
 | `scope`       | A space delimited list of scopes |
-| `client_id`   | Which client the token was issued to |
+| `client_id`   | Recipient of the token |
 | `nbf`         | Not before, which insures the token is only valid within a certain time window |
-| `cnf`         | Confirmation used for TLS client certificate bound tokens |
+| `cnf`         | Confirmation, used for TLS client certificate bound tokens |
 
 It is possible to add additional claims to an access token via the
 Auth Server interception scripts. The preferred script is the
