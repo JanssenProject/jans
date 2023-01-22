@@ -70,4 +70,6 @@ At a minimum, client developers should always validate the following:
 Don't do this. The ID Token is an identity assertion, not an access token. It
 may be passed in the payload to an API, but it should not be used in lieu of
 an OAuth access token! Fundamentally, the `id_token` details how a person
-was authenticated, not which API's a client is authorized to call.
+was authenticated, not which API's a client is authorized to call. Also,
+OAuth access tokens are short lived, while the expiration of an identity
+assertion is much longer.
