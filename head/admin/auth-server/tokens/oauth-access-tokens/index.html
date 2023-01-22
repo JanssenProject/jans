@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#this-content-is-in-progress" class="md-skip">
+        <a href="#oauth-access-tokens" class="md-skip">
           Skip to content
         </a>
       
@@ -2911,23 +2911,43 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#this-content-is-in-progress" class="md-nav__link">
-    This content is in progress
+  <a href="#oauth-access-tokens" class="md-nav__link">
+    OAuth Access Tokens
+  </a>
+  
+    <nav class="md-nav" aria-label="OAuth Access Tokens">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#background" class="md-nav__link">
+    Background
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#have-questions-in-the-meantime" class="md-nav__link">
-    Have questions in the meantime?
+        
+          <li class="md-nav__item">
+  <a href="#access-token-schema" class="md-nav__link">
+    Access Token Schema
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#want-to-contribute" class="md-nav__link">
-    Want to contribute?
+        
+          <li class="md-nav__item">
+  <a href="#access-token-crypto" class="md-nav__link">
+    Access Token Crypto
   </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#server-and-client-configurations" class="md-nav__link">
+    Server and Client configurations
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -8796,23 +8816,43 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#this-content-is-in-progress" class="md-nav__link">
-    This content is in progress
+  <a href="#oauth-access-tokens" class="md-nav__link">
+    OAuth Access Tokens
+  </a>
+  
+    <nav class="md-nav" aria-label="OAuth Access Tokens">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#background" class="md-nav__link">
+    Background
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#have-questions-in-the-meantime" class="md-nav__link">
-    Have questions in the meantime?
+        
+          <li class="md-nav__item">
+  <a href="#access-token-schema" class="md-nav__link">
+    Access Token Schema
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#want-to-contribute" class="md-nav__link">
-    Want to contribute?
+        
+          <li class="md-nav__item">
+  <a href="#access-token-crypto" class="md-nav__link">
+    Access Token Crypto
   </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#server-and-client-configurations" class="md-nav__link">
+    Server and Client configurations
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -8860,19 +8900,124 @@
 
   <h1>OAuth Access Tokens</h1>
 
-<h2 id="this-content-is-in-progress">This content is in progress<a class="headerlink" href="#this-content-is-in-progress" title="Permanent link">#</a></h2>
-<p>The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.</p>
-<h2 id="have-questions-in-the-meantime">Have questions in the meantime?<a class="headerlink" href="#have-questions-in-the-meantime" title="Permanent link">#</a></h2>
-<p>While this documentation is in progress, you can ask questions through <a href="https://github.com/JanssenProject/jans/discussion">GitHub Discussions</a> or the <a href="https://gitter.im/JanssenProject/Lobby">community chat on Gitter</a>. Any questions you have will help determine what information our documentation should cover.</p>
-<h2 id="want-to-contribute">Want to contribute?<a class="headerlink" href="#want-to-contribute" title="Permanent link">#</a></h2>
-<p>If you have content you'd like to contribute to this page in the meantime, you can get started with our <a href="https://docs.jans.io/head/CONTRIBUTING/">Contribution guide</a>.</p>
+<h2 id="oauth-access-tokens">OAuth Access Tokens<a class="headerlink" href="#oauth-access-tokens" title="Permanent link">#</a></h2>
+<h3 id="background">Background<a class="headerlink" href="#background" title="Permanent link">#</a></h3>
+<p>When a software client calls a OAuth protected API, an access token is presented
+in the HTTP Authorization header of the request. Following is an example of a
+bearer token:</p>
+<div class="highlight"><pre><span></span><code>Authorization: Bearer 8pkjyj0gxhwh6ux2
+</code></pre></div>
+<p>OAuth access tokens come in two main types: bearer tokens and MAC tokens.</p>
+<p>Bearer tokens are the most commonly used type of access token. They are simply
+a string that is included in the Authorization header of an HTTP request. The
+client presents the token to the resource server, which can trust the token,
+by validating it was issued by a trusted authorization server. Bearer tokens
+can be sent either by value or reference. A value token is a JWT, signed
+by the authorization server. A reference token is a short lived string--
+the client obtain the JSON for this reference token by calling the authorization
+server's introspection endpoint.</p>
+<p>MAC tokens, are cryptographically signed tokens that include a nonce, timestamp,
+and other information to prevent replay attacks. They are typically used in
+situations where the client and the resource server are not able to securely
+share a secret. They are not commonly used and Janssen Auth Server does
+not support MAC tokens.</p>
+<p>There are several security considerations that both mobile developers and API
+developers should be aware of when working with OAuth access tokens. For mobile
+developers, it is important to ensure that the access token is stored securely
+on the device, and that it is not exposed to other apps or processes. API
+developers should ensure that their API is only accessible to clients that have
+a valid access token, and that the API properly validates the token before
+allowing access to the protected resource.</p>
+<p>Scopes are used in OAuth access tokens to limit the extent of access of a token,
+i.e. the specific resources and actions that the token is valid for. Scopes are
+typically defined by the API developer, and the client can request a specific
+scope when requesting an access token from the authorization server. This allows
+the API developer to fine-tune the level of access that different clients have
+to the API.</p>
+<p>Other security considerations for OAuth access tokens include the need to
+protect against replay attacks by including a nonce and timestamp in the token
+and using TLS for all communication between the client, the authorization
+server and the resource server.</p>
+<p>It is also important to rotate the access token, this is can be done by using
+short lived tokens and refresh tokens which will allow the client to obtain a
+new access token without re-prompting the user for their credentials. By
+default, Jans Auth Server access tokens expire after 5 minutes.</p>
+<h3 id="access-token-schema">Access Token Schema<a class="headerlink" href="#access-token-schema" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>claim</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>active</code></td>
+<td><code>true</code> or <code>false</code>, whether the token is expired--relevant for reference tokens</td>
+</tr>
+<tr>
+<td><code>iss</code></td>
+<td>The URI of the issuer authorization server</td>
+</tr>
+<tr>
+<td><code>aud</code></td>
+<td>The audience, used by the client to verify it is the correct recipient. During registration, the client can specify <code>additional_audience</code> values</td>
+</tr>
+<tr>
+<td><code>iat</code></td>
+<td>When the client was issued, in seconds, e.g. <em>1514797822</em></td>
+</tr>
+<tr>
+<td><code>exp</code></td>
+<td>When the token expires, in seconds, e.g. <em>1514797942</em></td>
+</tr>
+<tr>
+<td><code>scope</code></td>
+<td>A space delimited list of scopes</td>
+</tr>
+<tr>
+<td><code>client_id</code></td>
+<td>Which client the token was issued to</td>
+</tr>
+<tr>
+<td><code>nbf</code></td>
+<td>Not before, which insures the token is only valid within a certain time window</td>
+</tr>
+<tr>
+<td><code>cnf</code></td>
+<td>Confirmation used for TLS client certificate bound tokens</td>
+</tr>
+</tbody>
+</table>
+<p>It is possible to add additional claims to an access token via the
+Auth Server interception scripts. The preferred script is the
+<a href="../../../developer/scripts/update-token/">update token script</a>. You can
+also use the <a href="../../../developer/scripts/introspection/">introspection script</a>.</p>
+<h3 id="access-token-crypto">Access Token Crypto<a class="headerlink" href="#access-token-crypto" title="Permanent link">#</a></h3>
+<p>JWT access tokens are signed by Jans Auth Server using
+algorithms specified in the <code>access_token_signing_alg_values_supported</code>
+claim of the OpenID configuration endpoint response. Access tokens are
+signed with the standard OpenID signing key.</p>
+<p>Jans Auth Server supports TLS client certificate bound access tokens. After
+a successful mutual TLS client authentication, Jans Auth Server encodes the
+client certificate thumbprint (hash) in <code>cnf</code> claim of the JWT or introspection
+JSON. Assuming the client uses the same certificate to establish a mutual TLS
+session with the API, the thumbprint in the access token can verify that this
+is the same client that obtained the access token. This feature is typically
+used in high security environments, as the operational cost of mutual TLS is
+material.</p>
+<h3 id="server-and-client-configurations">Server and Client configurations<a class="headerlink" href="#server-and-client-configurations" title="Permanent link">#</a></h3>
+<p>Access token lifetime is configurable at the server level via the
+<code>accessTokenLifetime</code> property. However, a client can override this value
+during client registration with the <code>access_token_lifetime</code> request
+parameter.</p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-08T20:20:00+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-08</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-22T05:54:07+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-22</span>
       
         <br>
         Created:
