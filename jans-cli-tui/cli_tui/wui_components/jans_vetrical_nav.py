@@ -134,6 +134,7 @@ class JansVerticalNav():
                             style='class:select-box',
                             height=D(preferred=len(self.data), max=len(self.data)),
                             cursorline=True,
+                            always_hide_cursor=True,
                             right_margins=[ScrollbarMargin(display_arrows=True), ],
                         )
         if self.jans_help:
