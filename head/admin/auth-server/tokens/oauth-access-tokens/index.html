@@ -8902,7 +8902,7 @@
 
 <h2 id="oauth-access-tokens">OAuth Access Tokens<a class="headerlink" href="#oauth-access-tokens" title="Permanent link">#</a></h2>
 <h3 id="background">Background<a class="headerlink" href="#background" title="Permanent link">#</a></h3>
-<p>When a software client calls a OAuth protected API, an access token is presented
+<p>When a software client calls an OAuth protected API, an access token is presented
 in the HTTP Authorization header of the request. Following is an example of a
 bearer token:</p>
 <div class="highlight"><pre><span></span><code>Authorization: Bearer 8pkjyj0gxhwh6ux2
@@ -8913,9 +8913,8 @@ a string that is included in the Authorization header of an HTTP request. The
 client presents the token to the resource server, which can trust the token,
 by validating it was issued by a trusted authorization server. Bearer tokens
 can be sent either by value or reference. A value token is a JWT, signed
-by the authorization server. A reference token is a short lived string--
-the client obtain the JSON for this reference token by calling the authorization
-server's introspection endpoint.</p>
+by the authorization server. By calling Auth Server's [introspection endpoint],
+the client can trade the reference token for the plain JSON object.</p>
 <p>MAC tokens, are cryptographically signed tokens that include a nonce, timestamp,
 and other information to prevent replay attacks. They are typically used in
 situations where the client and the resource server are not able to securely
@@ -8938,7 +8937,7 @@ to the API.</p>
 protect against replay attacks by including a nonce and timestamp in the token
 and using TLS for all communication between the client, the authorization
 server and the resource server.</p>
-<p>It is also important to rotate the access token, this is can be done by using
+<p>It is also important to rotate the access token. This can be done by using
 short lived tokens and refresh tokens which will allow the client to obtain a
 new access token without re-prompting the user for their credentials. By
 default, Jans Auth Server access tokens expire after 5 minutes.</p>
@@ -8953,7 +8952,7 @@ default, Jans Auth Server access tokens expire after 5 minutes.</p>
 <tbody>
 <tr>
 <td><code>active</code></td>
-<td><code>true</code> or <code>false</code>, whether the token is expired--relevant for reference tokens</td>
+<td><code>true</code> or <code>false</code>.</td>
 </tr>
 <tr>
 <td><code>iss</code></td>
@@ -8977,7 +8976,7 @@ default, Jans Auth Server access tokens expire after 5 minutes.</p>
 </tr>
 <tr>
 <td><code>client_id</code></td>
-<td>Which client the token was issued to</td>
+<td>Recipient of the token</td>
 </tr>
 <tr>
 <td><code>nbf</code></td>
@@ -8985,7 +8984,7 @@ default, Jans Auth Server access tokens expire after 5 minutes.</p>
 </tr>
 <tr>
 <td><code>cnf</code></td>
-<td>Confirmation used for TLS client certificate bound tokens</td>
+<td>Confirmation, used for TLS client certificate bound tokens</td>
 </tr>
 </tbody>
 </table>
@@ -9017,7 +9016,7 @@ parameter.</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-22T05:54:07+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-22</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-22T18:32:43+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-22</span>
       
         <br>
         Created:

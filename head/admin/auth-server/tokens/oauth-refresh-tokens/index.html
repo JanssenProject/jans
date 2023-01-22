@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#this-content-is-in-progress" class="md-skip">
+        <a href="#background" class="md-skip">
           Skip to content
         </a>
       
@@ -2925,23 +2925,29 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#this-content-is-in-progress" class="md-nav__link">
-    This content is in progress
+  <a href="#background" class="md-nav__link">
+    Background
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#have-questions-in-the-meantime" class="md-nav__link">
-    Have questions in the meantime?
+  <a href="#server-properties" class="md-nav__link">
+    Server properties.
+  </a>
+  
+    <nav class="md-nav" aria-label="Server properties.">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#refresh-token-management" class="md-nav__link">
+    Refresh Token Management
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#want-to-contribute" class="md-nav__link">
-    Want to contribute?
-  </a>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -8796,23 +8802,29 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#this-content-is-in-progress" class="md-nav__link">
-    This content is in progress
+  <a href="#background" class="md-nav__link">
+    Background
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#have-questions-in-the-meantime" class="md-nav__link">
-    Have questions in the meantime?
+  <a href="#server-properties" class="md-nav__link">
+    Server properties.
+  </a>
+  
+    <nav class="md-nav" aria-label="Server properties.">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#refresh-token-management" class="md-nav__link">
+    Refresh Token Management
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#want-to-contribute" class="md-nav__link">
-    Want to contribute?
-  </a>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -8858,21 +8870,45 @@
   </a>
 
 
-  <h1>OAuth Refresh Tokens</h1>
-
-<h2 id="this-content-is-in-progress">This content is in progress<a class="headerlink" href="#this-content-is-in-progress" title="Permanent link">#</a></h2>
-<p>The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.</p>
-<h2 id="have-questions-in-the-meantime">Have questions in the meantime?<a class="headerlink" href="#have-questions-in-the-meantime" title="Permanent link">#</a></h2>
-<p>While this documentation is in progress, you can ask questions through <a href="https://github.com/JanssenProject/jans/discussion">GitHub Discussions</a> or the <a href="https://gitter.im/JanssenProject/Lobby">community chat on Gitter</a>. Any questions you have will help determine what information our documentation should cover.</p>
-<h2 id="want-to-contribute">Want to contribute?<a class="headerlink" href="#want-to-contribute" title="Permanent link">#</a></h2>
-<p>If you have content you'd like to contribute to this page in the meantime, you can get started with our <a href="https://docs.jans.io/head/CONTRIBUTING/">Contribution guide</a>.</p>
+<h2 id="background">Background<a class="headerlink" href="#background" title="Permanent link">#</a></h2>
+<p>Refresh tokens are an optimization that allows a client to renew an access token
+without having to re-authenticate. You should not issue a refresh token to
+untrusted clients, i.e. public clients.</p>
+<h1 id="server-properties">Server properties.<a class="headerlink" href="#server-properties" title="Permanent link">#</a></h1>
+<p><code>refreshTokenLifetime</code>
+: <em>Default: 14400 minutes</em> - With this property, you can specify a longer lifetime
+then 5 days. Using the Jans Config API, you can set a client-specific refresh
+token lifetime.</p>
+<p><code>forceOfflineAccessScopeToEnableRefreshToken</code>
+: <em>Default: True</em> - A good practice is for Auth Server to explicitly ask the
+subject to consent to the use of refresh tokens. To encourage this practice,
+by default, Auth Server requires that the client have the <code>offline_access</code> scope
+to issue a refresh token.</p>
+<p><code>persistRefreshTokenInLdap</code>
+: <em>Default: True</em> - Otherwise they are written to the cache</p>
+<p><code>clientRegDefaultToCodeFlowWithRefresh</code>
+: <em>Default: True</em> - Set to False if you don't want web clients to get a refresh
+token.</p>
+<p><code>removeRefreshTokensForClientOnLogout</code>
+: <em>Default: True</em> - Explicit logout is different then timeout, so if the
+subject has initiated a logout, you may want to also remove all the refresh
+tokens for that client. <strong>todo</strong></p>
+<p><code>skipRefreshTokenDuringRefreshing</code>
+: <em>Default: False</em> - <strong>todo</strong></p>
+<p><code>refreshTokenExtendLifetimeOnRotation</code>
+: <em>Default: False</em> - <strong>todo</strong></p>
+<p><code>checkUserPresenceOnRefreshToken</code>
+: <em>Default: False</em> - <strong>todo</strong></p>
+<h3 id="refresh-token-management">Refresh Token Management<a class="headerlink" href="#refresh-token-management" title="Permanent link">#</a></h3>
+<p>To revoke a token, a client can do so via the [revocation endpoint][../endpoints/token-revocation]. In order to get a list of refresh tokens outstanding by the AS:
+<strong>todo</strong>.</p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-08T20:20:00+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-08</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-22T18:32:43+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-22</span>
       
         <br>
         Created:

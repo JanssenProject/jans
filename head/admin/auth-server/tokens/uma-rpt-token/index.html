@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#this-content-is-in-progress" class="md-skip">
+        <a href="#background" class="md-skip">
           Skip to content
         </a>
       
@@ -2967,23 +2967,22 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#this-content-is-in-progress" class="md-nav__link">
-    This content is in progress
+  <a href="#background" class="md-nav__link">
+    Background
+  </a>
+  
+    <nav class="md-nav" aria-label="Background">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#server-properties" class="md-nav__link">
+    Server properties
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#have-questions-in-the-meantime" class="md-nav__link">
-    Have questions in the meantime?
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#want-to-contribute" class="md-nav__link">
-    Want to contribute?
-  </a>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -8796,23 +8795,22 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#this-content-is-in-progress" class="md-nav__link">
-    This content is in progress
+  <a href="#background" class="md-nav__link">
+    Background
+  </a>
+  
+    <nav class="md-nav" aria-label="Background">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#server-properties" class="md-nav__link">
+    Server properties
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#have-questions-in-the-meantime" class="md-nav__link">
-    Have questions in the meantime?
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#want-to-contribute" class="md-nav__link">
-    Want to contribute?
-  </a>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -8860,19 +8858,47 @@
 
   <h1>UMA RPT Token</h1>
 
-<h2 id="this-content-is-in-progress">This content is in progress<a class="headerlink" href="#this-content-is-in-progress" title="Permanent link">#</a></h2>
-<p>The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.</p>
-<h2 id="have-questions-in-the-meantime">Have questions in the meantime?<a class="headerlink" href="#have-questions-in-the-meantime" title="Permanent link">#</a></h2>
-<p>While this documentation is in progress, you can ask questions through <a href="https://github.com/JanssenProject/jans/discussion">GitHub Discussions</a> or the <a href="https://gitter.im/JanssenProject/Lobby">community chat on Gitter</a>. Any questions you have will help determine what information our documentation should cover.</p>
-<h2 id="want-to-contribute">Want to contribute?<a class="headerlink" href="#want-to-contribute" title="Permanent link">#</a></h2>
-<p>If you have content you'd like to contribute to this page in the meantime, you can get started with our <a href="https://docs.jans.io/head/CONTRIBUTING/">Contribution guide</a>.</p>
+<h2 id="background">Background<a class="headerlink" href="#background" title="Permanent link">#</a></h2>
+<p>The UMA requesting party token (RPT) is an OAuth access token associated with
+the UMA grant. An RPT is unique to a requesting party, client, authorization
+server, resource server, and resource owner.</p>
+<p>The client uses the RPT in the Authorization header of an API request.
+The RPT bearer token conveys that  UMA policy evaluation was successful on Auth
+Server.</p>
+<p>The Client may also present the RPT token while making a request to Auth Server
+for a new RPT, for example to up-scope or down-scope a token.</p>
+<p>For more information on UMA, see the specifications:
+* <a href="https://gluu.co/uma-grant">User-Managed Access (UMA) 2.0 Grant for OAuth 2.0 Authorization</a>
+* <a href="https://gluu.co/uma-authz">Federated Authorization for User-Managed Access (UMA) 2.0</a></p>
+<h3 id="server-properties">Server properties<a class="headerlink" href="#server-properties" title="Permanent link">#</a></h3>
+<p><code>umaRptAsJwt</code> <em>Default: False</em> -
+: Reference token is the default</p>
+<p><code>umaRptLifetime</code> <em>Default: 3600 seconds</em> -
+: 60 minutes</p>
+<p><code>introspectionAccessTokenMustHaveUmaProtectionScope</code> <em>Default: False</em> -
+:</p>
+<p><code>umaGrantAccessIfNoPolicies</code> <em>Default: False</em> -
+:</p>
+<p><code>umaTicketLifetime</code> <em>Default: 3600 seconds</em> -
+: 60 minutes - Returned by the Resource Server to the Client for presentation
+at the UMA token endpoint. The ticket is the equivalent of the code in the
+OAuth code flow.</p>
+<p><code>umaAddScopesAutomatically</code> <em>Default: True</em> -
+:</p>
+<p><code>umaPctLifetime</code> <em>Default: 1728000 seconds</em> -
+: The PCT is a pushed claim token that references a previous claims gathering
+flow, so you don't have to bother the subject again for this information.</p>
+<p><code>umaValidateClaimToken</code> <em>Default: False</em> -
+:</p>
+<p><code>umaRestrictResourceToAssociatedClient</code> <em>Default: False</em> -
+:</p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-08T20:20:00+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-08</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-22T18:32:43+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-22</span>
       
         <br>
         Created:
