@@ -35,7 +35,10 @@ from edit_scope_dialog import EditScopeDialog
 from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.application import Application
 from utils.multi_lang import _
-
+from prompt_toolkit.widgets import (
+    HorizontalLine,
+    VerticalLine,
+)
 QUESTION_TEMP = "\n {} ?"
 
 class Plugin(DialogUtils):
@@ -256,20 +259,23 @@ class Plugin(DialogUtils):
                 )
 
             if data:
-                clients = JansVerticalNav(
-                    myparent=self.app,
-                    headers=['Client ID', 'Client Name', 'Grant Types', 'Subject Type'],
-                    preferred_size= [0,0,30,0],
-                    data=data,
-                    on_enter=self.edit_client,
-                    on_display=self.app.data_display_dialog,
-                    on_delete=self.delete_client,
-                    get_help=(self.get_help,'Client'),
-                    selectes=0,
-                    headerColor=cli_style.navbar_headcolor,
-                    entriesColor=cli_style.navbar_entriescolor,
-                    all_data=result['entries']
-                )
+                clients = VSplit([
+                    Label(text=" ",width=1),
+                    JansVerticalNav(
+                        myparent=self.app,
+                        headers=['Client ID', 'Client Name', 'Grant Types', 'Subject Type'],
+                        preferred_size= [0,0,30,0],
+                        data=data,
+                        on_enter=self.edit_client,
+                        on_display=self.app.data_display_dialog,
+                        on_delete=self.delete_client,
+                        get_help=(self.get_help,'Client'),
+                        selectes=0,
+                        headerColor=cli_style.navbar_headcolor,
+                        entriesColor=cli_style.navbar_entriescolor,
+                        all_data=result['entries']
+                    )
+                ])
                 buttons = []
                 if start_index > 0:
                     handler_partial = partial(self.oauth_update_clients, start_index-self.app.entries_per_page, pattern)
@@ -418,20 +424,23 @@ class Plugin(DialogUtils):
 
             if data:
 
-                scopes = JansVerticalNav(
-                        myparent=self.app,
-                        headers=['id', 'Description', 'Type','inum'],
-                        preferred_size= [30,40,8,12],
-                        data=data,
-                        on_enter=self.edit_scope_dialog,
-                        on_display=self.app.data_display_dialog,
-                        on_delete=self.delete_scope,
-                        get_help=(self.get_help,'Scope'),
-                        selectes=0,
-                        headerColor=cli_style.navbar_headcolor,
-                        entriesColor=cli_style.navbar_entriescolor,
-                        all_data=result['entries']
-                    )
+                scopes =VSplit([
+                    Label(text=" ",width=1),
+                    JansVerticalNav(
+                            myparent=self.app,
+                            headers=['id', 'Description', 'Type','inum'],
+                            preferred_size= [30,40,8,12],
+                            data=data,
+                            on_enter=self.edit_scope_dialog,
+                            on_display=self.app.data_display_dialog,
+                            on_delete=self.delete_scope,
+                            get_help=(self.get_help,'Scope'),
+                            selectes=0,
+                            headerColor=cli_style.navbar_headcolor,
+                            entriesColor=cli_style.navbar_entriescolor,
+                            all_data=result['entries']
+                        )
+                ])
 
                 buttons = []
                 if start_index > 0:
@@ -484,18 +493,21 @@ class Plugin(DialogUtils):
 
             self.view_property(passed=passed, op_type='add')
 
-        properties = JansVerticalNav(
-                myparent=self.app,
-                headers=['Property Name'],
-                preferred_size=[0],
-                data=missing_properties_data,
-                on_enter=add_property,
-                get_help=(self.get_help,'AppConfiguration'),
-                selectes=0,
-                headerColor=cli_style.navbar_headcolor,
-                entriesColor=cli_style.navbar_entriescolor,
-                all_data=missing_properties
-            )
+        properties = VSplit([
+                Label(text=" ",width=1),
+                JansVerticalNav(
+                        myparent=self.app,
+                        headers=['Property Name'],
+                        preferred_size=[0],
+                        data=missing_properties_data,
+                        on_enter=add_property,
+                        get_help=(self.get_help,'AppConfiguration'),
+                        selectes=0,
+                        headerColor=cli_style.navbar_headcolor,
+                        entriesColor=cli_style.navbar_entriescolor,
+                        all_data=missing_properties
+                    )
+        ])
 
         body = HSplit([properties])
         buttons = [Button(_("Cancel"))]
@@ -558,19 +570,23 @@ class Plugin(DialogUtils):
 
             data_now = data[start_index*20:start_index*20+20]
 
-            properties = JansVerticalNav(
-                myparent=self.app,
-                headers=['Property Name', 'Property Value'],
-                preferred_size= [0,0],
-                data=data_now,
-                on_enter=self.view_property,
-                on_display=self.properties_display_dialog,
-                get_help=(self.get_help,'AppConfiguration'),
-                selectes=0,
-                headerColor=cli_style.navbar_headcolor,
-                entriesColor=cli_style.navbar_entriescolor,
-                all_data=list(self.app_configuration.values())
+            properties =VSplit([
+                Label(text=" ",width=1),
+                JansVerticalNav(
+                    myparent=self.app,
+                    headers=['Property Name', 'Property Value'],
+                    preferred_size= [0,0],
+                    data=data_now,
+                    on_enter=self.view_property,
+                    on_display=self.properties_display_dialog,
+                    get_help=(self.get_help,'AppConfiguration'),
+                    selectes=0,
+                    headerColor=cli_style.navbar_headcolor,
+                    entriesColor=cli_style.navbar_entriescolor,
+                    all_data=list(self.app_configuration.values())
             )
+            ])
+
 
             self.oauth_data_container['properties'] = HSplit([
                 properties,
@@ -648,7 +664,9 @@ class Plugin(DialogUtils):
 
         if data:
 
-            keys = JansVerticalNav(
+            keys = VSplit([
+                Label(text=" ",width=1),
+                JansVerticalNav(
                     myparent=self.app,
                     headers=['Name', 'Expiration','Kid'],
                     data=data,
@@ -659,6 +677,7 @@ class Plugin(DialogUtils):
                     entriesColor=cli_style.navbar_entriescolor,
                     all_data=self.jwks_keys['keys']
                 )
+            ])
 
             self.oauth_data_container['keys'] = HSplit([keys])
             get_app().invalidate()
