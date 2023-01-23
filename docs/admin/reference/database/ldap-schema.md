@@ -193,7 +193,6 @@ tags:
 
 | Field                 |  |
 | -| -| 
-| doc_id      | |
 | objectClass | |
 | dn          | |
 | uuid        | |
@@ -205,7 +204,6 @@ tags:
 ### jansCibaReq             
 | Field                 | |
 | -| -| 
-| doc_id       | |
 | objectClass  | |
 | dn           | |
 | authReqId    | |
@@ -745,6 +743,7 @@ tags:
 ### jansToken                  
 | Field                 ||
 | -| -| 
+| tknCde      | |
 | objectClass | |
 | dn          | |
 | authnTime   | |
@@ -757,7 +756,6 @@ tags:
 | jwtReq      | |
 | nnc         | |
 | scp         | |
-| tknCde      | |
 | tknTyp      | |
 | usrId       | |
 | jansUsrDN   | |
