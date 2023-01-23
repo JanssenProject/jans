@@ -192,6 +192,30 @@ public class RegisterService {
         if (requestObject.getSpontaneousScopes() != null) {
             client.getAttributes().setSpontaneousScopes(requestObject.getSpontaneousScopes());
         }
+        if (requestObject.getAdditionalAudience() != null) {
+            client.getAttributes().setAdditionalAudience(requestObject.getAdditionalAudience());
+        }
+        if (requestObject.getSpontaneousScopeScriptDns() != null) {
+            client.getAttributes().setSpontaneousScopeScriptDns(requestObject.getSpontaneousScopeScriptDns());
+        }
+        if (requestObject.getUpdateTokenScriptDns() != null) {
+            client.getAttributes().setUpdateTokenScriptDns(requestObject.getUpdateTokenScriptDns());
+        }
+        if (requestObject.getPostAuthnScriptDns() != null) {
+            client.getAttributes().setPostAuthnScripts(requestObject.getPostAuthnScriptDns());
+        }
+        if (requestObject.getConsentGatheringScriptDns() != null) {
+            client.getAttributes().setConsentGatheringScripts(requestObject.getConsentGatheringScriptDns());
+        }
+        if (requestObject.getIntrospectionScriptDns() != null) {
+            client.getAttributes().setIntrospectionScripts(requestObject.getIntrospectionScriptDns());
+        }
+        if (requestObject.getRptClaimsScriptDns() != null) {
+            client.getAttributes().setRptClaimsScripts(requestObject.getRptClaimsScriptDns());
+        }
+        if (requestObject.getRopcScriptDns() != null) {
+            client.getAttributes().setRopcScripts(requestObject.getRopcScriptDns());
+        }
         if (requestObject.getRunIntrospectionScriptBeforeJwtCreation() != null) {
             client.getAttributes().setRunIntrospectionScriptBeforeJwtCreation(requestObject.getRunIntrospectionScriptBeforeJwtCreation());
         }
