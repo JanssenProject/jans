@@ -721,15 +721,6 @@
               "type": "string"
             }
           }
-        },
-        "upgrade": {
-          "type": "object",
-          "properties": {
-            "enabled": {
-              "description": "Boolean flag used when running helm upgrade command. This allows upgrading the chart without immutable objects errors.",
-              "type": "boolean"
-            }
-          }
         }
       }
     },
