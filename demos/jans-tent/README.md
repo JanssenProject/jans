@@ -1,4 +1,4 @@
-# Test-Auth-Client
+# Jans Tent
 
 This client aims to be a reliable client build with BDD / TDD metologies to be used in auth testing.
 
