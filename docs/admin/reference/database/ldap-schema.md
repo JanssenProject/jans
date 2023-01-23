@@ -159,34 +159,34 @@ tags:
 
 ###  jansAttr       
 
-| Field                 | |
-| -| -| 
-| inum                  | |
-| objectClass           | |
-| dn                    | |
-| description           | |
-| displayName           | |
-| jansAttrEditTyp       | |
-| jansAttrName          | |
-| jansAttrOrigin        | |
-| jansAttrSystemEditTyp | |
-| jansAttrTyp           | |
-| jansClaimName         | |
-| jansAttrUsgTyp        | |
-| jansAttrViewTyp       | |
-| jansSAML1URI          | |
-| jansSAML2URI          | |
-| jansStatus            | |
-| jansMultivaluedAttr   | |
-| jansHideOnDiscovery   | |
-| jansNameIdTyp         | |
-| jansScimCustomAttr    | |
-| jansSourceAttr        | |
-| seeAlso               | |
-| urn                   | |
-| jansRegExp            | |
-| jansTooltip           | |
-| jansValidation        | |
+| Field                 | Description|Datatype|Usage|
+| -| -| -|-|
+| inum                  | | | | 
+| objectClass           | | | | 
+| dn                    | | | | 
+| description           | | | | 
+| displayName           | |||
+| jansAttrEditTyp       | |||
+| jansAttrName          | |||
+| jansAttrOrigin        | |||
+| jansAttrSystemEditTyp | |||
+| jansAttrTyp           | |||
+| jansClaimName         | |||
+| jansAttrUsgTyp        | |||
+| jansAttrViewTyp       | |||
+| jansSAML1URI          | |||
+| jansSAML2URI          | |||
+| jansStatus            | |||
+| jansMultivaluedAttr   | |||
+| jansHideOnDiscovery   | |||
+| jansNameIdTyp         | |||
+| jansScimCustomAttr    | |||
+| jansSourceAttr        | |||
+| seeAlso               | |||
+| urn                   | |||
+| jansRegExp            | |||
+| jansTooltip           | |||
+| jansValidation        | |||
 
             
 ### jansCache                  
@@ -459,7 +459,6 @@ tags:
 ### jansOrganization           
 | Field                 | |
 | -| -| 
-
 | objectClass           | |
 | dn                    | |
 | c                     | |
