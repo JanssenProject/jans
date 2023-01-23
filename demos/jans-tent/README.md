@@ -86,7 +86,7 @@ Sending a `POST` request to `/register` endpoint containing a `JSON` with the OP
 
 ```json
 {
-    "op_url": "https://idpproxy-test.usg.edu",
+    "op_url": "https://demoexample.jans.io",
     "client_url": "https://tempclient.techno24x7.com"
 }
 ```
