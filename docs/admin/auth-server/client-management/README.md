@@ -17,7 +17,7 @@ Connect [defines relying party](https://openid.net/specs/openid-connect-core-1_0
 
 ### Config-API and Tools
 
-Janssen Server [config-API](../../config-guide/config-api/README.md) module APIs include [API for client management](../../config-guide/config-api/openid-client.md). 
+Janssen Server [config-API](../../config-guide/config-api/README.md) module includes [API for client management](../../config-guide/config-api/openid-client.md). 
 
 Janssen Server tools like [Janssen Text-based UI(TUI)](../../config-guide/tui.md) and [jans-CLI](../../config-guide/jans-cli/README.md)
 provide a way to perform client management operations. These tools use the same APIs provided by `config-API` module mentioned above. 
@@ -32,52 +32,74 @@ the request and response parameters. Also refer to
 [documentation for /registration endpoint](../endpoints/client-registration.md) to 
 understand steps involved in dynamic client registration.
 
-Below section is a step-by-step guide to for client management using
-[Janssen Text-based UI(TUI)](../../config-guide/tui.md). To start with client management, navigate to `Auth Server`->
-`Clients`.
-
-![tui-client-management](../../../assets/Jans_TUI_Main_panel.png)
+Below section is a step-by-step guide to for client management using [jans-CLI](../../config-guide/jans-cli/README.md) and 
+[Janssen Text-based UI(TUI)](../../config-guide/tui.md). 
 
 ## Client Registration
 
 In order to get token from token endpoint, a `confidential` client has to be registered with authorization server(AS),
-also called OpenID Connect Provider(OP) in OpenID Connect context. Registration allow clients to specify some 
+also called OpenID Connect Provider(OP) in OpenID Connect context. Registration allow clients to specify some
 vital details about itself, like [redirect_uri](./configuration/redirect-uris.md), plus information that will define
 the interaction between the client and the AS/OP.
+
+### Using Jans-CLI
+
+TODO: add sample command
+
+### Using TUI
 
 To start registering a new client, navigate to `Auth Server`->`Clients`->`Add Client`.  This brings up a screen as show below with various sections to input client details.
 
 ![](../../../assets/Jans_TUI_Auth_Server_Add_new_client.png)
 
-### Basic
+#### Basic
+
+| Parameter (TUI)             | Request Parameter (CLI) | Description                                                                                                                                                                                                                                                                                                                                                              | Required | Default                               |
+|-----------------------------|-------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------|---------------------------------------|
+| Client_ID                   |                         | Janssen Server generates and assigns a unique identifier to a successfully registered client                                                                                                                                                                                                                                                                             | No       | Server Generated                      |
+| Active                      |                         | Flag to activate or deactivate the client                                                                                                                                                                                                                                                                                                                                | No       | Active                                |
+| Client Name                 |                         | User provided name of the client                                                                                                                                                                                                                                                                                                                                         | No       | Blank                                 |
+| Client Secret               |                         | User provided secret for client authentication                                                                                                                                                                                                                                                                                                                           | No       | Server Generated                      |
+| Description                 |                         | User provided description of the client                                                                                                                                                                                                                                                                                                                                  | No       | Blank                                 |
+| Authn Method Token Endpoint |                         | Method used for authenticating client at token endpoint. It can be any one of the [client authentication methods](./client-authn.md) supported by Janssen Server                                                                                                                                                                                                         | No       | `none`                                |
+| Subject Type                |                         | Type of identifier used for subject(end-user). Janssen Server supports Subject identifier [type as defined in OIDC core specification](https://openid.net/specs/openid-connect-core-1_0.html#SubjectIDTypes)                                                                                                                                                             | No       | `public`                              |
+| Sector Identifier URI       |                         | User provided URI to be used in pairwise identifier algorithm [as specified in OIDC core specification](https://openid.net/specs/openid-connect-core-1_0.html#PairwiseAlg)                                                                                                                                                                                               | No       | Blank                                 |
+| Grant                       |                         | Enroll client for One or more [supported grant types](./configuration/grants.md)                                                                                                                                                                                                                                                                                         | No       | `Authorization Code`, `Refresh Token` |
+| Response Types              |                         | [Response Type](./configuration/response-types.md) value that determines the authorization processing flow to be used, including what parameters are returned from the endpoints used.                                                                                                                                                                                   | No       | `code`                                |
+| Suppress Authorization      |                         | TODO                                                                                                                                                                                                                                                                                                                                                                     | No       | False                                 |
+| Application Type            |                         | Kind of the application. The defined values are `native` or `web`. Web Clients using the OAuth Implicit Grant Type must only register URLs using the HTTPS scheme as redirect_uris; they must not use localhost as the hostname. Native Clients must only register redirect_uris using custom URI schemes or URLs using the http: scheme with localhost as the hostname. | No       | `web`                                 |
+| Redirect Uris               |                         | [Redirection URI](./configuration/redirect-uris.md) values used by the Client. One of these registered Redirection URI values must exactly match the redirect_uri parameter value used in each Authorization Request                                                                                                                                                     | Yes      | No defaults                           |
+| Redirect Regex              |                         | TODO                                                                                                                                                                                                                                                                                                                                                                     | No       | Blank                                 |
+| Scopes                      |                         | List of scopes that a client can request. Refer to Janssen Server [scope documentation](../scopes/README.md) for more details                                                                                                                                                                                                                                            |          |                                       |
+
+
+
+
+#### Token
 
 TODO: add details here
 
-### Token
+#### Logout
 
 TODO: add details here
 
-### Logout
+#### Software Info
 
 TODO: add details here
 
-### Software Info
+#### CIBA-PAR-UMA
 
 TODO: add details here
 
-### CIBA-PAR-UMA
+#### Encryption-Signing
 
 TODO: add details here
 
-### Encryption-Signing
+#### Advanced Client Properties
 
 TODO: add details here
 
-### Advanced Client Properties
-
-TODO: add details here
-
-### Client Scripts
+#### Client Scripts
 
 TODO: add details here
 
