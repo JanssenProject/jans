@@ -51,7 +51,7 @@ kubectl get secret -n jans -o yaml
 | `ldaps_port`                                  | `1636`                                             |
 | `optional_scopes`                             | `["fido2", "scim", "sql"]`                         |
 | `orgName`                                     | `Janssen`                                          |
-| `role_based_client_id`                        | `2000.4a8f3e8b-96b0-435a-8427-a287c242f4d9`        |
+| `tui_client_id`                               | `2000.4a8f3e8b-96b0-435a-8427-a287c242f4d9`        |
 | `scim_client_id`                              | `12`                                               |
 | `state`                                       | `TX`                                               |
 
@@ -79,8 +79,8 @@ kubectl get secret -n jans -o yaml
 | `otp_configuration`                       | base64                  |                                   |
 | `pairwiseCalculationKey`                  | base64                  |                                   |
 | `pairwiseCalculationSalt`                 | base64                  |                                   |
-| `role_based_client_encoded_pw`            | pyDes + base64          | /etc/certs/jans-radius.jks        |
-| `role_based_client_pw`                    | pyDes + base64          |                                   |
+| `tui_client_encoded_pw`                   | pyDes + base64          |                                   |
+| `tui_client_pw`                           | pyDes + base64          |                                   |
 | `scim_client_encoded_pw`                  | pyDes + base64          |                                   |
 | `scim_client_pw`                          | pyDes + base64          |                                   |
 | `sql_password`                            | base64                  |                                   |
