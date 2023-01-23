@@ -8897,8 +8897,8 @@
 </code></pre></div>
 
 <p><strong>Note - The preferred way to modify an access token is with the Update Token script.</strong></p>
-<p>It is also possible to run an introspection script during <code>access_token</code> creation as JWT. It can be controlled by <code>run_introspection_script_before_access_token_as_jwt_creation_and_include_claims</code> OpenID Client property which is set to false by default. </p>
-<p>If OpenID Client properties <code>run_introspection_script_before_access_token_as_jwt_creation_and_include_claims</code> and <code>access_token_as_jwt</code> are set to true then an introspection script will be run before JWT (<code>access_token</code>) is created and all JSON values will be transfered to JWT. Also <code>context</code> inside the script has additional method which allows you to cancel transfering of claims if needed <code>context.setTranferIntrospectionPropertiesIntoJwtClaims(false)</code></p>
+<p>It is also possible to run an introspection script during <code>access_token</code> creation as JWT. It can be controlled by <code>run_introspection_script_before_jwt_creation</code> OpenID Client property which is set to false by default. </p>
+<p>If OpenID Client properties <code>run_introspection_script_before_jwt_creation</code> and <code>access_token_as_jwt</code> are set to true then an introspection script will be run before JWT (<code>access_token</code>) is created and all JSON values will be transfered to JWT. Also <code>context</code> inside the script has additional method which allows you to cancel transfering of claims if needed <code>context.setTranferIntrospectionPropertiesIntoJwtClaims(false)</code></p>
 <h2 id="common-use-cases">Common Use Cases<a class="headerlink" href="#common-use-cases" title="Permanent link">#</a></h2>
 <h2 id="script-type-python">Script Type: Python<a class="headerlink" href="#script-type-python" title="Permanent link">#</a></h2>
 <h3 id="retrieve-grant-session-and-user-details-from-access-token"><a href="introspection-custom-parameters/introspection_custom_params.py">Retrieve Grant, Session and User Details from Access Token</a><a class="headerlink" href="#retrieve-grant-session-and-user-details-from-access-token" title="Permanent link">#</a></h3>
@@ -8912,7 +8912,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-08-09T15:30:29+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-08-09</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-23T20:44:57+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-23</span>
       
         <br>
         Created:
