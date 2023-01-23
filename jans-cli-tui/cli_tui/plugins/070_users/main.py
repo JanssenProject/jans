@@ -236,14 +236,15 @@ class Plugin(DialogUtils):
             _type_: bool value to check the status code response
         """
 
+        fix_title = _("Please fix!")
         raw_data = self.make_data_from_dialog(tabs={'user': dialog.edit_user_container.content})
 
         if not (raw_data['userId'].strip() and raw_data['mail'].strip()):
-            self.app.show_message(_("Please fix!"), _("Username and/or Email is empty"))
+            self.app.show_message(fix_title, _("Username and/or Email is empty"))
             return
 
         if 'baseDn' not in dialog.data and not raw_data['userPassword'].strip():
-            self.app.show_message(_("Please fix!"), _("Please enter Password"))
+            self.app.show_message(fix_title, _("Please enter Password"))
             return
 
         user_info = {'customObjectClasses':['top', 'jansCustomPerson'], 'customAttributes':[]}
@@ -272,7 +273,7 @@ class Plugin(DialogUtils):
                 except Exception as e:
                     display_name = key_prop.get('displayName') or key_
                     self.app.show_message(
-                                _("Please fix!"),
+                                fix_title,
                                 _(HTML("Can't convert <b>{}</b> to json. Conversion error: <i>{}</i>").format(display_name, e))
                             )
                     return
