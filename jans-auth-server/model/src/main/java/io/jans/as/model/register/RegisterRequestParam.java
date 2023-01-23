@@ -315,6 +315,47 @@ public enum RegisterRequestParam {
     SPONTANEOUS_SCOPES("spontaneous_scopes"),
 
     /**
+     * list of additional audiences
+     */
+    ADDITIONAL_AUDIENCE("additional_audience"),
+
+    /**
+     * list of spontaneous scope script dns
+     */
+    SPONTANEOUS_SCOPE_SCRIPT_DNS("spontaneous_scope_script_dns"),
+
+    /**
+     * list of update token script dns
+     */
+    UPDATE_TOKEN_SCRIPT_DNS("update_token_script_dns"),
+
+    /**
+     * list of post authn script dns
+     */
+    POST_AUTHN_SCRIPT_DNS("post_authn_script_dns"),
+
+    /**
+     * list of consent gathering script dns
+     */
+    CONSENT_GATHERING_SCRIPT_DNS("consent_gathering_script_dns"),
+
+    /**
+     * list of introspection script dns
+     */
+    INTROSPECTION_SCRIPT_DNS("introspection_script_dns"),
+
+    /**
+     * list of rpt claims script dns
+     */
+    RPT_CLAIMS_SCRIPT_DNS("rpt_claims_script_dns"),
+
+    /**
+     * list of ropc script dns
+     */
+    ROPC_SCRIPT_DNS("ropc_script_dns"),
+
+
+    /**
      * boolean property which indicates whether to run introspection script and then include claims from result into access_token as JWT
      */
     RUN_INTROSPECTION_SCRIPT_BEFORE_JWT_CREATION("run_introspection_script_before_jwt_creation"),
