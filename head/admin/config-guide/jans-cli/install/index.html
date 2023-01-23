@@ -8885,10 +8885,10 @@ make zipapp
 </code></pre></div>
 <p>You will be prompted for credentials if you do not have <code>~/.config/jans-cli.ini</code>. 
 Contact your administrator for credentials.</p>
-<div class="highlight"><pre><span></span><code>cat /opt/jans/jans-setup/setup.properties.last | grep role
-role_based_client_encoded_pw=4jnkODv3KRV6xNm1oGQ8+g\=\=
-role_based_client_id=2000.eac308d1-95e3-4e38-87cf-1532af310a9e
-role_based_client_pw=GnEkCqg4Vsks
+<div class="highlight"><pre><span></span><code>cat /opt/jans/jans-setup/setup.properties.last | grep tui_client
+tui_client_encoded_pw=4jnkODv3KRV6xNm1oGQ8+g\=\=
+tui_client_id=2000.eac308d1-95e3-4e38-87cf-1532af310a9e
+tui_client_pw=GnEkCqg4Vsks
 </code></pre></div>
 <h3 id="installing-with-pip-from-github">Installing with pip from GitHub<a class="headerlink" href="#installing-with-pip-from-github" title="Permanent link">#</a></h3>
 <div class="highlight"><pre><span></span><code>pip3 install https://github.com/JanssenProject/jans/archive/refs/heads/main.zip#subdirectory=jans-cli-tui
@@ -8897,19 +8897,19 @@ role_based_client_pw=GnEkCqg4Vsks
 <div class="highlight"><pre><span></span><code>config-cli-tui
 </code></pre></div>
 <p>Obtain Credidentials for CLI from the Janssen server:</p>
-<div class="highlight"><pre><span></span><code># cat /opt/jans/jans-setup/setup.properties.last | grep role
-role_based_client_encoded_pw=dDpwNN3lv94JF+ibgVFT7A\=\=
-role_based_client_id=2000.076aa5d9-fa8d-42a0-90d2-b83b5ea535d5
-role_based_client_pw=mrF8tcBd6m9Q
+<div class="highlight"><pre><span></span><code># cat /opt/jans/jans-setup/setup.properties.last | grep tui_client
+tui_client_encoded_pw=dDpwNN3lv94JF+ibgVFT7A\=\=
+tui_client_id=2000.076aa5d9-fa8d-42a0-90d2-b83b5ea535d5
+tui_client_pw=mrF8tcBd6m9Q
 </code></pre></div>
-<p><code>role_based_client_id</code> is the <strong>Client ID</strong> and <code>role_based_client_pw</code> is the <strong>Client Secret</strong></p>
+<p><code>tui_client_id</code> is the <strong>Client ID</strong> and <code>tui_client_pw</code> is the <strong>Client Secret</strong></p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-06T15:25:30+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-06</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-23T20:18:50+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-23</span>
       
         <br>
         Created:

@@ -9360,10 +9360,10 @@ cat <span class="s">&lt;&lt; EOF &gt; auth_code_client.json</span>
 <li>
 <p>Download or build <a href="../../config-guide/tui/">config-cli-tui</a> and run:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Notice the namespace is jans here . Change it if it was changed during installation of janssen previously</span>
-<span class="nv">ROLE_BASED_CLIENT_ID</span><span class="o">=</span><span class="k">$(</span>kubectl get cm cn -o json -n jans <span class="p">|</span> grep <span class="s1">&#39;&quot;role_based_client_id&quot;:&#39;</span> <span class="p">|</span> sed -e <span class="s1">&#39;s#.*:\(\)#\1#&#39;</span> <span class="p">|</span> tr -d <span class="s1">&#39;&quot;&#39;</span> <span class="p">|</span> tr -d <span class="s2">&quot;,&quot;</span> <span class="p">|</span> tr -d <span class="s1">&#39;[:space:]&#39;</span><span class="k">)</span>
-<span class="nv">ROLE_BASED_CLIENT_SECRET</span><span class="o">=</span><span class="k">$(</span>kubectl get secret cn -o json -n jans <span class="p">|</span> grep <span class="s1">&#39;&quot;role_based_client_pw&quot;:&#39;</span> <span class="p">|</span> sed -e <span class="s1">&#39;s#.*:\(\)#\1#&#39;</span> <span class="p">|</span> tr -d <span class="s1">&#39;&quot;&#39;</span> <span class="p">|</span> tr -d <span class="s2">&quot;,&quot;</span> <span class="p">|</span> tr -d <span class="s1">&#39;[:space:]&#39;</span> <span class="p">|</span> base64 -d<span class="k">)</span>
+<span class="nv">TUI_CLIENT_ID</span><span class="o">=</span><span class="k">$(</span>kubectl get cm cn -o json -n jans <span class="p">|</span> grep <span class="s1">&#39;&quot;tui_client_id&quot;:&#39;</span> <span class="p">|</span> sed -e <span class="s1">&#39;s#.*:\(\)#\1#&#39;</span> <span class="p">|</span> tr -d <span class="s1">&#39;&quot;&#39;</span> <span class="p">|</span> tr -d <span class="s2">&quot;,&quot;</span> <span class="p">|</span> tr -d <span class="s1">&#39;[:space:]&#39;</span><span class="k">)</span>
+<span class="nv">TUI_CLIENT_SECRET</span><span class="o">=</span><span class="k">$(</span>kubectl get secret cn -o json -n jans <span class="p">|</span> grep <span class="s1">&#39;&quot;tui_client_pw&quot;:&#39;</span> <span class="p">|</span> sed -e <span class="s1">&#39;s#.*:\(\)#\1#&#39;</span> <span class="p">|</span> tr -d <span class="s1">&#39;&quot;&#39;</span> <span class="p">|</span> tr -d <span class="s2">&quot;,&quot;</span> <span class="p">|</span> tr -d <span class="s1">&#39;[:space:]&#39;</span> <span class="p">|</span> base64 -d<span class="k">)</span>
 <span class="c1"># add -noverify if your fqdn is not registered</span>
-./config-cli-tui.pyz --host <span class="nv">$FQDN</span> --client-id <span class="nv">$ROLE_BASED_CLIENT_ID</span> --client-secret <span class="nv">$ROLE_BASED_CLIENT_SECRET</span> --no-tui --operation-id<span class="o">=</span>post-oauth-openid-client --data<span class="o">=</span>auth_code_client.json
+./config-cli-tui.pyz --host <span class="nv">$FQDN</span> --client-id <span class="nv">$TUI_CLIENT_ID</span> --client-secret <span class="nv">$TUI_CLIENT_SECRET</span> --no-tui --operation-id<span class="o">=</span>post-oauth-openid-client --data<span class="o">=</span>auth_code_client.json
 </code></pre></div>
 </li>
 <li>
@@ -9388,7 +9388,7 @@ cat <span class="s">&lt;&lt; EOF &gt; auth_code_client.json</span>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-13T08:34:37+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-13</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-23T20:18:50+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-23</span>
       
         <br>
         Created:
