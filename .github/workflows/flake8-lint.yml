@@ -1,19 +1,27 @@
-# This workflow will install Python dependencies, run tests and lint with a single version of Python
-# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
-
-name: Python application
-
+name: Flake lint Python
 on:
   push:
-    branches: [ master ]
+    branches:
+      - main
+    paths:
+      #TODO: add all python projects paths below "jans-pycloudlib", "jans-cli-tui", "jans-linux-setup"
+      - 'demos/jans-tent/**'
   pull_request:
-    branches: [ master ]
+    branches:
+      - main
+    paths:
+      #TODO: add all python projects paths below "jans-pycloudlib", "jans-cli-tui", "jans-linux-setup"
+      - 'demos/jans-tent/**'
 
 jobs:
-  build:
-
+  lint:
     runs-on: ubuntu-latest
-
+    strategy:
+      #max-parallel: 1
+      fail-fast: false
+      matrix:
+        #TODO: add all python projects paths below "jans-pycloudlib", "jans-cli-tui", "jans-linux-setup"
+        python-projects: ["demos/jans-tent"]
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python 3.8
@@ -25,10 +33,11 @@ jobs:
         python -m pip install --upgrade pip
         pip install flake8
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      working-directory: ${{ matrix.python-projects }}
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-   
+      working-directory: ${{ matrix.python-projects }}
