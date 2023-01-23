@@ -1419,6 +1419,42 @@ paths:
                   description: Additional audiences.
                   items:
                     type: string
+                spontaneous_scope_script_dns:
+                  type: array
+                  description: Spontaneous scope script dn
+                  items:
+                    type: string
+                update_token_script_dns:
+                  type: array
+                  description: Update token script dn
+                  items:
+                    type: string
+                post_authn_script_dns:
+                  type: array
+                  description: Post Authn script dn
+                  items:
+                    type: string
+                consent_gathering_script_dns:
+                  type: array
+                  description: Consent Gathering script dn
+                  items:
+                    type: string
+                introspection_script_dns:
+                  type: array
+                  description: Introspection script dn
+                  items:
+                    type: string
+                rpt_claims_script_dns:
+                  type: array
+                  description: RPT Claims script dn
+                  items:
+                    type: string
+                ropc_script_dns:
+                  type: array
+                  description: ROPC script dn
+                  items:
+                    type: string
+
       responses:
         200:
           description: OK
@@ -1769,6 +1805,41 @@ paths:
                 additional_audience:
                   type: array
                   description: Additional audiences.
+                  items:
+                    type: string
+                spontaneous_scope_script_dns:
+                  type: array
+                  description: Spontaneous scope script dn
+                  items:
+                    type: string
+                update_token_script_dns:
+                  type: array
+                  description: Update token script dn
+                  items:
+                    type: string
+                post_authn_script_dns:
+                  type: array
+                  description: Post Authn script dn
+                  items:
+                    type: string
+                consent_gathering_script_dns:
+                  type: array
+                  description: Consent Gathering script dn
+                  items:
+                    type: string
+                introspection_script_dns:
+                  type: array
+                  description: Introspection script dn
+                  items:
+                    type: string
+                rpt_claims_script_dns:
+                  type: array
+                  description: RPT Claims script dn
+                  items:
+                    type: string
+                ropc_script_dns:
+                  type: array
+                  description: ROPC script dn
                   items:
                     type: string
       responses:

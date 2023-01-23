@@ -51,11 +51,6 @@ spec:
         {{- with $.Values.volumeMounts }}
 {{- toYaml . | nindent 10 }}
         {{- end }}
-        {{- if $.Values.global.upgrade.enabled }}
-          - name: ox-ldif-cm
-            mountPath: /opt/opendj/config/schema/101-jans.ldif
-            subPath: 101-jans.ldif
-        {{- end }}
     {{- with $.Values.image.pullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
@@ -68,11 +63,6 @@ spec:
       volumes:
       {{- with $.Values.volumes }}
 {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- if $.Values.global.upgrade.enabled }}
-        - name: ox-ldif-cm
-          configMap:
-            name: {{ $.Release.Name }}-oxjans
       {{- end }}
       {{- if .Values.topologySpreadConstraints }}
       topologySpreadConstraints:
@@ -113,11 +103,6 @@ spec:
         {{- end }}
         {{- with $.Values.volumeMounts }}
 {{- toYaml . | nindent 10 }}
-        {{- end }}
-        {{- if $.Values.global.upgrade.enabled }}
-          - name: ox-ldif-cm
-            mountPath: /opt/opendj/config/schema/101-jans.ldif
-            subPath: 101-jans.ldif
         {{- end }}
         livenessProbe:
 {{- toYaml $.Values.livenessProbe | nindent 10 }}

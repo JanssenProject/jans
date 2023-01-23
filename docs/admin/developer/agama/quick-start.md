@@ -178,15 +178,15 @@ curl -k -i -H 'Authorization: Bearer <token>'
 
 Note the source code is not part of the response by default. Append `?includeSource=true` to the URL for the source to be included.
 
-
-!!! Important  
+!!! Important
     There are different, more detailed ways to retrieve, create and update flows but they are regarded in the [Development lifecycle](./lifecycle.md) doc page.
-
 
 Finally the flow assets must be uploaded. You can SFTP/SCP or use other means to do so. In our example, only two steps are required:
 
 - Create a directory `hello` under `/opt/jans/jetty/jans-auth/agama/ftl`
 - Upload the [template](https://github.com/JanssenProject/jans/raw/main/docs/admin/developer/agama/index.ftlh) there
+
+There is an alternative way to manage flows and is via deployment of `.gama` files. This is a more elaborate technique that allows bundling several flows and their required assets and classes for bulk deployment. Learn more about it [here](#gama-deployment.md).
 
 ### Craft an authentication request
 
@@ -230,6 +230,8 @@ We have barely scratched the surface so far. There is lots more to learn in orde
 - [Writing UI pages](./ui-pages.md)
 
 - [Flows lifecycle](./flows-lifecycle.md)
+
+- [`.gama` files deployment](#gama-deployment.md)
 
 - [Engine configuration](./engine-config.md)
 
