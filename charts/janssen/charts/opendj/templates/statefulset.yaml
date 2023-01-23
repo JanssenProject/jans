@@ -64,11 +64,6 @@ spec:
       {{- with $.Values.volumes }}
 {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if $.Values.global.upgrade.enabled }}
-        - name: ox-ldif-cm
-          configMap:
-            name: {{ $.Release.Name }}-oxjans
-      {{- end }}
       {{- if .Values.topologySpreadConstraints }}
       topologySpreadConstraints:
         {{- include "opendj.topology-spread-constraints" . | indent 8 }}
