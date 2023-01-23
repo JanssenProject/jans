@@ -1349,7 +1349,7 @@ paths:
                   description: List of spontaneous scopes
                   items:
                     type: string
-                run_introspection_script_before_access_token_as_jwt_creation_and_include_claims:
+                run_introspection_script_before_jwt_creation:
                   type: boolean
                   description: Boolean value with default value false. If true and access_token_as_jwt=true then run introspection script
                     and transfer claims into JWT.
@@ -1737,7 +1737,7 @@ paths:
                   description: List of spontaneous scopes
                   items:
                     type: string
-                run_introspection_script_before_access_token_as_jwt_creation_and_include_claims:
+                run_introspection_script_before_jwt_creation:
                   type: boolean
                   description: Boolean value with default value false. If true and access_token_as_jwt=true then run introspection script
                     and transfer claims into JWT.
@@ -2126,7 +2126,7 @@ paths:
                     description: List of spontaneous scopes
                     items:
                       type: string
-                  run_introspection_script_before_access_token_as_jwt_creation_and_include_claims:
+                  run_introspection_script_before_jwt_creation:
                     type: boolean
                     description: Boolean value with default value false. If true and access_token_as_jwt=true then run introspection script
                       and transfer claims into JWT.
