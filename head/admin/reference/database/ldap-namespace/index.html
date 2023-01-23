@@ -77,11 +77,6 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
-        
-        <a href="#this-content-is-in-progress" class="md-skip">
-          Skip to content
-        </a>
-      
     </div>
     <div data-md-component="announce">
       
@@ -2356,52 +2351,9 @@
       
       
       
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          LDAP Namespace Diagram
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
       <a href="./" class="md-nav__link md-nav__link--active">
         LDAP Namespace Diagram
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#this-content-is-in-progress" class="md-nav__link">
-    This content is in progress
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#have-questions-in-the-meantime" class="md-nav__link">
-    Have questions in the meantime?
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#want-to-contribute" class="md-nav__link">
-    Want to contribute?
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
       
     </li>
   
@@ -8789,35 +8741,6 @@
   
   
   
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#this-content-is-in-progress" class="md-nav__link">
-    This content is in progress
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#have-questions-in-the-meantime" class="md-nav__link">
-    Have questions in the meantime?
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#want-to-contribute" class="md-nav__link">
-    Want to contribute?
-  </a>
-  
-</li>
-      
-    </ul>
-  
 </nav>
                   </div>
                 </div>
@@ -8860,19 +8783,141 @@
 
   <h1>LDAP Namespace Diagram</h1>
 
-<h2 id="this-content-is-in-progress">This content is in progress<a class="headerlink" href="#this-content-is-in-progress" title="Permanent link">#</a></h2>
-<p>The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.</p>
-<h2 id="have-questions-in-the-meantime">Have questions in the meantime?<a class="headerlink" href="#have-questions-in-the-meantime" title="Permanent link">#</a></h2>
-<p>While this documentation is in progress, you can ask questions through <a href="https://github.com/JanssenProject/jans/discussion">GitHub Discussions</a> or the <a href="https://gitter.im/JanssenProject/Lobby">community chat on Gitter</a>. Any questions you have will help determine what information our documentation should cover.</p>
-<h2 id="want-to-contribute">Want to contribute?<a class="headerlink" href="#want-to-contribute" title="Permanent link">#</a></h2>
-<p>If you have content you'd like to contribute to this page in the meantime, you can get started with our <a href="https://docs.jans.io/head/CONTRIBUTING/">Contribution guide</a>.</p>
+<pre class="mermaid"><code>graph LR
+    A[ou=jans] --&gt; B(ou=agama)
+    B --&gt; B1[ou=flows]
+    B1 --&gt; B11[agFlowQname=flow_name1]
+    B1 --&gt; B12[agFlowQname=flow_name2]
+    B1 --&gt; B13[agFlowQname=flow_name3]
+    B1 --&gt; B14[agFlowQname=flow_name4]
+
+    B --&gt; B2[ou=runs]
+    B2 --&gt; B21[jansId=....]
+    B2 --&gt; B22[jansId=....]
+
+    A[ou=jans] --&gt; C(ou=attributes)
+    C --&gt; C1[inum=.....]
+    C --&gt; C2[inum=.....]
+    C --&gt; Cn[inum=.....]
+
+    A[ou=jans] --&gt; D(ou=authorizations)
+    D --&gt; D1[jansId=...]
+    D --&gt; D2[jansId=...]
+    D --&gt; D3[jansId=...]
+    D --&gt; Dn[jansId=...]
+
+    A[ou=jans] --&gt; E(ou=cache)
+    E --&gt; E1[uuid.....]
+
+    A[ou=jans] --&gt; F(ou=ciba)
+
+    A[ou=jans] --&gt; G(ou=clients)
+    G --&gt; G1[inum=....]
+    G1 --&gt; G12[ou=uma_permission]
+    G12 --&gt; G121[jansTicket=.....]
+    G12 --&gt; G122[jansTicket=.....]
+
+    G --&gt; G2[inum=....]
+    G2 --&gt; G21[ou=uma_permission]
+    G21 --&gt; G211[jansTicket=.....]
+    G21 --&gt; G212[jansTicket=.....]
+
+    G --&gt; Gn[inum=....]
+
+    A[ou=jans] --&gt; H(ou=groups)
+    H --&gt; H1[inum=...]
+    H --&gt; H2[inum=...]
+    H --&gt; Hn[inum=...]
+
+
+    A[ou=jans] --&gt; I(ou=metric)
+
+
+    A[ou=jans] --&gt; J(ou=par)
+
+    A[ou=jans] --&gt; K(ou=people)
+    K --&gt; K1[inum=....]
+    K1 --&gt; K11[ou=fido2_register]
+    K11 --&gt; K111[jansId=....]
+    K11 --&gt; K112[jansId=....]
+    K11 --&gt; K112[jansId=....]
+
+    K1 --&gt; K12[ou=fido2_auth]
+    K12 --&gt; K121[jansId=....]
+    K12 --&gt; K122[jansId=....]
+    K12 --&gt; K123[jansId=....]
+
+    K --&gt; K2[inum=....]
+    K --&gt; K3[inum=....]
+    K --&gt; K4[inum=....]
+    K --&gt; K5[inum=....]
+
+    A[ou=jans] --&gt; L(ou=push)
+    L --&gt; L1[ou=application]
+    L --&gt; L2[ou=device]
+
+    A[ou=jans] --&gt; M(ou=resetPasswordRequests)
+
+
+    A[ou=jans] --&gt; N(ou=scope)
+    N --&gt; N1[inum=...]
+    N --&gt; N2[inum=...]
+    N --&gt; N3[inum=...]
+
+    A[ou=jans] --&gt; O(ou=scripts)
+    O --&gt; O1[inum=...]
+    O --&gt; O2[inum=...]
+
+    A[ou=jans] --&gt; P(ou=sector_identifiers)
+
+
+    A[ou=jans] --&gt; Q(ou=sessions)
+    Q --&gt; Q1[jansId=....]
+    Q --&gt; Q2[jansId=....]
+    Q --&gt; Q3[jansId=....]
+
+    A[ou=jans] --&gt; R(ou=stat)
+    R --&gt; R1[ou=yyyymm]
+    R --&gt; R2[ou=yyyymm]
+
+
+    A[ou=jans] --&gt; S(ou=tokens)
+    S --&gt; S1[ou=uma_rpt]
+    S --&gt; S2[tknCde=....]
+    S --&gt; S3[tknCde=....]
+    S --&gt; S4[tknCde=....]
+
+    A[ou=jans] --&gt; T(ou=trustRelationships)
+    T --&gt; T1[inum=...]
+    T --&gt; T2[inum=...]
+    T --&gt; T3[inum=...]
+
+    A[ou=jans] --&gt; U(ou=uma)
+    U --&gt; W[ou=pct]
+    W --&gt; W1[tknCde=...]
+    W --&gt; W2[tknCde=...]
+    W --&gt; W3[tknCde=...]
+
+
+    U --&gt; X[ou=resources]
+    X --&gt; X1[jansId=...]
+    X --&gt; X2[jansId=...]
+    X --&gt; X3[jansId=...]
+
+    A[ou=jans] --&gt; V(ou=configuration)
+    V --&gt; V1[ou=admin-ui]
+    V --&gt; V2[ou=casa]
+    V --&gt; V3[ou=jans-auth]
+    V --&gt; V4[ou=jans-config-api]
+    V --&gt; V5[ou=jans-fido2]
+    V --&gt; V6[ou=jans-scim]</code></pre>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-08T20:20:00+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-08</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-23T07:40:44+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-23</span>
       
         <br>
         Created:
