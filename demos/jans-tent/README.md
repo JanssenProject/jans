@@ -8,11 +8,11 @@ Flask based auth/identity app based on test-first, made to encourage and learn B
 
 ### Code of Conduct
 
-[Janssen code of conduct](https://docs.jans.io/head/CODE_OF_CONDUCT/) ensures that Janssen community is a welcoming place for everyone. 
+[Janssen code of conduct](https://docs.jans.io/head/CODE_OF_CONDUCT/) ensures that Janssen community is a welcoming place for everyone.
 
 ### Contribution Guidelines
 
-[Contribution guide](https://docs.jans.io/head/CONTRIBUTING/) will give you all necessary information and `howto` to get started. Janssen community welcomes all types of contributions. Be it an interesting comment on an open issue or implementing a feature.  Welcome aboard! ✈️ 
+[Contribution guide](https://docs.jans.io/head/CONTRIBUTING/) will give you all necessary information and `howto` to get started. Janssen community welcomes all types of contributions. Be it an interesting comment on an open issue or implementing a feature.  Welcome aboard! ✈️
 
 ## Authorization code flow / Protected Ressources
 
@@ -41,29 +41,29 @@ App->App: Return protected-content\nOr unauthorized error
 
 ## Installation
 
-*  Install dependencies
+* Install dependencies
 
-```
+```bash
 pip3 install -r requirements.txt
 ```
 
 * Create client on Auth server, i.e.:
-    * response_type `code`
-    * redirect_uri `https://localhost:9090/oidc_callback`
-    * Grants `authorization_code`
-    * client authn at token endpoint `client_secret_post`
-    * scopes `openid` `username` `profile` `email`
-   Please notice: You may also use the `register` endpoint, still to be documented.
+  * response_type `code`
+  * redirect_uri `https://localhost:9090/oidc_callback`
+  * Grants `authorization_code`
+  * client authn at token endpoint `client_secret_post`
+  * scopes `openid` `username` `profile` `email`
+  Please notice: You may also use the `register` endpoint, still to be documented.
 
 * Copy `auth-tdd-client/config_dummy.py` to `config.py` and use data according to your needs, i.e.:
-    * Input client_id and secret from above step
-    * Set configuration endpoint URL
-    * Set `ISSUER`
-    * Set `ACR_VALUES='basic'`
+  * Input client_id and secret from above step
+  * Set configuration endpoint URL
+  * Set `ISSUER`
+  * Set `ACR_VALUES='basic'`
 
 * Import your Auth Server certificate
 
-```
+```bash
 export CERT_PATH=$(python3 -m certifi)
 export SSL_CERT_FILE=${CERT_PATH}
 export REQUESTS_CA_BUNDLE=${CERT_PATH}
@@ -72,7 +72,7 @@ mv issuer.cer $(python3 -m certifi)
 
 * Run server
 
-```
+```bash
 python3 main.py
 ```
 
@@ -86,8 +86,8 @@ Sending a `POST` request to `/register` endpoint containing a `JSON` with the OP
 
 ```json
 {
-    "op_url": "https://demoexample.jans.io",
-    "client_url": "https://tempclient.techno24x7.com"
+    "op_url": "https://oidc-provider.jans.io",
+    "client_url": "https://my-client.mydomain.com"
 }
 ```
 
@@ -95,7 +95,7 @@ Will return client id and client secret
 
 ### Auto-config endpoint
 
-Sending a `POST` request to `/configuration` endpoint, containing client id, client secret, and metadata endpoint will fetch data from metadata url and override `config.py` settings during runtime. 
+Sending a `POST` request to `/configuration` endpoint, containing client id, client secret, and metadata endpoint will fetch data from metadata url and override `config.py` settings during runtime.
 
 ```json
 {
@@ -104,8 +104,3 @@ Sending a `POST` request to `/configuration` endpoint, containing client id, cli
     "op_metadata_url": "https://t1.techno24x7.com/.well-known/openid-configuration"
 }
 ```
-
-
-
-
-
