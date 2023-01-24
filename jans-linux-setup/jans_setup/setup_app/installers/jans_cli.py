@@ -80,7 +80,7 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
         base.extract_from_zip(self.source_files[3][0], 'pygments', os.path.join(self.pylib_dir, 'pygments'))
 
         # extract yaml files
-        base.extract_file(base.current_app.jans_zip, 'jans-config-api/docs/jans-config-api-swagger-auto.yaml', os.path.join(ops_dir, 'jca', 'jans-config-api-swagger-auto.yaml'), ren=True)
+        base.extract_file(base.current_app.jans_zip, 'jans-config-api/docs/jans-config-api-swagger.yaml', os.path.join(ops_dir, 'jca', 'jans-config-api-swagger-auto.yaml'), ren=True)
         for plugin_yaml_file in ('fido2-plugin-swagger.yaml', 'jans-admin-ui-plugin-swagger.yaml', 'scim-plugin-swagger.yaml', 'user-mgt-plugin-swagger.yaml'):
             base.extract_file(base.current_app.jans_zip, 'jans-config-api/plugins/docs/'+plugin_yaml_file, os.path.join(ops_dir, 'jca', plugin_yaml_file), ren=True)
         base.extract_file(base.current_app.jans_zip, 'jans-scim/server/src/main/resources/jans-scim-openapi.yaml', os.path.join(ops_dir, 'scim', 'scim.yaml'), ren=True)
