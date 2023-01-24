@@ -72,7 +72,6 @@
 	<modules>
 		<module>model</module>
 		<module>client</module>
-		<module>common</module>
 		<module>server</module>
 	</modules>
 	
@@ -106,16 +105,6 @@
 				<groupId>io.jans</groupId>
 				<artifactId>jans-fido2-model</artifactId>
 				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>io.jans</groupId>
-				<artifactId>jans-fido2-common</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>io.jans</groupId>
-				<artifactId>jans-orm-model</artifactId>
-				<version>${janssen.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
