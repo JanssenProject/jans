@@ -99,3 +99,7 @@ Access token lifetime is configurable at the server level via the
 `accessTokenLifetime` property. However, a client can override this value
 during client registration with the `access_token_lifetime` request
 parameter.
+
+### Revoke Access Token
+
+Access token can be revoked via [Revoke Endpoint](../endpoints/token-revocation.md)
