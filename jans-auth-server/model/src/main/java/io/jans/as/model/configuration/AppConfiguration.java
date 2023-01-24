@@ -674,7 +674,7 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Boolean value specifying whether to return detailed reason of the error from AS. Default value is false", defaultValue = "false")
     private Boolean errorReasonEnabled = false;
 
-    @DocProperty(description = "Boolean value specifying whether to remove Refresh Tokens on logout. Default value is false", defaultValue = "true")
+    @DocProperty(description = "Boolean value specifying whether to remove Refresh Tokens on logout. Default value is true", defaultValue = "true")
     private Boolean removeRefreshTokensForClientOnLogout = true;
 
     @DocProperty(description = "Boolean value specifying whether to skip refreshing tokens on refreshing", defaultValue = "false")

@@ -77,7 +77,7 @@ Auth Server interception scripts. The preferred script is the
 [update token script](../../developer/scripts/update-token.md). You can
 also use the [introspection script](../../developer/scripts/introspection.md).
 
-### Access Token Crypto
+### Access Token Crypto (JWT)
 
 JWT access tokens are signed by Jans Auth Server using
 algorithms specified in the `access_token_signing_alg_values_supported`
@@ -86,12 +86,42 @@ signed with the standard OpenID signing key.
 
 Jans Auth Server supports TLS client certificate bound access tokens. After
 a successful mutual TLS client authentication, Jans Auth Server encodes the
-client certificate thumbprint (hash) in `cnf` claim of the JWT or introspection
+client certificate thumbprint (hash) in `x5t#S256` confirmation method of the JWT or introspection
 JSON. Assuming the client uses the same certificate to establish a mutual TLS
 session with the API, the thumbprint in the access token can verify that this
 is the same client that obtained the access token. This feature is typically
 used in high security environments, as the operational cost of mutual TLS is
 material.
+
+Decoded JWT example
+```json
+{
+  "iss": "https://server.example.com",
+  "sub": "ty.webb@example.com",
+  "exp": 1493726400,
+  "nbf": 1493722800,
+  "cnf":{
+    "x5t#S256": "bwcK0esc3ACC3DB2Y5_lESsXE8o9ltc05O89jdN-dg2"
+  }
+}
+```
+
+Sample introspection response
+```json
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "active": true,
+  "iss": "https://server.example.com",
+  "sub": "ty.webb@example.com",
+  "exp": 1493726400,
+  "nbf": 1493722800,
+  "cnf":{
+    "x5t#S256": "bwcK0esc3ACC3DB2Y5_lESsXE8o9ltc05O89jdN-dg2"
+  }
+}
+```
 
 ### Server and Client configurations
 
@@ -99,3 +129,7 @@ Access token lifetime is configurable at the server level via the
 `accessTokenLifetime` property. However, a client can override this value
 during client registration with the `access_token_lifetime` request
 parameter.
+
+### Revoke Access Token
+
+Access token can be revoked via [Revoke Endpoint](../endpoints/token-revocation.md)
