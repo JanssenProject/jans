@@ -6,10 +6,14 @@
 
 package io.jans.orm.model.fido2;
 
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
 
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DataEntry;
+import io.jans.orm.annotation.Expiration;
 import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.model.base.BaseEntry;
 
@@ -23,7 +27,9 @@ import io.jans.orm.model.base.BaseEntry;
 @ObjectClass
 public class Fido2Entry extends BaseEntry {
 
-    @AttributeName(ignoreDuringUpdate = true, name = "jansId")
+	private static final long serialVersionUID = -3122430771066187529L;
+
+	@AttributeName(ignoreDuringUpdate = true, name = "jansId")
     private String id;
 
     @AttributeName(name = "jansCodeChallenge")
@@ -34,6 +40,15 @@ public class Fido2Entry extends BaseEntry {
 
     @AttributeName(name = "personInum")
     private String userInum;
+
+    @AttributeName(name = "exp")
+    private Date expirationDate;
+
+    @AttributeName(name = "del")
+    private boolean deletable = true;
+
+    @Expiration
+    private Integer ttl;
 
     public Fido2Entry() {
     }
@@ -81,4 +96,47 @@ public class Fido2Entry extends BaseEntry {
     public void setUserInum(String userInum) {
         this.userInum = userInum;
     }
+
+	public Date getExpirationDate() {
+		return expirationDate;
+	}
+
+	public void setExpirationDate(Date expirationDate) {
+		this.expirationDate = expirationDate;
+	}
+
+	public boolean isDeletable() {
+		return deletable;
+	}
+
+	public void setDeletable(boolean deletable) {
+		this.deletable = deletable;
+	}
+
+	public Integer getTtl() {
+		return ttl;
+	}
+
+	public void setTtl(Integer ttl) {
+		this.ttl = ttl;
+	}
+
+	public void clearExpiration() {
+        this.expirationDate = null;
+        this.deletable = false;
+        this.ttl = 0;
+	}
+
+	public void setExpiration() {
+        if (creationDate != null) {
+            final int expiration = 90;
+            Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+            calendar.setTime(creationDate);
+            calendar.add(Calendar.SECOND, expiration);
+            this.expirationDate = calendar.getTime();
+            this.deletable = true;
+            this.ttl = expiration;
+        }
+    }
+
 }

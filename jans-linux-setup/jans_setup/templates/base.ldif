@@ -98,25 +98,15 @@ objectClass: top
 objectClass: organizationalUnit
 ou: device
 
-dn: ou=u2f,o=jans
+dn: ou=fido2,o=jans
 objectClass: top
 objectClass: organizationalUnit
-ou: u2f
+ou: fido2
 
-dn: ou=registration_requests,ou=u2f,o=jans
+dn: ou=fido2_register,ou=fido2,o=jans
 objectClass: top
 objectClass: organizationalUnit
-ou: registration_requests
-
-dn: ou=authentication_requests,ou=u2f,o=jans
-objectClass: top
-objectClass: organizationalUnit
-ou: authentication_requests
-
-dn: ou=registered_devices,ou=u2f,o=jans
-objectClass: top
-objectClass: organizationalUnit
-ou: registered_devices
+ou: fido2_register
 
 dn: ou=metric,o=jans
 objectClass: top

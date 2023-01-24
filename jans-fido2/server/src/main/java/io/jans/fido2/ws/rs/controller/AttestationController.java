@@ -37,7 +37,9 @@ import io.jans.fido2.service.DataMapperService;
 import io.jans.fido2.service.operation.AttestationService;
 import io.jans.fido2.service.sg.RawRegistrationService;
 import io.jans.fido2.service.verifier.CommonVerifiers;
+import io.jans.fido2.sg.SuperGluuMode;
 import io.jans.service.net.NetworkService;
+import io.jans.util.StringHelper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
@@ -165,16 +167,25 @@ public class AttestationController {
             return Response.status(Status.FORBIDDEN).build();
         }
 
+        boolean oneStep = StringHelper.isEmpty(userName);
+
         ObjectNode params = dataMapperService.createObjectNode();
         // Add all required parameters from request to allow process U2F request 
-        params.put(CommonVerifiers.SUPER_GLUU_REQUEST, true);
+        params.put(CommonVerifiers.SUPER_GLUU_MODE, oneStep ? SuperGluuMode.ONE_STEP.getMode() : SuperGluuMode.TWO_STEP.getMode());
 
         // TODO: Validate input parameters
-        params.put("username", userName);
+
+        String useUserName = userName;
+        if (oneStep) {
+        	useUserName = attestationService.generateUserId();
+        }
+        
+        params.put("username", useUserName);
+        params.put("displayName", useUserName);
+
         params.put("session_id", sessionId);
 
         // TODO: Get displayName from user entry 
-        params.put("displayName", userName);
 
         // Required parameters
         params.put("attestation", "direct");
@@ -263,6 +274,9 @@ public class AttestationController {
         ObjectNode params = dataMapperService.createObjectNode();
         // Add all required parameters from request to allow process U2F request 
         params.put(CommonVerifiers.SUPER_GLUU_REQUEST, true);
+
+        boolean oneStep = StringHelper.isEmpty(userName);
+        params.put(CommonVerifiers.SUPER_GLUU_MODE, oneStep ? SuperGluuMode.ONE_STEP.getMode() : SuperGluuMode.TWO_STEP.getMode());
 
         // Manadatory parameter
         params.put("type", "public-key");

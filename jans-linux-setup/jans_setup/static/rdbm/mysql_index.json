@@ -205,7 +205,9 @@
       "jansStatus",
       "personInum"
     ],
-    "custom": []
+    "custom": [
+      "`del`, `exp`"
+    ]
   },
   "jansFido2RegistrationEntry": {
     "fields": [
@@ -215,7 +217,9 @@
       "jansApp",
       "jansPublicKeyIdHash"
     ],
-    "custom": []
+    "custom": [
+      "`del`, `exp`"
+    ]
   },
   "jansInumMap": {
     "fields": [

@@ -29,6 +29,7 @@ import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.DataMapperService;
 import io.jans.fido2.service.processors.AttestationFormatProcessor;
+import io.jans.fido2.sg.SuperGluuMode;
 import io.jans.orm.model.fido2.UserVerification;
 import io.jans.service.net.NetworkService;
 import io.jans.util.StringHelper;
@@ -44,6 +45,7 @@ import jakarta.inject.Inject;
 public class CommonVerifiers {
 
     public static final String SUPER_GLUU_REQUEST = "super_gluu_request";
+    public static final String SUPER_GLUU_MODE = "super_gluu_request_mode";
 
 	@Inject
     private Logger log;
@@ -480,5 +482,14 @@ public class CommonVerifiers {
 
         return false;
 	}
+
+	public boolean isSuperGluuOneStepMode(JsonNode params) {
+		if (params.hasNonNull(CommonVerifiers.SUPER_GLUU_MODE)) {
+			return SuperGluuMode.ONE_STEP == SuperGluuMode.fromModeValue(params.get(CommonVerifiers.SUPER_GLUU_MODE).asText());
+		}
+
+        return false;
+	}
+
 
 }

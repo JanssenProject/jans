@@ -9,14 +9,12 @@ package io.jans.fido2.service.persist;
 import java.util.Date;
 import java.util.Map;
 
-
 import org.slf4j.Logger;
 
 import io.jans.as.common.model.session.SessionId;
 import io.jans.as.common.model.session.SessionIdState;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.orm.PersistenceEntryManager;
-import io.jans.orm.model.fido2.Fido2RegistrationData;
 import io.jans.orm.model.fido2.Fido2RegistrationEntry;
 import io.jans.orm.model.fido2.Fido2RegistrationStatus;
 import io.jans.util.StringHelper;
@@ -53,10 +51,11 @@ public class UserSessionIdService {
         } else {
             sessionAttributes.put("session_custom_state", "declined");
         }
-        sessionAttributes.put("oxpush2_u2f_device_id", registrationEntry.getId());
-        sessionAttributes.put("oxpush2_u2f_device_user_inum", userInum);
-        sessionAttributes.put("oxpush2_u2f_device_enroll", Boolean.toString(enroll));
-        sessionAttributes.put("oxpush2_u2f_device_one_step", Boolean.toString(oneStep));
+        sessionAttributes.put("super_gluu_u2f_device_id", registrationEntry.getId());
+        sessionAttributes.put("super_gluu_u2f_device_dn", registrationEntry.getDn());
+        sessionAttributes.put("super_gluu_u2f_device_user_inum", userInum);
+        sessionAttributes.put("super_gluu_u2f_device_enroll", Boolean.toString(enroll));
+        sessionAttributes.put("super_gluu_u2f_device_one_step", Boolean.toString(oneStep));
 
         updateSessionId(entity);
     }

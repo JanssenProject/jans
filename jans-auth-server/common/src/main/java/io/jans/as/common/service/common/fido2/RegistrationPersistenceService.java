@@ -11,9 +11,13 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.TimeZone;
+import java.util.UUID;
 
 import org.slf4j.Logger;
 
+import io.jans.as.common.model.common.User;
+import io.jans.as.common.service.common.UserService;
+import io.jans.as.model.config.StaticConfiguration;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.base.SimpleBranch;
 import io.jans.orm.model.fido2.Fido2RegistrationData;
@@ -21,6 +25,7 @@ import io.jans.orm.model.fido2.Fido2RegistrationEntry;
 import io.jans.orm.model.fido2.Fido2RegistrationStatus;
 import io.jans.orm.search.filter.Filter;
 import io.jans.util.StringHelper;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 /**
@@ -28,13 +33,26 @@ import jakarta.inject.Inject;
  * @author Yuriy Movchan
  * @version May 08, 2020
  */
-public abstract class BaseRegistrationPersistenceService {
+@ApplicationScoped
+public class RegistrationPersistenceService {
 
     @Inject
     private Logger log;
 
     @Inject
     private PersistenceEntryManager persistenceEntryManager;
+
+    @Inject
+    private UserService userService;
+
+    @Inject
+    private StaticConfiguration staticConfiguration;
+
+    public void save(Fido2RegistrationEntry registrationEntry) {
+        prepareBranch(registrationEntry.getUserInum());
+
+        persistenceEntryManager.persist(registrationEntry);
+    }
 
     public void update(Fido2RegistrationEntry registrationEntry) {
         prepareBranch(registrationEntry.getUserInum());
@@ -108,12 +126,39 @@ public abstract class BaseRegistrationPersistenceService {
     }
     
     
-    public void attachDeviceRegistrationToUser(String userInum, String deviceId) {
-    	throw new RuntimeException("TODO");
+    public boolean attachDeviceRegistrationToUser(String userInum, String deviceDn) {
+		Fido2RegistrationEntry registrationEntry = persistenceEntryManager.find(Fido2RegistrationEntry.class, deviceDn);
+		if (registrationEntry == null) {
+			return false;
+		}
+		
+		User user = userService.getUserByInum(userInum, "uid");
+		if (user == null) {
+			return false;
+		}
+		
+		persistenceEntryManager.remove(deviceDn, Fido2RegistrationEntry.class);
+		
+        final String id = UUID.randomUUID().toString();
+
+        String userAttestationDn = getDnForRegistrationEntry(userInum, id);
+        registrationEntry.setId(id);
+        registrationEntry.setDn(userAttestationDn);
+        registrationEntry.setUserInum(userInum);
+
+		Fido2RegistrationData registrationData = registrationEntry.getRegistrationData();    
+		registrationData.setUsername(user.getUserId());
+		registrationEntry.clearExpiration();
+		
+		save(registrationEntry);
+
+		return true;
     }
     
-    public Fido2RegistrationEntry findOneStepUserDeviceRegistration(String jansId) {
-        throw new RuntimeException("TODO");
+    public Fido2RegistrationEntry findOneStepUserDeviceRegistration(String deviceDn) {
+		Fido2RegistrationEntry registrationEntry = persistenceEntryManager.find(Fido2RegistrationEntry.class, deviceDn);
+		
+		return registrationEntry;
     }
 
     public String getDnForRegistrationEntry(String userInum, String jsId) {
@@ -143,6 +188,8 @@ public abstract class BaseRegistrationPersistenceService {
         return String.format("inum=%s,%s", userInum, peopleDn);
     }
 
-    public abstract String getBasedPeopleDn();
+    public String getBasedPeopleDn() {
+    	return staticConfiguration.getBaseDn().getPeople();
+    }
 
 }

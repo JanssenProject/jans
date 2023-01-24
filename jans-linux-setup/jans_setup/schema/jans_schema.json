@@ -4161,7 +4161,9 @@
         "jansCodeChallenge",
         "personInum",
         "jansAuthData",
-        "jansStatus"
+        "jansStatus",
+        "exp",
+        "del"
       ],
       "must": [
         "objectclass"
@@ -4192,7 +4194,9 @@
         "jansDeviceData",
         "jansDeviceNotificationConf",
         "jansCounter",
-        "jansStatus"
+        "jansStatus",
+        "exp",
+        "del"
       ],
       "must": [
         "objectclass"

@@ -8,6 +8,7 @@ package io.jans.as.server.session.ws.rs;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.jans.as.model.common.FeatureFlagType;
+import io.jans.as.model.config.Constants;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.common.model.session.SessionId;
 import io.jans.as.server.service.CookieService;
@@ -35,6 +36,8 @@ import java.util.Date;
  */
 @Path("/")
 public class CheckSessionStatusRestWebServiceImpl {
+
+	public static final String SESSION_CUSTOM_STATE = "session_custom_state";
 
     @Inject
     private Logger log;
@@ -64,7 +67,7 @@ public class CheckSessionStatusRestWebServiceImpl {
             response.setState(sessionId.getState().getValue());
             response.setAuthTime(sessionId.getAuthenticationTime());
 
-            String sessionCustomState = sessionId.getSessionAttributes().get(SessionIdService.SESSION_CUSTOM_STATE);
+            String sessionCustomState = sessionId.getSessionAttributes().get(SESSION_CUSTOM_STATE);
             if (StringHelper.isNotEmpty(sessionCustomState)) {
                 response.setCustomState(sessionCustomState);
             }
@@ -73,7 +76,9 @@ public class CheckSessionStatusRestWebServiceImpl {
         String responseJson = ServerUtil.asJson(response);
         log.debug("Check session status response: '{}'", responseJson);
 
-        return Response.ok().type(MediaType.APPLICATION_JSON).entity(responseJson).build();
+ 		return Response.ok().type(MediaType.APPLICATION_JSON).entity(responseJson)
+				.cacheControl(ServerUtil.cacheControlWithNoStoreTransformAndPrivate())
+				.header(Constants.PRAGMA, Constants.NO_CACHE).build();
     }
 
     class CheckSessionResponse {

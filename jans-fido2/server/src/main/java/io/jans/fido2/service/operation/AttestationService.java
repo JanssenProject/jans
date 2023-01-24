@@ -34,6 +34,7 @@ import io.jans.fido2.service.persist.UserSessionIdService;
 import io.jans.fido2.service.verifier.AttestationVerifier;
 import io.jans.fido2.service.verifier.CommonVerifiers;
 import io.jans.fido2.service.verifier.DomainVerifier;
+import io.jans.fido2.sg.SuperGluuMode;
 import io.jans.fido2.ws.rs.controller.AttestationController;
 import io.jans.orm.model.fido2.Fido2AuthenticationEntry;
 import io.jans.orm.model.fido2.Fido2DeviceData;
@@ -94,6 +95,8 @@ public class AttestationService {
 		// Verify request parameters
 		commonVerifiers.verifyAttestationOptions(params);
 
+		boolean oneStep = commonVerifiers.isSuperGluuOneStepMode(params);
+
 		// Create result object
 		ObjectNode optionsResponseNode = dataMapperService.createObjectNode();
 
@@ -136,9 +139,11 @@ public class AttestationService {
 		log.debug("Put user {}", credentialUserEntityNode);
 
 		// Put excludeCredentials
-		ArrayNode excludedCredentials = prepareExcludeCredentials(documentDomain, username);
-		optionsResponseNode.set("excludeCredentials", excludedCredentials);
-		log.debug("Put excludeCredentials {}", excludedCredentials);
+		if (!oneStep) {
+			ArrayNode excludedCredentials = prepareExcludeCredentials(documentDomain, username);
+			optionsResponseNode.set("excludeCredentials", excludedCredentials);
+			log.debug("Put excludeCredentials {}", excludedCredentials);
+		}
 
 		// Copy extensions
 		if (params.hasNonNull("extensions")) {
@@ -169,7 +174,7 @@ public class AttestationService {
 		// Store original requests
 		entity.setAttenstationRequest(params.toString());
 
-		Fido2RegistrationEntry registrationEntry = registrationPersistenceService.buildFido2RegistrationEntry(entity);
+		Fido2RegistrationEntry registrationEntry = registrationPersistenceService.buildFido2RegistrationEntry(entity, oneStep);
 		if (params.hasNonNull("session_id")) {
 			registrationEntry.setSessionStateId(params.get("session_id").asText());
 		}
@@ -183,6 +188,8 @@ public class AttestationService {
 
 	public ObjectNode verify(JsonNode params) {
 		log.debug("Attestation verify {}", params);
+
+		boolean oneStep = commonVerifiers.isSuperGluuOneStepMode(params);
 
 		// Verify if there are mandatory request parameters
 		commonVerifiers.verifyBasicPayload(params);
@@ -199,7 +206,7 @@ public class AttestationService {
 		String challenge = commonVerifiers.getChallenge(clientDataJSONNode);
 
 		// Find registration entry
-		Fido2RegistrationEntry registrationEntry = registrationPersistenceService.findByChallenge(challenge)
+		Fido2RegistrationEntry registrationEntry = registrationPersistenceService.findByChallenge(challenge, oneStep)
 				.parallelStream().findAny().orElseThrow(() -> new Fido2RuntimeException(
 						String.format("Can't find associated attestatioan request by challenge '%s'", challenge)));
 		Fido2RegistrationData registrationData = registrationEntry.getRegistrationData();
@@ -243,6 +250,10 @@ public class AttestationService {
         int publicKeyIdHash = registrationPersistenceService.getPublicKeyIdHash(registrationData.getPublicKeyId());
         registrationEntry.setPublicKeyIdHash(publicKeyIdHash);
 
+        // Set expiration for one_step entry
+        if (oneStep) {
+        	registrationEntry.setExpiration();
+        }
 		registrationPersistenceService.update(registrationEntry);
 
 		// If SessionStateId is not empty update session
@@ -250,8 +261,7 @@ public class AttestationService {
         if (StringHelper.isNotEmpty(sessionStateId)) {
             log.debug("There is session id. Setting session id attributes");
 
-            boolean oneStep = /*StringHelper.isEmpty(userName);*/ false;
-            userSessionIdService.updateUserSessionIdOnFinishRequest(sessionStateId, registrationEntry.getUserInum(), registrationEntry, false, oneStep);
+            userSessionIdService.updateUserSessionIdOnFinishRequest(sessionStateId, registrationEntry.getUserInum(), registrationEntry, true, oneStep);
         }
 
 		// Create result object
@@ -385,7 +395,7 @@ public class AttestationService {
 		return null;
 	}
 
-	private String generateUserId() {
+	public String generateUserId() {
 		byte[] buffer = new byte[32];
 		new SecureRandom().nextBytes(buffer);
 

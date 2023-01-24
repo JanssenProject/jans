@@ -13,7 +13,7 @@ from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from io.jans.as.server.model.config import ConfigurationFactory
 from io.jans.as.server.service import AuthenticationService
 from io.jans.as.server.service import SessionIdService
-from io.jans.as.server.service.fido2 import RegistrationPersistenceService
+from io.jans.as.common.service.common.fido2 import RegistrationPersistenceService
 from io.jans.as.server.service.net import HttpService
 from io.jans.as.server.util import ServerUtil
 from io.jans.util import StringHelper
@@ -211,6 +211,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 user_inum = session_device_status['user_inum']
 
+                print "3"
                 u2f_device = registrationPersistenceService.findRegisteredUserDevice(user_inum, u2f_device_id, "jansId")
                 if u2f_device == None:
                     print "Super-Gluu. Authenticate for step 1. Failed to load u2f_device '%s'" % u2f_device_id
@@ -278,16 +279,15 @@ class PersonAuthentication(PersonAuthenticationType):
                 session_device_status = self.getSessionDeviceStatus(session_attributes, user_inum)
 
                 if session_device_status['enroll']:
-
                     if session_device_status == None:
                         print "Super-Gluu. oneStep, authenticate for step2, session_device_status is false"
                         return False
 
-                    u2f_device_id = session_device_status['device_id']
+                    u2f_device_dn = session_device_status['device_dn']
 
-                    attach_result = registrationPersistenceService.attachDeviceRegistrationToUser(user_inum, u2f_device_id)
+                    attach_result = registrationPersistenceService.attachDeviceRegistrationToUser(user_inum, u2f_device_dn)
 
-                    print "Super-Gluu. Authenticate for step 2. Result after attaching u2f_device '%s' to user '%s': '%s'" % (u2f_device_id, user_inum, attach_result)
+                    print "Super-Gluu. Authenticate for step 2. Result after attaching u2f_device '%s' to user '%s': '%s'" % (u2f_device_dn, user_inum, attach_result)
 
                     return attach_result
                 else:
@@ -352,7 +352,6 @@ class PersonAuthentication(PersonAuthenticationType):
                     return False
                 issuer = CdiUtil.bean(AppConfiguration).getIssuer()
 
-
                 super_gluu_request_dictionary = {'app': client_redirect_uri,
                                    'issuer': issuer,
                                    'state': session.getId(),
@@ -364,7 +363,6 @@ class PersonAuthentication(PersonAuthenticationType):
                 print "Super-Gluu. Prepare for step 1. Prepared super_gluu_request:", super_gluu_request
 
                 identity.setWorkingParameter("super_gluu_request", super_gluu_request)
-                identity.setWorkingParameter("step_sg","one_step")
             elif self.twoStep:
                 identity.setWorkingParameter("display_register_action", True)
 
@@ -504,10 +502,11 @@ class PersonAuthentication(PersonAuthenticationType):
         registrationPersistenceService = CdiUtil.bean(RegistrationPersistenceService)
 
         u2f_device_id = session_device_status['device_id']
+        u2f_device_dn = session_device_status['device_dn']
 
         u2f_device = None
         if session_device_status['enroll'] and session_device_status['one_step']:
-            u2f_device = registrationPersistenceService.findOneStepUserDeviceRegistration(u2f_device_id)
+            u2f_device = registrationPersistenceService.findOneStepUserDeviceRegistration(u2f_device_dn)
             if u2f_device == None:
                 print "Super-Gluu. Validate session device status. There is no one step u2f_device '%s'" % u2f_device_id
                 return False
@@ -547,28 +546,34 @@ class PersonAuthentication(PersonAuthenticationType):
             return None
 
         # Try to find device_id in session attribute
-        if not session_attributes.containsKey("oxpush2_u2f_device_id"):
+        if not session_attributes.containsKey("super_gluu_u2f_device_id"):
+            print "Super-Gluu. Get session device status. There is no u2f_device associated with this request"
+            return None
+
+        # Try to find device_dn in session attribute
+        if not session_attributes.containsKey("super_gluu_u2f_device_dn"):
             print "Super-Gluu. Get session device status. There is no u2f_device associated with this request"
             return None
 
         # Try to find user_inum in session attribute
-        if not session_attributes.containsKey("oxpush2_u2f_device_user_inum"):
+        if not session_attributes.containsKey("super_gluu_u2f_device_user_inum"):
             print "Super-Gluu. Get session device status. There is no user_inum associated with this request"
             return None
 
         enroll = False
-        if session_attributes.containsKey("oxpush2_u2f_device_enroll"):
-            enroll = StringHelper.equalsIgnoreCase("true", session_attributes.get("oxpush2_u2f_device_enroll"))
+        if session_attributes.containsKey("super_gluu_u2f_device_enroll"):
+            enroll = StringHelper.equalsIgnoreCase("true", session_attributes.get("super_gluu_u2f_device_enroll"))
 
         one_step = False
-        if session_attributes.containsKey("oxpush2_u2f_device_one_step"):
-            one_step = StringHelper.equalsIgnoreCase("true", session_attributes.get("oxpush2_u2f_device_one_step"))
+        if session_attributes.containsKey("super_gluu_u2f_device_one_step"):
+            one_step = StringHelper.equalsIgnoreCase("true", session_attributes.get("super_gluu_u2f_device_one_step"))
 
         super_gluu_request = session_attributes.get("super_gluu_request")
-        u2f_device_id = session_attributes.get("oxpush2_u2f_device_id")
-        user_inum = session_attributes.get("oxpush2_u2f_device_user_inum")
+        u2f_device_dn = session_attributes.get("super_gluu_u2f_device_dn")
+        u2f_device_id = session_attributes.get("super_gluu_u2f_device_id")
+        user_inum = session_attributes.get("super_gluu_u2f_device_user_inum")
 
-        session_device_status = {"super_gluu_request": super_gluu_request, "device_id": u2f_device_id, "user_inum" : user_inum, "enroll" : enroll, "one_step" : one_step}
+        session_device_status = {"super_gluu_request": super_gluu_request, "device_id": u2f_device_id, "device_dn": u2f_device_dn, "user_inum" : user_inum, "enroll" : enroll, "one_step" : one_step}
         print "Super-Gluu. Get session device status. session_device_status: '%s'" % (session_device_status)
 
         return session_device_status

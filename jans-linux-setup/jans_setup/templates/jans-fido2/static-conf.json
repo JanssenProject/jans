@@ -3,7 +3,9 @@
         "configuration":"ou=configuration,o=jans",
         "people":"ou=people,o=jans",
         "scripts": "ou=scripts,o=jans",
-        "metric":"ou=statistic,o=metric",
-        "sessions":"ou=sessions,o=jans"
+        "attributes":"ou=attributes,o=jans",
+        "sessions":"ou=sessions,o=jans",
+        "fido2Attestation":"ou=fido2_register,ou=fido2,o=jans",
+        "metric":"ou=statistic,o=metric"
     }
 }
