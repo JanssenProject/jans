@@ -372,18 +372,6 @@
             <artifactId>jans-core-script</artifactId>
         </dependency>
 
-		<!-- Fido2 -->
-		<dependency>
-			<groupId>io.jans</groupId>
-			<artifactId>jans-fido2-client</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>io.jans</groupId>
-			<artifactId>jans-fido2-common</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		
-
 		<!-- Eleven -->
 		<dependency>
 			<groupId>io.jans</groupId>
