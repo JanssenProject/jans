@@ -101,6 +101,14 @@
         </dependency>
         <dependency>
             <groupId>io.jans</groupId>
+            <artifactId>jans-fido2-common</artifactId>
+        </dependency>
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-orm-model</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.jans</groupId>
             <artifactId>jans-orm-core</artifactId>
         </dependency>
         <dependency>
