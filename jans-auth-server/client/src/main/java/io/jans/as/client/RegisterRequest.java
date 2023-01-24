@@ -1872,30 +1872,16 @@ public class RegisterRequest extends BaseRequest {
         if (spontaneousScopes != null && !spontaneousScopes.isEmpty()) {
             function.apply(SPONTANEOUS_SCOPES.toString(), implode(spontaneousScopes, " "));
         }
-        if (additionalAudience != null && !additionalAudience.isEmpty()) {
-            function.apply(ADDITIONAL_AUDIENCE.toString(), implode(additionalAudience, " "));
-        }
-        if (spontaneousScopeScriptDns != null && !spontaneousScopeScriptDns.isEmpty()) {
-            function.apply(SPONTANEOUS_SCOPE_SCRIPT_DNS.toString(), implode(spontaneousScopeScriptDns, " "));
-        }
-        if (updateTokenScriptDns != null && !updateTokenScriptDns.isEmpty()) {
-            function.apply(UPDATE_TOKEN_SCRIPT_DNS.toString(), implode(updateTokenScriptDns, " "));
-        }
-        if (postAuthnScriptDns != null && !postAuthnScriptDns.isEmpty()) {
-            function.apply(POST_AUTHN_SCRIPT_DNS.toString(), implode(postAuthnScriptDns, " "));
-        }
-        if (consentGatheringScriptDns != null && !consentGatheringScriptDns.isEmpty()) {
-            function.apply(CONSENT_GATHERING_SCRIPT_DNS.toString(), implode(consentGatheringScriptDns, " "));
-        }
-        if (introspectionScriptDns != null && !introspectionScriptDns.isEmpty()) {
-            function.apply(INTROSPECTION_SCRIPT_DNS.toString(), implode(introspectionScriptDns, " "));
-        }
-        if (rptClaimsScriptDns != null && !rptClaimsScriptDns.isEmpty()) {
-            function.apply(RPT_CLAIMS_SCRIPT_DNS.toString(), implode(rptClaimsScriptDns, " "));
-        }
-        if (ropcScriptDns != null && !ropcScriptDns.isEmpty()) {
-            function.apply(ROPC_SCRIPT_DNS.toString(), implode(ropcScriptDns, " "));
-        }
+
+        applyArray(function, ADDITIONAL_AUDIENCE, additionalAudience);
+        applyArray(function, SPONTANEOUS_SCOPE_SCRIPT_DNS, spontaneousScopeScriptDns);
+        applyArray(function, UPDATE_TOKEN_SCRIPT_DNS, updateTokenScriptDns);
+        applyArray(function, POST_AUTHN_SCRIPT_DNS, postAuthnScriptDns);
+        applyArray(function, CONSENT_GATHERING_SCRIPT_DNS, consentGatheringScriptDns);
+        applyArray(function, INTROSPECTION_SCRIPT_DNS, introspectionScriptDns);
+        applyArray(function, RPT_CLAIMS_SCRIPT_DNS, rptClaimsScriptDns);
+        applyArray(function, ROPC_SCRIPT_DNS, ropcScriptDns);
+
         if (runIntrospectionScriptBeforeJwtCreation != null) {
             function.apply(RUN_INTROSPECTION_SCRIPT_BEFORE_JWT_CREATION.toString(), runIntrospectionScriptBeforeJwtCreation.toString());
         }
@@ -1935,6 +1921,12 @@ public class RegisterRequest extends BaseRequest {
                     function.apply(name, value);
                 }
             }
+        }
+    }
+
+    private static void applyArray(BiFunction<String, Object, Void> function, RegisterRequestParam key, List<String> list) {
+        if (list != null && !list.isEmpty()) {
+            function.apply(key.toString(), toJSONArray(list));
         }
     }
 
