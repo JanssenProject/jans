@@ -3252,6 +3252,20 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#revoke-all-tokens-by-client_id" class="md-nav__link">
+    Revoke all tokens by client_id
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#revoke-interception-script" class="md-nav__link">
+    Revoke Interception Script
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -8808,6 +8822,20 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#revoke-all-tokens-by-client_id" class="md-nav__link">
+    Revoke all tokens by client_id
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#revoke-interception-script" class="md-nav__link">
+    Revoke Interception Script
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -8886,13 +8914,20 @@ navigate via <code>Auth Server</code>-&gt;<code>Properties</code>.</p>
 <li><a href="../../../reference/json/properties/janssenauthserver-properties/#mtlstokenrevocationendpoint">mtlstokenrevocationendpoint</a></li>
 <li><a href="../../../reference/json/properties/janssenauthserver-properties/#tokenrevocationendpoint">tokenRevocationEndpoint</a></li>
 </ul>
+<h2 id="revoke-all-tokens-by-client_id">Revoke all tokens by <code>client_id</code><a class="headerlink" href="#revoke-all-tokens-by-client_id" title="Permanent link">#</a></h2>
+<p>To remove all tokens for given <code>client_id</code> it's required:
+- set <code>allowAllValueForRevokeEndpoint</code> AS configuration property to <code>true</code>
+- pass in request parameter <code>token_type_hint=all</code></p>
+<p><code>client</code> is identified by Client Authentication performed by AS to grant access to <code>/revoke</code> endpoint.</p>
+<h2 id="revoke-interception-script">Revoke Interception Script<a class="headerlink" href="#revoke-interception-script" title="Permanent link">#</a></h2>
+<p>Endpoint can provide custom behavior via implementing Revoke Token interception <a href="../../../developer/scripts/revoke-token/">script</a>.</p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-13T08:34:37+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-13</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-24T10:11:21+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-24</span>
       
         <br>
         Created:

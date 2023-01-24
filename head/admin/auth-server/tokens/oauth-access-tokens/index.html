@@ -2933,8 +2933,8 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#access-token-crypto" class="md-nav__link">
-    Access Token Crypto
+  <a href="#access-token-crypto-jwt" class="md-nav__link">
+    Access Token Crypto (JWT)
   </a>
   
 </li>
@@ -2942,6 +2942,13 @@
           <li class="md-nav__item">
   <a href="#server-and-client-configurations" class="md-nav__link">
     Server and Client configurations
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#revoke-access-token" class="md-nav__link">
+    Revoke Access Token
   </a>
   
 </li>
@@ -8838,8 +8845,8 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#access-token-crypto" class="md-nav__link">
-    Access Token Crypto
+  <a href="#access-token-crypto-jwt" class="md-nav__link">
+    Access Token Crypto (JWT)
   </a>
   
 </li>
@@ -8847,6 +8854,13 @@
           <li class="md-nav__item">
   <a href="#server-and-client-configurations" class="md-nav__link">
     Server and Client configurations
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#revoke-access-token" class="md-nav__link">
+    Revoke Access Token
   </a>
   
 </li>
@@ -8992,31 +9006,59 @@ default, Jans Auth Server access tokens expire after 5 minutes.</p>
 Auth Server interception scripts. The preferred script is the
 <a href="../../../developer/scripts/update-token/">update token script</a>. You can
 also use the <a href="../../../developer/scripts/introspection/">introspection script</a>.</p>
-<h3 id="access-token-crypto">Access Token Crypto<a class="headerlink" href="#access-token-crypto" title="Permanent link">#</a></h3>
+<h3 id="access-token-crypto-jwt">Access Token Crypto (JWT)<a class="headerlink" href="#access-token-crypto-jwt" title="Permanent link">#</a></h3>
 <p>JWT access tokens are signed by Jans Auth Server using
 algorithms specified in the <code>access_token_signing_alg_values_supported</code>
 claim of the OpenID configuration endpoint response. Access tokens are
 signed with the standard OpenID signing key.</p>
 <p>Jans Auth Server supports TLS client certificate bound access tokens. After
 a successful mutual TLS client authentication, Jans Auth Server encodes the
-client certificate thumbprint (hash) in <code>cnf</code> claim of the JWT or introspection
+client certificate thumbprint (hash) in <code>x5t#S256</code> confirmation method of the JWT or introspection
 JSON. Assuming the client uses the same certificate to establish a mutual TLS
 session with the API, the thumbprint in the access token can verify that this
 is the same client that obtained the access token. This feature is typically
 used in high security environments, as the operational cost of mutual TLS is
 material.</p>
+<p>Decoded JWT example
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;iss&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://server.example.com&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;sub&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ty.webb@example.com&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;exp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1493726400</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;nbf&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1493722800</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;cnf&quot;</span><span class="p">:{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;x5t#S256&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;bwcK0esc3ACC3DB2Y5_lESsXE8o9ltc05O89jdN-dg2&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div></p>
+<p>Sample introspection response
+<div class="highlight"><pre><span></span><code><span class="err">HTTP/</span><span class="mf">1.1</span><span class="w"> </span><span class="mi">200</span><span class="w"> </span><span class="err">OK</span><span class="w"></span>
+<span class="err">Co</span><span class="kc">ntent</span><span class="mi">-</span><span class="err">Type</span><span class="p">:</span><span class="w"> </span><span class="err">applica</span><span class="kc">t</span><span class="err">io</span><span class="kc">n</span><span class="err">/jso</span><span class="kc">n</span><span class="w"></span>
+
+<span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;active&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;iss&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://server.example.com&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;sub&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ty.webb@example.com&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;exp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1493726400</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;nbf&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1493722800</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;cnf&quot;</span><span class="p">:{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;x5t#S256&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;bwcK0esc3ACC3DB2Y5_lESsXE8o9ltc05O89jdN-dg2&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div></p>
 <h3 id="server-and-client-configurations">Server and Client configurations<a class="headerlink" href="#server-and-client-configurations" title="Permanent link">#</a></h3>
 <p>Access token lifetime is configurable at the server level via the
 <code>accessTokenLifetime</code> property. However, a client can override this value
 during client registration with the <code>access_token_lifetime</code> request
 parameter.</p>
+<h3 id="revoke-access-token">Revoke Access Token<a class="headerlink" href="#revoke-access-token" title="Permanent link">#</a></h3>
+<p>Access token can be revoked via <a href="../../endpoints/token-revocation/">Revoke Endpoint</a></p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-22T18:32:43+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-22</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-24T10:11:21+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-24</span>
       
         <br>
         Created:

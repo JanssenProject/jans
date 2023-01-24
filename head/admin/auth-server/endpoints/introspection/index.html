@@ -3349,6 +3349,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#response-as-jwt" class="md-nav__link">
+    Response as JWT
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#disabling-the-endpoint-using-feature-flag" class="md-nav__link">
     Disabling The Endpoint Using Feature Flag
   </a>
@@ -8923,6 +8930,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#response-as-jwt" class="md-nav__link">
+    Response as JWT
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#disabling-the-endpoint-using-feature-flag" class="md-nav__link">
     Disabling The Endpoint Using Feature Flag
   </a>
@@ -9020,9 +9034,13 @@ both opaque token (i.e. reference tokens) and structured tokens(i.e. value token
 introspection</a> specifications.</p>
 <p>The URI to invoke the introspection endpoint in Janssen Server 
 can be found by checking the <code>introspection_endpoint</code> claim of the OpenID Connect configuration response, typically deployed at <code>https://janssen.server.host/.well-known/openid-configuration</code></p>
-<p><code>"introspection_endpoint" : "https://janssen.server.host/jans-auth/restv1/introspection"</code></p>
+<p>"introspection_endpoint" : "https://janssen.server.host/jans-auth/restv1/introspection" `</p>
 <p>More information about request and response of the Introspection endpoint can be found in
 the OpenAPI specification of <a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/Token/get-introspection">jans-auth-server module</a>.</p>
+<p><strong>Request parameters</strong>
+- <code>token</code> - REQUIRED.  The string value of the token.  For access tokens, this is the "access_token" value returned from the token endpoint
+- <code>token_type_hint</code> - OPTIONAL.  A hint about the type of the token submitted for introspection. Not used in current implementation of the AS. 
+- <code>response_as_jwt</code> - OPTIONAL. Boolean value with default value false. If true, returns introspection response as JWT (signed based on client configuration used for authentication to Introspection Endpoint).</p>
 <h2 id="sample-get-request">Sample GET Request<a class="headerlink" href="#sample-get-request" title="Permanent link">#</a></h2>
 <h3 id="request">Request<a class="headerlink" href="#request" title="Permanent link">#</a></h3>
 <div class="highlight"><pre><span></span><code>curl -X &#39;GET&#39;   &#39;https://janssen.server.host/jans-auth/restv1/introspection?token=368fea2b-be14-4d30-bd57-bcc4cde2033c&amp;response_as_jwt=false&#39;   -H &#39;accept: application/json&#39; -H   &quot;Authorization: Bearer 111d51a4-2828-4b47-abce-77034cddcfb5&quot;
@@ -9072,6 +9090,7 @@ the OpenAPI specification of <a href="https://gluu.org/swagger-ui/?url=https://r
     &quot;username&quot;: null
 }
 </code></pre></div>
+<h2 id="response-as-jwt">Response as JWT<a class="headerlink" href="#response-as-jwt" title="Permanent link">#</a></h2>
 <h2 id="disabling-the-endpoint-using-feature-flag">Disabling The Endpoint Using Feature Flag<a class="headerlink" href="#disabling-the-endpoint-using-feature-flag" title="Permanent link">#</a></h2>
 <p><code>/introspection</code> endpoint can be enabled or disable using <a href="../../../reference/json/feature-flags/janssenauthserver-feature-flags/#introspection">END_SESSION feature flag</a>.
 Use <a href="../../../config-guide/tui/">Janssen Text-based UI(TUI)</a> or <a href="../../../config-guide/jans-cli/">Janssen command-line interface</a> to perform this task.</p>
@@ -9119,7 +9138,7 @@ navigate to</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-13T08:34:37+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-13</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-24T10:11:21+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-24</span>
       
         <br>
         Created:

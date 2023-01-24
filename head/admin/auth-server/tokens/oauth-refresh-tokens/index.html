@@ -8890,25 +8890,24 @@ to issue a refresh token.</p>
 : <em>Default: True</em> - Set to False if you don't want web clients to get a refresh
 token.</p>
 <p><code>removeRefreshTokensForClientOnLogout</code>
-: <em>Default: True</em> - Explicit logout is different then timeout, so if the
-subject has initiated a logout, you may want to also remove all the refresh
-tokens for that client. <strong>todo</strong></p>
+: <em>Default: True</em> - Boolean value specifying whether to remove Refresh Tokens on logout. 
+However if intention is to leave Refresh Token after logout, it's required to set it to <code>false</code>.</p>
 <p><code>skipRefreshTokenDuringRefreshing</code>
-: <em>Default: False</em> - <strong>todo</strong></p>
+: <em>Default: False</em> - Boolean value specifying whether to skip refreshing tokens on refreshing. 
+By default AS always creates new Refresh Token on refresh call to Token Endpoint. This property allows to avoid (skip) new Refresh Token creation.</p>
 <p><code>refreshTokenExtendLifetimeOnRotation</code>
-: <em>Default: False</em> - <strong>todo</strong></p>
+: <em>Default: False</em> - Boolean value specifying whether to extend refresh tokens on rotation. By default lifetime is not extended, expiration date is set to date of previous Refresh Token. With this property it's possible to have all further Refresh Token have fixed (extended in relation to previuos Refresh Token) lifetime. </p>
 <p><code>checkUserPresenceOnRefreshToken</code>
-: <em>Default: False</em> - <strong>todo</strong></p>
+: <em>Default: False</em> - Check whether user exists and is active before creating RefreshToken. Set it to true if check is needed(Default value is false - don't check.</p>
 <h3 id="refresh-token-management">Refresh Token Management<a class="headerlink" href="#refresh-token-management" title="Permanent link">#</a></h3>
-<p>To revoke a token, a client can do so via the [revocation endpoint][../endpoints/token-revocation]. In order to get a list of refresh tokens outstanding by the AS:
-<strong>todo</strong>.</p>
+<p>To revoke a token, a client can do so via the [revocation endpoint][../endpoints/token-revocation] (including revocation of all tokens by <code>client_id</code>).</p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-22T18:32:43+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-22</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-24T10:11:21+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-24</span>
       
         <br>
         Created:
