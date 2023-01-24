@@ -8845,21 +8845,21 @@ a person. The OAuth framework defines the term client
 <a href="https://openid.net/specs/openid-connect-core-1_0.html#Introduction">clarifies</a>
 that:
 <code>OAuth 2.0 Clients using OpenID Connect are also referred to as Relying Parties (RPs)</code></p>
-<p>Don't confuse a client with either the Person or the Browser!
+<p>Don't confuse a Client with either the Person or the Browser!
 <img alt="" src="../../../assets/federated_identity_actors.png" /></p>
 <h2 id="client-security">Client Security<a class="headerlink" href="#client-security" title="Permanent link">#</a></h2>
-<p>OpenID allows you to use as much security as you need. To a large extent, how
-the client is configured equals how secure is your OpenID implementation. For
-example, let's just consider how the client authenticates itself to Jans Auth
+<p>OpenID allows you to use as much security as you need. To a large extent, the
+security of your implemenation depends on what client features you select.
+For example, let's just consider how the client authenticates itself to Jans Auth
 Server, which is defined by the <code>token_endpoint_auth_method</code> in OpenID Connect
-as a <a href="https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata">Client Metadata</a> claim.</p>
+<a href="https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata">Client Metadata</a>.</p>
 <table>
 <thead>
 <tr>
 <th>Method</th>
 <th align="center">Secret Not Sent in Clear</th>
 <th align="center">Signed</th>
-<th align="left">Only client has secret</th>
+<th align="center">Only client has secret</th>
 </tr>
 </thead>
 <tbody>
@@ -8867,40 +8867,35 @@ as a <a href="https://openid.net/specs/openid-connect-registration-1_0.html#Clie
 <td><code>client_secret_basic</code></td>
 <td align="center"></td>
 <td align="center"></td>
-<td align="left"></td>
+<td align="center"></td>
 </tr>
 <tr>
 <td><code>client_secret_post</code></td>
 <td align="center"></td>
 <td align="center"></td>
-<td align="left"></td>
+<td align="center"></td>
 </tr>
 <tr>
 <td><code>client_secret_jwt</code></td>
 <td align="center">X</td>
 <td align="center">X</td>
-<td align="left"></td>
+<td align="center"></td>
 </tr>
 <tr>
 <td><code>private_key_jwt</code></td>
 <td align="center">X</td>
 <td align="center">X</td>
-<td align="left">X</td>
+<td align="center">X</td>
 </tr>
 </tbody>
 </table>
 <p>Obviously, using asynchronous secrets for authentication is more secure. The
 client configuration also determines what crypto is used for signing and
 encryption of tokens, what scopes are available to the client (which determines
-the extent of access to APIs), what grants are available, and what is a valid
-<code>redirect_uri</code> to redirect the browser to after a front channel interaction
-with Jans Auth Server. Through client configuration, you can also control other
-behavior, like timeouts, interception script executions, whether to use a value
-or reference token, whether to expire the client, and several other options that
-impact security.</p>
+the extent of access to APIs), what grants are available,  what is a valid
+<code>redirect_uri</code>, timeouts, whether to use a value or reference token, whether to
+expire the client, and several other options that impact security.</p>
 <h2 id="client-tools">Client Tools<a class="headerlink" href="#client-tools" title="Permanent link">#</a></h2>
-<p>Jan Auth Server client management enables admins to create (register), update,
-remove and get information about clients.</p>
 <p>There are a few ways clients are created and managed in Jans Auth Server:</p>
 <ul>
 <li><a href="../../config-guide/config-api/">Jans Config API</a></li>
@@ -8911,7 +8906,7 @@ remove and get information about clients.</p>
 <p>Which mechanism to use depends on the deployment requirements. For <em>ad hoc</em>
 creation, the TUI is great. If you need to quickly script client creation (e.g.
 in a bash script), use the CLI, or use <code>curl</code> to call the Jans Config API.  If
-developers need to have the ability to register clients, the adopt OpenID
+developers need to have the ability to register clients, then adopt OpenID
 Connect Dynamic Client Registration.</p>
 <h3 id="openid-dynamic-client-registration">OpenID Dynamic Client Registration<a class="headerlink" href="#openid-dynamic-client-registration" title="Permanent link">#</a></h3>
 <p>Jans Auth server publishes the <code>registration_endpoint</code> in the OpenID
@@ -8945,7 +8940,7 @@ with various sections to input client details.</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-24T04:15:55+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-24</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-24T04:49:26+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-24</span>
       
         <br>
         Created:
