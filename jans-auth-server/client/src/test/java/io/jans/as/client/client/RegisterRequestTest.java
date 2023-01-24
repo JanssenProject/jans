@@ -45,7 +45,7 @@ public class RegisterRequestTest {
         RegisterRequest request = new RegisterRequest();
         request.setAdditionalAudience(Lists.newArrayList("aud1", "aud2"));
 
-        assertEquals(Lists.newArrayList("aud1", "aud2"), request.getJSONParameters().get("additional_audience"));
+        assertEquals(Lists.newArrayList("aud1", "aud2"), ((JSONArray) request.getJSONParameters().get("additional_audience")).toList());
     }
 
     @Test
