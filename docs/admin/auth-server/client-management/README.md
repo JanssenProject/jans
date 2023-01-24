@@ -13,19 +13,19 @@ a person. The OAuth framework defines the term client
 that:
 `OAuth 2.0 Clients using OpenID Connect are also referred to as Relying Parties (RPs)`
 
-Don't confuse a client with either the Person or the Browser!
+Don't confuse a Client with either the Person or the Browser!
 ![](../../../assets/federated_identity_actors.png)
 
 ## Client Security
 
-OpenID allows you to use as much security as you need. To a large extent, how
-the client is configured equals how secure is your OpenID implementation. For
-example, let's just consider how the client authenticates itself to Jans Auth
+OpenID allows you to use as much security as you need. To a large extent, the
+security of your implemenation depends on what client features you select.
+For example, let's just consider how the client authenticates itself to Jans Auth
 Server, which is defined by the `token_endpoint_auth_method` in OpenID Connect
-as a [Client Metadata](https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata) claim.
+[Client Metadata](https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata).
 
 | Method | Secret Not Sent in Clear | Signed | Only client has secret |
-| ------ | :----------------------: | :----: | :--------------------- |
+| ------ | :----------------------: | :----: | :--------------------: |
 | `client_secret_basic` |   |   |   |
 | `client_secret_post`  |   |   |   |
 | `client_secret_jwt`   | X | X |   |
@@ -34,17 +34,11 @@ as a [Client Metadata](https://openid.net/specs/openid-connect-registration-1_0.
 Obviously, using asynchronous secrets for authentication is more secure. The
 client configuration also determines what crypto is used for signing and
 encryption of tokens, what scopes are available to the client (which determines
-the extent of access to APIs), what grants are available, and what is a valid
-`redirect_uri` to redirect the browser to after a front channel interaction
-with Jans Auth Server. Through client configuration, you can also control other
-behavior, like timeouts, interception script executions, whether to use a value
-or reference token, whether to expire the client, and several other options that
-impact security.
+the extent of access to APIs), what grants are available,  what is a valid
+`redirect_uri`, timeouts, whether to use a value or reference token, whether to
+expire the client, and several other options that impact security.
 
 ## Client Tools
-
-Jan Auth Server client management enables admins to create (register), update,
-remove and get information about clients.
 
 There are a few ways clients are created and managed in Jans Auth Server:
 
@@ -56,7 +50,7 @@ There are a few ways clients are created and managed in Jans Auth Server:
 Which mechanism to use depends on the deployment requirements. For *ad hoc*
 creation, the TUI is great. If you need to quickly script client creation (e.g.
 in a bash script), use the CLI, or use `curl` to call the Jans Config API.  If
-developers need to have the ability to register clients, the adopt OpenID
+developers need to have the ability to register clients, then adopt OpenID
 Connect Dynamic Client Registration.
 
 ### OpenID Dynamic Client Registration
