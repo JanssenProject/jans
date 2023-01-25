@@ -74,7 +74,6 @@ class JansInstaller(BaseInstaller, SetupUtils):
             if Config.profile == 'jans' or  Config.profile == 'disa-stig':
                 txt += 'Install Fido2 Server'.ljust(30) + repr(Config.installFido2).rjust(35) + (' *' if 'installFido2' in Config.addPostSetupService else '') + "\n"
                 txt += 'Install Scim Server'.ljust(30) + repr(Config.install_scim_server).rjust(35) + (' *' if 'install_scim_server' in Config.addPostSetupService else '') + "\n"
-                #txt += 'Install Oxd '.ljust(30) + repr(Config.installOxd).rjust(35) + (' *' if 'installOxd' in Config.addPostSetupService else '') + "\n"
 
             if Config.profile == 'jans' and Config.installEleven or Config.profile == 'disa-stig' and Config.installEleven:
                 txt += 'Install Eleven Server'.ljust(30) + repr(Config.installEleven).rjust(35) + (' *' if 'installEleven' in Config.addPostSetupService else '') + "\n"
@@ -477,7 +476,6 @@ class JansInstaller(BaseInstaller, SetupUtils):
             self.writeFile(os.path.join(base.snap_common, 'etc/hosts.jans'), Config.ip + '\t' + Config.hostname)
 
         else:
-#            self.run([paths.cmd_chown, '-R', 'jetty:root', Config.certFolder])
             self.run([paths.cmd_chown, '-R', 'jetty:jans', Config.certFolder])
             self.run([paths.cmd_chmod, '-R', '660', Config.certFolder])
             self.run([paths.cmd_chmod, 'ug+X', Config.certFolder])

@@ -292,15 +292,6 @@ class Config:
 
         self.encoded_ldapTrustStorePass = None
 
-#        self.ldapCertFn = self.opendj_cert_fn = os.path.join(self.certFolder, 'opendj.crt')
-
-#        self.ldapCertFn = self.opendj_cert_fn = os.path.join(self.certFolder, 'opendj.crt')
-#        self.ldapTrustStoreFn = self.opendj_p12_fn = os.path.join(self.certFolder, 'opendj.p12')
-
-#        if Config.profile == SetupProfiles.DISA_STIG:
-#            self.default_store_type = 'bcfks'
-#            self.opendj_truststore_format = base.argsp.opendj_keystore_type
-
         self.ldapCertFn = self.opendj_cert_fn = os.path.join(self.certFolder, 'opendj.crt')
         if self.opendj_truststore_format.lower() == 'pkcs11':
             self.opendj_trust_store_fn = self.opendj_cert_fn
@@ -309,7 +300,6 @@ class Config:
 
         self.oxd_package = base.determine_package(os.path.join(self.dist_jans_dir, 'oxd-server*.tgz'))
 
-#        self.opendj_p12_pass = None
         self.opendj_truststore_pass = None
 
         self.ldap_binddn = 'cn=directory manager'
@@ -480,24 +470,5 @@ class Config:
     @classmethod
     def init_ext(cls):
 
-#        if cls.profile == SetupProfiles.DISA_STIG:
         cls.bc_fips_jar = max(glob.glob(os.path.join(cls.dist_app_dir, 'bc-fips-*.jar')))
         cls.bcpkix_fips_jar = max(glob.glob(os.path.join(cls.dist_app_dir, 'bcpkix-fips-*.jar')))
-
-#        self.ldapCertFn = self.opendj_cert_fn = os.path.join(self.certFolder, 'opendj.crt')
-#        self.ldapTrustStoreFn = self.opendj_p12_fn = os.path.join(self.certFolder, 'opendj.p12')
-        
-#        self.ldapCertFn = self.opendj_cert_fn = os.path.join(self.certFolder, 'opendj.crt')
-#        if self.opendj_truststore_format.lower() == 'pkcs11':
-#            self.opendj_trust_store_fn = self.opendj_cert_fn
-#        else:
-#            self.opendj_trust_store_fn = os.path.join(self.certFolder, 'opendj.' + self.opendj_truststore_format)
- 
-#        self.ldapCertFn = self.opendj_cert_fn = os.path.join(self.certFolder, 'opendj.crt')
-#        self.ldapTrustStoreFn = self.opendj_p12_fn = os.path.join(self.certFolder, 'opendj.p12')
-        
-#        self.ldapCertFn = self.opendj_cert_fn = os.path.join(self.certFolder, 'opendj.crt')
-#        if self.opendj_truststore_format.lower() == 'pkcs11':
-#            self.opendj_trust_store_fn = self.opendj_cert_fn
-#        else:
-#            self.opendj_trust_store_fn = os.path.join(self.certFolder, 'opendj.' + self.opendj_truststore_format)

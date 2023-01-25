@@ -47,7 +47,6 @@ class JansAuthInstaller(JettyInstaller):
         self.oxauth_static_conf_json = os.path.join(self.templates_folder, 'jans-auth-static-conf.json')
         self.oxauth_error_json = os.path.join(self.templates_folder, 'jans-auth-errors.json')
         self.oxauth_openid_jwks_fn = os.path.join(self.output_folder, 'jans-auth-keys.json')
-#        self.oxauth_openid_jks_fn = os.path.join(Config.certFolder, 'jans-auth-keys.p12')
         self.oxauth_openid_jks_fn = os.path.join(Config.certFolder, self.get_keystore_fn('jans-auth-keys'))
         self.ldif_people = os.path.join(self.output_folder, 'people.ldif')
         self.ldif_groups = os.path.join(self.output_folder, 'groups.ldif')
@@ -88,7 +87,6 @@ class JansAuthInstaller(JettyInstaller):
         sig_keys = 'RS256 RS384 RS512 ES256 ES256K ES384 ES512 PS256 PS384 PS512'
         enc_keys = 'RSA1_5 RSA-OAEP ECDH-ES'
     
-        #jwks = self.gen_openid_jwks_jks_keys(self.oxauth_openid_jks_fn, Config.oxauth_openid_jks_pass, key_expiration=2, key_algs=sig_keys, enc_keys=enc_keys)
         jwks = self.gen_openid_data_store_keys(self.oxauth_openid_jks_fn, Config.oxauth_openid_jks_pass, key_expiration=2, key_algs=sig_keys, enc_keys=enc_keys)
         self.write_openid_keys(self.oxauth_openid_jwks_fn, jwks)
 
@@ -219,52 +217,18 @@ class JansAuthInstaller(JettyInstaller):
         self.chown(os.path.join(self.jetty_service_webapps, os.path.basename(src_xml)), Config.jetty_user, Config.jetty_group)
 
     def extract_bcfips_jars(self):
-#        Config.bc_fips_jar;
-#        Config.bcpkix_fips_jar;
-#        self.source_files[2][0];
 
         war_zip = zipfile.ZipFile(self.source_fips_files[0][0], "r")
         for fn in war_zip.namelist():
             if re.search('bc-fips-(.*?).jar$', fn) or re.search('bcpkix-fips-(.*?).jar$', fn):
                 file_name = os.path.basename(fn)
                 target_fn = os.path.join(Config.dist_app_dir, file_name)
-#                print("Extracting", fn, "to", target_fn)
                 file_content = war_zip.read(fn)
                 with open(target_fn, 'wb') as w:
                     w.write(file_content)
         war_zip.close()
 
-#    self.copyFile(self.source_files[0][0], self.jetty_service_webapps)
-
-#    if argsp.profile == 'DISA-STIG':
-#        war_zip = zipfile.ZipFile(oxauth_war_fn, "r")
-#        for fn in war_zip.namelist():
-#            if re.search('bc-fips-(.*?).jar$', fn) or re.search('bcpkix-fips-(.*?).jar$', fn):
-#                file_name = os.path.basename(fn)
-#                target_fn = os.path.join(app_dir, file_name)
-#                print("Extracting", fn, "to", target_fn)
-#                file_content = war_zip.read(fn)
-#                with open(target_fn, 'wb') as w:
-#                    w.write(file_content)
-#        war_zip.close()
-
-#    Config.profile == SetupProfiles.OPENBANKING
-        
-            
-            
-#   dist_app_dir = os.path.join(distFolder, 'app')
-#    dist_jans_dir = os.path.join(distFolder, 'jans')
-        
-        
-#            self.bc_fips_jar = max(glob.glob(os.path.join(self.distAppFolder, 'bc-fips-*.jar')))
-#            self.bcpkix_fips_jar = max(glob.glob(os.path.join(self.distAppFolder, 'bcpkix-fips-*.jar')))
-
     def init_key_gen(self):
-#        #Download jans-auth-client-jar-with-dependencies
-#        if not os.path.exists(Config.non_setup_properties['jans_auth_client_jar_fn']):
-#            jans_auth_client_jar_url = os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-auth-client/{0}/jans-auth-client-{0}-jar-with-dependencies.jar').format(base.current_app.app_info['ox_version'])
-#            self.logIt("Downloading {}".format(os.path.basename(jans_auth_client_jar_url)))
-#            base.download(jans_auth_client_jar_url, Config.non_setup_properties['jans_auth_client_jar_fn'])
 
         self.logIt("Determining key generator path")
         jans_auth_client_jar_zf = zipfile.ZipFile(Config.non_setup_properties['jans_auth_client_jar_fn'])

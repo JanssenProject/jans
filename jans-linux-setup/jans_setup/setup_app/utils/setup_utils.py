@@ -39,12 +39,6 @@ class SetupUtils(Crypto64):
         else:
             return base.run(*args)
 
-    def run_1(self, *args, **kwargs):
-        if kwargs:
-            return base.run_1(*args, **kwargs)
-        else:
-            return base.run_1(*args)
-
     def logOSChanges(self, *args):
         base.logOSChanges(*args)
 

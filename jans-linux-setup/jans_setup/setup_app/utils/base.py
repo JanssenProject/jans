@@ -284,59 +284,6 @@ def run(args, cwd=None, env=None, useWait=False, shell=False, get_stderr=False):
 
     return output
 
-# args = command + args, i.e. ['ls', '-ltr']
-def run_1(args, cwd=None, env=None, useWait=False, shell=False, get_stderr=False):
-    if snap and args[0] in [paths.cmd_chown]:
-        return ''
-
-    output = ''
-    log_arg = ' '.join(args) if type(args) is list else args
-    logIt('Running: %s' % log_arg)
-    logIt('run_1: useWait: {}'.format(useWait))
-
-    if args[0] == paths.cmd_chown:
-        argsc = get_clean_args(args)
-        if not argsc[2].startswith('/opt'):
-            logOSChanges('Making owner of %s to %s' % (', '.join(argsc[2:]), argsc[1]))
-    elif args[0] == paths.cmd_chmod:
-        argsc = get_clean_args(args)
-        if not argsc[2].startswith('/opt'):
-            logOSChanges('Setting permission of %s to %s' % (', '.join(argsc[2:]), argsc[1]))
-    elif args[0] == paths.cmd_chgrp:
-        argsc = get_clean_args(args)
-        if not argsc[2].startswith('/opt'):
-            logOSChanges('Making group of %s to %s' % (', '.join(argsc[2:]), argsc[1]))
-    elif args[0] == paths.cmd_mkdir:
-        argsc = get_clean_args(args)
-        if not (argsc[1].startswith('/opt') or argsc[1].startswith('.')):
-            logOSChanges('Creating directory %s' % (', '.join(argsc[1:])))
-
-    try:
-        logIt('run_1: subprocess.Popen: ...1...')
-        p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd, env=env, shell=shell)
-        if useWait is True:
-            logIt('run_1: subprocess.Popen: ...2...')
-            code = p.wait()
-            logIt('run_1: subprocess.Popen: ...3...')
-            logIt('Run: %s with result code: %d' % (' '.join(args), code) )
-            logIt('run_1: subprocess.Popen: ...4...')
-        else:
-            logIt('run_1: subprocess.Popen: ...5...')
-            output, err = p.communicate()
-            output = output.decode('utf-8')
-            err = err.decode('utf-8')
-
-            if output:
-                logIt(output)
-            if err:
-                logIt(err, True)
-    except:
-        logIt("Error running command : %s" % " ".join(args), True)
-
-    if get_stderr:
-        return output, err
-
-    return output
 
 def determine_package(glob_pattern):
     logIt("Determining package for pattern: {}".format(glob_pattern))

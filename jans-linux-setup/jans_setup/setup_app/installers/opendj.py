@@ -46,7 +46,6 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
         self.ldapDsCreateRcCommand = os.path.join(Config.ldap_bin_dir , 'create-rc-script')
 
     def install(self):
-        self.logIt("-------------------------------------------------- >>")
         self.logIt("Running OpenDJ Setup")
 
         if Config.profile == SetupProfiles.DISA_STIG:
@@ -56,34 +55,13 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
             self.pass_param = '-storepass:file'
         
         if Config.profile == SetupProfiles.DISA_STIG:
-            self.logIt("Config.opendj_truststore_format.lower() (init)  = %s" % Config.opendj_truststore_format.lower())
-            self.logIt("Config.ldap_setup_properties (init)(1)  = %s" % Config.ldap_setup_properties)
             Config.ldap_setup_properties += '.' + Config.opendj_truststore_format.lower()
-            self.logIt("Config.ldap_setup_properties (init)(2)  = %s" % Config.ldap_setup_properties)
             
         self.opendj_trusstore_setup_key_fn = os.path.join(Config.output_dir, 'opendj.keystore.pin')
         
         self.opendj_pck11_setup_key_fn = '/root/.keystore.pin'
         self.opendj_admin_truststore_fn = os.path.join(Config.ldap_base_dir, 'config', 'admin-truststore')
         self.opendj_key_store_password_fn = os.path.join(Config.ldap_base_dir, 'config', 'keystore.pin')
-
-        self.logIt("Config.profile                          = %s" % Config.profile)
-
-        self.logIt("Config.opendj_truststore_format.lower() = %s" % Config.opendj_truststore_format.lower())
-        self.logIt("Config.ldap_setup_properties            = %s" % Config.ldap_setup_properties)
-        self.logIt("self.opendj_trusstore_setup_key_fn      = %s" % self.opendj_trusstore_setup_key_fn)
-        self.logIt("self.opendj_pck11_setup_key_fn          = %s" % self.opendj_pck11_setup_key_fn)
-        self.logIt("self.opendj_admin_truststore_fn         = %s" % self.opendj_admin_truststore_fn)
-        self.logIt("self.opendj_key_store_password_fn       = %s" % self.opendj_key_store_password_fn)
-
-        if Config.profile == SetupProfiles.DISA_STIG:
-            self.logIt("Config.bc_fips_jar          = %s" % Config.bc_fips_jar)
-            self.logIt("Config.bcpkix_fips_jar      = %s" % Config.bcpkix_fips_jar)
-
-            self.logIt("self.fips_provider          = %s" % self.fips_provider)
-            self.logIt("self.provider_path          = %s" % self.provider_path)
-            self.logIt("self.admin_alias            = %s" % self.admin_alias)
-            self.logIt("self.pass_param             = %s" % self.pass_param)
 
         if not base.snap:
             Config.pbar.progress(self.service_name, "Extracting OpenDJ", False)
@@ -113,9 +91,6 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
                 self.logIt("Failed to connect LDAP. Trying once more")
         else:
             self.logIt("Four attempt to connection to LDAP failed. Exiting ...", True, True)
-
-        # it is time to bind OpenDJ
-#        self.dbUtils.bind()
 
         if Config.opendj_install:
             Config.pbar.progress(self.service_name, "Creating OpenDJ backends", False)
@@ -156,8 +131,6 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
                 self.post_install_opendj()
 
             self.enable()
-            
-        self.logIt("-------------------------------------------------- <<")
 
     def extractOpenDJ(self):
 
@@ -183,12 +156,6 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
     def install_opendj(self):
         self.logIt("Running OpenDJ Setup")
 
-#   Copy opendj-setup.properties so user ldap can find it in /opt/opendj
-#   setup_props_fn = os.path.join(Config.ldap_base_dir, 'opendj-setup.properties')
-#   shutil.copy("%s/opendj-setup.properties" % Config.output_dir, setup_props_fn)
-
-        self.logIt("Config.templateRenderingDict = {}".format(Config.templateRenderingDict))
-
         Config.templateRenderingDict['opendj_pck11_setup_key_fn'] = self.opendj_pck11_setup_key_fn
         Config.templateRenderingDict['opendj_trusstore_setup_key_fn'] = self.opendj_trusstore_setup_key_fn
 
@@ -198,23 +165,6 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
         
         setup_props_output_fn = os.path.join(Config.output_dir, ldap_setup_properties_fn)
         setup_props_ldap_fn = os.path.join(Config.ldap_base_dir, ldap_setup_properties_fn)
-        
-        self.logIt("self.opendj_pck11_setup_key_fn = {}".format(self.opendj_pck11_setup_key_fn))
-        self.logIt("self.opendj_trusstore_setup_key_fn = {}".format(self.opendj_trusstore_setup_key_fn))
-        
-        self.logIt("Config.ldap_setup_properties = {}".format(Config.ldap_setup_properties))
-        
-        self.logIt("Config.output_dir = {}".format(Config.output_dir))
-        self.logIt("Config.ldap_base_dir = {}".format(Config.ldap_base_dir))        
-        
-        self.logIt("setup_props_output_fn = {}".format(setup_props_output_fn))
-        self.logIt("setup_props_ldap_fn = {}".format(setup_props_ldap_fn))
-
-        self.logIt("Config.opendj_trust_store_fn = {}".format(Config.opendj_trust_store_fn))
-        
-        self.logIt("Config.ldap_setup_properties = {}".format(Config.ldap_setup_properties))
-        
-        self.logIt("Config.certFolder = {}".format(Config.certFolder))
 
         self.chown(setup_props_output_fn, Config.ldap_user, Config.ldap_group)
 
@@ -225,39 +175,6 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
         if Config.profile == SetupProfiles.DISA_STIG:
             self.generate_opendj_certs()
 
-#        some_command = "touch"
-
-#        some_command_exec = [some_command,
-#                                './some_file.dat'
-#                                ]
-
-#        self.logIt("Running: {}".format(some_command_exec))
-#        self.run_1(some_command_exec,
-#                  useWait=True
-#                  )
-
-#        self.logIt("After Running: {}".format(some_command_exec))                  
-
-#        some_command = "./_init.sh"
-
-#        some_command_exec = [some_command,
-#                                '/opt/opendj/some_file.1.dat',
-#                                '/opt/opendj/some_file.2.dat'
-#                                ]
-
-#        self.logIt("Running: {}".format(some_command_exec))
-#        self.run_1(some_command_exec,
-#                  useWait=False
-#                  )
-
-#        self.logIt("After Running: {}".format(some_command_exec))
-
-#        self.logIt("Before Reading file: {}".format('/opt/opendj/some_file.2.dat'))        
-
-#        result_reading = self.readFile('/opt/opendj/some_file.2.dat')
-
-#        self.logIt("result_reading = {}".format(result_reading))
-
         ldap_setup_command = os.path.join(Config.ldap_base_dir, 'setup')
 
         setup_cmd = [ldap_setup_command,
@@ -267,30 +184,18 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
                                 setup_props_ldap_fn,
                                 '--acceptLicense',
                                 '--doNotStart']
-#        if base.snap:
-#            self.run(setup_cmd, shell=True)
-#        else:
-#            self.run(['/bin/su',
-#                          Config.ldap_user,
-#                          '-c',
-#                          setup_cmd],
-#                          cwd='/opt/opendj',
-#                      )
 
         self.logIt("Running: {}".format(setup_cmd))
-        self.run_1(setup_cmd,
+        self.run(setup_cmd,
                   cwd='/opt/opendj',
                   env={'OPENDJ_JAVA_HOME': Config.jre_home},
                   useWait=True
                   )
                   
-        self.logIt("post_setup_import...")
         self.post_setup_import()
 
-        self.logIt("fix_opendj_java_properties...")
         self.fix_opendj_java_properties()
 
-        self.logIt("set_opendj_java_properties...")
         self.set_opendj_java_properties({
             'default.java-home': Config.jre_home,
             'start-ds.java-args': '-server -Xms{0}m -Xmx{0}m'.format(Config.opendj_max_ram),
@@ -521,10 +426,6 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
         alias = '{}_opendj'.format(Config.hostname)        
         self.delete_key(alias)  
         self.import_cert_to_java_truststore(alias, Config.opendj_cert_fn)
-        
-#        self.run([Config.cmd_keytool, "-import", "-trustcacerts", "-alias", alias, \
-#                  "-file", Config.opendj_cert_fn, "-keystore", Config.default_trust_store_fn, \
-#                  "-storepass", "changeit", "-noprompt"])
 
     def index_opendj(self):
 
@@ -534,9 +435,6 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
             index_json = json.load(f)
 
         index_backends = ['userRoot']
-
-#        if Config.mapping_locations['site'] == self.ldap_str:
-#            index_backends.append('site')
 
         for attrDict in index_json:
             attr_name = attrDict['attribute']
@@ -585,33 +483,16 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
             opendj_install = InstallTypes.LOCAL
         elif not os.path.exists(self.openDjSchemaFolder) and os.path.exists(Config.ox_ldap_properties):
             opendj_install = InstallTypes.REMOTE
-#        elif os.path.exists(Config.opendj_p12_fn):
-#            opendj_install = InstallTypes.REMOTE
         else:
             opendj_install = 0
 
         return opendj_install
 
     def generate_opendj_certs(self):
-    
-        self.logIt("generate_opendj_certs: -------------------------------------------------- >>")
-
-        self.logIt("self.opendj_trusstore_setup_key_fn = %s" % self.opendj_trusstore_setup_key_fn)
-#        self.logIt("Config.opendj_p12_pass = %s" % Config.opendj_p12_pass)
-        self.logIt("Config.opendj_truststore_pass = %s" % Config.opendj_truststore_pass)
 
         self.writeFile(self.opendj_trusstore_setup_key_fn, Config.opendj_truststore_pass)
-#        self.writeFile(self.opendj_trusstore_setup_key_fn, Config.opendj_p12_pass)
 
         keystore = Config.opendj_trust_store_fn if Config.opendj_truststore_format.upper() == 'BCFKS' else 'NONE'
-
-        self.logIt("keystore = %s" % keystore)
-
-        self.logIt("self.fips_provider = %s" % self.fips_provider)
-        self.logIt("self.provider_path = %s" % self.provider_path)
-        self.logIt("self.opendj_trusstore_setup_key_fn = %s" % self.opendj_trusstore_setup_key_fn)
-        self.logIt("self.pass_param    = %s" % self.pass_param)
-        self.logIt("Config.opendj_truststore_format.upper()    = %s" % Config.opendj_truststore_format.upper())
 
         # Generate keystore
 
@@ -641,7 +522,6 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
                     ]
 
         self.run(cmd_server_cert_gen)
-
 
         cmd_server_selfcert_gen = [
             Config.cmd_keytool, '-selfcert',
@@ -716,8 +596,6 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
                 ]
 
         self.run(cmd_admin_selfcert_gen)
-        
-        self.logIt("generate_opendj_certs: -------------------------------------------------- <<")
 
     def post_setup_import(self):
         if Config.profile == SetupProfiles.DISA_STIG and Config.opendj_truststore_format.upper() == 'BCFKS':

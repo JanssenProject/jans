@@ -215,7 +215,6 @@ class BaseInstaller:
                     self.download_file(url, src)
                     
     def profile_templates(self, temp_dir=None, recursive=False):
-        base.logIt("profile_templates: -------------------------------------- >>")
         if not temp_dir:
             if not hasattr(self, 'templates_folder'):
                 return
@@ -225,13 +224,10 @@ class BaseInstaller:
         if recursive:
             glob_param = '**/' + glob_param
 
-        base.logIt("profile_templates: temp_dir = {}".format(temp_dir))
         for temp_p in Path(temp_dir).glob(glob_param):
-            base.logIt("profile_templates: temp_p = {}".format(temp_p))
             target_p = temp_p.with_suffix('')
             base.logIt("Renaming {} to {}".format(temp_p, target_p))
             temp_p.rename(target_p)
-        base.logIt("profile_templates: -------------------------------------- <<")
 
     def create_user(self):
         pass

@@ -352,9 +352,6 @@ class Crypto64:
                         "-expiration",
                         "%s" % key_expiration]
 
-#        if not data_store_path.endswith('.jks'):
-#            args += ['-keystore_type', Config.default_store_type]
-
         output = self.run([' '.join(args)], shell=True)
 
         if output:
@@ -418,8 +415,6 @@ class Crypto64:
                 Config.encoded_ox_ldap_pw = self.obscure(Config.ldapPass)
             if Config.get('cb_password'):
                 Config.encoded_cb_password = self.obscure(Config.cb_password)
-#            if Config.get('opendj_p12_pass'):
-#                Config.encoded_opendj_p12_pass = self.obscure(Config.opendj_p12_pass)
             if not Config.get('opendj_truststore_pass'):
                 Config.opendj_truststore_pass = os.urandom(6).hex()
             Config.opendj_truststore_pass_enc = self.obscure(Config.opendj_truststore_pass)
@@ -581,9 +576,6 @@ class Crypto64:
                         '"%s"' % dn_name,
                         "-expiration",
                         "%s" % key_expiration]
-
-#        if not data_store_path.endswith('.jks'):
-#            args += ['-keystore_type', Config.default_store_type]
 
         output = self.run([' '.join(args)], shell=True)
 
