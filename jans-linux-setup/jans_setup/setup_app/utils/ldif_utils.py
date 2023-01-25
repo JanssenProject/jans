@@ -5,7 +5,7 @@ import json
 from collections import OrderedDict
 
 from ldap3.utils import dn as dnutils
-from setup_app.pylib.ldif4.ldif import LDIFParser
+from setup_app.pylib.ldif4.ldif import LDIFParser, LDIFWriter
 from setup_app.pylib.schema import AttributeType, ObjectClass
 from setup_app.utils.attributes import attribDataTypes
 from setup_app.config import Config
@@ -155,3 +155,36 @@ def schema2json(schema_file, out_dir=None):
     schema_str = json.dumps(jans_schema, indent=2)
     with open(out_file, 'w') as w:
         w.write(schema_str)
+
+def create_client_ldif(ldif_fn, client_id, encoded_pw, scopes, redirect_uri, trusted_client='false'):
+    clients_ldif_fd = open(ldif_fn, 'wb')
+    ldif_clients_writer = LDIFWriter(clients_ldif_fd, cols=1000)
+    client_dn = 'inum={},ou=clients,o=jans'.format(client_id)
+
+    ldif_clients_writer.unparse(
+        client_dn, {
+        'objectClass': ['top', 'jansClnt'],
+        'del': ['false'],
+        'displayName': ['Jans Config Api Client'],
+        'inum': [client_id],
+        'jansAccessTknAsJwt': ['false'],
+        'jansAccessTknSigAlg': ['RS256'],
+        'jansAppTyp': ['web'],
+        'jansAttrs': ['{"tlsClientAuthSubjectDn":"","runIntrospectionScriptBeforeJwtCreation":false,"keepClientAuthorizationAfterExpiration":false,"allowSpontaneousScopes":false,"spontaneousScopes":[],"spontaneousScopeScriptDns":[],"backchannelLogoutUri":[],"backchannelLogoutSessionRequired":false,"additionalAudience":[],"postAuthnScripts":[],"consentGatheringScripts":[],"introspectionScripts":[],"rptClaimsScripts":[]}'],
+        'jansClntSecret': [encoded_pw],
+        'jansDisabled': ['false'],
+        'jansGrantTyp': ['authorization_code', 'refresh_token', 'client_credentials'],
+        'jansIdTknSignedRespAlg': ['RS256'],
+        'jansInclClaimsInIdTkn': ['false'],
+        'jansLogoutSessRequired': ['false'],
+        'jansPersistClntAuthzs': ['true'],
+        'jansRespTyp': ['code'],
+        'jansRptAsJwt': ['false'],
+        'jansScope': scopes,
+        'jansSubjectTyp': ['pairwise'],
+        'jansTknEndpointAuthMethod': ['client_secret_basic'],
+        'jansTrustedClnt': [trusted_client],
+        'jansRedirectURI': redirect_uri
+        })
+
+    clients_ldif_fd.close()
