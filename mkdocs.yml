@@ -328,7 +328,7 @@ nav:
             - 'admin/auth-server/client-management/README.md'
             - 'Client Schema': 'admin/auth-server/client-management/client-schema.md'
             - 'Client Authentication': 'admin/auth-server/client-management/client-authn.md'
-            - 'Configuration':'admin/auth-server/client-management/client-configuration.md'
+            - 'Configuration': 'admin/auth-server/client-management/client-configuration.md'
             - 'Software Statements': 'admin/auth-server/client-management/software-statements.md'
             - 'Sector Identifiers': 'admin/auth-server/client-management/sector-identifiers.md'
             - 'Client Scripts': 'admin/auth-server/client-management/client-scripts.md'
