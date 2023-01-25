@@ -205,7 +205,8 @@
       "jansStatus",
       "personInum",
       "jansApp",
-      "jansPublicKeyIdHash"
+      "jansCodeChallenge",
+      "jansCodeChallengeHash"
     ],
     "custom": [
       "(\"del\", \"exp\")"
@@ -215,7 +216,12 @@
     "fields": [
       "creationDate",
       "jansStatus",
-      "personInum"
+      "personInum",
+      "jansApp",
+      "jansPublicKeyId".
+      "jansPublicKeyIdHash".
+      "jansCodeChallenge",
+      "jansCodeChallengeHash"
     ],
     "custom": [
       "(\"del\", \"exp\")"

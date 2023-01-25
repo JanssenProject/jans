@@ -6,6 +6,7 @@
 
 package io.jans.fido2.service.persist;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -31,6 +32,8 @@ import io.jans.orm.model.fido2.Fido2AuthenticationEntry;
 import io.jans.orm.model.fido2.Fido2AuthenticationStatus;
 import io.jans.orm.search.filter.Filter;
 import io.jans.util.StringHelper;
+
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
 /**
@@ -58,7 +61,7 @@ public class AuthenticationPersistenceService {
     private PersistenceEntryManager persistenceEntryManager;
 
     public void save(Fido2AuthenticationData authenticationData) {
-        Fido2AuthenticationEntry authenticationEntity = buildFido2AuthenticationEntry(authenticationData);
+        Fido2AuthenticationEntry authenticationEntity = buildFido2AuthenticationEntry(authenticationData, false);
 
         save(authenticationEntity);
     }
@@ -69,25 +72,33 @@ public class AuthenticationPersistenceService {
         persistenceEntryManager.persist(authenticationEntity);
     }
 
-    public Fido2AuthenticationEntry buildFido2AuthenticationEntry(Fido2AuthenticationData authenticationData) {
+    public Fido2AuthenticationEntry buildFido2AuthenticationEntry(Fido2AuthenticationData authenticationData, boolean oneStep) {
 		String userName = authenticationData.getUsername();
         
-        User user = userService.getUser(userName, "inum");
-        if (user == null) {
-            if (appConfiguration.getFido2Configuration().isUserAutoEnrollment()) {
-                user = userService.addDefaultUser(userName);
-            } else {
-                throw new Fido2RuntimeException("Auto user enrollment was disabled. User not exists!");
-            }
-        }
-        String userInum = userService.getUserInum(user);
+		String userInum = null;
+    	if (!oneStep) {
+	        User user = userService.getUser(userName, "inum");
+	        if (user == null) {
+	            if (appConfiguration.getFido2Configuration().isUserAutoEnrollment()) {
+	                user = userService.addDefaultUser(userName);
+	            } else {
+	                throw new Fido2RuntimeException("Auto user enrollment was disabled. User not exists!");
+	            }
+	        }
+	        userInum = userService.getUserInum(user);
+    	}
 
         Date now = new GregorianCalendar(TimeZone.getTimeZone("UTC")).getTime();
         final String id = UUID.randomUUID().toString();
+        final String challenge = authenticationData.getChallenge();
 
-        String dn = getDnForAuthenticationEntry(userInum, id);
+        String dn = oneStep ? getDnForAuthenticationEntry(null, id) : getDnForAuthenticationEntry(userInum, id);
         Fido2AuthenticationEntry authenticationEntity = new Fido2AuthenticationEntry(dn, authenticationData.getId(), now, userInum, authenticationData);
         authenticationEntity.setAuthenticationStatus(authenticationData.getStatus());
+        if (StringUtils.isNotEmpty(challenge)) {
+        	authenticationEntity.setChallengeHash(String.valueOf(getChallengeHashCode(challenge)));
+        }
+        authenticationEntity.setRpId(authenticationData.getApplicationId());
 
         authenticationData.setCreatedDate(now);
         authenticationData.setCreatedBy(userName);
@@ -132,19 +143,27 @@ public class AuthenticationPersistenceService {
         }
     }
 
-    public List<Fido2AuthenticationEntry> findByChallenge(String challenge) {
-        String baseDn = getBaseDnForFido2AuthenticationEntries(null);
+    public List<Fido2AuthenticationEntry> findByChallenge(String challenge, boolean oneStep) {
+        String baseDn = oneStep ? getDnForAuthenticationEntry(null, null) : getBaseDnForFido2AuthenticationEntries(null);
 
         Filter codeChallengFilter = Filter.createEqualityFilter("jansCodeChallenge", challenge);
+        Filter codeChallengHashCodeFilter = Filter.createEqualityFilter("jansCodeChallengeHash", String.valueOf(getChallengeHashCode(challenge)));
+        Filter filter = Filter.createANDFilter(codeChallengFilter, codeChallengHashCodeFilter);
 
-        List<Fido2AuthenticationEntry> fido2AuthenticationEntries = persistenceEntryManager.findEntries(baseDn, Fido2AuthenticationEntry.class, codeChallengFilter);
+        List<Fido2AuthenticationEntry> fido2AuthenticationEntries = persistenceEntryManager.findEntries(baseDn, Fido2AuthenticationEntry.class, filter);
 
         return fido2AuthenticationEntries;
     }
 
     public String getDnForAuthenticationEntry(String userInum, String jsId) {
+    	String baseDn;
+    	if (StringHelper.isEmpty(userInum)) {
+    		baseDn = staticConfiguration.getBaseDn().getFido2Attestation();
+    	} else {
+	        // Build DN string for Fido2 registration entry
+	        baseDn = getBaseDnForFido2AuthenticationEntries(userInum);
+    	}
         // Build DN string for Fido2 authentication entry
-        String baseDn = getBaseDnForFido2AuthenticationEntries(userInum);
         if (StringHelper.isEmpty(jsId)) {
             return baseDn;
         }
@@ -244,6 +263,16 @@ public class AuthenticationPersistenceService {
     private Filter getEmptyAuthenticationBranchFilter() {
         return Filter.createANDFilter(Filter.createEqualityFilter("ou", "fido2_auth"), Filter.createORFilter(
                 Filter.createEqualityFilter("numsubordinates", "0"), Filter.createEqualityFilter("hasSubordinates", "FALSE")));
+    }
+
+    public int getChallengeHashCode(String challenge) {
+        int hash = 0;
+        byte[] challengeBytes = challenge.getBytes(StandardCharsets.UTF_8);
+        for (int j = 0; j < challengeBytes.length; j++) {
+            hash += challengeBytes[j]*j;
+        }
+
+        return hash;
     }
 
 }

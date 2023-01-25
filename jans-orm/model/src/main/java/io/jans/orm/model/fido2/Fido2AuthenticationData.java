@@ -26,6 +26,8 @@ public class Fido2AuthenticationData extends Fido2Data {
 
     private Fido2AuthenticationStatus status;
 
+    private String applicationId;
+
     public String getId() {
         return id;
     }
@@ -98,11 +100,20 @@ public class Fido2AuthenticationData extends Fido2Data {
         this.status = status;
     }
 
+	public String getApplicationId() {
+		return applicationId;
+	}
+
+	public void setApplicationId(String applicationId) {
+		this.applicationId = applicationId;
+	}
+
 	@Override
 	public String toString() {
-		return "Fido2AuthenticationData [id=" + id + ", username=" + username + ", domain=" + domain
-				+ ", userId=" + userId + ", challenge=" + challenge + ", assertionRequest=" + assertionRequest + ", assertionResponse="
-				+ assertionResponse + ", userVerificationOption=" + userVerificationOption + ", status=" + status + "]";
+		return "Fido2AuthenticationData [id=" + id + ", username=" + username + ", domain=" + domain + ", userId="
+				+ userId + ", challenge=" + challenge + ", assertionRequest=" + assertionRequest
+				+ ", assertionResponse=" + assertionResponse + ", userVerificationOption=" + userVerificationOption
+				+ ", status=" + status + ", applicationId=" + applicationId + "]";
 	}
 
 }

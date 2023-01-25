@@ -6,25 +6,21 @@
 
 package io.jans.fido2.service.operation;
 
-import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import io.jans.orm.model.fido2.Fido2AuthenticationData;
-import io.jans.orm.model.fido2.Fido2AuthenticationEntry;
-import io.jans.orm.model.fido2.Fido2AuthenticationStatus;
-import io.jans.orm.model.fido2.Fido2RegistrationData;
-import io.jans.orm.model.fido2.Fido2RegistrationEntry;
-import io.jans.orm.model.fido2.Fido2RegistrationStatus;
-import io.jans.orm.model.fido2.UserVerification;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import io.jans.entry.DeviceRegistration;
 import io.jans.fido2.ctap.AttestationFormat;
 import io.jans.fido2.ctap.AuthenticatorAttachment;
@@ -41,14 +37,18 @@ import io.jans.fido2.service.persist.UserSessionIdService;
 import io.jans.fido2.service.verifier.AssertionVerifier;
 import io.jans.fido2.service.verifier.CommonVerifiers;
 import io.jans.fido2.service.verifier.DomainVerifier;
+import io.jans.orm.model.fido2.Fido2AuthenticationData;
+import io.jans.orm.model.fido2.Fido2AuthenticationEntry;
+import io.jans.orm.model.fido2.Fido2AuthenticationStatus;
+import io.jans.orm.model.fido2.Fido2RegistrationData;
+import io.jans.orm.model.fido2.Fido2RegistrationEntry;
+import io.jans.orm.model.fido2.Fido2RegistrationStatus;
+import io.jans.orm.model.fido2.UserVerification;
 import io.jans.service.net.NetworkService;
 import io.jans.u2f.service.persist.DeviceRegistrationService;
 import io.jans.util.StringHelper;
-import org.slf4j.Logger;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 /**
  * Core offering by the FIDO2 server, assertion is invoked upon authentication
@@ -105,7 +105,8 @@ public class AssertionService {
 	 */
 	public ObjectNode options(JsonNode params) {
 		log.debug("Assertion options {}", params);
-		
+
+		boolean oneStep = commonVerifiers.isSuperGluuOneStepMode(params);
 		boolean superGluu = commonVerifiers.hasSuperGluu(params);
 
 		// Verify request parameters
@@ -140,8 +141,13 @@ public class AssertionService {
 			applicationId = params.get(CommonVerifiers.SUPER_GLUU_APP_ID).asText();
 		}
 
+		String requestedKeyHandle = null;
+		if (superGluu && params.hasNonNull(CommonVerifiers.SUPER_GLUU_KEY_HANDLE)) {
+			requestedKeyHandle = params.get(CommonVerifiers.SUPER_GLUU_KEY_HANDLE).asText();
+		}
+
 		// Put allowCredentials
-		Pair<ArrayNode, String> allowedCredentialsPair = prepareAllowedCredentials(applicationId, username, superGluu);
+		Pair<ArrayNode, String> allowedCredentialsPair = prepareAllowedCredentials(applicationId, username, requestedKeyHandle, superGluu);
 		ArrayNode allowedCredentials = allowedCredentialsPair.getLeft();
 		if (allowedCredentials.isEmpty()) {
 			throw new Fido2RuntimeException("Can't find associated key(s). Username: " + username);
@@ -183,11 +189,14 @@ public class AssertionService {
 		entity.setDomain(documentDomain);
 		entity.setUserVerificationOption(userVerification);
 		entity.setStatus(Fido2AuthenticationStatus.pending);
+		if (params.hasNonNull(CommonVerifiers.SUPER_GLUU_APP_ID)) {
+			entity.setApplicationId(params.get(CommonVerifiers.SUPER_GLUU_APP_ID).asText());
+		}
 
 		// Store original request
 		entity.setAssertionRequest(params.toString());
 
-		Fido2AuthenticationEntry authenticationEntity = authenticationPersistenceService.buildFido2AuthenticationEntry(entity);
+		Fido2AuthenticationEntry authenticationEntity = authenticationPersistenceService.buildFido2AuthenticationEntry(entity, oneStep);
 		if (params.hasNonNull("session_id")) {
 			authenticationEntity.setSessionStateId(params.get("session_id").asText());
 		}
@@ -199,6 +208,9 @@ public class AssertionService {
 
 	public ObjectNode verify(JsonNode params) {
 		log.debug("authenticateResponse {}", params);
+
+		boolean oneStep = commonVerifiers.isSuperGluuOneStepMode(params);
+		boolean superGluu = commonVerifiers.hasSuperGluu(params);
 
 		// Verify if there are mandatory request parameters
 		commonVerifiers.verifyBasicPayload(params);
@@ -224,7 +236,7 @@ public class AssertionService {
 		String challenge = commonVerifiers.getChallenge(clientDataJSONNode);
 
 		// Find authentication entry
-		Fido2AuthenticationEntry authenticationEntity = authenticationPersistenceService.findByChallenge(challenge).parallelStream()
+		Fido2AuthenticationEntry authenticationEntity = authenticationPersistenceService.findByChallenge(challenge, oneStep).parallelStream()
 				.findFirst().orElseThrow(() -> new Fido2RuntimeException(
 						String.format("Can't find associated assertion request by challenge '%s'", challenge)));
 		Fido2AuthenticationData authenticationData = authenticationEntity.getAuthenticationData();
@@ -233,7 +245,7 @@ public class AssertionService {
 		domainVerifier.verifyDomain(authenticationData.getDomain(), clientDataJSONNode);
 
 		// Find registered public key
-		Fido2RegistrationEntry registrationEntry = registrationPersistenceService.findByPublicKeyId(keyId)
+		Fido2RegistrationEntry registrationEntry = registrationPersistenceService.findByPublicKeyId(keyId, authenticationEntity.getRpId())
 				.orElseThrow(() -> new Fido2RuntimeException(String.format("Couldn't find the key by PublicKeyId '%s'", keyId)));
 		Fido2RegistrationData registrationData = registrationEntry.getRegistrationData();
 
@@ -267,7 +279,6 @@ public class AssertionService {
         if (StringHelper.isNotEmpty(sessionStateId)) {
             log.debug("There is session id. Setting session id attributes");
 
-            boolean oneStep = /*StringHelper.isEmpty(userName);*/ false;
             userSessionIdService.updateUserSessionIdOnFinishRequest(sessionStateId, registrationEntry.getUserInum(), registrationEntry, false, oneStep);
         }
 
@@ -284,7 +295,7 @@ public class AssertionService {
 		return finishResponseNode;
 	}
 
-	private Pair<ArrayNode, String> prepareAllowedCredentials(String documentDomain, String username, boolean superGluu) {
+	private Pair<ArrayNode, String> prepareAllowedCredentials(String documentDomain, String username, String requestedKeyHandle, boolean superGluu) {
 		// TODO: Add property to enable/disable U2F -> Fido2 migration
 		List<DeviceRegistration> existingFidoRegistrations = deviceRegistrationService.findAllRegisteredByUsername(username,
 				documentDomain);
@@ -292,7 +303,14 @@ public class AssertionService {
 			deviceRegistrationService.migrateToFido2(existingFidoRegistrations, documentDomain, username);
 		}
 
-		List<Fido2RegistrationEntry> existingFido2Registrations = registrationPersistenceService.findByRpRegisteredUserDevices(username, documentDomain);
+		List<Fido2RegistrationEntry> existingFido2Registrations;
+		if (superGluu && StringHelper.isNotEmpty(requestedKeyHandle)) {
+			Fido2RegistrationEntry fido2RegistrationEntry = registrationPersistenceService.findByPublicKeyId(requestedKeyHandle, documentDomain).orElseThrow(() -> new Fido2RuntimeException(
+						String.format("Can't find associated key '%s' for application '%s'", requestedKeyHandle, documentDomain)));
+			existingFido2Registrations = Arrays.asList(fido2RegistrationEntry);
+		} else {
+			existingFido2Registrations = registrationPersistenceService.findByRpRegisteredUserDevices(username, documentDomain);
+		}
 		List<Fido2RegistrationEntry> allowedFido2Registrations = existingFido2Registrations.parallelStream()
 				.filter(f -> StringHelper.isNotEmpty(f.getRegistrationData().getPublicKeyId())).collect(Collectors.toList());
 
@@ -330,5 +348,15 @@ public class AssertionService {
 
 		return Pair.of(allowedCredentials, applicationId);
 	}
+
+    public int getChallengeHashCode(String challenge) {
+        int hash = 0;
+        byte[] challengeBytes = challenge.getBytes(StandardCharsets.UTF_8);
+        for (int j = 0; j < challengeBytes.length; j++) {
+            hash += challengeBytes[j]*j;
+        }
+
+        return hash;
+    }
 
 }

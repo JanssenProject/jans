@@ -100,12 +100,18 @@ public class RegistrationPersistenceService extends io.jans.as.common.service.co
         return registrationEntry;
 	}
 
-    public Optional<Fido2RegistrationEntry> findByPublicKeyId(String publicKeyId) {
+    public Optional<Fido2RegistrationEntry> findByPublicKeyId(String publicKeyId, String rpId) {
         String baseDn = getBaseDnForFido2RegistrationEntries(null);
 
+        Filter filter;
         Filter publicKeyIdFilter = Filter.createEqualityFilter("jansPublicKeyId", publicKeyId);
         Filter publicKeyIdHashFilter = Filter.createEqualityFilter("jansPublicKeyIdHash", getPublicKeyIdHash(publicKeyId));
-        Filter filter = Filter.createORFilter(publicKeyIdFilter, publicKeyIdHashFilter);
+        if (StringHelper.isNotEmpty(rpId)) {
+        	Filter appIdFilter = Filter.createEqualityFilter("jansApp", rpId);
+            filter = Filter.createORFilter(publicKeyIdFilter, publicKeyIdHashFilter, appIdFilter);
+        } else {
+            filter = Filter.createORFilter(publicKeyIdFilter, publicKeyIdHashFilter);
+        }
         List<Fido2RegistrationEntry> fido2RegistrationnEntries = persistenceEntryManager.findEntries(baseDn, Fido2RegistrationEntry.class, filter);
         
         if (fido2RegistrationnEntries.size() > 0) {

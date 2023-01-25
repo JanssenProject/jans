@@ -4157,8 +4157,10 @@
       "may": [
         "jansId",
         "creationDate",
+        "jansApp",
         "jansSessStateId",
         "jansCodeChallenge",
+        "jansCodeChallengeHash",
         "personInum",
         "jansAuthData",
         "jansStatus",

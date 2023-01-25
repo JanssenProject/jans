@@ -36,6 +36,8 @@ import io.jans.fido2.service.DataMapperService;
 import io.jans.fido2.service.operation.AssertionService;
 import io.jans.fido2.service.sg.RawAuthenticationService;
 import io.jans.fido2.service.verifier.CommonVerifiers;
+import io.jans.fido2.sg.SuperGluuMode;
+import io.jans.util.StringHelper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
@@ -147,10 +149,14 @@ public class AssertionController {
             return Response.status(Status.FORBIDDEN).build();
         }
 
+        boolean oneStep = StringHelper.isEmpty(userName);
+
         ObjectNode params = dataMapperService.createObjectNode();
         // Add all required parameters from request to allow process U2F request 
         params.put(CommonVerifiers.SUPER_GLUU_REQUEST, true);
         params.put(CommonVerifiers.SUPER_GLUU_APP_ID, appId);
+        params.put(CommonVerifiers.SUPER_GLUU_KEY_HANDLE, keyHandle);
+        params.put(CommonVerifiers.SUPER_GLUU_MODE, oneStep ? SuperGluuMode.ONE_STEP.getMode() : SuperGluuMode.TWO_STEP.getMode());
 
         // TODO: Validate input parameters
         params.put("username", userName);
@@ -225,9 +231,12 @@ public class AssertionController {
             throw new Fido2RuntimeException("Invalid options attestation request type");
         }
 
+        boolean oneStep = StringHelper.isEmpty(userName);
+
         ObjectNode params = dataMapperService.createObjectNode();
         // Add all required parameters from request to allow process U2F request 
         params.put(CommonVerifiers.SUPER_GLUU_REQUEST, true);
+        params.put(CommonVerifiers.SUPER_GLUU_MODE, oneStep ? SuperGluuMode.ONE_STEP.getMode() : SuperGluuMode.TWO_STEP.getMode());
 
         // Manadatory parameter
         params.put("type", "public-key");
