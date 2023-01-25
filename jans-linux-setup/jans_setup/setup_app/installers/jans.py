@@ -461,7 +461,14 @@ class JansInstaller(BaseInstaller, SetupUtils):
         Config.test_client_pw_encoded = encoded_pw
         Config.test_client_redirect_uri = redirect_uri
         Config.test_client_trusted_client = trusted_client
-        Config.test_client_scopes = str(scopes)
+        Config.test_client_scopes = ' '.join(scopes)
+
+
+    def post_install_before_saving_properties(self):
+
+        if base.argsp.test_client_id:
+            self.create_test_client()
+
 
     def post_install_tasks(self):
 
@@ -471,9 +478,6 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
         if base.argsp.import_ldif:
             self.import_custom_ldif_dir(base.argsp.import_ldif)
-
-        if base.argsp.test_client_id:
-            self.create_test_client()
 
         if base.snap:
             #write post-install.py script
