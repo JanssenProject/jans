@@ -46,6 +46,7 @@ public class CommonVerifiers {
 
     public static final String SUPER_GLUU_REQUEST = "super_gluu_request";
     public static final String SUPER_GLUU_MODE = "super_gluu_request_mode";
+    public static final String SUPER_GLUU_APP_ID = "super_gluu_app_id";
 
 	@Inject
     private Logger log;

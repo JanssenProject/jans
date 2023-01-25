@@ -109,10 +109,13 @@ public class AssertionService {
 		boolean superGluu = commonVerifiers.hasSuperGluu(params);
 
 		// Verify request parameters
-		commonVerifiers.verifyAssertionOptions(params);
+		String username = null;
+		if (!superGluu) {
+			commonVerifiers.verifyAssertionOptions(params);
 
-		// Get username
-		String username = commonVerifiers.verifyThatFieldString(params, "username");
+			// Get username
+			username = commonVerifiers.verifyThatFieldString(params, "username");
+		}
 
 		// Create result object
 		ObjectNode optionsResponseNode = dataMapperService.createObjectNode();
@@ -132,9 +135,13 @@ public class AssertionService {
 		optionsResponseNode.put("rpId", documentDomain);
 
 		// TODO: Verify documentDomain
+		String applicationId = documentDomain;
+		if (superGluu && params.hasNonNull(CommonVerifiers.SUPER_GLUU_APP_ID)) {
+			applicationId = params.get(CommonVerifiers.SUPER_GLUU_APP_ID).asText();
+		}
 
 		// Put allowCredentials
-		Pair<ArrayNode, String> allowedCredentialsPair = prepareAllowedCredentials(documentDomain, username, superGluu);
+		Pair<ArrayNode, String> allowedCredentialsPair = prepareAllowedCredentials(applicationId, username, superGluu);
 		ArrayNode allowedCredentials = allowedCredentialsPair.getLeft();
 		if (allowedCredentials.isEmpty()) {
 			throw new Fido2RuntimeException("Can't find associated key(s). Username: " + username);

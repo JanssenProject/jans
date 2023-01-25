@@ -150,6 +150,7 @@ public class AssertionController {
         ObjectNode params = dataMapperService.createObjectNode();
         // Add all required parameters from request to allow process U2F request 
         params.put(CommonVerifiers.SUPER_GLUU_REQUEST, true);
+        params.put(CommonVerifiers.SUPER_GLUU_APP_ID, appId);
 
         // TODO: Validate input parameters
         params.put("username", userName);
@@ -167,7 +168,7 @@ public class AssertionController {
 
         if (result.has("allowCredentials")) {
 	        	result.get("allowCredentials").forEach((f) -> {
-	        		((ObjectNode) f).put("appId", "https://" + rpId);
+	        		((ObjectNode) f).put("appId", appId);
 	        		((ObjectNode) f).put("userVerification", userVerification);
 	        		((ObjectNode) f).put("challenge", challenge);
 	        		((ObjectNode) f).put("keyHandle", f.get("id").asText());

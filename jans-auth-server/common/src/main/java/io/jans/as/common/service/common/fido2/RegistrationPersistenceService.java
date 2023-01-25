@@ -107,8 +107,13 @@ public class RegistrationPersistenceService {
         return persistenceEntryManager.find(deviceDn, Fido2RegistrationEntry.class, returnAttributes);
     }
 
-    public List<Fido2RegistrationEntry> findByRpRegisteredUserDevices(String userInum, String rpId, String ... returnAttributes) {
-        String baseDn = getBaseDnForFido2RegistrationEntries(userInum);
+    public List<Fido2RegistrationEntry> findByRpRegisteredUserDevices(String userName, String rpId, String ... returnAttributes) {
+		String userInum = userService.getUserInum(userName);
+		if (userInum == null) {
+			return Collections.emptyList();
+		}
+
+		String baseDn = getBaseDnForFido2RegistrationEntries(userInum);
         if (persistenceEntryManager.hasBranchesSupport(baseDn)) {
         	if (!containsBranch(baseDn)) {
                 return Collections.emptyList();

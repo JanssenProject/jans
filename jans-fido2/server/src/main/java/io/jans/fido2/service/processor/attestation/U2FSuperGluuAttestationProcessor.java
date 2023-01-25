@@ -102,7 +102,7 @@ public class U2FSuperGluuAttestationProcessor implements AttestationFormatProces
         commonVerifiers.verifyAAGUIDZeroed(authData);
 
         userVerificationVerifier.verifyUserPresent(authData);
-        commonVerifiers.verifyRpIdHash(authData, "https://" + registration.getDomain());
+//        commonVerifiers.verifyRpIdHash(authData, "https://" + registration.getDomain());
 
         if (attStmt.hasNonNull("x5c")) {
             Iterator<JsonNode> i = attStmt.get("x5c").elements();
@@ -118,8 +118,11 @@ public class U2FSuperGluuAttestationProcessor implements AttestationFormatProces
 //				Certificate verifiedCert = certificateVerifier.verifyAttestationCertificates(certificates, trustAnchorCertificates);
 			Certificate verifiedCert = certificates.get(0);
             byte[] challengeHash = DigestUtils.getSha256Digest().digest(registration.getChallenge().getBytes(Charset.forName("UTF-8")));
+            
+            // RP ID hash is application for Super Gluu
+            byte[] rpIdhash = DigestUtils.getSha256Digest().digest(registration.getApplicationId().getBytes(Charset.forName("UTF-8")));
 			
-            authenticatorDataVerifier.verifyU2FAttestationSignature(authData, challengeHash, signature, verifiedCert, alg);
+            authenticatorDataVerifier.verifyU2FAttestationSignature(authData, rpIdhash, challengeHash, signature, verifiedCert, alg);
         }
 
         credIdAndCounters.setAttestationType(getAttestationFormat().getFmt());

@@ -172,6 +172,7 @@ public class AttestationController {
         ObjectNode params = dataMapperService.createObjectNode();
         // Add all required parameters from request to allow process U2F request 
         params.put(CommonVerifiers.SUPER_GLUU_MODE, oneStep ? SuperGluuMode.ONE_STEP.getMode() : SuperGluuMode.TWO_STEP.getMode());
+        params.put(CommonVerifiers.SUPER_GLUU_APP_ID, appId);
 
         // TODO: Validate input parameters
 
@@ -194,12 +195,11 @@ public class AttestationController {
 
         // Build start registration response  
         ObjectNode superGluuResult = dataMapperService.createObjectNode();
-        ArrayNode authenticateRequests = superGluuResult.putArray("authenticateRequests");
         ArrayNode registerRequests = superGluuResult.putArray("registerRequests");
 
         if (result.has("rp")) {
-        	JsonNode rp = result.get("rp");
-        	result.put("appId", rp.get("name").asText());
+        	//JsonNode rp = result.get("rp");
+        	result.put("appId", appId);
         }
         registerRequests.add(result);
 

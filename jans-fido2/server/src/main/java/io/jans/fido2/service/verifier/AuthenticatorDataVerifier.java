@@ -146,10 +146,15 @@ public class AuthenticatorDataVerifier {
 
     public void verifyU2FAttestationSignature(AuthData authData, byte[] clientDataHash, String signature, Certificate certificate,
             int signatureAlgorithm) {
+        verifyU2FAttestationSignature(authData, authData.getRpIdHash(), clientDataHash, signature, certificate,
+                signatureAlgorithm);
+    }
+
+    public void verifyU2FAttestationSignature(AuthData authData, byte[] rpIdHash, byte[] clientDataHash, String signature, Certificate certificate,
+            int signatureAlgorithm) {
         int bufferSize = 0;
         byte[] reserved = new byte[] { 0x00 };
         bufferSize += reserved.length;
-        byte[] rpIdHash = authData.getRpIdHash();
         bufferSize += rpIdHash.length;
 
         bufferSize += clientDataHash.length;

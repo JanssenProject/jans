@@ -193,7 +193,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 u2f_device_id = session_device_status['device_id']
 
-                validation_result = self.validateSessionDeviceStatus(applicationName, session_device_status)
+                validation_result = self.validateSessionDeviceStatus(client_redirect_uri, session_device_status)
                 if validation_result:
                     print "Super-Gluu. Authenticate for step 1. User successfully authenticated with u2f_device '%s'" % u2f_device_id
                 else:
@@ -211,7 +211,6 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 user_inum = session_device_status['user_inum']
 
-                print "3"
                 u2f_device = registrationPersistenceService.findRegisteredUserDevice(user_inum, u2f_device_id, "jansId")
                 if u2f_device == None:
                     print "Super-Gluu. Authenticate for step 1. Failed to load u2f_device '%s'" % u2f_device_id
@@ -254,7 +253,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 if auth_method == 'authenticate':
                     user_inum = userService.getUserInum(authenticated_user)
-                    u2f_devices_list = registrationPersistenceService.findByRpRegisteredUserDevices(user_inum, applicationName, "jansId")
+                    u2f_devices_list = registrationPersistenceService.findByRpRegisteredUserDevices(user_inum, client_redirect_uri, "jansId")
                     if u2f_devices_list.size() == 0:
                         auth_method = 'enroll'
                         print "Super-Gluu. Authenticate for step 1. There is no U2F '%s' user devices associated with application '%s'. Changing auth_method to '%s'" % (user_name, applicationName, auth_method)
@@ -310,7 +309,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     print "Super-Gluu. Authenticate for step 2. Failed to determine user id"
                     return False
 
-                validation_result = self.validateSessionDeviceStatus(applicationName, session_device_status, user_name)
+                validation_result = self.validateSessionDeviceStatus(client_redirect_uri, session_device_status, user_name)
                 if validation_result:
                     print "Super-Gluu. Authenticate for step 2. User '%s' successfully authenticated with u2f_device '%s'" % (user_name, u2f_device_id)
                 else:
@@ -523,7 +522,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 return False
 
         if not StringHelper.equalsIgnoreCase(application_name, u2f_device.rpId):
-            print "Super-Gluu. Validate session device status. u2f_device '%s' associated with other application '%s'" % (u2f_device_id, u2f_device.application)
+            print "Super-Gluu. Validate session device status. u2f_device '%s' associated with other application '%s'" % (u2f_device_id, u2f_device.rpId)
             return False
 
         return True
