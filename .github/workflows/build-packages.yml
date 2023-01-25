@@ -143,35 +143,6 @@ jobs:
           make zipapp 
           mv config-cli-tui.pyz jans-cli-tui-linux-suse-X86-64.pyz
           sha256sum jans-cli-tui-linux-suse-X86-64.pyz > jans-cli-tui-linux-suse-X86-64.pyz.sha256sum
-    # To be removed once we get SUSE build working
-    - uses: addnab/docker-run-action@v3
-      name: Build with CentOS7
-      continue-on-error: true
-      with:
-        image: centos:centos7
-        options: -v ${{ github.workspace }}:/centos
-        run: |
-          yum install python36u python36u-devel python36u-pip -y
-          yum install gcc openssl-devel bzip2-devel libffi-devel zlib-devel -y
-          curl https://www.python.org/ftp/python/3.7.9/Python-3.7.9.tgz --output Python-3.7.9.tgz
-          tar xzf Python-3.7.9.tgz
-          cd Python-3.7.9
-          ./configure --enable-optimizations
-          yum install make -y
-          make altinstall
-          yum -y install epel-release
-          curl https://bootstrap.pypa.io/get-pip.py --output get-pip.py
-          python3.7 get-pip.py
-          echo "Building jans-linux-setup package"
-          cd /centos/jans-linux-setup
-          pip install shiv
-          make zipapp
-          mv jans-linux-setup.pyz jans-linux-centos7-X86-64-setup.pyz
-          sha256sum jans-linux-centos7-X86-64-setup.pyz > jans-linux-centos7-X86-64-setup.pyz.sha256sum
-          cd ../jans-cli-tui
-          make zipapp 
-          mv config-cli-tui.pyz jans-cli-tui-linux-centos7-X86-64.pyz
-          sha256sum jans-cli-tui-linux-centos7-X86-64.pyz > jans-cli-tui-linux-centos7-X86-64.pyz.sha256sum
     - name: Set up Python 3.6
       uses: actions/setup-python@v4
       with:
@@ -197,14 +168,10 @@ jobs:
       id: cache-installers
       with:
         path: |
-          ${{github.workspace}}/jans-linux-setup/jans-linux-centos7-X86-64-setup.pyz
-          ${{github.workspace}}/jans-linux-setup/jans-linux-centos7-X86-64-setup.pyz.sha256sum
           ${{github.workspace}}/jans-linux-setup/jans-linux-suse-X86-64-setup.pyz
           ${{github.workspace}}/jans-linux-setup/jans-linux-suse-X86-64-setup.pyz.sha256sum
           ${{github.workspace}}/jans-linux-setup/jans-linux-ubuntu-X86-64-setup.pyz
           ${{github.workspace}}/jans-linux-setup/jans-linux-ubuntu-X86-64-setup.pyz.sha256sum
-          ${{github.workspace}}/jans-cli-tui/jans-cli-tui-linux-centos7-X86-64.pyz
-          ${{github.workspace}}/jans-cli-tui/jans-cli-tui-linux-centos7-X86-64.pyz.sha256sum
           ${{github.workspace}}/jans-cli-tui/jans-cli-tui-linux-suse-X86-64.pyz
           ${{github.workspace}}/jans-cli-tui/jans-cli-tui-linux-suse-X86-64.pyz.sha256sum
           ${{github.workspace}}/jans-cli-tui/jans-cli-tui-linux-ubuntu-X86-64.pyz
@@ -216,7 +183,7 @@ jobs:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-        name: [centos7, ubuntu, suse]
+        name: [ubuntu, suse]
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -224,14 +191,10 @@ jobs:
       id: cache-installers
       with:
         path: |
-          ${{github.workspace}}/jans-linux-setup/jans-linux-centos7-X86-64-setup.pyz
-          ${{github.workspace}}/jans-linux-setup/jans-linux-centos7-X86-64-setup.pyz.sha256sum
           ${{github.workspace}}/jans-linux-setup/jans-linux-suse-X86-64-setup.pyz
           ${{github.workspace}}/jans-linux-setup/jans-linux-suse-X86-64-setup.pyz.sha256sum
           ${{github.workspace}}/jans-linux-setup/jans-linux-ubuntu-X86-64-setup.pyz
           ${{github.workspace}}/jans-linux-setup/jans-linux-ubuntu-X86-64-setup.pyz.sha256sum
-          ${{github.workspace}}/jans-cli-tui/jans-cli-tui-linux-centos7-X86-64.pyz
-          ${{github.workspace}}/jans-cli-tui/jans-cli-tui-linux-centos7-X86-64.pyz.sha256sum
           ${{github.workspace}}/jans-cli-tui/jans-cli-tui-linux-suse-X86-64.pyz
           ${{github.workspace}}/jans-cli-tui/jans-cli-tui-linux-suse-X86-64.pyz.sha256sum
           ${{github.workspace}}/jans-cli-tui/jans-cli-tui-linux-ubuntu-X86-64.pyz
