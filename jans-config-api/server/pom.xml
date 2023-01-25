@@ -312,7 +312,7 @@
 					<execution>
 						<configuration>
 							<alwaysResolveAppPath>true</alwaysResolveAppPath>
-							<outputFileName>jans-config-api-swagger-auto</outputFileName>
+							<outputFileName>jans-config-api-swagger</outputFileName>
 							<contextId>${project.artifactId}</contextId>
 							<prettyPrint>true</prettyPrint>
 							<resourcePackages>

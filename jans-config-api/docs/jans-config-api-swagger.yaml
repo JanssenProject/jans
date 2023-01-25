@@ -7316,6 +7316,10 @@ components:
           type: array
           items:
             type: string
+        libs:
+          type: array
+          items:
+            type: string
         flowsError:
           type: object
           additionalProperties:
@@ -7520,19 +7524,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        adminCanEdit:
+        whitePagesCanView:
           type: boolean
         userCanEdit:
           type: boolean
-        adminCanView:
-          type: boolean
         userCanAccess:
-          type: boolean
-        userCanView:
           type: boolean
         adminCanAccess:
           type: boolean
-        whitePagesCanView:
+        userCanView:
+          type: boolean
+        adminCanEdit:
+          type: boolean
+        adminCanView:
           type: boolean
         baseDn:
           type: string
@@ -8900,10 +8904,10 @@ components:
           type: array
           items:
             type: object
-        displayValue:
-          type: string
         value:
           type: object
+        displayValue:
+          type: string
     LocalizedString:
       type: object
       properties:
@@ -9117,13 +9121,13 @@ components:
           type: boolean
         internal:
           type: boolean
+        locationPath:
+          type: string
         locationType:
           type: string
           enum:
           - ldap
           - file
-        locationPath:
-          type: string
         baseDn:
           type: string
     ScriptError:
