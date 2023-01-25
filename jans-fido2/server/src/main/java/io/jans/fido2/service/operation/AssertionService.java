@@ -111,7 +111,7 @@ public class AssertionService {
 
 		// Verify request parameters
 		String username = null;
-		if (!superGluu) {
+		if (!(superGluu && oneStep)) {
 			commonVerifiers.verifyAssertionOptions(params);
 
 			// Get username

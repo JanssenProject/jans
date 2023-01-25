@@ -252,8 +252,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     auth_method = 'enroll'
 
                 if auth_method == 'authenticate':
-                    user_inum = userService.getUserInum(authenticated_user)
-                    u2f_devices_list = registrationPersistenceService.findByRpRegisteredUserDevices(user_inum, client_redirect_uri, "jansId")
+                    u2f_devices_list = registrationPersistenceService.findByRpRegisteredUserDevices(authenticated_user.getUserId(), client_redirect_uri, "jansId")
                     if u2f_devices_list.size() == 0:
                         auth_method = 'enroll'
                         print "Super-Gluu. Authenticate for step 1. There is no U2F '%s' user devices associated with application '%s'. Changing auth_method to '%s'" % (user_name, applicationName, auth_method)
