@@ -92,6 +92,8 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         self.run([paths.cmd_ln, '-sf', jettyDestinationPath, self.jetty_home])
         self.run([paths.cmd_chmod, '-R', "755", "%s/bin/" % jettyDestinationPath])
 
+        self.chown(jettyDestinationPath, Config.jetty_user, Config.jetty_group, recursive=True)
+
         self.applyChangesInFiles(self.app_custom_changes[NAME_STR])
 
         self.chown(jettyDestinationPath, Config.jetty_user, Config.jetty_group, recursive=True)
@@ -109,6 +111,8 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         self.copyFile("%s/system/initd/jetty.sh" % Config.staticFolder, self.jetty_bin_sh_fn)
         self.chown(self.jetty_bin_sh_fn, Config.jetty_user, Config.jetty_group, recursive=True)
         self.run([paths.cmd_chmod, '-R', '755', self.jetty_bin_sh_fn])
+        
+        self.chown(jetty_dist, Config.jetty_user, Config.jetty_group, recursive=True)
 
     def get_jetty_info(self):
         # first try latest versions
@@ -193,7 +197,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
 
         jetty_service_configuration = os.path.join(Config.output_dir, NAME_STR, service_name)
         self.copyFile(jetty_service_configuration, Config.os_default)
-        self.chown(os.path.join(Config.os_default, service_name), Config.root_user)
+        self.chown(os.path.join(Config.os_default, service_name), Config.user_group)
 
         # Render web reources file
         try:

@@ -139,12 +139,21 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
     def makeFolders(self):
         # Create these folder on all instances
+        
+        scripts_dist_dir = os.path.join(Config.distFolder, 'scripts')
+        
         for folder in (Config.jansOptFolder, Config.jansOptBinFolder, Config.jansOptSystemFolder,
                         Config.jansOptPythonFolder, Config.configFolder, Config.certFolder,
-                        Config.output_dir, Config.os_default, os.path.join(Config.distFolder, 'scripts')):
+                        Config.output_dir, Config.os_default, scripts_dist_dir):
 
             if not os.path.exists(folder):
                 self.run([paths.cmd_mkdir, '-p', folder])
+                
+        if os.path.exists(Config.distFolder):
+            self.run([paths.cmd_chown, Config.user_group, Config.distFolder])
+
+        if os.path.exists(scripts_dist_dir):
+            self.run([paths.cmd_chown, Config.user_group, scripts_dist_dir])
 
         if not base.snap:
             self.run([paths.cmd_chown, '-R', 'root:jans', Config.certFolder])
@@ -472,6 +481,8 @@ class JansInstaller(BaseInstaller, SetupUtils):
             self.run([paths.cmd_chown, '-R', 'jetty:jans', Config.certFolder])
             self.run([paths.cmd_chmod, '-R', '660', Config.certFolder])
             self.run([paths.cmd_chmod, 'ug+X', Config.certFolder])
+
+            self.chown(Config.jansOptFolder, user=Config.jetty_user, group=Config.jetty_group, recursive=True)
 
             self.chown(Config.jansBaseFolder, user=Config.jetty_user, group=Config.jetty_group, recursive=True)
             for p in Path(Config.jansBaseFolder).rglob("*"):

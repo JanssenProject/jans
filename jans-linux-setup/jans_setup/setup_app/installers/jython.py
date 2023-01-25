@@ -50,5 +50,5 @@ class JythonInstaller(BaseInstaller, SetupUtils):
             self.logIt("Error installing jython-installer-%s.jar" % jython_version)
 
         self.run([paths.cmd_ln, '-sf', '/opt/jython-%s' % jython_version, Config.jython_home])
-        self.run([paths.cmd_chown, '-R', 'root:root', '/opt/jython-%s' % jython_version])
-        self.run([paths.cmd_chown, '-h', 'root:root', Config.jython_home])
+        self.run([paths.cmd_chown, '-R', Config.user_group, '/opt/jython-%s' % jython_version])
+        self.run([paths.cmd_chown, '-h', Config.user_group, Config.jython_home])

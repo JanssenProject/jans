@@ -97,11 +97,7 @@ class Config:
         self.root_user = self.root_group = 'root'
         self.ldap_user = self.ldap_group = 'ldap'
 
-        self.jans_user = 'jans'
         self.jans_group = 'jans'
-
-#        self.gluu_user = 'gluu'
-#        self.gluu_group = 'gluu'
 
         self.user_group = '{}:{}'.format(self.jetty_user, self.jans_group)
 

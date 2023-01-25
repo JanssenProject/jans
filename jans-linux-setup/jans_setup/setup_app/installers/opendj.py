@@ -310,13 +310,9 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
             # Restore SELinux Context
             self.run(['restorecon', '-rv', os.path.join(Config.ldap_base_dir, 'bin')])
 
-#        self.chown(Config.certFolder, Config.root_user, Config.gluu_user)
-#        self.chown(Config.certFolder, Config.root_user, Config.gluu_user)
-
-        self.chown(Config.certFolder, Config.root_user, Config.jans_user)
+        self.chown(Config.certFolder, Config.root_user, Config.jans_group)
         if os.path.exists(Config.opendj_trust_store_fn):
-#            self.chown(Config.opendj_trust_store_fn,  Config.root_user, Config.gluu_user)
-            self.chown(Config.opendj_trust_store_fn,  Config.root_user, Config.jans_user)
+            self.chown(Config.opendj_trust_store_fn,  Config.root_user, Config.jans_group)
             self.run([paths.cmd_chmod, '660', Config.opendj_trust_store_fn])
 
         try:
