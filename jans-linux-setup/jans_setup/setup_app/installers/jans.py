@@ -18,6 +18,7 @@ from setup_app.utils import base
 from setup_app.static import InstallTypes, AppType, InstallOption
 from setup_app.config import Config
 from setup_app.utils.setup_utils import SetupUtils
+from setup_app.utils.ldif_utils import create_client_ldif
 from setup_app.utils.progress import jansProgress
 from setup_app.installers.base import BaseInstaller
 
@@ -430,6 +431,38 @@ class JansInstaller(BaseInstaller, SetupUtils):
                 self.logIt("Error importing custom ldif file {}".format(ldif), True)
 
 
+    def create_test_client(self):
+        ldif_fn = self.clients_ldif_fn = os.path.join(Config.output_dir, 'test-client.ldif')
+        client_pw = base.argsp.test_client_secret or self.getPW()
+        encoded_pw = self.obscure(client_pw)
+        trusted_client = base.argsp.test_client_trusted or 'false'
+
+        if base.argsp.test_client_redirect_uri:
+            redirect_uri = base.argsp.test_client_redirect_uri.split(',')
+        else:
+            redirect_uri = ['https://{}/admin-ui'.format(Config.hostname), 'http://localhost:4100']
+
+        result = self.dbUtils.search('ou=scopes,o=jans', search_filter='(objectClass=jansScope)', fetchmany=True)
+        scopes = [ scope[1]['dn'] for scope in result ]
+
+        create_client_ldif(
+                ldif_fn=ldif_fn,
+                client_id=base.argsp.test_client_id,
+                encoded_pw=encoded_pw,
+                scopes=scopes,
+                redirect_uri=redirect_uri,
+                trusted_client=trusted_client
+                )
+
+        self.dbUtils.import_ldif([ldif_fn])
+
+        Config.test_client_id = base.argsp.test_client_id
+        Config.test_client_pw = client_pw
+        Config.test_client_pw_encoded = encoded_pw
+        Config.test_client_redirect_uri = redirect_uri
+        Config.test_client_trusted_client = trusted_client
+        Config.test_client_scopes = str(scopes)
+
     def post_install_tasks(self):
 
         self.deleteLdapPw()
@@ -438,6 +471,9 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
         if base.argsp.import_ldif:
             self.import_custom_ldif_dir(base.argsp.import_ldif)
+
+        if base.argsp.test_client_id:
+            self.create_test_client()
 
         if base.snap:
             #write post-install.py script

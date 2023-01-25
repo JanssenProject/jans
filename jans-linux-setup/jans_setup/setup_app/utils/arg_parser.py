@@ -101,6 +101,12 @@ if PROFILE != OPENBANKING_PROFILE:
     spanner_cred_group.add_argument('-spanner-emulator-host', help="Use Spanner emulator host")
     spanner_cred_group.add_argument('-google-application-credentials', help="Path to Google application credentials json file")
 
+    # test-client
+    parser.add_argument('-test-client-id', help="ID of test client which has all available scopes")
+    parser.add_argument('-test-client-secret', help="Secret for test client")
+    parser.add_argument('-test-client-redirect-uri', help="Redirect URI for test client")
+    parser.add_argument('--test-client-trusted', help="Make test client trusted", action='store_true')
+
 else:
     # openbanking
     parser.add_argument('--no-external-key', help="Don't use external key", action='store_true')
