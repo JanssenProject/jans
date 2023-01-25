@@ -132,7 +132,7 @@ class ConfigApiInstaller(JettyInstaller):
                             display_name = 'Config API scope {}'.format(scope['name'])
                             description = 'Config API {} scope {}'.format(scope_level, scope['name'])
                             ldif_dict = {
-                                        'objectclass': ['top', 'jansScope'],
+                                        'objectClass': ['top', 'jansScope'],
                                         'description': [description],
                                         'displayName': [display_name],
                                         'inum': [scope['inum']],
