@@ -8,7 +8,7 @@ import xml.etree.ElementTree as ET
 
 from setup_app import paths
 from setup_app.utils import base
-from setup_app.static import AppType, InstallOption
+from setup_app.static import AppType, InstallOption, SetupProfiles
 from setup_app.config import Config
 from setup_app.utils.setup_utils import SetupUtils
 from setup_app.installers.base import BaseInstaller
@@ -155,6 +155,8 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         else:
             # we need this, because this method may be called externally
             jettyArchive, jetty_dist = self.get_jetty_info()
+            
+        Config.templateRenderingDict['service_user'] = Config.jetty_user            
 
         self.logIt("Preparing %s service base folders" % service_name)
         self.run([paths.cmd_mkdir, '-p', jetty_service_base])
@@ -249,6 +251,10 @@ class JettyInstaller(BaseInstaller, SetupUtils):
 
         self.write_webapps_xml()
         self.configure_extra_libs(self.source_files[0][0])
+
+        if Config.profile == SetupProfiles.DISA_STIG:
+            additional_rules = []
+            self.fapolicyd_access(Config.templateRenderingDict['service_user'], jetty_service_base, additional_rules)
 
     def set_jetty_param(self, jettyServiceName, jetty_param, jetty_val, inifile='start.ini'):
 

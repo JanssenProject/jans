@@ -103,6 +103,8 @@ class Config:
 #        self.gluu_user = 'gluu'
 #        self.gluu_group = 'gluu'
 
+        self.user_group = '{}:{}'.format(self.jetty_user, self.jans_group)
+
         self.dump_config_on_error = False
         if not self.output_dir:
             self.output_dir = os.path.join(install_dir, 'output')

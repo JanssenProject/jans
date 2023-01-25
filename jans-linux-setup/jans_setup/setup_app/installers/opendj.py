@@ -304,7 +304,7 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
                     '# give access to opendj server',
                     ]
 
-#            self.apply_fapolicyd_rules(opendj_fapolicyd_rules)
+            self.apply_fapolicyd_rules(opendj_fapolicyd_rules)
 
         if Config.profile == SetupProfiles.DISA_STIG:
             # Restore SELinux Context

@@ -557,7 +557,7 @@ class SetupUtils(Crypto64):
     def apply_fapolicyd_rules(self, rules):
 
         if os.path.exists('/etc/fapolicyd/rules.d'):
-            fapolicyd_rules_fn = '/etc/fapolicyd/rules.d/15-gluu.rules'
+            fapolicyd_rules_fn = '/etc/fapolicyd/rules.d/15-jans.rules'
             if not os.path.exists(fapolicyd_rules_fn):
                 self.writeFile(fapolicyd_rules_fn, '', backup=False)
                 self.chown(fapolicyd_rules_fn, 'root', 'fapolicyd')
@@ -593,15 +593,15 @@ class SetupUtils(Crypto64):
 
         facl_tmp = [
                 'allow perm=any uid=%(uid)s : dir=%(jre_home)s/',
-                'allow perm=any uid=%(uid)s : dir=%(gluuOptFolder)s/',
+                'allow perm=any uid=%(uid)s : dir=%(jansOptFolder)s/',
                 'allow perm=any uid=%(uid)s : dir=%(distFolder)s/',
                 'allow perm=any uid=%(uid)s : dir=%(jettyAbsoluteDir)s/',
                 'allow perm=any uid=%(uid)s : dir=%(jythonAbsoluteDir)s/',
                 'allow perm=any uid=%(uid)s : dir=%(service_dir)s/',
-                'allow perm=any uid=%(uid)s : dir=%(osDefault)s/',
-                'allow perm=any uid=%(uid)s : dir=%(gluuBaseFolder)s/',
-                'allow perm=any uid=%(uid)s : dir=%(gluuOptPythonFolder)s/',
-                'allow perm=any uid=%(uid)s : dir=%(gluuOptPythonFolder)s/libs/',
+                'allow perm=any uid=%(uid)s : dir=%(os_default)s/',
+                'allow perm=any uid=%(uid)s : dir=%(jansBaseFolder)s/',
+                'allow perm=any uid=%(uid)s : dir=%(jansOptPythonFolder)s/',
+                'allow perm=any uid=%(uid)s : dir=%(jansOptPythonFolder)s/libs/',
                 '# give access to gluu service %(uid)s',
                 ]
 
@@ -613,7 +613,7 @@ class SetupUtils(Crypto64):
             facl = acl % self.merge_dicts(Config.templateRenderingDict, Config.__dict__, self.__dict__, {'uid': uid, 'service_dir': service_dir})
             rules.append(facl)
 
-#tmp        self.apply_fapolicyd_rules(rules)
+        self.apply_fapolicyd_rules(rules)
 
     def get_keystore_fn(self, keystore_name):
         return keystore_name + '.' + Config.default_store_type

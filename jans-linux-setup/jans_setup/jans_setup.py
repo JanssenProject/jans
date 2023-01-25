@@ -438,6 +438,10 @@ def main():
 
             jansInstaller.post_install_tasks()
 
+            if Config.profile == SetupProfiles.DISA_STIG:
+                jansInstaller.stop('fapolicyd')
+                jansInstaller.start('fapolicyd')
+
             for service in jansProgress.services:
                 if service['app_type'] == static.AppType.SERVICE:
                     jansProgress.progress(PostSetup.service_name,

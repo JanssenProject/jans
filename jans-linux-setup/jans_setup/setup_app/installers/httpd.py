@@ -195,14 +195,17 @@ class HttpdInstaller(BaseInstaller, SetupUtils):
         if base.os_type == 'suse':
             self.copyFile(self.apache2_ssl_conf, self.https_jans_fn)
 
-        elif base.clone_type == 'rpm' and base.os_initdaemon == 'init':
-            self.copyFile(self.apache2_conf, '/etc/httpd/conf/httpd.conf')
+        elif base.clone_type == 'rpm': 
+            if self.apache_version == "2.4":
+                self.copyFile(self.apache2_24_conf, '/etc/httpd/conf/httpd.conf')
+            else:
+                self.copyFile(self.apache2_conf, '/etc/httpd/conf/httpd.conf')
             self.copyFile(self.apache2_ssl_conf, self.https_jans_fn)
 
         elif base.clone_type == 'deb':
             self.copyFile(self.apache2_ssl_conf, self.https_jans_fn)
             self.run([paths.cmd_ln, '-s', self.https_jans_fn,
-                      '/etc/apache2/sites-enabled/https_jans.conf'])
+                      '/etc/apache2/sites-enabled/https_gluu.conf'])
 
     def ob_mtls_config(self):
 
