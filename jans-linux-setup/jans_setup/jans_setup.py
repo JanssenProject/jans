@@ -360,14 +360,6 @@ def main():
                 jansInstaller.copy_scripts()
                 jansInstaller.encode_passwords()
 
-#                if Config.profile == SetupProfiles.JANS or Config.profile == SetupProfiles.DISA_STIG:
-#                    Config.ldapCertFn = Config.opendj_cert_fn
-#                    Config.ldapTrustStoreFn = Config.opendj_trust_store_fn
-#                    Config.encoded_ldapTrustStorePass = Config.opendj_truststore_pass_enc
-
-#                    Config.ldapTrustStoreFn = Config.opendj_p12_fn
-#                    Config.encoded_ldapTrustStorePass = Config.encoded_opendj_p12_pass
-
                 jansInstaller.render_templates()
                 jansInstaller.render_configuration_template()
 
@@ -425,9 +417,6 @@ def main():
             if Config.install_jans_cli:
                 jansCliInstaller.start_installation()
                 jansCliInstaller.configure()
-
-            # if (Config.installed_instance and 'installOxd' in Config.addPostSetupService) or (not Config.installed_instance and Config.installOxd):
-            #    oxdInstaller.start_installation()
 
             jansProgress.progress(PostSetup.service_name, "Saving properties")
             propertiesUtils.save_properties()

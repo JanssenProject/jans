@@ -152,24 +152,16 @@ class Config:
                                      }
 
         # java commands
-#        self.cmd_java = os.path.join(self.jre_home, 'bin/java')
-#        self.cmd_keytool = os.path.join(self.jre_home, 'bin/keytool')
-#        self.cmd_jar = os.path.join(self.jre_home, 'bin/jar')
-#        os.environ['OPENDJ_JAVA_HOME'] =  self.jre_home
         if self.profile == SetupProfiles.DISA_STIG:
             self.use_existing_java = True
             self.cmd_java = shutil.which('java')
             self.jre_home = Path(self.cmd_java).resolve().parent.parent.as_posix()
             self.cmd_keytool = shutil.which('keytool')
             self.cmd_jar = shutil.which('jar')
-#            os.environ['GLUU_SERVICES'] = 'installHttpd installOxd installCasa installScimServer'
             self.default_store_type = 'bcfks'
             self.opendj_truststore_format = base.argsp.opendj_keystore_type
             self.default_client_test_store_type = 'pkcs12'
-#            self.bc_fips_jar = max(glob.glob(os.path.join(self.distAppFolder, 'bc-fips-*.jar')))
-#            self.bcpkix_fips_jar = max(glob.glob(os.path.join(self.distAppFolder, 'bcpkix-fips-*.jar')))
         else:
-#            self.profile = SetupProfiles.JANS
             self.cmd_java = os.path.join(self.jre_home, 'bin/java')
             self.cmd_keytool = os.path.join(self.jre_home, 'bin/keytool')
             self.cmd_jar = os.path.join(self.jre_home, 'bin/jar') 
@@ -179,8 +171,6 @@ class Config:
         self.cmd_keytool = os.path.join(self.jre_home, 'bin/keytool')
         self.cmd_jar = os.path.join(self.jre_home, 'bin/jar')
         os.environ['OPENDJ_JAVA_HOME'] =  self.jre_home
-
-#        os.environ['OPENDJ_JAVA_HOME'] =  self.jre_home
 
         if self.profile == OPENBANKING_PROFILE:
             self.use_external_key = True
@@ -384,8 +374,6 @@ class Config:
 
         if self.profile != OPENBANKING_PROFILE:
             self.ce_templates[self.ox_ldap_properties] = True
-#            self.ce_templates[self.ldap_setup_properties] = False
-
 
         self.service_requirements = {
                         'opendj': ['', 70],
