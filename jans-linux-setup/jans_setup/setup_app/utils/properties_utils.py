@@ -241,7 +241,7 @@ class PropertiesUtils(SetupUtils):
             elif p.get('installLdap','').lower() == 'true':
                 Config.opendj_install = InstallTypes.LOCAL
             elif p.get('opendj_install'):
-                Config.opendj_install = p['opendj_install']   
+                Config.opendj_install = p['opendj_install']
             else:
                 Config.opendj_install = InstallTypes.NONE
 
