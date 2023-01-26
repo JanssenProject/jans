@@ -35,11 +35,20 @@ public class Fido2Entry extends BaseEntry {
     @AttributeName(name = "jansCodeChallenge")
     private String challange;
 
+    @AttributeName(name = "jansCodeChallengeHash")
+    private String challengeHash;
+
     @AttributeName(name = "creationDate")
     private Date creationDate;
 
     @AttributeName(name = "personInum")
     private String userInum;
+
+	@AttributeName(name = "jansApp")
+	private String rpId;
+
+    @AttributeName(name = "jansSessStateId")
+    private String sessionStateId;
 
     @AttributeName(name = "exp")
     private Date expirationDate;
@@ -96,6 +105,30 @@ public class Fido2Entry extends BaseEntry {
     public void setUserInum(String userInum) {
         this.userInum = userInum;
     }
+
+	public String getRpId() {
+		return rpId;
+	}
+
+	public void setRpId(String rpId) {
+		this.rpId = rpId;
+	}
+
+	public String getSessionStateId() {
+		return sessionStateId;
+	}
+
+	public void setSessionStateId(String sessionStateId) {
+		this.sessionStateId = sessionStateId;
+	}
+
+	public String getChallengeHash() {
+		return challengeHash;
+	}
+
+	public void setChallengeHash(String challengeHash) {
+		this.challengeHash = challengeHash;
+	}
 
 	public Date getExpirationDate() {
 		return expirationDate;

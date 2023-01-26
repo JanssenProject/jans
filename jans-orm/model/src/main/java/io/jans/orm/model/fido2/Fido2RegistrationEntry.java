@@ -24,11 +24,14 @@ public class Fido2RegistrationEntry extends Fido2Entry implements Serializable {
 
     private static final long serialVersionUID = -2242931562244920584L;
 
+    @AttributeName(name = "displayName")
+    private String displayName;
+
     @AttributeName(name = "jansPublicKeyId")
     protected String publicKeyId;
 
-    @AttributeName(name = "displayName")
-    private String displayName;
+	@AttributeName(name = "jansPublicKeyIdHash")
+	private Integer publicKeyIdHash;
 
     @JsonObject
     @AttributeName(name = "jansRegistrationData")
@@ -40,25 +43,13 @@ public class Fido2RegistrationEntry extends Fido2Entry implements Serializable {
     @JsonObject
     @AttributeName(name = "jansStatus")
     private Fido2RegistrationStatus registrationStatus;
-    
-    @AttributeName(name = "jansSessStateId")
-    private String sessionStateId;
 
     @AttributeName(name = "jansDeviceNotificationConf")
     private String deviceNotificationConf;
 
-	@AttributeName(name = "jansApp")
-	private String rpId;
-
-	@AttributeName(name = "jansPublicKeyIdHash")
-	private Integer publicKeyIdHash;
-
     @JsonObject
 	@AttributeName(name = "jansDeviceData")
 	private Fido2DeviceData deviceData;
-
-    @AttributeName(name = "jansCodeChallengeHash")
-    private String challengeHash;
 
     public Fido2RegistrationEntry() {
     }
@@ -101,14 +92,6 @@ public class Fido2RegistrationEntry extends Fido2Entry implements Serializable {
         this.registrationStatus = registrationStatus;
     }
 
-    public String getSessionStateId() {
-		return sessionStateId;
-	}
-
-	public void setSessionStateId(String sessionStateId) {
-		this.sessionStateId = sessionStateId;
-	}
-
 	public String getDeviceNotificationConf() {
         return deviceNotificationConf;
     }
@@ -124,22 +107,6 @@ public class Fido2RegistrationEntry extends Fido2Entry implements Serializable {
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
     }
-
-    public String getChallengeHash() {
-        return challengeHash;
-    }
-
-    public void setChallengeHash(String challengeHash) {
-        this.challengeHash = challengeHash;
-    }
-
-    public String getRpId() {
-		return rpId;
-	}
-
-	public void setRpId(String rpId) {
-		this.rpId = rpId;
-	}
 
 	public Integer getPublicKeyIdHash() {
 		return publicKeyIdHash;
@@ -159,11 +126,10 @@ public class Fido2RegistrationEntry extends Fido2Entry implements Serializable {
 
 	@Override
 	public String toString() {
-		return "Fido2RegistrationEntry [publicKeyId=" + publicKeyId + ", displayName=" + displayName
-				+ ", registrationData=" + registrationData + ", counter=" + counter + ", registrationStatus="
-				+ registrationStatus + ", sessionStateId=" + sessionStateId + ", deviceNotificationConf="
-				+ deviceNotificationConf + ", rpId=" + rpId + ", publicKeyIdHash=" + publicKeyIdHash + ", deviceData="
-				+ deviceData + ", challengeHash=" + challengeHash + "]";
+		return "Fido2RegistrationEntry [displayName=" + displayName + ", publicKeyId=" + publicKeyId
+				+ ", publicKeyIdHash=" + publicKeyIdHash + ", registrationData=" + registrationData + ", counter="
+				+ counter + ", registrationStatus=" + registrationStatus + ", deviceNotificationConf="
+				+ deviceNotificationConf + ", deviceData=" + deviceData + "]";
 	}
 
 }

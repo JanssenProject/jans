@@ -252,6 +252,7 @@ public class AttestationService {
 
         int publicKeyIdHash = registrationPersistenceService.getPublicKeyIdHash(registrationData.getPublicKeyId());
         registrationEntry.setPublicKeyIdHash(publicKeyIdHash);
+        registrationEntry.setSessionStateId(null);
 
         // Set expiration for one_step entry
         if (oneStep) {

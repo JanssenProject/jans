@@ -31,15 +31,6 @@ public class Fido2AuthenticationEntry extends Fido2Entry implements Serializable
     @JsonObject
     @AttributeName(name = "jansStatus")
     private Fido2AuthenticationStatus authenticationStatus;
-    
-    @AttributeName(name = "jansSessStateId")
-    private String sessionStateId;
-
-	@AttributeName(name = "jansApp")
-	private String rpId;
-
-    @AttributeName(name = "jansCodeChallengeHash")
-    private String challengeHash;
 
     public Fido2AuthenticationEntry() {
     }
@@ -65,34 +56,9 @@ public class Fido2AuthenticationEntry extends Fido2Entry implements Serializable
         this.authenticationStatus = authenticationStatus;
     }
 
-    public String getSessionStateId() {
-		return sessionStateId;
-	}
-
-	public void setSessionStateId(String sessionStateId) {
-		this.sessionStateId = sessionStateId;
-	}
-
-	public String getRpId() {
-		return rpId;
-	}
-
-	public void setRpId(String rpId) {
-		this.rpId = rpId;
-	}
-
-	public String getChallengeHash() {
-		return challengeHash;
-	}
-
-	public void setChallengeHash(String challengeHash) {
-		this.challengeHash = challengeHash;
-	}
-
 	@Override
 	public String toString() {
 		return "Fido2AuthenticationEntry [authenticationData=" + authenticationData + ", authenticationStatus="
-				+ authenticationStatus + ", sessionStateId=" + sessionStateId + ", rpId=" + rpId + ", challengeHash="
-				+ challengeHash + "]";
+				+ authenticationStatus + "]";
 	}
 }
