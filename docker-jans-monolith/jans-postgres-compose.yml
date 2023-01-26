@@ -1,20 +1,18 @@
 version: "3.7"
 services:
-  mysql:
-    image: mysql:8.0.30
-    command: "--default-authentication-plugin=mysql_native_password"
+  pgsql:
+    image: postgres:15.1
     restart: always
     ports:
-      - "3306:3306"
+      - "5432:5432"
     volumes:
-      - db-data:/var/lib/mysql
+      - db-data:/var/lib/postgresql/data/
     networks:
       - cloud_bridge
     environment:
-      - MYSQL_DATABASE=jans
-      - MYSQL_USER=jans
-      - MYSQL_PASSWORD=1t5Fin3#security
-      - MYSQL_ROOT_PASSWORD=1t5Fin3#security
+      POSTGRES_USER: jans
+      POSTGRES_PASSWORD: 1t5Fin3#security
+      POSTGRES_DB: jans
   jans:
     image: janssenproject/monolith:1.0.7_dev
     restart: always
@@ -22,7 +20,7 @@ services:
       - "443:443"
       - "80:80"
     depends_on:
-      - mysql
+      - pgsql
     networks:
       - cloud_bridge
     environment:
@@ -33,7 +31,7 @@ services:
       - CN_CITY=Austin
       - CN_STATE=TX
       - CN_COUNTRY=US
-      - CN_INSTALL_MYSQL=true
+      - CN_INSTALL_PGSQL=true
       - CN_INSTALL_CONFIG_API=true
       - CN_INSTALL_SCIM=true
       - CN_INSTALL_FIDO2=true
@@ -43,7 +41,7 @@ services:
       - RDBMS_DATABASE=jans
       - RDBMS_USER=jans
       - RDBMS_PASSWORD=1t5Fin3#security
-      - RDBMS_HOST=mysql
+      - RDBMS_HOST=pgsql
     volumes:
       - ./jans-auth-custom:/opt/jans/jetty/jans-auth/custom
       - ./jans-config-api-custom:/opt/jans/jetty/jans-config-api/custom
