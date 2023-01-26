@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 import io.jans.as.model.fido.u2f.exception.BadInputException;
 import io.jans.as.model.fido.u2f.message.RawRegisterResponse;
 import io.jans.as.model.util.Base64Util;
+import io.jans.as.model.util.SecurityProviderUtility;
 import io.jans.fido2.service.Base64Service;
 import io.jans.util.io.ByteDataInputStream;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -89,7 +90,7 @@ public class RawRegistrationService {
     }
 
     public X509Certificate parseDer(InputStream is) throws CertificateException, NoSuchProviderException {
-            return (X509Certificate) CertificateFactory.getInstance("X.509", "BC").generateCertificate(is);
+            return (X509Certificate) CertificateFactory.getInstance("X.509", SecurityProviderUtility.getInstance()).generateCertificate(is);
     }
 
 

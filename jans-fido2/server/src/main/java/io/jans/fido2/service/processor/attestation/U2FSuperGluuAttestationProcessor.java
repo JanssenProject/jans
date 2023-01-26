@@ -102,7 +102,6 @@ public class U2FSuperGluuAttestationProcessor implements AttestationFormatProces
         commonVerifiers.verifyAAGUIDZeroed(authData);
 
         userVerificationVerifier.verifyUserPresent(authData);
-//        commonVerifiers.verifyRpIdHash(authData, "https://" + registration.getDomain());
 
         if (attStmt.hasNonNull("x5c")) {
             Iterator<JsonNode> i = attStmt.get("x5c").elements();
