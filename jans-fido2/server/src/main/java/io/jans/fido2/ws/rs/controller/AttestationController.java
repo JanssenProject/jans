@@ -280,9 +280,6 @@ public class AttestationController {
 
         // Manadatory parameter
         params.put("type", "public-key");
-        
-        // TODO: Fix id
-        params.put("id", "id");
 
         // Add response node
         ObjectNode response = dataMapperService.createObjectNode();
@@ -298,6 +295,8 @@ public class AttestationController {
 
 		// Prepare attestationObject
         RawRegisterResponse rawRegisterResponse = rawRegistrationService.parseRawRegisterResponse(registerResponse.getRegistrationData());
+
+        params.put("id", rawRegisterResponse.getKeyHandle());
 
         ObjectNode attestationObject = dataMapperService.createObjectNode();
         ObjectNode attStmt = dataMapperService.createObjectNode();

@@ -223,7 +223,9 @@ public class AttestationService {
 		registrationData.setSignatureAlgorithm(attestationData.getSignatureAlgorithm());
 		registrationData.setCounter(attestationData.getCounters());
 
-		registrationData.setPublicKeyId(attestationData.getCredId());
+		String keyId = commonVerifiers.verifyCredentialId(attestationData, params);
+
+		registrationData.setPublicKeyId(keyId);
 		registrationData.setType("public-key");
 		registrationData.setStatus(Fido2RegistrationStatus.registered);
 

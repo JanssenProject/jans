@@ -64,10 +64,6 @@ public class MetricService extends io.jans.service.metric.MetricService {
 
     @Override
     public boolean isMetricReporterEnabled() {
-        if (this.appConfiguration.getMetricReporterEnabled() == null) {
-            return false;
-        }
-
         return this.appConfiguration.getMetricReporterEnabled();
     }
 
