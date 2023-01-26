@@ -440,12 +440,12 @@ class DBUtils:
 
                 sql_cmd = 'SELECT * FROM {} WHERE ({}) {}'.format(s_table, dn_clause, where_clause)
 
-                retVal = self.spanner_client.get_dict_data(sql_cmd)
+                result = self.spanner_client.get_dict_data(sql_cmd)
 
-                if not fetchmany and retVal:
-                    retVal = retVal[0]
+                if not fetchmany and result:
+                    return result[0]
 
-                return retVal
+                return [ (ldif_utils.get_key_from(item['dn']), item) for item in retVal ]
 
             sqlalchemy_table = self.Base.classes[s_table]
             sqlalchemyQueryObject = self.session.query(sqlalchemy_table)
@@ -469,7 +469,7 @@ class DBUtils:
 
             if fetchmany:
                 result = sqlalchemyQueryObject.all()
-                return [ item.__dict__ for item in result ]
+                return [ (ldif_utils.get_key_from(item.dn), item.__dict__) for item in result ]
 
             else:
                 result = sqlalchemyQueryObject.first()
@@ -508,7 +508,7 @@ class DBUtils:
                 data = result.json()
                 if data.get('results'):
                     if fetchmany:
-                        return [ item[bucket] for item in data['results'] ]
+                        return [ (ldif_utils.get_key_from(item[bucket]['dn']), item[bucket]) for item in data['results'] ]
                     else:
                         return data['results'][0][bucket]
 
