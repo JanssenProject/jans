@@ -18,7 +18,7 @@ import java.util.Map;
  */
 public enum ScriptLocationType implements AttributeEnum {
 
-    LDAP("ldap", "Database"), FILE("file", "File");
+    DB("db", "Database"), FILE("file", "File");
 
     private String value;
     private String displayName;

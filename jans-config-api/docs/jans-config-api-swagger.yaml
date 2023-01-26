@@ -3853,6 +3853,15 @@ paths:
       summary: Adds a new custom script
       description: Adds a new custom script
       operationId: post-config-scripts
+      parameters:
+      - name: addScriptTemplate
+        in: query
+        description: Boolean flag to indicate if script template is to be added. If
+          CustomScript request object has script populated then script template will
+          not be added.
+        schema:
+          type: boolean
+          default: false
       requestBody:
         description: CustomScript object
         content:
@@ -7524,19 +7533,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        whitePagesCanView:
+        userCanView:
           type: boolean
         userCanEdit:
           type: boolean
-        userCanAccess:
-          type: boolean
         adminCanAccess:
           type: boolean
-        userCanView:
+        adminCanView:
           type: boolean
         adminCanEdit:
           type: boolean
-        adminCanView:
+        userCanAccess:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -8257,8 +8266,6 @@ components:
           type: object
           additionalProperties:
             type: string
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8268,6 +8275,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -9126,7 +9135,7 @@ components:
         locationType:
           type: string
           enum:
-          - ldap
+          - db
           - file
         baseDn:
           type: string

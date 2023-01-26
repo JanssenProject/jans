@@ -85,3 +85,19 @@ Feature: Verify Custom Script configuration endpoint
 	Then status 200
 	And print response
 	And assert response.length !=0	
+
+	
+	Scenario: Post person custom script by inum
+    Given url mainUrl
+    And header Authorization = 'Bearer ' + accessToken
+    And request read('post-script.json')
+    When method POST
+    Then status 201
+    And print response
+    And print response.entries[0].inum
+    And print 'Delete newly created script'
+    Given url mainUrl + '/' +response.entries[0].inum
+    And header Authorization = 'Bearer ' + accessToken
+    When method DELETE
+    Then status 204
+    And print response
