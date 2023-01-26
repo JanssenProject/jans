@@ -209,8 +209,8 @@
       "jansStatus",
       "personInum",
       "jansApp",
-      "jansPublicKeyId".
-      "jansPublicKeyIdHash".
+      "jansPublicKeyId",
+      "jansPublicKeyIdHash",
       "jansCodeChallenge",
       "jansCodeChallengeHash"
     ],
