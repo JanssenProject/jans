@@ -69,7 +69,7 @@ def get_document_from_entry(dn, entry):
                 else:
                     document[k] = attribDataTypes.getTypedValue(dtype, document[k])
 
-            if k == 'objectClass':
+            if k.lower() == 'objectclass':
                 document[k].remove('top')
                 oc_list = document[k]
 
