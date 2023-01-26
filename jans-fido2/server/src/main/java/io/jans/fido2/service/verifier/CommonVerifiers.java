@@ -486,7 +486,7 @@ public class CommonVerifiers {
 	}
 
 	public boolean isSuperGluuOneStepMode(JsonNode params) {
-		if (params.hasNonNull(CommonVerifiers.SUPER_GLUU_MODE)) {
+		if (hasSuperGluu(params)) {
 			return SuperGluuMode.ONE_STEP == SuperGluuMode.fromModeValue(params.get(CommonVerifiers.SUPER_GLUU_MODE).asText());
 		}
 

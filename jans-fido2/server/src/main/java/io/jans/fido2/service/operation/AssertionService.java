@@ -6,7 +6,6 @@
 
 package io.jans.fido2.service.operation;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -106,8 +105,8 @@ public class AssertionService {
 	public ObjectNode options(JsonNode params) {
 		log.debug("Assertion options {}", params);
 
-		boolean oneStep = commonVerifiers.isSuperGluuOneStepMode(params);
 		boolean superGluu = commonVerifiers.hasSuperGluu(params);
+		boolean oneStep = commonVerifiers.isSuperGluuOneStepMode(params);
 
 		// Verify request parameters
 		String username = null;
@@ -135,7 +134,6 @@ public class AssertionService {
 		log.debug("Put rpId {}", documentDomain);
 		optionsResponseNode.put("rpId", documentDomain);
 
-		// TODO: Verify documentDomain
 		String applicationId = documentDomain;
 		if (superGluu && params.hasNonNull(CommonVerifiers.SUPER_GLUU_APP_ID)) {
 			applicationId = params.get(CommonVerifiers.SUPER_GLUU_APP_ID).asText();
@@ -210,7 +208,6 @@ public class AssertionService {
 		log.debug("authenticateResponse {}", params);
 
 		boolean oneStep = commonVerifiers.isSuperGluuOneStepMode(params);
-		boolean superGluu = commonVerifiers.hasSuperGluu(params);
 
 		// Verify if there are mandatory request parameters
 		commonVerifiers.verifyBasicPayload(params);
@@ -296,11 +293,12 @@ public class AssertionService {
 	}
 
 	private Pair<ArrayNode, String> prepareAllowedCredentials(String documentDomain, String username, String requestedKeyHandle, boolean superGluu) {
-		// TODO: Add property to enable/disable U2F -> Fido2 migration
-		List<DeviceRegistration> existingFidoRegistrations = deviceRegistrationService.findAllRegisteredByUsername(username,
-				documentDomain);
-		if (existingFidoRegistrations.size() > 0) {
-			deviceRegistrationService.migrateToFido2(existingFidoRegistrations, documentDomain, username);
+		if (appConfiguration.isOldU2fMigrationEnabled()) {
+	 		List<DeviceRegistration> existingFidoRegistrations = deviceRegistrationService.findAllRegisteredByUsername(username,
+					documentDomain);
+			if (existingFidoRegistrations.size() > 0) {
+				deviceRegistrationService.migrateToFido2(existingFidoRegistrations, documentDomain, username);
+			}
 		}
 
 		List<Fido2RegistrationEntry> existingFido2Registrations;
@@ -311,10 +309,10 @@ public class AssertionService {
 		} else {
 			existingFido2Registrations = registrationPersistenceService.findByRpRegisteredUserDevices(username, documentDomain);
 		}
+		//  f.getRegistrationData().getAttenstationRequest() null check is added to maintain backward compatiblity with U2F devices when U2F devices are migrated to the FIDO2 server
 		List<Fido2RegistrationEntry> allowedFido2Registrations = existingFido2Registrations.parallelStream()
 				.filter(f -> StringHelper.isNotEmpty(f.getRegistrationData().getPublicKeyId())).collect(Collectors.toList());
 
-		//  f.getRegistrationData().getAttenstationRequest() null check is added to maintain backward compatiblity with U2F devices when U2F devices are migrated to the FIDO2 server
 		List<JsonNode> allowedFido2Keys =  new ArrayList<>(allowedFido2Registrations.size());
 		allowedFido2Registrations.forEach((f) -> {
 			log.debug("attestation request:" + f.getRegistrationData().getAttenstationRequest());
@@ -337,7 +335,6 @@ public class AssertionService {
 		
 		Optional<Fido2RegistrationEntry> fidoRegistration = allowedFido2Registrations.parallelStream()
 				.filter(f -> StringUtils.isNotEmpty(f.getRegistrationData().getApplicationId())).findAny();
-		// TODO: Check value and which values to specify for Super Gluu
 		String applicationId = null;
 		if (fidoRegistration.isPresent()) {
 			applicationId = fidoRegistration.get().getRegistrationData().getApplicationId();
@@ -348,15 +345,5 @@ public class AssertionService {
 
 		return Pair.of(allowedCredentials, applicationId);
 	}
-
-    public int getChallengeHashCode(String challenge) {
-        int hash = 0;
-        byte[] challengeBytes = challenge.getBytes(StandardCharsets.UTF_8);
-        for (int j = 0; j < challengeBytes.length; j++) {
-            hash += challengeBytes[j]*j;
-        }
-
-        return hash;
-    }
 
 }

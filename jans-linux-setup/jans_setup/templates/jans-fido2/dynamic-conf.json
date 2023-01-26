@@ -16,6 +16,7 @@
       "jansPerson"
    ],
    "superGluuEnabled": false,
+   "oldU2fMigrationEnabled": true,
    "fido2Configuration":{
       "authenticatorCertsFolder":"%(fido2ConfigFolder)s/authenticator_cert",
       "mdsCertsFolder":"%(fido2ConfigFolder)s/mds/cert",
