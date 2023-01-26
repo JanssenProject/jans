@@ -18,7 +18,6 @@
 
 package io.jans.fido2.service.sg;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.NoSuchProviderException;
@@ -80,14 +79,6 @@ public class RawRegistrationService {
 			IOUtils.closeQuietly(bis);
 		}
 	}
-
-	public X509Certificate parseDer(String base64DerEncodedCert) throws CertificateException, NoSuchProviderException {
-        return parseDer(base64Service.decode(base64DerEncodedCert));
-    }
-
-    public X509Certificate parseDer(byte[] derEncodedCert) throws CertificateException, NoSuchProviderException {
-        return parseDer(new ByteArrayInputStream(derEncodedCert));
-    }
 
     public X509Certificate parseDer(InputStream is) throws CertificateException, NoSuchProviderException {
             return (X509Certificate) CertificateFactory.getInstance("X.509", SecurityProviderUtility.getInstance()).generateCertificate(is);

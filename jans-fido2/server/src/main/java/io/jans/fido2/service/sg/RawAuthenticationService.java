@@ -23,9 +23,6 @@ import java.io.IOException;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 
-import com.google.common.io.ByteArrayDataOutput;
-import com.google.common.io.ByteStreams;
-
 import io.jans.as.model.fido.u2f.exception.BadInputException;
 import io.jans.as.model.fido.u2f.message.RawAuthenticateResponse;
 import io.jans.as.model.util.Base64Util;
@@ -56,16 +53,6 @@ public class RawAuthenticationService {
 		} finally {
 			IOUtils.closeQuietly(bis);
 		}
-	}
-
-	private byte[] packBytesToSign(byte[] appIdHash, byte userPresence, long counter, byte[] challengeHash) {
-		ByteArrayDataOutput encoded = ByteStreams.newDataOutput();
-		encoded.write(appIdHash);
-		encoded.write(userPresence);
-		encoded.writeInt((int) counter);
-		encoded.write(challengeHash);
-
-		return encoded.toByteArray();
 	}
 
 }

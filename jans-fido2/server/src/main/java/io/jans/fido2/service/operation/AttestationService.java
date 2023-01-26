@@ -239,7 +239,7 @@ public class AttestationService {
 		JsonNode responseDeviceData = responseNode.get("deviceData");
 		if (responseDeviceData != null && responseDeviceData.isTextual()) {
             try {
-				Fido2DeviceData deviceData = AttestationController.jsonMapperWithWrapRoot().readValue(
+				Fido2DeviceData deviceData = dataMapperService.readValue(
 						new String(base64Service.urlDecode(responseDeviceData.asText()), StandardCharsets.UTF_8),
 						Fido2DeviceData.class);
                 registrationEntry.setDeviceData(deviceData);
