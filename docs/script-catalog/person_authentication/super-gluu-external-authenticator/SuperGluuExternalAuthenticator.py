@@ -210,6 +210,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 if u2f_device == None:
                     print "Super-Gluu. Authenticate for step 1. Failed to load u2f_device '%s'" % u2f_device_id
                     return False
+
                 found = userService.getUserByInum(user_inum)
                 user_name = found.getUserId()
                 logged_in = authenticationService.authenticate(user_name)
@@ -268,6 +269,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 authenticated_user = self.processBasicAuthentication(credentials)
                 if authenticated_user == None:
                     return False
+
                 user_inum = userService.getUserInum(authenticated_user)
                 session_device_status = self.getSessionDeviceStatus(session_attributes, user_inum)
 
@@ -277,10 +279,11 @@ class PersonAuthentication(PersonAuthenticationType):
                         return False
 
                     u2f_device_dn = session_device_status['device_dn']
+                    device_id = session_device_status['device_id']
 
                     attach_result = registrationPersistenceService.attachDeviceRegistrationToUser(user_inum, u2f_device_dn)
 
-                    print "Super-Gluu. Authenticate for step 2. Result after attaching u2f_device '%s' to user '%s': '%s'" % (u2f_device_dn, user_inum, attach_result)
+                    print "Super-Gluu. Authenticate for step 2. Result after attaching u2f_device '%s' to user '%s': '%s'" % (device_id, user_inum, attach_result)
 
                     return attach_result
                 else:
@@ -291,17 +294,18 @@ class PersonAuthentication(PersonAuthenticationType):
                 if (user == None):
                     print "Super-Gluu. Authenticate for step 2. Failed to determine user name"
                     return False
+
                 user_name = user.getUserId()
+                if user_name == None:
+                    print "Super-Gluu. Authenticate for step 2. Failed to determine user id"
+                    return False
+
                 session_device_status = self.getSessionDeviceStatus(session_attributes, user_name)
                 if session_device_status == None:
                     print "Super-Gluu. twoStep, authenticate for step2, session_device_status is false"
                     return False
 
                 u2f_device_id = session_device_status['device_id']
-
-                if user_name == None:
-                    print "Super-Gluu. Authenticate for step 2. Failed to determine user id"
-                    return False
 
                 validation_result = self.validateSessionDeviceStatus(client_redirect_uri, session_device_status, user_name)
                 if validation_result:
