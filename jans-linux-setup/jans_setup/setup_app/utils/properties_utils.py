@@ -208,6 +208,9 @@ class PropertiesUtils(SetupUtils):
         if p.get('enable-script'):
             base.argsp.enable_script = p['enable-script'].split()
 
+        if p.get('rdbm_type') == 'pgsql' and not p.get('rdbm_port'):
+            p['rdbm_port'] = '5432'
+
         properties_list = list(p.keys())
 
         for prop in properties_list:
@@ -241,7 +244,7 @@ class PropertiesUtils(SetupUtils):
             elif p.get('installLdap','').lower() == 'true':
                 Config.opendj_install = InstallTypes.LOCAL
             elif p.get('opendj_install'):
-                Config.opendj_install = p['opendj_install']   
+                Config.opendj_install = p['opendj_install']
             else:
                 Config.opendj_install = InstallTypes.NONE
 
@@ -263,7 +266,6 @@ class PropertiesUtils(SetupUtils):
             if 'couchbase' not in available_backends:
                 print("Couchbase package is not available exiting.")
                 sys.exit(1)
-
 
         if ('cb_password' not in properties_list) and Config.cb_install:
             Config.cb_password = p.get('ldapPass')
