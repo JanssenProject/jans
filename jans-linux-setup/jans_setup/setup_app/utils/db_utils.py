@@ -508,7 +508,7 @@ class DBUtils:
                 data = result.json()
                 if data.get('results'):
                     if fetchmany:
-                        return [ item[bucket] for item in data['results'] ]
+                        return [ (ldif_utils.get_key_from(item[bucket]['dn']), item[bucket]) for item in data['results'] ]
                     else:
                         return data['results'][0][bucket]
 
