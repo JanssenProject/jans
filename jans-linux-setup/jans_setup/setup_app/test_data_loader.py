@@ -62,19 +62,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
 
     def create_test_client_keystore(self):
         self.logIt("Creating {}".format(Config.templateRenderingDict['test_client_keystore_base_fn']))
-#        self.logIt("Creating client_keystore.p12")
-#        client_keystore_fn = os.path.join(Config.output_dir, 'test/jans-auth/client/client_keystore.p12')
-#        client_keystore_fn = os.path.join(Config.output_dir, 'test/jans-auth/client', self.get_client_test_keystore_fn('client_keystore'))
         keys_json_fn =  os.path.join(Config.output_dir, 'test/jans-auth/client/keys_client_keystore.json')
-
-#        args = [Config.cmd_keytool, '-genkey', '-alias', 'dummy', '-keystore', 
-#                    client_keystore_fn, '-storepass', 'secret', '-keypass', 
-#                    'secret', '-dname', 
-#                    "'{}'".format(Config.default_openid_jks_dn_name),
-#                    '-storetype', 'PKCS12'
-#                    ]
-
-#        self.run(' '.join(args), shell=True)
 
         client_cmd = self.get_key_gen_client_provider_cmd()
 
@@ -255,7 +243,6 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         apache_user = 'www-data' if base.clone_type == 'deb' else 'apache'
 
         # Client keys deployment
-        #base.download('https://raw.githubusercontent.com/JanssenProject/jans-auth-server/master/client/src/test/resources/jans_test_client_keys.zip', '/var/www/html/jans_test_client_keys.zip')
         base.download('https://raw.githubusercontent.com/JanssenProject/jans/a970d88d81f920973f3ba812db97448f135090a9/jans-auth-server/client/src/test/resources/jans_test_client_keys.zip', '/var/www/html/jans_test_client_keys.zip')
 
         self.run([paths.cmd_unzip, '-o', '/var/www/html/jans_test_client_keys.zip', '-d', '/var/www/html/'])
