@@ -18,7 +18,7 @@ jobs:
       max-parallel: 6
       matrix:
         # add '"pgsql" when supported
-        persistence-backends: ["MYSQL"]
+        persistence-backends: ["MYSQL", "PGSQL"]
         python-version: ["3.7"]
     steps:
     - uses: actions/checkout@v3
