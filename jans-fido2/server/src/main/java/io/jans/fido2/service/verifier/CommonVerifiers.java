@@ -22,6 +22,7 @@ import io.jans.fido2.ctap.AttestationConveyancePreference;
 import io.jans.fido2.ctap.AuthenticatorAttachment;
 import io.jans.fido2.ctap.TokenBindingSupport;
 import io.jans.fido2.exception.Fido2CompromisedDevice;
+import io.jans.fido2.exception.Fido2RpRuntimeException;
 import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.auth.AuthData;
 import io.jans.fido2.model.auth.CredAndCounterData;
@@ -483,6 +484,14 @@ public class CommonVerifiers {
         }
 
         return false;
+	}
+
+	public void verifyNotUseGluuParameters(JsonNode params) {
+		// Protect generic U2F/Fido2 from sending requests with Super Gluu parameters
+        if (params.hasNonNull(SUPER_GLUU_REQUEST) || params.hasNonNull(SUPER_GLUU_MODE) ||
+            params.hasNonNull(SUPER_GLUU_APP_ID) || params.hasNonNull(SUPER_GLUU_KEY_HANDLE)) {
+        	throw new Fido2RpRuntimeException("Input request conflicts with Super Gluu parameters");
+        }
 	}
 
 	public boolean isSuperGluuOneStepMode(JsonNode params) {

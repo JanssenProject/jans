@@ -6,7 +6,6 @@
 
 package io.jans.fido2.service.persist;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -14,14 +13,15 @@ import java.util.List;
 import java.util.TimeZone;
 import java.util.UUID;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
 
-import io.jans.fido2.exception.Fido2RuntimeException;
-import io.jans.fido2.model.conf.AppConfiguration;
-import io.jans.fido2.service.shared.UserService;
 import io.jans.as.common.model.common.User;
 import io.jans.as.model.config.StaticConfiguration;
+import io.jans.fido2.exception.Fido2RuntimeException;
+import io.jans.fido2.model.conf.AppConfiguration;
+import io.jans.fido2.service.ChallengeGenerator;
+import io.jans.fido2.service.shared.UserService;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.BatchOperation;
 import io.jans.orm.model.ProcessBatchOperation;
@@ -32,9 +32,8 @@ import io.jans.orm.model.fido2.Fido2AuthenticationEntry;
 import io.jans.orm.model.fido2.Fido2AuthenticationStatus;
 import io.jans.orm.search.filter.Filter;
 import io.jans.util.StringHelper;
-
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 /**
  * Every authentication is persisted under Person Entry
@@ -53,6 +52,9 @@ public class AuthenticationPersistenceService {
 
     @Inject
     private AppConfiguration appConfiguration;
+
+	@Inject
+	private ChallengeGenerator challengeGenerator;
 
     @Inject
     private UserService userService;
@@ -96,7 +98,7 @@ public class AuthenticationPersistenceService {
         Fido2AuthenticationEntry authenticationEntity = new Fido2AuthenticationEntry(dn, authenticationData.getId(), now, userInum, authenticationData);
         authenticationEntity.setAuthenticationStatus(authenticationData.getStatus());
         if (StringUtils.isNotEmpty(challenge)) {
-        	authenticationEntity.setChallengeHash(String.valueOf(getChallengeHashCode(challenge)));
+        	authenticationEntity.setChallengeHash(String.valueOf(challengeGenerator.getChallengeHashCode(challenge)));
         }
         authenticationEntity.setRpId(authenticationData.getApplicationId());
 
@@ -147,7 +149,7 @@ public class AuthenticationPersistenceService {
         String baseDn = oneStep ? getDnForAuthenticationEntry(null, null) : getBaseDnForFido2AuthenticationEntries(null);
 
         Filter codeChallengFilter = Filter.createEqualityFilter("jansCodeChallenge", challenge);
-        Filter codeChallengHashCodeFilter = Filter.createEqualityFilter("jansCodeChallengeHash", String.valueOf(getChallengeHashCode(challenge)));
+        Filter codeChallengHashCodeFilter = Filter.createEqualityFilter("jansCodeChallengeHash", String.valueOf(challengeGenerator.getChallengeHashCode(challenge)));
         Filter filter = Filter.createANDFilter(codeChallengFilter, codeChallengHashCodeFilter);
 
         List<Fido2AuthenticationEntry> fido2AuthenticationEntries = persistenceEntryManager.findEntries(baseDn, Fido2AuthenticationEntry.class, filter);
@@ -265,14 +267,5 @@ public class AuthenticationPersistenceService {
                 Filter.createEqualityFilter("numsubordinates", "0"), Filter.createEqualityFilter("hasSubordinates", "FALSE")));
     }
 
-    public int getChallengeHashCode(String challenge) {
-        int hash = 0;
-        byte[] challengeBytes = challenge.getBytes(StandardCharsets.UTF_8);
-        for (int j = 0; j < challengeBytes.length; j++) {
-            hash += challengeBytes[j]*j;
-        }
-
-        return hash;
-    }
 
 }
