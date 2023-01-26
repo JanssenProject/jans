@@ -435,7 +435,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
         ldif_fn = self.clients_ldif_fn = os.path.join(Config.output_dir, 'test-client.ldif')
         client_pw = base.argsp.test_client_secret or self.getPW()
         encoded_pw = self.obscure(client_pw)
-        trusted_client = base.argsp.test_client_trusted or 'false'
+        trusted_client = 'true' if base.argsp.test_client_trusted else 'false'
 
         if base.argsp.test_client_redirect_uri:
             redirect_uri = base.argsp.test_client_redirect_uri.split(',')
