@@ -27,7 +27,6 @@ from java.util import Arrays, HashMap, IdentityHashMap, Date
 from java.time import ZonedDateTime
 from java.time.format import DateTimeFormatter
 from io.jans.as.model.configuration import AppConfiguration
-from io.jans.service.net import NetworkService
 import datetime
 import urllib
 import sys
@@ -38,7 +37,6 @@ import urllib
 
 import sys
 import json
-from wsgiref.util import application_uri
 
 try:
     from com.notnoop.apns import APNS
@@ -161,9 +159,6 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Super-Gluu. Authenticate. redirect_uri is not set"
             return False
 
-        networkService = CdiUtil.bean(NetworkService)
-        applicationName = networkService.getHost(client_redirect_uri)
-
         self.setRequestScopedParameters(identity, step)
 
         # Validate form result code and initialize QR code regeneration if needed (retry_current_step = True)
@@ -255,7 +250,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     u2f_devices_list = registrationPersistenceService.findByRpRegisteredUserDevices(authenticated_user.getUserId(), client_redirect_uri, "jansId")
                     if u2f_devices_list.size() == 0:
                         auth_method = 'enroll'
-                        print "Super-Gluu. Authenticate for step 1. There is no U2F '%s' user devices associated with application '%s'. Changing auth_method to '%s'" % (user_name, applicationName, auth_method)
+                        print "Super-Gluu. Authenticate for step 1. There is no U2F '%s' user devices associated with application '%s'. Changing auth_method to '%s'" % (user_name, client_redirect_uri, auth_method)
 
                 print "Super-Gluu. Authenticate for step 1. auth_method: '%s'" % auth_method
 
