@@ -469,7 +469,7 @@ class DBUtils:
 
             if fetchmany:
                 result = sqlalchemyQueryObject.all()
-                return [ item.__dict__ for item in result ]
+                return [ (ldif_utils.get_key_from(item.dn), item.__dict__) for item in result ]
 
             else:
                 result = sqlalchemyQueryObject.first()
