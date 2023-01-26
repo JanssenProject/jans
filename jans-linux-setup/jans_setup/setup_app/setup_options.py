@@ -98,9 +98,6 @@ def get_setup_options():
         if base.argsp.no_fido2:
             setupOptions['installFido2'] = False
 
-        if base.argsp.install_eleven:
-            setupOptions['installEleven'] = True
-
         if base.argsp.jans_max_mem:
             setupOptions['jans_max_mem'] = base.argsp.jans_max_mem
 
@@ -145,6 +142,10 @@ def get_setup_options():
                 sys.exit(2)
 
         setupOptions['properties_password'] = base.argsp.properties_password
+
+    if base.current_app.profile == 'jans':
+        if base.argsp.install_eleven:
+            setupOptions['installEleven'] = True
 
     if base.current_app.profile == SetupProfiles.OPENBANKING:
         setupOptions['opendj_install'] = InstallTypes.NONE

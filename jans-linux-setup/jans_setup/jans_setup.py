@@ -241,6 +241,8 @@ configApiInstaller = ConfigApiInstaller()
 if Config.profile == SetupProfiles.JANS or Config.profile == SetupProfiles.DISA_STIG:
     fidoInstaller = FidoInstaller()
     scimInstaller = ScimInstaller()
+
+if Config.profile == SetupProfiles.JANS:
     elevenInstaller = ElevenInstaller()
 
 jansCliInstaller = JansCliInstaller()
@@ -374,8 +376,6 @@ def main():
 
                 # Installing jans components
                 if Config.profile == SetupProfiles.JANS or Config.profile == SetupProfiles.DISA_STIG:
-                    print("Config.profile == SetupProfiles.JANS or Config.profile == SetupProfiles.DISA_STIG")
-                    print("Config.opendj_install = {}".format(Config.opendj_install))
                     jansAuthInstaller.pre_installation()
                     if Config.opendj_install:
                         openDjInstaller.start_installation()                
@@ -409,10 +409,11 @@ def main():
                         not Config.installed_instance and Config.install_scim_server):
                     scimInstaller.start_installation()
 
+            if Config.profile == SetupProfiles.JANS:
+
                 if (Config.installed_instance and elevenInstaller.install_var in Config.addPostSetupService) or (
                         not Config.installed_instance and Config.get(elevenInstaller.install_var)):
                     elevenInstaller.start_installation()
-
 
             if Config.install_jans_cli:
                 jansCliInstaller.start_installation()
