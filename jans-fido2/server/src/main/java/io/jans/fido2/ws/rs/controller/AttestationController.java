@@ -65,11 +65,6 @@ public class AttestationController {
         JsonNode params;
         try {
         	params = dataMapperService.readTree(content);
-        	
-        	// Don't accept request with super_gluu_request parameter
-            if (commonVerifiers.hasSuperGluu(params)) {
-                throw new Fido2RpRuntimeException("Failed to parse options attestation request");
-            }
         } catch (IOException ex) {
             throw new Fido2RpRuntimeException("Failed to parse options attestation request", ex);
         }
@@ -93,11 +88,6 @@ public class AttestationController {
         JsonNode params;
         try {
         	params = dataMapperService.readTree(content);
-
-        	// Don't accept request with super_gluu_request parameter
-            if (commonVerifiers.hasSuperGluu(params)) {
-                throw new Fido2RpRuntimeException("Failed to parse options attestation request");
-            }
         } catch (IOException ex) {
             throw new Fido2RpRuntimeException("Failed to parse finish attestation request", ex) ;
         }
