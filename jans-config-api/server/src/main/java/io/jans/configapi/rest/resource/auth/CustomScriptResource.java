@@ -16,6 +16,7 @@ import io.jans.configapi.core.util.Jackson;
 import io.jans.service.custom.CustomScriptService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
+import io.jans.model.ScriptLocationType;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.model.CustomScript;
 import io.jans.orm.model.PagedResult;
@@ -192,6 +193,9 @@ public class CustomScriptResource extends ConfigBaseResource {
         if (StringUtils.isBlank(customScript.getScript()) && !addScriptTemplate) {
             customScript.setScript(""); //this will ensure that default Script Template is not added
         }
+        
+        //validate Script LocationType value
+        validateScriptLocationType(customScript);
 
         customScript.setDn(customScriptService.buildDn(inum));
         customScript.setInum(inum);
@@ -218,6 +222,10 @@ public class CustomScriptResource extends ConfigBaseResource {
         checkResourceNotNull(existingScript, CUSTOM_SCRIPT);
         customScript.setInum(existingScript.getInum());
         logger.debug("Custom Script updated {}", customScript);
+        
+        //validate Script LocationType value
+        validateScriptLocationType(customScript);
+        
         customScriptService.update(customScript);
         return Response.ok(customScript).build();
     }
@@ -299,6 +307,21 @@ public class CustomScriptResource extends ConfigBaseResource {
 
         logger.debug("CustomScript pagedResult:{} ", pagedResult);
         return pagedResult;
+    }
+    
+    /**
+     * ScriptLocationType.LDAP has been deprecated and hence for any new script creation or modification we need to ensure that valid values are used.
+     * @param customScript
+     */
+    private void validateScriptLocationType(CustomScript customScript) {
+        logger.info("validate ScriptLocationType - customScript:{}", customScript);
+        if(customScript!=null && customScript.getLocationType()==null) {
+            return;            
+        }
+        
+        if(ScriptLocationType.LDAP.getValue().equalsIgnoreCase(customScript.getLocationType().getValue())) {
+            throwBadRequestException("Invalid value for script location Type in request -> " + customScript.getLocationType().getValue()+" , valid values are "+ScriptLocationType.values());
+        }
     }
 
 }

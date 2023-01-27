@@ -189,7 +189,7 @@ public class ConfigurationService implements Serializable {
 	}
 
 	public ScriptLocationType[] getLocationTypes() {
-		return new ScriptLocationType[] { ScriptLocationType.DB, ScriptLocationType.FILE };
+		return new ScriptLocationType[] { ScriptLocationType.LDAP, ScriptLocationType.FILE };
 	}
 
 	public CustomScriptType[] getCustomScriptTypes() {

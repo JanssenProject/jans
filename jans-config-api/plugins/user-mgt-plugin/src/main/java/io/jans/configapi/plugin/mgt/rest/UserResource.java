@@ -196,7 +196,7 @@ public class UserResource extends BaseResource {
             logger.debug("Updated user:{}", user);
         } catch (Exception ex) {
             logger.error("Error while updating user", ex);
-            thorwInternalServerException(ex);
+            throwInternalServerException(ex);
         }
 
         // excludedAttributes

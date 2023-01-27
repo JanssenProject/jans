@@ -138,7 +138,7 @@ public class AgamaResource extends ConfigBaseResource {
         Flow existingFlow = findFlow(flow.getQname(), false);
         logger.debug(" existingFlow:{}", existingFlow);
         if (existingFlow != null) {
-            thorwBadRequestException("Flow identified by name '" + flow.getQname() + "' already exists!");
+            throwBadRequestException("Flow identified by name '" + flow.getQname() + "' already exists!");
         }
 
         // validate flow data
@@ -203,7 +203,7 @@ public class AgamaResource extends ConfigBaseResource {
         Flow existingFlow = findFlow(decodedFlowName, false);
         logger.debug(" existing-flow:{}", existingFlow);
         if (existingFlow != null) {
-            thorwBadRequestException("Flow identified by name '" + decodedFlowName + "' already exists!");
+            throwBadRequestException("Flow identified by name '" + decodedFlowName + "' already exists!");
         }
 
         Flow flow = new Flow();
@@ -347,7 +347,7 @@ public class AgamaResource extends ConfigBaseResource {
         String validateMsg = agamaFlowService.validateFlowFields(flow, checkNonMandatoryFields);
         logger.debug("Agama Flow to be validation msg:{} ", validateMsg);
         if (StringUtils.isNotBlank(validateMsg)) {
-            thorwBadRequestException(validateMsg);
+            throwBadRequestException(validateMsg);
         }
 
         // validate syntax
@@ -365,7 +365,7 @@ public class AgamaResource extends ConfigBaseResource {
         } catch (SyntaxException | TranspilerException e) {
             logger.error("Transpiler exception", e);
             e.setStackTrace(new StackTraceElement[0]);
-            thorwBadRequestException(e);
+            throwBadRequestException(e);
         }
     }
 
