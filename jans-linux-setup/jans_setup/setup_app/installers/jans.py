@@ -454,7 +454,8 @@ class JansInstaller(BaseInstaller, SetupUtils):
                 encoded_pw=encoded_pw,
                 scopes=scopes,
                 redirect_uri=redirect_uri,
-                trusted_client=trusted_client
+                display_name="Test Client with all scopes",
+                trusted_client=trusted_client,
                 )
 
         self.dbUtils.import_ldif([ldif_fn])
@@ -469,7 +470,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
     def post_install_before_saving_properties(self):
 
-        if base.argsp.test_client_id or Config.test_client_id:
+        if base.argsp.test_client_id or Config.get('test_client_id'):
             self.create_test_client()
 
 
