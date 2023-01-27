@@ -8,7 +8,7 @@ autopep8==1.7.0
 backcall==0.2.0
 bandit==1.7.4
 behave==1.2.6
-certifi==2022.6.15
+certifi==2022.12.7
 cffi==1.15.1
 chardet==5.0.0
 charset-normalizer==2.1.1
