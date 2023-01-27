@@ -118,6 +118,12 @@ public class AuthenticatorDataVerifier {
 
         byte[] signatureBase = ByteBuffer.allocate(bufferSize).put(rpIdHash).put(flags).put(counters).put(extensionsBuffer).put(clientDataHash).array();
         byte[] signatureBytes = base64Service.urlDecode(signature.getBytes());
+        log.debug("RP hash {}", Hex.encodeHexString(rpIdHash));
+        log.debug("Flags {}", Hex.encodeHexString(flags));
+        log.debug("Counters {}", Hex.encodeHexString(counters));
+        log.debug("Extensions {}", Hex.encodeHexString(extensionsBuffer));
+        log.debug("Client(channlenge) data hash {}", Hex.encodeHexString(clientDataHash));
+
         log.debug("Signature {}", Hex.encodeHexString(signatureBytes));
         log.debug("Signature Base {}", Hex.encodeHexString(signatureBase));
         log.debug("Signature BaseLen {}", signatureBase.length);
@@ -140,10 +146,15 @@ public class AuthenticatorDataVerifier {
 
     public void verifyU2FAttestationSignature(AuthData authData, byte[] clientDataHash, String signature, Certificate certificate,
             int signatureAlgorithm) {
+        verifyU2FAttestationSignature(authData, authData.getRpIdHash(), clientDataHash, signature, certificate,
+                signatureAlgorithm);
+    }
+
+    public void verifyU2FAttestationSignature(AuthData authData, byte[] rpIdHash, byte[] clientDataHash, String signature, Certificate certificate,
+            int signatureAlgorithm) {
         int bufferSize = 0;
         byte[] reserved = new byte[] { 0x00 };
         bufferSize += reserved.length;
-        byte[] rpIdHash = authData.getRpIdHash();
         bufferSize += rpIdHash.length;
 
         bufferSize += clientDataHash.length;

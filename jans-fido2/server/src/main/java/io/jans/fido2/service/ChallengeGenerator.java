@@ -18,6 +18,7 @@
 
 package io.jans.fido2.service;
 
+import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -37,6 +38,16 @@ public class ChallengeGenerator {
         byte buffer[] = new byte[32];
         new SecureRandom().nextBytes(buffer);
         return base64Service.urlEncodeToStringWithoutPadding(buffer);
+    }
+
+    public int getChallengeHashCode(String challenge) {
+        int hash = 0;
+        byte[] challengeBytes = challenge.getBytes(StandardCharsets.UTF_8);
+        for (int j = 0; j < challengeBytes.length; j++) {
+            hash += challengeBytes[j]*j;
+        }
+
+        return hash;
     }
 
 }
