@@ -6,44 +6,48 @@
 
 package io.jans.fido2.service.operation;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import io.jans.orm.model.fido2.Fido2RegistrationData;
-import io.jans.orm.model.fido2.Fido2RegistrationEntry;
-import io.jans.orm.model.fido2.Fido2RegistrationStatus;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import io.jans.entry.DeviceRegistration;
-import io.jans.fido2.ctap.AttestationFormat;
-import io.jans.fido2.ctap.AuthenticatorAttachment;
-import io.jans.fido2.ctap.UserVerification;
-import io.jans.fido2.exception.Fido2CompromisedDevice;
-import io.jans.fido2.exception.Fido2RuntimeException;
-import io.jans.fido2.model.auth.PublicKeyCredentialDescriptor;
-import io.jans.fido2.model.conf.AppConfiguration;
-import io.jans.fido2.model.entry.Fido2AuthenticationData;
-import io.jans.fido2.model.entry.Fido2AuthenticationEntry;
-import io.jans.fido2.model.entry.Fido2AuthenticationStatus;
-import io.jans.fido2.service.ChallengeGenerator;
-import io.jans.fido2.service.DataMapperService;
-import io.jans.fido2.service.persist.AuthenticationPersistenceService;
-import io.jans.fido2.service.persist.RegistrationPersistenceService;
-import io.jans.fido2.service.verifier.AssertionVerifier;
-import io.jans.fido2.service.verifier.CommonVerifiers;
-import io.jans.fido2.service.verifier.DomainVerifier;
-import io.jans.service.net.NetworkService;
-import io.jans.u2f.service.persist.DeviceRegistrationService;
-import io.jans.util.StringHelper;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import io.jans.entry.DeviceRegistration;
+import io.jans.fido2.ctap.AttestationFormat;
+import io.jans.fido2.ctap.AuthenticatorAttachment;
+import io.jans.fido2.exception.Fido2CompromisedDevice;
+import io.jans.fido2.exception.Fido2RuntimeException;
+import io.jans.fido2.model.auth.PublicKeyCredentialDescriptor;
+import io.jans.fido2.model.conf.AppConfiguration;
+import io.jans.fido2.service.Base64Service;
+import io.jans.fido2.service.ChallengeGenerator;
+import io.jans.fido2.service.DataMapperService;
+import io.jans.fido2.service.persist.AuthenticationPersistenceService;
+import io.jans.fido2.service.persist.RegistrationPersistenceService;
+import io.jans.fido2.service.persist.UserSessionIdService;
+import io.jans.fido2.service.verifier.AssertionVerifier;
+import io.jans.fido2.service.verifier.CommonVerifiers;
+import io.jans.fido2.service.verifier.DomainVerifier;
+import io.jans.orm.model.fido2.Fido2AuthenticationData;
+import io.jans.orm.model.fido2.Fido2AuthenticationEntry;
+import io.jans.orm.model.fido2.Fido2AuthenticationStatus;
+import io.jans.orm.model.fido2.Fido2RegistrationData;
+import io.jans.orm.model.fido2.Fido2RegistrationEntry;
+import io.jans.orm.model.fido2.Fido2RegistrationStatus;
+import io.jans.orm.model.fido2.UserVerification;
+import io.jans.service.net.NetworkService;
+import io.jans.u2f.service.persist.DeviceRegistrationService;
+import io.jans.util.StringHelper;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 /**
  * Core offering by the FIDO2 server, assertion is invoked upon authentication
@@ -72,6 +76,9 @@ public class AssertionService {
 
 	@Inject
 	private DeviceRegistrationService deviceRegistrationService;
+	
+	@Inject
+	private UserSessionIdService userSessionIdService;
 
 	@Inject
 	private AssertionVerifier assertionVerifier;
@@ -88,18 +95,27 @@ public class AssertionService {
 	@Inject
 	private NetworkService networkService;
 
+    @Inject
+    private Base64Service base64Service;
+
 	/*
 	 * Requires mandatory parameters: username Support non mandatory parameters:
 	 * userVerification, documentDomain, extensions, timeout
 	 */
-	public JsonNode options(JsonNode params) {
+	public ObjectNode options(JsonNode params) {
 		log.debug("Assertion options {}", params);
 
-		// Verify request parameters
-		commonVerifiers.verifyAssertionOptions(params);
+		boolean superGluu = commonVerifiers.hasSuperGluu(params);
+		boolean oneStep = commonVerifiers.isSuperGluuOneStepMode(params);
 
-		// Get username
-		String username = commonVerifiers.verifyThatFieldString(params, "username");
+		// Verify request parameters
+		String username = null;
+		if (!(superGluu && oneStep)) {
+			commonVerifiers.verifyAssertionOptions(params);
+
+			// Get username
+			username = commonVerifiers.verifyThatFieldString(params, "username");
+		}
 
 		// Create result object
 		ObjectNode optionsResponseNode = dataMapperService.createObjectNode();
@@ -118,14 +134,23 @@ public class AssertionService {
 		log.debug("Put rpId {}", documentDomain);
 		optionsResponseNode.put("rpId", documentDomain);
 
-		// TODO: Verify documentDomain
+		String applicationId = documentDomain;
+		if (superGluu && params.hasNonNull(CommonVerifiers.SUPER_GLUU_APP_ID)) {
+			applicationId = params.get(CommonVerifiers.SUPER_GLUU_APP_ID).asText();
+		}
+
+		String requestedKeyHandle = null;
+		if (superGluu && params.hasNonNull(CommonVerifiers.SUPER_GLUU_KEY_HANDLE)) {
+			requestedKeyHandle = params.get(CommonVerifiers.SUPER_GLUU_KEY_HANDLE).asText();
+		}
 
 		// Put allowCredentials
-		Pair<ArrayNode, String> allowedCredentialsPair = prepareAllowedCredentials(documentDomain, username);
+		Pair<ArrayNode, String> allowedCredentialsPair = prepareAllowedCredentials(applicationId, username, requestedKeyHandle, superGluu);
 		ArrayNode allowedCredentials = allowedCredentialsPair.getLeft();
 		if (allowedCredentials.isEmpty()) {
 			throw new Fido2RuntimeException("Can't find associated key(s). Username: " + username);
 		}
+
 		optionsResponseNode.set("allowCredentials", allowedCredentials);
 		log.debug("Put allowedCredentials {}", allowedCredentials);
 
@@ -162,18 +187,27 @@ public class AssertionService {
 		entity.setDomain(documentDomain);
 		entity.setUserVerificationOption(userVerification);
 		entity.setStatus(Fido2AuthenticationStatus.pending);
+		if (params.hasNonNull(CommonVerifiers.SUPER_GLUU_APP_ID)) {
+			entity.setApplicationId(params.get(CommonVerifiers.SUPER_GLUU_APP_ID).asText());
+		}
 
 		// Store original request
 		entity.setAssertionRequest(params.toString());
 
-		authenticationPersistenceService.save(entity);
+		Fido2AuthenticationEntry authenticationEntity = authenticationPersistenceService.buildFido2AuthenticationEntry(entity, oneStep);
+		if (params.hasNonNull("session_id")) {
+			authenticationEntity.setSessionStateId(params.get("session_id").asText());
+		}
+
+		authenticationPersistenceService.save(authenticationEntity);
 
 		return optionsResponseNode;
-
 	}
 
-	public JsonNode verify(JsonNode params) {
+	public ObjectNode verify(JsonNode params) {
 		log.debug("authenticateResponse {}", params);
+
+		boolean oneStep = commonVerifiers.isSuperGluuOneStepMode(params);
 
 		// Verify if there are mandatory request parameters
 		commonVerifiers.verifyBasicPayload(params);
@@ -199,7 +233,7 @@ public class AssertionService {
 		String challenge = commonVerifiers.getChallenge(clientDataJSONNode);
 
 		// Find authentication entry
-		Fido2AuthenticationEntry authenticationEntity = authenticationPersistenceService.findByChallenge(challenge).parallelStream()
+		Fido2AuthenticationEntry authenticationEntity = authenticationPersistenceService.findByChallenge(challenge, oneStep).parallelStream()
 				.findFirst().orElseThrow(() -> new Fido2RuntimeException(
 						String.format("Can't find associated assertion request by challenge '%s'", challenge)));
 		Fido2AuthenticationData authenticationData = authenticationEntity.getAuthenticationData();
@@ -208,7 +242,7 @@ public class AssertionService {
 		domainVerifier.verifyDomain(authenticationData.getDomain(), clientDataJSONNode);
 
 		// Find registered public key
-		Fido2RegistrationEntry registrationEntry = registrationPersistenceService.findByPublicKeyId(keyId)
+		Fido2RegistrationEntry registrationEntry = registrationPersistenceService.findByPublicKeyId(keyId, authenticationEntity.getRpId())
 				.orElseThrow(() -> new Fido2RuntimeException(String.format("Couldn't find the key by PublicKeyId '%s'", keyId)));
 		Fido2RegistrationData registrationData = registrationEntry.getRegistrationData();
 
@@ -236,6 +270,14 @@ public class AssertionService {
 		// initial value in Fido2RegistrationData to minimize DB updates
 		registrationEntry.setCounter(registrationData.getCounter());
 		registrationPersistenceService.update(registrationEntry);
+		
+        // If SessionStateId is not empty update session
+		String sessionStateId = authenticationEntity.getSessionStateId();
+        if (StringHelper.isNotEmpty(sessionStateId)) {
+            log.debug("There is session id. Setting session id attributes");
+
+            userSessionIdService.updateUserSessionIdOnFinishRequest(sessionStateId, registrationEntry.getUserInum(), registrationEntry, false, oneStep);
+        }
 
 		// Create result object
 		ObjectNode finishResponseNode = dataMapperService.createObjectNode();
@@ -250,34 +292,47 @@ public class AssertionService {
 		return finishResponseNode;
 	}
 
-	private Pair<ArrayNode, String> prepareAllowedCredentials(String documentDomain, String username) {
-		// TODO: Add property to enable/disable U2F -> Fido2 migration
-		List<DeviceRegistration> existingFidoRegistrations = deviceRegistrationService.findAllRegisteredByUsername(username,
-				documentDomain);
-		if (existingFidoRegistrations.size() > 0) {
-			deviceRegistrationService.migrateToFido2(existingFidoRegistrations, documentDomain, username);
+	private Pair<ArrayNode, String> prepareAllowedCredentials(String documentDomain, String username, String requestedKeyHandle, boolean superGluu) {
+		if (appConfiguration.isOldU2fMigrationEnabled()) {
+	 		List<DeviceRegistration> existingFidoRegistrations = deviceRegistrationService.findAllRegisteredByUsername(username,
+					documentDomain);
+			if (existingFidoRegistrations.size() > 0) {
+				deviceRegistrationService.migrateToFido2(existingFidoRegistrations, documentDomain, username);
+			}
 		}
 
-		List<Fido2RegistrationEntry> existingFido2Registrations = registrationPersistenceService.findAllRegisteredByUsername(username);
+		List<Fido2RegistrationEntry> existingFido2Registrations;
+		if (superGluu && StringHelper.isNotEmpty(requestedKeyHandle)) {
+			Fido2RegistrationEntry fido2RegistrationEntry = registrationPersistenceService.findByPublicKeyId(requestedKeyHandle, documentDomain).orElseThrow(() -> new Fido2RuntimeException(
+						String.format("Can't find associated key '%s' for application '%s'", requestedKeyHandle, documentDomain)));
+			existingFido2Registrations = Arrays.asList(fido2RegistrationEntry);
+		} else {
+			existingFido2Registrations = registrationPersistenceService.findByRpRegisteredUserDevices(username, documentDomain);
+		}
+		//  f.getRegistrationData().getAttenstationRequest() null check is added to maintain backward compatiblity with U2F devices when U2F devices are migrated to the FIDO2 server
 		List<Fido2RegistrationEntry> allowedFido2Registrations = existingFido2Registrations.parallelStream()
-				.filter(f -> StringHelper.equals(documentDomain, f.getRegistrationData().getDomain()))
 				.filter(f -> StringHelper.isNotEmpty(f.getRegistrationData().getPublicKeyId())).collect(Collectors.toList());
 
-		allowedFido2Registrations.forEach((value) -> {
-			log.debug("attestation request:" + value.getRegistrationData().getAttenstationRequest());
+		List<JsonNode> allowedFido2Keys =  new ArrayList<>(allowedFido2Registrations.size());
+		allowedFido2Registrations.forEach((f) -> {
+			log.debug("attestation request:" + f.getRegistrationData().getAttenstationRequest());
+			String transports[]; 
+			if (superGluu) {
+				transports = new String[] { "net", "qr" };
+			} else {
+				transports = ((f.getRegistrationData().getAttestationType().equalsIgnoreCase(AttestationFormat.apple.getFmt())) || ( f.getRegistrationData().getAttenstationRequest() != null && 
+						f.getRegistrationData().getAttenstationRequest().contains(AuthenticatorAttachment.PLATFORM.getAttachment())))
+
+						? new String[] { "internal" }
+						: new String[] { "usb", "ble", "nfc" };
+			}
+			PublicKeyCredentialDescriptor descriptor = new PublicKeyCredentialDescriptor(
+					f.getRegistrationData().getType(), transports, f.getRegistrationData().getPublicKeyId());
+			
+			ObjectNode allowedFido2Key = dataMapperService.convertValue(descriptor, ObjectNode.class);
+			allowedFido2Keys.add(allowedFido2Key);
 		});
 		
-		//  f.getRegistrationData().getAttenstationRequest() null check is added to maintain backward compatiblity with U2F devices when U2F devices are migrated to the FIDO2 server
-		List<JsonNode> allowedFido2Keys = allowedFido2Registrations.parallelStream()
-				.map(f -> dataMapperService.convertValue(new PublicKeyCredentialDescriptor(f.getRegistrationData().getType(),
-						((f.getRegistrationData().getAttestationType().equalsIgnoreCase(AttestationFormat.apple.getFmt())) || ( f.getRegistrationData().getAttenstationRequest() != null && 
-								f.getRegistrationData().getAttenstationRequest().contains(AuthenticatorAttachment.PLATFORM.getAttachment())))
-
-										? new String[] { "internal" }
-										: new String[] { "usb", "ble", "nfc" },
-						f.getRegistrationData().getPublicKeyId()), JsonNode.class))
-				.collect(Collectors.toList());
-
 		Optional<Fido2RegistrationEntry> fidoRegistration = allowedFido2Registrations.parallelStream()
 				.filter(f -> StringUtils.isNotEmpty(f.getRegistrationData().getApplicationId())).findAny();
 		String applicationId = null;

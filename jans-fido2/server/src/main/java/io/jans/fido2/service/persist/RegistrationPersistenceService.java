@@ -6,6 +6,7 @@
 
 package io.jans.fido2.service.persist;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -15,26 +16,26 @@ import java.util.Optional;
 import java.util.TimeZone;
 import java.util.UUID;
 
-import io.jans.orm.model.fido2.Fido2RegistrationData;
-import io.jans.orm.model.fido2.Fido2RegistrationEntry;
-import io.jans.orm.model.fido2.Fido2RegistrationStatus;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+
+import io.jans.as.common.model.common.User;
+import io.jans.as.model.config.StaticConfiguration;
 import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.service.shared.UserService;
-import io.jans.as.common.model.common.User;
-import io.jans.as.model.config.StaticConfiguration;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.BatchOperation;
 import io.jans.orm.model.ProcessBatchOperation;
 import io.jans.orm.model.SearchScope;
 import io.jans.orm.model.base.SimpleBranch;
+import io.jans.orm.model.fido2.Fido2RegistrationData;
+import io.jans.orm.model.fido2.Fido2RegistrationEntry;
+import io.jans.orm.model.fido2.Fido2RegistrationStatus;
 import io.jans.orm.search.filter.Filter;
 import io.jans.util.StringHelper;
-import org.slf4j.Logger;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 /**
  * Every registration is persisted under Person Entry
@@ -42,7 +43,7 @@ import org.slf4j.Logger;
  * @version May 08, 2020
  */
 @ApplicationScoped
-public class RegistrationPersistenceService {
+public class RegistrationPersistenceService extends io.jans.as.common.service.common.fido2.RegistrationPersistenceService {
 
     @Inject
     private Logger log;
@@ -60,85 +61,58 @@ public class RegistrationPersistenceService {
     private PersistenceEntryManager persistenceEntryManager;
 
     public void save(Fido2RegistrationData registrationData) {
-        Fido2RegistrationEntry registrationEntry = buildFido2RegistrationEntry(registrationData);
+        Fido2RegistrationEntry registrationEntry = buildFido2RegistrationEntry(registrationData, false);
 
-        persistenceEntryManager.persist(registrationEntry);
+        save(registrationEntry);
     }
 
-    public Fido2RegistrationEntry buildFido2RegistrationEntry(Fido2RegistrationData registrationData) {
+    public Fido2RegistrationEntry buildFido2RegistrationEntry(Fido2RegistrationData registrationData, boolean oneStep) {
 		String userName = registrationData.getUsername();
-        
-        User user = userService.getUser(userName, "inum");
-        if (user == null) {
-            if (appConfiguration.getFido2Configuration().isUserAutoEnrollment()) {
-                user = userService.addDefaultUser(userName);
-            } else {
-                throw new Fido2RuntimeException("Auto user enrollment was disabled. User not exists!");
-            }
-        }
-        String userInum = userService.getUserInum(user);
 
-        prepareBranch(userInum);
+		String userInum = null;
+    	if (!oneStep) {
+	        User user = userService.getUser(userName, "inum");
+	        if (user == null) {
+	            if (appConfiguration.getFido2Configuration().isUserAutoEnrollment()) {
+	                user = userService.addDefaultUser(userName);
+	            } else {
+	                throw new Fido2RuntimeException("Auto user enrollment was disabled. User not exists!");
+	            }
+	        }
+	        userInum = userService.getUserInum(user);
+    	}
 
         Date now = new GregorianCalendar(TimeZone.getTimeZone("UTC")).getTime();
         final String id = UUID.randomUUID().toString();
         final String challenge = registrationData.getChallenge();
 
-        String dn = getDnForRegistrationEntry(userInum, id);
+        String dn = oneStep ? getDnForRegistrationEntry(null, id) : getDnForRegistrationEntry(userInum, id);
         Fido2RegistrationEntry registrationEntry = new Fido2RegistrationEntry(dn, id, now, userInum, registrationData, challenge);
         registrationEntry.setRegistrationStatus(registrationData.getStatus());
         if (StringUtils.isNotEmpty(challenge)) {
-        	registrationEntry.setChallangeHash(String.valueOf(getChallengeHashCode(challenge)));
+        	registrationEntry.setChallengeHash(String.valueOf(getChallengeHashCode(challenge)));
         }
-        
+        registrationEntry.setRpId(registrationData.getApplicationId());
+
         registrationData.setCreatedDate(now);
         registrationData.setCreatedBy(userName);
 
         return registrationEntry;
 	}
 
-    public void update(Fido2RegistrationEntry registrationEntry) {
-        Date now = new GregorianCalendar(TimeZone.getTimeZone("UTC")).getTime();
-
-        Fido2RegistrationData registrationData = registrationEntry.getRegistrationData();
-        registrationData.setUpdatedDate(now);
-        registrationData.setUpdatedBy(registrationData.getUsername());
-        
-        registrationEntry.setPublicKeyId(registrationData.getPublicKeyId());
-        registrationEntry.setRegistrationStatus(registrationData.getStatus());
-
-        persistenceEntryManager.merge(registrationEntry);
-    }
-
-    public void addBranch(final String baseDn) {
-        SimpleBranch branch = new SimpleBranch();
-        branch.setOrganizationalUnitName("fido2_register");
-        branch.setDn(baseDn);
-
-        persistenceEntryManager.persist(branch);
-    }
-
-    public boolean containsBranch(final String baseDn) {
-        return persistenceEntryManager.contains(baseDn, SimpleBranch.class);
-    }
-
-    public void prepareBranch(final String userInum) {
-        String baseDn = getBaseDnForFido2RegistrationEntries(userInum);
-        if (!persistenceEntryManager.hasBranchesSupport(baseDn)) {
-        	return;
-        }
-
-        // Create Fido2 base branch for registration entries if needed
-        if (!containsBranch(baseDn)) {
-            addBranch(baseDn);
-        }
-    }
-
-    public Optional<Fido2RegistrationEntry> findByPublicKeyId(String publicKeyId) {
+    public Optional<Fido2RegistrationEntry> findByPublicKeyId(String publicKeyId, String rpId) {
         String baseDn = getBaseDnForFido2RegistrationEntries(null);
 
+        Filter filter;
         Filter publicKeyIdFilter = Filter.createEqualityFilter("jansPublicKeyId", publicKeyId);
-        List<Fido2RegistrationEntry> fido2RegistrationnEntries = persistenceEntryManager.findEntries(baseDn, Fido2RegistrationEntry.class, publicKeyIdFilter);
+        Filter publicKeyIdHashFilter = Filter.createEqualityFilter("jansPublicKeyIdHash", getPublicKeyIdHash(publicKeyId));
+        if (StringHelper.isNotEmpty(rpId)) {
+        	Filter appIdFilter = Filter.createEqualityFilter("jansApp", rpId);
+            filter = Filter.createORFilter(publicKeyIdFilter, publicKeyIdHashFilter, appIdFilter);
+        } else {
+            filter = Filter.createORFilter(publicKeyIdFilter, publicKeyIdHashFilter);
+        }
+        List<Fido2RegistrationEntry> fido2RegistrationnEntries = persistenceEntryManager.findEntries(baseDn, Fido2RegistrationEntry.class, filter);
         
         if (fido2RegistrationnEntries.size() > 0) {
             return Optional.of(fido2RegistrationnEntries.get(0));
@@ -188,9 +162,9 @@ public class RegistrationPersistenceService {
 
         return fido2RegistrationnEntries;
     }
-
-    public List<Fido2RegistrationEntry> findByChallenge(String challenge) {
-        String baseDn = getBaseDnForFido2RegistrationEntries(null);
+    
+    public List<Fido2RegistrationEntry> findByChallenge(String challenge, boolean oneStep) {
+        String baseDn = oneStep ? getDnForRegistrationEntry(null, null) : getBaseDnForFido2RegistrationEntries(null);
 
         Filter codeChallengFilter = Filter.createEqualityFilter("jansCodeChallenge", challenge);
         Filter codeChallengHashCodeFilter = Filter.createEqualityFilter("jansCodeChallengeHash", String.valueOf(getChallengeHashCode(challenge)));
@@ -201,33 +175,9 @@ public class RegistrationPersistenceService {
         return fido2RegistrationnEntries;
     }
 
-    public String getDnForRegistrationEntry(String userInum, String jsId) {
-        // Build DN string for Fido2 registration entry
-        String baseDn = getBaseDnForFido2RegistrationEntries(userInum);
-        if (StringHelper.isEmpty(jsId)) {
-            return baseDn;
-        }
-        return String.format("jansId=%s,%s", jsId, baseDn);
+    public String getBasedPeopleDn() {
+    	return staticConfiguration.getBaseDn().getPeople();
     }
-
-    public String getBaseDnForFido2RegistrationEntries(String userInum) {
-        final String userBaseDn = getDnForUser(userInum); // "ou=fido2_register,inum=1234,ou=people,o=jans"
-        if (StringHelper.isEmpty(userInum)) {
-            return userBaseDn;
-        }
-
-        return String.format("ou=fido2_register,%s", userBaseDn);
-    }
-
-    public String getDnForUser(String userInum) {
-        String peopleDn = staticConfiguration.getBaseDn().getPeople();
-        if (StringHelper.isEmpty(userInum)) {
-            return peopleDn;
-        }
-
-        return String.format("inum=%s,%s", userInum, peopleDn);
-    }
-
 
     public void cleanup(Date now, int batchSize) {
         // Cleaning expired entries
@@ -293,12 +243,42 @@ public class RegistrationPersistenceService {
 
     public int getChallengeHashCode(String challenge) {
         int hash = 0;
-        byte[] challengeBytes = challenge.getBytes();
+        byte[] challengeBytes = challenge.getBytes(StandardCharsets.UTF_8);
         for (int j = 0; j < challengeBytes.length; j++) {
             hash += challengeBytes[j]*j;
         }
 
         return hash;
+    }
+
+    /*
+     * Generate non unique hash code to split keyHandle among small cluster with 10-20 elements
+     *
+     * This hash code will be used to generate small LDAP indexes
+     */
+    public int getPublicKeyIdHash(String publicKeyId) {
+        byte[] publicKeyIdBytes = publicKeyId.getBytes(StandardCharsets.UTF_8);
+		int hash = 0;
+		for (int j = 0; j < publicKeyIdBytes.length; j++) {
+			hash += publicKeyIdBytes[j]*j;
+		}
+
+		return hash;
+    }
+    
+    @Override
+    public String getDnForRegistrationEntry(String userInum, String jsId) {
+    	String baseDn;
+    	if (StringHelper.isEmpty(userInum)) {
+    		baseDn = staticConfiguration.getBaseDn().getFido2Attestation();
+    	} else {
+	        // Build DN string for Fido2 registration entry
+	        baseDn = getBaseDnForFido2RegistrationEntries(userInum);
+    	}
+        if (StringHelper.isEmpty(jsId)) {
+            return baseDn;
+        }
+        return String.format("jansId=%s,%s", jsId, baseDn);
     }
 
 }
