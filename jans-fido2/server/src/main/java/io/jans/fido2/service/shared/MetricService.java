@@ -13,8 +13,8 @@ import jakarta.inject.Named;
 
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.model.ApplicationType;
-import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.common.service.common.ApplicationFactory;
+import io.jans.as.model.config.StaticConfiguration;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.service.metric.inject.ReportMetric;
 import io.jans.service.net.NetworkService;
@@ -64,10 +64,6 @@ public class MetricService extends io.jans.service.metric.MetricService {
 
     @Override
     public boolean isMetricReporterEnabled() {
-        if (this.appConfiguration.getMetricReporterEnabled() == null) {
-            return false;
-        }
-
         return this.appConfiguration.getMetricReporterEnabled();
     }
 

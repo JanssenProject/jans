@@ -33,7 +33,7 @@ public class Fido2RegistrationData extends Fido2Data {
     private String attestationType;
 
     private int signatureAlgorithm;
-    
+
     private String applicationId;
 
     public String getUsername() {

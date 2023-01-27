@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.fido2.ctap;
+package io.jans.orm.model.fido2;
 
 public enum UserVerification {
 
