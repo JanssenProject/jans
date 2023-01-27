@@ -31,8 +31,8 @@ Authentication methods can be broadly categorised in two categories:
 2. Private key based
 
 While shared key based authentication is simpler to implement, it is less secure than private key based authentication
-mechanisms. This is primarily because client secret is transferred between client and authorization server at some point
-during the authentication process. 
+mechanisms. This is primarily because when using shared key based authentication methods, the client secret is 
+transferred between client and authorization server at some point during the authentication process. 
 
 Characteristics table below shows side-by-side comparison of various supported authentication methods.
 
@@ -48,22 +48,22 @@ Characteristics table below shows side-by-side comparison of various supported a
 
 ### client_secret_basic
 
-Default authentication method for Janssen Server. Authenticates clients using method described in 
+Default authentication method for Janssen Server. It authenticates clients using method described in 
 [client authentication](https://datatracker.ietf.org/doc/html/rfc6749#section-2.3.1) section of OAuth framework. 
 
 ## client_secret_post
 
-Authenticates clients using method described in 
+`client_secret_post` method authenticates clients using method described in 
 [client authentication](https://datatracker.ietf.org/doc/html/rfc6749#section-2.3.1) section of OAuth framework by 
 adding client credentials in request body.
 
 ## client_secret_jwt
 
-Like client_secret_basic(#client_secret_basic) and client_secret_post (#client_secret_post) methods, this method is also
-based on a secret that client receives from Janssen Server. But instead of sending
+Like `client_secret_basic` and `client_secret_post` methods, this method is also
+based on a shared secret that client receives from Janssen Server. But instead of sending
 secret back to authorization server everytime, the client creates a JWT using an HMAC SHA algorithm where the shared
-secret is the key. This method is more secure than the client_secret_basic(#client_secret_basic) and client_secret_post
-(#client_secret_post) due to following reasons:
+secret is used as the key. This method is more secure than the `client_secret_basic` and `client_secret_post`
+ due to following reasons:
 
 - Secret which is shared once will never be transmitted again
 - JWT can have expiration time, beyond which the same JWT can not be used. This reduces the time window for replay of 
@@ -71,15 +71,15 @@ the same token in case it is compromised.
 
 This method is further described in OpenId Connect specification, [section 9](https://openid.net/specs/openid-connect-core-1_0.html#ClientAuthentication).
 
-### Configuration
+### Client Configuration For Using client_secret_jwt
 
-Janssen Server clients should specify the preferred algorithm for use of this method during client configuration.
+Janssen Server clients should specify the preferred algorithm for use with this method during client configuration.
 
 Algorithms supported by Janssen Server are listed in the response of Janssen Server's well-known
 [configuration endpoint](../endpoints/configuration.md). From the response, the claim 
-`token_endpoint_auth_signing_alg_values_supported` list the supported algorithms.
+`token_endpoint_auth_signing_alg_values_supported` lists the supported algorithms.
 
-To specify preferred algorithm for a client, when using [Janssen Text-based UI(TUI)](../../config-guide/tui.md) to configure the properties,
+To specify preferred algorithm for a client, using [Janssen Text-based UI(TUI)](../../config-guide/tui.md),
 navigate via `Auth Server` -> Get or add clients -> `encryption/signing` -> TODO: which exact properties.
 
 ## private_key_jwt
@@ -87,15 +87,15 @@ navigate via `Auth Server` -> Get or add clients -> `encryption/signing` -> TODO
 `private_key_jwt` is private key based method where secret is not shared between client and authorization server. This method is 
 further described in OpenId Connect specification, [section 9](https://openid.net/specs/openid-connect-core-1_0.html#ClientAuthentication).
 
-Janssen server implements signing and encryption mechanism following the guidelines in [section 10] of OpenId Connect
-specification. Clients sign and encrypt JWT as per its security requirements. 
+Janssen server implements signing and encryption mechanism following the guidelines in [section 10](https://openid.net/specs/openid-connect-core-1_0.html#SigEnc) 
+of OpenId Connect specification. Clients should sign and encrypt JWT as per their security requirements. 
 
-### Configuration
+### Client Configuration For Using private_key_jwt
 
-Janssen Server clients can specify signing and encryption keys in using client configuration. Clients can either specify
+Janssen Server clients can specify signing and encryption keys using client configuration. Clients can either specify
 JWKS as value or as reference URI. 
 
-To specify JWKS or reference URI, when using [Janssen Text-based UI(TUI)](../../config-guide/tui.md) to configure the properties,
+To specify JWKS values or reference URI, using [Janssen Text-based UI(TUI)](../../config-guide/tui.md),
 navigate via `Auth Server` -> Get or add clients -> `encryption/signing` -> set value for `Client JWKS URI` or 
 `Client JWKS`.
 
