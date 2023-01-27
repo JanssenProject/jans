@@ -18,6 +18,9 @@
 
 package io.jans.fido2.service.processor.assertion;
 
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.PublicKey;
 
 import io.jans.orm.model.fido2.Fido2AuthenticationData;
@@ -28,8 +31,6 @@ import jakarta.inject.Inject;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
 import io.jans.fido2.ctap.AttestationFormat;
-import io.jans.fido2.ctap.AuthenticatorAttachment;
-import io.jans.fido2.exception.Fido2CompromisedDevice;
 import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.auth.AuthData;
 import io.jans.fido2.service.AuthenticatorDataParser;
@@ -45,11 +46,11 @@ import org.slf4j.Logger;
 import com.fasterxml.jackson.databind.JsonNode;
 
 /**
- * Class which processes assertions of "packed" fmt (attestation type)
+ *  Class which processes assertions of "fido2-u2f" fmt (attestation type)
  *
  */
 @ApplicationScoped
-public class PackedAssertionFormatProcessor implements AssertionFormatProcessor {
+public class U2FSuperGluuAssertionFormatProcessor implements AssertionFormatProcessor {
 
     @Inject
     private Logger log;
@@ -77,19 +78,22 @@ public class PackedAssertionFormatProcessor implements AssertionFormatProcessor 
 
     @Override
     public AttestationFormat getAttestationFormat() {
-        return AttestationFormat.packed;
+        return AttestationFormat.fido_u2f_super_gluu;
     }
 
     @Override
     public void process(String base64AuthenticatorData, String signature, String clientDataJson, Fido2RegistrationData registration,
             Fido2AuthenticationData authenticationEntity) {
         AuthData authData = authenticatorDataParser.parseAssertionData(base64AuthenticatorData);
-        commonVerifiers.verifyRpIdHash(authData, registration.getDomain());
 
-        log.debug("User verification option {}", authenticationEntity.getUserVerificationOption());
-        userVerificationVerifier.verifyUserVerificationOption(authenticationEntity.getUserVerificationOption(), authData);
+//        String clientDataRaw = commonVerifiers.verifyClientRaw(response).asText();
+        userVerificationVerifier.verifyUserPresent(authData);
 
-        byte[] clientDataHash = DigestUtils.getSha256Digest().digest(base64Service.urlDecode(clientDataJson));
+        String clientDataJsonString = new String(base64Service.urlDecode(clientDataJson), StandardCharsets.UTF_8);
+        // Update to conform Super Gluu
+        clientDataJsonString = clientDataJsonString.replace("type", "typ").replaceAll("webauthn.get", "navigator.id.getAssertion");
+        
+        byte[] clientDataHash = DigestUtils.getSha256Digest().digest(clientDataJsonString.getBytes(StandardCharsets.UTF_8));
 
         try {
             int counter = authenticatorDataParser.parseCounter(authData.getCounters());
@@ -98,20 +102,12 @@ public class PackedAssertionFormatProcessor implements AssertionFormatProcessor 
 
             JsonNode uncompressedECPointNode = dataMapperService.cborReadTree(base64Service.urlDecode(registration.getUncompressedECPoint()));
             PublicKey publicKey = coseService.createUncompressedPointFromCOSEPublicKey(uncompressedECPointNode);
-
             log.debug("Uncompressed ECpoint node {}", uncompressedECPointNode.toString());
-            log.debug("EC Public key hex {}", Hex.encodeHexString(publicKey.getEncoded()));
-            // apple algorithm = -7
-            // windows hello algorithm is -257
-            log.debug("registration.getSignatureAlgorithm(): "+registration.getSignatureAlgorithm());
-            log.debug("Platform authenticator: "+ String.valueOf(registration.getAttenstationRequest().contains(AuthenticatorAttachment.PLATFORM.getAttachment()) ? -7 : registration.getSignatureAlgorithm()));
-            authenticatorDataVerifier.verifyAssertionSignature(authData, clientDataHash, signature, publicKey, registration.getAttenstationRequest().contains(AuthenticatorAttachment.PLATFORM.getAttachment()) ? -7 : registration.getSignatureAlgorithm());
-           
-        } catch (Fido2CompromisedDevice ex) {
-        	throw ex;
+            log.debug("Public key hex {}", Hex.encodeHexString(publicKey.getEncoded()));
+
+            authenticatorDataVerifier.verifyAssertionSignature(authData, clientDataHash, signature, publicKey, registration.getSignatureAlgorithm());
         } catch (Exception ex) {
-            throw new Fido2RuntimeException("Failed to check packet assertion", ex);
+            throw new Fido2RuntimeException("Failed to check U2F assertion", ex);
         }
     }
-
 }
