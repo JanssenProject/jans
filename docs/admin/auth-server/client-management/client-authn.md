@@ -76,21 +76,40 @@ This method is further described in OpenId Connect specification, [section 9](ht
 Janssen Server clients should specify the preferred algorithm for use of this method during client configuration.
 
 Algorithms supported by Janssen Server are listed in the response of Janssen Server's well-known
-[configuration endpoint](./configuration.md). From the response, the claims (TODO:list claims) list the supported
-algorithms.
+[configuration endpoint](../endpoints/configuration.md). From the response, the claim 
+`token_endpoint_auth_signing_alg_values_supported` list the supported algorithms.
 
 To specify preferred algorithm for a client, when using [Janssen Text-based UI(TUI)](../../config-guide/tui.md) to configure the properties,
 navigate via `Auth Server` -> Get or add clients -> `encryption/signing` -> TODO: which exact properties.
 
 ## private_key_jwt
 
+`private_key_jwt` is private key based method where secret is not shared between client and authorization server. This method is 
+further described in OpenId Connect specification, [section 9](https://openid.net/specs/openid-connect-core-1_0.html#ClientAuthentication).
 
+Janssen server implements signing and encryption mechanism following the guidelines in [section 10] of OpenId Connect
+specification. Clients sign and encrypt JWT as per its security requirements. 
+
+### Configuration
+
+Janssen Server clients can specify signing and encryption keys in using client configuration. Clients can either specify
+JWKS as value or as reference URI. 
+
+To specify JWKS or reference URI, when using [Janssen Text-based UI(TUI)](../../config-guide/tui.md) to configure the properties,
+navigate via `Auth Server` -> Get or add clients -> `encryption/signing` -> set value for `Client JWKS URI` or 
+`Client JWKS`.
 
 ## tls_client_auth
 
+TODO: add more details
+
 ## self_signed_tls_client_auth
 
+TODO: add more details
+
 ## none
+
+TODO: add more details
 
 ## Want to contribute?
 
