@@ -220,7 +220,7 @@ public class CustomScriptManager {
 			}
 
 			if (ScriptLocationType.FILE == newCustomScript.getLocationType()) {
-				// Replace script revision with file modification time. This should allow to
+				// Add to script revision file modification time. This should allow to
 				// reload script automatically after changing location_type
 				long fileModifiactionTime = getFileModificationTime(newCustomScript.getLocationPath());
 
@@ -258,10 +258,10 @@ public class CustomScriptManager {
 				}
 
 				if (ScriptLocationType.FILE == loadedCustomScript.getLocationType()) {
-					// Replace script revision with file modification time. This should allow to
+					// Add to script revision file modification time. This should allow to
 					// reload script automatically after changing location_type
 					long fileModifiactionTime = getFileModificationTime(loadedCustomScript.getLocationPath());
-					loadedCustomScript.setRevision(fileModifiactionTime);
+					loadedCustomScript.setRevision(newCustomScript.getRevision() + fileModifiactionTime);
 
 					if (fileModifiactionTime != 0) {
 						String scriptFromFile = loadFromFile(loadedCustomScript.getLocationPath());
