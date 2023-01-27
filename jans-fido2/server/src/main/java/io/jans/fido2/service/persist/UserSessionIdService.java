@@ -30,6 +30,8 @@ import jakarta.inject.Inject;
 @ApplicationScoped
 public class UserSessionIdService {
 
+	public static final String AUTHENTICATED_USER = "auth_user";
+
     @Inject
     private Logger log;
 
@@ -38,6 +40,24 @@ public class UserSessionIdService {
 
     @Inject
     private PersistenceEntryManager persistenceEntryManager;
+
+    public boolean isValidSessionId(String sessionId, String userName) {
+        SessionId session = getSessionId(sessionId);
+        if (session == null) {
+            log.error("Specified session_id '{}' is invalid", sessionId);
+            return false;
+        }
+
+        if (StringHelper.isNotEmpty(userName)) {
+	        String sessionIdUser = session.getSessionAttributes().get(AUTHENTICATED_USER);
+	        if (!StringHelper.equalsIgnoreCase(userName, sessionIdUser)) {
+	            log.error("Username '{}' and session_id '{}' don't match", userName, sessionId);
+	            return false;
+	        }
+        }
+
+        return true;
+    }
 
     public void updateUserSessionIdOnFinishRequest(String sessionId, String userInum, Fido2RegistrationEntry registrationEntry, boolean enroll, boolean oneStep) {
         SessionId entity = getSessionId(sessionId);

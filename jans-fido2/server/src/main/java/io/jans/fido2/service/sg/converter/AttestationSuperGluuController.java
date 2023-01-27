@@ -30,6 +30,7 @@ import io.jans.fido2.service.CoseService;
 import io.jans.fido2.service.DataMapperService;
 import io.jans.fido2.service.DigestService;
 import io.jans.fido2.service.operation.AttestationService;
+import io.jans.fido2.service.persist.UserSessionIdService;
 import io.jans.fido2.service.sg.RawRegistrationService;
 import io.jans.fido2.service.verifier.CommonVerifiers;
 import io.jans.fido2.sg.SuperGluuMode;
@@ -70,6 +71,9 @@ public class AttestationSuperGluuController {
 	@Inject
 	private DigestService digestService;
 
+	@Inject
+	private UserSessionIdService userSessionIdService;
+
     @Inject
     private AppConfiguration appConfiguration;
 
@@ -96,6 +100,11 @@ public class AttestationSuperGluuController {
     public JsonNode startRegistration(String userName, String appId, String sessionId, String enrollmentCode) {
         boolean oneStep = StringHelper.isEmpty(userName);
 
+        boolean valid = userSessionIdService.isValidSessionId(sessionId, userName);
+        if (!valid) {
+            throw new Fido2RuntimeException(String.format("session_id '%s' is invalid", sessionId));
+        }
+
         ObjectNode params = dataMapperService.createObjectNode();
         // Add all required parameters from request to allow process U2F request 
         params.put(CommonVerifiers.SUPER_GLUU_MODE, oneStep ? SuperGluuMode.ONE_STEP.getMode() : SuperGluuMode.TWO_STEP.getMode());
@@ -105,12 +114,12 @@ public class AttestationSuperGluuController {
         if (oneStep) {
         	useUserName = attestationService.generateUserId();
         }
-        
+
         params.put("username", useUserName);
         params.put("displayName", useUserName);
 
         params.put("session_id", sessionId);
-
+        
         // Required parameters
         params.put("attestation", "direct");
 

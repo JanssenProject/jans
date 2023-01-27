@@ -24,6 +24,7 @@ import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.DataMapperService;
 import io.jans.fido2.service.DigestService;
 import io.jans.fido2.service.operation.AssertionService;
+import io.jans.fido2.service.persist.UserSessionIdService;
 import io.jans.fido2.service.sg.RawAuthenticationService;
 import io.jans.fido2.service.verifier.CommonVerifiers;
 import io.jans.fido2.sg.SuperGluuMode;
@@ -54,6 +55,9 @@ public class AssertionSuperGluuController {
 	@Inject
 	private DigestService digestService;
 
+	@Inject
+	private UserSessionIdService userSessionIdService;
+
     /* Example for one_step:
      *  - request:
      *             username: null
@@ -78,6 +82,15 @@ public class AssertionSuperGluuController {
      */
     public JsonNode startAuthentication(String userName, String keyHandle, String appId, String sessionId) {
         boolean oneStep = StringHelper.isEmpty(userName);
+
+        boolean valid = userSessionIdService.isValidSessionId(sessionId, userName);
+        if (!valid) {
+            throw new Fido2RuntimeException(String.format("session_id '%s' is invalid", sessionId));
+        }
+
+        if (StringHelper.isEmpty(userName) && StringHelper.isEmpty(keyHandle)) {
+            throw new Fido2RuntimeException("The request should contains either username or keyhandle");
+        }
 
         ObjectNode params = dataMapperService.createObjectNode();
         // Add all required parameters from request to allow process U2F request 
