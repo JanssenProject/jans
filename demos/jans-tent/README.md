@@ -61,6 +61,11 @@ pip3 install -r requirements.txt
   * Set `ISSUER`
   * Set `ACR_VALUES='basic'`
 
+* Generate test RP server self signed certs
+
+Generate `key.pem` and `cert.pem` at `jans-tent` project root, i.e:
+`openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -sha256 -days 365 -nodes`
+
 * Import your Auth Server certificate
 
 ```bash
