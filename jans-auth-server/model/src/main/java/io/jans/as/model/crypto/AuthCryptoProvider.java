@@ -186,14 +186,14 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
         return "_" + algorithm.getUse().getParamName().toLowerCase() + "_" + algorithm.getParamName().toLowerCase();
     }
 
-    public String getAliasByAlgorithmForDeletion(Algorithm algorithm, String newAlias) throws KeyStoreException {
+    public String getAliasByAlgorithmForDeletion(Algorithm algorithm, String newAlias, KeyOps keyOps) throws KeyStoreException {
         for (String alias : Collections.list(keyStore.aliases())) {
 
-            if (newAlias.equals(alias) || alias.startsWith(KeyOps.SSA.getValue())) { // skip newly created alias or ssa keys
+            if (newAlias.equals(alias)) { // skip newly created alias or ssa keys
                 continue;
             }
 
-            if (alias.endsWith(getKidSuffix(algorithm))) {
+            if (alias.startsWith(keyOps.getValue()) && alias.endsWith(getKidSuffix(algorithm))) {
                 return alias;
             }
         }
@@ -441,26 +441,23 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
         KeyPairGenerator keyGen = null;
         final AlgorithmFamily algorithmFamily = algorithm.getFamily();
         switch (algorithmFamily) {
-            case RSA: {
+            case RSA:
                 keyGen = KeyPairGenerator.getInstance(algorithmFamily.toString(), "BC");
                 keyGen.initialize(keyLength, new SecureRandom());
                 break;
-            }
-            case EC: {
+            case EC:
                 ECGenParameterSpec eccgen = new ECGenParameterSpec(signatureAlgorithm.getCurve().getAlias());
                 keyGen = KeyPairGenerator.getInstance(algorithmFamily.toString(), "BC");
                 keyGen.initialize(eccgen, new SecureRandom());
                 break;
-            }
-            case ED: {
+            case ED:
                 EdDSAParameterSpec edSpec = new EdDSAParameterSpec(signatureAlgorithm.getCurve().getAlias());
                 keyGen = KeyPairGenerator.getInstance(signatureAlgorithm.getName(), "BC");
                 keyGen.initialize(edSpec, new SecureRandom());
                 break;
-            }
-            default: {
+            default:
                 throw new IllegalStateException("The provided signature algorithm parameter is not supported: algorithmFamily = " + algorithmFamily);
-            }
+
         }
         return getJson(algorithm, keyGen, signatureAlgorithm.getAlgorithm(), expirationTime, keyOps);
     }
@@ -477,23 +474,21 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
         String signatureAlgorithm = null;
         final AlgorithmFamily algorithmFamily = algorithm.getFamily();
         switch (algorithmFamily) {
-            case RSA: {
+            case RSA:
                 keyGen = KeyPairGenerator.getInstance(algorithmFamily.toString(), "BC");
                 keyGen.initialize(keyLength, new SecureRandom());
                 signatureAlgorithm = "SHA256WITHRSA";
                 break;
-            }
-            case EC: {
+            case EC:
                 ECGenParameterSpec eccgen = new ECGenParameterSpec(keyEncryptionAlgorithm.getCurve().getAlias());
                 keyGen = KeyPairGenerator.getInstance(algorithmFamily.toString(), "BC");
                 keyGen.initialize(eccgen, new SecureRandom());
                 signatureAlgorithm = "SHA256WITHECDSA";
                 break;
-            }
-            default: {
+            default:
                 throw new IllegalStateException(
                         "The provided key encryption algorithm parameter is not supported: algorithmFamily = " + algorithmFamily);
-            }
+
         }
         return getJson(algorithm, keyGen, signatureAlgorithm, expirationTime, keyOps);
     }
@@ -520,7 +515,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
         String alias = getKid(algorithm, keyOps);
         keyStore.setKeyEntry(alias, pk, keyStoreSecret.toCharArray(), chain);
 
-        final String oldAliasByAlgorithm = getAliasByAlgorithmForDeletion(algorithm, alias);
+        final String oldAliasByAlgorithm = getAliasByAlgorithmForDeletion(algorithm, alias, keyOps);
         if (StringUtils.isNotBlank(oldAliasByAlgorithm)) {
             keyStore.deleteEntry(oldAliasByAlgorithm);
             LOG.trace("New key: " + alias + ", deleted key: " + oldAliasByAlgorithm);

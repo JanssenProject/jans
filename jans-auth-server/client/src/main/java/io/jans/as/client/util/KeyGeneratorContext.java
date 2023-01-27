@@ -1,6 +1,7 @@
 package io.jans.as.client.util;
 
 import io.jans.as.model.crypto.AbstractCryptoProvider;
+import io.jans.as.model.jwk.KeyOps;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -17,13 +18,33 @@ public class KeyGeneratorContext {
     private int expirationDays;
     private int expirationHours;
     private Calendar expiration;
+    private KeyOps keyOps;
 
-    public Calendar calculateExpiration() {
+    public void calculateExpiration() {
         Calendar calendar = new GregorianCalendar();
         calendar.add(Calendar.DATE, getExpirationDays());
         calendar.add(Calendar.HOUR, getExpirationHours());
         this.expiration = calendar;
-        return calendar;
+    }
+
+    public long getExpirationForKeyOps(KeyOps keyOps) {
+        if (expiration == null) {
+            calculateExpiration();
+        }
+        if (keyOps == KeyOps.SSA) {
+            Calendar calendar = new GregorianCalendar();
+            calendar.add(Calendar.YEAR, 50);
+            return calendar.getTimeInMillis();
+        }
+        return expiration.getTimeInMillis();
+    }
+
+    public KeyOps getKeyOps() {
+        return keyOps;
+    }
+
+    public void setKeyOps(KeyOps keyOps) {
+        this.keyOps = keyOps;
     }
 
     public Calendar getExpiration() {

@@ -7,7 +7,9 @@ import com.fasterxml.jackson.annotation.JsonCreator;
  */
 public enum KeyOps {
     CONNECT("connect"),
-    SSA("ssa");
+    SSA("ssa"),
+
+    ALL("all");
 
     private final String value;
 
