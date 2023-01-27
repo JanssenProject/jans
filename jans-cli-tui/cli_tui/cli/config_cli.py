@@ -46,7 +46,14 @@ config_dir.mkdir(parents=True, exist_ok=True)
 config_ini_fn = config_dir.joinpath('jans-cli.ini')
 sys.path.append(cur_dir)
 
-my_op_mode = 'scim' if 'scim' in os.path.basename(sys.argv[0]) or '-scim' in sys.argv else 'jca'
+
+if 'scim' in os.path.basename(sys.argv[0]) or '-scim' in sys.argv:
+    my_op_mode = 'scim'
+elif 'auth' in os.path.basename(sys.argv[0]) or '-auth' in sys.argv:
+    my_op_mode = 'auth'
+else:
+    my_op_mode = 'jca'
+
 plugins = []
 
 warning_color = 214
@@ -164,6 +171,7 @@ parser.add_argument("-no-color", help="Do not colorize json dumps", action='stor
 parser.add_argument("--log-dir", help="Log directory", default=log_dir)
 parser.add_argument("-revoke-session", help="Revokes session", action='store_true')
 parser.add_argument("-scim", help="SCIM Mode", action='store_true', default=False)
+parser.add_argument("-auth", help="Jans OAuth Server Mode", action='store_true', default=False)
 
 parser.add_argument("--data", help="Path to json data file")
 args = parser.parse_args()
@@ -257,12 +265,14 @@ class JCA_CLI:
         self.openid_configuration = {}
         self.set_user()
         self.plugins()
+        self.auth_server_token = ''
 
         if my_op_mode == 'jca':
             self.host += '/jans-config-api'
-
-        if my_op_mode == 'scim':
+        elif my_op_mode == 'scim':
             self.host += '/jans-scim/restv1/v2'
+        elif my_op_mode == 'auth':
+            self.host += '/jans-auth/restv1'
 
         self.set_logging()
         self.ssl_settings()
@@ -370,13 +380,29 @@ class JCA_CLI:
         code.interact(local=locals_)
         sys.exit()
 
-    def get_request_header(self, headers={}, access_token=None):
-        if not access_token:
-            access_token = self.access_token
 
-        user = self.get_user_info()
-        if 'inum' in user:
-            headers['User-inum'] = user['inum']
+    def get_auth_server_token(self):
+        self.auth_server_token = self.get_scoped_access_token(
+                        scope=['https://jans.io/auth/ssa.admin'],
+                        set_access_token=False
+                        )
+
+
+    def get_request_header(self, headers=None, access_token=None):
+        if headers is None:
+            headers = {}
+
+        if my_op_mode == 'auth':
+            if not self.auth_server_token:
+                self.get_auth_server_token()
+            access_token = self.auth_server_token
+        else:
+            if not access_token:
+                access_token = self.access_token
+
+            user = self.get_user_info()
+            if 'inum' in user:
+                headers['User-inum'] = user['inum']
 
         ret_val = {'Authorization': 'Bearer {}'.format(access_token)}
         ret_val.update(headers)
@@ -507,7 +533,7 @@ class JCA_CLI:
             return False
 
 
-    def get_scoped_access_token(self, scope):
+    def get_scoped_access_token(self, scope, set_access_token=True):
 
         if not self.wrapped:
             scope_text = " for scope {}\n".format(scope) if scope else ''
@@ -521,9 +547,11 @@ class JCA_CLI:
         else:
             post_params = {"grant_type": "client_credentials", "scope": scope}
 
+        client = self.use_test_client or self.client_id
+
         response = requests.post(
             url,
-            auth=(self.use_test_client, self.client_secret),
+            auth=(client, self.client_secret),
             data=post_params,
             verify=self.verify_ssl,
             cert=self.mtls_client_cert
@@ -532,7 +560,10 @@ class JCA_CLI:
         try:
             result = response.json()
             if 'access_token' in result:
-                self.access_token = result['access_token']
+                if set_access_token:
+                    self.access_token = result['access_token']
+                else:
+                    return result['access_token']
             else:
                 sys.stderr.write("Error while getting access token")
                 sys.stderr.write(result)
@@ -692,11 +723,12 @@ class JCA_CLI:
         return True, ''
 
     def get_access_token(self, scope):
-        if self.use_test_client:
-            self.get_scoped_access_token(scope)
-        elif not self.access_token and not self.wrapped:
-            self.check_access_token()
-            self.get_jwt_access_token()
+        if my_op_mode != 'auth':
+            if self.use_test_client:
+                self.get_scoped_access_token(scope)
+            elif not self.access_token and not self.wrapped:
+                self.check_access_token()
+                self.get_jwt_access_token()
         return True, ''
 
     def print_exception(self, e):
@@ -1075,8 +1107,10 @@ class JCA_CLI:
             self.print_exception(e)
 
     def get_mime_for_endpoint(self, endpoint, req='requestBody'):
-        for key in endpoint.info[req]['content']:
-            return key
+        if req in endpoint.info:
+            for key in endpoint.info[req]['content']:
+                return key
+
 
     def post_requests(self, endpoint, data):
         url = 'https://{}{}'.format(self.host, endpoint.path)
@@ -1085,6 +1119,8 @@ class JCA_CLI:
         mime_type = self.get_mime_for_endpoint(endpoint)
 
         headers = self.get_request_header({'Accept': 'application/json', 'Content-Type': mime_type})
+        if mime_type:
+            headers['Content-Type'] = mime_type
 
         response = requests.post(url,
             headers=headers,
@@ -1101,7 +1137,7 @@ class JCA_CLI:
         try:
             return response.json()
         except:
-            print(response.text)
+            return {'server_error': response.text}
 
 
     def delete_requests(self, endpoint, url_param_dict):
@@ -1247,7 +1283,13 @@ class JCA_CLI:
                                 if 'requestBody' in path:
                                     for apptype in path['requestBody'].get('content', {}):
                                         if 'schema' in path['requestBody']['content'][apptype]:
-                                            if path['requestBody']['content'][apptype]['schema'].get('type') == 'array':
+                                            if path['requestBody']['content'][apptype]['schema'].get('type') == 'object' and '$ref' not in path['requestBody']['content'][apptype]['schema']:
+                                                print('  Parameters:')
+                                                for param in path['requestBody']['content'][apptype]['schema']['properties']:
+                                                    req_s = '*' if param in path['requestBody']['content'][apptype]['schema'].get('required', []) else ''
+                                                    print('    {}{}: {}'.format(param, req_s, path['requestBody']['content'][apptype]['schema']['properties'][param].get('description') or "Description not found for this property"))
+
+                                            elif path['requestBody']['content'][apptype]['schema'].get('type') == 'array':
                                                 schema_path = path['requestBody']['content'][apptype]['schema']['items']['$ref']
                                                 print('  Schema: Array of {}{}'.format(mode_suffix, os.path.basename(schema_path)))
                                             else:
@@ -1327,7 +1369,7 @@ class JCA_CLI:
 
         endpoint = self.get_fake_endpoint(path)
 
-        if not data:
+        if not data and data_fn:
 
             if data_fn.endswith('jwt'):
                 with open(data_fn) as reader:
