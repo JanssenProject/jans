@@ -156,7 +156,7 @@ def schema2json(schema_file, out_dir=None):
     with open(out_file, 'w') as w:
         w.write(schema_str)
 
-def create_client_ldif(ldif_fn, client_id, encoded_pw, scopes, redirect_uri, trusted_client='false'):
+def create_client_ldif(ldif_fn, client_id, encoded_pw, scopes, redirect_uri, display_name, trusted_client='false'):
     clients_ldif_fd = open(ldif_fn, 'wb')
     ldif_clients_writer = LDIFWriter(clients_ldif_fd, cols=1000)
     client_dn = 'inum={},ou=clients,o=jans'.format(client_id)
@@ -165,7 +165,7 @@ def create_client_ldif(ldif_fn, client_id, encoded_pw, scopes, redirect_uri, tru
         client_dn, {
         'objectClass': ['top', 'jansClnt'],
         'del': ['false'],
-        'displayName': ['Jans Config Api Client'],
+        'displayName': [display_name],
         'inum': [client_id],
         'jansAccessTknAsJwt': ['false'],
         'jansAccessTknSigAlg': ['RS256'],
