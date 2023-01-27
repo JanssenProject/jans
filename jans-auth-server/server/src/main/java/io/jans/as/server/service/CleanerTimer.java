@@ -184,15 +184,12 @@ public class CleanerTimer {
     }
 
     private Map<String, Class<?>> createCleanServiceBaseDns() {
-        final String u2fBase = staticConfiguration.getBaseDn().getU2fBase();
 
         final Map<String, Class<?>> cleanServiceBaseDns = Maps.newHashMap();
 
         cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getClients(), Client.class);
         cleanServiceBaseDns.put(umaPctService.branchBaseDn(), UmaPCT.class);
         cleanServiceBaseDns.put(umaResourceService.getBaseDnForResource(), UmaResource.class);
-        cleanServiceBaseDns.put(String.format("ou=registration_requests,%s", u2fBase), RegisterRequestMessageLdap.class);
-        cleanServiceBaseDns.put(String.format("ou=registered_devices,%s", u2fBase), DeviceRegistration.class);
         cleanServiceBaseDns.put(metricService.buildDn(null, null, ApplicationType.OX_AUTH), MetricEntry.class);
         cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getTokens(), TokenEntity.class);
         cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getAuthorizations(), ClientAuthorization.class);
