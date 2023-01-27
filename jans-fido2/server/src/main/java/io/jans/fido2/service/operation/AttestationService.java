@@ -252,16 +252,20 @@ public class AttestationService {
 
         int publicKeyIdHash = registrationPersistenceService.getPublicKeyIdHash(registrationData.getPublicKeyId());
         registrationEntry.setPublicKeyIdHash(publicKeyIdHash);
+
+        // Get sessionId before cleaning it from registration entry
+        String sessionStateId = registrationEntry.getSessionStateId();
         registrationEntry.setSessionStateId(null);
 
         // Set expiration for one_step entry
         if (oneStep) {
         	registrationEntry.setExpiration();
+        } else {
+        	registrationEntry.clearExpiration();
         }
 		registrationPersistenceService.update(registrationEntry);
 
-		// If SessionStateId is not empty update session
-		String sessionStateId = registrationEntry.getSessionStateId();
+		// If sessionStateId is not empty update session
         if (StringHelper.isNotEmpty(sessionStateId)) {
             log.debug("There is session id. Setting session id attributes");
 

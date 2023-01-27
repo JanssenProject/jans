@@ -158,7 +158,7 @@ public class AssertionSuperGluuController {
             throw new Fido2RpRuntimeException("Failed to parse options assertion request", ex);
         }
 
-        if (!authenticateResponse.getClientData().getTyp().equals("navigator.id.getAssertion")) {
+        if (!authenticateResponse.getClientData().getTyp().equals(RawAuthenticationService.AUTHENTICATE_GET_TYPE)) {
             throw new Fido2RuntimeException("Invalid options attestation request type");
         }
 

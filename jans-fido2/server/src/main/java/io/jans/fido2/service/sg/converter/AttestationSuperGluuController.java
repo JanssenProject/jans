@@ -107,6 +107,7 @@ public class AttestationSuperGluuController {
 
         ObjectNode params = dataMapperService.createObjectNode();
         // Add all required parameters from request to allow process U2F request 
+        params.put(CommonVerifiers.SUPER_GLUU_REQUEST, true);
         params.put(CommonVerifiers.SUPER_GLUU_MODE, oneStep ? SuperGluuMode.ONE_STEP.getMode() : SuperGluuMode.TWO_STEP.getMode());
         params.put(CommonVerifiers.SUPER_GLUU_APP_ID, appId);
 
@@ -188,14 +189,13 @@ public class AttestationSuperGluuController {
             throw new Fido2RpRuntimeException("Failed to parse options attestation request", ex);
         }
 
-        if (!registerResponse.getClientData().getTyp().equals("navigator.id.finishEnrollment")) {
+        if (!registerResponse.getClientData().getTyp().equals(RawRegistrationService.REGISTER_FINISH_TYPE)) {
             throw new Fido2RuntimeException("Invalid options attestation request type");
         }
 
         ObjectNode params = dataMapperService.createObjectNode();
         // Add all required parameters from request to allow process U2F request 
         params.put(CommonVerifiers.SUPER_GLUU_REQUEST, true);
-
         boolean oneStep = StringHelper.isEmpty(userName);
         params.put(CommonVerifiers.SUPER_GLUU_MODE, oneStep ? SuperGluuMode.ONE_STEP.getMode() : SuperGluuMode.TWO_STEP.getMode());
 
@@ -217,7 +217,7 @@ public class AttestationSuperGluuController {
 		// Prepare attestationObject
         RawRegisterResponse rawRegisterResponse = rawRegistrationService.parseRawRegisterResponse(registerResponse.getRegistrationData());
 
-        params.put("id", rawRegisterResponse.getKeyHandle());
+        params.put("id", base64Service.urlEncodeToString(rawRegisterResponse.getKeyHandle()));
 
         ObjectNode attestationObject = dataMapperService.createObjectNode();
         ObjectNode attStmt = dataMapperService.createObjectNode();

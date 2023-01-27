@@ -108,7 +108,7 @@ objectClass: top
 objectClass: organizationalUnit
 ou: fido2_register
 
-dn: ou=fido2_authenticate,ou=fido2,o=jans
+dn: ou=fido2_auth,ou=fido2,o=jans
 objectClass: top
 objectClass: organizationalUnit
 ou: fido2_authenticate

@@ -6,7 +6,7 @@
         "attributes":"ou=attributes,o=jans",
         "sessions":"ou=sessions,o=jans",
         "fido2Attestation":"ou=fido2_register,ou=fido2,o=jans",
-        "fido2Assertion":"ou=fido2_authenticate,ou=fido2,o=jans",
+        "fido2Assertion":"ou=fido2_auth,ou=fido2,o=jans",
         "metric":"ou=statistic,o=metric"
     }
 }
