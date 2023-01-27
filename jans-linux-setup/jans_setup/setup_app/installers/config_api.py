@@ -157,7 +157,8 @@ class ConfigApiInstaller(JettyInstaller):
                 client_id=Config.jca_client_id,
                 encoded_pw=Config.jca_client_encoded_pw,
                 scopes=jansUmaScopes_all,
-                redirect_uri=['https://{}/admin-ui'.format(Config.hostname), 'http://localhost:4100']
+                redirect_uri=['https://{}/admin-ui'.format(Config.hostname), 'http://localhost:4100'],
+                display_name="Jans Config Api Client"
                 )
 
             self.load_ldif_files.append(self.clients_ldif_fn)
