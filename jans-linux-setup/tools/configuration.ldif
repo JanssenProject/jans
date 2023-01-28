@@ -3,6 +3,7 @@ jansAuthMode: urn:openbanking:psd2:sca
 jansCacheConf: {"cacheProviderType": "%(cache_provider_type)s", "memcachedConfiguration": {"servers":"localhost:11211", "maxOperationQueueLength":100000, "bufferSize":32768, "defaultPutExpiration":60, "connectionFactoryType": "DEFAULT"}, "inMemoryConfiguration": {"defaultPutExpiration":60}, "nativePersistenceConfiguration": {"defaultPutExpiration":60, "defaultCleanupBatchSize": 10000}, "redisConfiguration":{"servers":"localhost:6379", "defaultPutExpiration": 60}}
 jansDbAuth: {"type": "auth", "name": null, "level": 0, "priority": 1, "enabled": false, "version": 0, "config": {} }
 jansDocStoreConf: {"documentStoreType":"LOCAL","localConfiguration":{"baseLocation":"/"},"jcaConfiguration":{"serverUrl":"http://localhost:8080/rmi","workspaceName":"default","connectionTimeout":15,"userId":"admin","password":""},"webDavConfiguration":null}
+jansSmtpConf: {"key-store":"%(smtp_jks_fn)s", "key-store-password":"%(smtp_jks_pass_enc)s", "key-store-alias":"%(smtp_alias)s", "signing-algorithm":"%(smtp_signing_alg)s"}
 jansOrgProfileMgt: 0
 jansScimEnabled: 0
 objectClass: top

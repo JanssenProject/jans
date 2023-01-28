@@ -349,6 +349,10 @@ class Config:
         self.default_enc_key_algs = 'RSA1_5 RSA-OAEP ECDH-ES'
         self.default_key_expiration = 365
 
+        self.smtp_jks_fn = os.path.join(self.certFolder, 'smtp-keys' + '.' + Config.default_store_type)
+        self.smtp_alias = 'smtp_sig_ec256'
+        self.smtp_signing_alg = 'SHA256withECDSA'
+
         self.post_messages = []
 
         self.ldif_files = [self.ldif_base,

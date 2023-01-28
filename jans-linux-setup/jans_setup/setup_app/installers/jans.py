@@ -9,13 +9,15 @@ import re
 import requests
 import zipfile
 import site
+import random
+import string
 
 from pathlib import Path
 
 from setup_app import paths
 from setup_app import static
 from setup_app.utils import base
-from setup_app.static import InstallTypes, AppType, InstallOption
+from setup_app.static import InstallTypes, AppType, InstallOption, SetupProfiles
 from setup_app.config import Config
 from setup_app.utils.setup_utils import SetupUtils
 from setup_app.utils.progress import jansProgress
@@ -109,8 +111,17 @@ class JansInstaller(BaseInstaller, SetupUtils):
         
         if not Config.installed_instance and Config.profile == static.SetupProfiles.DISA_STIG:
             self.remove_pcks11_keys()
-            
-        self.profile_templates(Config.templateFolder)            
+
+        self.make_salt()
+
+        if not Config.get('smtp_jks_pass'):
+            Config.smtp_jks_pass = self.getPW()
+            try:
+                Config.smtp_jks_pass_enc = self.obscure(Config.smtp_jks_pass)
+            except Exception as e:
+                self.logIt("JansInstaller. __init__ failed. Reason: %s" % str(e), errorLog=True)
+
+        self.profile_templates(Config.templateFolder)
 
     def configureSystem(self):
         self.logIt("Configuring system", 'jans')
@@ -143,7 +154,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
         
         for folder in (Config.jansOptFolder, Config.jansOptBinFolder, Config.jansOptSystemFolder,
                         Config.jansOptPythonFolder, Config.configFolder, Config.certFolder,
-                        Config.output_dir, Config.os_default, scripts_dist_dir):
+                        Config.output_dir, Config.os_default, Config.dist_app_dir, scripts_dist_dir):
 
             if not os.path.exists(folder):
                 self.run([paths.cmd_mkdir, '-p', folder])
@@ -195,6 +206,11 @@ class JansInstaller(BaseInstaller, SetupUtils):
             self.writeFile(Config.salt_fn, salt_text)
         except:
             self.logIt("Error writing salt", True, True)
+
+        if not Config.get('pairwiseCalculationKey') or enforce:
+            Config.pairwiseCalculationKey = self.genRandomString(random.randint(20,30))
+        if not Config.get('pairwiseCalculationSalt') or enforce:
+            Config.pairwiseCalculationSalt = self.genRandomString(random.randint(20,30))
 
     def render_templates(self, templates=None):
         self.logIt("Rendering templates")
@@ -519,3 +535,34 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
     def extract_scripts(self):
         base.extract_from_zip(base.current_app.jans_zip, 'docs/script-catalog', Config.script_catalog_dir)
+
+    def generate_configuration(self):
+        self.logIt("Generating smtp keys", pbar=self.service_name)
+
+        cmd_cert_gen = [Config.cmd_keytool, '-genkeypair',
+                        '-alias', Config.smtp_alias,
+                        '-keyalg', 'ec',
+                        '-groupname', 'secp256r1',
+                        '-sigalg', Config.smtp_signing_alg,
+                        '-validity', '3650',
+                        '-storetype', Config.default_store_type,
+                        '-keystore', Config.smtp_jks_fn,
+                        '-keypass', Config.smtp_jks_pass,
+                        '-storepass', Config.smtp_jks_pass,
+                        '-dname', 'CN=SMTP CA Certificate'
+                    ]
+
+        if Config.profile == SetupProfiles.DISA_STIG:
+            fips_provider = self.get_keytool_provider()
+            cmd_cert_gen += [
+                        '-providername', fips_provider['-providername'],
+                        '-provider', fips_provider['-providerclass'],
+                        '-providerpath', fips_provider['-providerpath']
+                    ]
+
+        self.run(cmd_cert_gen)
+
+    def genRandomString(self, N):
+        return ''.join(random.SystemRandom().choice(string.ascii_lowercase
+                                                    + string.ascii_uppercase
+                                                    + string.digits) for _ in range(N))

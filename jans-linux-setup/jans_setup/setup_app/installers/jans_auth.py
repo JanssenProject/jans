@@ -1,7 +1,5 @@
 import os
 import glob
-import random
-import string
 import uuid
 import shutil
 import json
@@ -160,17 +158,6 @@ class JansAuthInstaller(JettyInstaller):
 
         if Config.profile == SetupProfiles.OPENBANKING:
             self.import_openbanking_certificate()
-
-    def genRandomString(self, N):
-        return ''.join(random.SystemRandom().choice(string.ascii_lowercase
-                                                    + string.ascii_uppercase
-                                                    + string.digits) for _ in range(N))
-
-    def make_salt(self, enforce=False):
-        if not Config.get('pairwiseCalculationKey') or enforce:
-            Config.pairwiseCalculationKey = self.genRandomString(random.randint(20,30))
-        if not Config.get('pairwiseCalculationSalt') or enforce:
-            Config.pairwiseCalculationSalt = self.genRandomString(random.randint(20,30))
 
     def copy_static(self):
         for conf_fn in ('duo_creds.json', 'gplus_client_secrets.json', 'super_gluu_creds.json',

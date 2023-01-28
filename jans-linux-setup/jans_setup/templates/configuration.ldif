@@ -2,6 +2,7 @@ dn: ou=configuration,o=jans
 jansCacheConf: {"cacheProviderType": "%(cache_provider_type)s", "memcachedConfiguration": {"servers":"localhost:11211", "maxOperationQueueLength":100000, "bufferSize":32768, "defaultPutExpiration":60, "connectionFactoryType": "DEFAULT"}, "inMemoryConfiguration": {"defaultPutExpiration":60}, "nativePersistenceConfiguration": {"defaultPutExpiration":60, "defaultCleanupBatchSize": 10000}, "redisConfiguration":{"servers":"localhost:6379", "defaultPutExpiration": 60}}
 jansDocStoreConf: {"documentStoreType":"LOCAL","localConfiguration":{"baseLocation":"/"},"jcaConfiguration":{"serverUrl":"http://localhost:8080/rmi","workspaceName":"default","connectionTimeout":15,"userId":"admin","password":""},"webDavConfiguration":null}
 jansDbAuth: {"type": "auth", "name": null, "level": 0, "priority": 1, "enabled": false, "version": 0, "config": {"configId": "auth_ldap_server",           "servers": ["%(ldap_hostname)s:%(ldaps_port)s"],           "maxConnections": 1000,           "bindDN": "%(ldap_binddn)s",           "bindPassword": "%(encoded_ox_ldap_pw)s",           "useSSL": "true",           "baseDNs": ["ou=people,o=jans"],           "primaryKey": "uid",           "localPrimaryKey": "uid",           "useAnonymousBind": false,           "enabled": false} }
+jansSmtpConf: {"key-store":"%(smtp_jks_fn)s", "key-store-password":"%(smtp_jks_pass_enc)s", "key-store-alias":"%(smtp_alias)s", "signing-algorithm":"%(smtp_signing_alg)s"}
 jansOrgProfileMgt: false
 jansScimEnabled: false
 objectClass: top

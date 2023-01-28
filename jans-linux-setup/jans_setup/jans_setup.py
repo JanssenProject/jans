@@ -29,8 +29,6 @@ if os.path.exists(profile_fn):
 else:
     profile = SetupProfiles.JANS
 
-print("Read 'profile' = {}".format(profile))
-
 os.environ['LC_ALL'] = 'C'
 os.environ['JANS_PROFILE'] = profile
 from setup_app.utils import arg_parser
@@ -350,9 +348,11 @@ def main():
 
             if not Config.installed_instance:
                 jansInstaller.configureSystem()
-                jansInstaller.make_salt()
-                jansAuthInstaller.make_salt()
 
+                if Config.profile == SetupProfiles.JANS or Config.profile == SetupProfiles.DISA_STIG:
+                    jansAuthInstaller.pre_installation()
+
+                jansInstaller.generate_configuration()
 
                 if not base.snap:
                     jreInstaller.start_installation()
@@ -372,13 +372,12 @@ def main():
                 jansInstaller.copy_output()
                 jansInstaller.setup_init_scripts()
                 
-                jansInstaller.obtain_java_cacert_aliases()                
+                jansInstaller.obtain_java_cacert_aliases()
 
                 # Installing jans components
                 if Config.profile == SetupProfiles.JANS or Config.profile == SetupProfiles.DISA_STIG:
-                    jansAuthInstaller.pre_installation()
                     if Config.opendj_install:
-                        openDjInstaller.start_installation()                
+                        openDjInstaller.start_installation()
                     if Config.cb_install:
                         couchbaseInstaller.start_installation()
 
