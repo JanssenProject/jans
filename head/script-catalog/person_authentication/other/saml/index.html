@@ -8724,7 +8724,7 @@ tail -f /opt/tomcat/logs/wrapper.log | grep "Saml"</p>
    Example: true</p>
 <p>5) saml_name_identifier_format - Specify in which format IdP should return a name identifier for the user.
    This property isn't required when saml_use_authn_context has value 'false'
-   Example: urn:oasis:names:tc:SAML:2.0:nameid-format:persistent</p>
+   Example: urn:oasis:names<img alt="🇹🇨" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/1f1f9-1f1e8.svg" title=":tc:" />SAML:2.0:nameid-format:persistent</p>
 <p>6) saml_deployment_type - Specify deployment mode. It's optional property. If this property isn't specified Saml script
    tries to find user in local LDAP by 'Persistent Id' specified in Saml response. If this property has 'map' value Saml script map
    should map 'Persistent Id' to local user account. If this property has 'enroll' value Saml script should add new user to local LDAP

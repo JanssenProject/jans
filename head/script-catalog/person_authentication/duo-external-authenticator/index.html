@@ -8874,7 +8874,7 @@ Jans AS-&gt;&gt;RP: 10. write Jans session cookie</code></pre>
 2.Update the default authentication method to Google Sign-in
 <div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id put-acrs --data /tmp/duo-auth-default.json
 </code></pre></div>
-:memo: <strong>NOTE</strong></p>
+<img alt="📝" class="twemoji" src="https://twemoji.maxcdn.com/v/latest/svg/1f4dd.svg" title=":memo:" /> <strong>NOTE</strong></p>
 <p>To make sure <code>duo</code> has been enabled successfully as a default authentication method, you can check your Janssen Server's OpenID Connect configuration by navigating to the following URL: <code>https://&lt;hostname&gt;/.well-known/openid-configuration</code>. Find <code>"acr_values_supported":</code> and you should see <code>"duo"</code>. </p>
 <h2 id="test-the-feature">Test the feature<a class="headerlink" href="#test-the-feature" title="Permanent link">#</a></h2>
 <p>To test , enter the complete URL for authorization in a browser or create a simple web page with a link that simulates the user sign-in attempt. If the server is configured properly, the first page for the selected authentication method will be displayed to the user.</p>
