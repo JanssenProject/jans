@@ -54,10 +54,17 @@
 		</repository>
 	</repositories>	
 
+	<scm>
+		<url>https://github.com/JanssenProject/jans-eleven</url>
+		<connection>scm:git:git://github.com/JanssenProject/jans-eleven.git</connection>
+		<developerConnection>scm:git:git@github.com:v/jans-eleven.git</developerConnection>
+	</scm>
+
 	<modules>
 		<module>model</module>
 		<module>client</module>
 		<module>server</module>
+		<module>server-fips</module>
 	</modules>
 	
 	<dependencyManagement>
