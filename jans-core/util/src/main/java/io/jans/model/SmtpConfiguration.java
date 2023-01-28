@@ -27,9 +27,9 @@ public class SmtpConfiguration implements java.io.Serializable {
 
     @JsonProperty("port")
     private int port;
-
-    @JsonProperty("requires_ssl")
-    private boolean requiresSsl;
+    
+    @JsonProperty("connect-protection")
+    private SmtpConnectProtectionType connectProtection;    
 
     @JsonProperty("trust_host")
     private boolean serverTrust;
@@ -52,6 +52,22 @@ public class SmtpConfiguration implements java.io.Serializable {
     @Transient
     @JsonIgnore
     private String passwordDecrypted;
+    
+    @JsonProperty("key-store")
+    private String keyStore;
+
+    @JsonProperty("key-store-password")
+    private String keyStorePassword;
+
+    @Transient
+    @JsonIgnore
+    private String keyStorePasswordDecrypted;
+
+    @JsonProperty("key-store-alias")
+    private String keyStoreAlias;
+
+    @JsonProperty("signing-algorithm")
+    private String signingAlgorithm;
 
     public String getHost() {
         return host;
@@ -68,14 +84,14 @@ public class SmtpConfiguration implements java.io.Serializable {
     public void setPort(int port) {
         this.port = port;
     }
-
-    public boolean isRequiresSsl() {
-        return requiresSsl;
+    
+    public SmtpConnectProtectionType getConnectProtection() {
+        return connectProtection;
     }
 
-    public void setRequiresSsl(boolean requiresSsl) {
-        this.requiresSsl = requiresSsl;
-    }
+    public void setConnectProtection(SmtpConnectProtectionType connectProtection) {
+        this.connectProtection = connectProtection;
+    }    
 
     public boolean isServerTrust() {
         return serverTrust;
@@ -138,5 +154,49 @@ public class SmtpConfiguration implements java.io.Serializable {
     public void setPasswordDecrypted(String passwordDecrypted) {
         this.passwordDecrypted = passwordDecrypted;
     }
+    
+    public SmtpConnectProtectionType[] getConnectProtectionList() {
+        return SmtpConnectProtectionType.values();
+    }
 
+    public String getKeyStore() {
+        return keyStore;
+    }
+
+    public void setKeyStore(String keyStore) {
+        this.keyStore = keyStore;
+    }
+
+    public String getKeyStorePassword() {
+        return keyStorePassword;
+    }
+
+    public void setKeyStorePassword(String keyStorePassword) {
+        this.keyStorePassword = keyStorePassword;
+    }
+
+    public String getKeyStorePasswordDecrypted() {
+        return keyStorePasswordDecrypted;
+    }
+
+    public void setKeyStorePasswordDecrypted(String keyStorePasswordDecrypted) {
+        this.keyStorePasswordDecrypted = keyStorePasswordDecrypted;
+    }
+
+    public String getKeyStoreAlias() {
+        return keyStoreAlias;
+    }
+
+    public void setKeyStoreAlias(String keyStoreAlias) {
+        this.keyStoreAlias = keyStoreAlias;
+    }
+
+    public String getSigningAlgorithm() {
+        return signingAlgorithm;
+    }
+
+    public void setSigningAlgorithm(String signingAlgorithm) {
+        this.signingAlgorithm = signingAlgorithm;
+    }
+    
 }
