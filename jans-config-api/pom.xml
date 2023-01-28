@@ -66,6 +66,7 @@
 		<module>common</module>
 		<module>shared</module>
 		<module>server</module>
+		<module>server-fips</module>
 		<module>plugins</module>
 	</modules>
 
