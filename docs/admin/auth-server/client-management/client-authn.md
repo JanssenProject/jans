@@ -35,8 +35,6 @@ mechanisms. This is primarily because when using shared key based authentication
 transferred between client and authorization server at some point during the authentication process. There are more 
 reasons to prefer private key over shared secret as listed in this [section](#using-private-key-for-authentication)
 
-TODO: add section for why private key is better. Like [here](https://connect2id.com/products/server/docs/guides/oauth-client-authentication#private-key-auth-is-more-secure)
-
 Characteristics table below shows side-by-side comparison of various supported authentication methods.
 
 | Method                        | Secret Not Sent in Clear |      Signed      | Only client has secret | Token Expiry     |
@@ -112,7 +110,9 @@ TODO: add more details
 
 ## none
 
-TODO: add more details
+The Client does not authenticate itself at the Token Endpoint, either because it uses only the Implicit Flow (and so 
+does not use the Token Endpoint) or because it is a Public Client with no Client Secret or other authentication 
+mechanism.
 
 ## Using Private Key for Authentication
 
