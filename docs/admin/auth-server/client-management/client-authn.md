@@ -32,7 +32,10 @@ Authentication methods can be broadly categorised in two categories:
 
 While shared key based authentication is simpler to implement, it is less secure than private key based authentication
 mechanisms. This is primarily because when using shared key based authentication methods, the client secret is 
-transferred between client and authorization server at some point during the authentication process. 
+transferred between client and authorization server at some point during the authentication process. There are more 
+reasons to prefer private key over shared secret as listed in this [section](#using-private-key-for-authentication)
+
+TODO: add section for why private key is better. Like [here](https://connect2id.com/products/server/docs/guides/oauth-client-authentication#private-key-auth-is-more-secure)
 
 Characteristics table below shows side-by-side comparison of various supported authentication methods.
 
@@ -110,6 +113,18 @@ TODO: add more details
 ## none
 
 TODO: add more details
+
+## Using Private Key for Authentication
+
+### Security Features Of Private Key Authentication
+
+- **Secure Storage**: Hardware Security Module(HSM) or Trusted Platform Module(TPM) can be used to securely store private key 
+  and sign using it. These modules make it impossible to access private key from outside.
+- **Smaller footprint**: Unlike shared secret, where client secret resides on authorization server as well as client, 
+  the private key only exists on client. This reduced footprint reduces potential risks.
+- **Limited Time Validity**: JWT can be set to expire after a certain duration. Similarly, client certificates can be 
+  made to expire. This makes it harder to execute replay attacks using a compromised token or certificate.
+
 
 ## Want to contribute?
 
