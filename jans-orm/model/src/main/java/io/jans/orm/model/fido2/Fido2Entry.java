@@ -160,9 +160,9 @@ public class Fido2Entry extends BaseEntry {
         this.ttl = 0;
 	}
 
-	public void setExpiration() {
+	public void setExpiration(int expirationInSeconds) {
         if (creationDate != null) {
-            final int expiration = 90;
+            final int expiration = expirationInSeconds;
             Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
             calendar.setTime(creationDate);
             calendar.add(Calendar.SECOND, expiration);

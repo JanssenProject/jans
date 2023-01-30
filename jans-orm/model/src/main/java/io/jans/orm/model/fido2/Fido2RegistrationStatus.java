@@ -13,7 +13,7 @@ import io.jans.orm.annotation.AttributeEnum;
 
 public enum Fido2RegistrationStatus implements AttributeEnum {
 
-    pending("pending", "Pending"), registered("registered", "Registered"), compromised("compromised", "Compromised");
+    pending("pending", "Pending"), registered("registered", "Registered"), compromised("compromised", "Compromised"), canceled("canceled", "Canceled");
 
     private String value;
     private String displayName;
