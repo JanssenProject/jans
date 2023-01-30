@@ -13,27 +13,18 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import jakarta.ejb.DependsOn;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.event.Event;
-import jakarta.enterprise.event.Observes;
-import jakarta.inject.Inject;
-import jakarta.inject.Named;
-
 import org.slf4j.Logger;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.Maps;
 
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.common.model.session.SessionId;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.uma.persistence.UmaResource;
 import io.jans.as.persistence.model.Par;
 import io.jans.as.persistence.model.Scope;
-import io.jans.as.common.model.session.SessionId;
-import io.jans.as.server.model.fido.u2f.DeviceRegistration;
-import io.jans.as.server.model.fido.u2f.RegisterRequestMessageLdap;
 import io.jans.as.server.model.ldap.ClientAuthorization;
 import io.jans.as.server.model.ldap.TokenEntity;
 import io.jans.as.server.uma.authorization.UmaPCT;
@@ -49,6 +40,12 @@ import io.jans.service.cdi.event.CleanerEvent;
 import io.jans.service.cdi.event.Scheduled;
 import io.jans.service.timer.event.TimerEvent;
 import io.jans.service.timer.schedule.TimerSchedule;
+import jakarta.ejb.DependsOn;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Event;
+import jakarta.enterprise.event.Observes;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 /**
  * @author Yuriy Zabrovarnyy
