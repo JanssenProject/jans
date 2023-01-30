@@ -195,6 +195,7 @@ public class AttestationService {
 		log.debug("Attestation verify {}", params);
 
 		boolean oneStep = commonVerifiers.isSuperGluuOneStepMode(params);
+		boolean cancelRequest = commonVerifiers.isSuperGluuOneStepMode(params);
 
 		// Verify if there are mandatory request parameters
 		commonVerifiers.verifyBasicPayload(params);
@@ -268,6 +269,12 @@ public class AttestationService {
         } else {
         	registrationEntry.clearExpiration();
         }
+
+        // Support cancel request
+        if (cancelRequest) {
+        	registrationEntry.setRegistrationStatus(Fido2RegistrationStatus.canceled);
+        }
+        
 		registrationPersistenceService.update(registrationEntry);
 
 		// If sessionStateId is not empty update session

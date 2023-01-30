@@ -212,6 +212,7 @@ public class AssertionService {
 		log.debug("authenticateResponse {}", params);
 
 		boolean oneStep = commonVerifiers.isSuperGluuOneStepMode(params);
+		boolean cancelRequest = commonVerifiers.isSuperGluuOneStepMode(params);
 
 		// Verify if there are mandatory request parameters
 		commonVerifiers.verifyBasicPayload(params);
@@ -272,6 +273,12 @@ public class AssertionService {
 		int unfinishedRequestExpiration = appConfiguration.getFido2Configuration().getAuthenticationHistoryExpiration();
 		authenticationEntity.setExpiration(unfinishedRequestExpiration);
 
+
+        // Support cancel request
+        if (cancelRequest) {
+        	authenticationEntity.setAuthenticationStatus(Fido2AuthenticationStatus.canceled);
+        }
+
 		authenticationPersistenceService.update(authenticationEntity);
 
 		// Store actual counter value in separate attribute. Note: Fido2 not update
@@ -284,7 +291,7 @@ public class AssertionService {
         if (StringHelper.isNotEmpty(sessionStateId)) {
             log.debug("There is session id. Setting session id attributes");
 
-            userSessionIdService.updateUserSessionIdOnFinishRequest(sessionStateId, registrationEntry.getUserInum(), registrationEntry, false, oneStep);
+            userSessionIdService.updateUserSessionIdOnFinishRequest(sessionStateId, registrationEntry.getUserInum(), registrationEntry, authenticationEntity, false, oneStep);
         }
 
 		// Create result object
