@@ -7,6 +7,8 @@
 package io.jans.as.server.ssa.ws.rs;
 
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.common.model.ssa.Ssa;
+import io.jans.as.common.model.ssa.SsaState;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.ssa.SsaErrorResponseType;
 import io.jans.as.server.model.session.SessionClient;
@@ -20,7 +22,9 @@ import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
 
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 /**
@@ -41,6 +45,9 @@ public class SsaRestWebServiceValidator {
 
     @Inject
     private ScopeService scopeService;
+
+    @Inject
+    private SsaService ssaService;
 
     /**
      * Get client from session
@@ -86,5 +93,27 @@ public class SsaRestWebServiceValidator {
         if (scopeList.stream().noneMatch(scopes::contains)) {
             throw errorResponseFactory.createWebApplicationException(Response.Status.UNAUTHORIZED, SsaErrorResponseType.UNAUTHORIZED_CLIENT, "Unauthorized client");
         }
+    }
+
+    /**
+     * Find SSA based on "jti" and validated
+     * <p>
+     * This method returns {@link WebApplicationException} with status 422 if the SSA does not exist or if it is in
+     * state (expired, used or revoked).
+     * Otherwise it will return the valid SSA
+     * </p>
+     *
+     * @param jti Unique identifier
+     * @return Ssa valid
+     */
+    public Ssa getValidSsaByJti(String jti) {
+        Ssa ssa = ssaService.findSsaByJti(jti);
+        if (ssa == null ||
+                Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTime().after(ssa.getExpirationDate()) ||
+                !ssa.getState().equals(SsaState.ACTIVE)) {
+            log.warn("Ssa jti: '{}' is null or status (expired, used or revoked)", jti);
+            throw new WebApplicationException(Response.status(422).build());
+        }
+        return ssa;
     }
 }

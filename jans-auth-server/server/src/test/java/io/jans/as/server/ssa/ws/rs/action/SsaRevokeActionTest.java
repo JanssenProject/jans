@@ -119,7 +119,7 @@ public class SsaRevokeActionTest {
         assertEquals(ssa.getState(), SsaState.REVOKED);
 
         verify(log).info(anyString(), eq(jti), eq(SsaState.REVOKED.getValue()));
-        verify(ssaContextBuilder).buildModifySsaResponseContext(any(), any(), any(), any(), any());
+        verify(ssaContextBuilder).buildModifySsaResponseContext(any(), any());
         verify(modifySsaResponseService).revoke(any(), any());
         verifyNoMoreInteractions(ssaService, log, errorResponseFactory);
     }
