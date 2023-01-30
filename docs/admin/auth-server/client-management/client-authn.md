@@ -2,6 +2,7 @@
 tags:
   - administration
   - client
+  - authentication
 ---
 
 # Client Authentication
@@ -93,22 +94,70 @@ of OpenId Connect specification. Clients should sign and encrypt JWT as per thei
 
 ### How To Use
 
-- download Jar from `https://connect2id.com/assets/products/nimbus-jose-jwt/download/json-web-key-generator.jar`
-- Run command `java -jar json-web-key-generator.jar -t RSA -s 2048 -i 1 -u sig -S -p` and store full key as
-  `key_pair.jwk` and public key separately. You'll need to supply this public key to Janssen Server at the time of 
-  client regirstration.
-- Create your JWT payload. For example, 
-  ```json
-  {
-  "jti":"myJWTId001",
-  "sub":"38174623762",
-  "iss":"38174623762",
-  "aud":"http://localhost:4000/api/auth/token/direct/24523138205",
-  "exp":1536165540,
-  "iat":1536132708
-  }
-  ```
-- create JWT using JWK and payload
+- Create a private key
+
+    ```shell
+    openssl genrsa -out private-key.pem 2048
+    ```
+
+- Extract public key from private key
+
+    ```shell
+    openssl rsa -in private-key.pem -pubout -outform PEM -out public-key.pem
+    ```
+
+    During the client registration or via client configuration settings, the public key generated above should be attached
+    to the client on authorization server.
+
+- Create header payload. For example,
+
+    ```json
+    {
+    "alg": "RS256",
+    "typ": "JWT"
+    }
+    ```
+
+    To create JWT we need header in base64 encoded format. Use commands below and to convert header in base64 encoded string:
+  
+    ```shell
+    echo -n 'header-json' | base64 | sed s/\+/-/ | sed -E s/=+$//
+    ```
+
+- Create your JWT payload. For example,
+
+    ```json
+    {
+    "jti":"myJWTId001",
+    "sub":"38174623762",
+    "iss":"38174623762",
+    "aud":"http://localhost:4000/api/auth/token/direct/24523138205",
+    "exp":1536165540,
+    "iat":1536132708
+    }
+    ```
+
+    To create JWT we need the payload in base64 encoded format. Use commands below and to convert the payload in base64 
+    encoded string:
+  
+    ```shell
+    echo -n 'payload-json' | base64 | sed s/\+/-/ | sed -E s/=+$//
+    ```
+
+- Use the encoded header and payload to create the signature. The signature would be in form of an encoded string.
+
+    ```shell
+    echo -n "encoded-header.encoded-payload" | openssl dgst -sha256 -binary -sign jwtRSA256-private.pem  | openssl enc -base64 | tr -d '\n=' | tr -- '+/' '-_'
+    ```
+
+- Put together encoded strings for header, payload and signature in format below to completely form JWT.
+
+    ```json
+    encoded-header.encoded-payload.encoded-signature
+    ```
+
+- Use this JWT in request to the server. As mentioned earlier, the server must have public key registered as part of 
+  the client registration process in order to verify the JWT in the request.
 
 ### Client Configuration For Using private_key_jwt
 
