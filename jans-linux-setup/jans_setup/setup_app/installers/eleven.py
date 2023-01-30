@@ -2,18 +2,28 @@ import os
 import glob
 import shutil
 
+from pathlib import Path
+
 from setup_app import paths
 from setup_app.utils import base
 from setup_app.utils.package_utils import packageUtils
-from setup_app.static import AppType, InstallOption
+from setup_app.static import AppType, InstallOption, SetupProfiles
 from setup_app.config import Config
 from setup_app.installers.jetty import JettyInstaller
 
 
 class ElevenInstaller(JettyInstaller):
 
+#    source_files = [
+#            (os.path.join(Config.dist_jans_dir, 'jans-eleven.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-eleven-server/{0}/jans-eleven-server-{0}.war').format(base.current_app.app_info['ox_version']))
+#            ]
+
     source_files = [
-            (os.path.join(Config.dist_jans_dir, 'jans-eleven.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-eleven-server/{0}/jans-eleven-server-{0}.war').format(base.current_app.app_info['ox_version']))
+            (os.path.join(Config.dist_jans_dir, 'jans-eleven.war'), os.path.join(base.current_app.app_info['BASE_SERVER'], '_out/eleven.war'))
+            ]
+
+    source_fips_files = [
+            (os.path.join(Config.dist_jans_dir, 'jans-eleven-fips.war'), os.path.join(base.current_app.app_info['BASE_SERVER'], '_out/jans-eleven-server-fips.war'))
             ]
 
     def __init__(self):
@@ -51,7 +61,10 @@ class ElevenInstaller(JettyInstaller):
 
         self.logIt("Copying {} into jetty webapps folder...".format(self.source_files[0][0]))
         jettyServiceWebapps = os.path.join(self.jetty_base, self.service_name, 'webapps')
-        self.copyFile(self.source_files[0][0], jettyServiceWebapps)
+
+        src_file = self.source_files[0][0] if Config.profile != SetupProfiles.DISA_STIG else self.source_fips_files[0][0]
+        self.copyFile(src_file, os.path.join(jettyServiceWebapps, '%s%s' % (self.service_name, Path(self.source_files[0][0]).suffix)))
+
         self.enable()
 
     def render_import_templates(self):

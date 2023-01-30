@@ -8,6 +8,7 @@ import zipfile
 import re
 
 from urllib.parse import urlparse
+from pathlib import Path
 
 from setup_app import paths
 from setup_app.utils import base
@@ -17,14 +18,24 @@ from setup_app.static import AppType, InstallOption, SetupProfiles
 
 class JansAuthInstaller(JettyInstaller):
 
+#    source_files = [
+#                    (os.path.join(Config.dist_jans_dir, 'jans-auth.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-auth-server/{0}/jans-auth-server-{0}.war'.format(base.current_app.app_info['ox_version']))),
+#                    (os.path.join(Config.dist_jans_dir, 'jans-auth-client-jar-with-dependencies.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-auth-client/{0}/jans-auth-client-{0}-jar-with-dependencies.jar'.format(base.current_app.app_info['ox_version'])))
+#                    ]
+
+#    source_fips_files = [
+#                    (os.path.join(Config.dist_jans_dir, 'jans-auth-fips.war'), "http://192.168.64.4/jans/jans-auth-server-fips.war"),
+#                    (os.path.join(Config.dist_jans_dir, 'jans-auth-client-jar-without-provider-dependencies.jar'), "http://192.168.64.4/jans/jans-auth-client-jar-without-provider-dependencies.jar")
+#                    ]
+
     source_files = [
-                    (os.path.join(Config.dist_jans_dir, 'jans-auth.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-auth-server/{0}/jans-auth-server-{0}.war'.format(base.current_app.app_info['ox_version']))),
-                    (os.path.join(Config.dist_jans_dir, 'jans-auth-client-jar-with-dependencies.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-auth-client/{0}/jans-auth-client-{0}-jar-with-dependencies.jar'.format(base.current_app.app_info['ox_version'])))
+                    (os.path.join(Config.dist_jans_dir, 'jans-auth.war'), os.path.join(base.current_app.app_info['BASE_SERVER'], '_out/jans-auth-server.war')),
+                    (os.path.join(Config.dist_jans_dir, 'jans-auth-client-jar-with-dependencies.jar'), os.path.join(base.current_app.app_info['BASE_SERVER'], '_out/jans-auth-client-jar-with-dependencies.jar'))
                     ]
 
     source_fips_files = [
-                    (os.path.join(Config.dist_jans_dir, 'jans-auth-fips.war'), "http://192.168.64.4/jans/jans-auth-server-fips.war"),
-                    (os.path.join(Config.dist_jans_dir, 'jans-auth-client-jar-without-provider-dependencies.jar'), "http://192.168.64.4/jans/jans-auth-client-jar-without-provider-dependencies.jar")
+                    (os.path.join(Config.dist_jans_dir, 'jans-auth-fips.war'), os.path.join(base.current_app.app_info['BASE_SERVER'], '_out/jans-auth-server-fips.war')),
+                    (os.path.join(Config.dist_jans_dir, 'jans-auth-client-jar-without-provider-dependencies.jar'), os.path.join(base.current_app.app_info['BASE_SERVER'], '_out/jans-auth-client-jar-without-provider-dependencies.jar'))
                     ]
 
     def __init__(self):
@@ -63,12 +74,14 @@ class JansAuthInstaller(JettyInstaller):
 
     def install(self):
         self.init_key_gen()
-    
+
         self.logIt("Copying auth.war into jetty webapps folder...")
 
         self.installJettyService(self.jetty_app_configuration[self.service_name], True)
-        self.copyFile(self.source_files[0][0], self.jetty_service_webapps)
-        
+
+        src_file = self.source_files[0][0] if Config.profile != SetupProfiles.DISA_STIG else self.source_fips_files[0][0]
+        self.copyFile(src_file, os.path.join(self.jetty_service_webapps, '%s%s' % (self.service_name, Path(self.source_files[0][0]).suffix)))        
+
         self.setup_agama()
         self.enable()
 

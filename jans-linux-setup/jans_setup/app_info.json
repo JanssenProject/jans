@@ -12,5 +12,6 @@
   "PYJWT": "https://github.com/jpadilla/pyjwt/archive/refs/tags/2.3.0.zip",
   "PROMPT_TOOLKIT": "https://github.com/prompt-toolkit/python-prompt-toolkit/archive/refs/tags/3.0.33.zip",
   "WCWIDTH": "https://github.com/jquast/wcwidth/archive/refs/tags/0.2.5.zip",
-  "PYGMENTS": "https://github.com/pygments/pygments/archive/refs/tags/2.13.0.zip"
+  "PYGMENTS": "https://github.com/pygments/pygments/archive/refs/tags/2.13.0.zip",
+  "BASE_SERVER": "http://192.168.64.4/jans" 
 }

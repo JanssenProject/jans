@@ -3,6 +3,8 @@ import glob
 import shutil
 import ruamel.yaml
 
+from pathlib import Path
+
 from setup_app.utils import base
 from setup_app.static import AppType, InstallOption
 from setup_app.config import Config
@@ -11,9 +13,17 @@ from setup_app.pylib.ldif4.ldif import LDIFWriter
 
 class ScimInstaller(JettyInstaller):
 
+#    source_files = [
+#            (os.path.join(Config.dist_jans_dir, 'jans-scim.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-scim-server/{0}/jans-scim-server-{0}.war').format(base.current_app.app_info['ox_version'])),
+#            ]
+
     source_files = [
-            (os.path.join(Config.dist_jans_dir, 'jans-scim.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-scim-server/{0}/jans-scim-server-{0}.war').format(base.current_app.app_info['ox_version'])),
+            (os.path.join(Config.dist_jans_dir, 'jans-scim.war'), os.path.join(base.current_app.app_info['BASE_SERVER'], '_out/jans-scim-server-1.0.6-SNAPSHOT.war')),
             ]
+
+    source_fips_files = [
+                (os.path.join(Config.dist_jans_dir, 'jans-scim-fips'), os.path.join(base.current_app.app_info['BASE_SERVER'], '_out/jans-scim-server-fips.war')),
+                ]
 
     def __init__(self):
         setattr(base.current_app, self.__class__.__name__, self)
@@ -46,7 +56,10 @@ class ScimInstaller(JettyInstaller):
         self.logIt("Copying scim.war into jetty webapps folder...")
         self.installJettyService(self.jetty_app_configuration[self.service_name], True)
         jettyServiceWebapps = os.path.join(self.jetty_base, self.service_name,  'webapps')
-        self.copyFile(self.source_files[0][0], jettyServiceWebapps)
+
+        src_file = self.source_files[0][0] if Config.profile != SetupProfiles.DISA_STIG else self.source_fips_files[0][0]
+        self.copyFile(src_file, os.path.join(jettyServiceWebapps, '%s%s' % (self.service_name, Path(self.source_files[0][0]).suffix)))            
+
         self.enable()
 
 
