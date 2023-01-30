@@ -6,7 +6,7 @@ import ruamel.yaml
 from pathlib import Path
 
 from setup_app.utils import base
-from setup_app.static import AppType, InstallOption
+from setup_app.static import AppType, InstallOption, SetupProfiles
 from setup_app.config import Config
 from setup_app.installers.jetty import JettyInstaller
 from setup_app.pylib.ldif4.ldif import LDIFWriter
