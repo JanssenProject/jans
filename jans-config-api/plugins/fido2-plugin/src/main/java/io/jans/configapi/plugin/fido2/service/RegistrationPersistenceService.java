@@ -10,17 +10,20 @@ import io.jans.as.common.service.common.UserService;
 import jakarta.enterprise.inject.Specializes;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
-
+import jakarta.enterprise.context.ApplicationScoped;
 /**
  * Override RegistrationPersistenceService bean
  * @author Yuriy Movchan
  * @version Jun 01, 2023
  */
-@Specializes
+@ApplicationScoped
 public class RegistrationPersistenceService extends io.jans.as.common.service.common.fido2.RegistrationPersistenceService {
 
-    @Inject
-    @Named("userFido2Srv")
-    private UserService userService;
+    public String getUserInum(String userName)
+    {
+    	return userService.getUserInum(userName);
+    }
 
+    @Inject
+	private  UserService userService;
 }
