@@ -91,6 +91,25 @@ further described in OpenId Connect specification, [section 9](https://openid.ne
 Janssen server implements signing and encryption mechanism following the guidelines in [section 10](https://openid.net/specs/openid-connect-core-1_0.html#SigEnc) 
 of OpenId Connect specification. Clients should sign and encrypt JWT as per their security requirements. 
 
+### How To Use
+
+- download Jar from `https://connect2id.com/assets/products/nimbus-jose-jwt/download/json-web-key-generator.jar`
+- Run command `java -jar json-web-key-generator.jar -t RSA -s 2048 -i 1 -u sig -S -p` and store full key as
+  `key_pair.jwk` and public key separately. You'll need to supply this public key to Janssen Server at the time of 
+  client regirstration.
+- Create your JWT payload. For example, 
+  ```json
+  {
+  "jti":"myJWTId001",
+  "sub":"38174623762",
+  "iss":"38174623762",
+  "aud":"http://localhost:4000/api/auth/token/direct/24523138205",
+  "exp":1536165540,
+  "iat":1536132708
+  }
+  ```
+- create JWT using JWK and payload
+
 ### Client Configuration For Using private_key_jwt
 
 Janssen Server clients can specify signing and encryption keys using client configuration. Clients can either specify
