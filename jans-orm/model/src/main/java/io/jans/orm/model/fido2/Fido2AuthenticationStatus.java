@@ -17,7 +17,7 @@ import io.jans.orm.annotation.AttributeEnum;
  */
 public enum Fido2AuthenticationStatus implements AttributeEnum {
 
-	pending("pending", "Pending"), authenticated("authenticated", "Authenticated");
+	pending("pending", "Pending"), authenticated("authenticated", "Authenticated"), canceled("canceled", "Canceled");
 
     private String value;
     private String displayName;
