@@ -63,7 +63,7 @@ public class SsaGetActionTest {
         assertEquals(response.getStatus(), Response.Status.OK.getStatusCode());
         verify(log).debug(anyString(), any(), any());
         verify(errorResponseFactory).validateFeatureEnabled(any());
-        verify(ssaContextBuilder).buildModifySsaResponseContext(any(), any(), any(), any(), any());
+        verify(ssaContextBuilder).buildModifySsaResponseContext(any(), any());
         verify(ssaJsonService).jsonArrayToString(any());
         verify(modifySsaResponseService).get(any(), any());
         verifyNoMoreInteractions(log, errorResponseFactory);
