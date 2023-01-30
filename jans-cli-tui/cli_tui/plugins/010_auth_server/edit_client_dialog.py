@@ -77,6 +77,8 @@ class EditClientDialog(JansGDialog, DialogUtils):
         self.data = data
         self.title = title
         self.nav_dialog_width = int(self.myparent.dialog_width*1.1)
+        self.client_scopes_entries=[]
+        self.fill_client_scopes()
         self.prepare_tabs()
         self.create_window()
 
@@ -196,12 +198,12 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
 
     def fill_client_scopes(self):
-        self.client_scopes.entries = []
         for scope_dn in self.data.get('scopes', []):
             scope = self.get_scope_by_inum(scope_dn)
             if scope:
                 label = scope.get('displayName') or scope.get('inum') or scope_dn
-                self.client_scopes.add_label(scope_dn, label)
+                if [scope_dn, label] not in self.client_scopes_entries:
+                    self.client_scopes_entries.append([scope_dn, label])
 
     def prepare_tabs(self) -> None:
         """Prepare the tabs for Edil Client Dialogs
@@ -329,17 +331,18 @@ class EditClientDialog(JansGDialog, DialogUtils):
                                 jans_help=_("Add Scopes"), 
                                 handler=self.add_scopes)
                                 ])
-
+        
 
         self.client_scopes = JansLabelContainer(
                     title=_('Scopes'),
                     width=self.nav_dialog_width - 26,
                     on_display=self.myparent.data_display_dialog,
                     on_delete=self.delete_scope,
-                    buttonbox=add_scope_button
+                    buttonbox=add_scope_button,
+                    entries = self.client_scopes_entries,
                     )
 
-        self.fill_client_scopes()
+        
 
         basic_tab_widgets.append(self.client_scopes)
 
@@ -863,10 +866,9 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
     def delete_scope(self, scope: list) -> None:
 
-
         def do_delete_scope(dialog):
             self.data['scopes'].remove(scope[0])
-            self.fill_client_scopes()
+            self.client_scopes_entries.remove([scope[0],scope[1]])
 
         dialog = self.myparent.get_confirm_dialog(
                     message=_("Are you sure want to delete Scope:\n {} ?".format(scope[1])),
