@@ -1195,4 +1195,10 @@
             <class name="io.jans.as.client.ssa.SsaRevokeTest"/>
         </classes>
     </test>
+
+    <test name="SSA get JWT test (HTTP)" enabled="true">
+        <classes>
+            <class name="io.jans.as.client.ssa.SsaGetJwtTest"/>
+        </classes>
+    </test>
 </suite>

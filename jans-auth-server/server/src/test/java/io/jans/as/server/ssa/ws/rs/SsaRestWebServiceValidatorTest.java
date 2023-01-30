@@ -1,6 +1,8 @@
 package io.jans.as.server.ssa.ws.rs;
 
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.common.model.ssa.Ssa;
+import io.jans.as.common.model.ssa.SsaState;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.ssa.SsaErrorResponseType;
 import io.jans.as.model.ssa.SsaScopeType;
@@ -17,8 +19,10 @@ import org.slf4j.Logger;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.anyString;
@@ -42,6 +46,9 @@ public class SsaRestWebServiceValidatorTest {
 
     @Mock
     private ScopeService scopeService;
+
+    @Mock
+    private SsaService ssaService;
 
     @Test
     public void getClientFromSession_sessionClient_validClient() {
@@ -196,5 +203,53 @@ public class SsaRestWebServiceValidatorTest {
         verify(scopeService).getScopeIdsByDns(anyList());
         verify(errorResponseFactory).createWebApplicationException(any(), any(), anyString());
         verifyNoMoreInteractions(errorResponseFactory);
+    }
+
+    @Test
+    public void getValidSsaByJti_validJti_validSsa() {
+        String jti = "test-jti";
+        Ssa ssa = new Ssa();
+        ssa.setExpirationDate(Date.from(ZonedDateTime.now().plusHours(24).toInstant()));
+        ssa.setState(SsaState.ACTIVE);
+        when(ssaService.findSsaByJti(jti)).thenReturn(ssa);
+
+        Ssa result = ssaRestWebServiceValidator.getValidSsaByJti(jti);
+        assertNotNull(result, "ssa is null");
+        verifyNoInteractions(log);
+    }
+
+    @Test
+    public void getValidSsaByJti_ssaNull_422Status() {
+        String jti = "test-jti";
+        when(ssaService.findSsaByJti(jti)).thenReturn(null);
+
+        WebApplicationException ex = expectThrows(WebApplicationException.class, () -> ssaRestWebServiceValidator.getValidSsaByJti(jti));
+        assertEquals(ex.getResponse().getStatus(), 422);
+        verify(log).warn(anyString(), eq(jti));
+    }
+
+    @Test
+    public void getValidSsaByJti_ssaExpired_422Status() {
+        String jti = "test-jti";
+        Ssa ssa = new Ssa();
+        ssa.setExpirationDate(Date.from(ZonedDateTime.now().minusHours(24).toInstant()));
+        when(ssaService.findSsaByJti(jti)).thenReturn(ssa);
+
+        WebApplicationException ex = expectThrows(WebApplicationException.class, () -> ssaRestWebServiceValidator.getValidSsaByJti(jti));
+        assertEquals(ex.getResponse().getStatus(), 422);
+        verify(log).warn(anyString(), eq(jti));
+    }
+
+    @Test
+    public void getValidSsaByJti_ssaWithUsedStatus_422Status() {
+        String jti = "test-jti";
+        Ssa ssa = new Ssa();
+        ssa.setExpirationDate(Date.from(ZonedDateTime.now().plusHours(24).toInstant()));
+        ssa.setState(SsaState.USED);
+        when(ssaService.findSsaByJti(jti)).thenReturn(ssa);
+
+        WebApplicationException ex = expectThrows(WebApplicationException.class, () -> ssaRestWebServiceValidator.getValidSsaByJti(jti));
+        assertEquals(ex.getResponse().getStatus(), 422);
+        verify(log).warn(anyString(), eq(jti));
     }
 }

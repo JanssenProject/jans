@@ -4388,7 +4388,20 @@ paths:
       tags:
         - SSA
       summary: Create SSA.
-      description: Create `SSA` for the organization with `expiration` (optional).
+      description: |-
+        # Create SSA for the organization with `expiration` (optional).
+        ----
+        
+        **Security: Bearer Auth**
+        
+        Provide your bearer token in the Authorization header when making requests to protected resources.
+        
+        Example: `Authorization: Bearer {{your-access-token}}`
+
+        **Security: OAuth 2.0**
+        
+        Scopes:
+        - `https://jans.io/auth/ssa.admin` - **SSA Admin**, You can create `SSA`.
       operationId: post-register-ssa
       security:
         - bearer: [ ]
@@ -4454,12 +4467,26 @@ paths:
           $ref: '#/components/responses/UnauthorizedSSA'
         500:
           $ref: '#/components/responses/InternalServerErrorSSA'
-
     get:
       tags:
         - SSA
       summary: Get list of SSAs
-      description: Get all `SSA` list with filters.
+      description: |-
+        # Get all SSA list based on `jti` or `org_id`.
+        ----
+
+        **Security: Bearer Auth**
+
+        Provide your bearer token in the Authorization header when making requests to protected resources.
+
+        Example: `Authorization: Bearer {{your-access-token}}`
+
+        **Security: OAuth 2.0**
+
+        Scopes:
+        - `https://jans.io/auth/ssa.admin` - **SSA Admin**, Retrieves all `SSA`
+        - `https://jans.io/auth/ssa.portal` - **SSA Portal**, Retrieves all `SSA`
+        - `https://jans.io/auth/ssa.developer` - **SSA Developer**, Retrieves the `SSA` created by the same client
       operationId: get-ssa
       security:
         - bearer: [ ]
@@ -4468,7 +4495,7 @@ paths:
             type: string
           in: query
           name: jti
-          description: JTI
+          description: Unique Identifier
         - schema:
             type: integer
           in: query
@@ -4537,19 +4564,21 @@ paths:
           $ref: '#/components/responses/UnauthorizedSSA'
         500:
           $ref: '#/components/responses/InternalServerErrorSSA'
-
     head:
       tags:
         - SSA
       summary: Validate SSA
-      description: Validates that a given SSA JTI exists and is valid.
-      operationId: head-ssa
+      description: |-
+        # Validates that a given SSA `jti` exists and is valid
+        ----
+        
+        This endpoint does not have any security, it is an open endpoint.
       parameters:
         - schema:
             type: string
           in: header
           name: jti
-          description: JTI
+          description: Unique Identifier
           required: true
       responses:
         200:
@@ -4558,15 +4587,27 @@ paths:
           description: Not found.
         500:
           $ref: '#/components/responses/InternalServerErrorSSA'
-
     delete:
       tags:
         - SSA
       summary: Revoke SSA
       description: |-
-        Revokes existing active SSA based on `jti` or `org_id`.
+        # Revokes existing active SSA based on `jti` or `org_id`
+        ----
+        
         - `jti` - for delete only one SSA, the specified by `jti` 
         - `org_id` - for delete all SSA of the specified organization.
+        
+        **Security: Bearer Auth**
+        
+        Provide your bearer token in the Authorization header when making requests to protected resources.
+        
+        Example: `Authorization: Bearer {{your-access-token}}`
+        
+        **Security: OAuth 2.0**
+        
+        Scopes:
+        - `https://jans.io/auth/ssa.admin` - **SSA Admin**, You can revoke `SSA`.
       operationId: delete-ssa
       security:
         - bearer: [ ]
@@ -4590,6 +4631,50 @@ paths:
           description: Not Acceptable. Check the query params. (When `jti` or `org_id` is not sent in the query param)
         422:
           description: Not found.
+        500:
+          $ref: '#/components/responses/InternalServerErrorSSA'
+
+  /ssa/jwt:
+    get:
+      tags:
+        - SSA
+      summary: Get JWT of SSA based on JTI.
+      description: |-
+        # Get JWT of SSA based on `jti`.
+        ----
+
+        **Security: Bearer Auth**
+
+        Provide your bearer token in the Authorization header when making requests to protected resources.
+
+        Example: `Authorization: Bearer {{your-access-token}}`
+
+        **Security: OAuth 2.0**
+
+        Scopes:
+        - `https://jans.io/auth/ssa.admin` - **SSA Admin**, Retrieve `JWT` of `SSA`
+      operationId: get-jwt-ssa
+      security:
+        - bearer: [ ]
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: jti
+          description: Unique Identifier.
+      responses:
+        200:
+          description: The response will return the `JWT` of `SSA`.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ssa:
+                    type: string
+                    example: eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3BvcnRhbC5nbHV1Lm9yZyIsImlhdCI6IjE2NTUzMTkyNjgiLCJqdGkiOiJmN2I1OTkxYy00YzE4LTRjODEtYTY2NC1lNmY4NjcwZjVkNTEiLCJzb2Z0d2FyZV9pZCI6ImdsdXUtc2Nhbi1hcGkiLCJvcmdfaWQiOjEsInNvZnR3YXJlX3JvbGVzIjpbInBhc3N3dXJkIl0sImp3a3NfdXJpIjoiaHR0cHM6Ly9jbG91ZC1kZXYuZ2x1dS5jbG91ZC9wb3J0YWwvandrcyIsImdyYW50X3R5cGVzIjpbImNsaWVudF9jcmVkZW50aWFscyJdLCJleHAiOjE2NTkzMTkyNjh9.MkE-47SvBshmazBfyhAcHsqPpFIbg5CpA8k2TxDWhxc
+        401:
+          $ref: '#/components/responses/UnauthorizedSSA'
         500:
           $ref: '#/components/responses/InternalServerErrorSSA'
 
