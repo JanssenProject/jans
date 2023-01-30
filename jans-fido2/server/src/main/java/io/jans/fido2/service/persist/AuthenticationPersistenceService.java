@@ -207,6 +207,9 @@ public class AuthenticationPersistenceService {
         };
         
         String baseDn = getDnForUser(null);
+		if (persistenceEntryManager.hasExpirationSupport(baseDn)) {
+			return;
+		}
         persistenceEntryManager.findEntries(baseDn, Fido2AuthenticationEntry.class, getExpiredAuthenticationFilter(baseDn), SearchScope.SUB, new String[] {"jansCodeChallenge", "creationDate"}, cleanerAuthenticationBatchService, 0, 0, batchSize);
 
         String branchDn = getDnForUser(null);

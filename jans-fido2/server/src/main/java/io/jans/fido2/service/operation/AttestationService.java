@@ -180,6 +180,10 @@ public class AttestationService {
 			registrationEntry.setSessionStateId(params.get("session_id").asText());
 		}
 
+		// Set expiration
+		int unfinishedRequestExpiration = appConfiguration.getFido2Configuration().getUnfinishedRequestExpiration();
+        registrationEntry.setExpiration(unfinishedRequestExpiration);
+
 		registrationPersistenceService.save(registrationEntry);
 
 		log.debug("Saved in LDAP");
@@ -259,7 +263,8 @@ public class AttestationService {
 
         // Set expiration for one_step entry
         if (oneStep) {
-        	registrationEntry.setExpiration();
+            int unfinishedRequestExpiration = appConfiguration.getFido2Configuration().getUnfinishedRequestExpiration();
+        	registrationEntry.setExpiration(unfinishedRequestExpiration);
         } else {
         	registrationEntry.clearExpiration();
         }

@@ -199,6 +199,10 @@ public class AssertionService {
 			authenticationEntity.setSessionStateId(params.get("session_id").asText());
 		}
 
+		// Set expiration
+		int unfinishedRequestExpiration = appConfiguration.getFido2Configuration().getUnfinishedRequestExpiration();
+		authenticationEntity.setExpiration(unfinishedRequestExpiration);
+
 		authenticationPersistenceService.save(authenticationEntity);
 
 		return optionsResponseNode;
@@ -263,6 +267,10 @@ public class AssertionService {
 		authenticationData.setAssertionResponse(params.toString());
 
 		authenticationData.setStatus(Fido2AuthenticationStatus.authenticated);
+
+		// Set expiration
+		int unfinishedRequestExpiration = appConfiguration.getFido2Configuration().getAuthenticationHistoryExpiration();
+		authenticationEntity.setExpiration(unfinishedRequestExpiration);
 
 		authenticationPersistenceService.update(authenticationEntity);
 
