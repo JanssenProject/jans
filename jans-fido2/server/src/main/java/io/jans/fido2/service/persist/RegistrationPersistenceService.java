@@ -195,6 +195,9 @@ public class RegistrationPersistenceService extends io.jans.as.common.service.co
             }
         };
         String baseDn = getDnForUser(null);
+		if (persistenceEntryManager.hasExpirationSupport(baseDn)) {
+			return;
+		}
         persistenceEntryManager.findEntries(baseDn, Fido2RegistrationEntry.class, getExpiredRegistrationFilter(baseDn), SearchScope.SUB, new String[] {"jansCodeChallenge", "creationDate"}, cleanerRegistrationBatchService, 0, 0, batchSize);
 
         String branchDn = getDnForUser(null);
@@ -225,13 +228,12 @@ public class RegistrationPersistenceService extends io.jans.as.common.service.co
         final Date unfinishedRequestExpirationDate = calendar.getTime();
 
         // Build unfinished request expiration filter
-        Filter registrationStatusFilter = Filter.createNOTFilter(Filter.createEqualityFilter("jansStatus", Fido2RegistrationStatus.registered.getValue()));
-        Filter compomisedStatusFilter = Filter.createNOTFilter(Filter.createEqualityFilter("jansStatus", Fido2RegistrationStatus.compromised.getValue()));
+        Filter registrationStatusFilter = Filter.createNOTFilter(Filter.createEqualityFilter("jansStatus", Fido2RegistrationStatus.pending.getValue()));
 
         Filter exirationDateFilter = Filter.createLessOrEqualFilter("creationDate",
                 persistenceEntryManager.encodeTime(baseDn, unfinishedRequestExpirationDate));
         
-        Filter unfinishedRequestFilter = Filter.createANDFilter(registrationStatusFilter, compomisedStatusFilter, exirationDateFilter);
+        Filter unfinishedRequestFilter = Filter.createANDFilter(registrationStatusFilter, exirationDateFilter);
 
         return unfinishedRequestFilter;
     }

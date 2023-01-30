@@ -9,8 +9,6 @@ package io.jans.fido2.service.sg.converter;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -213,6 +211,9 @@ public class AttestationSuperGluuController {
         clientData.put("origin", registerResponse.getClientData().getOrigin());
         clientData.put("type", "webauthn.create");
 		response.put("clientDataJSON", base64Service.urlEncodeToString(clientData.toString().getBytes(Charset.forName("UTF-8"))));
+
+		// Store cancel type
+		response.put(CommonVerifiers.SUPER_GLUU_REQUEST_CANCEL, StringHelper.equals(RawRegistrationService.REGISTER_CANCEL_TYPE, registerResponse.getClientData().getTyp()));
 
 		// Prepare attestationObject
         RawRegisterResponse rawRegisterResponse = rawRegistrationService.parseRawRegisterResponse(registerResponse.getRegistrationData());

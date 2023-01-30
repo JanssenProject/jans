@@ -182,6 +182,9 @@ public class AssertionSuperGluuController {
         clientData.put("challenge", authenticateResponse.getClientData().getChallenge());
         clientData.put("origin", authenticateResponse.getClientData().getOrigin());
 
+        // Store cancel type
+        params.put(CommonVerifiers.SUPER_GLUU_REQUEST_CANCEL, StringHelper.equals(RawAuthenticationService.AUTHENTICATE_CANCEL_TYPE, authenticateResponse.getClientData().getTyp()));
+
         // Add response node
         ObjectNode response = dataMapperService.createObjectNode();
 		params.set("response", response);
