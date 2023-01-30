@@ -84,4 +84,20 @@ public interface SsaRestWebService {
             @QueryParam("org_id") Long orgId,
             @Context HttpServletRequest httpRequest
     );
+
+    /**
+     * Get JWT from existing active SSA based on "jti".
+     *
+     * @param jti Unique identifier
+     * @return {@link Response} with status {@code 200 (Ok)} and the body containing JWT of SSA.
+     * or with status {@code 401} if this functionality is not enabled, request has to have at least scope "ssa.admin",
+     * or with status {@code 422} if the SSA does not exist, is expired or used,
+     * or with status {@code 500} in case an uncontrolled error occurs when processing the method.
+     */
+    @GET
+    @Path("/ssa/jwt")
+    @Produces({MediaType.APPLICATION_JSON})
+    Response getSsaJwtByJti(
+            @QueryParam("jti") String jti
+    );
 }

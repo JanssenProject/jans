@@ -10,13 +10,11 @@ import io.jans.as.client.ssa.create.SsaCreateRequest;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.model.ssa.Ssa;
 import io.jans.as.common.model.ssa.SsaState;
-import io.jans.as.common.service.AttributeService;
 import io.jans.as.common.service.common.InumService;
 import io.jans.as.model.common.CreatorType;
 import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.config.Constants;
 import io.jans.as.model.config.StaticConfiguration;
-import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.jwt.Jwt;
@@ -74,16 +72,10 @@ public class SsaCreateAction {
     private AppConfiguration appConfiguration;
 
     @Inject
-    private AttributeService attributeService;
-
-    @Inject
     private ModifySsaResponseService modifySsaResponseService;
 
     @Inject
     private SsaRestWebServiceValidator ssaRestWebServiceValidator;
-
-    @Inject
-    private WebKeysConfiguration webKeysConfiguration;
 
     @Inject
     private SsaContextBuilder ssaContextBuilder;
@@ -149,12 +141,12 @@ public class SsaCreateAction {
             ssaService.persist(ssa);
             log.info("Ssa created: {}", ssa);
 
-            ModifySsaResponseContext context = ssaContextBuilder.buildModifySsaResponseContext(httpRequest, null, client, appConfiguration, attributeService);
+            ModifySsaResponseContext context = ssaContextBuilder.buildModifySsaResponseContext(httpRequest, client);
             Function<JsonWebResponse, Void> postProcessor = modifySsaResponseService.buildCreateProcessor(context);
             final ExecutionContext executionContext = context.toExecutionContext();
             executionContext.setPostProcessor(postProcessor);
 
-            Jwt jwt = ssaService.generateJwt(ssa, executionContext, webKeysConfiguration, null);
+            Jwt jwt = ssaService.generateJwt(ssa, executionContext);
             JSONObject jsonResponse = ssaJsonService.getJSONObject(jwt.toString());
             builder.entity(ssaJsonService.jsonObjectToString(jsonResponse));
 
