@@ -283,4 +283,8 @@ public class RegistrationPersistenceService extends io.jans.as.common.service.co
         return String.format("jansId=%s,%s", jsId, baseDn);
     }
 
+    public String getUserInum(String userName)
+    {
+    	return userService.getUserInum(userName);
+    }
 }
