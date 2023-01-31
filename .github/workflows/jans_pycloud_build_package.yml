@@ -35,8 +35,7 @@ jobs:
           git config user.email "54212639+mo-auto@users.noreply.github.com"
           git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
           git checkout -b ${{ env.PR_DOCKER_BRANCH_NAME }}
-          echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" > token.txt
-          gh auth login --with-token < token.txt
+          echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
 
       - name: Update stable requirements in docker images
         id: build_stable_reqs
