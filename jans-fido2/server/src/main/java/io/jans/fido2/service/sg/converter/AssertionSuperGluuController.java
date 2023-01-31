@@ -10,7 +10,10 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
+
+import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
+
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -165,7 +168,7 @@ public class AssertionSuperGluuController {
             throw new Fido2RpRuntimeException("Failed to parse options assertion request", ex);
         }
 
-        if (!authenticateResponse.getClientData().getTyp().equals(RawAuthenticationService.AUTHENTICATE_GET_TYPE)) {
+        if (!ArrayUtils.contains(RawAuthenticationService.SUPPORTED_AUTHENTICATE_TYPES, authenticateResponse.getClientData().getTyp())) {
             throw new Fido2RuntimeException("Invalid options attestation request type");
         }
 
