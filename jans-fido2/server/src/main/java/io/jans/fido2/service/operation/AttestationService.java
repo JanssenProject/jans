@@ -275,7 +275,7 @@ public class AttestationService {
 
         // Support cancel request
         if (cancelRequest) {
-        	registrationEntry.setRegistrationStatus(Fido2RegistrationStatus.canceled);
+        	registrationData.setStatus(Fido2RegistrationStatus.canceled);
         }
         
 		registrationPersistenceService.update(registrationEntry);

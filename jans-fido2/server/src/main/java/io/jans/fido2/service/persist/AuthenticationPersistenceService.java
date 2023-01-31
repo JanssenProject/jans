@@ -118,7 +118,6 @@ public class AuthenticationPersistenceService {
         authenticationEntity.setAuthenticationStatus(authenticationData.getStatus());
 
         persistenceEntryManager.merge(authenticationEntity);
-        System.err.println("Updated: " + authenticationEntity.getDn());
     }
 
     public void addBranch(final String baseDn) {
