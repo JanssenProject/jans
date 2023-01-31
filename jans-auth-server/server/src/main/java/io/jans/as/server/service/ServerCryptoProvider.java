@@ -11,10 +11,7 @@ import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.crypto.signature.AlgorithmFamily;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.exception.CryptoProviderException;
-import io.jans.as.model.jwk.Algorithm;
-import io.jans.as.model.jwk.JSONWebKey;
-import io.jans.as.model.jwk.JSONWebKeySet;
-import io.jans.as.model.jwk.Use;
+import io.jans.as.model.jwk.*;
 import io.jans.as.server.model.config.ConfigurationFactory;
 import io.jans.service.cdi.util.CdiUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -84,6 +81,11 @@ public class ServerCryptoProvider extends AbstractCryptoProvider {
     @Override
     public JSONObject generateKey(Algorithm algorithm, Long expirationTime, int keyLength) throws CryptoProviderException {
         return cryptoProvider.generateKey(algorithm, expirationTime, keyLength);
+    }
+
+    @Override
+    public JSONObject generateKey(Algorithm algorithm, Long expirationTime, int keyLength, KeyOps keyOps) throws CryptoProviderException {
+        return cryptoProvider.generateKey(algorithm, expirationTime, keyLength, keyOps);
     }
 
     @Override
