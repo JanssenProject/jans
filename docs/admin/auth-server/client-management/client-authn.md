@@ -44,8 +44,8 @@ Characteristics table below shows side-by-side comparison of various supported a
 | `client_secret_post`          |     :material-close:     | :material-close: |    :material-close:    | :material-close: |
 | `client_secret_jwt`           |     :material-check:     | :material-check: |    :material-close:    | :material-check: |
 | `private_key_jwt`             |     :material-check:     | :material-check: |    :material-check:    | :material-check: |
-| `tls_client_auth`             |                          |                  |                        |                  |
-| `self_signed_tls_client_auth` |                          |                  |                        |                  |
+| `tls_client_auth`             |     :material-check:     |                  |                        |                  |
+| `self_signed_tls_client_auth` |     :material-check:     |                  |                        |                  |
 | `none`                        |                          |                  |                        |                  |
 
 ### client_secret_basic
@@ -86,78 +86,35 @@ navigate via `Auth Server` -> Get or add clients -> `encryption/signing` -> TODO
 
 ## private_key_jwt
 
-`private_key_jwt` is private key based method where secret is not shared between client and authorization server. This method is 
+`private_key_jwt` is private key based method where secret is not shared between client and authorization server. Instead, the client generates an JSON Web Token(JWT) which is shared with the Janssen Server. Upon receiving JWT singned by client's private key, the Janssen Server can validate this JWT using public keys supplied by client at the time of registration in JSON Web Key format. This method is
 further described in OpenId Connect specification, [section 9](https://openid.net/specs/openid-connect-core-1_0.html#ClientAuthentication).
 
 Janssen server implements signing and encryption mechanism following the guidelines in [section 10](https://openid.net/specs/openid-connect-core-1_0.html#SigEnc) 
 of OpenId Connect specification. Clients should sign and encrypt JWT as per their security requirements. 
 
-### How To Use
+### Security Features Of Private Key Authentication
 
-- Create a private key
+This method of authentication is more secure than the methods relying on shared key due to following features.
 
-    ```shell
-    openssl genrsa -out private-key.pem 2048
-    ```
+- **Secure Storage**: Hardware Security Module(HSM) or Trusted Platform Module(TPM) can be used to securely store private key 
+  and sign using it at client side. These modules make it impossible to access private key from outside.
+- **Smaller footprint**: Unlike shared secret, where client secret resides on authorization server as well as client, 
+  the private key only exists on client. This reduced footprint reduces potential risks.
+- **Limited Time Validity**: JWT can be set to expire after a certain duration. Similarly, client certificates can be 
+  made to expire. This makes it harder to execute replay attacks using a compromised token or certificate.
 
-- Extract public key from private key
 
-    ```shell
-    openssl rsa -in private-key.pem -pubout -outform PEM -out public-key.pem
-    ```
+### Implementation Steps
 
-    During the client registration or via client configuration settings, the public key generated above should be attached
-    to the client on authorization server.
+Below are the high-level steps involved in using `private_key_jwt` authentication method:
 
-- Create header payload. For example,
+- Create JWK private key
+- Derive JWK public key for the private key. Public key JWK should be provided to Janssen Server at the time of registration
+- Create JWT header and payload as described in [section 9 of specification](https://openid.net/specs/openid-connect-core-1_0.html#ClientAuthentication)
+- Sign JWT with a signing algorithm
 
-    ```json
-    {
-    "alg": "RS256",
-    "typ": "JWT"
-    }
-    ```
-
-    To create JWT we need header in base64 encoded format. Use commands below and to convert header in base64 encoded string:
-  
-    ```shell
-    echo -n 'header-json' | base64 | sed s/\+/-/ | sed -E s/=+$//
-    ```
-
-- Create your JWT payload. For example,
-
-    ```json
-    {
-    "jti":"myJWTId001",
-    "sub":"38174623762",
-    "iss":"38174623762",
-    "aud":"http://localhost:4000/api/auth/token/direct/24523138205",
-    "exp":1536165540,
-    "iat":1536132708
-    }
-    ```
-
-    To create JWT we need the payload in base64 encoded format. Use commands below and to convert the payload in base64 
-    encoded string:
-  
-    ```shell
-    echo -n 'payload-json' | base64 | sed s/\+/-/ | sed -E s/=+$//
-    ```
-
-- Use the encoded header and payload to create the signature. The signature would be in form of an encoded string.
-
-    ```shell
-    echo -n "encoded-header.encoded-payload" | openssl dgst -sha256 -binary -sign jwtRSA256-private.pem  | openssl enc -base64 | tr -d '\n=' | tr -- '+/' '-_'
-    ```
-
-- Put together encoded strings for header, payload and signature in format below to completely form JWT.
-
-    ```json
-    encoded-header.encoded-payload.encoded-signature
-    ```
-
-- Use this JWT in request to the server. As mentioned earlier, the server must have public key registered as part of 
-  the client registration process in order to verify the JWT in the request.
+Client code that implements above steps should leverage any of the secure and trusted library that implements these functions. A non-exhaustive list of such libraries
+can be found at [jwt.io](https://jwt.io/libraries). Psudocode implementation for Java based client using `nimbus-jose-jwt` library can be found [here](https://connect2id.com/products/nimbus-jose-jwt/examples/jwt-with-rsa-signature)
 
 ### Client Configuration For Using private_key_jwt
 
@@ -170,13 +127,13 @@ navigate via `Auth Server` -> Get or add clients -> `encryption/signing` -> set 
 
 ## tls_client_auth
 
-This is mutual TLS based authentication method where client authenticates with Janssen Server using X.509 certificate. In this authentication method, the client uses X.509 certificate that is issued by a Certificate Authority(CA). Benefit of using mutual TLS based authentication is that the authorization server binds the token with the certificate. This provides enhanced security where it is possible to check that the token belongs to the intended client. 
+This is mutual TLS based authentication method where client authenticates with Janssen Server using X.509 certificate during TLS handshake. In this authentication method, the client uses X.509 certificate that is issued by a Certificate Authority(CA). Benefit of using mutual TLS based authentication is that the authorization server binds the token with the certificate. This provides enhanced security where it is possible to check that the token belongs to the intended client. 
 
 This authentication mechanism is defined in [mTLS specification for OAuth2](https://www.rfc-editor.org/rfc/rfc8705#name-mutual-tls-for-oauth-client)
 
 ## self_signed_tls_client_auth
 
-This is mutual TLS based authentication method where client authenticates with Janssen Server using X.509 certificate. Client uses self signed X.509 certificate, removing the dependency on for public key infrastructure(PKIX). Benefit of using mutual TLS based authentication is that the authorization server binds the token with the certificate. This provides enhanced security where it is possible to check that the token belongs to the intended client. 
+This is mutual TLS based authentication method where client authenticates with Janssen Server using X.509 certificate during TLS handshake. Client uses self signed X.509 certificate, removing the dependency on for public key infrastructure(PKIX). Benefit of using mutual TLS based authentication is that the authorization server binds the token with the certificate. This provides enhanced security where it is possible to check that the token belongs to the intended client. 
 
 This authentication mechanism is defined in [mTLS specification for OAuth2](https://www.rfc-editor.org/rfc/rfc8705#name-self-signed-certificate-mut)
 
@@ -185,17 +142,6 @@ This authentication mechanism is defined in [mTLS specification for OAuth2](http
 The Client does not authenticate itself at the Token Endpoint, either because it uses only the Implicit Flow (and so 
 does not use the Token Endpoint) or because it is a Public Client with no Client Secret or other authentication 
 mechanism.
-
-## Using Private Key for Authentication
-
-### Security Features Of Private Key Authentication
-
-- **Secure Storage**: Hardware Security Module(HSM) or Trusted Platform Module(TPM) can be used to securely store private key 
-  and sign using it. These modules make it impossible to access private key from outside.
-- **Smaller footprint**: Unlike shared secret, where client secret resides on authorization server as well as client, 
-  the private key only exists on client. This reduced footprint reduces potential risks.
-- **Limited Time Validity**: JWT can be set to expire after a certain duration. Similarly, client certificates can be 
-  made to expire. This makes it harder to execute replay attacks using a compromised token or certificate.
 
 
 ## Want to contribute?
