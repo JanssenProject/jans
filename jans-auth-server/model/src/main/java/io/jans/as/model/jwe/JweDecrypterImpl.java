@@ -19,7 +19,7 @@ import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaims;
 import io.jans.as.model.jwt.JwtHeader;
 import io.jans.as.model.jwt.JwtHeaderName;
-import io.jans.as.model.util.SecurityProviderUtility;
+import io.jans.util.security.SecurityProviderUtility;
 
 import javax.crypto.spec.SecretKeySpec;
 import java.security.Key;

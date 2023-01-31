@@ -7,6 +7,8 @@
 package io.jans.as.model.util;
 
 import io.jans.as.model.BaseTest;
+import io.jans.util.security.SecurityProviderUtility;
+
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

@@ -13,7 +13,7 @@ import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.PEMParser;
 
-import io.jans.as.model.util.SecurityProviderUtility;
+import io.jans.util.security.SecurityProviderUtility;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

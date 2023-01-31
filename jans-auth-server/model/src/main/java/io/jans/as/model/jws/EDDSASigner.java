@@ -22,7 +22,7 @@ import io.jans.as.model.crypto.signature.EDDSAPrivateKey;
 import io.jans.as.model.crypto.signature.EDDSAPublicKey;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.util.Base64Util;
-import io.jans.as.model.util.SecurityProviderUtility;
+import io.jans.util.security.SecurityProviderUtility;
 
 /**
  * Implementing the AbstractJwsSigner, that uses EDDSA for signing.

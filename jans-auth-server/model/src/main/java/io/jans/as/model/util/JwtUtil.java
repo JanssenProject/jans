@@ -17,6 +17,8 @@ import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.exception.InvalidParameterException;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.util.StringHelper;
+import io.jans.util.security.SecurityProviderUtility;
+
 import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.json.JSONArray;

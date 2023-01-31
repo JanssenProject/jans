@@ -9,7 +9,8 @@ package io.jans.as.client.util;
 import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.signature.AlgorithmFamily;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
-import io.jans.as.model.util.SecurityProviderUtility;
+import io.jans.util.security.SecurityProviderUtility;
+
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;

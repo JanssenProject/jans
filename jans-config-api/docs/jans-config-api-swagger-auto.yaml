@@ -7145,19 +7145,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        adminCanEdit:
+        whitePagesCanView:
           type: boolean
         adminCanView:
           type: boolean
-        userCanView:
-          type: boolean
-        userCanAccess:
+        userCanEdit:
           type: boolean
         adminCanAccess:
           type: boolean
-        userCanEdit:
+        userCanView:
           type: boolean
-        whitePagesCanView:
+        adminCanEdit:
+          type: boolean
+        userCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -7607,10 +7607,10 @@ components:
           type: array
           items:
             type: object
-        displayValue:
-          type: string
         value:
           type: object
+        displayValue:
+          type: string
     LocalizedString:
       type: object
       properties:
@@ -8554,13 +8554,25 @@ components:
       properties:
         valid:
           type: boolean
+        connectProtectionList:
+          type: array
+          items:
+            type: string
+            enum:
+            - None
+            - StartTls
+            - SslTls
         host:
           type: string
         port:
           type: integer
           format: int32
-        requires_ssl:
-          type: boolean
+        connect-protection:
+          type: string
+          enum:
+          - None
+          - StartTls
+          - SslTls
         trust_host:
           type: boolean
         from_name:
@@ -8572,6 +8584,14 @@ components:
         user_name:
           type: string
         password:
+          type: string
+        key-store:
+          type: string
+        key-store-password:
+          type: string
+        key-store-alias:
+          type: string
+        signing-algorithm:
           type: string
     CustomScript:
       type: object

@@ -4,9 +4,9 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
 import java.nio.file.Path;
 
-import io.jans.as.model.util.SecurityProviderUtility;
 import io.jans.scim2.client.ScimClient;
 import io.jans.scim2.client.rest.ClientSideService;
+import io.jans.util.security.SecurityProviderUtility;
 
 /**
  * A factory class to obtain "client" objects that allow interaction with the SCIM service. Usage

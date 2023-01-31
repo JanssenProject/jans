@@ -7,7 +7,7 @@
 package io.jans.as.server.crypto.signature;
 
 import io.jans.as.model.exception.SignatureException;
-import io.jans.as.model.util.SecurityProviderUtility;
+import io.jans.util.security.SecurityProviderUtility;
 
 import org.bouncycastle.asn1.sec.SECNamedCurves;
 import org.bouncycastle.asn1.x9.X9ECParameters;

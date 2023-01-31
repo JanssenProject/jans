@@ -6,7 +6,8 @@ import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
 import io.jans.as.model.util.CertUtils;
 import io.jans.as.model.util.JwtUtil;
-import io.jans.as.model.util.SecurityProviderUtility;
+import io.jans.util.security.SecurityProviderUtility;
+
 import org.json.JSONObject;
 import org.testng.annotations.Test;
 

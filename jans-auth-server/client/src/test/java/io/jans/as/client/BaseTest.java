@@ -28,9 +28,10 @@ import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.error.IErrorType;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.DateUtil;
-import io.jans.as.model.util.SecurityProviderUtility;
 import io.jans.as.model.util.Util;
 import io.jans.util.StringHelper;
+import io.jans.util.security.SecurityProviderUtility;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpClient;

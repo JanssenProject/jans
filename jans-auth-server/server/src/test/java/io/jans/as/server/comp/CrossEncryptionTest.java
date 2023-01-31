@@ -48,8 +48,9 @@ import io.jans.as.model.jws.RSASigner;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtType;
 import io.jans.as.model.util.Base64Util;
-import io.jans.as.model.util.SecurityProviderUtility;
 import io.jans.as.server.model.token.JwtSigner;
+import io.jans.util.security.SecurityProviderUtility;
+
 import org.apache.commons.codec.Charsets;
 import org.jose4j.jwa.AlgorithmConstraints;
 import org.jose4j.jwa.AlgorithmConstraints.ConstraintType;

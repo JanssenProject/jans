@@ -10,6 +10,8 @@ import io.jans.as.model.BaseTest;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaims;
+import io.jans.util.security.SecurityProviderUtility;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.mockito.MockedStatic;

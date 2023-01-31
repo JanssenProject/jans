@@ -34,7 +34,7 @@ import java.util.GregorianCalendar;
 import io.jans.as.model.crypto.Certificate;
 import io.jans.as.model.crypto.KeyFactory;
 import io.jans.as.model.jwk.JSONWebKey;
-import io.jans.as.model.util.SecurityProviderUtility;
+import io.jans.util.security.SecurityProviderUtility;
 
 /**
  * Factory to create asymmetric Public and Private Keys for the RSA algorithm

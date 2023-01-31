@@ -18,7 +18,6 @@ import jakarta.inject.Named;
 
 import org.slf4j.Logger;
 
-import io.jans.as.model.util.SecurityProviderUtility;
 import io.jans.exception.ConfigurationException;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.orm.PersistenceEntryManager;
@@ -34,6 +33,7 @@ import io.jans.service.custom.script.CustomScriptManager;
 import io.jans.service.timer.QuartzSchedulerManager;
 import io.jans.util.StringHelper;
 import io.jans.util.security.PropertiesDecrypter;
+import io.jans.util.security.SecurityProviderUtility;
 import io.jans.util.security.StringEncrypter;
 
 @ApplicationScoped

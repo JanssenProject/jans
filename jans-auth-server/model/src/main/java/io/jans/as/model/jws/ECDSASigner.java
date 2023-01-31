@@ -13,7 +13,7 @@ import io.jans.as.model.crypto.signature.ECDSAPrivateKey;
 import io.jans.as.model.crypto.signature.ECDSAPublicKey;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.util.Base64Util;
-import io.jans.as.model.util.SecurityProviderUtility;
+import io.jans.util.security.SecurityProviderUtility;
 
 import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jce.spec.ECParameterSpec;

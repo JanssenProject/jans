@@ -7,7 +7,7 @@ package io.jans.as.model.crypto.signature;
 
 import io.jans.as.model.crypto.Certificate;
 import io.jans.as.model.crypto.KeyFactory;
-import io.jans.as.model.util.SecurityProviderUtility;
+import io.jans.util.security.SecurityProviderUtility;
 
 import org.apache.commons.lang.StringUtils;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;

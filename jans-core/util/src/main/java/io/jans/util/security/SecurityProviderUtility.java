@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.as.model.util;
+package io.jans.util.security;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;

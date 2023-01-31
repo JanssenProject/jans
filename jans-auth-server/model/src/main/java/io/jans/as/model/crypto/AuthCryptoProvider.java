@@ -22,8 +22,9 @@ import io.jans.as.model.jwk.KeySelectionStrategy;
 import io.jans.as.model.jwk.Use;
 import io.jans.as.model.util.Base64Util;
 import io.jans.as.model.util.CertUtils;
-import io.jans.as.model.util.SecurityProviderUtility;
 import io.jans.as.model.util.Util;
+import io.jans.util.security.SecurityProviderUtility;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;

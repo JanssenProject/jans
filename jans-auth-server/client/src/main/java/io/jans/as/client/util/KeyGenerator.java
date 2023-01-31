@@ -16,9 +16,10 @@ import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.jwk.JSONWebKey;
 import io.jans.as.model.jwk.JSONWebKeySet;
 import io.jans.as.model.jwk.Use;
-import io.jans.as.model.util.SecurityProviderUtility;
 import io.jans.as.model.util.StringUtils;
 import io.jans.util.StringHelper;
+import io.jans.util.security.SecurityProviderUtility;
+
 import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;

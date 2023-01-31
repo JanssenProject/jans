@@ -10,7 +10,7 @@ import io.jans.as.model.crypto.signature.RSAPrivateKey;
 import io.jans.as.model.crypto.signature.RSAPublicKey;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.util.Base64Util;
-import io.jans.as.model.util.SecurityProviderUtility;
+import io.jans.util.security.SecurityProviderUtility;
 
 import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;

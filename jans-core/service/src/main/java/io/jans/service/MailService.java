@@ -55,7 +55,8 @@ import org.bouncycastle.operator.OperatorCreationException;
 import io.jans.model.SmtpConfiguration;
 import io.jans.model.SmtpConnectProtectionType;
 import io.jans.util.StringHelper;
-import io.jans.as.model.util.SecurityProviderUtility;
+//import io.jans.as.model.util.SecurityProviderUtility;
+import io.jans.util.security.SecurityProviderUtility;
 
 import org.slf4j.Logger;
 
