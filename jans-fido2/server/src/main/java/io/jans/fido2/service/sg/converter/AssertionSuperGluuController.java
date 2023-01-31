@@ -10,10 +10,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
-
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
-
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
