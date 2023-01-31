@@ -228,7 +228,7 @@ public class RegistrationPersistenceService extends io.jans.as.common.service.co
         final Date unfinishedRequestExpirationDate = calendar.getTime();
 
         // Build unfinished request expiration filter
-        Filter registrationStatusFilter = Filter.createNOTFilter(Filter.createEqualityFilter("jansStatus", Fido2RegistrationStatus.pending.getValue()));
+        Filter registrationStatusFilter = Filter.createNOTFilter(Filter.createEqualityFilter("jansStatus", Fido2RegistrationStatus.registered.getValue()));
 
         Filter exirationDateFilter = Filter.createLessOrEqualFilter("creationDate",
                 persistenceEntryManager.encodeTime(baseDn, unfinishedRequestExpirationDate));
