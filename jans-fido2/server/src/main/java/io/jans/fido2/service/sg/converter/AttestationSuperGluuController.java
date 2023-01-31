@@ -11,6 +11,8 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.security.cert.CertificateEncodingException;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -187,7 +189,7 @@ public class AttestationSuperGluuController {
             throw new Fido2RpRuntimeException("Failed to parse options attestation request", ex);
         }
 
-        if (!registerResponse.getClientData().getTyp().equals(RawRegistrationService.REGISTER_FINISH_TYPE)) {
+        if (!ArrayUtils.contains(RawRegistrationService.SUPPORTED_REGISTER_TYPES, registerResponse.getClientData().getTyp())) {
             throw new Fido2RuntimeException("Invalid options attestation request type");
         }
 
