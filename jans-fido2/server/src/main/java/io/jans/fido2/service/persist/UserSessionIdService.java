@@ -15,6 +15,8 @@ import io.jans.as.common.model.session.SessionId;
 import io.jans.as.common.model.session.SessionIdState;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.model.fido2.Fido2AuthenticationEntry;
+import io.jans.orm.model.fido2.Fido2AuthenticationStatus;
 import io.jans.orm.model.fido2.Fido2RegistrationEntry;
 import io.jans.orm.model.fido2.Fido2RegistrationStatus;
 import io.jans.util.StringHelper;
@@ -66,19 +68,41 @@ public class UserSessionIdService {
         }
 
         Map<String, String> sessionAttributes = entity.getSessionAttributes();
-        if (Fido2RegistrationStatus.registered == registrationEntry.getRegistrationData().getStatus()) {
+        if (Fido2RegistrationStatus.registered == registrationEntry.getRegistrationStatus()) {
             sessionAttributes.put("session_custom_state", "approved");
         } else {
             sessionAttributes.put("session_custom_state", "declined");
         }
-        sessionAttributes.put("super_gluu_u2f_device_id", registrationEntry.getId());
+        updateUserSessionAttributes(userInum, registrationEntry, enroll, oneStep, sessionAttributes);
+
+        updateSessionId(entity);
+    }
+
+    public void updateUserSessionIdOnFinishRequest(String sessionId, String userInum, Fido2RegistrationEntry registrationEntry, Fido2AuthenticationEntry authenticationEntry, boolean enroll, boolean oneStep) {
+        SessionId entity = getSessionId(sessionId);
+        if (entity == null) {
+            return;
+        }
+
+        Map<String, String> sessionAttributes = entity.getSessionAttributes();
+        if (Fido2AuthenticationStatus.authenticated == authenticationEntry.getAuthenticationStatus()) {
+            sessionAttributes.put("session_custom_state", "approved");
+        } else {
+            sessionAttributes.put("session_custom_state", "declined");
+        }
+        updateUserSessionAttributes(userInum, registrationEntry, enroll, oneStep, sessionAttributes);
+
+        updateSessionId(entity);
+    }
+
+	private void updateUserSessionAttributes(String userInum, Fido2RegistrationEntry registrationEntry, boolean enroll,
+			boolean oneStep, Map<String, String> sessionAttributes) {
+		sessionAttributes.put("super_gluu_u2f_device_id", registrationEntry.getId());
         sessionAttributes.put("super_gluu_u2f_device_dn", registrationEntry.getDn());
         sessionAttributes.put("super_gluu_u2f_device_user_inum", userInum);
         sessionAttributes.put("super_gluu_u2f_device_enroll", Boolean.toString(enroll));
         sessionAttributes.put("super_gluu_u2f_device_one_step", Boolean.toString(oneStep));
-
-        updateSessionId(entity);
-    }
+	}
 
     public void updateUserSessionIdOnError(String sessionId) {
         SessionId entity = getSessionId(sessionId);

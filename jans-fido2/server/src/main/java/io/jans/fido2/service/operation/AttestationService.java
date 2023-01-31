@@ -180,6 +180,10 @@ public class AttestationService {
 			registrationEntry.setSessionStateId(params.get("session_id").asText());
 		}
 
+		// Set expiration
+		int unfinishedRequestExpiration = appConfiguration.getFido2Configuration().getUnfinishedRequestExpiration();
+        registrationEntry.setExpiration(unfinishedRequestExpiration);
+
 		registrationPersistenceService.save(registrationEntry);
 
 		log.debug("Saved in LDAP");
@@ -190,7 +194,9 @@ public class AttestationService {
 	public ObjectNode verify(JsonNode params) {
 		log.debug("Attestation verify {}", params);
 
+		boolean superGluu = commonVerifiers.hasSuperGluu(params);
 		boolean oneStep = commonVerifiers.isSuperGluuOneStepMode(params);
+		boolean cancelRequest = commonVerifiers.isSuperGluuCancelRequest(params);
 
 		// Verify if there are mandatory request parameters
 		commonVerifiers.verifyBasicPayload(params);
@@ -201,7 +207,9 @@ public class AttestationService {
 
 		// Verify client data
 		JsonNode clientDataJSONNode = commonVerifiers.verifyClientJSON(responseNode);
-		commonVerifiers.verifyClientJSONTypeIsCreate(clientDataJSONNode);
+		if (!superGluu) {
+			commonVerifiers.verifyClientJSONTypeIsCreate(clientDataJSONNode);
+		}
 
 		// Get challenge
 		String challenge = commonVerifiers.getChallenge(clientDataJSONNode);
@@ -259,10 +267,17 @@ public class AttestationService {
 
         // Set expiration for one_step entry
         if (oneStep) {
-        	registrationEntry.setExpiration();
+            int unfinishedRequestExpiration = appConfiguration.getFido2Configuration().getUnfinishedRequestExpiration();
+        	registrationEntry.setExpiration(unfinishedRequestExpiration);
         } else {
         	registrationEntry.clearExpiration();
         }
+
+        // Support cancel request
+        if (cancelRequest) {
+        	registrationData.setStatus(Fido2RegistrationStatus.canceled);
+        }
+        
 		registrationPersistenceService.update(registrationEntry);
 
 		// If sessionStateId is not empty update session

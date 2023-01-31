@@ -199,6 +199,10 @@ public class AssertionService {
 			authenticationEntity.setSessionStateId(params.get("session_id").asText());
 		}
 
+		// Set expiration
+		int unfinishedRequestExpiration = appConfiguration.getFido2Configuration().getUnfinishedRequestExpiration();
+		authenticationEntity.setExpiration(unfinishedRequestExpiration);
+
 		authenticationPersistenceService.save(authenticationEntity);
 
 		return optionsResponseNode;
@@ -207,7 +211,9 @@ public class AssertionService {
 	public ObjectNode verify(JsonNode params) {
 		log.debug("authenticateResponse {}", params);
 
+		boolean superGluu = commonVerifiers.hasSuperGluu(params);
 		boolean oneStep = commonVerifiers.isSuperGluuOneStepMode(params);
+		boolean cancelRequest = commonVerifiers.isSuperGluuCancelRequest(params);
 
 		// Verify if there are mandatory request parameters
 		commonVerifiers.verifyBasicPayload(params);
@@ -227,7 +233,9 @@ public class AssertionService {
 
 		// Verify client data
 		JsonNode clientDataJSONNode = commonVerifiers.verifyClientJSON(responseNode);
-		commonVerifiers.verifyClientJSONTypeIsGet(clientDataJSONNode);
+		if (!superGluu) {
+			commonVerifiers.verifyClientJSONTypeIsGet(clientDataJSONNode);
+		}
 
 		// Get challenge
 		String challenge = commonVerifiers.getChallenge(clientDataJSONNode);
@@ -264,6 +272,16 @@ public class AssertionService {
 
 		authenticationData.setStatus(Fido2AuthenticationStatus.authenticated);
 
+		// Set expiration
+		int unfinishedRequestExpiration = appConfiguration.getFido2Configuration().getAuthenticationHistoryExpiration();
+		authenticationEntity.setExpiration(unfinishedRequestExpiration);
+
+
+        // Support cancel request
+        if (cancelRequest) {
+        	authenticationData.setStatus(Fido2AuthenticationStatus.canceled);
+        }
+
 		authenticationPersistenceService.update(authenticationEntity);
 
 		// Store actual counter value in separate attribute. Note: Fido2 not update
@@ -276,7 +294,7 @@ public class AssertionService {
         if (StringHelper.isNotEmpty(sessionStateId)) {
             log.debug("There is session id. Setting session id attributes");
 
-            userSessionIdService.updateUserSessionIdOnFinishRequest(sessionStateId, registrationEntry.getUserInum(), registrationEntry, false, oneStep);
+            userSessionIdService.updateUserSessionIdOnFinishRequest(sessionStateId, registrationEntry.getUserInum(), registrationEntry, authenticationEntity, false, oneStep);
         }
 
 		// Create result object

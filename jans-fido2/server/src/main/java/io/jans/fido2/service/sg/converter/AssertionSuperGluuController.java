@@ -10,6 +10,9 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
+import org.apache.commons.lang3.ArrayUtils;
+import org.slf4j.Logger;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -39,6 +42,9 @@ import jakarta.inject.Inject;
  */
 @ApplicationScoped
 public class AssertionSuperGluuController {
+
+    @Inject
+    private Logger log;
 
     @Inject
     private AssertionService assertionService;
@@ -102,6 +108,8 @@ public class AssertionSuperGluuController {
         params.put("username", userName);
         params.put("session_id", sessionId);
 
+        log.debug("Prepared U2F_V2 assertions options request: {}", params.toString());
+
         ObjectNode result = assertionService.options(params);
 
         // Build start authentication response  
@@ -158,7 +166,7 @@ public class AssertionSuperGluuController {
             throw new Fido2RpRuntimeException("Failed to parse options assertion request", ex);
         }
 
-        if (!authenticateResponse.getClientData().getTyp().equals(RawAuthenticationService.AUTHENTICATE_GET_TYPE)) {
+        if (!ArrayUtils.contains(RawAuthenticationService.SUPPORTED_AUTHENTICATE_TYPES, authenticateResponse.getClientData().getTyp())) {
             throw new Fido2RuntimeException("Invalid options attestation request type");
         }
 
@@ -178,9 +186,12 @@ public class AssertionSuperGluuController {
 
         // Convert clientData node to new format
         ObjectNode clientData = dataMapperService.createObjectNode();
-        clientData.put("type", "webauthn.get");
+        clientData.put("type",  authenticateResponse.getClientData().getTyp());
         clientData.put("challenge", authenticateResponse.getClientData().getChallenge());
         clientData.put("origin", authenticateResponse.getClientData().getOrigin());
+
+        // Store cancel type
+        params.put(CommonVerifiers.SUPER_GLUU_REQUEST_CANCEL, StringHelper.equals(RawAuthenticationService.AUTHENTICATE_CANCEL_TYPE, authenticateResponse.getClientData().getTyp()));
 
         // Add response node
         ObjectNode response = dataMapperService.createObjectNode();
@@ -203,6 +214,8 @@ public class AssertionSuperGluuController {
 		} catch (IOException e) {
             throw new Fido2RuntimeException("Failed to prepare attestationObject");
 		}
+
+        log.debug("Prepared U2F_V2 assertion verify request: {}", params.toString());
 
         ObjectNode result = assertionService.verify(params);
 

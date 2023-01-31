@@ -139,12 +139,12 @@
               "type": "string",
               "pattern": "^[a-z0-9\\-]*$"
             },
-            "cnSecretGoogleSecretVersionId": {
+            "cnGoogleSecretVersionId": {
               "description": "Secret version to be used for secret configuration. Defaults to latest and should normally always stay that way. Used only when global.configAdapterName and global.configSecretAdapter is set to google.",
               "type": "string",
               "pattern": "^([0-9]|latest)*$"
             },
-            "cnSecretGoogleSecretNamePrefix": {
+            "cnGoogleSecretNamePrefix": {
               "description": "Prefix for Janssen secret in Google Secret Manager. Defaults to janssen. If left janssen-secret secret will be created. Used only when global.configAdapterName and global.configSecretAdapter is set to google.",
               "type": "string",
               "pattern": "^[a-z]+$"
@@ -152,15 +152,6 @@
             "cnGoogleSecretManagerPassPhrase": {
               "description": "Passphrase for Janssen secret in Google Secret Manager. This is used for encrypting and decrypting data from the Google Secret Manager. Used only when global.configAdapterName and global.configSecretAdapter is set to google.",
               "$ref": "#/definitions/password"
-            },
-            "cnConfigGoogleSecretVersionId": {
-              "description": "Secret version to be used for configuration. Defaults to latest and should normally always stay that way. Used only when global.configAdapterName and global.configSecretAdapter is set to google. Used only when global.configAdapterName and global.configSecretAdapter is set to google.",
-              "type": "string",
-              "pattern": "^([0-9]|latest)*$"
-            },
-            "cnConfigGoogleSecretNamePrefix": {
-              "description": "Prefix for Janssen configuration secret in Google Secret Manager. Defaults to janssen. If left intact janssen-configuration secret will be created. Used only when global.configAdapterName and global.configSecretAdapter is set to google.",
-              "type": "string"
             },
             "cnLdapUrl": {
               "description": "OpenDJ internal address. Leave as default. Used when `global.cnPersistenceType` is set to `ldap`.",
