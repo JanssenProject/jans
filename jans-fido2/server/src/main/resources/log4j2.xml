@@ -50,7 +50,7 @@
 
     <Loggers>
 		<!-- ############### Gluu ################# -->
-		<Logger name=io.jans" level="${log4j.default.log.level}" />
+		<Logger name="io.jans" level="${log4j.default.log.level}" />
 
 		<Logger name="io.jans.orm" level="${log4j.default.log.level}" additivity="false">
 			<AppenderRef ref="FIDO2_PERSISTENCE_FILE" />
