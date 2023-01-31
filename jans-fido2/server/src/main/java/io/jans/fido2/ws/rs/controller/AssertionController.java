@@ -113,6 +113,8 @@ public class AssertionController {
         }
         log.debug("Start authentication: username = {}, keyhandle = {}, application = {}, session_id = {}", userName, keyHandle, appId, sessionId);
 
+        log.debug("Start authentication: username = {}, keyhandle = {}, application = {}, session_id = {}", userName, keyHandle, appId, sessionId);
+
         JsonNode result = assertionSuperGluuController.startAuthentication(userName, keyHandle, appId, sessionId);
 
         log.debug("Prepared U2F_V2 authentication options request: {}", result.toString());
