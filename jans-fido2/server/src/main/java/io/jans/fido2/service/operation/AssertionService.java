@@ -211,6 +211,7 @@ public class AssertionService {
 	public ObjectNode verify(JsonNode params) {
 		log.debug("authenticateResponse {}", params);
 
+		boolean superGluu = commonVerifiers.hasSuperGluu(params);
 		boolean oneStep = commonVerifiers.isSuperGluuOneStepMode(params);
 		boolean cancelRequest = commonVerifiers.isSuperGluuOneStepMode(params);
 
@@ -232,7 +233,9 @@ public class AssertionService {
 
 		// Verify client data
 		JsonNode clientDataJSONNode = commonVerifiers.verifyClientJSON(responseNode);
-		commonVerifiers.verifyClientJSONTypeIsGet(clientDataJSONNode);
+		if (!superGluu) {
+			commonVerifiers.verifyClientJSONTypeIsGet(clientDataJSONNode);
+		}
 
 		// Get challenge
 		String challenge = commonVerifiers.getChallenge(clientDataJSONNode);

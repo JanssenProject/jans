@@ -194,6 +194,7 @@ public class AttestationService {
 	public ObjectNode verify(JsonNode params) {
 		log.debug("Attestation verify {}", params);
 
+		boolean superGluu = commonVerifiers.hasSuperGluu(params);
 		boolean oneStep = commonVerifiers.isSuperGluuOneStepMode(params);
 		boolean cancelRequest = commonVerifiers.isSuperGluuOneStepMode(params);
 
@@ -206,7 +207,9 @@ public class AttestationService {
 
 		// Verify client data
 		JsonNode clientDataJSONNode = commonVerifiers.verifyClientJSON(responseNode);
-		commonVerifiers.verifyClientJSONTypeIsCreate(clientDataJSONNode);
+		if (!superGluu) {
+			commonVerifiers.verifyClientJSONTypeIsCreate(clientDataJSONNode);
+		}
 
 		// Get challenge
 		String challenge = commonVerifiers.getChallenge(clientDataJSONNode);

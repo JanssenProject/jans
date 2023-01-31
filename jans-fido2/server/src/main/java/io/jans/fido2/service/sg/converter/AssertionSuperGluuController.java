@@ -186,7 +186,7 @@ public class AssertionSuperGluuController {
 
         // Convert clientData node to new format
         ObjectNode clientData = dataMapperService.createObjectNode();
-        clientData.put("type", "webauthn.get");
+        clientData.put("type",  authenticateResponse.getClientData().getTyp());
         clientData.put("challenge", authenticateResponse.getClientData().getChallenge());
         clientData.put("origin", authenticateResponse.getClientData().getOrigin());
 
