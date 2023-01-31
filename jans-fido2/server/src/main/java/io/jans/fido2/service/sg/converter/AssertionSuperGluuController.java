@@ -11,6 +11,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -41,6 +42,9 @@ import jakarta.inject.Inject;
  */
 @ApplicationScoped
 public class AssertionSuperGluuController {
+
+    @Inject
+    private Logger log;
 
     @Inject
     private AssertionService assertionService;
@@ -103,6 +107,8 @@ public class AssertionSuperGluuController {
 
         params.put("username", userName);
         params.put("session_id", sessionId);
+
+        log.debug("Prepared U2F_V2 assertions options request: {}", params.toString());
 
         ObjectNode result = assertionService.options(params);
 
@@ -208,6 +214,8 @@ public class AssertionSuperGluuController {
 		} catch (IOException e) {
             throw new Fido2RuntimeException("Failed to prepare attestationObject");
 		}
+
+        log.debug("Prepared U2F_V2 assertion verify request: {}", params.toString());
 
         ObjectNode result = assertionService.verify(params);
 

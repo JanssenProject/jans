@@ -12,6 +12,8 @@ import java.nio.charset.Charset;
 import java.security.cert.CertificateEncodingException;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.slf4j.Logger;
+
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -46,6 +48,9 @@ import jakarta.inject.Inject;
  */
 @ApplicationScoped
 public class AttestationSuperGluuController {
+
+    @Inject
+    private Logger log;
 
     @Inject
     private AttestationService attestationService;
@@ -123,6 +128,8 @@ public class AttestationSuperGluuController {
         
         // Required parameters
         params.put("attestation", "direct");
+
+        log.debug("Prepared U2F_V2 attestation options request: {}", params.toString());
 
         ObjectNode result = attestationService.options(params);
 
@@ -241,6 +248,8 @@ public class AttestationSuperGluuController {
 		} catch (IOException e) {
             throw new Fido2RuntimeException("Failed to prepare attestationObject");
 		}
+
+        log.debug("Prepared U2F_V2 attestation verify request: {}", params.toString());
 
         ObjectNode result = attestationService.verify(params);
         

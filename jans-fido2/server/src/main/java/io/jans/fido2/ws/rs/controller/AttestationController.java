@@ -8,6 +8,8 @@ package io.jans.fido2.ws.rs.controller;
 
 import java.io.IOException;
 
+import org.slf4j.Logger;
+
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.jans.fido2.exception.Fido2RpRuntimeException;
@@ -37,6 +39,9 @@ import jakarta.ws.rs.core.Response.Status;
 @ApplicationScoped
 @Path("/attestation")
 public class AttestationController {
+
+    @Inject
+    private Logger log;
 
     @Inject
     private AttestationService attestationService;
@@ -107,7 +112,11 @@ public class AttestationController {
             return Response.status(Status.FORBIDDEN).build();
         }
 
+        log.debug("Start registration: username = {}, application = {}, session_id = {}, enrollment_code = {}", userName, appId, sessionId, enrollmentCode);
+
         JsonNode result = attestationSuperGluuController.startRegistration(userName, appId, sessionId, enrollmentCode);
+
+        log.debug("Prepared U2F_V2 registration options request: {}", result.toString());
 
         ResponseBuilder builder = Response.ok().entity(result.toString());
         return builder.build();
@@ -121,7 +130,11 @@ public class AttestationController {
             return Response.status(Status.FORBIDDEN).build();
         }
 
+        log.debug("Finish registration: username = {}, tokenResponse = {}", userName, registerResponseString);
+
         JsonNode result = attestationSuperGluuController.finishRegistration(userName, registerResponseString);
+
+        log.debug("Prepared U2F_V2 registration verify request: {}", result.toString());
 
         ResponseBuilder builder = Response.ok().entity(result.toString());
         return builder.build();
