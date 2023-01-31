@@ -8,6 +8,8 @@ package io.jans.as.model.crypto.signature;
 
 import io.jans.as.model.crypto.Certificate;
 import io.jans.as.model.crypto.KeyFactory;
+import io.jans.as.model.util.SecurityProviderUtility;
+
 import org.apache.commons.lang.StringUtils;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.cert.X509CertificateHolder;
@@ -62,7 +64,7 @@ public class ECDSAKeyFactory extends KeyFactory<ECDSAPrivateKey, ECDSAPublicKey>
 
         ECParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec(signatureAlgorithm.getCurve().getAlias());
 
-        KeyPairGenerator keyGen = KeyPairGenerator.getInstance("ECDSA", DEF_BC);
+        KeyPairGenerator keyGen = KeyPairGenerator.getInstance("ECDSA", SecurityProviderUtility.getBCProvider());
         keyGen.initialize(ecSpec, new SecureRandom());
 
         this.keyPair = keyGen.generateKeyPair();
@@ -84,8 +86,8 @@ public class ECDSAKeyFactory extends KeyFactory<ECDSAPrivateKey, ECDSAPublicKey>
             BigInteger serialNumber = new BigInteger(1024, new SecureRandom()); // serial number for certificate
             X500Name name = new X500Name(dnName);
             JcaX509v1CertificateBuilder certGen = new JcaX509v1CertificateBuilder(name, serialNumber, startDate.getTime(), expiryDate.getTime(), name, keyPair.getPublic());
-            X509CertificateHolder certHolder = certGen.build(new JcaContentSignerBuilder(signatureAlgorithm.getAlgorithm()).setProvider(DEF_BC).build(keyPair.getPrivate()));
-            X509Certificate cert = new JcaX509CertificateConverter().setProvider(DEF_BC).getCertificate(certHolder);
+            X509CertificateHolder certHolder = certGen.build(new JcaContentSignerBuilder(signatureAlgorithm.getAlgorithm()).setProvider(SecurityProviderUtility.getBCProvider()).build(keyPair.getPrivate()));
+            X509Certificate cert = new JcaX509CertificateConverter().setProvider(SecurityProviderUtility.getBCProvider()).getCertificate(certHolder);
             this.certificate = new Certificate(signatureAlgorithm, cert);
         }
 
@@ -98,8 +100,8 @@ public class ECDSAKeyFactory extends KeyFactory<ECDSAPrivateKey, ECDSAPublicKey>
         BigInteger serialNumber = new BigInteger(1024, new SecureRandom()); // serial number for certificate
         X500Name name = new X500Name(dnName);
         JcaX509v3CertificateBuilder certGen = new JcaX509v3CertificateBuilder(name, serialNumber, startDate, expirationDate, name, publicKey);
-        X509CertificateHolder certHolder = certGen.build(new JcaContentSignerBuilder(signatureAlgorithm.getAlgorithm()).setProvider(DEF_BC).build(keyPair.getPrivate()));
-        X509Certificate cert = new JcaX509CertificateConverter().setProvider(DEF_BC).getCertificate(certHolder);
+        X509CertificateHolder certHolder = certGen.build(new JcaContentSignerBuilder(signatureAlgorithm.getAlgorithm()).setProvider(SecurityProviderUtility.getBCProvider()).build(keyPair.getPrivate()));
+        X509Certificate cert = new JcaX509CertificateConverter().setProvider(SecurityProviderUtility.getBCProvider()).getCertificate(certHolder);
         resCertificate = new Certificate(signatureAlgorithm, cert);
         return resCertificate;
     }

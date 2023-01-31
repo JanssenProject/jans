@@ -276,11 +276,11 @@
 				<version>${bc.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.nimbusds</groupId>
-				<artifactId>nimbus-jose-jwt</artifactId>
-				<version>9.25.6</version>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bcmail-jdk15on</artifactId>
+				<version>${bc.version}</version>
 			</dependency>
-
+            
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
 				<artifactId>bc-fips</artifactId>
@@ -289,12 +289,18 @@
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
 				<artifactId>bcpkix-fips</artifactId>
-				<version>1.0.7</version>
+				<version>1.0.6</version>
 			</dependency>
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
 				<artifactId>bcmail-fips</artifactId>
 				<version>1.0.4</version>
+			</dependency>
+            
+			<dependency>
+				<groupId>com.nimbusds</groupId>
+				<artifactId>nimbus-jose-jwt</artifactId>
+				<version>9.25.6</version>
 			</dependency>
 
 			<!-- Weld -->

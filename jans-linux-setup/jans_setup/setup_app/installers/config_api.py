@@ -30,9 +30,9 @@ class ConfigApiInstaller(JettyInstaller):
     source_files = [
                 (os.path.join(Config.dist_jans_dir, 'jans-config-api.war'), os.path.join(base.current_app.app_info['BASE_SERVER'], '_out/jans-config-api.war')),
                 (os.path.join(Config.dist_jans_dir, 'facter'), 'https://raw.githubusercontent.com/GluuFederation/gluu-snap/master/facter/facter'),
-                (os.path.join(Config.dist_jans_dir, 'scim-plugin.jar'), os.path.join(base.current_app.app_info['BASE_SERVER'], '_out/_plugins/scim-plugin-1.0.6-SNAPSHOT-distribution.jar')),
+                (os.path.join(Config.dist_jans_dir, 'scim-plugin.jar'), os.path.join(base.current_app.app_info['BASE_SERVER'], 	   '_out/_plugins/scim-plugin-1.0.6-SNAPSHOT-distribution.jar')),
                 (os.path.join(Config.dist_jans_dir, 'user-mgt-plugin.jar'), os.path.join(base.current_app.app_info['BASE_SERVER'], '_out/_plugins/user-mgt-plugin-1.0.6-SNAPSHOT-distribution.jar')),
-                (os.path.join(Config.dist_jans_dir, 'fido2-plugin.jar'), os.path.join(base.current_app.app_info['BASE_SERVER'], '_out/_plugins/fido2-plugin-1.0.6-SNAPSHOT-distribution.jar')),
+                (os.path.join(Config.dist_jans_dir, 'fido2-plugin.jar'), os.path.join(base.current_app.app_info['BASE_SERVER'],    '_out/_plugins/fido2-plugin-1.0.6-SNAPSHOT-distribution.jar')),
                 (os.path.join(Config.dist_jans_dir, 'admin-ui-plugin.jar'), os.path.join(base.current_app.app_info['BASE_SERVER'], '_out/_plugins/admin-ui-plugin-distribution.jar'))
                ]
                

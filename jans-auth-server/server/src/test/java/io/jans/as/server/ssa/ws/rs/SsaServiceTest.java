@@ -20,6 +20,7 @@ import io.jans.as.model.jwt.JwtHeader;
 import io.jans.as.model.ssa.SsaConfiguration;
 import io.jans.as.model.ssa.SsaScopeType;
 import io.jans.as.model.util.Base64Util;
+import io.jans.as.model.util.SecurityProviderUtility;
 import io.jans.as.server.model.common.ExecutionContext;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
@@ -46,6 +47,10 @@ import static org.testng.Assert.*;
 
 @Listeners(MockitoTestNGListener.class)
 public class SsaServiceTest {
+	
+    static {
+    	SecurityProviderUtility.installBCProvider();
+    }	
 
     private final String senderJwkJson = "{\n" +
             "    \"kty\": \"RSA\",\n" +
@@ -95,13 +100,12 @@ public class SsaServiceTest {
             public String sign(String signingInput, String keyId, String sharedSecret, SignatureAlgorithm signatureAlgorithm) throws CryptoProviderException {
                 try {
                     RSAPrivateKey privateKey = ((RSAKey) JWK.parse(senderJwkJson)).toRSAPrivateKey();
-                    Signature signature = Signature.getInstance(signatureAlgorithm.getAlgorithm(), "BC");
+                    Signature signature = Signature.getInstance(signatureAlgorithm.getAlgorithm(), SecurityProviderUtility.getBCProvider());
                     signature.initSign(privateKey);
                     signature.update(signingInput.getBytes());
 
                     return Base64Util.base64urlencode(signature.sign());
-                } catch (JOSEException | ParseException | NoSuchAlgorithmException | NoSuchProviderException |
-                         InvalidKeyException | SignatureException e) {
+                } catch (JOSEException | ParseException | NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
                     throw new CryptoProviderException(e);
                 }
             }

@@ -13,6 +13,8 @@ import io.jans.as.model.crypto.signature.ECDSAPrivateKey;
 import io.jans.as.model.crypto.signature.ECDSAPublicKey;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.util.Base64Util;
+import io.jans.as.model.util.SecurityProviderUtility;
+
 import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jce.spec.ECParameterSpec;
 import org.bouncycastle.jce.spec.ECPrivateKeySpec;
@@ -90,10 +92,10 @@ public class ECDSASigner extends AbstractJwsSigner {
             ECParameterSpec ecSpec = ECNamedCurveTable.getParameterSpec(getSignatureAlgorithm().getCurve().getName());
             ECPrivateKeySpec privateKeySpec = new ECPrivateKeySpec(ecdsaPrivateKey.getD(), ecSpec);
 
-            KeyFactory keyFactory = KeyFactory.getInstance("ECDSA", "BC");
+            KeyFactory keyFactory = KeyFactory.getInstance("ECDSA", SecurityProviderUtility.getBCProvider());
             PrivateKey privateKey = keyFactory.generatePrivate(privateKeySpec);
 
-            Signature signer = Signature.getInstance(getSignatureAlgorithm().getAlgorithm(), "BC");
+            Signature signer = Signature.getInstance(getSignatureAlgorithm().getAlgorithm(), SecurityProviderUtility.getBCProvider());
             signer.initSign(privateKey);
             signer.update(signingInput.getBytes(StandardCharsets.UTF_8));
 
@@ -136,10 +138,10 @@ public class ECDSASigner extends AbstractJwsSigner {
 
             ECPublicKeySpec publicKeySpec = new ECPublicKeySpec(pointQ, ecSpec);
 
-            KeyFactory keyFactory = KeyFactory.getInstance("ECDSA", "BC");
+            KeyFactory keyFactory = KeyFactory.getInstance("ECDSA", SecurityProviderUtility.getBCProvider());
             PublicKey publicKey = keyFactory.generatePublic(publicKeySpec);
 
-            Signature sig = Signature.getInstance(signatureAlgorithm.getAlgorithm(), "BC");
+            Signature sig = Signature.getInstance(signatureAlgorithm.getAlgorithm(), SecurityProviderUtility.getBCProvider());
             sig.initVerify(publicKey);
             sig.update(sigInBytes);
             return sig.verify(sigBytes);

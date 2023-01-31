@@ -17,15 +17,12 @@ import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.exception.InvalidParameterException;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.util.StringHelper;
-import org.bouncycastle.jce.provider.X509CertificateObject;
-import org.bouncycastle.openssl.PEMParser;
 import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.core.Response;
 import java.io.IOException;
@@ -38,6 +35,7 @@ import java.security.NoSuchProviderException;
 import java.security.Provider;
 import java.security.Security;
 import java.security.cert.X509Certificate;
+import org.bouncycastle.openssl.PEMParser;
 import java.util.Set;
 
 import static io.jans.as.model.jwk.JWKParameter.ALGORITHM;
@@ -108,7 +106,7 @@ public class JwtUtil {
     }
 
     public static byte[] getMessageDigest(String data, String algorithm) throws NoSuchProviderException, NoSuchAlgorithmException {
-        return MessageDigest.getInstance(algorithm, "BC").digest(data.getBytes(StandardCharsets.UTF_8));
+        return MessageDigest.getInstance(algorithm, SecurityProviderUtility.getBCProvider()).digest(data.getBytes(StandardCharsets.UTF_8));
     }
 
     public static io.jans.as.model.crypto.PublicKey getPublicKey(
@@ -164,6 +162,24 @@ public class JwtUtil {
             } else {
                 throw new InvalidParameterException("Wrong value of the AlgorithmFamily: algorithmFamily = " + algorithmFamily);
             }
+            
+            if (publicKey != null && jsonKeyValue.has(CERTIFICATE_CHAIN)) {
+                final String BEGIN = "-----BEGIN CERTIFICATE-----";
+                final String END = "-----END CERTIFICATE-----";
+
+                JSONArray certChain = jsonKeyValue.getJSONArray(CERTIFICATE_CHAIN);
+                String certificateString = BEGIN + "\n" + certChain.getString(0) + "\n" + END;
+                StringReader sr = new StringReader(certificateString);
+                PEMParser pemReader = new PEMParser(sr);
+                X509Certificate cert = (X509Certificate) pemReader.readObject();
+                Certificate certificate = new Certificate(signatureAlgorithm, cert);
+                publicKey.setCertificate(certificate);
+            }
+            if (publicKey != null) {
+                publicKey.setKeyId(resultKeyId);
+                publicKey.setSignatureAlgorithm(signatureAlgorithm);
+            }
+            
 
             if (jsonKeyValue.has(CERTIFICATE_CHAIN)) {
                 final String BEGIN = "-----BEGIN CERTIFICATE-----";
@@ -173,8 +189,8 @@ public class JwtUtil {
                 String certificateString = BEGIN + "\n" + certChain.getString(0) + "\n" + END;
                 StringReader sr = new StringReader(certificateString);
                 PEMParser pemReader = new PEMParser(sr);
-                X509Certificate cert = (X509CertificateObject) pemReader.readObject();
-                io.jans.as.model.crypto.Certificate certificate = new Certificate(signatureAlgorithm, cert);
+                X509Certificate cert = (X509Certificate) pemReader.readObject();
+                Certificate certificate = new Certificate(signatureAlgorithm, cert);
                 publicKey.setCertificate(certificate);
             }
 

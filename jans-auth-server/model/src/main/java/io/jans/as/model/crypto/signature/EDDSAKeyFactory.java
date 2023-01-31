@@ -7,6 +7,8 @@ package io.jans.as.model.crypto.signature;
 
 import io.jans.as.model.crypto.Certificate;
 import io.jans.as.model.crypto.KeyFactory;
+import io.jans.as.model.util.SecurityProviderUtility;
+
 import org.apache.commons.lang.StringUtils;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x500.X500Name;
@@ -83,7 +85,7 @@ public class EDDSAKeyFactory extends KeyFactory<EDDSAPrivateKey, EDDSAPublicKey>
 
         EdDSAParameterSpec edSpec = new EdDSAParameterSpec(signatureAlgorithm.getCurve().getName());
 
-        KeyPairGenerator keyGen = KeyPairGenerator.getInstance(signatureAlgorithm.getName(), DEF_BC);
+        KeyPairGenerator keyGen = KeyPairGenerator.getInstance(signatureAlgorithm.getName(), SecurityProviderUtility.getBCProvider());
         keyGen.initialize(edSpec, new SecureRandom());
 
         this.keyPair = keyGen.generateKeyPair();
@@ -107,9 +109,9 @@ public class EDDSAKeyFactory extends KeyFactory<EDDSAPrivateKey, EDDSAPublicKey>
             JcaX509v1CertificateBuilder certGen = new JcaX509v1CertificateBuilder(name, serialNumber,
                     startDate.getTime(), expiryDate.getTime(), name, publicKey);
             X509CertificateHolder certHolder = certGen
-                    .build(new JcaContentSignerBuilder(signatureAlgorithm.getAlgorithm()).setProvider(DEF_BC)
+                    .build(new JcaContentSignerBuilder(signatureAlgorithm.getAlgorithm()).setProvider(SecurityProviderUtility.getBCProvider())
                             .build(keyPair.getPrivate()));
-            X509Certificate cert = new JcaX509CertificateConverter().setProvider(DEF_BC).getCertificate(certHolder);
+            X509Certificate cert = new JcaX509CertificateConverter().setProvider(SecurityProviderUtility.getBCProvider()).getCertificate(certHolder);
             this.certificate = new Certificate(signatureAlgorithm, cert);
         }
     }
@@ -138,9 +140,9 @@ public class EDDSAKeyFactory extends KeyFactory<EDDSAPrivateKey, EDDSAPublicKey>
             JcaX509v3CertificateBuilder certGen = new JcaX509v3CertificateBuilder(name, serialNumber, startDate,
                     expirationDate, name, publicKey);
             X509CertificateHolder certHolder = certGen
-                    .build(new JcaContentSignerBuilder(signatureAlgorithm.getAlgorithm()).setProvider(DEF_BC)
+                    .build(new JcaContentSignerBuilder(signatureAlgorithm.getAlgorithm()).setProvider(SecurityProviderUtility.getBCProvider())
                             .build(keyPair.getPrivate()));
-            X509Certificate cert = new JcaX509CertificateConverter().setProvider(DEF_BC).getCertificate(certHolder);
+            X509Certificate cert = new JcaX509CertificateConverter().setProvider(SecurityProviderUtility.getBCProvider()).getCertificate(certHolder);
             resCertificate = new Certificate(signatureAlgorithm, cert);
         } catch (Exception e) {
             throw new SignatureException(e);

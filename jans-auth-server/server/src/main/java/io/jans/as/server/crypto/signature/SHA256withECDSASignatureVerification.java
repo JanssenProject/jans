@@ -7,6 +7,8 @@
 package io.jans.as.server.crypto.signature;
 
 import io.jans.as.model.exception.SignatureException;
+import io.jans.as.model.util.SecurityProviderUtility;
+
 import org.bouncycastle.asn1.sec.SECNamedCurves;
 import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.jce.spec.ECParameterSpec;
@@ -34,7 +36,7 @@ public class SHA256withECDSASignatureVerification implements SignatureVerificati
     public boolean checkSignature(PublicKey publicKey, byte[] signedBytes, byte[] signature) throws SignatureException {
         boolean isValid = false;
         try {
-            Signature ecdsaSignature = Signature.getInstance("SHA256withECDSA", "BC");
+            Signature ecdsaSignature = Signature.getInstance("SHA256withECDSA", SecurityProviderUtility.getBCProvider());
             ecdsaSignature.initVerify(publicKey);
             ecdsaSignature.update(signedBytes);
 

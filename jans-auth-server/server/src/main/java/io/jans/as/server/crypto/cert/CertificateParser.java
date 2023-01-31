@@ -13,11 +13,12 @@ import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.PEMParser;
 
+import io.jans.as.model.util.SecurityProviderUtility;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
-import java.security.NoSuchProviderException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -50,10 +51,6 @@ public class CertificateParser {
     }
 
     public static X509Certificate parseDer(InputStream is) throws CertificateException {
-        try {
-            return (X509Certificate) CertificateFactory.getInstance("X.509", "BC").generateCertificate(is);
-        } catch (NoSuchProviderException ex) {
-            throw new CertificateException(ex);
-        }
+        return (X509Certificate) CertificateFactory.getInstance("X.509", SecurityProviderUtility.getBCProvider()).generateCertificate(is);
     }
 }

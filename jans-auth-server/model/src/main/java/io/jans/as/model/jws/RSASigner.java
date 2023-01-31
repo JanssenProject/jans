@@ -10,6 +10,7 @@ import io.jans.as.model.crypto.signature.RSAPrivateKey;
 import io.jans.as.model.crypto.signature.RSAPublicKey;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.util.Base64Util;
+import io.jans.as.model.util.SecurityProviderUtility;
 
 import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
@@ -61,10 +62,10 @@ public class RSASigner extends AbstractJwsSigner {
                     rsaPrivateKey.getModulus(),
                     rsaPrivateKey.getPrivateExponent());
 
-            KeyFactory keyFactory = KeyFactory.getInstance("RSA", "BC");
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA", SecurityProviderUtility.getBCProvider());
             PrivateKey privateKey = keyFactory.generatePrivate(rsaPrivateKeySpec);
 
-            Signature signature = Signature.getInstance(getSignatureAlgorithm().getAlgorithm(), "BC");
+            Signature signature = Signature.getInstance(getSignatureAlgorithm().getAlgorithm(), SecurityProviderUtility.getBCProvider());
             signature.initSign(privateKey);
             signature.update(signingInput.getBytes(StandardCharsets.UTF_8));
 
@@ -94,10 +95,10 @@ public class RSASigner extends AbstractJwsSigner {
                     rsaPublicKey.getModulus(),
                     rsaPublicKey.getPublicExponent());
 
-            KeyFactory keyFactory = KeyFactory.getInstance("RSA", "BC");
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA", SecurityProviderUtility.getBCProvider());
             PublicKey publicKey = keyFactory.generatePublic(rsaPublicKeySpec);
 
-            Signature sign = Signature.getInstance(getSignatureAlgorithm().getAlgorithm(), "BC");
+            Signature sign = Signature.getInstance(getSignatureAlgorithm().getAlgorithm(), SecurityProviderUtility.getBCProvider());
             sign.initVerify(publicKey);
             sign.update(sigInBytes);
 
