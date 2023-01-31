@@ -54,6 +54,12 @@ public class SsaService {
     @Inject
     private StaticConfiguration staticConfiguration;
 
+    @Inject
+    private WebKeysConfiguration webKeysConfiguration;
+
+    @Inject
+    private AbstractCryptoProvider cryptoProvider;
+
     /**
      * Persist SSA in to the database
      *
@@ -133,13 +139,35 @@ public class SsaService {
      * Method executes a postProcessor in case it has been sent in the execution context parameter.
      * </p>
      *
-     * @param ssa                  Ssa
-     * @param executionContext     Execution context
-     * @param webKeysConfiguration Web keys configuration
-     * @param cryptoProvider       Crypto provider
+     * @param ssa              Ssa
+     * @param executionContext Execution context
      * @return Jwt with SSA structure
      */
-    public Jwt generateJwt(Ssa ssa, ExecutionContext executionContext, WebKeysConfiguration webKeysConfiguration, AbstractCryptoProvider cryptoProvider) {
+    public Jwt generateJwt(Ssa ssa, ExecutionContext executionContext) {
+        try {
+            Jwt jwr = generateJwt(ssa);
+            if (executionContext.getPostProcessor() != null) {
+                executionContext.getPostProcessor().apply(jwr);
+            }
+            return jwr;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Generates a new JWT using a given SSA.
+     * <p>
+     * Method throws an {@link RuntimeException} if it fails to create the jwt
+     * </p>
+     * <p>
+     * Method executes a postProcessor in case it has been sent in the execution context parameter.
+     * </p>
+     *
+     * @param ssa Ssa
+     * @return Jwt with SSA structure
+     */
+    public Jwt generateJwt(Ssa ssa) {
         try {
             SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(appConfiguration.getSsaConfiguration().getSsaSigningAlg());
             JwtSigner jwtSigner = new JwtSigner(appConfiguration, webKeysConfiguration, signatureAlgorithm, null, null, cryptoProvider);
@@ -152,11 +180,7 @@ public class SsaService {
             jwt.getClaims().setClaim(SOFTWARE_ROLES.getName(), ssa.getAttributes().getSoftwareRoles());
             jwt.getClaims().setClaim(GRANT_TYPES.getName(), ssa.getAttributes().getGrantTypes());
 
-            Jwt jwr = jwtSigner.sign();
-            if (executionContext.getPostProcessor() != null) {
-                executionContext.getPostProcessor().apply(jwr);
-            }
-            return jwr;
+            return jwtSigner.sign();
         } catch (Exception e) {
             if (log.isErrorEnabled())
                 log.error("Failed to sign session jwt! " + e.getMessage(), e);

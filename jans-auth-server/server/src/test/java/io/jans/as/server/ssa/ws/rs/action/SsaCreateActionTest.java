@@ -123,10 +123,10 @@ public class SsaCreateActionTest {
 
         ExecutionContext executionContext = mock(ExecutionContext.class);
         ModifySsaResponseContext context = mock(ModifySsaResponseContext.class);
-        when(ssaContextBuilder.buildModifySsaResponseContext(any(), any(), any(), any(), any())).thenReturn(context);
+        when(ssaContextBuilder.buildModifySsaResponseContext(any(), any())).thenReturn(context);
         when(modifySsaResponseService.buildCreateProcessor(any())).thenReturn(jsonWebResponse -> null);
         when(context.toExecutionContext()).thenReturn(executionContext);
-        when(ssaService.generateJwt(any(), any(), any(), any())).thenReturn(mock(Jwt.class));
+        when(ssaService.generateJwt(any(), any())).thenReturn(mock(Jwt.class));
         when(ssaJsonService.getJSONObject(anyString())).thenReturn(mock(JSONObject.class));
         when(ssaJsonService.jsonObjectToString(any())).thenReturn("{\"ssa\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c\"}");
         when(appConfiguration.getSsaConfiguration()).thenReturn(new SsaConfiguration());
@@ -143,10 +143,10 @@ public class SsaCreateActionTest {
         verify(ssaRestWebServiceValidator).checkScopesPolicy(any(), anyString());
         verify(ssaService).persist(any());
         verify(log).info(anyString(), any(Ssa.class));
-        verify(ssaContextBuilder).buildModifySsaResponseContext(any(), any(), any(), any(), any());
+        verify(ssaContextBuilder).buildModifySsaResponseContext(any(), any());
         verify(modifySsaResponseService).buildCreateProcessor(any());
         verify(context).toExecutionContext();
-        verify(ssaService).generateJwt(any(), any(), any(), any());
+        verify(ssaService).generateJwt(any(), any());
         verify(ssaJsonService).getJSONObject(anyString());
         verify(ssaJsonService).jsonObjectToString(any());
 
