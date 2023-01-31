@@ -23,7 +23,5 @@ public class RegistrationPersistenceService extends io.jans.as.common.service.co
     {
     	return userService.getUserInum(userName);
     }
-
-    @Inject
-	private  UserService userService;
+    
 }
