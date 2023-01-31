@@ -111,11 +111,10 @@ public class AssertionController {
         if ((appConfiguration.getFido2Configuration() == null) && !appConfiguration.isSuperGluuEnabled()) {
             return Response.status(Status.FORBIDDEN).build();
         }
+
         log.debug("Start authentication: username = {}, keyhandle = {}, application = {}, session_id = {}", userName, keyHandle, appId, sessionId);
 
         JsonNode result = assertionSuperGluuController.startAuthentication(userName, keyHandle, appId, sessionId);
-
-        log.debug("Prepared U2F_V2 authentication options request: {}", result.toString());
 
         ResponseBuilder builder = Response.ok().entity(result.toString());
         return builder.build();
@@ -132,8 +131,6 @@ public class AssertionController {
         log.debug("Finish authentication: username = {}, tokenResponse = {}", userName, authenticateResponseString);
 
         JsonNode result = assertionSuperGluuController.finishAuthentication(userName, authenticateResponseString);
-
-        log.debug("Prepared U2F_V2 authentication verify request: {}", result.toString());
 
         ResponseBuilder builder = Response.ok().entity(result.toString());
         return builder.build();

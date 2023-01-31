@@ -116,8 +116,6 @@ public class AttestationController {
 
         JsonNode result = attestationSuperGluuController.startRegistration(userName, appId, sessionId, enrollmentCode);
 
-        log.debug("Prepared U2F_V2 registration options request: {}", result.toString());
-
         ResponseBuilder builder = Response.ok().entity(result.toString());
         return builder.build();
     }
@@ -133,8 +131,6 @@ public class AttestationController {
         log.debug("Finish registration: username = {}, tokenResponse = {}", userName, registerResponseString);
 
         JsonNode result = attestationSuperGluuController.finishRegistration(userName, registerResponseString);
-
-        log.debug("Prepared U2F_V2 registration verify request: {}", result.toString());
 
         ResponseBuilder builder = Response.ok().entity(result.toString());
         return builder.build();
