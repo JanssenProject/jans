@@ -219,7 +219,7 @@
       "personInum",
       "jansApp",
       "jansPublicKeyId",
-      "jansPublicKeyIdHash"
+      "jansPublicKeyIdHash",
       "jansCodeChallenge",
       "jansCodeChallengeHash"
     ],
