@@ -213,7 +213,7 @@ public class AssertionService {
 
 		boolean superGluu = commonVerifiers.hasSuperGluu(params);
 		boolean oneStep = commonVerifiers.isSuperGluuOneStepMode(params);
-		boolean cancelRequest = commonVerifiers.isSuperGluuOneStepMode(params);
+		boolean cancelRequest = commonVerifiers.isSuperGluuCancelRequest(params);
 
 		// Verify if there are mandatory request parameters
 		commonVerifiers.verifyBasicPayload(params);
