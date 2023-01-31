@@ -279,7 +279,7 @@ public class AssertionService {
 
         // Support cancel request
         if (cancelRequest) {
-        	authenticationEntity.setAuthenticationStatus(Fido2AuthenticationStatus.canceled);
+        	authenticationData.setStatus(Fido2AuthenticationStatus.canceled);
         }
 
 		authenticationPersistenceService.update(authenticationEntity);
