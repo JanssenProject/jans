@@ -218,7 +218,7 @@ public class AttestationSuperGluuController {
         ObjectNode clientData = dataMapperService.createObjectNode();
         clientData.put("challenge", registerResponse.getClientData().getChallenge());
         clientData.put("origin", registerResponse.getClientData().getOrigin());
-        clientData.put("type", "webauthn.create");
+        clientData.put("type", registerResponse.getClientData().getTyp());
 		response.put("clientDataJSON", base64Service.urlEncodeToString(clientData.toString().getBytes(Charset.forName("UTF-8"))));
 
 		// Store cancel type

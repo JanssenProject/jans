@@ -90,8 +90,6 @@ public class U2FSuperGluuAssertionFormatProcessor implements AssertionFormatProc
         userVerificationVerifier.verifyUserPresent(authData);
 
         String clientDataJsonString = new String(base64Service.urlDecode(clientDataJson), StandardCharsets.UTF_8);
-        // Update to conform Super Gluu
-        clientDataJsonString = clientDataJsonString.replace("type", "typ").replaceAll("webauthn.get", "navigator.id.getAssertion");
         
         byte[] clientDataHash = DigestUtils.getSha256Digest().digest(clientDataJsonString.getBytes(StandardCharsets.UTF_8));
 
