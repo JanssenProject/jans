@@ -7,6 +7,7 @@
 package io.jans.as.model.jwk;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.nimbusds.jose.jwk.JWKException;
 import io.jans.as.model.crypto.signature.EllipticEdvardsCurve;
 import io.jans.as.model.util.Base64Util;
@@ -42,6 +43,8 @@ public class JSONWebKey {
     private Long exp;
     private EllipticEdvardsCurve crv;
     private List<String> x5c;
+    @JsonProperty("key_ops")
+    private KeyOps keyOps;
 
     /**
      * Modulus
@@ -55,6 +58,24 @@ public class JSONWebKey {
 
     private String x;
     private String y;
+
+    /**
+     * Returns key ops
+     *
+     * @return key ops
+     */
+    public KeyOps getKeyOps() {
+        return keyOps;
+    }
+
+    /**
+     * Sets key ops
+     *
+     * @param keyOps key ops
+     */
+    public void setKeyOps(KeyOps keyOps) {
+        this.keyOps = keyOps;
+    }
 
     /**
      * Returns the Key Name.
@@ -350,6 +371,9 @@ public class JSONWebKey {
         if (use != null) {
             jsonObj.put(JWKParameter.KEY_USE, use.getParamName());
         }
+        if (keyOps != null) {
+            jsonObj.put(JWKParameter.KEY_OPS, keyOps.getValue());
+        }
         jsonObj.put(JWKParameter.ALGORITHM, alg);
         jsonObj.put(JWKParameter.EXPIRATION_TIME, exp);
         if (crv != null) {
@@ -383,6 +407,7 @@ public class JSONWebKey {
         jwk.setKty(KeyType.fromString(jwkJSONObject.optString(JWKParameter.KEY_TYPE)));
         jwk.setUse(Use.fromString(jwkJSONObject.optString(JWKParameter.KEY_USE)));
         jwk.setAlg(Algorithm.fromString(jwkJSONObject.optString(JWKParameter.ALGORITHM)));
+        jwk.setKeyOps(KeyOps.fromString(jwkJSONObject.optString(JWKParameter.KEY_OPS)));
         if (jwkJSONObject.has(JWKParameter.EXPIRATION_TIME)) {
             jwk.setExp(jwkJSONObject.optLong(JWKParameter.EXPIRATION_TIME));
         }

@@ -6,46 +6,28 @@
 
 package io.jans.as.client.util;
 
-import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.ElevenCryptoProvider;
 import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.exception.CryptoProviderException;
-import io.jans.as.model.jwk.Algorithm;
-import io.jans.as.model.jwk.JSONWebKey;
-import io.jans.as.model.jwk.JSONWebKeySet;
-import io.jans.as.model.jwk.Use;
+import io.jans.as.model.jwk.*;
 import io.jans.as.model.util.SecurityProviderUtility;
 import io.jans.as.model.util.StringUtils;
 import io.jans.util.StringHelper;
-import org.apache.commons.cli.BasicParser;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.*;
 import org.apache.log4j.Logger;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.status.StatusLogger;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.List;
 
-import static io.jans.as.model.jwk.JWKParameter.CERTIFICATE_CHAIN;
-import static io.jans.as.model.jwk.JWKParameter.EXPIRATION_TIME;
-import static io.jans.as.model.jwk.JWKParameter.EXPONENT;
-import static io.jans.as.model.jwk.JWKParameter.KEY_ID;
-import static io.jans.as.model.jwk.JWKParameter.MODULUS;
-import static io.jans.as.model.jwk.JWKParameter.X;
-import static io.jans.as.model.jwk.JWKParameter.Y;
+import static io.jans.as.model.jwk.JWKParameter.*;
 
 /**
  * Command example:
@@ -75,6 +57,7 @@ public class KeyGenerator {
     private static final String KEY_LENGTH = "key_length";
     private static final String HELP = "h";
     private static final String TEST_PROP_FILE = "test_prop_file";
+    private static final String KEY_OPS = "key_ops";
 
     private static final String KEY_NAME_SUFFIX = "_keyId";
 
@@ -85,7 +68,7 @@ public class KeyGenerator {
         log = Logger.getLogger(KeyGenerator.class);
     }
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         new Cli(args).parse();
     }
 
@@ -114,16 +97,17 @@ public class KeyGenerator {
             options.addOption(EXPIRATION, true, "Expiration in days.");
             options.addOption(EXPIRATION_HOURS, true, "Expiration in hours.");
             options.addOption(KEY_LENGTH, true, "Key length");
+            options.addOption(KEY_OPS, true, "Key Operations");
             options.addOption(TEST_PROP_FILE, true, "Tests property file.");
             options.addOption(HELP, false, "Show help.");
         }
 
+        @SuppressWarnings("java:S1874")
         public void parse() {
             CommandLineParser parser = new BasicParser();
 
-            CommandLine cmd = null;
             try {
-                cmd = parser.parse(options, args);
+                CommandLine cmd = parser.parse(options, args);
 
                 if (cmd.hasOption(HELP)) {
                     help();
@@ -134,53 +118,30 @@ public class KeyGenerator {
                     help();
                 }
 
+                final KeyOps keyOps = parseKeyOps(cmd);
+
                 String[] sigAlgorithms = cmd.getOptionValues(SIGNING_KEYS);
                 String[] encAlgorithms = cmd.getOptionValues(ENCRYPTION_KEYS);
-                List<Algorithm> signatureAlgorithms = cmd.hasOption(SIGNING_KEYS) ? Algorithm.fromString(sigAlgorithms, Use.SIGNATURE) : new ArrayList<Algorithm>();
-                List<Algorithm> encryptionAlgorithms = cmd.hasOption(ENCRYPTION_KEYS) ? Algorithm.fromString(encAlgorithms, Use.ENCRYPTION) : new ArrayList<Algorithm>();
+                List<Algorithm> signatureAlgorithms = cmd.hasOption(SIGNING_KEYS) ? Algorithm.fromString(sigAlgorithms, Use.SIGNATURE) : new ArrayList<>();
+                List<Algorithm> encryptionAlgorithms = cmd.hasOption(ENCRYPTION_KEYS) ? Algorithm.fromString(encAlgorithms, Use.ENCRYPTION) : new ArrayList<>();
                 if (signatureAlgorithms.isEmpty() && encryptionAlgorithms.isEmpty()) {
                     help();
                 }
 
-                int keyLength = StringHelper.toInt(cmd.getOptionValue(KEY_LENGTH), 2048);
-                int expiration = StringHelper.toInt(cmd.getOptionValue(EXPIRATION), 0);
-                int expirationHours = StringHelper.toInt(cmd.getOptionValue(EXPIRATION_HOURS), 0);
-
-                String testPropFile = null;
-                if (cmd.hasOption(TEST_PROP_FILE)) {
-                    testPropFile = cmd.getOptionValue(TEST_PROP_FILE);
-                }
+                KeyGeneratorContext context = new KeyGeneratorContext();
+                context.setKeyLength(StringHelper.toInt(cmd.getOptionValue(KEY_LENGTH), 2048));
+                context.setExpirationDays(StringHelper.toInt(cmd.getOptionValue(EXPIRATION), 0));
+                context.setExpirationHours(StringHelper.toInt(cmd.getOptionValue(EXPIRATION_HOURS), 0));
+                context.calculateExpiration();
+                context.setTestPropFile(TestPropFile.create(cmd));
+                context.setKeyOps(keyOps);
 
                 if (cmd.hasOption(OXELEVEN_ACCESS_TOKEN) && cmd.hasOption(OXELEVEN_GENERATE_KEY_ENDPOINT)) {
-                    String accessToken = cmd.getOptionValue(OXELEVEN_ACCESS_TOKEN);
-                    String generateKeyEndpoint = cmd.getOptionValue(OXELEVEN_GENERATE_KEY_ENDPOINT);
-
-                    try {
-                        ElevenCryptoProvider cryptoProvider = new ElevenCryptoProvider(generateKeyEndpoint,
-                                null, null, null, accessToken);
-
-                        generateKeys(cryptoProvider, signatureAlgorithms, encryptionAlgorithms, expiration, expirationHours, testPropFile, keyLength);
-                    } catch (Exception e) {
-                        log.error("Failed to generate keys", e);
-                        help();
-                    }
+                    generateKeysWithEleven(cmd, signatureAlgorithms, encryptionAlgorithms, context);
                 } else if (cmd.hasOption(KEY_STORE_FILE)
                         && cmd.hasOption(KEY_STORE_PASSWORD)
                         && cmd.hasOption(DN_NAME)) {
-                    String keystore = cmd.getOptionValue(KEY_STORE_FILE);
-                    String keypasswd = cmd.getOptionValue(KEY_STORE_PASSWORD);
-                    String dnName = cmd.getOptionValue(DN_NAME);
-
-                    try {
-                        SecurityProviderUtility.installBCProvider(true);
-
-                        AuthCryptoProvider cryptoProvider = new AuthCryptoProvider(keystore, keypasswd, dnName);
-                        generateKeys(cryptoProvider, signatureAlgorithms, encryptionAlgorithms, expiration, expirationHours, testPropFile, keyLength);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        log.error("Failed to generate keys", e);
-                        help();
-                    }
+                    generateKeysWithJansAuth(cmd, signatureAlgorithms, encryptionAlgorithms, context);
                 } else {
                     help();
                 }
@@ -190,49 +151,75 @@ public class KeyGenerator {
             }
         }
 
-        private void generateKeys(AbstractCryptoProvider cryptoProvider, List<Algorithm> signatureAlgorithms,
-                                  List<Algorithm> encryptionAlgorithms, int expiration, int expirationHours, String testPropFile, int keyLength) throws CryptoProviderException, IOException {
+        @Nullable
+        private KeyOps parseKeyOps(CommandLine cmd) {
+            if (!cmd.hasOption(KEY_OPS)) {
+                help();
+            }
+
+            final KeyOps keyOps = KeyOps.fromString(cmd.getOptionValue(KEY_OPS));
+            if (keyOps == null) {
+                help();
+            }
+            return keyOps;
+        }
+
+        private void generateKeysWithJansAuth(CommandLine cmd, List<Algorithm> signatureAlgorithms, List<Algorithm> encryptionAlgorithms, KeyGeneratorContext context) {
+            String keystore = cmd.getOptionValue(KEY_STORE_FILE);
+            String keypasswd = cmd.getOptionValue(KEY_STORE_PASSWORD);
+            String dnName = cmd.getOptionValue(DN_NAME);
+
+            try {
+                SecurityProviderUtility.installBCProvider(true);
+
+                context.setCryptoProvider(new AuthCryptoProvider(keystore, keypasswd, dnName));
+                generateKeys(context, signatureAlgorithms, encryptionAlgorithms);
+            } catch (Exception e) {
+                e.printStackTrace();
+                log.error("Failed to generate keys with `jans-auth` crypto", e);
+                help();
+            }
+        }
+
+        private void generateKeysWithEleven(CommandLine cmd, List<Algorithm> signatureAlgorithms, List<Algorithm> encryptionAlgorithms, KeyGeneratorContext context) {
+            String accessToken = cmd.getOptionValue(OXELEVEN_ACCESS_TOKEN);
+            String generateKeyEndpoint = cmd.getOptionValue(OXELEVEN_GENERATE_KEY_ENDPOINT);
+
+            try {
+                context.setCryptoProvider(new ElevenCryptoProvider(generateKeyEndpoint,
+                        null, null, null, accessToken));
+
+                generateKeys(context, signatureAlgorithms, encryptionAlgorithms);
+            } catch (Exception e) {
+                log.error("Failed to generate keys with 'eleven' crypto", e);
+                help();
+            }
+        }
+
+        @SuppressWarnings("java:S106")
+        private void generateKeys(KeyGeneratorContext context, List<Algorithm> signatureAlgorithms,
+                                  List<Algorithm> encryptionAlgorithms) throws CryptoProviderException, IOException {
             JSONWebKeySet jwks = new JSONWebKeySet();
 
-            Calendar calendar = new GregorianCalendar();
-            calendar.add(Calendar.DATE, expiration);
-            calendar.add(Calendar.HOUR, expirationHours);
-
-            boolean genTestPropFile = (testPropFile != null && testPropFile.length() > 0);
-
-            List<String> recs = genTestPropFile ? (new ArrayList<>()) : null;
-
-            for (Algorithm algorithm : signatureAlgorithms) {
-                SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(algorithm.getParamName());
-                JSONObject result = cryptoProvider.generateKey(algorithm, calendar.getTimeInMillis(), keyLength);
-
-                JSONWebKey key = new JSONWebKey();
-
-                key.setName(algorithm.getOutName());
-                key.setDescr(algorithm.getDescription());
-                key.setKid(result.getString(KEY_ID));
-                key.setUse(Use.SIGNATURE);
-                key.setAlg(algorithm);
-                key.setKty(signatureAlgorithm.getFamily().getKeyType());
-                key.setExp(result.optLong(EXPIRATION_TIME));
-                key.setCrv(signatureAlgorithm.getCurve());
-                key.setN(result.optString(MODULUS));
-                key.setE(result.optString(EXPONENT));
-                key.setX(result.optString(X));
-                key.setY(result.optString(Y));
-
-                JSONArray x5c = result.optJSONArray(CERTIFICATE_CHAIN);
-                key.setX5c(StringUtils.toList(x5c));
-
-                jwks.getKeys().add(key);
-
-                if (genTestPropFile) {
-                    recs.add(getKeyNameFromAlgorithm(algorithm) + "=" + result.getString(KEY_ID));
-                }
+            final KeyOps keyOps = context.getKeyOps();
+            if (keyOps == KeyOps.ALL) {
+                generateSignatureKeys(context, signatureAlgorithms, jwks, KeyOps.CONNECT);
+                generateSignatureKeys(context, signatureAlgorithms, jwks, KeyOps.SSA);
+                generateEncryptionKeys(context, encryptionAlgorithms, jwks, KeyOps.CONNECT);
+                generateEncryptionKeys(context, encryptionAlgorithms, jwks, KeyOps.SSA);
+            } else {
+                generateSignatureKeys(context, signatureAlgorithms, jwks, keyOps);
+                generateEncryptionKeys(context, encryptionAlgorithms, jwks, keyOps);
             }
+
+            context.getTestPropFile().generate();
+            System.out.println(jwks);
+        }
+
+        private void generateEncryptionKeys(KeyGeneratorContext context, List<Algorithm> encryptionAlgorithms, JSONWebKeySet jwks, KeyOps keyOps) throws CryptoProviderException {
             for (Algorithm algorithm : encryptionAlgorithms) {
                 KeyEncryptionAlgorithm encryptionAlgorithm = KeyEncryptionAlgorithm.fromName(algorithm.getParamName());
-                JSONObject result = cryptoProvider.generateKey(algorithm, calendar.getTimeInMillis(), keyLength);
+                JSONObject result = context.getCryptoProvider().generateKey(algorithm, context.getExpirationForKeyOps(keyOps), context.getKeyLength(), keyOps);
 
                 JSONWebKey key = new JSONWebKey();
 
@@ -248,29 +235,49 @@ public class KeyGenerator {
                 key.setE(result.optString(EXPONENT));
                 key.setX(result.optString(X));
                 key.setY(result.optString(Y));
+                key.setKeyOps(keyOps);
 
                 JSONArray x5c = result.optJSONArray(CERTIFICATE_CHAIN);
                 key.setX5c(StringUtils.toList(x5c));
 
                 jwks.getKeys().add(key);
 
-                if (genTestPropFile) {
-                    recs.add(getKeyNameFromAlgorithm(algorithm) + "=" + result.getString(KEY_ID));
-                }
+                context.getTestPropFile().add(getKeyNameFromAlgorithm(algorithm) + "=" + result.getString(KEY_ID));
             }
-            if (genTestPropFile) {
-                try (FileOutputStream fosTestPropFile = new FileOutputStream(testPropFile)) {
-                    for (String rec : recs) {
-                        fosTestPropFile.write(rec.getBytes());
-                        fosTestPropFile.write("\n".getBytes());
-                    }
-                }
+        }
+
+        private void generateSignatureKeys(KeyGeneratorContext context, List<Algorithm> signatureAlgorithms, JSONWebKeySet jwks, KeyOps keyOps) throws CryptoProviderException {
+            for (Algorithm algorithm : signatureAlgorithms) {
+                SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(algorithm.getParamName());
+                JSONObject result = context.getCryptoProvider().generateKey(algorithm, context.getExpirationForKeyOps(keyOps), context.getKeyLength(), keyOps);
+
+                JSONWebKey key = new JSONWebKey();
+
+                key.setName(algorithm.getOutName());
+                key.setDescr(algorithm.getDescription());
+                key.setKid(result.getString(KEY_ID));
+                key.setUse(Use.SIGNATURE);
+                key.setAlg(algorithm);
+                key.setKty(signatureAlgorithm.getFamily().getKeyType());
+                key.setExp(result.optLong(EXPIRATION_TIME));
+                key.setCrv(signatureAlgorithm.getCurve());
+                key.setN(result.optString(MODULUS));
+                key.setE(result.optString(EXPONENT));
+                key.setX(result.optString(X));
+                key.setY(result.optString(Y));
+                key.setKeyOps(keyOps);
+
+                JSONArray x5c = result.optJSONArray(CERTIFICATE_CHAIN);
+                key.setX5c(StringUtils.toList(x5c));
+
+                jwks.getKeys().add(key);
+
+                context.getTestPropFile().add(getKeyNameFromAlgorithm(algorithm) + "=" + result.getString(KEY_ID));
             }
-            System.out.println(jwks);
         }
 
         private static String getKeyNameFromAlgorithm(Algorithm algorithm) {
-            String keyNamePrefix = null;
+            final String keyNamePrefix;
             if (Algorithm.RSA_OAEP.equals(algorithm) || Algorithm.RSA_OAEP_256.equals(algorithm)
                     || Algorithm.ECDH_ES.equals(algorithm) || Algorithm.ECDH_ES_PLUS_A128KW.equals(algorithm)
                     || Algorithm.ECDH_ES_PLUS_A192KW.equals(algorithm)
