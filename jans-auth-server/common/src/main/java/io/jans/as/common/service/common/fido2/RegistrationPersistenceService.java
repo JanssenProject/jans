@@ -16,7 +16,6 @@ import java.util.UUID;
 import org.slf4j.Logger;
 
 import io.jans.as.common.model.common.User;
-import io.jans.as.common.service.common.UserService;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.base.SimpleBranch;
@@ -43,7 +42,7 @@ public class RegistrationPersistenceService {
     private PersistenceEntryManager persistenceEntryManager;
 
     @Inject
-    private UserService userService;
+    protected UserServiceImpl usrService;
 
     @Inject
     private StaticConfiguration staticConfiguration;
@@ -108,7 +107,7 @@ public class RegistrationPersistenceService {
     }
 
     public List<Fido2RegistrationEntry> findByRpRegisteredUserDevices(String userName, String rpId, String ... returnAttributes) {
-		String userInum = userService.getUserInum(userName);
+		String userInum = usrService.getUserInum(userName);
 		if (userInum == null) {
 			return Collections.emptyList();
 		}
@@ -137,7 +136,7 @@ public class RegistrationPersistenceService {
 			return false;
 		}
 		
-		User user = userService.getUserByInum(userInum, "uid");
+		User user = usrService.getUserByInum(userInum, "uid");
 		if (user == null) {
 			return false;
 		}
