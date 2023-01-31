@@ -106,9 +106,8 @@ public class KeyGenerator {
         public void parse() {
             CommandLineParser parser = new BasicParser();
 
-            CommandLine cmd = null;
             try {
-                cmd = parser.parse(options, args);
+                CommandLine cmd = parser.parse(options, args);
 
                 if (cmd.hasOption(HELP)) {
                     help();
