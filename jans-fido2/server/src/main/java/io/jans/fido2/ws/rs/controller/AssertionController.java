@@ -7,36 +7,17 @@
 package io.jans.fido2.ws.rs.controller;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 
-import com.fasterxml.jackson.databind.AnnotationIntrospector;
+import org.slf4j.Logger;
+
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.type.TypeFactory;
-import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
 
-import io.jans.as.model.fido.u2f.message.RawAuthenticateResponse;
-import io.jans.as.model.fido.u2f.protocol.AuthenticateResponse;
-import io.jans.as.model.fido.u2f.protocol.ClientData;
 import io.jans.fido2.exception.Fido2RpRuntimeException;
-import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.conf.AppConfiguration;
-import io.jans.fido2.service.AuthenticatorDataParser;
-import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.DataMapperService;
 import io.jans.fido2.service.operation.AssertionService;
-import io.jans.fido2.service.sg.RawAuthenticationService;
 import io.jans.fido2.service.sg.converter.AssertionSuperGluuController;
 import io.jans.fido2.service.verifier.CommonVerifiers;
-import io.jans.fido2.sg.SuperGluuMode;
-import io.jans.util.StringHelper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
@@ -58,6 +39,9 @@ import jakarta.ws.rs.core.Response.Status;
 @ApplicationScoped
 @Path("/assertion")
 public class AssertionController {
+
+    @Inject
+    private Logger log;
 
     @Inject
     private AssertionService assertionService;
@@ -127,8 +111,11 @@ public class AssertionController {
         if ((appConfiguration.getFido2Configuration() == null) && !appConfiguration.isSuperGluuEnabled()) {
             return Response.status(Status.FORBIDDEN).build();
         }
+        log.debug("Start authentication: username = {}, keyhandle = {}, application = {}, session_id = {}", userName, keyHandle, appId, sessionId);
 
         JsonNode result = assertionSuperGluuController.startAuthentication(userName, keyHandle, appId, sessionId);
+
+        log.debug("Prepared U2F_V2 authentication options request: {}", result.toString());
 
         ResponseBuilder builder = Response.ok().entity(result.toString());
         return builder.build();
@@ -142,7 +129,11 @@ public class AssertionController {
             return Response.status(Status.FORBIDDEN).build();
         }
 
+        log.debug("Finish authentication: username = {}, tokenResponse = {}", userName, authenticateResponseString);
+
         JsonNode result = assertionSuperGluuController.finishAuthentication(userName, authenticateResponseString);
+
+        log.debug("Prepared U2F_V2 authentication verify request: {}", result.toString());
 
         ResponseBuilder builder = Response.ok().entity(result.toString());
         return builder.build();
