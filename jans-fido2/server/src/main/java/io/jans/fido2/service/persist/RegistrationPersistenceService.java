@@ -7,7 +7,6 @@
 package io.jans.fido2.service.persist;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -25,10 +24,6 @@ import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.service.shared.UserService;
 import io.jans.orm.PersistenceEntryManager;
-import io.jans.orm.model.BatchOperation;
-import io.jans.orm.model.ProcessBatchOperation;
-import io.jans.orm.model.SearchScope;
-import io.jans.orm.model.base.SimpleBranch;
 import io.jans.orm.model.fido2.Fido2RegistrationData;
 import io.jans.orm.model.fido2.Fido2RegistrationEntry;
 import io.jans.orm.model.fido2.Fido2RegistrationStatus;
@@ -177,70 +172,6 @@ public class RegistrationPersistenceService extends io.jans.as.common.service.co
 
     public String getBasedPeopleDn() {
     	return staticConfiguration.getBaseDn().getPeople();
-    }
-
-    public void cleanup(Date now, int batchSize) {
-        // Cleaning expired entries
-        BatchOperation<Fido2RegistrationEntry> cleanerRegistrationBatchService = new ProcessBatchOperation<Fido2RegistrationEntry>() {
-            @Override
-            public void performAction(List<Fido2RegistrationEntry> entries) {
-                for (Fido2RegistrationEntry p : entries) {
-                    log.debug("Removing Fido2 registration entry: {}, Creation date: {}", p.getChallange(), p.getCreationDate());
-                    try {
-                        persistenceEntryManager.remove(p);
-                    } catch (Exception e) {
-                        log.error("Failed to remove entry", e);
-                    }
-                }
-            }
-        };
-        String baseDn = getDnForUser(null);
-		if (persistenceEntryManager.hasExpirationSupport(baseDn)) {
-			return;
-		}
-        persistenceEntryManager.findEntries(baseDn, Fido2RegistrationEntry.class, getExpiredRegistrationFilter(baseDn), SearchScope.SUB, new String[] {"jansCodeChallenge", "creationDate"}, cleanerRegistrationBatchService, 0, 0, batchSize);
-
-        String branchDn = getDnForUser(null);
-        if (persistenceEntryManager.hasBranchesSupport(branchDn)) {
-	        // Cleaning empty branches
-	        BatchOperation<SimpleBranch> cleanerBranchBatchService = new ProcessBatchOperation<SimpleBranch>() {
-	            @Override
-	            public void performAction(List<SimpleBranch> entries) {
-	                for (SimpleBranch p : entries) {
-	                    try {
-	                        persistenceEntryManager.remove(p);
-	                    } catch (Exception e) {
-	                        log.error("Failed to remove entry", e);
-	                    }
-	                }
-	            }
-	        };
-	        persistenceEntryManager.findEntries(branchDn, SimpleBranch.class, getEmptyRegistrationBranchFilter(), SearchScope.SUB, new String[] {"ou"}, cleanerBranchBatchService, 0, 0, batchSize);
-        }
-    }
-
-    private Filter getExpiredRegistrationFilter(String baseDn) {
-        int unfinishedRequestExpiration = appConfiguration.getFido2Configuration().getUnfinishedRequestExpiration();
-        unfinishedRequestExpiration = unfinishedRequestExpiration == 0 ? 120 : unfinishedRequestExpiration;
-
-        Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
-        calendar.add(Calendar.SECOND, -unfinishedRequestExpiration);
-        final Date unfinishedRequestExpirationDate = calendar.getTime();
-
-        // Build unfinished request expiration filter
-        Filter registrationStatusFilter = Filter.createNOTFilter(Filter.createEqualityFilter("jansStatus", Fido2RegistrationStatus.registered.getValue()));
-
-        Filter exirationDateFilter = Filter.createLessOrEqualFilter("creationDate",
-                persistenceEntryManager.encodeTime(baseDn, unfinishedRequestExpirationDate));
-        
-        Filter unfinishedRequestFilter = Filter.createANDFilter(registrationStatusFilter, exirationDateFilter);
-
-        return unfinishedRequestFilter;
-    }
-
-    private Filter getEmptyRegistrationBranchFilter() {
-        return Filter.createANDFilter(Filter.createEqualityFilter("ou", "fido2_register"), Filter.createORFilter(
-                Filter.createEqualityFilter("numsubordinates", "0"), Filter.createEqualityFilter("hasSubordinates", "FALSE")));
     }
 
     public int getChallengeHashCode(String challenge) {
