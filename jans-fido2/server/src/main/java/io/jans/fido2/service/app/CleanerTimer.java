@@ -7,6 +7,9 @@
 package io.jans.fido2.service.app;
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -14,14 +17,19 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 
 import com.google.common.base.Stopwatch;
-import com.google.common.collect.Sets;
+import com.google.common.collect.Maps;
 
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.service.persist.AuthenticationPersistenceService;
 import io.jans.fido2.service.persist.RegistrationPersistenceService;
 import io.jans.orm.PersistenceEntryManager;
-import io.jans.orm.model.base.DeletableEntity;
+import io.jans.orm.model.BatchOperation;
+import io.jans.orm.model.ProcessBatchOperation;
+import io.jans.orm.model.SearchScope;
+import io.jans.orm.model.base.SimpleBranch;
+import io.jans.orm.model.fido2.Fido2AuthenticationEntry;
+import io.jans.orm.model.fido2.Fido2RegistrationEntry;
 import io.jans.orm.search.filter.Filter;
 import io.jans.service.cdi.async.Asynchronous;
 import io.jans.service.cdi.event.CleanerEvent;
@@ -48,7 +56,7 @@ public class CleanerTimer {
 	private Logger log;
 
 	@Inject
-	private PersistenceEntryManager persistenceEntryManager;
+	private PersistenceEntryManager entryManager;
 
 	@Inject
 	private StaticConfiguration staticConfiguration;
@@ -112,68 +120,111 @@ public class CleanerTimer {
 		return timeDiffrence >= cleaningInterval;
 	}
 
-	public void processImpl() {
-		try {
-			if (!isStartProcess()) {
-				log.trace("Starting conditions aren't reached");
-				return;
-			}
+    public void processImpl() {
+        try {
+            if (!isStartProcess()) {
+                log.trace("Starting conditions aren't reached");
+                return;
+            }
 
-			int chunkSize = appConfiguration.getCleanServiceBatchChunkSize();
-			if (chunkSize <= 0)
-				chunkSize = BATCH_SIZE;
+            int chunkSize = appConfiguration.getCleanServiceBatchChunkSize();
+            if (chunkSize <= 0)
+                chunkSize = BATCH_SIZE;
 
-			Date now = new Date();
+            Date now = new Date();
 
-			for (String baseDn : createCleanServiceBaseDns()) {
-				try {
-					if (persistenceEntryManager.hasExpirationSupport(baseDn)) {
-						continue;
-					}
+            final Set<String> processedBaseDns = new HashSet<>();
+            for (Map.Entry<String, Class<?>> baseDn : createCleanServiceBaseDns().entrySet()) {
+                final String processedKey = createProcessedKey(baseDn);
+                if (entryManager.hasExpirationSupport(baseDn.getKey()) || processedBaseDns.contains(processedKey)) {
+                    continue;
+                }
 
-					log.debug("Start clean up for baseDn: " + baseDn);
-					final Stopwatch started = Stopwatch.createStarted();
+                processedBaseDns.add(processedKey);
 
-					int removed = cleanup(baseDn, now, chunkSize);
+                if (log.isDebugEnabled())
+                    log.debug("Start clean up for baseDn: {}, class: {}", baseDn.getValue(), baseDn.getValue());
 
-					log.debug("Finished clean up for baseDn: {}, takes: {}ms, removed items: {}", baseDn,
-							started.elapsed(TimeUnit.MILLISECONDS), removed);
-				} catch (Exception e) {
-					log.error("Failed to process clean up for baseDn: " + baseDn, e);
-				}
-			}
+                final Stopwatch started = Stopwatch.createStarted();
 
-			registrationPersistenceService.cleanup(now, chunkSize);
-			authenticationPersistenceService.cleanup(now, chunkSize);
+                int removed = cleanup(baseDn, now, chunkSize);
+
+                if (log.isDebugEnabled())
+                    log.debug("Finished clean up for baseDn: {}, takes: {}ms, removed items: {}", baseDn, started.elapsed(TimeUnit.MILLISECONDS), removed);
+            }
+
+            // Process sub-branches
+            String baseDn = staticConfiguration.getBaseDn().getPeople();
+            if (log.isDebugEnabled())
+                log.debug("Start clean up for baseDn: {}", baseDn);
+
+            final Stopwatch started = Stopwatch.createStarted();
+
+            int removed = cleanupBranches(baseDn, now, chunkSize);
+
+            if (log.isDebugEnabled())
+                log.debug("Finished clean up for baseDn: {}, takes: {}ms, removed items: {}", baseDn, started.elapsed(TimeUnit.MILLISECONDS), removed);
 
 			this.lastFinishedTime = System.currentTimeMillis();
-		} catch (Exception e) {
-			log.error("Failed to process clean up.", e);
-		}
-	}
+        } catch (Exception e) {
+            log.error("Failed to process clean up.", e);
+        }
+    }
 
-	public Set<String> createCleanServiceBaseDns() {
-		final Set<String> cleanServiceBaseDns = Sets.newHashSet();
+    private static String createProcessedKey(Map.Entry<String, Class<?>> baseDn) {
+        return baseDn.getKey() + "_" + (baseDn.getValue() == null ? "" : baseDn.getValue().getSimpleName());
+    }
 
-		cleanServiceBaseDns.add(staticConfiguration.getBaseDn().getFido2Attestation());
-		cleanServiceBaseDns.add(staticConfiguration.getBaseDn().getFido2Assertion());
+    private Map<String, Class<?>> createCleanServiceBaseDns() {
 
-		log.debug("Built-in base dns: " + cleanServiceBaseDns);
+        final Map<String, Class<?>> cleanServiceBaseDns = Maps.newHashMap();
 
-		return cleanServiceBaseDns;
-	}
+        cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getFido2Attestation(), Fido2RegistrationEntry.class);
+        cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getFido2Assertion(), Fido2AuthenticationEntry.class);
+        cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getPeople(), Fido2RegistrationEntry.class);
+        cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getPeople(), Fido2AuthenticationEntry.class);
 
-	public int cleanup(final String baseDn, final Date now, final int batchSize) {
-		try {
-			Filter filter = Filter.createANDFilter(Filter.createEqualityFilter("del", true),
-					Filter.createLessOrEqualFilter("exp", persistenceEntryManager.encodeTime(baseDn, now)));
+        return cleanServiceBaseDns;
+    }
 
-			return persistenceEntryManager.remove(baseDn, DeletableEntity.class, filter, batchSize);
-		} catch (Exception e) {
-			log.error("Failed to perform clean up.", e);
-		}
+    public int cleanup(final Map.Entry<String, Class<?>> baseDn, final Date now, final int batchSize) {
+        try {
+            Filter filter = Filter.createANDFilter(
+                    Filter.createEqualityFilter("del", true),
+                    Filter.createLessOrEqualFilter("exp", entryManager.encodeTime(baseDn.getKey(), now)));
 
-		return 0;
-	}
+            int removedCount = entryManager.remove(baseDn.getKey(), baseDn.getValue(), filter, batchSize);
+            log.trace("Removed {} entries from {}", removedCount, baseDn.getKey());
+            return removedCount;
+        } catch (Exception e) {
+            log.error("Failed to perform clean up.", e);
+        }
+
+        return 0;
+    }
+    
+    public int cleanupBranches(String branchDn, Date now, int batchSize) {
+        try {
+	        // Cleaning branches entries
+			if (entryManager.hasExpirationSupport(branchDn) || !entryManager.hasBranchesSupport(branchDn)) {
+				return 0;
+			}
+
+	        // Cleaning empty branches
+			Filter filter = Filter.createANDFilter(
+					Filter.createORFilter(Filter.createEqualityFilter("ou", "fido2_register"),
+							Filter.createEqualityFilter("ou", "fido2_auth")),
+					Filter.createORFilter(Filter.createEqualityFilter("numsubordinates", "0"),
+							Filter.createEqualityFilter("hasSubordinates", "FALSE")));
+	
+	        int removedCount = entryManager.remove(branchDn, SimpleBranch.class, filter, batchSize);
+	        log.trace("Removed {} entries from {}", removedCount, branchDn);
+	        return removedCount;
+	    } catch (Exception e) {
+	        log.error("Failed to perform clean up.", e);
+	    }
+
+        return 0;
+    }
 
 }
