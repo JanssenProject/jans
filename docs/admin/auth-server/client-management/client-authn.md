@@ -170,11 +170,15 @@ navigate via `Auth Server` -> Get or add clients -> `encryption/signing` -> set 
 
 ## tls_client_auth
 
-TODO: add more details
+This is mutual TLS based authentication method where client authenticates with Janssen Server using X.509 certificate. In this authentication method, the client uses X.509 certificate that is issued by a Certificate Authority(CA). Benefit of using mutual TLS based authentication is that the authorization server binds the token with the certificate. This provides enhanced security where it is possible to check that the token belongs to the intended client. 
+
+This authentication mechanism is defined in [mTLS specification for OAuth2](https://www.rfc-editor.org/rfc/rfc8705#name-mutual-tls-for-oauth-client)
 
 ## self_signed_tls_client_auth
 
-TODO: add more details
+This is mutual TLS based authentication method where client authenticates with Janssen Server using X.509 certificate. Client uses self signed X.509 certificate, removing the dependency on for public key infrastructure(PKIX). Benefit of using mutual TLS based authentication is that the authorization server binds the token with the certificate. This provides enhanced security where it is possible to check that the token belongs to the intended client. 
+
+This authentication mechanism is defined in [mTLS specification for OAuth2](https://www.rfc-editor.org/rfc/rfc8705#name-self-signed-certificate-mut)
 
 ## none
 
