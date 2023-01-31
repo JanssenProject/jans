@@ -1,0 +1,19 @@
+<html>
+    <head><title>Index Test</title></head>
+    <body>
+        <h1>Welcome to the test of your life</h1>
+        <br><hr>
+        {% if user %}
+        <pre>
+        {{ user|tojson }}
+        </pre>
+        <br><hr>
+        <pre>
+        {{ id_token|tojson }}
+        </pre>
+        <a href="/logout">logout</a>
+        {% else %}
+        <h3><a href="/protected-content">Click here to start!</a>
+        {% endif %}
+    </body>
+</html>

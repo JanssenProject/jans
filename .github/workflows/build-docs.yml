@@ -116,9 +116,8 @@ jobs:
          echo "Replacing release number markers with actual release number"
          if [ ! -z "$VERSION" ]; then
            cd docs
-           egrep -lRZ --exclude=CONTRIBUTING.md . | xargs -0 -l sed -i -e "s/replace-janssen-version/$VERSION/g"
-           # strip v from v1.x.x. Remove the above line once all replace-janssen-versions in docs is prefixed with v where appropriate
-           egrep -lRZ --exclude=CONTRIBUTING.md . | xargs -0 -l sed -i -e "s/replace-janssen-image-version/${VERSION:1}/g"
+           # strip v from v1.x.x
+           egrep -lRZ --exclude=CONTRIBUTING.md . | xargs -0 -l sed -i -e "s/replace-janssen-version/${VERSION:1}/g"
            git add . || echo "Nothing to add"
            git commit -a -S -m "docs: replace release marker with release number" || echo "Nothing to commit"
            cd ..

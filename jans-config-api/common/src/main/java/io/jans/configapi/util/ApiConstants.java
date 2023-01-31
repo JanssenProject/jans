@@ -12,6 +12,7 @@ public class ApiConstants {
 
     public static final String BASE_API_URL = "/";
     public static final String CONFIG = "/config";
+    public static final String API_CONFIG = "/api-config";
     public static final String JWKS = "/jwks";
     public static final String JANS_AUTH = "/jans-auth-server";
     public static final String LOGGING = "/logging";
@@ -85,6 +86,7 @@ public class ApiConstants {
     public static final String INCLUDE_SOURCE = "includeSource";
     public static final String SOURCE = "/source/";
     public static final String PLUGIN = "/plugin";
+    public static final String PLUGIN_NAME_PATH = "{pluginName}";
 
     public static final String LIMIT = "limit";
     public static final String START_INDEX = "startIndex";
@@ -103,7 +105,7 @@ public class ApiConstants {
     public static final String CREATORID = "creatorId";
     public static final String SESSIONID = "sessionId";
     public static final String USERDN = "userDn";
-    
+    public static final String PLUGIN_NAME = "pluginName";
 
     public static final String ALL = "all";
     public static final String ACTIVE = "active";

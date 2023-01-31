@@ -11,18 +11,18 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
-
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+
+import com.fasterxml.jackson.databind.JsonNode;
+
 import io.jans.fido2.ctap.AttestationConveyancePreference;
 import io.jans.fido2.ctap.AuthenticatorAttachment;
 import io.jans.fido2.ctap.TokenBindingSupport;
-import io.jans.fido2.ctap.UserVerification;
 import io.jans.fido2.exception.Fido2CompromisedDevice;
+import io.jans.fido2.exception.Fido2RpRuntimeException;
 import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.auth.AuthData;
 import io.jans.fido2.model.auth.CredAndCounterData;
@@ -30,11 +30,13 @@ import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.DataMapperService;
 import io.jans.fido2.service.processors.AttestationFormatProcessor;
+import io.jans.fido2.sg.SuperGluuMode;
+import io.jans.orm.model.fido2.UserVerification;
 import io.jans.service.net.NetworkService;
 import io.jans.util.StringHelper;
-import org.slf4j.Logger;
-
-import com.fasterxml.jackson.databind.JsonNode;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
 
 /**
  * @author Yuriy Movchan
@@ -43,7 +45,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 @ApplicationScoped
 public class CommonVerifiers {
 
-    @Inject
+    public static final String SUPER_GLUU_REQUEST = "super_gluu_request";
+    public static final String SUPER_GLUU_MODE = "super_gluu_request_mode";
+    public static final String SUPER_GLUU_APP_ID = "super_gluu_app_id";
+    public static final String SUPER_GLUU_KEY_HANDLE = "super_gluu_key_handle";
+
+	@Inject
     private Logger log;
 
     @Inject
@@ -309,6 +316,14 @@ public class CommonVerifiers {
         return clientJsonNode;
     }
 
+    public JsonNode verifyClientRaw(JsonNode responseNode) {
+        if (!responseNode.hasNonNull("clientDataRaw")) {
+            throw new Fido2RuntimeException("Client data RAW is missing");
+        }
+
+        return responseNode.get("clientDataRaw");
+    }
+
     public void verifyTPMVersion(JsonNode ver) {
         if (!"2.0".equals(ver.asText())) {
             throw new Fido2RuntimeException("Invalid TPM Attestation version");
@@ -417,10 +432,10 @@ public class CommonVerifiers {
             throw new Fido2RuntimeException("Credential id attestationObject and response id mismatch");
         }
         
-//		String attestationDataCredId = attestationData.getCredId();
-//        if (!StringHelper.compare(attestationDataCredId, paramsKeyId)) {
-//            throw new Fido2RPRuntimeException("Credential id attestationObject and response id mismatch");
-//        }
+		String attestationDataCredId = attestationData.getCredId();
+        if (!StringHelper.compare(attestationDataCredId, paramsKeyId)) {
+            throw new Fido2RuntimeException("Credential id attestationObject and response id mismatch");
+        }
         
         return paramsKeyId;
 	}
@@ -461,5 +476,31 @@ public class CommonVerifiers {
             throw new Fido2RuntimeException("Invalid parameters in metadata");
         }
     }
+
+	public boolean hasSuperGluu(JsonNode params) {
+        if (params.hasNonNull(SUPER_GLUU_REQUEST)) {
+        	JsonNode node = params.get(SUPER_GLUU_REQUEST);
+        	return node.isBoolean() && node.asBoolean();
+        }
+
+        return false;
+	}
+
+	public void verifyNotUseGluuParameters(JsonNode params) {
+		// Protect generic U2F/Fido2 from sending requests with Super Gluu parameters
+        if (params.hasNonNull(SUPER_GLUU_REQUEST) || params.hasNonNull(SUPER_GLUU_MODE) ||
+            params.hasNonNull(SUPER_GLUU_APP_ID) || params.hasNonNull(SUPER_GLUU_KEY_HANDLE)) {
+        	throw new Fido2RpRuntimeException("Input request conflicts with Super Gluu parameters");
+        }
+	}
+
+	public boolean isSuperGluuOneStepMode(JsonNode params) {
+		if (hasSuperGluu(params)) {
+			return SuperGluuMode.ONE_STEP == SuperGluuMode.fromModeValue(params.get(CommonVerifiers.SUPER_GLUU_MODE).asText());
+		}
+
+        return false;
+	}
+
 
 }

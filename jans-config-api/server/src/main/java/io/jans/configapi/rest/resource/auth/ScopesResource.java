@@ -39,9 +39,6 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.UriInfo;
-
-import static io.jans.as.model.util.Util.escapeLog;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -70,9 +67,6 @@ public class ScopesResource extends ConfigBaseResource {
     @Inject
     ScopeService scopeService;
 
-    @Context
-    UriInfo uriInfo;
-
     @Operation(summary = "Gets list of Scopes", description = "Gets list of Scopes", operationId = "get-oauth-scopes", tags = {
             "OAuth - Scopes" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.SCOPES_READ_ACCESS }))
@@ -90,9 +84,12 @@ public class ScopesResource extends ConfigBaseResource {
             @Parameter(description = "Attribute whose value will be used to order the returned response") @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
             @Parameter(description = "Order in which the sortBy param is applied. Allowed values are \"ascending\" and \"descending\"") @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder,
             @Parameter(description = "Boolean fag to indicate if clients associated with the scope are to be returned") @DefaultValue("false") @QueryParam(value = ApiConstants.WITH_ASSOCIATED_CLIENTS) boolean withAssociatedClients) {
-        log.debug(
-                "SCOPES to be fetched based on type:{}, limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}, withAssociatedClients:{}",
-                type, limit, pattern, startIndex, sortBy, sortOrder, withAssociatedClients);
+        if (log.isDebugEnabled()) {
+            log.debug(
+                    "SCOPES to be fetched based on type:{}, limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}, withAssociatedClients:{}",
+                    type, limit, pattern, startIndex, sortBy, sortOrder, withAssociatedClients);
+        }
+        
         SearchRequest searchReq = createSearchRequest(scopeService.getDnForScope(null), pattern, sortBy, sortOrder,
                 startIndex, limit, null, null, this.getMaxCount());
 
@@ -113,7 +110,10 @@ public class ScopesResource extends ConfigBaseResource {
     @Path(ApiConstants.INUM_PATH)
     public Response getScopeById(@Parameter(description = "Scope identifier") @NotNull @PathParam(ApiConstants.INUM) String inum,
             @DefaultValue("false") @QueryParam(value = ApiConstants.WITH_ASSOCIATED_CLIENTS) boolean withAssociatedClients) {
-        log.debug("SCOPES to be fetched by inum:{}", inum);
+        if (log.isDebugEnabled()) {
+            log.debug("SCOPES to be fetched by inum:{}", inum);
+        }
+        
         CustomScope scope = scopeService.getScopeByInum(inum, withAssociatedClients);
         checkResourceNotNull(scope, SCOPE);
         return Response.ok(scope).build();
@@ -131,7 +131,10 @@ public class ScopesResource extends ConfigBaseResource {
             ApiAccessConstants.SCOPES_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Path(ApiConstants.CREATOR + ApiConstants.CREATORID_PATH)
     public Response getScopeByClientId(@Parameter(description = "Id of the scope creator. If creator is client then client_id if user then user_id") @NotNull @PathParam(ApiConstants.CREATORID) String creatorId) {
-        log.debug("SCOPES to be fetched by creatorId:{}", creatorId);
+        if (log.isDebugEnabled()) {
+            log.debug("SCOPES to be fetched by creatorId:{}", creatorId);
+        }
+        
         SearchRequest searchReq = new SearchRequest();
         searchReq.setFilterAttributeName(Arrays.asList("creatorId"));
         searchReq.setFilter(creatorId);
@@ -152,7 +155,10 @@ public class ScopesResource extends ConfigBaseResource {
             ApiAccessConstants.SCOPES_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Path(ApiConstants.TYPE + ApiConstants.TYPE_PATH)
     public Response getScopeByType(@Parameter(description = "Type of the scope") @NotNull @PathParam(ApiConstants.TYPE) String type) {
-        log.debug("SCOPES to be fetched by type:{}", type);
+        if (log.isDebugEnabled()) {
+            log.debug("SCOPES to be fetched by type:{}", type);
+        }
+        
         SearchRequest searchReq = new SearchRequest();
         searchReq.setFilterAttributeName(Arrays.asList("jansScopeTyp"));
         searchReq.setFilter(type);
@@ -235,7 +241,10 @@ public class ScopesResource extends ConfigBaseResource {
     @Path(ApiConstants.INUM_PATH)
     public Response patchScope(@Parameter(description = "Scope identifier") @PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString)
             throws JsonPatchException, IOException {
-        log.debug("SCOPES patch details - inum:{}, pathString:{}", inum, pathString);
+        if (log.isDebugEnabled()) {
+            log.debug("SCOPES patch details - inum:{}, pathString:{}", inum, pathString);
+        }
+        
         Scope existingScope = scopeService.getScopeByInum(inum);
         checkResourceNotNull(existingScope, SCOPE);
         existingScope = Jackson.applyPatch(pathString, existingScope);
@@ -258,7 +267,10 @@ public class ScopesResource extends ConfigBaseResource {
     @Path(ApiConstants.INUM_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.SCOPES_DELETE_ACCESS }, groupScopes = {}, superScopes = { ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
     public Response deleteScope(@Parameter(description = "Scope identifier") @PathParam(ApiConstants.INUM) @NotNull String inum) {
-        log.debug("SCOPES to be deleted - inum:{}", inum);
+        if (log.isDebugEnabled()) {
+            log.debug("SCOPES to be deleted - inum:{}", inum);
+        }
+        
         Scope scope = scopeService.getScopeByInum(inum);
         checkResourceNotNull(scope, SCOPE);
         scopeService.removeScope(scope);
@@ -267,7 +279,10 @@ public class ScopesResource extends ConfigBaseResource {
     }
 
     private PagedResult<CustomScope> doSearch(SearchRequest searchReq, String type, boolean withAssociatedClients) {
-            logger.debug("CustomScope search params - searchReq:{}, type:{}, withAssociatedClients:{} ", searchReq, type, withAssociatedClients);
+        if (log.isDebugEnabled()) {
+            logger.debug("CustomScope search params - searchReq:{}, type:{}, withAssociatedClients:{} ", searchReq,
+                    type, withAssociatedClients);
+        }
 
         PagedResult<CustomScope> pagedResult = scopeService.getScopeResult(searchReq, type, withAssociatedClients);
         if (logger.isTraceEnabled()) {

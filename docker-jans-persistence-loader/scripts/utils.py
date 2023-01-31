@@ -197,22 +197,26 @@ def merge_auth_ctx(ctx):
 
 def merge_jans_cli_ctx(manager, ctx):
     # jans-cli-tui client
-    ctx["role_based_client_id"] = manager.config.get("role_based_client_id")
-    if not ctx["role_based_client_id"]:
-        ctx["role_based_client_id"] = f"2000.{uuid4()}"
-        manager.config.set("role_based_client_id", ctx["role_based_client_id"])
+    ctx["tui_client_id"] = manager.config.get("tui_client_id")
+    if not ctx["tui_client_id"]:
+        # migrate from old configs/secrets (if any)
+        ctx["tui_client_id"] = manager.config.get("role_based_client_id", f"2000.{uuid4()}")
+        manager.config.set("tui_client_id", ctx["tui_client_id"])
 
-    ctx["role_based_client_pw"] = manager.secret.get("role_based_client_pw")
-    if not ctx["role_based_client_pw"]:
-        ctx["role_based_client_pw"] = get_random_chars()
-        manager.secret.set("role_based_client_pw", ctx["role_based_client_pw"])
+    ctx["tui_client_pw"] = manager.secret.get("tui_client_pw")
+    if not ctx["tui_client_pw"]:
+        # migrate from old configs/secrets (if any)
+        ctx["tui_client_pw"] = manager.secret.get("role_based_client_pw", get_random_chars())
+        manager.secret.set("tui_client_pw", ctx["tui_client_pw"])
 
-    ctx["role_based_client_encoded_pw"] = manager.secret.get("role_based_client_encoded_pw")
-    if not ctx["role_based_client_encoded_pw"]:
-        ctx["role_based_client_encoded_pw"] = encode_text(
-            ctx["role_based_client_pw"], manager.secret.get("encoded_salt"),
-        ).decode()
-        manager.secret.set("role_based_client_encoded_pw", ctx["role_based_client_encoded_pw"])
+    ctx["tui_client_encoded_pw"] = manager.secret.get("tui_client_encoded_pw")
+    if not ctx["tui_client_encoded_pw"]:
+        # migrate from old configs/secrets (if any)
+        ctx["tui_client_encoded_pw"] = manager.secret.get(
+            "role_based_client_encoded_pw",
+            encode_text(ctx["tui_client_pw"], manager.secret.get("encoded_salt")).decode(),
+        )
+        manager.secret.set("tui_client_encoded_pw", ctx["tui_client_encoded_pw"])
     return ctx
 
 
@@ -253,9 +257,9 @@ def get_ldif_mappings(group, optional_scopes=None):
             ]
 
         files += [
-            "jans-auth/configuration.ldif",
             "jans-auth/role-scope-mappings.ldif",
             "jans-cli/client.ldif",
+            "jans-auth/configuration.ldif",
         ]
 
         return files

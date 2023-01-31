@@ -743,9 +743,6 @@ global:
     provisioner: microk8s.io/hostpath
     reclaimPolicy: Retain
     volumeBindingMode: WaitForFirstConsumer
-  upgrade:
-    # -- Boolean flag used when running upgrading through versions command. Used when upgrading with LDAP as the persistence to load the 101x ldif.
-    enabled: false
 
 # -- Nginx ingress definitions chart
 nginx-ingress:

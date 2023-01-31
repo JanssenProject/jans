@@ -31,7 +31,7 @@ https://jans-dynamic-ldap/jans-auth/restv1/revoke
 ```
 
 More information about request and response of the revocation endpoint can be found in
-the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/replace-janssen-version/jans-auth-server/docs/swagger.yaml#/Token/revoke).
+the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/Token/revoke).
 
 
 
@@ -53,4 +53,17 @@ navigate via `Auth Server`->`Properties`.
 
 - [mtlstokenrevocationendpoint](../../reference/json/properties/janssenauthserver-properties.md#mtlstokenrevocationendpoint)
 - [tokenRevocationEndpoint](../../reference/json/properties/janssenauthserver-properties.md#tokenrevocationendpoint)
+
+## Revoke all tokens by `client_id`
+
+To remove all tokens for given `client_id` it's required:
+- set `allowAllValueForRevokeEndpoint` AS configuration property to `true`
+- pass in request parameter `token_type_hint=all`
+
+`client` is identified by Client Authentication performed by AS to grant access to `/revoke` endpoint.
+
+## Revoke Interception Script
+
+Endpoint can provide custom behavior via implementing Revoke Token interception [script](../../developer/scripts/revoke-token.md).
+
 

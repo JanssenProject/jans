@@ -1,7 +1,6 @@
 # Janssen Project software is available under the Apache 2.0 License (2004). See http://www.apache.org/licenses/ for full text.
 # Copyright (c) 2020, Janssen Project
 #
-# Author: Yuriy Movchan
 #
 
 from io.jans.as.common.model.common import User
@@ -137,7 +136,7 @@ class PersonAuthentication(PersonAuthenticationType):
     def getPageForStep(self, configurationAttributes, step):
         print "GitHub: getPageForStep called for step %s" % str(step)
         if(step == 1):
-            return "/auth/github/github.xhtml"
+            return "/auth/github/login.xhtml"
         return ""
 
     def getNextStep(self, configurationAttributes, requestParameters, step):

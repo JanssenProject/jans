@@ -20,7 +20,7 @@ class Plugin:
         """
         self.app = app
         self.pid = 'jans-menu'
-        self.name = '[J]ans Cli'
+        self.name = '[J]ans CLI'
 
         self.menu_container = Frame(
                             body=HSplit([

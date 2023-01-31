@@ -12,6 +12,7 @@ import io.jans.as.persistence.model.Scope;
 import io.jans.configapi.model.configuration.AgamaConfiguration;
 import io.jans.configapi.model.configuration.AuditLogConf;
 import io.jans.configapi.model.configuration.DataFormatConversionConf;
+import io.jans.configapi.model.configuration.PluginConf;
 import io.jans.configapi.security.api.ApiProtectionCache;
 import io.jans.configapi.security.client.AuthClientFactory;
 import io.jans.configapi.configuration.ConfigurationFactory;
@@ -79,6 +80,10 @@ public class AuthUtil {
     
     public DataFormatConversionConf getDataFormatConversionConf() {
         return this.configurationFactory.getApiAppConfiguration().getDataFormatConversionConf();
+    }
+    
+    public List<PluginConf> getPluginConf() {
+        return this.configurationFactory.getApiAppConfiguration().getPlugins();
     }
 
     public String getIssuer() {

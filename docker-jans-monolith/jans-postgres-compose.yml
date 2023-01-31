@@ -1,0 +1,54 @@
+version: "3.7"
+services:
+  pgsql:
+    image: postgres:15.1
+    restart: always
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data/
+    networks:
+      - cloud_bridge
+    environment:
+      POSTGRES_USER: jans
+      POSTGRES_PASSWORD: 1t5Fin3#security
+      POSTGRES_DB: jans
+  jans:
+    image: janssenproject/monolith:1.0.7_dev
+    restart: always
+    ports:
+      - "443:443"
+      - "80:80"
+    depends_on:
+      - pgsql
+    networks:
+      - cloud_bridge
+    environment:
+      - CN_HOSTNAME=demoexample.jans.io
+      - CN_ADMIN_PASS=1t5Fin3#security
+      - CN_ORG_NAME=Janssen
+      - CN_EMAIL=support@jans.io
+      - CN_CITY=Austin
+      - CN_STATE=TX
+      - CN_COUNTRY=US
+      - CN_INSTALL_PGSQL=true
+      - CN_INSTALL_CONFIG_API=true
+      - CN_INSTALL_SCIM=true
+      - CN_INSTALL_FIDO2=true
+      - TEST_CLIENT_ID=9876baac-de39-4c23-8a78-674b59df8c09
+      - TEST_CLIENT_TRUSTED=true
+      - TEST_CLIENT_SECRET=1t5Fin3#security
+      - RDBMS_DATABASE=jans
+      - RDBMS_USER=jans
+      - RDBMS_PASSWORD=1t5Fin3#security
+      - RDBMS_HOST=pgsql
+    volumes:
+      - ./jans-auth-custom:/opt/jans/jetty/jans-auth/custom
+      - ./jans-config-api-custom:/opt/jans/jetty/jans-config-api/custom
+      - ./jans-fido2-custom:/opt/jans/jetty/jans-fido2/custom
+      - ./jans-scim-custom:/opt/jans/jetty/jans-scim/custom
+volumes:
+  db-data:
+networks:
+  cloud_bridge:
+    driver: bridge

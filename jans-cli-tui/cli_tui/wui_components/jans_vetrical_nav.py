@@ -23,6 +23,7 @@ class JansVerticalNav():
         on_enter: Callable= None,
         get_help: Tuple= None,
         on_delete: Callable= None,
+        change_password: Callable= None,
         all_data: Optional[list]= [], 
         preferred_size: Optional[list]= [], 
         data: Optional[list]= [], 
@@ -32,6 +33,7 @@ class JansVerticalNav():
         max_width: AnyDimension = None,
         jans_name: Optional[str]= '', 
         max_height: AnyDimension = None,
+        jans_help: Optional[str]= '',
         )->FloatContainer :
         """init for JansVerticalNav
 
@@ -51,7 +53,7 @@ class JansVerticalNav():
             max_width (int, optional): Maximum width of container.
             jans_name (str, optional): Widget name
             max_height (int, optional): Maximum hegight of container
-        
+            jans_help (str, optional): Status bar help message
         Examples:
             clients = JansVerticalNav(
                 myparent=self,
@@ -80,14 +82,15 @@ class JansVerticalNav():
         self.headerColor = headerColor
         self.entriesColor = entriesColor
         self.max_height = max_height
-
+        self.jans_help = jans_help
         self.on_enter = on_enter
         self.on_delete = on_delete
         self.on_display = on_display
+        self.change_password = change_password
         if get_help:
             self.get_help, self.scheme = get_help
             if self.data :
-                self.get_help(data=self.data[self.selectes],scheme=self.scheme)
+                self.get_help(data=self.data[self.selectes], scheme=self.scheme)
         else:
             self.get_help= None
         self.all_data=all_data
@@ -95,7 +98,7 @@ class JansVerticalNav():
 
         self.handle_header_spaces()
         self.create_window()
-            
+
 
     def view_data(
         self,
@@ -120,6 +123,22 @@ class JansVerticalNav():
     def create_window(self) -> None:
         """This method creat the dialog it self
         """
+        
+        self.list_box = Window(
+                            content=FormattedTextControl(
+                                text=self._get_formatted_text,
+                                focusable=True,
+                                key_bindings=self._get_key_bindings(),
+                                style=self.entriesColor,
+                            ),
+                            style='class:select-box',
+                            height=D(preferred=len(self.data), max=len(self.data)),
+                            cursorline=True,
+                            right_margins=[ScrollbarMargin(display_arrows=True), ],
+                        )
+        if self.jans_help:
+            self.list_box.jans_help = self.jans_help
+
         self.container_content = [
                         Window(
                             content=FormattedTextControl(
@@ -132,18 +151,7 @@ class JansVerticalNav():
                             height=D(preferred=1, max=1),
                             cursorline=False,
                         ),
-                        Window(
-                            content=FormattedTextControl(
-                                text=self._get_formatted_text,
-                                focusable=True,
-                                key_bindings=self._get_key_bindings(),
-                                style=self.entriesColor,
-                            ),
-                            style='class:select-box',
-                            height=D(preferred=len(self.data), max=len(self.data)),
-                            cursorline=True,
-                            right_margins=[ScrollbarMargin(display_arrows=True), ],
-                        ),
+                        self.list_box ,
                     ]
 
         if self.underline_headings:
@@ -294,6 +302,13 @@ class JansVerticalNav():
             size = self.myparent.output.get_size()
             if self.on_enter :
                 self.on_enter(passed=self.data[self.selectes], event=event, size=size, data=self.all_data[self.selectes], selected=self.selectes, jans_name=self.jans_name)
+
+        @kb.add('p')
+        def _(event):
+            if not self.data:
+                return
+            if self.change_password:
+                self.change_password(data=self.all_data[self.selectes])
 
 
         @kb.add('d')

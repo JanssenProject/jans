@@ -166,12 +166,13 @@ def _transform_auth_dynamic_config(conf):
         conf["blockWebviewAuthorizationEnabled"] = False
         should_update = True
 
-    if "userInfoConfiguration" not in conf:
-        conf["userInfoConfiguration"] = {
-            "dateFormatterPattern": {
-                "birthdate": "yyyy-MM-dd",
-            },
+    if "dateFormatterPatterns" not in conf:
+        # remove old config
+        conf.pop("userInfoConfiguration", None)
+        conf["dateFormatterPatterns"] = {
+            "birthdate": "yyyy-MM-dd",
         }
+        should_update = True
 
     # specific config per distribution
     if distribution == "openbanking":

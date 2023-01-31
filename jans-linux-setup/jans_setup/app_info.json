@@ -6,11 +6,11 @@
   "JYTHON_VERSION": "2.7.3",
   "OPENDJ_VERSION": "4.4.12",
   "JANS_MAVEN": "https://jenkins.jans.io",
-  "EXTERNAL_LIBS": "https://ox.gluu.org/icrby8xcvbcv/",
   "APPLE_WEBAUTHN": "https://www.apple.com/certificateauthority/Apple_WebAuthn_Root_CA.pem",
   "SQLALCHEMY": "https://github.com/sqlalchemy/sqlalchemy/archive/rel_1_3_23.zip",
-  "PYJWT": "https://github.com/jpadilla/pyjwt/archive/refs/tags/2.3.0.zip",
+  "PYJWT": "https://github.com/jpadilla/pyjwt/archive/refs/tags/2.4.0.zip",
   "PROMPT_TOOLKIT": "https://github.com/prompt-toolkit/python-prompt-toolkit/archive/refs/tags/3.0.33.zip",
   "WCWIDTH": "https://github.com/jquast/wcwidth/archive/refs/tags/0.2.5.zip",
-  "PYGMENTS": "https://github.com/pygments/pygments/archive/refs/tags/2.13.0.zip"
+  "PYGMENTS": "https://github.com/pygments/pygments/archive/refs/tags/2.13.0.zip",
+  "CRYPTOGRAPHY": "https://files.pythonhosted.org/packages/20/8b/66600f5851ec7893ace9b74445d7eaf3499571b347e339d18c76c876b0f9/cryptography-37.0.4-cp36-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
 }

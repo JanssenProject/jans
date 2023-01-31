@@ -85,7 +85,7 @@ A Kubernetes cluster can be created with three nodes or more in one region and t
 
 3. Make sure [helm](https://helm.sh/docs/intro/install/) is installed.
 
-4. Prepare your [override.yaml](../install/helm-install/README.md). Copy the below into a file named override.yaml. At the time of writing this we are using image tags `replace-janssen-image-version_dev` which are the bleeding edge images for release `replace-janssen-image-version`. Stable images such as `replace-janssen-image-version-1` should be used.
+4. Prepare your [override.yaml](../install/helm-install/README.md). Copy the below into a file named override.yaml. At the time of writing this we are using image tags `replace-janssen-version_dev` which are the bleeding edge images for release `replace-janssen-version`. Stable images such as `replace-janssen-version-1` should be used.
    
    ```yaml
    config:
@@ -178,7 +178,7 @@ Loading users requires a hefty but temporary amount of resources. By default, th
     ```bash
     mkdir add_users && cd add_users
     ```
-2. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/replace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-users/load_users_rdbms_job.yaml) into the folder under the name `load_users.yaml`.
+2. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-users/load_users_rdbms_job.yaml) into the folder under the name `load_users.yaml`.
 
 3. Open the file and modify the sql connection parameters. To speed the loading process increase the CPU requests and limits.
 
@@ -257,16 +257,16 @@ Create the client needed to run the test by executing the following. Make sure t
     }
     EOF
     ```
-3. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/replace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/load_test_auth_code.yaml) into the folder.
+3. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/load_test_auth_code.yaml) into the folder.
 
 4. Download or build [config-cli-tui](../config-guide/tui.md) and run:
 
     ```bash
     # Notice the namespace is jans here . Change it if it was changed during installation of janssen previously
-    ROLE_BASED_CLIENT_ID=$(kubectl get cm cn -o json -n jans | grep '"role_based_client_id":' | sed -e 's#.*:\(\)#\1#' | tr -d '"' | tr -d "," | tr -d '[:space:]')
-    ROLE_BASED_CLIENT_SECRET=$(kubectl get secret cn -o json -n jans | grep '"role_based_client_pw":' | sed -e 's#.*:\(\)#\1#' | tr -d '"' | tr -d "," | tr -d '[:space:]' | base64 -d)
+    TUI_CLIENT_ID=$(kubectl get cm cn -o json -n jans | grep '"tui_client_id":' | sed -e 's#.*:\(\)#\1#' | tr -d '"' | tr -d "," | tr -d '[:space:]')
+    TUI_CLIENT_SECRET=$(kubectl get secret cn -o json -n jans | grep '"tui_client_pw":' | sed -e 's#.*:\(\)#\1#' | tr -d '"' | tr -d "," | tr -d '[:space:]' | base64 -d)
     # add -noverify if your fqdn is not registered
-    ./config-cli-tui.pyz --host $FQDN --client-id $ROLE_BASED_CLIENT_ID --client-secret $ROLE_BASED_CLIENT_SECRET --no-tui --operation-id=post-oauth-openid-client --data=auth_code_client.json
+    ./config-cli-tui.pyz --host $FQDN --client-id $TUI_CLIENT_ID --client-secret $TUI_CLIENT_SECRET --no-tui --operation-id=post-oauth-openid-client --data=auth_code_client.json
     ```
 
 5. Save the client id and secret from the response and enter them along with your FQDN in the yaml file `load_test_auth_code.yaml`  under `AUTHZ_CLIENT_ID`, `AUTHZ_CLIENT_SECRET` and `FQDN` respectively then execute :

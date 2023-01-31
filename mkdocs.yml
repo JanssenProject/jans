@@ -93,6 +93,9 @@ markdown_extensions:
           class: mermaid
           format: !!python/name:pymdownx.superfences.fence_code_format
 - pymdownx.tabbed
+- pymdownx.emoji:
+        emoji_index: !!python/name:materialx.emoji.twemoji
+        emoji_generator: !!python/name:materialx.emoji.to_svg
 
 extra:
   generator: false
@@ -276,6 +279,7 @@ nav:
             - 'Clientinfo': 'admin/auth-server/endpoints/clientinfo.md'
             - 'Introspection': 'admin/auth-server/endpoints/introspection.md'
             - 'Device Authorization': 'admin/auth-server/endpoints/device-authorization.md'
+            - 'PAR': 'admin/auth-server/endpoints/par.md'
             - 'Backchannel Authentication': 'admin/auth-server/endpoints/backchannel-authentication.md'
         - 'Crypto':
             - 'admin/auth-server/crypto/README.md'
@@ -327,13 +331,7 @@ nav:
             - 'admin/auth-server/client-management/README.md'
             - 'Client Schema': 'admin/auth-server/client-management/client-schema.md'
             - 'Client Authentication': 'admin/auth-server/client-management/client-authn.md'
-            - 'Configuration':
-                - 'admin/auth-server/client-management/configuration/README.md'
-                - 'Redirect URIs': 'admin/auth-server/client-management/configuration/redirect-uris.md'
-                - 'Grants': 'admin/auth-server/client-management/configuration/grants.md'
-                - 'Response Types': 'admin/auth-server/client-management/configuration/response-types.md'
-                - 'Pre-authorization': 'admin/auth-server/client-management/configuration/pre-authorization.md'
-                - 'Client Crypto': 'admin/auth-server/client-management/configuration/client-crypto.md'
+            - 'Configuration': 'admin/auth-server/client-management/client-configuration.md'
             - 'Software Statements': 'admin/auth-server/client-management/software-statements.md'
             - 'Sector Identifiers': 'admin/auth-server/client-management/sector-identifiers.md'
             - 'Client Scripts': 'admin/auth-server/client-management/client-scripts.md'
@@ -371,6 +369,7 @@ nav:
             - 'DSL Reference': 'admin/developer/agama/dsl-full.md'
             - 'Java Classpath': 'admin/developer/agama/java-classpath.md'
             - 'A closer look to the engine': 'admin/developer/agama/hello-world-closer.md'
+            - '.gama files deployment': 'admin/developer/agama/gama-deployment.md'
             - 'FAQ': 'admin/developer/agama/faq.md'
         - 'Interception Script Overview': 'admin/developer/interception-scripts.md'
         - 'Script Debugging': 'admin/developer/interception-scripts-debug.md'
