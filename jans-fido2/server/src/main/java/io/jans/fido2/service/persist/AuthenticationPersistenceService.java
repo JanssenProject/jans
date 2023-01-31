@@ -160,7 +160,7 @@ public class AuthenticationPersistenceService {
     public String getDnForAuthenticationEntry(String userInum, String jsId) {
     	String baseDn;
     	if (StringHelper.isEmpty(userInum)) {
-    		baseDn = staticConfiguration.getBaseDn().getFido2Attestation();
+    		baseDn = staticConfiguration.getBaseDn().getFido2Assertion();
     	} else {
 	        // Build DN string for Fido2 registration entry
 	        baseDn = getBaseDnForFido2AuthenticationEntries(userInum);
