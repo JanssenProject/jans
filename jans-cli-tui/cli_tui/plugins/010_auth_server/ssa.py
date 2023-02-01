@@ -116,7 +116,8 @@ class SSA(DialogUtils):
         new_data = self.make_data_from_dialog(tabs={'ssa': dialog.body})
 
         if self.never_expire_cb.checked:
-            new_data['expiration'] = 0
+            # set expiration to 50 years
+            new_data['expiration'] = int(datetime.now().timestamp()) + 1576800000
         else:
             new_data['expiration'] = int(datetime.fromisoformat(self.expire_widget.value).timestamp())
 
