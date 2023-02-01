@@ -22,7 +22,7 @@ class PostInstallCommand(install):
         print("downloding", 'jans-config-api-swagger-auto.yaml')
 
         urlretrieve(
-            'https://raw.githubusercontent.com/JanssenProject/jans/main/jans-config-api/docs/jans-config-api-swagger-auto.yaml',
+            'https://raw.githubusercontent.com/JanssenProject/jans/main/jans-config-api/docs/jans-config-api-swagger.yaml',
             os.path.join(yaml_dir, 'jans-config-api-swagger-auto.yaml')
             )
 
