@@ -22,7 +22,6 @@ import com.nimbusds.jose.crypto.RSADecrypter;
 import com.nimbusds.jose.crypto.RSAEncrypter;
 import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
-import com.nimbusds.jose.crypto.bc.BouncyCastleProviderSingleton;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jwt.EncryptedJWT;
@@ -189,7 +188,7 @@ public class CrossEncryptionTest {
             RSAPrivateKey rsaPrivateKey = ((RSAKey) jwk).toRSAPrivateKey();
 
             JWEDecrypter decrypter = new RSADecrypter(rsaPrivateKey);
-            decrypter.getJCAContext().setProvider(BouncyCastleProviderSingleton.getInstance());
+            decrypter.getJCAContext().setProvider(SecurityProviderUtility.getBCProvider());
 
             encryptedJwt.decrypt(decrypter);
             final String decryptedPayload = new String(Base64Util.base64urldecode(encryptedJwt.getPayload().toString()));

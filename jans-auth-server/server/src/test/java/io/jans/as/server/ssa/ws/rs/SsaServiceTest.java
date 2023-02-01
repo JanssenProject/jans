@@ -83,7 +83,7 @@ public class SsaServiceTest {
 
     @BeforeMethod
     public void setUp() {
-        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+        Security.addProvider(SecurityProviderUtility.getBCProvider());
         cryptoProvider = new AbstractCryptoProvider() {
 
             @Override
