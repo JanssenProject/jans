@@ -7,48 +7,48 @@ tags:
 
 # Client Authentication
 
-Janssen Server supports authentication for confidential clients at the token endpoint. Confidential clients
+Janssen Server supports authentication at the token endpoint for confidential clients. Confidential clients
 have to specify a preferred method of authentication during the client registration process. Client authentication
-is defined by [OAuth](https://datatracker.ietf.org/doc/html/rfc6749#section-2.3) and OpenID Connect
-[Client Metadata](https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata) in the section 
-`token_endpoint_auth_method` and [client authentication section](https://openid.net/specs/openid-connect-core-1_0.html#ClientAuthentication)
+is defined by [OAuth](https://datatracker.ietf.org/doc/html/rfc6749#section-2.3) and OpenID Connect 
+[client authentication section](https://openid.net/specs/openid-connect-core-1_0.html#ClientAuthentication) and in
+[Metadata section](https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata) property 
+`token_endpoint_auth_method`
 
 ## Supported Authentication Methods
 
-List of supported authentication methods for a Janssen Server host is listed in the response of Janssen Server's 
+List of supported authentication methods are listed in the response of Janssen Server's 
 well-known [configuration endpoint](./configuration.md) given below.
 
 ```text
 https://janssen.server.host/jans-auth/.well-known/openid-configuration
 ```
 
-`token_endpoint_auth_methods_supported` claim in the response specifies the list of all the supported methods.
+The `token_endpoint_auth_methods_supported` claim in the response specifies the list of all the supported methods.
 
 ## Authentication Methods
 
 Authentication methods can be broadly categorised in two categories:
 
 1. Shared key based
-2. Private key based
+2. Private( or asymmetric) key based
 
-While shared key based authentication is simpler to implement, it is less secure than private key based authentication
-mechanisms. This is primarily because when using shared key based authentication methods, the client secret is 
-transferred between client and authorization server at some point during the authentication process. There are more 
-reasons to prefer private key over shared secret as listed in this [section](#using-private-key-for-authentication)
+While shared key based authentication is simpler to implement, it is less secure than a private key based authentication.
+This is primarily because when using shared key based authentication, the client secret is transmitted between the client
+and the authorization server. This makes the authentication vulnerable to theft attacks. There are more 
+reasons to prefer private key over shared secret as listed in this [section](#security-features-of-private-key-authentication)
 
 Characteristics table below shows side-by-side comparison of various supported authentication methods.
 
-| Method                        | Secret Not Sent in Clear |      Signed      | Only client has secret | Token Expiry     |
-|-------------------------------|:------------------------:|:----------------:|:----------------------:|------------------|
-| `client_secret_basic`         |     :material-close:     | :material-close: |    :material-close:    | :material-close: |
-| `client_secret_post`          |     :material-close:     | :material-close: |    :material-close:    | :material-close: |
-| `client_secret_jwt`           |     :material-check:     | :material-check: |    :material-close:    | :material-check: |
-| `private_key_jwt`             |     :material-check:     | :material-check: |    :material-check:    | :material-check: |
-| `tls_client_auth`             |     :material-check:     |                  |                        |                  |
-| `self_signed_tls_client_auth` |     :material-check:     |                  |                        |                  |
-| `none`                        |                          |                  |                        |                  |
+| Method                        | Secret Not Sent in Clear |      Signed      | Only client has secret | Expiry           | Token Binding    |
+|-------------------------------|:------------------------:|:----------------:|:----------------------:|------------------|------------------|
+| `client_secret_basic`         |     :material-close:     | :material-close: |    :material-close:    | :material-close: | :material-close: |
+| `client_secret_post`          |     :material-close:     | :material-close: |    :material-close:    | :material-close: | :material-close: |
+| `client_secret_jwt`           |     :material-close:     | :material-check: |    :material-close:    | :material-check: | :material-close: |
+| `private_key_jwt`             |     :material-check:     | :material-check: |    :material-check:    | :material-check: | :material-close: |
+| `tls_client_auth`             |     :material-check:     | :material-check: |    :material-check:    | :material-check: | :material-check: |
+| `self_signed_tls_client_auth` |     :material-check:     | :material-check: |    :material-check:    | :material-check: | :material-check: |
 
-### client_secret_basic
+## client_secret_basic
 
 Default authentication method for Janssen Server. It authenticates clients using method described in 
 [client authentication](https://datatracker.ietf.org/doc/html/rfc6749#section-2.3.1) section of OAuth framework. 
@@ -86,11 +86,22 @@ navigate via `Auth Server` -> Get or add clients -> `encryption/signing` -> TODO
 
 ## private_key_jwt
 
-`private_key_jwt` is private key based method where secret is not shared between client and authorization server. Instead, the client generates an JSON Web Token(JWT) which is shared with the Janssen Server. Upon receiving JWT singned by client's private key, the Janssen Server can validate this JWT using public keys supplied by client at the time of registration in JSON Web Key format. This method is
-further described in OpenId Connect specification, [section 9](https://openid.net/specs/openid-connect-core-1_0.html#ClientAuthentication).
+`private_key_jwt` is private key based method where secret is not shared between client and authorization server. 
+Instead, the client generates an JSON Web Token(JWT) which is shared with the Janssen Server. Upon receiving JWT singned
+by client's private key, the Janssen Server can validate this JWT using public keys supplied by client at the time of 
+registration. 
+
+The client can supply public keys in form of [JSON Web Key Set(JWKS)](https://www.rfc-editor.org/rfc/rfc7517#section-5) or 
+provide a URI where the client publishes its JWKS. Providing JWKS URI is preferred method as it enable easy key rotations
+without client having to update JWKS manualy. Check `jwks` and `jwks_uri` elements in [OIDC client metadata section](https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata)
+for more details.
+
+This authentication method is further described in OpenId Connect specification, 
+[section 9](https://openid.net/specs/openid-connect-core-1_0.html#ClientAuthentication).
 
 Janssen server implements signing and encryption mechanism following the guidelines in [section 10](https://openid.net/specs/openid-connect-core-1_0.html#SigEnc) 
-of OpenId Connect specification. Clients should sign and encrypt JWT as per their security requirements. 
+of OpenId Connect specification. Clients should choose the algorithm to sign and encrypt JWT as per their security 
+requirements. 
 
 ### Security Features Of Private Key Authentication
 
@@ -127,13 +138,19 @@ navigate via `Auth Server` -> Get or add clients -> `encryption/signing` -> set 
 
 ## tls_client_auth
 
-This is mutual TLS based authentication method where client authenticates with Janssen Server using X.509 certificate during TLS handshake. In this authentication method, the client uses X.509 certificate that is issued by a Certificate Authority(CA). Benefit of using mutual TLS based authentication is that the authorization server binds the token with the certificate. This provides enhanced security where it is possible to check that the token belongs to the intended client. 
+During TLS handshake, the client authenticates with Janssen Server using X.509 certificate that is issued by a 
+Certificate Authority(CA). This is mutual TLS based authentication method.
+Benefit of using mutual TLS based authentication is that the authorization server binds the token with the certificate.
+This provides enhanced security where it is possible to check that the token belongs to the intended client.
 
 This authentication mechanism is defined in [mTLS specification for OAuth2](https://www.rfc-editor.org/rfc/rfc8705#name-mutual-tls-for-oauth-client)
 
 ## self_signed_tls_client_auth
 
-This is mutual TLS based authentication method where client authenticates with Janssen Server using X.509 certificate during TLS handshake. Client uses self signed X.509 certificate, removing the dependency on for public key infrastructure(PKIX). Benefit of using mutual TLS based authentication is that the authorization server binds the token with the certificate. This provides enhanced security where it is possible to check that the token belongs to the intended client. 
+Client authenticates with Janssen Server using self signed X.509 certificate during TLS handshake. Use of self-signed
+certificate removes the dependency of public key infrastructure(PKIX). This is mutual TLS based authentication method.
+Benefit of using mutual TLS based authentication is that the authorization server binds the token with the certificate.
+This provides enhanced security where it is possible to check that the token belongs to the intended client. 
 
 This authentication mechanism is defined in [mTLS specification for OAuth2](https://www.rfc-editor.org/rfc/rfc8705#name-self-signed-certificate-mut)
 
@@ -142,7 +159,6 @@ This authentication mechanism is defined in [mTLS specification for OAuth2](http
 The Client does not authenticate itself at the Token Endpoint, either because it uses only the Implicit Flow (and so 
 does not use the Token Endpoint) or because it is a Public Client with no Client Secret or other authentication 
 mechanism.
-
 
 ## Want to contribute?
 
