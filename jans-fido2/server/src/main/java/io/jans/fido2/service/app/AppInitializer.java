@@ -53,6 +53,7 @@ import java.util.Properties;
  * @version May 12, 2020
  */
 @ApplicationScoped
+@Named
 public class AppInitializer {
 
 	@Inject

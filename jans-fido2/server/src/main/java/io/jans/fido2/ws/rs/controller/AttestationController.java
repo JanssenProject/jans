@@ -10,10 +10,13 @@ import java.io.IOException;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
 import jakarta.ws.rs.core.Response.Status;
@@ -47,7 +50,7 @@ public class AttestationController {
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @Path("/options")
-    public Response register(String content) {
+    public Response register(String content, @Context HttpServletRequest httpRequest, @Context HttpServletResponse httpResponse) {
         if (appConfiguration.getFido2Configuration() == null) {
             return Response.status(Status.FORBIDDEN).build();
         }
@@ -59,7 +62,7 @@ public class AttestationController {
             throw new Fido2RpRuntimeException("Failed to parse options attestation request", ex);
         }
 
-        JsonNode result = attestationService.options(params);
+        JsonNode result = attestationService.options(params, httpRequest, httpResponse);
 
         ResponseBuilder builder = Response.ok().entity(result.toString());
         return builder.build();
@@ -69,7 +72,7 @@ public class AttestationController {
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @Path("/result")
-    public Response verify(String content) {
+    public Response verify(String content, @Context HttpServletRequest httpRequest, @Context HttpServletResponse httpResponse) {
         if (appConfiguration.getFido2Configuration() == null) {
             return Response.status(Status.FORBIDDEN).build();
         }
@@ -81,7 +84,7 @@ public class AttestationController {
             throw new Fido2RpRuntimeException("Failed to parse finish attestation request", ex) ;
         }
 
-        JsonNode result = attestationService.verify(params);
+        JsonNode result = attestationService.verify(params, httpRequest, httpResponse);
 
         ResponseBuilder builder = Response.ok().entity(result.toString());
         return builder.build();

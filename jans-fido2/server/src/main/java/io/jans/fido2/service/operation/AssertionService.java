@@ -10,12 +10,17 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import io.jans.fido2.service.external.ExternalFido2InterceptionService;
+import io.jans.fido2.service.external.context.ExternalFido2InterceptionContext;
 import io.jans.orm.model.fido2.Fido2RegistrationData;
 import io.jans.orm.model.fido2.Fido2RegistrationEntry;
 import io.jans.orm.model.fido2.Fido2RegistrationStatus;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.core.Context;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import io.jans.entry.DeviceRegistration;
@@ -88,12 +93,19 @@ public class AssertionService {
 	@Inject
 	private NetworkService networkService;
 
+	@Inject
+	private ExternalFido2InterceptionService externalFido2InterceptionService;
+
 	/*
 	 * Requires mandatory parameters: username Support non mandatory parameters:
 	 * userVerification, documentDomain, extensions, timeout
 	 */
-	public JsonNode options(JsonNode params) {
+	public JsonNode options(JsonNode params, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
 		log.debug("Assertion options {}", params);
+
+		// Apply external custom scripts
+		ExternalFido2InterceptionContext externalFido2InterceptionContext = new ExternalFido2InterceptionContext(params, httpRequest, httpResponse);
+		boolean externalIntercetContext = externalFido2InterceptionService.interceptAuthenticateAssertion(params, externalFido2InterceptionContext);
 
 		// Verify request parameters
 		commonVerifiers.verifyAssertionOptions(params);
@@ -172,8 +184,12 @@ public class AssertionService {
 
 	}
 
-	public JsonNode verify(JsonNode params) {
+	public JsonNode verify(JsonNode params, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
 		log.debug("authenticateResponse {}", params);
+
+		// Apply external custom scripts
+		ExternalFido2InterceptionContext externalFido2InterceptionContext = new ExternalFido2InterceptionContext(params, httpRequest, httpResponse);
+		boolean externalIntercetContext = externalFido2InterceptionService.interceptVerifyAssertion(params, externalFido2InterceptionContext);
 
 		// Verify if there are mandatory request parameters
 		commonVerifiers.verifyBasicPayload(params);

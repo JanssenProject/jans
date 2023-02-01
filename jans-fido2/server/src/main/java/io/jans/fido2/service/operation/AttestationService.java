@@ -10,6 +10,8 @@ import java.security.SecureRandom;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import io.jans.fido2.service.external.ExternalFido2InterceptionService;
+import io.jans.fido2.service.external.context.ExternalFido2InterceptionContext;
 import io.jans.orm.model.fido2.Fido2RegistrationData;
 import io.jans.orm.model.fido2.Fido2RegistrationEntry;
 import io.jans.orm.model.fido2.Fido2RegistrationStatus;
@@ -34,6 +36,8 @@ import io.jans.fido2.service.verifier.AttestationVerifier;
 import io.jans.fido2.service.verifier.CommonVerifiers;
 import io.jans.fido2.service.verifier.DomainVerifier;
 import io.jans.util.StringHelper;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -75,13 +79,20 @@ public class AttestationService {
 	@Inject
 	private Base64Service base64Service;
 
+	@Inject
+	private ExternalFido2InterceptionService externalFido2InterceptionService;
+
 	/*
 	 * Requires mandatory parameters: username, displayName, attestation Support non
 	 * mandatory parameters: authenticatorSelection, documentDomain, extensions,
 	 * timeout
 	 */
-	public JsonNode options(JsonNode params) {
+	public JsonNode options(JsonNode params, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
 		log.debug("Attestation options {}", params);
+
+		// Apply external custom scripts
+		ExternalFido2InterceptionContext externalFido2InterceptionContext = new ExternalFido2InterceptionContext(params, httpRequest, httpResponse);
+		boolean externalIntercetContext = externalFido2InterceptionService.interceptRegisterAttestation(params, externalFido2InterceptionContext);
 
 		// Verify request parameters
 		commonVerifiers.verifyAttestationOptions(params);
@@ -168,8 +179,12 @@ public class AttestationService {
 		return optionsResponseNode;
 	}
 
-	public JsonNode verify(JsonNode params) {
+	public JsonNode verify(JsonNode params, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
 		log.debug("Attestation verify {}", params);
+
+		// Apply external custom scripts
+		ExternalFido2InterceptionContext externalFido2InterceptionContext = new ExternalFido2InterceptionContext(params, httpRequest, httpResponse);
+		boolean externalIntercetContext = externalFido2InterceptionService.interceptVerifyAttestation(params, externalFido2InterceptionContext);
 
 		// Verify if there are mandatory request parameters
 		commonVerifiers.verifyBasicPayload(params);
