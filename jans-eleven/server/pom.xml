@@ -17,12 +17,16 @@
 	</build>
 
 	<dependencies>
-		<!-- oxEleven -->
+		<!-- jans-core -->
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-core-util</artifactId>
+		</dependency>
+		<!-- jans-eleven -->
 		<dependency>
 			<groupId>io.jans</groupId>
 			<artifactId>jans-eleven-model</artifactId>
 		</dependency>
-
 		<!-- Weld -->
 		<dependency>
 			<groupId>jakarta.enterprise</groupId>
