@@ -143,9 +143,8 @@ def get_setup_options():
 
         setupOptions['properties_password'] = base.argsp.properties_password
 
-    if base.current_app.profile == 'jans':
-        if base.argsp.install_eleven:
-            setupOptions['installEleven'] = True
+    if base.current_app.profile == 'jans' and base.argsp.install_eleven:
+        setupOptions['installEleven'] = True
 
     if base.current_app.profile == SetupProfiles.OPENBANKING:
         setupOptions['opendj_install'] = InstallTypes.NONE
@@ -157,8 +156,6 @@ def get_setup_options():
 
         if base.argsp.no_external_key:
             setupOptions['use_external_key'] = False
-
-
 
     if base.argsp.ip_address:
         setupOptions['ip'] = base.argsp.ip_address
