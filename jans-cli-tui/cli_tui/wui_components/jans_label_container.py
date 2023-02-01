@@ -1,12 +1,16 @@
 from typing import Callable, Optional
 from prompt_toolkit.application import get_app
 
-from prompt_toolkit.formatted_text import HTML, AnyFormattedText, merge_formatted_text
+from prompt_toolkit.formatted_text import HTML, AnyFormattedText, merge_formatted_text,to_formatted_text
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.layout import FormattedTextControl, Window
 from prompt_toolkit.widgets import Label, Frame, Box, Button
 from prompt_toolkit.layout.containers import HSplit
-
+from prompt_toolkit.layout.containers import (
+    HSplit,
+    VSplit,
+    DynamicContainer,
+)
 class JansLabelContainer:
     def __init__(
         self,
@@ -15,7 +19,8 @@ class JansLabelContainer:
         on_enter: Optional[Callable]=None,
         on_delete: Optional[Callable]=None,
         on_display: Optional[Callable]=None,
-        buttonbox: Optional[Button]=None
+        buttonbox: Optional[Button]=None,
+        entries: Optional=None,
         ) -> None:
 
         """Label container for Jans
@@ -33,13 +38,13 @@ class JansLabelContainer:
         self.on_delete = on_delete
         self.on_display = on_display
         self.height=2
-        self.entries = []
+        self.entries = [] if not entries else entries
         self.invalidate = False
         self.selected_entry = 0
         self.body = Window(
             content=FormattedTextControl(
                 text=self._get_formatted_text,
-                focusable=True,
+                focusable=True if self.entries != [] else False,
                 key_bindings=self._get_key_bindings(),
             ),
             width=self.width-2,
@@ -52,7 +57,6 @@ class JansLabelContainer:
             widgets.append(buttonbox)
 
         self.container = Box(Frame(HSplit(widgets), title=title, width=self.width))
-
 
     def _get_formatted_text(self) -> AnyFormattedText:
         """Internal function for formatting entries
