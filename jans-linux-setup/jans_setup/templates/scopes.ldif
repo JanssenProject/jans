@@ -185,3 +185,13 @@ jansId: device_sso
 jansScopeTyp: openid
 objectClass: top
 objectClass: jansScope
+
+dn: inum=B9D2-D6E5,ou=scopes,o=jans
+displayName: SSA Admin
+inum: B9D2-D6E5
+jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
+jansId: https://jans.io/auth/ssa.admin
+jansScopeTyp: openid
+jansDefScope: false
+objectClass: top
+objectClass: jansScope
