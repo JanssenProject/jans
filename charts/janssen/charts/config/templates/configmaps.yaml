@@ -163,6 +163,10 @@ data:
   | replace "fido2LogLevel" "fido2_log_level"
   | replace "persistenceLogTarget" "persistence_log_target"
   | replace "persistenceLogLevel" "persistence_log_level"
+  | replace "persistenceDurationLogTarget" "persistence_duration_log_target"
+  | replace "persistenceDurationLogLevel" "persistence_duration_log_level"
+  | replace "scriptLogTarget" "script_log_target"
+  | replace "scriptLogLevel" "script_log_level"
   | replace "enableStdoutLogPrefix" "enable_stdout_log_prefix"
   | squote
   }}

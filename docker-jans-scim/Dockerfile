@@ -35,7 +35,7 @@ EXPOSE 8080
 # ======
 
 ARG JYTHON_VERSION=2.7.3
-ARG JYTHON_BUILD_DATE='2022-08-01 07:49'
+ARG JYTHON_BUILD_DATE='2022-08-01 17:37'
 RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSION}/jython-installer-${JYTHON_VERSION}.jar -O /tmp/jython-installer.jar \
     && mkdir -p /opt/jython \
     && java -jar /tmp/jython-installer.jar -v -s -d /opt/jython -e ensurepip \
@@ -46,7 +46,7 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # ====
 
 ENV CN_VERSION=1.0.7-SNAPSHOT
-ENV CN_BUILD_DATE='2023-01-24 10:01'
+ENV CN_BUILD_DATE='2023-01-31 09:56'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-scim-server/${CN_VERSION}/jans-scim-server-${CN_VERSION}.war
 
 # Install SCIM
@@ -80,7 +80,7 @@ COPY conf/prometheus-config.yaml /opt/prometheus/
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_SOURCE_VERSION=cee252522061b43065eddbdc70d51bda9e2e85d7
+ENV JANS_SOURCE_VERSION=1a2d298c5b4911bfaccdf80203df1a919ff7a6b8
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCIM_RESOURCE_DIR=jans-scim/server/src/main/resources
 
