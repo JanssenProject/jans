@@ -4282,18 +4282,12 @@
     Authentication Methods
   </a>
   
-    <nav class="md-nav" aria-label="Authentication Methods">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
+</li>
+      
+        <li class="md-nav__item">
   <a href="#client_secret_basic" class="md-nav__link">
     client_secret_basic
   </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -4331,6 +4325,20 @@
   
     <nav class="md-nav" aria-label="private_key_jwt">
       <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#security-features-of-private-key-authentication" class="md-nav__link">
+    Security Features Of Private Key Authentication
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#implementation-steps" class="md-nav__link">
+    Implementation Steps
+  </a>
+  
+</li>
         
           <li class="md-nav__item">
   <a href="#client-configuration-for-using-private_key_jwt" class="md-nav__link">
@@ -8781,18 +8789,12 @@
     Authentication Methods
   </a>
   
-    <nav class="md-nav" aria-label="Authentication Methods">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
+</li>
+      
+        <li class="md-nav__item">
   <a href="#client_secret_basic" class="md-nav__link">
     client_secret_basic
   </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -8830,6 +8832,20 @@
   
     <nav class="md-nav" aria-label="private_key_jwt">
       <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#security-features-of-private-key-authentication" class="md-nav__link">
+    Security Features Of Private Key Authentication
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#implementation-steps" class="md-nav__link">
+    Implementation Steps
+  </a>
+  
+</li>
         
           <li class="md-nav__item">
   <a href="#client-configuration-for-using-private_key_jwt" class="md-nav__link">
@@ -8898,6 +8914,11 @@
         <span class="md-tag">client</span>
       
     
+      
+      
+        <span class="md-tag">authentication</span>
+      
+    
   </nav>
 
 
@@ -8909,26 +8930,28 @@
 
 
 <h1 id="client-authentication">Client Authentication<a class="headerlink" href="#client-authentication" title="Permanent link">#</a></h1>
-<p>Janssen Server supports authentication for confidential clients at the token endpoint. Confidential clients
+<p>Janssen Server supports authentication at the token endpoint for confidential clients. Confidential clients
 have to specify a preferred method of authentication during the client registration process. Client authentication
-is defined by <a href="https://datatracker.ietf.org/doc/html/rfc6749#section-2.3">OAuth</a> and OpenID Connect
-<a href="https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata">Client Metadata</a> in the section 
-<code>token_endpoint_auth_method</code> and <a href="https://openid.net/specs/openid-connect-core-1_0.html#ClientAuthentication">client authentication section</a></p>
+is defined by <a href="https://datatracker.ietf.org/doc/html/rfc6749#section-2.3">OAuth</a> and OpenID Connect 
+<a href="https://openid.net/specs/openid-connect-core-1_0.html#ClientAuthentication">client authentication section</a> and in
+<a href="https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata">Metadata section</a> property 
+<code>token_endpoint_auth_method</code></p>
 <h2 id="supported-authentication-methods">Supported Authentication Methods<a class="headerlink" href="#supported-authentication-methods" title="Permanent link">#</a></h2>
-<p>List of supported authentication methods for a Janssen Server host is listed in the response of Janssen Server's 
+<p>List of supported authentication methods are listed in the response of Janssen Server's 
 well-known <a href="./configuration.md">configuration endpoint</a> given below.</p>
 <div class="highlight"><pre><span></span><code>https://janssen.server.host/jans-auth/.well-known/openid-configuration
 </code></pre></div>
-<p><code>token_endpoint_auth_methods_supported</code> claim in the response specifies the list of all the supported methods.</p>
+<p>The <code>token_endpoint_auth_methods_supported</code> claim in the response specifies the list of all the supported methods.</p>
 <h2 id="authentication-methods">Authentication Methods<a class="headerlink" href="#authentication-methods" title="Permanent link">#</a></h2>
 <p>Authentication methods can be broadly categorised in two categories:</p>
 <ol>
 <li>Shared key based</li>
-<li>Private key based</li>
+<li>Private( or asymmetric) key based</li>
 </ol>
-<p>While shared key based authentication is simpler to implement, it is less secure than private key based authentication
-mechanisms. This is primarily because when using shared key based authentication methods, the client secret is 
-transferred between client and authorization server at some point during the authentication process. </p>
+<p>While shared key based authentication is simpler to implement, it is less secure than a private key based authentication.
+This is primarily because when using shared key based authentication, the client secret is transmitted between the client
+and the authorization server. This makes the authentication vulnerable to theft attacks. There are more 
+reasons to prefer private key over shared secret as listed in this <a href="#security-features-of-private-key-authentication">section</a></p>
 <p>Characteristics table below shows side-by-side comparison of various supported authentication methods.</p>
 <table>
 <thead>
@@ -8937,7 +8960,8 @@ transferred between client and authorization server at some point during the aut
 <th align="center">Secret Not Sent in Clear</th>
 <th align="center">Signed</th>
 <th align="center">Only client has secret</th>
-<th>Token Expiry</th>
+<th>Expiry</th>
+<th>Token Binding</th>
 </tr>
 </thead>
 <tbody>
@@ -8947,6 +8971,7 @@ transferred between client and authorization server at some point during the aut
 <td align="center"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg></span></td>
 <td align="center"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg></span></td>
 <td><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg></span></td>
+<td><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg></span></td>
 </tr>
 <tr>
 <td><code>client_secret_post</code></td>
@@ -8954,13 +8979,15 @@ transferred between client and authorization server at some point during the aut
 <td align="center"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg></span></td>
 <td align="center"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg></span></td>
 <td><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg></span></td>
+<td><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg></span></td>
 </tr>
 <tr>
 <td><code>client_secret_jwt</code></td>
-<td align="center"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 7 9 19l-5.5-5.5 1.41-1.41L9 16.17 19.59 5.59 21 7Z"/></svg></span></td>
+<td align="center"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg></span></td>
 <td align="center"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 7 9 19l-5.5-5.5 1.41-1.41L9 16.17 19.59 5.59 21 7Z"/></svg></span></td>
 <td align="center"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg></span></td>
 <td><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 7 9 19l-5.5-5.5 1.41-1.41L9 16.17 19.59 5.59 21 7Z"/></svg></span></td>
+<td><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg></span></td>
 </tr>
 <tr>
 <td><code>private_key_jwt</code></td>
@@ -8968,31 +8995,27 @@ transferred between client and authorization server at some point during the aut
 <td align="center"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 7 9 19l-5.5-5.5 1.41-1.41L9 16.17 19.59 5.59 21 7Z"/></svg></span></td>
 <td align="center"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 7 9 19l-5.5-5.5 1.41-1.41L9 16.17 19.59 5.59 21 7Z"/></svg></span></td>
 <td><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 7 9 19l-5.5-5.5 1.41-1.41L9 16.17 19.59 5.59 21 7Z"/></svg></span></td>
+<td><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg></span></td>
 </tr>
 <tr>
 <td><code>tls_client_auth</code></td>
-<td align="center"></td>
-<td align="center"></td>
-<td align="center"></td>
-<td></td>
+<td align="center"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 7 9 19l-5.5-5.5 1.41-1.41L9 16.17 19.59 5.59 21 7Z"/></svg></span></td>
+<td align="center"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 7 9 19l-5.5-5.5 1.41-1.41L9 16.17 19.59 5.59 21 7Z"/></svg></span></td>
+<td align="center"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 7 9 19l-5.5-5.5 1.41-1.41L9 16.17 19.59 5.59 21 7Z"/></svg></span></td>
+<td><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 7 9 19l-5.5-5.5 1.41-1.41L9 16.17 19.59 5.59 21 7Z"/></svg></span></td>
+<td><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 7 9 19l-5.5-5.5 1.41-1.41L9 16.17 19.59 5.59 21 7Z"/></svg></span></td>
 </tr>
 <tr>
 <td><code>self_signed_tls_client_auth</code></td>
-<td align="center"></td>
-<td align="center"></td>
-<td align="center"></td>
-<td></td>
-</tr>
-<tr>
-<td><code>none</code></td>
-<td align="center"></td>
-<td align="center"></td>
-<td align="center"></td>
-<td></td>
+<td align="center"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 7 9 19l-5.5-5.5 1.41-1.41L9 16.17 19.59 5.59 21 7Z"/></svg></span></td>
+<td align="center"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 7 9 19l-5.5-5.5 1.41-1.41L9 16.17 19.59 5.59 21 7Z"/></svg></span></td>
+<td align="center"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 7 9 19l-5.5-5.5 1.41-1.41L9 16.17 19.59 5.59 21 7Z"/></svg></span></td>
+<td><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 7 9 19l-5.5-5.5 1.41-1.41L9 16.17 19.59 5.59 21 7Z"/></svg></span></td>
+<td><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 7 9 19l-5.5-5.5 1.41-1.41L9 16.17 19.59 5.59 21 7Z"/></svg></span></td>
 </tr>
 </tbody>
 </table>
-<h3 id="client_secret_basic">client_secret_basic<a class="headerlink" href="#client_secret_basic" title="Permanent link">#</a></h3>
+<h2 id="client_secret_basic">client_secret_basic<a class="headerlink" href="#client_secret_basic" title="Permanent link">#</a></h2>
 <p>Default authentication method for Janssen Server. It authenticates clients using method described in 
 <a href="https://datatracker.ietf.org/doc/html/rfc6749#section-2.3.1">client authentication</a> section of OAuth framework. </p>
 <h2 id="client_secret_post">client_secret_post<a class="headerlink" href="#client_secret_post" title="Permanent link">#</a></h2>
@@ -9019,10 +9042,39 @@ the same token in case it is compromised.</li>
 <p>To specify preferred algorithm for a client, using <a href="../../../config-guide/tui/">Janssen Text-based UI(TUI)</a>,
 navigate via <code>Auth Server</code> -&gt; Get or add clients -&gt; <code>encryption/signing</code> -&gt; TODO: which exact properties.</p>
 <h2 id="private_key_jwt">private_key_jwt<a class="headerlink" href="#private_key_jwt" title="Permanent link">#</a></h2>
-<p><code>private_key_jwt</code> is private key based method where secret is not shared between client and authorization server. This method is 
-further described in OpenId Connect specification, <a href="https://openid.net/specs/openid-connect-core-1_0.html#ClientAuthentication">section 9</a>.</p>
+<p><code>private_key_jwt</code> is private key based method where secret is not shared between client and authorization server. 
+Instead, the client generates an JSON Web Token(JWT) which is shared with the Janssen Server. Upon receiving JWT singned
+by client's private key, the Janssen Server can validate this JWT using public keys supplied by client at the time of 
+registration. </p>
+<p>The client can supply public keys in form of <a href="https://www.rfc-editor.org/rfc/rfc7517#section-5">JSON Web Key Set(JWKS)</a> or 
+provide a URI where the client publishes its JWKS. Providing JWKS URI is preferred method as it enable easy key rotations
+without client having to update JWKS manualy. Check <code>jwks</code> and <code>jwks_uri</code> elements in <a href="https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata">OIDC client metadata section</a>
+for more details.</p>
+<p>This authentication method is further described in OpenId Connect specification, 
+<a href="https://openid.net/specs/openid-connect-core-1_0.html#ClientAuthentication">section 9</a>.</p>
 <p>Janssen server implements signing and encryption mechanism following the guidelines in <a href="https://openid.net/specs/openid-connect-core-1_0.html#SigEnc">section 10</a> 
-of OpenId Connect specification. Clients should sign and encrypt JWT as per their security requirements. </p>
+of OpenId Connect specification. Clients should choose the algorithm to sign and encrypt JWT as per their security 
+requirements. </p>
+<h3 id="security-features-of-private-key-authentication">Security Features Of Private Key Authentication<a class="headerlink" href="#security-features-of-private-key-authentication" title="Permanent link">#</a></h3>
+<p>This method of authentication is more secure than the methods relying on shared key due to following features.</p>
+<ul>
+<li><strong>Secure Storage</strong>: Hardware Security Module(HSM) or Trusted Platform Module(TPM) can be used to securely store private key 
+  and sign using it at client side. These modules make it impossible to access private key from outside.</li>
+<li><strong>Smaller footprint</strong>: Unlike shared secret, where client secret resides on authorization server as well as client, 
+  the private key only exists on client. This reduced footprint reduces potential risks.</li>
+<li><strong>Limited Time Validity</strong>: JWT can be set to expire after a certain duration. Similarly, client certificates can be 
+  made to expire. This makes it harder to execute replay attacks using a compromised token or certificate.</li>
+</ul>
+<h3 id="implementation-steps">Implementation Steps<a class="headerlink" href="#implementation-steps" title="Permanent link">#</a></h3>
+<p>Below are the high-level steps involved in using <code>private_key_jwt</code> authentication method:</p>
+<ul>
+<li>Create JWK private key</li>
+<li>Derive JWK public key for the private key. Public key JWK should be provided to Janssen Server at the time of registration</li>
+<li>Create JWT header and payload as described in <a href="https://openid.net/specs/openid-connect-core-1_0.html#ClientAuthentication">section 9 of specification</a></li>
+<li>Sign JWT with a signing algorithm</li>
+</ul>
+<p>Client code that implements above steps should leverage any of the secure and trusted library that implements these functions. A non-exhaustive list of such libraries
+can be found at <a href="https://jwt.io/libraries">jwt.io</a>. Psudocode implementation for Java based client using <code>nimbus-jose-jwt</code> library can be found <a href="https://connect2id.com/products/nimbus-jose-jwt/examples/jwt-with-rsa-signature">here</a></p>
 <h3 id="client-configuration-for-using-private_key_jwt">Client Configuration For Using private_key_jwt<a class="headerlink" href="#client-configuration-for-using-private_key_jwt" title="Permanent link">#</a></h3>
 <p>Janssen Server clients can specify signing and encryption keys using client configuration. Clients can either specify
 JWKS as value or as reference URI. </p>
@@ -9030,11 +9082,21 @@ JWKS as value or as reference URI. </p>
 navigate via <code>Auth Server</code> -&gt; Get or add clients -&gt; <code>encryption/signing</code> -&gt; set value for <code>Client JWKS URI</code> or 
 <code>Client JWKS</code>.</p>
 <h2 id="tls_client_auth">tls_client_auth<a class="headerlink" href="#tls_client_auth" title="Permanent link">#</a></h2>
-<p>TODO: add more details</p>
+<p>During TLS handshake, the client authenticates with Janssen Server using X.509 certificate that is issued by a 
+Certificate Authority(CA). This is mutual TLS based authentication method.
+Benefit of using mutual TLS based authentication is that the authorization server binds the token with the certificate.
+This provides enhanced security where it is possible to check that the token belongs to the intended client.</p>
+<p>This authentication mechanism is defined in <a href="https://www.rfc-editor.org/rfc/rfc8705#name-mutual-tls-for-oauth-client">mTLS specification for OAuth2</a></p>
 <h2 id="self_signed_tls_client_auth">self_signed_tls_client_auth<a class="headerlink" href="#self_signed_tls_client_auth" title="Permanent link">#</a></h2>
-<p>TODO: add more details</p>
+<p>Client authenticates with Janssen Server using self signed X.509 certificate during TLS handshake. Use of self-signed
+certificate removes the dependency of public key infrastructure(PKIX). This is mutual TLS based authentication method.
+Benefit of using mutual TLS based authentication is that the authorization server binds the token with the certificate.
+This provides enhanced security where it is possible to check that the token belongs to the intended client. </p>
+<p>This authentication mechanism is defined in <a href="https://www.rfc-editor.org/rfc/rfc8705#name-self-signed-certificate-mut">mTLS specification for OAuth2</a></p>
 <h2 id="none">none<a class="headerlink" href="#none" title="Permanent link">#</a></h2>
-<p>TODO: add more details</p>
+<p>The Client does not authenticate itself at the Token Endpoint, either because it uses only the Implicit Flow (and so 
+does not use the Token Endpoint) or because it is a Public Client with no Client Secret or other authentication 
+mechanism.</p>
 <h2 id="want-to-contribute">Want to contribute?<a class="headerlink" href="#want-to-contribute" title="Permanent link">#</a></h2>
 <p>If you have content you'd like to contribute to this page in the meantime, you can get started with our <a href="https://docs.jans.io/head/CONTRIBUTING/">Contribution guide</a>.</p>
 
@@ -9043,7 +9105,7 @@ navigate via <code>Auth Server</code> -&gt; Get or add clients -&gt; <code>encry
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-27T17:38:27+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-02-01T17:33:04+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-02-01</span>
       
         <br>
         Created:
