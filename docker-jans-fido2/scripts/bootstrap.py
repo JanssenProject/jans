@@ -138,6 +138,10 @@ def configure_logging():
         "fido2_log_level": "INFO",
         "persistence_log_target": "FILE",
         "persistence_log_level": "INFO",
+        "persistence_duration_log_target": "FILE",
+        "persistence_duration_log_level": "INFO",
+        "script_log_target": "FILE",
+        "script_log_level": "INFO",
         "log_prefix": "",
     }
 
@@ -177,7 +181,9 @@ def configure_logging():
     # mapping between the ``log_target`` value and their appenders
     file_aliases = {
         "fido2_log_target": "FILE",
-        "persistence_log_target": "PERSISTENCE_FILE",
+        "persistence_log_target": "FIDO2_PERSISTENCE_FILE",
+        "persistence_duration_log_target": "FIDO2_PERSISTENCE_DURATION_FILE",
+        "script_log_target": "FIDO2_SCRIPT_LOG_FILE",
     }
     for key, value in file_aliases.items():
         if config[key] == "FILE":
