@@ -136,7 +136,7 @@ style = Style.from_dict(
         "tab-nav-background": "fg:#b0e0e6 bg:#a9a9a9",
         "tab-unselected": "fg:#b0e0e6 bg:#a9a9a9 underline",
         "tab-selected": "fg:#000080 bg:#d3d3d3",
-        
+
         ##scim
         "scim-widget": "bg:black fg:white",
 
@@ -172,7 +172,7 @@ date_picker_TimeTitle = "yellow"  ## only color >> HTML '<blue></blue>'
 date_picker_Time = "green"       ## only color
 date_picker_TimeSelected = "black"
 
-date_picker_calender_prevSelected = "red" #>black >> defult bold
+date_picker_calender_prevSelected = "red" #>black >> default bold
 date_picker_calenderNSelected = "blue"#>black
 date_picker_calenderSelected = "red"
 

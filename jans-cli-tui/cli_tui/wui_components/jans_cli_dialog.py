@@ -36,20 +36,21 @@ class JansGDialog:
         self.body = body
         self.myparent = parent
 
-
         if not width:
             width = parent.dialog_width
 
         if not buttons:
             buttons = [Button(text=_("OK"))]
 
-        def do_handler(button_text, handler):
+        def do_handler(button_text, handler, keep_dialog):
             if handler:
                 handler(self)
-            self.future.set_result(button_text)
+
+            if not keep_dialog:
+                self.future.set_result(button_text)
 
         for button in buttons:
-            button.handler = partial(do_handler, button.text, button.handler)
+            button.handler = partial(do_handler, button.text, button.handler, getattr(button, 'keep_dialog', False))
 
         self.dialog = Dialog(
             title=title,

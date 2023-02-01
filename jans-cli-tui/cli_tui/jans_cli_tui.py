@@ -35,7 +35,7 @@ if no_tui:
     sys.exit()
 
 import prompt_toolkit
-from prompt_toolkit.application import Application
+from prompt_toolkit.application import Application, get_app_session
 from prompt_toolkit.application.current import get_app
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.key_binding.bindings.focus import focus_next, focus_previous
@@ -187,7 +187,8 @@ class JansCliApp(Application):
         self.invalidate()
 
     def cli_requests(self, args: dict) -> Response:
-        response = self.cli_object.process_command_by_id(
+        cli_object = args['cli_object'] if 'cli_object' in args else self.cli_object
+        response = cli_object.process_command_by_id(
                         operation_id=args['operation_id'],
                         url_suffix=args.get('url_suffix', ''),
                         endpoint_args=args.get('endpoint_args', ''),
@@ -250,14 +251,21 @@ class JansCliApp(Application):
                 self._plugins.remove(plugin_object)
                 return
 
-
     @property
-    def dialog_width(self) -> None:
+    def dialog_width(self) -> int:
         return int(self.output.get_size().columns*0.8)
 
     @property
-    def dialog_height(self) -> None:
+    def dialog_height(self) -> int:
         return int(self.output.get_size().rows*0.9)
+
+    def get_column_sizes(self, *args: tuple) -> list:
+        col_size_list = []
+        w = get_app_session().output.get_size().columns - 3
+        for col_ratio in args:
+            col_size_list.append(int(w*col_ratio))
+
+        return col_size_list
 
     def init_logger(self) -> None:
         self.logger = logging.getLogger('JansCli')
