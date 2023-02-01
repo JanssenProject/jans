@@ -30,12 +30,23 @@ RUN wget -q https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/${JETTY_
 # Ports required by jetty
 EXPOSE 8080
 
+# ======
+# Jython
+# ======
+
+ARG JYTHON_VERSION=2.7.3
+ARG JYTHON_BUILD_DATE='2022-08-01 17:37'
+RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSION}/jython-installer-${JYTHON_VERSION}.jar -O /tmp/jython-installer.jar \
+    && mkdir -p /opt/jython \
+    && java -jar /tmp/jython-installer.jar -v -s -d /opt/jython \
+    && rm -f /tmp/jython-installer.jar /tmp/*.properties
+
 # =====
 # FIDO2
 # =====
 
 ENV CN_VERSION=1.0.7-SNAPSHOT
-ENV CN_BUILD_DATE='2023-01-24 08:16'
+ENV CN_BUILD_DATE='2023-01-31 18:29'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-fido2-server/${CN_VERSION}/jans-fido2-server-${CN_VERSION}.war
 
 # Install FIDO2
@@ -54,7 +65,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-fido2/webapps \
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_SOURCE_VERSION=cee252522061b43065eddbdc70d51bda9e2e85d7
+ENV JANS_SOURCE_VERSION=1a2d298c5b4911bfaccdf80203df1a919ff7a6b8
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)

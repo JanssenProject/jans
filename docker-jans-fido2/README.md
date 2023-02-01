@@ -111,7 +111,11 @@ The following key-value pairs are the defaults:
     "fido2_log_target": "STDOUT",
     "fido2_log_level": "INFO",
     "persistence_log_target": "FILE",
-    "persistence_log_level": "INFO"
+    "persistence_log_level": "INFO",
+    "persistence_duration_log_target": "FILE",
+    "persistence_duration_log_level": "INFO",
+    "script_log_target": "FILE",
+    "script_log_level": "INFO"
 }
 ```
 

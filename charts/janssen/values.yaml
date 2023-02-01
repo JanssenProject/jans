@@ -654,6 +654,14 @@ global:
       persistenceLogTarget: "FILE"
       # -- fido2_persistence.log level
       persistenceLogLevel: "INFO"
+      # -- fido2_persistence_duration.log target
+      persistenceDurationLogTarget: "FILE"
+      # -- fido2_persistence_duration.log level
+      persistenceDurationLogLevel: "INFO"
+      # -- fido2_script.log target
+      scriptLogTarget: "FILE"
+      # -- fido2_script.log level
+      scriptLogLevel: "INFO"
     # -- Enable endpoints in either istio or nginx ingress depending on users choice
     ingress:
       # -- Enable endpoint /.well-known/fido2-configuration
