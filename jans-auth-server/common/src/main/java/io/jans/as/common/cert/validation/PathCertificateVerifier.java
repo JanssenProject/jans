@@ -9,7 +9,6 @@ package io.jans.as.common.cert.validation;
 import io.jans.as.common.cert.validation.model.ValidationStatus;
 import io.jans.util.security.SecurityProviderUtility;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -170,11 +169,11 @@ public class PathCertificateVerifier implements CertificateVerifier {
         pkixParams.addCertStore(intermediateCertStore);
 
         // Build and verify the certification chain
-        CertPathBuilder builder = CertPathBuilder.getInstance("PKIX", BouncyCastleProvider.PROVIDER_NAME);
+        CertPathBuilder builder = CertPathBuilder.getInstance("PKIX", SecurityProviderUtility.getBCProvider());
         PKIXCertPathBuilderResult certPathBuilderResult = (PKIXCertPathBuilderResult) builder.build(pkixParams);
 
         // Additional check to Verify cert path
-        CertPathValidator certPathValidator = CertPathValidator.getInstance("PKIX", BouncyCastleProvider.PROVIDER_NAME);
+        CertPathValidator certPathValidator = CertPathValidator.getInstance("PKIX", SecurityProviderUtility.getBCProvider());
         certPathValidator.validate(certPathBuilderResult.getCertPath(), pkixParams);
 
         return certPathBuilderResult;
