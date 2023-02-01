@@ -61,7 +61,7 @@ public class SsaRestWebServiceImpl implements SsaRestWebService {
      * @return {@link Response} with status {@code 200 (Ok)} and with body List of SSA.
      */
     @Override
-    public Response get(String jti, Long orgId, HttpServletRequest httpRequest) {
+    public Response get(String jti, String orgId, HttpServletRequest httpRequest) {
         return ssaGetAction.get(jti, orgId, httpRequest);
     }
 
@@ -91,7 +91,7 @@ public class SsaRestWebServiceImpl implements SsaRestWebService {
      * @return {@link Response} with status {@code 200 (Ok)} if SSA has been revoked.
      */
     @Override
-    public Response revoke(String jti, Long orgId, HttpServletRequest httpRequest) {
+    public Response revoke(String jti, String orgId, HttpServletRequest httpRequest) {
         return ssaRevokeAction.revoke(jti, orgId, httpRequest);
     }
 

@@ -85,7 +85,7 @@ public class SsaGetAction {
      * @param httpRequest Http request
      * @return {@link Response} with status {@code 200 (Ok)} and the body containing the list of SSAs.
      */
-    public Response get(String jti, Long orgId, HttpServletRequest httpRequest) {
+    public Response get(String jti, String orgId, HttpServletRequest httpRequest) {
         log.debug("Attempting to read ssa: softwareRoles = {}, orgId = {}", jti, orgId);
 
         errorResponseFactory.validateFeatureEnabled(FeatureFlagType.SSA);

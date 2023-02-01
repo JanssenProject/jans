@@ -77,10 +77,11 @@ public class SsaJsonService {
             Util.addToJSONObjectIfNotNull(responseJsonObject, CREATED_AT.getName(), DateUtil.dateToUnixEpoch(ssa.getCreationDate()));
             Util.addToJSONObjectIfNotNull(responseJsonObject, EXPIRATION.getName(), DateUtil.dateToUnixEpoch(ssa.getExpirationDate()));
             Util.addToJSONObjectIfNotNull(responseJsonObject, ISSUER.getName(), ssa.getCreatorId());
+            Util.addToJSONObjectIfNotNull(responseJsonObject, STATUS.getName(), ssa.getState());
 
             JSONObject jsonSsa = new JSONObject();
             JsonApplier.getInstance().apply(ssa, jsonSsa);
-            Util.addToJSONObjectIfNotNull(jsonSsa, ORG_ID.getName(), Long.parseLong(ssa.getOrgId()));
+            Util.addToJSONObjectIfNotNull(jsonSsa, ORG_ID.getName(), ssa.getOrgId());
             Util.addToJSONObjectIfNotNull(jsonSsa, SOFTWARE_ID.getName(), ssa.getAttributes().getSoftwareId());
             Util.addToJSONObjectIfNotNull(jsonSsa, SOFTWARE_ROLES.getName(), ssa.getAttributes().getSoftwareRoles());
             Util.addToJSONObjectIfNotNull(jsonSsa, GRANT_TYPES.getName(), ssa.getAttributes().getGrantTypes());
