@@ -12,10 +12,10 @@ import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-
+/*
 import org.bouncycastle.jcajce.provider.asymmetric.edec.BCEdDSAPrivateKey;
 import org.bouncycastle.jcajce.provider.asymmetric.edec.BCEdDSAPublicKey;
-
+*/
 import io.jans.as.model.crypto.Certificate;
 import io.jans.as.model.crypto.signature.AlgorithmFamily;
 import io.jans.as.model.crypto.signature.EDDSAPrivateKey;
@@ -87,6 +87,7 @@ public class EDDSASigner extends AbstractJwsSigner {
         if (signingInput == null) {
             throw new SignatureException("The signing input is null");
         }
+/*        
         try {
             PKCS8EncodedKeySpec privateKeySpec = eddsaPrivateKey.getPrivateKeySpec();
             java.security.KeyFactory keyFactory = java.security.KeyFactory.getInstance(signatureAlgorithm.getName());
@@ -100,6 +101,8 @@ public class EDDSASigner extends AbstractJwsSigner {
                 | IllegalArgumentException e) {
             throw new SignatureException(e);
         }
+*/
+        return null;
     }
 
     /**
@@ -120,6 +123,7 @@ public class EDDSASigner extends AbstractJwsSigner {
         if (signingInput == null) {
             throw new SignatureException("The signing input is null");
         }
+/*        
         try {
             X509EncodedKeySpec publicKeySpec = eddsaPublicKey.getPublicKeySpec();
             java.security.KeyFactory keyFactory = java.security.KeyFactory.getInstance(signatureAlgorithm.getName());
@@ -131,5 +135,7 @@ public class EDDSASigner extends AbstractJwsSigner {
         } catch (NoSuchAlgorithmException | InvalidKeySpecException | InvalidKeyException | IllegalArgumentException e) {
             throw new SignatureException(e);
         }
-    }	
+*/
+		return false;
+    }
 }
