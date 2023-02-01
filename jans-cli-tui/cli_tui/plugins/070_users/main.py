@@ -1,19 +1,23 @@
+import json
 import asyncio
 from functools import partial
 from types import SimpleNamespace
 from typing import Any, Optional
+
+from prompt_toolkit import HTML
 from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.application import Application
 from prompt_toolkit.layout.containers import HSplit, VSplit, DynamicContainer, HorizontalAlign
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.widgets import Button, Dialog
+from prompt_toolkit.eventloop import get_event_loop
+
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from edit_user_dialog import EditUserDialog
 from utils.utils import DialogUtils, common_data
 from utils.static import DialogResult
 from utils.multi_lang import _
 from wui_components.jans_cli_dialog import JansGDialog
-from prompt_toolkit.eventloop import get_event_loop
 from utils.static import DialogResult, cli_style, common_strings
 
 common_data.users = SimpleNamespace()
@@ -232,14 +236,15 @@ class Plugin(DialogUtils):
             _type_: bool value to check the status code response
         """
 
+        fix_title = _("Please fix!")
         raw_data = self.make_data_from_dialog(tabs={'user': dialog.edit_user_container.content})
 
         if not (raw_data['userId'].strip() and raw_data['mail'].strip()):
-            self.app.show_message(_("Please fix!"), _("Username and/or Email is empty"))
+            self.app.show_message(fix_title, _("Username and/or Email is empty"))
             return
-        
+
         if 'baseDn' not in dialog.data and not raw_data['userPassword'].strip():
-            self.app.show_message(_("Please fix!"), _("Please enter Password"))
+            self.app.show_message(fix_title, _("Please enter Password"))
             return
 
         user_info = {'customObjectClasses':['top', 'jansCustomPerson'], 'customAttributes':[]}
@@ -260,6 +265,19 @@ class Plugin(DialogUtils):
 
         for key_ in raw_data:
             multi_valued = False
+            key_prop = dialog.get_claim_properties(key_)
+
+            if key_prop.get('dataType') == 'json':
+                try:
+                    json.loads(raw_data[key_])
+                except Exception as e:
+                    display_name = key_prop.get('displayName') or key_
+                    self.app.show_message(
+                                fix_title,
+                                _(HTML("Can't convert <b>{}</b> to json. Conversion error: <i>{}</i>").format(display_name, e))
+                            )
+                    return
+
             user_info['customAttributes'].append({
                     'name': key_, 
                     'multiValued': multi_valued, 
