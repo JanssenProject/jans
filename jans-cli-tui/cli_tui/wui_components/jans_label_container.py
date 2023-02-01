@@ -20,7 +20,7 @@ class JansLabelContainer:
         on_delete: Optional[Callable]=None,
         on_display: Optional[Callable]=None,
         buttonbox: Optional[Button]=None,
-        entries:Optional[list]=[],
+        entries: Optional=None,
         ) -> None:
 
         """Label container for Jans
@@ -38,7 +38,7 @@ class JansLabelContainer:
         self.on_delete = on_delete
         self.on_display = on_display
         self.height=2
-        self.entries = entries
+        self.entries = [] if not entries else entries
         self.invalidate = False
         self.selected_entry = 0
         self.body = Window(

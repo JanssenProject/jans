@@ -35,10 +35,8 @@ class SSA(DialogUtils):
                 myparent=app,
                 headers=[_("Software ID"), _("Organisation"), _("Software Roles"), _("Status"), _("Exp.")],
                 preferred_size= self.app.get_column_sizes(.25, .25 , .3, .1, .1),
-                #on_enter=self.edit_ssa,
                 on_display=self.app.data_display_dialog,
                 on_delete=self.delete_ssa,
-                #get_help=(self.get_help, 'SSA'),
                 selectes=0,
                 headerColor=cli_style.navbar_headcolor,
                 entriesColor=cli_style.navbar_entriescolor,
@@ -128,7 +126,7 @@ class SSA(DialogUtils):
                 operation_id = 'post-register-ssa'
                 cli_args = {'operation_id': operation_id, 'cli_object': self.cli_object, 'data': new_data}
                 self.app.start_progressing(_("Saving ssa..."))
-                response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+                await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
                 self.app.stop_progressing()
                 self.get_ssa()
                 dialog.future.set_result(True)
@@ -231,7 +229,7 @@ class SSA(DialogUtils):
             async def coroutine():
                 cli_args = {'operation_id': 'delete-ssa', 'cli_object': self.cli_object, 'url_suffix': 'jti:{}'.format(jti)}
                 self.app.start_progressing(_("Deleting ssa {}".format(jti)))
-                response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+                await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
                 self.app.stop_progressing()
                 self.get_ssa()
 

@@ -1270,7 +1270,6 @@ class JCA_CLI:
                         for tag_ in path.get('tags', []):
                             tag = get_named_tag(tag_)
                             if tag == op_name:
-                                title = cfg_yaml[self.my_op_mode][plugin]['info']['title']
                                 mode_suffix = plugin+ ':' if plugin else ''
                                 print('Operation ID:', path['operationId'])
                                 print('  Description:', path['description'])
