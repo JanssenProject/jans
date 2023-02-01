@@ -25,29 +25,28 @@ import io.jans.orm.model.fido2.Fido2RegistrationEntry;
 import io.jans.orm.model.fido2.Fido2RegistrationStatus;
 import io.jans.orm.search.filter.Filter;
 import io.jans.util.StringHelper;
-import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 /**
- * Every registration is persisted under Person Entry
- * @author Yuriy Movchan
- * @version May 08, 2020
+ * Abstract class for registrations that are persisted under Person Entry
+ * @author madhumitas
+ *
  */
-@ApplicationScoped
-public class RegistrationPersistenceService {
 
-    @Inject
-    private Logger log;
+public abstract class RegistrationPersistenceService {
 
-    @Inject
-    private PersistenceEntryManager persistenceEntryManager;
+	@Inject
+	protected Logger log;
 
-    @Inject
-    private UserService userService;
+	@Inject
+	protected  PersistenceEntryManager persistenceEntryManager;
 
-    @Inject
-    private StaticConfiguration staticConfiguration;
+	@Inject
+	protected  UserService userService;
 
+	@Inject
+	protected StaticConfiguration staticConfiguration;
+	
     public void save(Fido2RegistrationEntry registrationEntry) {
         prepareBranch(registrationEntry.getUserInum());
 
@@ -196,5 +195,7 @@ public class RegistrationPersistenceService {
     public String getBasedPeopleDn() {
     	return staticConfiguration.getBaseDn().getPeople();
     }
+    
+	public abstract String getUserInum(String userName);
 
 }

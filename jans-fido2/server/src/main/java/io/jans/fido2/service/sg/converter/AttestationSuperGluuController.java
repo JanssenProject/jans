@@ -11,6 +11,10 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.security.cert.CertificateEncodingException;
 
+import org.apache.commons.lang3.ArrayUtils;
+import org.slf4j.Logger;
+
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -44,6 +48,9 @@ import jakarta.inject.Inject;
  */
 @ApplicationScoped
 public class AttestationSuperGluuController {
+
+    @Inject
+    private Logger log;
 
     @Inject
     private AttestationService attestationService;
@@ -122,6 +129,8 @@ public class AttestationSuperGluuController {
         // Required parameters
         params.put("attestation", "direct");
 
+        log.debug("Prepared U2F_V2 attestation options request: {}", params.toString());
+
         ObjectNode result = attestationService.options(params);
 
         // Build start registration response  
@@ -187,7 +196,7 @@ public class AttestationSuperGluuController {
             throw new Fido2RpRuntimeException("Failed to parse options attestation request", ex);
         }
 
-        if (!registerResponse.getClientData().getTyp().equals(RawRegistrationService.REGISTER_FINISH_TYPE)) {
+        if (!ArrayUtils.contains(RawRegistrationService.SUPPORTED_REGISTER_TYPES, registerResponse.getClientData().getTyp())) {
             throw new Fido2RuntimeException("Invalid options attestation request type");
         }
 
@@ -209,7 +218,7 @@ public class AttestationSuperGluuController {
         ObjectNode clientData = dataMapperService.createObjectNode();
         clientData.put("challenge", registerResponse.getClientData().getChallenge());
         clientData.put("origin", registerResponse.getClientData().getOrigin());
-        clientData.put("type", "webauthn.create");
+        clientData.put("type", registerResponse.getClientData().getTyp());
 		response.put("clientDataJSON", base64Service.urlEncodeToString(clientData.toString().getBytes(Charset.forName("UTF-8"))));
 
 		// Store cancel type
@@ -239,6 +248,8 @@ public class AttestationSuperGluuController {
 		} catch (IOException e) {
             throw new Fido2RuntimeException("Failed to prepare attestationObject");
 		}
+
+        log.debug("Prepared U2F_V2 attestation verify request: {}", params.toString());
 
         ObjectNode result = attestationService.verify(params);
         

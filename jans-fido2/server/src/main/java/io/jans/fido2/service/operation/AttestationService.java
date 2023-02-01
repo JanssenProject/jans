@@ -194,8 +194,9 @@ public class AttestationService {
 	public ObjectNode verify(JsonNode params) {
 		log.debug("Attestation verify {}", params);
 
+		boolean superGluu = commonVerifiers.hasSuperGluu(params);
 		boolean oneStep = commonVerifiers.isSuperGluuOneStepMode(params);
-		boolean cancelRequest = commonVerifiers.isSuperGluuOneStepMode(params);
+		boolean cancelRequest = commonVerifiers.isSuperGluuCancelRequest(params);
 
 		// Verify if there are mandatory request parameters
 		commonVerifiers.verifyBasicPayload(params);
@@ -206,7 +207,9 @@ public class AttestationService {
 
 		// Verify client data
 		JsonNode clientDataJSONNode = commonVerifiers.verifyClientJSON(responseNode);
-		commonVerifiers.verifyClientJSONTypeIsCreate(clientDataJSONNode);
+		if (!superGluu) {
+			commonVerifiers.verifyClientJSONTypeIsCreate(clientDataJSONNode);
+		}
 
 		// Get challenge
 		String challenge = commonVerifiers.getChallenge(clientDataJSONNode);
@@ -272,7 +275,7 @@ public class AttestationService {
 
         // Support cancel request
         if (cancelRequest) {
-        	registrationEntry.setRegistrationStatus(Fido2RegistrationStatus.canceled);
+        	registrationData.setStatus(Fido2RegistrationStatus.canceled);
         }
         
 		registrationPersistenceService.update(registrationEntry);

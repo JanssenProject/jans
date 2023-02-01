@@ -206,15 +206,11 @@ config:
     # [google_spanner_envs] END
     # [google_secret_manager_envs] Envs related to using Google Secret Manager to store config and secret layer
     # -- Secret version to be used for secret configuration. Defaults to latest and should normally always stay that way. Used only when global.configAdapterName and global.configSecretAdapter is set to google.
-    cnSecretGoogleSecretVersionId: "latest"
+    cnGoogleSecretVersionId: "latest"
     # -- Prefix for Janssen secret in Google Secret Manager. Defaults to janssen. If left janssen-secret secret will be created. Used only when global.configAdapterName and global.configSecretAdapter is set to google.
-    cnSecretGoogleSecretNamePrefix: janssen
+    cnGoogleSecretNamePrefix: janssen
     # -- Passphrase for Janssen secret in Google Secret Manager. This is used for encrypting and decrypting data from the Google Secret Manager. Used only when global.configAdapterName and global.configSecretAdapter is set to google.
     cnGoogleSecretManagerPassPhrase: Test1234#
-    # -- Secret version to be used for configuration. Defaults to latest and should normally always stay that way. Used only when global.configAdapterName and global.configSecretAdapter is set to google. Used only when global.configAdapterName and global.configSecretAdapter is set to google.
-    cnConfigGoogleSecretVersionId: "latest"
-    # -- Prefix for Janssen configuration secret in Google Secret Manager. Defaults to janssen. If left intact janssen-configuration secret will be created. Used only when global.configAdapterName and global.configSecretAdapter is set to google.
-    cnConfigGoogleSecretNamePrefix: janssen
     # [google_secret_manager_envs] END
     # [google_envs] END
     # [aws_envs] Envs related to using AWS
@@ -658,6 +654,14 @@ global:
       persistenceLogTarget: "FILE"
       # -- fido2_persistence.log level
       persistenceLogLevel: "INFO"
+      # -- fido2_persistence_duration.log target
+      persistenceDurationLogTarget: "FILE"
+      # -- fido2_persistence_duration.log level
+      persistenceDurationLogLevel: "INFO"
+      # -- fido2_script.log target
+      scriptLogTarget: "FILE"
+      # -- fido2_script.log level
+      scriptLogLevel: "INFO"
     # -- Enable endpoints in either istio or nginx ingress depending on users choice
     ingress:
       # -- Enable endpoint /.well-known/fido2-configuration
