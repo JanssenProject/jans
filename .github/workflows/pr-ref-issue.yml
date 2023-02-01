@@ -16,7 +16,7 @@ on:
   workflow_dispatch:
 jobs:
   check-prs-issue:
-    if:  startsWith(github.head_ref, 'release-please') || startsWith(github.head_ref, 'dependabot/' || startsWith(github.head_ref, 'snyk-')
+    if:  startsWith(github.head_ref, 'release-please') || startsWith(github.head_ref, 'dependabot/') || startsWith(github.head_ref, 'snyk-')
     name: Check PRs issue
     runs-on: ubuntu-latest
     permissions:
