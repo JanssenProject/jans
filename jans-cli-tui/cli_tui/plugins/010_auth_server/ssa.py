@@ -73,7 +73,10 @@ class SSA(DialogUtils):
         for ssa in self.data:
             if search_str and (search_str not in ssa['ssa']['software_id'] and search_str not in str(ssa['ssa']['org_id']) and search_str not in ssa['ssa']['software_roles']):
                 continue
-            dt_object = datetime.fromtimestamp(ssa['ssa']['exp'])
+            try:
+                dt_object = datetime.fromtimestamp(ssa['ssa']['exp'])
+            except Exception:
+                continue
             data_display.append((
                         str(ssa['ssa']['software_id']),
                         str(ssa['ssa']['org_id']),
