@@ -21,9 +21,13 @@ from prompt_toolkit.widgets import (
     TextArea
 )
 from prompt_toolkit.lexers import PygmentsLexer, DynamicLexer
+from prompt_toolkit.buffer import Buffer
+from prompt_toolkit.application import Application
+
 from utils.static import DialogResult, cli_style, common_strings
 from utils.utils import DialogUtils
 from utils.utils import common_data
+from utils.multi_lang import _
 
 from wui_components.jans_nav_bar import JansNavBar
 from wui_components.jans_vetrical_nav import JansVerticalNav
@@ -32,9 +36,8 @@ from wui_components.jans_cli_dialog import JansGDialog
 from view_property import ViewProperty
 from edit_client_dialog import EditClientDialog
 from edit_scope_dialog import EditScopeDialog
-from prompt_toolkit.buffer import Buffer
-from prompt_toolkit.application import Application
-from utils.multi_lang import _
+from ssa import SSA
+
 from prompt_toolkit.widgets import (
     HorizontalLine,
     VerticalLine,
@@ -58,11 +61,14 @@ class Plugin(DialogUtils):
         self.name = '[A]uth Server'
         self.search_text= None
         self.oauth_update_properties_start_index = 0
+        self.ssa = SSA(app)
         self.app_configuration = {}
         self.oauth_containers = {}
+
         self.oauth_prepare_navbar()
         self.oauth_prepare_containers()
         self.oauth_nav_selection_changed(self.nav_bar.navbar_entries[0][0])
+        
 
     def init_plugin(self) -> None:
         """The initialization for this plugin
@@ -178,6 +184,7 @@ class Plugin(DialogUtils):
                     DynamicContainer(lambda: self.oauth_data_container['properties'])
                     ],style='class:outh_containers_scopes')
 
+        self.oauth_containers['ssa'] = self.ssa.main_container
         self.oauth_containers['logging'] = DynamicContainer(lambda: self.oauth_data_container['logging'])
 
         self.oauth_main_container = HSplit([
@@ -193,7 +200,7 @@ class Plugin(DialogUtils):
         """
         self.nav_bar = JansNavBar(
                     self.app,
-                    entries=[('clients', 'C[l]ients'), ('scopes', 'Sc[o]pes'), ('keys', '[K]eys'), ('defaults', '[D]efaults'), ('properties', 'Properti[e]s'), ('logging', 'Lo[g]ging')],
+                    entries=[('clients', 'C[l]ients'), ('scopes', 'Sc[o]pes'), ('keys', '[K]eys'), ('defaults', '[D]efaults'), ('properties', 'Properti[e]s'), ('logging', 'Lo[g]ging'), ('ssa', '[S]SA')],
                     selection_changed=self.oauth_nav_selection_changed,
                     select=0,
                     jans_name='oauth:nav_bar'

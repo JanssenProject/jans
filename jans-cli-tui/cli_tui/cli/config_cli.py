@@ -29,7 +29,7 @@ import jwt
 import pyDes
 import stat
 import ruamel.yaml
-
+import urllib.parse
 
 from pathlib import Path
 from types import SimpleNamespace
@@ -117,26 +117,30 @@ def get_plugin_name_from_title(title):
         return title[n+1:].strip()
     return ''
 
-# load yaml files
 cfg_yaml = {}
-op_list = []
-cfg_yaml[my_op_mode] = {}
-for yaml_fn in glob.glob(os.path.join(cur_dir, 'ops', my_op_mode, '*.yaml')):
-    fn, ext = os.path.splitext(os.path.basename(yaml_fn))
-    with open(yaml_fn) as f:
-        config_ = ruamel.yaml.load(f.read().replace('\t', ''), ruamel.yaml.RoundTripLoader)
-        plugin_name = get_plugin_name_from_title(config_['info']['title'])
-        cfg_yaml[my_op_mode][plugin_name] = config_
-
-        for path in config_['paths']:
-            for method in config_['paths'][path]:
-                if isinstance(config_['paths'][path][method], dict):
-                    for tag_ in config_['paths'][path][method].get('tags', []):
-                        tag = get_named_tag(tag_)
-                        if not tag in op_list:
-                            op_list.append(tag)
 
 
+# load yaml files
+def read_swagger(op_mode):
+    op_list = []
+    cfg_yaml[op_mode] = {}
+    for yaml_fn in glob.glob(os.path.join(cur_dir, 'ops', op_mode, '*.yaml')):
+        fn, ext = os.path.splitext(os.path.basename(yaml_fn))
+        with open(yaml_fn) as f:
+            config_ = ruamel.yaml.load(f.read().replace('\t', ''), ruamel.yaml.RoundTripLoader)
+            plugin_name = get_plugin_name_from_title(config_['info']['title'])
+            cfg_yaml[op_mode][plugin_name] = config_
+
+            for path in config_['paths']:
+                for method in config_['paths'][path]:
+                    if isinstance(config_['paths'][path][method], dict):
+                        for tag_ in config_['paths'][path][method].get('tags', []):
+                            tag = get_named_tag(tag_)
+                            if not tag in op_list:
+                                op_list.append(tag)
+    return op_list
+
+op_list = read_swagger(my_op_mode)
 op_list.sort()
 
 parser = argparse.ArgumentParser()
@@ -250,11 +254,13 @@ debug = get_bool(debug)
 
 class JCA_CLI:
 
-    def __init__(self, host, client_id, client_secret, access_token, test_client=False, wrapped=None):
+    def __init__(self, host, client_id, client_secret, access_token, test_client=False, op_mode=None, wrapped=None):
         self.host = self.idp_host = host
         self.client_id = client_id
         self.client_secret = client_secret
         self.use_test_client = test_client
+        self.my_op_mode = op_mode if op_mode else my_op_mode
+
         self.getCredentials()
         self.wrapped = wrapped
         if wrapped == None:
@@ -265,13 +271,15 @@ class JCA_CLI:
         self.openid_configuration = {}
         self.set_user()
         self.plugins()
-        self.auth_server_token = ''
 
-        if my_op_mode == 'jca':
+        if self.my_op_mode not in cfg_yaml:
+            read_swagger(self.my_op_mode)
+
+        if self.my_op_mode == 'jca':
             self.host += '/jans-config-api'
-        elif my_op_mode == 'scim':
+        elif self.my_op_mode == 'scim':
             self.host += '/jans-scim/restv1/v2'
-        elif my_op_mode == 'auth':
+        elif self.my_op_mode == 'auth':
             self.host += '/jans-auth/restv1'
 
         self.set_logging()
@@ -360,7 +368,7 @@ class JCA_CLI:
                 sys.exit()
 
     def plugins(self):
-        for plugin_s in config['DEFAULT'].get(my_op_mode + '_plugins', '').split(','):
+        for plugin_s in config['DEFAULT'].get(self.my_op_mode + '_plugins', '').split(','):
             plugin = plugin_s.strip()
             if plugin:
                 plugins.append(plugin)
@@ -381,24 +389,12 @@ class JCA_CLI:
         sys.exit()
 
 
-    def get_auth_server_token(self):
-        self.auth_server_token = self.get_scoped_access_token(
-                        scope=['https://jans.io/auth/ssa.admin'],
-                        set_access_token=False
-                        )
-
-
     def get_request_header(self, headers=None, access_token=None):
         if headers is None:
             headers = {}
 
-        if my_op_mode == 'auth':
-            if not self.auth_server_token:
-                self.get_auth_server_token()
-            access_token = self.auth_server_token
-        else:
-            if not access_token:
-                access_token = self.access_token
+        if not access_token:
+            access_token = self.access_token
 
             user = self.get_user_info()
             if 'inum' in user:
@@ -723,7 +719,7 @@ class JCA_CLI:
         return True, ''
 
     def get_access_token(self, scope):
-        if my_op_mode != 'auth':
+        if self.my_op_mode != 'auth':
             if self.use_test_client:
                 self.get_scoped_access_token(scope)
             elif not self.access_token and not self.wrapped:
@@ -1042,12 +1038,12 @@ class JCA_CLI:
 
     def get_path_by_id(self, operation_id):
         retVal = {}
-        for plugin in cfg_yaml[my_op_mode]:
-            for path in cfg_yaml[my_op_mode][plugin]['paths']:
-                for method in cfg_yaml[my_op_mode][plugin]['paths'][path]:
-                    if 'operationId' in cfg_yaml[my_op_mode][plugin]['paths'][path][method] and cfg_yaml[my_op_mode][plugin]['paths'][path][method][
+        for plugin in cfg_yaml[self.my_op_mode]:
+            for path in cfg_yaml[self.my_op_mode][plugin]['paths']:
+                for method in cfg_yaml[self.my_op_mode][plugin]['paths'][path]:
+                    if 'operationId' in cfg_yaml[self.my_op_mode][plugin]['paths'][path][method] and cfg_yaml[self.my_op_mode][plugin]['paths'][path][method][
                         'operationId'] == operation_id:
-                        retVal = cfg_yaml[my_op_mode][plugin]['paths'][path][method].copy()
+                        retVal = cfg_yaml[self.my_op_mode][plugin]['paths'][path][method].copy()
                         retVal['__path__'] = path
                         retVal['__method__'] = method
                         retVal['__urlsuffix__'] = self.get_url_param(path)
@@ -1143,14 +1139,27 @@ class JCA_CLI:
     def delete_requests(self, endpoint, url_param_dict):
         security = self.get_scope_for_endpoint(endpoint)
         self.get_access_token(security)
+        url_params = self.get_url_param(endpoint.path)
+
+        if url_params:
+            url_path = endpoint.path.format(**url_param_dict)
+            for param in url_params:
+                del url_param_dict[param]
+        else:
+            url_path = endpoint.path
+
+        if url_param_dict:
+            url_path += '?'+ urllib.parse.urlencode(url_param_dict)
 
         response = requests.delete(
-            url='https://{}{}'.format(self.host, endpoint.path.format(**url_param_dict)),
+            url='https://{}{}'.format(self.host, url_path),
             headers=self.get_request_header({'Accept': 'application/json'}),
             verify=self.verify_ssl,
             cert=self.mtls_client_cert
             )
+
         self.log_response(response)
+
         if response.status_code in (200, 204):
             return None
 
@@ -1253,15 +1262,15 @@ class JCA_CLI:
 
         schema_path = None
 
-        for plugin in cfg_yaml[my_op_mode]:
-            for path_name in cfg_yaml[my_op_mode][plugin]['paths']:
-                for method in cfg_yaml[my_op_mode][plugin]['paths'][path_name]:
-                    path = cfg_yaml[my_op_mode][plugin]['paths'][path_name][method]
+        for plugin in cfg_yaml[self.my_op_mode]:
+            for path_name in cfg_yaml[self.my_op_mode][plugin]['paths']:
+                for method in cfg_yaml[self.my_op_mode][plugin]['paths'][path_name]:
+                    path = cfg_yaml[self.my_op_mode][plugin]['paths'][path_name][method]
                     if isinstance(path, dict):
                         for tag_ in path.get('tags', []):
                             tag = get_named_tag(tag_)
                             if tag == op_name:
-                                title = cfg_yaml[my_op_mode][plugin]['info']['title']
+                                title = cfg_yaml[self.my_op_mode][plugin]['info']['title']
                                 mode_suffix = plugin+ ':' if plugin else ''
                                 print('Operation ID:', path['operationId'])
                                 print('  Description:', path['description'])
@@ -1431,6 +1440,7 @@ class JCA_CLI:
     def process_command_delete(self, path, suffix_param, endpoint_params, data_fn, data=None):
         endpoint = self.get_fake_endpoint(path)
         response = self.delete_requests(endpoint, suffix_param)
+
         if self.wrapped:
             return response
 
@@ -1482,16 +1492,15 @@ class JCA_CLI:
 
 
     def get_schema_reference_from_name(self, plugin_name, schema_name):
-        for plugin in cfg_yaml[my_op_mode]:
-            if plugin_name == get_plugin_name_from_title(title = cfg_yaml[my_op_mode][plugin]['info']['title']):
-                for schema in cfg_yaml[my_op_mode][plugin]['components']['schemas']:
+        for plugin in cfg_yaml[self.my_op_mode]:
+            if plugin_name == get_plugin_name_from_title(title = cfg_yaml[self.my_op_mode][plugin]['info']['title']):
+                for schema in cfg_yaml[self.my_op_mode][plugin]['components']['schemas']:
                     if schema == schema_name:
                         return '#/components/schemas/' + schema
 
     def get_schema_from_reference(self, plugin_name, ref):
-        
         schema_path_list = ref.strip('/#').split('/')
-        schema = cfg_yaml[my_op_mode][plugin_name][schema_path_list[0]]
+        schema = cfg_yaml[self.my_op_mode][plugin_name][schema_path_list[0]]
 
         schema_ = schema.copy()
 

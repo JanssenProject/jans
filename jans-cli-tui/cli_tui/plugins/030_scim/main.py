@@ -22,7 +22,7 @@ class Plugin(DialogUtils):
         """
         self.app = app
         self.pid = 'scim'
-        self.name = '[S]CIM'
+        self.name = 'S[C]IM'
         self.server_side_plugin = True
         self.app_config = {}
         self.widgets_ready = False

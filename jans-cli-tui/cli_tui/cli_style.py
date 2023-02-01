@@ -136,7 +136,7 @@ style = Style.from_dict(
         "tab-nav-background": "fg:#b0e0e6 bg:#a9a9a9",
         "tab-unselected": "fg:#b0e0e6 bg:#a9a9a9 underline",
         "tab-selected": "fg:#000080 bg:#d3d3d3",
-        
+
         ##scim
         "scim-widget": "bg:black fg:white",
 
