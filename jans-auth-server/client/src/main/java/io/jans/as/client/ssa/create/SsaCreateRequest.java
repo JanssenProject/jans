@@ -29,7 +29,7 @@ public class SsaCreateRequest extends BaseRequest {
     private static final Logger log = Logger.getLogger(SsaCreateRequest.class);
 
     @JsonProperty(value = "org_id")
-    private Long orgId;
+    private String orgId;
 
     private Long expiration;
 
@@ -59,11 +59,11 @@ public class SsaCreateRequest extends BaseRequest {
         this.softwareRoles = new ArrayList<>();
     }
 
-    public Long getOrgId() {
+    public String getOrgId() {
         return orgId;
     }
 
-    public void setOrgId(Long orgId) {
+    public void setOrgId(String orgId) {
         this.orgId = orgId;
     }
 
@@ -138,7 +138,7 @@ public class SsaCreateRequest extends BaseRequest {
     public static SsaCreateRequest fromJson(JSONObject requestObject) throws JSONException {
         final SsaCreateRequest result = new SsaCreateRequest();
         JsonApplier.getInstance().apply(requestObject, result);
-        result.setOrgId(requestObject.getLong(ORG_ID.getName()));
+        result.setOrgId(requestObject.getString(ORG_ID.getName()));
         result.setExpiration(longOrNull(requestObject, EXPIRATION.getName()));
         result.setDescription(requestObject.optString(DESCRIPTION.getName()));
         result.setSoftwareId(requestObject.optString(SOFTWARE_ID.getName()));

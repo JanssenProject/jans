@@ -49,7 +49,7 @@ public interface SsaRestWebService {
     @Produces({MediaType.APPLICATION_JSON})
     Response get(
             @QueryParam("jti") String jti,
-            @QueryParam("org_id") Long orgId,
+            @QueryParam("org_id") String orgId,
             @Context HttpServletRequest httpRequest
     );
 
@@ -81,7 +81,7 @@ public interface SsaRestWebService {
     @Produces({MediaType.APPLICATION_JSON})
     Response revoke(
             @QueryParam("jti") String jti,
-            @QueryParam("org_id") Long orgId,
+            @QueryParam("org_id") String orgId,
             @Context HttpServletRequest httpRequest
     );
 

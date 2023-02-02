@@ -108,7 +108,7 @@ public class SsaService {
      * @param scopes   List of scope
      * @return List of SSA
      */
-    public List<Ssa> getSsaList(String jti, Long orgId, SsaState status, String clientId, String[] scopes) {
+    public List<Ssa> getSsaList(String jti, String orgId, SsaState status, String clientId, String[] scopes) {
         List<Filter> filters = new ArrayList<>();
         if (hasDeveloperScope(Arrays.asList(scopes))) {
             filters.add(Filter.createEqualityFilter("creatorId", clientId));
@@ -176,7 +176,7 @@ public class SsaService {
             jwt.getClaims().setIssuedAt(ssa.getCreationDate());
             jwt.getClaims().setExpirationTime(ssa.getExpirationDate());
             jwt.getClaims().setClaim(SOFTWARE_ID.getName(), ssa.getAttributes().getSoftwareId());
-            jwt.getClaims().setClaim(ORG_ID.getName(), Long.parseLong(ssa.getOrgId()));
+            jwt.getClaims().setClaim(ORG_ID.getName(), ssa.getOrgId());
             jwt.getClaims().setClaim(SOFTWARE_ROLES.getName(), ssa.getAttributes().getSoftwareRoles());
             jwt.getClaims().setClaim(GRANT_TYPES.getName(), ssa.getAttributes().getGrantTypes());
 
