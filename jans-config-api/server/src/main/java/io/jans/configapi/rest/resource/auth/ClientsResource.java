@@ -375,7 +375,7 @@ public class ClientsResource extends ConfigBaseResource {
         logger.debug("Scope validation result - validScopes:{}, invalidScopes:{} ", validScopes, invalidScopes);
 
         if (!invalidScopes.isEmpty()) {
-            thorwBadRequestException("Invalid scope in request -> " + invalidScopes.toString());
+            throwBadRequestException("Invalid scope in request -> " + invalidScopes.toString());
         }
 
         // reset scopes
@@ -425,7 +425,7 @@ public class ClientsResource extends ConfigBaseResource {
         logger.debug("Claim validation result - validClaims:{}, invalidClaims:{} ", validClaims, invalidClaims);
 
         if (!invalidClaims.isEmpty()) {
-            thorwBadRequestException("Invalid claim in request -> " + invalidClaims.toString());
+            throwBadRequestException("Invalid claim in request -> " + invalidClaims.toString());
         }
 
         // reset Claims
