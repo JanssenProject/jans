@@ -48,7 +48,7 @@ public class UserMgmtService {
 
     @Inject
     ConfigurationService configurationService;
-    
+
     @Inject
     PersistenceEntryManager persistenceEntryManager;
 
@@ -57,7 +57,7 @@ public class UserMgmtService {
 
     @Inject
     MgtUtil mgtUtil;
-    
+
     @Inject
     UserService userService;
 
@@ -328,5 +328,13 @@ public class UserMgmtService {
             user.setCustomObjectClasses(null);
         }
         return user;
+    }
+
+    public User addUser(User user, boolean active) {
+        return userService.addUser(user, active);
+    }
+
+    public User updateUser(User user) {
+        return userService.updateUser(user);
     }
 }
