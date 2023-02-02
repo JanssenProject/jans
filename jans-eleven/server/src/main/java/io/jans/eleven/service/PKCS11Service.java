@@ -12,21 +12,31 @@ import io.jans.eleven.model.KeyRequestParam;
 import io.jans.eleven.model.SignatureAlgorithm;
 import io.jans.eleven.model.SignatureAlgorithmFamily;
 import io.jans.eleven.util.Base64Util;
+import io.jans.util.security.SecurityProviderUtility;
 import jakarta.enterprise.inject.Vetoed;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.x509.X509V3CertificateGenerator;
+
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x509.KeyPurposeId;
+import org.bouncycastle.cert.CertIOException;
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
+import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
+import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-import javax.security.auth.x500.X500Principal;
 import java.io.*;
 import java.math.BigInteger;
 import java.security.*;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.spec.*;
@@ -57,22 +67,10 @@ public class PKCS11Service implements Serializable {
 
     public void init(String pin, Map<String, String> pkcs11Config) throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException {
         this.pin = pin.toCharArray();
-        this.provider = Security.getProvider(BouncyCastleProvider.PROVIDER_NAME);
-
-        Provider installedProvider = Security.getProvider(provider.getName());
-        if (installedProvider == null) {
-            Security.addProvider(provider);
-        } else {
-            provider = installedProvider;
-        }
+        this.provider = SecurityProviderUtility.getBCProvider();
 
         keyStore = KeyStore.getInstance("PKCS11", provider);
         keyStore.load(null, this.pin);
-
-        installedProvider = Security.getProvider(BouncyCastleProvider.PROVIDER_NAME);
-        if (installedProvider == null) {
-            Security.addProvider(new BouncyCastleProvider());
-        }
     }
 
     private static InputStream getTokenCfg(Map<String, String> pkcs11Config) {
@@ -92,7 +90,7 @@ public class PKCS11Service implements Serializable {
 
     public String generateKey(String dnName, SignatureAlgorithm signatureAlgorithm, Long expirationTime)
             throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, CertificateException,
-            NoSuchProviderException, InvalidKeyException, SignatureException, KeyStoreException, IOException {
+            NoSuchProviderException, InvalidKeyException, SignatureException, KeyStoreException, IOException, OperatorCreationException {
         KeyPairGenerator keyGen = null;
 
         if (signatureAlgorithm == null) {
@@ -113,7 +111,8 @@ public class PKCS11Service implements Serializable {
         PrivateKey pk = keyPair.getPrivate();
 
         // Java API requires a certificate chain
-        X509Certificate[] chain = generateV3Certificate(keyPair, dnName, signatureAlgorithm, expirationTime);
+        X509Certificate[] chain = generateV3Certificate(keyPair, dnName, signatureAlgorithm,
+        		new Date(System.currentTimeMillis() - 10000), new Date(expirationTime));
 
         String alias = UUID.randomUUID().toString();
 
@@ -264,54 +263,12 @@ public class PKCS11Service implements Serializable {
         return privateKey;
     }
 
-    private X509Certificate[] generateV3Certificate(KeyPair pair, String dnName, SignatureAlgorithm signatureAlgorithm,
-                                                    Long expirationTime)
-            throws NoSuchAlgorithmException, CertificateEncodingException, NoSuchProviderException, InvalidKeyException,
-            SignatureException {
-        X500Principal principal = new X500Principal(dnName);
-        BigInteger serialNumber = BigInteger.valueOf(System.currentTimeMillis());
+    private X509Certificate[] generateV3Certificate(KeyPair keyPair, String dnName, SignatureAlgorithm signatureAlgorithm,
+            Date startDate, Date expirationDate) throws CertIOException, OperatorCreationException, CertificateException {
+        BigInteger serialNumber = new BigInteger(1024, new SecureRandom()); // serial number for certificate
+        X500Name name = new X500Name(dnName);
 
-        X509V3CertificateGenerator certGen = new X509V3CertificateGenerator();
-
-        certGen.setSerialNumber(serialNumber);
-        certGen.setIssuerDN(principal);
-        certGen.setNotBefore(new Date(System.currentTimeMillis() - 10000));
-        certGen.setNotAfter(new Date(expirationTime));
-        certGen.setSubjectDN(principal);
-        certGen.setPublicKey(pair.getPublic());
-        certGen.setSignatureAlgorithm(signatureAlgorithm.getAlgorithm());
-
-        //certGen.addExtension(X509Extensions.BasicConstraints, true, new BasicConstraints(false));
-        //certGen.addExtension(X509Extensions.KeyUsage, true, new KeyUsage(KeyUsage.digitalSignature | KeyUsage.keyEncipherment));
-        //certGen.addExtension(X509Extensions.ExtendedKeyUsage, true, new ExtendedKeyUsage(KeyPurposeId.id_kp_serverAuth));
-        //certGen.addExtension(X509Extensions.SubjectAlternativeName, false, new GeneralNames(new GeneralName(GeneralName.rfc822Name, "test@test.test")));
-
-        X509Certificate[] chain = new X509Certificate[1];
-        chain[0] = certGen.generate(pair.getPrivate(), "SunPKCS11-SoftHSM");
-
-        return chain;
-    }
-
-
-    /*public X509Certificate generateV3Certificate(KeyPair keyPair, String issuer, SignatureAlgorithm signatureAlgorithm, Long expirationTime) throws CertIOException, OperatorCreationException, CertificateException {
-        PrivateKey privateKey = keyPair.getPrivate();
-        PublicKey publicKey = keyPair.getPublic();
-
-        // Signers name
-        X500Name issuerName = new X500Name(issuer);
-
-        // Subjects name - the same as we are self signed.
-        X500Name subjectName = new X500Name(issuer);
-
-        // Serial
-        BigInteger serial = new BigInteger(256, new SecureRandom());
-
-        // Not before
-        Date notBefore = new Date(System.currentTimeMillis() - 10000);
-        Date notAfter = new Date(expirationTime);
-
-        // Create the certificate - version 3
-        JcaX509v3CertificateBuilder builder = new JcaX509v3CertificateBuilder(issuerName, serial, notBefore, notAfter, subjectName, publicKey);
+        JcaX509v3CertificateBuilder certGen = new JcaX509v3CertificateBuilder(name, serialNumber, startDate, expirationDate, name, keyPair.getPublic());
 
         ASN1EncodableVector purposes = new ASN1EncodableVector();
         purposes.add(KeyPurposeId.id_kp_serverAuth);
@@ -319,12 +276,15 @@ public class PKCS11Service implements Serializable {
         purposes.add(KeyPurposeId.anyExtendedKeyUsage);
 
         ASN1ObjectIdentifier extendedKeyUsage = new ASN1ObjectIdentifier("2.5.29.37").intern();
-        builder.addExtension(extendedKeyUsage, false, new DERSequence(purposes));
+        certGen.addExtension(extendedKeyUsage, false, new DERSequence(purposes));
 
-        ContentSigner signer = new JcaContentSignerBuilder(signatureAlgorithm.getAlgorithm()).setProvider(SecurityProviderUtility.getBCProvider()).build(privateKey);
-        X509CertificateHolder holder = builder.build(signer);
-        X509Certificate cert = new JcaX509CertificateConverter().setProvider(SecurityProviderUtility.getBCProvider()).getCertificate(holder);
+        X509CertificateHolder certHolder = certGen.build(new JcaContentSignerBuilder(signatureAlgorithm.getAlgorithm()).setProvider(SecurityProviderUtility.getBCProviderName()).build(keyPair.getPrivate()));
+        X509Certificate x509Certificate = new JcaX509CertificateConverter().setProvider(SecurityProviderUtility.getBCProviderName()).getCertificate(certHolder);
 
-        return cert;
-    }*/
+        X509Certificate[] chain = new X509Certificate[1];
+        chain[0] = x509Certificate;
+
+        return chain;
+    }
+
 }

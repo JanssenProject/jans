@@ -21,7 +21,7 @@
 		<jans.bom.version>${project.version}</jans.bom.version>
 
 		<jettison.version>1.5.1</jettison.version>
-		<bouncycastle.version>1.54</bouncycastle.version>
+		<bouncycastle.version>1.70</bouncycastle.version>
 
 		<httpcore.version>4.4.6</httpcore.version>
 		<httpclient.version>4.5.3</httpclient.version>
@@ -66,7 +66,7 @@
 		<module>server</module>
 		<module>server-fips</module>
 	</modules>
-	
+
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
@@ -82,18 +82,6 @@
 				<artifactId>jans-eleven-model</artifactId>
 				<version>${project.version}</version>
 			</dependency>			
-
-			<!-- Security -->
-			<dependency>
-				<groupId>org.bouncycastle</groupId>
-				<artifactId>bcprov-jdk15on</artifactId>
-				<version>1.69</version>
-			</dependency>
-			<dependency>
-				<groupId>org.bouncycastle</groupId>
-				<artifactId>bcpkix-jdk15on</artifactId>
-				<version>1.67</version>
-			</dependency>
 
 			<!-- Net -->
 			<dependency>
