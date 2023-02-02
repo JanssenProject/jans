@@ -7,7 +7,7 @@
 "revision": 1,
 "moduleProperties": [
   {
-	"value2": "ldap",
+	"value2": "db",
 	"value1": "location_type"
   }
 ],

@@ -322,18 +322,8 @@ public class CustomScriptResource extends ConfigBaseResource {
         }
 
         if (ScriptLocationType.LDAP.getValue().equalsIgnoreCase(customScript.getLocationType().getValue())) {
-            ScriptLocationType[] types = ScriptLocationType.values();
-            StringBuilder scriptLocationType = new StringBuilder();
-            if (types != null) {
-                for (ScriptLocationType type : types) {
-                    scriptLocationType.append(type.getValue());
-                    scriptLocationType.append(",");
-                }
-                scriptLocationType.delete(scriptLocationType.lastIndexOf(","), scriptLocationType.lastIndexOf(",") + 1);
-            }
 
-            throwBadRequestException("Invalid value for script location Type in request -> "
-                    + customScript.getLocationType().getValue() + " , valid values are " + scriptLocationType);
+            throwBadRequestException("Invalid value for '"+customScript.LOCATION_TYPE_MODEL_PROPERTY+"' in request is 'ldap' which is deprecated. Use '"+ScriptLocationType.DB.getValue()+"' instead.");
         }
     }
 
