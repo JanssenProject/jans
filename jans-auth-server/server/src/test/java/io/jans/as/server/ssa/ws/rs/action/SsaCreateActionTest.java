@@ -91,7 +91,7 @@ public class SsaCreateActionTest {
         Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
         calendar.add(Calendar.HOUR, 24);
         ssa = new Ssa();
-        ssa.setOrgId("1");
+        ssa.setOrgId("org-id-test");
         ssa.setExpirationDate(calendar.getTime());
         ssa.setDescription("test description");
         ssa.getAttributes().setSoftwareId("gluu-scan-api");

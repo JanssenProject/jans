@@ -4411,10 +4411,15 @@ paths:
             schema:
               required:
                 - org_id
+                - software_id
+                - software_roles
+                - grant_types
+                - one_time_use
+                - rotate_ssa
               type: object
               properties:
                 org_id:
-                  type: number
+                  type: string
                   description: The `org_id` is used for organization identification.
                   example: 1
                 description:
@@ -4497,7 +4502,7 @@ paths:
           name: jti
           description: Unique Identifier
         - schema:
-            type: integer
+            type: string
           in: query
           name: org_id
           description: Organization ID
@@ -4519,6 +4524,8 @@ paths:
                       type: string
                     jti:
                       type: string
+                    status:
+                      type: string
                     ssa:
                       type: object
                       properties:
@@ -4531,7 +4538,7 @@ paths:
                         software_id:
                           type: string
                         org_id:
-                          type: integer
+                          type: string
                         software_roles:
                           type: array
                           items:
@@ -4549,12 +4556,13 @@ paths:
                       expiration: 1656319268
                       issuer: 04d7af18-f69c-4cf9-8b17-9872315a8f17
                       jti: 1527324c-b5a3-4d7d-8953-8c1874600ec1
+                      status: ACTIVE
                       ssa:
                         iss: 'https://jans.io'
                         iat: 1655319268
                         jti: f7b5991c-4c18-4c81-a664-e6f8670f5d51
                         software_id: gluu-scan-api
-                        org_id: 1
+                        org_id: org-id-1000
                         software_roles:
                           - password
                         grant_types:
@@ -4618,7 +4626,7 @@ paths:
           name: jti
           description: A unique identifier for the token, which can be used to prevent reuse of the token.
         - schema:
-            type: integer
+            type: string
           in: query
           name: org_id
           description: Delete all SSAs of the specified organization.

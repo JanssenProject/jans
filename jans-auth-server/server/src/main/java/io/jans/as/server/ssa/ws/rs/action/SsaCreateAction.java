@@ -122,7 +122,7 @@ public class SsaCreateAction {
             ssa.setDn("inum=" + inum + "," + ssaBaseDN);
             ssa.setId(inum);
             ssa.setDeletable(true);
-            ssa.setOrgId(ssaCreateRequest.getOrgId() != null ? ssaCreateRequest.getOrgId().toString() : null); // should orgId be long or string? e.g. guid as orgId sounds common
+            ssa.setOrgId(ssaCreateRequest.getOrgId());
             ssa.setExpirationDate(expirationDate);
             ssa.setTtl(ServerUtil.calculateTtl(creationDate, expirationDate));
             ssa.setDescription(ssaCreateRequest.getDescription());
@@ -136,7 +136,6 @@ public class SsaCreateAction {
             ssa.setCreatorType(CreatorType.CLIENT);
             ssa.setState(SsaState.ACTIVE);
             ssa.setCreatorId(client.getClientId());
-
             ssa.setCreationDate(creationDate);
             ssaService.persist(ssa);
             log.info("Ssa created: {}", ssa);

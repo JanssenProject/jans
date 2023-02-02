@@ -49,7 +49,7 @@ public class SsaRevokeTest extends BaseTest {
         String jti = ssaCreateResponse.getJti();
 
         // Ssa first revocation
-        Long orgId = null;
+        String orgId = null;
         SsaRevokeClient ssaRevokeClient = new SsaRevokeClient(ssaEndpoint);
         SsaRevokeResponse firstSsaRevokeResponse = ssaRevokeClient.execSsaRevoke(accessToken, jti, orgId);
         showClient(ssaRevokeClient);
@@ -87,7 +87,7 @@ public class SsaRevokeTest extends BaseTest {
         String accessToken = tokenResponse.getAccessToken();
 
         // Create ssa
-        Long orgId = 10L;
+        String orgId = "org-id-test-1";
         createSsaWithDefaultValues(accessToken, orgId, null, Boolean.TRUE);
 
         // Ssa first revocation
@@ -123,7 +123,7 @@ public class SsaRevokeTest extends BaseTest {
 
         // Ssa revocation
         String jti = "WRONG-JTI";
-        Long orgId = null;
+        String orgId = null;
         SsaRevokeClient ssaRevokeClient = new SsaRevokeClient(ssaEndpoint);
         SsaRevokeResponse ssaRevokeResponse = ssaRevokeClient.execSsaRevoke(accessToken, jti, orgId);
         showClient(ssaRevokeClient);
@@ -149,7 +149,7 @@ public class SsaRevokeTest extends BaseTest {
 
         // Ssa revocation
         String jti = null;
-        Long orgId = null;
+        String orgId = null;
         SsaRevokeClient ssaRevokeClient = new SsaRevokeClient(ssaEndpoint);
         SsaRevokeResponse ssaRevokeResponse = ssaRevokeClient.execSsaRevoke(accessToken, jti, orgId);
         showClient(ssaRevokeClient);
