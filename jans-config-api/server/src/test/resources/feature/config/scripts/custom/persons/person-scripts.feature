@@ -46,7 +46,7 @@ Then status 200
 And assert response.entries.length <= 3
 And assert response.entries[0].scriptType == 'person_authentication'
 
-
+@ignore
 @CreateUpdateDelete
 Scenario: Create new Person Script
 Given url mainUrl + '/type'

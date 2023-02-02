@@ -1,0 +1,17 @@
+{
+"internal": false,
+"level": 1,
+"programmingLanguage": "PYTHON",
+"description": "Introspection Custom Parameters Sample Script",
+"enabled": false,
+"revision": 1,
+"moduleProperties": [
+  {
+	"value2": "db",
+	"value1": "location_type"
+  }
+],
+"scriptType": "INTROSPECTION",
+"name": "introspection_custom_params",
+"modified": false
+}

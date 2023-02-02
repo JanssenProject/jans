@@ -130,6 +130,10 @@ components:
           type: array
           items:
             type: string
+        superGluuEnabled:
+          type: boolean
+        oldU2fMigrationEnabled:
+          type: boolean
         fido2Configuration:
           $ref: '#/components/schemas/Fido2Configuration'
     Fido2Configuration:
@@ -172,6 +176,30 @@ components:
           type: array
           items:
             type: string
+    Fido2DeviceData:
+      type: object
+      properties:
+        uuid:
+          type: string
+        token:
+          type: string
+          writeOnly: true
+        type:
+          type: string
+        platform:
+          type: string
+        name:
+          type: string
+        os_name:
+          type: string
+        os_version:
+          type: string
+        custom_data:
+          type: object
+          additionalProperties:
+            type: string
+        push_token:
+          type: string
     Fido2RegistrationData:
       type: object
       properties:
@@ -209,6 +237,7 @@ components:
           - pending
           - registered
           - compromised
+          - canceled
         counter:
           type: integer
           format: int32
@@ -228,15 +257,32 @@ components:
           type: string
         challange:
           type: string
+        challengeHash:
+          type: string
         creationDate:
           type: string
           format: date-time
         userInum:
           type: string
-        publicKeyId:
+        rpId:
           type: string
+        sessionStateId:
+          type: string
+        expirationDate:
+          type: string
+          format: date-time
+        deletable:
+          type: boolean
+        ttl:
+          type: integer
+          format: int32
         displayName:
           type: string
+        publicKeyId:
+          type: string
+        publicKeyIdHash:
+          type: integer
+          format: int32
         registrationData:
           $ref: '#/components/schemas/Fido2RegistrationData'
         counter:
@@ -248,10 +294,15 @@ components:
           - pending
           - registered
           - compromised
+          - canceled
         deviceNotificationConf:
           type: string
-        challangeHash:
-          type: string
+        deviceData:
+          $ref: '#/components/schemas/Fido2DeviceData'
+        expiration:
+          type: integer
+          format: int32
+          writeOnly: true
         baseDn:
           type: string
   securitySchemes:

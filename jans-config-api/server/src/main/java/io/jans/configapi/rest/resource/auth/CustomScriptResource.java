@@ -16,6 +16,7 @@ import io.jans.configapi.core.util.Jackson;
 import io.jans.service.custom.CustomScriptService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
+import io.jans.model.ScriptLocationType;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.model.CustomScript;
 import io.jans.orm.model.PagedResult;
@@ -42,6 +43,8 @@ import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.UUID;
+
+import org.apache.commons.lang.StringUtils;
 
 @Path(ApiConstants.CONFIG + ApiConstants.SCRIPTS)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -93,7 +96,8 @@ public class CustomScriptResource extends ConfigBaseResource {
     @Path(PATH_SEPARATOR + ApiConstants.NAME + ApiConstants.NAME_PARAM_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.SCRIPTS_READ_ACCESS }, groupScopes = {
             ApiAccessConstants.SCRIPTS_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
-    public Response getCustomScriptByName(@Parameter(description = "Script name") @PathParam(ApiConstants.NAME) @NotNull String name) {
+    public Response getCustomScriptByName(
+            @Parameter(description = "Script name") @PathParam(ApiConstants.NAME) @NotNull String name) {
 
         if (logger.isDebugEnabled()) {
             logger.debug("Custom Script to be fetched based on type - name:{} ", escapeLog(name));
@@ -118,7 +122,8 @@ public class CustomScriptResource extends ConfigBaseResource {
     @Path(PATH_SEPARATOR + ApiConstants.TYPE + ApiConstants.TYPE_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.SCRIPTS_READ_ACCESS }, groupScopes = {
             ApiAccessConstants.SCRIPTS_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
-    public Response getCustomScriptsByTypePattern(@Parameter(description = "Script type") @PathParam(ApiConstants.TYPE) @NotNull String type,
+    public Response getCustomScriptsByTypePattern(
+            @Parameter(description = "Script type") @PathParam(ApiConstants.TYPE) @NotNull String type,
             @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @Parameter(description = "Search pattern") @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
             @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
@@ -148,7 +153,8 @@ public class CustomScriptResource extends ConfigBaseResource {
     @Path(PATH_SEPARATOR + ApiConstants.INUM + PATH_SEPARATOR + ApiConstants.INUM_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.SCRIPTS_READ_ACCESS }, groupScopes = {
             ApiAccessConstants.SCRIPTS_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
-    public Response getCustomScriptByInum(@Parameter(description = "Script identifier") @PathParam(ApiConstants.INUM) @NotNull String inum) {
+    public Response getCustomScriptByInum(
+            @Parameter(description = "Script identifier") @PathParam(ApiConstants.INUM) @NotNull String inum) {
         if (logger.isDebugEnabled()) {
             logger.debug("Custom Script to be fetched - inum:{} ", escapeLog(inum));
         }
@@ -176,13 +182,21 @@ public class CustomScriptResource extends ConfigBaseResource {
     @POST
     @ProtectedApi(scopes = { ApiAccessConstants.SCRIPTS_WRITE_ACCESS }, groupScopes = {}, superScopes = {
             ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
-    public Response createScript(@Valid CustomScript customScript) {
-        logger.debug("Custom Script to create - customScript:{}", customScript);
+    public Response createScript(@Valid CustomScript customScript,
+            @Parameter(description = "Boolean flag to indicate if script template is to be added. If CustomScript request object has script populated then script template will not be added.") @DefaultValue("false") @QueryParam(value = ApiConstants.ADD_SCRIPT_TEMPLATE) boolean addScriptTemplate) {
+        logger.info("Custom Script to create - customScript:{}, addScriptTemplate:{}", customScript, addScriptTemplate);
         Objects.requireNonNull(customScript, "Attempt to create null custom script");
         String inum = customScript.getInum();
         if (StringHelper.isEmpty(inum)) {
             inum = UUID.randomUUID().toString();
         }
+        if (StringUtils.isBlank(customScript.getScript()) && !addScriptTemplate) {
+            customScript.setScript(""); // this will ensure that default Script Template is not added
+        }
+
+        // validate Script LocationType value
+        validateScriptLocationType(customScript);
+
         customScript.setDn(customScriptService.buildDn(inum));
         customScript.setInum(inum);
         customScriptService.add(customScript);
@@ -208,6 +222,10 @@ public class CustomScriptResource extends ConfigBaseResource {
         checkResourceNotNull(existingScript, CUSTOM_SCRIPT);
         customScript.setInum(existingScript.getInum());
         logger.debug("Custom Script updated {}", customScript);
+
+        // validate Script LocationType value
+        validateScriptLocationType(customScript);
+
         customScriptService.update(customScript);
         return Response.ok(customScript).build();
     }
@@ -223,7 +241,8 @@ public class CustomScriptResource extends ConfigBaseResource {
     @Path(ApiConstants.INUM_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.SCRIPTS_DELETE_ACCESS }, groupScopes = {}, superScopes = {
             ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
-    public Response deleteScript(@Parameter(description = "Script identifier") @PathParam(ApiConstants.INUM) @NotNull String inum) {
+    public Response deleteScript(
+            @Parameter(description = "Script identifier") @PathParam(ApiConstants.INUM) @NotNull String inum) {
         try {
             if (logger.isDebugEnabled()) {
                 logger.debug("Custom Script Resource to delete - inum:{}", escapeLog(inum));
@@ -251,8 +270,9 @@ public class CustomScriptResource extends ConfigBaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.SCRIPTS_WRITE_ACCESS }, groupScopes = {}, superScopes = {
             ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @Path(ApiConstants.INUM_PATH)
-    public Response patchAtribute(@Parameter(description = "Script identifier") @PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String pathString)
-            throws JsonPatchException, IOException {
+    public Response patchScript(
+            @Parameter(description = "Script identifier") @PathParam(ApiConstants.INUM) @NotNull String inum,
+            @NotNull String pathString) throws JsonPatchException, IOException {
         if (logger.isDebugEnabled()) {
             logger.debug("Custom Script Resource to patch - inum:{} , pathString:{}", escapeLog(inum),
                     escapeLog(pathString));
@@ -287,6 +307,24 @@ public class CustomScriptResource extends ConfigBaseResource {
 
         logger.debug("CustomScript pagedResult:{} ", pagedResult);
         return pagedResult;
+    }
+
+    /**
+     * ScriptLocationType.LDAP has been deprecated and hence for any new script
+     * creation or modification we need to ensure that valid values are used.
+     * 
+     * @param customScript
+     */
+    private void validateScriptLocationType(CustomScript customScript) {
+        logger.info("validate ScriptLocationType - customScript:{}", customScript);
+        if (customScript == null || customScript.getLocationType() == null) {
+            return;
+        }
+
+        if (ScriptLocationType.LDAP.getValue().equalsIgnoreCase(customScript.getLocationType().getValue())) {
+
+            throwBadRequestException("Invalid value for '"+customScript.LOCATION_TYPE_MODEL_PROPERTY+"' in request is 'ldap' which is deprecated. Use '"+ScriptLocationType.DB.getValue()+"' instead.");
+        }
     }
 
 }
