@@ -4,6 +4,8 @@ tags:
 - client-management
 ---
 
+# Client Management
+
 ## Background
 
 A "client" is a piece of software either acting autonomously or on behalf of
@@ -19,23 +21,16 @@ Don't confuse a Client with either the Person or the Browser!
 ## Client Security
 
 OpenID allows you to use as much security as you need. To a large extent, the
-security of your implemenation depends on what client features you select.
-For example, let's just consider how the client authenticates itself to Jans Auth
+security of your implementation depends on what client features you select.
+For example, let's just consider how the [client authenticates](client-authn.md) itself to Jans Auth
 Server, which is defined by the `token_endpoint_auth_method` in OpenID Connect
 [Client Metadata](https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata).
 
-| Method | Secret Not Sent in Clear | Signed | Only client has secret |
-| ------ | :----------------------: | :----: | :--------------------: |
-| `client_secret_basic` |   |   |   |
-| `client_secret_post`  |   |   |   |
-| `client_secret_jwt`   | X | X |   |
-| `private_key_jwt`     | X | X | X |
-
 Obviously, using asynchronous secrets for authentication is more secure. The
-client configuration also determines what crypto is used for signing and
-encryption of tokens, what scopes are available to the client (which determines
-the extent of access to APIs), what grants are available,  what is a valid
-`redirect_uri`, timeouts, whether to use a value or reference token, whether to
+client configuration also determines what [crypto](client-configuration.md#cryptography) is used for signing and
+encryption of tokens, what [scopes](client-configuration.md#scopes) are available to the client (which determines
+the extent of access to APIs), what [grants](client-configuration.md#grants) are available,  what is a valid
+[redirect_uri](client-configuration.md#redirect-uri), timeouts, whether to use a value or reference token, whether to
 expire the client, and several other options that impact security.
 
 ## Client Tools
@@ -49,7 +44,7 @@ There are a few ways clients are created and managed in Jans Auth Server:
 
 Which mechanism to use depends on the deployment requirements. For *ad hoc*
 creation, the TUI is great. If you need to quickly script client creation (e.g.
-in a bash script), use the CLI, or use `curl` to call the Jans Config API.  If
+in a bash script), use the CLI or use `curl` to call the Jans Config API.  If
 developers need to have the ability to register clients, then adopt OpenID
 Connect Dynamic Client Registration.
 
@@ -62,7 +57,7 @@ in your specific deployment. Typically, it is
 
 The OpenApi specification for [/registration](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/Registration) documents Jans Auth Server's specific implementation,
 which aligns with the requirements of OpenID Connect dynamic client
-registration. Also check the
+registration. Also, check the
 [Registration Endpoint documentation](../endpoints/client-registration.md) for
 more details on the steps involved in dynamic client registration.
 
@@ -82,12 +77,14 @@ the Jans-CLI, see the [docs](../../config-guide/jans-cli/README.md)
 ### Using TUI
 
 To start registering a new client, navigate to
-`Auth Server`->`Clients`->`Add Client`.  This brings up a screen as show below
+`Auth Server`->`Clients`->`Add Client`.  This brings up a screen as shown below
 with various sections to input client details.
 
 ![](../../../assets/Jans_TUI_Auth_Server_Add_new_client.png)
 
+Refer to complete documentation [here](../../config-guide/tui.md)
+
 ### Using curl
 
-To add a client via `curl`, see information on the
+To add a client via `curl`, see the information on the
 [curl documentation page](../../config-guide/curl.md).
