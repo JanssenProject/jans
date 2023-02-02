@@ -191,10 +191,10 @@ public class CustomScriptResource extends ConfigBaseResource {
             inum = UUID.randomUUID().toString();
         }
         if (StringUtils.isBlank(customScript.getScript()) && !addScriptTemplate) {
-            customScript.setScript(""); //this will ensure that default Script Template is not added
+            customScript.setScript(""); // this will ensure that default Script Template is not added
         }
-        
-        //validate Script LocationType value
+
+        // validate Script LocationType value
         validateScriptLocationType(customScript);
 
         customScript.setDn(customScriptService.buildDn(inum));
@@ -222,10 +222,10 @@ public class CustomScriptResource extends ConfigBaseResource {
         checkResourceNotNull(existingScript, CUSTOM_SCRIPT);
         customScript.setInum(existingScript.getInum());
         logger.debug("Custom Script updated {}", customScript);
-        
-        //validate Script LocationType value
+
+        // validate Script LocationType value
         validateScriptLocationType(customScript);
-        
+
         customScriptService.update(customScript);
         return Response.ok(customScript).build();
     }
@@ -270,7 +270,7 @@ public class CustomScriptResource extends ConfigBaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.SCRIPTS_WRITE_ACCESS }, groupScopes = {}, superScopes = {
             ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @Path(ApiConstants.INUM_PATH)
-    public Response patchAtribute(
+    public Response patchScript(
             @Parameter(description = "Script identifier") @PathParam(ApiConstants.INUM) @NotNull String inum,
             @NotNull String pathString) throws JsonPatchException, IOException {
         if (logger.isDebugEnabled()) {
@@ -308,19 +308,32 @@ public class CustomScriptResource extends ConfigBaseResource {
         logger.debug("CustomScript pagedResult:{} ", pagedResult);
         return pagedResult;
     }
-    
+
     /**
-     * ScriptLocationType.LDAP has been deprecated and hence for any new script creation or modification we need to ensure that valid values are used.
+     * ScriptLocationType.LDAP has been deprecated and hence for any new script
+     * creation or modification we need to ensure that valid values are used.
+     * 
      * @param customScript
      */
     private void validateScriptLocationType(CustomScript customScript) {
         logger.info("validate ScriptLocationType - customScript:{}", customScript);
-        if(customScript!=null && customScript.getLocationType()==null) {
-            return;            
+        if (customScript == null || customScript.getLocationType() == null) {
+            return;
         }
-        
-        if(ScriptLocationType.LDAP.getValue().equalsIgnoreCase(customScript.getLocationType().getValue())) {
-            throwBadRequestException("Invalid value for script location Type in request -> " + customScript.getLocationType().getValue()+" , valid values are "+ScriptLocationType.values().toString());
+
+        if (ScriptLocationType.LDAP.getValue().equalsIgnoreCase(customScript.getLocationType().getValue())) {
+            ScriptLocationType[] types = ScriptLocationType.values();
+            StringBuilder scriptLocationType = new StringBuilder();
+            if (types != null) {
+                for (ScriptLocationType type : types) {
+                    scriptLocationType.append(type.getValue());
+                    scriptLocationType.append(",");
+                }
+                scriptLocationType.delete(scriptLocationType.lastIndexOf(","), scriptLocationType.lastIndexOf(",") + 1);
+            }
+
+            throwBadRequestException("Invalid value for script location Type in request -> "
+                    + customScript.getLocationType().getValue() + " , valid values are " + scriptLocationType);
         }
     }
 
