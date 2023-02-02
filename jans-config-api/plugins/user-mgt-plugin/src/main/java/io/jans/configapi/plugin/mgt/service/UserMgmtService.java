@@ -3,7 +3,7 @@ package io.jans.configapi.plugin.mgt.service;
 import com.github.fge.jsonpatch.JsonPatchException;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.util.AttributeConstants;
-import io.jans.as.common.service.common.UserService;
+import io.jans.configapi.core.service.ConfigUserService;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.configapi.core.util.Jackson;
@@ -59,20 +59,19 @@ public class UserMgmtService {
     MgtUtil mgtUtil;
 
     @Inject
-    UserService userService;
+    ConfigUserService userService;
 
     private static final String BIRTH_DATE = "birthdate";
 
-    public List<String> getPersonCustomObjectClassList() {
-        return appConfiguration.getPersonCustomObjectClassList();
-    }
-
     public String getPeopleBaseDn() {
-        return staticConfiguration.getBaseDn().getPeople();
+        return userService.getPeopleBaseDn();
     }
 
     public PagedResult<User> searchUsers(SearchRequest searchRequest) {
-        logger.debug("Search Users with searchRequest:{}", escapeLog(searchRequest));
+        if (logger.isDebugEnabled()) {
+            logger.debug("Search Users with searchRequest:{}, getPeopleBaseDn():{}", escapeLog(searchRequest),
+                    getPeopleBaseDn());
+        }
         Filter searchFilter = null;
         List<Filter> filters = new ArrayList<>();
         if (searchRequest.getFilterAssertionValue() != null && !searchRequest.getFilterAssertionValue().isEmpty()) {
@@ -90,7 +89,7 @@ public class UserMgmtService {
             searchFilter = Filter.createORFilter(filters);
         }
         logger.debug("Users searchFilter:{}", searchFilter);
-        return persistenceEntryManager.findPagedEntries(getPeopleBaseDn(), User.class, searchFilter, null,
+        return persistenceEntryManager.findPagedEntries(userService.getPeopleBaseDn(), User.class, searchFilter, null,
                 searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
                 searchRequest.getStartIndex(), searchRequest.getCount(), searchRequest.getMaxCount());
 
