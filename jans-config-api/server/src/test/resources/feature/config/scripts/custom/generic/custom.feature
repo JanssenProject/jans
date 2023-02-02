@@ -94,9 +94,9 @@ Feature: Verify Custom Script configuration endpoint
     When method POST
     Then status 201
     And print response
-    And print response.entries[0].inum
+    And print response.inum
     And print 'Delete newly created script'
-    Given url mainUrl + '/' +response.entries[0].inum
+    Given url mainUrl + '/' +response.inum
     And header Authorization = 'Bearer ' + accessToken
     When method DELETE
     Then status 204
