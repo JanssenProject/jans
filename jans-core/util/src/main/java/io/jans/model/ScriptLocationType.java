@@ -18,10 +18,7 @@ import java.util.Map;
  */
 public enum ScriptLocationType implements AttributeEnum {
 
-    /**
-     * @deprecated Use DB instead.
-     */
-    @Deprecated 
+   
     LDAP("ldap", "Ldap"), //Todo: migrate existing scripts with LDAP to DB
     DB("db", "Database"), 
     FILE("file", "File");

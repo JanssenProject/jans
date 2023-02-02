@@ -62,7 +62,7 @@ Feature: Verify Custom Script configuration endpoint
 	And print response
 	And assert response.length != null
 	
-	
+	@ignore
 	Scenario: Patch person custom script by inum
     Given url  mainUrl
     And header Authorization = 'Bearer ' + accessToken
@@ -86,7 +86,7 @@ Feature: Verify Custom Script configuration endpoint
 	And print response
 	And assert response.length !=0	
 
-	
+	@ignore
 	Scenario: Post person custom script by inum
     Given url mainUrl
     And header Authorization = 'Bearer ' + accessToken

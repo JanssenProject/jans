@@ -320,7 +320,7 @@ public class CustomScriptResource extends ConfigBaseResource {
         }
         
         if(ScriptLocationType.LDAP.getValue().equalsIgnoreCase(customScript.getLocationType().getValue())) {
-            throwBadRequestException("Invalid value for script location Type in request -> " + customScript.getLocationType().getValue()+" , valid values are "+ScriptLocationType.values());
+            throwBadRequestException("Invalid value for script location Type in request -> " + customScript.getLocationType().getValue()+" , valid values are "+ScriptLocationType.values().toString());
         }
     }
 
