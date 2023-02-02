@@ -18,7 +18,7 @@ public class SsaRevokeRequest extends BaseRequest {
 
     private String jti;
 
-    private Long orgId;
+    private String orgId;
 
     public SsaRevokeRequest() {
         setContentType(MediaType.APPLICATION_JSON);
@@ -42,11 +42,11 @@ public class SsaRevokeRequest extends BaseRequest {
         this.jti = jti;
     }
 
-    public Long getOrgId() {
+    public String getOrgId() {
         return orgId;
     }
 
-    public void setOrgId(Long orgId) {
+    public void setOrgId(String orgId) {
         this.orgId = orgId;
     }
 
@@ -54,7 +54,7 @@ public class SsaRevokeRequest extends BaseRequest {
     public String getQueryString() {
         QueryBuilder builder = QueryBuilder.instance();
         builder.append(SsaRequestParam.JTI.getName(), jti);
-        builder.append(SsaRequestParam.ORG_ID.getName(), orgId != null ? orgId.toString() : "");
+        builder.append(SsaRequestParam.ORG_ID.getName(), orgId);
         return builder.toString();
     }
 }
