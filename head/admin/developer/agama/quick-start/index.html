@@ -8991,18 +8991,12 @@
 <h3 id="getting-an-access-token">Getting an access token<a class="headerlink" href="#getting-an-access-token" title="Permanent link">#</a></h3>
 <p>In order to add/modify flows, you will interact with a small REST API which is protected by bearer token. To be able to get tokens, SSH to your server and perform the following steps:</p>
 <ul>
-<li>Run <code>python3 /opt/jans/jans-cli/config-cli.py</code></li>
-<li>In the menu enter to <code>OAuth</code> &gt; <code>OIDC clients</code> &gt; <code>Get list of clients</code></li>
-<li>Accept the default parameters, for <code>pattern</code> enter <code>config</code></li>
+<li>Run <code>python3 /opt/jans/jans-cli/config-cli.py --operation-id get-oauth-openid-clients --endpoint-args pattern:config</code></li>
 <li>Follow the instructions (in a web browser) to get authorized access</li>
-<li>A list of results will be shown, pick the value in the <code>inum</code> column for the client with display name <code>Jans Config Api Client</code></li>
-<li>Choose <code>back</code>, and enter to <code>Get client by inum</code></li>
-<li>Enter the collected <code>inum</code> and grab the value of <code>clientSecret</code> in the resulting JSON document</li>
-<li>Finally, choose <code>logout and quit</code></li>
+<li>A list of results will be shown in JSON format. Pick the value of the <code>inum</code> property for the client with display name <code>Jans Config Api Client</code>. Do the same for <code>clientSecret</code></li>
 </ul>
-<p>The collected secret is encoded, run <code>python3 /opt/jans/bin/encode.py -D &lt;clientSecret&gt;</code> to decode it.</p>
 <p>The following is an example of how to get a token using <code>curl</code>. Replace data in the placeholders appropriately:</p>
-<div class="highlight"><pre><span></span><code>curl -u &#39;&lt;client-inum:client-secret-decoded&gt;&#39;
+<div class="highlight"><pre><span></span><code>curl -u &#39;&lt;client-inum&gt;:&lt;client-secret&gt;&#39;
      -d scope=&#39;https://jans.io/oauth/config/agama.write&#39;
      -d grant_type=client_credentials https://&lt;your-host&gt;/jans-auth/restv1/token
 </code></pre></div>
@@ -9134,7 +9128,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-20T13:36:16+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-20</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-02-02T14:02:36+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-02-02</span>
       
         <br>
         Created:
