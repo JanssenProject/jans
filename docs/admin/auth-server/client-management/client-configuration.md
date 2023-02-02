@@ -22,6 +22,10 @@ tags:
 
 - [sector_identifier_uri](https://github.dev/JanssenProject/jans/blob/82a1046bf4a14a2ae191251e4fc874ccf7c612ec/jans-auth-server/server/src/main/java/io/jans/as/server/model/registration/RegisterParamsValidator.java#L298)
 
+- Using `state` param
+
+- where all its validated [here](https://www.oauth.com/oauth2-servers/redirect-uris/redirect-uri-validation/)
+
 ## Cryptography 
 
 
