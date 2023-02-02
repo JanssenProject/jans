@@ -53,6 +53,7 @@ public class SsaGetAssertBuilder extends BaseAssertBuilder {
                     assertTrue(ssaWrapper.has(CREATED_AT.getName()));
                     assertTrue(ssaWrapper.has(EXPIRATION.getName()));
                     assertTrue(ssaWrapper.has(ISSUER.getName()));
+                    assertTrue(ssaWrapper.has(STATUS.getName()));
 
                     JSONObject ssaJson = ssaWrapper.getJSONObject(SSA.getName());
                     assertNotNull(ssaJson);
