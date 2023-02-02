@@ -237,6 +237,7 @@ components:
           - pending
           - registered
           - compromised
+          - canceled
         counter:
           type: integer
           format: int32
@@ -293,10 +294,15 @@ components:
           - pending
           - registered
           - compromised
+          - canceled
         deviceNotificationConf:
           type: string
         deviceData:
           $ref: '#/components/schemas/Fido2DeviceData'
+        expiration:
+          type: integer
+          format: int32
+          writeOnly: true
         baseDn:
           type: string
   securitySchemes:

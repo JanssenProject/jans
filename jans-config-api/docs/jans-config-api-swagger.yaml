@@ -7533,19 +7533,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        adminCanView:
-          type: boolean
-        userCanEdit:
-          type: boolean
-        userCanView:
-          type: boolean
-        adminCanEdit:
-          type: boolean
-        userCanAccess:
+        whitePagesCanView:
           type: boolean
         adminCanAccess:
           type: boolean
-        whitePagesCanView:
+        adminCanView:
+          type: boolean
+        adminCanEdit:
+          type: boolean
+        userCanView:
+          type: boolean
+        userCanEdit:
+          type: boolean
+        userCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -8266,8 +8266,6 @@ components:
           type: object
           additionalProperties:
             type: string
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8277,6 +8275,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -9244,6 +9244,12 @@ components:
           type: string
         "y":
           type: string
+        key_ops:
+          type: string
+          enum:
+          - "KeyOps{value='connect'} CONNECT"
+          - "KeyOps{value='ssa'} SSA"
+          - "KeyOps{value='all'} ALL"
     WebKeysConfiguration:
       type: object
       properties:
