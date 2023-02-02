@@ -29,7 +29,7 @@ from parameter import params_from_file
 from settings import LOGGING_CONFIG
 
 DEFAULT_SIG_KEYS = "RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512"
-DEFAULT_ENC_KEYS = "RSA1_5 RSA-OAEP"
+DEFAULT_ENC_KEYS = "RSA1_5 RSA-OAEP ECDH-ES"
 
 DEFAULT_CONFIG_FILE = "/app/db/config.json"
 DEFAULT_SECRET_FILE = "/app/db/secret.json"
@@ -63,6 +63,7 @@ def generate_openid_keys(passwd, jks_path, jwks_path, dn, exp=365, sig_keys=DEFA
         "-expiration", "{}".format(exp),
         "-keystore", jks_path,
         "-keypasswd", passwd,
+        "-key_ops", "connect",
     ])
     out, err, retcode = exec_cmd(cmd)
     if retcode == 0:
@@ -83,6 +84,7 @@ def generate_openid_keys_hourly(passwd, jks_path, jwks_path, dn, exp=48, sig_key
         "-expiration_hours", "{}".format(exp),
         "-keystore", jks_path,
         "-keypasswd", passwd,
+        "-key_ops", "connect",
     ])
     out, err, retcode = exec_cmd(cmd)
     if retcode == 0:
