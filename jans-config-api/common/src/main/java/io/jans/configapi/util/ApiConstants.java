@@ -110,6 +110,7 @@ public class ApiConstants {
     public static final String ALL = "all";
     public static final String ACTIVE = "active";
     public static final String INACTIVE = "inactive"; 
+    public static final String ADD_SCRIPT_TEMPLATE = "addScriptTemplate";
 
     // API Protection
     public static final String PROTECTION_TYPE_OAUTH2 = "oauth2";
