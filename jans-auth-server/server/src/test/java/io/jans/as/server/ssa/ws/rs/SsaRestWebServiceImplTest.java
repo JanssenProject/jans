@@ -49,7 +49,7 @@ public class SsaRestWebServiceImplTest {
     public void get_validParams_validResponse() {
         when(ssaGetAction.get(anyString(), any(), any())).thenReturn(mock(Response.class));
 
-        Response response = ssaRestWebServiceImpl.get("testJti", 1000L, mock(HttpServletRequest.class));
+        Response response = ssaRestWebServiceImpl.get("testJti", "org-id-test", mock(HttpServletRequest.class));
         assertNotNull(response, "response is null");
         verify(ssaGetAction).get(anyString(), any(), any());
         verifyNoMoreInteractions(ssaGetAction);
@@ -69,7 +69,7 @@ public class SsaRestWebServiceImplTest {
     public void revoke_validParams_validResponse() {
         when(ssaRevokeAction.revoke(anyString(), any(), any())).thenReturn(mock(Response.class));
 
-        Response response = ssaRestWebServiceImpl.revoke("testJti", 1000L, mock(HttpServletRequest.class));
+        Response response = ssaRestWebServiceImpl.revoke("testJti", "org-id-test", mock(HttpServletRequest.class));
         assertNotNull(response, "response is null");
         verify(ssaRevokeAction).revoke(anyString(), any(), any());
         verifyNoMoreInteractions(ssaRevokeAction);

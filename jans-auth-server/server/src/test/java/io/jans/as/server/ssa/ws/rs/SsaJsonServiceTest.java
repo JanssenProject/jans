@@ -89,7 +89,7 @@ public class SsaJsonServiceTest {
         JSONObject ssaJsonObject = jsonObject.getJSONObject(SSA.getName());
         assertNotNull(ssaJsonObject);
         assertTrue(ssaJsonObject.has(ORG_ID.getName()));
-        assertEquals(ssaJsonObject.get(ORG_ID.getName()), Long.parseLong(ssa.getOrgId()));
+        assertEquals(ssaJsonObject.get(ORG_ID.getName()), ssa.getOrgId());
         assertTrue(ssaJsonObject.has(SOFTWARE_ID.getName()));
         assertEquals(ssaJsonObject.get(SOFTWARE_ID.getName()), ssa.getAttributes().getSoftwareId());
         assertTrue(ssaJsonObject.has(SOFTWARE_ROLES.getName()));

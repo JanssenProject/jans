@@ -132,7 +132,7 @@ public class SsaServiceTest {
         when(staticConfiguration.getBaseDn()).thenReturn(baseDnConfiguration);
 
         String jti = null;
-        Long orgId = null;
+        String orgId = null;
         SsaState status = null;
         String clientId = "test-client";
         String[] scopes = new String[]{SsaScopeType.SSA_DEVELOPER.getValue()};
@@ -150,7 +150,7 @@ public class SsaServiceTest {
         when(staticConfiguration.getBaseDn()).thenReturn(baseDnConfiguration);
 
         String jti = "test-jti";
-        Long orgId = null;
+        String orgId = null;
         SsaState status = null;
         String clientId = "test-client";
         String[] scopes = new String[]{};
@@ -168,7 +168,7 @@ public class SsaServiceTest {
         when(staticConfiguration.getBaseDn()).thenReturn(baseDnConfiguration);
 
         String jti = null;
-        Long orgId = 1000L;
+        String orgId = "org-id-test-1";
         SsaState status = null;
         String clientId = "test-client";
         String[] scopes = new String[]{};
@@ -186,7 +186,7 @@ public class SsaServiceTest {
         when(staticConfiguration.getBaseDn()).thenReturn(baseDnConfiguration);
 
         String jti = null;
-        Long orgId = null;
+        String orgId = null;
         SsaState status = SsaState.ACTIVE;
         String clientId = "test-client";
         String[] scopes = new String[]{};
@@ -204,7 +204,7 @@ public class SsaServiceTest {
         when(staticConfiguration.getBaseDn()).thenReturn(baseDnConfiguration);
 
         String jti = null;
-        Long orgId = null;
+        String orgId = null;
         SsaState status = null;
         String clientId = null;
         String[] scopes = new String[]{};
@@ -305,7 +305,7 @@ public class SsaServiceTest {
 
         JwtClaims jwtClaims = jwt.getClaims();
         assertNotNull(jwtClaims.getClaim(ORG_ID.getName()), "The org_id in jwt is null");
-        assertEquals(jwtClaims.getClaim(ORG_ID.getName()), Long.parseLong(ssa.getOrgId()));
+        assertEquals(jwtClaims.getClaim(ORG_ID.getName()), ssa.getOrgId());
         assertNotNull(jwtClaims.getClaim(SOFTWARE_ID.getName()), "The software_id in jwt is null");
         assertEquals(jwtClaims.getClaim(SOFTWARE_ID.getName()), ssa.getAttributes().getSoftwareId());
         assertNotNull(jwtClaims.getClaim(SOFTWARE_ROLES.getName()), "The software_roles in jwt is null");

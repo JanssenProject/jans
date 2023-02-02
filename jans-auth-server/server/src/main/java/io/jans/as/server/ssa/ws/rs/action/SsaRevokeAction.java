@@ -82,7 +82,7 @@ public class SsaRevokeAction {
      * @param httpRequest Http request
      * @return {@link Response} with status {@code 200 (Ok)} if SSA has been revoked.
      */
-    public Response revoke(String jti, Long orgId, HttpServletRequest httpRequest) {
+    public Response revoke(String jti, String orgId, HttpServletRequest httpRequest) {
         log.debug("Attempting to revoke ssa, jti: '{}', orgId: {}", jti, orgId);
 
         errorResponseFactory.validateFeatureEnabled(FeatureFlagType.SSA);
@@ -132,7 +132,7 @@ public class SsaRevokeAction {
      * @param orgId Organization ID
      * @return true if the parameters are valid or false otherwise.
      */
-    private boolean isNotValidParam(String jti, Long orgId) {
-        return StringUtils.isBlank(jti) && orgId == null;
+    private boolean isNotValidParam(String jti, String orgId) {
+        return StringUtils.isBlank(jti) && StringUtils.isBlank(orgId);
     }
 }
