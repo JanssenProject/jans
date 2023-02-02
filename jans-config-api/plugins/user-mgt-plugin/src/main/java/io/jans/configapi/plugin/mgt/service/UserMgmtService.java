@@ -3,6 +3,7 @@ package io.jans.configapi.plugin.mgt.service;
 import com.github.fge.jsonpatch.JsonPatchException;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.util.AttributeConstants;
+import io.jans.configapi.core.service.ConfigUserService;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.configapi.core.util.Jackson;
@@ -34,7 +35,7 @@ import static io.jans.as.model.util.Util.escapeLog;
 
 @ApplicationScoped
 @Named("userMgmtSrv")
-public class UserMgmtService extends io.jans.as.common.service.common.UserService {
+public class UserMgmtService {
 
     @Inject
     private Logger logger;
@@ -49,25 +50,28 @@ public class UserMgmtService extends io.jans.as.common.service.common.UserServic
     ConfigurationService configurationService;
 
     @Inject
+    PersistenceEntryManager persistenceEntryManager;
+
+    @Inject
     AuthUtil authUtil;
 
     @Inject
     MgtUtil mgtUtil;
 
+    @Inject
+    ConfigUserService userService;
+
     private static final String BIRTH_DATE = "birthdate";
 
-    @Override
-    public List<String> getPersonCustomObjectClassList() {
-        return appConfiguration.getPersonCustomObjectClassList();
-    }
-
-    @Override
     public String getPeopleBaseDn() {
-        return staticConfiguration.getBaseDn().getPeople();
+        return userService.getPeopleBaseDn();
     }
 
     public PagedResult<User> searchUsers(SearchRequest searchRequest) {
-        logger.debug("Search Users with searchRequest:{}", escapeLog(searchRequest));
+        if (logger.isDebugEnabled()) {
+            logger.debug("Search Users with searchRequest:{}, getPeopleBaseDn():{}", escapeLog(searchRequest),
+                    getPeopleBaseDn());
+        }
         Filter searchFilter = null;
         List<Filter> filters = new ArrayList<>();
         if (searchRequest.getFilterAssertionValue() != null && !searchRequest.getFilterAssertionValue().isEmpty()) {
@@ -85,7 +89,7 @@ public class UserMgmtService extends io.jans.as.common.service.common.UserServic
             searchFilter = Filter.createORFilter(filters);
         }
         logger.debug("Users searchFilter:{}", searchFilter);
-        return persistenceEntryManager.findPagedEntries(getPeopleBaseDn(), User.class, searchFilter, null,
+        return persistenceEntryManager.findPagedEntries(userService.getPeopleBaseDn(), User.class, searchFilter, null,
                 searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
                 searchRequest.getStartIndex(), searchRequest.getCount(), searchRequest.getMaxCount());
 
@@ -104,7 +108,7 @@ public class UserMgmtService extends io.jans.as.common.service.common.UserServic
             return null;
         }
 
-        User user = getUserByInum(inum);
+        User user = userService.getUserByInum(inum);
         if (user == null) {
             return null;
         }
@@ -126,7 +130,7 @@ public class UserMgmtService extends io.jans.as.common.service.common.UserServic
 
         // persist user
         ignoreCustomObjectClassesForNonLDAP(user);
-        user = updateUser(user);
+        user = userService.updateUser(user);
         logger.debug("User after patch user:{}", user);
         return user;
 
@@ -135,7 +139,7 @@ public class UserMgmtService extends io.jans.as.common.service.common.UserServic
     public User getUserBasedOnInum(String inum) {
         User result = null;
         try {
-            result = getUserByInum(inum);
+            result = userService.getUserByInum(inum);
         } catch (Exception ex) {
             logger.error("Failed to load user entry", ex);
         }
@@ -150,12 +154,12 @@ public class UserMgmtService extends io.jans.as.common.service.common.UserServic
         }
 
         for (CustomObjectAttribute attribute : customAttributes) {
-            CustomObjectAttribute existingAttribute = getCustomAttribute(user, attribute.getName());
+            CustomObjectAttribute existingAttribute = userService.getCustomAttribute(user, attribute.getName());
             logger.debug("Existing CustomAttributes with existingAttribute:{} ", existingAttribute);
 
             // add
             if (existingAttribute == null) {
-                boolean result = addUserAttribute(user, attribute.getName(), attribute.getValues(),
+                boolean result = userService.addUserAttribute(user, attribute.getName(), attribute.getValues(),
                         attribute.isMultiValued());
                 logger.debug("Result of adding CustomAttributes attribute:{} , result:{} ", attribute, result);
             }
@@ -323,5 +327,13 @@ public class UserMgmtService extends io.jans.as.common.service.common.UserServic
             user.setCustomObjectClasses(null);
         }
         return user;
+    }
+
+    public User addUser(User user, boolean active) {
+        return userService.addUser(user, active);
+    }
+
+    public User updateUser(User user) {
+        return userService.updateUser(user);
     }
 }

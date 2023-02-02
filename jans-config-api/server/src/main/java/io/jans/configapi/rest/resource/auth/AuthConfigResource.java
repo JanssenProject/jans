@@ -128,7 +128,7 @@ public class AuthConfigResource extends ConfigBaseResource {
         }
 
         if (engineConfig.getMaxItemsLoggedInCollections() < 1) {
-            thorwBadRequestException("maxItemsLoggedInCollections should be greater than zero -> "
+            throwBadRequestException("maxItemsLoggedInCollections should be greater than zero -> "
                     + engineConfig.getMaxItemsLoggedInCollections());
         }
     }
