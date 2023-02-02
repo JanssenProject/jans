@@ -9156,30 +9156,6 @@
                   
   
 
-  <nav class="md-tags" >
-    
-      
-      
-        <span class="md-tag">administration</span>
-      
-    
-      
-      
-        <span class="md-tag">auth-server</span>
-      
-    
-      
-      
-        <span class="md-tag">SSA</span>
-      
-    
-      
-      
-        <span class="md-tag">endpoint</span>
-      
-    
-  </nav>
-
 
 
   <a href="https://github.com/JanssenProject/jans/edit/main/docs/admin/auth-server/endpoints/ssa.md" title="Edit this page" class="md-content__button md-icon">
@@ -9188,9 +9164,19 @@
   </a>
 
 
+<hr />
+<p>"org_id": "test-org-id",
+tags:</p>
+<ul>
+<li>administration</li>
+<li>auth-server</li>
+<li>SSA</li>
+<li>endpoint</li>
+</ul>
+<hr />
 <h1 id="software-statement-assertion-ssa">Software Statement Assertion (SSA)<a class="headerlink" href="#software-statement-assertion-ssa" title="Permanent link">#</a></h1>
-<p>Janssen Server provides SSA endpoint that enables management of SSAs. The SSA is a JSON Web Token (JWT) containing 
-client metadata and some custom attributes. Specification for SSAs has been outlined as part of 
+<p>Janssen Server provides SSA endpoint that enables management of SSAs. The SSA is a JSON Web Token (JWT) containing
+client metadata and some custom attributes. Specification for SSAs has been outlined as part of
 <a href="https://www.rfc-editor.org/rfc/rfc7591#section-2.3">Dynamic Client Registration Protocol</a>.</p>
 <p>URL to access revocation endpoint on Janssen Server is listed in the response of Janssen Server's well-known
 <a href="../configuration/">configuration endpoint</a> given below.</p>
@@ -9201,10 +9187,13 @@ looks like below:</p>
 <div class="highlight"><pre><span></span><code>https://janssen.server.host/jans-auth/restv1/ssa
 </code></pre></div>
 <p>More information about request and response of the revocation endpoint can be found in
-the OpenAPI specification of <a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/SSA">jans-auth-server module</a>.</p>
+the OpenAPI specification
+of <a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/SSA">jans-auth-server module</a>.</p>
 <h2 id="disabling-the-endpoint-using-feature-flag">Disabling The Endpoint Using Feature Flag<a class="headerlink" href="#disabling-the-endpoint-using-feature-flag" title="Permanent link">#</a></h2>
-<p><code>/ssa</code> endpoint can be enabled or disable using <a href="../../../reference/json/feature-flags/janssenauthserver-feature-flags/#ssa">SSA feature flag</a>.
-Use <a href="../../../config-guide/tui/">Janssen Text-based UI(TUI)</a> or <a href="../../../config-guide/jans-cli/">Janssen command-line interface</a> to perform this task.</p>
+<p><code>/ssa</code> endpoint can be enabled or disable
+using <a href="../../../reference/json/feature-flags/janssenauthserver-feature-flags/#ssa">SSA feature flag</a>.
+Use <a href="../../../config-guide/tui/">Janssen Text-based UI(TUI)</a>
+or <a href="../../../config-guide/jans-cli/">Janssen command-line interface</a> to perform this task.</p>
 <p>When using TUI, navigate via <code>Auth Server</code>-&gt;<code>Properties</code>-&gt;<code>enabledFeatureFlags</code> to screen below. From here, enable or
 disable <code>SSA</code> flag as required.</p>
 <p><img alt="" src="../../../../assets/image-tui-enable-components.png" /></p>
@@ -9217,7 +9206,8 @@ parameters as described below:</p>
     &quot;ssaEndpoint&quot;: &quot;{{your-url}}/ssa&quot;,
     &quot;ssaCustomAttributes&quot;: [
         &quot;myCustomAttr1&quot;,
-        &quot;myCustomAttr2&quot;
+        &quot;myCustomAttr2&quot;,
+        ...
     ],
     &quot;ssaSigningAlg&quot;: &quot;RS512&quot;,
     &quot;ssaExpirationInDays&quot;: 30
@@ -9234,8 +9224,8 @@ parameters as described below:</p>
 <ul>
 <li><code>https://jans.io/auth/ssa.admin</code> — Allows calling all SSA services.</li>
 <li><code>https://jans.io/auth/ssa.portal</code> — Allows only call <code>Get SSA</code> service.</li>
-<li><code>https://jans.io/auth/ssa.developer</code> — Allows only call <code>Get SSA</code>, but you can only filter ssa that have</li>
-<li>been created by the same client.</li>
+<li><code>https://jans.io/auth/ssa.developer</code> — Allows only call <code>Get SSA</code>, but you can only filter ssa that have been created
+  by the same client.</li>
 </ul>
 <h2 id="create-a-new-ssa">Create a new SSA<a class="headerlink" href="#create-a-new-ssa" title="Permanent link">#</a></h2>
 <p>Create <code>SSA</code> for the organization with <code>expiration</code> (optional).</p>
@@ -9256,7 +9246,7 @@ parameters as described below:</p>
 </tr>
 <tr>
 <td>description</td>
-<td>Describe ssa</td>
+<td>Describe SSA</td>
 <td>false</td>
 </tr>
 <tr>
@@ -9291,6 +9281,21 @@ parameters as described below:</p>
 </tr>
 </tbody>
 </table>
+<p><strong>Note:</strong> You can add more <code>custom attributes</code> in the request, (you must have previously configured in the SSA global
+configuration).
+It should be clarified that these values are persisted in the database and are not returned in the SSA JWT.</p>
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code>{
+  &quot;org_id&quot;: &quot;your-org-id&quot;,
+  &quot;description&quot;: &quot;your description&quot;
+  ...
+
+  org_id: &quot;Your org_id&quot;,
+  &quot;myCustomAttr1&quot;: &quot;Your value custom attr 1&quot;, 
+  &quot;myCustomAttr2&quot;: &quot;Your value custom attr 2&quot;,
+  ...
+} 
+</code></pre></div>
 <h3 id="response-description">Response description<a class="headerlink" href="#response-description" title="Permanent link">#</a></h3>
 <p>Returned SSA is a JWT, containing the following structure:</p>
 <div class="highlight"><pre><span></span><code>{
@@ -9321,7 +9326,6 @@ Content-Type: application/json
 Authorization: Bearer {{your-token}}
 
 {
-    &quot;org_id&quot;: 1,
     &quot;description&quot;: &quot;test&quot;,
     &quot;software_id&quot;: &quot;gluu-scan-api&quot;,
     &quot;software_roles&quot;: [
@@ -9379,7 +9383,8 @@ Connection: Keep-Alive
         },
         &quot;iss&quot;: &quot;ed4d5f74-ce41-4180-aed4-54cffa974630&quot;,
         &quot;created_at&quot;: 1668608851,
-        &quot;expiration&quot;: 1668608852
+        &quot;expiration&quot;: 1668608852,
+        &quot;status&quot;: &quot;ACTIVE&quot;
     }
 ]
 </code></pre></div>
@@ -9398,6 +9403,7 @@ Connection: Keep-Alive
 <li><code>iss</code> — The "iss" is related to the client that created this SSA.</li>
 <li><code>created_at</code> — Creation time.</li>
 <li><code>expiration</code> — Expiration time.</li>
+<li><code>status</code> — SSA status (<code>ACTIVE</code>, <code>USED</code>, <code>EXPIRED</code> or <code>REVOKED</code>).</li>
 </ul>
 <h3 id="example_1">Example:<a class="headerlink" href="#example_1" title="Permanent link">#</a></h3>
 <p><strong>Request:</strong></p>
@@ -9443,7 +9449,8 @@ Connection: Keep-Alive
     },
     &quot;iss&quot;: &quot;ed4d5f74-ce41-4180-aed4-54cffa974630&quot;,
     &quot;created_at&quot;: 1668608851,
-    &quot;expiration&quot;: 1668608852
+    &quot;expiration&quot;: 1668608852,
+    &quot;status&quot;: &quot;ACTIVE&quot;
   }
 ]
 </code></pre></div>
@@ -9566,14 +9573,18 @@ Connection: Keep-Alive
 <li><code>creatorId</code> type <code>String</code> — Client that created SSA.</li>
 <li><code>creatorType</code> type enum <code>CreatorType</code> — Contains the following CreatorType values (<code>NONE</code>, <code>CLIENT</code>, <code>USER</code>, <code>AUTO</code>).</li>
 <li><code>ttl</code> type <code>Integer</code> — SSA lifetime in milliseconds.</li>
-<li><code>atributes</code> type class <code>SsaAtributes</code></li>
+<li><code>atributes</code> type class <code>SsaAtributes</code><ul>
 <li><code>oneTimeUse</code> type <code>Boolean</code> — Whether the SSA will be single use.</li>
-<li><code>rotateSsa</code> type <code>Boolean</code> — TODO - Will be used to rotate expiration of the SSA, currently is only saved as part of the SSA.</li>
+<li><code>rotateSsa</code> type <code>Boolean</code> — TODO - Will be used to rotate expiration of the SSA, currently is only saved as part
+  of the SSA.</li>
 <li><code>clientDn</code> type <code>String</code> — Client's DN.</li>
-<li><code>customAttributes</code> type <code>Map&lt;String, String&gt;</code> — Contain additional fields, previously configured in the SSA global configuration.</li>
+<li><code>customAttributes</code> type <code>Map&lt;String, String&gt;</code> — Contain additional fields, previously configured in the SSA global
+  configuration.</li>
 <li><code>softwareId</code> type <code>String</code> — Is used for software identification.</li>
 <li><code>softwareRoles</code> type <code>List&lt;String&gt;</code> — List of string values, fixed value <code>["password", "notify"]</code>.</li>
 <li><code>grantTypes</code> type <code>List&lt;String&gt;</code> — Fixed value <code>["client_credentials"]</code>.</li>
+</ul>
+</li>
 </ul>
 
   <hr>
@@ -9581,7 +9592,7 @@ Connection: Keep-Alive
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-13T08:34:37+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-13</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-02-02T06:46:15+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-02-02</span>
       
         <br>
         Created:
