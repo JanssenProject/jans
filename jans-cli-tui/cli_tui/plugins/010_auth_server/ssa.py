@@ -81,7 +81,7 @@ class SSA(DialogUtils):
                         str(ssa['ssa']['software_id']),
                         str(ssa['ssa']['org_id']),
                         ','.join(ssa['ssa']['software_roles']),
-                        '??',
+                        ssa['status'],
                         '{:02d}/{:02d}/{}'.format(dt_object.day, dt_object.month, str(dt_object.year)[2:])
                     ))
 
@@ -124,6 +124,8 @@ class SSA(DialogUtils):
         else:
             new_data['expiration'] = int(datetime.fromisoformat(self.expire_widget.value).timestamp())
 
+        new_data['software_roles'] = new_data['software_roles'].splitlines()
+
         if self.check_required_fields(dialog.body, data=new_data):
 
             async def coroutine():
@@ -162,8 +164,7 @@ class SSA(DialogUtils):
                 self.app.getTitledText(
                     title=_("Organisation"),
                     name='org_id',
-                    value=str(data.get('org_id','')),
-                    text_type='integer',
+                    value=data.get('org_id',''),
                     style=cli_style.edit_text_required
                 ),
 
