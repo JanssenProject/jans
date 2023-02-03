@@ -44,11 +44,11 @@ Source code [here](https://github.com/JanssenProject/jans/raw/main/docs/admin/de
 
 [`login.ftlh`](https://github.com/JanssenProject/jans/raw/main/docs/admin/developer/agama/basic/login.ftlh) is 99% HTML markup and will not be detailed here. There are only a couple of things to highlight:
 
-- The conditional `<#if !(success!true)>` (around line 27) is used to determine if an error message should be included in the generated markup. It works this way: if the key `success` exists in this template data model, its value is negated (note the bang character before the left parenthesis) and the `if` condition is evaluated. If non-existing, a `true` value is assumed which is then negated and thus the `if` body will not be evaluated-  
+- The conditional `<#if !(success!true)>` (around line 27) is used to determine if an error message should be included in the generated markup. It works this way: if the key `success` exists in this template data model, its value is negated (note the bang character before the left parenthesis) and the `if` condition is evaluated. If non-existing, a `true` value is assumed which is then negated and thus the `if` body will not be evaluated 
 
-- Expressions of the form `${msgs[...]}` are used to access string messages defined in the server resource bundle. For more information visit ["Writing UI pages"](./ui-pages.md#data-model).
+- Expressions of the form `${msgs[...]}` are used to access string messages defined in the server resource bundle. For more information visit ["Writing UI pages"](./ui-pages.md#data-model)
 
-- The expression `${uid!}` (around line 35) is equivalent to `${uid!""}` and evaluates to the value of key `uid`. In case `uid` is not defined, an empty string value is used.
+- The expression `${uid!}` (around line 35) is equivalent to `${uid!""}` and evaluates to the value of key `uid`. In case `uid` is not defined, an empty string value is used
 
 ## Email OTP authentication
 
@@ -71,7 +71,7 @@ Source code [here](https://github.com/JanssenProject/jans/raw/main/docs/admin/de
 
 - Line 9. The user identifier is grabbed from the basic flow output and stored in `userId`
 
-- Line 10. The e-mail of the user identified by `userId` is obtained by calling method `emailOf` of class `EmailOTPUtil`. Source code [here](https://github.com/JanssenProject/jans/blob/main/docs/admin/developer/agama/otp-email/EmailOTPUtil.java). This time the managed bean [`UserService`](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/service/UserService.java) is used. Copy `EmailOTPUtil.java` directly to folder `/opt/jans/jetty/jans-auth/agama/scripts/io/jans/agama/samples` of your server
+- Line 10. The e-mail of the user identified by `userId` is obtained by calling method `emailOf` of class `EmailOTPUtil`. Source code [here](https://github.com/JanssenProject/jans/blob/main/docs/admin/developer/agama/otp-email/EmailOTPUtil.java). This time the managed bean [`UserService`](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/service/UserService.java) is used. Copy `EmailOTPUtil.java` directly to folder `/opt/jans/jetty/jans-auth/agama/scripts/io/jans/agama/samples` of your server. Alternatively, a Groovy version is available [here](https://github.com/JanssenProject/jans/blob/main/docs/admin/developer/agama/otp-email/EmailOTPUtil.groovy); just copy one of these two files to your server
 
 - Lines 12-14. If the user does not have a designated e-mail address, the flow is finished 
 
@@ -111,7 +111,7 @@ In this flow features like [template overrides](./dsl-full.md#template-overrides
 
 - Upon successful account creation, a "continue to login" page is presented
 
-- The OTP authentication flow of the previous section is reused: a standard login form is shown and then the user is prompted to enter a passcode.
+- The OTP authentication flow of the previous section is reused: a standard login form is shown and then the user is prompted to enter a passcode
 
 ### Registration
 
