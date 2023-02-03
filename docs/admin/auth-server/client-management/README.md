@@ -1,7 +1,8 @@
 ---
 tags:
 - administration
-- client-management
+- client
+- management
 ---
 
 # Client Management
