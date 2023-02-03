@@ -96,21 +96,14 @@ This flow is extremely static and unrealistic but showcases minimal key elements
 
 In order to add/modify flows, you will interact with a small REST API which is protected by bearer token. To be able to get tokens, SSH to your server and perform the following steps:
 
-- Run `python3 /opt/jans/jans-cli/config-cli.py`
-- In the menu enter to `OAuth` > `OIDC clients` > `Get list of clients`
-- Accept the default parameters, for `pattern` enter `config`
+- Run `python3 /opt/jans/jans-cli/config-cli.py --operation-id get-oauth-openid-clients --endpoint-args pattern:config`
 - Follow the instructions (in a web browser) to get authorized access
-- A list of results will be shown, pick the value in the `inum` column for the client with display name `Jans Config Api Client`
-- Choose `back`, and enter to `Get client by inum`
-- Enter the collected `inum` and grab the value of `clientSecret` in the resulting JSON document
-- Finally, choose `logout and quit`
-
-The collected secret is encoded, run `python3 /opt/jans/bin/encode.py -D <clientSecret>` to decode it.
+- A list of results will be shown in JSON format. Pick the value of the `inum` property for the client with display name `Jans Config Api Client`. Do the same for `clientSecret`
 
 The following is an example of how to get a token using `curl`. Replace data in the placeholders appropriately:
 
 ```
-curl -u '<client-inum:client-secret-decoded>'
+curl -u '<client-inum>:<client-secret>'
      -d scope='https://jans.io/oauth/config/agama.write'
      -d grant_type=client_credentials https://<your-host>/jans-auth/restv1/token
 ```

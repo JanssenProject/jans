@@ -502,6 +502,7 @@ class Upgrade:
         self.update_attributes_entries()
         self.update_scripts_entries()
         self.update_admin_ui_config()
+        self.update_tui_client()
 
     def update_scripts_entries(self):
         # default to ldap persistence
@@ -880,6 +881,40 @@ class Upgrade:
                 entry.attrs["jansConfStatic"] = json.dumps(conf)
 
             entry.attrs["jansRevision"] += 1
+            self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
+
+    def update_tui_client(self):
+        kwargs = {}
+        tui_client_id = self.manager.config.get("tui_client_id")
+        id_ = f"inum={tui_client_id},ou=clients,o=jans"
+
+        if self.backend.type in ("sql", "spanner"):
+            kwargs = {"table_name": "jansClnt"}
+            id_ = doc_id_from_dn(id_)
+        elif self.backend.type == "couchbase":
+            kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
+            id_ = id_from_dn(id_)
+
+        entry = self.backend.get_entry(id_, **kwargs)
+
+        if not entry:
+            return
+
+        should_update = False
+
+        # add SSA scope inum=B9D2-D6E5,ou=scopes,o=jans to tui client
+        ssa_scope = "inum=B9D2-D6E5,ou=scopes,o=jans"
+
+        if isinstance(entry.attrs["jansScope"], dict):  # likely mysql
+            if ssa_scope not in entry.attrs["jansScope"]["v"]:
+                entry.attrs["jansScope"]["v"].append(ssa_scope)
+                should_update = True
+        else:
+            if ssa_scope not in entry.attrs["jansScope"]:
+                entry.attrs["jansScope"].append(ssa_scope)
+                should_update = True
+
+        if should_update:
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
 
 
