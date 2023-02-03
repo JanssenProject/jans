@@ -112,7 +112,7 @@ Once a `.gama` file is built the deployment process follows. Here is a typical w
 1. Go to point 1 if needed
 1. If desired, a request can be sent to undeploy the flows (via DELETE)
 
-The following tables summarize the available endpoints. All URLs are relative to `/jans-config-api/api/v1`. An OpenAPI document is also available [here](https://github.com/JanssenProject/jans/blob/main/jans-config-api/docs/jans-config-api-swagger-auto.yaml#L-110-L254).
+The following tables summarize the available endpoints. All URLs are relative to `/jans-config-api/api/v1`. An OpenAPI document is also available [here](https://github.com/JanssenProject/jans/blob/main/jans-config-api/docs/jans-config-api-swagger.yaml#L-110-L254).
 
 
 |Endpoint -> |`/ads-deployment/list`|
