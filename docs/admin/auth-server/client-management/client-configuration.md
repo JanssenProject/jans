@@ -29,7 +29,11 @@ Client can register a list of URIs as value for redirect URI parameter. Redirect
   supported by allowing redirect URI to take form of reverse DNS name, for example, ` com.example.app`. URLs for
   loopback interface redirection are also supported.
   TODO: confirm what this [code comment](https://github.com/JanssenProject/jans/blob/82a1046bf4a14a2ae191251e4fc874ccf7c612ec/jans-auth-server/server/src/main/java/io/jans/as/server/model/registration/RegisterParamsValidator.java#L284-L285) means 
-- When client registers multiple redirect URIs (Janssen Server accepts a list URIs separated by space),   
+- When client registers multiple redirect URIs (Janssen Server accepts a list URIs separated by space), be aware that
+  Janssen Server will use these one by one for validation purpose and the validation stops at the first match. 
+  URIs are used for validation of authorization request
+  for authorization code and implicit grant type. URIs are also used for validation when the application exchanges an 
+  authorization code for an access token.  
 
 - TODO: what if someone registers URIs where just ports are different [here](https://learn.microsoft.com/en-us/azure/active-directory/develop/reply-url#localhost-exceptions)
 
@@ -42,6 +46,8 @@ Client can register a list of URIs as value for redirect URI parameter. Redirect
 - Using `state` param
 
 - where all its validated [here](https://www.oauth.com/oauth2-servers/redirect-uris/redirect-uri-validation/)
+
+- Different domain via sector identifier: https://gluu.org/docs/gluu-server/4.4/admin-guide/openid-connect/#adding-redirect-uris-to-client
 
 ## Cryptography 
 
