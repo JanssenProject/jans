@@ -8915,13 +8915,13 @@
 <p><a href="https://github.com/JanssenProject/jans/raw/main/docs/admin/developer/agama/basic/login.ftlh"><code>login.ftlh</code></a> is 99% HTML markup and will not be detailed here. There are only a couple of things to highlight:</p>
 <ul>
 <li>
-<p>The conditional <code>&lt;#if !(success!true)&gt;</code> (around line 27) is used to determine if an error message should be included in the generated markup. It works this way: if the key <code>success</code> exists in this template data model, its value is negated (note the bang character before the left parenthesis) and the <code>if</code> condition is evaluated. If non-existing, a <code>true</code> value is assumed which is then negated and thus the <code>if</code> body will not be evaluated-  </p>
+<p>The conditional <code>&lt;#if !(success!true)&gt;</code> (around line 27) is used to determine if an error message should be included in the generated markup. It works this way: if the key <code>success</code> exists in this template data model, its value is negated (note the bang character before the left parenthesis) and the <code>if</code> condition is evaluated. If non-existing, a <code>true</code> value is assumed which is then negated and thus the <code>if</code> body will not be evaluated </p>
 </li>
 <li>
-<p>Expressions of the form <code>${msgs[...]}</code> are used to access string messages defined in the server resource bundle. For more information visit <a href="../ui-pages/#data-model">"Writing UI pages"</a>.</p>
+<p>Expressions of the form <code>${msgs[...]}</code> are used to access string messages defined in the server resource bundle. For more information visit <a href="../ui-pages/#data-model">"Writing UI pages"</a></p>
 </li>
 <li>
-<p>The expression <code>${uid!}</code> (around line 35) is equivalent to <code>${uid!""}</code> and evaluates to the value of key <code>uid</code>. In case <code>uid</code> is not defined, an empty string value is used.</p>
+<p>The expression <code>${uid!}</code> (around line 35) is equivalent to <code>${uid!""}</code> and evaluates to the value of key <code>uid</code>. In case <code>uid</code> is not defined, an empty string value is used</p>
 </li>
 </ul>
 <h2 id="email-otp-authentication">Email OTP authentication<a class="headerlink" href="#email-otp-authentication" title="Permanent link">#</a></h2>
@@ -8947,7 +8947,7 @@
 <p>Line 9. The user identifier is grabbed from the basic flow output and stored in <code>userId</code></p>
 </li>
 <li>
-<p>Line 10. The e-mail of the user identified by <code>userId</code> is obtained by calling method <code>emailOf</code> of class <code>EmailOTPUtil</code>. Source code <a href="https://github.com/JanssenProject/jans/blob/main/docs/admin/developer/agama/otp-email/EmailOTPUtil.java">here</a>. This time the managed bean <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/service/UserService.java"><code>UserService</code></a> is used. Copy <code>EmailOTPUtil.java</code> directly to folder <code>/opt/jans/jetty/jans-auth/agama/scripts/io/jans/agama/samples</code> of your server</p>
+<p>Line 10. The e-mail of the user identified by <code>userId</code> is obtained by calling method <code>emailOf</code> of class <code>EmailOTPUtil</code>. Source code <a href="https://github.com/JanssenProject/jans/blob/main/docs/admin/developer/agama/otp-email/EmailOTPUtil.java">here</a>. This time the managed bean <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/service/UserService.java"><code>UserService</code></a> is used. Copy <code>EmailOTPUtil.java</code> directly to folder <code>/opt/jans/jetty/jans-auth/agama/scripts/io/jans/agama/samples</code> of your server. Alternatively, a Groovy version is available <a href="https://github.com/JanssenProject/jans/blob/main/docs/admin/developer/agama/otp-email/EmailOTPUtil.groovy">here</a>; just copy one of these two files to your server</p>
 </li>
 <li>
 <p>Lines 12-14. If the user does not have a designated e-mail address, the flow is finished </p>
@@ -9001,7 +9001,7 @@
 <p>Upon successful account creation, a "continue to login" page is presented</p>
 </li>
 <li>
-<p>The OTP authentication flow of the previous section is reused: a standard login form is shown and then the user is prompted to enter a passcode.</p>
+<p>The OTP authentication flow of the previous section is reused: a standard login form is shown and then the user is prompted to enter a passcode</p>
 </li>
 </ul>
 <h3 id="registration">Registration<a class="headerlink" href="#registration" title="Permanent link">#</a></h3>
@@ -9033,7 +9033,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-09-27T11:17:38+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-02-03T13:56:02+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-02-03</span>
       
         <br>
         Created:
