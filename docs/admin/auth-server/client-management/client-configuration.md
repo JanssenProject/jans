@@ -35,17 +35,12 @@ Client can register a list of URIs as value for redirect URI parameter. Redirect
   for authorization code and implicit grant type. URIs are also used for validation when the application exchanges an 
   authorization code for an access token.  
 
-- TODO: what if someone registers URIs where just ports are different [here](https://learn.microsoft.com/en-us/azure/active-directory/develop/reply-url#localhost-exceptions)
-
-- wild cards in URIs
-
-- query params 
+- Redirect URI should be absolute URI. For instance, URI should not have wildcard characters. As recommended 
+  [here](https://www.rfc-editor.org/rfc/rfc6749#section-3.1.2)
 
 - [sector_identifier_uri](https://github.dev/JanssenProject/jans/blob/82a1046bf4a14a2ae191251e4fc874ccf7c612ec/jans-auth-server/server/src/main/java/io/jans/as/server/model/registration/RegisterParamsValidator.java#L298)
 
 - Using `state` param
-
-- where all its validated [here](https://www.oauth.com/oauth2-servers/redirect-uris/redirect-uri-validation/)
 
 - Different domain via sector identifier: https://gluu.org/docs/gluu-server/4.4/admin-guide/openid-connect/#adding-redirect-uris-to-client
 
