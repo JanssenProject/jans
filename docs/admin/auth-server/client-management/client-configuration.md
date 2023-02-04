@@ -35,12 +35,21 @@ Client can register a list of URIs as value for redirect URI parameter. Redirect
   for authorization code and implicit grant type. URIs are also used for validation when the application exchanges an 
   authorization code for an access token.  
 
-- Redirect URI should be absolute URI. For instance, URI should not have wildcard characters. As recommended 
+- Redirect URI should be an absolute URI. For instance, URI should not have wildcard characters. As recommended 
   [here](https://www.rfc-editor.org/rfc/rfc6749#section-3.1.2)
+
+- Using `state` param
+
+- TODO: what is the MAX number of redirect URI configurable
 
 - [sector_identifier_uri](https://github.dev/JanssenProject/jans/blob/82a1046bf4a14a2ae191251e4fc874ccf7c612ec/jans-auth-server/server/src/main/java/io/jans/as/server/model/registration/RegisterParamsValidator.java#L298)
 
-- Using `state` param
+- If there are multiple hostnames in the registered redirect_uris, and the client is using `pairwise` subject 
+  identifiers, the Client MUST also register a sector_identifier_uri. This is required to keep the pairwise subject
+  identifiers consistent across various domains under same administrative control. Refer to [pairwise algorithm 
+  section](https://openid.net/specs/openid-connect-core-1_0.html#PairwiseAlg) of OpenId Connect specification for more
+  details.
+
 
 - Different domain via sector identifier: https://gluu.org/docs/gluu-server/4.4/admin-guide/openid-connect/#adding-redirect-uris-to-client
 
