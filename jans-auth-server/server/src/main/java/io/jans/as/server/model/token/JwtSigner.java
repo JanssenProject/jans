@@ -11,8 +11,10 @@ import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.exception.CryptoProviderException;
 import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.jwk.JSONWebKeySet;
+import io.jans.as.model.jwk.KeyOps;
 import io.jans.as.model.jwk.Use;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtType;
@@ -90,14 +92,14 @@ public class JwtSigner {
         return jwt;
     }
 
-    private String getKid() throws Exception {
+    private String getKid() throws CryptoProviderException {
         final String staticKid = appConfiguration.getStaticKid();
         if (StringUtils.isNotBlank(staticKid)) {
-            log.trace("Use staticKid: " + staticKid);
+            log.trace("Use staticKid: {}", staticKid);
             return staticKid;
         }
 
-        return cryptoProvider.getKeyId(webKeys, Algorithm.fromString(signatureAlgorithm.getName()), Use.SIGNATURE);
+        return cryptoProvider.getKeyId(webKeys, Algorithm.fromString(signatureAlgorithm.getName()), Use.SIGNATURE, KeyOps.CONNECT);
     }
 
     public Jwt sign() throws Exception {

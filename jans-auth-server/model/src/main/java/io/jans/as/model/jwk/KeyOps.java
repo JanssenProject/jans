@@ -1,6 +1,10 @@
 package io.jans.as.model.jwk;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import org.json.JSONArray;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Yuriy Z
@@ -31,6 +35,22 @@ public enum KeyOps {
             }
         }
         return null;
+    }
+
+    public static List<KeyOps> fromJSONArray(JSONArray jsonArray) {
+        List<KeyOps> result = new ArrayList<>();
+        if (jsonArray == null) {
+            return result;
+        }
+
+        for (int i = 0; i < jsonArray.length(); i++) {
+            final KeyOps v = fromString(jsonArray.optString(i));
+            if (v != null) {
+                result.add(v);
+            }
+        }
+
+        return result;
     }
 
     @Override
