@@ -156,7 +156,8 @@ class PersonAuthentication(PersonAuthenticationType):
             attestationResponse = None
 
             # Check if user have registered devices
-            count = CdiUtil.bean(UserService).countFido2RegisteredDevices(userName, self.fido2_domain)
+            count = CdiUtil.bean(UserService).countFido2RegisteredDevices(userName)
+            
             if count > 0:
                 print "Fido2. Prepare for step 2. Call Fido2 endpoint in order to start assertion flow"
 

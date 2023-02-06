@@ -121,9 +121,15 @@ public abstract class RegistrationPersistenceService {
 
         Filter userInumFilter = Filter.createEqualityFilter("personInum", userInum);
         Filter registeredFilter = Filter.createEqualityFilter("jansStatus", Fido2RegistrationStatus.registered.getValue());
-		Filter appIdFilter = Filter.createEqualityFilter("jansApp", rpId);
-        Filter filter = Filter.createANDFilter(userInumFilter, registeredFilter, appIdFilter);
-
+        Filter filter = null;
+        if (StringHelper.isNotEmpty(rpId)) {
+        	Filter appIdFilter = Filter.createEqualityFilter("jansApp", rpId);
+        	filter = Filter.createANDFilter(userInumFilter, registeredFilter, appIdFilter);
+        }
+        else
+        {
+        	filter = Filter.createANDFilter(userInumFilter, registeredFilter);
+        }
         List<Fido2RegistrationEntry> fido2RegistrationnEntries = persistenceEntryManager.findEntries(baseDn, Fido2RegistrationEntry.class, filter, returnAttributes);
 
         return fido2RegistrationnEntries;
