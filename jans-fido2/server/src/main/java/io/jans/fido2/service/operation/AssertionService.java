@@ -325,7 +325,7 @@ public class AssertionService {
 						String.format("Can't find associated key '%s' for application '%s'", requestedKeyHandle, documentDomain)));
 			existingFido2Registrations = Arrays.asList(fido2RegistrationEntry);
 		} else {
-			existingFido2Registrations = registrationPersistenceService.findByRpRegisteredUserDevices(username, documentDomain);
+			existingFido2Registrations = registrationPersistenceService.findByRpRegisteredUserDevices(username, null);
 		}
 		//  f.getRegistrationData().getAttenstationRequest() null check is added to maintain backward compatiblity with U2F devices when U2F devices are migrated to the FIDO2 server
 		List<Fido2RegistrationEntry> allowedFido2Registrations = existingFido2Registrations.parallelStream()
