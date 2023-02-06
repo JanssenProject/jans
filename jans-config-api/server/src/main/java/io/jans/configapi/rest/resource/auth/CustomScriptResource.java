@@ -314,10 +314,11 @@ public class CustomScriptResource extends ConfigBaseResource {
      * @param customScript
      */
     private void validateScriptLocationType(CustomScript customScript) {
-        logger.error("validate ScriptLocationType - customScript:{}, customScript.getLocationType().getValue():{}", customScript, customScript.getLocationType().getValue());
+        logger.info("validate ScriptLocationType - customScript:{}", customScript);
         if (customScript == null || customScript.getLocationType() == null) {
             return;
         }
+        logger.trace("validate customScript.getLocationType().getValue():{}", customScript.getLocationType().getValue());
 
         if (ScriptLocationType.LDAP.getValue().equalsIgnoreCase(customScript.getLocationType().getValue())) {
 
