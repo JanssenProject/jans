@@ -28,7 +28,6 @@ Client can register a list of URIs as value for redirect URI parameter. Redirect
   native apps](https://datatracker.ietf.org/doc/html/rfc8252#section-7). Use of Private-Use URI (or custom URL) is 
   supported by allowing redirect URI to take form of reverse DNS name, for example, ` com.example.app`. URLs for
   loopback interface redirection are also supported.
-  **TODO**: confirm what this [code comment](https://github.com/JanssenProject/jans/blob/82a1046bf4a14a2ae191251e4fc874ccf7c612ec/jans-auth-server/server/src/main/java/io/jans/as/server/model/registration/RegisterParamsValidator.java#L284-L285) means 
 - When client registers multiple redirect URIs (Janssen Server accepts a list URIs separated by space), be aware that
   Janssen Server will use these one by one for validation purpose and the validation stops at the first match. 
   URIs are used for validation of authorization request
@@ -36,8 +35,11 @@ Client can register a list of URIs as value for redirect URI parameter. Redirect
   authorization code for an access token.  
 - Redirect URI should be an absolute URI. For instance, URI should not have wildcard characters. As recommended 
   [here](https://www.rfc-editor.org/rfc/rfc6749#section-3.1.2)
-- Redirect Regex: **TODO**
-- **TODO**: Max number of redirect uris that can be configured, plus, should we document [this approach](https://learn.microsoft.com/en-us/azure/active-directory/develop/reply-url#use-a-state-parameter)?
+- Redirect Regex: Janssen Server enables clients to allow redirect URIs that conform to a regular expression(regex) 
+  pattern. While validating redirect URIs received in an incoming requrest, the Janssen Server first looks at the list
+  of statically registered URI as part of `Redirect URIs` and then checks if any of the redirect URI from the request
+  matches with the regex provided by client. Great care should be exercised when using regex to ensure that it accurately
+  matches with the intended patterns only. This feature can be turned on or off via [feature flag](../../reference/json/feature-flags/janssenauthserver-feature-flags.md)
 - If there are multiple registered redirect_uris, and the client is using `pairwise` subject 
   identifiers, the Client MUST also register a sector_identifier_uri. This is required to keep the pairwise subject
   identifiers consistent across various domains under same administrative control. Refer to [pairwise algorithm 
