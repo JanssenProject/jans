@@ -3926,6 +3926,8 @@ paths:
                     }
         "401":
           description: Unauthorized
+        "400":
+          description: Bad Request
         "500":
           description: InternalServerError
       security:
@@ -7533,13 +7535,13 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        adminCanEdit:
-          type: boolean
-        userCanAccess:
+        adminCanAccess:
           type: boolean
         adminCanView:
           type: boolean
-        adminCanAccess:
+        adminCanEdit:
+          type: boolean
+        userCanAccess:
           type: boolean
         userCanView:
           type: boolean
