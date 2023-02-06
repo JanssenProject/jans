@@ -178,6 +178,7 @@ public class CustomScriptResource extends ConfigBaseResource {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomScript.class), examples = @ExampleObject(name = "Response json example", value = "example/auth/scripts/scripts-response.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "400", description = "Bad Request"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
     @ProtectedApi(scopes = { ApiAccessConstants.SCRIPTS_WRITE_ACCESS }, groupScopes = {}, superScopes = {
@@ -221,10 +222,7 @@ public class CustomScriptResource extends ConfigBaseResource {
         CustomScript existingScript = customScriptService.getScriptByInum(customScript.getInum());
         checkResourceNotNull(existingScript, CUSTOM_SCRIPT);
         customScript.setInum(existingScript.getInum());
-        logger.debug("Custom Script updated {}", customScript);
-
-        // validate Script LocationType value
-        validateScriptLocationType(customScript);
+        logger.debug("Custom Script to be updated {}", customScript);
 
         customScriptService.update(customScript);
         return Response.ok(customScript).build();
@@ -320,6 +318,7 @@ public class CustomScriptResource extends ConfigBaseResource {
         if (customScript == null || customScript.getLocationType() == null) {
             return;
         }
+        logger.trace("validate customScript.getLocationType().getValue():{}", customScript.getLocationType().getValue());
 
         if (ScriptLocationType.LDAP.getValue().equalsIgnoreCase(customScript.getLocationType().getValue())) {
 
