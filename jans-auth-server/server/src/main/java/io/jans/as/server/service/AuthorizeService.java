@@ -23,6 +23,7 @@ import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.exception.CryptoProviderException;
 import io.jans.as.model.jwk.Algorithm;
+import io.jans.as.model.jwk.KeyOps;
 import io.jans.as.model.jwk.Use;
 import io.jans.as.persistence.model.Scope;
 import io.jans.as.server.auth.Authenticator;
@@ -287,7 +288,7 @@ public class AuthorizeService {
 			String clientSecret = clientService.decryptSecret(client.getClientSecret());
 			redirectUri.setSharedSecret(clientSecret);
 			keyId = new ServerCryptoProvider(cryptoProvider).getKeyId(webKeysConfiguration,
-					Algorithm.fromString(signatureAlgorithm.getName()), Use.SIGNATURE);
+					Algorithm.fromString(signatureAlgorithm.getName()), Use.SIGNATURE, KeyOps.CONNECT);
 		} catch (CryptoProviderException e) {
 			log.error(e.getMessage(), e);
 		} catch (StringEncrypter.EncryptionException e) {
@@ -312,7 +313,6 @@ public class AuthorizeService {
         String scope = session.getSessionAttributes().get("scope");
 
         return getScopes(scope);
-
     }
 
     public List<Scope> getScopes(String scopes) {

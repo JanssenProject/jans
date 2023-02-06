@@ -26,6 +26,7 @@ import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.jwe.Jwe;
 import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.jwk.JSONWebKeySet;
+import io.jans.as.model.jwk.KeyOps;
 import io.jans.as.model.jwk.Use;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
@@ -434,7 +435,7 @@ public class AuthzRequestService {
                             .fromString(client.getAttributes().getAuthorizationSignedResponseAlg());
 
                     String nestedKeyId = new ServerCryptoProvider(cryptoProvider).getKeyId(webKeysConfiguration,
-                            Algorithm.fromString(signatureAlgorithm.getName()), Use.SIGNATURE);
+                            Algorithm.fromString(signatureAlgorithm.getName()), Use.SIGNATURE, KeyOps.CONNECT);
 
                     JSONObject jsonWebKeys = CommonUtils.getJwks(client);
                     redirectUriResponse.getRedirectUri().setNestedJsonWebKeys(jsonWebKeys);
@@ -449,7 +450,7 @@ public class AuthzRequestService {
                 if (jsonWebKeys != null) {
                     keyId = new ServerCryptoProvider(cryptoProvider).getKeyId(JSONWebKeySet.fromJSONObject(jsonWebKeys),
                             Algorithm.fromString(client.getAttributes().getAuthorizationEncryptedResponseAlg()),
-                            Use.ENCRYPTION);
+                            Use.ENCRYPTION, KeyOps.CONNECT);
                 }
                 String sharedSecret = clientService.decryptSecret(client.getClientSecret());
                 byte[] sharedSymmetricKey = sharedSecret.getBytes(StandardCharsets.UTF_8);
@@ -464,7 +465,7 @@ public class AuthzRequestService {
                 }
 
                 keyId = new ServerCryptoProvider(cryptoProvider).getKeyId(webKeysConfiguration,
-                        Algorithm.fromString(signatureAlgorithm.getName()), Use.SIGNATURE);
+                        Algorithm.fromString(signatureAlgorithm.getName()), Use.SIGNATURE, KeyOps.CONNECT);
 
                 JSONObject jsonWebKeys = CommonUtils.getJwks(client);
                 redirectUriResponse.getRedirectUri().setJsonWebKeys(jsonWebKeys);

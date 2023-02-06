@@ -14,6 +14,7 @@ import io.jans.as.model.util.Base64Util;
 import io.jans.as.model.util.JwtUtil;
 import io.jans.as.model.util.StringUtils;
 import io.jans.as.model.util.Util;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -44,7 +45,7 @@ public class JSONWebKey {
     private EllipticEdvardsCurve crv;
     private List<String> x5c;
     @JsonProperty("key_ops")
-    private KeyOps keyOps;
+    private List<KeyOps> keyOps;
 
     /**
      * Modulus
@@ -64,7 +65,7 @@ public class JSONWebKey {
      *
      * @return key ops
      */
-    public KeyOps getKeyOps() {
+    public List<KeyOps> getKeyOps() {
         return keyOps;
     }
 
@@ -73,7 +74,7 @@ public class JSONWebKey {
      *
      * @param keyOps key ops
      */
-    public void setKeyOps(KeyOps keyOps) {
+    public void setKeyOps(List<KeyOps> keyOps) {
         this.keyOps = keyOps;
     }
 
@@ -371,9 +372,15 @@ public class JSONWebKey {
         if (use != null) {
             jsonObj.put(JWKParameter.KEY_USE, use.getParamName());
         }
+
+        JSONArray keyOpsArray = new JSONArray();
         if (keyOps != null) {
-            jsonObj.put(JWKParameter.KEY_OPS, keyOps.getValue());
+            for (KeyOps keyOp : keyOps) {
+                keyOpsArray.put(keyOp.getValue());
+            }
         }
+        jsonObj.put(JWKParameter.KEY_OPS, keyOpsArray);
+
         jsonObj.put(JWKParameter.ALGORITHM, alg);
         jsonObj.put(JWKParameter.EXPIRATION_TIME, exp);
         if (crv != null) {
@@ -407,7 +414,7 @@ public class JSONWebKey {
         jwk.setKty(KeyType.fromString(jwkJSONObject.optString(JWKParameter.KEY_TYPE)));
         jwk.setUse(Use.fromString(jwkJSONObject.optString(JWKParameter.KEY_USE)));
         jwk.setAlg(Algorithm.fromString(jwkJSONObject.optString(JWKParameter.ALGORITHM)));
-        jwk.setKeyOps(KeyOps.fromString(jwkJSONObject.optString(JWKParameter.KEY_OPS)));
+        jwk.setKeyOps(KeyOps.fromJSONArray(jwkJSONObject.optJSONArray(JWKParameter.KEY_OPS)));
         if (jwkJSONObject.has(JWKParameter.EXPIRATION_TIME)) {
             jwk.setExp(jwkJSONObject.optLong(JWKParameter.EXPIRATION_TIME));
         }
