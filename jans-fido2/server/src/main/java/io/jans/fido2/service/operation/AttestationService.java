@@ -92,7 +92,7 @@ public class AttestationService {
 
 		// Apply external custom scripts
 		ExternalFido2InterceptionContext externalFido2InterceptionContext = new ExternalFido2InterceptionContext(params, httpRequest, httpResponse);
-		boolean externalIntercetContext = externalFido2InterceptionService.interceptRegisterAttestation(params, externalFido2InterceptionContext);
+		boolean externalInterceptContext = externalFido2InterceptionService.interceptRegisterAttestation(params, externalFido2InterceptionContext);
 
 		// Verify request parameters
 		commonVerifiers.verifyAttestationOptions(params);
@@ -184,7 +184,7 @@ public class AttestationService {
 
 		// Apply external custom scripts
 		ExternalFido2InterceptionContext externalFido2InterceptionContext = new ExternalFido2InterceptionContext(params, httpRequest, httpResponse);
-		boolean externalIntercetContext = externalFido2InterceptionService.interceptVerifyAttestation(params, externalFido2InterceptionContext);
+		boolean externalInterceptContext = externalFido2InterceptionService.interceptVerifyAttestation(params, externalFido2InterceptionContext);
 
 		// Verify if there are mandatory request parameters
 		commonVerifiers.verifyBasicPayload(params);

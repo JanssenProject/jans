@@ -105,7 +105,7 @@ public class AssertionService {
 
 		// Apply external custom scripts
 		ExternalFido2InterceptionContext externalFido2InterceptionContext = new ExternalFido2InterceptionContext(params, httpRequest, httpResponse);
-		boolean externalIntercetContext = externalFido2InterceptionService.interceptAuthenticateAssertion(params, externalFido2InterceptionContext);
+		boolean externalInterceptContext = externalFido2InterceptionService.interceptAuthenticateAssertion(params, externalFido2InterceptionContext);
 
 		// Verify request parameters
 		commonVerifiers.verifyAssertionOptions(params);
@@ -189,7 +189,7 @@ public class AssertionService {
 
 		// Apply external custom scripts
 		ExternalFido2InterceptionContext externalFido2InterceptionContext = new ExternalFido2InterceptionContext(params, httpRequest, httpResponse);
-		boolean externalIntercetContext = externalFido2InterceptionService.interceptVerifyAssertion(params, externalFido2InterceptionContext);
+		boolean externalInterceptContext = externalFido2InterceptionService.interceptVerifyAssertion(params, externalFido2InterceptionContext);
 
 		// Verify if there are mandatory request parameters
 		commonVerifiers.verifyBasicPayload(params);
