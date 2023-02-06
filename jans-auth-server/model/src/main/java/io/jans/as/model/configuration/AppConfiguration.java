@@ -397,9 +397,6 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "The expiration notificator interval in second")
     private int expirationNotificatorIntervalInSeconds = 600;
 
-
-
-    //feature flags
     @DocProperty(description = "Enable/Disable redirect uris validation using regular expression", defaultValue = "false")
     private Boolean redirectUrisRegexEnabled = false;
 
