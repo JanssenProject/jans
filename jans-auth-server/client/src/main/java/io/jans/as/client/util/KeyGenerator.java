@@ -25,6 +25,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static io.jans.as.model.jwk.JWKParameter.*;
@@ -235,7 +236,7 @@ public class KeyGenerator {
                 key.setE(result.optString(EXPONENT));
                 key.setX(result.optString(X));
                 key.setY(result.optString(Y));
-                key.setKeyOps(keyOps);
+                key.setKeyOps(Collections.singletonList(keyOps));
 
                 JSONArray x5c = result.optJSONArray(CERTIFICATE_CHAIN);
                 key.setX5c(StringUtils.toList(x5c));
@@ -265,7 +266,7 @@ public class KeyGenerator {
                 key.setE(result.optString(EXPONENT));
                 key.setX(result.optString(X));
                 key.setY(result.optString(Y));
-                key.setKeyOps(keyOps);
+                key.setKeyOps(Collections.singletonList(keyOps));
 
                 JSONArray x5c = result.optJSONArray(CERTIFICATE_CHAIN);
                 key.setX5c(StringUtils.toList(x5c));

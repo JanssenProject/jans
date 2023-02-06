@@ -302,7 +302,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
     }
 
     @Override
-    public String getKeyId(JSONWebKeySet jsonWebKeySet, Algorithm algorithm, Use use) throws CryptoProviderException {
+    public String getKeyId(JSONWebKeySet jsonWebKeySet, Algorithm algorithm, Use use, KeyOps keyOps) throws CryptoProviderException {
         if (algorithm == null || AlgorithmFamily.HMAC.equals(algorithm.getFamily())) {
             return null;
         }
@@ -315,7 +315,8 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
             List<JSONWebKey> keysByAlgAndUse = new ArrayList<>();
 
             for (JSONWebKey key : keys) {
-                if (algorithm == key.getAlg() && (use == null || use == key.getUse())) {
+                boolean keyOpsCondition = keyOps == null || (key.getKeyOps() == null || key.getKeyOps().contains(keyOps));
+                if (algorithm == key.getAlg() && (use == null || use == key.getUse()) && keyOpsCondition) {
                     kid = key.getKid();
                     Key keyFromStore;
                     keyFromStore = keyStore.getKey(kid, keyStoreSecret.toCharArray());
@@ -326,7 +327,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
             }
 
             if (keysByAlgAndUse.isEmpty()) {
-                LOG.trace("kid is not in keystore, algorithm: " + algorithm + ", kid: " + kid + ", keyStorePath:" + keyStoreFile);
+                LOG.trace("kid is not in keystore, algorithm: {}" + algorithm + ", kid: " + kid + ", keyStorePath:" + keyStoreFile + ", keyOps: " + keyOps + ", use: " + use);
                 return kid;
             }
 
@@ -339,7 +340,6 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
         } catch (UnrecoverableKeyException | KeyStoreException | NoSuchAlgorithmException e) {
             throw new CryptoProviderException(e);
         }
-
     }
 
     @Override
