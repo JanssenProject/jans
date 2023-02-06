@@ -2,12 +2,17 @@
 tags:
   - administration
   - scim
+  - Log
 ---
 
-## This content is in progress
-
-The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.
-
+## SCIM Logs
+    Jans Server logs usually reveal the source of problems when things are going wrong: the first place to look is the SCIM log.  
+   Authorization issues (access tokens problems, for instance) are on the side of oxAuth (the authorization server)
+        • SCIM log is located at  /opt/jans/jetty/jans-scim/logs/scim.log
+        • Auth log is at /opt/jans/jetty/jans-auth/logs/jans-auth.log
+        • If using the SCIM custom script in order to intercept API calls and apply custom logic, the script log is also        
+          useful: /opt/jans/jetty/jans-scim/logs/scim_script.log
+   Generally it's convenient to set the logging level for both jans-Auth and SCIM to DEBUG.
 ## Have questions in the meantime?
 
 While this documentation is in progress, you can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussion) or the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). Any questions you have will help determine what information our documentation should cover.
