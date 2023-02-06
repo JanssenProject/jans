@@ -221,7 +221,7 @@ public class CustomScriptResource extends ConfigBaseResource {
         CustomScript existingScript = customScriptService.getScriptByInum(customScript.getInum());
         checkResourceNotNull(existingScript, CUSTOM_SCRIPT);
         customScript.setInum(existingScript.getInum());
-        logger.debug("Custom Script updated {}", customScript);
+        logger.debug("Custom Script to be updated {}", customScript);
 
         // validate Script LocationType value
         validateScriptLocationType(customScript);
@@ -316,7 +316,7 @@ public class CustomScriptResource extends ConfigBaseResource {
      * @param customScript
      */
     private void validateScriptLocationType(CustomScript customScript) {
-        logger.info("validate ScriptLocationType - customScript:{}", customScript);
+        logger.error("validate ScriptLocationType - customScript:{}, customScript.getLocationType().getValue():{}", customScript, customScript.getLocationType().getValue());
         if (customScript == null || customScript.getLocationType() == null) {
             return;
         }
