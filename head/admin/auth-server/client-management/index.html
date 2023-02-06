@@ -19,7 +19,7 @@
     
     
       
-        <title>Index - Janssen Documentation</title>
+        <title>Client Management - Janssen Documentation</title>
       
     
     
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#background" class="md-skip">
+        <a href="#client-management" class="md-skip">
           Skip to content
         </a>
       
@@ -128,7 +128,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Index
+              Client Management
             
           </span>
         </div>
@@ -8624,6 +8624,8 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -8710,7 +8712,12 @@
     
       
       
-        <span class="md-tag">client-management</span>
+        <span class="md-tag">client</span>
+      
+    
+      
+      
+        <span class="md-tag">management</span>
       
     
   </nav>
@@ -8723,8 +8730,7 @@
   </a>
 
 
-  <h1>Index</h1>
-
+<h1 id="client-management">Client Management<a class="headerlink" href="#client-management" title="Permanent link">#</a></h1>
 <h2 id="background">Background<a class="headerlink" href="#background" title="Permanent link">#</a></h2>
 <p>A "client" is a piece of software either acting autonomously or on behalf of
 a person. The OAuth framework defines the term client
@@ -8736,51 +8742,15 @@ that:
 <img alt="" src="../../../assets/federated_identity_actors.png" /></p>
 <h2 id="client-security">Client Security<a class="headerlink" href="#client-security" title="Permanent link">#</a></h2>
 <p>OpenID allows you to use as much security as you need. To a large extent, the
-security of your implemenation depends on what client features you select.
-For example, let's just consider how the client authenticates itself to Jans Auth
+security of your implementation depends on what client features you select.
+For example, let's just consider how the <a href="client-authn/">client authenticates</a> itself to Jans Auth
 Server, which is defined by the <code>token_endpoint_auth_method</code> in OpenID Connect
 <a href="https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata">Client Metadata</a>.</p>
-<table>
-<thead>
-<tr>
-<th>Method</th>
-<th align="center">Secret Not Sent in Clear</th>
-<th align="center">Signed</th>
-<th align="center">Only client has secret</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>client_secret_basic</code></td>
-<td align="center"></td>
-<td align="center"></td>
-<td align="center"></td>
-</tr>
-<tr>
-<td><code>client_secret_post</code></td>
-<td align="center"></td>
-<td align="center"></td>
-<td align="center"></td>
-</tr>
-<tr>
-<td><code>client_secret_jwt</code></td>
-<td align="center">X</td>
-<td align="center">X</td>
-<td align="center"></td>
-</tr>
-<tr>
-<td><code>private_key_jwt</code></td>
-<td align="center">X</td>
-<td align="center">X</td>
-<td align="center">X</td>
-</tr>
-</tbody>
-</table>
 <p>Obviously, using asynchronous secrets for authentication is more secure. The
-client configuration also determines what crypto is used for signing and
-encryption of tokens, what scopes are available to the client (which determines
-the extent of access to APIs), what grants are available,  what is a valid
-<code>redirect_uri</code>, timeouts, whether to use a value or reference token, whether to
+client configuration also determines what <a href="client-configuration/#cryptography">crypto</a> is used for signing and
+encryption of tokens, what <a href="client-configuration/#scopes">scopes</a> are available to the client (which determines
+the extent of access to APIs), what <a href="client-configuration/#grants">grants</a> are available,  what is a valid
+<a href="client-configuration/#redirect-uri">redirect_uri</a>, timeouts, whether to use a value or reference token, whether to
 expire the client, and several other options that impact security.</p>
 <h2 id="client-tools">Client Tools<a class="headerlink" href="#client-tools" title="Permanent link">#</a></h2>
 <p>There are a few ways clients are created and managed in Jans Auth Server:</p>
@@ -8792,7 +8762,7 @@ expire the client, and several other options that impact security.</p>
 </ul>
 <p>Which mechanism to use depends on the deployment requirements. For <em>ad hoc</em>
 creation, the TUI is great. If you need to quickly script client creation (e.g.
-in a bash script), use the CLI, or use <code>curl</code> to call the Jans Config API.  If
+in a bash script), use the CLI or use <code>curl</code> to call the Jans Config API.  If
 developers need to have the ability to register clients, then adopt OpenID
 Connect Dynamic Client Registration.</p>
 <h3 id="openid-dynamic-client-registration">OpenID Dynamic Client Registration<a class="headerlink" href="#openid-dynamic-client-registration" title="Permanent link">#</a></h3>
@@ -8802,7 +8772,7 @@ in your specific deployment. Typically, it is
 <code>https://{hostname}/jans-auth/restv1/register</code></p>
 <p>The OpenApi specification for <a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/Registration">/registration</a> documents Jans Auth Server's specific implementation,
 which aligns with the requirements of OpenID Connect dynamic client
-registration. Also check the
+registration. Also, check the
 <a href="../endpoints/client-registration/">Registration Endpoint documentation</a> for
 more details on the steps involved in dynamic client registration.</p>
 <h3 id="jans-cli">Jans-CLI<a class="headerlink" href="#jans-cli" title="Permanent link">#</a></h3>
@@ -8815,11 +8785,12 @@ more details on the steps involved in dynamic client registration.</p>
 the Jans-CLI, see the <a href="../../config-guide/jans-cli/">docs</a></p>
 <h3 id="using-tui">Using TUI<a class="headerlink" href="#using-tui" title="Permanent link">#</a></h3>
 <p>To start registering a new client, navigate to
-<code>Auth Server</code>-&gt;<code>Clients</code>-&gt;<code>Add Client</code>.  This brings up a screen as show below
+<code>Auth Server</code>-&gt;<code>Clients</code>-&gt;<code>Add Client</code>.  This brings up a screen as shown below
 with various sections to input client details.</p>
 <p><img alt="" src="../../../assets/Jans_TUI_Auth_Server_Add_new_client.png" /></p>
+<p>Refer to complete documentation <a href="../../config-guide/tui/">here</a></p>
 <h3 id="using-curl">Using curl<a class="headerlink" href="#using-curl" title="Permanent link">#</a></h3>
-<p>To add a client via <code>curl</code>, see information on the
+<p>To add a client via <code>curl</code>, see the information on the
 <a href="../../config-guide/curl/">curl documentation page</a>.</p>
 
   <hr>
@@ -8827,7 +8798,7 @@ with various sections to input client details.</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-24T04:49:26+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-24</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-02-06T08:42:48+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-02-06</span>
       
         <br>
         Created:

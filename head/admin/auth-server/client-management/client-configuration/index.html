@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#overview" class="md-skip">
+        <a href="#client-configuration" class="md-skip">
           Skip to content
         </a>
       
@@ -8779,11 +8779,46 @@
   </a>
 
 
-<h1 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">#</a></h1>
+<h1 id="client-configuration">Client Configuration<a class="headerlink" href="#client-configuration" title="Permanent link">#</a></h1>
+<p>This document covers some important configuration elements of client configuration. How these elements are configured
+for a client has an impact on aspects like client security.</p>
 <h2 id="redirect-uri">Redirect URI<a class="headerlink" href="#redirect-uri" title="Permanent link">#</a></h2>
+<p>Redirect URI is the most basic and at times the only parameter needed for registering a client. It is defined in <a href="https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.1">OAuth
+framework</a> and
+<a href="https://openid.net/specs/openid-connect-core-1_0.html#ClientAuthentication">OpenId Connect specification</a>.</p>
+<p>The client can register a list of URIs as a value for redirect URI parameter. Redirect URI can be any
+<a href="https://www.ietf.org/rfc/rfc2396.txt">valid URI</a>.</p>
+<ul>
+<li>Redirect URI should be an <strong>absolute URI</strong>. For instance, URI should not have wildcard characters. As recommended
+  <a href="https://www.rfc-editor.org/rfc/rfc6749#section-3.1.2">here</a></li>
+<li><strong>Redirect Regex</strong>: Janssen Server enables clients to allow redirect URIs that conform to a regular expression(regex)
+  pattern. While validating redirect URIs received in an incoming request, the Janssen Server first looks at the list
+  of statically registered URI as part of <code>Redirect URIs</code> and then checks if any of the redirect URI from the request
+  matches with the regex provided by the client. Great care should be exercised when using regex to ensure that it
+  accurately matches with the intended patterns only. This feature can be turned on or off via
+  <a href="../../../reference/json/feature-flags/janssenauthserver-feature-flags/">feature flag</a></li>
+<li>When using client type as <code>web</code>, the redirect URI generally takes the form of <code>&lt;schema&gt;://&lt;host-name&gt;:&lt;port&gt;/&lt;path&gt;</code>.
+  It must use <code>https</code> schema. The exception to <strong>schema rule</strong> is made when<br />
+<code>localhost</code> or loopback ip <code>127.0.0.1</code> is used as the hostname. </li>
+<li>Prefer to use the loopback IP instead of <code>localhost</code> as hostname to facilitate <strong>local testing</strong> as
+  recommended in <a href="https://www.rfc-editor.org/rfc/rfc8252#section-8.3">OAuth 2.0 native app specification section 8.3</a></li>
+<li>Janssen Server supports all <a href="https://datatracker.ietf.org/doc/html/rfc8252#section-7">methods of redirection</a> used by
+  <strong>native apps</strong>. Use of Private-Use URI (or custom URL) is
+  supported by allowing redirect URI to take the form of reverse DNS name, for example, <code>com.example.app</code>. URLs for
+  loopback interface redirection are also supported.</li>
+<li>When the client registers <strong>multiple redirect URIs</strong> (Janssen Server accepts a list of URIs separated by space), be aware
+  that Janssen Server will use these, one by one for validation purposes and the validation stops at the first match.</li>
+<li>If there are multiple registered redirect_uris, and the client is using <code>pairwise</code> subject
+  identifiers, the Client MUST also register a <strong>sector_identifier_uri</strong>. This is required to keep the pairwise subject
+  identifiers consistent across various domains under the same administrative control. Refer to <a href="https://openid.net/specs/openid-connect-core-1_0.html#PairwiseAlg">pairwise algorithm
+  section</a> of OpenId Connect specification for more
+  details.</li>
+</ul>
 <h2 id="cryptography">Cryptography<a class="headerlink" href="#cryptography" title="Permanent link">#</a></h2>
 <h2 id="grants">Grants<a class="headerlink" href="#grants" title="Permanent link">#</a></h2>
 <h2 id="pre-authorization">Pre-authorization<a class="headerlink" href="#pre-authorization" title="Permanent link">#</a></h2>
+<p>If the OAuth authorization prompt should not be displayed to end users, set this field to True. This is useful for SSO
+to internal clients (not a third party) where there is no need to prompt the person to approve the release of information.</p>
 <h2 id="response-types">Response Types<a class="headerlink" href="#response-types" title="Permanent link">#</a></h2>
 <p>Please use the left navigation menu to browse the content of this section while we are still working on developing content for <code>Overview</code> page.</p>
 <div class="admonition contribute">
@@ -8796,7 +8831,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-25T22:08:24+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-25</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-02-06T08:42:48+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-02-06</span>
       
         <br>
         Created:
