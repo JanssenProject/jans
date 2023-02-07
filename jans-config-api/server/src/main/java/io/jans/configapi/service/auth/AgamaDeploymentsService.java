@@ -17,7 +17,7 @@ import org.slf4j.Logger;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 @ApplicationScoped
-public class ADSDeploymentsService {
+public class AgamaDeploymentsService {
 
     private static final String BASE_DN = "ou=deployments,ou=agama,o=jans";
     
