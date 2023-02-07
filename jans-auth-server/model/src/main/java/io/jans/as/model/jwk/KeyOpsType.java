@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * @author Yuriy Z
  */
-public enum KeyOps {
+public enum KeyOpsType {
     CONNECT("connect"),
     SSA("ssa"),
 
@@ -17,7 +17,7 @@ public enum KeyOps {
 
     private final String value;
 
-    KeyOps(String value) {
+    KeyOpsType(String value) {
         this.value = value;
     }
 
@@ -26,9 +26,9 @@ public enum KeyOps {
     }
 
     @JsonCreator
-    public static KeyOps fromString(String valueString) {
+    public static KeyOpsType fromString(String valueString) {
         if (valueString != null) {
-            for (KeyOps v : values()) {
+            for (KeyOpsType v : values()) {
                 if (valueString.equalsIgnoreCase(v.name())) {
                     return v;
                 }
@@ -37,14 +37,14 @@ public enum KeyOps {
         return null;
     }
 
-    public static List<KeyOps> fromJSONArray(JSONArray jsonArray) {
-        List<KeyOps> result = new ArrayList<>();
+    public static List<KeyOpsType> fromJSONArray(JSONArray jsonArray) {
+        List<KeyOpsType> result = new ArrayList<>();
         if (jsonArray == null) {
             return result;
         }
 
         for (int i = 0; i < jsonArray.length(); i++) {
-            final KeyOps v = fromString(jsonArray.optString(i));
+            final KeyOpsType v = fromString(jsonArray.optString(i));
             if (v != null) {
                 result.add(v);
             }

@@ -9,7 +9,7 @@ package io.jans.as.model.crypto;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.exception.CryptoProviderException;
 import io.jans.as.model.jwk.Algorithm;
-import io.jans.as.model.jwk.KeyOps;
+import io.jans.as.model.jwk.KeyOpsType;
 import io.jans.eleven.client.DeleteKeyClient;
 import io.jans.eleven.client.DeleteKeyRequest;
 import io.jans.eleven.client.DeleteKeyResponse;
@@ -78,8 +78,8 @@ public class ElevenCryptoProvider extends AbstractCryptoProvider {
     }
 
     @Override
-    public JSONObject generateKey(Algorithm algorithm, Long expirationTime, int keyLength, KeyOps keyOps) throws CryptoProviderException {
-        return generateKey(algorithm, expirationTime, keyLength, KeyOps.CONNECT);
+    public JSONObject generateKey(Algorithm algorithm, Long expirationTime, int keyLength, KeyOpsType keyOpsType) throws CryptoProviderException {
+        return generateKey(algorithm, expirationTime, keyLength, KeyOpsType.CONNECT);
     }
 
     @Override

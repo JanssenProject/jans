@@ -41,7 +41,7 @@ public class ServerCryptoProvider extends AbstractCryptoProvider {
     }
 
     @Override
-    public String getKeyId(JSONWebKeySet jsonWebKeySet, Algorithm algorithm, Use use, KeyOps keyOps) throws CryptoProviderException {
+    public String getKeyId(JSONWebKeySet jsonWebKeySet, Algorithm algorithm, Use use, KeyOpsType keyOps) throws CryptoProviderException {
         try {
             if (algorithm == null || AlgorithmFamily.HMAC.equals(algorithm.getFamily())) {
                 return null;
@@ -85,8 +85,8 @@ public class ServerCryptoProvider extends AbstractCryptoProvider {
     }
 
     @Override
-    public JSONObject generateKey(Algorithm algorithm, Long expirationTime, int keyLength, KeyOps keyOps) throws CryptoProviderException {
-        return cryptoProvider.generateKey(algorithm, expirationTime, keyLength, keyOps);
+    public JSONObject generateKey(Algorithm algorithm, Long expirationTime, int keyLength, KeyOpsType keyOpsType) throws CryptoProviderException {
+        return cryptoProvider.generateKey(algorithm, expirationTime, keyLength, keyOpsType);
     }
 
     @Override

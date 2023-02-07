@@ -1,6 +1,6 @@
 package io.jans.as.client.util;
 
-import io.jans.as.model.jwk.KeyOps;
+import io.jans.as.model.jwk.KeyOpsType;
 import org.testng.annotations.Test;
 
 import java.util.Calendar;
@@ -17,7 +17,7 @@ public class KeyGeneratorContextTest {
         KeyGeneratorContext context = new KeyGeneratorContext();
         context.setExpirationHours(1);
 
-        final long expirationForKeyOps = context.getExpirationForKeyOps(KeyOps.CONNECT);
+        final long expirationForKeyOps = context.getExpirationForKeyOpsType(KeyOpsType.CONNECT);
 
         assertTrue(expirationForKeyOps < futureIn2Hours());
     }
@@ -27,7 +27,7 @@ public class KeyGeneratorContextTest {
         KeyGeneratorContext context = new KeyGeneratorContext();
         context.setExpirationHours(1);
 
-        final long expirationForKeyOps = context.getExpirationForKeyOps(KeyOps.SSA);
+        final long expirationForKeyOps = context.getExpirationForKeyOpsType(KeyOpsType.SSA);
 
         assertTrue(expirationForKeyOps > futureIn2Hours());
     }
