@@ -1155,7 +1155,8 @@ class JCA_CLI:
         if url_params:
             url_path = endpoint.path.format(**url_param_dict)
             for param in url_params:
-                del url_param_dict[param]
+                if param in url_param_dict:
+                    del url_param_dict[param]
         else:
             url_path = endpoint.path
 
