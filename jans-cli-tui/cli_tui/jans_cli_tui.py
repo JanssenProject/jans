@@ -123,7 +123,6 @@ from utils.validators import IntegerValidator
 from wui_components.jans_cli_dialog import JansGDialog
 from wui_components.jans_nav_bar import JansNavBar
 from wui_components.jans_message_dialog import JansMessageDialog
-from wui_components.jans_path_finder import PathFinderWidget
 
 home_dir = Path.home()
 config_dir = home_dir.joinpath('.config')
@@ -870,6 +869,8 @@ class JansCliApp(Application):
             try:
                 with open(dialog.body.text, 'w') as w:
                     w.write(text_area.text)
+                self.pbar_text = _("File {} was saved".format(dialog.body.text))
+                self.show_message(_("Info"), _("File {} was successfully saved").format(dialog.body.text), tobefocused=self.center_container)
             except Exception as e:
                 self.show_message(_("Error!"), _("An error ocurred while saving") + ":\n{}".format(str(e)), tobefocused=self.center_container)
         
