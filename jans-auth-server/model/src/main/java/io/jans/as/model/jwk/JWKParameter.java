@@ -20,7 +20,7 @@ public class JWKParameter {
     public static final String JSON_WEB_KEY_SET = "keys";
     public static final String KEY_TYPE = "kty";
     public static final String KEY_USE = "use";
-    public static final String KEY_OPS = "key_ops";
+    public static final String KEY_OPS_TYPE = "key_ops_type";
     public static final String ALGORITHM = "alg";
     public static final String KEY_ID = "kid";
     public static final String EXPIRATION_TIME = "exp";

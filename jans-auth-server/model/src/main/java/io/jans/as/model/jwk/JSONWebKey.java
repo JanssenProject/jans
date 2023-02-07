@@ -44,8 +44,8 @@ public class JSONWebKey {
     private Long exp;
     private EllipticEdvardsCurve crv;
     private List<String> x5c;
-    @JsonProperty("key_ops")
-    private List<KeyOps> keyOps;
+    @JsonProperty("key_ops_type")
+    private List<KeyOpsType> keyOpsType;
 
     /**
      * Modulus
@@ -65,17 +65,17 @@ public class JSONWebKey {
      *
      * @return key ops
      */
-    public List<KeyOps> getKeyOps() {
-        return keyOps;
+    public List<KeyOpsType> getKeyOpsType() {
+        return keyOpsType;
     }
 
     /**
      * Sets key ops
      *
-     * @param keyOps key ops
+     * @param keyOpsType key ops
      */
-    public void setKeyOps(List<KeyOps> keyOps) {
-        this.keyOps = keyOps;
+    public void setKeyOpsType(List<KeyOpsType> keyOpsType) {
+        this.keyOpsType = keyOpsType;
     }
 
     /**
@@ -373,13 +373,13 @@ public class JSONWebKey {
             jsonObj.put(JWKParameter.KEY_USE, use.getParamName());
         }
 
-        JSONArray keyOpsArray = new JSONArray();
-        if (keyOps != null) {
-            for (KeyOps keyOp : keyOps) {
-                keyOpsArray.put(keyOp.getValue());
+        JSONArray keyOpsTypeArray = new JSONArray();
+        if (keyOpsType != null) {
+            for (KeyOpsType keyOpType : keyOpsType) {
+                keyOpsTypeArray.put(keyOpType.getValue());
             }
         }
-        jsonObj.put(JWKParameter.KEY_OPS, keyOpsArray);
+        jsonObj.put(JWKParameter.KEY_OPS_TYPE, keyOpsTypeArray);
 
         jsonObj.put(JWKParameter.ALGORITHM, alg);
         jsonObj.put(JWKParameter.EXPIRATION_TIME, exp);
@@ -414,7 +414,7 @@ public class JSONWebKey {
         jwk.setKty(KeyType.fromString(jwkJSONObject.optString(JWKParameter.KEY_TYPE)));
         jwk.setUse(Use.fromString(jwkJSONObject.optString(JWKParameter.KEY_USE)));
         jwk.setAlg(Algorithm.fromString(jwkJSONObject.optString(JWKParameter.ALGORITHM)));
-        jwk.setKeyOps(KeyOps.fromJSONArray(jwkJSONObject.optJSONArray(JWKParameter.KEY_OPS)));
+        jwk.setKeyOpsType(KeyOpsType.fromJSONArray(jwkJSONObject.optJSONArray(JWKParameter.KEY_OPS_TYPE)));
         if (jwkJSONObject.has(JWKParameter.EXPIRATION_TIME)) {
             jwk.setExp(jwkJSONObject.optLong(JWKParameter.EXPIRATION_TIME));
         }
