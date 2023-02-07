@@ -12,6 +12,7 @@ from prompt_toolkit.widgets import (
     RadioList,
     Button,
     Dialog,
+    Frame
 )
 import asyncio
 from prompt_toolkit.lexers import PygmentsLexer
@@ -96,16 +97,26 @@ class EditScriptDialog(JansGDialog, DialogUtils):
         data['script'] = self.script
 
         if data['locationType'] != 'file':
-            data.pop('locationPath', None)
+            data['locationType'] = 'db'
+
+        if not 'moduleProperties' in data:
+            data['moduleProperties'] = []
+
+        for prop in data['moduleProperties'][:]:
+            if prop['value1'] == 'location_type':
+                data['moduleProperties'].remove(prop)
+
+        data['moduleProperties'].append({'value1': 'location_type', 'value2': data['locationType']})
 
         if self.data.get('baseDn'):
             data['baseDn'] = self.data['baseDn']
 
         self.new_data = data
-
         close_me = True
+
         if self.save_handler:
             close_me = self.save_handler(self)
+
         if close_me:
             self.future.set_result(DialogResult.ACCEPT)
 
@@ -187,6 +198,8 @@ class EditScriptDialog(JansGDialog, DialogUtils):
 
         module_properties_data = []
         for prop in self.data.get('moduleProperties', []):
+            if prop['value1'] == 'location_type':
+                continue
             module_properties_data.append([prop['value1'], prop.get('value2', '')])
 
         self.module_properties_container = JansVerticalNav(
@@ -228,11 +241,12 @@ class EditScriptDialog(JansGDialog, DialogUtils):
                     self.myparent.getTitledText(_("Name"), name='name', value=self.data.get('name',''), style='class:script-titledtext', jans_help=self.myparent.get_help_from_schema(schema, 'name')),
                     self.myparent.getTitledText(_("Description"), name='description', value=self.data.get('description',''), style='class:script-titledtext', jans_help=self.myparent.get_help_from_schema(schema, 'description')),
 
+
                     self.myparent.getTitledRadioButton(
                             _("Location"),
                             name='locationType',
-                            values=[('ldap', _("Database")), ('file', _("File System"))],
-                            current_value= 'file' if self.data.get('locationType') == 'file' else 'ldap',
+                            values=[('db', _("Database")), ('file', _("File System"))],
+                            current_value= 'file' if self.data.get('locationType') == 'file' else 'db',
                             jans_help=_("Where to save script"),
                             style='class:outh-client-radiobutton',
                             on_selection_changed=self.script_location_changed,

@@ -46,7 +46,7 @@ class JansGDialog:
             if handler:
                 handler(self)
 
-            if not keep_dialog:
+            if not (keep_dialog or self.future.done()):
                 self.future.set_result(button_text)
 
         for button in buttons:

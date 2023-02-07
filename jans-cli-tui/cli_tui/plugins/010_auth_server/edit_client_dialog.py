@@ -204,6 +204,9 @@ class EditClientDialog(JansGDialog, DialogUtils):
                 label = scope.get('displayName') or scope.get('inum') or scope_dn
                 if [scope_dn, label] not in self.client_scopes_entries:
                     self.client_scopes_entries.append([scope_dn, label])
+                    if hasattr(self, 'client_scopes'):
+                        if not [scope_dn, label] in self.client_scopes.entries:
+                            self.client_scopes.add_label(scope_dn, label)
 
     def prepare_tabs(self) -> None:
         """Prepare the tabs for Edil Client Dialogs
@@ -331,7 +334,6 @@ class EditClientDialog(JansGDialog, DialogUtils):
                                 jans_help=_("Add Scopes"), 
                                 handler=self.add_scopes)
                                 ])
-        
 
         self.client_scopes = JansLabelContainer(
                     title=_('Scopes'),
@@ -341,8 +343,6 @@ class EditClientDialog(JansGDialog, DialogUtils):
                     buttonbox=add_scope_button,
                     entries = self.client_scopes_entries,
                     )
-
-        
 
         basic_tab_widgets.append(self.client_scopes)
 
