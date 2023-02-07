@@ -28,7 +28,7 @@ import io.jans.as.model.jwe.JweEncrypter;
 import io.jans.as.model.jwe.JweEncrypterImpl;
 import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.jwk.JSONWebKeySet;
-import io.jans.as.model.jwk.KeyOps;
+import io.jans.as.model.jwk.KeyOpsType;
 import io.jans.as.model.jwk.Use;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaims;
@@ -243,7 +243,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         jwt.getHeader().setType(JwtType.JWT);
         jwt.getHeader().setAlgorithm(signatureAlgorithm);
 
-        String keyId = new ServerCryptoProvider(cryptoProvider).getKeyId(webKeysConfiguration, Algorithm.fromString(signatureAlgorithm.getName()), Use.SIGNATURE, KeyOps.CONNECT);
+        String keyId = new ServerCryptoProvider(cryptoProvider).getKeyId(webKeysConfiguration, Algorithm.fromString(signatureAlgorithm.getName()), Use.SIGNATURE, KeyOpsType.CONNECT);
         if (keyId != null) {
             jwt.getHeader().setKeyId(keyId);
         }
@@ -289,7 +289,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
             JSONObject jsonWebKeys = CommonUtils.getJwks(authorizationGrant.getClient());
             String keyId = new ServerCryptoProvider(cryptoProvider).getKeyId(JSONWebKeySet.fromJSONObject(jsonWebKeys),
                     Algorithm.fromString(keyEncryptionAlgorithm.getName()),
-                    Use.ENCRYPTION, KeyOps.CONNECT);
+                    Use.ENCRYPTION, KeyOpsType.CONNECT);
             PublicKey publicKey = cryptoProvider.getPublicKey(keyId, jsonWebKeys, null);
 
             if (publicKey != null) {

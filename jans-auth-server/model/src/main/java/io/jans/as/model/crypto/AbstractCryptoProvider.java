@@ -49,7 +49,7 @@ public abstract class AbstractCryptoProvider {
 
     public abstract JSONObject generateKey(Algorithm algorithm, Long expirationTime, int keyLength) throws CryptoProviderException;
 
-    public abstract JSONObject generateKey(Algorithm algorithm, Long expirationTime, int keyLength, KeyOps keyOps) throws CryptoProviderException;
+    public abstract JSONObject generateKey(Algorithm algorithm, Long expirationTime, int keyLength, KeyOpsType keyOpsType) throws CryptoProviderException;
 
     public abstract String sign(String signingInput, String keyId, String sharedSecret, SignatureAlgorithm signatureAlgorithm) throws CryptoProviderException;
 
@@ -68,7 +68,7 @@ public abstract class AbstractCryptoProvider {
     public abstract PublicKey getPublicKey(String alias) throws CryptoProviderException;
 
     @SuppressWarnings("java:S1130")
-    public String getKeyId(JSONWebKeySet jsonWebKeySet, Algorithm algorithm, Use use, KeyOps keyOps) throws CryptoProviderException {
+    public String getKeyId(JSONWebKeySet jsonWebKeySet, Algorithm algorithm, Use use, KeyOpsType keyOps) throws CryptoProviderException {
         if (algorithm == null || AlgorithmFamily.HMAC.equals(algorithm.getFamily())) {
             return null;
         }
