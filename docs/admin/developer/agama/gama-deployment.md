@@ -115,7 +115,7 @@ Once a `.gama` file is built the deployment process follows. Here is a typical w
 The following tables summarize the available endpoints. All URLs are relative to `/jans-config-api/api/v1`. An OpenAPI document is also available [here](https://github.com/JanssenProject/jans/blob/main/jans-config-api/docs/jans-config-api-swagger.yaml#L110-L254).
 
 
-|Endpoint -> |`/ads-deployment/list`|
+|Endpoint -> |`/agama-deployment/list`|
 |-|-|
 |Purpose|Retrieve a list of deployments in the server. This is not a search, just a paged listing|
 |Method|GET|
@@ -125,7 +125,7 @@ The following tables summarize the available endpoints. All URLs are relative to
 |Status|200 (OK)|
 
 
-|Endpoint -> |`/ads-deployment`|
+|Endpoint -> |`/agama-deployment`|
 |-|-|
 |Purpose|Retrieve details of a single deployment by name|
 |Method|GET|
@@ -151,7 +151,7 @@ The following tables summarize the available endpoints. All URLs are relative to
 |flowsError|A mapping of the errors obtained per flow found in the archive. The keys correspond to qualified names. A `null` value indicates the flow was successfully added|`{ "co.acme.example": "Syntax error on line 4", "io.jans.test": null }`|
 
 
-|Endpoint -> |`/ads-deployment`|
+|Endpoint -> |`/agama-deployment`|
 |-|-|
 |Purpose|Add or replace an ADS project to the server|
 |Method|POST|
@@ -161,7 +161,7 @@ The following tables summarize the available endpoints. All URLs are relative to
 |Status|202 (the task was created and scheduled for deployment), 409 (there is a task already for this project and it hasn't finished yet), 400 (a param is missing)|
 
 
-|Endpoint -> |`/ads-deployment`|
+|Endpoint -> |`/agama-deployment`|
 |-|-|
 |Purpose|Undeploy an ADS project from the server. Entails removing flows and assets initally supplied|
 |Method|DELETE|
@@ -173,6 +173,7 @@ The following tables summarize the available endpoints. All URLs are relative to
 API operations are protected by Oauth2 scopes this way:
 
 - GET: `https://jans.io/oauth/config/agama.readonly`
+- DELETE: `https://jans.io/oauth/config/agama.delete`
 - Others:  `https://jans.io/oauth/config/agama.write`
 
 ## Internals of deployment
