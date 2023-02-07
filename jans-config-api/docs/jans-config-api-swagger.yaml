@@ -9246,12 +9246,12 @@ components:
           type: string
         "y":
           type: string
-        key_ops:
+        key_ops_type:
           type: string
           enum:
-          - "KeyOps{value='connect'} CONNECT"
-          - "KeyOps{value='ssa'} SSA"
-          - "KeyOps{value='all'} ALL"
+          - "KeyOpsType{value='connect'} CONNECT"
+          - "KeyOpsType{value='ssa'} SSA"
+          - "KeyOpsType{value='all'} ALL"
     WebKeysConfiguration:
       type: object
       properties:

@@ -48,7 +48,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
 
         args = [Config.cmd_java, '-Dlog4j.defaultInitOverride=true',
                 '-cp', Config.non_setup_properties['oxauth_client_jar_fn'], Config.non_setup_properties['key_gen_path'],
-                '-key_ops', 'ALL',
+                '-key_ops_type', 'ALL',
                 '-keystore', client_keystore_fn,
                 '-keypasswd', 'secret',
                 '-sig_keys', Config.default_sig_key_algs,
