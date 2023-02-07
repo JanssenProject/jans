@@ -369,6 +369,7 @@ class SQLBackend:
             ("jansClnt", "jansLogoutURI"),
             ("jansPerson", "role"),
             ("jansPerson", "mobile"),
+            ("jansPerson", "jansPersistentJWT"),
             ("jansCustomScr", "jansAlias"),
             ("jansClnt", "jansReqURI"),
             ("jansClnt", "jansClaimRedirectURI"),
