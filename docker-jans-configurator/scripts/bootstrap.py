@@ -63,7 +63,7 @@ def generate_openid_keys(passwd, jks_path, jwks_path, dn, exp=365, sig_keys=DEFA
         "-expiration", "{}".format(exp),
         "-keystore", jks_path,
         "-keypasswd", passwd,
-        "-key_ops", "connect",
+        "-key_ops_type", "connect",
     ])
     out, err, retcode = exec_cmd(cmd)
     if retcode == 0:
@@ -84,7 +84,7 @@ def generate_openid_keys_hourly(passwd, jks_path, jwks_path, dn, exp=48, sig_key
         "-expiration_hours", "{}".format(exp),
         "-keystore", jks_path,
         "-keypasswd", passwd,
-        "-key_ops", "connect",
+        "-key_ops_type", "connect",
     ])
     out, err, retcode = exec_cmd(cmd)
     if retcode == 0:

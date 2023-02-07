@@ -62,7 +62,7 @@ def generate_openid_keys(passwd, jks_path, dn, exp=48, sig_keys=SIG_KEYS, enc_ke
         f"-enc_keys {enc_keys} -sig_keys {sig_keys} "
         f"-dnname '{dn}' -expiration_hours {exp} "
         f"-keystore {jks_path} -keypasswd {passwd} "
-        "-key_ops connect"
+        "-key_ops_type connect"
     )
     return exec_cmd(cmd)
 
