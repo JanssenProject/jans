@@ -246,10 +246,10 @@ class EditScriptDialog(JansGDialog, DialogUtils):
                             _("Location"),
                             name='locationType',
                             values=[('db', _("Database")), ('file', _("File System"))],
-                            #current_value= 'file' if self.data.get('locationType') == 'file' else 'db',
+                            current_value= 'file' if self.data.get('locationType') == 'file' else 'db',
                             jans_help=_("Where to save script"),
                             style='class:outh-client-radiobutton',
-                            #on_selection_changed=self.script_location_changed,
+                            on_selection_changed=self.script_location_changed,
                             ),
 
                      self.location_widget,
