@@ -26,7 +26,6 @@ from flask import (Flask, jsonify, redirect, render_template, request, session,
 
 from . import config as cfg
 from .client_handler import ClientHandler
-from .ressources.errors import MismatchingStateError, OAuthError
 
 oauth = OAuth()
 
@@ -216,7 +215,7 @@ def create_app():
 
             return redirect('/')
 
-        except (MismatchingStateError, OAuthError) as error:
+        except Exception as error:
             print('exception!')
             print(error)
             app.logger.error(error)
