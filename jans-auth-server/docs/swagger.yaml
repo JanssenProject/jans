@@ -4771,7 +4771,6 @@ components:
       required:
         - alg
         - exp
-        - key_ops
         - kid
         - kty
         - use
