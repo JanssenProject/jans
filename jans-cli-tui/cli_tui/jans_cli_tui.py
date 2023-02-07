@@ -11,6 +11,7 @@ import asyncio
 import concurrent.futures
 
 from enum import Enum
+from functools import partial
 from pathlib import Path
 from itertools import cycle
 from requests.models import Response
@@ -41,6 +42,46 @@ from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.key_binding.bindings.focus import focus_next, focus_previous
 from prompt_toolkit.layout.containers import Float, HSplit, VSplit
 from prompt_toolkit.formatted_text import HTML, merge_formatted_text
+from prompt_toolkit.completion import PathCompleter
+
+
+class TextInputDialog:
+    def __init__(self, title="", label_text="", completer=None):
+        self.future = Future()
+
+        def accept_text(buf):
+            get_app().layout.focus(ok_button)
+            buf.complete_state = None
+            return True
+
+        def accept():
+            self.future.set_result(self.text_area.text)
+
+        def cancel():
+            self.future.set_result(None)
+
+        self.text_area = TextArea(
+            completer=completer,
+            multiline=False,
+            width=D(preferred=40),
+            accept_handler=accept_text,
+        )
+
+        ok_button = Button(text="OK", handler=accept)
+        cancel_button = Button(text="Cancel", handler=cancel)
+
+        self.dialog = Dialog(
+            title=title,
+            body=HSplit([Label(text=label_text), self.text_area]),
+            buttons=[ok_button, cancel_button],
+            width=D(preferred=80),
+            modal=True,
+        )
+
+    def __pt_container__(self):
+        return self.dialog
+
+
 
 from prompt_toolkit.layout.containers import (
     Float,
@@ -50,7 +91,8 @@ from prompt_toolkit.layout.containers import (
     DynamicContainer,
     FloatContainer,
     Window,
-    FormattedTextControl
+    FormattedTextControl,
+    AnyContainer
 )
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.layout.layout import Layout
@@ -67,24 +109,21 @@ from prompt_toolkit.widgets import (
 from collections import OrderedDict
 from typing import Any, Optional, Sequence, Union
 from prompt_toolkit.key_binding.key_processor import KeyPressEvent
-from prompt_toolkit.layout.containers import (
-    AnyContainer,
-)
 from prompt_toolkit.layout.dimension import AnyDimension
 from prompt_toolkit.formatted_text import AnyFormattedText
 from typing import TypeVar, Callable
 from prompt_toolkit.widgets import Button, Dialog, Label
+from prompt_toolkit.mouse_events import MouseEvent, MouseEventType
+from prompt_toolkit.keys import Keys
 
+from cli_style import style
+from utils.multi_lang import _
+from utils.static import cli_style
 from utils.validators import IntegerValidator
 from wui_components.jans_cli_dialog import JansGDialog
 from wui_components.jans_nav_bar import JansNavBar
 from wui_components.jans_message_dialog import JansMessageDialog
-from cli_style import style
-import cli_style
-from utils.multi_lang import _
-from prompt_toolkit.mouse_events import MouseEvent, MouseEventType
-from prompt_toolkit.keys import Keys
-
+from wui_components.jans_path_finder import PathFinderWidget
 
 home_dir = Path.home()
 config_dir = home_dir.joinpath('.config')
@@ -772,12 +811,16 @@ class JansCliApp(Application):
             plugin.on_page_enter()
         plugin.set_center_frame()
 
-    async def show_dialog_as_float(self, dialog:Dialog) -> None:
+    async def show_dialog_as_float(self, dialog:Dialog, focus=None) -> None:
         'Coroutine.'
         float_ = Float(content=dialog)
         self.root_layout.floats.append(float_)
         self.layout.focus(dialog)
+        if focus:
+            self.layout.focus(focus)
+
         self.invalidate()
+
         result = await dialog.future
 
         if float_ in self.root_layout.floats:
@@ -790,11 +833,11 @@ class JansCliApp(Application):
 
         return result
 
-    def show_jans_dialog(self, dialog:Dialog) -> None:
+    def show_jans_dialog(self, dialog:Dialog, focus=None) -> None:
 
         async def coroutine():
             focused_before = self.layout.current_window
-            result = await self.show_dialog_as_float(dialog)
+            result = await self.show_dialog_as_float(dialog, focus)
             try:
                 self.layout.focus(focused_before)
             except Exception:
@@ -806,8 +849,7 @@ class JansCliApp(Application):
 
     def data_display_dialog(self, **params: Any) -> None:
 
-        body = HSplit([
-                TextArea(
+        text_area = TextArea(
                     lexer=DynamicLexer(lambda: PygmentsLexer.from_filename('.json', sync_from_start=True)),
                     scrollbar=True,
                     line_numbers=True,
@@ -816,9 +858,35 @@ class JansCliApp(Application):
                     text=str(json.dumps(params['data'], indent=2)),
                     style='class:jans-main-datadisplay.text'
                 )
-            ],style='class:jans-main-datadisplay')
 
-        dialog = JansGDialog(self, title=params['selected'][0], body=body)
+        data_display_widgets = [text_area]
+        if 'message' in params:
+            data_display_widgets.insert(0, Label(params['message'], style="blink"))
+
+        body = HSplit(data_display_widgets, style='class:jans-main-datadisplay')
+        title = params.get('title') or params['selected'][0]
+
+        def do_save(dialog):
+            try:
+                with open(dialog.body.text, 'w') as w:
+                    w.write(text_area.text)
+            except Exception as e:
+                self.show_message(_("Error!"), _("An error ocurred while saving") + ":\n{}".format(str(e)), tobefocused=self.center_container)
+        
+        def save(dialog):
+            dialog.future.set_result('Save')
+            path_textarea = TextArea(style=cli_style.edit_text)
+            do_save_button = Button(_("OK"), handler=do_save)
+            buttons = [Button('Cancel'), do_save_button]
+            save_dialog = JansGDialog(self, title=_("Enter path of file to save"), body=path_textarea, buttons=buttons)
+            self.show_jans_dialog(save_dialog)
+
+
+        save_button = Button(_("Save"), handler=save)
+
+
+        buttons = [Button('Close'), save_button]
+        dialog = JansGDialog(self, title=title, body=body, buttons=buttons)
 
         self.show_jans_dialog(dialog)
 
@@ -859,7 +927,7 @@ class JansCliApp(Application):
         if not tobefocused:
             focused_before = self.root_layout.floats[-1].content if self.root_layout.floats else self.layout.current_window #show_message
         else :
-            focused_before = self.root_layout.floats[-1].content if self.root_layout.floats else tobefocused 
+            focused_before = tobefocused
         float_ = Float(content=dialog)
         self.root_layout.floats.append(float_)
         dialog.me = float_
