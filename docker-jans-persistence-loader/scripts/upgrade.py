@@ -140,6 +140,10 @@ def _transform_auth_dynamic_config(conf):
         }
         should_update = True
 
+    if "ssaCustomAttributes" not in conf["ssaConfiguration"]:
+        conf["ssaConfiguration"]["ssaCustomAttributes"] = []
+        should_update = True
+
     for grant_type in [
         "urn:ietf:params:oauth:grant-type:device_code",
         "urn:ietf:params:oauth:grant-type:token-exchange",
