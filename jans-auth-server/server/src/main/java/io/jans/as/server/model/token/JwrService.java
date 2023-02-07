@@ -19,7 +19,7 @@ import io.jans.as.model.jwe.JweEncrypter;
 import io.jans.as.model.jwe.JweEncrypterImpl;
 import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.jwk.JSONWebKeySet;
-import io.jans.as.model.jwk.KeyOps;
+import io.jans.as.model.jwk.KeyOpsType;
 import io.jans.as.model.jwk.Use;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtType;
@@ -107,7 +107,7 @@ public class JwrService {
             JSONObject jsonWebKeys = CommonUtils.getJwks(client);
             String keyId = new ServerCryptoProvider(cryptoProvider).getKeyId(JSONWebKeySet.fromJSONObject(jsonWebKeys),
                     Algorithm.fromString(keyEncryptionAlgorithm.getName()),
-                    Use.ENCRYPTION, KeyOps.CONNECT);
+                    Use.ENCRYPTION, KeyOpsType.CONNECT);
             PublicKey publicKey = cryptoProvider.getPublicKey(keyId, jsonWebKeys, null);
             jwe.getHeader().setKeyId(keyId);
 

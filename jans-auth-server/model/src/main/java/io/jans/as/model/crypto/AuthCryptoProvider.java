@@ -158,7 +158,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
     }
 
     @Override
-    public JSONObject generateKey(Algorithm algorithm, Long expirationTime, int keyLength, KeyOps keyOps) throws CryptoProviderException {
+    public JSONObject generateKey(Algorithm algorithm, Long expirationTime, int keyLength, KeyOpsType keyOpsType) throws CryptoProviderException {
         if (algorithm == null) {
             throw new IllegalArgumentException("The signature algorithm parameter cannot be null");
         }
@@ -166,9 +166,9 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
         try {
             Use algUse = algorithm.getUse();
             if (algUse == Use.SIGNATURE) {
-                jsonObject = generateKeySignature(algorithm, expirationTime, keyLength, keyOps);
+                jsonObject = generateKeySignature(algorithm, expirationTime, keyLength, keyOpsType);
             } else if (algUse == Use.ENCRYPTION) {
-                jsonObject = generateKeyEncryption(algorithm, expirationTime, keyLength, keyOps);
+                jsonObject = generateKeyEncryption(algorithm, expirationTime, keyLength, keyOpsType);
             }
         } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException | OperatorCreationException
                 | CertificateException | KeyStoreException | IOException e) {
@@ -179,21 +179,21 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
 
     @Override
     public JSONObject generateKey(Algorithm algorithm, Long expirationTime, int keyLength) throws CryptoProviderException {
-        return generateKey(algorithm, expirationTime, keyLength, KeyOps.CONNECT);
+        return generateKey(algorithm, expirationTime, keyLength, KeyOpsType.CONNECT);
     }
 
     private static String getKidSuffix(Algorithm algorithm) {
         return "_" + algorithm.getUse().getParamName().toLowerCase() + "_" + algorithm.getParamName().toLowerCase();
     }
 
-    public String getAliasByAlgorithmForDeletion(Algorithm algorithm, String newAlias, KeyOps keyOps) throws KeyStoreException {
+    public String getAliasByAlgorithmForDeletion(Algorithm algorithm, String newAlias, KeyOpsType keyOpsType) throws KeyStoreException {
         for (String alias : Collections.list(keyStore.aliases())) {
 
             if (newAlias.equals(alias)) { // skip newly created alias or ssa keys
                 continue;
             }
 
-            if (alias.startsWith(keyOps.getValue()) && alias.endsWith(getKidSuffix(algorithm))) {
+            if (alias.startsWith(keyOpsType.getValue()) && alias.endsWith(getKidSuffix(algorithm))) {
                 return alias;
             }
         }
@@ -302,7 +302,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
     }
 
     @Override
-    public String getKeyId(JSONWebKeySet jsonWebKeySet, Algorithm algorithm, Use use, KeyOps keyOps) throws CryptoProviderException {
+    public String getKeyId(JSONWebKeySet jsonWebKeySet, Algorithm algorithm, Use use, KeyOpsType keyOpsType) throws CryptoProviderException {
         if (algorithm == null || AlgorithmFamily.HMAC.equals(algorithm.getFamily())) {
             return null;
         }
@@ -315,7 +315,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
             List<JSONWebKey> keysByAlgAndUse = new ArrayList<>();
 
             for (JSONWebKey key : keys) {
-                boolean keyOpsCondition = keyOps == null || (key.getKeyOps() == null || key.getKeyOps().contains(keyOps));
+                boolean keyOpsCondition = keyOpsType == null || (key.getKeyOpsType() == null || key.getKeyOpsType().contains(keyOpsType));
                 if (algorithm == key.getAlg() && (use == null || use == key.getUse()) && keyOpsCondition) {
                     kid = key.getKid();
                     Key keyFromStore;
@@ -327,7 +327,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
             }
 
             if (keysByAlgAndUse.isEmpty()) {
-                LOG.trace("kid is not in keystore, algorithm: {}" + algorithm + ", kid: " + kid + ", keyStorePath:" + keyStoreFile + ", keyOps: " + keyOps + ", use: " + use);
+                LOG.trace("kid is not in keystore, algorithm: {}" + algorithm + ", kid: " + kid + ", keyStorePath:" + keyStoreFile + ", keyOpsType: " + keyOpsType + ", use: " + use);
                 return kid;
             }
 
@@ -429,7 +429,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
         return keyStore;
     }
 
-    private JSONObject generateKeySignature(Algorithm algorithm, Long expirationTime, int keyLength, KeyOps keyOps)
+    private JSONObject generateKeySignature(Algorithm algorithm, Long expirationTime, int keyLength, KeyOpsType keyOpsType)
             throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException, OperatorCreationException,
             CertificateException, KeyStoreException, IOException {
 
@@ -459,10 +459,10 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
                 throw new IllegalStateException("The provided signature algorithm parameter is not supported: algorithmFamily = " + algorithmFamily);
 
         }
-        return getJson(algorithm, keyGen, signatureAlgorithm.getAlgorithm(), expirationTime, keyOps);
+        return getJson(algorithm, keyGen, signatureAlgorithm.getAlgorithm(), expirationTime, keyOpsType);
     }
 
-    private JSONObject generateKeyEncryption(Algorithm algorithm, Long expirationTime, int keyLength, KeyOps keyOps) throws NoSuchAlgorithmException, NoSuchProviderException,
+    private JSONObject generateKeyEncryption(Algorithm algorithm, Long expirationTime, int keyLength, KeyOpsType keyOpsType) throws NoSuchAlgorithmException, NoSuchProviderException,
             InvalidAlgorithmParameterException, OperatorCreationException, CertificateException, KeyStoreException, IOException {
 
         KeyEncryptionAlgorithm keyEncryptionAlgorithm = KeyEncryptionAlgorithm.fromName(algorithm.getParamName());
@@ -490,16 +490,16 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
                         "The provided key encryption algorithm parameter is not supported: algorithmFamily = " + algorithmFamily);
 
         }
-        return getJson(algorithm, keyGen, signatureAlgorithm, expirationTime, keyOps);
+        return getJson(algorithm, keyGen, signatureAlgorithm, expirationTime, keyOpsType);
     }
 
-    private String getKid(Algorithm algorithm, KeyOps keyOps) {
-        if (keyOps == null)
-            keyOps = KeyOps.CONNECT;
-        return keyOps.getValue() + "_" + UUID.randomUUID().toString() + getKidSuffix(algorithm);
+    private String getKid(Algorithm algorithm, KeyOpsType keyOpsType) {
+        if (keyOpsType == null)
+            keyOpsType = KeyOpsType.CONNECT;
+        return keyOpsType.getValue() + "_" + UUID.randomUUID().toString() + getKidSuffix(algorithm);
     }
 
-    private JSONObject getJson(final Algorithm algorithm, final KeyPairGenerator keyGen, final String signatureAlgorithmStr, final Long expirationTime, KeyOps keyOps) throws NoSuchAlgorithmException,
+    private JSONObject getJson(final Algorithm algorithm, final KeyPairGenerator keyGen, final String signatureAlgorithmStr, final Long expirationTime, KeyOpsType keyOpsType) throws NoSuchAlgorithmException,
             OperatorCreationException, CertificateException, KeyStoreException, IOException {
 
         // Generate the key
@@ -512,10 +512,10 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
         X509Certificate[] chain = new X509Certificate[1];
         chain[0] = cert;
 
-        String alias = getKid(algorithm, keyOps);
+        String alias = getKid(algorithm, keyOpsType);
         keyStore.setKeyEntry(alias, pk, keyStoreSecret.toCharArray(), chain);
 
-        final String oldAliasByAlgorithm = getAliasByAlgorithmForDeletion(algorithm, alias, keyOps);
+        final String oldAliasByAlgorithm = getAliasByAlgorithmForDeletion(algorithm, alias, keyOpsType);
         if (StringUtils.isNotBlank(oldAliasByAlgorithm)) {
             keyStore.deleteEntry(oldAliasByAlgorithm);
             LOG.trace("New key: " + alias + ", deleted key: " + oldAliasByAlgorithm);
