@@ -43,7 +43,7 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # ==========
 
 ENV CN_VERSION=1.0.7-SNAPSHOT
-ENV CN_BUILD_DATE='2023-01-31 09:58'
+ENV CN_BUILD_DATE='2023-02-07 12:18'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api-server/${CN_VERSION}/jans-config-api-server-${CN_VERSION}.war
 
 # Install Jans Config API
@@ -74,19 +74,19 @@ RUN wget -q https://github.com/GluuFederation/gluu-snap/raw/${PYFACTER_VERSION}/
 
 RUN mkdir -p /usr/share/java
 
-ENV SCIM_PLUGIN_BUILD_DATE='2023-01-31 09:58'
+ENV SCIM_PLUGIN_BUILD_DATE=${CN_BUILD_DATE}
 ENV SCIM_PLUGIN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/scim-plugin/${CN_VERSION}/scim-plugin-${CN_VERSION}-distribution.jar
 RUN wget -q ${SCIM_PLUGIN_SOURCE_URL} -O /usr/share/java/scim-plugin.jar
 
-ENV ADMIN_UI_PLUGIN_BUILD_DATE='2023-01-31 09:58'
+ENV ADMIN_UI_PLUGIN_BUILD_DATE=${CN_BUILD_DATE}
 ENV ADMIN_UI_PLUGIN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/admin-ui-plugin/${CN_VERSION}/admin-ui-plugin-${CN_VERSION}-distribution.jar
 RUN wget -q ${ADMIN_UI_PLUGIN_SOURCE_URL} -O /usr/share/java/admin-ui-plugin.jar
 
-ENV FIDO2_PLUGIN_BUILD_DATE='2023-01-31 09:58'
+ENV FIDO2_PLUGIN_BUILD_DATE=${CN_BUILD_DATE}
 ENV FIDO2_PLUGIN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/fido2-plugin/${CN_VERSION}/fido2-plugin-${CN_VERSION}-distribution.jar
 RUN wget -q ${FIDO2_PLUGIN_SOURCE_URL} -O /usr/share/java/fido2-plugin.jar
 
-ENV USER_MGT_PLUGIN_BUILD_DATE='2023-01-31 09:58'
+ENV USER_MGT_PLUGIN_BUILD_DATE=${CN_BUILD_DATE}
 ENV USER_MGT_PLUGIN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/user-mgt-plugin/${CN_VERSION}/user-mgt-plugin-${CN_VERSION}-distribution.jar
 RUN wget -q ${USER_MGT_PLUGIN_SOURCE_URL} -O /usr/share/java/user-mgt-plugin.jar
 
@@ -110,7 +110,7 @@ COPY conf/prometheus-config.yaml /opt/prometheus/
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_SOURCE_VERSION=1a2d298c5b4911bfaccdf80203df1a919ff7a6b8
+ENV JANS_SOURCE_VERSION=438192893dc3e091de60fc711dd219054dad374a
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
 
