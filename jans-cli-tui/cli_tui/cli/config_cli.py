@@ -1060,27 +1060,31 @@ class JCA_CLI:
         return ' '.join(scope)
 
 
-    def get_requests(self, endpoint, params={}):
+    def get_requests(self, endpoint, params=None):
         if not self.wrapped:
             sys.stderr.write("Please wait while retrieving data ...\n")
 
         security = self.get_scope_for_endpoint(endpoint)
         self.get_access_token(security)
 
+        headers=self.get_request_header({'Accept': 'application/json'})
         url_param_name = self.get_url_param(endpoint.path)
-
         url = 'https://{}{}'.format(self.host, endpoint.path)
+
         if params and url_param_name in params:
             url = url.format(**{url_param_name: params.pop(url_param_name)})
 
-        response = requests.get(
-            url = url,
-            headers=self.get_request_header({'Accept': 'application/json'}),
-            params=params,
-            verify=self.verify_ssl,
-            cert=self.mtls_client_cert
-        )
+        get_params = {
+            'url': url,
+            'headers': headers,
+            'verify': self.verify_ssl,
+            'cert': self.mtls_client_cert,
+            }
 
+        if params:
+            get_params['params'] = params
+
+        response = requests.get(**get_params)
         self.log_response(response)
 
         if self.wrapped:
@@ -1108,22 +1112,29 @@ class JCA_CLI:
                 return key
 
 
-    def post_requests(self, endpoint, data):
+    def post_requests(self, endpoint, data, params=None):
         url = 'https://{}{}'.format(self.host, endpoint.path)
         security = self.get_scope_for_endpoint(endpoint)
         self.get_access_token(security)
         mime_type = self.get_mime_for_endpoint(endpoint)
-
         headers = self.get_request_header({'Accept': 'application/json', 'Content-Type': mime_type})
-        if mime_type:
-            headers['Content-Type'] = mime_type
 
-        response = requests.post(url,
-            headers=headers,
-            json=data,
-            verify=self.verify_ssl,
-            cert=self.mtls_client_cert
-            )
+        post_params = {
+            'url': url,
+            'headers': headers,
+            'verify': self.verify_ssl,
+            'cert': self.mtls_client_cert,
+            }
+
+        if params:
+            post_params['params'] = params
+
+        if mime_type.endswith(('json', 'text')):
+            post_params['json'] = data
+        else:
+            post_params['data'] = data
+
+        response = requests.post(**post_params)
 
         self.log_response(response)
 
@@ -1144,7 +1155,8 @@ class JCA_CLI:
         if url_params:
             url_path = endpoint.path.format(**url_param_dict)
             for param in url_params:
-                del url_param_dict[param]
+                if param in url_param_dict:
+                    del url_param_dict[param]
         else:
             url_path = endpoint.path
 
@@ -1170,28 +1182,34 @@ class JCA_CLI:
         url = 'https://{}{}'.format(self.host, endpoint.path.format(**url_param_dict))
         security = self.get_scope_for_endpoint(endpoint)
         self.get_access_token(security)
+        mime_type = self.get_mime_for_endpoint(endpoint)
+        headers = self.get_request_header({'Accept': 'application/json', 'Content-Type': mime_type})
 
-        content_key = 'application/json-patch+json'
-        for content_key in endpoint.info.get('requestBody', {}).get('content', {}):
-            break
+        patch_params = {
+            'url': url,
+            'headers': headers,
+            'verify': self.verify_ssl,
+            'cert': self.mtls_client_cert,
+            }
 
-        headers = self.get_request_header({'Accept': 'application/json', 'Content-Type': content_key})
-        data = data
-        response = requests.patch(
-            url=url,
-            headers=headers,
-            json=data,
-            verify=self.verify_ssl,
-            cert=self.mtls_client_cert
-            )
+        if url_param_dict:
+            patch_params['params'] = patch_params
+
+        if mime_type.endswith(('json', 'text')):
+            patch_params['json'] = data
+        else:
+            patch_params['data'] = data
+
+        response = requests.patch(**patch_params)
         self.log_response(response)
+
         try:
             return response.json()
         except:
             self.print_exception(response.text)
 
 
-    def put_requests(self, endpoint, data, params={}):
+    def put_requests(self, endpoint, data, params=None):
 
         security = self.get_scope_for_endpoint(endpoint)
         self.get_access_token(security)
@@ -1204,13 +1222,25 @@ class JCA_CLI:
         if params and url_param_name in params:
             url = url.format(**{url_param_name: params.pop(url_param_name)})
 
-        response = requests.put(
-                url=url,
-                headers=self.get_request_header({'Accept': mime_type}),
-                json=data,
-                verify=self.verify_ssl,
-                cert=self.mtls_client_cert
-            )
+        headers = self.get_request_header({'Accept': 'application/json', 'Content-Type': mime_type})
+
+        put_params = {
+            'url': url,
+            'headers': headers,
+            'verify': self.verify_ssl,
+            'cert': self.mtls_client_cert,
+            }
+
+
+        if mime_type.endswith(('json', 'text')):
+            put_params['json'] = data
+        else:
+            put_params['data'] = data
+
+        if params:
+            put_params['params'] = params
+
+        response = requests.put(**put_params)
 
         self.log_response(response)
 
@@ -1371,11 +1401,21 @@ class JCA_CLI:
             sys.stderr.write("Server Response:\n")
             self.pretty_print(response)
 
+
+    def read_binary_file(self, fn):
+        with open(fn, 'rb') as f:
+            return f.read()
+
+
     def process_command_post(self, path, suffix_param, endpoint_params, data_fn, data):
 
         # TODO: suffix_param, endpoint_params
 
         endpoint = self.get_fake_endpoint(path)
+        mime_type = self.get_mime_for_endpoint(endpoint)
+        params = {}
+        params.update(suffix_param)
+        params.update(endpoint_params)
 
         if not data and data_fn:
 
@@ -1385,15 +1425,16 @@ class JCA_CLI:
                                           options={"verify_signature": False, "verify_exp": False, "verify_aud": False})
             else:
                 try:
-                    data = self.get_json_from_file(data_fn)
+                    if mime_type.endswith(('json', 'text')):
+                        data = self.get_json_from_file(data_fn)
+                    else:
+                        data = self.read_binary_file(data_fn)
                 except ValueError as ve:
                     self.exit_with_error(str(ve))
 
         if path['__method__'] == 'post':
-            response = self.post_requests(endpoint, data)
+            response = self.post_requests(endpoint, data, params)
         elif path['__method__'] == 'put':
-            params = endpoint_params.copy()
-            params.update(suffix_param)
             response = self.put_requests(endpoint, data, params)
 
         if self.wrapped:
