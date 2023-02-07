@@ -12,19 +12,19 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
-import io.jans.configapi.service.auth.ADSDeploymentsService;
+import io.jans.configapi.service.auth.AgamaDeploymentsService;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-@Path(ApiConstants.ADS_DEPLOYMENTS)
+@Path(ApiConstants.AGAMA_DEPLOYMENTS)
 @Produces(MediaType.APPLICATION_JSON)
-public class ADSDeploymentsResource extends ConfigBaseResource {
+public class AgamaDeploymentsResource extends ConfigBaseResource {
 
     @Inject
-    private ADSDeploymentsService ads;
+    private AgamaDeploymentsService ads;
 
     @Operation(summary = "Retrieve the list of projects deployed currently.", description = "Retrieve the list of projects deployed currently.", operationId = "get-agama-dev-prj", tags = {
     "Agama - Developer Studio" }, security = @SecurityRequirement(name = "oauth2", scopes = {
