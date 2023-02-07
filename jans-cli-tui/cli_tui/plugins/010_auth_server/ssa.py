@@ -122,7 +122,10 @@ class SSA(DialogUtils):
             # set expiration to 50 years
             new_data['expiration'] = int(datetime.now().timestamp()) + 1576800000
         else:
-            new_data['expiration'] = int(datetime.fromisoformat(self.expire_widget.value).timestamp())
+            if self.expire_widget.value:
+                new_data['expiration'] = int(datetime.fromisoformat(self.expire_widget.value).timestamp())
+
+        new_data['software_roles'] = new_data['software_roles'].splitlines()
 
         new_data['software_roles'] = new_data['software_roles'].splitlines()
 
@@ -132,8 +135,11 @@ class SSA(DialogUtils):
                 operation_id = 'post-register-ssa'
                 cli_args = {'operation_id': operation_id, 'cli_object': self.cli_object, 'data': new_data}
                 self.app.start_progressing(_("Saving ssa..."))
-                await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+                result = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
                 self.app.stop_progressing()
+                ssa = result.json()
+                self.app.data_display_dialog(data=ssa, title=_("SSA Token"), message=_("Save and store it securely. This is the only time you see this token."))
+
                 self.get_ssa()
                 dialog.future.set_result(True)
 
