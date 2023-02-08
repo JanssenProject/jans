@@ -170,6 +170,8 @@ public class AttestationService {
 		entity.setStatus(Fido2RegistrationStatus.pending);
 		if (params.hasNonNull(CommonVerifiers.SUPER_GLUU_APP_ID)) {
 			entity.setApplicationId(params.get(CommonVerifiers.SUPER_GLUU_APP_ID).asText());
+		} else {
+			entity.setApplicationId(documentDomain);
 		}
 
 		// Store original requests

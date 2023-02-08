@@ -189,6 +189,8 @@ public class AssertionService {
 		entity.setStatus(Fido2AuthenticationStatus.pending);
 		if (params.hasNonNull(CommonVerifiers.SUPER_GLUU_APP_ID)) {
 			entity.setApplicationId(params.get(CommonVerifiers.SUPER_GLUU_APP_ID).asText());
+		} else {
+			entity.setApplicationId(documentDomain);
 		}
 
 		// Store original request
