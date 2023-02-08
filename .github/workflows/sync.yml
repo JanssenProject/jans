@@ -1,9 +1,9 @@
 name: sync
 on:
   workflow_dispatch:
-  pull_request:
+  pull_request_target:
     branches:
-      - cn-update-terraform-provider-jans
+      - "cn-update-terraform-provider-jans"
 jobs:
   publish:
     name: Publish
@@ -35,7 +35,15 @@ jobs:
         git config --global user.email "54212639+mo-auto@users.noreply.github.com"
         git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
         echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
-        pull_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
+        # If the user passed in a PR number
+        PR_NUMBER=${{ github.event.inputs.pr_number }}
+        if [ ! -z "$PR_NUMBER" ]
+        then
+          pull_number=$PR_NUMBER
+          echo "Manual PR number inputted"
+        else
+          pull_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
+        fi
         BODY=$(gh pr view $pull_number --json body --jq '.body')
         echo $BODY
         cd terraform-provider-jans
