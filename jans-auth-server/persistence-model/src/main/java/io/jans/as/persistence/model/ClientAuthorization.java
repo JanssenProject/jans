@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.as.server.model.ldap;
+package io.jans.as.persistence.model;
 
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DN;
