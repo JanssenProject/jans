@@ -25,7 +25,7 @@ import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.uma.persistence.UmaResource;
 import io.jans.as.persistence.model.Par;
 import io.jans.as.persistence.model.Scope;
-import io.jans.as.server.model.ldap.ClientAuthorization;
+import io.jans.as.persistence.model.ClientAuthorization;
 import io.jans.as.server.model.ldap.TokenEntity;
 import io.jans.as.server.uma.authorization.UmaPCT;
 import io.jans.as.server.uma.service.UmaPctService;
