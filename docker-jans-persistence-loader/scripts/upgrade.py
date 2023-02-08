@@ -949,6 +949,17 @@ def _transform_auth_errors_config(conf):
             },
         ]
         should_update = True
+
+    # add new ssa error
+    ssa_errors = [err["id"] for err in conf["ssa"]]
+
+    if "invalid_signature" not in ssa_errors:
+        conf["ssa"].append({
+            "id": "invalid_signature",
+            "description": "No algorithm found to sign the JWT.",
+            "uri": None,
+        })
+        should_update = True
     return conf, should_update
 
 
