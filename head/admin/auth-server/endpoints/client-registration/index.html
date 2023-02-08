@@ -9052,11 +9052,13 @@ Example:<br />
        -i &#39;https://my-jans-server/jans-auth/restv1/register&#39;  \
        --data &#39;eyJraWQiOiJrWTIyZXBUT......ueOg2HkjpggwAEP84jq9Q&#39;
 </code></pre></div>
-When such will be the nature of client registration requests, the following configuration properties should be set in the authorization server:
-- <code>dcrSignatureValidationEnabled</code> - enables DCR signature validation
-- <code>dcrSignatureValidationJwksUri</code> - specifies JWKS URI for all DCR's validations.
-- <code>dcrSignatureValidationJwks</code> - specifies JWKS for all DCR's validations.
-Configure the Janssen AS using steps explained in the <a href="#curl-commands-to-configure-jans-auth-server">link</a></p>
+When such will be the nature of client registration requests, the following configuration properties should be set in the authorization server:</p>
+<ul>
+<li><code>dcrSignatureValidationEnabled</code> - enables DCR signature validation</li>
+<li><code>dcrSignatureValidationJwksUri</code> - specifies JWKS URI for all DCR's validations.</li>
+<li><code>dcrSignatureValidationJwks</code> - specifies JWKS for all DCR's validations.</li>
+</ul>
+<p>Configure the Janssen AS using steps explained in the <a href="#curl-commands-to-configure-jans-auth-server">link</a></p>
 <h4 id="4-client-registration-using-software-statement">4. Client registration using software statement<a class="headerlink" href="#4-client-registration-using-software-statement" title="Permanent link">#</a></h4>
 <p>A signed assertion from a trusted party, a Software statement or Software Statement Assertion (SSA), is used to dynamically register clients to an Authorization server.
 Example:
@@ -9067,35 +9069,37 @@ Example:
               &quot;software_statement&quot;:&quot;eyJ0eXAi........j3ouyeYOv8&quot;, \
               &quot;jwks_uri&quot;:&quot;https://my.portal/portal/jwks&quot; \
             } DATA
-</code></pre></div>
-For Client registrations using Software statements, the AS should be configured using the following configuration parameters:
- - <code>softwareStatementValidationType</code> - The value of this variable is one of the following:
-        - NONE - validation is skipped for software statement
-        - SCRIPT - (default), invokes <code>getSoftwareStatementJwks</code> of dynamic registration script which has to return jwks.
-    - JWKS - claim name within software statement that has inlined JWKS
-    - JWKS_URI - claim name within software statement that points to JWKS URI that should lead to keys.
- - <code>dcrSignatureValidationSoftwareStatementJwksURIClaim</code> - specifies claim name inside software statement that should point to JWKS URI.
- - <code>dcrSignatureValidationSoftwareStatementJwksClaim</code> - specifies claim name inside software statement. Value of claim should point to inlined JWKS.</p>
+</code></pre></div></p>
+<p>For Client registrations using Software statements, the AS should be configured using the following configuration parameters:</p>
+<ul>
+<li><code>softwareStatementValidationType</code> - The value of this variable is one of the following:<ul>
+<li>NONE - validation is skipped for software statement</li>
+<li>SCRIPT - (default), invokes <code>getSoftwareStatementJwks</code> of dynamic registration script which has to return jwks.</li>
+<li>JWKS - claim name within software statement that has inlined JWKS</li>
+<li>JWKS_URI - claim name within software statement that points to JWKS URI that should lead to keys.</li>
+</ul>
+</li>
+<li><code>dcrSignatureValidationSoftwareStatementJwksURIClaim</code> - specifies claim name inside software statement that should point to JWKS URI.</li>
+<li><code>dcrSignatureValidationSoftwareStatementJwksClaim</code> - specifies claim name inside software statement. Value of claim should point to inlined JWKS.</li>
+</ul>
 <p>Configure the AS using steps explained in the <a href="#curl-commands-to-configure-jans-auth-server">link</a></p>
 <h4 id="5-special-mention-about-fapi">5. Special mention about FAPI:<a class="headerlink" href="#5-special-mention-about-fapi" title="Permanent link">#</a></h4>
 <p>In case of a typical <a href="https://openbankinguk.github.io/dcr-docs-pub/v3.3/dynamic-client-registration.html">client registration request in FAPI implementation</a>, the request object which is a signed JWT (as seen in point 3) is also called an SSA (Software statement Assertion) or DCR payload. This SSA can contain the software_statement inside it which is also a signed JWT. Each of the JWTs, the outer JWT called the SSA and the inner JWT called the software_statement are signed by different entities - the TPP and OBIE respectively.</p>
 <h3 id="security-pointers">Security Pointers<a class="headerlink" href="#security-pointers" title="Permanent link">#</a></h3>
 <p>If <code>dynamicRegistrationEnabled</code> is enabled in the Authorization Server, assess the following points to minimize potential exposure of sensitive personal data:</p>
 <ol>
-<li>
-<p><code>trustedClientEnabled</code> and <code>dynamicRegistrationPersistClientAuthorizations</code> properties determine whether clients are trusted and if consent should be sought from the user before releasing their personal data to the RP</p>
-</li>
-<li>
-<p><code>dynamicRegistrationScopesParamEnabled</code> controls whether default scopes are globally enabled. If <code>dynamicRegistrationScopesParamEnabled</code> is <code>true</code> then scopes defined as default will be automatically added to any dynamically registered client entry without consent of OP's administrator. Therefore, make an informed decision before setting this field to <code>true</code>.</p>
-</li>
+<li><code>trustedClientEnabled</code> and <code>dynamicRegistrationPersistClientAuthorizations</code> properties determine whether clients are trusted and if consent should be sought from the user before releasing their personal data to the RP</li>
+<li><code>dynamicRegistrationScopesParamEnabled</code> controls whether default scopes are globally enabled. If <code>dynamicRegistrationScopesParamEnabled</code> is <code>true</code> then scopes defined as default will be automatically added to any dynamically registered client entry without consent of OP's administrator. Therefore, make an informed decision before setting this field to <code>true</code>.</li>
 </ol>
 <h3 id="curl-commands-to-configure-jans-auth-server">CURL commands to configure Jans-auth server<a class="headerlink" href="#curl-commands-to-configure-jans-auth-server" title="Permanent link">#</a></h3>
-<p>Jans-auth server is configured using <a href="https://github.com/JanssenProject/jans/tree/main/jans-config-api">Jans Config Api</a> :
-1. Obtain the access token
+<p>Jans-auth server is configured using <a href="https://github.com/JanssenProject/jans/tree/main/jans-config-api">Jans Config Api</a> :</p>
+<ol>
+<li>Obtain the access token
    <div class="highlight"><pre><span></span><code>   curl -u &quot;put_client_id_here:put_config_api_client_secret_here&quot; https://&lt;your.jans.server&gt;/jans-auth/restv1/token \
         -d  &quot;grant_type=client_credentials&amp;scope=https://jans.io/oauth/jans-auth-server/config/properties.write&quot;
-</code></pre></div>
-2. Patch jans-auth server configurations to reflect <code>anExampleConfigField</code> with the value <code>anExampleConfigField_value</code></p>
+</code></pre></div></li>
+<li>Patch jans-auth server configurations to reflect <code>anExampleConfigField</code> with the value <code>anExampleConfigField_value</code></li>
+</ol>
 <p><div class="highlight"><pre><span></span><code> curl -X PATCH -k -H &#39;Content-Type: application/json-patch+json&#39; \
     -i &#39;https://&lt;your.jans.server&gt;/jans-config-api/api/v1/jans-auth-server/config&#39; \
     -H &quot;Authorization: Bearer put_access_token_here&quot; --data &#39;[
@@ -9394,7 +9398,7 @@ eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJJREFtYX...
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-07T04:50:37+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-07</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-02-08T06:38:07+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-02-08</span>
       
         <br>
         Created:
