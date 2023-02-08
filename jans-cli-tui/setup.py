@@ -102,8 +102,8 @@ setup(
 
     entry_points={
         "console_scripts": [
-            "config-cli-tui=cli_tui.jans_cli_tui:run",
-            "config-cli=cli_tui.cli.config_cli:main",
+            "jans-cli-tui=cli_tui.jans_cli_tui:run",
+            "jans-cli=cli_tui.cli.config_cli:main",
             "scim-cli=cli_tui.cli.config_cli:main",
         ],
     },
