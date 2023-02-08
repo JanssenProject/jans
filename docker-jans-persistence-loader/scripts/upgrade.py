@@ -140,6 +140,10 @@ def _transform_auth_dynamic_config(conf):
         }
         should_update = True
 
+    if "ssaCustomAttributes" not in conf["ssaConfiguration"]:
+        conf["ssaConfiguration"]["ssaCustomAttributes"] = []
+        should_update = True
+
     for grant_type in [
         "urn:ietf:params:oauth:grant-type:device_code",
         "urn:ietf:params:oauth:grant-type:token-exchange",
@@ -944,6 +948,17 @@ def _transform_auth_errors_config(conf):
                 "uri": None,
             },
         ]
+        should_update = True
+
+    # add new ssa error
+    ssa_errors = [err["id"] for err in conf["ssa"]]
+
+    if "invalid_signature" not in ssa_errors:
+        conf["ssa"].append({
+            "id": "invalid_signature",
+            "description": "No algorithm found to sign the JWT.",
+            "uri": None,
+        })
         should_update = True
     return conf, should_update
 
