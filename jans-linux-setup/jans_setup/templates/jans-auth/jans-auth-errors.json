@@ -550,6 +550,11 @@
             "uri": null
         },
         {
+            "id": "invalid_signature",
+            "description": "No algorithm found to sign the JWT.",
+            "uri": null
+        },
+        {
             "id": "unknown_error",
             "description": "Unknown or not found error.",
             "uri": null
