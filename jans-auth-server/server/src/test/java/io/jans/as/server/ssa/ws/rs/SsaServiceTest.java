@@ -7,6 +7,7 @@ import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
+import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaims;
 import io.jans.as.model.jwt.JwtHeader;
@@ -15,8 +16,10 @@ import io.jans.as.model.ssa.SsaScopeType;
 import io.jans.as.server.model.common.ExecutionContext;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import org.apache.http.HttpStatus;
+import org.json.JSONObject;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -56,6 +59,9 @@ public class SsaServiceTest {
     @Mock
     private AbstractCryptoProvider cryptoProvider;
 
+    @Mock
+    private ErrorResponseFactory errorResponseFactory;
+
     private Ssa ssa;
 
     @BeforeMethod
@@ -64,7 +70,7 @@ public class SsaServiceTest {
         calendar.add(Calendar.HOUR, 24);
         ssa = new Ssa();
         ssa.setId(UUID.randomUUID().toString());
-        ssa.setOrgId("1");
+        ssa.setOrgId("test-org-id-1000");
         ssa.setExpirationDate(calendar.getTime());
         ssa.setDescription("Test description");
         ssa.getAttributes().setSoftwareId("scan-api-test");
@@ -216,9 +222,9 @@ public class SsaServiceTest {
     }
 
     @Test
-    public void generateJwt_executionContextWithPostProcessorNull_jwtValid() {
+    public void generateJwt_executionContextWithPostProcessorNull_jwtValid() throws Exception {
         SsaConfiguration ssaConfiguration = new SsaConfiguration();
-        String issuer = "https://jans.io";
+        String issuer = "https://test.jans.io";
         when(appConfiguration.getSsaConfiguration()).thenReturn(ssaConfiguration);
         when(appConfiguration.getIssuer()).thenReturn(issuer);
         ExecutionContext executionContext = mock(ExecutionContext.class);
@@ -230,9 +236,9 @@ public class SsaServiceTest {
     }
 
     @Test
-    public void generateJwt_executionContextWithPostProcessor_jwtValid() {
+    public void generateJwt_executionContextWithPostProcessor_jwtValid() throws Exception {
         SsaConfiguration ssaConfiguration = new SsaConfiguration();
-        String issuer = "https://jans.io";
+        String issuer = "https://test.jans.io";
         when(appConfiguration.getSsaConfiguration()).thenReturn(ssaConfiguration);
         when(appConfiguration.getIssuer()).thenReturn(issuer);
         ExecutionContext executionContext = mock(ExecutionContext.class);
@@ -244,40 +250,42 @@ public class SsaServiceTest {
     }
 
     @Test
-    public void generateJwt_executionContextNotSsaConfiguration_exception() {
-        ExecutionContext executionContext = mock(ExecutionContext.class);
-        assertThrows(Exception.class, () -> ssaService.generateJwt(ssa, executionContext));
-        verifyNoInteractions(executionContext);
-    }
-
-    @Test
-    public void generateJwt_ssa_jwtValid() {
+    public void generateJwt_ssa_jwtValid() throws Exception {
         SsaConfiguration ssaConfiguration = new SsaConfiguration();
-        String issuer = "https://jans.io";
+        String issuer = "https://test.jans.io";
         when(appConfiguration.getSsaConfiguration()).thenReturn(ssaConfiguration);
         when(appConfiguration.getIssuer()).thenReturn(issuer);
 
         Jwt jwt = ssaService.generateJwt(ssa);
         assertSsaJwt(ssaConfiguration.getSsaSigningAlg(), issuer, ssa, jwt);
+        verify(cryptoProvider).sign(any(), any(), eq(null), any());
         verifyNoInteractions(log);
     }
 
     @Test
-    public void generateJwt_ssaLogErrorEnabledFalse_exception() {
-        when(log.isErrorEnabled()).thenReturn(false);
+    public void generateJwt_signatureAlgorithmNull_invalidSignature() {
+        SsaConfiguration ssaConfiguration = new SsaConfiguration();
+        ssaConfiguration.setSsaSigningAlg("WRONG-SIGNING-ALG");
+        when(appConfiguration.getSsaConfiguration()).thenReturn(ssaConfiguration);
+        WebApplicationException error = new WebApplicationException(
+                Response.status(Response.Status.BAD_REQUEST)
+                        .entity("{\"error\":\"invalid_signature\",\"description\":\"No algorithm found to sign the JWT.\"}")
+                        .build());
+        when(errorResponseFactory.createWebApplicationException(any(), any(), anyString())).thenThrow(error);
 
-        assertThrows(Exception.class, () -> ssaService.generateJwt(ssa));
-        verify(log).isErrorEnabled();
+        WebApplicationException ex = expectThrows(WebApplicationException.class, () -> ssaService.generateJwt(ssa));
+        assertNotNull(ex);
+        assertEquals(ex.getResponse().getStatus(), 400);
+        assertNotNull(ex.getResponse().getEntity());
+
+        JSONObject jsonObject = new JSONObject(ex.getResponse().getEntity().toString());
+        assertTrue(jsonObject.has("error"));
+        assertEquals(jsonObject.get("error"), "invalid_signature");
+        assertTrue(jsonObject.has("description"));
+
+        verify(log).error(anyString(), anyString());
         verifyNoMoreInteractions(log);
-    }
-
-    @Test
-    public void generateJwt_ssaLogErrorEnabledTrue_exception() {
-        when(log.isErrorEnabled()).thenReturn(true);
-
-        assertThrows(Exception.class, () -> ssaService.generateJwt(ssa));
-        verify(log).isErrorEnabled();
-        verify(log).error(anyString(), any(Throwable.class));
+        verifyNoInteractions(cryptoProvider, webKeysConfiguration);
     }
 
     @Test
