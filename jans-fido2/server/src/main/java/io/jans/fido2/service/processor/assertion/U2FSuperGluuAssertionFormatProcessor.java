@@ -84,7 +84,7 @@ public class U2FSuperGluuAssertionFormatProcessor implements AssertionFormatProc
     @Override
     public void process(String base64AuthenticatorData, String signature, String clientDataJson, Fido2RegistrationData registration,
             Fido2AuthenticationData authenticationEntity) {
-        AuthData authData = authenticatorDataParser.parseAssertionData(base64AuthenticatorData);
+        AuthData authData = authenticatorDataParser.parseAssertionDataForSuperGluu(base64AuthenticatorData);
 
 //        String clientDataRaw = commonVerifiers.verifyClientRaw(response).asText();
         userVerificationVerifier.verifyUserPresent(authData);

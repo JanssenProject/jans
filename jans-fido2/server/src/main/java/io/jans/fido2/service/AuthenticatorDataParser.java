@@ -74,6 +74,11 @@ public class AuthenticatorDataParser {
     	byte[] incomingAuthDataBuffer = base64Service.urlDecode(incomingAuthData.getBytes());
         return parseAuthData(incomingAuthDataBuffer);
     }
+    
+    public AuthData parseAssertionDataForSuperGluu(String incomingAuthData) {
+    	byte[] incomingAuthDataBuffer = base64Service.decode(incomingAuthData.getBytes());
+        return parseAuthData(incomingAuthDataBuffer);
+    }
 
     private AuthData parseAuthData(byte[] incomingAuthDataBuffer) {
         AuthData authData = new AuthData();
