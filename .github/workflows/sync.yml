@@ -1,6 +1,11 @@
 name: sync
 on:
   workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'The PR number to pull the body from'
+        required: false
+        default: ''
   pull_request_target:
     branches:
       - "cn-update-terraform-provider-jans"
