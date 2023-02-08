@@ -10,7 +10,7 @@ make zipapp
 ### Execute
 
 ```
-./config-cli-tui.pyz
+./jans-cli-tui.pyz
 ```
 
 It will ask credentials unless you have no ~/.config/jans-cli.ini. Login to Jans server and get
