@@ -112,7 +112,7 @@ public class SsaCreateActionTest {
     }
 
     @Test
-    public void create_request_valid() {
+    public void create_request_valid() throws Exception {
         BaseDnConfiguration baseDnConfiguration = new BaseDnConfiguration();
         baseDnConfiguration.setSsa("ou=ssa,o=jans");
         when(staticConfiguration.getBaseDn()).thenReturn(baseDnConfiguration);

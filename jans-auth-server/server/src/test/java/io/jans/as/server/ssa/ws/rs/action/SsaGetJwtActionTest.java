@@ -44,7 +44,7 @@ public class SsaGetJwtActionTest {
     private SsaJsonService ssaJsonService;
 
     @Test
-    public void testGetJwtSsa_jti_validStatus() {
+    public void testGetJwtSsa_jti_validStatus() throws Exception {
         String jti = "test-jti";
         String jwt = "jwt-test";
         Ssa ssa = new Ssa();
