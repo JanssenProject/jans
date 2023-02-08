@@ -320,17 +320,38 @@ public class AssertionService {
 		}
 
 		List<Fido2RegistrationEntry> existingFido2Registrations;
+		List<Fido2RegistrationEntry> allowedFido2Registrations;
+		
+		// superGluu - one_step
 		if (superGluu && StringHelper.isNotEmpty(requestedKeyHandle)) {
 			Fido2RegistrationEntry fido2RegistrationEntry = registrationPersistenceService.findByPublicKeyId(requestedKeyHandle, documentDomain).orElseThrow(() -> new Fido2RuntimeException(
 						String.format("Can't find associated key '%s' for application '%s'", requestedKeyHandle, documentDomain)));
 			existingFido2Registrations = Arrays.asList(fido2RegistrationEntry);
+			//  f.getRegistrationData().getAttenstationRequest() null check is added to maintain backward compatiblity with U2F devices when U2F devices are migrated to the FIDO2 server
+			allowedFido2Registrations = existingFido2Registrations.parallelStream()
+					.filter(f -> StringHelper.isNotEmpty(f.getRegistrationData().getPublicKeyId())).collect(Collectors.toList());
 		} else {
-			existingFido2Registrations = registrationPersistenceService.findByRpRegisteredUserDevices(username, null);
-		}
-		//  f.getRegistrationData().getAttenstationRequest() null check is added to maintain backward compatiblity with U2F devices when U2F devices are migrated to the FIDO2 server
-		List<Fido2RegistrationEntry> allowedFido2Registrations = existingFido2Registrations.parallelStream()
-				.filter(f -> StringHelper.isNotEmpty(f.getRegistrationData().getPublicKeyId())).collect(Collectors.toList());
+			
+			// superGluu - twoStep
+			if(superGluu)
+			{
+				existingFido2Registrations = registrationPersistenceService.findByRpRegisteredUserDevices(username, documentDomain);
+				allowedFido2Registrations = existingFido2Registrations.parallelStream()
+						.filter(f -> StringHelper.isNotEmpty(f.getRegistrationData().getPublicKeyId())).collect(Collectors.toList());
+			}
+			else
+			{
+				
+				// `jansApp` attrib is unique to SG registrations, hence  findByRpRegisteredUserDevices's second parameter is null
+				// however registrationData contains a field called domain and hence the domain check in allowedFido2Registrations
+				existingFido2Registrations = registrationPersistenceService.findByRpRegisteredUserDevices(username, null);
+				allowedFido2Registrations = existingFido2Registrations.parallelStream()
+						.filter(f -> StringHelper.equals(documentDomain, f.getRegistrationData().getDomain()))
+						.filter(f -> StringHelper.isNotEmpty(f.getRegistrationData().getPublicKeyId())).collect(Collectors.toList());
 
+			}
+		}
+		
 		List<JsonNode> allowedFido2Keys =  new ArrayList<>(allowedFido2Registrations.size());
 		allowedFido2Registrations.forEach((f) -> {
 			log.debug("attestation request:" + f.getRegistrationData().getAttenstationRequest());
