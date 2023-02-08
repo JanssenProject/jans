@@ -62,9 +62,11 @@ Example:
        --data 'eyJraWQiOiJrWTIyZXBUT......ueOg2HkjpggwAEP84jq9Q'
 ```
 When such will be the nature of client registration requests, the following configuration properties should be set in the authorization server:
+
 - `dcrSignatureValidationEnabled` - enables DCR signature validation
 - `dcrSignatureValidationJwksUri` - specifies JWKS URI for all DCR's validations.
 - `dcrSignatureValidationJwks` - specifies JWKS for all DCR's validations.
+
 Configure the Janssen AS using steps explained in the [link](#curl-commands-to-configure-jans-auth-server)
 
 #### 4. Client registration using software statement
@@ -79,30 +81,35 @@ Example:
 		      "jwks_uri":"https://my.portal/portal/jwks" \
 		    } DATA
 ```
+
 For Client registrations using Software statements, the AS should be configured using the following configuration parameters:
+
  - `softwareStatementValidationType` - The value of this variable is one of the following:
-        - NONE - validation is skipped for software statement
-        - SCRIPT - (default), invokes `getSoftwareStatementJwks` of dynamic registration script which has to return jwks.
-	- JWKS - claim name within software statement that has inlined JWKS
-	- JWKS_URI - claim name within software statement that points to JWKS URI that should lead to keys.
+      - NONE - validation is skipped for software statement
+      - SCRIPT - (default), invokes `getSoftwareStatementJwks` of dynamic registration script which has to return jwks.
+      - JWKS - claim name within software statement that has inlined JWKS
+      - JWKS_URI - claim name within software statement that points to JWKS URI that should lead to keys.
  - `dcrSignatureValidationSoftwareStatementJwksURIClaim` - specifies claim name inside software statement that should point to JWKS URI.
  - `dcrSignatureValidationSoftwareStatementJwksClaim` - specifies claim name inside software statement. Value of claim should point to inlined JWKS.
 
 Configure the AS using steps explained in the [link](#curl-commands-to-configure-jans-auth-server)
 
 #### 5. Special mention about FAPI:
+
 In case of a typical [client registration request in FAPI implementation]( https://openbankinguk.github.io/dcr-docs-pub/v3.3/dynamic-client-registration.html), the request object which is a signed JWT (as seen in point 3) is also called an SSA (Software statement Assertion) or DCR payload. This SSA can contain the software_statement inside it which is also a signed JWT. Each of the JWTs, the outer JWT called the SSA and the inner JWT called the software_statement are signed by different entities - the TPP and OBIE respectively.
 
 
 ### Security Pointers
+
 If `dynamicRegistrationEnabled` is enabled in the Authorization Server, assess the following points to minimize potential exposure of sensitive personal data:
 
 1. `trustedClientEnabled` and `dynamicRegistrationPersistClientAuthorizations` properties determine whether clients are trusted and if consent should be sought from the user before releasing their personal data to the RP
-
 2. `dynamicRegistrationScopesParamEnabled` controls whether default scopes are globally enabled. If `dynamicRegistrationScopesParamEnabled` is `true` then scopes defined as default will be automatically added to any dynamically registered client entry without consent of OP's administrator. Therefore, make an informed decision before setting this field to `true`.
 
 ### CURL commands to configure Jans-auth server
+
 Jans-auth server is configured using [Jans Config Api](https://github.com/JanssenProject/jans/tree/main/jans-config-api) :
+
 1. Obtain the access token
    ```
       curl -u "put_client_id_here:put_config_api_client_secret_here" https://<your.jans.server>/jans-auth/restv1/token \
