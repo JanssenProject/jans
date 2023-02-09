@@ -1,4 +1,3 @@
-import json
 from functools import partial
 from asyncio import Future
 from prompt_toolkit.widgets import Button, Dialog
