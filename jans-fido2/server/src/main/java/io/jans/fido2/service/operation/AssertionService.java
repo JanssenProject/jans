@@ -278,7 +278,6 @@ public class AssertionService {
 		int unfinishedRequestExpiration = appConfiguration.getFido2Configuration().getAuthenticationHistoryExpiration();
 		authenticationEntity.setExpiration(unfinishedRequestExpiration);
 
-
         // Support cancel request
         if (cancelRequest) {
         	authenticationData.setStatus(Fido2AuthenticationStatus.canceled);

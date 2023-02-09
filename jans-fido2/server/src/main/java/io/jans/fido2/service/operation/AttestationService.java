@@ -309,8 +309,6 @@ public class AttestationService {
 		AuthenticatorAttachment authenticatorAttachment = AuthenticatorAttachment.CROSS_PLATFORM;
 		UserVerification userVerification = UserVerification.preferred;
 
-		
-
 		Boolean requireResidentKey = false;
 
 		if (params.hasNonNull("authenticatorSelection")) {
