@@ -43,46 +43,6 @@ from prompt_toolkit.key_binding.bindings.focus import focus_next, focus_previous
 from prompt_toolkit.layout.containers import Float, HSplit, VSplit
 from prompt_toolkit.formatted_text import HTML, merge_formatted_text
 from prompt_toolkit.completion import PathCompleter
-
-
-class TextInputDialog:
-    def __init__(self, title="", label_text="", completer=None):
-        self.future = Future()
-
-        def accept_text(buf):
-            get_app().layout.focus(ok_button)
-            buf.complete_state = None
-            return True
-
-        def accept():
-            self.future.set_result(self.text_area.text)
-
-        def cancel():
-            self.future.set_result(None)
-
-        self.text_area = TextArea(
-            completer=completer,
-            multiline=False,
-            width=D(preferred=40),
-            accept_handler=accept_text,
-        )
-
-        ok_button = Button(text="OK", handler=accept)
-        cancel_button = Button(text="Cancel", handler=cancel)
-
-        self.dialog = Dialog(
-            title=title,
-            body=HSplit([Label(text=label_text), self.text_area]),
-            buttons=[ok_button, cancel_button],
-            width=D(preferred=80),
-            modal=True,
-        )
-
-    def __pt_container__(self):
-        return self.dialog
-
-
-
 from prompt_toolkit.layout.containers import (
     Float,
     HSplit,
@@ -123,6 +83,7 @@ from utils.validators import IntegerValidator
 from wui_components.jans_cli_dialog import JansGDialog
 from wui_components.jans_nav_bar import JansNavBar
 from wui_components.jans_message_dialog import JansMessageDialog
+from wui_components.jans_path_browser import JansFileBrowserDialog, BrowseType
 
 home_dir = Path.home()
 config_dir = home_dir.joinpath('.config')
@@ -158,6 +119,7 @@ class JansCliApp(Application):
         self.pbar_text = ""
         self.progressing_text = ""
         self.mouse_float=True
+        self.browse_path = '/'
 
         self.not_implemented = Frame(
                             body=HSplit([Label(text=_("Not imlemented yet")), Button(text=_("MyButton"))], width=D()),
@@ -814,9 +776,11 @@ class JansCliApp(Application):
         'Coroutine.'
         float_ = Float(content=dialog)
         self.root_layout.floats.append(float_)
-        self.layout.focus(dialog)
+
         if focus:
             self.layout.focus(focus)
+        else:
+            self.layout.focus(dialog)
 
         self.invalidate()
 
@@ -865,27 +829,20 @@ class JansCliApp(Application):
         body = HSplit(data_display_widgets, style='class:jans-main-datadisplay')
         title = params.get('title') or params['selected'][0]
 
-        def do_save(dialog):
+        def do_save(path):
             try:
-                with open(dialog.body.text, 'w') as w:
+                with open(path, 'w') as w:
                     w.write(text_area.text)
-                self.pbar_text = _("File {} was saved".format(dialog.body.text))
-                self.show_message(_("Info"), _("File {} was successfully saved").format(dialog.body.text), tobefocused=self.center_container)
+                self.pbar_text = _("File {} was saved".format(text_area.text))
+                self.show_message(_("Info"), _("File {} was successfully saved").format(path), tobefocused=self.center_container)
             except Exception as e:
                 self.show_message(_("Error!"), _("An error ocurred while saving") + ":\n{}".format(str(e)), tobefocused=self.center_container)
-        
-        def save(dialog):
-            dialog.future.set_result('Save')
-            path_textarea = TextArea(style=cli_style.edit_text)
-            do_save_button = Button(_("OK"), handler=do_save)
-            buttons = [Button('Cancel'), do_save_button]
-            save_dialog = JansGDialog(self, title=_("Enter path of file to save"), body=path_textarea, buttons=buttons)
-            self.show_jans_dialog(save_dialog)
 
+        def save(dialog):
+            file_browser_dialog = JansFileBrowserDialog(self, path=self.browse_path, browse_type=BrowseType.save_as, ok_handler=do_save)
+            self.show_jans_dialog(file_browser_dialog, focus=file_browser_dialog)
 
         save_button = Button(_("Save"), handler=save)
-
-
         buttons = [Button('Close'), save_button]
         dialog = JansGDialog(self, title=title, body=body, buttons=buttons)
 
