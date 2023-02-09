@@ -209,7 +209,7 @@ public class AssertionSuperGluuController {
         
         try {
 	        byte[] authData = generateAuthData(authenticateResponse.getClientData(), rawAuthenticateResponse);
-	        response.put("authenticatorData", authData);
+	        response.put("authenticatorData", base64Service.urlEncodeToString(authData));
 	        response.put("attestationObject", base64Service.urlEncodeToString(dataMapperService.cborWriteAsBytes(attestationObject)));
 		} catch (IOException e) {
             throw new Fido2RuntimeException("Failed to prepare attestationObject");
