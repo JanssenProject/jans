@@ -87,6 +87,7 @@ public class ApiConstants {
     public static final String SOURCE = "/source/";
     public static final String PLUGIN = "/plugin";
     public static final String PLUGIN_NAME_PATH = "{pluginName}";
+    public static final String AUTHORIZATIONS = "/authorizations";
 
     public static final String LIMIT = "limit";
     public static final String START_INDEX = "startIndex";
@@ -106,6 +107,7 @@ public class ApiConstants {
     public static final String SESSIONID = "sessionId";
     public static final String USERDN = "userDn";
     public static final String PLUGIN_NAME = "pluginName";
+    
 
     public static final String ALL = "all";
     public static final String ACTIVE = "active";
