@@ -367,11 +367,11 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "This list details LDAP custom object classes for dynamic person enrollment")
     private List<String> personCustomObjectClassList;
 
-    @DocProperty(description = "Specifies whether to persist id_token into LDAP (otherwise saves into cache)", defaultValue = "false")
-    private Boolean persistIdTokenInLdap = false;
+    @DocProperty(description = "Specifies whether to persist id_token (otherwise saves into cache)", defaultValue = "false")
+    private Boolean persistIdToken = false;
 
-    @DocProperty(description = "Specifies whether to persist refresh_token into LDAP (otherwise saves into cache)", defaultValue = "true")
-    private Boolean persistRefreshTokenInLdap = true;
+    @DocProperty(description = "Specifies whether to persist refresh_token (otherwise saves into cache)", defaultValue = "true")
+    private Boolean persistRefreshToken = true;
 
     @DocProperty(description = "Allows post-logout redirect without validation for the End Session endpoint (still AS validates it against clientWhiteList url pattern property)", defaultValue = "false")
     private Boolean allowPostLogoutRedirectWithoutValidation = false;
@@ -2158,20 +2158,20 @@ public class AppConfiguration implements Configuration {
         this.dynamicRegistrationScopesParamEnabled = dynamicRegistrationScopesParamEnabled;
     }
 
-    public Boolean getPersistIdTokenInLdap() {
-        return persistIdTokenInLdap;
+    public Boolean getPersistIdToken() {
+        return persistIdToken;
     }
 
-    public void setPersistIdTokenInLdap(Boolean persistIdTokenInLdap) {
-        this.persistIdTokenInLdap = persistIdTokenInLdap;
+    public void setPersistIdToken(Boolean persistIdToken) {
+        this.persistIdToken = persistIdToken;
     }
 
-    public Boolean getPersistRefreshTokenInLdap() {
-        return persistRefreshTokenInLdap;
+    public Boolean getPersistRefreshToken() {
+        return persistRefreshToken;
     }
 
-    public void setPersistRefreshTokenInLdap(Boolean persistRefreshTokenInLdap) {
-        this.persistRefreshTokenInLdap = persistRefreshTokenInLdap;
+    public void setPersistRefreshToken(Boolean persistRefreshToken) {
+        this.persistRefreshToken = persistRefreshToken;
     }
 
     public Boolean getAllowPostLogoutRedirectWithoutValidation() {
