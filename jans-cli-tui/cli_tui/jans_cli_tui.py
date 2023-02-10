@@ -82,7 +82,7 @@ from utils.validators import IntegerValidator
 from wui_components.jans_cli_dialog import JansGDialog
 from wui_components.jans_nav_bar import JansNavBar
 from wui_components.jans_message_dialog import JansMessageDialog
-from wui_components.jans_path_browser import JansFileBrowserDialog, BrowseType
+from wui_components.jans_path_browser import jans_file_browser_dialog, BrowseType
 
 home_dir = Path.home()
 config_dir = home_dir.joinpath('.config')
@@ -840,10 +840,10 @@ class JansCliApp(Application):
                 self.show_message(_("Error!"), _("An error ocurred while saving") + ":\n{}".format(str(e)), tobefocused=self.center_container)
 
         def save(dialog):
-            file_browser_dialog = JansFileBrowserDialog(self, path=self.browse_path, browse_type=BrowseType.save_as, ok_handler=do_save)
+            file_browser_dialog = jans_file_browser_dialog(self, path=self.browse_path, browse_type=BrowseType.save_as, ok_handler=do_save)
             self.show_jans_dialog(file_browser_dialog)
 
-        save_button = Button(_("Save As"), handler=save)
+        save_button = Button(_("Export"), handler=save)
         buttons = [Button('Close'), save_button]
         dialog = JansGDialog(self, title=title, body=body, buttons=buttons)
         self.show_jans_dialog(dialog)

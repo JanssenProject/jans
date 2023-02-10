@@ -148,12 +148,12 @@ class JansPathBrowserWidget:
 
         @kb.add("pageup")
         def _pageup(event) -> None:
-            for i in range(self.height - 1):
+            for _ in range(self.height - 1):
                 _go_up(event)
 
         @kb.add("pagedown")
         def _pagedown(event) -> None:
-            for i in range(self.height - 1):
+            for _ in range(self.height - 1):
                 _go_down(event)
 
         return kb
@@ -162,13 +162,13 @@ class JansPathBrowserWidget:
         return self.container
 
 
-def JansFileBrowserDialog(
+def jans_file_browser_dialog(
         app: Application , 
         path: str = '/', 
         browse_type: Optional[BrowseType] = BrowseType.save_as,
         ok_handler: Optional[Callable] = None
     ) -> JansGDialog:
-    """Functo to create a JansFileBrowserDialog
+    """Functo to create a Jans File Browser Dialog
     
     Args:
         app (Application): JansCliApp

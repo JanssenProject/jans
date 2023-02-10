@@ -17,7 +17,7 @@ from utils.multi_lang import _
 from utils.utils import DialogUtils
 from utils.static import cli_style, common_strings
 from wui_components.jans_vetrical_nav import JansVerticalNav
-from wui_components.jans_path_browser import JansFileBrowserDialog, BrowseType
+from wui_components.jans_path_browser import jans_file_browser_dialog, BrowseType
 
 class Agama(DialogUtils):
     def __init__(
@@ -137,7 +137,7 @@ class Agama(DialogUtils):
             asyncio.ensure_future(coroutine())
 
 
-        file_browser_dialog = JansFileBrowserDialog(self.app, path=self.app.browse_path, browse_type=BrowseType.file, ok_handler=do_upload_project)
+        file_browser_dialog = jans_file_browser_dialog(self.app, path=self.app.browse_path, browse_type=BrowseType.file, ok_handler=do_upload_project)
         self.app.show_jans_dialog(file_browser_dialog)
 
     def search_agama_project(self, tbuffer:Buffer) -> None:
