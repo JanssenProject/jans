@@ -95,7 +95,7 @@ class Agama(DialogUtils):
             self.app.stop_progressing()
             try:
                 self.data = response.json()
-            except:
+            except Exception:
                 self.app.show_message(_(common_strings.error), HTML(_("Server reterned non json data <i>{}</i>").format(response.text)), tobefocused=self.app.center_container)
                 return
 
@@ -130,7 +130,7 @@ class Agama(DialogUtils):
             async def coroutine():
                 cli_args = {'operation_id': 'post-agama-dev-studio-prj', 'data_fn': path, 'url_suffix':'name:{}'.format(project_json['projectName'])}
                 self.app.start_progressing(_("Uploading agama project..."))
-                response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+                await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
                 self.app.stop_progressing()
                 self.get_agama_projects()
 

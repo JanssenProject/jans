@@ -13,10 +13,10 @@ class JansGDialog:
     def __init__(
         self, 
         parent, 
-        body: Optional[AnyContainer]=None,
-        title: Optional[str]= '',
-        buttons: Optional[Sequence[Button]]=[],
-        width: AnyDimension=None
+        body: Optional[AnyContainer] = None,
+        title: Optional[str] = '',
+        buttons: Optional[Sequence[Button]] = None,
+        width: AnyDimension = None
         )-> Dialog:
         
         """init for JansGDialog
@@ -34,7 +34,6 @@ class JansGDialog:
         self.future = Future()
         self.body = body
         self.myparent = parent
-        self.buttons = buttons
         self.title = title
 
         if not width:
