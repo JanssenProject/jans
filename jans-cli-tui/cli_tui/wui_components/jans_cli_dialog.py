@@ -34,6 +34,8 @@ class JansGDialog:
         self.future = Future()
         self.body = body
         self.myparent = parent
+        self.buttons = buttons
+        self.title = title
 
         if not width:
             width = parent.dialog_width

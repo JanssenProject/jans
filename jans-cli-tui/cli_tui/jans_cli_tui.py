@@ -42,7 +42,6 @@ from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.key_binding.bindings.focus import focus_next, focus_previous
 from prompt_toolkit.layout.containers import Float, HSplit, VSplit
 from prompt_toolkit.formatted_text import HTML, merge_formatted_text
-from prompt_toolkit.completion import PathCompleter
 from prompt_toolkit.layout.containers import (
     Float,
     HSplit,
@@ -801,10 +800,12 @@ class JansCliApp(Application):
         async def coroutine():
             focused_before = self.layout.current_window
             result = await self.show_dialog_as_float(dialog, focus)
-            try:
-                self.layout.focus(focused_before)
-            except Exception:
-                self.layout.focus(self.center_frame)
+
+            if not self.root_layout.floats:
+                try:
+                    self.layout.focus(focused_before)
+                except Exception:
+                    self.layout.focus(self.center_frame)
 
             return result
 
@@ -840,12 +841,11 @@ class JansCliApp(Application):
 
         def save(dialog):
             file_browser_dialog = JansFileBrowserDialog(self, path=self.browse_path, browse_type=BrowseType.save_as, ok_handler=do_save)
-            self.show_jans_dialog(file_browser_dialog, focus=file_browser_dialog)
+            self.show_jans_dialog(file_browser_dialog)
 
-        save_button = Button(_("Save"), handler=save)
+        save_button = Button(_("Save As"), handler=save)
         buttons = [Button('Close'), save_button]
         dialog = JansGDialog(self, title=title, body=body, buttons=buttons)
-
         self.show_jans_dialog(dialog)
 
     def save_creds(self, dialog:Dialog) -> None:

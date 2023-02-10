@@ -1,29 +1,42 @@
 from enum import Enum
 from pathlib import Path
 from typing import Callable, Optional
-from prompt_toolkit.application import get_app
-from functools import partial
-from prompt_toolkit.formatted_text import HTML, AnyFormattedText, merge_formatted_text,to_formatted_text
+
+from prompt_toolkit.formatted_text import HTML, AnyFormattedText, merge_formatted_text
+from prompt_toolkit.application import Application
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.layout import FormattedTextControl, Window
-from prompt_toolkit.widgets import Label, Frame, Box, Button, TextArea
-from prompt_toolkit.layout.containers import HSplit
-from prompt_toolkit.layout.containers import HSplit, VSplit, DynamicContainer, ScrollOffsets
+from prompt_toolkit.widgets import Label, Button, TextArea
+from prompt_toolkit.layout.containers import HSplit, VSplit, ScrollOffsets, AnyContainer
 from prompt_toolkit.layout.margins import ScrollbarMargin
-from prompt_toolkit.layout.dimension import D
+
 from utils.multi_lang import _
 from wui_components.jans_cli_dialog import JansGDialog
 
 
 class BrowseType(Enum):
+    """Enumeration for path browser type"""
     directory = 0
     file = 1
     save_as = 2
 
 
 class JansPathBrowserWidget:
+    """
+    Creates a path browser container widget.
 
-    def __init__(self, path, browse_type, height=10):
+    :param path: Path to browse
+    :param browse_type: Type of browsing
+    :param height: Height of widget, default to 10
+    """
+
+
+    def __init__(self, 
+            path: str, 
+            browse_type: BrowseType, 
+            height: int = 10
+            ) -> None:
+        """init for JansPathBrowserWidget"""
 
         self.path = Path(path)
         self.entries = []
@@ -56,33 +69,38 @@ class JansPathBrowserWidget:
         self.container = HSplit(container_content)
 
 
-    def path_as_str(self, path, i):
+    def _path_as_str(self, path:str, i:int) -> str:
+        """Converts name of path object to string with icon based on type"""
+        s = path.name
         if path.is_dir():
-            s = path.name
             if not i and self.path.as_posix() != '/':
                 s = '..'
             return chr(128448) +' ' + s
-        return chr(128441) + ' ' + path.name
+        return chr(128441) + ' ' + s
 
 
-    def _get_formatted_text(self):
-        self.get_path_content()
+    def _get_formatted_text(self) -> AnyFormattedText:
+        """Returns formatted text for list"""
+
+        self._update_path_content()
         result = []
 
         for i, path in enumerate(self.entries):
             if i == self.selected_line:
                 result.append([("[SetCursorPosition]", "")])
                 if path.is_dir():
-                    result.append(HTML('<b><style fg="ansired" bg="{}">{}</style></b>'.format('#ADD8E6', self.path_as_str(path, i))))
+                    result.append(HTML('<b><style fg="ansired" bg="{}">{}</style></b>'.format('#ADD8E6', self._path_as_str(path, i))))
                 else:
-                    result.append(HTML('<style fg="ansired" bg="{}">{}</style>'.format('#ADD8E6', self.path_as_str(path, i))))
+                    result.append(HTML('<style fg="ansired" bg="{}">{}</style>'.format('#ADD8E6', self._path_as_str(path, i))))
             else:
-                result.append(HTML('{}'.format(self.path_as_str(path, i))))
+                result.append(HTML('{}'.format(self._path_as_str(path, i))))
             result.append("\n")
 
         return merge_formatted_text(result)
 
-    def get_path_content(self):
+    def _update_path_content(self) -> None:
+        """Updates entries for current path"""
+
         self.entries = []
         files = []
         dirs = []
@@ -99,11 +117,14 @@ class JansPathBrowserWidget:
             self.entries.insert(0, self.path.parent)
 
 
-    def _set_file_name(self):
+    def _set_file_name(self) -> None:
+        """Sets value of file_name entry if path under curser is file"""
         if self.browse_type in (BrowseType.save_as, BrowseType.file):
             self.file_name.text = self.entries[self.selected_line].name if self.entries[self.selected_line].is_file() else ''
 
-    def _get_key_bindings(self):
+    def _get_key_bindings(self) -> KeyBindings:
+        """Returns key bindings for list"""
+
         kb = KeyBindings()
 
         @kb.add("up")
@@ -137,16 +158,34 @@ class JansPathBrowserWidget:
 
         return kb
 
-    def __pt_container__(self):
+    def __pt_container__(self) -> AnyContainer:
         return self.container
 
 
-def JansFileBrowserDialog(app, path='/', browse_type=BrowseType.save_as, ok_handler=None):
+def JansFileBrowserDialog(
+        app: Application , 
+        path: str = '/', 
+        browse_type: Optional[BrowseType] = BrowseType.save_as,
+        ok_handler: Optional[Callable] = None
+    ) -> JansGDialog:
+    """Functo to create a JansFileBrowserDialog
+    
+    Args:
+        app (Application): JansCliApp
+        browse_type (BrowseType, optional): Type of browsing
+        ok_handler (collable, optional): Callable when OK button is pressed
+    """
+
     browse_widget = JansPathBrowserWidget(path, browse_type)
 
 
     def call_ok_handler(dialog):
         dialog.future.set_result(True)
+        if browse_widget.path.is_file():
+            app.browse_path = browse_widget.path.parent.as_posix()
+        else:
+            app.browse_path = browse_widget.path.as_posix()
+
         if ok_handler:
             if browse_type in (BrowseType.file, BrowseType.save_as):
                 ok_handler(browse_widget.path.joinpath(browse_widget.file_name.text).as_posix())
@@ -181,7 +220,7 @@ def JansFileBrowserDialog(app, path='/', browse_type=BrowseType.save_as, ok_hand
         title = _("Save As")
 
     ok_button = Button(_("OK"), handler=my_ok_handler)
-    ok_button.keep_dialog =True
+    ok_button.keep_dialog = True
     cancel_button = Button(_("Cancel"))
     dialog = JansGDialog(app, title=title, body=browse_widget, buttons=[ok_button, cancel_button])
 
