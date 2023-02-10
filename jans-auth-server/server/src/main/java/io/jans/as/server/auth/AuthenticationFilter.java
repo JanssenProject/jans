@@ -568,7 +568,7 @@ public class AuthenticationFilter implements Filter {
             } else if (grantType == GrantType.REFRESH_TOKEN) {
                 final String refreshTokenCode = servletRequest.getParameter("refresh_token");
                 TokenEntity tokenEntity;
-                if (!isTrue(appConfiguration.getPersistRefreshTokenInLdap())) {
+                if (!isTrue(appConfiguration.getPersistRefreshToken())) {
                     tokenEntity = (TokenEntity) cacheService.get(TokenHashUtil.hash(refreshTokenCode));
                 } else {
                     tokenEntity = grantService.getGrantByCode(refreshTokenCode);

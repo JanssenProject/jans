@@ -190,8 +190,8 @@ tags:
 | pairwiseCalculationSalt | Salt to calculate algorithmic pairwise IDs | [Details](#pairwisecalculationsalt) |
 | pairwiseIdType | the pairwise ID type | [Details](#pairwiseidtype) |
 | parEndpoint | URL for Pushed Authorisation Request (PAR) Endpoint | [Details](#parendpoint) |
-| persistIdTokenInLdap | Specifies whether to persist id_token into LDAP (otherwise saves into cache) | [Details](#persistidtokeninldap) |
-| persistRefreshTokenInLdap | Specifies whether to persist refresh_token into LDAP (otherwise saves into cache) | [Details](#persistrefreshtokeninldap) |
+| persistIdToken | Specifies whether to persist id_token (otherwise saves into cache) | [Details](#persistIdToken) |
+| persistRefreshToken | Specifies whether to persist refresh_token (otherwise saves into cache) | [Details](#persistRefreshToken) |
 | personCustomObjectClassList | This list details LDAP custom object classes for dynamic person enrollment | [Details](#personcustomobjectclasslist) |
 | publicSubjectIdentifierPerClientEnabled | Specifies whether public subject identifier is allowed per client | [Details](#publicsubjectidentifierperclientenabled) |
 | redirectUrisRegexEnabled | Enable/Disable redirect uris validation using regular expression | [Details](#redirecturisregexenabled) |
@@ -1888,18 +1888,18 @@ tags:
 - Default value: None
 
 
-### persistIdTokenInLdap
+### persistIdToken
 
-- Description: Specifies whether to persist id_token into LDAP (otherwise saves into cache)
+- Description: Specifies whether to persist id_token (otherwise saves into cache)
 
 - Required: No
 
 - Default value: false
 
 
-### persistRefreshTokenInLdap
+### persistRefreshToken
 
-- Description: Specifies whether to persist refresh_token into LDAP (otherwise saves into cache)
+- Description: Specifies whether to persist refresh_token (otherwise saves into cache)
 
 - Required: No
 

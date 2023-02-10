@@ -24,7 +24,7 @@ subject to consent to the use of refresh tokens. To encourage this practice,
 by default, Auth Server requires that the client have the `offline_access` scope
 to issue a refresh token.
 
-`persistRefreshTokenInLdap`
+`persistRefreshToken`
 : *Default: True* - Otherwise they are written to the cache
 
 `clientRegDefaultToCodeFlowWithRefresh`
