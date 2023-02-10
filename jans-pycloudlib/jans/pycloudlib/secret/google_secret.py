@@ -213,7 +213,9 @@ class GoogleSecret(BaseSecret):
         Returns:
             A boolean to mark whether secret is set or not.
         """
-        all_ = {}
+        # fetch existing data (if any) as we will merge them;
+        # note that existing value will be overwritten
+        all_ = self.get_all()
 
         for k, v in data.items():
             all_[k] = safe_value(v)
