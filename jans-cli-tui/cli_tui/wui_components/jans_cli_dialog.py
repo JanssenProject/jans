@@ -1,4 +1,3 @@
-import json
 from functools import partial
 from asyncio import Future
 from prompt_toolkit.widgets import Button, Dialog
@@ -14,10 +13,10 @@ class JansGDialog:
     def __init__(
         self, 
         parent, 
-        body: Optional[AnyContainer]=None,
-        title: Optional[str]= '',
-        buttons: Optional[Sequence[Button]]=[],
-        width: AnyDimension=None
+        body: Optional[AnyContainer] = None,
+        title: Optional[str] = '',
+        buttons: Optional[Sequence[Button]] = None,
+        width: AnyDimension = None
         )-> Dialog:
         
         """init for JansGDialog
@@ -35,6 +34,7 @@ class JansGDialog:
         self.future = Future()
         self.body = body
         self.myparent = parent
+        self.title = title
 
         if not width:
             width = parent.dialog_width
