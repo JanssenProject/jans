@@ -189,6 +189,8 @@ public class AssertionService {
 		entity.setStatus(Fido2AuthenticationStatus.pending);
 		if (params.hasNonNull(CommonVerifiers.SUPER_GLUU_APP_ID)) {
 			entity.setApplicationId(params.get(CommonVerifiers.SUPER_GLUU_APP_ID).asText());
+		} else {
+			entity.setApplicationId(documentDomain);
 		}
 
 		// Store original request
@@ -275,7 +277,6 @@ public class AssertionService {
 		// Set expiration
 		int unfinishedRequestExpiration = appConfiguration.getFido2Configuration().getAuthenticationHistoryExpiration();
 		authenticationEntity.setExpiration(unfinishedRequestExpiration);
-
 
         // Support cancel request
         if (cancelRequest) {
