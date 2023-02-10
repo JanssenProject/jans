@@ -7889,9 +7889,9 @@ components:
           type: array
           items:
             type: string
-        persistIdTokenInLdap:
+        persistIdToken:
           type: boolean
-        persistRefreshTokenInLdap:
+        persistRefreshToken:
           type: boolean
         allowPostLogoutRedirectWithoutValidation:
           type: boolean
