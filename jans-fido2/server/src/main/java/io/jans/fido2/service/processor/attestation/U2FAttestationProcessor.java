@@ -31,6 +31,7 @@ import jakarta.inject.Inject;
 
 import io.jans.fido2.ctap.AttestationFormat;
 import io.jans.fido2.exception.Fido2MissingAttestationCertException;
+import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.auth.AuthData;
 import io.jans.fido2.model.auth.CredAndCounterData;
 import io.jans.fido2.model.conf.AppConfiguration;
@@ -127,7 +128,11 @@ public class U2FAttestationProcessor implements AttestationFormatProcessor {
             throw new UnsupportedOperationException("ecdaaKeyId is not supported");
         } else {
             PublicKey publicKey = coseService.getPublicKeyFromUncompressedECPoint(authData.getCosePublicKey());
+            try {
             authenticatorDataVerifier.verifyPackedSurrogateAttestationSignature(authData.getAuthDataDecoded(), clientDataHash, signature, publicKey, alg);
+            } catch (Fido2RuntimeException ex) {
+            	log.error("Enable this after SG iOS app attestion signature update!!!", ex);
+            }
         }
 
         credIdAndCounters.setAttestationType(getAttestationFormat().getFmt());
