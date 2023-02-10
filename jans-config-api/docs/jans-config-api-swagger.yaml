@@ -107,7 +107,73 @@ paths:
                 $ref: '#/components/schemas/StatsData'
         "500":
           description: InternalServerError
-  /api/v1/ads-deployment:
+  /api/v1/acrs:
+    get:
+      tags:
+      - Default Authentication Method
+      summary: Gets default authentication method.
+      description: Gets default authentication method.
+      operationId: get-acrs
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationMethod'
+              examples:
+                Response example:
+                  description: Response example
+                  value: |
+                    {
+                      "defaultAcr": "basic"
+                    }
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/acrs.readonly
+        - https://jans.io/oauth/config/acrs.write
+        - https://jans.io/oauth/config/read-all
+    put:
+      tags:
+      - Default Authentication Method
+      summary: Updates default authentication method.
+      description: Updates default authentication method.
+      operationId: put-acrs
+      requestBody:
+        description: String representing patch-document.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthenticationMethod'
+            examples:
+              Request json example:
+                description: Request json example
+                value: |
+                  {
+                    "defaultAcr": "basic"
+                  }
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationMethod'
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/acrs.write
+        - https://jans.io/oauth/config/write-all
+  /api/v1/agama-deployment:
     get:
       tags:
       - Agama - Developer Studio
@@ -214,7 +280,7 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/agama.delete
-  /api/v1/ads-deployment/list:
+  /api/v1/agama-deployment/list:
     get:
       tags:
       - Agama - Developer Studio
@@ -252,72 +318,6 @@ paths:
         - https://jans.io/oauth/config/agama.readonly
         - https://jans.io/oauth/config/agama.write
         - https://jans.io/oauth/config/read-all
-  /api/v1/acrs:
-    get:
-      tags:
-      - Default Authentication Method
-      summary: Gets default authentication method.
-      description: Gets default authentication method.
-      operationId: get-acrs
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AuthenticationMethod'
-              examples:
-                Response example:
-                  description: Response example
-                  value: |
-                    {
-                      "defaultAcr": "basic"
-                    }
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/acrs.readonly
-        - https://jans.io/oauth/config/acrs.write
-        - https://jans.io/oauth/config/read-all
-    put:
-      tags:
-      - Default Authentication Method
-      summary: Updates default authentication method.
-      description: Updates default authentication method.
-      operationId: put-acrs
-      requestBody:
-        description: String representing patch-document.
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AuthenticationMethod'
-            examples:
-              Request json example:
-                description: Request json example
-                value: |
-                  {
-                    "defaultAcr": "basic"
-                  }
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AuthenticationMethod'
-        "400":
-          description: Bad Request
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/acrs.write
-        - https://jans.io/oauth/config/write-all
   /api/v1/agama:
     get:
       tags:
@@ -7299,6 +7299,11 @@ components:
           format: date-time
         facterData:
           $ref: '#/components/schemas/FacterData'
+    AuthenticationMethod:
+      type: object
+      properties:
+        defaultAcr:
+          type: string
     Deployment:
       type: object
       properties:
@@ -7366,11 +7371,6 @@ components:
           type: array
           items:
             type: object
-    AuthenticationMethod:
-      type: object
-      properties:
-        defaultAcr:
-          type: string
     Flow:
       type: object
       properties:
@@ -7535,19 +7535,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        whitePagesCanView:
-          type: boolean
-        userCanEdit:
-          type: boolean
         adminCanEdit:
-          type: boolean
-        adminCanView:
-          type: boolean
-        userCanAccess:
           type: boolean
         userCanView:
           type: boolean
+        adminCanView:
+          type: boolean
+        userCanEdit:
+          type: boolean
+        userCanAccess:
+          type: boolean
         adminCanAccess:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -8915,10 +8915,10 @@ components:
           type: array
           items:
             type: object
-        value:
-          type: object
         displayValue:
           type: string
+        value:
+          type: object
     LocalizedString:
       type: object
       properties:
@@ -9132,14 +9132,14 @@ components:
           type: boolean
         internal:
           type: boolean
-        locationPath:
-          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
+        locationPath:
+          type: string
         baseDn:
           type: string
     ScriptError:
@@ -9247,11 +9247,13 @@ components:
         "y":
           type: string
         key_ops_type:
-          type: string
-          enum:
-          - "KeyOpsType{value='connect'} CONNECT"
-          - "KeyOpsType{value='ssa'} SSA"
-          - "KeyOpsType{value='all'} ALL"
+          type: array
+          items:
+            type: string
+            enum:
+            - "KeyOps{value='connect'} CONNECT"
+            - "KeyOps{value='ssa'} SSA"
+            - "KeyOps{value='all'} ALL"
     WebKeysConfiguration:
       type: object
       properties:
@@ -9723,3 +9725,5 @@ components:
               configuration properties
             https://jans.io/oauth/config/properties.write: Manage Config-API related
               configuration properties
+            https://jans.io/oauth/client/authorizations.readonly: View ClientAuthorizations
+            https://jans.io/oauth/client/authorizations.delete: Revoke ClientAuthorizations
