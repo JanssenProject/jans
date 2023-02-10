@@ -88,6 +88,9 @@ public class ApiAccessConstants {
     
     public static final String CONFIG_READ_ACCESS = "https://jans.io/oauth/config/properties.readonly";
     public static final String CONFIG_WRITE_ACCESS = "https://jans.io/oauth/config/properties.write";
+    
+    public static final String CLIENT_AUTHORIZATIONS_READ_ACCESS = "https://jans.io/oauth/client/authorizations.readonly";
+    public static final String CLIENT_AUTHORIZATIONS_DELETE_ACCESS = "https://jans.io/oauth/client/authorizations.delete";
 
     
 }
