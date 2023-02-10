@@ -179,12 +179,17 @@ class AwsSecret(BaseSecret):
         """
         self._prepare_secret()
 
+        # fetch existing data (if any) as we will merge them;
+        # note that existing value will be overwritten
+        payload = self.get_all()
+
+        for k, v in data.items():
+            # ensure value that has bytes is converted to text
+            payload[k] = safe_value(v)
+
         resp = self.client.update_secret(
             SecretId=self.basepath,
-            SecretBinary=_dump_value(
-                # ensure key-value that has bytes is converted to text
-                {k: safe_value(v) for k, v in data.items()}
-            ),
+            SecretBinary=_dump_value(payload),
         )
         return bool(resp)
 
