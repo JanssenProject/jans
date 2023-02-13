@@ -171,11 +171,13 @@ public class AssertionService {
 			if (optionsResponseNode.hasNonNull("extensions")) {
 				ObjectNode extensions = (ObjectNode) optionsResponseNode.get("extensions");
 				extensions.put("appid", fidoApplicationId);
-			} else {
+			} 
+			// TODO: this doesnt make any sense - test and remove
+			/*else {
 				ObjectNode extensions = dataMapperService.createObjectNode();
 				extensions.put("appid", fidoApplicationId);
 				optionsResponseNode.set("extensions", extensions);
-			}
+			}*/
 		}
 
 		// optionsResponseNode.put("status", "ok");
@@ -355,7 +357,8 @@ public class AssertionService {
 		Optional<Fido2RegistrationEntry> fidoRegistration = allowedFido2Registrations.parallelStream()
 				.filter(f -> StringUtils.isNotEmpty(f.getRegistrationData().getApplicationId())).findAny();
 		String applicationId = null;
-		if (fidoRegistration.isPresent()) {
+		// applicationId should not be sent incase of pure fido2
+		if (fidoRegistration.isPresent() && superGluu) {
 			applicationId = fidoRegistration.get().getRegistrationData().getApplicationId();
 		}
 
