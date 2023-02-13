@@ -42,4 +42,5 @@ jobs:
         export JANS_CLIENT_SECRET=1t5Fin3#security
         export JANS_INSECURE_CLIENT=true
         export TF_ACC=1
-        go test -v ./terraform-provider-jans/...
+        cd terraform-provider-jans
+        go test -v ./...
