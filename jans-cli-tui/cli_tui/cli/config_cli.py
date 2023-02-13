@@ -520,15 +520,6 @@ class JCA_CLI:
                 print(self.colored_text("Unable to validate access token: {}".format(e), error_color))
                 self.access_token = None
 
-    def validate_date_time(self, date_str):
-        try:
-            datetime.datetime.fromisoformat(date_str)
-            return True
-        except Exception as e:
-            self.log_response('invalid date-time format: %s'.format(str(e)))
-            return False
-
-
     def get_scoped_access_token(self, scope, set_access_token=True):
 
         if not self.wrapped:
@@ -565,7 +556,7 @@ class JCA_CLI:
                 sys.stderr.write(result)
                 sys.stderr.write('\n')
         except Exception as e:
-            print("Error while getting access token")
+            sys.stderr.write("Error while getting access token")
             sys.stderr.write(response.text)
             sys.stderr.write(str(e))
             sys.stderr.write('\n')
@@ -603,7 +594,7 @@ class JCA_CLI:
     def raise_error(self, msg):
         if not self.wrapped:
             msg = self.colored_text(msg, error_color)
-            print(msg)
+            sys.stderr.write(msg)
             sys.exit()
 
         raise ValueError(msg)
@@ -754,233 +745,6 @@ class JCA_CLI:
         return u"\u001b[38;5;{}m{}\u001b[0m".format(color, text)
 
 
-    def guess_bool(self, val):
-        if val == '_false':
-            return False
-        if val == '_true':
-            return True
-
-
-    def check_type(self, val, vtype):
-        if vtype == 'string' and val:
-            return str(val)
-        elif vtype == 'integer':
-            if isinstance(val, int):
-                return val
-            if val.isnumeric():
-                return int(val)
-        elif vtype == 'object':
-            try:
-                retVal = json.loads(val)
-                if isinstance(retVal, dict):
-                    return retVal
-            except:
-                pass
-        elif vtype == 'boolean':
-            guessed_val = self.guess_bool(val)
-            if not guessed_val is None:
-                return guessed_val
-
-        error_text = "Please enter a(n) {} value".format(vtype)
-        if vtype == 'boolean':
-            error_text += ': _true, _false'
-
-        raise TypeError(self.colored_text(error_text, warning_color))
-
-    def get_input(self, values=[], text='Selection', default=None, itype=None,
-                  help_text=None, sitype=None, enforce='__true__',
-                  example=None, spacing=0, iformat=None
-                  ):
-        if isinstance(default, str):
-            default = html.escape(default)
-
-        if 'b' in values and 'q' in values and 'x' in values:
-            greyed_help_list = [ ('b', 'back'), ('q', 'quit'),  ('x', 'logout and quit') ]
-            for k,v in (('w', 'write result'), ('y', 'yes'), ('n', 'no')):
-                if k in values:
-                    greyed_help_list.insert(1, (k, v))
-            grey_help_text = ', '.join(['{}: {}'.format(k,v) for k,v in greyed_help_list])
-            print(self.colored_text(grey_help_text, grey_color))
-        print()
-        type_text = ''
-        if itype:
-            if itype == 'array':
-                type_text = "Type: array of {} separated by _,".format(sitype)
-                if values:
-                    type_text += ' Valid values: {}'.format(', '.join(values))
-            elif itype == 'boolean':
-                type_text = "Type: " + itype
-                if default is None:
-                    default = False
-            else:
-                type_text = "Type: " + itype
-                if values:
-                    type_text += ', Valid values: {}'.format(self.colored_text(', '.join(values), bold_color))
-
-        if help_text:
-            help_text = help_text.strip('.') + '. ' + type_text
-        else:
-            help_text = type_text
-
-        if help_text:
-            print(' ' * spacing, self.colored_text('«{}»'.format(help_text), 244), sep='')
-
-        if example:
-            if isinstance(example, list):
-                example_str = ', '.join(example)
-            else:
-                example_str = str(example)
-            print(' ' * spacing, self.colored_text('Example: {}'.format(example_str), 244), sep='')
-
-        if not default is None:
-            default_text = str(default).lower() if itype == 'boolean' else str(default)
-            text += '  [<b>' + default_text + '</b>]'
-            if itype == 'integer':
-                default = int(default)
-
-        if not text.endswith('?'):
-            text += ':'
-
-        if itype == 'boolean' and not values:
-            values = ['_true', '_false']
-
-        while True:
-
-            selection = input(' ' * spacing + self.colored_text(text, 20) + ' ')
-
-            selection = selection.strip()
-            if selection.startswith('_file '):
-                fname = selection.split()[1]
-                if os.path.isfile(fname):
-                    with open(fname) as f:
-                        selection = f.read().strip()
-                else:
-                    print(self.colored_text("File {} does not exist".format(fname), warning_color))
-                    continue
-
-            if itype == 'boolean' and not selection:
-                return False
-
-            if not selection and default:
-                return default
-
-            if enforce and not selection:
-                continue
-
-            if not enforce and not selection:
-                if itype == 'array':
-                    return []
-                return None
-
-            if selection and iformat:
-                if iformat == 'date-time' and not self.validate_date_time(selection):
-                    print(' ' * spacing,
-                              self.colored_text('Please enter date-time string, i.e. 2001-07-04T12:08:56.235', warning_color),
-                              sep='')
-                    continue
-
-            if 'q' in values and selection == 'q':
-                print("Quiting...")
-                sys.exit()
-
-            if 'x' in values and selection == 'x':
-                print("Logging out...")
-                if 'access_token_enc' in config['DEFAULT']:
-                    config['DEFAULT'].pop('access_token_enc')
-                    write_config()
-                print("Quiting...")
-                sys.exit()
-                break
-
-
-            if itype == 'object' and sitype:
-                try:
-                    object_ = self.check_type(selection, itype)
-                except Exception as e:
-                    print(' ' * spacing, e, sep='')
-                    continue
-
-                data_ok = True
-                for items in object_:
-                    try:
-                        self.check_type(object_[items], sitype)
-                    except Exception as e:
-                        print(' ' * spacing, e, sep='')
-                        data_ok = False
-                if data_ok:
-                    return object_
-                else:
-                    continue
-
-            if itype == 'array' and default and not selection:
-                return default
-
-            if itype == 'array' and sitype:
-                if selection == '_null':
-                    selection = []
-                    data_ok = True
-                else:
-                    selection = selection.split('_,')
-                    for i, item in enumerate(selection):
-                        data_ok = True
-                        try:
-                            selection[i] = self.check_type(item.strip(), sitype)
-                            if selection[i] == '_null':
-                                selection[i] = None
-                            if values:
-                                if not selection[i] in values:
-                                    data_ok = False
-                                    print(' ' * spacing, self.colored_text(
-                                        "Please enter array of {} separated by _,".format(', '.join(values)),
-                                        warning_color), sep='')
-                                    break
-                        except TypeError as e:
-                            print(' ' * spacing, e, sep='')
-                            data_ok = False
-                if data_ok:
-                    break
-            else:
-                if not itype is None:
-                    try:
-                        selection = self.check_type(selection, itype)
-                    except TypeError as e:
-                        if enforce:
-                            print(' ' * spacing, e, sep='')
-                            continue
-
-                if values:
-                    if selection in values:
-                        break
-                    elif itype == 'boolean':
-                        if isinstance(selection, bool):
-                            break
-                        else:
-                            continue
-                    else:
-                        print(' ' * spacing,
-                              self.colored_text('Please enter one of {}'.format(', '.join(values)), warning_color),
-                              sep='')
-
-                if not values and not selection and not enforce:
-                    break
-
-                if not values and selection:
-                    break
-
-        if selection == '_null':
-            selection = None
-        elif selection == '_q':
-            selection = 'q'
-
-        return selection
-
-
-    def print_underlined(self, text):
-        print()
-        print(text)
-        print('-' * len(text.splitlines()[-1]))
-
-
     def pretty_print(self, data):
         pp_string = json.dumps(data, indent=2)
         if args.no_color:
@@ -1001,39 +765,6 @@ class JCA_CLI:
             param = {'name': pname, 'description': pname, 'schema': {'type': 'string'}}
 
         return param
-
-
-    def obtain_parameters(self, endpoint, single=False):
-        parameters = {}
-
-        endpoint_parameters = []
-        if 'parameters' in endpoint.info:
-            endpoint_parameters = endpoint.info['parameters']
-
-        end_point_param = self.get_endpiont_url_param(endpoint)
-        if end_point_param and not end_point_param in endpoint_parameters:
-            endpoint_parameters.insert(0, end_point_param)
-
-        n = 1 if single else len(endpoint_parameters)
-
-        for param in endpoint_parameters[0:n]:
-            param_name = param['name']
-            if param_name not in parameters:
-                text_ = param['name']
-                help_text = param.get('description') or param.get('summary')
-                enforce = True if param['schema']['type'] == 'integer' or (end_point_param and end_point_param['name'] == param['name']) else False
-
-                parameters[param_name] = self.get_input(
-                    text=text_.strip('.'),
-                    itype=param['schema']['type'],
-                    default=param['schema'].get('default'),
-                    enforce=enforce,
-                    help_text=help_text,
-                    example=param.get('example'),
-                    values=param['schema'].get('enum', [])
-                )
-
-        return parameters
 
 
     def get_path_by_id(self, operation_id):
@@ -1269,23 +1000,6 @@ class JCA_CLI:
                         args_dict[arg_name] = arg_val
 
         return args_dict
-
-    def parse_args(self, args, path):
-        param_names = []
-        if not 'parameters' in path:
-            return {}
-        for param in path['parameters']:
-            param_names.append(param['name'])
-
-        args_dict = self.parse_command_args(args)
-
-        for arg_name in args_dict:
-            if not arg_name in param_names:
-                self.exit_with_error("valid endpoint args are: {}".format(', '.join(param_names)))
-
-        return args_dict
-
-
 
 
     def help_for(self, op_name):
