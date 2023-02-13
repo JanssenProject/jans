@@ -46,8 +46,33 @@ The client can register a list of URIs as a value for redirect URI parameter. Re
 
 ## Cryptography
 
+Janssen Server allows clients to configure static set of keys using `JWKS` or specify a URI as `JWKS URI` where client
+is exposing its key set. For client who can host keys and expose a URI, it is **recommended** to use `JWKS URI` instead of
+static `JWKS` key set. Using `JWKS URI` enables client to rotate its cryptographic keys without having to change the
+client configuration on Janssen Server.
 
+### Selecting Algorithms for Encryption and Signing
 
+The client can select algorithms for cryptographic and encryption during client configuration. Janssen 
+Server supports a list of algorithms as listed in response of Janssen Server's well-known
+[configuration endpoint](./configuration.md) given below.
+
+```text
+https://janssen.server.host/jans-auth/.well-known/openid-configuration
+```
+
+Claims that list supported algorithms:
+
+- id_token_encryption_alg_values_supported
+- id_token_signing_alg_values_supported
+- userinfo_encryption_enc_values_supported
+- userinfo_signing_alg_values_supported
+- userinfo_encryption_alg_values_supported
+- access_token_signing_alg_values_supported
+- request_object_signing_alg_values_supported
+- request_object_encryption_alg_values_supported
+- request_object_encryption_alg_values_supported
+ 
 ## Grants
 
 ## Pre-authorization
