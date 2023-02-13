@@ -20,6 +20,7 @@ jobs:
         # add '"pgsql" when supported
         persistence-backends: ["MYSQL", "PGSQL"]
         python-version: ["3.7"]
+      fail-fast: false
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python3
@@ -42,4 +43,5 @@ jobs:
         export JANS_CLIENT_SECRET=1t5Fin3#security
         export JANS_INSECURE_CLIENT=true
         export TF_ACC=1
-        go test -v ./terraform-provider-jans/...
+        cd terraform-provider-jans
+        go test -v ./...
