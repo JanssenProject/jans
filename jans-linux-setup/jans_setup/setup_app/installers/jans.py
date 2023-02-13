@@ -460,7 +460,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
         self.dbUtils.import_ldif([ldif_fn])
 
-        Config.test_client_id = base.argsp.test_client_id
+        Config.test_client_id = client_id
         Config.test_client_pw = client_pw
         Config.test_client_pw_encoded = encoded_pw
         Config.test_client_redirect_uri = redirect_uri
