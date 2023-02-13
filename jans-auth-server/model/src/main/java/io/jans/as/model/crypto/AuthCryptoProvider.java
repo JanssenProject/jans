@@ -315,7 +315,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
             List<JSONWebKey> keysByAlgAndUse = new ArrayList<>();
 
             for (JSONWebKey key : keys) {
-                boolean keyOpsCondition = keyOpsType == null || (key.getKeyOpsType() == null || key.getKeyOpsType().contains(keyOpsType));
+                boolean keyOpsCondition = keyOpsType == null || (key.getKeyOpsType() == null || key.getKeyOpsType().isEmpty() || key.getKeyOpsType().contains(keyOpsType));
                 if (algorithm == key.getAlg() && (use == null || use == key.getUse()) && keyOpsCondition) {
                     kid = key.getKid();
                     Key keyFromStore;
