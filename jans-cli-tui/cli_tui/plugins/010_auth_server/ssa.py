@@ -127,8 +127,6 @@ class SSA(DialogUtils):
 
         new_data['software_roles'] = new_data['software_roles'].splitlines()
 
-        new_data['software_roles'] = new_data['software_roles'].splitlines()
-
         if self.check_required_fields(dialog.body, data=new_data):
 
             async def coroutine():
