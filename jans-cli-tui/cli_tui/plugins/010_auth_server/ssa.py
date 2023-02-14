@@ -33,7 +33,7 @@ class SSA(DialogUtils):
         self.data = []
         self.working_container = JansVerticalNav(
                 myparent=app,
-                headers=[_("Software ID"), _("Organisation"), _("Software Roles"), _("Status"), _("Exp.")],
+                headers=[_("Software ID"), _("Organization"), _("Software Roles"), _("Status"), _("Exp.")],
                 preferred_size= self.app.get_column_sizes(.25, .25 , .3, .1, .1),
                 on_display=self.app.data_display_dialog,
                 on_delete=self.delete_ssa,
@@ -166,7 +166,7 @@ class SSA(DialogUtils):
                 ),
 
                 self.app.getTitledText(
-                    title=_("Organisation"),
+                    title=_("Organization"),
                     name='org_id',
                     value=data.get('org_id',''),
                     style=cli_style.edit_text_required
