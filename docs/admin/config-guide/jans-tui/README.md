@@ -46,7 +46,7 @@ jca_plugins = user-mgt,scim,fido2,admin-ui
 ## Administration
 
 When you run the TUI, this is the home panel:
-![image](../../assets/Jans_TUI_Main_panel.png)
+![image](../../../assets/Jans_TUI_Main_panel.png)
 
 ### Auth Server
 
@@ -55,7 +55,7 @@ surprise, because this component is responsible for the implementation of
 OpenID Provider, OAuth Authorization Server, and UMA Authorization Server
 endpoints.
 
-- In below screenshot, we are getting the list of existing clients. ![image](../../assets/Jans_TUI_Auth_Server_Get_client_list.png)
+- In below screenshot, we are getting the list of existing clients. ![image](../../../assets/Jans_TUI_Auth_Server_Get_client_list.png)
 - It's possible to get details of any client as well. Just hit enter on any client and  you will see information like this. ![image](../../assets/Jans_TUI_Auth_Server_Client_detail.png)
 - With the button which is located on right upper side named "Add Client", it's possible to create new client. ![image](../../assets/Jans_TUI_Auth_Server_Add_new_client.png)
 
@@ -66,8 +66,8 @@ TUI, you can view/update details of the FIDO configuration.
 
 There are two configurations included here:
 
-- Dynamic Configuration ![image](../../assets/Jans_TUI_Fido_Dynamic_Configuration.png)
-- Static Configuration ![image](../../assets/Jans_TUI_Fido_Static_Configuration.png)
+- Dynamic Configuration ![image](../../../assets/Jans_TUI_Fido_Dynamic_Configuration.png)
+- Static Configuration ![image](../../../assets/Jans_TUI_Fido_Static_Configuration.png)
 
 ### SCIM
 
@@ -75,7 +75,7 @@ System for Cross-domain Identity Management, in short SCIM, is a specification
 that simplifies the exchange of user identity information across different
 domains. The Janssen Server provides implementation for the SCIM specification.
 
-With Janssen CLI-TUI, it's possible to view / update SCIM configuration. ![image](../../assets/Janssen_TUI_SCIM_1.png)
+With Janssen CLI-TUI, it's possible to view / update SCIM configuration. ![image](../../../assets/Janssen_TUI_SCIM_1.png)
 
 ## Standalone Installation
 
