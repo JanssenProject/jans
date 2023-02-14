@@ -51,7 +51,7 @@ is exposing its key set. For client who can host keys and expose a URI, it is **
 static `JWKS` key set. Using `JWKS URI` enables client to rotate its cryptographic keys without having to change the
 client configuration on Janssen Server.
 
-### Selecting Algorithms for Encryption and Signing
+### Available Algorithms for Encryption and Signing
 
 The client can select algorithms for cryptographic and encryption during client configuration. Janssen 
 Server supports a list of algorithms as listed in response of Janssen Server's well-known
@@ -73,6 +73,13 @@ Claims that list supported algorithms:
 - request_object_encryption_alg_values_supported
 - request_object_encryption_alg_values_supported
  
+### Recommendations
+
+- RSA keys with a minimum 2048 bits if using RSA cryptography
+- Elliptic Curve keys with a minimum of 160 bits if using Elliptic Curve cryptography
+- Client secret should have a minimum of 128 bits if using symmetric key cryptography
+- Sign with PS256 (RSASSA-PSS using SHA-256 and MGF1 with SHA-256) or ES256 (ECDSA using P-256 and SHA-256)
+
 ## Grants
 
 ## Pre-authorization
