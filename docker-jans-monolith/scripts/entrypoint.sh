@@ -38,9 +38,7 @@ install_jans() {
   echo "install_config_api=""$([[ ${CN_INSTALL_CONFIG_API} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
   echo "install_scim_server=""$([[ ${CN_INSTALL_SCIM} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
   echo "installFido2=""$([[ ${CN_INSTALL_FIDO2} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
-  echo "test_client_id=${TEST_CLIENT_ID}"| tee -a setup.properties > /dev/null
-  echo "test_client_secret=${TEST_CLIENT_SECRET}" | tee -a setup.properties > /dev/null
-  echo "test_client_trusted=""$([[ ${TEST_CLIENT_TRUSTED} == true ]] && echo True || echo True)" | tee -a setup.properties > /dev/null
+
   if [[ "${CN_INSTALL_MYSQL}" == "true" ]] || [[ "${CN_INSTALL_PGSQL}" == "true" ]]; then
     echo "Installing with RDBMS"
     echo "rdbm_install=2" | tee -a setup.properties > /dev/null
@@ -64,8 +62,8 @@ install_jans() {
   echo "*****   PLEASE NOTE THAT THIS MAY TAKE A WHILE TO FINISH. PLEASE BE PATIENT!!   *****"
   echo "Executing https://raw.githubusercontent.com/JanssenProject/jans/${JANS_SOURCE_VERSION}/jans-linux-setup/jans_setup/install.py > install.py"
   curl https://raw.githubusercontent.com/JanssenProject/jans/"${JANS_SOURCE_VERSION}"/jans-linux-setup/jans_setup/install.py > install.py
-  echo "Executing python3 install.py -yes --args=-f setup.properties -n"
-  python3 install.py -yes --args="-f setup.properties -n"
+  echo "Executing python3 install.py -yes --args=-f setup.properties -n -test-client-id=${TEST_CLIENT_ID} -test-client-secret=${TEST_CLIENT_SECRET} --test-client-trusted"
+  python3 install.py -yes --args="-f setup.properties -n -test-client-id=${TEST_CLIENT_ID} -test-client-secret=${TEST_CLIENT_SECRET} --test-client-trusted"
   echo "*****   Setup script completed!!    *****"
 
 }
