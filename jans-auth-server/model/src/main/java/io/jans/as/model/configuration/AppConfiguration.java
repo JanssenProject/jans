@@ -448,6 +448,8 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Boolean value specifying whether to disable prompt=login", defaultValue = "false")
     private Boolean disablePromptLogin = false;
 
+    @DocProperty(description = "Boolean value specifying whether to disable prompt=consent", defaultValue = "false")
+    private Boolean disablePromptConsent = false;
 
     /**
      * SessionId will be expired after sessionIdLifetime seconds
@@ -1120,6 +1122,15 @@ public class AppConfiguration implements Configuration {
 
     public void setDisablePromptLogin(Boolean disablePromptLogin) {
         this.disablePromptLogin = disablePromptLogin;
+    }
+
+    public Boolean getDisablePromptConsent() {
+        if (disablePromptConsent == null) disablePromptConsent = false;
+        return disablePromptConsent;
+    }
+
+    public void setDisablePromptConsent(Boolean disablePromptConsent) {
+        this.disablePromptConsent = disablePromptConsent;
     }
 
     public Boolean getIncludeSidInResponse() {
