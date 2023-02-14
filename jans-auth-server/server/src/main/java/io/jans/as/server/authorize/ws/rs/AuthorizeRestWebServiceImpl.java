@@ -352,7 +352,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
         authzRequest.getAuditLog().setUsername(user.getUserId());
 
-        ExternalPostAuthnContext postAuthnContext = new ExternalPostAuthnContext(client, sessionUser, authzRequest.getHttpRequest(), authzRequest.getHttpResponse());
+        ExternalPostAuthnContext postAuthnContext = new ExternalPostAuthnContext(client, sessionUser, authzRequest, prompts);
         checkForceReAuthentication(authzRequest, prompts, client, postAuthnContext);
         checkForceAuthorization(authzRequest, prompts, client, postAuthnContext);
 
@@ -533,6 +533,12 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     }
 
     private void checkPromptConsent(AuthzRequest authzRequest, List<Prompt> prompts, SessionId sessionUser, User user, ClientAuthorization clientAuthorization, boolean clientAuthorizationFetched) {
+        if (isTrue(appConfiguration.getDisablePromptConsent())) {
+            log.trace("Disabled prompt=consent (because disablePromptConsent=true).");
+            prompts.remove(Prompt.CONSENT);
+            return;
+        }
+
         if (prompts.contains(Prompt.CONSENT) || !isTrue(sessionUser.isPermissionGrantedForClient(authzRequest.getClientId()))) {
             if (!clientAuthorizationFetched) {
                 clientAuthorization = clientAuthorizationsService.find(user.getAttribute("inum"), authzRequest.getClient().getClientId());
