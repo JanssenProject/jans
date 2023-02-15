@@ -33,6 +33,7 @@ class TestRegisterEndpoint(TestCase):
     def tearDown(self):
         # restoring original method from stash
         ClientHandler.discover = self.CHd
+        ClientHandler.register_client = self.register
 
     def test_if_app_has_register_endpoint(self):
         self.assertIn(
