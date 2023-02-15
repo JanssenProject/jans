@@ -82,6 +82,32 @@ Claims that list supported algorithms:
 
 ## Grants
 
+Janssen Server supports grant types defined by OAuth 2.0, OAuth 2.1 and extension grants defined by other RFCs. Complete
+list of supported grant types can be found in the response of the Janssen Server's well-known
+[configuration endpoint](./configuration.md) given below.
+
+```text
+https://janssen.server.host/jans-auth/.well-known/openid-configuration
+```
+
+Claim `grant_types_supported` lists all the supported grant types in the response.
+
+### Configure Grants Types For Client
+
+| Client Type                                                                                                        | Recommended Grant Type       | Comments |     |     |
+|--------------------------------------------------------------------------------------------------------------------|------------------------------|----------|-----|-----|
+| Backend App (Example: batch processes)                                                                             | Client Credentials           |          |     |     |
+| App Hosted on server that needs end-user's permission to access resource (Example: client-server Web Applications) | Authorization Code           |          |     |     |
+| App that completely runs on end-user's browser (Example: single page applications)                                 | Authorization Code with PKCE |          |     |     |
+| Mobile Applications                                                                                                |                              |          |     |     |
+
+Note: Implicit and ROPC(Resource Owner Password Credentials) grant types have been removed from OAuth v2.1 and no longer 
+recommended for any usecase. 
+
+### How to implement a custom extension grant in Jans, similar to 
+[here](https://identityserver4.readthedocs.io/en/aspnetcore2/topics/extension_grants.html#extension-grants). May be
+it should go to developer guide.
+
 ## Pre-authorization
 
 If the OAuth authorization prompt should not be displayed to end users, set this field to True. This is useful for SSO
