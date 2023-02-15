@@ -22,7 +22,9 @@ from setup_app.pylib.ldif4.ldif import LDIFWriter
 
 class OpenDjInstaller(BaseInstaller, SetupUtils):
 
-    opendj_link = 'https://maven.gluu.org/maven/org/gluufederation/opendj/opendj-server-legacy/{0}/opendj-server-legacy-{0}.zip'.format(base.current_app.app_info['OPENDJ_VERSION'])
+    # opendj_link = 'https://maven.gluu.org/maven/org/gluufederation/opendj/opendj-server-legacy/{0}/opendj-server-legacy-{0}.zip'.format(base.current_app.app_info['OPENDJ_VERSION'])
+    opendj_link = os.path.join(base.current_app.app_info['BASE_SERVER'], 'opendj-server-legacy-4.4.13.zip')
+
     source_files = [
             (os.path.join(Config.dist_app_dir, os.path.basename(opendj_link)), opendj_link),
             ]
