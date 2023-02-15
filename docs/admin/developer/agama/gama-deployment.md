@@ -156,7 +156,7 @@ The following tables summarize the available endpoints. All URLs are relative to
 |Purpose|Add or replace an ADS project to the server|
 |Method|POST|
 |Query params|`name` (the project's name) - mandatory|
-|Body|The binary contents of a `.gama` file. See example below. Ensure to use header `Content-Type: application/zip`|
+|Body|The binary contents of a `.gama` file; example [here](#sample-file). Ensure to use header `Content-Type: application/zip`|
 |Output|Textual explanation, e.g. `A deployment task for project XXX  has been queued. Use the GET endpoint to poll status`|
 |Status|202 (the task was created and scheduled for deployment), 409 (there is a task already for this project and it hasn't finished yet), 400 (a param is missing)|
 
@@ -173,8 +173,8 @@ The following tables summarize the available endpoints. All URLs are relative to
 API operations are protected by Oauth2 scopes this way:
 
 - GET: `https://jans.io/oauth/config/agama.readonly`
+- POST:  `https://jans.io/oauth/config/agama.write`
 - DELETE: `https://jans.io/oauth/config/agama.delete`
-- Others:  `https://jans.io/oauth/config/agama.write`
 
 ## Internals of deployment
 
