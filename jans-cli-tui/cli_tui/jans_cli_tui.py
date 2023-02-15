@@ -550,7 +550,7 @@ class JansCliApp(Application):
     def help(self,ev: KeyPressEvent) -> None:
         self.logger.debug("ev:"+str(ev))
         self.logger.debug("ev:"+str(type(ev)))
-        self.show_message(_("Help"),'''<Enter> {} \n<j> {}\n<d> {}'''.format(_("Edit current selection"),_("Display current item in JSON format"),_("Delete current selection")))
+        self.show_message(_("Help"),'''<Enter>          {} \n<d>              {}\n<Delete>         {}\n<Alt + letter>   {}\n<Esc>            {}\nFor More Visite  {}'''.format(_("Confirm or Edit current selection"),_("Display current item in JSON format if possible"),_("Delete current selection if possible"),_("Navigate to an other tab"),_("Close the current dialog"),"https://docs.jans.io/v1.0.6/admin/config-guide/tui/"))
         
     def escape(self,ev: KeyPressEvent) -> None:
         try:
