@@ -106,7 +106,7 @@ if PROFILE != OPENBANKING_PROFILE:
 
     # test-client
     parser.add_argument('-test-client-id', help="ID of test client which has all available scopes. Must be in UUID format.")
-    parser.add_argument('-test-client-secret', help="Secret for test client")
+    parser.add_argument('-test-client-pw', help="Secret for test client")
     parser.add_argument('-test-client-redirect-uri', help="Redirect URI for test client")
     parser.add_argument('--test-client-trusted', help="Make test client trusted", action='store_true')
 
