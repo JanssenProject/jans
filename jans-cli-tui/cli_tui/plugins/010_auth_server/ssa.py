@@ -136,10 +136,12 @@ class SSA(DialogUtils):
                 result = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
                 self.app.stop_progressing()
                 ssa = result.json()
-                self.app.data_display_dialog(data=ssa, title=_("SSA Token"), message=_("Save and store it securely. This is the only time you see this token."))
-
-                self.get_ssa()
                 dialog.future.set_result(True)
+                if 'ssa' in ssa:
+                    self.app.data_display_dialog(data=ssa, title=_("SSA Token"), message=_("Save and store it securely. This is the only time you see this token."))
+                    self.get_ssa()
+                else:
+                    self.app.show_message(_(common_strings.error), _("Something not went good while creating SSA:" + "\n" + str(ssa)), tobefocused = self.main_container)
 
             asyncio.ensure_future(coroutine())
 
