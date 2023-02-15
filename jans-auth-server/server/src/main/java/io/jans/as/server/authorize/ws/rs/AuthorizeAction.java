@@ -392,7 +392,13 @@ public class AuthorizeAction {
             return;
         }
 
-        ExternalPostAuthnContext postAuthnContext = new ExternalPostAuthnContext(client, session, (HttpServletRequest) externalContext.getRequest(), (HttpServletResponse) externalContext.getResponse());
+        AuthzRequest authzRequest = new AuthzRequest();
+        authzRequest.setHttpRequest((HttpServletRequest) externalContext.getRequest());
+        authzRequest.setHttpResponse((HttpServletResponse) externalContext.getResponse());
+        authzRequest.setClient(client);
+        authzRequest.setSessionId(sessionId);
+
+        ExternalPostAuthnContext postAuthnContext = new ExternalPostAuthnContext(client, session, authzRequest, prompts);
         final boolean forceAuthorization = externalPostAuthnService.externalForceAuthorization(client, postAuthnContext);
 
         final boolean hasConsentPrompt = prompts.contains(io.jans.as.model.common.Prompt.CONSENT);
