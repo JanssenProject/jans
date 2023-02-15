@@ -434,11 +434,9 @@ class JansInstaller(BaseInstaller, SetupUtils):
     def create_test_client(self):
         ldif_fn = self.clients_ldif_fn = os.path.join(Config.output_dir, 'test-client.ldif')
         client_id = Config.get('test_client_id') or base.argsp.test_client_id
-        client_pw = Config.get('test_client_pw') or base.argsp.test_client_secret or self.getPW()
+        client_pw = Config.get('test_client_pw') or base.argsp.test_client_pw or self.getPW()
         encoded_pw = self.obscure(client_pw)
-        trusted_client = Config.get('test_client_trusted_client')
-        if not trusted_client:
-            trusted_client = 'true' if base.argsp.test_client_trusted else 'false'
+        trusted_client = 'true' if (Config.get('test_client_trusted') or base.argsp.test_client_trusted) else 'false'
 
         if base.argsp.test_client_redirect_uri:
             redirect_uri = base.argsp.test_client_redirect_uri.split(',')
@@ -464,7 +462,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
         Config.test_client_pw = client_pw
         Config.test_client_pw_encoded = encoded_pw
         Config.test_client_redirect_uri = redirect_uri
-        Config.test_client_trusted_client = trusted_client
+        Config.test_client_trusted = trusted_client
         Config.test_client_scopes = ' '.join(scopes)
 
 
