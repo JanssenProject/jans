@@ -721,8 +721,6 @@ class Plugin(DialogUtils):
     def edit_client(self, **params: Any) -> None:
         """This Method show the scopes dialog for edit
         """
-
-        self.app.create_background_task(self.retrieve_sopes())
         selected_line_data = params['data']
         title = _("Edit Clients")
 
