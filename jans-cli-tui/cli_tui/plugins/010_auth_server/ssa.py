@@ -8,7 +8,7 @@ from prompt_toolkit.eventloop import get_event_loop
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.layout.containers import HSplit, VSplit
 from prompt_toolkit.layout.containers import DynamicContainer, Window
-from prompt_toolkit.widgets import Button, Label, Checkbox
+from prompt_toolkit.widgets import Button, Label, Checkbox, Dialog
 from prompt_toolkit.buffer import Buffer
 
 from utils.utils import DialogUtils
@@ -40,7 +40,8 @@ class SSA(DialogUtils):
                 selectes=0,
                 headerColor=cli_style.navbar_headcolor,
                 entriesColor=cli_style.navbar_entriescolor,
-                hide_headers = True
+                hide_headers = True,
+                max_height=20
             )
 
         self.main_container =  HSplit([
@@ -145,6 +146,40 @@ class SSA(DialogUtils):
 
             asyncio.ensure_future(coroutine())
 
+
+    def edit_custom_claim(self, **kwargs: Any) -> None:
+
+        """Method for editing the custom claim 
+        """
+
+        key, val = kwargs.get('data', ('',''))
+
+        key_widget = self.app.getTitledText(_("Key"), name='claim_key', value=key, style=cli_style.edit_text, jans_help=_("Custom claim Key"))
+        val_widget = self.app.getTitledText(_("Value"), name='claim_val', value=val, style=cli_style.edit_text, jans_help=_("Custom claim value"))
+
+        def add_claim(dialog: Dialog) -> None:
+            key_ = key_widget.me.text
+            val_ = val_widget.me.text
+            cur_data = [key_, val_]
+
+            if not kwargs.get('data'):
+                self.custom_claims_container.add_item(cur_data)
+                self.custom_claims_container.all_data.append(cur_data)
+            else:
+                self.custom_claims_container.replace_item(kwargs['selected'], cur_data)
+                self.custom_claims_container.all_data[kwargs['selected']] = cur_data
+
+        body_widgets = [key_widget, val_widget]
+        body = HSplit(body_widgets)
+        buttons = [Button(_("Cancel")), Button(_("OK"), handler=add_claim)]
+        dialog = JansGDialog(self.app, title=_("Edit Custom Claim"), body=body, buttons=buttons, width=self.app.dialog_width-20)
+        self.app.show_jans_dialog(dialog)
+
+
+    def delete_custom_claim(self):
+        pass
+
+
     def edit_ssa_dialog(self, data=None):
         if data:
             title = _("Edit SSA")
@@ -157,6 +192,25 @@ class SSA(DialogUtils):
         self.never_expire_cb = Checkbox(never_expire_label)
         expiration_iso = datetime.fromtimestamp(data['exp']).isoformat() if 'exp' in data else ''
         self.expire_widget = DateSelectWidget(value=expiration_iso, parent=self)
+
+        custom_claims_title = _("Custom Claims: ")
+        add_custom_claim_title = _("Add Claim")
+        self.custom_claims_container = JansVerticalNav(
+                myparent=self.app,
+                headers=['Key', 'Value'],
+                preferred_size=[15, 20],
+                on_enter=self.edit_custom_claim,
+                on_delete=self.delete_custom_claim,
+                on_display=self.myparent.data_display_dialog,
+                selectes=0,
+                all_data=[],
+                headerColor=cli_style.navbar_headcolor,
+                entriesColor=cli_style.navbar_entriescolor,
+                underline_headings=False,
+                max_width=52,
+                jans_name='customClaims',
+                max_height=3
+                )
 
         body = HSplit([
 
@@ -197,6 +251,15 @@ class SSA(DialogUtils):
                     style=cli_style.edit_text_required
                 ),
 
+                VSplit([
+                            HSplit([Label(text=custom_claims_title, style=cli_style.titled_text, width=len(custom_claims_title)+1)], height=1),
+                            self.custom_claims_container,
+                            Window(width=2),
+                            HSplit([Button(text=add_custom_claim_title, width=len(add_custom_claim_title)+ 2, handler=self.edit_custom_claim)], height=1),
+                            ],
+                            height=5, width=D(),
+                            ),
+
                 self.app.getTitledCheckBox(
                             _("One Time Use"), 
                             name='one_time_use', 
@@ -212,7 +275,7 @@ class SSA(DialogUtils):
                             ),
 
                 VSplit([
-                    Label(expiration_label + ': ', width=len(expiration_label)+2, style=cli_style.edit_text),
+                    Label(expiration_label + ': ', width=len(expiration_label)+2, style=cli_style.titled_text),
                     HSplit([self.never_expire_cb], width=len(never_expire_label)+7),
                     self.expire_widget,
                     ], height=1),
