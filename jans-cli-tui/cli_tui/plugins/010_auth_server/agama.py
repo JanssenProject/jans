@@ -119,7 +119,6 @@ class Agama(DialogUtils):
                 self.app.start_progressing(_("Uploading agama project..."))
                 result = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
                 data = result.text
-                open("/tmp/data.txt", "w").write(str(data))
                 self.app.stop_progressing()
                 self.get_agama_projects()
 
