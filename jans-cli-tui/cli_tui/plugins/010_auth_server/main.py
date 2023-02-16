@@ -860,6 +860,7 @@ class Plugin(DialogUtils):
                     data={}
                 )
                 self.oauth_get_scopes()
+                self.app.create_background_task(self.retrieve_sopes())
             return result
 
         asyncio.ensure_future(coroutine())
