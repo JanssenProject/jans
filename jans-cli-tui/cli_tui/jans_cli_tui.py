@@ -901,7 +901,7 @@ class JansCliApp(Application):
         ) -> Dialog:
         body = VSplit([Label(message)], align=HorizontalAlign.CENTER)
         buttons = [Button(_("No")), Button(_("Yes"), handler=confirm_handler)]
-        dialog = JansGDialog(self, title=_("Confirmation"), body=body, buttons=buttons)
+        dialog = JansGDialog(self, title=_("Confirmation"), body=body, buttons=buttons, width=self.dialog_width-20)
         return dialog
 
 

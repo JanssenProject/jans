@@ -176,8 +176,24 @@ class SSA(DialogUtils):
         self.app.show_jans_dialog(dialog)
 
 
-    def delete_custom_claim(self):
-        pass
+    def delete_custom_claim(self, **kwargs: Any) -> None:
+        """This method for deleting custom claim
+        """
+
+        dialog = self.app.get_confirm_dialog(_("Are you sure want to delete custom claim with Key:")+"\n {} ?".format(kwargs['selected'][0]))
+
+        async def coroutine():
+            focused_before = self.app.layout.current_window
+            result = await self.myparent.show_dialog_as_float(dialog)
+            try:
+                self.myparent.layout.focus(focused_before)
+            except:
+                self.myparent.app.focus(self.myparent.center_frame)
+
+            if result.lower() == 'yes':
+                self.custom_claims_container.remove_item(kwargs['selected'])
+
+        asyncio.ensure_future(coroutine())
 
 
     def edit_ssa_dialog(self, data=None):
