@@ -2,7 +2,10 @@ package jans
 
 import (
 	"context"
+	"fmt"
+	"math/rand"
 	"testing"
+	"time"
 )
 
 func TestAuthConfigMapping(t *testing.T) {
@@ -39,7 +42,11 @@ func TestPatchAuthConfig(t *testing.T) {
 		t.Fatal("expected 1 client in blacklist")
 	}
 
-	cfg.ClientBlackList = []string{"*.attacker.com/*"}
+	rand.Seed(time.Now().UnixNano())
+
+	newEntry := fmt.Sprintf("*.attacker-%v.com/*", rand.Intn(100))
+
+	cfg.ClientBlackList = []string{newEntry}
 
 	if _, err := client.UpdateAppConfiguration(ctx, cfg); err != nil {
 		t.Fatal(err)
@@ -54,7 +61,8 @@ func TestPatchAuthConfig(t *testing.T) {
 		t.Fatal("expected 1 client in blacklist")
 	}
 
-	if (cfg.ClientBlackList[0]) != "*.attacker.com/*" {
-		t.Fatal("expected *.attacker.com/* in blacklist")
+	if (cfg.ClientBlackList[0]) != newEntry {
+		t.Fatalf("expected '%s' in blacklist, got '%s'", newEntry, cfg.ClientBlackList[0])
 	}
+
 }

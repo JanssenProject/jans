@@ -330,48 +330,9 @@ func setFieldValue(f reflect.Value, v interface{}) error {
 		f.Set(valueToSet)
 
 	case reflect.Slice:
-		// if the field is a slice, we need to initialize a new slice of
-		// the correct type and add all items to it
-
-		elemType := vType.Elem()
-
-		// create a new slice of the correct type
-		elemSlice := reflect.New(reflect.SliceOf(elemType)).Elem()
-
-		// if the elements in the slice are structs, we need to map them back
-		// from the map to the struct first, before we can add them to the slice
-		if vType.Elem().Kind() == reflect.Struct {
-
-			for _, elem := range v.([]interface{}) {
-
-				m, ok := elem.(map[string]interface{})
-				if !ok {
-					return fmt.Errorf("failed to convert value to map")
-				}
-
-				// create a new struct of the correct type
-				newElem := reflect.New(elemType)
-
-				getter := func(key string) (any, bool) {
-					val, ok := m[key]
-					return val, ok
-				}
-
-				if err := decoder(getter, newElem.Interface()); err != nil {
-					return fmt.Errorf("failed to convert map to struct: %w", err)
-				}
-
-				elemSlice = reflect.Append(elemSlice, reflect.Indirect(newElem))
-			}
-
-		} else {
-
-			// otherwise we can just fill the slice, assuming it's
-			// a slice of primitive types
-			for _, elem := range v.([]interface{}) {
-				elemSlice = reflect.Append(elemSlice, reflect.ValueOf(elem))
-			}
-
+		elemSlice, err := convertSlice(vType, v)
+		if err != nil {
+			return fmt.Errorf("failed to convert slice: %w", err)
 		}
 
 		f.Set(elemSlice)
@@ -423,4 +384,71 @@ func setFieldValue(f reflect.Value, v interface{}) error {
 	}
 
 	return nil
+}
+
+// convertSlice will take the provided value and convert it to a slice of the
+// correct type. If the elements in the slice are structs, they will be
+// converted from a map to a struct first. If the value is nil, an empty slice
+// will be returned. For slices, this will run recursively.
+func convertSlice(targetType reflect.Type, value interface{}) (reflect.Value, error) {
+
+	// if the field is a slice, we need to initialize a new slice of
+	// the correct type and add all items to it
+
+	elemType := targetType.Elem()
+
+	// create a new slice of the correct type
+	elemSlice := reflect.New(reflect.SliceOf(elemType)).Elem()
+
+	// if the elements in the slice are structs, we need to map them back
+	// from the map to the struct first, before we can add them to the slice
+	if targetType.Elem().Kind() == reflect.Struct {
+
+		for _, elem := range value.([]interface{}) {
+
+			m, ok := elem.(map[string]interface{})
+			if !ok {
+				return reflect.ValueOf(nil), fmt.Errorf("failed to convert value to map")
+			}
+
+			// create a new struct of the correct type
+			newElem := reflect.New(elemType)
+
+			getter := func(key string) (any, bool) {
+				val, ok := m[key]
+				return val, ok
+			}
+
+			if err := decoder(getter, newElem.Interface()); err != nil {
+				return reflect.ValueOf(nil), fmt.Errorf("failed to convert map to struct: %w", err)
+			}
+
+			elemSlice = reflect.Append(elemSlice, reflect.Indirect(newElem))
+		}
+
+	} else if targetType.Elem().Kind() == reflect.Slice {
+
+		// nested slices have to be handled separately from primitive types
+
+		subType := reflect.SliceOf(elemType.Elem())
+		for _, elem := range value.([]interface{}) {
+			val, err := convertSlice(subType, elem)
+			if err != nil {
+				return reflect.ValueOf(nil), fmt.Errorf("failed to convert slice: %w", err)
+			}
+
+			elemSlice = reflect.Append(elemSlice, val)
+		}
+
+	} else {
+
+		// otherwise we can just fill the slice, assuming it's
+		// a slice of primitive types
+		for _, elem := range value.([]interface{}) {
+			elemSlice = reflect.Append(elemSlice, reflect.ValueOf(elem))
+		}
+
+	}
+
+	return elemSlice, nil
 }

@@ -35,23 +35,6 @@ func (c *Client) GetSMTPConfiguration(ctx context.Context) (*SMTPConfiguration, 
 	return ret, nil
 }
 
-// CreateSMTPConfiguration creates a new SMTP configuration.
-func (c *Client) CreateSMTPConfiguration(ctx context.Context, config *SMTPConfiguration) (*SMTPConfiguration, error) {
-
-	token, err := c.getToken(ctx, "https://jans.io/oauth/config/smtp.write")
-	if err != nil {
-		return nil, fmt.Errorf("failed to get token: %w", err)
-	}
-
-	ret := &SMTPConfiguration{}
-
-	if err := c.post(ctx, "/jans-config-api/api/v1/config/smtp", token, config, ret); err != nil {
-		return nil, fmt.Errorf("post request failed: %w", err)
-	}
-
-	return ret, nil
-}
-
 // UpdateSMTPConfiguration updates an existing SMTP configuration.
 func (c *Client) UpdateSMTPConfiguration(ctx context.Context, config *SMTPConfiguration) (*SMTPConfiguration, error) {
 
@@ -67,19 +50,4 @@ func (c *Client) UpdateSMTPConfiguration(ctx context.Context, config *SMTPConfig
 	}
 
 	return ret, nil
-}
-
-// DeleteSMTPConfiguration deletes an existing SMTP configuration.
-func (c *Client) DeleteSMTPConfiguration(ctx context.Context) error {
-
-	token, err := c.getToken(ctx, "https://jans.io/oauth/config/smtp.delete")
-	if err != nil {
-		return fmt.Errorf("failed to get token: %w", err)
-	}
-
-	if err := c.delete(ctx, "/jans-config-api/api/v1/config/smtp", token); err != nil {
-		return fmt.Errorf("delete request failed: %w", err)
-	}
-
-	return nil
 }

@@ -346,14 +346,23 @@ func resourceAppConfiguration() *schema.Resource {
 				},
 			},
 			"response_modes_supported": {
-				Type:        schema.TypeList,
-				Optional:    true,
-				Description: `A list of the OAuth 2.0 Response Mode values that this OP supports. One of "query¡¡", "fragment", "form_post".`,
+				Type:     schema.TypeList,
+				Optional: true,
+				Description: `A list of the OAuth 2.0 Response Mode values that this OP supports. One of "query", 
+							"fragment", "form_post", "query.jwt", "fragment.jwt", "form_post.jwt", "jwt".`,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 					ValidateDiagFunc: func(v interface{}, p cty.Path) diag.Diagnostics {
 
-						enums := []string{"query¡¡", "fragment", "form_post"}
+						enums := []string{
+							"query",
+							"fragment",
+							"form_post",
+							"query.jwt",
+							"fragment.jwt",
+							"form_post.jwt",
+							"jwt",
+						}
 
 						return validateEnum(v, enums)
 					},
@@ -362,15 +371,23 @@ func resourceAppConfiguration() *schema.Resource {
 			"grant_types_supported": {
 				Type:     schema.TypeList,
 				Optional: true,
-				Description: `A list of the OAuth 2.0 Grant Type values that this OP supports. One of "authorization_code",
-							"implicit", "password", "client_credentials", "refresh_token", "urn:ietf:params:oauth:grant-type:uma-ticket",
+				Description: `A list of the OAuth 2.0 Grant Type values that this OP supports. One of"none", "authorization_code", 
+							"client_credentials", "implicit", "password", "refresh_token", "urn:ietf:params:oauth:grant-type:device_code", 
+							"urn:ietf:params:oauth:grant-type:token-exchange", "urn:ietf:params:oauth:grant-type:uma-ticket", 
 							"urn:openid:params:grant-type:ciba".`,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 					ValidateDiagFunc: func(v interface{}, p cty.Path) diag.Diagnostics {
 
-						enums := []string{"authorization_code", "implicit", "password",
-							"client_credentials", "refresh_token",
+						enums := []string{
+							"none",
+							"authorization_code",
+							"client_credentials",
+							"implicit",
+							"password",
+							"refresh_token",
+							"urn:ietf:params:oauth:grant-type:device_code",
+							"urn:ietf:params:oauth:grant-type:token-exchange",
 							"urn:ietf:params:oauth:grant-type:uma-ticket",
 							"urn:openid:params:grant-type:ciba",
 						}
@@ -554,15 +571,9 @@ func resourceAppConfiguration() *schema.Resource {
 			"token_endpoint_auth_methods_supported": {
 				Type:        schema.TypeList,
 				Optional:    true,
-				Description: "A list of Client Authentication methods supported by this Token Endpoint. One of 'client_secret_basic', 'client_secret_post', 'client_secret_jwt', 'private_key_jwt'.",
+				Description: "A list of Client Authentication methods supported by this Token Endpoint.",
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
-					ValidateDiagFunc: func(v interface{}, p cty.Path) diag.Diagnostics {
-
-						enums := []string{"client_secret_basic", "client_secret_post", "client_secret_jwt", "private_key_jwt"}
-
-						return validateEnum(v, enums)
-					},
 				},
 			},
 			"token_endpoint_auth_signing_alg_values_supported": {
@@ -665,12 +676,12 @@ func resourceAppConfiguration() *schema.Resource {
 			"ui_locales_supported": {
 				Type:        schema.TypeList,
 				Optional:    true,
-				Description: "Languages and scripts supported for the user interface. One of 'en', 'es'.",
+				Description: `Languages and scripts supported for the user interface. One of "en", "bg", "de", "es", "fr", "it", "ru", "tr".`,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 					ValidateDiagFunc: func(v interface{}, p cty.Path) diag.Diagnostics {
 
-						enums := []string{"en", "es"}
+						enums := []string{"en", "bg", "de", "es", "fr", "it", "ru", "tr"}
 
 						return validateEnum(v, enums)
 					},
@@ -1223,7 +1234,7 @@ func resourceAppConfiguration() *schema.Resource {
 			"authorization_request_custom_allowed_parameters": {
 				Type:        schema.TypeList,
 				Optional:    true,
-				Description: "Authorization Request Custom Allowed Parameters.",
+				Description: "Authorization Request Custom Allowed Parameters. To avoid diverging state, those should be defined in alphabetical order.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"param_name": {
