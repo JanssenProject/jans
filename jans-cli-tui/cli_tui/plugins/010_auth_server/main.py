@@ -781,6 +781,8 @@ class Plugin(DialogUtils):
             if response.status_code == 500:
                 self.app.show_message(_('Error'), response.text + '\n' + response.reason)
             else:
+                if operation_id == 'post-oauth-scopes':
+                    self.app.create_background_task(self.retrieve_sopes())
                 self.oauth_get_scopes()
 
         asyncio.ensure_future(coroutine())
