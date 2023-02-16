@@ -416,10 +416,10 @@ class EditScriptDialog(JansGDialog, DialogUtils):
             if result.lower() == 'yes':
                 if kwargs['jans_name'] == 'configurationProperties':
                     self.config_properties_container.remove_item(kwargs['selected'])
-                else:
+                else Exception:
                     self.module_properties_container.remove_item(kwargs['selected'])
                 self.myparent.stop_progressing()
-                
+
             return result
 
         asyncio.ensure_future(coroutine())

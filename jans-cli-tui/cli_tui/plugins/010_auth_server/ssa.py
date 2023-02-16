@@ -187,7 +187,7 @@ class SSA(DialogUtils):
             result = await self.myparent.show_dialog_as_float(dialog)
             try:
                 self.myparent.layout.focus(focused_before)
-            except:
+            except Exception:
                 self.myparent.app.focus(self.myparent.center_frame)
 
             if result.lower() == 'yes':
