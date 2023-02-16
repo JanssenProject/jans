@@ -186,8 +186,8 @@ type AppConfiguration struct {
 	DynamicRegistrationCustomObjectClass                      string                                `schema:"dynamic_registration_custom_object_class" json:"dynamicRegistrationCustomObjectClass"`
 	DynamicRegistrationScopesParamEnabled                     bool                                  `schema:"dynamic_registration_scopes_param_enabled" json:"dynamicRegistrationScopesParamEnabled"`
 	DynamicRegistrationPasswordGrantTypeEnabled               bool                                  `schema:"dynamic_registration_password_grant_type_enabled" json:"dynamicRegistrationPasswordGrantTypeEnabled"`
-	PersistIdToken                                            bool                                  `schema:"persist_id_token_in_ldap" json:"persistIdToken"`
-	PersistRefreshToken                                       bool                                  `schema:"persist_refresh_token_in_ldap" json:"persistRefreshToken"`
+	PersistIdTokenInLdap                                      bool                                  `schema:"persist_id_token_in_ldap" json:"persistIdTokenInLdap"`
+	PersistRefreshTokenInLdap                                 bool                                  `schema:"persist_refresh_token_in_ldap" json:"persistRefreshTokenInLdap"`
 	AllowPostLogoutRedirectWithoutValidation                  bool                                  `schema:"allow_post_logout_redirect_without_validation" json:"allowPostLogoutRedirectWithoutValidation"`
 	InvalidateSessionCookiesAfterAuthorizationFlow            bool                                  `schema:"invalidate_session_cookies_after_authorization_flow" json:"invalidateSessionCookiesAfterAuthorizationFlow"`
 	ReturnClientSecretOnRead                                  bool                                  `schema:"return_client_secret_on_read" json:"returnClientSecretOnRead"`
@@ -339,6 +339,8 @@ func (c *Client) GetAppConfiguration(ctx context.Context) (*AppConfiguration, er
 	if err := c.get(ctx, "/jans-config-api/api/v1/jans-auth-server/config", token, ret); err != nil {
 		return nil, fmt.Errorf("get request failed: %w", err)
 	}
+
+	sortArrays(&ret.AuthorizationRequestCustomAllowedParameters)
 
 	return ret, nil
 }
