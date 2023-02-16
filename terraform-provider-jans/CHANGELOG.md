@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.2.0](https://github.com/techtative/terraform-provider-jans/compare/v0.1.0...v0.2.0) (2023-02-16)
+## [0.2.0](https://github.com/JannsenProject/terraform-provider-jans/compare/v0.1.0...v0.2.0) (2023-02-16)
 
 
 ### Features
