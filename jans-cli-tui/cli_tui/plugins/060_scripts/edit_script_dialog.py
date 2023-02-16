@@ -409,14 +409,14 @@ class EditScriptDialog(JansGDialog, DialogUtils):
             result = await self.myparent.show_dialog_as_float(dialog)
             try:
                 self.myparent.layout.focus(focused_before)
-            except:
+            except Exception:
                 self.myparent.stop_progressing()
                 self.myparent.layout.focus(self.myparent.center_frame)
 
             if result.lower() == 'yes':
                 if kwargs['jans_name'] == 'configurationProperties':
                     self.config_properties_container.remove_item(kwargs['selected'])
-                else Exception:
+                else:
                     self.module_properties_container.remove_item(kwargs['selected'])
                 self.myparent.stop_progressing()
 
