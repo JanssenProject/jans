@@ -44,9 +44,9 @@ The `configurationAttributes` parameter is `java.util.Map<String, SimpleCustomPr
         
 **Note - The preferred way to modify an access token is with the Update Token script.**
 
-It is also possible to run an introspection script during `access_token` creation as JWT. It can be controlled by `run_introspection_script_before_access_token_as_jwt_creation_and_include_claims` OpenID Client property which is set to false by default. 
+It is also possible to run an introspection script during `access_token` creation as JWT. It can be controlled by `run_introspection_script_before_jwt_creation` OpenID Client property which is set to false by default. 
 
-If OpenID Client properties `run_introspection_script_before_access_token_as_jwt_creation_and_include_claims` and `access_token_as_jwt` are set to true then an introspection script will be run before JWT (`access_token`) is created and all JSON values will be transfered to JWT. Also `context` inside the script has additional method which allows you to cancel transfering of claims if needed `context.setTranferIntrospectionPropertiesIntoJwtClaims(false)`
+If OpenID Client properties `run_introspection_script_before_jwt_creation` and `access_token_as_jwt` are set to true then an introspection script will be run before JWT (`access_token`) is created and all JSON values will be transfered to JWT. Also `context` inside the script has additional method which allows you to cancel transfering of claims if needed `context.setTranferIntrospectionPropertiesIntoJwtClaims(false)`
         
 ## Common Use Cases
 

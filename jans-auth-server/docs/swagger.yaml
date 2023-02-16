@@ -1349,7 +1349,7 @@ paths:
                   description: List of spontaneous scopes
                   items:
                     type: string
-                run_introspection_script_before_access_token_as_jwt_creation_and_include_claims:
+                run_introspection_script_before_jwt_creation:
                   type: boolean
                   description: Boolean value with default value false. If true and access_token_as_jwt=true then run introspection script
                     and transfer claims into JWT.
@@ -1419,6 +1419,42 @@ paths:
                   description: Additional audiences.
                   items:
                     type: string
+                spontaneous_scope_script_dns:
+                  type: array
+                  description: Spontaneous scope script dn
+                  items:
+                    type: string
+                update_token_script_dns:
+                  type: array
+                  description: Update token script dn
+                  items:
+                    type: string
+                post_authn_script_dns:
+                  type: array
+                  description: Post Authn script dn
+                  items:
+                    type: string
+                consent_gathering_script_dns:
+                  type: array
+                  description: Consent Gathering script dn
+                  items:
+                    type: string
+                introspection_script_dns:
+                  type: array
+                  description: Introspection script dn
+                  items:
+                    type: string
+                rpt_claims_script_dns:
+                  type: array
+                  description: RPT Claims script dn
+                  items:
+                    type: string
+                ropc_script_dns:
+                  type: array
+                  description: ROPC script dn
+                  items:
+                    type: string
+
       responses:
         200:
           description: OK
@@ -1701,7 +1737,7 @@ paths:
                   description: List of spontaneous scopes
                   items:
                     type: string
-                run_introspection_script_before_access_token_as_jwt_creation_and_include_claims:
+                run_introspection_script_before_jwt_creation:
                   type: boolean
                   description: Boolean value with default value false. If true and access_token_as_jwt=true then run introspection script
                     and transfer claims into JWT.
@@ -1769,6 +1805,41 @@ paths:
                 additional_audience:
                   type: array
                   description: Additional audiences.
+                  items:
+                    type: string
+                spontaneous_scope_script_dns:
+                  type: array
+                  description: Spontaneous scope script dn
+                  items:
+                    type: string
+                update_token_script_dns:
+                  type: array
+                  description: Update token script dn
+                  items:
+                    type: string
+                post_authn_script_dns:
+                  type: array
+                  description: Post Authn script dn
+                  items:
+                    type: string
+                consent_gathering_script_dns:
+                  type: array
+                  description: Consent Gathering script dn
+                  items:
+                    type: string
+                introspection_script_dns:
+                  type: array
+                  description: Introspection script dn
+                  items:
+                    type: string
+                rpt_claims_script_dns:
+                  type: array
+                  description: RPT Claims script dn
+                  items:
+                    type: string
+                ropc_script_dns:
+                  type: array
+                  description: ROPC script dn
                   items:
                     type: string
       responses:
@@ -2055,7 +2126,7 @@ paths:
                     description: List of spontaneous scopes
                     items:
                       type: string
-                  run_introspection_script_before_access_token_as_jwt_creation_and_include_claims:
+                  run_introspection_script_before_jwt_creation:
                     type: boolean
                     description: Boolean value with default value false. If true and access_token_as_jwt=true then run introspection script
                       and transfer claims into JWT.
@@ -4317,7 +4388,20 @@ paths:
       tags:
         - SSA
       summary: Create SSA.
-      description: Create `SSA` for the organization with `expiration` (optional).
+      description: |-
+        # Create SSA for the organization with `expiration` (optional).
+        ----
+        
+        **Security: Bearer Auth**
+        
+        Provide your bearer token in the Authorization header when making requests to protected resources.
+        
+        Example: `Authorization: Bearer {{your-access-token}}`
+
+        **Security: OAuth 2.0**
+        
+        Scopes:
+        - `https://jans.io/auth/ssa.admin` - **SSA Admin**, You can create `SSA`.
       operationId: post-register-ssa
       security:
         - bearer: [ ]
@@ -4327,10 +4411,15 @@ paths:
             schema:
               required:
                 - org_id
+                - software_id
+                - software_roles
+                - grant_types
+                - one_time_use
+                - rotate_ssa
               type: object
               properties:
                 org_id:
-                  type: number
+                  type: string
                   description: The `org_id` is used for organization identification.
                   example: 1
                 description:
@@ -4383,12 +4472,26 @@ paths:
           $ref: '#/components/responses/UnauthorizedSSA'
         500:
           $ref: '#/components/responses/InternalServerErrorSSA'
-
     get:
       tags:
         - SSA
       summary: Get list of SSAs
-      description: Get all `SSA` list with filters.
+      description: |-
+        # Get all SSA list based on `jti` or `org_id`.
+        ----
+
+        **Security: Bearer Auth**
+
+        Provide your bearer token in the Authorization header when making requests to protected resources.
+
+        Example: `Authorization: Bearer {{your-access-token}}`
+
+        **Security: OAuth 2.0**
+
+        Scopes:
+        - `https://jans.io/auth/ssa.admin` - **SSA Admin**, Retrieves all `SSA`
+        - `https://jans.io/auth/ssa.portal` - **SSA Portal**, Retrieves all `SSA`
+        - `https://jans.io/auth/ssa.developer` - **SSA Developer**, Retrieves the `SSA` created by the same client
       operationId: get-ssa
       security:
         - bearer: [ ]
@@ -4397,9 +4500,9 @@ paths:
             type: string
           in: query
           name: jti
-          description: JTI
+          description: Unique Identifier
         - schema:
-            type: integer
+            type: string
           in: query
           name: org_id
           description: Organization ID
@@ -4421,6 +4524,8 @@ paths:
                       type: string
                     jti:
                       type: string
+                    status:
+                      type: string
                     ssa:
                       type: object
                       properties:
@@ -4433,7 +4538,7 @@ paths:
                         software_id:
                           type: string
                         org_id:
-                          type: integer
+                          type: string
                         software_roles:
                           type: array
                           items:
@@ -4451,12 +4556,13 @@ paths:
                       expiration: 1656319268
                       issuer: 04d7af18-f69c-4cf9-8b17-9872315a8f17
                       jti: 1527324c-b5a3-4d7d-8953-8c1874600ec1
+                      status: ACTIVE
                       ssa:
                         iss: 'https://jans.io'
                         iat: 1655319268
                         jti: f7b5991c-4c18-4c81-a664-e6f8670f5d51
                         software_id: gluu-scan-api
-                        org_id: 1
+                        org_id: org-id-1000
                         software_roles:
                           - password
                         grant_types:
@@ -4466,19 +4572,21 @@ paths:
           $ref: '#/components/responses/UnauthorizedSSA'
         500:
           $ref: '#/components/responses/InternalServerErrorSSA'
-
     head:
       tags:
         - SSA
       summary: Validate SSA
-      description: Validates that a given SSA JTI exists and is valid.
-      operationId: head-ssa
+      description: |-
+        # Validates that a given SSA `jti` exists and is valid
+        ----
+        
+        This endpoint does not have any security, it is an open endpoint.
       parameters:
         - schema:
             type: string
           in: header
           name: jti
-          description: JTI
+          description: Unique Identifier
           required: true
       responses:
         200:
@@ -4487,15 +4595,27 @@ paths:
           description: Not found.
         500:
           $ref: '#/components/responses/InternalServerErrorSSA'
-
     delete:
       tags:
         - SSA
       summary: Revoke SSA
       description: |-
-        Revokes existing active SSA based on `jti` or `org_id`.
+        # Revokes existing active SSA based on `jti` or `org_id`
+        ----
+        
         - `jti` - for delete only one SSA, the specified by `jti` 
         - `org_id` - for delete all SSA of the specified organization.
+        
+        **Security: Bearer Auth**
+        
+        Provide your bearer token in the Authorization header when making requests to protected resources.
+        
+        Example: `Authorization: Bearer {{your-access-token}}`
+        
+        **Security: OAuth 2.0**
+        
+        Scopes:
+        - `https://jans.io/auth/ssa.admin` - **SSA Admin**, You can revoke `SSA`.
       operationId: delete-ssa
       security:
         - bearer: [ ]
@@ -4506,7 +4626,7 @@ paths:
           name: jti
           description: A unique identifier for the token, which can be used to prevent reuse of the token.
         - schema:
-            type: integer
+            type: string
           in: query
           name: org_id
           description: Delete all SSAs of the specified organization.
@@ -4519,6 +4639,50 @@ paths:
           description: Not Acceptable. Check the query params. (When `jti` or `org_id` is not sent in the query param)
         422:
           description: Not found.
+        500:
+          $ref: '#/components/responses/InternalServerErrorSSA'
+
+  /ssa/jwt:
+    get:
+      tags:
+        - SSA
+      summary: Get JWT of SSA based on JTI.
+      description: |-
+        # Get JWT of SSA based on `jti`.
+        ----
+
+        **Security: Bearer Auth**
+
+        Provide your bearer token in the Authorization header when making requests to protected resources.
+
+        Example: `Authorization: Bearer {{your-access-token}}`
+
+        **Security: OAuth 2.0**
+
+        Scopes:
+        - `https://jans.io/auth/ssa.admin` - **SSA Admin**, Retrieve `JWT` of `SSA`
+      operationId: get-jwt-ssa
+      security:
+        - bearer: [ ]
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: jti
+          description: Unique Identifier.
+      responses:
+        200:
+          description: The response will return the `JWT` of `SSA`.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ssa:
+                    type: string
+                    example: eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL3BvcnRhbC5nbHV1Lm9yZyIsImlhdCI6IjE2NTUzMTkyNjgiLCJqdGkiOiJmN2I1OTkxYy00YzE4LTRjODEtYTY2NC1lNmY4NjcwZjVkNTEiLCJzb2Z0d2FyZV9pZCI6ImdsdXUtc2Nhbi1hcGkiLCJvcmdfaWQiOjEsInNvZnR3YXJlX3JvbGVzIjpbInBhc3N3dXJkIl0sImp3a3NfdXJpIjoiaHR0cHM6Ly9jbG91ZC1kZXYuZ2x1dS5jbG91ZC9wb3J0YWwvandrcyIsImdyYW50X3R5cGVzIjpbImNsaWVudF9jcmVkZW50aWFscyJdLCJleHAiOjE2NTkzMTkyNjh9.MkE-47SvBshmazBfyhAcHsqPpFIbg5CpA8k2TxDWhxc
+        401:
+          $ref: '#/components/responses/UnauthorizedSSA'
         500:
           $ref: '#/components/responses/InternalServerErrorSSA'
 
@@ -4607,7 +4771,6 @@ components:
       required:
         - alg
         - exp
-        - key_ops
         - kid
         - kty
         - use

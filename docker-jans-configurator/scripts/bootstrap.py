@@ -29,7 +29,7 @@ from parameter import params_from_file
 from settings import LOGGING_CONFIG
 
 DEFAULT_SIG_KEYS = "RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512"
-DEFAULT_ENC_KEYS = "RSA1_5 RSA-OAEP"
+DEFAULT_ENC_KEYS = "RSA1_5 RSA-OAEP ECDH-ES"
 
 DEFAULT_CONFIG_FILE = "/app/db/config.json"
 DEFAULT_SECRET_FILE = "/app/db/secret.json"
@@ -63,6 +63,7 @@ def generate_openid_keys(passwd, jks_path, jwks_path, dn, exp=365, sig_keys=DEFA
         "-expiration", "{}".format(exp),
         "-keystore", jks_path,
         "-keypasswd", passwd,
+        "-key_ops_type", "connect",
     ])
     out, err, retcode = exec_cmd(cmd)
     if retcode == 0:
@@ -83,6 +84,7 @@ def generate_openid_keys_hourly(passwd, jks_path, jwks_path, dn, exp=48, sig_key
         "-expiration_hours", "{}".format(exp),
         "-keystore", jks_path,
         "-keypasswd", passwd,
+        "-key_ops_type", "connect",
     ])
     out, err, retcode = exec_cmd(cmd)
     if retcode == 0:
@@ -196,7 +198,10 @@ class CtxGenerator:
         return self.ctx_manager.get_secret(key, default)
 
     def base_ctx(self):
-        self.set_secret("encoded_salt", partial(get_random_chars, 24))
+        if self.params["salt"]:
+            self.set_secret("encoded_salt", self.params["salt"])
+        else:
+            self.set_secret("encoded_salt", partial(get_random_chars, 24))
         self.set_config("orgName", self.params["org_name"])
         self.set_config("country_code", self.params["country_code"])
         self.set_config("state", self.params["state"])
@@ -769,18 +774,8 @@ class CtxGenerator:
         if "sql" in opt_scopes:
             self.sql_ctx()
 
-        self.jans_cli_ctx()
-
         # populated config
         return self.ctx
-
-    def jans_cli_ctx(self):
-        self.set_config("role_based_client_id", lambda: f"2000.{uuid4()}")
-        role_based_client_pw = self.set_secret("role_based_client_pw", get_random_chars)
-        self.set_secret(
-            "role_based_client_encoded_pw",
-            partial(encode_text, role_based_client_pw, self.get_secret("encoded_salt")),
-        )
 
 
 def gen_idp3_key(storepass):

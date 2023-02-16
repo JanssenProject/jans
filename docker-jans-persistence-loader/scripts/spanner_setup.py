@@ -342,6 +342,7 @@ class SpannerBackend:
             ("jansClnt", "jansLogoutURI"),
             ("jansPerson", "role"),
             ("jansPerson", "mobile"),
+            ("jansPerson", "jansPersistentJWT"),
             ("jansCustomScr", "jansAlias"),
             ("jansClnt", "jansReqURI"),
             ("jansClnt", "jansClaimRedirectURI"),
@@ -369,6 +370,15 @@ class SpannerBackend:
             ("jansClnt", "jansPolicyURILocalized"),
             ("jansClnt", "jansTosURILocalized"),
             ("jansClnt", "displayNameLocalized"),
+            ("jansFido2AuthnEntry", "jansApp"),
+            ("jansFido2AuthnEntry", "jansCodeChallengeHash"),
+            ("jansFido2AuthnEntry", "exp"),
+            ("jansFido2AuthnEntry", "del"),
+            ("jansFido2RegistrationEntry", "jansApp"),
+            ("jansFido2RegistrationEntry", "jansPublicKeyIdHash"),
+            ("jansFido2RegistrationEntry", "jansDeviceData"),
+            ("jansFido2RegistrationEntry", "exp"),
+            ("jansFido2RegistrationEntry", "del"),
         ]:
             add_column(mod[0], mod[1])
 
@@ -421,6 +431,10 @@ class SpannerBackend:
         for mod in [
             ("jansPerson", "jansMobileDevices"),
             ("jansPerson", "jansOTPDevices"),
+            ("jansToken", "clnId"),
+            ("jansUmaRPT", "clnId"),
+            ("jansUmaPCT", "clnId"),
+            ("jansCibaReq", "clnId"),
         ]:
             column_from_array(mod[0], mod[1])
 

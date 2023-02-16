@@ -6,22 +6,18 @@
 
 package io.jans.as.server.service;
 
+import java.util.List;
+
 import io.jans.as.common.util.AttributeConstants;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.model.fido.u2f.DeviceRegistrationStatus;
-import io.jans.as.server.model.fido.u2f.DeviceRegistration;
 import io.jans.orm.ldap.impl.LdapEntryManagerFactory;
 import io.jans.orm.model.base.SimpleBranch;
 import io.jans.orm.model.fido2.Fido2RegistrationEntry;
 import io.jans.orm.search.filter.Filter;
 import io.jans.service.net.NetworkService;
-import io.jans.util.StringHelper;
-import org.apache.commons.lang.StringUtils;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import java.util.List;
 
 /**
  * Provides operations with users.
@@ -57,7 +53,7 @@ public class UserService extends io.jans.as.common.service.common.UserService {
         return staticConfiguration.getBaseDn().getPeople();
     }
 
-    public long countFido2RegisteredDevices(String username) {
+    public long countFido2RegisteredDevices(String username, String domain) {
         String userInum = getUserInum(username);
         if (userInum == null) {
             return 0;
@@ -72,38 +68,11 @@ public class UserService extends io.jans.as.common.service.common.UserService {
 
         Filter userInumFilter = Filter.createEqualityFilter("personInum", userInum);
         Filter registeredFilter = Filter.createEqualityFilter("jansStatus", "registered");
-        Filter filter = Filter.createANDFilter(userInumFilter, registeredFilter);
+        Filter domainFilter = Filter.createEqualityFilter("jansApp", domain);
+        Filter filter = Filter.createANDFilter(userInumFilter, registeredFilter, domainFilter);
 
         return persistenceEntryManager.countEntries(baseDn, Fido2RegistrationEntry.class, filter);
     }
-
-    public long countFidoRegisteredDevices(String username, String domain) {
-        String userInum = getUserInum(username);
-        if (userInum == null) {
-            return 0;
-        }
-
-        String baseDn = getBaseDnForFidoDevices(userInum);
-        if (persistenceEntryManager.hasBranchesSupport(baseDn)) {
-            if (!persistenceEntryManager.contains(baseDn, SimpleBranch.class)) {
-                return 0;
-            }
-        }
-
-        Filter resultFilter = Filter.createEqualityFilter("jansStatus", DeviceRegistrationStatus.ACTIVE.getValue());
-
-        List<DeviceRegistration> fidoRegistrations = persistenceEntryManager.findEntries(baseDn, DeviceRegistration.class, resultFilter);
-        if (StringUtils.isEmpty(domain)) {
-            return fidoRegistrations.size();
-        }
-
-        return fidoRegistrations.parallelStream().filter(f -> StringHelper.equals(domain, networkService.getHost(f.getApplication()))).count();
-    }
-
-    public long countFidoAndFido2Devices(String username, String domain) {
-        return countFidoRegisteredDevices(username, domain) + countFido2RegisteredDevices(username);
-    }
-
 
     public String getBaseDnForFido2RegistrationEntries(String userInum) {
         final String userBaseDn = getDnForUser(userInum); // "ou=fido2_register,inum=1234,ou=people,o=jans"

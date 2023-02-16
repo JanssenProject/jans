@@ -30,7 +30,7 @@ public class SsaCreateClient extends BaseClient<SsaCreateRequest, SsaCreateRespo
         return HttpMethod.POST;
     }
 
-    public SsaCreateResponse execSsaCreate(String accessToken, Long orgId, Long expirationDate, String description,
+    public SsaCreateResponse execSsaCreate(String accessToken, String orgId, Long expirationDate, String description,
                                            String softwareId, List<String> softwareRoles, List<String> grantTypes,
                                            Boolean oneTimeUse, Boolean rotateSsa) {
         SsaCreateRequest ssaCreateRequest = new SsaCreateRequest();

@@ -1,6 +1,9 @@
 import os
+import sys
+import uuid
 import argparse
 
+from setup_app import static
 from setup_app.version import __version__
 from setup_app.utils import base
 
@@ -104,6 +107,12 @@ if PROFILE == JANS_PROFILE or PROFILE == DISA_STIG_PROFILE:
     spanner_cred_group.add_argument('-spanner-emulator-host', help="Use Spanner emulator host")
     spanner_cred_group.add_argument('-google-application-credentials', help="Path to Google application credentials json file")
 
+    # test-client
+    parser.add_argument('-test-client-id', help="ID of test client which has all available scopes. Must be in UUID format.")
+    parser.add_argument('-test-client-pw', help="Secret for test client")
+    parser.add_argument('-test-client-redirect-uri', help="Redirect URI for test client")
+    parser.add_argument('--test-client-trusted', help="Make test client trusted", action='store_true')
+
 if PROFILE == JANS_PROFILE:
 
     parser.add_argument('--install-eleven', help="Install Eleven Server", action='store_true')
@@ -146,5 +155,13 @@ def add_to_me(you):
 
 
 def get_parser():
-    argsp = parser.parse_known_args()
-    return argsp[0]
+    argsp, others = parser.parse_known_args()
+    if argsp.test_client_id:
+        try:
+            uuid.UUID(argsp.test_client_id)
+        except:
+            sys.stderr.write("{}-test-client-id should be in UUID format{}\n".format(static.colors.DANGER, static.colors.ENDC))
+            sys.stderr.flush()
+            sys.exit(2)
+
+    return argsp

@@ -67,7 +67,7 @@ Janssen is not a big monolith--it's a lot of services working together. Whether 
 
 ### Quick Start
 
-For development and testing purposes, the Janssen Server can be quickly installed on an Ubuntu 22.04 VM by running the command below:
+For development and testing purposes, the Janssen Server can be quickly installed on an Ubuntu 20.04 VM by running the command below:
 
 ```
 wget https://raw.githubusercontent.com/JanssenProject/jans/main/automation/startjanssenmonolithdemo.sh && chmod u+x startjanssenmonolithdemo.sh && sudo bash startjanssenmonolithdemo.sh demoexample.jans.io MYSQL
@@ -143,6 +143,10 @@ If you find a bug in a Janssen project, or you would like to suggest a new featu
 
 Below are the list of current mega releases that hold information about each single release of our services and modules:
 
+- [v1.0.6](https://github.com/JanssenProject/jans/releases/tag/v1.0.6)
+- [v1.0.5](https://github.com/JanssenProject/jans/releases/tag/v1.0.5)
+- [v1.0.4](https://github.com/JanssenProject/jans/releases/tag/v1.0.4)
+- [v1.0.3](https://github.com/JanssenProject/jans/releases/tag/v1.0.3)
 - [v1.0.2](https://github.com/JanssenProject/jans/releases/tag/v1.0.2)
 - [v1.0.1](https://github.com/JanssenProject/jans/releases/tag/v1.0.1)
 - [v1.0.0](https://github.com/JanssenProject/jans/releases/tag/v1.0.0)

@@ -1,5 +1,41 @@
 # Changelog
 
+## 1.0.6 (2023-01-09)
+
+
+### Features
+
+* add endpoint to do syntax check only [#3277](https://github.com/JanssenProject/jans/issues/3277) ([#3299](https://github.com/JanssenProject/jans/issues/3299)) ([3b23636](https://github.com/JanssenProject/jans/commit/3b236360ca7e2c3d7edcae9c356ffd2b193c42c2))
+* add endpoints for MVP ADS projects management [#3094](https://github.com/JanssenProject/jans/issues/3094) ([#3262](https://github.com/JanssenProject/jans/issues/3262)) ([8546356](https://github.com/JanssenProject/jans/commit/8546356c7b6ee2e7f1fcc83f8fcafb889179c769))
+* add feature to include custom-claims in user-info endpoint of admin-ui plugin [#2969](https://github.com/JanssenProject/jans/issues/2969) ([#2970](https://github.com/JanssenProject/jans/issues/2970)) ([0549879](https://github.com/JanssenProject/jans/commit/054987944d91fe2021092c30b337e880421533ff))
+* changes in admin-ui plugin to allow agama-developer-studio to use its OAuth2 apis [#3085](https://github.com/JanssenProject/jans/issues/3085) ([#3298](https://github.com/JanssenProject/jans/issues/3298)) ([9e9a7bd](https://github.com/JanssenProject/jans/commit/9e9a7bd17c9b7238b7e65359ffdd5f6b0474e9d1))
+* **config-api:** audit log, agama ADS spec, fix for 0 index search ([#3369](https://github.com/JanssenProject/jans/issues/3369)) ([ea04e2c](https://github.com/JanssenProject/jans/commit/ea04e2ce5d83d4840638cd2e137fcbc67ee69c81))
+* **config-api:** client claim enhancement, manual spec removed ([#3413](https://github.com/JanssenProject/jans/issues/3413)) ([bd2cdf8](https://github.com/JanssenProject/jans/commit/bd2cdf8501d60959498078bbb31650965c321c73))
+* **config-api:** health check response rectification and Agama ADS swagger spec ([#3293](https://github.com/JanssenProject/jans/issues/3293)) ([faf2888](https://github.com/JanssenProject/jans/commit/faf2888f3d58d14fc6361d5a9ff5f743984cea4f))
+* **jans-config-api:** added admin-ui scopes in config-api-rs-protect.json ([c348ae6](https://github.com/JanssenProject/jans/commit/c348ae6a44bf59eec5a3f20b2984f7f245cff307))
+
+
+### Bug Fixes
+
+* Broken swagger address. ([843f78b](https://github.com/JanssenProject/jans/commit/843f78b7a0d7cb27b07a041a76d07e61430e6ab1))
+* **config-api:** error handling for agama get and org patch ([#3028](https://github.com/JanssenProject/jans/issues/3028)) ([21dd6e5](https://github.com/JanssenProject/jans/commit/21dd6e5f273e968245508d6a03a8ac7b6cfd3125))
+* **config-api:** fix for swagger spec for scope creation and sessoin endpoint filter ([#2949](https://github.com/JanssenProject/jans/issues/2949)) ([2989f1d](https://github.com/JanssenProject/jans/commit/2989f1dc151a77ecc66408ccccdfbb18d3b9dca8))
+* **config-api:** fixes for client creation, enum handling ([#2854](https://github.com/JanssenProject/jans/issues/2854)) ([3121493](https://github.com/JanssenProject/jans/commit/312149393337ff2b2c794053a729c0f0919caa31))
+* **config-api:** swagger update for enum and error handling ([#2934](https://github.com/JanssenProject/jans/issues/2934)) ([6b61556](https://github.com/JanssenProject/jans/commit/6b61556b49cca96622c2e59b1e99244a7eaae3ab))
+* fix format string [#3278](https://github.com/JanssenProject/jans/issues/3278) ([#3281](https://github.com/JanssenProject/jans/issues/3281)) ([7104d9c](https://github.com/JanssenProject/jans/commit/7104d9c205900e08d85043aa23d4b00460861b3f))
+* getting ready for a release ([0bda832](https://github.com/JanssenProject/jans/commit/0bda832ebc1da7017231deb38fe9aa6c7c51360a))
+* jans-config-api/pom.xml to reduce vulnerabilities ([#3005](https://github.com/JanssenProject/jans/issues/3005)) ([3e642c2](https://github.com/JanssenProject/jans/commit/3e642c2ebbd6d17c84bdec940e403d9b37affc38))
+* **jans-config-api:** corrected broken swagger address ([#3505](https://github.com/JanssenProject/jans/issues/3505)) ([843f78b](https://github.com/JanssenProject/jans/commit/843f78b7a0d7cb27b07a041a76d07e61430e6ab1))
+* **jans:** added null check to avoid NullPointerException ([#3077](https://github.com/JanssenProject/jans/issues/3077)) ([42d49b2](https://github.com/JanssenProject/jans/commit/42d49b2ac2ffb50086b5941c93c810cdbaff75ea))
+* prepare for 1.0.6 release ([9e4c8fb](https://github.com/JanssenProject/jans/commit/9e4c8fb4c0a1ef4779934558e8d8d40d8fedbabf))
+* the admin-ui role/permission/mapping delete apis are not protected by appropriate permissions [#2991](https://github.com/JanssenProject/jans/issues/2991) ([#2992](https://github.com/JanssenProject/jans/issues/2992)) ([7d68021](https://github.com/JanssenProject/jans/commit/7d680219c1db037fa4ee137a5d7241753c32b20a))
+
+
+### Documentation
+
+* **config-api:** swagger fix for script enum ([#2862](https://github.com/JanssenProject/jans/issues/2862)) ([47edb6e](https://github.com/JanssenProject/jans/commit/47edb6e4112ce834486101e2cc8aea3a725df308))
+* prepare for 1.0.4 release ([c23a2e5](https://github.com/JanssenProject/jans/commit/c23a2e505b7eb325a293975d60bbc65d5e367c7d))
+
 ## [1.0.5](https://github.com/JanssenProject/jans/compare/jans-config-api-v1.0.4...jans-config-api-v1.0.5) (2022-12-01)
 
 

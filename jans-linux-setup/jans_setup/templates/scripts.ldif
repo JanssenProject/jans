@@ -11,7 +11,7 @@ jansConfProperty: {"value1":"use_ocsp_validator","value2":"false","description":
 jansConfProperty: {"value1":"use_crl_validator","value2":"false","description":""}
 jansConfProperty: {"value1":"crl_max_response_size","value2":"10485760","description":""}
 jansLevel: 30
-jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
 jansRevision: 1
 jansScr::%(person_authentication_user_cert_external_authenticator_usercertexternalauthenticator)s
@@ -26,7 +26,7 @@ description: Permission Dynamic Scope script
 displayName: dynamic_permission
 inum: CB5B-3211
 jansLevel: 100
-jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansRevision: 1
 jansScr::%(dynamic_scope_dynamic_permission)s
 jansScrTyp: dynamic_scope
@@ -40,7 +40,7 @@ description: Sample Id Generator script
 displayName: id_generator
 inum: 031C-4A65
 jansLevel: 100
-jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansRevision: 1
 jansScr::%(id_generator_samplescript)s
 jansScrTyp: id_generator
@@ -54,7 +54,7 @@ description: Sample Dynamic Scope script for org_name
 displayName: org_name
 inum: 031C-5621
 jansLevel: 100
-jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansRevision: 1
 jansScr::%(dynamic_scope_org_name)s
 jansScrTyp: dynamic_scope
@@ -68,7 +68,7 @@ description: Sample Dynamic Scope script for work_phone
 displayName: work_phone
 inum: 031C-5622
 jansLevel: 100
-jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansRevision: 1
 jansScr::%(dynamic_scope_work_phone)s
 jansScrTyp: dynamic_scope
@@ -82,7 +82,7 @@ description: Sample Cache Refresh script
 displayName: cache_refresh
 inum: 13D3-E7AD
 jansLevel: 100
-jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansRevision: 1
 jansScr::%(cache_refresh_samplescript)s
 jansScrTyp: cache_refresh
@@ -100,7 +100,7 @@ jansConfProperty: {"value1":"yubicloud_api_key","value2":"","description":""}
 jansConfProperty: {"value1":"yubicloud_id","value2":"","description":""}
 jansLevel: 40
 jansModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
-jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansRevision: 1
 jansScr::%(person_authentication_yubicloud_external_authenticator_yubicloudexternalauthenticator)s
 jansScrTyp: person_authentication
@@ -115,7 +115,7 @@ displayName: uma_rpt_policy
 inum: 2DAF-F995
 jansConfProperty: {"value1":"allowed_clients","value2":"","description":""}
 jansLevel: 100
-jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansRevision: 1
 jansScr::%(uma_rpt_policy_uma_rpt_policy)s
 jansScrTyp: uma_rpt_policy
@@ -130,7 +130,7 @@ displayName: scim_access_policy
 inum: 2DAF-F9A5
 jansConfProperty: {"value1":"allowed_clients","value2":"","description":""}
 jansLevel: 100
-jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansRevision: 1
 jansScr::%(uma_rpt_policy_umaclientauthzrptpolicy)s
 jansScrTyp: uma_rpt_policy
@@ -144,7 +144,7 @@ description: Sample UMA Claims Gathering
 displayName: sampleClaimsGathering
 inum: 2DAF-F996
 jansLevel: 1
-jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansRevision: 1
 jansScr::%(uma_claims_gathering_uma_claims_gathering)s
 jansScrTyp: uma_claims_gathering
@@ -158,7 +158,7 @@ description: Introspection Sample Script
 displayName: introspection_sample
 inum: 2DAF-AA90
 jansLevel: 1
-jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansRevision: 1
 jansScr::%(introspection_introspection)s
 jansScrTyp: introspection
@@ -172,7 +172,7 @@ description: Introspection Custom Parameters Sample Script
 displayName: introspection_custom_params
 inum: 2DAF-BA90
 jansLevel: 1
-jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansRevision: 1
 jansScr::%(introspection_introspection_custom_params)s
 jansScrTyp: introspection
@@ -186,7 +186,7 @@ description: Frontchannel logout Sample
 displayName: frontchannel_logout_sample
 inum: 2DAF-CA90
 jansLevel: 1
-jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansRevision: 1
 jansScr::%(end_session_end_session)s
 jansScrTyp: end_session
@@ -200,7 +200,7 @@ description: Resource Owner Password Credentials Example
 displayName: resource_owner_password_credentials_example
 inum: 2DAF-AA91
 jansLevel: 1
-jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansRevision: 1
 jansScr::%(resource_owner_password_credentials_resource_owner_password_credentials)s
 jansScrTyp: resource_owner_password_credentials
@@ -214,7 +214,7 @@ description: Resource Owner Password Credentials Custom Parameters Example
 displayName: resource_owner_password_credentials_custom_params_example
 inum: 2DAF-BA91
 jansLevel: 1
-jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansRevision: 1
 jansScr::%(resource_owner_password_credentials_resource_owner_password_credentials_custom_params)s
 jansScrTyp: resource_owner_password_credentials
@@ -231,7 +231,7 @@ jansConfProperty: {"value1":"invalid_login_count_attribute","value2":"oxCountInv
 jansConfProperty: {"value1":"maximum_invalid_login_attemps","value2":"3","description":""}
 jansConfProperty: {"value1":"lock_expiration_time","value2":"120","description":""}
 jansLevel: 20
-jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
 jansRevision: 1
 jansScr::%(person_authentication_basic_lock_account_external_authenticator_basiclockaccountexternalauthenticator)s
@@ -252,7 +252,7 @@ jansConfProperty: {"value1":"label","value2":"Gluu OTP","description":""}
 jansConfProperty: {"value1":"qr_options","value2":"{ size: 400, mSize: 0.05 }","description":""}
 jansConfProperty: {"value1":"registration_uri","value2":"https://%(hostname)s/identity/register","description":""}
 jansLevel: 40
-jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
 jansRevision: 1
 jansScr::%(person_authentication_otp_external_authenticator_otpexternalauthenticator)s
@@ -270,7 +270,7 @@ jansConfProperty: {"value1":"duo_creds_file","value2":"/etc/certs/duo_creds.json
 jansConfProperty: {"value1":"duo_host","value2":"api-random.duosecurity.com","description":""}
 jansLevel: 50
 jansModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
-jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansRevision: 1
 jansScr::%(person_authentication_duo_external_authenticator_duoexternalauthenticator)s
 jansScrTyp: person_authentication
@@ -286,7 +286,7 @@ inum: 8BAF-80D7
 jansConfProperty: {"value1":"fido2_server_uri","value2":"https://%(hostname)s","hide":false,"description":""}
 jansLevel: 70
 jansModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
-jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansRevision: 1
 jansScr::%(person_authentication_fido2_external_authenticator_fido2externalauthenticator)s
 jansScrTyp: person_authentication
@@ -308,7 +308,7 @@ jansConfProperty: {"value1":"credentials_file","value2":"/etc/certs/super_gluu_c
 jansConfProperty: {"value1":"supergluu_android_download_url","value2":"https://play.google.com/store/apps/details?id=gluu.org.super.gluu&hl=en_US","description":""}
 jansConfProperty: {"value1":"supergluu_ios_download_url","value2":"https://itunes.apple.com/us/app/super-gluu/id1093479646","description":""}
 jansLevel: 60
-jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
 jansRevision: 1
 jansScr::%(person_authentication_super_gluu_external_authenticator_supergluuexternalauthenticator)s
@@ -324,7 +324,7 @@ displayName: basic
 inum: A51E-76DA
 jansLevel: 10
 jansModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
-jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansRevision: 1
 jansScr::%(person_authentication_basic_external_authenticator_basicexternalauthenticator)s
 jansScrTyp: person_authentication
@@ -342,7 +342,7 @@ inum: A910-56AB
 jansConfProperty: {"value1":"testProp1","value2":"Test value 1","description":""}
 jansConfProperty: {"value1":"testProp2","value2":"Test value 2","description":""}
 jansLevel: 100
-jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansRevision: 1
 jansScr::%(scim_samplescript)s
 jansScrTyp: scim
@@ -357,7 +357,7 @@ displayName: client_registration
 inum: DAA9-B788
 jansConfProperty: {"value1":"client_redirect_uris","value2":"https://client.example.com/example1, https://client.example.com/example2","description":""}
 jansLevel: 100
-jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansRevision: 1
 jansScr::%(client_registration_samplescript)s
 jansScrTyp: client_registration
@@ -375,7 +375,7 @@ jansConfProperty: {"value1":"twilio_token","value2":"","description":"Twilio API
 jansConfProperty: {"value1":"from_number","value2":"","description":"Twilio phone number with SMS capabilities"}
 jansLevel: 50
 jansModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
-jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansRevision: 1
 jansScr::%(person_authentication_twilio_2fa_twilio2fa)s
 jansScrTyp: person_authentication
@@ -396,7 +396,7 @@ jansConfProperty: {"value1":"source_addr_ton","value2":"","description":"Type of
 jansConfProperty: {"value1":"source_addr","value2":"","description":"From number/name"}
 jansLevel: 45
 jansModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
-jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansRevision: 1
 jansScr::%(person_authentication_smpp_2fa_smpp2fa)s
 jansScrTyp: person_authentication
@@ -410,7 +410,7 @@ description: Sample Application Session script
 displayName: application_session
 inum: DAA9-B789
 jansLevel: 100
-jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansRevision: 1
 jansScr::%(application_session_samplescript)s
 jansScrTyp: application_session
@@ -424,7 +424,7 @@ description: Consent Gathering script
 displayName: consent_gathering
 inum: DAA9-BA60
 jansLevel: 10
-jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansRevision: 1
 jansScr::%(consent_gathering_consentgatheringsample)s
 jansScrTyp: consent_gathering
@@ -437,7 +437,7 @@ dn: inum=8AF7.D82A,ou=scripts,o=jans
 displayName: persistence_extension
 inum: 8AF7.D82A
 jansLevel: 100
-jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansRevision: 1
 jansScr::%(persistence_extension_samplescript)s
 jansScrTyp: persistence_extension
@@ -450,7 +450,7 @@ dn: inum=8AF7.D82B,ou=scripts,o=jans
 displayName: idp
 inum: 8AF7.D82B
 jansLevel: 100
-jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansRevision: 1
 jansScr::%(idp_samplescript)s
 jansScrTyp: idp
@@ -467,7 +467,7 @@ displayName: update_token_sample
 inum: 2D3E.5A03
 jansEnabled: false
 jansLevel: 1
-jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansRevision: 12
 jansScr::%(update_token_sample_script)s
 jansScrTyp: update_token
@@ -478,7 +478,7 @@ description: Firebase notification sender
 displayName: firebase_ciba_end_user_notification
 inum: C1BA-C1BA
 jansLevel: 10
-jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansRevision: 1
 jansScr::%(ciba_end_user_notification)s
 jansScrTyp: ciba_end_user_notification
@@ -495,7 +495,7 @@ displayName: role_based_scopes
 inum: A44E-4F3D
 jansEnabled: true
 jansLevel: 1
-jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansProgLng: python
 jansRevision: 1
 jansScr::%(introspection_introspection_role_based_scope)s
@@ -510,7 +510,7 @@ inum: A110-88AB
 jansEnabled: false
 jansConfProperty: {"value1":"testProp1","value2":"Test value 1","hide":false,"description":""}
 jansConfProperty: {"value1":"testProp2","value2":"Test value 2","hide":false,"description":""}
-jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansLevel: 100
 jansRevision: 1
 jansProgLng: python
@@ -525,7 +525,7 @@ displayName: discovery_java_params
 inum: 0300-BA90
 jansEnabled: FALSE
 jansLevel: 1
-jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansProgLng: java
 jansRevision: 11
 jansScr::%(discovery_discovery)s
@@ -541,7 +541,7 @@ jansConfProperty: {"value1":"cust_param_name","value2":"agama_flow","hide":false
 jansEnabled: false
 jansLevel: 10
 jansModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
-jansModuleProperty: {"value1":"location_type","value2":"ldap","description": ""}
+jansModuleProperty: {"value1":"location_type","value2":"db","description": ""}
 jansProgLng: python
 jansRevision: 1
 jansScr::%(person_authentication_agama_bridge_agamabridge)s
@@ -556,7 +556,7 @@ inum: B270-381E
 jansConfProperty: {"value1":"SCRIPT_FUNCTION","value2":"forgot_password","description":""}
 jansEnabled: false
 jansLevel: 10
-jansModuleProperty: {"value1":"SCRIPT_FUNCTION","value2":"ldap","description":""}
+jansModuleProperty: {"value1":"SCRIPT_FUNCTION","value2":"db","description":""}
 jansProgLng: python
 jansRevision: 1
 jansScr::%(person_authentication_forgot_password_forgot_password)s
@@ -588,11 +588,29 @@ jansConfProperty: {"value1":"github_creds_file","value2":"/etc/jans/conf/github.
 jansConfProperty: {"value1":"description","value2":"GitHub Login","hide":false,"description":""}
 jansEnabled: false
 jansLevel: 10
-jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
 jansProgLng: python
 jansRevision: 0
 jansScr::%(person_authentication_github_external_authenticator_githubexternalauthenticator)s
+jansScrTyp: person_authentication
+
+dn: inum=E706-F8A9,ou=scripts,o=jans
+objectClass: top
+objectClass: jansCustomScr
+description: GitHub Inbound Custom Authentication script For ADS
+displayName: github_ads
+inum: E706-F8A9
+jansConfProperty: {"value1":"hide","value2":"true","hide":false,"description":""}
+jansConfProperty: {"value1":"github_creds_file","value2":"/etc/jans/conf/github.json","hide":false,"description":""}
+jansConfProperty: {"value1":"description","value2":"GitHub Login","hide":false,"description":""}
+jansEnabled: false
+jansLevel: 10
+jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
+jansModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
+jansProgLng: python
+jansRevision: 0
+jansScr::%(person_authentication_github_external_authenticator_githubauthenticatorforads)s
 jansScrTyp: person_authentication
 
 dn: inum=8333-DFBC,ou=scripts,o=jans
@@ -603,7 +621,7 @@ displayName: github-claims-introspection-script
 inum: 8333-DFBC
 jansEnabled: false
 jansLevel: 10
-jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansProgLng: python
 jansRevision: 0
 jansScr::%(introspection_introspection_github_claims_introspection_github_claims)s

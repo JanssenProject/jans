@@ -68,6 +68,14 @@ public final class ArrayHelper {
         return clonedArray;
     }
 
+    @SuppressWarnings("unchecked")
+    public static <T> T[] arrayClone(T[] array, Class<?> componentType) {
+        T[] clonedArray = (T[]) Array.newInstance(componentType, array.length);
+        System.arraycopy(array, 0, clonedArray, 0, array.length);
+
+        return clonedArray;
+    }
+
     public static <T> T[] sortAndClone(T[] array) {
         if (array == null) {
             return array;

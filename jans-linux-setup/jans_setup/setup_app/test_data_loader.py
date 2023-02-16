@@ -17,7 +17,7 @@ from setup_app.installers.base import BaseInstaller
 from setup_app.utils.ldif_utils import myLdifParser, schema2json
 from setup_app.pylib.schema import ObjectClass
 from setup_app.pylib.ldif4.ldif import LDIFWriter
-
+from setup_app.pylib.jproperties import Properties
 
 class TestDataLoader(BaseInstaller, SetupUtils):
 
@@ -30,45 +30,26 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         self.install_type = static.InstallOption.OPTONAL
         self.install_var = 'loadTestData'
         self.register_progess()
-
         self.template_base = os.path.join(Config.templateFolder, 'test')
-        self.test_client_keystore_fn = os.path.join(Config.output_dir, 'test/jans-auth/client', self.get_client_test_keystore_fn('client_keystore'))
-        Config.templateRenderingDict['test_client_keystore_base_fn'] = os.path.basename(self.test_client_keystore_fn)
-        
-    def create_test_client_keystore_(self):
-
-        self.logIt("Creating {}".format(Config.templateRenderingDict['test_client_keystore_base_fn']))
-        keys_json_fn =  os.path.join(Config.outputFolder, 'test/oxauth/client/keys_client_keystore.json')
-
-        client_cmd = self.get_key_gen_client_provider_cmd()
-
-        args = [Config.cmd_java, '-Dlog4j.defaultInitOverride=true',
-                "-cp", client_cmd,
-                Config.non_setup_properties['key_gen_path'],
-                '-keystore', self.test_client_keystore_fn,
-                '-keystore_type', Config.default_store_type,
-                '-keypasswd', 'secret',
-                '-sig_keys', Config.default_sig_key_algs,
-                '-enc_keys', Config.default_enc_key_algs,
-                '-dnname', "'{}'".format(Config.default_openid_dstore_dn_name),
-                '-expiration', '365','>', keys_json_fn]
-
-        cmd = ' '.join(args)
-
-        self.run(cmd, shell=True)
-
-        self.copyFile(self.test_client_keystore_fn, os.path.join(Config.outputFolder, 'test/oxauth/server'))
-        self.copyFile(keys_json_fn, os.path.join(Config.outputFolder, 'test/oxauth/server'))
 
     def create_test_client_keystore(self):
-        self.logIt("Creating {}".format(Config.templateRenderingDict['test_client_keystore_base_fn']))
+        self.logIt("Creating client_keystore.p12")
+        client_keystore_fn = os.path.join(Config.output_dir, 'test/jans-auth/client/client_keystore.p12')
         keys_json_fn =  os.path.join(Config.output_dir, 'test/jans-auth/client/keys_client_keystore.json')
 
-        client_cmd = self.get_key_gen_client_provider_cmd()
+        args = [Config.cmd_keytool, '-genkey', '-alias', 'dummy', '-keystore', 
+                    client_keystore_fn, '-storepass', 'secret', '-keypass', 
+                    'secret', '-dname', 
+                    "'{}'".format(Config.default_openid_jks_dn_name),
+                    '-storetype', 'PKCS12'
+                    ]
+
+        self.run(' '.join(args), shell=True)
 
         args = [Config.cmd_java, '-Dlog4j.defaultInitOverride=true',
-                '-cp', client_cmd, Config.non_setup_properties['key_gen_path'],
-                '-keystore', self.test_client_keystore_fn,
+                '-cp', Config.non_setup_properties['jans_auth_client_jar_fn'], Config.non_setup_properties['key_gen_path'],
+                '-key_ops_type', 'ALL',
+                '-keystore', client_keystore_fn,
                 '-keypasswd', 'secret',
                 '-sig_keys', Config.default_sig_key_algs,
                 '-enc_keys', Config.default_enc_key_algs,
@@ -79,8 +60,9 @@ class TestDataLoader(BaseInstaller, SetupUtils):
 
         self.run(cmd, shell=True)
 
-        self.copyFile(self.test_client_keystore_fn, os.path.join(Config.output_dir, 'test/jans-auth/server'))
+        self.copyFile(client_keystore_fn, os.path.join(Config.output_dir, 'test/jans-auth/server'))
         self.copyFile(keys_json_fn, os.path.join(Config.output_dir, 'test/jans-auth/server'))
+
 
     def enable_cusom_scripts(self):
         self.logIt("Enabling custom scripts")
@@ -99,10 +81,16 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         target_dir = os.path.join(base.current_app.JansAuthInstaller.agama_root, 'ftl')
         base.extract_from_zip(
                 base.current_app.jans_zip,
-                'agama/engine/src/test/resources/templates',
+                'jans-auth-server/agama/engine/src/test/resources/templates',
                 target_dir
                 )
-        self.chown(target_dir, Config.jetty_user, Config.jetty_group, recursive=True)
+        scripts_target = os.path.join(base.current_app.JansAuthInstaller.agama_root, 'scripts')
+        base.extract_from_zip(
+                base.current_app.jans_zip,
+                'jans-auth-server/agama/engine/src/test/resources/libs',
+                scripts_target
+                )
+        self.chown(base.current_app.JansAuthInstaller.agama_root, Config.jetty_user, Config.jetty_group, recursive=True)
 
         prop_src_fn = os.path.join(agama_out_dir, 'config-agama-test.properties')
         self.renderTemplateInOut(prop_src_fn, agama_temp_dir, os.path.join(Config.output_dir, 'test/jans-auth'))
@@ -227,6 +215,26 @@ class TestDataLoader(BaseInstaller, SetupUtils):
             ignoredirs.append(os.path.join(self.template_base, 'jans-config-api'))
 
         self.render_templates_folder(self.template_base, ignoredirs=ignoredirs)
+
+        if Config.get('jca_client_id') or Config.get('jca_test_client_id'):
+            config_oxauth_test_data_server_properties_fn = os.path.join(Config.output_dir, 'test/jans-auth/server/config-oxauth-test-data.properties')
+            config_oxauth_test_data_server_properties = Properties()
+
+            with open(config_oxauth_test_data_server_properties_fn, 'rb') as f:
+                config_oxauth_test_data_server_properties.load(f, 'utf-8')
+
+            keep_clients = config_oxauth_test_data_server_properties["test.keep.clients"].data.split(',')
+            keep_clients = [client_id.strip() for client_id in keep_clients]
+
+            if Config.get('jca_client_id'):
+                keep_clients.append(Config.jca_client_id)
+            if Config.get('jca_test_client_id'):
+                keep_clients.append(Config.jca_test_client_id)
+
+            config_oxauth_test_data_server_properties["test.keep.clients"] = ', '.join(keep_clients)
+
+            with open(config_oxauth_test_data_server_properties_fn, 'wb') as w:
+                config_oxauth_test_data_server_properties.store(w)
 
         self.logIt("Loading test ldif files")
         Config.pbar.progress(self.service_name, "Importing ldif files", False)

@@ -11,12 +11,10 @@ import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.crypto.signature.AlgorithmFamily;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.exception.CryptoProviderException;
-import io.jans.as.model.jwk.Algorithm;
-import io.jans.as.model.jwk.JSONWebKey;
-import io.jans.as.model.jwk.JSONWebKeySet;
-import io.jans.as.model.jwk.Use;
+import io.jans.as.model.jwk.*;
 import io.jans.as.server.model.config.ConfigurationFactory;
 import io.jans.service.cdi.util.CdiUtil;
+import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
@@ -43,14 +41,14 @@ public class ServerCryptoProvider extends AbstractCryptoProvider {
     }
 
     @Override
-    public String getKeyId(JSONWebKeySet jsonWebKeySet, Algorithm algorithm, Use use) throws CryptoProviderException {
+    public String getKeyId(JSONWebKeySet jsonWebKeySet, Algorithm algorithm, Use use, KeyOpsType keyOps) throws CryptoProviderException {
         try {
             if (algorithm == null || AlgorithmFamily.HMAC.equals(algorithm.getFamily())) {
                 return null;
             }
 
             final AppConfiguration appConfiguration = configurationFactory.getAppConfiguration();
-            if (appConfiguration.getKeySignWithSameKeyButDiffAlg()) { // open banking: same key with different algorithms
+            if (BooleanUtils.isTrue(appConfiguration.getKeySignWithSameKeyButDiffAlg())) { // open banking: same key with different algorithms
                 LOG.trace("Getting key by use: " + use);
                 for (JSONWebKey key : jsonWebKeySet.getKeys()) {
                     if (use != null && use == key.getUse()) {
@@ -66,16 +64,16 @@ public class ServerCryptoProvider extends AbstractCryptoProvider {
                 return staticKid;
             }
 
-            final String kid = cryptoProvider.getKeyId(jsonWebKeySet, algorithm, use);
+            final String kid = cryptoProvider.getKeyId(jsonWebKeySet, algorithm, use, keyOps);
             if (!cryptoProvider.getKeys().contains(kid) && configurationFactory.reloadConfFromLdap()) {
-                return cryptoProvider.getKeyId(jsonWebKeySet, algorithm, use);
+                return cryptoProvider.getKeyId(jsonWebKeySet, algorithm, use, keyOps);
             }
             return kid;
 
         } catch (CryptoProviderException e) {
             LOG.trace("Try to re-load configuration due to keystore exception (it can be rotated).");
             if (configurationFactory.reloadConfFromLdap()) {
-                return cryptoProvider.getKeyId(jsonWebKeySet, algorithm, use);
+                return cryptoProvider.getKeyId(jsonWebKeySet, algorithm, use, keyOps);
             }
         }
         return null;
@@ -84,6 +82,11 @@ public class ServerCryptoProvider extends AbstractCryptoProvider {
     @Override
     public JSONObject generateKey(Algorithm algorithm, Long expirationTime, int keyLength) throws CryptoProviderException {
         return cryptoProvider.generateKey(algorithm, expirationTime, keyLength);
+    }
+
+    @Override
+    public JSONObject generateKey(Algorithm algorithm, Long expirationTime, int keyLength, KeyOpsType keyOpsType) throws CryptoProviderException {
+        return cryptoProvider.generateKey(algorithm, expirationTime, keyLength, keyOpsType);
     }
 
     @Override

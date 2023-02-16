@@ -1,7 +1,10 @@
 package io.jans.ads;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.jans.ads.model.Deployment;
 import io.jans.ads.model.DeploymentDetails;
+import io.jans.ads.model.ProjectMetadata;
 import io.jans.agama.dsl.TranspilationResult;
 import io.jans.agama.dsl.Transpiler;
 import io.jans.agama.dsl.TranspilerException;
@@ -49,6 +52,7 @@ import net.lingala.zip4j.model.ZipParameters;
 import org.slf4j.Logger;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 /*
  * This bean deploys .gama project files. Modifications of this file must not only account a single
@@ -58,10 +62,21 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class Deployer {
     
     private static final String BASE_DN = "ou=deployments,ou=agama,o=jans";
+    private static final String CUST_LIBS_DIR = "/opt/jans/jetty/jans-auth/custom/libs";
     private static final String ASSETS_DIR = "/opt/jans/jetty/jans-auth/agama";
+
     private static final String[] ASSETS_SUBDIRS = { "ftl", "fl" };
+    private static final String SCRIPTS_SUBDIR = "scripts";
+    
     private static final String[] TEMPLATES_EXTENSIONS = new String[] { "ftl", "ftlh" };
+    private static final String[] SCRIPTS_EXTENSIONS = new String[] { "java", "groovy" };
     private static final String FLOW_EXT = "flow";
+
+    private static final String METADATA_FILE = "project.json";
+    private static final boolean ON_CONTAINERS = System.getenv("CN_VERSION") != null;
+    
+    @Inject
+    private ObjectMapper mapper;
     
     @Inject
     private Logger logger;
@@ -81,6 +96,7 @@ public class Deployer {
     private Map<String, Long> projectsFinishTimes;    
     private Map<String, Set<String>> projectsBasePaths;
     private Map<String, Set<String>> projectsFlows;
+    private Map<String, Set<String>> projectsLibs;
     
     public void process() throws IOException {
         
@@ -98,7 +114,8 @@ public class Deployer {
         if (deployment == null) {
             updateFlowsAndAssets(depls);
         } else {
-            deployProject(deployment.getDn(), deployment.getId(), deployment.getDetails().getProjectName());
+            deployProject(deployment.getDn(), deployment.getId(),
+                    deployment.getDetails().getProjectMetadata().getProjectName());
         }
 
     }
@@ -107,7 +124,6 @@ public class Deployer {
 
         logger.info("Deploying project {}", name);
         DeploymentDetails dd = new DeploymentDetails();
-        dd.setProjectName(name);
 
         Deployment dep = entryManager.find(dn, Deployment.class, null);
         String b64EncodedAssets = dep.getAssets();
@@ -118,12 +134,15 @@ public class Deployer {
         logger.info("Marking deployment task as active");
         //This merge helps other nodes/pods not to take charge of this very deployment task
         entryManager.merge(dep);
-        
-        //Check the zip has the expected layout        
+  
         Path p = extractGamaFile(b64EncodedAssets);
-        String tmpdir = p.toString(); 
+        String tmpdir = p.toString();
+        dd.setProjectMetadata(computeMetadata(name, tmpdir));
+
+        //Check the zip has the expected layout      
         Path pcode = Paths.get(tmpdir, "code");
         Path pweb = Paths.get(tmpdir, "web");
+        Path plib = Paths.get(tmpdir, "lib");
 
         if (Files.isDirectory(pcode) && Files.isDirectory(pweb)) {
             
@@ -132,8 +151,10 @@ public class Deployer {
                 if (dd.getError() == null) {
                     projectsFlows.put(prjId, flowIds);
 
-                    ZipFile zip = compileAssetsArchive(p, pweb);
-                    byte[] bytes = extractZipFileWithPurge(zip, ASSETS_DIR, projectsBasePaths.get(prjId));
+                    Set<String> libsPaths = transferJarFiles(plib);
+                    ZipFile zip = compileAssetsArchive(p, pweb, plib);
+                    byte[] bytes = extractZipFileWithPurge(zip, ASSETS_DIR,
+                            projectsBasePaths.get(prjId), projectsLibs.get(prjId));
 
                     Set<String> basePaths = new HashSet<>();
                     //Update this project's base paths: use the subdirs of web folder
@@ -141,8 +162,13 @@ public class Deployer {
                         .map(pa -> pa.getFileName().toString()).forEach(basePaths::add);
                     basePaths.remove(pweb.getFileName().toString());
                     projectsBasePaths.put(prjId, basePaths);
-                    
+
+                    //Update this project's libs paths
+                    libsPaths.addAll(computeSourcePaths(plib));
+                    projectsLibs.put(prjId, libsPaths);
+
                     dd.setFolders(new ArrayList<>(basePaths));
+                    dd.setLibs(new ArrayList<>(libsPaths));
                     //Update binary in DB - not a gama file anymore!
                     dep.setAssets(new String(b64Encoder.encode(bytes), UTF_8));
                 }
@@ -156,7 +182,7 @@ public class Deployer {
             logger.warn("This does not seem to be a .gama file");
             dd.setError("Archive missing web and/or code subdirectories");
         }
-        
+
         dep.setDetails(dd);
         //Mark as finished
         dep.setTaskActive(false);
@@ -186,12 +212,14 @@ public class Deployer {
             (path, attrs) -> attrs.isRegularFile() && path.getFileName().toString().endsWith("." + FLOW_EXT);
         
         logger.info("Looking for .{} files under {}", FLOW_EXT, dir); 
-        Map<Path, String> flowsCode = Files.find​(dir, 2, matcher).collect(Collectors.toMap(p -> p, p -> ""));
+        Map<Path, String> flowsCode = Files.find​(dir, 3, matcher).collect(Collectors.toMap(p -> p, p -> ""));
         flowsCode = new HashMap<>(flowsCode);   //Make map modifiable
         
         Set<Path> flowsPaths = flowsCode.keySet();
         for (Path p: flowsPaths) {
-            logger.debug("Reading {}", p);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Reading {}", p.getFileName());
+            }
             flowsCode.put(p, Files.readString(p));
         }
         
@@ -229,7 +257,8 @@ public class Deployer {
                 meta.setInputs(tresult.getInputs());
                 meta.setTimeout(tresult.getTimeout());
                 meta.setTimestamp(System.currentTimeMillis());
-                //No displayname, author or description. No handling of properties either
+                meta.setAuthor(dd.getProjectMetadata().getAuthor());
+                //No displayname or description. No handling of properties either
     
                 String compiled = tresult.getCode();
                 fl.setMetadata(meta);
@@ -276,22 +305,29 @@ public class Deployer {
         
     }
     
-    private ZipFile compileAssetsArchive(Path root, Path webroot) throws IOException {
+    private ZipFile compileAssetsArchive(Path root, Path webroot, Path lib) throws IOException {
         
         String rnd = rndName();
 
         Path agama = Files.createDirectory(Paths.get(root.toString(), rnd));
-        logger.debug("Created temp directory {}", agama);
+        String agamStr = agama.toString();
+        logger.debug("Created temp directory");
 
-        Path ftl = Files.createDirectory(Paths.get(agama.toString(), "ftl"));
-        Path fl = Files.createDirectory(Paths.get(agama.toString(), "fl"));
-        
+        Path ftl = Files.createDirectory(Paths.get(agamStr, "ftl"));
+        Path fl = Files.createDirectory(Paths.get(agamStr, "fl"));
+        Path scripts = Files.createDirectory(Paths.get(agamStr, SCRIPTS_SUBDIR));
+
         logger.debug("Copying templates to {}", ftl);
         Files.walkFileTree(webroot, copyVisitor(webroot, ftl, TEMPLATES_EXTENSIONS, true));
         logger.debug("Copying assets to {}", fl);
         Files.walkFileTree(webroot, copyVisitor(webroot, fl, TEMPLATES_EXTENSIONS, false));
         
-        //Make a zip with ftl and fl folders
+        if (Files.isDirectory(lib)) {
+            logger.debug("Copying .java and .groovy sources to {}", scripts);
+            Files.walkFileTree(lib, copyVisitor(lib, scripts, SCRIPTS_EXTENSIONS, true));
+        }
+
+        //Make a zip with scripts, ftl, and fl folders
         ZipParameters params = new ZipParameters();
         params.setCompressionMethod(CompressionMethod.STORE);
         
@@ -301,8 +337,53 @@ public class Deployer {
         ZipFile newZip = new ZipFile(newZipPath.toFile());
         newZip.addFolder(ftl.toFile(), params);
         newZip.addFolder(fl.toFile(), params);
+        newZip.addFolder(scripts.toFile(), params);
 
         return newZip;
+
+    }
+    
+    private Set<String> computeSourcePaths(Path lib) throws IOException {
+        
+        BiPredicate<Path, BasicFileAttributes> matcher = (path, attrs) -> attrs.isRegularFile() &&  
+            Stream.of(SCRIPTS_EXTENSIONS).anyMatch(ext -> path.getFileName().toString().endsWith("." + ext));
+            
+        if (Files.isDirectory(lib)) {
+            String slib = lib.toString();
+
+            try (Stream<Path> stream = Files.find(lib, 20, matcher)) {
+                return stream.map(Path::toString)
+                        .map(s -> s.substring(slib.length() + 1)).collect(Collectors.toSet());
+            }
+        }
+        return Collections.emptySet();
+        
+    }
+    
+    private Set<String> transferJarFiles(Path lib) throws IOException {
+
+        Set<String> paths = new HashSet<>();
+        //All .jar files found at the top level are moved to the custom libs destination.
+        //This applies for VM-based installations only
+        if (!ON_CONTAINERS && Files.isDirectory(lib)) {
+            BiPredicate<Path, BasicFileAttributes> matcher = 
+                (path, attrs) -> attrs.isRegularFile() && path.getFileName().toString().endsWith(".jar");
+
+            List<Path> list = null;
+            try (Stream<Path> stream = Files.find(lib, 1, matcher)) {
+                list = stream.collect(Collectors.toList());
+            }
+            logger.debug("Moving {} jar files to custom libs dir", list.size());
+
+            for (Path jar : list) {
+                String fn = jar.getFileName().toString();
+                paths.add(fn);
+
+                Files.move(jar, Paths.get(CUST_LIBS_DIR, fn), REPLACE_EXISTING);
+                logger.debug("{} moved", fn);
+            }
+        }
+        return paths;
 
     }
 
@@ -320,12 +401,14 @@ public class Deployer {
             //In this case d only has id, start date, and end date populated
             String prjId = d.getId();
             actualPrjIds.add(prjId);
-            String name = d.getDetails().getProjectName();
+            String name = d.getDetails().getProjectMetadata().getProjectName();
 
             Long finishedAt = projectsFinishTimes.get(prjId);
             
             //If local map does not contain the given project or the local finishedAt value is less
             //than the DB value, extract to disk the assets (including a previous directory purge)
+            //This conditional can only evaluate truthy in a multinode environment (containers) or
+            //upon application startup in a VM installation
             if (finishedAt == null || finishedAt < d.getFinishedAt().getTime()) {
                 //Retrieve associated assets
                 String b64EncodedAssets = entryManager.find(d.getDn(), Deployment.class, 
@@ -333,7 +416,7 @@ public class Deployer {
 
                 try {
                     if (finishedAt != null) {
-                        purge(projectsBasePaths.get(prjId));
+                        purge(projectsBasePaths.get(prjId), projectsLibs.get(prjId));
                     }
                     if (b64EncodedAssets != null) {
                         extract(b64EncodedAssets, ASSETS_DIR);
@@ -360,7 +443,7 @@ public class Deployer {
 
                 try {
                     projectsFinishTimes.remove(prjId);
-                    purge(projectsBasePaths.get(prjId));
+                    purge(projectsBasePaths.get(prjId), projectsLibs.get(prjId));
                 } catch(IOException e) {
                     logger.error(e.getMessage());
                 }
@@ -369,20 +452,25 @@ public class Deployer {
             }
         }
         
-        Set<String> set;
         projectsFlows.clear();
         projectsBasePaths.clear();
+        projectsLibs.clear();
         //Refresh maps wrt DB content
         for (Deployment d : depls) {
             String prjId = d.getId();
+            DeploymentDetails dd = d.getDetails();
 
-            set = Optional.ofNullable(d.getDetails().getFlowsError()).map(Map::keySet)
+            Set<String> set = Optional.ofNullable(dd.getFlowsError()).map(Map::keySet)
                     .orElse(new HashSet<>());
             projectsFlows.put(prjId, set);
             
-            set = Optional.ofNullable(d.getDetails().getFolders()).map(HashSet::new)
+            set = Optional.ofNullable(dd.getFolders()).map(HashSet::new)
                     .orElse(new HashSet<>());
             projectsBasePaths.put(prjId, set);
+            
+            set = Optional.ofNullable(dd.getLibs()).map(HashSet::new)
+                    .orElse(new HashSet<>());
+            projectsLibs.put(prjId, set);
         }
 
     }
@@ -402,6 +490,25 @@ public class Deployer {
         }
         
     }
+    
+    private ProjectMetadata computeMetadata(String name, String path) {
+        
+        ProjectMetadata meta = new ProjectMetadata();
+        Path p = Paths.get(path, METADATA_FILE);
+
+        if (!Files.isRegularFile(p)) {
+            logger.warn("Archive has no metadata file");
+        } else {
+            try {            
+                meta =  mapper.readValue(Files.readString(p, UTF_8), ProjectMetadata.class);
+            } catch (IOException e) {
+                logger.error("Unable to read archive metadata", e);
+            }
+        }
+        meta.setProjectName(name);
+        return meta;
+        
+    }
 
     private static String dnFromQname(String qname) {
         return String.format("%s=%s,%s", Flow.ATTR_NAMES.QNAME,
@@ -411,19 +518,34 @@ public class Deployer {
     // ========== File-system related utilities follow: ===========
 
     //Walpurgis
-    private void purge(Set<String> dirs) throws IOException {
+    private void purge(Set<String> dirs, Set<String> filesToRemove) throws IOException {
         
-        if (dirs == null) return;
-        
-        for (String dir : dirs) {
-            for (String subdir : ASSETS_SUBDIRS) {
-                Path p = Paths.get(ASSETS_DIR, subdir, dir);
+        if (dirs != null) {
+            for (String dir : dirs) {
+                for (String subdir : ASSETS_SUBDIRS) {
+                    Path p = Paths.get(ASSETS_DIR, subdir, dir);
 
-                if (Files.isDirectory(p)) {
-                    logger.info("Flushing folder {}", p);
-                    removeDir(p);
+                    if (Files.isDirectory(p)) {
+                        logger.info("Flushing folder {}", p);
+                        removeDir(p);
+                    }
                 }
             }
+        }
+
+        if (filesToRemove == null) return;
+
+        for (String f : filesToRemove) {
+            Path p = null;
+
+            if (f.endsWith(".jar")) {
+                p = Paths.get(CUST_LIBS_DIR, f);
+            } else {
+                p = Paths.get(ASSETS_DIR, SCRIPTS_SUBDIR, f);
+            }
+
+            logger.debug("Removing file {}", f);
+            Files.deleteIfExists(p);
         }
         
     }
@@ -459,10 +581,10 @@ public class Deployer {
     }    
 
     private byte[] extractZipFileWithPurge(ZipFile zip, String destination,
-            Set<String> dirsPurge) throws IOException {
+            Set<String> dirsPurge, Set<String> filesToRemove) throws IOException {
 
         Path zipPath = zip.getFile().toPath();
-        purge(dirsPurge);
+        purge(dirsPurge, filesToRemove);
 
         logger.debug("Extracting contents of {} to {}", zipPath, destination); 
         zip.extractAll(destination);
@@ -549,6 +671,7 @@ public class Deployer {
         projectsBasePaths = new HashMap<>();
         projectsFinishTimes = new HashMap<>();
         projectsFlows = new HashMap<>();
+        projectsLibs = new HashMap<>();
 
     }
 

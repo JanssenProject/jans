@@ -16,6 +16,8 @@ on:
 
 jobs:
   label:
+    # This cannot run on forks as the user mo-auto does not have access to forks
+    if: github.repository_owner == 'JanssenProject'
     name: label PR
     runs-on: ubuntu-latest
     steps:
@@ -41,11 +43,11 @@ jobs:
           sudo apt install gh
 
       - name: Update labels
+        if: github.repository_owner == 'JanssenProject'
         run: |
           git config --global user.name "mo-auto"
           git config --global user.email "54212639+mo-auto@users.noreply.github.com"
-          echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" > token.txt
-          gh auth login --with-token < token.txt          
+          echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
           if [[ "${{github.event_name}}" == "issues" ]]; then
             echo "Activated by an issue event"
             issue_or_pull_number=$(jq --raw-output .issue.number "$GITHUB_EVENT_PATH")

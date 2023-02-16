@@ -32,6 +32,7 @@ if base.current_app.profile != 'disa-stig':
     import pymysql
     from setup_app.utils.cbm import CBM
     from setup_app.utils.spanner import Spanner
+    from setup_app.utils.spanner_rest_client import SpannerClient
 
     my_path = PurePath(os.path.dirname(os.path.realpath(__file__)))
     sys.path.append(my_path.parent.joinpath('pylib/sqlalchemy'))
@@ -73,7 +74,14 @@ class DBUtils:
                 self.moddb = BackendTypes.PGSQL
             elif Config.rdbm_type == 'spanner':
                 self.moddb = BackendTypes.SPANNER
-                self.spanner = Spanner()
+                self.spanner_client = SpannerClient(
+                            project_id=Config.spanner_project,
+                            instance_id=Config.spanner_instance,
+                            database_id=Config.spanner_database,
+                            google_application_credentials=Config.google_application_credentials,
+                            emulator_host=Config.spanner_emulator_host,
+                            log_dir=os.path.join(Config.install_dir, 'logs')
+                        )
         else:
             self.moddb = BackendTypes.COUCHBASE
 
@@ -185,10 +193,7 @@ class DBUtils:
                 elif getresult:
                     return qresult.fetchall()
         elif Config.rdbm_type == 'spanner':
-            if query.startswith('CREATE TABLE') or query.startswith('ALTER TABLE'):
-                self.spanner.create_table(query.strip(';'))
-            else:
-                return self.spanner.exec_sql(query.strip(';'))
+                self.spanner_client.exec_sql(query.strip(';'))
 
     def set_cbm(self):
         self.cbm = CBM(Config.get('cb_query_node'), Config.get('couchebaseClusterAdmin'), Config.get('cb_password'))
@@ -243,7 +248,7 @@ class DBUtils:
             oxAuthConfDynamic.update(entries)
             doc_id = self.get_doc_id_from_dn(dn)
 
-            self.spanner.update_data(table='jansAppConf', columns=['doc_id', 'jansConfDyn'], values=[[doc_id, json.dumps(oxAuthConfDynamic)]])
+            self.spanner_client.write_data(table='jansAppConf', columns=['doc_id', 'jansConfDyn'], values=[doc_id, json.dumps(oxAuthConfDynamic)], mutation='update')
 
         elif self.moddb == BackendTypes.COUCHBASE:
             for k in entries:
@@ -270,7 +275,7 @@ class DBUtils:
             dn = 'inum={},ou=scripts,o=jans'.format(inum)
             table = self.get_spanner_table_for_dn(dn)
             if table:
-                self.spanner.update_data(table=table, columns=['doc_id', 'jansEnabled'], values=[[inum, enable]])
+                self.spanner_client.write_data(table=table, columns=['doc_id', 'jansEnabled'], values=[inum, enable], mutation='update')
 
         elif self.moddb == BackendTypes.COUCHBASE:
             n1ql = 'UPDATE `{}` USE KEYS "scripts_{}" SET jansEnabled=true'.format(self.default_bucket, inum)
@@ -290,35 +295,39 @@ class DBUtils:
             self.session.commit()
 
         elif self.moddb == BackendTypes.SPANNER:
-            self.spanner.update_data(table='jansAppConf', columns=['doc_id', service], values=[["configuration", True]])
+            self.spanner_client.write_data(table='jansAppConf', columns=['doc_id', service], values=["configuration", True], mutation='update')
 
         elif self.moddb == BackendTypes.COUCHBASE:
             n1ql = 'UPDATE `{}` USE KEYS "configuration" SET {}=true'.format(self.default_bucket, service)
             self.cbm.exec_query(n1ql)
 
-    def set_configuration(self, component, value):
+    def set_configuration(self, component, value, dn='ou=configuration,o=jans'):
         if self.moddb == BackendTypes.LDAP:
+            if value is None:
+                value = []
             ldap_operation_result = self.ldap_conn.modify(
-                'ou=configuration,o=jans',
+                dn,
                 {component: [ldap3.MODIFY_REPLACE, value]}
                 )
             self.log_ldap_result(ldap_operation_result)
 
         elif self.moddb in (BackendTypes.MYSQL, BackendTypes.PGSQL):
-            result = self.get_sqlalchObj_for_dn('ou=configuration,o=jans')
+            result = self.get_sqlalchObj_for_dn(dn)
             table_name = result.objectClass
             sqlalchemy_table = self.Base.classes[table_name]
-            sqlalchemyObj = self.session.query(sqlalchemy_table).filter(sqlalchemy_table.dn =='ou=configuration,o=jans').first()
+            sqlalchemyObj = self.session.query(sqlalchemy_table).filter(sqlalchemy_table.dn ==dn).first()
             cur_val = getattr(sqlalchemyObj, component)
             setattr(sqlalchemyObj, component, value)
             self.session.commit()
 
         elif self.moddb == BackendTypes.SPANNER:
-            self.spanner.update_data(table='jansAppConf', columns=["doc_id", component], values=[["configuration", value]])
-
+            table = self.get_spanner_table_for_dn(dn)
+            doc_id = self.get_doc_id_from_dn(dn)
+            self.spanner_client.write_data(table=table, columns=['doc_id', component], values=[doc_id, value], mutation='update')
 
         elif self.moddb == BackendTypes.COUCHBASE:
-            n1ql = 'UPDATE `{}` USE KEYS "configuration" SET {}={}'.format(self.default_bucket, component, value)
+            key = ldif_utils.get_key_from(dn)
+            n1ql = 'UPDATE `{}` USE KEYS "{}" SET {}={}'.format(self.default_bucket, key, component, value)
             self.cbm.exec_query(n1ql)
 
 
@@ -335,7 +344,7 @@ class DBUtils:
         elif mapping_location == BackendTypes.SPANNER:
             table = self.get_spanner_table_for_dn(dn)
             data = self.dn_exists_rdbm(dn, table)
-            return self.spanner_to_dict(data)
+            return data
 
         elif mapping_location == BackendTypes.LDAP:
             base.logIt("Querying LDAP for dn {}".format(dn))
@@ -361,36 +370,13 @@ class DBUtils:
         backend_location = self.get_backend_location_for_dn(dn)
 
         if backend_location == BackendTypes.SPANNER:
-            result = self.spanner.exec_sql('SELECT * from {} WHERE dn="{}"'.format(table, dn))
-            if result and 'rows' in result and result['rows']:
-                return result
-            return
+            result = self.spanner_client.get_dict_data('SELECT * from {} WHERE dn="{}"'.format(table, dn))
+            if result:
+                result = result[0]
+            return result
+
         sqlalchemy_table = self.Base.classes[table].__table__
         return self.session.query(sqlalchemy_table).filter(sqlalchemy_table.columns.dn == dn).first()
-
-
-    def spanner_to_dict(self, data):
-        if not data or not'rows' in data:
-            return {}
-
-        n = len(data['rows'])
-        retVal = []
-        for j in range(n):
-            row = data['rows'][j]
-            row_dict = {}
-
-            for i, field in enumerate(data['fields']):
-                val = row[i]
-                if val:
-                    if field['type'] == 'INT64':
-                        val = int(val)
-                    row_dict[field['name']] = val
-            if n > 1:
-                retVal.append(row_dict)
-            else:
-                return row_dict
-
-        return retVal
 
 
     def search(self, search_base, search_filter='(objectClass=*)', search_scope=ldap3.LEVEL, fetchmany=False):
@@ -467,16 +453,12 @@ class DBUtils:
 
                 sql_cmd = 'SELECT * FROM {} WHERE ({}) {}'.format(s_table, dn_clause, where_clause)
 
-                data = self.spanner.exec_sql(sql_cmd)
+                result = self.spanner_client.get_dict_data(sql_cmd)
 
-                if not data.get('rows'):
-                    return retVal
+                if not fetchmany and result:
+                    return result[0]
 
-                retVal = self.spanner_to_dict(data)
-                if not fetchmany and isinstance(retVal, list):
-                    retVal = retVal[0]
-
-                return retVal
+                return [ (ldif_utils.get_key_from(item['dn']), item) for item in retVal ]
 
             sqlalchemy_table = self.Base.classes[s_table]
             sqlalchemyQueryObject = self.session.query(sqlalchemy_table)
@@ -500,7 +482,7 @@ class DBUtils:
 
             if fetchmany:
                 result = sqlalchemyQueryObject.all()
-                return [ item.__dict__ for item in result ]
+                return [ (ldif_utils.get_key_from(item.dn), item.__dict__) for item in result ]
 
             else:
                 result = sqlalchemyQueryObject.first()
@@ -539,7 +521,7 @@ class DBUtils:
                 data = result.json()
                 if data.get('results'):
                     if fetchmany:
-                        return [ item[bucket] for item in data['results'] ]
+                        return [ (ldif_utils.get_key_from(item[bucket]['dn']), item[bucket]) for item in data['results'] ]
                     else:
                         return data['results'][0][bucket]
 
@@ -573,7 +555,10 @@ class DBUtils:
 
             elif backend_location == BackendTypes.SPANNER:
                 tbl = self.get_spanner_table_for_dn(dn)
-                self.spanner.exec_sql('DELETE from {} WHERE dn="{}"'.format(tbl, dn))
+                data = self.spanner_client.get_dict_data('SELECT doc_id FROM {} WHERE dn="{}"'.format(tbl, dn))
+                if data:
+                    doc_id = data[0]['doc_id']
+                    self.spanner_client.delete_data_data(tbl, doc_id)
 
             elif backend_location == BackendTypes.COUCHBASE:
                 key = ldif_utils.get_key_from(dn)
@@ -633,10 +618,10 @@ class DBUtils:
 
 
         elif backend_location == BackendTypes.SPANNER:
-            data = self.spanner.exec_sql('SELECT jansConfProperty from jansCustomScr WHERE dn="{}"'.format(dn))
+            spanner_data_list = self.spanner_client.get_dict_data('SELECT jansConfProperty from jansCustomScr WHERE dn="{}"'.format(dn))
+            spanner_data = spanner_data_list[0]
             jansConfProperty = []
             added = False
-            spanner_data = self.spanner_to_dict(data)
             jansConfProperty = spanner_data.get('jansConfProperty', [])
 
             for i, oxconfigprop in enumerate(jansConfProperty):
@@ -651,7 +636,7 @@ class DBUtils:
 
             if not added:
                 jansConfProperty.append(json.dumps({'value1': 'allowed_clients', 'value2': client_id}))
-            self.spanner.update_data(table='jansCustomScr', columns=['doc_id', 'jansConfProperty'], values=[[script_inum,  jansConfProperty]])
+            self.spanner_client.write_data(table='jansCustomScr', columns=['doc_id', 'jansConfProperty'], values=[script_inum, jansConfProperty], mutation='update')
 
         elif backend_location == BackendTypes.COUCHBASE:
             bucket = self.get_bucket_for_dn(dn)
@@ -751,7 +736,7 @@ class DBUtils:
 
     def table_exists(self, table):
         if Config.rdbm_type == 'spanner':
-            return table in self.spanner.get_tables()
+            return table in self.spanner_client.get_tables()
         else:
             metadata = sqlalchemy.MetaData()
             try:
@@ -821,12 +806,12 @@ class DBUtils:
         return doc_id
 
     def get_spanner_table_for_dn(self, dn):
-        tables = self.spanner.get_tables()
+        tables = self.spanner_client.get_tables()
 
         for table in tables:
             sql_cmd = 'SELECT doc_id FROM {} WHERE dn="{}"'.format(table, dn)
-            result = self.spanner.exec_sql(sql_cmd)
-            if result and 'rows' in result and result['rows']:
+            result = self.spanner_client.get_dict_data(sql_cmd)
+            if result:
                 return table
 
     def get_sha_digest(self, val):
@@ -962,21 +947,17 @@ class DBUtils:
                                 for subval in entry[change_attr]:
                                     typed_val = self.get_rdbm_val(change_attr, subval, rdbm_type='spanner')
                                     dict_doc_id = self.get_sha_digest(typed_val)
-                                    self.spanner.insert_data(table=sub_table, columns=['doc_id', 'dict_doc_id', change_attr], values=[[doc_id, typed_val, typed_val]])
+                                    self.spanner_client.write_data(table=sub_table, columns=['doc_id', 'dict_doc_id', change_attr], values=[doc_id, typed_val, typed_val])
 
                             else:
-                                data = self.spanner.exec_sql('SELECT {} FROM {} WHERE doc_id="{}"'.format(entry['add'][0], table, doc_id))
-                                if data.get('rows'):
-                                    cur_data = []
-
-                                    if 'rows' in data and data['rows'] and data['rows'][0] and data['rows'][0][0]:
-                                        cur_data = data['rows'][0][0]
-                                    
+                                data_list = self.spanner_client.get_dict_data('SELECT {} FROM {} WHERE doc_id="{}"'.format(entry['add'][0], table, doc_id))
+                                cur_data = data_list[0]
+                                if cur_data:
                                     for cur_val in entry[change_attr]:
                                         typed_val = self.get_rdbm_val(change_attr, cur_val, rdbm_type='spanner')
                                         cur_data.append(typed_val)
 
-                                self.spanner.update_data(table=table, columns=['doc_id', change_attr], values=[[doc_id, cur_data]])
+                                self.spanner_client.write_data(table=table, columns=['doc_id', change_attr], values=[doc_id, cur_data], mutation='update')
 
                     elif 'replace' in entry and 'changetype' in entry:
                         table = self.get_spanner_table_for_dn(dn)
@@ -988,9 +969,9 @@ class DBUtils:
                             sub_table = '{}_{}'.format(table, replace_attr)
                             # TODO: how to replace ?
                             #for subval in typed_val:
-                            #    self.spanner.update_data(table=sub_table, columns=['doc_id', replace_attr], values=[[doc_id, subval]])
+                            #    self.spanner_client.write_data(table=sub_table, columns=['doc_id', replace_attr], values=[doc_id, subval], mutation='update')
                         else:
-                            self.spanner.update_data(table=table, columns=['doc_id', replace_attr], values=[[doc_id, typed_val]])
+                            self.spanner_client.write_data(table=table, columns=['doc_id', replace_attr], values=[doc_id, typed_val], mutation='update')
 
                     else:
                         vals = {}
@@ -1029,11 +1010,11 @@ class DBUtils:
 
                         columns = [ *vals.keys() ]
                         values = [ vals[lkey] for lkey in columns ]
-
-                        self.spanner.insert_data(table=table_name, columns=columns, values=[values])
+                        base.logIt("SPANNER:WRITE {} {} {}".format(table_name, columns, values))
+                        self.spanner_client.write_data(table=table_name, columns=columns, values=values)
 
                         for sdata in subtable_data:
-                            self.spanner.insert_data(table=sdata[0], columns=sdata[1], values=sdata[2])
+                            self.spanner_client.write_data(table=sdata[0], columns=sdata[1], values=sdata[2][0])
 
                 elif backend_location == BackendTypes.COUCHBASE:
                     if len(entry) < 3:

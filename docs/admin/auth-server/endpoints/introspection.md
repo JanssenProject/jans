@@ -8,23 +8,40 @@ tags:
   - introspectionScriptBackwardCompatibility
 ---
 
-### Introspection endpoint
+# Overview
 
-The URI to invoke the [Introspection Endpoint](https://datatracker.ietf.org/doc/html/rfc7662) in Janssen Auth Server can be found by checking the `introspection_endpoint` claim of the OpenID Connect configuration response, typically deployed at `https://<my.jans.server>/.well-known/openid-configuration`
+Introspection endpoint allows a protected resource to determine the active state of an OAuth 2.0 token and to determine 
+meta-information about this token. This endpoint can be used to introspect
+both opaque token (i.e. reference tokens) and structured tokens(i.e. value tokens). This endpoint conforms to [OAuth2 token
+introspection](https://datatracker.ietf.org/doc/html/rfc7662) specifications.
 
-` "introspection_endpoint" : "https://<my.jans.server>/jans-auth/restv1/introspection" `
+The URI to invoke the introspection endpoint in Janssen Server 
+can be found by checking the `introspection_endpoint` claim of the OpenID Connect configuration response, typically deployed at `https://janssen.server.host/.well-known/openid-configuration`
 
-#### A. GET:
+ "introspection_endpoint" : "https://janssen.server.host/jans-auth/restv1/introspection" `
+
+More information about request and response of the Introspection endpoint can be found in
+the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/Token/get-introspection).
+
+**Request parameters**
+- `token` - REQUIRED.  The string value of the token.  For access tokens, this is the "access_token" value returned from the token endpoint
+- `token_type_hint` - OPTIONAL.  A hint about the type of the token submitted for introspection. Not used in current implementation of the AS. 
+- `response_as_jwt` - OPTIONAL. Boolean value with default value false. If true, returns introspection response as JWT (signed based on client configuration used for authentication to Introspection Endpoint).
+
+## Sample GET Request
+
+### Request
 
 ```
-curl -X 'GET'   'https://<my.jans.server>/jans-auth/restv1/introspection?token=368fea2b-be14-4d30-bd57-bcc4cde2033c&response_as_jwt=false'   -H 'accept: application/json' -H   "Authorization: Bearer 111d51a4-2828-4b47-abce-77034cddcfb5"
-
+curl -X 'GET'   'https://janssen.server.host/jans-auth/restv1/introspection?token=368fea2b-be14-4d30-bd57-bcc4cde2033c&response_as_jwt=false'   -H 'accept: application/json' -H   "Authorization: Bearer 111d51a4-2828-4b47-abce-77034cddcfb5"
 ```
-Response:
+
+### Response
+
 ```
 {
     "sub": "",
-    "iss": "https://<my.jans.server>",
+    "iss": "https://janssen.server.host",
     "active": true,
     "token_type": "Bearer",
     "client_id": "1800.df1bb233-10b8-40ed-bbb9-07da50892a35",
@@ -39,23 +56,25 @@ Response:
     "username": null
 }
 ```
-#### B. POST:
+## Sample POST Request
 
+### Request
 
-Example:
 ```
 curl -X 'POST' \
-  'https://<my.jans.server>/jans-auth/restv1/introspection' \
+  'https://janssen.server.host/jans-auth/restv1/introspection' \
   -H 'accept: application/json' \
   -H 'Content-Type: application/x-www-form-urlencoded' \
   -d 'token=eyJra....3ZkB-Ajwg'  
   -H "Authorization: Bearer eyJra...BpKo7g"
 ```
-Response:
+
+### Response
+
 ```
 {
     "sub": "",
-    "iss": "https://<my.jans.server>",
+    "iss": "https://janssen.server.host",
     "active": true,
     "token_type": "Bearer",
     "client_id": "3000.5829c1f8-7554-41ab-a7d6-3513a5e9c4ad",
@@ -71,36 +90,53 @@ Response:
 }
 ```
 
+## Response as JWT
 
-### Customizing the behavior of AS
+## Disabling The Endpoint Using Feature Flag
 
-Configure the Janssen AS using steps explained in the [link](#curl-commands-to-configure-jans-auth-server)
+`/introspection` endpoint can be enabled or disable using [END_SESSION feature flag](../../reference/json/feature-flags/janssenauthserver-feature-flags.md#introspection).
+Use [Janssen Text-based UI(TUI)](../../config-guide/tui.md) or [Janssen command-line interface](../../config-guide/jans-cli/README.md) to perform this task.
 
-1. As the access token has sufficient entropy, and a short lifetime, authentication should not be required.
-Configure the Janssen AS to reflect `introspectionSkipAuthorization=true` (default value false)
+When using TUI, navigate via `Auth Server`->`Properties`->`enabledFeatureFlags` to screen below. From here, enable or
+disable `INTROSPECTION` flag as required.
 
-2. In order to be run and Introspection script should be associated with an OpenID Client (used for obtaining the token). Another way of doing this is by setting the ` introspectionScriptBackwardCompatibility` global Auth Server JSON Configuration Property to true. In this case the Auth Server will run all scripts and will do so by ignoring client configuration.
+![](../../../assets/image-tui-enable-components.png)
 
-### Introspection interception script
-By using the power [IntrospectionType](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/introspection/IntrospectionType.java) custom script, one can modify claims of an Access token as JWT. To do this:
+## Configuration Properties
 
-1. Configure the Client using steps explained in the [link](#curl-commands-to-configure-jans-auth-server)
-  Update the following parameters for the client
-  - `accessTokenAsJwt = true`
-  - `runIntrospectionScriptBeforeJwtCreation = true`
+Introspection endpoint can be further configured using Janssen Server configuration properties listed below. When using
+[Janssen Text-based UI(TUI)](../../config-guide/tui.md) to configure the properties,
+navigate via `Auth Server`->`Properties`.
 
-2. Script
-  [Introspection Script Guide](../../../script-catalog/introspection/README.md)
+- [introspectionEndpoint](../../reference/json/properties/janssenauthserver-properties.md#introspectionendpoint)
+- [mtlsIntrospectionEndpoint](../../reference/json/properties/janssenauthserver-properties.md#mtlsintrospectionendpoint)
+- [introspectionSkipAuthorization](../../reference/json/properties/janssenauthserver-properties.md#introspectionskipauthorization)
+- [introspectionScriptBackwardCompatibility](../../reference/json/properties/janssenauthserver-properties.md#introspectionscriptbackwardcompatibility)
+- [introspectionAccessTokenMustHaveUmaProtectionScope](../../reference/json/properties/janssenauthserver-properties.md#introspectionaccesstokenmusthaveumaprotectionscope)
+- [introspectionResponseScopesBackwardCompatibility](../../reference/json/properties/janssenauthserver-properties.md#introspectionresponsescopesbackwardcompatibility)
 
+## Customising Introspection Endpoint Behaviour using Custom script:
 
-### Testing
+Customizing certain aspects of endpoint behaviour, for example, one can modify claims of an access token as JWT, using
+[introspection scripts](../../../script-catalog/introspection/README.md). Use
+[update token](../../developer/scripts/update-token.md) introspection script for transformation of claims and values in
+id-token and access-token.
 
-1. [Reference](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/client/src/test/java/io/jans/as/client/ws/rs/IntrospectionWsHttpTest.java)
+Configure below-mentioned client properties to enable usage of introspection scripts.
+When using [Janssen Text-based UI(TUI)](../../config-guide/tui.md) to configure these client properties,
+navigate to
 
-2. Swagger doc - https://github.com/JanssenProject/jans/blob/main/jans-auth-server/docs/swagger.yaml
+- _accessTokenAsJwt_:
 
-3. Useful tool - [jwt.io](https://jwt.io/) to inspect a JWT
+`Auth Server`->`Clients`->select the client->`Tokens`->`Access Token Type`->Select JWT
 
-### References
+- _runIntrospectionScriptBeforeJwtCreation_:
 
-1. How is UpdateTokenType script different? - [Article](https://github.com/JanssenProject/jans/blob/main/docs/script-catalog/update_token/sample-script/README.md)
+`Auth Server`->`Clients`->select the client->`Tokens`->enable `Run Introspection Script before JWT access token creation`
+
+![](../../../assets/image-tui-client-config-token-screen.png)
+
+### References for custom scripts
+1. Interface - [IntrospectionType](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/introspection/IntrospectionType.java)
+2. [Introspection scripts](../../../script-catalog/introspection/README.md)
+3. [Introspection script vs Update Token Script](https://github.com/JanssenProject/jans/blob/main/docs/admin/developer/scripts/update-token.md#introspectiontype-script-vs-updatetokentype-script)

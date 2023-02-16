@@ -38,7 +38,7 @@ public class SsaCreateAssertBuilder extends BaseAssertBuilder {
             assertNotNull(jwt, "The jwt is null");
             JwtClaims jwtClaims = jwt.getClaims();
             assertNotNull(jwtClaims.getClaim(ORG_ID.getName()), "The org_id in jwt is null");
-            assertEquals(jwtClaims.getClaimAsLong(ORG_ID.getName()), request.getOrgId());
+            assertEquals(jwtClaims.getClaim(ORG_ID.getName()), request.getOrgId());
             assertNotNull(jwtClaims.getClaim(SOFTWARE_ID.getName()), "The software_id in jwt is null");
             assertEquals(jwtClaims.getClaimAsString(SOFTWARE_ID.getName()), request.getSoftwareId());
             assertNotNull(jwtClaims.getClaim(SOFTWARE_ROLES.getName()), "The software_roles in jwt is null");

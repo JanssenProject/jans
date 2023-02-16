@@ -1,0 +1,61 @@
+name: sync
+on:
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'The PR number to pull the body from'
+        required: false
+        default: ''
+  pull_request_target:
+    branches:
+      - "cn-update-terraform-provider-jans"
+jobs:
+  publish:
+    name: Publish
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.8
+
+    - name: Import GPG key
+      id: import_gpg
+      uses: crazy-max/ghaction-import-gpg@v5
+      with:
+        gpg_private_key: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY }}
+        passphrase: ${{ secrets.MOAUTO_GPG_PRIVATE_KEY_PASSPHRASE }}
+        git_user_signingkey: true
+        git_commit_gpgsign: true
+
+    - name: Configure Git
+      run: |
+        mkdir sync
+        cd sync
+        git clone  https://mo-auto:${{ secrets.MOAUTO_WORKFLOW_TOKEN }}@github.com/JanssenProject/terraform-provider-jans.git
+        git config --global user.name "mo-auto"
+        git config --global user.email "54212639+mo-auto@users.noreply.github.com"
+        git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
+        echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
+        # If the user passed in a PR number
+        PR_NUMBER=${{ github.event.inputs.pr_number }}
+        if [ ! -z "$PR_NUMBER" ]
+        then
+          pull_number=$PR_NUMBER
+          echo "Manual PR number inputted"
+        else
+          pull_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
+        fi
+        BODY=$(gh pr view $pull_number --json body --jq '.body')
+        echo $BODY
+        cd terraform-provider-jans
+        git checkout -b cn-update-terraform-provider-jans
+        rsync -av --progress ../../terraform-provider-jans/* . --exclude=.git
+        git add -A
+        git commit -S -s -m "fix(terraform-provider-jans): update terraform provider" || exit 0
+        git push --set-upstream origin cn-update-terraform-provider-jans
+        MESSAGE="fix(terraform-provider-jans): update terraform module"
+        PR=$(gh pr create --body "${BODY}" --title "${MESSAGE}")      

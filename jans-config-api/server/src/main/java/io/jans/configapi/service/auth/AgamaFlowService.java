@@ -84,16 +84,14 @@ public class AgamaFlowService implements Serializable {
         Filter searchFilter = null;
         if (StringUtils.isNotBlank(searchRequest.getFilter())) {
             String[] targetArray = new String[] { searchRequest.getFilter() };
-            searchFilter = Filter.createORFilter(
-                    Filter.createSubstringFilter(Flow.ATTR_NAMES.QNAME, null, targetArray, null),
-                    Filter.createSubstringFilter(Flow.ATTR_NAMES.META, null, targetArray, null));
+            searchFilter = Filter.createSubstringFilter(Flow.ATTR_NAMES.QNAME, null, targetArray, null);
         }
 
         logger.debug("Searching Agama Flow with searchFilter:{}", searchFilter);
 
         return persistenceEntryManager.findPagedEntries(getAgamaFlowDn(null), Flow.class, searchFilter, null,
                 searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
-                searchRequest.getStartIndex() - 1, searchRequest.getCount(), searchRequest.getMaxCount());
+                searchRequest.getStartIndex(), searchRequest.getCount(), searchRequest.getMaxCount());
 
     }
 
@@ -145,7 +143,7 @@ public class AgamaFlowService implements Serializable {
         if (StringUtils.isBlank(flowName)) {
             return AGAMA_FLOWS_BASE;
         }
-        return String.format(String.format("%s,%s", Flow.ATTR_NAMES.QNAME, flowName, AGAMA_FLOWS_BASE));
+        return String.format("%s=%s,%s", Flow.ATTR_NAMES.QNAME, flowName, AGAMA_FLOWS_BASE);
     }
 
     public AgamaConfiguration getAgamaConfiguration() {

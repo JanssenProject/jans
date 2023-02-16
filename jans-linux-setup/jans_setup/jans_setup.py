@@ -11,10 +11,13 @@ import shutil
 import traceback
 import code
 import site
+import warnings
 
 from pathlib import Path
 from queue import Queue
 from setup_app.static import SetupProfiles
+
+warnings.filterwarnings("ignore")
 
 __STATIC_SETUP_DIR__ = '/opt/jans/jans-setup/'
 queue = Queue()
@@ -418,6 +421,9 @@ def main():
                 jansCliInstaller.start_installation()
                 jansCliInstaller.configure()
 
+            # if (Config.installed_instance and 'installOxd' in Config.addPostSetupService) or (not Config.installed_instance and Config.installOxd):
+            #    oxdInstaller.start_installation()
+            jansInstaller.post_install_before_saving_properties()
             jansProgress.progress(PostSetup.service_name, "Saving properties")
             propertiesUtils.save_properties()
             time.sleep(2)

@@ -258,6 +258,7 @@ class SqlClient(SqlSchemaMixin):
             self.adapter = MysqlAdapter()
 
         self.dialect = self.adapter.dialect
+        self._metadata: _t.Optional[MetaData] = None
 
     @cached_property
     def engine(self) -> Engine:
@@ -274,24 +275,25 @@ class SqlClient(SqlSchemaMixin):
         password = get_sql_password(self.manager)
         return f"{self.adapter.connector}://{user}:{password}@{host}:{port}/{database}"
 
-    @cached_property
+    @property
     def metadata(self) -> MetaData:
         """Lazy init of metadata."""
-        with warnings.catch_warnings():
-            # postgresql driver will show warnings about unsupported reflection
-            # on expression-based index, i.e. `lower(uid::text)`; but we don't
-            # want to clutter the logs with these warnings, hence we suppress the
-            # warnings
-            warnings.filterwarnings(
-                "ignore",
-                message="Skipped unsupported reflection of expression-based index",
-                category=SAWarning,
-            )
+        if not self._metadata:
+            with warnings.catch_warnings():
+                # postgresql driver will show warnings about unsupported reflection
+                # on expression-based index, i.e. `lower(uid::text)`; but we don't
+                # want to clutter the logs with these warnings, hence we suppress the
+                # warnings
+                warnings.filterwarnings(
+                    "ignore",
+                    message="Skipped unsupported reflection of expression-based index",
+                    category=SAWarning,
+                )
 
-            # do reflection on database table
-            metadata = MetaData(bind=self.engine)
-            metadata.reflect()
-        return metadata
+                # do reflection on database table
+                self._metadata = MetaData(bind=self.engine)
+                self._metadata.reflect()
+        return self._metadata
 
     def connected(self) -> bool:
         """Check whether connection is alive by executing simple query."""

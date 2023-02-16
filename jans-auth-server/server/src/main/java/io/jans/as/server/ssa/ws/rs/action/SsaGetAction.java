@@ -9,10 +9,8 @@ package io.jans.as.server.ssa.ws.rs.action;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.model.ssa.Ssa;
 import io.jans.as.common.model.ssa.SsaState;
-import io.jans.as.common.service.AttributeService;
 import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.config.Constants;
-import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.ssa.SsaErrorResponseType;
 import io.jans.as.model.ssa.SsaScopeType;
@@ -56,12 +54,6 @@ public class SsaGetAction {
     private SsaService ssaService;
 
     @Inject
-    private AppConfiguration appConfiguration;
-
-    @Inject
-    private AttributeService attributeService;
-
-    @Inject
     private ModifySsaResponseService modifySsaResponseService;
 
     @Inject
@@ -93,7 +85,7 @@ public class SsaGetAction {
      * @param httpRequest Http request
      * @return {@link Response} with status {@code 200 (Ok)} and the body containing the list of SSAs.
      */
-    public Response get(String jti, Long orgId, HttpServletRequest httpRequest) {
+    public Response get(String jti, String orgId, HttpServletRequest httpRequest) {
         log.debug("Attempting to read ssa: softwareRoles = {}, orgId = {}", jti, orgId);
 
         errorResponseFactory.validateFeatureEnabled(FeatureFlagType.SSA);
@@ -105,7 +97,7 @@ public class SsaGetAction {
             final List<Ssa> ssaList = ssaService.getSsaList(jti, orgId, SsaState.ACTIVE, client.getClientId(), client.getScopes());
 
             JSONArray jsonArray = ssaJsonService.getJSONArray(ssaList);
-            ModifySsaResponseContext context = ssaContextBuilder.buildModifySsaResponseContext(httpRequest, null, client, appConfiguration, attributeService);
+            ModifySsaResponseContext context = ssaContextBuilder.buildModifySsaResponseContext(httpRequest, client);
             jsonArray = modifyGetScript(jsonArray, context, ssaList);
             builder.entity(ssaJsonService.jsonArrayToString(jsonArray));
 

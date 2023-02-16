@@ -1248,8 +1248,8 @@ public abstract class BaseTest {
         return tokenResponse;
     }
 
-    public SsaCreateResponse createSsaWithDefaultValues(String accessToken, Long orgId, Long expiration, Boolean oneTimeUse) {
-        Long orgIdAux = orgId != null ? orgId : 1000L;
+    public SsaCreateResponse createSsaWithDefaultValues(String accessToken, String orgId, Long expiration, Boolean oneTimeUse) {
+        String orgIdAux = orgId != null ? orgId : "org-id-test";
         String descriptionAux = "test description";
         String softwareIdAux = "gluu-scan-api";
         Long expirationAux;
@@ -1266,7 +1266,7 @@ public abstract class BaseTest {
                 grantTypesAux, oneTimeUse, Boolean.TRUE);
     }
 
-    public SsaCreateResponse createSsa(String accessToken, Long orgId, Long expiration, String description,
+    public SsaCreateResponse createSsa(String accessToken, String orgId, Long expiration, String description,
                                        String softwareId, List<String> softwareRoles, List<String> grantTypes,
                                        Boolean oneTimeUse, Boolean rotateSsa) {
         SsaCreateClient ssaCreateClient = new SsaCreateClient(ssaEndpoint);

@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    app: load-users
+  name: load-users-spanner-cm
+data:
+  GOOGLE_APPLICATION_CREDENTIALS: '/etc/certs/google_service_account.json'
+  GOOGLE_PROJECT_ID: cb.cbns.svc.cluster.local
+  GOOGLE_SPANNER_INSTANCE_ID: "cn-test"
+  GOOGLE_SPANNER_DATABASE_ID: "test"
+  LOAD_USERS_TO_SPANNER: "true"
+  USER_NUMBER_STARTING_POINT: "0"
+  USER_NUMBER_ENDING_POINT: "10000000"
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  labels:
+    app: load-users
+  name: load-users-spanner
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      labels:
+        app: load-users
+    spec:
+      #hostAliases:
+      #  - ip: NGINX_IP
+      #    hostnames:
+      #      - FQDN
+      volumes:
+      - name: google-sa
+        secret:
+          secretName: google-sa
+      containers:
+      - envFrom:
+        - configMapRef:
+            name: load-users-spanner-cm
+        image: janssenproject/demo_loadtesting:1.0.7_dev
+        volumeMounts:
+        - mountPath: /etc/certs/google_service_account.json
+          name: google-sa
+          subPath: google_service_account.json
+        name: load-users-spanner
+        resources:
+          limits:
+            cpu: 30000m
+            memory: 5000Mi
+          requests:
+            cpu: 30000m
+            memory: 5000Mi
+      restartPolicy: Never

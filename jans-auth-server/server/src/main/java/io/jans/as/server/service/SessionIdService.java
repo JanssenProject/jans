@@ -11,28 +11,23 @@ import com.google.common.collect.Sets;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.ResultCode;
 import io.jans.as.common.model.common.User;
+import io.jans.as.common.model.session.SessionId;
+import io.jans.as.common.model.session.SessionIdState;
 import io.jans.as.common.service.common.UserService;
 import io.jans.as.model.authorize.AuthorizeRequestParam;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.config.StaticConfiguration;
-import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.model.crypto.signature.SignatureAlgorithm;
-import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
-import io.jans.as.model.jwt.JwtSubClaimObject;
 import io.jans.as.model.util.JwtUtil;
 import io.jans.as.model.util.Pair;
 import io.jans.as.model.util.Util;
 import io.jans.as.server.audit.ApplicationAuditLogger;
 import io.jans.as.server.model.audit.Action;
 import io.jans.as.server.model.audit.OAuth2AuditLog;
-import io.jans.as.common.model.session.SessionId;
-import io.jans.as.common.model.session.SessionIdState;
 import io.jans.as.server.model.config.Constants;
 import io.jans.as.server.model.exception.AcrChangedException;
 import io.jans.as.server.model.exception.InvalidSessionStateException;
-import io.jans.as.server.model.token.JwtSigner;
 import io.jans.as.server.security.Identity;
 import io.jans.as.server.service.exception.FailedComputeSessionStateException;
 import io.jans.as.server.service.external.ExternalApplicationSessionService;
@@ -47,11 +42,6 @@ import io.jans.orm.search.filter.Filter;
 import io.jans.service.CacheService;
 import io.jans.service.LocalCacheService;
 import io.jans.util.StringHelper;
-import org.apache.commons.lang.StringUtils;
-import org.jetbrains.annotations.Nullable;
-import org.json.JSONException;
-import org.slf4j.Logger;
-
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
@@ -59,21 +49,17 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.lang.StringUtils;
+import org.jetbrains.annotations.Nullable;
+import org.json.JSONException;
+import org.slf4j.Logger;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import static org.apache.commons.lang.BooleanUtils.isTrue;
@@ -88,7 +74,6 @@ import static org.apache.commons.lang.BooleanUtils.isTrue;
 @Named
 public class SessionIdService {
 
-    public static final String SESSION_CUSTOM_STATE = "session_custom_state";
     private static final int MAX_MERGE_ATTEMPTS = 3;
     private static final int DEFAULT_LOCAL_CACHE_EXPIRATION = 2;
 
@@ -106,9 +91,6 @@ public class SessionIdService {
 
     @Inject
     private AppConfiguration appConfiguration;
-
-    @Inject
-    private WebKeysConfiguration webKeysConfiguration;
 
     @Inject
     private FacesContext facesContext;
@@ -298,9 +280,16 @@ public class SessionIdService {
             currentStep = StringHelper.toInteger(sessionAttributes.get(io.jans.as.model.config.Constants.AUTH_STEP), currentStep);
         }
 
-        for (int i = resetToStep; i <= currentStep; i++) {
-            String key = String.format("auth_step_passed_%d", i);
-            sessionAttributes.remove(key);
+        if (resetToStep <= currentStep) {
+	        for (int i = resetToStep; i <= currentStep; i++) {
+	            String key = String.format("auth_step_passed_%d", i);
+	            sessionAttributes.remove(key);
+	        }
+        } else {
+        	// Scenario when we sckip steps. In this case we need to mark all previous steps as passed
+	        for (int i = currentStep + 1; i < resetToStep; i++) {
+	            sessionAttributes.put(String.format("auth_step_passed_%d", i), Boolean.TRUE.toString());
+	        }
         }
 
         sessionAttributes.put(io.jans.as.model.config.Constants.AUTH_STEP, String.valueOf(resetToStep));
@@ -345,13 +334,21 @@ public class SessionIdService {
             sessionId = identity.getSessionId().getId();
         }
 
+        SessionId result = null; 
         if (StringHelper.isNotEmpty(sessionId)) {
-            return getSessionId(sessionId);
+        	result = getSessionId(sessionId);
+        	if ((result == null) && identity.getSessionId() != null) {
+        		// Here we cover scenario when user were redirected from /device-code to ACR method
+        		// which call this method in prepareForStep for step 1. The cookie in this case is not updated yet.
+        		// hence actual information about session_id only in identity.
+                sessionId = identity.getSessionId().getId();
+            	result = getSessionId(sessionId);
+        	}
         } else {
             log.trace("Session cookie not exists");
         }
 
-        return null;
+        return result;
     }
 
     public Map<String, String> getSessionAttributes(SessionId sessionId) {
@@ -482,9 +479,6 @@ public class SessionIdService {
         sessionId.setExpirationDate(expiration.getFirst());
         sessionId.setTtl(expiration.getSecond());
 
-        Boolean sessionAsJwt = appConfiguration.getSessionAsJwt();
-        sessionId.setIsJwt(sessionAsJwt != null && sessionAsJwt);
-
         sessionId.setAuthenticationTime(authenticationDate != null ? authenticationDate : new Date());
 
         if (state != null) {
@@ -494,10 +488,6 @@ public class SessionIdService {
         sessionId.setSessionAttributes(sessionIdAttributes);
         sessionId.setLastUsedAt(new Date());
 
-        if (isTrue(sessionId.getIsJwt())) {
-            sessionId.setJwt(generateJwt(sessionId, userDn).asString());
-        }
-
         boolean persisted = false;
         if (persist) {
             persisted = persistSessionId(sessionId);
@@ -505,36 +495,8 @@ public class SessionIdService {
 
         auditLogging(sessionId);
 
-        log.trace("Generated new session, id = '{}', state = '{}', asJwt = '{}', persisted = '{}'", sessionId.getId(), sessionId.getState(), sessionId.getIsJwt(), persisted);
+        log.trace("Generated new session, id = '{}', state = '{}', persisted = '{}'", sessionId.getId(), sessionId.getState(), persisted);
         return sessionId;
-    }
-
-
-    private Jwt generateJwt(SessionId sessionId, String audience) {
-        try {
-            JwtSigner jwtSigner = new JwtSigner(appConfiguration, webKeysConfiguration, SignatureAlgorithm.RS512, audience);
-            Jwt jwt = jwtSigner.newJwt();
-
-            // claims
-            jwt.getClaims().setClaim("id", sessionId.getId());
-            jwt.getClaims().setClaim("authentication_time", sessionId.getAuthenticationTime());
-            jwt.getClaims().setClaim("user_dn", sessionId.getUserDn());
-            jwt.getClaims().setClaim("state", sessionId.getState() != null ?
-                    sessionId.getState().getValue() : "");
-
-            jwt.getClaims().setClaim("session_attributes", JwtSubClaimObject.fromMap(sessionId.getSessionAttributes()));
-
-            jwt.getClaims().setClaim("last_used_at", sessionId.getLastUsedAt());
-            jwt.getClaims().setClaim("permission_granted", sessionId.getPermissionGranted());
-            jwt.getClaims().setClaim("permission_granted_map", JwtSubClaimObject.fromBooleanMap(sessionId.getPermissionGrantedMap().getPermissionGranted()));
-
-            // sign
-            return jwtSigner.sign();
-        } catch (Exception e) {
-            if (log.isErrorEnabled())
-                log.error("Failed to sign session jwt! " + e.getMessage(), e);
-            throw new RuntimeException(e);
-        }
     }
 
     public SessionId setSessionIdStateAuthenticated(HttpServletRequest httpRequest, HttpServletResponse httpResponse, SessionId sessionId, String userDn) {
@@ -558,9 +520,6 @@ public class SessionIdService {
             sessionId.setId(newSessionId);
             sessionId.setDn(buildDn(newSessionId));
             sessionId.getSessionAttributes().put(SessionId.OLD_SESSION_ID_ATTR_KEY, oldSessionId);
-            if (isTrue(sessionId.getIsJwt())) {
-                sessionId.setJwt(generateJwt(sessionId, sessionId.getUserDn()).asString());
-            }
 
             persisted = persistSessionId(sessionId, true);
             cookieService.createSessionIdCookie(sessionId, httpRequest, httpResponse, false);

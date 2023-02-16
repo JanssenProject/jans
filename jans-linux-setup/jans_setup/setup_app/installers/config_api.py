@@ -13,6 +13,7 @@ from pathlib import Path
 from setup_app import paths
 from setup_app.static import AppType, InstallOption, SetupProfiles
 from setup_app.utils import base
+from setup_app.utils.ldif_utils import create_client_ldif
 from setup_app.config import Config
 from setup_app.installers.jetty import JettyInstaller
 from setup_app.pylib.ldif4.ldif import LDIFWriter
@@ -30,9 +31,9 @@ class ConfigApiInstaller(JettyInstaller):
     source_files = [
                 (os.path.join(Config.dist_jans_dir, 'jans-config-api.war'), os.path.join(base.current_app.app_info['BASE_SERVER'], '_out/jans-config-api.war')),
                 (os.path.join(Config.dist_jans_dir, 'facter'), 'https://raw.githubusercontent.com/GluuFederation/gluu-snap/master/facter/facter'),
-                (os.path.join(Config.dist_jans_dir, 'scim-plugin.jar'), os.path.join(base.current_app.app_info['BASE_SERVER'], 	   '_out/_plugins/scim-plugin-1.0.6-SNAPSHOT-distribution.jar')),
-                (os.path.join(Config.dist_jans_dir, 'user-mgt-plugin.jar'), os.path.join(base.current_app.app_info['BASE_SERVER'], '_out/_plugins/user-mgt-plugin-1.0.6-SNAPSHOT-distribution.jar')),
-                (os.path.join(Config.dist_jans_dir, 'fido2-plugin.jar'), os.path.join(base.current_app.app_info['BASE_SERVER'],    '_out/_plugins/fido2-plugin-1.0.6-SNAPSHOT-distribution.jar')),
+                (os.path.join(Config.dist_jans_dir, 'scim-plugin.jar'), os.path.join(base.current_app.app_info['BASE_SERVER'], 	   '_out/_plugins/scim-plugin-1.0.7-SNAPSHOT-distribution.jar')),
+                (os.path.join(Config.dist_jans_dir, 'user-mgt-plugin.jar'), os.path.join(base.current_app.app_info['BASE_SERVER'], '_out/_plugins/user-mgt-plugin-1.0.7-SNAPSHOT-distribution.jar')),
+                (os.path.join(Config.dist_jans_dir, 'fido2-plugin.jar'), os.path.join(base.current_app.app_info['BASE_SERVER'],    '_out/_plugins/fido2-plugin-1.0.7-SNAPSHOT-distribution.jar')),
                 (os.path.join(Config.dist_jans_dir, 'admin-ui-plugin.jar'), os.path.join(base.current_app.app_info['BASE_SERVER'], '_out/_plugins/admin-ui-plugin-distribution.jar'))
                ]
                
@@ -103,18 +104,14 @@ class ConfigApiInstaller(JettyInstaller):
         self.run([paths.cmd_chown, '-R', 'jetty:jetty', os.path.join(Config.jetty_base, self.service_name)])
 
 
-    def read_config_api_swagger(self):
-        config_api_swagger_yaml_fn = os.path.join(Config.data_dir, 'jans-config-api-swagger.yaml')
-        yml_str = self.readFile(config_api_swagger_yaml_fn)
-        yml_str = yml_str.replace('\t', ' ')
-        cfg_yml = ruamel.yaml.load(yml_str, ruamel.yaml.RoundTripLoader)
-        return cfg_yml
-
+    def get_scope_defs(self):
+        config_api_rs_protect_fn = os.path.join(Config.data_dir, 'config-api-rs-protect.json')
+        scopes_def = base.readJsonFile(config_api_rs_protect_fn)
+        return scopes_def
 
     def generate_configuration(self):
 
-        config_api_rs_protect_fn = os.path.join(Config.data_dir, 'config-api-rs-protect.json')
-        scopes_def = base.readJsonFile(config_api_rs_protect_fn)
+        scopes_def = self.get_scope_defs()
 
         scope_type = 'oauth'
         self.check_clients([('jca_client_id', '1800.')])
@@ -152,7 +149,7 @@ class ConfigApiInstaller(JettyInstaller):
                             display_name = 'Config API scope {}'.format(scope['name'])
                             description = 'Config API {} scope {}'.format(scope_level, scope['name'])
                             ldif_dict = {
-                                        'objectclass': ['top', 'jansScope'],
+                                        'objectClass': ['top', 'jansScope'],
                                         'description': [description],
                                         'displayName': [display_name],
                                         'inum': [scope['inum']],
@@ -166,42 +163,22 @@ class ConfigApiInstaller(JettyInstaller):
 
         scope_ldif_fd.close()
 
-        createClient = True
-        config_api_dn = 'inum={},ou=clients,o=jans'.format(Config.jca_client_id)
+        create_client = True
         if Config.installed_instance and self.dbUtils.search('ou=clients,o=jans', search_filter='(&(inum={})(objectClass=jansClnt))'.format(Config.jca_client_id)):
-            createClient = False
+            create_client = False
 
-        if createClient:
-            clients_ldif_fd = open(self.clients_ldif_fn, 'wb')
-            ldif_clients_writer = LDIFWriter(clients_ldif_fd, cols=1000)
-            ldif_clients_writer.unparse(
-                config_api_dn, {
-                'objectClass': ['top', 'jansClnt'],
-                'del': ['false'],
-                'displayName': ['Jans Config Api Client'],
-                'inum': [Config.jca_client_id],
-                'jansAccessTknAsJwt': ['false'],
-                'jansAccessTknSigAlg': ['RS256'],
-                'jansAppTyp': ['web'],
-                'jansAttrs': ['{"tlsClientAuthSubjectDn":"","runIntrospectionScriptBeforeJwtCreation":false,"keepClientAuthorizationAfterExpiration":false,"allowSpontaneousScopes":false,"spontaneousScopes":[],"spontaneousScopeScriptDns":[],"backchannelLogoutUri":[],"backchannelLogoutSessionRequired":false,"additionalAudience":[],"postAuthnScripts":[],"consentGatheringScripts":[],"introspectionScripts":[],"rptClaimsScripts":[]}'],
-                'jansClntSecret': [Config.jca_client_encoded_pw],
-                'jansDisabled': ['false'],
-                'jansGrantTyp': ['authorization_code', 'refresh_token', 'client_credentials'],
-                'jansIdTknSignedRespAlg': ['RS256'],
-                'jansInclClaimsInIdTkn': ['false'],
-                'jansLogoutSessRequired': ['false'],
-                'jansPersistClntAuthzs': ['true'],
-                'jansRespTyp': ['code'],
-                'jansRptAsJwt': ['false'],
-                'jansScope': jansUmaScopes_all,
-                'jansSubjectTyp': ['pairwise'],
-                'jansTknEndpointAuthMethod': ['client_secret_basic'],
-                'jansTrustedClnt': ['false'],
-                'jansRedirectURI': ['https://{}/admin-ui'.format(Config.hostname), 'http://localhost:4100']
-                })
+        if create_client:
+            create_client_ldif(
+                ldif_fn=self.clients_ldif_fn,
+                client_id=Config.jca_client_id,
+                encoded_pw=Config.jca_client_encoded_pw,
+                scopes=jansUmaScopes_all,
+                redirect_uri=['https://{}/admin-ui'.format(Config.hostname), 'http://localhost:4100'],
+                display_name="Jans Config Api Client"
+                )
 
-            clients_ldif_fd.close()
             self.load_ldif_files.append(self.clients_ldif_fn)
+
 
     def render_import_templates(self):
 

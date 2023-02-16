@@ -16,7 +16,7 @@ services:
       - MYSQL_PASSWORD=1t5Fin3#security
       - MYSQL_ROOT_PASSWORD=1t5Fin3#security
   jans:
-    image: janssenproject/monolith:1.0.6_dev
+    image: janssenproject/monolith:1.0.7_dev
     restart: always
     ports:
       - "443:443"
@@ -33,13 +33,17 @@ services:
       - CN_CITY=Austin
       - CN_STATE=TX
       - CN_COUNTRY=US
+      - CN_INSTALL_MYSQL=true
       - CN_INSTALL_CONFIG_API=true
       - CN_INSTALL_SCIM=true
       - CN_INSTALL_FIDO2=true
-      - MYSQL_DATABASE=jans
-      - MYSQL_USER=jans
-      - MYSQL_PASSWORD=1t5Fin3#security
-      - MYSQL_HOST=mysql
+      - TEST_CLIENT_ID=9876baac-de39-4c23-8a78-674b59df8c09
+      - TEST_CLIENT_TRUSTED=true
+      - TEST_CLIENT_SECRET=1t5Fin3#security
+      - RDBMS_DATABASE=jans
+      - RDBMS_USER=jans
+      - RDBMS_PASSWORD=1t5Fin3#security
+      - RDBMS_HOST=mysql
     volumes:
       - ./jans-auth-custom:/opt/jans/jetty/jans-auth/custom
       - ./jans-config-api-custom:/opt/jans/jetty/jans-config-api/custom

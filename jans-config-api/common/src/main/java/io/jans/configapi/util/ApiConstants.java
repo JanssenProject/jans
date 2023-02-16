@@ -12,6 +12,7 @@ public class ApiConstants {
 
     public static final String BASE_API_URL = "/";
     public static final String CONFIG = "/config";
+    public static final String API_CONFIG = "/api-config";
     public static final String JWKS = "/jwks";
     public static final String JANS_AUTH = "/jans-auth-server";
     public static final String LOGGING = "/logging";
@@ -78,13 +79,15 @@ public class ApiConstants {
     public static final String SESSIONID_PATH = "/{sessionId}";
     public static final String USERDN_PATH = "/{userDn}";
     public static final String AGAMA = "/agama";
-    public static final String ADS_DEPLOYMENTS = "/ads-deployment";
+    public static final String AGAMA_DEPLOYMENTS = "/agama-deployment";
     public static final String QNAME_PATH = "{qname}";
     public static final String ENABLED = "enabled";
     public static final String QNAME = "qname";
     public static final String INCLUDE_SOURCE = "includeSource";
     public static final String SOURCE = "/source/";
     public static final String PLUGIN = "/plugin";
+    public static final String PLUGIN_NAME_PATH = "{pluginName}";
+    public static final String AUTHORIZATIONS = "/authorizations";
 
     public static final String LIMIT = "limit";
     public static final String START_INDEX = "startIndex";
@@ -103,11 +106,13 @@ public class ApiConstants {
     public static final String CREATORID = "creatorId";
     public static final String SESSIONID = "sessionId";
     public static final String USERDN = "userDn";
+    public static final String PLUGIN_NAME = "pluginName";
     
 
     public static final String ALL = "all";
     public static final String ACTIVE = "active";
     public static final String INACTIVE = "inactive"; 
+    public static final String ADD_SCRIPT_TEMPLATE = "addScriptTemplate";
 
     // API Protection
     public static final String PROTECTION_TYPE_OAUTH2 = "oauth2";
@@ -122,7 +127,7 @@ public class ApiConstants {
     
     //Pagination
     public static final String DEFAULT_LIST_SIZE = "50";
-    public static final String DEFAULT_LIST_START_INDEX = "1";
+    public static final String DEFAULT_LIST_START_INDEX = "0";
     public static final int DEFAULT_MAX_COUNT = 200;  
     public static final String SORT_BY = "sortBy";
     public static final String SORT_ORDER = "sortOrder";

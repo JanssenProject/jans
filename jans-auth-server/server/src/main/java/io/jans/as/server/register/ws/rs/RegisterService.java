@@ -5,6 +5,7 @@
  */
 package io.jans.as.server.register.ws.rs;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Lists;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.common.model.registration.Client;
@@ -190,6 +191,30 @@ public class RegisterService {
         }
         if (requestObject.getSpontaneousScopes() != null) {
             client.getAttributes().setSpontaneousScopes(requestObject.getSpontaneousScopes());
+        }
+        if (requestObject.getAdditionalAudience() != null) {
+            client.getAttributes().setAdditionalAudience(requestObject.getAdditionalAudience());
+        }
+        if (requestObject.getSpontaneousScopeScriptDns() != null) {
+            client.getAttributes().setSpontaneousScopeScriptDns(requestObject.getSpontaneousScopeScriptDns());
+        }
+        if (requestObject.getUpdateTokenScriptDns() != null) {
+            client.getAttributes().setUpdateTokenScriptDns(requestObject.getUpdateTokenScriptDns());
+        }
+        if (requestObject.getPostAuthnScriptDns() != null) {
+            client.getAttributes().setPostAuthnScripts(requestObject.getPostAuthnScriptDns());
+        }
+        if (requestObject.getConsentGatheringScriptDns() != null) {
+            client.getAttributes().setConsentGatheringScripts(requestObject.getConsentGatheringScriptDns());
+        }
+        if (requestObject.getIntrospectionScriptDns() != null) {
+            client.getAttributes().setIntrospectionScripts(requestObject.getIntrospectionScriptDns());
+        }
+        if (requestObject.getRptClaimsScriptDns() != null) {
+            client.getAttributes().setRptClaimsScripts(requestObject.getRptClaimsScriptDns());
+        }
+        if (requestObject.getRopcScriptDns() != null) {
+            client.getAttributes().setRopcScripts(requestObject.getRopcScriptDns());
         }
         if (requestObject.getRunIntrospectionScriptBeforeJwtCreation() != null) {
             client.getAttributes().setRunIntrospectionScriptBeforeJwtCreation(requestObject.getRunIntrospectionScriptBeforeJwtCreation());
@@ -400,9 +425,37 @@ public class RegisterService {
             return;
         }
 
+        addDefaultCustomAttributes(requestObject);
+
         for (String attr : attrList) {
             if (requestObject.has(attr)) {
                 addCustomAttribute(client, requestObject, attr);
+            }
+        }
+    }
+
+    public void addDefaultCustomAttributes(JSONObject requestObject) {
+        final JsonNode node = appConfiguration.getDynamicRegistrationDefaultCustomAttributes();
+        final List<String> allowed = appConfiguration.getDynamicRegistrationCustomAttributes();
+        if (allowed == null || allowed.isEmpty() || node == null || node.isEmpty()) {
+            return;
+        }
+
+        final Iterator<String> fieldNames = node.fieldNames();
+        while (fieldNames.hasNext()) {
+            String key = fieldNames.next();
+            if (!allowed.contains(key)) {
+                continue;
+            }
+            final JsonNode value = node.get(key);
+            if (value.isBoolean()) {
+                requestObject.put(key, value.booleanValue());
+            } else if (value.isTextual()) {
+                requestObject.put(key, value.textValue());
+            } else if (value.isNumber()) {
+                requestObject.put(key, value.numberValue());
+            } else if (value.isDouble()) {
+                requestObject.put(key, value.asDouble());
             }
         }
     }

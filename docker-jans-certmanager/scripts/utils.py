@@ -36,7 +36,8 @@ def generate_openid_keys(passwd, jks_path, jwks_path, dn, exp=365, sig_keys=DEFA
         "io.jans.as.client.util.KeyGenerator "
         f"-enc_keys {enc_keys} -sig_keys {sig_keys} "
         f"-dnname '{dn}' -expiration_hours {exp} "
-        f"-keystore {jks_path} -keypasswd {passwd}"
+        f"-keystore {jks_path} -keypasswd {passwd} "
+        "-key_ops_type connect"
     )
 
     out, err, retcode = exec_cmd(cmd)

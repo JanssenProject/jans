@@ -26,27 +26,33 @@ paths:
       parameters:
       - name: limit
         in: query
+        description: Search size - max size of the results to return
         schema:
           type: integer
           format: int32
           default: 50
       - name: pattern
         in: query
+        description: Search pattern
         schema:
           type: string
           default: ""
       - name: startIndex
         in: query
+        description: The 1-based index of the first query result
         schema:
           type: integer
           format: int32
-          default: 1
+          default: 0
       - name: sortBy
         in: query
+        description: Attribute whose value will be used to order the returned response
         schema:
           type: string
       - name: sortOrder
         in: query
+        description: Order in which the sortBy param is applied. Allowed values are
+          "ascending" and "descending"
         schema:
           type: string
       responses:
@@ -506,6 +512,7 @@ paths:
       parameters:
       - name: inum
         in: path
+        description: User identifier
         required: true
         schema:
           type: string
@@ -618,6 +625,7 @@ paths:
       parameters:
       - name: inum
         in: path
+        description: User identifier
         required: true
         schema:
           type: string
@@ -642,13 +650,14 @@ paths:
       parameters:
       - name: inum
         in: path
+        description: User identifier
         required: true
         schema:
           type: string
       requestBody:
         description: UserPatchRequest
         content:
-          application/json-patch+json:
+          application/json:
             schema:
               $ref: '#/components/schemas/UserPatchRequest'
             examples:

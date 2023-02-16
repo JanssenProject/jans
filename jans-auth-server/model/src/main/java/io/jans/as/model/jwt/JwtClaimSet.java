@@ -202,11 +202,25 @@ public abstract class JwtClaimSet {
     }
 
     private void setClaimString(String key, Object value, boolean overrideValue) {
-        Object currentValue = getClaim(key);
-        if (overrideValue || currentValue == null) {
+        if (overrideValue) {
             setClaim(key, (String) value);
-        } else {
-            setClaim(key, Lists.newArrayList(currentValue.toString(), (String) value));
+            return;
+        }
+
+        Object currentValue = getClaim(key);
+        String valueAsString = (String) value;
+
+        if (currentValue instanceof String) {
+            if (!currentValue.equals(value)) {
+                setClaim(key, Lists.newArrayList(currentValue.toString(), valueAsString));
+            } else {
+                setClaim(key, (String) value);
+            }
+        } else if (currentValue instanceof List) {
+            List<String> currentValueAsList = (List) currentValue;
+            if (!currentValueAsList.contains(valueAsString)) {
+                currentValueAsList.add(valueAsString);
+            }
         }
     }
 
@@ -262,8 +276,7 @@ public abstract class JwtClaimSet {
         if (attribute instanceof JSONArray) {
             claims.put(key, JsonApplier.getStringList((JSONArray) attribute));
         } else {
-            String value = (String) attribute;
-            claims.put(key, value);
+            claims.put(key, attribute);
         }
     }
 

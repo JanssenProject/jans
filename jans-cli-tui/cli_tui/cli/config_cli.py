@@ -29,7 +29,7 @@ import jwt
 import pyDes
 import stat
 import ruamel.yaml
-
+import urllib.parse
 
 from pathlib import Path
 from types import SimpleNamespace
@@ -46,7 +46,14 @@ config_dir.mkdir(parents=True, exist_ok=True)
 config_ini_fn = config_dir.joinpath('jans-cli.ini')
 sys.path.append(cur_dir)
 
-my_op_mode = 'scim' if 'scim' in os.path.basename(sys.argv[0]) or '-scim' in sys.argv else 'jca'
+
+if 'scim' in os.path.basename(sys.argv[0]) or '-scim' in sys.argv:
+    my_op_mode = 'scim'
+elif 'auth' in os.path.basename(sys.argv[0]) or '-auth' in sys.argv:
+    my_op_mode = 'auth'
+else:
+    my_op_mode = 'jca'
+
 plugins = []
 
 warning_color = 214
@@ -110,26 +117,30 @@ def get_plugin_name_from_title(title):
         return title[n+1:].strip()
     return ''
 
-# load yaml files
 cfg_yaml = {}
-op_list = []
-cfg_yaml[my_op_mode] = {}
-for yaml_fn in glob.glob(os.path.join(cur_dir, 'ops', my_op_mode, '*.yaml')):
-    fn, ext = os.path.splitext(os.path.basename(yaml_fn))
-    with open(yaml_fn) as f:
-        config_ = ruamel.yaml.load(f.read().replace('\t', ''), ruamel.yaml.RoundTripLoader)
-        plugin_name = get_plugin_name_from_title(config_['info']['title'])
-        cfg_yaml[my_op_mode][plugin_name] = config_
-
-        for path in config_['paths']:
-            for method in config_['paths'][path]:
-                if isinstance(config_['paths'][path][method], dict):
-                    for tag_ in config_['paths'][path][method].get('tags', []):
-                        tag = get_named_tag(tag_)
-                        if not tag in op_list:
-                            op_list.append(tag)
 
 
+# load yaml files
+def read_swagger(op_mode):
+    op_list = []
+    cfg_yaml[op_mode] = {}
+    for yaml_fn in glob.glob(os.path.join(cur_dir, 'ops', op_mode, '*.yaml')):
+        fn, ext = os.path.splitext(os.path.basename(yaml_fn))
+        with open(yaml_fn) as f:
+            config_ = ruamel.yaml.load(f.read().replace('\t', ''), ruamel.yaml.RoundTripLoader)
+            plugin_name = get_plugin_name_from_title(config_['info']['title'])
+            cfg_yaml[op_mode][plugin_name] = config_
+
+            for path in config_['paths']:
+                for method in config_['paths'][path]:
+                    if isinstance(config_['paths'][path][method], dict):
+                        for tag_ in config_['paths'][path][method].get('tags', []):
+                            tag = get_named_tag(tag_)
+                            if not tag in op_list:
+                                op_list.append(tag)
+    return op_list
+
+op_list = read_swagger(my_op_mode)
 op_list.sort()
 
 parser = argparse.ArgumentParser()
@@ -164,6 +175,7 @@ parser.add_argument("-no-color", help="Do not colorize json dumps", action='stor
 parser.add_argument("--log-dir", help="Log directory", default=log_dir)
 parser.add_argument("-revoke-session", help="Revokes session", action='store_true')
 parser.add_argument("-scim", help="SCIM Mode", action='store_true', default=False)
+parser.add_argument("-auth", help="Jans OAuth Server Mode", action='store_true', default=False)
 
 parser.add_argument("--data", help="Path to json data file")
 args = parser.parse_args()
@@ -242,11 +254,13 @@ debug = get_bool(debug)
 
 class JCA_CLI:
 
-    def __init__(self, host, client_id, client_secret, access_token, test_client=False, wrapped=None):
+    def __init__(self, host, client_id, client_secret, access_token, test_client=False, op_mode=None, wrapped=None):
         self.host = self.idp_host = host
         self.client_id = client_id
         self.client_secret = client_secret
         self.use_test_client = test_client
+        self.my_op_mode = op_mode if op_mode else my_op_mode
+
         self.getCredentials()
         self.wrapped = wrapped
         if wrapped == None:
@@ -258,11 +272,15 @@ class JCA_CLI:
         self.set_user()
         self.plugins()
 
-        if my_op_mode == 'jca':
-            self.host += '/jans-config-api'
+        if self.my_op_mode not in cfg_yaml:
+            read_swagger(self.my_op_mode)
 
-        if my_op_mode == 'scim':
+        if self.my_op_mode == 'jca':
+            self.host += '/jans-config-api'
+        elif self.my_op_mode == 'scim':
             self.host += '/jans-scim/restv1/v2'
+        elif self.my_op_mode == 'auth':
+            self.host += '/jans-auth/restv1'
 
         self.set_logging()
         self.ssl_settings()
@@ -350,7 +368,7 @@ class JCA_CLI:
                 sys.exit()
 
     def plugins(self):
-        for plugin_s in config['DEFAULT'].get(my_op_mode + '_plugins', '').split(','):
+        for plugin_s in config['DEFAULT'].get(self.my_op_mode + '_plugins', '').split(','):
             plugin = plugin_s.strip()
             if plugin:
                 plugins.append(plugin)
@@ -370,13 +388,17 @@ class JCA_CLI:
         code.interact(local=locals_)
         sys.exit()
 
-    def get_request_header(self, headers={}, access_token=None):
+
+    def get_request_header(self, headers=None, access_token=None):
+        if headers is None:
+            headers = {}
+
         if not access_token:
             access_token = self.access_token
 
-        user = self.get_user_info()
-        if 'inum' in user:
-            headers['User-inum'] = user['inum']
+            user = self.get_user_info()
+            if 'inum' in user:
+                headers['User-inum'] = user['inum']
 
         ret_val = {'Authorization': 'Bearer {}'.format(access_token)}
         ret_val.update(headers)
@@ -507,7 +529,7 @@ class JCA_CLI:
             return False
 
 
-    def get_scoped_access_token(self, scope):
+    def get_scoped_access_token(self, scope, set_access_token=True):
 
         if not self.wrapped:
             scope_text = " for scope {}\n".format(scope) if scope else ''
@@ -521,9 +543,11 @@ class JCA_CLI:
         else:
             post_params = {"grant_type": "client_credentials", "scope": scope}
 
+        client = self.use_test_client or self.client_id
+
         response = requests.post(
             url,
-            auth=(self.use_test_client, self.client_secret),
+            auth=(client, self.client_secret),
             data=post_params,
             verify=self.verify_ssl,
             cert=self.mtls_client_cert
@@ -532,7 +556,10 @@ class JCA_CLI:
         try:
             result = response.json()
             if 'access_token' in result:
-                self.access_token = result['access_token']
+                if set_access_token:
+                    self.access_token = result['access_token']
+                else:
+                    return result['access_token']
             else:
                 sys.stderr.write("Error while getting access token")
                 sys.stderr.write(result)
@@ -692,11 +719,12 @@ class JCA_CLI:
         return True, ''
 
     def get_access_token(self, scope):
-        if self.use_test_client:
-            self.get_scoped_access_token(scope)
-        elif not self.access_token and not self.wrapped:
-            self.check_access_token()
-            self.get_jwt_access_token()
+        if self.my_op_mode != 'auth':
+            if self.use_test_client:
+                self.get_scoped_access_token(scope)
+            elif not self.access_token and not self.wrapped:
+                self.check_access_token()
+                self.get_jwt_access_token()
         return True, ''
 
     def print_exception(self, e):
@@ -1010,12 +1038,12 @@ class JCA_CLI:
 
     def get_path_by_id(self, operation_id):
         retVal = {}
-        for plugin in cfg_yaml[my_op_mode]:
-            for path in cfg_yaml[my_op_mode][plugin]['paths']:
-                for method in cfg_yaml[my_op_mode][plugin]['paths'][path]:
-                    if 'operationId' in cfg_yaml[my_op_mode][plugin]['paths'][path][method] and cfg_yaml[my_op_mode][plugin]['paths'][path][method][
+        for plugin in cfg_yaml[self.my_op_mode]:
+            for path in cfg_yaml[self.my_op_mode][plugin]['paths']:
+                for method in cfg_yaml[self.my_op_mode][plugin]['paths'][path]:
+                    if 'operationId' in cfg_yaml[self.my_op_mode][plugin]['paths'][path][method] and cfg_yaml[self.my_op_mode][plugin]['paths'][path][method][
                         'operationId'] == operation_id:
-                        retVal = cfg_yaml[my_op_mode][plugin]['paths'][path][method].copy()
+                        retVal = cfg_yaml[self.my_op_mode][plugin]['paths'][path][method].copy()
                         retVal['__path__'] = path
                         retVal['__method__'] = method
                         retVal['__urlsuffix__'] = self.get_url_param(path)
@@ -1032,27 +1060,31 @@ class JCA_CLI:
         return ' '.join(scope)
 
 
-    def get_requests(self, endpoint, params={}):
+    def get_requests(self, endpoint, params=None):
         if not self.wrapped:
             sys.stderr.write("Please wait while retrieving data ...\n")
 
         security = self.get_scope_for_endpoint(endpoint)
         self.get_access_token(security)
 
+        headers=self.get_request_header({'Accept': 'application/json'})
         url_param_name = self.get_url_param(endpoint.path)
-
         url = 'https://{}{}'.format(self.host, endpoint.path)
+
         if params and url_param_name in params:
             url = url.format(**{url_param_name: params.pop(url_param_name)})
 
-        response = requests.get(
-            url = url,
-            headers=self.get_request_header({'Accept': 'application/json'}),
-            params=params,
-            verify=self.verify_ssl,
-            cert=self.mtls_client_cert
-        )
+        get_params = {
+            'url': url,
+            'headers': headers,
+            'verify': self.verify_ssl,
+            'cert': self.mtls_client_cert,
+            }
 
+        if params:
+            get_params['params'] = params
+
+        response = requests.get(**get_params)
         self.log_response(response)
 
         if self.wrapped:
@@ -1075,23 +1107,34 @@ class JCA_CLI:
             self.print_exception(e)
 
     def get_mime_for_endpoint(self, endpoint, req='requestBody'):
-        for key in endpoint.info[req]['content']:
-            return key
+        if req in endpoint.info:
+            for key in endpoint.info[req]['content']:
+                return key
 
-    def post_requests(self, endpoint, data):
+
+    def post_requests(self, endpoint, data, params=None):
         url = 'https://{}{}'.format(self.host, endpoint.path)
         security = self.get_scope_for_endpoint(endpoint)
         self.get_access_token(security)
         mime_type = self.get_mime_for_endpoint(endpoint)
-
         headers = self.get_request_header({'Accept': 'application/json', 'Content-Type': mime_type})
 
-        response = requests.post(url,
-            headers=headers,
-            json=data,
-            verify=self.verify_ssl,
-            cert=self.mtls_client_cert
-            )
+        post_params = {
+            'url': url,
+            'headers': headers,
+            'verify': self.verify_ssl,
+            'cert': self.mtls_client_cert,
+            }
+
+        if params:
+            post_params['params'] = params
+
+        if mime_type.endswith(('json', 'text')):
+            post_params['json'] = data
+        else:
+            post_params['data'] = data
+
+        response = requests.post(**post_params)
 
         self.log_response(response)
 
@@ -1101,20 +1144,34 @@ class JCA_CLI:
         try:
             return response.json()
         except:
-            print(response.text)
+            return {'server_error': response.text}
 
 
     def delete_requests(self, endpoint, url_param_dict):
         security = self.get_scope_for_endpoint(endpoint)
         self.get_access_token(security)
+        url_params = self.get_url_param(endpoint.path)
+
+        if url_params:
+            url_path = endpoint.path.format(**url_param_dict)
+            for param in url_params:
+                if param in url_param_dict:
+                    del url_param_dict[param]
+        else:
+            url_path = endpoint.path
+
+        if url_param_dict:
+            url_path += '?'+ urllib.parse.urlencode(url_param_dict)
 
         response = requests.delete(
-            url='https://{}{}'.format(self.host, endpoint.path.format(**url_param_dict)),
+            url='https://{}{}'.format(self.host, url_path),
             headers=self.get_request_header({'Accept': 'application/json'}),
             verify=self.verify_ssl,
             cert=self.mtls_client_cert
             )
+
         self.log_response(response)
+
         if response.status_code in (200, 204):
             return None
 
@@ -1125,24 +1182,34 @@ class JCA_CLI:
         url = 'https://{}{}'.format(self.host, endpoint.path.format(**url_param_dict))
         security = self.get_scope_for_endpoint(endpoint)
         self.get_access_token(security)
+        mime_type = self.get_mime_for_endpoint(endpoint)
+        headers = self.get_request_header({'Accept': 'application/json', 'Content-Type': mime_type})
 
-        headers = self.get_request_header({'Accept': 'application/json', 'Content-Type': 'application/json-patch+json'})
-        data = data
-        response = requests.patch(
-            url=url,
-            headers=headers,
-            json=data,
-            verify=self.verify_ssl,
-            cert=self.mtls_client_cert
-            )
+        patch_params = {
+            'url': url,
+            'headers': headers,
+            'verify': self.verify_ssl,
+            'cert': self.mtls_client_cert,
+            }
+
+        if url_param_dict:
+            patch_params['params'] = patch_params
+
+        if mime_type.endswith(('json', 'text')):
+            patch_params['json'] = data
+        else:
+            patch_params['data'] = data
+
+        response = requests.patch(**patch_params)
         self.log_response(response)
+
         try:
             return response.json()
         except:
             self.print_exception(response.text)
 
 
-    def put_requests(self, endpoint, data, params={}):
+    def put_requests(self, endpoint, data, params=None):
 
         security = self.get_scope_for_endpoint(endpoint)
         self.get_access_token(security)
@@ -1155,13 +1222,25 @@ class JCA_CLI:
         if params and url_param_name in params:
             url = url.format(**{url_param_name: params.pop(url_param_name)})
 
-        response = requests.put(
-                url=url,
-                headers=self.get_request_header({'Accept': mime_type}),
-                json=data,
-                verify=self.verify_ssl,
-                cert=self.mtls_client_cert
-            )
+        headers = self.get_request_header({'Accept': 'application/json', 'Content-Type': mime_type})
+
+        put_params = {
+            'url': url,
+            'headers': headers,
+            'verify': self.verify_ssl,
+            'cert': self.mtls_client_cert,
+            }
+
+
+        if mime_type.endswith(('json', 'text')):
+            put_params['json'] = data
+        else:
+            put_params['data'] = data
+
+        if params:
+            put_params['params'] = params
+
+        response = requests.put(**put_params)
 
         self.log_response(response)
 
@@ -1213,15 +1292,14 @@ class JCA_CLI:
 
         schema_path = None
 
-        for plugin in cfg_yaml[my_op_mode]:
-            for path_name in cfg_yaml[my_op_mode][plugin]['paths']:
-                for method in cfg_yaml[my_op_mode][plugin]['paths'][path_name]:
-                    path = cfg_yaml[my_op_mode][plugin]['paths'][path_name][method]
+        for plugin in cfg_yaml[self.my_op_mode]:
+            for path_name in cfg_yaml[self.my_op_mode][plugin]['paths']:
+                for method in cfg_yaml[self.my_op_mode][plugin]['paths'][path_name]:
+                    path = cfg_yaml[self.my_op_mode][plugin]['paths'][path_name][method]
                     if isinstance(path, dict):
                         for tag_ in path.get('tags', []):
                             tag = get_named_tag(tag_)
                             if tag == op_name:
-                                title = cfg_yaml[my_op_mode][plugin]['info']['title']
                                 mode_suffix = plugin+ ':' if plugin else ''
                                 print('Operation ID:', path['operationId'])
                                 print('  Description:', path['description'])
@@ -1243,7 +1321,13 @@ class JCA_CLI:
                                 if 'requestBody' in path:
                                     for apptype in path['requestBody'].get('content', {}):
                                         if 'schema' in path['requestBody']['content'][apptype]:
-                                            if path['requestBody']['content'][apptype]['schema'].get('type') == 'array':
+                                            if path['requestBody']['content'][apptype]['schema'].get('type') == 'object' and '$ref' not in path['requestBody']['content'][apptype]['schema']:
+                                                print('  Parameters:')
+                                                for param in path['requestBody']['content'][apptype]['schema']['properties']:
+                                                    req_s = '*' if param in path['requestBody']['content'][apptype]['schema'].get('required', []) else ''
+                                                    print('    {}{}: {}'.format(param, req_s, path['requestBody']['content'][apptype]['schema']['properties'][param].get('description') or "Description not found for this property"))
+
+                                            elif path['requestBody']['content'][apptype]['schema'].get('type') == 'array':
                                                 schema_path = path['requestBody']['content'][apptype]['schema']['items']['$ref']
                                                 print('  Schema: Array of {}{}'.format(mode_suffix, os.path.basename(schema_path)))
                                             else:
@@ -1317,13 +1401,23 @@ class JCA_CLI:
             sys.stderr.write("Server Response:\n")
             self.pretty_print(response)
 
+
+    def read_binary_file(self, fn):
+        with open(fn, 'rb') as f:
+            return f.read()
+
+
     def process_command_post(self, path, suffix_param, endpoint_params, data_fn, data):
 
         # TODO: suffix_param, endpoint_params
 
         endpoint = self.get_fake_endpoint(path)
+        mime_type = self.get_mime_for_endpoint(endpoint)
+        params = {}
+        params.update(suffix_param)
+        params.update(endpoint_params)
 
-        if not data:
+        if not data and data_fn:
 
             if data_fn.endswith('jwt'):
                 with open(data_fn) as reader:
@@ -1331,15 +1425,16 @@ class JCA_CLI:
                                           options={"verify_signature": False, "verify_exp": False, "verify_aud": False})
             else:
                 try:
-                    data = self.get_json_from_file(data_fn)
+                    if mime_type.endswith(('json', 'text')):
+                        data = self.get_json_from_file(data_fn)
+                    else:
+                        data = self.read_binary_file(data_fn)
                 except ValueError as ve:
                     self.exit_with_error(str(ve))
 
         if path['__method__'] == 'post':
-            response = self.post_requests(endpoint, data)
+            response = self.post_requests(endpoint, data, params)
         elif path['__method__'] == 'put':
-            params = endpoint_params.copy()
-            params.update(suffix_param)
             response = self.put_requests(endpoint, data, params)
 
         if self.wrapped:
@@ -1361,17 +1456,18 @@ class JCA_CLI:
             except ValueError as ve:
                 self.exit_with_error(str(ve))
 
-            if not isinstance(data, list):
+            if ('configuser' not in endpoint.path) and (not isinstance(data, list)):
                 self.exit_with_error("{} must be array of /components/schemas/PatchRequest".format(data_fn))
 
-        op_modes = ('add', 'remove', 'replace', 'move', 'copy', 'test')
+        if 'configuser' not in endpoint.path:
+            op_modes = ('add', 'remove', 'replace', 'move', 'copy', 'test')
 
-        for item in data:
-            if not item['op'] in op_modes:
-                print("op must be one of {}".format(', '.join(op_modes)))
-                sys.exit()
-            if not item['path'].startswith('/'):
-                item['path'] = '/' + item['path']
+            for item in data:
+                if not item['op'] in op_modes:
+                    print("op must be one of {}".format(', '.join(op_modes)))
+                    sys.exit()
+                if not item['path'].startswith('/'):
+                    item['path'] = '/' + item['path']
 
         response = self.patch_requests(endpoint, suffix_param, data)
 
@@ -1384,6 +1480,7 @@ class JCA_CLI:
     def process_command_delete(self, path, suffix_param, endpoint_params, data_fn, data=None):
         endpoint = self.get_fake_endpoint(path)
         response = self.delete_requests(endpoint, suffix_param)
+
         if self.wrapped:
             return response
 
@@ -1419,11 +1516,13 @@ class JCA_CLI:
                     pdata = args.patch_replace
 
                 if pop:
-                    if pop != 'remove' and pdata.count(':') != 1:
-                        self.exit_with_error("Please provide --patch-data as colon delimited key:value pair")
+                    if pop != 'remove':
+                        try:
+                            ppath, pval = self.unescaped_split(pdata, ':')
+                        except Exception:
+                            self.exit_with_error("Please provide --patch-data as colon delimited key:value pair.\nUse escape if you need colon in value or key, i.e. mtlsUserInfoEndpoint:https\\:example.jans.io/userinfo")
 
                     if pop != 'remove':
-                        ppath, pval = pdata.split(':')
                         data = [{'op': pop, 'path': '/'+ ppath.lstrip('/'), 'value': pval}]
                     else:
                         data = [{'op': pop, 'path': '/'+ pdata.lstrip('/')}]
@@ -1433,16 +1532,15 @@ class JCA_CLI:
 
 
     def get_schema_reference_from_name(self, plugin_name, schema_name):
-        for plugin in cfg_yaml[my_op_mode]:
-            if plugin_name == get_plugin_name_from_title(title = cfg_yaml[my_op_mode][plugin]['info']['title']):
-                for schema in cfg_yaml[my_op_mode][plugin]['components']['schemas']:
+        for plugin in cfg_yaml[self.my_op_mode]:
+            if plugin_name == get_plugin_name_from_title(title = cfg_yaml[self.my_op_mode][plugin]['info']['title']):
+                for schema in cfg_yaml[self.my_op_mode][plugin]['components']['schemas']:
                     if schema == schema_name:
                         return '#/components/schemas/' + schema
 
     def get_schema_from_reference(self, plugin_name, ref):
-        
         schema_path_list = ref.strip('/#').split('/')
-        schema = cfg_yaml[my_op_mode][plugin_name][schema_path_list[0]]
+        schema = cfg_yaml[self.my_op_mode][plugin_name][schema_path_list[0]]
 
         schema_ = schema.copy()
 

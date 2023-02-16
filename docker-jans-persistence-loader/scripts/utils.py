@@ -2,11 +2,8 @@ import contextlib
 import json
 import os
 import typing as _t
-from itertools import chain
 from pathlib import Path
 from uuid import uuid4
-
-import ruamel.yaml
 
 from jans.pycloudlib.utils import as_boolean
 from jans.pycloudlib.utils import encode_text
@@ -199,28 +196,27 @@ def merge_auth_ctx(ctx):
 
 
 def merge_jans_cli_ctx(manager, ctx):
-    # WARNING:
-    # - deprecated configs and secrets for role_based
-    # - move the configs and secrets creation to configurator
-    # - remove them on future release
-
     # jans-cli-tui client
-    ctx["role_based_client_id"] = manager.config.get("role_based_client_id")
-    if not ctx["role_based_client_id"]:
-        ctx["role_based_client_id"] = f"2000.{uuid4()}"
-        manager.config.set("role_based_client_id", ctx["role_based_client_id"])
+    ctx["tui_client_id"] = manager.config.get("tui_client_id")
+    if not ctx["tui_client_id"]:
+        # migrate from old configs/secrets (if any)
+        ctx["tui_client_id"] = manager.config.get("role_based_client_id", f"2000.{uuid4()}")
+        manager.config.set("tui_client_id", ctx["tui_client_id"])
 
-    ctx["role_based_client_pw"] = manager.secret.get("role_based_client_pw")
-    if not ctx["role_based_client_pw"]:
-        ctx["role_based_client_pw"] = get_random_chars()
-        manager.secret.set("role_based_client_pw", ctx["role_based_client_pw"])
+    ctx["tui_client_pw"] = manager.secret.get("tui_client_pw")
+    if not ctx["tui_client_pw"]:
+        # migrate from old configs/secrets (if any)
+        ctx["tui_client_pw"] = manager.secret.get("role_based_client_pw", get_random_chars())
+        manager.secret.set("tui_client_pw", ctx["tui_client_pw"])
 
-    ctx["role_based_client_encoded_pw"] = manager.secret.get("role_based_client_encoded_pw")
-    if not ctx["role_based_client_encoded_pw"]:
-        ctx["role_based_client_encoded_pw"] = encode_text(
-            ctx["role_based_client_pw"], manager.secret.get("encoded_salt"),
-        ).decode()
-        manager.secret.set("role_based_client_encoded_pw", ctx["role_based_client_encoded_pw"])
+    ctx["tui_client_encoded_pw"] = manager.secret.get("tui_client_encoded_pw")
+    if not ctx["tui_client_encoded_pw"]:
+        # migrate from old configs/secrets (if any)
+        ctx["tui_client_encoded_pw"] = manager.secret.get(
+            "role_based_client_encoded_pw",
+            encode_text(ctx["tui_client_pw"], manager.secret.get("encoded_salt")).decode(),
+        )
+        manager.secret.set("tui_client_encoded_pw", ctx["tui_client_encoded_pw"])
     return ctx
 
 
@@ -261,9 +257,9 @@ def get_ldif_mappings(group, optional_scopes=None):
             ]
 
         files += [
-            "jans-auth/configuration.ldif",
             "jans-auth/role-scope-mappings.ldif",
             "jans-cli/client.ldif",
+            "jans-auth/configuration.ldif",
         ]
 
         return files
@@ -304,25 +300,22 @@ def get_ldif_mappings(group, optional_scopes=None):
     return ldif_mappings
 
 
-def get_config_api_swagger(path="/app/static/jans-config-api-swagger.yaml"):
+def get_config_api_scopes(path="/app/static/config-api-rs-protect.json"):
+    scopes = []
+
     with open(path) as f:
-        txt = f.read()
-    txt = txt.replace("\t", " ")
-    return ruamel.yaml.load(txt, Loader=ruamel.yaml.RoundTripLoader)
+        scope_defs = json.loads(f.read())
 
+    for resource in scope_defs["resources"]:
+        for condition in resource["conditions"]:
+            scopes += [
+                scope["name"]
+                for scope in condition["scopes"]
+                if scope.get("inum") and scope.get("name")
+            ]
 
-def get_config_api_scopes():
-    swagger = get_config_api_swagger()
-    scope_list = []
-
-    for _, methods in swagger["paths"].items():
-        for _, attrs in methods.items():
-            if "security" not in attrs:
-                continue
-            scope_list += [attr["oauth2"] for attr in attrs["security"]]
-
-    # make sure there's no duplication
-    return list(set(chain(*scope_list)))
+    # ensure no duplicates and sorted
+    return sorted(set(scopes))
 
 
 def get_role_scope_mappings(path="/app/templates/jans-auth/role-scope-mappings.json"):
@@ -334,7 +327,7 @@ def get_role_scope_mappings(path="/app/templates/jans-auth/role-scope-mappings.j
     for i, api_role in enumerate(role_mapping["rolePermissionMapping"]):
         if api_role["role"] == "api-admin":
             # merge scopes without duplication
-            role_mapping["rolePermissionMapping"][i]["permissions"] = list(set(
+            role_mapping["rolePermissionMapping"][i]["permissions"] = sorted(set(
                 role_mapping["rolePermissionMapping"][i]["permissions"] + scope_list
             ))
             break

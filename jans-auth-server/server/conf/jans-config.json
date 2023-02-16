@@ -19,10 +19,10 @@
     "deviceAuthorizationEndpoint":"${config.oxauth.contextPath}/restv1/device_authorization",
     "umaConfigurationEndpoint":"${config.oxauth.contextPath}/restv1/uma2-configuration",
     "sectorIdentifierEndpoint":"${config.oxauth.contextPath}/sectoridentifier",
-    "oxElevenGenerateKeyEndpoint":"${config.oxauth.contextPath}/oxeleven/rest/oxeleven/generateKey",
-    "oxElevenSignEndpoint":"${config.oxauth.contextPath}/oxeleven/rest/oxeleven/sign",
-    "oxElevenVerifySignatureEndpoint":"${config.oxauth.contextPath}/oxeleven/rest/oxeleven/verifySignature",
-    "oxElevenDeleteKeyEndpoint":"${config.oxauth.contextPath}/oxeleven/rest/oxeleven/deleteKey",
+    "jansElevenGenerateKeyEndpoint":"${config.oxauth.contextPath}/oxeleven/rest/oxeleven/generateKey",
+    "jansElevenSignEndpoint":"${config.oxauth.contextPath}/oxeleven/rest/oxeleven/sign",
+    "jansElevenVerifySignatureEndpoint":"${config.oxauth.contextPath}/oxeleven/rest/oxeleven/verifySignature",
+    "jansElevenDeleteKeyEndpoint":"${config.oxauth.contextPath}/oxeleven/rest/oxeleven/deleteKey",
     "backchannelAuthenticationEndpoint":"${config.oxauth.contextPath}/restv1/bc-authorize",
     "parEndpoint":"${config.oxauth.contextPath}/restv1/par",
     "backchannelDeviceRegistrationEndpoint":"${config.oxauth.contextPath}/restv1/bc-deviceRegistration",
@@ -283,8 +283,8 @@
     "keyRegenerationEnabled":false,
     "keyRegenerationInterval":48,
     "defaultSignatureAlgorithm":"RS256",
-    "oxOpenIdConnectVersion":"openidconnect-1.0",
-    "oxId":"https://${server.name}/oxid/service/gluu/inum",
+    "jansOpenIdConnectVersion":"openidconnect-1.0",
+    "jansId":"https://${server.name}/oxid/service/gluu/inum",
     "dynamicRegistrationEnabled":true,
     "dynamicRegistrationPasswordGrantTypeEnabled":true,
     "dynamicRegistrationExpirationTime":${config.client.dynamic-registration-expiration-time},
@@ -338,7 +338,7 @@
     "pairwiseCalculationSalt": "${config.oxauth.pairwiseCalculationSalt}",
     "shareSubjectIdBetweenClientsWithSameSectorId": true,
     "webKeysStorage": "keystore",
-    "oxElevenTestModeToken": "${config.oxeleven.testModeToken}",
+    "jansElevenTestModeToken": "${config.oxeleven.testModeToken}",
     "dnName": "CN=Jans Auth CA Certificates",
     "keyStoreFile": "./conf/keystore.p12",
     "keyStoreSecret": "secret",
@@ -408,7 +408,8 @@
     "ssaConfiguration": {
         "ssaEndpoint":"${config.oxauth.contextPath}/restv1/ssa",
         "ssaSigningAlg": "RS256",
-        "ssaExpirationInDays": 30
+        "ssaExpirationInDays": 30,
+        "ssaCustomAttributes": []
     },
     "backchannelClientId": "123-123-123",
     "backchannelRedirectUri": "https://ce.gluu.info:8443/ciba/home.htm",
@@ -450,5 +451,8 @@
             "Cache-Control": "max-age=0, no-store"
         }
     },
-    "blockWebviewAuthorizationEnabled": false
+    "blockWebviewAuthorizationEnabled": false,
+    "dateFormatterPatterns": {
+        "birthdate": "yyyy-MM-dd"
+    }
 }

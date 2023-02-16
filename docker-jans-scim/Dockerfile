@@ -15,7 +15,7 @@ RUN apk update \
 # Jetty
 # =====
 
-ARG JETTY_VERSION=11.0.11
+ARG JETTY_VERSION=11.0.13
 ARG JETTY_HOME=/opt/jetty
 ARG JETTY_BASE=/opt/jans/jetty
 ARG JETTY_USER_HOME_LIB=/home/jetty/lib
@@ -35,7 +35,7 @@ EXPOSE 8080
 # ======
 
 ARG JYTHON_VERSION=2.7.3
-ARG JYTHON_BUILD_DATE='2022-08-01 07:49'
+ARG JYTHON_BUILD_DATE='2022-08-01 17:37'
 RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSION}/jython-installer-${JYTHON_VERSION}.jar -O /tmp/jython-installer.jar \
     && mkdir -p /opt/jython \
     && java -jar /tmp/jython-installer.jar -v -s -d /opt/jython -e ensurepip \
@@ -45,8 +45,8 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # SCIM
 # ====
 
-ENV CN_VERSION=1.0.6-SNAPSHOT
-ENV CN_BUILD_DATE='2022-12-01 12:40'
+ENV CN_VERSION=1.0.7-SNAPSHOT
+ENV CN_BUILD_DATE='2023-02-08 14:34'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-scim-server/${CN_VERSION}/jans-scim-server-${CN_VERSION}.war
 
 # Install SCIM
@@ -57,7 +57,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-scim/webapps \
     && zip -d jans-scim.war WEB-INF/jetty-web.xml \
     && zip -r jans-scim.war WEB-INF/jetty-env.xml \
     && cp jans-scim.war ${JETTY_BASE}/jans-scim/webapps/jans-scim.war \
-    && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-scim --add-to-start=server,deploy,resources,http,http-forwarded,jsp,websocket,cdi-decorate \
+    && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-scim --add-module=server,deploy,resources,http,http-forwarded,jsp,websocket,cdi-decorate,jmx,stats,logging-log4j2 --approve-all-licenses \
     && rm -rf /tmp/jans-scim.war /tmp/WEB-INF
 
 # ======
@@ -66,7 +66,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-scim/webapps \
 
 COPY requirements.txt /app/requirements.txt
 RUN python3 -m ensurepip \
-    && pip3 install --no-cache-dir -U pip wheel \
+    && pip3 install --no-cache-dir -U pip wheel setuptools \
     && pip3 install --no-cache-dir -r /app/requirements.txt \
     && pip3 uninstall -y pip wheel
 
@@ -74,17 +74,13 @@ RUN python3 -m ensurepip \
 # Prometheus
 # ==========
 
-ARG PROMETHEUS_JAVAAGENT_VERSION=0.17.2
 COPY conf/prometheus-config.yaml /opt/prometheus/
-RUN mkdir -p /opt/prometheus \
-    && wget -q https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/${PROMETHEUS_JAVAAGENT_VERSION}/jmx_prometheus_javaagent-${PROMETHEUS_JAVAAGENT_VERSION}.jar -O /opt/prometheus/jmx_prometheus_javaagent.jar \
-    && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-scim --add-module=jmx,stats
 
 # =====================
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_SOURCE_VERSION=c9d1ed9cbb5de852fcada889f8c1f6be95d66c49
+ENV JANS_SOURCE_VERSION=2603bbb1080345cab4fe814dca39024d8d0b5434
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCIM_RESOURCE_DIR=jans-scim/server/src/main/resources
 
@@ -148,9 +144,7 @@ ENV CN_CONFIG_ADAPTER=consul \
     CN_CONFIG_CONSUL_NAMESPACE=jans \
     CN_CONFIG_KUBERNETES_NAMESPACE=default \
     CN_CONFIG_KUBERNETES_CONFIGMAP=jans \
-    CN_CONFIG_KUBERNETES_USE_KUBE_CONFIG=false \
-    CN_CONFIG_GOOGLE_SECRET_VERSION_ID=latest \
-    CN_CONFIG_GOOGLE_SECRET_NAME_PREFIX=jans
+    CN_CONFIG_KUBERNETES_USE_KUBE_CONFIG=false
 
 # ==========
 # Secret ENV
@@ -169,10 +163,7 @@ ENV CN_SECRET_ADAPTER=vault \
     CN_SECRET_VAULT_NAMESPACE=jans \
     CN_SECRET_KUBERNETES_NAMESPACE=default \
     CN_SECRET_KUBERNETES_SECRET=jans \
-    CN_SECRET_KUBERNETES_USE_KUBE_CONFIG=false \
-    CN_SECRET_GOOGLE_SECRET_MANAGER_PASSPHRASE=secret \
-    CN_SECRET_GOOGLE_SECRET_VERSION_ID=latest \
-    CN_SECRET_GOOGLE_SECRET_NAME_PREFIX=jans
+    CN_SECRET_KUBERNETES_USE_KUBE_CONFIG=false
 
 # ===============
 # Persistence ENV
@@ -204,6 +195,9 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_JAVA_OPTIONS="" \
     GOOGLE_PROJECT_ID="" \
     GOOGLE_APPLICATION_CREDENTIALS=/etc/jans/conf/google-credentials.json \
+    CN_GOOGLE_SECRET_MANAGER_PASSPHRASE=secret \
+    CN_GOOGLE_SECRET_VERSION_ID=latest \
+    CN_GOOGLE_SECRET_NAME_PREFIX=jans \
     CN_PROMETHEUS_PORT="" \
     CN_AWS_SECRETS_ENDPOINT_URL="" \
     CN_AWS_SECRETS_PREFIX=jans \
@@ -216,7 +210,7 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
 LABEL name="janssenproject/scim" \
     maintainer="Janssen Project <support@jans.io>" \
     vendor="Janssen Project" \
-    version="1.0.6" \
+    version="1.0.7" \
     release="dev" \
     summary="Janssen SCIM" \
     description="SCIM server"
@@ -229,8 +223,7 @@ RUN mkdir -p /etc/certs \
     ${JETTY_BASE}/common/libs/couchbase \
     /usr/share/java
 
-COPY --chown=1000:0 jetty/jans-scim.xml ${JETTY_BASE}/jans-scim/webapps/
-COPY jetty/log4j2.xml ${JETTY_BASE}/jans-scim/resources/
+COPY jetty/log4j2.xml /app/templates/
 COPY conf/*.tmpl /app/templates/
 COPY templates /app/templates
 
@@ -240,8 +233,10 @@ RUN chmod +x /app/scripts/entrypoint.sh
 # create non-root user
 RUN adduser -s /bin/sh -D -G root -u 1000 jetty
 
+COPY --chown=1000:0 jetty/jans-scim.xml ${JETTY_BASE}/jans-scim/webapps/
+
 # adjust ownership
-RUN chmod -R g=u ${JETTY_BASE}/jans-scim/resources \
+RUN chmod 664 ${JETTY_BASE}/jans-scim/resources/log4j2.xml \
     && chmod -R g=u ${JETTY_BASE}/jans-scim/logs \
     && chmod -R g=u /etc/certs \
     && chmod -R g=u /etc/jans \
@@ -250,7 +245,8 @@ RUN chmod -R g=u ${JETTY_BASE}/jans-scim/resources \
     && chmod 664 /opt/jetty/etc/webdefault.xml \
     && chown -R 1000:0 ${JETTY_BASE}/common/libs \
     && chown -R 1000:0 /usr/share/java \
-    && chmod -R g=u /app/templates/jans-scim
+    && chmod -R g=u /app/templates/jans-scim \
+    && chown -R 1000:0 /opt/prometheus
 
 USER 1000
 

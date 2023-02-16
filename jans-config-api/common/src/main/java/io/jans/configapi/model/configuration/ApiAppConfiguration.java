@@ -36,6 +36,9 @@ public class ApiAppConfiguration implements Configuration {
     private List<String> userExclusionAttributes;
     private List<String> userMandatoryAttributes;
     private AgamaConfiguration agamaConfiguration;
+    private AuditLogConf auditLogConf;
+    private DataFormatConversionConf dataFormatConversionConf;
+    private List<PluginConf> plugins;
 
     public boolean isConfigOauthEnabled() {
         return configOauthEnabled;
@@ -230,6 +233,30 @@ public class ApiAppConfiguration implements Configuration {
     public void setAgamaConfiguration(AgamaConfiguration agamaConfiguration) {
         this.agamaConfiguration = agamaConfiguration;
     }
+        
+    public AuditLogConf getAuditLogConf() {
+        return auditLogConf;
+    }
+
+    public void setAuditLogConf(AuditLogConf auditLogConf) {
+        this.auditLogConf = auditLogConf;
+    }
+    
+    public DataFormatConversionConf getDataFormatConversionConf() {
+        return dataFormatConversionConf;
+    }
+
+    public void setDataFormatConversionConf(DataFormatConversionConf dataFormatConversionConf) {
+        this.dataFormatConversionConf = dataFormatConversionConf;
+    }    
+
+    public List<PluginConf> getPlugins() {
+        return plugins;
+    }
+
+    public void setPlugins(List<PluginConf> plugins) {
+        this.plugins = plugins;
+    }
 
     @Override
     public String toString() {
@@ -246,7 +273,11 @@ public class ApiAppConfiguration implements Configuration {
                 + " , userExclusionAttributes="+ userExclusionAttributes
                 + " , userMandatoryAttributes="+ userMandatoryAttributes
                 + " , agamaConfiguration="+ agamaConfiguration
+                + " , auditLogConf="+ auditLogConf
+                + " , dataFormatConversionConf="+ dataFormatConversionConf
+                + " , plugins="+ plugins
                 + "]";
     }
 
 }
+

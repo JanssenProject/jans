@@ -15,7 +15,7 @@ RUN apk update \
 # Jetty
 # =====
 
-ARG JETTY_VERSION=11.0.11
+ARG JETTY_VERSION=11.0.13
 ARG JETTY_HOME=/opt/jetty
 ARG JETTY_BASE=/opt/jans/jetty
 ARG JETTY_USER_HOME_LIB=/home/jetty/lib
@@ -35,7 +35,7 @@ EXPOSE 8080
 # ======
 
 ARG JYTHON_VERSION=2.7.3
-ARG JYTHON_BUILD_DATE='2022-08-01 07:49'
+ARG JYTHON_BUILD_DATE='2022-08-01 17:37'
 RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSION}/jython-installer-${JYTHON_VERSION}.jar -O /tmp/jython-installer.jar \
     && mkdir -p /opt/jython \
     && java -jar /tmp/jython-installer.jar -v -s -d /opt/jython \
@@ -55,8 +55,8 @@ RUN /opt/jython/bin/pip uninstall -y pip
 # Auth server
 # ===========
 
-ENV CN_VERSION=1.0.6-SNAPSHOT
-ENV CN_BUILD_DATE='2022-12-01 12:38'
+ENV CN_VERSION=1.0.7-SNAPSHOT
+ENV CN_BUILD_DATE='2023-02-08 16:54'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-server/${CN_VERSION}/jans-auth-server-${CN_VERSION}.war
 
 # Install Jans Auth
@@ -67,7 +67,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/webapps \
     && zip -d jans-auth.war WEB-INF/jetty-web.xml \
     && zip -r jans-auth.war WEB-INF/jetty-env.xml \
     && cp jans-auth.war ${JETTY_BASE}/jans-auth/webapps/jans-auth.war \
-    && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-auth --add-module=server,deploy,annotations,resources,http,http-forwarded,threadpool,jsp,websocket,cdi-decorate \
+    && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-auth --add-module=server,deploy,annotations,resources,http,http-forwarded,threadpool,jsp,websocket,cdi-decorate,jmx,stats,logging-log4j2 --approve-all-licenses \
     && rm -rf /tmp/jans-auth.war /tmp/WEB-INF
 
 # ===========
@@ -84,19 +84,19 @@ RUN wget -q https://repo1.maven.org/maven2/org/jsmpp/jsmpp/${JSMPP_VERSION}/jsmp
 
 # This will later be refactored and moved to be pulled from persitence or a central bucket
 ARG CASA_CONFIG_VERSION=5.0.0-SNAPSHOT
-ARG CASA_CONFIG_BUILD_DATE="2022-05-26 13:56"
+ARG CASA_CONFIG_BUILD_DATE="2022-12-27 19:26"
 RUN wget -q https://jenkins.gluu.org/maven/org/gluu/casa-config/${CASA_CONFIG_VERSION}/casa-config-${CASA_CONFIG_VERSION}.jar -P /usr/share/java/
 
 # A workaround for Fido2 integration
-ARG FIDO2_CLIENT_VERSION=1.0.1
-ARG FIDO2_CLIENT_BUILD_DATE="2022-07-06 12:49"
+ARG FIDO2_CLIENT_VERSION=1.0.7-SNAPSHOT
+ARG FIDO2_CLIENT_BUILD_DATE="2023-01-31 15:04"
 RUN wget -q https://jenkins.jans.io/maven/io/jans/jans-fido2-client/${FIDO2_CLIENT_VERSION}/jans-fido2-client-${FIDO2_CLIENT_VERSION}.jar -P /usr/share/java/
 
 # =====================
 # Casa external scripts
 # =====================
 
-ARG FLEX_SOURCE_VERSION=48418cd351655a48c650075a6d60601c368a403d
+ARG FLEX_SOURCE_VERSION=5f065b7fb931199a26817ee22ffe5c2a9cc1e3f9
 ARG CASA_EXTRAS_DIR=casa/extras
 
 RUN mkdir -p /opt/jans/python/libs
@@ -118,7 +118,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/agama/fl \
     ${JETTY_BASE}/jans-auth/agama/scripts
 
 # janssenproject/jans SHA commit
-ENV JANS_SOURCE_VERSION=c9d1ed9cbb5de852fcada889f8c1f6be95d66c49
+ENV JANS_SOURCE_VERSION=2603bbb1080345cab4fe814dca39024d8d0b5434
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the agama code
@@ -137,7 +137,7 @@ RUN cp -R /tmp/jans/agama/misc/* ${JETTY_BASE}/jans-auth/agama/ \
 
 COPY requirements.txt /app/requirements.txt
 RUN python3 -m ensurepip \
-    && pip3 install --no-cache-dir -U pip wheel \
+    && pip3 install --no-cache-dir -U pip wheel setuptools \
     && pip3 install --no-cache-dir --default-timeout=300 -r /app/requirements.txt \
     && pip3 uninstall -y pip wheel
 
@@ -145,11 +145,7 @@ RUN python3 -m ensurepip \
 # Prometheus
 # ==========
 
-ARG PROMETHEUS_JAVAAGENT_VERSION=0.17.2
 COPY conf/prometheus-config.yaml /opt/prometheus/
-RUN mkdir -p /opt/prometheus \
-    && wget -q https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/${PROMETHEUS_JAVAAGENT_VERSION}/jmx_prometheus_javaagent-${PROMETHEUS_JAVAAGENT_VERSION}.jar -O /opt/prometheus/jmx_prometheus_javaagent.jar \
-    && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-auth --add-module=jmx,stats
 
 # =======
 # Cleanup
@@ -181,9 +177,7 @@ ENV CN_CONFIG_ADAPTER=consul \
     CN_CONFIG_CONSUL_NAMESPACE=jans \
     CN_CONFIG_KUBERNETES_NAMESPACE=default \
     CN_CONFIG_KUBERNETES_CONFIGMAP=jans \
-    CN_CONFIG_KUBERNETES_USE_KUBE_CONFIG=false \
-    CN_CONFIG_GOOGLE_SECRET_VERSION_ID=latest \
-    CN_CONFIG_GOOGLE_SECRET_NAME_PREFIX=jans
+    CN_CONFIG_KUBERNETES_USE_KUBE_CONFIG=false
 
 # ==========
 # Secret ENV
@@ -202,10 +196,7 @@ ENV CN_SECRET_ADAPTER=vault \
     CN_SECRET_VAULT_NAMESPACE=jans \
     CN_SECRET_KUBERNETES_NAMESPACE=default \
     CN_SECRET_KUBERNETES_SECRET=jans \
-    CN_SECRET_KUBERNETES_USE_KUBE_CONFIG=false \
-    CN_SECRET_GOOGLE_SECRET_MANAGER_PASSPHRASE=secret \
-    CN_SECRET_GOOGLE_SECRET_VERSION_ID=latest \
-    CN_SECRET_GOOGLE_SECRET_NAME_PREFIX=jans
+    CN_SECRET_KUBERNETES_USE_KUBE_CONFIG=false
 
 # ===============
 # Persistence ENV
@@ -246,6 +237,9 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_SYNC_JKS_INTERVAL=30 \
     GOOGLE_PROJECT_ID="" \
     GOOGLE_APPLICATION_CREDENTIALS=/etc/jans/conf/google-credentials.json \
+    CN_GOOGLE_SECRET_VERSION_ID=latest \
+    CN_GOOGLE_SECRET_NAME_PREFIX=jans \
+    CN_GOOGLE_SECRET_MANAGER_PASSPHRASE=secret \
     ADMIN_UI_JWKS=http://0.0.0.0:8080/jans-auth/restv1/jwks \
     CN_JETTY_REQUEST_HEADER_SIZE=8192 \
     CN_PROMETHEUS_PORT="" \
@@ -260,7 +254,7 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
 LABEL name="janssenproject/auth-server" \
     maintainer="Janssen Project <support@jans.io>" \
     vendor="Janssen Project" \
-    version="1.0.6" \
+    version="1.0.7" \
     release="dev" \
     summary="Janssen Authorization Server" \
     description="OAuth 2.0 server and client; OpenID Connect Provider (OP) & UMA Authorization Server (AS)"
@@ -278,7 +272,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/custom/pages \
 COPY certs /etc/certs
 COPY jetty/jans-auth_web_resources.xml ${JETTY_BASE}/jans-auth/webapps/
 COPY jetty/agama_web_resources.xml ${JETTY_BASE}/jans-auth/webapps/
-COPY jetty/log4j2.xml ${JETTY_BASE}/jans-auth/resources/
+COPY jetty/log4j2.xml /app/templates
 COPY conf/*.tmpl /app/templates/
 COPY scripts /app/scripts
 RUN chmod +x /app/scripts/entrypoint.sh
@@ -290,7 +284,7 @@ COPY --chown=1000:0 jetty/jans-auth.xml ${JETTY_BASE}/jans-auth/webapps/
 
 # adjust ownership and permission
 RUN chmod -R g=u ${JETTY_BASE}/jans-auth/custom \
-    && chmod -R g=u ${JETTY_BASE}/jans-auth/resources \
+    && chmod 664 ${JETTY_BASE}/jans-auth/resources/log4j2.xml \
     && chmod -R g=u ${JETTY_BASE}/jans-auth/logs \
     && chmod -R g=u /etc/certs \
     && chmod -R g=u /etc/jans \
@@ -300,7 +294,8 @@ RUN chmod -R g=u ${JETTY_BASE}/jans-auth/custom \
     && chown -R 1000:0 ${JETTY_BASE}/jans-auth/agama \
     && chown -R 1000:0 /opt/jans/python/libs \
     && chown -R 1000:0 ${JETTY_BASE}/common/libs \
-    && chown -R 1000:0 /usr/share/java
+    && chown -R 1000:0 /usr/share/java \
+    && chown -R 1000:0 /opt/prometheus
 
 USER 1000
 

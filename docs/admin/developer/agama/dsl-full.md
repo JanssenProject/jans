@@ -130,7 +130,6 @@ The following table relates Java types to Agama types. Java values are obtained 
 |`x` is a Java array or implements `java.util.List`|list|Changing the list contents (includes updates on x.length) can only be achieved if the Java list is modifiable|
 |`x` implements `java.util.Map` and keys are of type` java.lang.String`|map|Changing the map contents can only be achieved if the Java map is modifiable|
 |`x` is a `java.lang.(Double|Float|Long|Integer|Short|Byte)` or an equivalent primitive|number||
-|`x` is a `java.lang.(Double|Float|Long|Integer|Short|Byte)` or an equivalent primitive|number||
 |`x` is a (non-null) `java.lang.Boolean` or equivalent primitive|boolean||
 |`x` is a `java.lang.String`|string (limited)|Neither indexing nor `x.length` can be used|
 |null|null||
@@ -493,6 +492,8 @@ the callback URL by the external site (twitter.com), the flow continues ignoring
 
 Agama engine's callback URL is `https://<your-server>/jans-auth/fl/callback`. This resource is only available for a given browser session while `RFAC` is in execution. Once the callback is visited or the flow times out (whichever occurs first), subsequent requests will respond with an HTTP 404 error. 
 
+The mechanism used for redirection is a "302 Found" HTTP redirect that entails a subsequent GET request to the external site. In cases where a POST is expected, the 3-param version of [RRF](#3-param-variant) can be useful.   
+
 ### RRF
 
 `RRF` (stands for _Render-Reply-Fetch_) abstracts the process of rendering a UI template, send the produced markup to the browser and grab user-provided data back at the server side.
@@ -535,12 +536,14 @@ result = RRF "survey.ftl" obj
 - The template location must be specified with a string literal only (not a variable). Normally the template must submit a POST to the current URL with the desired data. In HTML terms, it would look like `<form method="post" enctype="application/x-www-form-urlencoded">...` for instance.
 - Use _map_ variables - not literals - for the second argument of `RRF`. Objects obtained from Java can be used except collections, arrays, strings, numbers, or boolean values.
 
-`RRF` can be passed a third parameter, that is, `RRF templatePath variable boolean`. When the boolean value is `false`, it exhibits the regular two-param behavior. Otherwise (truthy value) the callback URL (see [RFAC](#rfac)) will be available while `RRF` is in execution. In this case, if the callback is visited, data passed to it will be set as the result of the `RRF` call unless a POST to the current URL is received first, where behavior will be as usual. Finally, the callback resource is disabled.
+#### 3-param variant
 
-The three-param variant can be used when:
+`RRF` can be passed a third parameter: `RRF templatePath variable boolean`. When the boolean value is `true` a callback URL will be available while `RRF` is in execution (see [RFAC](#rfac)). In this case, if the callback is visited, data passed to it will be set as the result of the `RRF`. If a POST to the current URL is received first, i.e. callback not hit, behavior will be as in the two-param `RRF` invocation. This is also the case when a `false` value is passed for the third parameter.
+
+The three-param variant of `RRF` can be useful when:
 
 - The decision to redirect to an external site can only be done from the browser itself
-- The external site expects to receive an HTTP POST
+- The external site expects to receive an HTTP POST. In this case, the rendered template may contain a form with fields as needed plus auto-submission logic in Javascript to perform the actual POST. This typically occurs in inbound-identity flows where identity providers require authentication requests serialized in `application/x-www-form-urlencoded` format as is the case of SAML HTTP POST binding, for example  
 
 ## Looping
 
@@ -828,7 +831,7 @@ When E is not null
 <td>
 
 ```
-| E = Call com.acme.NotifyExternalSystem
+| E = Call com.acme.Worker#notifyExternalSystem
 //Do something with E
 //... 
 ```
@@ -879,11 +882,22 @@ The usage of a hash sign (or spaces) before a method name helps disambiguate whe
 
 ### Highlights
 
-Any method that meets the conditions above (public or interface static) and that is reachable in the JVM [classpath](./java-classpath.md) can be called; developers are not restricted solely to `java.*` packages. 
+Any method that meets the conditions mentioned (public or interface static) and that is reachable in the JVM [classpath](./java-classpath.md) can be called; developers are not restricted solely to `java.*` packages. 
 
-When using `Call`, the method to execute is picked based on the name (e.g. after the `#` sign) and the number of arguments supplied. If a class/interface exhibits several methods with the same name and arity (number of parameters), there is no way to know which of the available variants will be called. The `java.util.Arrays` class has several methods of this kind for instance.
+When using `Call`, the method to execute is picked based on the name (e.g. after the `#` sign) and the number of arguments supplied. If a class/interface exhibits several methods with the same name and arity (number of parameters), there is **no way to know** which of the available variants will be called. The `java.util.Arrays` class has several methods of this kind for instance.
 
-Once a concrete method is picked, a best effort is made to convert (if required) the values passed as arguments so that they match the expected parameter types in the method signature. If a conversion fails, this will degenerate in an `IllegalArgumentException`.
+For non-static method invocations, i.e. no hash sign, the class used for method lookup is that of the instance passed (the first parameter in the `Call` directive). When the instance does not hold a Java but an Agama value, the following is used to pick a class:
+
+|Agama type|Java class for method lookup|
+|-|-|
+|`string`|`String`|
+|`boolean`|`Boolean`|
+|`number`|`Double`|
+|`list`|`java.util.List`|
+|`map`|`java.util.Map`|
+
+Once a concrete method is selected, a best effort is made to convert (if required) the values passed as arguments so that they match the expected parameter types in the method signature. If a conversion fails, this will degenerate in an `IllegalArgumentException`. More on conversions [here](#arguments-conversion).
+
 
 **Limitations:**
 
@@ -893,7 +907,52 @@ Once a concrete method is picked, a best effort is made to convert (if required)
 
 ### Exception handling
 
-As seen in the examples Agama can deal with Java exceptions, however, this feature should be used sparingly. When exception handling is really required, create wrapper methods in Java to do it instead of delegating that to the DSL.
+As seen in the examples Agama can deal with Java exceptions, however, this feature should be used sparingly. When exception handling adds undesired complexity to your code, create wrapper methods in Java and do the processing there instead of delegating that to the DSL.
+
+### Arguments conversion
+
+[Agama types](#data-types) do not match Java types. This means passing a "native" Agama value as parameter in a method `Call` requires some form of compatibility with the target (Java) type in the method signature. [Earlier](#java-objects), we saw how some Java values returned from `Call`s can be treated in Agama code in a very straightforward manner, here we make an analysis in the reverse direction: from Agama to Java.
+
+An argument (Agama value) is compatible with a method parameter if it can be "converted" successfully. As we'll see, conversion feels pretty natural in practice. If this process fails a `java.lang.IllegalArgumentException` is thrown and the flow will crash unless the exception is caught. Note however the recommended practice is to let flows [crash](./lifecycle.md#about-crashes).
+
+The following lists some of the most common successful conversions:
+
+|Agama value|Can be converted to|
+|-|-|
+|`string`|`String` or `char[]`|
+|`boolean`|`Boolean` or primitive equivalent|
+|`number`|`Double`/`Float`/`Integer`/`Long`/`Short`/`Byte` or primitive equivalent|
+|`null`|Any non-primitive|
+|`list`|Array or class implementing `Collection<T>` as long as items can be converted to type `T`|
+|`map`|Class implementing `Map<K, V>` as long as keys and values can be converted to types `K` and `V`, respectively|
+|`map`|Java bean. Unrecognized properties in Agama value are ignored|
+
+The below table shows some examples of interesting and handy conversions:
+
+|Agama value|Param data type in target Java method|Argument value (Agama)|Received param value (in method)|Notes|
+|-|-|-|-|-|
+|Positive `number` having fractional part|`Integer`/`Long`/`Short`/`Byte` or primitive equivalent|2.6|2|Integer part kept|
+|Negative `number` having fractional part|`Integer`/`Long`/`Short`/`Byte` or primitive equivalent|-2.4|2|Integer part kept|
+|Integer `number`|`Float`/`Double` or primitive equivalent|1|1.0||
+|`list` of `number`s|`List<Integer>`|[1, 2.0, 3.1, -4.2]|[1, 2, 3, -4]|Only integer parts kept|
+|`list` of integer `number`s|`List<Float>`/`List<Double>`|[1, 2, 3, -4]|[1.0, 2.0, 3.0, -4.0]||
+|`string` of length 1|`Character` or primitive equivalent|a|a|Passing a zero, two, or more lengthed string will make the call fail|
+
+When the argument is not an Agama but a Java object/primitive, the following rules apply:
+
+- If the value can be cast to the target type, no conversion is needed, otherwise
+- If it is an instance of `java.lang.Number` and the type is a numeric primitive or wrapper (e.g. `Integer`), the value is truncated if required, otherwise
+- The value is serialized to JSON - if possible - and then an attempt to create a Java instance based on the given JSON contents is made. For this purpose, the FasterXML Jackson library is used
+
+This is powerful because it allows to send data of similar shape/structure when data types do not necessarily match. Consider the following example:
+
+```
+s = "a man's gotta do what a man's gotta do"
+jStrArr = Call s split " "
+words = Call java.util.Collections#unmodifiableSet jStrArr
+```
+
+This Agama snippet creates the (Java) `Set` of different words found in a given (Agama) `string`. Note `jStrArr` is of type `String[]` and is passed directly to method `unmodifiableSet` which originally expects an instance of `Set` as parameter.
 
 ### OOP prose warning
 

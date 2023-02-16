@@ -7,16 +7,23 @@
 package io.jans.configapi.core.rest;
 
 import static io.jans.as.model.util.Util.escapeLog;
+
+import io.jans.configapi.core.interceptor.RequestAuditInterceptor;
+import io.jans.configapi.core.interceptor.RequestInterceptor;
 import io.jans.configapi.core.model.ApiError;
 import io.jans.configapi.core.model.SearchRequest;
 import io.jans.configapi.core.util.Util;
 import io.jans.orm.model.SortOrder;
 
 import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
 
 import java.util.List;
 import java.util.Map;
@@ -27,10 +34,33 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@RequestAuditInterceptor
+@RequestInterceptor
 public class BaseResource {
-
+   
     @Inject
     Util util;
+    
+    @Context
+    UriInfo uriInfo;
+    
+    @Context
+    private HttpServletRequest httpRequest;
+
+    @Context
+    private HttpHeaders httpHeaders;
+    
+    public UriInfo getUriInfo() {
+        return uriInfo;
+    }
+
+    public HttpServletRequest getHttpRequest() {
+        return httpRequest;
+    }
+    
+    public HttpHeaders getHttpHeaders() {
+        return httpHeaders;
+    }    
 
     private static Logger log = LoggerFactory.getLogger(BaseResource.class);
 
@@ -89,19 +119,19 @@ public class BaseResource {
         }
     }
 
-    public static void thorwBadRequestException(String msg) {
+    public static void throwBadRequestException(String msg) {
         throw new BadRequestException(getBadRequestException(msg));
     }
 
-    public static void thorwBadRequestException(Object obj) {
+    public static void throwBadRequestException(Object obj) {
         throw new BadRequestException(getBadRequestException(obj));
     }
 
-    public static void thorwInternalServerException(String msg) {
+    public static void throwInternalServerException(String msg) {
         throw new InternalServerErrorException(getInternalServerException(msg));
     }
 
-    public static void thorwInternalServerException(Throwable throwable) {
+    public static void throwInternalServerException(Throwable throwable) {
         throwable = findRootError(throwable);
         if (throwable != null) {
             throw new InternalServerErrorException(getInternalServerException(throwable.getMessage()));
@@ -164,7 +194,7 @@ public class BaseResource {
         int maxCount = maximumRecCount;
         log.debug(" count:{}, maxCount:{}", count, maxCount);
         if (count > maxCount) {
-            thorwBadRequestException("Maximum number of results per page is " + maxCount);
+            throwBadRequestException("Maximum number of results per page is " + maxCount);
         }
 
         count = count == null ? maxCount : count;
@@ -173,9 +203,6 @@ public class BaseResource {
         if (count < 0) {
             count = 0;
         }
-
-        // SCIM searches are 1 indexed
-        startIndex = (startIndex == null || startIndex < 1) ? 1 : startIndex;
 
         if (StringUtils.isEmpty(sortOrder) || !sortOrder.equals(SortOrder.DESCENDING.getValue())) {
             sortOrder = SortOrder.ASCENDING.getValue();

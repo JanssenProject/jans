@@ -28,6 +28,7 @@ import io.jans.as.model.jwe.JweEncrypter;
 import io.jans.as.model.jwe.JweEncrypterImpl;
 import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.jwk.JSONWebKeySet;
+import io.jans.as.model.jwk.KeyOpsType;
 import io.jans.as.model.jwk.Use;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaims;
@@ -40,41 +41,33 @@ import io.jans.as.server.audit.ApplicationAuditLogger;
 import io.jans.as.server.model.audit.Action;
 import io.jans.as.server.model.audit.OAuth2AuditLog;
 import io.jans.as.server.model.authorize.Claim;
-import io.jans.as.server.model.common.AbstractToken;
-import io.jans.as.server.model.common.AuthorizationGrant;
-import io.jans.as.server.model.common.AuthorizationGrantList;
-import io.jans.as.server.model.common.AuthorizationGrantType;
-import io.jans.as.server.model.common.DefaultScope;
-import io.jans.as.server.model.common.UnmodifiableAuthorizationGrant;
+import io.jans.as.server.model.common.*;
 import io.jans.as.server.model.userinfo.UserInfoParamsValidator;
 import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.ScopeService;
 import io.jans.as.server.service.ServerCryptoProvider;
 import io.jans.as.server.service.UserService;
+import io.jans.as.server.service.date.DateFormatterService;
 import io.jans.as.server.service.external.ExternalDynamicScopeService;
 import io.jans.as.server.service.external.context.DynamicScopeExternalContext;
 import io.jans.as.server.service.token.TokenService;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.model.GluuAttribute;
 import io.jans.orm.exception.EntryPersistenceException;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.SecurityContext;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+
+import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.security.PublicKey;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Provides interface for User Info REST web services
@@ -123,6 +116,9 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
 
     @Inject
     private TokenService tokenService;
+
+    @Inject
+    private DateFormatterService dateFormatterService;
 
     @Override
     public Response requestUserInfoGet(String accessToken, String authorization, HttpServletRequest request, SecurityContext securityContext) {
@@ -247,7 +243,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         jwt.getHeader().setType(JwtType.JWT);
         jwt.getHeader().setAlgorithm(signatureAlgorithm);
 
-        String keyId = new ServerCryptoProvider(cryptoProvider).getKeyId(webKeysConfiguration, Algorithm.fromString(signatureAlgorithm.getName()), Use.SIGNATURE);
+        String keyId = new ServerCryptoProvider(cryptoProvider).getKeyId(webKeysConfiguration, Algorithm.fromString(signatureAlgorithm.getName()), Use.SIGNATURE, KeyOpsType.CONNECT);
         if (keyId != null) {
             jwt.getHeader().setKeyId(keyId);
         }
@@ -293,7 +289,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
             JSONObject jsonWebKeys = CommonUtils.getJwks(authorizationGrant.getClient());
             String keyId = new ServerCryptoProvider(cryptoProvider).getKeyId(JSONWebKeySet.fromJSONObject(jsonWebKeys),
                     Algorithm.fromString(keyEncryptionAlgorithm.getName()),
-                    Use.ENCRYPTION);
+                    Use.ENCRYPTION, KeyOpsType.CONNECT);
             PublicKey publicKey = cryptoProvider.getPublicKey(keyId, jsonWebKeys, null);
 
             if (publicKey != null) {
@@ -366,7 +362,8 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                     } else if (value instanceof Boolean) {
                         jsonWebResponse.getClaims().setClaim(key, (Boolean) value);
                     } else if (value instanceof Date) {
-                        jsonWebResponse.getClaims().setClaim(key, ((Date) value).getTime() / 1000);
+                        Serializable formattedValue = dateFormatterService.formatClaim((Date) value, key);
+                        jsonWebResponse.getClaims().setClaimObject(key, formattedValue, true);
                     } else {
                         jsonWebResponse.getClaims().setClaim(key, String.valueOf(value));
                     }

@@ -14,6 +14,8 @@ Before you install, check the [VM system requirements](vm-requirements.md).
 ## Supported versions
 - Red Hat Enterprise Linus 8 (RHEL 8)
 - CentOS 8
+## Disable SELinux
+You can disbale SELinux temporarly by executing `setenforce 0`. To disable permanently edit file `/etc/selinux/config`.
 
 ## Install the Package
 
@@ -22,7 +24,7 @@ Before you install, check the [VM system requirements](vm-requirements.md).
   [Releases](https://github.com/JanssenProject/jans/releases)
 
 ```
-wget https://github.com/JanssenProject/jans/releases/download/v1.0.4/jans-1.0.4-el8.x86_64.rpm -P ~/
+wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-el8.x86_64.rpm -P ~/
 ```
 
 - Verify integrity of the downloaded package using published `sha256sum`.
@@ -30,13 +32,13 @@ wget https://github.com/JanssenProject/jans/releases/download/v1.0.4/jans-1.0.4-
     Download `sha256sum` file for the package
 
     ```shell
-    wget https://github.com/JanssenProject/jans/releases/download/v1.0.4/jans-1.0.4-el8.x86_64.rpm.sha256sum -P ~/
+    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-el8.x86_64.rpm.sha256sum -P ~/
     ```
 
     Check the hash if it is matching.
 
     ```shell
-    sha256sum -c jans-1.0.4-el8.x86_64.rpm.sha256sum
+    sha256sum -c jans-replace-janssen-version-el8.x86_64.rpm.sha256sum
     ```
 
     Output similar to below should confirm the integrity of the downloaded package.
@@ -48,7 +50,7 @@ wget https://github.com/JanssenProject/jans/releases/download/v1.0.4/jans-1.0.4-
 - Install the package
 
 ```
-yum install ~/jans-1.0.4-el8.x86_64.rpm
+yum install ~/jans-replace-janssen-version-el8.x86_64.rpm
 ```
 
 ## Run the setup script

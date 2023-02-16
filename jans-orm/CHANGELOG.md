@@ -1,5 +1,30 @@
 # Changelog
 
+## 1.0.6 (2023-01-09)
+
+
+### Features
+
+* allow to use like with lower together ([#2944](https://github.com/JanssenProject/jans/issues/2944)) ([1807629](https://github.com/JanssenProject/jans/commit/1807629b93a6dfba691183ad0185e19f981727ee))
+* problems with handling custom attributes [#2752](https://github.com/JanssenProject/jans/issues/2752) ([#3378](https://github.com/JanssenProject/jans/issues/3378)) ([3028a94](https://github.com/JanssenProject/jans/commit/3028a94b8c7ef4eead7f45ea6b91b9e1a72e6368))
+
+
+### Bug Fixes
+
+* (jans-auth-server): fixed Client serialization/deserialization issue [#2946](https://github.com/JanssenProject/jans/issues/2946) ([#3064](https://github.com/JanssenProject/jans/issues/3064)) ([31b5bfc](https://github.com/JanssenProject/jans/commit/31b5bfc2d626a94998c6e0a1d9121579858437e3))
+* fix OR filters join when sub-filters uses lower ([#2850](https://github.com/JanssenProject/jans/issues/2850)) ([3dc6b32](https://github.com/JanssenProject/jans/commit/3dc6b329aacbb6958efd834c85143231595b0d99))
+* getting ready for a release ([0bda832](https://github.com/JanssenProject/jans/commit/0bda832ebc1da7017231deb38fe9aa6c7c51360a))
+* **jans-auth-server:** fix language metadata format ([#2883](https://github.com/JanssenProject/jans/issues/2883)) ([e21e206](https://github.com/JanssenProject/jans/commit/e21e206df16b048b1743c3ee441d9fbdb1f8c67e))
+* **jans-config-api:** user attributes not updated [#2753](https://github.com/JanssenProject/jans/issues/2753) ([082cfe3](https://github.com/JanssenProject/jans/commit/082cfe32dca1321a333c520a142b95cab1cfa0d8))
+* **jans-config-api:** user attributes not updated [#2753](https://github.com/JanssenProject/jans/issues/2753) ([#3110](https://github.com/JanssenProject/jans/issues/3110)) ([803468b](https://github.com/JanssenProject/jans/commit/803468b895e022bbb20ec1975f11aafd08a214f2))
+* **jans:** added null check to avoid NullPointerException ([#3077](https://github.com/JanssenProject/jans/issues/3077)) ([42d49b2](https://github.com/JanssenProject/jans/commit/42d49b2ac2ffb50086b5941c93c810cdbaff75ea))
+* prepare for 1.0.6 release ([9e4c8fb](https://github.com/JanssenProject/jans/commit/9e4c8fb4c0a1ef4779934558e8d8d40d8fedbabf))
+
+
+### Documentation
+
+* prepare for 1.0.4 release ([c23a2e5](https://github.com/JanssenProject/jans/commit/c23a2e505b7eb325a293975d60bbc65d5e367c7d))
+
 ## [1.0.5](https://github.com/JanssenProject/jans/compare/jans-orm-v1.0.4...jans-orm-v1.0.5) (2022-12-01)
 
 

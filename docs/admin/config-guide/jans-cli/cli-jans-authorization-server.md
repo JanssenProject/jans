@@ -42,78 +42,132 @@ Table of Contents
 It returns all the information of the Jans Authorization server.
 
 ```text
-/opt/jans/jans-cli/config-cli.py --operation-id get-properties
-
-
-Getting access token for scope https://jans.io/oauth/jans-auth-server/config/properties.readonly
+ python3 jans-cli-tui/cli_tui/cli/config_cli.py --operation-id get-properties
+ ```
+ 
+ You will get output like below
+```json
 {
-  "issuer": "https://testjans.gluu.com",
-  "baseEndpoint": "https://testjans.gluu.com/jans-auth/restv1",
-  "authorizationEndpoint": "https://testjans.gluu.com/jans-auth/restv1/authorize",
-  "tokenEndpoint": "https://testjans.gluu.com/jans-auth/restv1/token",
-  "tokenRevocationEndpoint": "https://testjans.gluu.com/jans-auth/restv1/revoke",
-  "userInfoEndpoint": "https://testjans.gluu.com/jans-auth/restv1/userinfo",
-  "clientInfoEndpoint": "https://testjans.gluu.com/jans-auth/restv1/clientinfo",
-  "checkSessionIFrame": "https://testjans.gluu.com/jans-auth/opiframe.htm",
-  "endSessionEndpoint": "https://testjans.gluu.com/jans-auth/restv1/end_session",
-  "jwksUri": "https://testjans.gluu.com/jans-auth/restv1/jwks",
-  "registrationEndpoint": "https://testjans.gluu.com/jans-auth/restv1/register",
-  "openIdDiscoveryEndpoint": "https://testjans.gluu.com/.well-known/webfinger",
-  "openIdConfigurationEndpoint": "https://testjans.gluu.com/.well-known/openid-configuration",
-  "idGenerationEndpoint": "https://testjans.gluu.com/jans-auth/restv1/id",
-  "introspectionEndpoint": "https://testjans.gluu.com/jans-auth/restv1/introspection",
-  "deviceAuthzEndpoint": "https://testjans.gluu.com/jans-auth/restv1/device_authorization",
-  "sessionAsJwt": false,
+  "issuer": "https://example.jans.io",
+  "baseEndpoint": "https://example.jans.io/jans-auth/restv1",
+  "authorizationEndpoint": "https://example.jans.io/jans-auth/restv1/authorize",
+  "tokenEndpoint": "https://example.jans.io/jans-auth/restv1/token",
+  "tokenRevocationEndpoint": "https://example.jans.io/jans-auth/restv1/revoke",
+  "userInfoEndpoint": "https://example.jans.io/jans-auth/restv1/userinfo",
+  "clientInfoEndpoint": "https://example.jans.io/jans-auth/restv1/clientinfo",
+  "checkSessionIFrame": "https://example.jans.io/jans-auth/opiframe.htm",
+  "endSessionEndpoint": "https://example.jans.io/jans-auth/restv1/end_session",
+  "jwksUri": "https://example.jans.io/jans-auth/restv1/jwks",
+  "registrationEndpoint": "https://example.jans.io/jans-auth/restv1/register",
+  "openIdDiscoveryEndpoint": "https://example.jans.io/.well-known/webfinger",
+  "openIdConfigurationEndpoint": "https://example.jans.io/.well-known/openid-configuration",
+  "idGenerationEndpoint": "https://example.jans.io/jans-auth/restv1/id",
+  "introspectionEndpoint": "https://example.jans.io/jans-auth/restv1/introspection",
+  "parEndpoint": "https://example.jans.io/jans-auth/restv1/par",
+  "requirePar": false,
+  "deviceAuthzEndpoint": "https://example.jans.io/jans-auth/restv1/device_authorization",
+  "requireRequestObjectEncryption": false,
+  "requirePkce": false,
+  "allowAllValueForRevokeEndpoint": false,
   "sectorIdentifierCacheLifetimeInMinutes": 1440,
-  "umaConfigurationEndpoint": "https://testjans.gluu.com/jans-auth/restv1/uma2-configuration",
+  "umaConfigurationEndpoint": "https://example.jans.io/jans-auth/restv1/uma2-configuration",
   "umaRptAsJwt": false,
   "umaRptLifetime": 3600,
   "umaTicketLifetime": 3600,
-  "umaPctLifetime": 2592000,
-  "umaResourceLifetime": 2592000,
+  "umaPctLifetime": 1728000,
+  "umaResourceLifetime": 1728000,
   "umaAddScopesAutomatically": true,
   "umaValidateClaimToken": false,
   "umaGrantAccessIfNoPolicies": false,
   "umaRestrictResourceToAssociatedClient": false,
+  "statTimerIntervalInSeconds": 0,
+  "statAuthorizationScope": "jans_stat",
+  "allowSpontaneousScopes": false,
   "spontaneousScopeLifetime": 86400,
   "openidSubAttribute": "inum",
+  "publicSubjectIdentifierPerClientEnabled": true,
+  "subjectIdentifiersPerClientSupported": [
+    "mail",
+    "uid"
+  ],
   "responseTypesSupported": [
-    "['code', 'token']",
-    "['id_token', 'code', 'token']",
-    "['id_token']",
-    "['code']",
-    "['token']",
-    "['id_token', 'code']",
-    "['id_token', 'token']"
+    [
+      "token",
+      "id_token"
+    ],
+    [
+      "token",
+      "id_token",
+      "code"
+    ],
+    [
+      "id_token",
+      "code"
+    ],
+    [
+      "token"
+    ],
+    [
+      "id_token"
+    ],
+    [
+      "token",
+      "code"
+    ],
+    [
+      "code"
+    ]
   ],
   "responseModesSupported": [
-    "query",
+    "fragment.jwt",
+    "form_post.jwt",
+    "query.jwt",
+    "jwt",
     "form_post",
+    "query",
     "fragment"
   ],
   "grantTypesSupported": [
-    "password",
-    "authorization_code",
     "refresh_token",
+    "password",
     "urn:ietf:params:oauth:grant-type:device_code",
+    "urn:ietf:params:oauth:grant-type:token-exchange",
     "client_credentials",
     "urn:ietf:params:oauth:grant-type:uma-ticket",
-    "implicit",
-    "urn:ietf:params:oauth:grant-type:token-exchange"
+    "authorization_code",
+    "implicit"
   ],
   "subjectTypesSupported": [
     "public",
     "pairwise"
   ],
-  "defaultSubjectType": [
-    "p",
-    "a",
-    "i",
-    "r",
-    "w",
-    "i",
-    "s",
-    "e"
+  "defaultSubjectType": "pairwise",
+  "authorizationSigningAlgValuesSupported": [
+    "HS256",
+    "HS384",
+    "HS512",
+    "RS256",
+    "RS384",
+    "RS512",
+    "ES256",
+    "ES384",
+    "ES512",
+    "ES512",
+    "PS256",
+    "PS384",
+    "PS512"
+  ],
+  "authorizationEncryptionAlgValuesSupported": [
+    "RSA1_5",
+    "RSA-OAEP",
+    "A128KW",
+    "A256KW"
+  ],
+  "authorizationEncryptionEncValuesSupported": [
+    "A128CBC+HS256",
+    "A256CBC+HS512",
+    "A128GCM",
+    "A256GCM"
   ],
   "userInfoSigningAlgValuesSupported": [
     "HS256",
@@ -124,7 +178,11 @@ Getting access token for scope https://jans.io/oauth/jans-auth-server/config/pro
     "RS512",
     "ES256",
     "ES384",
-    "ES512"
+    "ES512",
+    "ES512",
+    "PS256",
+    "PS384",
+    "PS512"
   ],
   "userInfoEncryptionAlgValuesSupported": [
     "RSA1_5",
@@ -148,7 +206,11 @@ Getting access token for scope https://jans.io/oauth/jans-auth-server/config/pro
     "RS512",
     "ES256",
     "ES384",
-    "ES512"
+    "ES512",
+    "ES512",
+    "PS256",
+    "PS384",
+    "PS512"
   ],
   "idTokenEncryptionAlgValuesSupported": [
     "RSA1_5",
@@ -162,6 +224,23 @@ Getting access token for scope https://jans.io/oauth/jans-auth-server/config/pro
     "A128GCM",
     "A256GCM"
   ],
+  "accessTokenSigningAlgValuesSupported": [
+    "none",
+    "HS256",
+    "HS384",
+    "HS512",
+    "RS256",
+    "RS384",
+    "RS512",
+    "ES256",
+    "ES384",
+    "ES512",
+    "ES512",
+    "PS256",
+    "PS384",
+    "PS512"
+  ],
+  "forceSignedRequestObject": false,
   "requestObjectSigningAlgValuesSupported": [
     "none",
     "HS256",
@@ -172,7 +251,11 @@ Getting access token for scope https://jans.io/oauth/jans-auth-server/config/pro
     "RS512",
     "ES256",
     "ES384",
-    "ES512"
+    "ES512",
+    "ES512",
+    "PS256",
+    "PS384",
+    "PS512"
   ],
   "requestObjectEncryptionAlgValuesSupported": [
     "RSA1_5",
@@ -203,9 +286,12 @@ Getting access token for scope https://jans.io/oauth/jans-auth-server/config/pro
     "RS512",
     "ES256",
     "ES384",
-    "ES512"
+    "ES512",
+    "ES512",
+    "PS256",
+    "PS384",
+    "PS512"
   ],
-  "dynamicRegistrationCustomAttributes": null,
   "displayValuesSupported": [
     "page",
     "popup"
@@ -226,28 +312,7 @@ Getting access token for scope https://jans.io/oauth/jans-auth-server/config/pro
     "RSA1_5",
     "RSA-OAEP"
   ],
-  "serviceDocumentation": [
-    "h",
-    "t",
-    "t",
-    "p",
-    ":",
-    "/",
-    "/",
-    "j",
-    "a",
-    "n",
-    "s",
-    ".",
-    "o",
-    "r",
-    "g",
-    "/",
-    "d",
-    "o",
-    "c",
-    "s"
-  ],
+  "serviceDocumentation": "http://jans.org/docs",
   "claimsLocalesSupported": [
     "en"
   ],
@@ -269,6 +334,10 @@ Getting access token for scope https://jans.io/oauth/jans-auth-server/config/pro
   "requestUriParameterSupported": true,
   "requestUriHashVerificationEnabled": false,
   "requireRequestUriRegistration": false,
+  "requestUriBlockList": [
+    "localhost",
+    "127.0.0.1"
+  ],
   "opPolicyUri": "http://www.jans.io/doku.php?id=jans:policy",
   "opTosUri": "http://www.jans.io/doku.php?id=jans:tos",
   "authorizationCodeLifetime": 60,
@@ -278,33 +347,23 @@ Getting access token for scope https://jans.io/oauth/jans-auth-server/config/pro
   "accessTokenLifetime": 300,
   "cleanServiceInterval": 60,
   "cleanServiceBatchChunkSize": 10000,
-  "cleanServiceBaseDns": null,
   "keyRegenerationEnabled": true,
   "keyRegenerationInterval": 48,
-  "defaultSignatureAlgorithm": [
-    "R",
-    "S",
-    "2",
-    "5",
-    "6"
-  ],
-  "oxOpenIdConnectVersion": "openidconnect-1.0",
-  "oxId": "https://testjans.gluu.com/oxid/service/jans/inum",
-  "dynamicRegistrationEnabled": true,
+  "defaultSignatureAlgorithm": "RS256",
+  "jansOpenIdConnectVersion": "openidconnect-1.0",
+  "jansId": "https://example.jans.io/oxid/service/jans/inum",
   "dynamicRegistrationExpirationTime": -1,
   "dynamicRegistrationPersistClientAuthorizations": true,
   "trustedClientEnabled": true,
   "skipAuthorizationForOpenIdScopeAndPairwiseId": false,
   "dynamicRegistrationScopesParamEnabled": true,
   "dynamicRegistrationPasswordGrantTypeEnabled": false,
-  "dynamicRegistrationAllowedPasswordGrantScopes": null,
-  "dynamicRegistrationCustomObjectClass": null,
   "personCustomObjectClassList": [
     "jansCustomPerson",
     "jansPerson"
   ],
-  "persistIdTokenInLdap": false,
-  "persistRefreshTokenInLdap": true,
+  "persistIdToken": false,
+  "persistRefreshToken": true,
   "allowPostLogoutRedirectWithoutValidation": false,
   "invalidateSessionCookiesAfterAuthorizationFlow": false,
   "returnClientSecretOnRead": true,
@@ -313,29 +372,29 @@ Getting access token for scope https://jans.io/oauth/jans-auth-server/config/pro
   "useNestedJwtDuringEncryption": true,
   "expirationNotificatorMapSizeLimit": 100000,
   "expirationNotificatorIntervalInSeconds": 600,
+  "redirectUrisRegexEnabled": true,
+  "useHighestLevelScriptIfAcrScriptNotFound": true,
   "authenticationFiltersEnabled": false,
   "clientAuthenticationFiltersEnabled": false,
   "clientRegDefaultToCodeFlowWithRefresh": true,
+  "grantTypesAndResponseTypesAutofixEnabled": false,
   "authenticationFilters": [
     {
       "filter": "(&(mail=*{0}*)(inum={1}))",
       "bind": false,
-      "bind-password-attribute": null,
-      "base-dn": null
+      "baseDn": "ou=people,o=jans"
     },
     {
       "filter": "uid={0}",
       "bind": true,
-      "bind-password-attribute": null,
-      "base-dn": null
+      "bindPasswordAttribute": "pwd",
+      "baseDn": "ou=people,o=jans"
     }
   ],
   "clientAuthenticationFilters": [
     {
       "filter": "myCustomAttr1={0}",
-      "bind": null,
-      "bind-password-attribute": null,
-      "base-dn": null
+      "baseDn": "ou=clients,o=jans"
     }
   ],
   "corsConfigurationFilters": [
@@ -345,7 +404,6 @@ Getting access token for scope https://jans.io/oauth/jans-auth-server/config/pro
       "corsAllowedOrigins": "*",
       "corsAllowedMethods": "GET,POST,HEAD,OPTIONS",
       "corsAllowedHeaders": "Origin,Authorization,Accept,X-Requested-With,Content-Type,Access-Control-Request-Method,Access-Control-Request-Headers",
-      "corsExposedHeaders": null,
       "corsSupportCredentials": true,
       "corsLoggingEnabled": false,
       "corsPreflightMaxAge": 1800,
@@ -354,63 +412,43 @@ Getting access token for scope https://jans.io/oauth/jans-auth-server/config/pro
   ],
   "sessionIdUnusedLifetime": 86400,
   "sessionIdUnauthenticatedUnusedLifetime": 120,
-  "sessionIdEnabled": true,
   "sessionIdPersistOnPromptNone": true,
   "sessionIdRequestParameterEnabled": false,
   "changeSessionIdOnAuthentication": true,
   "sessionIdPersistInCache": false,
+  "includeSidInResponse": false,
   "sessionIdLifetime": 86400,
   "serverSessionIdLifetime": 86400,
   "configurationUpdateInterval": 3600,
   "enableClientGrantTypeUpdate": true,
   "dynamicGrantTypeDefault": [
-    "authorization_code",
     "refresh_token",
     "urn:ietf:params:oauth:grant-type:device_code",
+    "urn:ietf:params:oauth:grant-type:token-exchange",
     "client_credentials",
     "urn:ietf:params:oauth:grant-type:uma-ticket",
-    "urn:ietf:params:oauth:grant-type:token-exchange",
+    "authorization_code",
     "implicit"
   ],
-  "cssLocation": null,
-  "jsLocation": null,
-  "imgLocation": null,
   "metricReporterInterval": 300,
   "metricReporterKeepDataDays": 15,
-  "metricReporterEnabled": false,
-  "pairwiseIdType": [
-    "a",
-    "l",
-    "g",
-    "o",
-    "r",
-    "i",
-    "t",
-    "h",
-    "m",
-    "i",
-    "c"
-  ],
-  "pairwiseCalculationKey": "rYX4K1hkDOAc0ie6ESr6T4N2z",
-  "pairwiseCalculationSalt": "1smvd6pswngMcjB4xVcMuIiuyH",
+  "pairwiseIdType": "algorithmic",
+  "pairwiseCalculationKey": "Yr1IUdevJZPRszoeOJps9",
+  "pairwiseCalculationSalt": "3NrpD7CuD6yN8g1pvovDT8CWmr",
   "shareSubjectIdBetweenClientsWithSameSectorId": true,
   "webKeysStorage": "keystore",
   "dnName": "CN=Jans Auth CA Certificates",
-  "keyStoreFile": "/etc/certs/jans-auth-keys.jks",
-  "keyStoreSecret": "nXfbJvxuVRNi",
+  "keyStoreFile": "/etc/certs/jans-auth-keys.p12",
+  "keyStoreSecret": "wCPqCzNQxwLg",
   "keySelectionStrategy": "OLDER",
-  "oxElevenTestModeToken": null,
-  "oxElevenGenerateKeyEndpoint": "https://testjans.gluu.com/oxeleven/rest/oxeleven/generateKey",
-  "oxElevenSignEndpoint": "https://testjans.gluu.com/oxeleven/rest/oxeleven/sign",
-  "oxElevenVerifySignatureEndpoint": "https://testjans.gluu.com/oxeleven/rest/oxeleven/verifySignature",
-  "oxElevenDeleteKeyEndpoint": "https://testjans.gluu.com/oxeleven/rest/oxeleven/deleteKey",
+  "keySignWithSameKeyButDiffAlg": false,
+  "jansElevenGenerateKeyEndpoint": "https://example.jans.io/oxeleven/rest/oxeleven/generateKey",
+  "jansElevenSignEndpoint": "https://example.jans.io/oxeleven/rest/oxeleven/sign",
+  "jansElevenVerifySignatureEndpoint": "https://example.jans.io/oxeleven/rest/oxeleven/verifySignature",
+  "jansElevenDeleteKeyEndpoint": "https://example.jans.io/oxeleven/rest/oxeleven/deleteKey",
   "introspectionAccessTokenMustHaveUmaProtectionScope": false,
+  "introspectionSkipAuthorization": false,
   "endSessionWithAccessToken": false,
-  "cookieDomain": null,
-  "enabledOAuthAuditLogging": null,
-  "jmsBrokerURISet": null,
-  "jmsUserName": null,
-  "jmsPassword": null,
   "clientWhiteList": [
     "*"
   ],
@@ -428,26 +466,53 @@ Getting access token for scope https://jans.io/oauth/jans-auth-server/config/pro
   "logClientNameOnClientAuthentication": false,
   "disableJdkLogger": true,
   "authorizationRequestCustomAllowedParameters": [
-    "customParam2",
-    "customParam3",
-    "customParam1"
+    {
+      "paramName": "customParam3",
+      "returnInResponse": false
+    },
+    {
+      "paramName": "customParam1",
+      "returnInResponse": false
+    },
+    {
+      "paramName": "customParam4",
+      "returnInResponse": true
+    },
+    {
+      "paramName": "customParam5",
+      "returnInResponse": true
+    },
+    {
+      "paramName": "customParam2",
+      "returnInResponse": false
+    },
+    {
+      "paramName": "agama_flow",
+      "returnInResponse": false
+    }
   ],
-  "legacyDynamicRegistrationScopeParam": false,
   "openidScopeBackwardCompatibility": false,
   "disableU2fEndpoint": false,
+  "rotateDeviceSecret": false,
+  "returnDeviceSecretFromAuthzEndpoint": false,
+  "dcrSignatureValidationEnabled": false,
+  "dcrAuthorizationWithClientCredentials": false,
+  "dcrAuthorizationWithMTLS": false,
   "useLocalCache": true,
   "fapiCompatibility": false,
   "forceIdTokenHintPrecense": false,
+  "rejectEndSessionIfIdTokenExpired": false,
+  "allowEndSessionWithUnmatchedSid": false,
   "forceOfflineAccessScopeToEnableRefreshToken": true,
   "errorReasonEnabled": false,
   "removeRefreshTokensForClientOnLogout": true,
   "skipRefreshTokenDuringRefreshing": false,
   "refreshTokenExtendLifetimeOnRotation": false,
+  "checkUserPresenceOnRefreshToken": false,
   "consentGatheringScriptBackwardCompatibility": false,
   "introspectionScriptBackwardCompatibility": false,
   "introspectionResponseScopesBackwardCompatibility": false,
   "softwareStatementValidationType": "script",
-  "softwareStatementValidationClaimName": null,
   "authenticationProtectionConfiguration": {
     "attemptExpiration": 15,
     "maximumAllowedAttemptsWithoutDelay": 4,
@@ -459,16 +524,14 @@ Getting access token for scope https://jans.io/oauth/jans-auth-server/config/pro
   "deviceAuthzRequestExpiresIn": 1800,
   "deviceAuthzTokenPollInterval": 5,
   "deviceAuthzResponseTypeToProcessAuthz": "code",
-  "backchannelClientId": null,
-  "backchannelRedirectUri": "https://testjans.gluu.com/jans-auth/ciba/home.htm",
-  "backchannelAuthenticationEndpoint": "https://testjans.gluu.com/jans-auth/restv1/bc-authorize",
-  "backchannelDeviceRegistrationEndpoint": "https://testjans.gluu.com/jans-auth/restv1/bc-deviceRegistration",
+  "backchannelRedirectUri": "https://example.jans.io/jans-auth/ciba/home.htm",
+  "backchannelAuthenticationEndpoint": "https://example.jans.io/jans-auth/restv1/bc-authorize",
+  "backchannelDeviceRegistrationEndpoint": "https://example.jans.io/jans-auth/restv1/bc-deviceRegistration",
   "backchannelTokenDeliveryModesSupported": [
     "poll",
     "ping",
     "push"
   ],
-  "backchannelAuthenticationRequestSigningAlgValuesSupported": null,
   "backchannelUserCodeParameterSupported": false,
   "backchannelBindingMessagePattern": "^[a-zA-Z0-9]{4,8}$",
   "backchannelAuthenticationResponseExpiresIn": 3600,
@@ -478,30 +541,67 @@ Getting access token for scope https://jans.io/oauth/jans-auth-server/config/pro
     "uid",
     "mail"
   ],
-  "cibaEndUserNotificationConfig": {
-    "apiKey": null,
-    "authDomain": null,
-    "databaseURL": null,
-    "projectId": null,
-    "storageBucket": null,
-    "messagingSenderId": null,
-    "appId": null,
-    "notificationUrl": null,
-    "notificationKey": null,
-    "publicVapidKey": null
-  },
+  "cibaEndUserNotificationConfig": {},
   "backchannelRequestsProcessorJobIntervalSec": 5,
   "backchannelRequestsProcessorJobChunkSize": 100,
   "cibaGrantLifeExtraTimeSec": 180,
   "cibaMaxExpirationTimeAllowedSec": 1800,
-  "cibaEnabled": false,
+  "dpopSigningAlgValuesSupported": [
+    "RS256",
+    "RS384",
+    "RS512",
+    "ES256",
+    "ES384",
+    "ES512",
+    "ES512",
+    "PS256",
+    "PS384",
+    "PS512"
+  ],
+  "dpopTimeframe": 5,
+  "dpopJtiCacheTime": 3600,
+  "allowIdTokenWithoutImplicitGrantType": false,
   "discoveryCacheLifetimeInMinutes": 60,
+  "discoveryDenyKeys": [
+    "id_generation_endpoint",
+    "auth_level_mapping",
+    "scope_to_claims_mapping",
+    "op_policy_uri"
+  ],
   "httpLoggingEnabled": false,
-  "httpLoggingExcludePaths": null,
-  "externalLoggerConfiguration": null,
-  "redirectUrisRegexEnabled": false,
-  "useHighestLevelScriptIfAcrScriptNotFound": true
+  "agamaConfiguration": {
+    "enabled": false,
+    "rootDir": "/opt/jans/jetty/jans-config-api/agama",
+    "templatesPath": "/ftl",
+    "scriptsPath": "/scripts",
+    "serializerType": "KRYO",
+    "maxItemsLoggedInCollections": 9,
+    "pageMismatchErrorPage": "mismatch.ftlh",
+    "interruptionErrorPage": "timeout.ftlh",
+    "crashErrorPage": "crash.ftlh",
+    "finishedFlowPage": "finished.ftlh",
+    "bridgeScriptPage": "agama.xhtml",
+    "defaultResponseHeaders": {
+      "Cache-Control": "max-age=0, no-store"
+    }
+  },
+  "ssaConfiguration": {
+    "ssaEndpoint": "https://example.jans.io/jans-auth/restv1/ssa",
+    "ssaSigningAlg": "RS256",
+    "ssaExpirationInDays": 30
+  },
+  "blockWebviewAuthorizationEnabled": false,
+  "dateFormatterPatterns": {
+        "userinfo": "yyyy-MM-dd"
+  },
+  "fapi": false,
+  "allResponseTypesSupported": [
+    "token",
+    "id_token",
+    "code"
+  ]
 }
+
 ```
 
 

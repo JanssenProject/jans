@@ -235,7 +235,7 @@ spec:
         spec:
           containers:
             - name: auth-key-rotation
-              image: janssenproject/certmanager:1.0.4-1
+              image: janssenproject/certmanager:replace-janssen-version-1
               resources:
                 requests:
                   memory: "300Mi"

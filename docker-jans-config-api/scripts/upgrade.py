@@ -4,8 +4,6 @@ import logging.config
 import os
 from collections import namedtuple
 
-from ldif import LDIFWriter
-
 from jans.pycloudlib import get_manager
 from jans.pycloudlib.persistence import CouchbaseClient
 from jans.pycloudlib.persistence import LdapClient
@@ -14,10 +12,10 @@ from jans.pycloudlib.persistence import SqlClient
 from jans.pycloudlib.persistence import PersistenceMapper
 from jans.pycloudlib.persistence import doc_id_from_dn
 from jans.pycloudlib.persistence import id_from_dn
+from jans.pycloudlib.utils import as_boolean
 
 from settings import LOGGING_CONFIG
-from utils import parse_config_api_swagger
-from utils import generate_hex
+from utils import get_config_api_scope_mapping
 
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("entrypoint")
@@ -53,6 +51,47 @@ def _transform_api_dynamic_config(conf):
                 "enabled",
             ],
         }
+        should_update = True
+
+    if "auditLogConf" not in conf:
+        conf["auditLogConf"] = {
+            "enabled": True,
+            "headerAttributes": ["User-inum"],
+        }
+        should_update = True
+
+    if "dataFormatConversionConf" not in conf:
+        conf["dataFormatConversionConf"] = {
+            "enabled": True,
+            "ignoreHttpMethod": [
+                "@jakarta.ws.rs.GET()",
+            ],
+        }
+        should_update = True
+
+    if "plugins" not in conf:
+        conf["plugins"] = [
+            {
+                "name": "admin",
+                "description": "admin-ui plugin",
+                "className": "io.jans.ca.plugin.adminui.rest.ApiApplication",
+            },
+            {
+                "name": "fido2",
+                "description": "fido2 plugin",
+                "className": "io.jans.configapi.plugin.fido2.rest.ApiApplication",
+            },
+            {
+                "name": "scim",
+                "description": "scim plugin",
+                "className": "io.jans.configapi.plugin.scim.rest.ApiApplication",
+            },
+            {
+                "name": "user-management",
+                "description": "user-management plugin",
+                "className": "io.jans.configapi.plugin.mgt.rest.ApiApplication",
+            },
+        ]
         should_update = True
     return conf, should_update
 
@@ -245,9 +284,10 @@ class Upgrade:
         logger.info("Running upgrade process (if required)")
         self.update_client_redirect_uri()
         self.update_api_dynamic_config()
-        # temporarily disable client updates
-        # see https://github.com/JanssenProject/jans/issues/2869
-        # self.update_client_scopes()
+
+        # add missing scopes into internal config-api client (if enabled)
+        if as_boolean(os.environ.get("CN_CONFIG_API_CREATE_SCOPES")):
+            self.update_client_scopes()
 
     def update_client_redirect_uri(self):
         kwargs = {}
@@ -310,58 +350,6 @@ class Upgrade:
             entry.attrs["jansRevision"] += 1
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
 
-    def get_all_scopes(self):
-        if self.backend.type in ("sql", "spanner"):
-            kwargs = {"table_name": "jansScope"}
-            entries = self.backend.search_entries(None, **kwargs)
-        elif self.backend.type == "couchbase":
-            kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
-            entries = self.backend.search_entries(
-                None, filter_="WHERE objectClass = 'jansScope'", **kwargs
-            )
-        else:
-            # likely ldap
-            entries = self.backend.search_entries(
-                "ou=scopes,o=jans", filter_="(objectClass=jansScope)"
-            )
-
-        return {
-            entry.attrs["jansId"]: entry.attrs.get("dn") or entry.id
-            for entry in entries
-        }
-
-    def generate_scim_plugin_scopes(self):
-        all_scopes = self.get_all_scopes()
-        plugin_scopes = {
-            "https://jans.io/scim/users.read": "Query user resources",
-            "https://jans.io/scim/users.write": "Manage user resources",
-        }
-        generated_scopes = []
-
-        for jans_id, desc in plugin_scopes.items():
-            if jans_id in all_scopes:
-                continue
-
-            inum = f"1200.{generate_hex()}-{generate_hex()}"
-            attrs = {
-                "description": [desc],
-                "displayName": [f"SCIM scope {jans_id}"],
-                "inum": [inum],
-                "jansAttrs": [json.dumps({"spontaneousClientScopes": None, "showInConfigurationEndpoint": True})],
-                "jansId": [jans_id],
-                "jansScopeTyp": ["oauth"],
-                "objectClass": ["top", "jansScope"],
-                "jansDefScope": ["false"],
-            }
-            generated_scopes.append(attrs)
-
-        with open("/app/templates/jans-config-api/scim-scopes.ldif", "wb") as fd:
-            writer = LDIFWriter(fd)
-
-            for scope in generated_scopes:
-                writer.unparse(f"inum={scope['inum'][0]},ou=scopes,o=jans", scope)
-        self.backend.client.create_from_ldif("/app/templates/jans-config-api/scim-scopes.ldif", {})
-
     def update_client_scopes(self):
         kwargs = {}
         client_id = self.manager.config.get("jca_client_id")
@@ -387,31 +375,9 @@ class Upgrade:
         if not isinstance(client_scopes, list):
             client_scopes = [client_scopes]
 
-        # prepare scim plugin scopes
-        self.generate_scim_plugin_scopes()
-
-        # all scopes mapping from persistence
-        all_scopes = self.get_all_scopes()
-
-        # all potential scopes for client
-        new_client_scopes = []
-
-        # extract config_api scopes within range of jansId defined in swagger
-        swagger = parse_config_api_swagger()
-        config_api_jans_ids = list(swagger["components"]["securitySchemes"]["oauth2"]["flows"]["clientCredentials"]["scopes"].keys())
-        config_api_scopes = list({
-            dn for jid, dn in all_scopes.items()
-            if jid in config_api_jans_ids
-        })
-        new_client_scopes += config_api_scopes
-
-        # extract scim scopes within range of jansId defined in swagger
-        scim_jans_ids = ["https://jans.io/scim/users.read", "https://jans.io/scim/users.write"]
-        scim_scopes = list({
-            dn for jid, dn in all_scopes.items()
-            if jid in scim_jans_ids
-        })
-        new_client_scopes += scim_scopes
+        # all potential new scopes for client
+        scope_mapping = get_config_api_scope_mapping()
+        new_client_scopes = [f"inum={inum},ou=scopes,o=jans" for inum in scope_mapping.keys()]
 
         # find missing scopes from the client
         diff = list(set(new_client_scopes).difference(client_scopes))

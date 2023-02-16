@@ -53,7 +53,7 @@ If you would like to build `jans-cli` manually, you can go through the following
 
     ```sh
     unzip main.zip
-    cd jans-main/jans-cli
+    cd jans-main/jans-cli-tui
     ```
 
 4. Build
@@ -65,7 +65,7 @@ If you would like to build `jans-cli` manually, you can go through the following
 You can verify with the following command line if everything is done successfully.
 
 ```
-python3 config-cli.pyz -h
+python3 jans-cli-tui.pyz
 ```
 
 
@@ -87,11 +87,11 @@ python3 config-cli.pyz -h
     ```
     wget https://github.com/JanssenProject/jans/archive/refs/heads/main.zip
     unzip main.zip
-    cd jans-main/jans-cli
+    cd jans-main/jans-cli-tui
     make install
     ```
 
-    This command will install executable called `jans-cli` available in virtual environment `PATH`.
+    This command will install executable called `jans-cli` and `jans-cli-tui` available in virtual environment `PATH`.
 
 
 ![](../docs/assets/image-build-jans-cli-pyz-manually-03042021.png)
@@ -142,3 +142,4 @@ Now selecting 1 and it returns our desired result as below image:
 ![default-authentication-method.png](../docs/assets/image-im-cur-default-auth-03042021.png)
 
 So, That was a quick start to view how this _jans-cli_ Interactive Mode works. Please, follow this [link](../docs/admin/jans-cli) to read the _jans-cli_ docs for a better understanding of the Janssen Command-Line.
+

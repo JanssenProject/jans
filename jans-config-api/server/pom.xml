@@ -9,7 +9,7 @@
 	<parent>
 		<groupId>io.jans</groupId>
 		<artifactId>jans-config-api-parent</artifactId>
-		<version>1.0.6-SNAPSHOT</version>
+		<version>1.0.7-SNAPSHOT</version>
 	</parent>
 
 	<prerequisites>
@@ -312,7 +312,7 @@
 					<execution>
 						<configuration>
 							<alwaysResolveAppPath>true</alwaysResolveAppPath>
-							<outputFileName>jans-config-api-swagger-auto</outputFileName>
+							<outputFileName>jans-config-api-swagger</outputFileName>
 							<contextId>${project.artifactId}</contextId>
 							<prettyPrint>true</prettyPrint>
 							<resourcePackages>

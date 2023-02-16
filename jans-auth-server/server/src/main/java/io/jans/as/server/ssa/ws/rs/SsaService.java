@@ -12,10 +12,14 @@ import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.as.model.jwk.KeyOpsType;
+import io.jans.as.model.jwk.Use;
 import io.jans.as.model.jwt.Jwt;
+import io.jans.as.model.jwt.JwtType;
+import io.jans.as.model.ssa.SsaErrorResponseType;
 import io.jans.as.model.ssa.SsaScopeType;
 import io.jans.as.server.model.common.ExecutionContext;
-import io.jans.as.server.model.token.JwtSigner;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.search.filter.Filter;
@@ -53,6 +57,15 @@ public class SsaService {
 
     @Inject
     private StaticConfiguration staticConfiguration;
+
+    @Inject
+    private WebKeysConfiguration webKeysConfiguration;
+
+    @Inject
+    private AbstractCryptoProvider cryptoProvider;
+
+    @Inject
+    private ErrorResponseFactory errorResponseFactory;
 
     /**
      * Persist SSA in to the database
@@ -102,7 +115,7 @@ public class SsaService {
      * @param scopes   List of scope
      * @return List of SSA
      */
-    public List<Ssa> getSsaList(String jti, Long orgId, SsaState status, String clientId, String[] scopes) {
+    public List<Ssa> getSsaList(String jti, String orgId, SsaState status, String clientId, String[] scopes) {
         List<Filter> filters = new ArrayList<>();
         if (hasDeveloperScope(Arrays.asList(scopes))) {
             filters.add(Filter.createEqualityFilter("creatorId", clientId));
@@ -127,41 +140,59 @@ public class SsaService {
     /**
      * Generates a new JWT using a given SSA.
      * <p>
-     * Method throws an {@link RuntimeException} if it fails to create the jwt
+     * Method throws an {@link Exception} if it fails to generate JWT
      * </p>
      * <p>
      * Method executes a postProcessor in case it has been sent in the execution context parameter.
      * </p>
      *
-     * @param ssa                  Ssa
-     * @param executionContext     Execution context
-     * @param webKeysConfiguration Web keys configuration
-     * @param cryptoProvider       Crypto provider
+     * @param ssa              Ssa
+     * @param executionContext Execution context
      * @return Jwt with SSA structure
      */
-    public Jwt generateJwt(Ssa ssa, ExecutionContext executionContext, WebKeysConfiguration webKeysConfiguration, AbstractCryptoProvider cryptoProvider) {
-        try {
-            SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(appConfiguration.getSsaConfiguration().getSsaSigningAlg());
-            JwtSigner jwtSigner = new JwtSigner(appConfiguration, webKeysConfiguration, signatureAlgorithm, null, null, cryptoProvider);
-            Jwt jwt = jwtSigner.newJwt();
-            jwt.getClaims().setJwtId(ssa.getId());
-            jwt.getClaims().setIssuedAt(ssa.getCreationDate());
-            jwt.getClaims().setExpirationTime(ssa.getExpirationDate());
-            jwt.getClaims().setClaim(SOFTWARE_ID.getName(), ssa.getAttributes().getSoftwareId());
-            jwt.getClaims().setClaim(ORG_ID.getName(), Long.parseLong(ssa.getOrgId()));
-            jwt.getClaims().setClaim(SOFTWARE_ROLES.getName(), ssa.getAttributes().getSoftwareRoles());
-            jwt.getClaims().setClaim(GRANT_TYPES.getName(), ssa.getAttributes().getGrantTypes());
-
-            Jwt jwr = jwtSigner.sign();
-            if (executionContext.getPostProcessor() != null) {
-                executionContext.getPostProcessor().apply(jwr);
-            }
-            return jwr;
-        } catch (Exception e) {
-            if (log.isErrorEnabled())
-                log.error("Failed to sign session jwt! " + e.getMessage(), e);
-            throw new RuntimeException(e);
+    public Jwt generateJwt(Ssa ssa, ExecutionContext executionContext) throws Exception {
+        Jwt jwt = generateJwt(ssa);
+        if (executionContext.getPostProcessor() != null) {
+            executionContext.getPostProcessor().apply(jwt);
         }
+        return jwt;
+    }
+
+    /**
+     * Generates a new JWT using a given SSA.
+     * <p>
+     * Method throws an {@link Exception} if it fails to generate JWT
+     * </p>
+     *
+     * @param ssa Ssa
+     * @return Jwt with SSA structure
+     */
+    public Jwt generateJwt(Ssa ssa) throws Exception {
+        SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(appConfiguration.getSsaConfiguration().getSsaSigningAlg());
+        if (signatureAlgorithm == null) {
+            log.error("Invalid signature, Key is not found: {}", appConfiguration.getSsaConfiguration().getSsaSigningAlg());
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, SsaErrorResponseType.INVALID_SIGNATURE, "Invalid signature error");
+        }
+        String keyId = cryptoProvider.getKeyId(webKeysConfiguration, signatureAlgorithm.getAlg(), Use.SIGNATURE, KeyOpsType.SSA);
+
+        Jwt jwt = new Jwt();
+        jwt.getHeader().setType(JwtType.JWT);
+        jwt.getHeader().setAlgorithm(signatureAlgorithm);
+        jwt.getHeader().setKeyId(keyId);
+
+        jwt.getClaims().setJwtId(ssa.getId());
+        jwt.getClaims().setIssuedAt(ssa.getCreationDate());
+        jwt.getClaims().setExpirationTime(ssa.getExpirationDate());
+        jwt.getClaims().setIssuer(appConfiguration.getIssuer());
+        jwt.getClaims().setClaim(SOFTWARE_ID.getName(), ssa.getAttributes().getSoftwareId());
+        jwt.getClaims().setClaim(ORG_ID.getName(), ssa.getOrgId());
+        jwt.getClaims().setClaim(SOFTWARE_ROLES.getName(), ssa.getAttributes().getSoftwareRoles());
+        jwt.getClaims().setClaim(GRANT_TYPES.getName(), ssa.getAttributes().getGrantTypes());
+
+        String signature = cryptoProvider.sign(jwt.getSigningInput(), jwt.getHeader().getKeyId(), null, signatureAlgorithm);
+        jwt.setEncodedSignature(signature);
+
+        return jwt;
     }
 
     /**

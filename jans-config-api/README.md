@@ -17,4 +17,5 @@ Be aware that all the dependencies are copied into the `server/target/jans-confi
 The application can be deployed on web server like jetty and can be now runnable using `java -jar start.jar -Djans.base=etc/jans`.
 
 ## Documentation
-Learn more in the [jans-config-api documentation](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/main/jans-config-api/docs/jans-config-api-swagger.yaml).
+Learn more in the [jans-config-api documentation](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/main/jans-config-api/docs/jans-config-api-swagger-auto.yaml).
+

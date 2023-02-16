@@ -17,11 +17,13 @@ import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.core.model.SearchRequest;
 import io.jans.configapi.service.auth.ClientService;
 import io.jans.configapi.service.auth.ConfigurationService;
+import io.jans.configapi.service.auth.AttributeService;
 import io.jans.configapi.service.auth.ScopeService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.util.AttributeNames;
 import io.jans.configapi.util.AuthUtil;
+import io.jans.model.GluuAttribute;
 import io.jans.configapi.core.util.Jackson;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
@@ -30,6 +32,7 @@ import io.jans.util.StringHelper;
 import io.jans.util.security.StringEncrypter.EncryptionException;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -48,6 +51,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -82,22 +86,25 @@ public class ClientsResource extends ConfigBaseResource {
     @Inject
     ScopeService scopeService;
 
+    @Inject
+    AttributeService attributeService;
+
     @Operation(summary = "Gets list of OpenID Connect clients", description = "Gets list of OpenID Connect clients", operationId = "get-oauth-openid-clients", tags = {
             "OAuth - OpenID Connect - Clients" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.OPENID_CLIENTS_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PagedResult.class), examples = @ExampleObject(name = "Response json example", value = "example/openid-clients/openid-clients-get-all.json"))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PagedResult.class), examples = @ExampleObject(name = "Response json example", value = "example/openid-clients/clients/openid-clients-get-all.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_READ_ACCESS }, groupScopes = {
             ApiAccessConstants.OPENID_READ_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getOpenIdConnectClients(
-            @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
-            @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
-            @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
-            @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
-            @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder) throws EncryptionException {
+            @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
+            @Parameter(description = "Search pattern") @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
+            @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
+            @Parameter(description = "Attribute whose value will be used to order the returned response") @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
+            @Parameter(description = "Order in which the sortBy param is applied. Allowed values are \"ascending\" and \"descending\"") @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder) throws EncryptionException {
         if (logger.isDebugEnabled()) {
             logger.debug("Client serach param - limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}",
                     escapeLog(limit), escapeLog(pattern), escapeLog(startIndex), escapeLog(sortBy),
@@ -113,14 +120,14 @@ public class ClientsResource extends ConfigBaseResource {
             "OAuth - OpenID Connect - Clients" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.OPENID_CLIENTS_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Client.class), examples = @ExampleObject(name = "Response json example", value = "example/openid-clients/openid-clients-get.json"))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Client.class), examples = @ExampleObject(name = "Response json example", value = "example/openid-clients/clients/openid-clients-get.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_READ_ACCESS }, groupScopes = {
             ApiAccessConstants.OPENID_READ_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Path(ApiConstants.INUM_PATH)
-    public Response getOpenIdClientByInum(@PathParam(ApiConstants.INUM) @NotNull String inum) {
+    public Response getOpenIdClientByInum(@Parameter(description = "Client identifier") @PathParam(ApiConstants.INUM) @NotNull String inum) {
         if (logger.isDebugEnabled()) {
             logger.debug("Client serach by inum:{}", escapeLog(inum));
         }
@@ -132,9 +139,9 @@ public class ClientsResource extends ConfigBaseResource {
     @Operation(summary = "Create new OpenId Connect client", description = "Create new OpenId Connect client", operationId = "post-oauth-openid-client", tags = {
             "OAuth - OpenID Connect - Clients" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS }))
-    @RequestBody(description = "OpenID Connect Client object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Client.class), examples = @ExampleObject(name = "Request json example", value = "example/openid-clients/openid-clients-post.json")))
+    @RequestBody(description = "OpenID Connect Client object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Client.class), examples = @ExampleObject(name = "Request json example", value = "example/openid-clients/clients/openid-clients-post.json")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Client.class), examples = @ExampleObject(name = "Response json example", value = "example/openid-clients/openid-clients-get.json"))),
+            @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Client.class), examples = @ExampleObject(name = "Response json example", value = "example/openid-clients/clients/openid-clients-get.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
@@ -156,6 +163,12 @@ public class ClientsResource extends ConfigBaseResource {
         // scope validation
         checkScopeFormat(client);
 
+        // Claim validation
+        String[] claims = client.getClaims();
+        if (client.getClaims() != null && client.getClaims().length > 0) {
+            validateClaim(client);
+        }
+
         String clientSecret = client.getClientSecret();
 
         if (StringHelper.isEmpty(clientSecret)) {
@@ -173,16 +186,18 @@ public class ClientsResource extends ConfigBaseResource {
         clientService.addClient(client);
         Client result = clientService.getClientByInum(inum);
         result.setClientSecret(encryptionService.decrypt(result.getClientSecret()));
+        result.setClaims(claims);
 
+        logger.debug("Claim post creation - result.getClaims():{} ", result.getClaims());
         return Response.status(Response.Status.CREATED).entity(result).build();
     }
 
     @Operation(summary = "Update OpenId Connect client", description = "Update OpenId Connect client", operationId = "put-oauth-openid-client", tags = {
             "OAuth - OpenID Connect - Clients" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS }))
-    @RequestBody(description = "OpenID Connect Client object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Client.class), examples = @ExampleObject(name = "Request json example", value = "example/openid-clients/openid-clients-put.json")))
+    @RequestBody(description = "OpenID Connect Client object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Client.class), examples = @ExampleObject(name = "Request json example", value = "example/openid-clients/clients/openid-clients-put.json")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Client.class), examples = @ExampleObject(name = "Response json example", value = "example/openid-clients/openid-clients-get.json"))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Client.class), examples = @ExampleObject(name = "Response json example", value = "example/openid-clients/clients/openid-clients-get.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
@@ -202,6 +217,12 @@ public class ClientsResource extends ConfigBaseResource {
         // scope validation
         checkScopeFormat(client);
 
+        // Claim validation
+        String[] claims = client.getClaims();
+        if (client.getClaims() != null && client.getClaims().length > 0) {
+            validateClaim(client);
+        }
+
         client.setClientId(existingClient.getClientId());
         client.setBaseDn(clientService.getDnForClient(inum));
         client.setDeletable(client.getExpirationDate() != null);
@@ -214,16 +235,18 @@ public class ClientsResource extends ConfigBaseResource {
         clientService.updateClient(client);
         Client result = clientService.getClientByInum(existingClient.getClientId());
         result.setClientSecret(encryptionService.decrypt(client.getClientSecret()));
+        result.setClaims(claims);
 
+        logger.debug("Claim post updation - result.getClaims():{} ", result.getClaims());
         return Response.ok(result).build();
     }
 
     @Operation(summary = "Patch OpenId Connect client", description = "Patch OpenId Connect client", operationId = "patch-oauth-openid-client-by-inum", tags = {
             "OAuth - OpenID Connect - Clients" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS }))
-    @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class)), examples = @ExampleObject(name = "Request json example", value = "example/openid-clients/openid-clients-patch.json")))
+    @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class)), examples = @ExampleObject(name = "Request json example", value = "example/openid-clients/clients/openid-clients-patch.json")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Client.class), examples = @ExampleObject(name = "Response json example", value = "example/openid-clients/openid-clients-get.json"))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Client.class), examples = @ExampleObject(name = "Response json example", value = "example/openid-clients/clients/openid-clients-get.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
@@ -232,7 +255,7 @@ public class ClientsResource extends ConfigBaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS }, groupScopes = {
             ApiAccessConstants.OPENID_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @Path(ApiConstants.INUM_PATH)
-    public Response patchClient(@PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String jsonPatchString)
+    public Response patchClient(@Parameter(description = "Client identifier") @PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String jsonPatchString)
             throws JsonPatchException, IOException {
         if (logger.isDebugEnabled()) {
             logger.debug("Client details to be patched - inum:{}, jsonPatchString:{}", escapeLog(inum),
@@ -257,7 +280,7 @@ public class ClientsResource extends ConfigBaseResource {
     @Path(ApiConstants.INUM_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_DELETE_ACCESS }, groupScopes = {
             ApiAccessConstants.OPENID_DELETE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
-    public Response deleteClient(@PathParam(ApiConstants.INUM) @NotNull String inum) {
+    public Response deleteClient(@Parameter(description = "Client identifier") @PathParam(ApiConstants.INUM) @NotNull String inum) {
         if (logger.isDebugEnabled()) {
             logger.debug("Client to be deleted - inum:{} ", escapeLog(inum));
         }
@@ -352,7 +375,7 @@ public class ClientsResource extends ConfigBaseResource {
         logger.debug("Scope validation result - validScopes:{}, invalidScopes:{} ", validScopes, invalidScopes);
 
         if (!invalidScopes.isEmpty()) {
-            thorwBadRequestException("Invalid scope in request -> " + invalidScopes.toString());
+            throwBadRequestException("Invalid scope in request -> " + invalidScopes.toString());
         }
 
         // reset scopes
@@ -370,4 +393,48 @@ public class ClientsResource extends ConfigBaseResource {
             return null;
         }
     }
+
+    private Client validateClaim(Client client) {
+        if (client == null) {
+            return client;
+        }
+
+        // check claims
+        logger.debug("client.getClaims():{}", client.getClaims());
+        List<String> claims = client.getClaims() != null ? Arrays.asList(client.getClaims()) : null;
+        logger.debug("Client claims:{}", claims);
+
+        List<String> validClaims = new ArrayList<>();
+        List<String> invalidClaims = new ArrayList<>();
+
+        for (String claim : claims) {
+            logger.debug("Is claim:{} valid-DN?:{}", claim, authUtil.isValidDn(claim));
+            GluuAttribute gluuAttribute = null;
+            if (authUtil.isValidDn(claim)) {
+                gluuAttribute = attributeService.getAttributeUsingDn(claim);
+            } else {
+                gluuAttribute = attributeService.getAttributeUsingName(claim);
+            }
+            logger.debug("Attribute from DB - {}'", gluuAttribute);
+            if (gluuAttribute != null) {
+                validClaims.add(gluuAttribute.getDn());
+            } else {
+                invalidClaims.add(claim);
+            }
+        }
+        logger.debug("Claim validation result - validClaims:{}, invalidClaims:{} ", validClaims, invalidClaims);
+
+        if (!invalidClaims.isEmpty()) {
+            throwBadRequestException("Invalid claim in request -> " + invalidClaims.toString());
+        }
+
+        // reset Claims
+        if (!validClaims.isEmpty()) {
+            String[] scopeArr = validClaims.stream().toArray(String[]::new);
+            client.setClaims(scopeArr);
+        }
+
+        return client;
+    }
+
 }

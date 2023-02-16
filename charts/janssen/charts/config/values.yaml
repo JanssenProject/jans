@@ -34,7 +34,7 @@ configmap:
   containerMetadataName: kubernetes
   # -- The name of the Kubernetes ConfigMap that will hold the configuration layer
   cnConfigKubernetesConfigMap: cn
-  # -- The prefix of couchbase buckets. This helps with separation in between different environments and allows for the same couchbase cluster to be used by different setups of Gluu.
+  # -- The prefix of couchbase buckets. This helps with separation in between different environments and allows for the same couchbase cluster to be used by different setups of Janssen.
   cnCouchbaseBucketPrefix: jans
   # -- Couchbase certificate authority string. This must be encoded using base64. This can also be found in your couchbase UI Security > Root Certificate. In mTLS setups this is not required.
   cnCouchbaseCrt: SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo=
@@ -63,15 +63,11 @@ configmap:
   # [google_spanner_envs] END
   # [google_secret_manager_envs] Envs related to using Google Secret Manager to store config and secret layer
   # -- Secret version to be used for secret configuration. Defaults to latest and should normally always stay that way. Used only when global.configAdapterName and global.configSecretAdapter is set to google.
-  cnSecretGoogleSecretVersionId: "latest"
+  cnGoogleSecretVersionId: "latest"
   # -- Prefix for Janssen secret in Google Secret Manager. Defaults to janssen. If left janssen-secret secret will be created. Used only when global.configAdapterName and global.configSecretAdapter is set to google.
-  cnSecretGoogleSecretNamePrefix: janssen
+  cnGoogleSecretNamePrefix: janssen
   # -- Passphrase for Janssen secret in Google Secret Manager. This is used for encrypting and decrypting data from the Google Secret Manager. Used only when global.configAdapterName and global.configSecretAdapter is set to google.
   cnGoogleSecretManagerPassPhrase: Test1234#
-  # -- Secret version to be used for configuration. Defaults to latest and should normally always stay that way. Used only when global.configAdapterName and global.configSecretAdapter is set to google. Used only when global.configAdapterName and global.configSecretAdapter is set to google.
-  cnConfigGoogleSecretVersionId: "latest"
-  # -- Prefix for Janssen configuration secret in Google Secret Manager. Defaults to janssen. If left intact janssen-configuration secret will be created. Used only when global.configAdapterName and global.configSecretAdapter is set to google.
-  cnConfigGoogleSecretNamePrefix: janssen
   # [google_secret_manager_envs] END
   # [google_envs] END
   # -- OpenDJ internal address. Leave as default. Used when `global.cnPersistenceType` is set to `ldap`.
@@ -110,7 +106,7 @@ image:
   # -- Image  to use for deploying.
   repository: janssenproject/configurator
   # -- Image  tag to use for deploying.
-  tag: 1.0.6_dev
+  tag: 1.0.7_dev
   # -- Image Pull Secrets
   pullSecrets: [ ]
 # -- LDAP admin password if OpennDJ is used for persistence.

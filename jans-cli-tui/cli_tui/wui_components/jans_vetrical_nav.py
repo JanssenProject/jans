@@ -1,10 +1,12 @@
 from prompt_toolkit.layout.containers import HSplit, Window, FloatContainer
+
 from prompt_toolkit.layout.controls import FormattedTextControl
 from prompt_toolkit.layout.margins import ScrollbarMargin
 from prompt_toolkit.formatted_text import merge_formatted_text
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.widgets import HorizontalLine
+from prompt_toolkit.widgets.base import Border
 from typing import Tuple, TypeVar, Callable
 from prompt_toolkit.layout.dimension import AnyDimension
 from typing import Optional, Sequence, Union
@@ -23,6 +25,7 @@ class JansVerticalNav():
         on_enter: Callable= None,
         get_help: Tuple= None,
         on_delete: Callable= None,
+        change_password: Callable= None,
         all_data: Optional[list]= [], 
         preferred_size: Optional[list]= [], 
         data: Optional[list]= [], 
@@ -32,6 +35,8 @@ class JansVerticalNav():
         max_width: AnyDimension = None,
         jans_name: Optional[str]= '', 
         max_height: AnyDimension = None,
+        jans_help: Optional[str]= '',
+        hide_headers: Optional[bool]= False,
         )->FloatContainer :
         """init for JansVerticalNav
 
@@ -51,7 +56,8 @@ class JansVerticalNav():
             max_width (int, optional): Maximum width of container.
             jans_name (str, optional): Widget name
             max_height (int, optional): Maximum hegight of container
-        
+            jans_help (str, optional): Status bar help message
+            hide_headers (bool, optional): Hide or display headers
         Examples:
             clients = JansVerticalNav(
                 myparent=self,
@@ -80,22 +86,27 @@ class JansVerticalNav():
         self.headerColor = headerColor
         self.entriesColor = entriesColor
         self.max_height = max_height
-
+        self.jans_help = jans_help
         self.on_enter = on_enter
         self.on_delete = on_delete
         self.on_display = on_display
+        self.change_password = change_password
+        self.hide_headers = hide_headers
+        self.spaces = [len(header)+1 for header in self.headers]
+
         if get_help:
             self.get_help, self.scheme = get_help
             if self.data :
-                self.get_help(data=self.data[self.selectes],scheme=self.scheme)
+                self.get_help(data=self.data[self.selectes], scheme=self.scheme)
         else:
             self.get_help= None
+
         self.all_data=all_data
         self.underline_headings = underline_headings
 
         self.handle_header_spaces()
         self.create_window()
-            
+
 
     def view_data(
         self,
@@ -120,19 +131,8 @@ class JansVerticalNav():
     def create_window(self) -> None:
         """This method creat the dialog it self
         """
-        self.container_content = [
-                        Window(
-                            content=FormattedTextControl(
-                                text=self._get_head_text,
-                                focusable=False,
-                                key_bindings=self._get_key_bindings(),
-                                style=self.headerColor,
-                            ),
-                            style='class:select-box',
-                            height=D(preferred=1, max=1),
-                            cursorline=False,
-                        ),
-                        Window(
+        
+        self.list_box = Window(
                             content=FormattedTextControl(
                                 text=self._get_formatted_text,
                                 focusable=True,
@@ -142,12 +142,28 @@ class JansVerticalNav():
                             style='class:select-box',
                             height=D(preferred=len(self.data), max=len(self.data)),
                             cursorline=True,
+                            always_hide_cursor=True,
                             right_margins=[ScrollbarMargin(display_arrows=True), ],
-                        ),
-                    ]
+                        )
+        if self.jans_help:
+            self.list_box.jans_help = self.jans_help
 
-        if self.underline_headings:
-            self.container_content.insert(1, HorizontalLine())
+        headers_height = 2 if self.underline_headings else 1
+
+        self.container_content = [
+                        Window(
+                            content=FormattedTextControl(
+                                text=self._get_head_text,
+                                focusable=False,
+                                key_bindings=self._get_key_bindings(),
+                                style=self.headerColor,
+                            ),
+                            style='class:select-box',
+                            height=D(preferred=headers_height, max=headers_height),
+                            cursorline=False,
+                        ),
+                        self.list_box ,
+                    ]
 
         self.container = FloatContainer(
             content=HSplit(self.container_content+[Window(height=1)], width=D(max=self.max_width)),
@@ -157,7 +173,8 @@ class JansVerticalNav():
     def handle_header_spaces(self) -> None:
         """Make header evenlly spaced
         """
-
+        if not self.data:
+            return
         data = self.view_data(self.data)
         self.spaces = []
         data_length_list = []
@@ -203,6 +220,9 @@ class JansVerticalNav():
         return spaced_data
 
     def _get_head_text(self) -> AnyFormattedText:
+        if self.hide_headers:
+            return ''
+
         """Get all headers entries
 
         Returns:
@@ -214,7 +234,11 @@ class JansVerticalNav():
         for k in range(len(self.headers)):
             y += self.headers[k] + ' ' * \
                 (self.spaces[k] - len(self.headers[k]) + 3)
+
         result.append(y)
+
+        if self.underline_headings:
+            result.append('\n' + Border.HORIZONTAL*len(y))
 
         return merge_formatted_text(result)
 
@@ -262,6 +286,11 @@ class JansVerticalNav():
         self.data[item_index] = item
         self.handle_header_spaces()
 
+    def clear(self) -> None:
+        self.data = []
+        self.container_content[-1].height = self.max_height
+
+
     def _get_key_bindings(self) -> KeyBindingsBase:
         """All key binding for the Dialog with Navigation bar
 
@@ -295,6 +324,13 @@ class JansVerticalNav():
             if self.on_enter :
                 self.on_enter(passed=self.data[self.selectes], event=event, size=size, data=self.all_data[self.selectes], selected=self.selectes, jans_name=self.jans_name)
 
+        @kb.add('p')
+        def _(event):
+            if not self.data:
+                return
+            if self.change_password:
+                self.change_password(data=self.all_data[self.selectes])
+
 
         @kb.add('d')
         def _(event):
@@ -314,7 +350,7 @@ class JansVerticalNav():
         def _(event):
             if self.data and self.on_delete:
                 selected_line = self.data[self.selectes]
-                self.on_delete(selected=selected_line, event=event, jans_name=self.jans_name)
+                self.on_delete(selected=selected_line, selected_idx=self.selectes, event=event, jans_name=self.jans_name)
 
         return kb
 

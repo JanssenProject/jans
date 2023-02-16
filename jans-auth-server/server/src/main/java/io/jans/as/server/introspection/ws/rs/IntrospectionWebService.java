@@ -250,6 +250,9 @@ public class IntrospectionWebService {
                 }
             }
         }
+        if (log.isTraceEnabled()) {
+            log.trace("Response before signing: {}", jwt.getClaims().toJsonString());
+        }
 
         return jwtSigner.sign().toString();
     }

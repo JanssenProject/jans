@@ -66,6 +66,7 @@ tags:
 | corsConfigurationFilters | This list specifies the CORS configuration filters | [Details](#corsconfigurationfilters) |
 | cssLocation | The location for CSS files | [Details](#csslocation) |
 | customHeadersWithAuthorizationResponse | Choose whether to enable the custom response header parameter to return custom headers with the authorization response | [Details](#customheaderswithauthorizationresponse) |
+| dateFormatterPatterns | List of key value, e.g. 'birthdate: 'yyyy-MM-dd', etc. | [Details](#dateformatterpattern) |
 | dcrAuthorizationWithClientCredentials | Boolean value indicating if DCR authorization to be performed using client credentials | [Details](#dcrauthorizationwithclientcredentials) |
 | dcrAuthorizationWithMTLS | Boolean value indicating if DCR authorization allowed with MTLS | [Details](#dcrauthorizationwithmtls) |
 | dcrIssuers | List of DCR issuers | [Details](#dcrissuers) |
@@ -111,6 +112,7 @@ tags:
 | expirationNotificatorIntervalInSeconds | The expiration notificator interval in second | [Details](#expirationnotificatorintervalinseconds) |
 | expirationNotificatorMapSizeLimit | The expiration notificator maximum size limit | [Details](#expirationnotificatormapsizelimit) |
 | externalLoggerConfiguration | The path to the external log4j2 logging configuration | [Details](#externalloggerconfiguration) |
+| externalUriWhiteList | This list specifies which external URIs can be called by AS (if empty any URI can be called) | [Details](#externaluriwhitelist) |
 | fapiCompatibility | Boolean value specifying whether to turn on FAPI compatibility mode. If true AS behaves in more strict mode | [Details](#fapicompatibility) |
 | featureFlags | List of enabled feature flags | [Details](#featureflags) |
 | forceIdTokenHintPrecense | Boolean value specifying whether force id_token_hint parameter presence | [Details](#forceidtokenhintprecense) |
@@ -137,6 +139,13 @@ tags:
 | introspectionSkipAuthorization | Specifies if authorization to be skipped for introspection | [Details](#introspectionskipauthorization) |
 | invalidateSessionCookiesAfterAuthorizationFlow | Boolean value to specify whether to invalidate session_id and consent_session_id cookies right after successful or unsuccessful authorization | [Details](#invalidatesessioncookiesafterauthorizationflow) |
 | issuer | URL using the https scheme that OP asserts as Issuer identifier | [Details](#issuer) |
+| jansElevenDeleteKeyEndpoint | oxEleven Delete Key endpoint URL | [Details](#janselevendeletekeyendpoint) |
+| jansElevenGenerateKeyEndpoint | oxEleven Generate Key endpoint URL | [Details](#janselevengeneratekeyendpoint) |
+| jansElevenSignEndpoint | oxEleven Sign endpoint UR | [Details](#janselevensignendpoint) |
+| jansElevenTestModeToken | oxEleven Test Mode Token | [Details](#janseleventestmodetoken) |
+| jansElevenVerifySignatureEndpoint | oxEleven Verify Signature endpoint URL | [Details](#janselevenverifysignatureendpoint) |
+| jansId | URL for the Inum generator Service | [Details](#jansid) |
+| jansOpenIdConnectVersion | OpenID Connect Version | [Details](#jansopenidconnectversion) |
 | jmsBrokerURISet | JMS Broker URI Set | [Details](#jmsbrokeruriset) |
 | jmsPassword | JMS Password | [Details](#jmspassword) |
 | jmsUserName | JMS UserName | [Details](#jmsusername) |
@@ -177,19 +186,12 @@ tags:
 | openidSubAttribute | Specifies which LDAP attribute is used for the subject identifier claim | [Details](#openidsubattribute) |
 | opPolicyUri | URL that the OpenID Provider provides to the person registering the Client to read about the OP's requirements on how the Relying Party can use the data provided by the OP | [Details](#oppolicyuri) |
 | opTosUri | URL that the OpenID Provider provides to the person registering the Client to read about OpenID Provider's terms of service | [Details](#optosuri) |
-| oxElevenDeleteKeyEndpoint | oxEleven Delete Key endpoint URL | [Details](#oxelevendeletekeyendpoint) |
-| oxElevenGenerateKeyEndpoint | oxEleven Generate Key endpoint URL | [Details](#oxelevengeneratekeyendpoint) |
-| oxElevenSignEndpoint | oxEleven Sign endpoint UR | [Details](#oxelevensignendpoint) |
-| oxElevenTestModeToken | oxEleven Test Mode Token | [Details](#oxeleventestmodetoken) |
-| oxElevenVerifySignatureEndpoint | oxEleven Verify Signature endpoint URL | [Details](#oxelevenverifysignatureendpoint) |
-| oxId | URL for the Inum generator Service | [Details](#oxid) |
-| oxOpenIdConnectVersion | OpenID Connect Version | [Details](#oxopenidconnectversion) |
 | pairwiseCalculationKey | Key to calculate algorithmic pairwise IDs | [Details](#pairwisecalculationkey) |
 | pairwiseCalculationSalt | Salt to calculate algorithmic pairwise IDs | [Details](#pairwisecalculationsalt) |
 | pairwiseIdType | the pairwise ID type | [Details](#pairwiseidtype) |
 | parEndpoint | URL for Pushed Authorisation Request (PAR) Endpoint | [Details](#parendpoint) |
-| persistIdTokenInLdap | Specifies whether to persist id_token into LDAP (otherwise saves into cache) | [Details](#persistidtokeninldap) |
-| persistRefreshTokenInLdap | Specifies whether to persist refresh_token into LDAP (otherwise saves into cache) | [Details](#persistrefreshtokeninldap) |
+| persistIdToken | Specifies whether to persist id_token (otherwise saves into cache) | [Details](#persistIdToken) |
+| persistRefreshToken | Specifies whether to persist refresh_token (otherwise saves into cache) | [Details](#persistRefreshToken) |
 | personCustomObjectClassList | This list details LDAP custom object classes for dynamic person enrollment | [Details](#personcustomobjectclasslist) |
 | publicSubjectIdentifierPerClientEnabled | Specifies whether public subject identifier is allowed per client | [Details](#publicsubjectidentifierperclientenabled) |
 | redirectUrisRegexEnabled | Enable/Disable redirect uris validation using regular expression | [Details](#redirecturisregexenabled) |
@@ -218,7 +220,6 @@ tags:
 | sectorIdentifierCacheLifetimeInMinutes | Sector Identifier cache lifetime in minutes | [Details](#sectoridentifiercachelifetimeinminutes) |
 | serverSessionIdLifetime | Dedicated property to control lifetime of the server side OP session object in seconds. Overrides sessionIdLifetime. By default value is 0, so object lifetime equals sessionIdLifetime (which sets both cookie and object expiration). It can be useful if goal is to keep different values for client cookie and server object | [Details](#serversessionidlifetime) |
 | serviceDocumentation | URL of a page containing human-readable information that developers might want or need to know when using the OpenID Provider | [Details](#servicedocumentation) |
-| sessionAsJwt | Boolean value true saves session data as a JWT | [Details](#sessionasjwt) |
 | sessionIdLifetime | The lifetime of session id in seconds. If 0 or -1 then expiration is not set. session_id cookie expires when browser session ends | [Details](#sessionidlifetime) |
 | sessionIdPersistInCache | Boolean value specifying whether to persist session_id in cache | [Details](#sessionidpersistincache) |
 | sessionIdPersistOnPromptNone | Boolean value specifying whether to persist session ID on prompt none | [Details](#sessionidpersistonpromptnone) |
@@ -259,6 +260,7 @@ tags:
 | useHighestLevelScriptIfAcrScriptNotFound | Enable/Disable usage of highest level script in case ACR script does not exist | [Details](#usehighestlevelscriptifacrscriptnotfound) |
 | useLocalCache | Cache in local memory cache attributes, scopes, clients and organization entry with expiration 60 seconds | [Details](#uselocalcache) |
 | useNestedJwtDuringEncryption | Boolean value specifying whether to use nested Jwt during encryption | [Details](#usenestedjwtduringencryption) |
+| userInfoConfiguration | UserInfo Configuration | [Details](#userinfoconfiguration) |
 | userInfoEncryptionAlgValuesSupported | This JSON Array lists which JWS encryption algorithms (alg values) [JWA] can be used by for the UserInfo endpoint to encode the claims in a JWT | [Details](#userinfoencryptionalgvaluessupported) |
 | userInfoEncryptionEncValuesSupported | This JSON Array lists which JWS encryption algorithms (enc values) [JWA] can be used by for the UserInfo endpoint to encode the claims in a JWT | [Details](#userinfoencryptionencvaluessupported) |
 | userInfoEndpoint | The User Info endpoint URL | [Details](#userinfoendpoint) |
@@ -770,6 +772,15 @@ tags:
 - Default value: None
 
 
+### dateFormatterPatterns
+
+- Description: List of key value, e.g. 'birthdate: 'yyyy-MM-dd', etc.
+
+- Required: No
+
+- Default value: None
+
+
 ### dcrAuthorizationWithClientCredentials
 
 - Description: Boolean value indicating if DCR authorization to be performed using client credentials
@@ -1175,6 +1186,15 @@ tags:
 - Default value: None
 
 
+### externalUriWhiteList
+
+- Description: This list specifies which external URIs can be called by AS (if empty any URI can be called)
+
+- Required: No
+
+- Default value: None
+
+
 ### fapiCompatibility
 
 - Description: Boolean value specifying whether to turn on FAPI compatibility mode. If true AS behaves in more strict mode
@@ -1403,6 +1423,69 @@ tags:
 ### issuer
 
 - Description: URL using the https scheme that OP asserts as Issuer identifier
+
+- Required: No
+
+- Default value: None
+
+
+### jansElevenDeleteKeyEndpoint
+
+- Description: oxEleven Delete Key endpoint URL
+
+- Required: No
+
+- Default value: None
+
+
+### jansElevenGenerateKeyEndpoint
+
+- Description: oxEleven Generate Key endpoint URL
+
+- Required: No
+
+- Default value: None
+
+
+### jansElevenSignEndpoint
+
+- Description: oxEleven Sign endpoint UR
+
+- Required: No
+
+- Default value: None
+
+
+### jansElevenTestModeToken
+
+- Description: oxEleven Test Mode Token
+
+- Required: No
+
+- Default value: None
+
+
+### jansElevenVerifySignatureEndpoint
+
+- Description: oxEleven Verify Signature endpoint URL
+
+- Required: No
+
+- Default value: None
+
+
+### jansId
+
+- Description: URL for the Inum generator Service
+
+- Required: No
+
+- Default value: None
+
+
+### jansOpenIdConnectVersion
+
+- Description: OpenID Connect Version
 
 - Required: No
 
@@ -1769,69 +1852,6 @@ tags:
 - Default value: None
 
 
-### oxElevenDeleteKeyEndpoint
-
-- Description: oxEleven Delete Key endpoint URL
-
-- Required: No
-
-- Default value: None
-
-
-### oxElevenGenerateKeyEndpoint
-
-- Description: oxEleven Generate Key endpoint URL
-
-- Required: No
-
-- Default value: None
-
-
-### oxElevenSignEndpoint
-
-- Description: oxEleven Sign endpoint UR
-
-- Required: No
-
-- Default value: None
-
-
-### oxElevenTestModeToken
-
-- Description: oxEleven Test Mode Token
-
-- Required: No
-
-- Default value: None
-
-
-### oxElevenVerifySignatureEndpoint
-
-- Description: oxEleven Verify Signature endpoint URL
-
-- Required: No
-
-- Default value: None
-
-
-### oxId
-
-- Description: URL for the Inum generator Service
-
-- Required: No
-
-- Default value: None
-
-
-### oxOpenIdConnectVersion
-
-- Description: OpenID Connect Version
-
-- Required: No
-
-- Default value: None
-
-
 ### pairwiseCalculationKey
 
 - Description: Key to calculate algorithmic pairwise IDs
@@ -1868,18 +1888,18 @@ tags:
 - Default value: None
 
 
-### persistIdTokenInLdap
+### persistIdToken
 
-- Description: Specifies whether to persist id_token into LDAP (otherwise saves into cache)
+- Description: Specifies whether to persist id_token (otherwise saves into cache)
 
 - Required: No
 
 - Default value: false
 
 
-### persistRefreshTokenInLdap
+### persistRefreshToken
 
-- Description: Specifies whether to persist refresh_token into LDAP (otherwise saves into cache)
+- Description: Specifies whether to persist refresh_token (otherwise saves into cache)
 
 - Required: No
 
@@ -2136,15 +2156,6 @@ tags:
 - Required: No
 
 - Default value: None
-
-
-### sessionAsJwt
-
-- Description: Boolean value true saves session data as a JWT
-
-- Required: No
-
-- Default value: false
 
 
 ### sessionIdLifetime
@@ -2505,6 +2516,15 @@ tags:
 - Required: No
 
 - Default value: true
+
+
+### userInfoConfiguration
+
+- Description: UserInfo Configuration
+
+- Required: No
+
+- Default value: None
 
 
 ### userInfoEncryptionAlgValuesSupported

@@ -5,23 +5,23 @@ on:
       simple_release_as:
         description: 'Release version for docs'
         required: true
-        default: '1.0.6'
+        default: '1.0.7'
       java_release_as:
         description: 'Release version for the java projects jans-*'
         required: true
-        default: '1.0.6'
+        default: '1.0.7'
       docker_release_as:
         description: 'Release version for the docker images docker-*'
         required: true
-        default: '1.0.6-1'
+        default: '1.0.7-1'
       python_release_as:
         description: 'Release version for the python projects'
         required: true
-        default: '1.0.6'
+        default: '1.0.7'
       mega_release_as:
         description: 'Mega release version'
         required: true
-        default: '1.0.6'
+        default: '1.0.7'
 jobs:
   release-simple-pr:
     runs-on: ubuntu-latest
@@ -51,7 +51,7 @@ jobs:
         git config user.email "54212639+mo-auto@users.noreply.github.com"
         git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
 
-    - uses: google-github-actions/release-please-action@v3.6
+    - uses: google-github-actions/release-please-action@v3.7
       id: release-please
       with:
          path: ${{ matrix.simple }}
@@ -89,7 +89,7 @@ jobs:
         git config user.email "54212639+mo-auto@users.noreply.github.com"
         git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
 
-    - uses: google-github-actions/release-please-action@v3.6
+    - uses: google-github-actions/release-please-action@v3.7
       id: release-please
       with:
          path: ${{ matrix.maven }}
@@ -127,7 +127,7 @@ jobs:
         git config user.email "54212639+mo-auto@users.noreply.github.com"
         git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
 
-    - uses: google-github-actions/release-please-action@v3.6
+    - uses: google-github-actions/release-please-action@v3.7
       id: release-please
       with:
          path: ${{ matrix.simple }}
@@ -165,7 +165,7 @@ jobs:
         git config user.email "54212639+mo-auto@users.noreply.github.com"
         git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
 
-    - uses: google-github-actions/release-please-action@v3.6
+    - uses: google-github-actions/release-please-action@v3.7
       id: release-please
       with:
          path: ${{ matrix.python-projects }}
@@ -199,7 +199,7 @@ jobs:
         git config --global user.signingkey "${{ steps.import_gpg.outputs.keyid }}"
 
 
-    - uses: google-github-actions/release-please-action@v3.6
+    - uses: google-github-actions/release-please-action@v3.7
       id: release-please
       with:
          token: ${{ secrets.MOAUTO3_WORKFLOW_TOKEN }}

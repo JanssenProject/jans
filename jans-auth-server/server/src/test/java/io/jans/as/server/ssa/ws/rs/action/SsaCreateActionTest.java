@@ -91,7 +91,7 @@ public class SsaCreateActionTest {
         Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
         calendar.add(Calendar.HOUR, 24);
         ssa = new Ssa();
-        ssa.setOrgId("1");
+        ssa.setOrgId("org-id-test");
         ssa.setExpirationDate(calendar.getTime());
         ssa.setDescription("test description");
         ssa.getAttributes().setSoftwareId("gluu-scan-api");
@@ -112,7 +112,7 @@ public class SsaCreateActionTest {
     }
 
     @Test
-    public void create_request_valid() {
+    public void create_request_valid() throws Exception {
         BaseDnConfiguration baseDnConfiguration = new BaseDnConfiguration();
         baseDnConfiguration.setSsa("ou=ssa,o=jans");
         when(staticConfiguration.getBaseDn()).thenReturn(baseDnConfiguration);
@@ -123,10 +123,10 @@ public class SsaCreateActionTest {
 
         ExecutionContext executionContext = mock(ExecutionContext.class);
         ModifySsaResponseContext context = mock(ModifySsaResponseContext.class);
-        when(ssaContextBuilder.buildModifySsaResponseContext(any(), any(), any(), any(), any())).thenReturn(context);
+        when(ssaContextBuilder.buildModifySsaResponseContext(any(), any())).thenReturn(context);
         when(modifySsaResponseService.buildCreateProcessor(any())).thenReturn(jsonWebResponse -> null);
         when(context.toExecutionContext()).thenReturn(executionContext);
-        when(ssaService.generateJwt(any(), any(), any(), any())).thenReturn(mock(Jwt.class));
+        when(ssaService.generateJwt(any(), any())).thenReturn(mock(Jwt.class));
         when(ssaJsonService.getJSONObject(anyString())).thenReturn(mock(JSONObject.class));
         when(ssaJsonService.jsonObjectToString(any())).thenReturn("{\"ssa\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c\"}");
         when(appConfiguration.getSsaConfiguration()).thenReturn(new SsaConfiguration());
@@ -143,10 +143,10 @@ public class SsaCreateActionTest {
         verify(ssaRestWebServiceValidator).checkScopesPolicy(any(), anyString());
         verify(ssaService).persist(any());
         verify(log).info(anyString(), any(Ssa.class));
-        verify(ssaContextBuilder).buildModifySsaResponseContext(any(), any(), any(), any(), any());
+        verify(ssaContextBuilder).buildModifySsaResponseContext(any(), any());
         verify(modifySsaResponseService).buildCreateProcessor(any());
         verify(context).toExecutionContext();
-        verify(ssaService).generateJwt(any(), any(), any(), any());
+        verify(ssaService).generateJwt(any(), any());
         verify(ssaJsonService).getJSONObject(anyString());
         verify(ssaJsonService).jsonObjectToString(any());
 

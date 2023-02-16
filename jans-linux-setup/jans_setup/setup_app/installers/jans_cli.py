@@ -57,9 +57,8 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
         self.createDirs(self.pylib_dir)
         ops_dir = os.path.join(self.jans_cli_install_dir, 'cli', 'ops')
         self.createDirs(ops_dir)
-        self.createDirs(os.path.join(ops_dir, 'jca'))
-        self.createDirs(os.path.join(ops_dir, 'scim'))
-
+        for opsd in ('jca', 'scim', 'auth'):
+            self.createDirs(os.path.join(ops_dir, opsd))
 
         #extract jans-cli tgz archieve
         base.extract_from_zip(base.current_app.jans_zip, 'jans-cli-tui/cli_tui', self.jans_cli_install_dir)
@@ -80,14 +79,15 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
         base.extract_from_zip(self.source_files[3][0], 'pygments', os.path.join(self.pylib_dir, 'pygments'))
 
         # extract yaml files
-        base.extract_file(base.current_app.jans_zip, 'jans-config-api/docs/jans-config-api-swagger-auto.yaml', os.path.join(ops_dir, 'jca', 'jans-config-api-swagger-auto.yaml'), ren=True)
+        base.extract_file(base.current_app.jans_zip, 'jans-config-api/docs/jans-config-api-swagger.yaml', os.path.join(ops_dir, 'jca', 'jans-config-api-swagger.yaml'), ren=True)
         for plugin_yaml_file in ('fido2-plugin-swagger.yaml', 'jans-admin-ui-plugin-swagger.yaml', 'scim-plugin-swagger.yaml', 'user-mgt-plugin-swagger.yaml'):
             base.extract_file(base.current_app.jans_zip, 'jans-config-api/plugins/docs/'+plugin_yaml_file, os.path.join(ops_dir, 'jca', plugin_yaml_file), ren=True)
         base.extract_file(base.current_app.jans_zip, 'jans-scim/server/src/main/resources/jans-scim-openapi.yaml', os.path.join(ops_dir, 'scim', 'scim.yaml'), ren=True)
+        base.extract_file(base.current_app.jans_zip, 'jans-auth-server/docs/swagger.yaml', os.path.join(ops_dir, 'auth', 'swagger.yaml'), ren=True)
 
 
     def generate_configuration(self):
-        self.check_clients([('role_based_client_id', '2000.')])
+        self.check_clients([('tui_client_id', '2000.')])
 
     def configure(self, options={}):
         config = configparser.ConfigParser()
@@ -107,8 +107,8 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
             config['DEFAULT'][key_] = options[key_]
 
         if Config.install_config_api:
-            config['DEFAULT']['jca_client_id'] = Config.role_based_client_id
-            config['DEFAULT']['jca_client_secret_enc'] = Config.role_based_client_encoded_pw
+            config['DEFAULT']['jca_client_id'] = Config.tui_client_id
+            config['DEFAULT']['jca_client_secret_enc'] = Config.tui_client_encoded_pw
             if base.argsp.cli_test_client:
                 config['DEFAULT']['jca_test_client_id'] = Config.jca_client_id
                 config['DEFAULT']['jca_test_client_secret_enc'] = Config.jca_client_encoded_pw

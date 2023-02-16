@@ -5,7 +5,7 @@
 	<artifactId>jans-bom</artifactId>
 	<packaging>pom</packaging>
 	<name>jans-bom</name>
-	<version>1.0.6-SNAPSHOT</version>
+	<version>1.0.7-SNAPSHOT</version>
 
     <distributionManagement>
 	  <repository>
@@ -300,7 +300,7 @@
 			<dependency>
 				<groupId>com.nimbusds</groupId>
 				<artifactId>nimbus-jose-jwt</artifactId>
-				<version>9.25.6</version>
+				<version>9.28</version>
 			</dependency>
 
 			<!-- Weld -->
@@ -404,7 +404,7 @@
 			<!-- <dependency>
 				<groupId>javax.persistence</groupId>
 				<artifactId>persistence-api</artifactId>
-				<version>1.0.6-SNAPSHOT</version>
+				<version>1.0.7-SNAPSHOT</version>
 			</dependency> -->
 
 			<!-- hibernate -->
@@ -585,7 +585,7 @@
 			<dependency>
 				<groupId>org.codehaus.jettison</groupId>
 				<artifactId>jettison</artifactId>
-				<version>1.5.1</version>
+				<version>1.5.2</version>
 			</dependency>
 
 			<!-- Jython -->
@@ -771,7 +771,7 @@
 			<dependency>
 			    <groupId>org.postgresql</groupId>
 			    <artifactId>postgresql</artifactId>
-			    <version>42.5.0</version>
+			    <version>42.5.1</version>
 			</dependency>
 
 			<!-- SQL Query -->

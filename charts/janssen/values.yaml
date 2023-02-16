@@ -47,7 +47,7 @@ auth-server:
     # -- Image  to use for deploying.
     repository: janssenproject/auth-server
     # -- Image  tag to use for deploying.
-    tag: 1.0.6_dev
+    tag: 1.0.7_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -114,7 +114,7 @@ auth-server-key-rotation:
     # -- Image  to use for deploying.
     repository: janssenproject/certmanager
     # -- Image  tag to use for deploying.
-    tag: 1.0.6_dev
+    tag: 1.0.7_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Auth server key rotation keys life in hours
@@ -206,15 +206,11 @@ config:
     # [google_spanner_envs] END
     # [google_secret_manager_envs] Envs related to using Google Secret Manager to store config and secret layer
     # -- Secret version to be used for secret configuration. Defaults to latest and should normally always stay that way. Used only when global.configAdapterName and global.configSecretAdapter is set to google.
-    cnSecretGoogleSecretVersionId: "latest"
+    cnGoogleSecretVersionId: "latest"
     # -- Prefix for Janssen secret in Google Secret Manager. Defaults to janssen. If left janssen-secret secret will be created. Used only when global.configAdapterName and global.configSecretAdapter is set to google.
-    cnSecretGoogleSecretNamePrefix: janssen
+    cnGoogleSecretNamePrefix: janssen
     # -- Passphrase for Janssen secret in Google Secret Manager. This is used for encrypting and decrypting data from the Google Secret Manager. Used only when global.configAdapterName and global.configSecretAdapter is set to google.
     cnGoogleSecretManagerPassPhrase: Test1234#
-    # -- Secret version to be used for configuration. Defaults to latest and should normally always stay that way. Used only when global.configAdapterName and global.configSecretAdapter is set to google. Used only when global.configAdapterName and global.configSecretAdapter is set to google.
-    cnConfigGoogleSecretVersionId: "latest"
-    # -- Prefix for Janssen configuration secret in Google Secret Manager. Defaults to janssen. If left intact janssen-configuration secret will be created. Used only when global.configAdapterName and global.configSecretAdapter is set to google.
-    cnConfigGoogleSecretNamePrefix: janssen
     # [google_secret_manager_envs] END
     # [google_envs] END
     # [aws_envs] Envs related to using AWS
@@ -273,7 +269,7 @@ config:
     # -- Image  to use for deploying.
     repository: janssenproject/configurator
     # -- Image  tag to use for deploying.
-    tag: 1.0.6_dev
+    tag: 1.0.7_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- LDAP admin password if OpenDJ is used for persistence.
@@ -356,7 +352,7 @@ config-api:
     # -- Image  to use for deploying.
     repository: janssenproject/config-api
     # -- Image  tag to use for deploying.
-    tag: 1.0.6_dev
+    tag: 1.0.7_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -367,12 +363,12 @@ config-api:
       # -- CPU limit.
       cpu: 1000m
       # -- Memory limit.
-      memory: 400Mi
+      memory: 1000Mi
     requests:
       # -- CPU request.
       cpu: 1000m
       # -- Memory request.
-      memory: 400Mi
+      memory: 1000Mi
   # -- Configure the liveness healthcheck for the auth server if needed.
   livenessProbe:
     # -- http liveness probe endpoint
@@ -448,7 +444,7 @@ fido2:
     # -- Image  to use for deploying.
     repository: janssenproject/fido2
     # -- Image  tag to use for deploying.
-    tag: 1.0.6_dev
+    tag: 1.0.7_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -518,6 +514,8 @@ global:
     enabled: true
     # -- App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed.
     appLoggers:
+      # -- Enable log prefixing which enables prepending the STDOUT logs with the file name. i.e auth-server-script ===> 2022-12-20 17:49:55,744 INFO
+      enableStdoutLogPrefix: "true"
       # -- jans-auth.log target
       authLogTarget: "STDOUT"
       # -- jans-auth.log level
@@ -611,13 +609,15 @@ global:
     enabled: true
     # -- App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed.
     appLoggers:
+      # -- Enable log prefixing which enables prepending the STDOUT logs with the file name. i.e config-api_persistence ===> 2022-12-20 17:49:55,744 INFO
+      enableStdoutLogPrefix: "true"
       # -- configapi.log target
       configApiLogTarget: "STDOUT"
       # -- configapi.log level
       configApiLogLevel: "INFO"
       # -- config-api_persistence.log target
       persistenceLogTarget: "FILE"
-      # -- jans-auth_persistence.log level
+      # -- config-api_persistence.log level
       persistenceLogLevel: "INFO"
       # -- config-api_persistence_duration.log target
       persistenceDurationLogTarget: "FILE"
@@ -644,6 +644,8 @@ global:
     enabled: true
     # -- App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed.
     appLoggers:
+      # -- Enable log prefixing which enables prepending the STDOUT logs with the file name. i.e fido2 ===> 2022-12-20 17:49:55,744 INFO
+      enableStdoutLogPrefix: "true"
       # -- fido2.log target
       fido2LogTarget: "STDOUT"
       # -- fido2.log level
@@ -652,6 +654,14 @@ global:
       persistenceLogTarget: "FILE"
       # -- fido2_persistence.log level
       persistenceLogLevel: "INFO"
+      # -- fido2_persistence_duration.log target
+      persistenceDurationLogTarget: "FILE"
+      # -- fido2_persistence_duration.log level
+      persistenceDurationLogLevel: "INFO"
+      # -- fido2_script.log target
+      scriptLogTarget: "FILE"
+      # -- fido2_script.log level
+      scriptLogLevel: "INFO"
     # -- Enable endpoints in either istio or nginx ingress depending on users choice
     ingress:
       # -- Enable endpoint /.well-known/fido2-configuration
@@ -693,6 +703,8 @@ global:
     enabled: true
     # -- App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed.
     appLoggers:
+      # -- Enable log prefixing which enables prepending the STDOUT logs with the file name. i.e jans-scim ===> 2022-12-20 17:49:55,744 INFO
+      enableStdoutLogPrefix: "true"
       # -- jans-scim.log target
       scimLogTarget: "STDOUT"
       # -- jans-scim.log level
@@ -735,9 +747,6 @@ global:
     provisioner: microk8s.io/hostpath
     reclaimPolicy: Retain
     volumeBindingMode: WaitForFirstConsumer
-  upgrade:
-    # -- Boolean flag used when running upgrading through versions command. Used when upgrading with LDAP as the persistence to load the 101x ldif.
-    enabled: false
 
 # -- Nginx ingress definitions chart
 nginx-ingress:
@@ -966,7 +975,7 @@ persistence:
     # -- Image  to use for deploying.
     repository: janssenproject/persistence-loader
     # -- Image  tag to use for deploying.
-    tag: 1.0.6_dev
+    tag: 1.0.7_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Resource specs.
@@ -1039,7 +1048,7 @@ scim:
     # -- Image  to use for deploying.
     repository: janssenproject/scim
     # -- Image  tag to use for deploying.
-    tag: 1.0.6_dev
+    tag: 1.0.7_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.

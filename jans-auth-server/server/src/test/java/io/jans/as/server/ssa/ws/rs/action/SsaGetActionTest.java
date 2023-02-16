@@ -56,14 +56,14 @@ public class SsaGetActionTest {
         when(ssaRestWebServiceValidator.getClientFromSession()).thenReturn(client);
 
         String jti = "my-jti";
-        Long orgId = 1000L;
+        String orgId = "org-id-test";
         Response response = ssaGetAction.get(jti, orgId, mock(HttpServletRequest.class));
         assertNotNull(response, "response is null");
         assertNotNull(response.getEntity(), "response entity is null");
         assertEquals(response.getStatus(), Response.Status.OK.getStatusCode());
         verify(log).debug(anyString(), any(), any());
         verify(errorResponseFactory).validateFeatureEnabled(any());
-        verify(ssaContextBuilder).buildModifySsaResponseContext(any(), any(), any(), any(), any());
+        verify(ssaContextBuilder).buildModifySsaResponseContext(any(), any());
         verify(ssaJsonService).jsonArrayToString(any());
         verify(modifySsaResponseService).get(any(), any());
         verifyNoMoreInteractions(log, errorResponseFactory);
@@ -79,7 +79,7 @@ public class SsaGetActionTest {
         when(log.isErrorEnabled()).thenReturn(Boolean.FALSE);
 
         String jti = "my-jti";
-        Long orgId = 1000L;
+        String orgId = "org-id-test";
         assertThrows(WebApplicationException.class, () -> ssaGetAction.get(jti, orgId, mock(HttpServletRequest.class)));
         verify(log).debug(anyString(), any(), any());
         verify(ssaRestWebServiceValidator).getClientFromSession();
@@ -99,7 +99,7 @@ public class SsaGetActionTest {
         when(log.isErrorEnabled()).thenReturn(Boolean.TRUE);
 
         String jti = "my-jti";
-        Long orgId = 1000L;
+        String orgId = "org-id-test";
         assertThrows(WebApplicationException.class, () -> ssaGetAction.get(jti, orgId, mock(HttpServletRequest.class)));
         verify(log).debug(anyString(), any(), any());
         verify(ssaRestWebServiceValidator).getClientFromSession();
@@ -118,7 +118,7 @@ public class SsaGetActionTest {
         when(errorResponseFactory.createWebApplicationException(any(Response.Status.class), any(SsaErrorResponseType.class), anyString())).thenThrow(error);
 
         String jti = "my-jti";
-        Long orgId = 1000L;
+        String orgId = "org-id-test";
         assertThrows(WebApplicationException.class, () -> ssaGetAction.get(jti, orgId, mock(HttpServletRequest.class)));
         verify(log).debug(anyString(), any(), any());
         verify(ssaRestWebServiceValidator).getClientFromSession();

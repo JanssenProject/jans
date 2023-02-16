@@ -20,6 +20,7 @@ from jans.pycloudlib.persistence.utils import PersistenceMapper
 from jans.pycloudlib.utils import cert_to_truststore
 from jans.pycloudlib.utils import get_server_certificate
 from jans.pycloudlib.utils import generate_keystore
+from jans.pycloudlib.utils import as_boolean
 
 from keystore_mod import modify_keystore_path
 
@@ -76,7 +77,9 @@ def main():
     persistence_groups = mapper.groups().keys()
 
     if persistence_type == "hybrid":
-        render_hybrid_properties("/etc/jans/conf/jans-hybrid.properties")
+        hybrid_prop = "/etc/jans/conf/jans-hybrid.properties"
+        if not os.path.exists(hybrid_prop):
+            render_hybrid_properties(hybrid_prop)
 
     if "ldap" in persistence_groups:
         render_ldap_properties(
@@ -251,6 +254,7 @@ def configure_logging():
         "script_log_level": "INFO",
         "audit_log_target": "FILE",
         "audit_log_level": "INFO",
+        "log_prefix": "",
     }
 
     # pre-populate custom config; format is JSON string of ``dict``
@@ -300,10 +304,13 @@ def configure_logging():
         if config[key] == "FILE":
             config[key] = value
 
-    logfile = "/opt/jans/jetty/jans-auth/resources/log4j2.xml"
-    with open(logfile) as f:
+    if as_boolean(custom_config.get("enable_stdout_log_prefix")):
+        config["log_prefix"] = "${sys:log.console.prefix}%X{log.console.group} - "
+
+    with open("/app/templates/log4j2.xml") as f:
         txt = f.read()
 
+    logfile = "/opt/jans/jetty/jans-auth/resources/log4j2.xml"
     tmpl = Template(txt)
     with open(logfile, "w") as f:
         f.write(tmpl.safe_substitute(config))

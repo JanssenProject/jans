@@ -31,11 +31,9 @@ data:
   {{- end }}
   {{ if eq .Values.global.configSecretAdapter "google" }}
   # [google_secret_manager_envs] Envs related to using Google Secret Manager to store config and secret layer
-  CN_SECRET_GOOGLE_SECRET_VERSION_ID: {{ .Values.configmap.cnSecretGoogleSecretVersionId | quote }}
-  CN_SECRET_GOOGLE_SECRET_MANAGER_PASSPHRASE: {{ .Values.configmap.cnGoogleSecretManagerPassPhrase | quote }}
-  CN_SECRET_GOOGLE_SECRET_NAME_PREFIX: {{ .Values.configmap.cnSecretGoogleSecretNamePrefix | quote }}
-  CN_CONFIG_GOOGLE_SECRET_VERSION_ID: {{ .Values.configmap.cnConfigGoogleSecretVersionId | quote }}
-  CN_CONFIG_GOOGLE_SECRET_NAME_PREFIX: {{ .Values.configmap.cnConfigGoogleSecretNamePrefix | quote }}
+  CN_GOOGLE_SECRET_VERSION_ID: {{ .Values.configmap.cnGoogleSecretVersionId | quote }}
+  CN_GOOGLE_SECRET_MANAGER_PASSPHRASE: {{ .Values.configmap.cnGoogleSecretManagerPassPhrase | quote }}
+  CN_GOOGLE_SECRET_NAME_PREFIX: {{ .Values.configmap.cnGoogleSecretNamePrefix | quote }}
   # [google_secret_manager_envs] END
   {{- end }}
   CN_SQL_DB_SCHEMA: {{ .Values.configmap.cnSqlDbSchema | quote }}
@@ -73,6 +71,7 @@ data:
   | replace "scriptLogLevel" "script_log_level"
   | replace "auditStatsLogTarget" "audit_log_target"
   | replace "auditStatsLogLevel" "audit_log_level"
+  | replace "enableStdoutLogPrefix" "enable_stdout_log_prefix"
   | squote
   }}
   {{- if index .Values "global" "config-api" "enabled" }}
@@ -88,6 +87,7 @@ data:
   | replace "ldapStatsLogLevel" "ldap_stats_log_level"
   | replace "scriptLogTarget" "script_log_target"
   | replace "scriptLogLevel" "script_log_level"
+  | replace "enableStdoutLogPrefix" "enable_stdout_log_prefix"
   | squote
   }}
   {{- end }}
@@ -152,6 +152,7 @@ data:
   | replace "ldapStatsLogLevel" "ldap_stats_log_level"
   | replace "scriptLogTarget" "script_log_target"
   | replace "scriptLogLevel" "script_log_level"
+  | replace "enableStdoutLogPrefix" "enable_stdout_log_prefix"
   | squote
   }}
   {{- end }}
@@ -162,6 +163,11 @@ data:
   | replace "fido2LogLevel" "fido2_log_level"
   | replace "persistenceLogTarget" "persistence_log_target"
   | replace "persistenceLogLevel" "persistence_log_level"
+  | replace "persistenceDurationLogTarget" "persistence_duration_log_target"
+  | replace "persistenceDurationLogLevel" "persistence_duration_log_level"
+  | replace "scriptLogTarget" "script_log_target"
+  | replace "scriptLogLevel" "script_log_level"
+  | replace "enableStdoutLogPrefix" "enable_stdout_log_prefix"
   | squote
   }}
   {{- end }}

@@ -91,7 +91,7 @@ public class NativeSsoHttpTest extends BaseTest {
                 .validateSignatureRSAClientEngine(jwksUri, SignatureAlgorithm.RS256)
                 .claimsPresence(JwtClaimName.CODE_HASH)
                 .notNullAuthenticationTime()
-                .notNullOxOpenIDConnectVersion()
+                .notNullJansOpenIDConnectVersion()
                 .notNullAuthenticationContextClassReference()
                 .notNullAuthenticationMethodReferences()
                 .notBlankDsHash()

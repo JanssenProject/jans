@@ -3,16 +3,32 @@ tags:
   - administration
   - auth-server
   - session
+  - Account Chooser
 ---
 
-## This content is in progress
+## Select Account
 
-The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.
+A person may have several accounts on a single Jans Auth Server instance. For
+example, it is common to have several Gmail accounts. Jans Auth Server uses two
+cookies to track which accounts are associated with a browser: `session_id` and
+`current_sessions`.
 
-## Have questions in the meantime?
+Below is an example or a person with two authenticated sessions:
 
-While this documentation is in progress, you can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussion) or the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). Any questions you have will help determine what information our documentation should cover.
+```
+session_id: de510ab6-b06c-4393-86d8-12a7c501aafe
+current_sessions: ["de510ab6-b06c-4393-86d8-12a7c501aafe", "c691e83d-eb1b-41f0-b453-fab905681b5b"]
+```
 
-## Want to contribute?
+An RP can trigger Auth Server's built in Account Chooser feature by sending an
+[OpenID Authentication Request](https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest) with the parameter `prompt=select_account`. In
+this case, Auth Server renders the default page:
+`/opt/jans/jetty/jans-auth/custom/pages/selectAccount.xhtml`
 
-If you have content you'd like to contribute to this page in the meantime, you can get started with our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/).
+This page iterates `current_sessions` and enables the person
+to login as a different account, for example:
+
+![Sample Select Account login page screenshot](../../../../assets/auth_server_sessions_selectAccount.png)
+
+You can override this page if you place a `selectAccount.xhtml` in
+`custom/pages`.

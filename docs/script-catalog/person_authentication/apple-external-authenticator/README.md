@@ -34,7 +34,7 @@ The custom script has the following properties:
 |`apple_client_id`		|Name of Service ID on developer.apple.com. 	| `com.company.name`|
 |`apple_jwks`		| Apple’s public JWK to validate Apple Identity Token | `https://appleid.apple.com/auth/keys`|
 
-To update this setting in Jans persistence, follow this [link](https://github.com/JanssenProject/jans-cli/blob/main/docs/cli/cli-custom-scripts.md#update-an-existing-custom-script)
+To update this setting in Jans persistence, follow this [link](https://github.com/JanssenProject/jans-cli-tui/blob/vreplace-janssen-version/docs/cli/cli-custom-scripts.md#update-an-existing-custom-script)
 
 ### Enable Sign-in with Apple Authentication script
 By default, users will get the default authentication mechanism as specified above. However, using the OpenID Connect acr_values parameter, web and mobile clients can request any enabled authentication mechanism.
@@ -50,7 +50,7 @@ Now Sign-in with Apple is an available authentication mechanism for your Janssen
 
 ### Make Sign-in with Apple Script as default authentication script:
 
-Use this [link](https://github.com/JanssenProject/jans-cli/blob/main/docs/cli/cli-default-authentication-method.md) as a reference.
+Use this [link](https://github.com/JanssenProject/jans-cli-tui/blob/vreplace-janssen-version/docs/cli/cli-default-authentication-method.md) as a reference.
 
 Steps:
 1. Create a file say `apple-auth-default.json` with the following contents

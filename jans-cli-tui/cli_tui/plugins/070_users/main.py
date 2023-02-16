@@ -1,17 +1,24 @@
+import json
 import asyncio
 from functools import partial
 from types import SimpleNamespace
 from typing import Any, Optional
+
+from prompt_toolkit import HTML
 from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.application import Application
 from prompt_toolkit.layout.containers import HSplit, VSplit, DynamicContainer, HorizontalAlign
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.widgets import Button, Dialog
+from prompt_toolkit.eventloop import get_event_loop
+
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from edit_user_dialog import EditUserDialog
 from utils.utils import DialogUtils, common_data
 from utils.static import DialogResult
 from utils.multi_lang import _
+from wui_components.jans_cli_dialog import JansGDialog
+from utils.static import DialogResult, cli_style, common_strings
 
 common_data.users = SimpleNamespace()
 
@@ -28,7 +35,8 @@ class Plugin(DialogUtils):
             app (Generic): The main Application class
         """
         self.app = app
-        self.pid = 'users'
+        self.pid = 'user-management'
+        self.server_side_plugin = True
         self.name = '[U]sers'
         self.users = {}
         self.widgets_ready = False
@@ -79,10 +87,12 @@ class Plugin(DialogUtils):
                 on_display=self.app.data_display_dialog,
                 on_delete=self.delete_user,
                 #get_help=(self.get_help,'User'),
+                change_password=self.change_password,
                 selectes=0,
-                headerColor='class:outh-verticalnav-headcolor',
-                entriesColor='class:outh-verticalnav-entriescolor',
-                all_data=self.users['entries']
+                headerColor=cli_style.navbar_headcolor,
+                entriesColor=cli_style.navbar_entriescolor,
+                all_data=self.users['entries'],
+                jans_help = "Press p to change password"
             )
 
         self.user_list_container = self.users_list_box
@@ -103,7 +113,7 @@ class Plugin(DialogUtils):
 
         self.app.invalidate()
 
-    def get_users(self, start_index: int=1, pattern: Optional[str]='') -> None:
+    def get_users(self, start_index: int=0, pattern: Optional[str]='') -> None:
         """Gets Users from server.
         """
 
@@ -141,6 +151,52 @@ class Plugin(DialogUtils):
 
         edit_user_dialog = EditUserDialog(self.app, title=title, data=data, save_handler=self.save_user)
         self.app.show_jans_dialog(edit_user_dialog)
+
+
+    def change_password(self, **kwargs: Any) -> None:
+        """Method to display the edit user dialog
+        """
+        if kwargs:
+            data = kwargs.get('data', {})
+        else:
+            data = {}
+
+        def save(dialog) -> None:
+            async def coroutine():
+                cli_args = {'operation_id': 'patch-user-by-inum', 'endpoint_args': '',
+                'url_suffix':'inum:{}'.format(data['inum']),
+                    'data':{"jsonPatchString": "",
+                        "customAttributes": [
+                                {"name": "userPassword",
+                                "multiValued": False,
+                                "value": "{}".format(self.new_password.me.text)}]}
+                    }
+                self.app.start_progressing(_("Changing Password ..."))
+                await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+                self.app.stop_progressing()
+            asyncio.ensure_future(coroutine())
+
+        self.new_password = self.app.getTitledText(
+                                        _('New Password'), 
+                                        name='passwd', 
+                                        value='', 
+                                        style='class:outh-scope-text',
+                                        )
+        body = HSplit([
+            self.new_password
+            ],style='class:jans-main-datadisplay')
+        buttons=[
+                Button(
+                    text=_("Cancel"),
+                ) ,
+                Button(
+                    text=_("Save"),
+                    handler=save,
+                ) ,            ]
+
+        dialog = JansGDialog(self.app, title="Change Password for {}".format(data['userId']), body=body, buttons=buttons)
+
+        self.app.show_jans_dialog(dialog)
 
     def delete_user(self, **kwargs: Any) -> None:
         """This method for the deletion of the User 
@@ -180,14 +236,15 @@ class Plugin(DialogUtils):
             _type_: bool value to check the status code response
         """
 
+        fix_title = _("Please fix!")
         raw_data = self.make_data_from_dialog(tabs={'user': dialog.edit_user_container.content})
 
         if not (raw_data['userId'].strip() and raw_data['mail'].strip()):
-            self.app.show_message(_("Please fix!"), _("Username and/or Email is empty"))
+            self.app.show_message(fix_title, _("Username and/or Email is empty"))
             return
-        
+
         if 'baseDn' not in dialog.data and not raw_data['userPassword'].strip():
-            self.app.show_message(_("Please fix!"), _("Please enter Password"))
+            self.app.show_message(fix_title, _("Please enter Password"))
             return
 
         user_info = {'customObjectClasses':['top', 'jansCustomPerson'], 'customAttributes':[]}
@@ -208,6 +265,19 @@ class Plugin(DialogUtils):
 
         for key_ in raw_data:
             multi_valued = False
+            key_prop = dialog.get_claim_properties(key_)
+
+            if key_prop.get('dataType') == 'json':
+                try:
+                    json.loads(raw_data[key_])
+                except Exception as e:
+                    display_name = key_prop.get('displayName') or key_
+                    self.app.show_message(
+                                fix_title,
+                                _(HTML("Can't convert <b>{}</b> to json. Conversion error: <i>{}</i>").format(display_name, e))
+                            )
+                    return
+
             user_info['customAttributes'].append({
                     'name': key_, 
                     'multiValued': multi_valued, 
@@ -263,8 +333,5 @@ class Plugin(DialogUtils):
         Args:
             tbuffer (Buffer): Buffer returned from the TextArea widget > GetTitleText
         """
-        if not len(tbuffer.text) > 2:
-            self.app.show_message(_("Error!"), _("Search string should be at least three characters"), tobefocused=self.app.center_container)
-            return
         self.get_users(pattern=tbuffer.text)
 

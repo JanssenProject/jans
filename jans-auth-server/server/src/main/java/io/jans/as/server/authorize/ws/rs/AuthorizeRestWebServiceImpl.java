@@ -34,7 +34,7 @@ import io.jans.as.server.model.config.Constants;
 import io.jans.as.server.model.exception.AcrChangedException;
 import io.jans.as.server.model.exception.InvalidRedirectUrlException;
 import io.jans.as.server.model.exception.InvalidSessionStateException;
-import io.jans.as.server.model.ldap.ClientAuthorization;
+import io.jans.as.persistence.model.ClientAuthorization;
 import io.jans.as.server.model.token.JwrService;
 import io.jans.as.server.security.Identity;
 import io.jans.as.server.service.*;
@@ -352,7 +352,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
         authzRequest.getAuditLog().setUsername(user.getUserId());
 
-        ExternalPostAuthnContext postAuthnContext = new ExternalPostAuthnContext(client, sessionUser, authzRequest.getHttpRequest(), authzRequest.getHttpResponse());
+        ExternalPostAuthnContext postAuthnContext = new ExternalPostAuthnContext(client, sessionUser, authzRequest, prompts);
         checkForceReAuthentication(authzRequest, prompts, client, postAuthnContext);
         checkForceAuthorization(authzRequest, prompts, client, postAuthnContext);
 
@@ -533,6 +533,12 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     }
 
     private void checkPromptConsent(AuthzRequest authzRequest, List<Prompt> prompts, SessionId sessionUser, User user, ClientAuthorization clientAuthorization, boolean clientAuthorizationFetched) {
+        if (isTrue(appConfiguration.getDisablePromptConsent())) {
+            log.trace("Disabled prompt=consent (because disablePromptConsent=true).");
+            prompts.remove(Prompt.CONSENT);
+            return;
+        }
+
         if (prompts.contains(Prompt.CONSENT) || !isTrue(sessionUser.isPermissionGrantedForClient(authzRequest.getClientId()))) {
             if (!clientAuthorizationFetched) {
                 clientAuthorization = clientAuthorizationsService.find(user.getAttribute("inum"), authzRequest.getClient().getClientId());
@@ -545,7 +551,12 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         }
     }
 
-    private void checkPromptLogin(AuthzRequest authzRequest, List<Prompt> prompts) {
+    public void checkPromptLogin(AuthzRequest authzRequest, List<Prompt> prompts) {
+        if (isTrue(appConfiguration.getDisablePromptLogin())) {
+            log.trace("Disabled prompt=login (because disablePromptLogin=true).");
+            prompts.remove(Prompt.LOGIN);
+            return;
+        }
         if (prompts.contains(Prompt.LOGIN)) {
             boolean sessionUnauthenticated = false;
 

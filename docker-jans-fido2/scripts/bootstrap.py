@@ -21,7 +21,9 @@ from jans.pycloudlib.persistence.ldap import LdapClient
 from jans.pycloudlib.persistence.spanner import SpannerClient
 from jans.pycloudlib.persistence.sql import SqlClient
 from jans.pycloudlib.persistence.utils import PersistenceMapper
-from jans.pycloudlib.utils import cert_to_truststore, generate_base64_contents
+from jans.pycloudlib.utils import cert_to_truststore
+from jans.pycloudlib.utils import generate_base64_contents
+from jans.pycloudlib.utils import as_boolean
 
 from settings import LOGGING_CONFIG
 
@@ -75,7 +77,9 @@ def main():
     persistence_groups = mapper.groups()
 
     if persistence_type == "hybrid":
-        render_hybrid_properties("/etc/jans/conf/jans-hybrid.properties")
+        hybrid_prop = "/etc/jans/conf/jans-hybrid.properties"
+        if not os.path.exists(hybrid_prop):
+            render_hybrid_properties(hybrid_prop)
 
     if "ldap" in persistence_groups:
         render_ldap_properties(
@@ -134,6 +138,11 @@ def configure_logging():
         "fido2_log_level": "INFO",
         "persistence_log_target": "FILE",
         "persistence_log_level": "INFO",
+        "persistence_duration_log_target": "FILE",
+        "persistence_duration_log_level": "INFO",
+        "script_log_target": "FILE",
+        "script_log_level": "INFO",
+        "log_prefix": "",
     }
 
     # pre-populate custom config; format is JSON string of ``dict``
@@ -172,16 +181,21 @@ def configure_logging():
     # mapping between the ``log_target`` value and their appenders
     file_aliases = {
         "fido2_log_target": "FILE",
-        "persistence_log_target": "PERSISTENCE_FILE",
+        "persistence_log_target": "FIDO2_PERSISTENCE_FILE",
+        "persistence_duration_log_target": "FIDO2_PERSISTENCE_DURATION_FILE",
+        "script_log_target": "FIDO2_SCRIPT_LOG_FILE",
     }
     for key, value in file_aliases.items():
         if config[key] == "FILE":
             config[key] = value
 
-    logfile = "/opt/jans/jetty/jans-fido2/resources/log4j2.xml"
-    with open(logfile) as f:
+    if as_boolean(custom_config.get("enable_stdout_log_prefix")):
+        config["log_prefix"] = "${sys:log.console.prefix}%X{log.console.group} - "
+
+    with open("/app/templates/log4j2.xml") as f:
         txt = f.read()
 
+    logfile = "/opt/jans/jetty/jans-fido2/resources/log4j2.xml"
     tmpl = Template(txt)
     with open(logfile, "w") as f:
         f.write(tmpl.safe_substitute(config))

@@ -20,6 +20,7 @@ from wui_components.jans_vetrical_nav import JansVerticalNav
 from edit_script_dialog import EditScriptDialog
 from prompt_toolkit.application import Application
 from utils.multi_lang import _
+from utils.static import DialogResult, cli_style, common_strings
 
 class Plugin():
     """This is a general class for plugins 
@@ -56,7 +57,7 @@ class Plugin():
                     VSplit([
                         self.app.getButton(text=_("Get Scripts"), name='scripts:get', jans_help=_("Retreive first %d Scripts") % (20), handler=self.get_scripts),
                         self.app.getTitledText(_("Search"), name='scripts:search', jans_help=_("Press enter to perform search"), accept_handler=self.search_scripts, style='class:outh_containers_scopes.text'),
-                        self.app.getButton(text=_("Add Sscript"), name='scripts:add', jans_help=_("To add a new scope press this button"), handler=self.add_script_dialog),
+                        self.app.getButton(text=_("Add Script"), name='scripts:add', jans_help=_("To add a new scope press this button"), handler=self.add_script_dialog),
                         ],
                         padding=3,
                         width=D(),
@@ -66,7 +67,7 @@ class Plugin():
 
     def get_scripts(
         self, 
-        start_index: Optional[int]= 1,
+        start_index: Optional[int]= 0,
         pattern: Optional[str]= '',
         ) -> None:
         """Get the current Scripts from server
@@ -129,15 +130,15 @@ class Plugin():
                 get_help=(self.get_help,'Scripts'),
                 on_delete=self.delete_script,
                 selectes=0,
-                headerColor='class:outh-verticalnav-headcolor',
-                entriesColor='class:outh-verticalnav-entriescolor',
+                headerColor=cli_style.navbar_headcolor,
+                entriesColor=cli_style.navbar_entriescolor,
                 all_data=self.data['entries']
             )
 
         buttons = []
 
         if self.data['start'] > 1:
-            handler_partial = partial(self.get_scripts, self.data['start']-self.app.entries_per_page+1, pattern)
+            handler_partial = partial(self.get_scripts, self.data['start']-self.app.entries_per_page-1, pattern)
             prev_button = Button(_("Prev"), handler=handler_partial)
             prev_button.window.jans_help = _("Retreives previous %d entries") % self.app.entries_per_page
             buttons.append(prev_button)
@@ -170,10 +171,7 @@ class Plugin():
         Args:
             tbuffer (Buffer): Buffer returned from the TextArea widget > GetTitleText
         """
-        if not len(tbuffer.text) > 2:
-            self.app.show_message(_("Error!"), _("Search string should be at least three characters"), tobefocused=self.scripts_main_area)
-            return
-
+ 
         self.get_scripts(pattern=tbuffer.text)
 
     def add_script_dialog(self, **kwargs: Any):

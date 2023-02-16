@@ -7,6 +7,7 @@ import shutil
 
 from string import Template
 
+from setup_app import paths
 from setup_app.static import AppType, InstallOption
 from setup_app.config import Config
 from setup_app.utils import base
@@ -23,7 +24,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 #                    ]
 
     source_files = [
-                    (os.path.join(Config.dist_jans_dir, 'jans-orm-spanner-libs-distribution.zip'), os.path.join(base.current_app.app_info['BASE_SERVER'], '_out/jans-orm-spanner-libs-1.0.6-SNAPSHOT-distribution.zip')),
+                    (os.path.join(Config.dist_jans_dir, 'jans-orm-spanner-libs-distribution.zip'), os.path.join(base.current_app.app_info['BASE_SERVER'], '_out/jans-orm-spanner-libs-1.0.7-SNAPSHOT-distribution.zip')),
                     ]
 
     def __init__(self):
@@ -68,6 +69,26 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
         self.dbUtils.session.commit()
         self.dbUtils.metadata.clear()
 
+    def fix_unit_file(self, service_name):
+        unit_fn_ = self.run(['systemctl', 'show', '-P', 'FragmentPath', service_name])
+        if unit_fn_ and unit_fn_.strip():
+            unit_fn = unit_fn_.strip()
+            if os.path.exists(unit_fn):
+                unit_file_content = self.readFile(unit_fn.strip())
+                unit_file_content_list = unit_file_content.splitlines()
+                unit_content = False
+
+                for i, l in enumerate(unit_file_content_list[:]):
+                    if l.strip().lower() == '[unit]':
+                        unit_content = True
+                    if not l.strip() and unit_content:
+                        unit_file_content_list.insert(i, 'Before=jans-auth.service')
+                        break
+
+                unit_file_content_list.append('')
+                self.writeFile(unit_fn, '\n'.join(unit_file_content_list))
+                self.run(['systemctl', 'daemon-reload'])
+
     def local_install(self):
         if not Config.rdbm_password:
             Config.rdbm_password = self.getPW()
@@ -81,9 +102,12 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
             if Config.rdbm_type == 'mysql':
                 if base.os_type == 'suse':
                     self.restart('mariadb')
+                    self.fix_unit_file('mariadb')
                     self.enable('mariadb')
+
                 elif base.clone_type == 'rpm':
                     self.restart('mysqld')
+                    self.enable('mysqld')
                 result, conn = self.dbUtils.mysqlconnection(log=False)
                 if not result:
                     sql_cmd_list = [
@@ -96,13 +120,30 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 
             elif Config.rdbm_type == 'pgsql':
                 if base.clone_type == 'rpm':
-                    self.restart('postgresql')
+                    self.run(['postgresql-setup', 'initdb'])
+                elif base.clone_type == 'deb':
+                    self.run([paths.cmd_chmod, '640', '/etc/ssl/private/ssl-cert-snakeoil.key'])
+
+                self.restart('postgresql')
+
                 cmd_create_db = '''su - postgres -c "psql -U postgres -d postgres -c \\"CREATE DATABASE {};\\""'''.format(Config.rdbm_db)
                 cmd_create_user = '''su - postgres -c "psql -U postgres -d postgres -c \\"CREATE USER {} WITH PASSWORD '{}';\\""'''.format(Config.rdbm_user, Config.rdbm_password)
                 cmd_grant_previlages = '''su - postgres -c "psql -U postgres -d postgres -c \\"GRANT ALL PRIVILEGES ON DATABASE {} TO {};\\""'''.format(Config.rdbm_db, Config.rdbm_user)
 
                 for cmd in (cmd_create_db, cmd_create_user, cmd_grant_previlages):
                     self.run(cmd, shell=True)
+
+                if base.clone_type == 'rpm':
+                    hba_file_path_query = self.run('''su - postgres -c "psql -U postgres -d postgres -t -c \\"SHOW hba_file;\\""''', shell=True)
+                    if hba_file_path_query and hba_file_path_query.strip():
+                        self.stop('postgresql')
+                        hba_file_path = hba_file_path_query.strip()
+                        hba_file_content = self.readFile(hba_file_path)
+                        hba_file_content = 'host\t{0}\t{1}\t127.0.0.1/32\tmd5\nhost\t{0}\t{1}\t::1/128\tmd5\n'.format(Config.rdbm_db, Config.rdbm_user) + hba_file_content
+                        self.writeFile(hba_file_path, hba_file_content)
+                        self.start('postgresql')
+
+            self.enable('postgresql')
 
         self.dbUtils.bind(force=True)
 
@@ -215,7 +256,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                 sql_cmd = alter_table_sql_cmd.format(attr['sql']['add_table'], col_def)
 
                 if Config.rdbm_type == 'spanner':
-                    req = self.dbUtils.spanner.create_table(sql_cmd.strip(';'))
+                    req = self.dbUtils.spanner_client.exec_sql(sql_cmd.strip(';'))
                 else:
                     self.dbUtils.exec_rdbm_query(sql_cmd)
                 tables.append(sql_cmd)
@@ -228,9 +269,9 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
             for sattr, sdt in self.dbUtils.sub_tables[Config.rdbm_type][subtable]:
                 subtable_columns = []
                 sql_cmd = 'CREATE TABLE `{0}_{1}` (`doc_id` STRING(64) NOT NULL, `dict_doc_id` STRING(64), `{1}` {2}) PRIMARY KEY (`doc_id`, `dict_doc_id`), INTERLEAVE IN PARENT `{0}` ON DELETE CASCADE'.format(subtable, sattr, sdt)
-                self.dbUtils.spanner.create_table(sql_cmd)
+                self.dbUtils.spanner_client.exec_sql(sql_cmd)
                 sql_cmd_index = 'CREATE INDEX `{0}_{1}Idx` ON `{0}_{1}` (`{1}`)'.format(subtable, sattr)
-                self.dbUtils.spanner.create_table(sql_cmd_index)
+                self.dbUtils.spanner_client.exec_sql(sql_cmd_index)
 
 
     def get_index_name(self, attrname):
@@ -255,11 +296,11 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                         sql_indexes['__common__']['fields'].append(attr_name)
 
         if Config.rdbm_type == 'spanner':
-            tables = self.dbUtils.spanner.get_tables()
+            tables = self.dbUtils.spanner_client.get_tables()
             for tblCls in tables:
                 tbl_fields = sql_indexes.get(tblCls, {}).get('fields', []) + sql_indexes['__common__']['fields']
 
-                tbl_data = self.dbUtils.spanner.exec_sql('SELECT * FROM {} LIMIT 1'.format(tblCls))
+                tbl_data = self.dbUtils.spanner_client.exec_sql('SELECT * FROM {} LIMIT 1'.format(tblCls))
 
                 for attr in tbl_data.get('fields', []):
                     if attr['name'] == 'doc_id':
@@ -278,7 +319,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                                     tblCls,
                                     attr_name
                                 )
-                        self.dbUtils.spanner.create_table(sql_cmd)
+                        self.dbUtils.spanner_client.exec_sql(sql_cmd)
 
                 for i, custom_index in enumerate(sql_indexes.get(tblCls, {}).get('custom', [])):
                     sql_cmd = 'CREATE INDEX `{0}_CustomIdx{1}` ON {0} ({2})'.format(
@@ -286,7 +327,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                                     i+1, 
                                     custom_index
                                 )
-                    self.dbUtils.spanner.create_table(sql_cmd)
+                    self.dbUtils.spanner_client.exec_sql(sql_cmd)
 
         else:
             for tblCls in self.dbUtils.Base.classes.keys():
@@ -397,7 +438,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
             else:
                 auth_cred_target_fn = os.path.join(Config.configFolder, 'google_application_credentials.json')
                 shutil.copy(Config.google_application_credentials, auth_cred_target_fn)
-                Config.templateRenderingDict['spanner_creds'] = 'auth.credentials-file={}'.format(auth_cred_target_fn)
+                Config.templateRenderingDict['spanner_creds'] = 'connection.credentials-file={}'.format(auth_cred_target_fn)
 
             self.renderTemplateInOut(Config.jansSpannerProperties, Config.templateFolder, Config.configFolder)
 

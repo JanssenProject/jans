@@ -23,6 +23,7 @@ import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.exception.CryptoProviderException;
 import io.jans.as.model.jwk.Algorithm;
+import io.jans.as.model.jwk.KeyOpsType;
 import io.jans.as.model.jwk.Use;
 import io.jans.as.persistence.model.Scope;
 import io.jans.as.server.auth.Authenticator;
@@ -151,13 +152,18 @@ public class AuthorizeService {
         try {
             final User user = sessionIdService.getUser(session);
             if (user == null) {
-                log.debug("Permission denied. Failed to find session user: userDn = " + session.getUserDn() + ".");
+                log.debug("Permission denied. Failed to find session user: userDn = {}", session.getUserDn());
                 permissionDenied(session);
                 return;
             }
 
             String clientId = session.getSessionAttributes().get(AuthorizeRequestParam.CLIENT_ID);
             final Client client = clientService.getClient(clientId);
+            if (client == null) {
+                log.debug("Permission denied. Failed to find client by id: {}", clientId);
+                permissionDenied(session);
+                return;
+            }
 
             String scope = session.getSessionAttributes().get(AuthorizeRequestParam.SCOPE);
             String responseType = session.getSessionAttributes().get(AuthorizeRequestParam.RESPONSE_TYPE);
@@ -282,7 +288,7 @@ public class AuthorizeService {
 			String clientSecret = clientService.decryptSecret(client.getClientSecret());
 			redirectUri.setSharedSecret(clientSecret);
 			keyId = new ServerCryptoProvider(cryptoProvider).getKeyId(webKeysConfiguration,
-					Algorithm.fromString(signatureAlgorithm.getName()), Use.SIGNATURE);
+					Algorithm.fromString(signatureAlgorithm.getName()), Use.SIGNATURE, KeyOpsType.CONNECT);
 		} catch (CryptoProviderException e) {
 			log.error(e.getMessage(), e);
 		} catch (StringEncrypter.EncryptionException e) {
@@ -307,7 +313,6 @@ public class AuthorizeService {
         String scope = session.getSessionAttributes().get("scope");
 
         return getScopes(scope);
-
     }
 
     public List<Scope> getScopes(String scopes) {

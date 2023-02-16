@@ -81,7 +81,7 @@ public class AcrsResource extends ConfigBaseResource {
         log.debug("ACRS details to  update - authenticationMethod:{}", authenticationMethod);
 
         if (authenticationMethod == null || StringUtils.isBlank(authenticationMethod.getDefaultAcr())) {
-            thorwBadRequestException("Default authentication method should not be null or empty !");
+            throwBadRequestException("Default authentication method should not be null or empty !");
         }
 
         if (authenticationMethod != null) {

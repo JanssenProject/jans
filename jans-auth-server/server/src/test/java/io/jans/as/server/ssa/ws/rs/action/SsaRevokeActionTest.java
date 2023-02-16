@@ -63,7 +63,7 @@ public class SsaRevokeActionTest {
         when(ssaService.createNotAcceptableResponse()).thenReturn(Response.status(406));
 
         String jti = null;
-        Long orgId = null;
+        String orgId = null;
         Response response = ssaRevokeAction.revoke(jti, orgId, mock(HttpServletRequest.class));
         assertNotNull(response);
         assertEquals(response.getStatus(), 406);
@@ -81,7 +81,7 @@ public class SsaRevokeActionTest {
         when(ssaService.createUnprocessableEntityResponse()).thenReturn(Response.status(422));
 
         String jti = "test-jti";
-        Long orgId = 1000L;
+        String orgId = "org-id-test";
         Response response = ssaRevokeAction.revoke(jti, orgId, mock(HttpServletRequest.class));
         assertNotNull(response);
         assertEquals(response.getStatus(), 422);
@@ -96,7 +96,7 @@ public class SsaRevokeActionTest {
     @Test
     public void revoke_validJti_200Status() {
         String jti = "test-jti";
-        Long orgId = null;
+        String orgId = null;
         Client client = new Client();
         client.setDn("inum=0000,ou=clients,o=jans");
         when(ssaRestWebServiceValidator.getClientFromSession()).thenReturn(client);
@@ -119,7 +119,7 @@ public class SsaRevokeActionTest {
         assertEquals(ssa.getState(), SsaState.REVOKED);
 
         verify(log).info(anyString(), eq(jti), eq(SsaState.REVOKED.getValue()));
-        verify(ssaContextBuilder).buildModifySsaResponseContext(any(), any(), any(), any(), any());
+        verify(ssaContextBuilder).buildModifySsaResponseContext(any(), any());
         verify(modifySsaResponseService).revoke(any(), any());
         verifyNoMoreInteractions(ssaService, log, errorResponseFactory);
     }
@@ -134,7 +134,7 @@ public class SsaRevokeActionTest {
         when(log.isErrorEnabled()).thenReturn(Boolean.FALSE);
 
         String jti = "test-jti";
-        Long orgId = 1000L;
+        String orgId = "org-id-test";
         assertThrows(WebApplicationException.class, () -> ssaRevokeAction.revoke(jti, orgId, mock(HttpServletRequest.class)));
         verify(log).debug(anyString(), eq(jti), eq(orgId));
         verify(errorResponseFactory).validateFeatureEnabled(eq(FeatureFlagType.SSA));
@@ -154,7 +154,7 @@ public class SsaRevokeActionTest {
         when(log.isErrorEnabled()).thenReturn(Boolean.TRUE);
 
         String jti = "test-jti";
-        Long orgId = 1000L;
+        String orgId = "org-id-test";
         assertThrows(WebApplicationException.class, () -> ssaRevokeAction.revoke(jti, orgId, mock(HttpServletRequest.class)));
         verify(log).debug(anyString(), eq(jti), eq(orgId));
         verify(errorResponseFactory).validateFeatureEnabled(eq(FeatureFlagType.SSA));
@@ -173,7 +173,7 @@ public class SsaRevokeActionTest {
         when(errorResponseFactory.createWebApplicationException(any(), any(), anyString())).thenThrow(error);
 
         String jti = "test-jti";
-        Long orgId = 1000L;
+        String orgId = "org-id-test";
         assertThrows(WebApplicationException.class, () -> ssaRevokeAction.revoke(jti, orgId, mock(HttpServletRequest.class)));
         verify(log).debug(anyString(), eq(jti), eq(orgId));
         verify(errorResponseFactory).validateFeatureEnabled(eq(FeatureFlagType.SSA));

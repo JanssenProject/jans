@@ -447,7 +447,7 @@
       "names": [
         "clnId"
       ],
-      "multivalued": true,
+      "multivalued": false,
       "oid": "jansAttr",
       "substr": "caseIgnoreSubstringsMatch",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
@@ -787,6 +787,7 @@
       "names": [
         "jansPersistentJWT"
       ],
+	  "multivalued": true,
       "oid": "jansAttr",
       "substr": "caseIgnoreSubstringsMatch",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
@@ -2871,6 +2872,16 @@
       "x_origin": "Jans created attribute"
     },
     {
+      "desc": "jansPublicKeyIdHash",
+      "equality": "integerMatch",
+      "names": [
+        "jansPublicKeyIdHash"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
+      "x_origin": "Jans created attribute"
+    },
+    {
       "desc": "Life of access token",
       "equality": "integerMatch",
       "names": [
@@ -4147,11 +4158,15 @@
       "may": [
         "jansId",
         "creationDate",
+        "jansApp",
         "jansSessStateId",
         "jansCodeChallenge",
+        "jansCodeChallengeHash",
         "personInum",
         "jansAuthData",
-        "jansStatus"
+        "jansStatus",
+        "exp",
+        "del"
       ],
       "must": [
         "objectclass"
@@ -4171,15 +4186,20 @@
         "jansId",
         "creationDate",
         "displayName",
+        "jansApp",
         "jansSessStateId",
         "jansCodeChallenge",
         "jansCodeChallengeHash",
         "jansPublicKeyId",
+        "jansPublicKeyIdHash",
         "personInum",
         "jansRegistrationData",
+        "jansDeviceData",
         "jansDeviceNotificationConf",
         "jansCounter",
-        "jansStatus"
+        "jansStatus",
+        "exp",
+        "del"
       ],
       "must": [
         "objectclass"
@@ -4297,30 +4317,6 @@
       ], 
       "x_origin": "Jans created objectclass"
     },
-    {
-      "kind": "STRUCTURAL",
-      "may": [
-        "c",
-        "ou",
-        "description",
-        "inum",
-        "displayName",
-        "jansConfDyn",
-        "o",
-        "jansRevision"
-      ],
-      "must": [
-        "objectclass"
-      ],
-      "names": [
-        "jansAdminConfDyn"
-      ],
-      "oid": "jansObjClass",
-      "sup": [
-        "top"
-      ],
-      "x_origin": "Jans created objectclass"
-    },    
     {
       "kind": "STRUCTURAL",
       "may": [

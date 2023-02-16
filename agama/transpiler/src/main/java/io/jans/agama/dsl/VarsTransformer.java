@@ -32,6 +32,9 @@ public class VarsTransformer {
             // http://web.archive.org/web/20210304081342/https://developer.mozilla.org/en-US/docs/Scripting_Java
             "Packages",
             
+            // Prevent rhino trying to interpret an expression as a package reference 
+            "java",
+            
             // See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects
             // function names not included because they cannot be invoked from DSL code
             // Control abstraction objects (except Promise), Reflection, Internationalization, 

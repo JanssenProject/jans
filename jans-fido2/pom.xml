@@ -5,7 +5,7 @@
 	<groupId>io.jans</groupId>
 	<artifactId>jans-fido2-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>1.0.6-SNAPSHOT</version>
+	<version>1.0.7-SNAPSHOT</version>
 	<name>Fido2 API</name>
 
     <distributionManagement>
@@ -97,11 +97,11 @@
 				<artifactId>jans-auth-model</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-            <dependency>
-                <groupId>io.jans</groupId>
-                <artifactId>jans-auth-client</artifactId>
-                <version>${project.version}</version>
-            </dependency>
+			<dependency>
+				<groupId>io.jans</groupId>
+				<artifactId>jans-auth-client</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
 				<artifactId>jans-fido2-model</artifactId>

@@ -2,7 +2,7 @@
 
 ## Integrating DUO's Universal Prompt as an authentication method in Janssen server
 
-[Duo Security](https://duosecurity.com) is a SaaS authentication provider. This document will explain how to use Janssen's [Duo interception script](https://github.com/JanssenProject/jans/blob/main/docs/script-catalog/person_authentication/duo-external-authenticator/DuoExternalAuthenticator.py) to configure the Janssen Server for a two-step authentication process with username and password as the first step, and Duo as the second step. The script invokes the Universal Prompt which is a redesign of Duo’s traditional authentication prompt. 
+[Duo Security](https://duosecurity.com) is a SaaS authentication provider. This document will explain how to use Janssen's [Duo interception script](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/script-catalog/person_authentication/duo-external-authenticator/DuoExternalAuthenticator.py) to configure the Janssen Server for a two-step authentication process with username and password as the first step, and Duo as the second step. The script invokes the Universal Prompt which is a redesign of Duo’s traditional authentication prompt. 
 
 ## Authentication flow
 ```mermaid 
@@ -29,7 +29,7 @@ Jans AS->>RP: 10. write Jans session cookie
 ```
 
 ## Administrator prerequisites
-- [Duo interception script](https://github.com/JanssenProject/jans/blob/main/docs/script-catalog/person_authentication/duo-external-authenticator/DuoExternalAuthenticator.py) (included in the default Janssen Server distribution);
+- [Duo interception script](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/script-catalog/person_authentication/duo-external-authenticator/DuoExternalAuthenticator.py) (included in the default Janssen Server distribution);
 - An account with [Duo Security](https://duo.com/).   
 
 ## User prerequisites
@@ -69,7 +69,7 @@ The dependencies have to be added separately as mentioned in the steps below. Us
 
 1. Create `cs.json` with the contents of a CUSTOM script. To do that, run the following command.
 ```
-/opt/jans/jans-cli/config-cli.py --schema /components/schemas/CustomScript > /tmp/cs.json
+/opt/jans/jans-cli/config-cli.py --schema CustomScript > /tmp/cs.json
 ```
 2. Edit the file's contents to reflect the addition of the duo custom script. 
  *  Set enabled flag `true`
@@ -143,7 +143,7 @@ Now Duo is an available authentication mechanism for your Janssen Server. This m
     To make sure Duo has been enabled successfully, you can check your Janssen Server's OpenID Connect configuration by navigating to the following URL: `https://<hostname>/.well-known/openid-configuration`. Find `"acr_values_supported":` and you should see `"duo"`. 
 
 ## Make Duo the Default Authentication Mechanism
-For CURL commands, use this [link](https://github.com/JanssenProject/jans/blob/main/docs/admin/config-guide/curl.md#2-enable-an-authentication-script) as a reference.
+For CURL commands, use this [link](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/admin/config-guide/curl.md#2-enable-an-authentication-script) as a reference.
 
 Steps:
 1. Create a file say `duo-auth-default.json` with the following contents

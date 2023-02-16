@@ -8,6 +8,21 @@ tags:
 
 ----------------------------
 
+## How to enable debug logs for jans-cli and TUI configuration tools
+
+By default, logging is not enabled for CLI or TUI tools on Janssen Server. Follow the steps below
+to enable and configure logging for CLI and TUI tools:
+
+- Log in as root user
+- open config file for editing `~/.config/jans-cli.ini`
+- Update value for `debug` to `true` and add new entry for `log_dir` key with value pointing to directory where logs need to be generated. e.g 
+  ```
+  debug = true
+  log_dir = /opt/jans
+  ```
+- Close currently open TUI session if any and open a new one
+- Logs should get available at location configured in `log_dir` in files `cli_debug.log` and `dev-tui.log`
+
 ## How to install Janssen Server OpenBanking for testing?
 
 !!! Note
@@ -20,7 +35,7 @@ This installation uses Gluu Testing certificate.
 ### Download Installer
 
 ```
-wget https://raw.githubusercontent.com/JanssenProject/jans/main/jans-linux-setup/jans_setup/install.py -O install.py
+wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-linux-setup/jans_setup/install.py -O install.py
 ```
 
 ### Execute Installer
@@ -62,7 +77,7 @@ launch jans-cli using below command
 ```
 further testing is same as jans server
 
-### Testing using commnd line mode
+### Testing using command line mode
 
 we can run below command at command line.
 for ex:

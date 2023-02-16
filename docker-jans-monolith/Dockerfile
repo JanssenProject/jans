@@ -38,7 +38,7 @@ EXPOSE 443 8080 1636
 # jans-linux-setup
 # =====================
 
-ENV JANS_SOURCE_VERSION=c9d1ed9cbb5de852fcada889f8c1f6be95d66c49
+ENV JANS_SOURCE_VERSION=2603bbb1080345cab4fe814dca39024d8d0b5434
 
 # cleanup
 RUN rm -rf /tmp/jans
@@ -60,14 +60,19 @@ ENV CN_HOSTNAME="demoexample.jans.io" \
     CN_CITY="Austin" \
     CN_STATE="TX" \
     CN_COUNTRY="US" \
-    # Install with local mysql by default
-    INSTALL_LDAP="false" \
+    TEST_CLIENT_ID="9876baac-de39-4c23-8a78-674b59df8c09" \
+    TEST_CLIENT_SECRET="" \
+    TEST_CLIENT_TRUSTED="true" \
+    CN_INSTALL_LDAP="false" \
+    CN_INSTALL_MYSQL="false" \
+    CN_INSTALL_PGSQL="false" \
     CN_INSTALL_CONFIG_API="true" \
     CN_INSTALL_SCIM="true" \
     CN_INSTALL_FIDO2="true" \
-    MYSQL_DATABASE="jans" \
-    MYSQL_USER="jans" \
-    MYSQL_PASSWORD=""
+    RDBMS_DATABASE="jans" \
+    RDBMS_USER="jans" \
+    RDBMS_PASSWORD="" \
+    RDBMS_HOST=""
 
 # ==========
 # misc stuff
@@ -76,7 +81,7 @@ ENV CN_HOSTNAME="demoexample.jans.io" \
 LABEL name="janssenproject/monolith" \
     maintainer="Janssen Project <support@jans.io>" \
     vendor="Janssen Project" \
-    version="1.0.6" \
+    version="1.0.7" \
     release="dev" \
     summary="Janssen Monolith Image" \
     description="Janssen Authorization server"

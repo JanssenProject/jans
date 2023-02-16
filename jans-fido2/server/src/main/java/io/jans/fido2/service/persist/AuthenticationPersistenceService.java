@@ -13,25 +13,27 @@ import java.util.List;
 import java.util.TimeZone;
 import java.util.UUID;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
 
-import io.jans.fido2.exception.Fido2RuntimeException;
-import io.jans.fido2.model.conf.AppConfiguration;
-import io.jans.fido2.model.entry.Fido2AuthenticationData;
-import io.jans.fido2.model.entry.Fido2AuthenticationEntry;
-import io.jans.fido2.model.entry.Fido2AuthenticationStatus;
-import io.jans.fido2.service.shared.UserService;
 import io.jans.as.common.model.common.User;
 import io.jans.as.model.config.StaticConfiguration;
+import io.jans.fido2.exception.Fido2RuntimeException;
+import io.jans.fido2.model.conf.AppConfiguration;
+import io.jans.fido2.service.ChallengeGenerator;
+import io.jans.fido2.service.shared.UserService;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.BatchOperation;
 import io.jans.orm.model.ProcessBatchOperation;
 import io.jans.orm.model.SearchScope;
 import io.jans.orm.model.base.SimpleBranch;
+import io.jans.orm.model.fido2.Fido2AuthenticationData;
+import io.jans.orm.model.fido2.Fido2AuthenticationEntry;
+import io.jans.orm.model.fido2.Fido2AuthenticationStatus;
 import io.jans.orm.search.filter.Filter;
 import io.jans.util.StringHelper;
-import org.slf4j.Logger;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 /**
  * Every authentication is persisted under Person Entry
@@ -51,6 +53,9 @@ public class AuthenticationPersistenceService {
     @Inject
     private AppConfiguration appConfiguration;
 
+	@Inject
+	private ChallengeGenerator challengeGenerator;
+
     @Inject
     private UserService userService;
 
@@ -58,33 +63,50 @@ public class AuthenticationPersistenceService {
     private PersistenceEntryManager persistenceEntryManager;
 
     public void save(Fido2AuthenticationData authenticationData) {
-        String userName = authenticationData.getUsername();
-        
-        User user = userService.getUser(userName, "inum");
-        if (user == null) {
-            if (appConfiguration.getFido2Configuration().isUserAutoEnrollment()) {
-                user = userService.addDefaultUser(userName);
-            } else {
-                throw new Fido2RuntimeException("Auto user enrollment was disabled. User not exists!");
-            }
-        }
-        String userInum = userService.getUserInum(user);
+        Fido2AuthenticationEntry authenticationEntity = buildFido2AuthenticationEntry(authenticationData, false);
 
-        prepareBranch(userInum);
+        save(authenticationEntity);
+    }
+
+    public void save(Fido2AuthenticationEntry authenticationEntity) {
+        prepareBranch(authenticationEntity.getUserInum());
+
+        persistenceEntryManager.persist(authenticationEntity);
+    }
+
+    public Fido2AuthenticationEntry buildFido2AuthenticationEntry(Fido2AuthenticationData authenticationData, boolean oneStep) {
+		String userName = authenticationData.getUsername();
+        
+		String userInum = null;
+    	if (!oneStep) {
+	        User user = userService.getUser(userName, "inum");
+	        if (user == null) {
+	            if (appConfiguration.getFido2Configuration().isUserAutoEnrollment()) {
+	                user = userService.addDefaultUser(userName);
+	            } else {
+	                throw new Fido2RuntimeException("Auto user enrollment was disabled. User not exists!");
+	            }
+	        }
+	        userInum = userService.getUserInum(user);
+    	}
 
         Date now = new GregorianCalendar(TimeZone.getTimeZone("UTC")).getTime();
         final String id = UUID.randomUUID().toString();
+        final String challenge = authenticationData.getChallenge();
 
-        String dn = getDnForAuthenticationEntry(userInum, id);
+        String dn = oneStep ? getDnForAuthenticationEntry(null, id) : getDnForAuthenticationEntry(userInum, id);
         Fido2AuthenticationEntry authenticationEntity = new Fido2AuthenticationEntry(dn, authenticationData.getId(), now, userInum, authenticationData);
         authenticationEntity.setAuthenticationStatus(authenticationData.getStatus());
+        if (StringUtils.isNotEmpty(challenge)) {
+        	authenticationEntity.setChallengeHash(String.valueOf(challengeGenerator.getChallengeHashCode(challenge)));
+        }
+        authenticationEntity.setRpId(authenticationData.getApplicationId());
 
         authenticationData.setCreatedDate(now);
         authenticationData.setCreatedBy(userName);
 
-
-        persistenceEntryManager.persist(authenticationEntity);
-    }
+        return authenticationEntity;
+	}
 
     public void update(Fido2AuthenticationEntry authenticationEntity) {
         Date now = new GregorianCalendar(TimeZone.getTimeZone("UTC")).getTime();
@@ -96,7 +118,6 @@ public class AuthenticationPersistenceService {
         authenticationEntity.setAuthenticationStatus(authenticationData.getStatus());
 
         persistenceEntryManager.merge(authenticationEntity);
-        System.err.println("Updated: " + authenticationEntity.getDn());
     }
 
     public void addBranch(final String baseDn) {
@@ -123,19 +144,27 @@ public class AuthenticationPersistenceService {
         }
     }
 
-    public List<Fido2AuthenticationEntry> findByChallenge(String challenge) {
-        String baseDn = getBaseDnForFido2AuthenticationEntries(null);
+    public List<Fido2AuthenticationEntry> findByChallenge(String challenge, boolean oneStep) {
+        String baseDn = oneStep ? getDnForAuthenticationEntry(null, null) : getBaseDnForFido2AuthenticationEntries(null);
 
         Filter codeChallengFilter = Filter.createEqualityFilter("jansCodeChallenge", challenge);
+        Filter codeChallengHashCodeFilter = Filter.createEqualityFilter("jansCodeChallengeHash", String.valueOf(challengeGenerator.getChallengeHashCode(challenge)));
+        Filter filter = Filter.createANDFilter(codeChallengFilter, codeChallengHashCodeFilter);
 
-        List<Fido2AuthenticationEntry> fido2AuthenticationEntries = persistenceEntryManager.findEntries(baseDn, Fido2AuthenticationEntry.class, codeChallengFilter);
+        List<Fido2AuthenticationEntry> fido2AuthenticationEntries = persistenceEntryManager.findEntries(baseDn, Fido2AuthenticationEntry.class, filter);
 
         return fido2AuthenticationEntries;
     }
 
     public String getDnForAuthenticationEntry(String userInum, String jsId) {
+    	String baseDn;
+    	if (StringHelper.isEmpty(userInum)) {
+    		baseDn = staticConfiguration.getBaseDn().getFido2Assertion();
+    	} else {
+	        // Build DN string for Fido2 registration entry
+	        baseDn = getBaseDnForFido2AuthenticationEntries(userInum);
+    	}
         // Build DN string for Fido2 authentication entry
-        String baseDn = getBaseDnForFido2AuthenticationEntries(userInum);
         if (StringHelper.isEmpty(jsId)) {
             return baseDn;
         }
@@ -158,83 +187,6 @@ public class AuthenticationPersistenceService {
         }
 
         return String.format("inum=%s,%s", userInum, peopleDn);
-    }
-
-    public void cleanup(Date now, int batchSize) {
-        // Cleaning expired entries
-        BatchOperation<Fido2AuthenticationEntry> cleanerAuthenticationBatchService = new ProcessBatchOperation<Fido2AuthenticationEntry>() {
-            @Override
-            public void performAction(List<Fido2AuthenticationEntry> entries) {
-                for (Fido2AuthenticationEntry p : entries) {
-                    log.debug("Removing Fido2 authentication entry: {}, Creation date: {}", p.getChallange(), p.getCreationDate());
-                    try {
-                        persistenceEntryManager.remove(p);
-                    } catch (Exception e) {
-                        log.error("Failed to remove entry", e);
-                    }
-                }
-            }
-        };
-        
-        String baseDn = getDnForUser(null);
-        persistenceEntryManager.findEntries(baseDn, Fido2AuthenticationEntry.class, getExpiredAuthenticationFilter(baseDn), SearchScope.SUB, new String[] {"jansCodeChallenge", "creationDate"}, cleanerAuthenticationBatchService, 0, 0, batchSize);
-
-        String branchDn = getDnForUser(null);
-        if (persistenceEntryManager.hasBranchesSupport(branchDn)) {
-        	// Cleaning empty branches
-	        BatchOperation<SimpleBranch> cleanerBranchBatchService = new ProcessBatchOperation<SimpleBranch>() {
-	            @Override
-	            public void performAction(List<SimpleBranch> entries) {
-	                for (SimpleBranch p : entries) {
-	                    try {
-	                        persistenceEntryManager.remove(p);
-	                    } catch (Exception e) {
-	                        log.error("Failed to remove entry", e);
-	                    }
-	                }
-	            }
-	        };
-	        persistenceEntryManager.findEntries(getDnForUser(null), SimpleBranch.class, getEmptyAuthenticationBranchFilter(), SearchScope.SUB, new String[] {"ou"}, cleanerBranchBatchService, 0, 0, batchSize);
-        }
-    }
-
-    private Filter getExpiredAuthenticationFilter(String baseDn) {
-        int unfinishedRequestExpiration = appConfiguration.getFido2Configuration().getUnfinishedRequestExpiration();
-        unfinishedRequestExpiration = unfinishedRequestExpiration == 0 ? 120 : unfinishedRequestExpiration;
-
-        int authenticationHistoryExpiration = appConfiguration.getFido2Configuration().getAuthenticationHistoryExpiration();
-        authenticationHistoryExpiration = authenticationHistoryExpiration == 0 ? 15 * 24 * 3600 : authenticationHistoryExpiration;
-
-        Calendar calendar1 = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
-        calendar1.add(Calendar.SECOND, -unfinishedRequestExpiration);
-        final Date unfinishedRequestExpirationDate = calendar1.getTime();
-
-        Calendar calendar2 = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
-        calendar2.add(Calendar.SECOND, -authenticationHistoryExpiration);
-        final Date authenticationHistoryExpirationDate = calendar2.getTime();
-
-        // Build unfinished request expiration filter
-        Filter authenticationStatusFilter1 = Filter.createNOTFilter(Filter.createEqualityFilter("jansStatus", Fido2AuthenticationStatus.authenticated.getValue()));
-
-        Filter exirationDateFilter1 = Filter.createLessOrEqualFilter("creationDate",
-                persistenceEntryManager.encodeTime(baseDn, unfinishedRequestExpirationDate));
-        
-        Filter unfinishedRequestFilter = Filter.createANDFilter(authenticationStatusFilter1, exirationDateFilter1);
-
-        // Build authentication history expiration filter
-        Filter authenticationStatusFilter2 = Filter.createEqualityFilter("jansStatus", Fido2AuthenticationStatus.authenticated.getValue());
-
-        Filter exirationDateFilter2 = Filter.createLessOrEqualFilter("creationDate",
-                persistenceEntryManager.encodeTime(baseDn, authenticationHistoryExpirationDate));
-        
-        Filter authenticationHistoryFilter = Filter.createANDFilter(authenticationStatusFilter2, exirationDateFilter2);
-
-        return Filter.createORFilter(unfinishedRequestFilter, authenticationHistoryFilter);
-    }
-
-    private Filter getEmptyAuthenticationBranchFilter() {
-        return Filter.createANDFilter(Filter.createEqualityFilter("ou", "fido2_auth"), Filter.createORFilter(
-                Filter.createEqualityFilter("numsubordinates", "0"), Filter.createEqualityFilter("hasSubordinates", "FALSE")));
     }
 
 }
