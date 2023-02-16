@@ -1,7 +1,7 @@
 from typing import Tuple, TypeVar, Callable, Optional, Sequence, Union
 
 
-from prompt_toolkit.layout.containers import HSplit, Window, FloatContainer, ScrollOffsets
+from prompt_toolkit.layout.containers import HSplit, Window, FloatContainer
 from prompt_toolkit.layout.controls import FormattedTextControl
 from prompt_toolkit.layout.margins import ScrollbarMargin
 from prompt_toolkit.formatted_text import merge_formatted_text
@@ -143,7 +143,6 @@ class JansVerticalNav():
                             height=D(preferred=len(self.data), max=len(self.data)),
                             cursorline=True,
                             always_hide_cursor=True,
-                            scroll_offsets=ScrollOffsets(top=1, bottom=1),
                             right_margins=[ScrollbarMargin(display_arrows=True)],
                         )
         if self.jans_help:
