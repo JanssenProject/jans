@@ -82,7 +82,9 @@ Claims that list supported algorithms:
 
 ## Grants
 
-Janssen Server supports grant types defined by OAuth 2.0, OAuth 2.1 and extension grants defined by other RFCs. Complete
+### Supported Grant Types
+Grant defines how a client interacts with the token endpoint to get the tokens. Janssen Server supports grant types
+defined by OAuth 2.0, OAuth 2.1, and extension grants defined by other RFCs. A complete
 list of supported grant types can be found in the response of the Janssen Server's well-known
 [configuration endpoint](./configuration.md) given below.
 
@@ -92,21 +94,32 @@ https://janssen.server.host/jans-auth/.well-known/openid-configuration
 
 Claim `grant_types_supported` lists all the supported grant types in the response.
 
-### Configure Grants Types For Client
+### Configuring Grant Type For Client
 
-| Client Type                                                                                                        | Recommended Grant Type       | Comments |     |     |
-|--------------------------------------------------------------------------------------------------------------------|------------------------------|----------|-----|-----|
-| Backend App (Example: batch processes)                                                                             | Client Credentials           |          |     |     |
-| App Hosted on server that needs end-user's permission to access resource (Example: client-server Web Applications) | Authorization Code           |          |     |     |
-| App that completely runs on end-user's browser (Example: single page applications)                                 | Authorization Code with PKCE |          |     |     |
-| Mobile Applications                                                                                                |                              |          |     |     |
+Janssen Server will allow requests from a client with grant types that the client is configured to use. Client can be
+configured to use or not use certain grant types using [CLI](../../config-guide/jans-cli/README.md) or [TUI](../../config-guide/tui.md) tools.
 
-Note: Implicit and ROPC(Resource Owner Password Credentials) grant types have been removed from OAuth v2.1 and no longer 
-recommended for any usecase. 
+### Recommendations For Using Grant Types and Flows
 
-### How to implement a custom extension grant in Jans, similar to 
-[here](https://identityserver4.readthedocs.io/en/aspnetcore2/topics/extension_grants.html#extension-grants). May be
-it should go to developer guide.
+Developers should use the grant types based on the ability of the client to protect the client credentials as well as
+the security profile of the deployment. If the client software is a server-side component that can securely store the
+client credentials, such a client is called a `confidential` client. As opposed to that, if the application requesting
+access token is entirely running on a browser, where it is not possible to store client credentials securely, such a client
+is called a `public` client.
+
+Along with the grant type to be used, developers also need to choose which flow should be used to get the required
+tokens. The table below shows grant types and flows that should be used for various use-cases.
+
+| Client Type                                                                                     | Recommended Grant Type                         | Flow                         | 
+|-------------------------------------------------------------------------------------------------|------------------------------------------------|------------------------------|
+| Backend App (Example: batch processes) that need to access its own resources                    | `client_credentials`                           | Client Credentials           |
+| Server backend of a web-application needs access token                                          | `authorization_code`                           | Authorization Code           |
+| Web-application that needs user information via id_token on browser and access token on backend | `authorization_code`                           | Hybrid Flow                  |
+| Browser based single page applications or Mobile applications                                   | `authorization_code`                           | Authorization Code with PKCE |
+| Browser based single page applications or Mobile applications that only intend to get id_token  | -                                              | Implicit Flow with Form Post |
+| Input constrained devices (Example: TV)                                                         | `urn:ietf:params:oauth:grant-type:device_code` | Device Flow                  |
+| Highly trusted applications where redirect based flows are not feasible to implement            | `password`                                     | Resource Owner Password Flow |
+
 
 ## Pre-authorization
 
@@ -115,9 +128,7 @@ to internal clients (not a third party) where there is no need to prompt the per
 
 ## Response Types
 
-
-
-Please use the left navigation menu to browse the content of this section while we are still working on developing content for `Overview` page.
+TODO: add details to this section
 
 !!! Contribute
 If you’d like to contribute to this document, get started with the [Contribution Guide](https://docs.jans.io/head/CONTRIBUTING/#contributing-to-the-documentation)
