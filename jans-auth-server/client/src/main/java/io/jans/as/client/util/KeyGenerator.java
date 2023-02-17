@@ -100,7 +100,7 @@ public class KeyGenerator {
             options.addOption(KEY_STORE_FILE, true, "Key Store file.");
             options.addOption(KEY_STORE_PASSWORD, true, "Key Store password.");
             options.addOption(DN_NAME, true, "DN of certificate issuer.");
-            options.addOption(OXELEVEN_ACCESS_TOKEN, true, "oxEleven Access Token");
+            options.addOption(OXELEVEN_ACCESS_TOKEN, true, "oxEleven Access Token.");
             options.addOption(OXELEVEN_GENERATE_KEY_ENDPOINT, true, "oxEleven Generate Key Endpoint.");
             options.addOption(EXPIRATION, true, "Expiration in days.");
             options.addOption(EXPIRATION_HOURS, true, "Expiration in hours.");

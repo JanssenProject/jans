@@ -6,17 +6,13 @@
 
 package io.jans.util.security;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
 import java.security.Security;
-import java.util.List;
 
 import javax.crypto.Cipher;
 
-import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -307,27 +303,6 @@ public class SecurityProviderUtility {
             LOG.trace("BC Fips provider is not available", e);
             return false;
         }
-
-        if (USE_FIPS_CHECK_COMMAND) {
-            String osName = System.getProperty("os.name");
-            if (org.apache.commons.lang.StringUtils.isNotEmpty(osName) && osName.toLowerCase().startsWith("windows")) {
-                return false;
-            }
-
-            try {
-                // Check if FIPS is enabled 
-                Process process = Runtime.getRuntime().exec("fips-mode-setup --check");
-                List<String> result = IOUtils.readLines(process.getInputStream(), StandardCharsets.UTF_8);
-                if ((result.size() > 0) && org.apache.commons.lang.StringUtils.equalsIgnoreCase(result.get(0), "FIPS mode is enabled.")) {
-                    return true;
-                }
-            } catch (IOException e) {
-                LOG.error("Failed to check if FIPS mode was enabled", e);
-                return false;
-            }
-            return false;
-        }
-
         return true;
     }
 
