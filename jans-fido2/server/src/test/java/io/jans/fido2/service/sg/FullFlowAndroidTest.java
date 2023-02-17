@@ -247,7 +247,7 @@ public class FullFlowAndroidTest {
         assertEquals(registrationEntry.getRegistrationStatus(), Fido2RegistrationStatus.pending);
 	}
 
-	public void testFinishAttestationTwoStepAndroidImpl(String userName, String registerFinishResponse) {
+	public void testFinishAttestationTwoStepAndroidImpl(String userName, String registerFinishResponse, String registeredPublicKey) {
 		// Parse register response
 		RegisterResponse registerResponse = attestationSuperGluuController.parseRegisterResponse(registerFinishResponse);
 
@@ -264,7 +264,7 @@ public class FullFlowAndroidTest {
 
 		assertNotNull(response);
         assertEquals(response.get("status").asText(), "ok");
-        assertEquals(response.get("createdCredentials").get("id").asText(), "lGWf7urVmKzN_4vklat2W8jqJoWCTIYfrjkLFDkef2Zmdl7k13FXCFHdMMw0G_YyluFAHwx5oDf-7bcbAlG0Wg");
+        assertEquals(response.get("createdCredentials").get("id").asText(), registeredPublicKey);
 
         assertEquals(registrationEntry.getRegistrationStatus(), Fido2RegistrationStatus.registered);
 	}
@@ -334,8 +334,8 @@ public class FullFlowAndroidTest {
 	@Order(2)
     @ExtendWith(FileParameterExtension.class)
 	public void testFinishAttestationTwoStepAndroid(@Name("attestation.android.two-step.userName") String userName,
-			@Name("attestation.android.two-step.finish.request") String registerFinishResponse) {
-		testFinishAttestationTwoStepAndroidImpl(userName, registerFinishResponse);
+			@Name("attestation.android.two-step.finish.request") String registerFinishResponse, @Name("attestation.android.two-step.finish.publicKeyId") String publicKeyId) {
+		testFinishAttestationTwoStepAndroidImpl(userName, registerFinishResponse, publicKeyId);
 	}
 
 	@Test
