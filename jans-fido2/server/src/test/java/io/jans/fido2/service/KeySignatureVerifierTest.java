@@ -44,7 +44,6 @@ public class KeySignatureVerifierTest {
 
 	@BeforeAll
     public static void beforeAll() {
-		System.out.println("!!!!!!!");
 		SecurityProviderUtility.installBCProvider();
     }
 
