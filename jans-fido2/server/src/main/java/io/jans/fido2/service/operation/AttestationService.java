@@ -110,7 +110,7 @@ public class AttestationService {
 		log.debug("Put authenticatorSelection {}", authenticatorSelectionNode);
 
 		// Generate and put challenge
-		String challenge = challengeGenerator.getChallenge();
+		String challenge = challengeGenerator.getAttestationChallenge();
 		optionsResponseNode.put("challenge", challenge);
 		log.debug("Put challenge {}", challenge);
 
