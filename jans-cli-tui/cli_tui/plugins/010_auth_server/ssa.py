@@ -57,6 +57,8 @@ class SSA(DialogUtils):
                     ],style='class:outh_containers_scopes')
 
 
+    def init_cli_object(self):
+
         self.cli_object = config_cli.JCA_CLI(
                 host=config_cli.host,
                 client_id=config_cli.client_id,

@@ -82,6 +82,8 @@ class Plugin(DialogUtils):
         if not hasattr(common_data, 'scopes'):
             self.app.create_background_task(self.retrieve_sopes())
 
+        self.ssa.init_cli_object()
+
     async def get_appconfiguration(self) -> None:
         'Coroutine for getting application configuration.'
 
