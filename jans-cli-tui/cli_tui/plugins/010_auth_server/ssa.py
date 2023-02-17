@@ -11,6 +11,8 @@ from prompt_toolkit.layout.containers import DynamicContainer, Window
 from prompt_toolkit.widgets import Button, Label, Checkbox, Dialog
 from prompt_toolkit.buffer import Buffer
 
+from cli import config_cli
+from utils.multi_lang import _
 from utils.utils import DialogUtils
 from utils.static import cli_style, common_strings
 from wui_components.jans_vetrical_nav import JansVerticalNav
@@ -18,10 +20,6 @@ from wui_components.jans_cli_dialog import JansGDialog
 from wui_components.jans_label_container import JansLabelContainer
 from wui_components.jans_date_picker import DateSelectWidget
 
-from cli import config_cli
-
-
-from utils.multi_lang import _
 
 class SSA(DialogUtils):
     def __init__(
@@ -58,15 +56,13 @@ class SSA(DialogUtils):
 
 
     def init_cli_object(self):
-
         self.cli_object = config_cli.JCA_CLI(
-                host=config_cli.host,
-                client_id=config_cli.client_id,
-                client_secret=config_cli.client_secret,
-                access_token=config_cli.access_token,
+                host=self.app.cli_object.idp_host,
+                client_id=self.app.cli_object.client_id,
+                client_secret=self.app.cli_object.client_secret,
+                access_token=self.app.cli_object.access_token,
                 op_mode = 'auth'
             )
-
 
     def update_ssa_container(self, start_index=0, search_str=''):
 

@@ -337,8 +337,7 @@ class JansCliApp(Application):
 
             else:
                 self.cli_object_ok = True
-
-        self.check_available_plugins()
+                self.check_available_plugins()
 
 
     def check_available_plugins(self) -> None:
