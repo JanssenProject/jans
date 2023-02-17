@@ -289,7 +289,6 @@ public class FullFlowAndroidTest {
 
         assertNotNull(authenticationEntry);
         assertNotNull(response);
-        System.out.println(response);
         assertTrue(response.get("allowCredentials").size() > 0);
         assertEquals(response.get("allowCredentials").get(0).get("id").asText(), registrationEntry.getPublicKeyId());
 
