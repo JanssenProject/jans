@@ -104,8 +104,8 @@ public class KeyGenerator {
             options.addOption(OXELEVEN_GENERATE_KEY_ENDPOINT, true, "oxEleven Generate Key Endpoint.");
             options.addOption(EXPIRATION, true, "Expiration in days.");
             options.addOption(EXPIRATION_HOURS, true, "Expiration in hours.");
-            options.addOption(KEY_LENGTH, true, "Key length");
-            options.addOption(KEY_OPS_TYPE, true, "Key Operations Type");
+            options.addOption(KEY_LENGTH, true, "Key length.");
+            options.addOption(KEY_OPS_TYPE, true, "Key Operations Type.");
             options.addOption(TEST_PROP_FILE, true, "Tests property file.");
             options.addOption(HELP, false, "Show help.");
         }
