@@ -25,6 +25,7 @@ import org.apache.commons.io.FileUtils;
 import org.jboss.weld.junit5.auto.AddPackages;
 import org.jboss.weld.junit5.auto.WeldJunit5AutoExtension;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import io.jans.as.model.util.SecurityProviderUtility;
@@ -54,7 +55,7 @@ public class KeySignatureVerifierTest {
 	 * 
 	 * openssl dgst -sha256 -sign private.key data.txt | openssl enc -base64 > signature.txt
 	 */
-	//@Test
+	@Test
 	public void testSHA256withECDSASignature() throws IOException, NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException, InvalidKeyException, SignatureException {
 		System.out.println(new File(".").getAbsolutePath());
 		String key = FileUtils.readFileToString(new File("./target/test-classes/keys/secp256r1/public.pem"), StandardCharsets.UTF_8);
