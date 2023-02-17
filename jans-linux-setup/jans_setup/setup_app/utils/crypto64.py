@@ -298,7 +298,7 @@ class Crypto64:
 
         cmd = " ".join([Config.cmd_java,
                         "-Dlog4j.defaultInitOverride=true",
-                        "-cp", Config.non_setup_properties['jans_auth_client_jar_fn'], 
+                        "-cp", self.get_key_gen_client_cmd(), 
                         Config.non_setup_properties['key_gen_path'],
                         '-key_ops_type', 'ALL',
                         "-keystore",
@@ -334,12 +334,11 @@ class Crypto64:
         if not enc_keys:
             enc_keys = Config.default_enc_key_algs
 
-        client_cmd = self.get_key_gen_client_cmd()
-
         args = [Config.cmd_java,
                         "-Dlog4j.defaultInitOverride=true",
-                        "-cp", client_cmd,
+                        "-cp", self.get_key_gen_client_cmd(),
                         Config.non_setup_properties['key_gen_path'],
+                        '-key_ops_type', 'ALL',
                         "-keystore",
                         data_store_path,
                         "-keypasswd",
@@ -363,8 +362,7 @@ class Crypto64:
 
         cmd = " ".join([Config.cmd_java,
                         "-Dlog4j.defaultInitOverride=true",
-                        "-cp",
-                        Config.non_setup_properties['jans_auth_client_jar_fn'], 
+                        "-cp", self.get_key_gen_client_cmd(),
                         Config.non_setup_properties['key_export_path'],
                         '-key_ops_type', 'ALL',
                         "-keystore",
@@ -539,11 +537,7 @@ class Crypto64:
                         )
         else:
             client_cmd = Config.non_setup_properties['jans_auth_client_jar_fn']
-
         return client_cmd
-
-    def get_key_gen_client_provider_cmd(self):
-        return Config.non_setup_properties['jans_auth_client_jar_fn']
 
     def gen_openid_data_store_keys(self, data_store_path, data_store_pwd, key_expiration=None, dn_name=None, key_algs=None, enc_keys=None):
         self.logIt("Generating oxAuth OpenID Connect keys")
@@ -560,12 +554,11 @@ class Crypto64:
         if not enc_keys:
             enc_keys = Config.default_enc_key_algs
 
-        client_cmd = self.get_key_gen_client_cmd()
-
         args = [Config.cmd_java,
                         "-Dlog4j.defaultInitOverride=true",
-                        "-cp", client_cmd,
+                        "-cp", self.get_key_gen_client_cmd(),
                         Config.non_setup_properties['key_gen_path'],
+                        '-key_ops_type', 'ALL',
                         "-keystore",
                         data_store_path,
                         "-keypasswd",

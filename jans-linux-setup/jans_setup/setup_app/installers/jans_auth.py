@@ -266,8 +266,11 @@ class JansAuthInstaller(JettyInstaller):
     def init_key_gen(self):
 
         self.logIt("Determining key generator path")
-        jans_auth_client_jar_zf = zipfile.ZipFile(Config.non_setup_properties['jans_auth_client_jar_fn'])
-
+        if Config.profile == SetupProfiles.DISA_STIG:
+            client_file = Config.non_setup_properties['jans_auth_client_noprivder_jar_fn']
+        else:
+            client_file = Config.non_setup_properties['jans_auth_client_jar_fn']
+        jans_auth_client_jar_zf = zipfile.ZipFile(client_file)
         for f in jans_auth_client_jar_zf.namelist():
             if os.path.basename(f) == 'KeyGenerator.class':
                 p, e = os.path.splitext(f)
@@ -277,6 +280,6 @@ class JansAuthInstaller(JettyInstaller):
                 Config.non_setup_properties['key_export_path'] = p.replace(os.path.sep, '.')
 
         if (not 'key_gen_path' in Config.non_setup_properties) or (not 'key_export_path' in Config.non_setup_properties):
-            self.logIt("Can't determine key generator and/or key exporter path form {}".format(Config.non_setup_properties['jans_auth_client_jar_fn']), True, True)
+            self.logIt("Can't determine key generator and/or key exporter path form {}".format(client_file), True, True)
         else:
             self.logIt("Key generator path was determined as {}".format(Config.non_setup_properties['key_export_path']))

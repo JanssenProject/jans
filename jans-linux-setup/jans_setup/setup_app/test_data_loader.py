@@ -47,7 +47,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         self.run(' '.join(args), shell=True)
 
         args = [Config.cmd_java, '-Dlog4j.defaultInitOverride=true',
-                '-cp', Config.non_setup_properties['jans_auth_client_jar_fn'], Config.non_setup_properties['key_gen_path'],
+                '-cp', self.get_key_gen_client_cmd(), Config.non_setup_properties['key_gen_path'],
                 '-key_ops_type', 'ALL',
                 '-keystore', client_keystore_fn,
                 '-keypasswd', 'secret',
