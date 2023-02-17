@@ -163,9 +163,9 @@ public class AttestationSignatureAndroidTest {
 	@Test
 	@Order(1)
     @ExtendWith(CustomExtension.class)
-	public void testStartAttestationSignature(@Name("attestation.android.issuer") String issuer, @Name("attestation.android.challenge") String challenge,
-			@Name("attestation.android.userName") String userName, @Name("attestation.android.applicationId") String applicationId,
-			@Name("attestation.android.sessionId") String sessionId, @Name("attestation.android.enrollmentCode") String enrollmentCode) {
+	public void testStartAttestationSignature(@Name("attestation.android.two-step.issuer") String issuer, @Name("attestation.android.two-step.challenge") String challenge,
+			@Name("attestation.android.two-step.userName") String userName, @Name("attestation.android.two-step.applicationId") String applicationId,
+			@Name("attestation.android.two-step.sessionId") String sessionId, @Name("attestation.android.two-step.enrollmentCode") String enrollmentCode) {
 		
 		this.issuer = issuer;
 		this.challenge = challenge;
@@ -190,7 +190,8 @@ public class AttestationSignatureAndroidTest {
 	@Test
 	@Order(2)
     @ExtendWith(CustomExtension.class)
-	public void testFinishAttestationSignature(@Name("attestation.android.userName") String userName, @Name("attestation.android.finish.request") String registerFinishResponse) {
+	public void testFinishAttestationSignature(@Name("attestation.android.two-step.userName") String userName,
+			@Name("attestation.android.two-step.finish.request") String registerFinishResponse) {
 		// Parse register response
 		RegisterResponse registerResponse = attestationSuperGluuController.parseRegisterResponse(registerFinishResponse);
 
