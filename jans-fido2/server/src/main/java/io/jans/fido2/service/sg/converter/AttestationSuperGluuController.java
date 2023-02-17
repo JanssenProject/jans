@@ -103,7 +103,24 @@ public class AttestationSuperGluuController {
      *             "appId":"https://yurem-emerging-pig.gluu.info/identity/authcode.htm","version":"U2F_V2"}]}
      */
     public JsonNode startRegistration(String userName, String appId, String sessionId, String enrollmentCode) {
-        boolean oneStep = StringHelper.isEmpty(userName);
+        ObjectNode params = buildFido2AttestationStartResponse(userName, appId, sessionId);
+
+        ObjectNode result = attestationService.options(params);
+
+        // Build start registration response  
+        ObjectNode superGluuResult = dataMapperService.createObjectNode();
+        ArrayNode registerRequests = superGluuResult.putArray("registerRequests");
+
+    	result.put("appId", appId);
+        registerRequests.add(result);
+
+        result.put("version", "U2F_V2");
+
+        return superGluuResult;
+    }
+
+	public ObjectNode buildFido2AttestationStartResponse(String userName, String appId, String sessionId) {
+		boolean oneStep = StringHelper.isEmpty(userName);
 
         boolean valid = userSessionIdService.isValidSessionId(sessionId, userName);
         if (!valid) {
@@ -130,20 +147,8 @@ public class AttestationSuperGluuController {
         params.put("attestation", "direct");
 
         log.debug("Prepared U2F_V2 attestation options request: {}", params.toString());
-
-        ObjectNode result = attestationService.options(params);
-
-        // Build start registration response  
-        ObjectNode superGluuResult = dataMapperService.createObjectNode();
-        ArrayNode registerRequests = superGluuResult.putArray("registerRequests");
-
-    	result.put("appId", appId);
-        registerRequests.add(result);
-
-        result.put("version", "U2F_V2");
-
-        return superGluuResult;
-    }
+		return params;
+	}
 
     /* Example for one_step:
      *  - request:
@@ -189,14 +194,31 @@ public class AttestationSuperGluuController {
      *            
      */
     public JsonNode finishRegistration(String userName, String registerResponseString) {
-        RegisterResponse registerResponse;
+        RegisterResponse registerResponse = parseRegisterResponse(registerResponseString);
+
+        ObjectNode params = buildFido2AttestationVerifyResponse(userName, registerResponse);
+
+        ObjectNode result = attestationService.verify(params);
+        
+        result.put("status", "success");
+        result.put("challenge", registerResponse.getClientData().getChallenge());
+
+        return result;
+    }
+
+    public RegisterResponse parseRegisterResponse(String registerResponseString) {
+		RegisterResponse registerResponse;
         try {
             registerResponse = dataMapperService.readValue(registerResponseString, RegisterResponse.class);
         } catch (IOException ex) {
             throw new Fido2RpRuntimeException("Failed to parse options attestation request", ex);
         }
 
-        if (!ArrayUtils.contains(RawRegistrationService.SUPPORTED_REGISTER_TYPES, registerResponse.getClientData().getTyp())) {
+        return registerResponse;
+	}
+
+	public ObjectNode buildFido2AttestationVerifyResponse(String userName, RegisterResponse registerResponse) {
+		if (!ArrayUtils.contains(RawRegistrationService.SUPPORTED_REGISTER_TYPES, registerResponse.getClientData().getTyp())) {
             throw new Fido2RuntimeException("Invalid options attestation request type");
         }
 
@@ -250,14 +272,8 @@ public class AttestationSuperGluuController {
 		}
 
         log.debug("Prepared U2F_V2 attestation verify request: {}", params.toString());
-
-        ObjectNode result = attestationService.verify(params);
-        
-        result.put("status", "success");
-        result.put("challenge", registerResponse.getClientData().getChallenge());
-
-        return result;
-    }
+		return params;
+	}
 
     private byte[] generateAuthData(ClientData clientData, RawRegisterResponse rawRegisterResponse) throws IOException {
     	byte[] rpIdHash = digestService.hashSha256(clientData.getOrigin());
