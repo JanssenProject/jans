@@ -125,7 +125,7 @@ public class AssertionService {
 		optionsResponseNode.put("userVerification", userVerification.name());
 
 		// Generate and put challenge
-		String challenge = challengeGenerator.getChallenge();
+		String challenge = challengeGenerator.getAssertionChallenge();
 		optionsResponseNode.put("challenge", challenge);
 		log.debug("Put challenge {}", challenge);
 
