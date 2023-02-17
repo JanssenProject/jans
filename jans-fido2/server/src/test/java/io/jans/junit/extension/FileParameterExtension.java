@@ -27,13 +27,13 @@ import io.jans.util.StringHelper;
  * @author Yuriy Movchan
  * @version 0.1, 17/02/2023
  */
-public class CustomExtension implements ParameterResolver {
+public class FileParameterExtension implements ParameterResolver {
 
-	Logger logger = LoggerFactory.getLogger(CustomExtension.class);
+	Logger logger = LoggerFactory.getLogger(FileParameterExtension.class);
 
 	private Map<String, String> parameters;
 
-	public CustomExtension() throws IOException {
+	public FileParameterExtension() throws IOException {
 		logger.info("Loading test properties...");
 
         String propertiesFile = "target/test-classes/test.properties";
@@ -67,7 +67,17 @@ public class CustomExtension implements ParameterResolver {
     		return null;
     	}
 
+    	Class<?> parameterType = parameterContext.getParameter().getType();
+    	if (parameterType.equals(String.class)) {
+        	return parameters.get(name.value());
+    	}
+
+    	if (parameterType.equals(Integer.class)) {
+        	return StringHelper.toInteger(parameters.get(name.value()));
+    	}
+
     	return parameters.get(name.value());
+
     }
 
     @Override
@@ -83,7 +93,14 @@ public class CustomExtension implements ParameterResolver {
     		logger.error("Parameter '{}' is not defined!", name.value());
     	}
 
-    	return supports;
+    	Class<?> parameterType = parameterContext.getParameter().getType();
+    	if (parameterType.equals(String.class) || parameterType.equals(Integer.class)) {
+        	return supports;
+    	}
+    	
+		logger.error("Parameter '{}' type isn't supported!", name.value());
+
+		return false;
     }
     
 }
