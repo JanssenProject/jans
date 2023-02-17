@@ -50,6 +50,8 @@ import io.jans.fido2.service.persist.UserSessionIdService;
 import io.jans.fido2.service.processor.attestation.U2FSuperGluuAttestationProcessor;
 import io.jans.fido2.service.sg.converter.AttestationSuperGluuController;
 import io.jans.fido2.service.shared.UserService;
+import io.jans.fido2.service.verifier.CommonVerifiers;
+import io.jans.fido2.sg.SuperGluuMode;
 import io.jans.junit.extension.CustomExtension;
 import io.jans.junit.extension.Name;
 import io.jans.orm.model.fido2.Fido2RegistrationEntry;
@@ -169,6 +171,9 @@ public class AttestationSignatureAndroidTest {
 		this.challenge = challenge;
 
 		JsonNode request = attestationSuperGluuController.buildFido2AttestationStartResponse(userName, applicationId, sessionId);
+        assertEquals(request.get(CommonVerifiers.SUPER_GLUU_REQUEST).asBoolean(), true);
+        assertEquals(request.get(CommonVerifiers.SUPER_GLUU_MODE).asText(), SuperGluuMode.TWO_STEP.getMode());
+        assertEquals(request.get(CommonVerifiers.SUPER_GLUU_APP_ID).asText(), applicationId);
 
 		ObjectNode response = attestationService.options(request);
 		
@@ -190,6 +195,8 @@ public class AttestationSignatureAndroidTest {
 		RegisterResponse registerResponse = attestationSuperGluuController.parseRegisterResponse(registerFinishResponse);
 
 		JsonNode request = attestationSuperGluuController.buildFido2AttestationVerifyResponse(userName, registerResponse);
+        assertEquals(request.get(CommonVerifiers.SUPER_GLUU_REQUEST).asBoolean(), true);
+        assertEquals(request.get(CommonVerifiers.SUPER_GLUU_MODE).asText(), SuperGluuMode.TWO_STEP.getMode());
 
 		ObjectNode response = attestationService.verify(request);
 
