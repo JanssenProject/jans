@@ -52,10 +52,6 @@ public class RegistrationPersistenceService extends io.jans.as.common.service.co
     @Inject
     private UserService userService;
 
-//    public void setUserService(UserService userService) {
-//        this.userService = userService;
-//    }
-
     @Inject
     private PersistenceEntryManager persistenceEntryManager;
 
