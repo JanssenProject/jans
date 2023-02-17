@@ -56,7 +56,6 @@ public class KeySignatureVerifierTest {
 	 */
 	@Test
 	public void testSHA256withECDSASignature() throws IOException, NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException, InvalidKeyException, SignatureException {
-		System.out.println(new File(".").getAbsolutePath());
 		String key = FileUtils.readFileToString(new File("./target/test-classes/keys/secp256r1/public.pem"), StandardCharsets.UTF_8);
 	    String publicKeyPEM = key.replace("-----BEGIN PUBLIC KEY-----", "").replaceAll(System.lineSeparator(), "").replace("-----END PUBLIC KEY-----", "");
 
