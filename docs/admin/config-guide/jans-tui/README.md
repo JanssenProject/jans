@@ -83,12 +83,34 @@ Installation of a Jans TUI ( Text-Based User Interface ) need a Jans server to b
 
 ### Build:
 
-- `pip3 install shiv`
-- `wget https://github.com/JanssenProject/jans/archive/refs/heads/jans-cli-tui-works.zip`
-- `unzip jans-cli-tui-works.zip`
-- `cd jans-jans-cli-tui-works/jans-cli-tui/`
-- `make zipapp`
+1. Install dependencies
 
-### Run
+    ```sh
+    apt install -y wget unzip python3-pip python3-dev
+    pip3 install shiv
+    ```
 
-- `./config-cli-tui.pyz`
+2. Download the repository:
+
+    ```sh
+    wget https://github.com/JanssenProject/jans/archive/refs/heads/main.zip
+    ```
+
+3. Unzip package, and change to directory
+
+    ```sh
+    unzip main.zip
+    cd jans-main/jans-cli-tui
+    ```
+
+4. Build
+
+    ```sh
+    make zipapp
+    ```
+
+You can verify with the following command line if everything is done successfully.
+
+```
+python3 jans-cli-tui.pyz
+```
