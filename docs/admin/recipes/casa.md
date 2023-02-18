@@ -71,30 +71,13 @@ casa_client_pw=MyCasaClientSecret
 1. Go to `/opt/jans/jetty/casa` folder and execute `touch .administrable`. [Further reading]()
 
 2. [Enable authentication mechanisms](https://github.com/maduvena/jans-docs/wiki/Enabling-an-authentication-mechanism-(or-custom-script)) in Jan-auth server like `otp`, `fido2`, `email_otp`.
+3. launch jans-cli-tui to enable scripts in Jans-auth server
+4. search for script, open script and navigate to enable section and press enter at enable then press save.
+![image](https://user-images.githubusercontent.com/5729240/219859903-97e863d6-3e49-40ff-92e4-3f95d1d56018.png)
 
-    ```shell
-    python3 /opt/jans/jans-setup/setup.py -enable-script="<inum_of_script>"
-    ```
+5. Login to the Casa portal as an administrator
 
-    | Inum | displayName |
-    |---|---|
-    | 09A0-93D7 | smpp  |
-    | 5018-D4BF | otp |
-    | 5018-F9CF | duo |
-    | 8BAF-80D7 | fido2 |
-    | 92F0-BF9E | super_gluu |
-    | 09A0-93D6 | twilio_sms |
-
-    When successfully enabled, you should see a confirmation message similar to the one below on console:
-
-    ```text
-    Please wait while collecting properties...
-    Enabling scripts 5018-D4BF
-    ```
-
-3. Login to the Casa portal as an administrator
-
-4. Enable authentication methods by navigating to `Administration console` -> `Enabled Authentication methods`. Details about enabling authentication methods are available in [Casa documentation](https://gluu.org/docs/casa/4.4/administration/admin-console/#configure-casa)
+6. Enable authentication methods by navigating to `Administration console` -> `Enabled Authentication methods`. Details about enabling authentication methods are available in [Casa documentation](https://gluu.org/docs/casa/4.4/administration/admin-console/#configure-casa)
 
 ## Configuring authentication methods
 
