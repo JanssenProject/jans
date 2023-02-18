@@ -391,6 +391,7 @@ class KeyRegenerator:
         print("Generating keys")
         args = [self.java_cmd, '-Dlog4j.defaultInitOverride=true',
                 '-cp', self.client_jar_fn, self.key_gen_path,
+                '-key_ops_type', 'ALL',
                 '-keystore', self.keystore_fn,
                 '-keypasswd', self.key_store_secret,
                 '-sig_keys', ' '.join(self.sig_enc['sig']),
