@@ -547,8 +547,6 @@ class JansCliApp(Application):
         focus_previous(ev)
 
     def help(self,ev: KeyPressEvent) -> None:
-        # self.logger.debug("ev:"+str(ev))
-        # self.logger.debug("ev:"+str(type(ev)))
         self.show_message(_("Help"),
         ("<Enter>          {} \n"
         "<Esc>            {}\n"
@@ -563,7 +561,7 @@ class JansCliApp(Application):
             _("Display current item in JSON format if possible"),
             _("Delete current selection if possible"),
             "https://docs.jans.io/v1.0.6/admin/config-guide/tui/"))
-            
+
     def escape(self,ev: KeyPressEvent) -> None:
         try:
             if self.layout.container.floats:

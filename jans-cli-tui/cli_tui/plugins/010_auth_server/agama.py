@@ -112,18 +112,15 @@ class Agama(DialogUtils):
 
     def upload_project(self):
 
-
         def project_uploader(path, project_name):
             async def coroutine():
                 cli_args = {'operation_id': 'post-agama-dev-studio-prj', 'data_fn': path, 'url_suffix':'name:{}'.format(project_name)}
                 self.app.start_progressing(_("Uploading agama project..."))
                 result = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-                data = result.text
                 self.app.stop_progressing()
                 self.get_agama_projects()
 
             asyncio.ensure_future(coroutine())
-
 
 
         def aks_project_name(path):
@@ -156,7 +153,7 @@ class Agama(DialogUtils):
 
         def do_upload_project(path):
             project_name = None
-            
+
             try:
                 project_zip = zipfile.ZipFile(path)
             except Exception:
