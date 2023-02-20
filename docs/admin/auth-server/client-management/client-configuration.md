@@ -120,6 +120,11 @@ tokens. The table below shows grant types and flows that should be used for vari
 | Input constrained devices (Example: TV)                                                         | `urn:ietf:params:oauth:grant-type:device_code` | Device Flow                  |
 | Highly trusted applications where redirect based flows are not feasible to implement            | `password`                                     | Resource Owner Password Flow |
 
+!!! Note
+
+    Certain grant types should not be used together. For example, implicit flow with hybrid flow. Or using authorization
+    code flow with hybrid flow. This allows a downgrade attack from more secure flow to less secure flow.
+
 
 ## Pre-authorization
 
@@ -127,6 +132,17 @@ If the OAuth authorization prompt should not be displayed to end users, set this
 to internal clients (not a third party) where there is no need to prompt the person to approve the release of information.
 
 ## Response Types
+
+Grant defines how a client interacts with the token endpoint to get the tokens. Janssen Server supports grant types
+defined by OAuth 2.0, OAuth 2.1, and extension grants defined by other RFCs. A complete
+list of supported grant types can be found in the response of the Janssen Server's well-known
+[configuration endpoint](./configuration.md) given below.
+
+```text
+https://janssen.server.host/jans-auth/.well-known/openid-configuration
+```
+
+Claim `request_parameter_supported` lists all the supported grant types in the response.
 
 TODO: add details to this section
 
