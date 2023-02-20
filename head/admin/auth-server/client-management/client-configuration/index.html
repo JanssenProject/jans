@@ -4296,12 +4296,59 @@
     Cryptography
   </a>
   
+    <nav class="md-nav" aria-label="Cryptography">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#available-algorithms-for-encryption-and-signing" class="md-nav__link">
+    Available Algorithms for Encryption and Signing
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recommendations" class="md-nav__link">
+    Recommendations
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
   <a href="#grants" class="md-nav__link">
     Grants
   </a>
+  
+    <nav class="md-nav" aria-label="Grants">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#supported-grant-types" class="md-nav__link">
+    Supported Grant Types
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuring-grant-type-for-client" class="md-nav__link">
+    Configuring Grant Type For Client
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recommendations-for-using-grant-types-and-flows" class="md-nav__link">
+    Recommendations For Using Grant Types and Flows
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -4316,6 +4363,19 @@
   <a href="#response-types" class="md-nav__link">
     Response Types
   </a>
+  
+    <nav class="md-nav" aria-label="Response Types">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#response-type-recommendations" class="md-nav__link">
+    Response Type Recommendations
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -8714,12 +8774,59 @@
     Cryptography
   </a>
   
+    <nav class="md-nav" aria-label="Cryptography">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#available-algorithms-for-encryption-and-signing" class="md-nav__link">
+    Available Algorithms for Encryption and Signing
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recommendations" class="md-nav__link">
+    Recommendations
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
   <a href="#grants" class="md-nav__link">
     Grants
   </a>
+  
+    <nav class="md-nav" aria-label="Grants">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#supported-grant-types" class="md-nav__link">
+    Supported Grant Types
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configuring-grant-type-for-client" class="md-nav__link">
+    Configuring Grant Type For Client
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recommendations-for-using-grant-types-and-flows" class="md-nav__link">
+    Recommendations For Using Grant Types and Flows
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -8734,6 +8841,19 @@
   <a href="#response-types" class="md-nav__link">
     Response Types
   </a>
+  
+    <nav class="md-nav" aria-label="Response Types">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#response-type-recommendations" class="md-nav__link">
+    Response Type Recommendations
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -8815,12 +8935,129 @@ framework</a> and
   details.</li>
 </ul>
 <h2 id="cryptography">Cryptography<a class="headerlink" href="#cryptography" title="Permanent link">#</a></h2>
+<p>Janssen Server allows clients to configure static set of keys using <code>JWKS</code> or specify a URI as <code>JWKS URI</code> where client
+is exposing its key set. For client who can host keys and expose a URI, it is <strong>recommended</strong> to use <code>JWKS URI</code> instead of
+static <code>JWKS</code> key set. Using <code>JWKS URI</code> enables client to rotate its cryptographic keys without having to change the
+client configuration on Janssen Server.</p>
+<h3 id="available-algorithms-for-encryption-and-signing">Available Algorithms for Encryption and Signing<a class="headerlink" href="#available-algorithms-for-encryption-and-signing" title="Permanent link">#</a></h3>
+<p>The client can select algorithms for cryptographic and encryption during client configuration. Janssen 
+Server supports a list of algorithms as listed in response of Janssen Server's well-known
+<a href="./configuration.md">configuration endpoint</a> given below.</p>
+<div class="highlight"><pre><span></span><code>https://janssen.server.host/jans-auth/.well-known/openid-configuration
+</code></pre></div>
+<p>Claims that list supported algorithms:</p>
+<ul>
+<li>id_token_encryption_alg_values_supported</li>
+<li>id_token_signing_alg_values_supported</li>
+<li>userinfo_encryption_enc_values_supported</li>
+<li>userinfo_signing_alg_values_supported</li>
+<li>userinfo_encryption_alg_values_supported</li>
+<li>access_token_signing_alg_values_supported</li>
+<li>request_object_signing_alg_values_supported</li>
+<li>request_object_encryption_alg_values_supported</li>
+<li>request_object_encryption_alg_values_supported</li>
+</ul>
+<h3 id="recommendations">Recommendations<a class="headerlink" href="#recommendations" title="Permanent link">#</a></h3>
+<ul>
+<li>RSA keys with a minimum 2048 bits if using RSA cryptography</li>
+<li>Elliptic Curve keys with a minimum of 160 bits if using Elliptic Curve cryptography</li>
+<li>Client secret should have a minimum of 128 bits if using symmetric key cryptography</li>
+<li>Sign with PS256 (RSASSA-PSS using SHA-256 and MGF1 with SHA-256) or ES256 (ECDSA using P-256 and SHA-256)</li>
+</ul>
 <h2 id="grants">Grants<a class="headerlink" href="#grants" title="Permanent link">#</a></h2>
+<h3 id="supported-grant-types">Supported Grant Types<a class="headerlink" href="#supported-grant-types" title="Permanent link">#</a></h3>
+<p>Grant defines how a client interacts with the token endpoint to get the tokens. Janssen Server supports grant types
+defined by OAuth 2.0, OAuth 2.1, and extension grants defined by other RFCs. A complete
+list of supported grant types can be found in the response of the Janssen Server's well-known
+<a href="./configuration.md">configuration endpoint</a> given below.</p>
+<div class="highlight"><pre><span></span><code>https://janssen.server.host/jans-auth/.well-known/openid-configuration
+</code></pre></div>
+<p>Claim <code>grant_types_supported</code> lists all the supported grant types in the response.</p>
+<h3 id="configuring-grant-type-for-client">Configuring Grant Type For Client<a class="headerlink" href="#configuring-grant-type-for-client" title="Permanent link">#</a></h3>
+<p>Janssen Server will allow requests from a client with grant types that the client is configured to use. Client can be
+configured to use or not use certain grant types using <a href="../../../config-guide/jans-cli/">CLI</a> or <a href="../../../config-guide/tui/">TUI</a> tools.</p>
+<h3 id="recommendations-for-using-grant-types-and-flows">Recommendations For Using Grant Types and Flows<a class="headerlink" href="#recommendations-for-using-grant-types-and-flows" title="Permanent link">#</a></h3>
+<p>Developers should use the grant types based on the ability of the client to protect the client credentials as well as
+the security profile of the deployment. If the client software is a server-side component that can securely store the
+client credentials, such a client is called a <code>confidential</code> client. As opposed to that, if the application requesting
+access token is entirely running on a browser, where it is not possible to store client credentials securely, such a client
+is called a <code>public</code> client.</p>
+<p>Along with the grant type to be used, developers also need to choose which flow should be used to get the required
+tokens. The table below shows grant types and flows that should be used for various use-cases.</p>
+<table>
+<thead>
+<tr>
+<th>Client Type</th>
+<th>Recommended Grant Type</th>
+<th>Flow</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Backend App (Example: batch processes) that need to access its own resources</td>
+<td><code>client_credentials</code></td>
+<td>Client Credentials</td>
+</tr>
+<tr>
+<td>Server backend of a web-application needs access token</td>
+<td><code>authorization_code</code></td>
+<td>Authorization Code</td>
+</tr>
+<tr>
+<td>Web-application that needs user information via id_token on browser and access token on backend</td>
+<td><code>authorization_code</code></td>
+<td>Hybrid Flow</td>
+</tr>
+<tr>
+<td>Browser based single page applications or Mobile applications</td>
+<td><code>authorization_code</code></td>
+<td>Authorization Code with PKCE</td>
+</tr>
+<tr>
+<td>Browser based single page applications or Mobile applications that only intend to get id_token</td>
+<td>-</td>
+<td>Implicit Flow with Form Post</td>
+</tr>
+<tr>
+<td>Input constrained devices (Example: TV)</td>
+<td><code>urn:ietf:params:oauth:grant-type:device_code</code></td>
+<td>Device Flow</td>
+</tr>
+<tr>
+<td>Highly trusted applications where redirect based flows are not feasible to implement</td>
+<td><code>password</code></td>
+<td>Resource Owner Password Flow</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Certain grant types should not be used together. For example, implicit flow with hybrid flow. Or using authorization
+code flow with hybrid flow. This allows a downgrade attack from more secure flow to less secure flow.</p>
+</div>
 <h2 id="pre-authorization">Pre-authorization<a class="headerlink" href="#pre-authorization" title="Permanent link">#</a></h2>
 <p>If the OAuth authorization prompt should not be displayed to end users, set this field to True. This is useful for SSO
 to internal clients (not a third party) where there is no need to prompt the person to approve the release of information.</p>
 <h2 id="response-types">Response Types<a class="headerlink" href="#response-types" title="Permanent link">#</a></h2>
-<p>Please use the left navigation menu to browse the content of this section while we are still working on developing content for <code>Overview</code> page.</p>
+<p>Client sends <code>response_type</code> request parameter when sending request to authorization endpoint. Using this parameter, the
+client informs the authorization server of the desired grant. Response type parameter is
+<a href="https://datatracker.ietf.org/doc/html/rfc6749#section-3.1.1">defined</a> in the OAuth 2.0 framework.</p>
+<p>Janssen Server supports response types
+defined by OAuth 2.0, OAuth 2.1.The complete list of supported response types can be found in the response of the 
+Janssen Server's well-known <a href="./configuration.md">configuration endpoint</a> given below.</p>
+<div class="highlight"><pre><span></span><code>https://janssen.server.host/jans-auth/.well-known/openid-configuration
+</code></pre></div>
+<p>Claim <code>response_types_supported</code> lists all the supported grant types in the response.</p>
+<p>When registering client using dynamic client registration, if the <code>response_type</code> parameter is not specified, it'll 
+default to <code>code</code>.</p>
+<h3 id="response-type-recommendations">Response Type Recommendations<a class="headerlink" href="#response-type-recommendations" title="Permanent link">#</a></h3>
+<ul>
+<li>Avoid using response type <code>token</code>. This response type is 
+<a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-07#section-10.1">deprecated</a> by OAuth 2.1. </li>
+<li>Grant types allowed for a client determines which response types are permitted in authorization requests. 
+Make sure appropriate grant types are configured in Janssen Server client configuration. Janssen Server will reject 
+authorization requests containing response types not permitted for respective client.</li>
+</ul>
 <div class="admonition contribute">
 <p class="admonition-title">Contribute</p>
 </div>
@@ -8831,7 +9068,7 @@ to internal clients (not a third party) where there is no need to prompt the per
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-02-06T08:42:48+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-02-06</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-02-20T11:42:44+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-02-20</span>
       
         <br>
         Created:
