@@ -595,24 +595,6 @@ jansRevision: 0
 jansScr::%(person_authentication_github_external_authenticator_githubexternalauthenticator)s
 jansScrTyp: person_authentication
 
-dn: inum=E706-F8A9,ou=scripts,o=jans
-objectClass: top
-objectClass: jansCustomScr
-description: GitHub Inbound Custom Authentication script For ADS
-displayName: github_ads
-inum: E706-F8A9
-jansConfProperty: {"value1":"hide","value2":"true","hide":false,"description":""}
-jansConfProperty: {"value1":"github_creds_file","value2":"/etc/jans/conf/github.json","hide":false,"description":""}
-jansConfProperty: {"value1":"description","value2":"GitHub Login","hide":false,"description":""}
-jansEnabled: false
-jansLevel: 10
-jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
-jansModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
-jansProgLng: python
-jansRevision: 0
-jansScr::%(person_authentication_github_external_authenticator_githubauthenticatorforads)s
-jansScrTyp: person_authentication
-
 dn: inum=8333-DFBC,ou=scripts,o=jans
 objectClass: jansCustomScr
 objectClass: top
