@@ -72,8 +72,16 @@ jobs:
     - name: Get latest tag
       id: previoustag
       run: |
-        echo "tag=$(curl https://api.github.com/repos/${{ github.repository }}/releases -s | grep "tag_name" | cut -d '"' -f 4 | grep -o '^\v.*' | head -n 1)" >> $GITHUB_OUTPUT
         echo "version=$(curl https://api.github.com/repos/${{ github.repository }}/releases -s | grep "tag_name" | cut -d '"' -f 4 | grep -o '^\v.*' | head -n 1 | cut -d 'v' -f 2)" >> $GITHUB_OUTPUT
+        TAG=$(curl https://api.github.com/repos/${{ github.repository }}/releases -s | grep "tag_name" | cut -d '"' -f 4 | grep -o '^\v.*' | head -n 1)
+        echo "tag=$TAG" >> $GITHUB_OUTPUT
+        echo "PACKAGE_PREFIX=jans" >> ${GITHUB_ENV}
+        #If on schedule build nightly packages
+        if [ ${{ github.event_name }} = "schedule" ] || [ ${{ github.event.inputs.nightly }} = true ]; then
+          echo "Activating nightly build"
+          VERSION=$(cat docker-jans-auth-server/Dockerfile | grep "ENV CN_VERSION" | awk -F "[=-]" '{print $2}')
+          echo "PACKAGE_PREFIX=jans-$VERSION-nightly-build" >> ${GITHUB_ENV}
+        fi
 
     - name: Print Version
       run: |
@@ -109,16 +117,18 @@ jobs:
       with:
         repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
         file: ${{github.workspace}}/${{ matrix.asset_path }}/jans${{ matrix.asset_prefix }}${{ steps.previoustag.outputs.version }}${{ matrix.asset_suffix }}
-        asset_name: jans${{ matrix.asset_prefix }}${{ steps.previoustag.outputs.version }}${{ matrix.asset_suffix }}
+        asset_name: ${{ env.PACKAGE_PREFIX }}${{ matrix.asset_prefix }}${{ steps.previoustag.outputs.version }}${{ matrix.asset_suffix }}
         tag: ${{ steps.previoustag.outputs.tag }}
+        overwrite: true
     - name: Upload checksum to release
       id: upload_shas
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
         file: ${{github.workspace}}/${{ matrix.asset_path }}/jans${{ matrix.asset_prefix }}${{ steps.previoustag.outputs.version }}${{ matrix.asset_suffix }}.sha256sum
-        asset_name: jans${{ matrix.asset_prefix }}${{ steps.previoustag.outputs.version }}${{ matrix.asset_suffix }}.sha256sum
+        asset_name: ${{ env.PACKAGE_PREFIX }}${{ matrix.asset_prefix }}${{ steps.previoustag.outputs.version }}${{ matrix.asset_suffix }}.sha256sum
         tag: ${{ steps.previoustag.outputs.tag }}
+        overwrite: true
   build_python_packages:
     runs-on: ubuntu-20.04
     steps:
@@ -215,9 +225,9 @@ jobs:
         echo "SETUP_PREFIX=jans-linux" >> ${GITHUB_ENV}
         echo "TUI_PREFIX=jans-cli-tui-linux" >> ${GITHUB_ENV}
         #If on schedule build nightly packages
-        if [ ${{ github.event_name }} = "schedule" ] || [ ${{ github.event.inputs.nightly }} = true]; then
+        if [ ${{ github.event_name }} = "schedule" ] || [ ${{ github.event.inputs.nightly }} = true ]; then
           echo "Activating nightly build"
-          VERSION=$(cat docker-jans-auth-server/Dockerfile | grep "ENV CN_VERSION" | awk -F "[=-]" '{print $2}')-nightly-build)
+          VERSION=$(cat docker-jans-auth-server/Dockerfile | grep "ENV CN_VERSION" | awk -F "[=-]" '{print $2}')
           echo "SETUP_PREFIX=jans-linux-$VERSION-nightly-build" >> ${GITHUB_ENV}
           echo "TUI_PREFIX=jans-cli-tui-linux-$VERSION-nightly-build" >> ${GITHUB_ENV}
         fi
