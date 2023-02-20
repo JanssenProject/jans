@@ -206,13 +206,14 @@ public class IntrospectionWebService {
             response.setActive(tokenToIntrospect.isValid());
             response.setExpiresAt(ServerUtil.dateToSeconds(tokenToIntrospect.getExpirationDate()));
             response.setIssuedAt(ServerUtil.dateToSeconds(tokenToIntrospect.getCreationDate()));
-            response.setAcrValues(grantOfIntrospectionToken.getAcrValues());
+            response.setAcr(grantOfIntrospectionToken.getAcrValues());
             response.setScope(grantOfIntrospectionToken.getScopes() != null ? grantOfIntrospectionToken.getScopes() : Lists.newArrayList()); // #433
             response.setClientId(grantOfIntrospectionToken.getClientId());
             response.setSub(grantOfIntrospectionToken.getSub());
             response.setUsername(grantOfIntrospectionToken.getUserId());
             response.setIssuer(appConfiguration.getIssuer());
             response.setAudience(grantOfIntrospectionToken.getClientId());
+            response.setAuthTime(ServerUtil.dateToSeconds(grantOfIntrospectionToken.getAuthenticationTime()));
 
             if (tokenToIntrospect instanceof AccessToken) {
                 AccessToken accessToken = (AccessToken) tokenToIntrospect;
