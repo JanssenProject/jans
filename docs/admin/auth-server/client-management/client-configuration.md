@@ -133,18 +133,27 @@ to internal clients (not a third party) where there is no need to prompt the per
 
 ## Response Types
 
-Grant defines how a client interacts with the token endpoint to get the tokens. Janssen Server supports grant types
-defined by OAuth 2.0, OAuth 2.1, and extension grants defined by other RFCs. A complete
-list of supported grant types can be found in the response of the Janssen Server's well-known
-[configuration endpoint](./configuration.md) given below.
+Client sends `response_type` request parameter when sending request to authorization endpoint. Using this parameter, the
+client informs the authorization server of the desired grant. Response type parameter is
+[defined](https://datatracker.ietf.org/doc/html/rfc6749#section-3.1.1) in the OAuth 2.0 framework.
+
+Janssen Server supports response types
+defined by OAuth 2.0, OAuth 2.1.The complete list of supported response types can be found in the response of the 
+Janssen Server's well-known [configuration endpoint](./configuration.md) given below.
 
 ```text
 https://janssen.server.host/jans-auth/.well-known/openid-configuration
 ```
 
-Claim `request_parameter_supported` lists all the supported grant types in the response.
+Claim `response_types_supported` lists all the supported grant types in the response.
 
-TODO: add details to this section
+### Response Type Recommendations
+
+- Avoid using response type `token`. This response type is 
+[deprecated](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-07#section-10.1) by OAuth 2.1. 
+- Grant types allowed for a client determines which response types are permitted in authorization requests. 
+Make sure appropriate grant types are configured in Janssen Server client configuration. Janssen Server will reject 
+authorization requests containing response types not permitted for respective client.
 
 !!! Contribute
 If you’d like to contribute to this document, get started with the [Contribution Guide](https://docs.jans.io/head/CONTRIBUTING/#contributing-to-the-documentation)
