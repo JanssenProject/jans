@@ -214,7 +214,7 @@ jobs:
         echo "tag=$TAG" >> $GITHUB_OUTPUT
         echo "SETUP_PREFIX=jans-linux" >> ${GITHUB_ENV}
         echo "TUI_PREFIX=jans-cli-tui-linux" >> ${GITHUB_ENV}
-       #If on schedule build nightly packages
+        #If on schedule build nightly packages
         if [ ${{ github.event_name }} = "schedule" ] || [ ${{ github.event.inputs.nightly }} = true]; then
           echo "Activating nightly build"
           VERSION=$(cat docker-jans-auth-server/Dockerfile | grep "ENV CN_VERSION" | awk -F "[=-]" '{print $2}')-nightly-build)
