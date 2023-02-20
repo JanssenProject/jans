@@ -7,7 +7,7 @@ on:
 
   workflow_dispatch:
   schedule:
-    - "*/10 * * * *"
+    - cron: "*/10 * * * *"
 jobs:
   publish_binary_packages:
     runs-on: ubuntu-20.04
