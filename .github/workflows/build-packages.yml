@@ -72,6 +72,8 @@ jobs:
         #If on schedule build nightly packages
         if [ ${{ github.event_name }} = "schedule" ]; then
           echo "Activating nightly build"
+          mkdir test
+          cd test
           git clone https://github.com/JanssenProject/jans
           cd jans
           echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
@@ -80,7 +82,8 @@ jobs:
             gh release delete-asset $version $package -y || echo "nothing to delete"
           done
           echo "version=$(cat docker-jans-auth-server/Dockerfile | grep "ENV CN_VERSION" | awk -F "[=-]" '{print $2}')-nightly" >> $GITHUB_OUTPUT
-          cd ..
+          cd ../../
+          rm -rf test
         fi
 
     - name: Print Version
