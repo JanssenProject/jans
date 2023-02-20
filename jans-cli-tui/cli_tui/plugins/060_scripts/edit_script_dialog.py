@@ -1,35 +1,28 @@
 from functools import partial
-from prompt_toolkit.layout.dimension import D
-from prompt_toolkit.layout.containers import (
-    HSplit,
-    VSplit,
-    Window
-)
-from prompt_toolkit.widgets import (
-    Button,
-    Label,
-    TextArea,
-    RadioList,
-    Button,
-    Dialog,
-    Frame
-)
-import asyncio
-from prompt_toolkit.lexers import PygmentsLexer
+
+
 from pygments.lexers.python import PythonLexer
+import asyncio
+from typing import Optional, Sequence, Callable, Any
+
 from pygments.lexers.jvm import JavaLexer
+
+from prompt_toolkit.layout.dimension import D
+from prompt_toolkit.layout.containers import HSplit, VSplit, Window
+from prompt_toolkit.lexers import PygmentsLexer
+from prompt_toolkit.formatted_text import AnyFormattedText
+from prompt_toolkit.widgets import Button, Label, TextArea, RadioList,\
+    Button, Dialog, Frame
+
+from utils.multi_lang import _
+from utils.utils import DialogUtils
 from utils.static import DialogResult
 from wui_components.jans_dialog_with_nav import JansDialogWithNav
 from wui_components.jans_cli_dialog import JansGDialog
 from wui_components.jans_drop_down import DropDownWidget
-from utils.utils import DialogUtils
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from wui_components.jans_spinner import Spinner
-from prompt_toolkit.formatted_text import AnyFormattedText
-from typing import Optional, Sequence
-from typing import Callable
-from typing import Any, Optional
-from utils.multi_lang import _
+from wui_components.jans_path_browser import jans_file_browser_dialog, BrowseType
 
 class EditScriptDialog(JansGDialog, DialogUtils):
     """This Script editing dialog
@@ -225,6 +218,10 @@ class EditScriptDialog(JansGDialog, DialogUtils):
         open_editor_button = Button(text=open_editor_button_title, width=len(open_editor_button_title)+2, handler=self.edit_script_dialog)
         open_editor_button.window.jans_help="Enter to open editing window"
 
+        import_script_button_title = _("Import Script")
+        import_script_button = Button(text=import_script_button_title, width=len(import_script_button_title)+2, handler=self.import_script_dialog)
+        import_script_button.window.jans_help="Enter to import script for local file"
+
         self.edit_dialog_content = [
                     self.myparent.getTitledText(_("Inum"), name='inum', value=self.data.get('inum',''), style='class:script-titledtext', jans_help=self.myparent.get_help_from_schema(schema, 'inum'), read_only=True),
                     self.myparent.getTitledWidget(
@@ -297,7 +294,7 @@ class EditScriptDialog(JansGDialog, DialogUtils):
                             ],
                              height=5
                             ),
-                    VSplit([open_editor_button, Window(width=D())]),
+                    VSplit([open_editor_button, import_script_button, Window(width=D())], padding=2),
                     ]
 
 
@@ -312,7 +309,7 @@ class EditScriptDialog(JansGDialog, DialogUtils):
             height=self.myparent.dialog_height,
             width=self.myparent.dialog_width,
             )
-    
+
     def get_help(self, **kwargs: Any):
         """This method get focused field Description to display on statusbar
         """
@@ -424,6 +421,24 @@ class EditScriptDialog(JansGDialog, DialogUtils):
 
         asyncio.ensure_future(coroutine())
 
+
+
+    def import_script_dialog(self) -> None:
+
+        def set_script(path):
+            with open(path, 'rb') as f:
+                script_content = f.read()
+            self.script = script_content.decode()
+
+        def open_file_browser_dialog(dialog=None):
+            file_browser_dialog = jans_file_browser_dialog(self.myparent, path=self.myparent.browse_path, browse_type=BrowseType.file, ok_handler=set_script)
+            self.myparent.show_jans_dialog(file_browser_dialog)
+
+        if self.script:
+            dialog = self.myparent.get_confirm_dialog(_("Are you sure want to replace script?"), confirm_handler=open_file_browser_dialog)
+            self.myparent.show_jans_dialog(dialog)
+        else:
+            open_file_browser_dialog()
 
 
     def edit_script_dialog(self) -> None:
