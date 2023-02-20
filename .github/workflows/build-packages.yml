@@ -159,7 +159,7 @@ jobs:
           sha256sum jans-linux-suse-X86-64-setup.pyz > jans-linux-suse-X86-64-setup.pyz.sha256sum
           cd ../jans-cli-tui
           make zipapp 
-          mv config-cli-tui.pyz jans-cli-tui-linux-suse-X86-64.pyz
+          mv jans-cli-tui.pyz jans-cli-tui-linux-suse-X86-64.pyz
           sha256sum jans-cli-tui-linux-suse-X86-64.pyz > jans-cli-tui-linux-suse-X86-64.pyz.sha256sum
     - name: Set up Python 3.6
       uses: actions/setup-python@v4
@@ -180,7 +180,7 @@ jobs:
         sha256sum jans-linux-ubuntu-X86-64-setup.pyz > jans-linux-ubuntu-X86-64-setup.pyz.sha256sum || echo "Failed"
         cd ../jans-cli-tui
         make zipapp 
-        mv config-cli-tui.pyz jans-cli-tui-linux-ubuntu-X86-64.pyz
+        mv jans-cli-tui.pyz jans-cli-tui-linux-ubuntu-X86-64.pyz
         sha256sum jans-cli-tui-linux-ubuntu-X86-64.pyz > jans-cli-tui-linux-ubuntu-X86-64.pyz.sha256sum
     - uses: actions/cache@v3
       id: cache-installers
@@ -221,7 +221,13 @@ jobs:
     - name: Get latest tag
       id: previoustag
       run: |
-        echo "::set-output name=tag::$(curl https://api.github.com/repos/${{ github.repository }}/releases -s | grep "tag_name" | cut -d '"' -f 4 | grep -o '^\v.*' | head -n 1)"
+        echo "tag=$(curl https://api.github.com/repos/${{ github.repository }}/releases -s | grep "tag_name" | cut -d '"' -f 4 | grep -o '^\v.*' | head -n 1)" >> $GITHUB_OUTPUT
+        echo "SETUP_PREFIX=jans-linux" >> ${GITHUB_ENV}
+        echo "TUI_PREFIX=jans-cli-tui-linux" >> ${GITHUB_ENV}
+        if [ ${{ github.event_name }} = "schedule" ]; then
+          echo "SETUP_PREFIX=jans-linux-nightly-build" >> ${GITHUB_ENV}
+          echo "TUI_PREFIX=jans-cli-tui-linux-nightly-build" >> ${GITHUB_ENV}
+        fi
     - name: Print Version
       run: |
         echo "${{ steps.previoustag.outputs.tag }}"
@@ -232,7 +238,7 @@ jobs:
       with:
         repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
         file: ${{github.workspace}}/jans-linux-setup/jans-linux-${{ matrix.name }}-X86-64-setup.pyz
-        asset_name: jans-linux-${{ matrix.name }}-X86-64-setup.pyz
+        asset_name: ${{ env.SETUP_PREFIX }}-${{ matrix.name }}-X86-64-setup.pyz
         tag: ${{ steps.previoustag.outputs.tag }}
     - name: Upload checksum to release
       id: upload_shas_setup
@@ -241,7 +247,7 @@ jobs:
       with:
         repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
         file: ${{github.workspace}}/jans-linux-setup/jans-linux-${{ matrix.name }}-X86-64-setup.pyz.sha256sum
-        asset_name: jans-linux-${{ matrix.name }}-X86-64-setup.pyz.sha256sum
+        asset_name: ${{ env.SETUP_PREFIX }}-${{ matrix.name }}-X86-64-setup.pyz.sha256sum
         tag: ${{ steps.previoustag.outputs.tag }}
     - name: Upload binaries to release
       id: upload_binaries_cli
@@ -250,7 +256,7 @@ jobs:
       with:
         repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
         file: ${{github.workspace}}/jans-cli-tui/jans-cli-tui-linux-${{ matrix.name }}-X86-64.pyz
-        asset_name: jans-cli-tui-linux-${{ matrix.name }}-X86-64.pyz
+        asset_name: ${{ env.TUI_PREFIX }}-${{ matrix.name }}-X86-64.pyz
         tag: ${{ steps.previoustag.outputs.tag }}
     - name: Upload checksum to release
       id: upload_shas_cli
@@ -259,5 +265,5 @@ jobs:
       with:
         repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
         file: ${{github.workspace}}/jans-cli-tui/jans-cli-tui-linux-${{ matrix.name }}-X86-64.pyz.sha256sum
-        asset_name: jans-cli-tui-linux-${{ matrix.name }}-X86-64.pyz.sha256sum
+        asset_name: ${{ env.TUI_PREFIX }}-${{ matrix.name }}-X86-64.pyz.sha256sum
         tag: ${{ steps.previoustag.outputs.tag }}
