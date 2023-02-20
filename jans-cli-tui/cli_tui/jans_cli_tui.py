@@ -337,8 +337,7 @@ class JansCliApp(Application):
 
             else:
                 self.cli_object_ok = True
-
-        self.check_available_plugins()
+                self.check_available_plugins()
 
 
     def check_available_plugins(self) -> None:
@@ -548,10 +547,21 @@ class JansCliApp(Application):
         focus_previous(ev)
 
     def help(self,ev: KeyPressEvent) -> None:
-        self.logger.debug("ev:"+str(ev))
-        self.logger.debug("ev:"+str(type(ev)))
-        self.show_message(_("Help"),'''<Enter> {} \n<j> {}\n<d> {}'''.format(_("Edit current selection"),_("Display current item in JSON format"),_("Delete current selection")))
-        
+        self.show_message(_("Help"),
+        ("<Enter>          {} \n"
+        "<Esc>            {}\n"
+        "<Alt + letter>   {}\n"
+        "<d>              {}\n"
+        "<Delete>         {}\n"
+        "For More Visite  {}")
+        .format(
+            _("Confirm or Edit current selection"),
+            _("Close the current dialog"),
+            _("Navigate to an other tab"),
+            _("Display current item in JSON format if possible"),
+            _("Delete current selection if possible"),
+            "https://docs.jans.io/v1.0.6/admin/config-guide/tui/"))
+
     def escape(self,ev: KeyPressEvent) -> None:
         try:
             if self.layout.container.floats:
@@ -901,7 +911,7 @@ class JansCliApp(Application):
         ) -> Dialog:
         body = VSplit([Label(message)], align=HorizontalAlign.CENTER)
         buttons = [Button(_("No")), Button(_("Yes"), handler=confirm_handler)]
-        dialog = JansGDialog(self, title=_("Confirmation"), body=body, buttons=buttons)
+        dialog = JansGDialog(self, title=_("Confirmation"), body=body, buttons=buttons, width=self.dialog_width-20)
         return dialog
 
 

@@ -12,12 +12,14 @@ from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.layout.containers import HSplit, VSplit, DynamicContainer
 from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.formatted_text import HTML
+from prompt_toolkit.widgets import Button
 
 from utils.multi_lang import _
 from utils.utils import DialogUtils
 from utils.static import cli_style, common_strings
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from wui_components.jans_path_browser import jans_file_browser_dialog, BrowseType
+from wui_components.jans_cli_dialog import JansGDialog
 
 class Agama(DialogUtils):
     def __init__(
@@ -110,7 +112,48 @@ class Agama(DialogUtils):
 
     def upload_project(self):
 
+        def project_uploader(path, project_name):
+            async def coroutine():
+                cli_args = {'operation_id': 'post-agama-dev-studio-prj', 'data_fn': path, 'url_suffix':'name:{}'.format(project_name)}
+                self.app.start_progressing(_("Uploading agama project..."))
+                await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+                self.app.stop_progressing()
+                self.get_agama_projects()
+
+            asyncio.ensure_future(coroutine())
+
+
+        def aks_project_name(path):
+            body = self.app.getTitledText(_("Project Name"), name='oauth:agama:projectname', style=cli_style.edit_text)
+            ok = _("OK")
+            buttons = [Button(_("Cancel")), Button(ok)]
+            dialog = JansGDialog(self.app, body=body, title=_("Enter Project Name"), buttons=buttons, width=self.app.dialog_width-20)
+
+            async def coroutine():
+                focused_before = self.app.layout.current_window
+                result = await self.app.show_dialog_as_float(dialog)
+
+                try:
+                    self.app.layout.focus(focused_before)
+                except Exception:
+                    self.app.layout.focus(self.app.center_frame)
+
+                if result != ok:
+                    return
+
+                project_name = body.me.text.strip()
+
+                if not project_name:
+                   aks_project_name(path)
+
+                project_uploader(path, project_name)
+
+            return asyncio.ensure_future(coroutine())
+
+
         def do_upload_project(path):
+            project_name = None
+
             try:
                 project_zip = zipfile.ZipFile(path)
             except Exception:
@@ -119,23 +162,10 @@ class Agama(DialogUtils):
 
             try:
                 project_json = json.loads(project_zip.read('project.json'))
-            except Exception as e:
-                self.app.show_message(_(common_strings.error), HTML(_("Can't read <b>project.json</b> from zip file:\n {}").format(str(e))), tobefocused=self.app.center_container)
-                return
-
-            if 'projectName' not in project_json:
-                self.app.show_message(_(common_strings.error), HTML(_("Property <b>projectName</b> does not exist in <b>project.json</b>.")), tobefocused=self.app.center_container)
-                return
-
-            async def coroutine():
-                cli_args = {'operation_id': 'post-agama-dev-studio-prj', 'data_fn': path, 'url_suffix':'name:{}'.format(project_json['projectName'])}
-                self.app.start_progressing(_("Uploading agama project..."))
-                await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-                self.app.stop_progressing()
-                self.get_agama_projects()
-
-            asyncio.ensure_future(coroutine())
-
+                project_name = project_json['projectName']
+                project_uploader(path, project_name)
+            except Exception:
+                aks_project_name(path)
 
         file_browser_dialog = jans_file_browser_dialog(self.app, path=self.app.browse_path, browse_type=BrowseType.file, ok_handler=do_upload_project)
         self.app.show_jans_dialog(file_browser_dialog)
