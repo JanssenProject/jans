@@ -265,14 +265,14 @@ class SSA(DialogUtils):
                     style=cli_style.edit_text_required
                 ),
 
-                VSplit([
-                            HSplit([Label(text=custom_claims_title, style=cli_style.titled_text, width=len(custom_claims_title)+1)], height=1),
-                            self.custom_claims_container,
-                            Window(width=2),
-                            HSplit([Button(text=add_custom_claim_title, width=len(add_custom_claim_title)+ 2, handler=self.edit_custom_claim)], height=1),
-                            ],
-                            height=5, width=D(),
-                            ),
+                #VSplit([
+                #            HSplit([Label(text=custom_claims_title, style=cli_style.titled_text, width=len(custom_claims_title)+1)], height=1),
+                #            self.custom_claims_container,
+                #            Window(width=2),
+                #            HSplit([Button(text=add_custom_claim_title, width=len(add_custom_claim_title)+ 2, handler=self.edit_custom_claim)], height=1),
+                #            ],
+                #            height=5, width=D(),
+                #            ),
 
                 self.app.getTitledCheckBox(
                             _("One Time Use"), 
