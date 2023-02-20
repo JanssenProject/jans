@@ -147,6 +147,9 @@ https://janssen.server.host/jans-auth/.well-known/openid-configuration
 
 Claim `response_types_supported` lists all the supported grant types in the response.
 
+When registering client using dynamic client registration, if the `response_type` parameter is not specified, it'll 
+default to `code`.
+
 ### Response Type Recommendations
 
 - Avoid using response type `token`. This response type is 
