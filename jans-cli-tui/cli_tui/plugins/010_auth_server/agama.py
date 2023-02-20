@@ -116,7 +116,7 @@ class Agama(DialogUtils):
             async def coroutine():
                 cli_args = {'operation_id': 'post-agama-dev-studio-prj', 'data_fn': path, 'url_suffix':'name:{}'.format(project_name)}
                 self.app.start_progressing(_("Uploading agama project..."))
-                result = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+                await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
                 self.app.stop_progressing()
                 self.get_agama_projects()
 
