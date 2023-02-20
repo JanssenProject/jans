@@ -67,16 +67,15 @@ jobs:
     - name: Get latest tag
       id: previoustag
       run: |
-        echo "::set-output name=tag::$(curl https://api.github.com/repos/${{ github.repository }}/releases -s | grep "tag_name" | cut -d '"' -f 4 | grep -o '^\v.*' | head -n 1)"
-        echo "::set-output name=version::$(curl https://api.github.com/repos/${{ github.repository }}/releases -s | grep "tag_name" | cut -d '"' -f 4 | grep -o '^\v.*' | head -n 1 | cut -d 'v' -f 2)"
-        
+        echo "tag=$(curl https://api.github.com/repos/${{ github.repository }}/releases -s | grep "tag_name" | cut -d '"' -f 4 | grep -o '^\v.*' | head -n 1)" >> $GITHUB_OUTPUT
+        echo "version=$(curl https://api.github.com/repos/${{ github.repository }}/releases -s | grep "tag_name" | cut -d '"' -f 4 | grep -o '^\v.*' | head -n 1 | cut -d 'v' -f 2)" >> $GITHUB_OUTPUT
         #If on schedule build nightly packages
         if [ ${{ github.event_name }} = "schedule" ]; then
           nightlypackages=$(gh release view --json assets --jq '.assets[].name' | grep "nightly")
           for package in $nightlypackages; do
             gh release delete-asset $version $package -y || echo "nothing to delete"
           done
-          echo "::set-output name=version::$(cat docker-jans-auth-server/Dockerfile | grep "ENV CN_VERSION" | awk -F "[=-]" '{print $2}')"
+          echo "version=$(cat docker-jans-auth-server/Dockerfile | grep "ENV CN_VERSION" | awk -F "[=-]" '{print $2}')" >> $GITHUB_OUTPUT
         fi
 
     - name: Print Version
