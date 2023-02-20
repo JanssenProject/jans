@@ -73,25 +73,7 @@ jobs:
       id: previoustag
       run: |
         echo "tag=$(curl https://api.github.com/repos/${{ github.repository }}/releases -s | grep "tag_name" | cut -d '"' -f 4 | grep -o '^\v.*' | head -n 1)" >> $GITHUB_OUTPUT
-        VERSION=$(curl https://api.github.com/repos/${{ github.repository }}/releases -s | grep "tag_name" | cut -d '"' -f 4 | grep -o '^\v.*' | head -n 1 | cut -d 'v' -f 2)
-        echo "version=$VERSION" >> $GITHUB_OUTPUT
-        #If on schedule build nightly packages
-        if [ ${{ github.event_name }} = "schedule" ] || [ ${{ github.event.inputs.nightly }} = true ]; then
-          echo "Activating nightly build"
-          mkdir test
-          cd test
-          git clone https://github.com/JanssenProject/jans
-          cd jans
-          echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
-          nightlypackages=$(gh release view --json assets --jq '.assets[].name' | grep "nightly")
-          echo "The following assests will be removed $nightlypackages"
-          for package in $nightlypackages; do
-            gh release delete-asset $VERSION $package -y || echo "nothing to delete"
-          done
-          echo "version=$(cat docker-jans-auth-server/Dockerfile | grep "ENV CN_VERSION" | awk -F "[=-]" '{print $2}')-nightly-build" >> $GITHUB_OUTPUT
-          cd ../../
-          rm -rf test
-        fi
+        echo "version=$(curl https://api.github.com/repos/${{ github.repository }}/releases -s | grep "tag_name" | cut -d '"' -f 4 | grep -o '^\v.*' | head -n 1 | cut -d 'v' -f 2)" >> $GITHUB_OUTPUT
 
     - name: Print Version
       run: |
@@ -228,10 +210,13 @@ jobs:
     - name: Get latest tag
       id: previoustag
       run: |
-        echo "tag=$(curl https://api.github.com/repos/${{ github.repository }}/releases -s | grep "tag_name" | cut -d '"' -f 4 | grep -o '^\v.*' | head -n 1)" >> $GITHUB_OUTPUT
+        TAG=$(curl https://api.github.com/repos/${{ github.repository }}/releases -s | grep "tag_name" | cut -d '"' -f 4 | grep -o '^\v.*' | head -n 1)
+        echo "tag=$TAG" >> $GITHUB_OUTPUT
         echo "SETUP_PREFIX=jans-linux" >> ${GITHUB_ENV}
         echo "TUI_PREFIX=jans-cli-tui-linux" >> ${GITHUB_ENV}
+       #If on schedule build nightly packages
         if [ ${{ github.event_name }} = "schedule" ] || [ ${{ github.event.inputs.nightly }} = true]; then
+          echo "Activating nightly build"
           VERSION=$(cat docker-jans-auth-server/Dockerfile | grep "ENV CN_VERSION" | awk -F "[=-]" '{print $2}')-nightly-build)
           echo "SETUP_PREFIX=jans-linux-$VERSION-nightly-build" >> ${GITHUB_ENV}
           echo "TUI_PREFIX=jans-cli-tui-linux-$VERSION-nightly-build" >> ${GITHUB_ENV}
@@ -248,6 +233,7 @@ jobs:
         file: ${{github.workspace}}/jans-linux-setup/jans-linux-${{ matrix.name }}-X86-64-setup.pyz
         asset_name: ${{ env.SETUP_PREFIX }}-${{ matrix.name }}-X86-64-setup.pyz
         tag: ${{ steps.previoustag.outputs.tag }}
+        overwrite: true
     - name: Upload checksum to release
       id: upload_shas_setup
       continue-on-error: true
@@ -257,6 +243,7 @@ jobs:
         file: ${{github.workspace}}/jans-linux-setup/jans-linux-${{ matrix.name }}-X86-64-setup.pyz.sha256sum
         asset_name: ${{ env.SETUP_PREFIX }}-${{ matrix.name }}-X86-64-setup.pyz.sha256sum
         tag: ${{ steps.previoustag.outputs.tag }}
+        overwrite: true
     - name: Upload binaries to release
       id: upload_binaries_cli
       continue-on-error: true
@@ -266,6 +253,7 @@ jobs:
         file: ${{github.workspace}}/jans-cli-tui/jans-cli-tui-linux-${{ matrix.name }}-X86-64.pyz
         asset_name: ${{ env.TUI_PREFIX }}-${{ matrix.name }}-X86-64.pyz
         tag: ${{ steps.previoustag.outputs.tag }}
+        overwrite: true
     - name: Upload checksum to release
       id: upload_shas_cli
       continue-on-error: true
@@ -275,3 +263,4 @@ jobs:
         file: ${{github.workspace}}/jans-cli-tui/jans-cli-tui-linux-${{ matrix.name }}-X86-64.pyz.sha256sum
         asset_name: ${{ env.TUI_PREFIX }}-${{ matrix.name }}-X86-64.pyz.sha256sum
         tag: ${{ steps.previoustag.outputs.tag }}
+        overwrite: true
