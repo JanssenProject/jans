@@ -73,7 +73,8 @@ jobs:
       id: previoustag
       run: |
         echo "tag=$(curl https://api.github.com/repos/${{ github.repository }}/releases -s | grep "tag_name" | cut -d '"' -f 4 | grep -o '^\v.*' | head -n 1)" >> $GITHUB_OUTPUT
-        echo "version=$(curl https://api.github.com/repos/${{ github.repository }}/releases -s | grep "tag_name" | cut -d '"' -f 4 | grep -o '^\v.*' | head -n 1 | cut -d 'v' -f 2)" >> $GITHUB_OUTPUT
+        VERSION=$(curl https://api.github.com/repos/${{ github.repository }}/releases -s | grep "tag_name" | cut -d '"' -f 4 | grep -o '^\v.*' | head -n 1 | cut -d 'v' -f 2)
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
         #If on schedule build nightly packages
         if [ ${{ github.event_name }} = "schedule" ] || [ ${{ github.event.inputs.nightly }} == "true"]; then
           echo "Activating nightly build"
@@ -83,10 +84,11 @@ jobs:
           cd jans
           echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
           nightlypackages=$(gh release view --json assets --jq '.assets[].name' | grep "nightly")
+          echo "The following assests will be removed $nightlypackages"
           for package in $nightlypackages; do
-            gh release delete-asset $version $package -y || echo "nothing to delete"
+            gh release delete-asset $VERSION $package -y || echo "nothing to delete"
           done
-          echo "version=$(cat docker-jans-auth-server/Dockerfile | grep "ENV CN_VERSION" | awk -F "[=-]" '{print $2}')-nightly" >> $GITHUB_OUTPUT
+          echo "version=$(cat docker-jans-auth-server/Dockerfile | grep "ENV CN_VERSION" | awk -F "[=-]" '{print $2}')-nightly-build" >> $GITHUB_OUTPUT
           cd ../../
           rm -rf test
         fi
@@ -230,8 +232,9 @@ jobs:
         echo "SETUP_PREFIX=jans-linux" >> ${GITHUB_ENV}
         echo "TUI_PREFIX=jans-cli-tui-linux" >> ${GITHUB_ENV}
         if [ ${{ github.event_name }} = "schedule" ] || [ ${{ github.event.inputs.nightly }} == "true"]; then
-          echo "SETUP_PREFIX=jans-linux-nightly-build" >> ${GITHUB_ENV}
-          echo "TUI_PREFIX=jans-cli-tui-linux-nightly-build" >> ${GITHUB_ENV}
+          VERSION=$(cat docker-jans-auth-server/Dockerfile | grep "ENV CN_VERSION" | awk -F "[=-]" '{print $2}')-nightly-build)
+          echo "SETUP_PREFIX=jans-linux-$VERSION-nightly-build" >> ${GITHUB_ENV}
+          echo "TUI_PREFIX=jans-cli-tui-linux-$VERSION-nightly-build" >> ${GITHUB_ENV}
         fi
     - name: Print Version
       run: |
