@@ -6,8 +6,13 @@ on:
     - 'v**'
 
   workflow_dispatch:
+    inputs:
+      nightly:
+        description: 'Enable nightly build'
+        default: "false"
+        required: false
   schedule:
-    - cron: "*/10 * * * *"
+    - cron: "0 0 * * *"
 jobs:
   publish_binary_packages:
     runs-on: ubuntu-20.04
@@ -70,7 +75,7 @@ jobs:
         echo "tag=$(curl https://api.github.com/repos/${{ github.repository }}/releases -s | grep "tag_name" | cut -d '"' -f 4 | grep -o '^\v.*' | head -n 1)" >> $GITHUB_OUTPUT
         echo "version=$(curl https://api.github.com/repos/${{ github.repository }}/releases -s | grep "tag_name" | cut -d '"' -f 4 | grep -o '^\v.*' | head -n 1 | cut -d 'v' -f 2)" >> $GITHUB_OUTPUT
         #If on schedule build nightly packages
-        if [ ${{ github.event_name }} = "schedule" ]; then
+        if [ ${{ github.event_name }} = "schedule" ] || [ ${{ github.event.inputs.nightly }} == "true"]; then
           echo "Activating nightly build"
           mkdir test
           cd test
@@ -224,7 +229,7 @@ jobs:
         echo "tag=$(curl https://api.github.com/repos/${{ github.repository }}/releases -s | grep "tag_name" | cut -d '"' -f 4 | grep -o '^\v.*' | head -n 1)" >> $GITHUB_OUTPUT
         echo "SETUP_PREFIX=jans-linux" >> ${GITHUB_ENV}
         echo "TUI_PREFIX=jans-cli-tui-linux" >> ${GITHUB_ENV}
-        if [ ${{ github.event_name }} = "schedule" ]; then
+        if [ ${{ github.event_name }} = "schedule" ] || [ ${{ github.event.inputs.nightly }} == "true"]; then
           echo "SETUP_PREFIX=jans-linux-nightly-build" >> ${GITHUB_ENV}
           echo "TUI_PREFIX=jans-cli-tui-linux-nightly-build" >> ${GITHUB_ENV}
         fi
