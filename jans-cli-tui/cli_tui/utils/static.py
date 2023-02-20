@@ -6,6 +6,7 @@ class DialogResult(Enum):
     OK = 2
 
 class cli_style:
+    titled_text = 'class:plugin-titledtext'
     edit_text = 'class:plugin-text'
     edit_text_required = 'class:plugin-textrequired'
     check_box = 'class:plugin-checkbox'
