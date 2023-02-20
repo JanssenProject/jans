@@ -46,9 +46,85 @@ The client can register a list of URIs as a value for redirect URI parameter. Re
 
 ## Cryptography
 
+Janssen Server allows clients to configure static set of keys using `JWKS` or specify a URI as `JWKS URI` where client
+is exposing its key set. For client who can host keys and expose a URI, it is **recommended** to use `JWKS URI` instead of
+static `JWKS` key set. Using `JWKS URI` enables client to rotate its cryptographic keys without having to change the
+client configuration on Janssen Server.
 
+### Available Algorithms for Encryption and Signing
+
+The client can select algorithms for cryptographic and encryption during client configuration. Janssen 
+Server supports a list of algorithms as listed in response of Janssen Server's well-known
+[configuration endpoint](./configuration.md) given below.
+
+```text
+https://janssen.server.host/jans-auth/.well-known/openid-configuration
+```
+
+Claims that list supported algorithms:
+
+- id_token_encryption_alg_values_supported
+- id_token_signing_alg_values_supported
+- userinfo_encryption_enc_values_supported
+- userinfo_signing_alg_values_supported
+- userinfo_encryption_alg_values_supported
+- access_token_signing_alg_values_supported
+- request_object_signing_alg_values_supported
+- request_object_encryption_alg_values_supported
+- request_object_encryption_alg_values_supported
+ 
+### Recommendations
+
+- RSA keys with a minimum 2048 bits if using RSA cryptography
+- Elliptic Curve keys with a minimum of 160 bits if using Elliptic Curve cryptography
+- Client secret should have a minimum of 128 bits if using symmetric key cryptography
+- Sign with PS256 (RSASSA-PSS using SHA-256 and MGF1 with SHA-256) or ES256 (ECDSA using P-256 and SHA-256)
 
 ## Grants
+
+### Supported Grant Types
+Grant defines how a client interacts with the token endpoint to get the tokens. Janssen Server supports grant types
+defined by OAuth 2.0, OAuth 2.1, and extension grants defined by other RFCs. A complete
+list of supported grant types can be found in the response of the Janssen Server's well-known
+[configuration endpoint](./configuration.md) given below.
+
+```text
+https://janssen.server.host/jans-auth/.well-known/openid-configuration
+```
+
+Claim `grant_types_supported` lists all the supported grant types in the response.
+
+### Configuring Grant Type For Client
+
+Janssen Server will allow requests from a client with grant types that the client is configured to use. Client can be
+configured to use or not use certain grant types using [CLI](../../config-guide/jans-cli/README.md) or [TUI](../../config-guide/tui.md) tools.
+
+### Recommendations For Using Grant Types and Flows
+
+Developers should use the grant types based on the ability of the client to protect the client credentials as well as
+the security profile of the deployment. If the client software is a server-side component that can securely store the
+client credentials, such a client is called a `confidential` client. As opposed to that, if the application requesting
+access token is entirely running on a browser, where it is not possible to store client credentials securely, such a client
+is called a `public` client.
+
+Along with the grant type to be used, developers also need to choose which flow should be used to get the required
+tokens. The table below shows grant types and flows that should be used for various use-cases.
+
+| Client Type                                                                                     | Recommended Grant Type                         | Flow                         | 
+|-------------------------------------------------------------------------------------------------|------------------------------------------------|------------------------------|
+| Backend App (Example: batch processes) that need to access its own resources                    | `client_credentials`                           | Client Credentials           |
+| Server backend of a web-application needs access token                                          | `authorization_code`                           | Authorization Code           |
+| Web-application that needs user information via id_token on browser and access token on backend | `authorization_code`                           | Hybrid Flow                  |
+| Browser based single page applications or Mobile applications                                   | `authorization_code`                           | Authorization Code with PKCE |
+| Browser based single page applications or Mobile applications that only intend to get id_token  | -                                              | Implicit Flow with Form Post |
+| Input constrained devices (Example: TV)                                                         | `urn:ietf:params:oauth:grant-type:device_code` | Device Flow                  |
+| Highly trusted applications where redirect based flows are not feasible to implement            | `password`                                     | Resource Owner Password Flow |
+
+!!! Note
+
+    Certain grant types should not be used together. For example, implicit flow with hybrid flow. Or using authorization
+    code flow with hybrid flow. This allows a downgrade attack from more secure flow to less secure flow.
+
 
 ## Pre-authorization
 
@@ -57,9 +133,30 @@ to internal clients (not a third party) where there is no need to prompt the per
 
 ## Response Types
 
+Client sends `response_type` request parameter when sending request to authorization endpoint. Using this parameter, the
+client informs the authorization server of the desired grant. Response type parameter is
+[defined](https://datatracker.ietf.org/doc/html/rfc6749#section-3.1.1) in the OAuth 2.0 framework.
 
+Janssen Server supports response types
+defined by OAuth 2.0, OAuth 2.1.The complete list of supported response types can be found in the response of the 
+Janssen Server's well-known [configuration endpoint](./configuration.md) given below.
 
-Please use the left navigation menu to browse the content of this section while we are still working on developing content for `Overview` page.
+```text
+https://janssen.server.host/jans-auth/.well-known/openid-configuration
+```
+
+Claim `response_types_supported` lists all the supported grant types in the response.
+
+When registering client using dynamic client registration, if the `response_type` parameter is not specified, it'll 
+default to `code`.
+
+### Response Type Recommendations
+
+- Avoid using response type `token`. This response type is 
+[deprecated](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-07#section-10.1) by OAuth 2.1. 
+- Grant types allowed for a client determines which response types are permitted in authorization requests. 
+Make sure appropriate grant types are configured in Janssen Server client configuration. Janssen Server will reject 
+authorization requests containing response types not permitted for respective client.
 
 !!! Contribute
 If you’d like to contribute to this document, get started with the [Contribution Guide](https://docs.jans.io/head/CONTRIBUTING/#contributing-to-the-documentation)
