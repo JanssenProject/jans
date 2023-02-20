@@ -52,7 +52,7 @@ class JansPathBrowserWidget:
                             key_bindings=self._get_key_bindings(),
                             ),
                             scroll_offsets=ScrollOffsets(top=2, bottom=2),
-                            right_margins=[ScrollbarMargin(display_arrows=True),],
+                            right_margins=[ScrollbarMargin(display_arrows=True)],
                             cursorline=False,
                             height=self.height
                         )
