@@ -8967,43 +8967,45 @@
 <p><code>/opt/jans/jans-cli/config-cli.py --operation-id get-properties-fido2</code></p>
 <p>Response:
 <div class="highlight"><pre><span></span><code>{
-   &quot;issuer&quot;:&quot;https://.jans.io&quot;,
-   &quot;baseEndpoint&quot;:&quot;https://my-jans-server.jans.io/jans-fido2/restv1&quot;,
-   &quot;cleanServiceInterval&quot;:60,
-   &quot;cleanServiceBatchChunkSize&quot;:10000,
-   &quot;useLocalCache&quot;:true,
-   &quot;disableJdkLogger&quot;:true,
-   &quot;loggingLevel&quot;:&quot;INFO&quot;,
-   &quot;loggingLayout&quot;:&quot;text&quot;,
-   &quot;externalLoggerConfiguration&quot;:&quot;&quot;,
-   &quot;metricReporterInterval&quot;:300,
-   &quot;metricReporterKeepDataDays&quot;:15,
-   &quot;metricReporterEnabled&quot;:true,
-   &quot;personCustomObjectClassList&quot;:[
-      &quot;jansCustomPerson&quot;,
-      &quot;jansPerson&quot;
-   ],
-   &quot;fido2Configuration&quot;:{
-      &quot;authenticatorCertsFolder&quot;:&quot;/etc/jans/conf/fido2/authenticator_cert&quot;,
-      &quot;mdsCertsFolder&quot;:&quot;/etc/jans/conf/fido2/mds/cert&quot;,
-      &quot;mdsTocsFolder&quot;:&quot;/etc/jans/conf/fido2/mds/toc&quot;,
-      &quot;serverMetadataFolder&quot;:&quot;/etc/jans/conf/fido2/server_metadata&quot;,
-      &quot;requestedCredentialTypes&quot;:[
-         &quot;RS256&quot;,
-         &quot;ES256&quot;
-      ],
-      &quot;requestedParties&quot;:[
-         {
-            &quot;name&quot;:&quot;https://my-jans-server.jans.io&quot;,
-            &quot;domains&quot;:[
-               &quot;my-jans-server.jans.io&quot;
-            ]
-         }
-      ],
-      &quot;userAutoEnrollment&quot;:false,
-      &quot;unfinishedRequestExpiration&quot;:180,
-      &quot;authenticationHistoryExpiration&quot;:1296000
-   }
+  &quot;issuer&quot;: &quot;https://my.jans.server&quot;,
+  &quot;baseEndpoint&quot;: &quot;https://my.jans.server/jans-fido2/restv1&quot;,
+  &quot;cleanServiceInterval&quot;: 60,
+  &quot;cleanServiceBatchChunkSize&quot;: 10000,
+  &quot;useLocalCache&quot;: true,
+  &quot;disableJdkLogger&quot;: true,
+  &quot;loggingLevel&quot;: &quot;DEBUG&quot;,
+  &quot;loggingLayout&quot;: &quot;text&quot;,
+  &quot;metricReporterInterval&quot;: 300,
+  &quot;metricReporterKeepDataDays&quot;: 15,
+  &quot;metricReporterEnabled&quot;: true,
+  &quot;personCustomObjectClassList&quot;: [
+    &quot;jansCustomPerson&quot;,
+    &quot;jansPerson&quot;
+  ],
+  &quot;superGluuEnabled&quot;: true,
+  &quot;oldU2fMigrationEnabled&quot;: true,
+  &quot;fido2Configuration&quot;: {
+    &quot;authenticatorCertsFolder&quot;: &quot;/etc/jans/conf/fido2/authenticator_cert&quot;,
+    &quot;mdsCertsFolder&quot;: &quot;/etc/jans/conf/fido2/mds/cert&quot;,
+    &quot;mdsTocsFolder&quot;: &quot;/etc/jans/conf/fido2/mds/toc&quot;,
+    &quot;checkU2fAttestations&quot;: false,
+    &quot;userAutoEnrollment&quot;: false,
+    &quot;unfinishedRequestExpiration&quot;: 180,
+    &quot;authenticationHistoryExpiration&quot;: 1296000,
+    &quot;serverMetadataFolder&quot;: &quot;/etc/jans/conf/fido2/server_metadata&quot;,
+    &quot;requestedCredentialTypes&quot;: [
+      &quot;RS256&quot;,
+      &quot;ES256&quot;
+    ],
+    &quot;requestedParties&quot;: [
+      {
+        &quot;name&quot;: &quot;https://my.jans.server&quot;,
+        &quot;domains&quot;: [
+          &quot;my.jans.server&quot;
+        ]
+      }
+    ]
+  }
 }
 </code></pre></div></p>
 <h4 id="2-update-configuration-parameters">2. Update configuration parameters:<a class="headerlink" href="#2-update-configuration-parameters" title="Permanent link">#</a></h4>
@@ -9035,7 +9037,7 @@ A[ou=jans] --&gt; V(ou=configuration)
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-11-02T12:47:29+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-11-02</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-02-21T08:21:44+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-02-21</span>
       
         <br>
         Created:
