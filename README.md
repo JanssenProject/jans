@@ -10,7 +10,7 @@ Janssen enables organizations to build a scalable centralized authentication and
 
 **Get Started**: [Documentation](https://docs.jans.io/) | [Quick Start](#quick-start) | [User Guides](https://docs.jans.io/head/admin/recipes/)
 
-**Contribute**: [Contribution Guide](https://docs.jans.io/head/CONTRIBUTING/) | [Community Docs](https://docs.jans.io/head/governance/) | [Developer Guides](https://docs.jans.io/head/developer/)
+**Contribute**: [Contribution Guide](https://docs.jans.io/head/CONTRIBUTING/) | [Community Docs](https://docs.jans.io/head/governance/charter/) | [Developer Guides](https://docs.jans.io/head/CODE_OF_CONDUCT/)
 
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/janssen-auth-server)](https://artifacthub.io/packages/search?repo=janssen-auth-server)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/4353/badge)](https://bestpractices.coreinfrastructure.org/projects/4353)
@@ -52,10 +52,8 @@ Janssen is not a big monolith--it's a lot of services working together. Whether 
 
 1. **[jans-scim](jans-scim)**: [SCIM](http://www.simplecloud.info/) is JSON/REST API to manage user data. Use it to add, edit and update user information. This service should not be Internet facing.
 
-1. **[jans-cli](jans-cli)**: This module is a command line interface for configuring the Janssen software, providing both interactive and simple single line
+1. **[jans-cli](jans-cli-tui)**: This module is a command line interface for configuring the Janssen software, providing both interactive and simple single line
    options for configuration.
-
-1. **[jans-client-api](jans-client-api)**: Middleware API to help application developers call an OAuth, OpenID or UMA server. You may wonder why this is necessary. It makes it easier for client developers to use OpenID signing and encryption features, without becoming crypto experts. This API provides some high level endpoints to do some of the heavy lifting.
 
 1. **[jans-core](jans-core)**: This library has code that is shared across several janssen projects. You will most likely need this project when you build other Janssen components.
 
@@ -73,14 +71,13 @@ For development and testing purposes, the Janssen Server can be quickly installe
 wget https://raw.githubusercontent.com/JanssenProject/jans/main/automation/startjanssenmonolithdemo.sh && chmod u+x startjanssenmonolithdemo.sh && sudo bash startjanssenmonolithdemo.sh demoexample.jans.io MYSQL
 ```
 
-Full featured Janssen Server is now installed and ready to be used. See [Quick-Start Guide](https://docs.jans.io/head/admin/install/vm-install/quick-start-install/) to know how to access and start configuring.
-
+Fully featured Janssen Server is now installed and ready to be used. Start configuring as needed using 
+[Text-based User Interface (TUI)](https://docs.jans.io/head/admin/config-guide/tui/) or 
+[command-line](https://docs.jans.io/head/admin/config-guide/jans-cli/)
 
 ### Installation
 
 For production environment, Janssen can be installed as cloud-native in a Kubernetes cluster or as a server on a single VM. Go to the [Janssen Documentation](https://docs.jans.io/head/admin/install/) to know all the installation options
-
-
 
 ## Users and Community
 
