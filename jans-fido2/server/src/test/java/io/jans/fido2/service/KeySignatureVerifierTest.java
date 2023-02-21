@@ -53,6 +53,12 @@ public class KeySignatureVerifierTest {
 	 * echo -n "test" > data.txt
 	 * 
 	 * openssl dgst -sha256 -sign private.key data.txt | openssl enc -base64 > signature.txt
+	 * 
+	 * 
+	 * Additional steps which can be used in Vender cert generation:
+	 * 
+	 * openssl req -new -key private.pem -x509 -nodes -days 3650 -out cert.pem
+	 * openssl x509 -outform der -in cert.pem -out cert.de
 	 */
 	@Test
 	public void testSHA256withECDSASignature() throws IOException, NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException, InvalidKeyException, SignatureException {
