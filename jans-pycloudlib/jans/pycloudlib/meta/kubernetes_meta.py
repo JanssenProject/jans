@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 class KubernetesMeta(BaseMeta):
     """A class to interact with a subset of Kubernetes APIs."""
 
-    def __init__(self) -> None:
+    def __init__(self) -> None:  # noqa: D107
         self._client: _t.Union[kubernetes.client.CoreV1Api, None] = None
         self.kubeconfig_file = os.path.expanduser("~/.kube/config")
 
@@ -38,10 +38,28 @@ class KubernetesMeta(BaseMeta):
             # config loading priority
             try:
                 kubernetes.config.load_incluster_config()
-            except kubernetes.config.config_exception.ConfigException:
-                kubernetes.config.load_kube_config(self.kubeconfig_file)
-            self._client = kubernetes.client.CoreV1Api()
-            self._client.api_client.configuration.assert_hostname = False
+                config_loaded = True
+            except kubernetes.config.config_exception.ConfigException as exc:
+                # some cluster running restricted env (like Google Cloud Run) doesn't have
+                # required env vars `KUBERNETES_SERVICE_HOST` and `KUBERNETES_SERVICE_PORT_HTTPS`
+                logger.warning(f"Unable to load Kubernetes in-cluster config; reason={exc}")
+                config_loaded = False
+
+            # try loading config from kubeconfig file
+            if not config_loaded:
+                try:
+                    kubernetes.config.load_kube_config(self.kubeconfig_file)
+                    config_loaded = True
+                except kubernetes.config.config_exception.ConfigException as exc:
+                    logger.warning(f"Unable to load Kubernetes config from {self.kubeconfig_file}; reason={exc}")
+                    config_loaded = False
+
+            # set client only if config is loaded properly
+            if config_loaded:
+                self._client = kubernetes.client.CoreV1Api()
+                self._client.api_client.configuration.assert_hostname = False
+            else:
+                logger.warning("Kubernetes client config are not loaded properly, thus client will be disabled!")
         return self._client
 
     def get_containers(self, label: str) -> list[V1Pod]:
@@ -57,7 +75,11 @@ class KubernetesMeta(BaseMeta):
             List of pod objects.
         """
         namespace = os.environ.get("CN_CONTAINER_METADATA_NAMESPACE", "default")
-        pods: list[V1Pod] = self.client.list_namespaced_pod(namespace, label_selector=label).items
+        try:
+            pods: list[V1Pod] = self.client.list_namespaced_pod(namespace, label_selector=label).items
+        except AttributeError:
+            # client is not set due to missing k8s config
+            pods = []
         return pods
 
     def get_container_ip(self, container: V1Pod) -> str:
