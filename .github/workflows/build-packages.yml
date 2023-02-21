@@ -83,7 +83,7 @@ jobs:
           git clone https://github.com/JanssenProject/jans
           VERSION=$(cat jans/docker-jans-auth-server/Dockerfile | grep "ENV CN_VERSION" | awk -F "[=-]" '{print $2}')
           cd ../../
-          echo "PACKAGE_PREFIX=jans-$VERSION-nightly-build" >> ${GITHUB_ENV}
+          echo "PACKAGE_PREFIX=jans-nightly-build" >> ${GITHUB_ENV}
           echo "version=$VERSION" >> $GITHUB_OUTPUT
         fi
 
