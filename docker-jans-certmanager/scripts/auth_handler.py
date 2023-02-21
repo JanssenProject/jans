@@ -197,7 +197,7 @@ class AuthHandler(BaseHandler):
         self.rotation_interval = opts.get("interval", 48)
         self.push_keys = as_boolean(opts.get("push-to-container", True))
         self.key_strategy = opts.get("key-strategy", "OLDER")
-        self.privkey_push_delay = opts.get("privkey-push-delay", 0)
+        self.privkey_push_delay = int(opts.get("privkey-push-delay", 0))
         self.privkey_push_strategy = opts.get("privkey-push-strategy", "OLDER")
         self.sig_keys = resolve_sig_keys(opts.get("sig-keys", SIG_KEYS))
         self.enc_keys = resolve_enc_keys(opts.get("enc-keys", ENC_KEYS))
@@ -290,7 +290,7 @@ class AuthHandler(BaseHandler):
 
         push_delay_invalid = False
         try:
-            if int(self.privkey_push_delay) < 0:
+            if self.privkey_push_delay < 0:
                 push_delay_invalid = True
         except ValueError:
             push_delay_invalid = True
@@ -354,10 +354,9 @@ class AuthHandler(BaseHandler):
                 logger.warning(
                     "Unable to find any jans-auth container; make sure "
                     "to deploy jans-auth and set APP_NAME=auth-server "
-                    "label on container level"
+                    "label on container level; Note that pushing keys to "
+                    "containers will be skipped!"
                 )
-                # exit immediately to avoid persistence/secrets being modified
-                return
 
         for container in auth_containers:
             name = self.meta_client.get_container_name(container)
@@ -367,7 +366,7 @@ class AuthHandler(BaseHandler):
             logger.info(f"creating new {name}:{jwks_fn}")
             self.meta_client.copy_to_container(container, jwks_fn)
 
-            if int(self.privkey_push_delay) > 0:
+            if self.privkey_push_delay > 0:
                 # delayed jks push
                 continue
 
@@ -397,54 +396,54 @@ class AuthHandler(BaseHandler):
                     logger.info(f"restoring backup of {name}:{jwks_fn}")
                     self.meta_client.exec_cmd(container, f"cp {jwks_fn}.backup {jwks_fn}")
 
-                    if int(self.privkey_push_delay) > 0:
+                    if self.privkey_push_delay > 0:
                         # delayed jks revert
                         continue
 
                     name = self.meta_client.get_container_name(container)
                     logger.info(f"restoring backup of {name}:{jks_fn}")
                     self.meta_client.exec_cmd(container, f"cp {jks_fn}.backup {jks_fn}")
-                return
 
-            self.manager.secret.set("auth_jks_base64", encode_jks(self.manager))
-            self.manager.config.set("auth_key_rotated_at", int(time.time()))
-            self.manager.secret.set("auth_openid_jks_pass", jks_pass)
-            self.manager.config.set("auth_sig_keys", self.sig_keys)
-            self.manager.config.set("auth_enc_keys", self.enc_keys)
-            # jwks
-            self.manager.secret.set(
-                "auth_openid_key_base64",
-                generate_base64_contents(json.dumps(keys)),
-            )
+            else:
+                self.manager.secret.set("auth_jks_base64", encode_jks(self.manager))
+                self.manager.config.set("auth_key_rotated_at", int(time.time()))
+                self.manager.secret.set("auth_openid_jks_pass", jks_pass)
+                self.manager.config.set("auth_sig_keys", self.sig_keys)
+                self.manager.config.set("auth_enc_keys", self.enc_keys)
+                # jwks
+                self.manager.secret.set(
+                    "auth_openid_key_base64",
+                    generate_base64_contents(json.dumps(keys)),
+                )
 
-            # publish delayed jks
-            if int(self.privkey_push_delay) > 0:
-                logger.info(f"Waiting for private key push delay ({int(self.privkey_push_delay)} seconds) ...")
-                time.sleep(int(self.privkey_push_delay))
+                # publish delayed jks
+                if self.push_keys and self.privkey_push_delay > 0 and auth_containers:
+                    logger.info(f"Waiting for private key push delay ({self.privkey_push_delay} seconds) ...")
+                    time.sleep(self.privkey_push_delay)
 
-                for container in auth_containers:
-                    logger.info(f"creating backup of {name}:{jks_fn}")
-                    self.meta_client.exec_cmd(container, f"cp {jks_fn} {jks_fn}.backup")
-                    logger.info(f"creating new {name}:{jks_fn}")
-                    self.meta_client.copy_to_container(container, jks_fn)
+                    for container in auth_containers:
+                        logger.info(f"creating backup of {name}:{jks_fn}")
+                        self.meta_client.exec_cmd(container, f"cp {jks_fn} {jks_fn}.backup")
+                        logger.info(f"creating new {name}:{jks_fn}")
+                        self.meta_client.copy_to_container(container, jks_fn)
 
-                    # as new JKS pushed to container, we need to tell auth-server to reload the private keys
-                    # by increasing jansRevision again; note that as jansRevision may have been modified externally
-                    # we need to ensure we have fresh jansRevision value to increase to
-                    config = self.backend.get_auth_config()
-                    rev = int(config["jansRevision"]) + 1
-                    conf_dynamic.update({
-                        "keySelectionStrategy": self.privkey_push_strategy,
-                    })
+                        # as new JKS pushed to container, we need to tell auth-server to reload the private keys
+                        # by increasing jansRevision again; note that as jansRevision may have been modified externally
+                        # we need to ensure we have fresh jansRevision value to increase to
+                        config = self.backend.get_auth_config()
+                        rev = int(config["jansRevision"]) + 1
+                        conf_dynamic.update({
+                            "keySelectionStrategy": self.privkey_push_strategy,
+                        })
 
-                    logger.info(f"using keySelectionStrategy {self.privkey_push_strategy}")
+                        logger.info(f"using keySelectionStrategy {self.privkey_push_strategy}")
 
-                    self.backend.modify_auth_config(
-                        config["id"],
-                        rev,
-                        conf_dynamic,
-                        keys,
-                    )
+                        self.backend.modify_auth_config(
+                            config["id"],
+                            rev,
+                            conf_dynamic,
+                            keys,
+                        )
         except (TypeError, ValueError,) as exc:
             logger.warning(f"Unable to get public keys; reason={exc}")
 
@@ -539,7 +538,8 @@ class AuthHandler(BaseHandler):
                 logger.warning(
                     "Unable to find any jans-auth container; make sure "
                     "to deploy jans-auth and set APP_NAME=auth-server "
-                    "label on container level"
+                    "label on container level. Note that pushing keys to "
+                    "containers will be skipped!"
                 )
                 # exit immediately to avoid persistence/secrets being modified
                 return
@@ -579,18 +579,17 @@ class AuthHandler(BaseHandler):
                     self.meta_client.exec_cmd(container, f"cp {jks_fn}.backup {jks_fn}")
                     logger.info(f"restoring backup of {name}:{jwks_fn}")
                     self.meta_client.exec_cmd(container, f"cp {jwks_fn}.backup {jwks_fn}")
-                return
-
-            self.manager.secret.set("auth_jks_base64", encode_jks(self.manager))
-            self.manager.config.set("auth_key_rotated_at", int(time.time()))
-            self.manager.secret.set("auth_openid_jks_pass", jks_pass)
-            self.manager.config.set("auth_sig_keys", self.sig_keys)
-            self.manager.config.set("auth_enc_keys", self.enc_keys)
-            # jwks
-            self.manager.secret.set(
-                "auth_openid_key_base64",
-                generate_base64_contents(json.dumps(keys)),
-            )
+            else:
+                self.manager.secret.set("auth_jks_base64", encode_jks(self.manager))
+                self.manager.config.set("auth_key_rotated_at", int(time.time()))
+                self.manager.secret.set("auth_openid_jks_pass", jks_pass)
+                self.manager.config.set("auth_sig_keys", self.sig_keys)
+                self.manager.config.set("auth_enc_keys", self.enc_keys)
+                # jwks
+                self.manager.secret.set(
+                    "auth_openid_key_base64",
+                    generate_base64_contents(json.dumps(keys)),
+                )
         except (TypeError, ValueError,) as exc:
             logger.warning(f"Unable to get public keys; reason={exc}")
 
