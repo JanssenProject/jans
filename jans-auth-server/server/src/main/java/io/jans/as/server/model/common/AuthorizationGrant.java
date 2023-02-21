@@ -37,6 +37,7 @@ import io.jans.as.server.util.TokenHashUtil;
 import io.jans.model.metric.MetricType;
 import io.jans.service.CacheService;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -223,6 +224,8 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
                 log.trace("Created plain access token: {}", accessToken.getCode());
 
             return accessToken;
+        } catch (WebApplicationException e) {
+            throw e;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             return null;
