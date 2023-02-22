@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.0.7-1 (2023-02-22)
+
+
+### Features
+
+* add support for postgres testing ([3494925](https://github.com/JanssenProject/jans/commit/34949250f6c06ecf73be30628ee17fecedf70a9d))
+
+
+### Bug Fixes
+
+* **docker-jans-monolith:** use test client and secret ([42c9556](https://github.com/JanssenProject/jans/commit/42c95562cdfe250be893c4f363dc74aadbf05bb7))
+* modify clnId column type ([#3459](https://github.com/JanssenProject/jans/issues/3459)) ([701394c](https://github.com/JanssenProject/jans/commit/701394c3d7463ffb2bd223daf9662921244ad34d))
+* prepare 1.0.7 release ([ce02fd9](https://github.com/JanssenProject/jans/commit/ce02fd9322ab49d5bea4f6e88f316f931e9d2169))
+* prepare for 1.0.6 release ([9e4c8fb](https://github.com/JanssenProject/jans/commit/9e4c8fb4c0a1ef4779934558e8d8d40d8fedbabf))
+
 ## [1.0.6-1](https://github.com/JanssenProject/jans/compare/docker-jans-monolith-v1.0.5-1...docker-jans-monolith-v1.0.6-1) (2023-01-09)
 
 
