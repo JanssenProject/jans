@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.0.7-1 (2023-02-22)
+
+
+### Features
+
+* **docker-jans-persistence-loader:** add ssa admin scope ([#3762](https://github.com/JanssenProject/jans/issues/3762)) ([540f619](https://github.com/JanssenProject/jans/commit/540f6196bfe4e5b239486ef5728e381b18d65bc8))
+* **docker-jans:** add admin-ui scopes ([#3530](https://github.com/JanssenProject/jans/issues/3530)) ([bc62673](https://github.com/JanssenProject/jans/commit/bc626739bf7a2ed10e7551eda6ea4cc45e7ea49a))
+* **docker-jans:** change persistence entry check to read configuration ([#3618](https://github.com/JanssenProject/jans/issues/3618)) ([d465c19](https://github.com/JanssenProject/jans/commit/d465c191c8276c5d409e1200ddd7e3a364089e96))
+
+
+### Bug Fixes
+
+* **docker-jans-persistence-loader:** add missing persist tokens config when upgrading from previous version ([#3849](https://github.com/JanssenProject/jans/issues/3849)) ([5b8036d](https://github.com/JanssenProject/jans/commit/5b8036dff57423f36ffa6f47bdd7a150db55d51e))
+* modify clnId column type ([#3459](https://github.com/JanssenProject/jans/issues/3459)) ([701394c](https://github.com/JanssenProject/jans/commit/701394c3d7463ffb2bd223daf9662921244ad34d))
+* prepare 1.0.7 release ([ce02fd9](https://github.com/JanssenProject/jans/commit/ce02fd9322ab49d5bea4f6e88f316f931e9d2169))
+* prepare for 1.0.6 release ([9e4c8fb](https://github.com/JanssenProject/jans/commit/9e4c8fb4c0a1ef4779934558e8d8d40d8fedbabf))
+* rename role_based_client as tui_client ([#3657](https://github.com/JanssenProject/jans/issues/3657)) ([c393cb2](https://github.com/JanssenProject/jans/commit/c393cb2052f7e73cc6a02b84bbc673bcc93dc13d))
+
 ## 1.0.6-1 (2023-01-09)
 
 
