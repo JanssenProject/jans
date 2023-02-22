@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.7](https://github.com/JanssenProject/jans/compare/jans-scim-v1.0.6...jans-scim-v1.0.7) (2023-02-22)
+
+
+### Bug Fixes
+
+* prepare 1.0.7 release ([ce02fd9](https://github.com/JanssenProject/jans/commit/ce02fd9322ab49d5bea4f6e88f316f931e9d2169))
+
 ## 1.0.6 (2023-01-09)
 
 
