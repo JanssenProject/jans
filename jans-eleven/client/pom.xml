@@ -8,7 +8,7 @@
 	<parent>
 		<artifactId>jans-eleven-parent</artifactId>
 		<groupId>io.jans</groupId>
-		<version>1.0.7-SNAPSHOT</version>
+		<version>1.0.7</version>
 	</parent>
 
 	<build>
