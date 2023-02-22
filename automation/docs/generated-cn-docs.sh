@@ -8,7 +8,7 @@ echo "Generating helm docs"
 mkdir helmtemp
 cd helmtemp
 HELM_DOCS_VERSION=$(curl "https://api.github.com/repos/norwoodj/helm-docs/releases/latest" | grep '"tag_name"' | sed -E 's/.*"([^"]+)".*/\1/' | cut -c2-)
-curl -sSL https://github.com/norwoodj/helm-docs/releases/download/v"${VERSION}"/helm-docs_"${VERSION}"_Linux_x86_64.tar.gz  -o helm-docs_"${VERSION}"_Linux_x86_64.tar.gz
+curl -sSL https://github.com/norwoodj/helm-docs/releases/download/v"${HELM_DOCS_VERSION}"/helm-docs_"${HELM_DOCS_VERSION}"_Linux_x86_64.tar.gz  -o helm-docs_"${HELM_DOCS_VERSION}"_Linux_x86_64.tar.gz
 tar xvf helm-docs_"${HELM_DOCS_VERSION}"_Linux_x86_64.tar.gz
 sudo cp helm-docs /usr/local/bin/
 cd ..
