@@ -42,7 +42,7 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # Config API
 # ==========
 
-ENV CN_VERSION=1.0.7-SNAPSHOT
+ENV CN_VERSION=1.0.7
 ENV CN_BUILD_DATE='2023-02-08 17:05'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api-server/${CN_VERSION}/jans-config-api-server-${CN_VERSION}.war
 
@@ -240,7 +240,7 @@ LABEL name="janssenproject/config-api" \
     maintainer="Janssen Project <support@jans.io>" \
     vendor="Janssen Project" \
     version="1.0.7" \
-    release="dev" \
+    release="1" \
     summary="Janssen Config API" \
     description=""
 
