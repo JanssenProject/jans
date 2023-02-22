@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.0.7-1 (2023-02-22)
+
+
+### Features
+
+* **docker-jans:** introduce key_ops when generating keys ([#3770](https://github.com/JanssenProject/jans/issues/3770)) ([2495842](https://github.com/JanssenProject/jans/commit/249584257c3e892f5106d0e3559d1c0caa4a8d77))
+* **jans-auth-server:** renamed "key_ops" -&gt; "key_ops_type" [#3790](https://github.com/JanssenProject/jans/issues/3790) ([#3792](https://github.com/JanssenProject/jans/issues/3792)) ([7a6bcba](https://github.com/JanssenProject/jans/commit/7a6bcba5ca3597f7556d406e4a572c76a229bbdf))
+
+
+### Bug Fixes
+
+* **docker-jans:** handle failure on running API requests to Kubernetes API server in Google Cloud Run ([#3893](https://github.com/JanssenProject/jans/issues/3893)) ([a31dee3](https://github.com/JanssenProject/jans/commit/a31dee3fa43be70c64f267fc86f8162b9b48dce2))
+* prepare 1.0.7 release ([ce02fd9](https://github.com/JanssenProject/jans/commit/ce02fd9322ab49d5bea4f6e88f316f931e9d2169))
+* prepare for 1.0.6 release ([9e4c8fb](https://github.com/JanssenProject/jans/commit/9e4c8fb4c0a1ef4779934558e8d8d40d8fedbabf))
+
 ## 1.0.6-1 (2023-01-09)
 
 
