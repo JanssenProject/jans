@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.0.7](https://github.com/JanssenProject/jans/compare/jans-pycloudlib-v1.0.6...jans-pycloudlib-v1.0.7) (2023-02-22)
+
+
+### Features
+
+* **docker-jans:** change persistence entry check to read configuration ([#3618](https://github.com/JanssenProject/jans/issues/3618)) ([d465c19](https://github.com/JanssenProject/jans/commit/d465c191c8276c5d409e1200ddd7e3a364089e96))
+
+
+### Bug Fixes
+
+* **docker-jans:** handle failure on running API requests to Kubernetes API server in Google Cloud Run ([#3893](https://github.com/JanssenProject/jans/issues/3893)) ([a31dee3](https://github.com/JanssenProject/jans/commit/a31dee3fa43be70c64f267fc86f8162b9b48dce2))
+* **jans-pycloudlib:** avoid overwritten data by using merge strategy for AWS wrappers ([#3832](https://github.com/JanssenProject/jans/issues/3832)) ([cf0d4e3](https://github.com/JanssenProject/jans/commit/cf0d4e3cff9478496fe1e63f9d4113c3dc81abe9))
+* **jans-pycloudlib:** avoid overwritten data by using merge strategy for Google wrappers ([#3826](https://github.com/JanssenProject/jans/issues/3826)) ([809b9db](https://github.com/JanssenProject/jans/commit/809b9dbf08b4ed3ad1b0e545302502bf731298be))
+* **jans-pycloudlib:** split google secrets when payload is larger than 65536 bytes ([#3890](https://github.com/JanssenProject/jans/issues/3890)) ([a86b098](https://github.com/JanssenProject/jans/commit/a86b098699e554f31f170d60de978f7797f76730))
+* prepare 1.0.7 release ([ce02fd9](https://github.com/JanssenProject/jans/commit/ce02fd9322ab49d5bea4f6e88f316f931e9d2169))
+
 ## [1.0.6](https://github.com/JanssenProject/jans/compare/jans-pycloudlib-v1.0.5...jans-pycloudlib-v1.0.6) (2023-01-09)
 
 
