@@ -11,13 +11,13 @@ This is The TUI cheat sheet, here you can find all shortcuts and turnarounds to 
 
 ------------------------
 
-### table of content
-##### 1. Genral Structure:
-##### 2. General Purpose shortcuts 
-##### 3. Navigation Shortcuts 
-##### 4. Custom widgets shortcuts 
----------------------------------------
+## table of content
 ### 1. Genral Structure:
+### 2. General Purpose shortcuts 
+### 3. Navigation Shortcuts 
+### 4. Custom widgets shortcuts 
+---------------------------------------
+## 1. Genral Structure:
 
 1. The tui consists of many tabs, each tab may or may not contain nested tabs.
 2. The tui consists of one main navigation bar which contains (Auth Server, FIDO, SCIM, Scripts, Users, and Jans CLI)
@@ -37,7 +37,7 @@ Note:
 
 ---------------------------------------------
 
-### 2. General Purpose shortcuts 
+## 2. General Purpose shortcuts 
 
 *  `f1` : 
 Open help dialog (currently, help dialog is static, in the near future it will dynamically change according to the current position inside the TUI )
@@ -54,8 +54,8 @@ Terminate the program (SigKILL)
 
 ------------------------------------
 
-### 3. Navigation Shortcuts 
-#### 3.1 General Navigation shortcuts 
+## 3. Navigation Shortcuts 
+### 3.1 General Navigation shortcuts 
 
 * `tab`(Next) :
 focus on the next field or widget
@@ -86,7 +86,7 @@ Note:
 
 ![page_up](https://user-images.githubusercontent.com/63171603/216956999-5c813da5-f3a8-4755-9324-a4694b06ab68.gif)
 
-#### 3.2 Main tabs Navigation shortcuts 
+### 3.2 Main tabs Navigation shortcuts 
 
 * `Alt + key` 
 You can navigate to any tab inside the TUI by using the `Alt` key followed by a certain letter from the tab you want to navigate too 
@@ -107,11 +107,11 @@ examples on the navigation letters for the main navigation bar:
 
 -----------------------------------------
 
-### 4. Custom widgets shortcuts 
+## 4. Custom widgets shortcuts 
 Note:
 * What are meant by custom widgets are the widget that has special shortcuts and behavior 
 
-#### 4.1 Lists (Vertical Nav bar)
+### 4.1 Lists (Vertical Nav bar)
 currently, we have about 6 List widgets
 
 Note:
@@ -132,7 +132,7 @@ ex:
 ![image](https://user-images.githubusercontent.com/63171603/216964422-1dcd692d-b9d0-4386-b12c-8a66b2dc3b4a.png)
 
 --------------------------------------------------
-#### 4.2 Date Widgets
+### 4.2 Date Widgets
 The date widget can be used to select a date and time. ex (Client Expiration Date)
 
 ![image](https://user-images.githubusercontent.com/63171603/216964886-12eefe6a-5617-4ce5-9db9-646c844ce18b.png)
@@ -159,7 +159,7 @@ Note:
 ![date_wid_time](https://user-images.githubusercontent.com/63171603/216968005-74f5a56c-fa9d-495d-95ad-ca71576198ab.gif)
 
 --------------------------------------------------
-#### 4.3 Label Widgets
+### 4.3 Label Widgets
 
 The label widget is used with scopes to show certain items instead of a long one, it is similar to the List widget
 
