@@ -8846,11 +8846,11 @@ In this guide, the following command is documented:</p>
 <p>Above command contains references to the release number at two places. <code>v1.0.5</code> in the URL and <code>1.0.5</code> as part of the file
 name. There are many such places throughout the documentation when release numbers need to be mentioned. Whenever we
 make a new release, these numbers need to change as they point to the latest release number. This becomes a manual task.</p>
-<p>To avoid this manual, error-prone approach the Janssen Project uses a release marker, <code>replace-janssen-version</code> instead
+<p>To avoid this manual, error-prone approach the Janssen Project uses a release marker, <code>1.0.7</code> instead
 of writing actual release numbers in the <code>head</code>(latest) documentation branch. So, when there is a need to mention the release number, instead of
 writing the actual release number, use the release marker. Let's see how to document the above command (at the <code>head</code> version)
 so that it stays up-to-date release after release.</p>
-<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version.ubuntu20.04_amd64.deb -P /tmp
+<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/releases/download/v1.0.7/jans_1.0.7.ubuntu20.04_amd64.deb -P /tmp
 </code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>

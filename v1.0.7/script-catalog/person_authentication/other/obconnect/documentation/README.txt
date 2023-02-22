@@ -74,4 +74,4 @@ The mandatory properties in the obconnect authentication script are as follows
 
 Now applications can request obconnect's authentication and consent flow. To make obconnect your default authentication mechanism, follow these instructions in this document set the default authentication mechanism to "obconnect" 
 
-https://github.com/JanssenProject/jans-cli-tui/blob/vreplace-janssen-version/README.md
+https://github.com/JanssenProject/jans-cli-tui/blob/v1.0.7/README.md

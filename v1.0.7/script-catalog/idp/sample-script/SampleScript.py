@@ -94,7 +94,7 @@ class IdpExtension(IdpType):
         return False
 
     # Update attributes before releasing them
-    #   context is io.jans.idp.consent.processor.PostProcessAttributesContext (https://github.com/JanssenProject/shib-oxauth-authn3/blob/vreplace-janssen-version/src/main/java/io.jans.idp/consent/processor/PostProcessAttributesContext.java)
+    #   context is io.jans.idp.consent.processor.PostProcessAttributesContext (https://github.com/JanssenProject/shib-oxauth-authn3/blob/v1.0.7/src/main/java/io.jans.idp/consent/processor/PostProcessAttributesContext.java)
     #   configurationAttributes is java.util.Map<String, SimpleCustomProperty>
     def updateAttributes(self, context, configurationAttributes):
         print "Idp extension. Method: updateAttributes"
