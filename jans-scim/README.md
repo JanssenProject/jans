@@ -93,7 +93,7 @@ Add the artifact `jans-scim-client` to your project pom, eg:
 
 ```
 <properties>
-	<scim.client.version>1.0.0-SNAPSHOT</scim.client.version>
+	<scim.client.version>1.0.8-SNAPSHOT</scim.client.version>
 </properties>
 ...
 <repositories>
