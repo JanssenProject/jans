@@ -237,7 +237,13 @@ public class AttestationService {
 
 		registrationData.setPublicKeyId(keyId);
 		registrationData.setType("public-key");
-		registrationData.setStatus(Fido2RegistrationStatus.registered);
+
+        // Support cancel request
+        if (cancelRequest) {
+        	registrationData.setStatus(Fido2RegistrationStatus.canceled);
+        } else {
+        	registrationData.setStatus(Fido2RegistrationStatus.registered);
+        }
 
 		// Store original response
 		registrationData.setAttenstationResponse(params.toString());
@@ -273,11 +279,6 @@ public class AttestationService {
         	registrationEntry.setExpiration(unfinishedRequestExpiration);
         } else {
         	registrationEntry.clearExpiration();
-        }
-
-        // Support cancel request
-        if (cancelRequest) {
-        	registrationData.setStatus(Fido2RegistrationStatus.canceled);
         }
         
 		registrationPersistenceService.update(registrationEntry);
