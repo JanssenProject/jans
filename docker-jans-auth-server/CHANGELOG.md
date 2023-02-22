@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.0.7-1 (2023-02-22)
+
+
+### Features
+
+* **docker-jans:** add support for mounted hybrid properties file ([#3623](https://github.com/JanssenProject/jans/issues/3623)) ([8c58a5a](https://github.com/JanssenProject/jans/commit/8c58a5a9530cc9c44e7009ce3952064f8610cc69))
+* **docker-jans:** enable prefix and group for stdout logs ([#3481](https://github.com/JanssenProject/jans/issues/3481)) ([e7684e7](https://github.com/JanssenProject/jans/commit/e7684e7f6da7c789d03311fe2df855c687aa7fa6))
+* **docker-jans:** introduce key_ops when generating keys ([#3770](https://github.com/JanssenProject/jans/issues/3770)) ([2495842](https://github.com/JanssenProject/jans/commit/249584257c3e892f5106d0e3559d1c0caa4a8d77))
+
+
+### Bug Fixes
+
+* modify clnId column type ([#3459](https://github.com/JanssenProject/jans/issues/3459)) ([701394c](https://github.com/JanssenProject/jans/commit/701394c3d7463ffb2bd223daf9662921244ad34d))
+* prepare 1.0.7 release ([ce02fd9](https://github.com/JanssenProject/jans/commit/ce02fd9322ab49d5bea4f6e88f316f931e9d2169))
+* prepare for 1.0.6 release ([9e4c8fb](https://github.com/JanssenProject/jans/commit/9e4c8fb4c0a1ef4779934558e8d8d40d8fedbabf))
+
 ## 1.0.6-1 (2023-01-09)
 
 
