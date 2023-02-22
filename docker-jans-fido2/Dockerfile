@@ -45,7 +45,7 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # FIDO2
 # =====
 
-ENV CN_VERSION=1.0.7-SNAPSHOT
+ENV CN_VERSION=1.0.7
 ENV CN_BUILD_DATE='2023-02-08 08:33'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-fido2-server/${CN_VERSION}/jans-fido2-server-${CN_VERSION}.war
 
@@ -220,7 +220,7 @@ LABEL name="janssenproject/fido2" \
     maintainer="Janssen Project <support@jans.io>" \
     vendor="Janssen Project" \
     version="1.0.7" \
-    release="dev" \
+    release="1" \
     summary="Janssen FIDO2" \
     description="FIDO2 server"
 
