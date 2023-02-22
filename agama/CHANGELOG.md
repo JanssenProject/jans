@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.7 (2023-02-22)
+
+
+### Bug Fixes
+
+* add 'java' to the list of restricted variable names [#3533](https://github.com/JanssenProject/jans/issues/3533) ([#3534](https://github.com/JanssenProject/jans/issues/3534)) ([a970d88](https://github.com/JanssenProject/jans/commit/a970d88d81f920973f3ba812db97448f135090a9))
+* **agama:** fix agama auth dependency which blocks build process [#3149](https://github.com/JanssenProject/jans/issues/3149) ([#3244](https://github.com/JanssenProject/jans/issues/3244)) ([8f9fee3](https://github.com/JanssenProject/jans/commit/8f9fee31c66ce08046258694e5e2d83a31e38b5d))
+* prepare 1.0.7 release ([ce02fd9](https://github.com/JanssenProject/jans/commit/ce02fd9322ab49d5bea4f6e88f316f931e9d2169))
+* prepare for 1.0.6 release ([9e4c8fb](https://github.com/JanssenProject/jans/commit/9e4c8fb4c0a1ef4779934558e8d8d40d8fedbabf))
+
 ## 1.0.6 (2023-01-09)
 
 
