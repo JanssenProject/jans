@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.0.7 (2023-02-22)
+
+
+### Features
+
+* add Jupiter+Weld+Mockito+Extension to Fido2 ([#3875](https://github.com/JanssenProject/jans/issues/3875)) ([0152435](https://github.com/JanssenProject/jans/commit/01524358cbd720ad547c6b0d622c2cc32e76a125))
+* **config-api:** health check response rectification and Agama ADS swagger spec ([#3293](https://github.com/JanssenProject/jans/issues/3293)) ([faf2888](https://github.com/JanssenProject/jans/commit/faf2888f3d58d14fc6361d5a9ff5f743984cea4f))
+* **jans-core:** add AES utility class [#3215](https://github.com/JanssenProject/jans/issues/3215) ([#3242](https://github.com/JanssenProject/jans/issues/3242)) ([7e59795](https://github.com/JanssenProject/jans/commit/7e59795e21bc63b173802346b614e7ae6112de4e))
+
+
+### Bug Fixes
+
+* **config-api:** user service conflict with fido2 and script enhancement ([#3767](https://github.com/JanssenProject/jans/issues/3767)) ([5753d39](https://github.com/JanssenProject/jans/commit/5753d3989b96d76699f234cc87f58e355ba313b0))
+* login page doesn't display the correct localized characters ([#3528](https://github.com/JanssenProject/jans/issues/3528)) ([395b376](https://github.com/JanssenProject/jans/commit/395b3769750d2d32f624060c0b6e6ceeee7df0be)), closes [#1660](https://github.com/JanssenProject/jans/issues/1660)
+* prepare 1.0.7 release ([ce02fd9](https://github.com/JanssenProject/jans/commit/ce02fd9322ab49d5bea4f6e88f316f931e9d2169))
+* prepare for 1.0.6 release ([9e4c8fb](https://github.com/JanssenProject/jans/commit/9e4c8fb4c0a1ef4779934558e8d8d40d8fedbabf))
+* store correct script revision after script reload from file ([#3704](https://github.com/JanssenProject/jans/issues/3704)) ([2ca6a83](https://github.com/JanssenProject/jans/commit/2ca6a833132b129c29924106ed65db430917cb8c)), closes [#3703](https://github.com/JanssenProject/jans/issues/3703)
+
 ## 1.0.6 (2023-01-09)
 
 
