@@ -1,0 +1,18 @@
+Flow io.jans.inbound.Apple
+    Basepath ""
+    Configs p
+
+issuer = "https://appleid.apple.com"
+//See https://developer.apple.com/documentation/sign_in_with_apple/generate_and_validate_tokens#create-the-client-secret
+p.clientSecret = Call io.jans.inbound.JwtUtil#mkES256SignedJWT p.key p.keyId p.teamId issuer p.clientId 60
+
+obj = Trigger io.jans.inbound.oauth2.AuthzCode p
+When obj.success is false
+    Finish obj
+
+//See https://developer.apple.com/documentation/sign_in_with_apple/sign_in_with_apple_rest_api/verifying_a_user#verify-the-identity-token
+claims = Call io.jans.inbound.JwtUtil#partialVerifyJWT obj.data.id_token issuer p.clientId
+
+//Most claims don't carry profile data, e.g. iss, iat, exp, ...
+obj = { success: true, data: { sub: claims.sub, email: claims.email } }
+Finish obj
