@@ -1,4 +1,4 @@
-CN_VERSION?=1.0.7-SNAPSHOT
+CN_VERSION?=1.0.8-SNAPSHOT
 IMAGE_NAME=janssenproject/config-api
 DEV_VERSION?=$(shell echo ${CN_VERSION} | cut -d '-' -f 1)_dev
 

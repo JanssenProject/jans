@@ -36,7 +36,7 @@ spec:
       - envFrom:
         - configMapRef:
             name: load-testing-cm
-        image: janssenproject/demo_loadtesting:1.0.7_dev
+        image: janssenproject/demo_loadtesting:1.0.8_dev
         imagePullPolicy: Always
         name: load-testing
         resources:
