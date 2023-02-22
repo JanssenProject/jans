@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.0.7](https://github.com/JanssenProject/jans/compare/jans-cli-tui-v1.0.6...jans-cli-tui-v1.0.7) (2023-02-22)
+
+
+### Bug Fixes
+
+* jans-cli-tui documentation and setup ([#3818](https://github.com/JanssenProject/jans/issues/3818)) ([74660db](https://github.com/JanssenProject/jans/commit/74660db65cb2e1b3c2a039a3296cfc6df11ba1af))
+* jans-cli-tui include pyproject.toml (ref: [#3804](https://github.com/JanssenProject/jans/issues/3804)) ([#3835](https://github.com/JanssenProject/jans/issues/3835)) ([f250372](https://github.com/JanssenProject/jans/commit/f250372eb42d613d72be63ca4098fc3762cef995))
+* jans-cli-tui rename config-api swagger file ([#3758](https://github.com/JanssenProject/jans/issues/3758)) ([a7e14a0](https://github.com/JanssenProject/jans/commit/a7e14a00c373661abafc1a59a7bba30b89c66108))
+* jans-cli-tui SSA org_id, status and software_roles ([#3765](https://github.com/JanssenProject/jans/issues/3765)) ([4bd3e9a](https://github.com/JanssenProject/jans/commit/4bd3e9a6bcba66307dd682a71708ed113bfdd302))
+* jans-cli-tui typo ([#3846](https://github.com/JanssenProject/jans/issues/3846)) ([aaab377](https://github.com/JanssenProject/jans/commit/aaab377deb34504bb12014aaa3c544b0dfaca252))
+* jans-cli-tui typo organisation ([#3853](https://github.com/JanssenProject/jans/issues/3853)) ([58a974b](https://github.com/JanssenProject/jans/commit/58a974bae20cea8113e9537c2d27864964c1b84c))
+* jans-cli-tui working branch 4 - many different improvements ([#3504](https://github.com/JanssenProject/jans/issues/3504)) ([e572552](https://github.com/JanssenProject/jans/commit/e572552d2d09b7100679c5d06ddf07fab8383641))
+* jans-cli-tui working branch 5 ([#3649](https://github.com/JanssenProject/jans/issues/3649)) ([4d3f982](https://github.com/JanssenProject/jans/commit/4d3f982f38cc51854f5a41b6cf1d6076766c3937))
+* jans-cli-tui working branch 6 ([#3794](https://github.com/JanssenProject/jans/issues/3794)) ([afea59d](https://github.com/JanssenProject/jans/commit/afea59d3195ea1b1fbf0c64f7f35a3467626edf6))
+* jans-cli-tui working branch 7 ([#3824](https://github.com/JanssenProject/jans/issues/3824)) ([776bab3](https://github.com/JanssenProject/jans/commit/776bab37c1eab6fd548232504538078854ae546d))
+* **jans-cli-tui:** working branch 9 ([#3871](https://github.com/JanssenProject/jans/issues/3871)) ([9f16d75](https://github.com/JanssenProject/jans/commit/9f16d75e4de5d1e3ccca6b21f004ecf6a219daae))
+* jans-linux-setup rename role_based_client as tui_client ([#3630](https://github.com/JanssenProject/jans/issues/3630)) ([b331ef3](https://github.com/JanssenProject/jans/commit/b331ef32b49c870e0a972fc0463e954939317f88))
+* prepare 1.0.7 release ([ce02fd9](https://github.com/JanssenProject/jans/commit/ce02fd9322ab49d5bea4f6e88f316f931e9d2169))
+* rename role_based_client as tui_client ([#3657](https://github.com/JanssenProject/jans/issues/3657)) ([c393cb2](https://github.com/JanssenProject/jans/commit/c393cb2052f7e73cc6a02b84bbc673bcc93dc13d))
+
 ## [1.0.6](https://github.com/JanssenProject/jans/compare/jans-cli-tui-v1.0.5...jans-cli-tui-v1.0.6) (2023-01-09)
 
 
