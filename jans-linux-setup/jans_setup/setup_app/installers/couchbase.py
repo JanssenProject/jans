@@ -94,7 +94,7 @@ class CouchbaseInstaller(PackageUtils, BaseInstaller):
 
     def couchbaseInstall(self):
         coucbase_package = None
-
+        Config.start_auth_after = 'couchbase-server.service'
         cb_package_list = glob.glob(os.path.join(self.couchbasePackageFolder, 'couchbase-server-enterprise*'))
 
         if not cb_package_list:
@@ -103,7 +103,7 @@ class CouchbaseInstaller(PackageUtils, BaseInstaller):
 
         package_name = max(cb_package_list)
         self.logIt("Found package '%s' for install" % package_name)
-        Config.pbar.progress(self.service_name, "Importing Couchbase package", incr=False)
+        Config.pbar.progress(self.service_name, "Installing Couchbase package", incr=False)
         if base.clone_type == 'deb':
             apt_path = shutil.which('apt')
             self.chown(self.couchbasePackageFolder, '_apt', 'nogroup', recursive=True)
