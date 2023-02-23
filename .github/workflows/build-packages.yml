@@ -18,9 +18,16 @@ jobs:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-        name: [ubuntu20, el8, suse15]
+        name: [ubuntu22, ubuntu20, el8, suse15]
 
         include:
+          - name: ubuntu22
+            asset_suffix: ~ubuntu22.04_amd64.deb
+            build_files: deb/jammy
+            asset_prefix: '_'
+            asset_path: jans
+            sign_cmd: dpkg-sig -s builder -k DE92BEF14A1A4E542F678B64DC3C790386C73900
+            python_version: 3.8                
           - name: ubuntu20
             asset_suffix: ~ubuntu20.04_amd64.deb
             build_files: deb/focal
