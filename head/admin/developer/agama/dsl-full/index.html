@@ -9977,7 +9977,8 @@ Finish it.nonsense
 <ul>
 <li>Any statements found after <code>Finish</code> is not reached and thus, not executed</li>
 <li>If no <code>Finish</code> statement is found in a flow's execution, this will degenerate in flow crash </li>
-<li>When a flow is finished and was used as subflow (part of the execution of a bigger parent flow), the parent does not terminate. Execution continues at the following instruction that triggered the subflow. More on <code>Trigger</code> later</li>
+<li>When a flow is finished and was used as <a href="#subflows">subflow</a> (part of the execution of a bigger parent flow), the parent does not terminate. Execution continues at the following instruction that triggered the subflow. More on <code>Trigger</code> later</li>
+<li>Using <code>data</code> in the <code>Finish</code> directive is an effective way to communicate information to callers (parent flows). If a  flow has no parents, <code>data</code> is stored in the authentication server's session of the given user under the key <code>agamaData</code>. Contents are serialized to a JSON string previously </li>
 <li>A flow cannot be aborted by itself. This can only be achieved through a parent flow. Learn more about aborted flows <a href="../flows-lifecycle/#cancellation">here</a></li>
 <li>Check the best practices on finishing flows <a href="../flows-lifecycle/#finishing-flows">here</a></li>
 </ul>
@@ -10762,7 +10763,7 @@ x[2] = &quot;polo&quot;    //adds the key/value pair &quot;2&quot; / &quot;polo&
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-04T15:51:13+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-04</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-02-23T14:16:27+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-02-23</span>
       
         <br>
         Created:

@@ -8801,8 +8801,6 @@ For bleeding-edge/unstable version, use <code>janssenproject/persistence:1.0.1_d
 <li><code>CN_CONFIG_KUBERNETES_NAMESPACE</code>: Kubernetes namespace (default to <code>default</code>).</li>
 <li><code>CN_CONFIG_KUBERNETES_CONFIGMAP</code>: Kubernetes configmaps name (default to <code>jans</code>).</li>
 <li><code>CN_CONFIG_KUBERNETES_USE_KUBE_CONFIG</code>: Load credentials from <code>$HOME/.kube/config</code>, only useful for non-container environment (default to <code>false</code>).</li>
-<li><code>CN_CONFIG_GOOGLE_SECRET_VERSION_ID</code>: Janssen configuration secret version ID in Google Secret Manager. Defaults to <code>latest</code>, which is recommended.</li>
-<li><code>CN_CONFIG_GOOGLE_SECRET_NAME_PREFIX</code>: Prefix for Janssen configuration secret in Google Secret Manager. Defaults to <code>jans</code>. If left intact <code>jans-configuration</code> secret will be created.</li>
 <li><code>CN_SECRET_ADAPTER</code>: The secrets' adapter, can be <code>vault</code> (default), <code>kubernetes</code>, or <code>google</code>.</li>
 <li><code>CN_SECRET_VAULT_SCHEME</code>: supported Vault scheme (<code>http</code> or <code>https</code>).</li>
 <li><code>CN_SECRET_VAULT_HOST</code>: hostname or IP of Vault (default to <code>localhost</code>).</li>
@@ -8816,9 +8814,6 @@ For bleeding-edge/unstable version, use <code>janssenproject/persistence:1.0.1_d
 <li><code>CN_SECRET_KUBERNETES_NAMESPACE</code>: Kubernetes namespace (default to <code>default</code>).</li>
 <li><code>CN_SECRET_KUBERNETES_SECRET</code>: Kubernetes secrets name (default to <code>jans</code>).</li>
 <li><code>CN_SECRET_KUBERNETES_USE_KUBE_CONFIG</code>: Load credentials from <code>$HOME/.kube/config</code>, only useful for non-container environment (default to <code>false</code>).</li>
-<li><code>CN_SECRET_GOOGLE_SECRET_VERSION_ID</code>:  Janssen secret version ID in Google Secret Manager. Defaults to <code>latest</code>, which is recommended.</li>
-<li><code>CN_SECRET_GOOGLE_SECRET_MANAGER_PASSPHRASE</code>: Passphrase for Janssen secret in Google Secret Manager. This is recommended to be changed and defaults to <code>secret</code>.</li>
-<li><code>CN_SECRET_GOOGLE_SECRET_NAME_PREFIX</code>: Prefix for Janssen secret in Google Secret Manager. Defaults to <code>jans</code>. If left <code>jans-secret</code> secret will be created.</li>
 <li><code>CN_WAIT_MAX_TIME</code>: How long the startup "health checks" should run (default to <code>300</code> seconds).</li>
 <li><code>CN_WAIT_SLEEP_DURATION</code>: Delay between startup "health checks" (default to <code>10</code> seconds).</li>
 <li><code>CN_OXTRUST_CONFIG_GENERATION</code>: Whether to generate oxShibboleth configuration or not (default to <code>true</code>).</li>
@@ -8844,8 +8839,11 @@ For bleeding-edge/unstable version, use <code>janssenproject/persistence:1.0.1_d
 <li><code>CN_JACKRABBIT_URL</code>: URL to remote repository (default to <code>http://localhost:8080</code>).</li>
 <li><code>CN_JACKRABBIT_ADMIN_ID_FILE</code>: Absolute path to file contains ID for admin user (default to <code>/etc/jans/conf/jackrabbit_admin_id</code>).</li>
 <li><code>CN_JACKRABBIT_ADMIN_PASSWORD_FILE</code>: Absolute path to file contains password for admin user (default to <code>/etc/gluu/conf/jackrabbit_admin_password</code>).</li>
-<li><code>GOOGLE_PROJECT_ID</code>: Google Project ID (default to empty string). Used when <code>CN_CONFIG_ADAPTER</code> or <code>CN_SECRET_ADAPTER</code> set to <code>google</code>.</li>
-<li><code>GOOGLE_APPLICATION_CREDENTIALS</code>: Path to Google credentials JSON file (default to <code>/etc/jans/conf/google-credentials.json</code>). Used when <code>CN_CONFIG_ADAPTER</code> or <code>CN_SECRET_ADAPTER</code> set to <code>google</code>.</li>
+<li><code>GOOGLE_APPLICATION_CREDENTIALS</code>: JSON file (contains Google credentials) that should be injected into container.</li>
+<li><code>GOOGLE_PROJECT_ID</code>: ID of Google project.</li>
+<li><code>CN_GOOGLE_SECRET_VERSION_ID</code>: Janssen secret version ID in Google Secret Manager. Defaults to <code>latest</code>, which is recommended.</li>
+<li><code>CN_GOOGLE_SECRET_NAME_PREFIX</code>: Prefix for Janssen secret in Google Secret Manager. Defaults to <code>jans</code>. If left <code>jans-secret</code> secret will be created.</li>
+<li><code>CN_GOOGLE_SECRET_MANAGER_PASSPHRASE</code>: Passphrase for Janssen secret in Google Secret Manager. This is recommended to be changed and defaults to <code>secret</code>.</li>
 <li><code>CN_GOOGLE_SPANNER_INSTANCE_ID</code>: Google Spanner instance ID.</li>
 <li><code>CN_GOOGLE_SPANNER_DATABASE_ID</code>: Google Spanner database ID.</li>
 <li><code>CN_SQL_DB_HOST</code>: Hostname of the SQL database (default to <code>localhost</code>).</li>
@@ -8898,7 +8896,7 @@ For bleeding-edge/unstable version, use <code>janssenproject/persistence:1.0.1_d
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-07T11:29:39+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-07</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-02-23T14:24:45+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-02-23</span>
       
         <br>
         Created:

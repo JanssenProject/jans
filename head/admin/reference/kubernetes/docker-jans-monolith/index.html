@@ -8878,6 +8878,16 @@ This image is for testing and development purposes only. Use Janssen <a href="ht
 <td><code>false</code></td>
 </tr>
 <tr>
+<td><code>CN_INSTALL_MYSQL</code></td>
+<td>Install jans with mysql as the backend</td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><code>CN_INSTALL_PGSQL</code></td>
+<td>Install jans with Postgres as the backend</td>
+<td><code>false</code></td>
+</tr>
+<tr>
 <td><code>CN_INSTALL_CONFIG_API</code></td>
 <td>Installs the Config API service.</td>
 <td><code>true</code></td>
@@ -8893,30 +8903,50 @@ This image is for testing and development purposes only. Use Janssen <a href="ht
 <td><code>true</code></td>
 </tr>
 <tr>
-<td><code>MYSQL_DATABASE</code></td>
-<td>MySQL jans database.</td>
+<td><code>RDBMS_DATABASE</code></td>
+<td>RDBMS jans database for MySQL or Postgres.</td>
 <td><code>jans</code></td>
 </tr>
 <tr>
-<td><code>MYSQL_USER</code></td>
-<td>MySQL database user.</td>
+<td><code>RDBMS_USER</code></td>
+<td>RDBMS database user for MySQL or Postgres.</td>
 <td><code>jans</code></td>
 </tr>
 <tr>
-<td><code>MYSQL_PASSWORD</code></td>
-<td>MySQL database user password.</td>
+<td><code>RDBMS_PASSWORD</code></td>
+<td>RDBMS database user password for MySQL or Postgres.</td>
 <td><code>1t5Fin3#security</code></td>
 </tr>
 <tr>
-<td><code>MYSQL_HOST</code></td>
-<td>MySQL host.</td>
+<td><code>RDBMS_HOST</code></td>
+<td>RDBMS host for MySQL or Postgres.</td>
 <td><code>mysql</code> which is the docker compose service name</td>
+</tr>
+<tr>
+<td><code>TEST_CLIENT_ID</code></td>
+<td>ID of test client in UUID which has all available scopes to access any jans API</td>
+<td><code>9876baac-de39-4c23-8a78-674b59df8c09</code></td>
+</tr>
+<tr>
+<td><code>TEST_CLIENT_SECRET</code></td>
+<td>Secret for test client</td>
+<td><code>1t5Fin3#security</code></td>
+</tr>
+<tr>
+<td><code>TEST_CLIENT_TRUSTED</code></td>
+<td>Trust test client</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><code>TEST_CLIENT_REDIRECT_URI</code></td>
+<td><strong>Not Implemented yet</strong> Redirect URI for test client. Multiple uri's with comma may be provided, if not provided redirect uris will be same as the config-api-client</td>
+<td>``</td>
 </tr>
 </tbody>
 </table>
 <h2 id="how-to-run">How to run<a class="headerlink" href="#how-to-run" title="Permanent link">#</a></h2>
 <p>Download the compose file </p>
-<div class="highlight"><pre><span></span><code>wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/docker-jans-monolith/jans-mysql-compose.yml 
+<div class="highlight"><pre><span></span><code>wget https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/jans-mysql-compose.yml 
 </code></pre></div>
 <p>This docker compose file runs two containers, the janssen monolith container and mysql container.</p>
 <div class="highlight"><pre><span></span><code>docker compose -f jans-mysql-compose.yml up -d
@@ -8947,7 +8977,7 @@ This image is for testing and development purposes only. Use Janssen <a href="ht
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-13T08:34:37+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-13</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-02-23T14:24:45+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-02-23</span>
       
         <br>
         Created:

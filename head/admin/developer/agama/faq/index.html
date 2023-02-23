@@ -5068,6 +5068,13 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#a-class-is-still-available-after-removing-the-corresponding-file" class="md-nav__link">
+    A class is still available after removing the corresponding file
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#how-to-append-data-to-a-flows-log-directly" class="md-nav__link">
     How to append data to a flow's log directly?
   </a>
@@ -9011,6 +9018,13 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#a-class-is-still-available-after-removing-the-corresponding-file" class="md-nav__link">
+    A class is still available after removing the corresponding file
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#how-to-append-data-to-a-flows-log-directly" class="md-nav__link">
     How to append data to a flow's log directly?
   </a>
@@ -9279,6 +9293,8 @@
 <h2 id="classes-added-on-the-fly">Classes added on the fly<a class="headerlink" href="#classes-added-on-the-fly" title="Permanent link">#</a></h2>
 <h3 id="a-class-does-not-see-other-classes-in-its-own-package">A class does not "see" other classes in its own package<a class="headerlink" href="#a-class-does-not-see-other-classes-in-its-own-package" title="Permanent link">#</a></h3>
 <p>This is a limitation of the scripting engine. Here, classes have to be imported even if they belong to the same package, or the fully qualified name used.</p>
+<h3 id="a-class-is-still-available-after-removing-the-corresponding-file">A class is still available after removing the corresponding file<a class="headerlink" href="#a-class-is-still-available-after-removing-the-corresponding-file" title="Permanent link">#</a></h3>
+<p>This is because the JVM does not support unloading: even if a given source file is removed, its corresponding class will still be accessible - it remains in the classpath. The classpath will be clean again after a service restart.</p>
 <h3 id="how-to-append-data-to-a-flows-log-directly">How to append data to a flow's log directly?<a class="headerlink" href="#how-to-append-data-to-a-flows-log-directly" title="Permanent link">#</a></h3>
 <p>Call method <code>log</code> of class <code>io.jans.agama.engine.script.LogUtils</code>. This method receives a variable number of arguments as DSL's <code>Log</code> does. Thus you can do <code>LogUtils.log("@w Today is Friday %th", 13)</code>, as in the logging <a href="../dsl-full/#logging">examples</a>.</p>
 <h3 id="what-groovy-and-java-versions-are-supported">What Groovy and Java versions are supported?<a class="headerlink" href="#what-groovy-and-java-versions-are-supported" title="Permanent link">#</a></h3>
@@ -9337,7 +9353,7 @@ Call java.lang.String#join &quot;&quot; strings
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-10-25T19:55:42+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-10-25</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-02-23T14:16:27+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-02-23</span>
       
         <br>
         Created:

@@ -8909,8 +8909,6 @@ For bleeding-edge/unstable version, use <code>janssenproject/configurator:1.0.1_
 <li><code>CN_CONFIG_KUBERNETES_NAMESPACE</code>: Kubernetes namespace (default to <code>default</code>).</li>
 <li><code>CN_CONFIG_KUBERNETES_CONFIGMAP</code>: Kubernetes configmaps name (default to <code>jans</code>).</li>
 <li><code>CN_CONFIG_KUBERNETES_USE_KUBE_CONFIG</code>: Load credentials from <code>$HOME/.kube/config</code>, only useful for non-container environment (default to <code>false</code>).</li>
-<li><code>CN_CONFIG_GOOGLE_SECRET_VERSION_ID</code>: Janssen configuration secret version ID in Google Secret Manager. Defaults to <code>latest</code>, which is recommended.</li>
-<li><code>CN_CONFIG_GOOGLE_SECRET_NAME_PREFIX</code>: Prefix for Janssen configuration secret in Google Secret Manager. Defaults to <code>jans</code>. If left intact <code>jans-configuration</code> secret will be created.</li>
 <li><code>CN_SECRET_ADAPTER</code>: The secrets' adapter, can be <code>vault</code> (default), <code>kubernetes</code>, <code>google</code>, or <code>aws</code>.</li>
 <li><code>CN_SECRET_VAULT_SCHEME</code>: supported Vault scheme (<code>http</code> or <code>https</code>).</li>
 <li><code>CN_SECRET_VAULT_HOST</code>: hostname or IP of Vault (default to <code>localhost</code>).</li>
@@ -8924,13 +8922,13 @@ For bleeding-edge/unstable version, use <code>janssenproject/configurator:1.0.1_
 <li><code>CN_SECRET_KUBERNETES_NAMESPACE</code>: Kubernetes namespace (default to <code>default</code>).</li>
 <li><code>CN_SECRET_KUBERNETES_SECRET</code>: Kubernetes secrets name (default to <code>jans</code>).</li>
 <li><code>CN_SECRET_KUBERNETES_USE_KUBE_CONFIG</code>: Load credentials from <code>$HOME/.kube/config</code>, only useful for non-container environment (default to <code>false</code>).</li>
-<li><code>CN_SECRET_GOOGLE_SECRET_VERSION_ID</code>:  Janssen secret version ID in Google Secret Manager. Defaults to <code>latest</code>, which is recommended.</li>
-<li><code>CN_SECRET_GOOGLE_SECRET_MANAGER_PASSPHRASE</code>: Passphrase for Janssen secret in Google Secret Manager. This is recommended to be changed and defaults to <code>secret</code>.</li>
-<li><code>CN_SECRET_GOOGLE_SECRET_NAME_PREFIX</code>: Prefix for Janssen secret in Google Secret Manager. Defaults to <code>jans</code>. If left <code>jans-secret</code> secret will be created.</li>
 <li><code>CN_WAIT_MAX_TIME</code>: How long the startup "health checks" should run (default to <code>300</code> seconds).</li>
 <li><code>CN_WAIT_SLEEP_DURATION</code>: Delay between startup "health checks" (default to <code>10</code> seconds).</li>
-<li><code>GOOGLE_PROJECT_ID</code>: Google Project ID (default to empty string). Used when <code>CN_CONFIG_ADAPTER</code> or <code>CN_SECRET_ADAPTER</code> set to <code>google</code>.</li>
-<li><code>GOOGLE_APPLICATION_CREDENTIALS</code>: Path to Google credentials JSON file (default to <code>/etc/jans/conf/google-credentials.json</code>). Used when <code>CN_CONFIG_ADAPTER</code> or <code>CN_SECRET_ADAPTER</code> set to <code>google</code>.</li>
+<li><code>GOOGLE_APPLICATION_CREDENTIALS</code>: JSON file (contains Google credentials) that should be injected into container.</li>
+<li><code>GOOGLE_PROJECT_ID</code>: ID of Google project.</li>
+<li><code>CN_GOOGLE_SECRET_VERSION_ID</code>: Janssen secret version ID in Google Secret Manager. Defaults to <code>latest</code>, which is recommended.</li>
+<li><code>CN_GOOGLE_SECRET_NAME_PREFIX</code>: Prefix for Janssen secret in Google Secret Manager. Defaults to <code>jans</code>. If left <code>jans-secret</code> secret will be created.</li>
+<li><code>CN_GOOGLE_SECRET_MANAGER_PASSPHRASE</code>: Passphrase for Janssen secret in Google Secret Manager. This is recommended to be changed and defaults to <code>secret</code>.</li>
 <li><code>CN_CONFIGURATION_SKIP_INITIALIZED</code>: skip initialization if backend already initialized (default to <code>false</code>).</li>
 <li><code>CN_AWS_SECRETS_ENDPOINT_URL</code>: The URL of AWS secretsmanager service (if omitted, will use the one in specified region).</li>
 <li><code>CN_AWS_SECRETS_PREFIX</code>: The prefix name of the secrets (default to <code>jans</code>).</li>
@@ -8948,10 +8946,7 @@ For bleeding-edge/unstable version, use <code>janssenproject/configurator:1.0.1_
 </ul>
 <h3 id="load">load<a class="headerlink" href="#load" title="Permanent link">#</a></h3>
 <p>The load command can be used either to generate or restore config and secret for the cluster.</p>
-<h4 id="docker">Docker<a class="headerlink" href="#docker" title="Permanent link">#</a></h4>
-<ol>
-<li>
-<p>To generate the initial configuration and secret, create <code>/path/to/host/volume/generate.json</code> similar to example below:</p>
+<p>For fresh installation, generate the initial configuration and secret by creating <code>/path/to/host/volume/generate.json</code> similar to example below:
 <div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;hostname&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;demoexample.jans.io&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;country_code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;US&quot;</span><span class="p">,</span><span class="w"></span>
@@ -8962,8 +8957,8 @@ For bleeding-edge/unstable version, use <code>janssenproject/configurator:1.0.1_
 <span class="w">    </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;s@jans.io&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;org_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Gluu Inc.&quot;</span><span class="w"></span>
 <span class="p">}</span><span class="w"></span>
-</code></pre></div>
-<p><strong>NOTE</strong>: <code>generate.json</code> has optional attributes to generate oxAuth signing and encryption keys based on specific algorithms.</p>
+</code></pre></div></p>
+<p><strong>NOTE</strong>: <code>generate.json</code> has optional attributes as seen below.</p>
 <ul>
 <li><code>auth_sig_keys</code>: space-separated key algorithm for signing (default to <code>RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512</code>)</li>
 <li><code>auth_enc_keys</code>: space-separated key algorithm for encryption (default to <code>RSA1_5 RSA-OAEP</code>)</li>
@@ -8972,10 +8967,21 @@ For bleeding-edge/unstable version, use <code>janssenproject/configurator:1.0.1_
 <li><code>sql_pw</code>: user's password to access SQL database (only used if <code>optional_scopes</code> list contains <code>sql</code> scope)</li>
 <li><code>couchbase_pw</code>: user's password to access Couchbase database (only used if <code>optional_scopes</code> list contains <code>couchbase</code> scope)</li>
 <li><code>couchbase_superuser_pw</code>: superusers password to access Couchbase database (only used if <code>optional_scopes</code> list contains <code>couchbase</code> scope)</li>
+<li><code>salt</code>: user-defined salt (24 characters length); if omitted, salt will be generated automatically</li>
 </ul>
-</li>
+<p>Example of generating <code>salt</code> value:</p>
+<div class="highlight"><pre><span></span><code># using shell script
+cat /dev/urandom | tr -dc &#39;a-zA-Z0-9&#39; | fold -w 24 | head -n 1
+# output: NFAG5g4R0NSkAZXHL8t2DScL
+
+# using python oneliner
+python -c &#39;import random, string; print(&quot;&quot;.join(random.choices(string.ascii_letters + string.digits, k=24)))&#39;
+# ouput: HsPzqiPkRzNySWlOVui8Ilmw
+</code></pre></div>
+<h4 id="docker">Docker<a class="headerlink" href="#docker" title="Permanent link">#</a></h4>
+<ol>
 <li>
-<p>Mount the volume into container:</p>
+<p>Mount the <code>generate.json</code> into container:</p>
 <div class="highlight"><pre><span></span><code>docker run <span class="se">\</span>
     --rm <span class="se">\</span>
     --network container:consul <span class="se">\</span>
@@ -8992,28 +8998,7 @@ For bleeding-edge/unstable version, use <code>janssenproject/configurator:1.0.1_
 </ol>
 <h4 id="kubernetes">Kubernetes<a class="headerlink" href="#kubernetes" title="Permanent link">#</a></h4>
 <ol>
-<li>
-<p>To generate the initial configuration and secret, create <code>/path/to/host/volume/generate.json</code> similar to example below:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;hostname&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;demoexample.jans.io&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;country_code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;US&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;state&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;TX&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;city&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Austin&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;admin_pw&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;S3cr3t+pass&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;ldap_pw&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;S3cr3t+pass&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;s@gluu.local&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;org_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Gluu Inc.&quot;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
-</code></pre></div>
-<p><strong>NOTE</strong>: <code>generate.json</code> has optional attributes to generate oxAuth signing and encryption keys based on specific algorithms.</p>
-<ul>
-<li><code>auth_sig_keys</code>: space-separated key algorithm for signing (default to <code>RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512</code>)</li>
-<li><code>auth_enc_keys</code>: space-separated key algorithm for encryption (default to <code>RSA1_5 RSA-OAEP</code>)</li>
-</ul>
-</li>
-<li>
-<p>Create config map <code>config-generate-params</code></p>
-</li>
+<li>Create config map <code>config-generate-params</code> to store the contents of <code>generate.json</code></li>
 </ol>
 <div class="highlight"><pre><span></span><code>kubectl create cm config-generate-params --from-file<span class="o">=</span>generate.json
 </code></pre></div>
@@ -9136,7 +9121,7 @@ spec:
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-07T11:29:39+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-07</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-02-23T14:24:45+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-02-23</span>
       
         <br>
         Created:
