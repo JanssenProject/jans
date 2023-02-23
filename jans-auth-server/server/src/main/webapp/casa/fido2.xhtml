@@ -1,7 +1,8 @@
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
-                xmlns:f="http://xmlns.jcp.org/jsf/core"
-                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
-                template="/casa/login-template.xhtml">
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	template="/casa/login-template.xhtml">
 	
 	<f:metadata>
 		<f:viewAction action="#{authenticator.prepareAuthenticationForStep}" if="#{not identity.loggedIn}" />
@@ -78,18 +79,41 @@
 		<section class="pa4 shadow-4 bg-blank gray cust-section" id="fido2_section">
 			<h2 class="f3 dark-blue2">#{msgs['casa.snd_step']}</h2>
 			<div id="messages" class="list dark-red pv2 ph0 ma0 f7-cust mw5" />
-			
-			<div class="flex flex-column items-center pa3">
-				<p class="f4 tc">#{msgs['casa.securitykey.insert']}</p>
-				<img class="w4" src="#{request.contextPath}/img/securitykey.jpg" />
-				<div class="db w5 tc f7-cust pv3">#{msgs['casa.securitykey.tap']}</div>
+			<div class="flex flex-row">
+				<div>
+					<div class="flex flex-column items-center pa3">
+						<p class="f4 tc">#{msgs['casa.securitykey.insert']}</p>
+						<img class="w4" src="#{request.contextPath}/img/securitykey.jpg" />
+						<div class="db w5 tc f7-cust pv3">#{msgs['casa.securitykey.tap']}</div>
+					</div>
+				</div>
+				<ui:fragment
+					rendered="#{identity.getWorkingParameter('platformAuthenticatorAvailable') == 'true'}">
+					<div>
+						<div class="flex flex-column items-center pa3">
+							<p class="f4 tc">#{msgs['casa.touchid.use']}</p>
+							<img class="w4" src="#{request.contextPath}/img/touchid.png" />
+							<div class="db w5 tc f7-cust pv3">#{msgs['casa.touchid.tap']}</div>
+						</div>
+					</div>
+				</ui:fragment>
 			</div>
-
 			<div class="flex justify-between f7-cust">
 				<!-- do not change the ID of anchor following -->
-				<a id="alter_link" href="javascript:showAlternative('fido2_section')" class="green hover-green">#{msgs['casa.alternative']}</a>
-
-				<a id="retry" href="javascript:retry()" class="green hover-green f7-cust pl3 dn">#{msgs['casa.fido2.retry_key']}</a>
+				<a id="alter_link"
+					href="javascript:showAlternative('fido2_section')"
+					class="green hover-green">#{msgs['casa.alternative']}</a>
+				<ui:fragment
+					rendered="#{identity.getWorkingParameter('platformAuthenticatorAvailable') != 'true'}">
+					<a id="retry" href="javascript:retry()"
+						class="green hover-green f7-cust pl3 dn">#{msgs['casa.fido2.retry_key']}</a>
+				</ui:fragment>
+				<ui:fragment
+					rendered="#{identity.getWorkingParameter('platformAuthenticatorAvailable') == 'true'}">
+					<a id="retry" href="javascript:retry()"
+						class="green hover-green f7-cust pl3 dn">#{msgs['casa.activate.touchid']}</a>
+				</ui:fragment>
+				
 			</div>
 		</section>
 		<ui:include src="/casa/casa.xhtml" />
