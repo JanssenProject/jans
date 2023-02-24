@@ -324,7 +324,7 @@ public class AssertionService {
 
 		List<Fido2RegistrationEntry> existingFido2Registrations;
 		if (superGluu && StringHelper.isNotEmpty(requestedKeyHandle)) {
-			Fido2RegistrationEntry fido2RegistrationEntry = registrationPersistenceService.findByPublicKeyId(requestedKeyHandle, documentDomain).orElseThrow(() -> new Fido2RuntimeException(
+			Fido2RegistrationEntry fido2RegistrationEntry = registrationPersistenceService.findByPublicKeyId(username, requestedKeyHandle, documentDomain).orElseThrow(() -> new Fido2RuntimeException(
 						String.format("Can't find associated key '%s' for application '%s'", requestedKeyHandle, documentDomain)));
 			existingFido2Registrations = Arrays.asList(fido2RegistrationEntry);
 		} else {
