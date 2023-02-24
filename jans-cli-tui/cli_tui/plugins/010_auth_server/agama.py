@@ -31,8 +31,8 @@ class Agama(DialogUtils):
         self.data = []
         self.working_container = JansVerticalNav(
                 myparent=app,
-                headers=[_("Project Name"), _("Type"), _("Author"), _("Updated")],
-                preferred_size= self.app.get_column_sizes(.25, .25 , .3, .1, .1),
+                headers=[_("Project Name"), _("Type"), _("Author"), _("Updated"), _("Status"), _("Errors")],
+                preferred_size= self.app.get_column_sizes(.2, .2 , .2, .1, .1, .1, .1),
                 on_display=self.app.data_display_dialog,
                 on_delete=self.delete_agama_project,
                 selectes=0,
@@ -60,23 +60,37 @@ class Agama(DialogUtils):
         data_display = []
 
         for agama in self.data.get('entries', []):
+            project_details = agama['details']
+            project_metadata = project_details['projectMetadata']
+
             if search_str.lower():
                 project_str = ' '.join((
-                        agama['details']['projectMetadata'].get('projectName'),
-                        agama['details']['projectMetadata'].get('author', ''),
-                        agama['details']['projectMetadata'].get('type', ''),
-                        agama['details']['projectMetadata'].get('description', '')
+                        project_metadata.get('projectName'),
+                        project_metadata.get('author', ''),
+                        project_metadata.get('type', ''),
+                        project_metadata.get('description', '')
                         )).lower()
                 if search_str not in project_str:
                     continue
 
             dt_object = datetime.fromisoformat(agama['createdAt'])
+            if agama.get('finishedAt'):
+                status = _("Pending")
+                error = ''
+            else:
+                status = _("Processed")
+                if not project_details.get('error'):
+                    error = 'No'
+                else:
+                    error = project_details['error'][:5] + '...'
 
             data_display.append((
-                        agama['details']['projectMetadata'].get('projectName'),
-                        agama['details']['projectMetadata'].get('type', '??'),
-                        agama['details']['projectMetadata'].get('author', '??'),
-                        '{:02d}/{:02d}/{}'.format(dt_object.day, dt_object.month, str(dt_object.year)[2:])
+                        project_metadata.get('projectName'),
+                        project_metadata.get('type', '??'),
+                        project_metadata.get('author', '??'),
+                        '{:02d}/{:02d}/{}'.format(dt_object.day, dt_object.month, str(dt_object.year)[2:]),
+                        status,
+                        error
                     ))
 
         if not data_display:
