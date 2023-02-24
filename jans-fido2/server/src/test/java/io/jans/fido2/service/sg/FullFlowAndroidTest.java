@@ -185,6 +185,7 @@ public class FullFlowAndroidTest {
 		if (registrationEntry != null) {
 			Mockito.when(registrationPersistenceService.findByChallenge(eq(registrationEntry.getChallange()), anyBoolean())).thenReturn(Arrays.asList(registrationEntry));
 			Mockito.when(registrationPersistenceService.findByPublicKeyId(eq(registrationEntry.getPublicKeyId()), eq(registrationEntry.getRpId()))).thenReturn(Optional.of(registrationEntry));
+			Mockito.when(registrationPersistenceService.findByPublicKeyId(anyString(), eq(registrationEntry.getPublicKeyId()), eq(registrationEntry.getRpId()))).thenReturn(Optional.of(registrationEntry));
 		}
 
 		Mockito.when(userService.getUser(anyString(), any())).thenReturn(new User());
