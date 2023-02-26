@@ -89,6 +89,12 @@ public class SsaJsonService {
             Util.addToJSONObjectIfNotNull(jsonSsa, IAT.getName(), DateUtil.dateToUnixEpoch(ssa.getCreationDate()));
             Util.addToJSONObjectIfNotNull(jsonSsa, EXP.getName(), DateUtil.dateToUnixEpoch(ssa.getExpirationDate()));
             Util.addToJSONObjectIfNotNull(jsonSsa, JTI.getName(), ssa.getId());
+            Util.addToJSONObjectIfNotNull(jsonSsa, DESCRIPTION.getName(), ssa.getDescription());
+            Util.addToJSONObjectIfNotNull(jsonSsa, ONE_TIME_USE.getName(), ssa.getAttributes().getOneTimeUse());
+            Util.addToJSONObjectIfNotNull(jsonSsa, ROTATE_SSA.getName(), ssa.getAttributes().getRotateSsa());
+            if (!ssa.getAttributes().getCustomAttributes().isEmpty()) {
+                ssa.getAttributes().getCustomAttributes().forEach((key, value) -> Util.addToJSONObjectIfNotNull(jsonSsa, key, value));
+            }
 
             Util.addToJSONObjectIfNotNull(responseJsonObject, SSA.getName(), jsonSsa);
             jsonArray.put(responseJsonObject);

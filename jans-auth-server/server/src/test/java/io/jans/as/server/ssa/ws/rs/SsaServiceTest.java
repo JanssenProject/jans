@@ -289,6 +289,20 @@ public class SsaServiceTest {
     }
 
     @Test
+    public void generateJwt_customAttributesEmpty_jwtValid() throws Exception {
+        SsaConfiguration ssaConfiguration = new SsaConfiguration();
+        String issuer = "https://test.jans.io";
+        ssa.getAttributes().setCustomAttributes(Collections.singletonMap("test-key", "test-value"));
+        when(appConfiguration.getSsaConfiguration()).thenReturn(ssaConfiguration);
+        when(appConfiguration.getIssuer()).thenReturn(issuer);
+
+        Jwt jwt = ssaService.generateJwt(ssa);
+        assertSsaJwt(ssaConfiguration.getSsaSigningAlg(), issuer, ssa, jwt);
+        verify(cryptoProvider).sign(any(), any(), eq(null), any());
+        verifyNoInteractions(log);
+    }
+
+    @Test
     public void createNotAcceptableResponse_valid_response() {
         Response response = ssaService.createNotAcceptableResponse().build();
         assertNotNull(response, "Response is null");
@@ -329,6 +343,11 @@ public class SsaServiceTest {
         assertEquals(jwtClaims.getClaim(IAT.getName()), ssa.getCreationDate());
         assertNotNull(jwtClaims.getClaim(EXP.getName()), "The exp in jwt is null");
         assertEquals(jwtClaims.getClaim(EXP.getName()), ssa.getExpirationDate());
+
+        ssa.getAttributes().getCustomAttributes().forEach((key, value) -> {
+            assertTrue(jwtClaims.hasClaim(key));
+            assertEquals(jwtClaims.getClaimAsString(key), value);
+        });
     }
 
     private static void assertSsaWithAux(Ssa ssa, Ssa ssaAux) {
