@@ -51,7 +51,7 @@ def encode_jks(manager, jks="/etc/certs/auth-keys.jks"):
     return encoded_jks
 
 
-def generate_openid_keys(passwd, jks_path, dn, exp=48, sig_keys=SIG_KEYS, enc_keys=ENC_KEYS):
+def generate_openid_keys(passwd, jks_path, dn, exp=48, sig_keys=SIG_KEYS, enc_keys=ENC_KEYS, key_ops_type="connect"):
     if os.path.isfile(jks_path):
         os.unlink(jks_path)
 
@@ -62,7 +62,7 @@ def generate_openid_keys(passwd, jks_path, dn, exp=48, sig_keys=SIG_KEYS, enc_ke
         f"-enc_keys {enc_keys} -sig_keys {sig_keys} "
         f"-dnname '{dn}' -expiration_hours {exp} "
         f"-keystore {jks_path} -keypasswd {passwd} "
-        "-key_ops_type connect"
+        f"-key_ops_type {key_ops_type}"
     )
     return exec_cmd(cmd)
 
@@ -228,8 +228,22 @@ class AuthHandler(BaseHandler):
         jks_fn = "/etc/certs/auth-keys.jks"
         jwks_fn = "/etc/certs/auth-keys.json"
         logger.info(f"Generating new {jwks_fn} and {jks_fn}")
+
+        # a counter to determine value of `key_ops_type` to be passed to `KeyGenerator`
+        ops_type_cnt = Counter(key_ops_from_jwk(jwk) for jwk in old_jwks)
+
+        # if we have ssa key, use `connect` keys
+        if ops_type_cnt["ssa"]:
+            logger.info("Found existing SSA keys ... generating keys with key_ops_type=connect")
+            key_ops_type = "connect"
+        else:
+            # likely upgrading from previous version where SSA keys are not generated initially
+            logger.info("No existing SSA keys ... generating keys with key_ops_type=all")
+            key_ops_type = "all"
+
+        # if ssa keys exist, use `key_ops_type=connect` otherwise use `key_ops_type=all`
         out, err, retcode = generate_openid_keys(
-            jks_pass, jks_fn, jks_dn, exp=exp_hours, sig_keys=self.sig_keys, enc_keys=self.enc_keys,
+            jks_pass, jks_fn, jks_dn, exp=exp_hours, sig_keys=self.sig_keys, enc_keys=self.enc_keys, key_ops_type=key_ops_type,
         )
 
         if retcode != 0:
@@ -243,20 +257,28 @@ class AuthHandler(BaseHandler):
         # won't be added to new JWKS
         old_jwks = sorted(old_jwks, key=lambda k: k["exp"], reverse=True)
 
-        cnt = Counter(j["alg"] for j in new_jwks)
+        # counter for `connect` keys
+        cnt = Counter(
+            jwk["alg"] for jwk in new_jwks
+            if key_ops_from_jwk(jwk) == "connect"
+        )
 
         for jwk in old_jwks:
             # exclude alg if it's not allowed
             if jwk["alg"] not in self.allowed_key_algs:
                 continue
 
-            # cannot have more than 2 keys for same algorithm in new JWKS
-            if cnt[jwk["alg"]] > 1:
+            ops_type = key_ops_from_jwk(jwk)
+
+            # cannot have more than 2 connect keys for same algorithm in new JWKS
+            if ops_type == "connect" and cnt[jwk["alg"]] > 1:
                 continue
 
             # insert old key to new keys
             new_jwks.appendleft(jwk)
-            cnt[jwk["alg"]] += 1
+
+            if ops_type == "connect":
+                cnt[jwk["alg"]] += 1
 
             # import key to new JKS
             keytool_import_key(old_jks_fn, jks_fn, jwk["kid"], jks_pass)
@@ -504,7 +526,10 @@ class AuthHandler(BaseHandler):
         old_jwks = web_keys.get("keys", [])
         old_jwks = sorted(old_jwks, key=lambda k: k["exp"], reverse=True)
 
-        cnt = Counter(j["alg"] for j in new_jwks)
+        cnt = Counter(
+            jwk["alg"] for jwk in new_jwks
+            if key_ops_from_jwk(jwk) == "connect"
+        )
 
         for jwk in old_jwks:
             # exclude alg if it's not allowed
@@ -512,14 +537,18 @@ class AuthHandler(BaseHandler):
                 keytool_delete_key(jks_fn, jwk["kid"], jks_pass)
                 continue
 
+            ops_type = key_ops_from_jwk(jwk)
+
             # cannot have more than 1 key for same algorithm in new JWKS
-            if cnt[jwk["alg"]]:
+            if ops_type == "connect" and cnt[jwk["alg"]]:
                 keytool_delete_key(jks_fn, jwk["kid"], jks_pass)
                 continue
 
             # preserve the key
             new_jwks.append(jwk)
-            cnt[jwk["alg"]] += 1
+
+            if ops_type == "connect":
+                cnt[jwk["alg"]] += 1
 
         web_keys["keys"] = new_jwks
 
@@ -640,3 +669,8 @@ def resolve_enc_keys(keys: str) -> str:
         enc_keys = default_enc_keys
         logger.warning(f"Encryption keys are empty; fallback to default {ENC_KEYS}")
     return " ".join(enc_keys)
+
+
+def key_ops_from_jwk(jwk):
+    """Resolve key_ops_type first value."""
+    return (jwk.get("key_ops_type") or ["connect"])[0]
