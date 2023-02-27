@@ -326,7 +326,6 @@ public class SsaServiceTest {
         ssa.getAttributes().setCustomAttributes(Collections.singletonMap("test-key", "test-value"));
         when(appConfiguration.getSsaConfiguration()).thenReturn(ssaConfiguration);
         when(appConfiguration.getIssuer()).thenReturn(issuer);
-        when(cryptoProvider.getKeyId(any(), any(), any(), any())).thenReturn("kid-test");
 
         Jwt jwt = ssaService.generateJwt(ssa);
         assertSsaJwt(ssaConfiguration.getSsaSigningAlg(), issuer, ssa, jwt);
