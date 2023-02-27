@@ -137,8 +137,6 @@ public class SsaCreateAction {
             ssa.setState(SsaState.ACTIVE);
             ssa.setCreatorId(client.getClientId());
             ssa.setCreationDate(creationDate);
-            ssaService.persist(ssa);
-            log.info("Ssa created: {}", ssa);
 
             ModifySsaResponseContext context = ssaContextBuilder.buildModifySsaResponseContext(httpRequest, client);
             Function<JsonWebResponse, Void> postProcessor = modifySsaResponseService.buildCreateProcessor(context);
@@ -146,6 +144,8 @@ public class SsaCreateAction {
             executionContext.setPostProcessor(postProcessor);
 
             Jwt jwt = ssaService.generateJwt(ssa, executionContext);
+            ssaService.persist(ssa);
+            log.info("Ssa created: {}", ssa);
             JSONObject jsonResponse = ssaJsonService.getJSONObject(jwt.toString());
             builder.entity(ssaJsonService.jsonObjectToString(jsonResponse));
 

@@ -174,6 +174,10 @@ public class SsaService {
             throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, SsaErrorResponseType.INVALID_SIGNATURE, "Invalid signature error");
         }
         String keyId = cryptoProvider.getKeyId(webKeysConfiguration, signatureAlgorithm.getAlg(), Use.SIGNATURE, KeyOpsType.SSA);
+        if (keyId == null) {
+            log.error("Invalid keyId, not found: {}", appConfiguration.getSsaConfiguration().getSsaSigningAlg());
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, SsaErrorResponseType.INVALID_SIGNATURE, "Invalid signature error");
+        }
 
         Jwt jwt = new Jwt();
         jwt.getHeader().setType(JwtType.JWT);
