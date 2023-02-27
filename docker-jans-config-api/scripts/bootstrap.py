@@ -290,12 +290,12 @@ def configure_admin_ui_logging():
             continue
 
         if value == "STDOUT":
-            config[key] = "Console"
+            config[key] = "AdminUI_Console"
         else:
             config[key] = file_aliases[key]
 
     if as_boolean(custom_config.get("enable_stdout_log_prefix")):
-        config["log_prefix"] = "${sys:log.console.prefix}%X{log.console.group} - "
+        config["log_prefix"] = "${sys:log.console.prefix.admin-ui}%X{log.console.group.admin-ui} - "
 
     with open("/app/plugins/admin-ui/log4j2-adminui.xml") as f:
         txt = f.read()
