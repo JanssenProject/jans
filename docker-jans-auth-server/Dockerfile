@@ -48,8 +48,8 @@ RUN wget -q https://github.com/fabioz/PyDev.Debugger/archive/refs/tags/pydev_deb
     && /opt/jython/bin/pip install . \
     && rm -rf /tmp/pydev_debugger* /tmp/PyDev.Debugger-*
 
-# uninstall Jython pip and easy_install to reduce vulnerabilities
-RUN /opt/jython/bin/pip uninstall -y pip
+# uninstall modules included in Jython ensurepip to reduce vulnerabilities
+RUN /opt/jython/bin/pip uninstall -y pip setuptools
 
 # ===========
 # Auth server
@@ -118,7 +118,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/agama/fl \
     ${JETTY_BASE}/jans-auth/agama/scripts
 
 # janssenproject/jans SHA commit
-ENV JANS_SOURCE_VERSION=2603bbb1080345cab4fe814dca39024d8d0b5434
+ENV JANS_SOURCE_VERSION=8c551c0c09aaaf13898e047e7c30c96531d37518
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the agama code
