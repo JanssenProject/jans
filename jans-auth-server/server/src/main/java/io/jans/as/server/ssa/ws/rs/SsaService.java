@@ -170,7 +170,7 @@ public class SsaService {
     public Jwt generateJwt(Ssa ssa) throws Exception {
         SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.fromString(appConfiguration.getSsaConfiguration().getSsaSigningAlg());
         if (signatureAlgorithm == null) {
-            log.error("Invalid signature, Key is not found: {}", appConfiguration.getSsaConfiguration().getSsaSigningAlg());
+            log.error("Invalid signature algorithm, not found: {}", appConfiguration.getSsaConfiguration().getSsaSigningAlg());
             throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, SsaErrorResponseType.INVALID_SIGNATURE, "Invalid signature error");
         }
         String keyId = cryptoProvider.getKeyId(webKeysConfiguration, signatureAlgorithm.getAlg(), Use.SIGNATURE, KeyOpsType.SSA);
@@ -188,6 +188,9 @@ public class SsaService {
         jwt.getClaims().setClaim(ORG_ID.getName(), ssa.getOrgId());
         jwt.getClaims().setClaim(SOFTWARE_ROLES.getName(), ssa.getAttributes().getSoftwareRoles());
         jwt.getClaims().setClaim(GRANT_TYPES.getName(), ssa.getAttributes().getGrantTypes());
+        if (!ssa.getAttributes().getCustomAttributes().isEmpty()) {
+            ssa.getAttributes().getCustomAttributes().forEach((key, value) -> jwt.getClaims().setClaim(key, value));
+        }
 
         String signature = cryptoProvider.sign(jwt.getSigningInput(), jwt.getHeader().getKeyId(), null, signatureAlgorithm);
         jwt.setEncodedSignature(signature);
