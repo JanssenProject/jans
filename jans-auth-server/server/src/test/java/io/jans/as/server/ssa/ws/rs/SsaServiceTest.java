@@ -8,6 +8,7 @@ import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.as.model.exception.CryptoProviderException;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaims;
 import io.jans.as.model.jwt.JwtHeader;
@@ -227,6 +228,7 @@ public class SsaServiceTest {
         String issuer = "https://test.jans.io";
         when(appConfiguration.getSsaConfiguration()).thenReturn(ssaConfiguration);
         when(appConfiguration.getIssuer()).thenReturn(issuer);
+        when(cryptoProvider.getKeyId(any(), any(), any(), any())).thenReturn("kid-test");
         ExecutionContext executionContext = mock(ExecutionContext.class);
 
         Jwt jwt = ssaService.generateJwt(ssa, executionContext);
@@ -241,6 +243,7 @@ public class SsaServiceTest {
         String issuer = "https://test.jans.io";
         when(appConfiguration.getSsaConfiguration()).thenReturn(ssaConfiguration);
         when(appConfiguration.getIssuer()).thenReturn(issuer);
+        when(cryptoProvider.getKeyId(any(), any(), any(), any())).thenReturn("kid-test");
         ExecutionContext executionContext = mock(ExecutionContext.class);
         when(executionContext.getPostProcessor()).thenReturn(jsonWebResponse -> null);
 
@@ -255,6 +258,7 @@ public class SsaServiceTest {
         String issuer = "https://test.jans.io";
         when(appConfiguration.getSsaConfiguration()).thenReturn(ssaConfiguration);
         when(appConfiguration.getIssuer()).thenReturn(issuer);
+        when(cryptoProvider.getKeyId(any(), any(), any(), any())).thenReturn("kid-test");
 
         Jwt jwt = ssaService.generateJwt(ssa);
         assertSsaJwt(ssaConfiguration.getSsaSigningAlg(), issuer, ssa, jwt);
@@ -286,6 +290,33 @@ public class SsaServiceTest {
         verify(log).error(anyString(), anyString());
         verifyNoMoreInteractions(log);
         verifyNoInteractions(cryptoProvider, webKeysConfiguration);
+    }
+
+    @Test
+    public void generateJwt_kidNull_invalidSignature() throws CryptoProviderException {
+        SsaConfiguration ssaConfiguration = new SsaConfiguration();
+        ssaConfiguration.setSsaSigningAlg("RS256");
+        when(appConfiguration.getSsaConfiguration()).thenReturn(ssaConfiguration);
+        when(cryptoProvider.getKeyId(any(), any(), any(), any())).thenReturn(null);
+        WebApplicationException error = new WebApplicationException(
+                Response.status(Response.Status.BAD_REQUEST)
+                        .entity("{\"error\":\"invalid_signature\",\"description\":\"No algorithm found to sign the JWT.\"}")
+                        .build());
+        when(errorResponseFactory.createWebApplicationException(any(), any(), anyString())).thenThrow(error);
+
+        WebApplicationException ex = expectThrows(WebApplicationException.class, () -> ssaService.generateJwt(ssa));
+        assertNotNull(ex);
+        assertEquals(ex.getResponse().getStatus(), 400);
+        assertNotNull(ex.getResponse().getEntity());
+
+        JSONObject jsonObject = new JSONObject(ex.getResponse().getEntity().toString());
+        assertTrue(jsonObject.has("error"));
+        assertEquals(jsonObject.get("error"), "invalid_signature");
+        assertTrue(jsonObject.has("description"));
+
+        verify(log).error(anyString(), anyString());
+        verifyNoMoreInteractions(cryptoProvider, log, errorResponseFactory);
+        verifyNoInteractions(webKeysConfiguration);
     }
 
     @Test
