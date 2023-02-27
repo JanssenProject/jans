@@ -74,8 +74,9 @@ public class SsaRestWebServiceValidator {
      */
     public void checkScopesPolicy(Client client, String scope) throws WebApplicationException {
         List<String> scopes = scopeService.getScopeIdsByDns(Arrays.stream(client.getScopes()).collect(Collectors.toList()));
-        if (!scopes.contains(scope))
+        if (!scopes.contains(scope)) {
             throw errorResponseFactory.createWebApplicationException(Response.Status.UNAUTHORIZED, SsaErrorResponseType.UNAUTHORIZED_CLIENT, "Unauthorized client");
+        }
     }
 
     /**
