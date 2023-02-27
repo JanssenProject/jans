@@ -66,7 +66,6 @@ class CouchbaseInstaller(PackageUtils, BaseInstaller):
 
         if Config.cb_install == InstallTypes.LOCAL:
             self.add_couchbase_post_messages()
-            self.couchbaseInstall()
             Config.pbar.progress(self.service_name, "Configuring Couchbase", incr=False)
             self.checkIfJansBucketReady()
             self.couchebaseCreateCluster()
@@ -103,11 +102,11 @@ class CouchbaseInstaller(PackageUtils, BaseInstaller):
 
         package_name = max(cb_package_list)
         self.logIt("Found package '%s' for install" % package_name)
-        Config.pbar.progress(self.service_name, "Installing Couchbase package", incr=False)
+
         if base.clone_type == 'deb':
             apt_path = shutil.which('apt')
             self.chown(self.couchbasePackageFolder, '_apt', 'nogroup', recursive=True)
-            install_output = self.run([apt_path, 'install', '-y', package_name])
+            install_output = self.run([apt_path, '--quiet', 'install', '-y', package_name])
         else:
             if not self.check_installed('ncurses-compat-libs'):
                 self.installNetPackage('ncurses-compat-libs')
