@@ -1,6 +1,5 @@
 package io.jans.ca.plugin.adminui.rest.license;
 
-import io.jans.as.model.config.adminui.LicenseSpringCredentials;
 import io.jans.ca.plugin.adminui.model.auth.LicenseApiResponse;
 import io.jans.ca.plugin.adminui.model.auth.LicenseRequest;
 import io.jans.ca.plugin.adminui.model.auth.LicenseResponse;
@@ -8,24 +7,23 @@ import io.jans.ca.plugin.adminui.service.license.LicenseDetailsService;
 import io.jans.ca.plugin.adminui.utils.AppConstants;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
 import io.jans.configapi.core.rest.ProtectedApi;
-
-import io.jans.configapi.util.ApiAccessConstants;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.security.*;
-
-import org.slf4j.Logger;
-
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import jakarta.ws.rs.*;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.slf4j.Logger;
 
 @Path("/admin-ui/license")
 public class LicenseResource {
@@ -36,7 +34,7 @@ public class LicenseResource {
     static final String LICENSE_DETAILS = "/licenseDetails";
 
     public static final String SCOPE_OPENID = "openid";
-    static final String SCOPE_LICENSE_READ = "https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly";
+    public static final String SCOPE_LICENSE_READ = "https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly";
     static final String SCOPE_LICENSE_WRITE = "https://jans.io/oauth/jans-auth-server/config/adminui/license.write";
 
     @Inject
@@ -55,7 +53,7 @@ public class LicenseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LicenseApiResponse.class, description = "License response")))})
     @GET
     @Path(IS_ACTIVE)
-    @ProtectedApi(scopes = {SCOPE_LICENSE_READ}, groupScopes = {SCOPE_LICENSE_WRITE}, superScopes = { AppConstants.SCOPE_ADMINUI_READ })
+    @ProtectedApi(scopes = {SCOPE_LICENSE_READ}, groupScopes = {SCOPE_LICENSE_WRITE}, superScopes = {AppConstants.SCOPE_ADMINUI_READ})
     @Produces(MediaType.APPLICATION_JSON)
     public Response isActive() {
         LicenseApiResponse licenseResponse = null;
@@ -81,7 +79,7 @@ public class LicenseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LicenseApiResponse.class, description = "License response")))})
     @POST
     @Path(ACTIVATE_LICENSE)
-    @ProtectedApi(scopes = {SCOPE_LICENSE_WRITE}, superScopes = { AppConstants.SCOPE_ADMINUI_WRITE })
+    @ProtectedApi(scopes = {SCOPE_LICENSE_WRITE}, superScopes = {AppConstants.SCOPE_ADMINUI_WRITE})
     @Produces(MediaType.APPLICATION_JSON)
     public Response activateLicense(@Valid @NotNull LicenseRequest licenseRequest) {
         LicenseApiResponse licenseResponse = null;
@@ -96,32 +94,6 @@ public class LicenseResource {
         }
     }
 
-    @Operation(summary = "Save license api credentials", description = "Save license api credentials", operationId = "save-license-api-credentials", tags = {
-            "Admin UI - License"}, security = @SecurityRequirement(name = "oauth2", scopes = {
-            SCOPE_LICENSE_WRITE}))
-    @RequestBody(description = "LicenseSpringCredentials object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LicenseSpringCredentials.class)))
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LicenseApiResponse.class, description = "License response"))),
-            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LicenseApiResponse.class, description = "License response"))),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LicenseApiResponse.class, description = "License response")))})
-    @POST
-    @Path(SAVE_API_CREDENTIALS)
-    @ProtectedApi(scopes = {SCOPE_LICENSE_WRITE}, superScopes = { AppConstants.SCOPE_ADMINUI_WRITE })
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response saveLicenseCredentials(@Valid @NotNull LicenseSpringCredentials licenseSpringCredentials) {
-        LicenseApiResponse licenseResponse = null;
-        try {
-            log.info("Trying to save license-spring credentials.");
-            licenseResponse = licenseDetailsService.saveLicenseSpringCredentials(licenseSpringCredentials);
-            log.info("License saved (true/false): {}", licenseResponse.isApiResult());
-            return Response.ok(licenseResponse).build();
-        } catch (Exception e) {
-            log.error(ErrorResponse.SAVE_LICENSE_SPRING_CREDENTIALS_ERROR.getDescription(), e);
-            return Response.serverError().entity(licenseResponse).build();
-        }
-    }
-
     @Operation(summary = "Get admin ui license details", description = "Get admin ui license details", operationId = "get-adminui-license", tags = {
             "Admin UI - License"}, security = @SecurityRequirement(name = "oauth2", scopes = {
             SCOPE_LICENSE_READ}))
@@ -132,7 +104,7 @@ public class LicenseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError")})
     @GET
     @Path(LICENSE_DETAILS)
-    @ProtectedApi(scopes = {SCOPE_LICENSE_READ}, groupScopes = {SCOPE_LICENSE_WRITE}, superScopes = { AppConstants.SCOPE_ADMINUI_READ })
+    @ProtectedApi(scopes = {SCOPE_LICENSE_READ}, groupScopes = {SCOPE_LICENSE_WRITE}, superScopes = {AppConstants.SCOPE_ADMINUI_READ})
     @Produces(MediaType.APPLICATION_JSON)
     public Response getLicenseDetails() {
         try {

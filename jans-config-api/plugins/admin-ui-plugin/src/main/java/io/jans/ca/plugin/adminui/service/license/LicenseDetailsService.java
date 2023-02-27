@@ -2,7 +2,6 @@ package io.jans.ca.plugin.adminui.service.license;
 
 import com.google.common.base.Strings;
 import io.jans.as.model.config.adminui.AdminConf;
-import io.jans.as.model.config.adminui.LicenseSpringCredentials;
 import io.jans.ca.plugin.adminui.model.auth.LicenseApiResponse;
 import io.jans.ca.plugin.adminui.model.auth.LicenseRequest;
 import io.jans.ca.plugin.adminui.model.auth.LicenseResponse;
@@ -23,7 +22,6 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
-import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.slf4j.Logger;
 
 import javax.crypto.Mac;
@@ -34,7 +32,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 @Singleton
 public class LicenseDetailsService {
@@ -48,43 +45,11 @@ public class LicenseDetailsService {
     @Inject
     private PersistenceEntryManager entryManager;
 
-    public LicenseApiResponse saveLicenseSpringCredentials(LicenseSpringCredentials licenseSpringCredentials) {
-        try {
-            String hardwareId = UUID.randomUUID().toString();
-            LicenseConfiguration licenseConfiguration = new LicenseConfiguration(licenseSpringCredentials.getApiKey(),
-                    licenseSpringCredentials.getProductCode(),
-                    licenseSpringCredentials.getSharedKey(),
-                    licenseSpringCredentials.getManagementKey());
-            licenseConfiguration.setHardwareId(hardwareId);
-
-            if (!licenseCredentialsValid(licenseConfiguration)) {
-                return createLicenseResponse(false, 400, "The license credentials are not valid.");
-            }
-            //check is license is already active
-            LicenseApiResponse licenseApiResponse = checkLicense();
-            if (licenseApiResponse.isApiResult()) {
-                return createLicenseResponse(false, 500, "The license has been already activated.");
-            }
-
-            licenseSpringCredentials.setHardwareId(hardwareId);
-            //set license-spring configuration
-            AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
-
-            auiConfiguration.setLicenseConfiguration(licenseConfiguration);
-            auiConfigurationService.setAuiConfiguration(auiConfiguration);
-
-            //save license spring credentials
-            AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
-            adminConf.getDynamic().setLicenseSpringCredentials(licenseSpringCredentials);
-            entryManager.merge(adminConf);
-
-            return createLicenseResponse(true, 201, "Success!!");
-        } catch (Exception e) {
-            log.error(ErrorResponse.SAVE_LICENSE_SPRING_CREDENTIALS_ERROR.getDescription(), e);
-            return createLicenseResponse(false, 500, ErrorResponse.SAVE_LICENSE_SPRING_CREDENTIALS_ERROR.getDescription());
-        }
-    }
-
+    /**
+     * The function checks the license key and the api key and returns a response object
+     *
+     * @return A LicenseApiResponse object is being returned.
+     */
     public LicenseApiResponse checkLicense() {
         try {
             AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
@@ -127,6 +92,13 @@ public class LicenseDetailsService {
         }
     }
 
+    /**
+     * The function checks if the license is already active, if not, it creates a header map, creates a body map, and sends
+     * a POST request to the license server
+     *
+     * @param licenseRequest The license key that you received from the license server.
+     * @return A LicenseApiResponse object.
+     */
     public LicenseApiResponse activateLicense(LicenseRequest licenseRequest) {
         //check is license is already active
         LicenseApiResponse licenseApiResponse = checkLicense();
@@ -158,9 +130,7 @@ public class LicenseDetailsService {
                 if (entity.getString("license_key").equals(licenseRequest.getLicenseKey())) {
                     //save license spring credentials
                     AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
-                    LicenseSpringCredentials licenseSpringCredentials = adminConf.getDynamic().getLicenseSpringCredentials();
-                    licenseSpringCredentials.setLicenseKey(licenseRequest.getLicenseKey());
-                    adminConf.getDynamic().setLicenseSpringCredentials(licenseSpringCredentials);
+                    adminConf.getMainSettings().getLicenseConfig().setLicenseKey(licenseRequest.getLicenseKey());
                     entryManager.merge(adminConf);
                     //save in license configuration
                     licenseConfiguration.setLicenseKey(licenseRequest.getLicenseKey());
@@ -178,6 +148,11 @@ public class LicenseDetailsService {
         }
     }
 
+    /**
+     * This function is used to get the license details of the admin-ui
+     *
+     * @return A LicenseResponse object
+     */
     public LicenseResponse getLicenseDetails() {
         LicenseResponse licenseResponse = new LicenseResponse();
         try {
@@ -252,22 +227,6 @@ public class LicenseDetailsService {
             return null;
         }
 
-    }
-
-    private boolean licenseCredentialsValid(LicenseConfiguration licenseConfiguration) {
-        MultivaluedMap<String, Object> headers = createHeaderMap(licenseConfiguration);
-
-        Invocation.Builder request = ClientFactory.instance().getClientBuilder(AppConstants.LICENSE_SPRING_API_URL + "product_details?product=" + licenseConfiguration.getProductCode());
-        request.headers(headers);
-
-        Response response = request.get();
-        log.info("license Credentials request status code: {}", response.getStatus());
-        if (response.getStatus() == 200) {
-            JsonObject entity = response.readEntity(JsonObject.class);
-            log.info("Product Information: {}", entity.toString());
-            return true;
-        }
-        return false;
     }
 
     private LicenseApiResponse createLicenseResponse(boolean result, int responseCode, String responseMessage) {

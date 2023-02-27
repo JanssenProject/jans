@@ -7535,17 +7535,17 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        adminCanEdit:
+        userCanAccess:
           type: boolean
-        userCanView:
+        adminCanAccess:
           type: boolean
         adminCanView:
           type: boolean
         userCanEdit:
           type: boolean
-        userCanAccess:
+        userCanView:
           type: boolean
-        adminCanAccess:
+        adminCanEdit:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -7899,6 +7899,8 @@ components:
           type: boolean
         returnClientSecretOnRead:
           type: boolean
+        rotateClientRegistrationAccessTokenOnUsage:
+          type: boolean
         rejectJwtWithNoneAlg:
           type: boolean
         expirationNotificatorEnabled:
@@ -7952,6 +7954,8 @@ components:
         includeSidInResponse:
           type: boolean
         disablePromptLogin:
+          type: boolean
+        disablePromptConsent:
           type: boolean
         sessionIdLifetime:
           type: integer
@@ -8915,10 +8919,10 @@ components:
           type: array
           items:
             type: object
-        displayValue:
-          type: string
         value:
           type: object
+        displayValue:
+          type: string
     LocalizedString:
       type: object
       properties:

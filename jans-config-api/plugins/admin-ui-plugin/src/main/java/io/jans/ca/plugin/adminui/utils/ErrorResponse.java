@@ -8,7 +8,7 @@ public enum ErrorResponse {
     USER_INFO_JWT_BLANK("User-Info jwt is blank or empty. Generating token with default scopes."),
     CODE_OR_TOKEN_REQUIRED("Bad Request: Either `code` or `access_token` is required."),
     CHECK_LICENSE_ERROR("Error in checking license status."),
-    SAVE_LICENSE_SPRING_CREDENTIALS_ERROR("Error in saving license spring credentials."),
+    LICENSE_SPRING_CREDENTIALS_ERROR("Error in fetching license spring credentials from SCAN Api."),
     ACTIVATE_LICENSE_ERROR("Error in activating License."),
     GET_LICENSE_DETAILS_ERROR("Error in fetching license details."),
     UPDATE_LICENSE_DETAILS_ERROR("Problem in updating license details"),
