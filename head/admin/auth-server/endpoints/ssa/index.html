@@ -3300,16 +3300,16 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#validate-ssa" class="md-nav__link">
-    Validate SSA
+  <a href="#get-jwt-ssa" class="md-nav__link">
+    Get JWT SSA
   </a>
   
-    <nav class="md-nav" aria-label="Validate SSA">
+    <nav class="md-nav" aria-label="Get JWT SSA">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#header-parameters" class="md-nav__link">
-    Header Parameters
+  <a href="#query-parameters_1" class="md-nav__link">
+    Query Parameters
   </a>
   
 </li>
@@ -3334,16 +3334,16 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#revoke-ssa" class="md-nav__link">
-    Revoke SSA
+  <a href="#validate-ssa" class="md-nav__link">
+    Validate SSA
   </a>
   
-    <nav class="md-nav" aria-label="Revoke SSA">
+    <nav class="md-nav" aria-label="Validate SSA">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#query-parameters_1" class="md-nav__link">
-    Query Parameters
+  <a href="#header-parameters" class="md-nav__link">
+    Header Parameters
   </a>
   
 </li>
@@ -3357,6 +3357,40 @@
         
           <li class="md-nav__item">
   <a href="#example_3" class="md-nav__link">
+    Example:
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#revoke-ssa" class="md-nav__link">
+    Revoke SSA
+  </a>
+  
+    <nav class="md-nav" aria-label="Revoke SSA">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#query-parameters_2" class="md-nav__link">
+    Query Parameters
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#response-description_4" class="md-nav__link">
+    Response description
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example_4" class="md-nav__link">
     Example:
   </a>
   
@@ -8994,16 +9028,16 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#validate-ssa" class="md-nav__link">
-    Validate SSA
+  <a href="#get-jwt-ssa" class="md-nav__link">
+    Get JWT SSA
   </a>
   
-    <nav class="md-nav" aria-label="Validate SSA">
+    <nav class="md-nav" aria-label="Get JWT SSA">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#header-parameters" class="md-nav__link">
-    Header Parameters
+  <a href="#query-parameters_1" class="md-nav__link">
+    Query Parameters
   </a>
   
 </li>
@@ -9028,16 +9062,16 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#revoke-ssa" class="md-nav__link">
-    Revoke SSA
+  <a href="#validate-ssa" class="md-nav__link">
+    Validate SSA
   </a>
   
-    <nav class="md-nav" aria-label="Revoke SSA">
+    <nav class="md-nav" aria-label="Validate SSA">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#query-parameters_1" class="md-nav__link">
-    Query Parameters
+  <a href="#header-parameters" class="md-nav__link">
+    Header Parameters
   </a>
   
 </li>
@@ -9051,6 +9085,40 @@
         
           <li class="md-nav__item">
   <a href="#example_3" class="md-nav__link">
+    Example:
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#revoke-ssa" class="md-nav__link">
+    Revoke SSA
+  </a>
+  
+    <nav class="md-nav" aria-label="Revoke SSA">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#query-parameters_2" class="md-nav__link">
+    Query Parameters
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#response-description_4" class="md-nav__link">
+    Response description
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example_4" class="md-nav__link">
     Example:
   </a>
   
@@ -9318,6 +9386,7 @@ It should be clarified that these values are persisted in the database and are n
 <li><code>software_roles</code> — List of string values, fixed value <code>["password", "notify"]</code>.</li>
 <li><code>grant_types</code> — Fixed value <code>["client_credentials"]</code>.</li>
 <li><code>exp</code> — Expiration Time.</li>
+<li><code>myCustom1, myCustom2, ...</code>: if you have custom attributes, they will be displayed here.</li>
 </ul>
 <h3 id="example">Example:<a class="headerlink" href="#example" title="Permanent link">#</a></h3>
 <p><strong>Request:</strong></p>
@@ -9380,6 +9449,9 @@ Connection: Keep-Alive
             &quot;iss&quot;: &quot;https://jans.localhost&quot;,
             &quot;exp&quot;: 1668608852,
             &quot;iat&quot;: 1668608851,
+            &quot;description: &quot;test description&quot;,
+            &quot;one_time_use&quot;: true,
+            &quot;rotate_ssa&quot;: false
         },
         &quot;iss&quot;: &quot;ed4d5f74-ce41-4180-aed4-54cffa974630&quot;,
         &quot;created_at&quot;: 1668608851,
@@ -9398,6 +9470,10 @@ Connection: Keep-Alive
 <li><code>iss</code> — The "iss" (issuer) claim identifies the principal that issued the JWT.</li>
 <li><code>exp</code> — Expiration time.</li>
 <li><code>iat</code> — Creation time.</li>
+<li><code>description</code> — Describe SSA.</li>
+<li><code>one_time_use</code> — Defined whether the SSA will be used only once or can be used multiple times.</li>
+<li><code>rotate_ssa</code> — TODO - Will be used to rotate expiration of the SSA, currently is only saved as part of the SSA.</li>
+<li><code>myCustom1, myCustom2, ...</code> — if you have custom attributes, they will be displayed here.</li>
 </ul>
 </li>
 <li><code>iss</code> — The "iss" is related to the client that created this SSA.</li>
@@ -9445,7 +9521,10 @@ Connection: Keep-Alive
       ],
       &quot;exp&quot;: 1668608852,
       &quot;iat&quot;: 1668608851,
-      &quot;jti&quot;: &quot;c3eb1c16-be9b-4e96-974e-aea5e3cf95b0&quot;
+      &quot;jti&quot;: &quot;c3eb1c16-be9b-4e96-974e-aea5e3cf95b0&quot;,
+      &quot;description: &quot;test description&quot;,
+      &quot;one_time_use&quot;: true,
+      &quot;rotate_ssa&quot;: false
     },
     &quot;iss&quot;: &quot;ed4d5f74-ce41-4180-aed4-54cffa974630&quot;,
     &quot;created_at&quot;: 1668608851,
@@ -9454,15 +9533,69 @@ Connection: Keep-Alive
   }
 ]
 </code></pre></div>
+<h2 id="get-jwt-ssa">Get JWT SSA<a class="headerlink" href="#get-jwt-ssa" title="Permanent link">#</a></h2>
+<p>Get existing active SSA based on <code>jti</code>.</p>
+<h3 id="query-parameters_1">Query Parameters<a class="headerlink" href="#query-parameters_1" title="Permanent link">#</a></h3>
+<ul>
+<li><code>jti</code> — Unique identifier</li>
+</ul>
+<h3 id="response-description_2">Response description<a class="headerlink" href="#response-description_2" title="Permanent link">#</a></h3>
+<p>Returned SSA is a JWT, containing the following structure:</p>
+<div class="highlight"><pre><span></span><code>{
+    &quot;ssa&quot;: &quot;eyJraWQiOiI1NTk3MGFkZS00M2MwLTQ4YWMtODEyZi0yZTY1MzhjMTEyN2Zfc2lnX3JzNTEyIiwidHlwIjoiand0IiwiYWxnIjoiUlM1MTIifQ.eyJzb2Z0d2FyZV9pZCI6ImdsdXUtc2Nhbi1hcGkiLCJncmFudF90eXBlcyI6WyJjbGllbnRfY3JlZGVudGlhbHMiXSwib3JnX2lkIjoxLCJpc3MiOiJodHRwczovL2phbnMubG9jYWxob3N0Iiwic29mdHdhcmVfcm9sZXMiOlsicGFzc3d1cmQiXSwiZXhwIjoxNjY4NjA5MDA1LCJpYXQiOjE2Njg2NDE5NjcsImp0aSI6ImU4OWVjYTQxLTM0ODUtNDUxNi1hMTYyLWZiODYyNjJhYmFjMyJ9.jRgh8_aiwMTJxeT9cwfup9QP9LBc6gQstvabCzUOJvELnzosxiNJHeU2mrvavaNK6BGvs_lbNjODVDeetGCD48_F2ay9r8qmo-f3GPzdzcJozKgfzonSkAE5Ran9LKcQQJpVc1rDYcV2xYiJLJ6FSuvnoClkDEE1tXysxshLPs-GXOZE7rD8XUXzezuxZWUE1jXwA-EFajoat8CP6QulHGxlcn_sKIhawhGODxJPz4Pf3jgeZVLG_7HfRJgxNiKcdzQIxnkbdpuS-0Q4-oc5yntsXhFhn31Pa3vGsiPPH9f3ndL2ZZKk3xCgyImLDJuGaxXg-qEVoIG4zNWNHMUNUQ&quot;
+}
+</code></pre></div>
+<p><strong>Header</strong></p>
+<ul>
+<li><code>alg</code> — The signature algorithm which used <code>RS256</code>.</li>
+<li><code>typ</code> — The type which used.</li>
+<li><code>kid</code> — The key identification <code>gluu-scan-api-rs256-ssa-signature-key</code>.</li>
+</ul>
+<p><strong>Payload</strong></p>
+<ul>
+<li><code>iat</code> — The time the JWT was created.</li>
+<li><code>iss</code> — The "iss" (issuer) claim identifies the principal that issued the JWT.</li>
+<li><code>jti</code> — The "jti" (JWT ID) claim provides a unique identifier for the JWT.</li>
+<li><code>software_id</code> — The "software_id" is used for software identification.</li>
+<li><code>org_id</code> — The "org_id" is used for organization identification.</li>
+<li><code>software_roles</code> — List of string values, fixed value <code>["password", "notify"]</code>.</li>
+<li><code>grant_types</code> — Fixed value <code>["client_credentials"]</code>.</li>
+<li><code>exp</code> — Expiration Time.</li>
+<li><code>myCustom1, myCustom2, ...</code>: if you have custom attributes, they will be displayed here.</li>
+</ul>
+<h3 id="example_2">Example:<a class="headerlink" href="#example_2" title="Permanent link">#</a></h3>
+<p><strong>Request:</strong></p>
+<div class="highlight"><pre><span></span><code>GET {{your-url}}/ssa/jwt?jti={{your-jti}}
+Content-Type: application/json
+Authorization: Bearer {{your-token}}
+</code></pre></div>
+<p><strong>Response:</strong></p>
+<div class="highlight"><pre><span></span><code>HTTP/1.1 201 Created
+Date: Wed, 16 Nov 2022 23:39:27 GMT
+Server: Apache/2.4.52 (Ubuntu)
+X-Xss-Protection: 1; mode=block
+X-Content-Type-Options: nosniff
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+Cache-Control: no-store
+Content-Type: application/json
+Pragma: no-cache
+Content-Length: 757
+Keep-Alive: timeout=5, max=100
+Connection: Keep-Alive
+
+{
+    &quot;ssa&quot;: &quot;eyJraWQiOiI1NTk3MGFkZS00M2MwLTQ4YWMtODEyZi0yZTY1MzhjMTEyN2Zfc2lnX3JzNTEyIiwidHlwIjoiand0IiwiYWxnIjoiUlM1MTIifQ.eyJzb2Z0d2FyZV9pZCI6ImdsdXUtc2Nhbi1hcGkiLCJncmFudF90eXBlcyI6WyJjbGllbnRfY3JlZGVudGlhbHMiXSwib3JnX2lkIjoxLCJpc3MiOiJodHRwczovL2phbnMubG9jYWxob3N0Iiwic29mdHdhcmVfcm9sZXMiOlsicGFzc3d1cmQiXSwiZXhwIjoxNjY4NjA5MDA1LCJpYXQiOjE2Njg2NDE5NjcsImp0aSI6ImU4OWVjYTQxLTM0ODUtNDUxNi1hMTYyLWZiODYyNjJhYmFjMyJ9.jRgh8_aiwMTJxeT9cwfup9QP9LBc6gQstvabCzUOJvELnzosxiNJHeU2mrvavaNK6BGvs_lbNjODVDeetGCD48_F2ay9r8qmo-f3GPzdzcJozKgfzonSkAE5Ran9LKcQQJpVc1rDYcV2xYiJLJ6FSuvnoClkDEE1tXysxshLPs-GXOZE7rD8XUXzezuxZWUE1jXwA-EFajoat8CP6QulHGxlcn_sKIhawhGODxJPz4Pf3jgeZVLG_7HfRJgxNiKcdzQIxnkbdpuS-0Q4-oc5yntsXhFhn31Pa3vGsiPPH9f3ndL2ZZKk3xCgyImLDJuGaxXg-qEVoIG4zNWNHMUNUQ&quot;
+}
+</code></pre></div>
 <h2 id="validate-ssa">Validate SSA<a class="headerlink" href="#validate-ssa" title="Permanent link">#</a></h2>
 <p>Validate existing active SSA based on <code>jti</code></p>
 <h3 id="header-parameters">Header Parameters<a class="headerlink" href="#header-parameters" title="Permanent link">#</a></h3>
 <ul>
 <li>jti — Unique identifier</li>
 </ul>
-<h3 id="response-description_2">Response description<a class="headerlink" href="#response-description_2" title="Permanent link">#</a></h3>
+<h3 id="response-description_3">Response description<a class="headerlink" href="#response-description_3" title="Permanent link">#</a></h3>
 <p>Method returns status 200 with an empty body if the corresponding SSA exists and is active.</p>
-<h3 id="example_2">Example:<a class="headerlink" href="#example_2" title="Permanent link">#</a></h3>
+<h3 id="example_3">Example:<a class="headerlink" href="#example_3" title="Permanent link">#</a></h3>
 <div class="highlight"><pre><span></span><code>HEAD {{your-url}}/ssa
 jti: {{your-jti}}
 </code></pre></div>
@@ -9482,14 +9615,14 @@ Connection: Keep-Alive
 </code></pre></div>
 <h2 id="revoke-ssa">Revoke SSA<a class="headerlink" href="#revoke-ssa" title="Permanent link">#</a></h2>
 <p>Revoke existing active SSA based on <code>jti</code> or <code>org_id</code>.</p>
-<h3 id="query-parameters_1">Query Parameters<a class="headerlink" href="#query-parameters_1" title="Permanent link">#</a></h3>
+<h3 id="query-parameters_2">Query Parameters<a class="headerlink" href="#query-parameters_2" title="Permanent link">#</a></h3>
 <ul>
 <li><code>jti</code> — for revoke only one SSA, the specified by jti</li>
 <li><code>org_id</code> — for revoke all SSA of the specified organization.</li>
 </ul>
-<h3 id="response-description_3">Response description<a class="headerlink" href="#response-description_3" title="Permanent link">#</a></h3>
+<h3 id="response-description_4">Response description<a class="headerlink" href="#response-description_4" title="Permanent link">#</a></h3>
 <p>Method returns status 200 with an empty body if all required SSAs were revoked correctly.</p>
-<h3 id="example_3">Example:<a class="headerlink" href="#example_3" title="Permanent link">#</a></h3>
+<h3 id="example_4">Example:<a class="headerlink" href="#example_4" title="Permanent link">#</a></h3>
 <p><strong>Request:</strong></p>
 <p>Revoke using <code>jti</code>.</p>
 <div class="highlight"><pre><span></span><code>DELETE {{your-url}}/ssa?jti={{your-jti}}
@@ -9592,7 +9725,7 @@ Connection: Keep-Alive
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-02-02T06:46:15+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-02-02</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-02-27T09:48:38+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-02-27</span>
       
         <br>
         Created:
