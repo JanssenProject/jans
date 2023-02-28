@@ -7,7 +7,7 @@ jansConfProperty: {"value1":"tpp_jwks_url","value2":"https://keystore.openbankin
 jansEnabled: true
 jansLevel: 10
 jansModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
-jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansProgLng: python
 jansRevision: 1
 jansScr::%(person_authentication_openbanking)s
@@ -80,7 +80,7 @@ displayName: role_based_scopes
 inum: A44E-4F3D
 jansEnabled: true
 jansLevel: 1
-jansModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansProgLng: python
 jansRevision: 1
 jansScr::%(introspection_introspection_role_based_scope)s

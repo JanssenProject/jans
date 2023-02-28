@@ -16,6 +16,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -134,7 +135,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
         if (password != null) {
 	        try {
 		        List<AttributeData> attributes = lookup(key, objectClass, USER_PASSWORD);
-		        
+
 		        Object userPasswordObj = null;
 		        for (AttributeData attribute : attributes) {
 		        	if (StringHelper.equalsIgnoreCase(attribute.getName(), USER_PASSWORD)) {
@@ -460,8 +461,6 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 	                int resultCount = 0;
 	                int lastCountRows = 0;
 	                do {
-	                    collectSearchResult = true;
-	
 	                    currentLimit = pageSize;
 	                    if (count > 0) {
 	                        currentLimit = Math.min(pageSize, count - resultCount);
@@ -477,6 +476,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 
 		    			lastCountRows = lastResult.size();
 		    			
+	                    collectSearchResult = true;
 	                    if (batchOperation != null) {
 	                        collectSearchResult = batchOperation.collectSearchResult(lastCountRows);
 	                    }
@@ -659,6 +659,9 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 					} else if (attributeObject instanceof Timestamp) {
 						attributeValueObjects = new Object[] {
 								new java.util.Date(((Timestamp) attributeObject).getTime()) };
+					} else if (attributeObject instanceof LocalDateTime) {
+						attributeValueObjects = new Object[] {
+								new java.util.Date(Timestamp.valueOf((LocalDateTime) attributeObject).getTime()) };
 					} else {
 						Object value = attributeObject.toString();
 						attributeValueObjects = new Object[] { value };
@@ -683,9 +686,8 @@ public class SqlOperationServiceImpl implements SqlOperationService {
     private List<EntryData> getEntryDataList(TableMapping tableMapping, ResultSet resultSet) throws EntryConvertationException, SQLException {
     	List<EntryData> entryDataList = new LinkedList<>();
 
-    	List<AttributeData> attributeDataList = null;
     	while (!resultSet.isLast()) {
-    		attributeDataList = getAttributeDataList(tableMapping, resultSet, false);
+    		List<AttributeData> attributeDataList = getAttributeDataList(tableMapping, resultSet, false);
     		if (attributeDataList == null) {
     			break;
     		}

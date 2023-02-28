@@ -83,7 +83,6 @@ resources:
     # -- Memory request.
     memory: 2000Mi
 # -- Configure the liveness healthcheck for OpenDJ if needed.
-# https://github.com/JanssenFederation/docker-opendj/blob/4.3/scripts/healthcheck.py
 livenessProbe:
   # -- Executes the python3 healthcheck.
   exec:
@@ -95,7 +94,6 @@ livenessProbe:
   timeoutSeconds: 5
   failureThreshold: 20
 # -- Configure the readiness healthcheck for OpenDJ if needed.
-# https://github.com/JanssenFederation/docker-opendj/blob/4.3/scripts/healthcheck.py
 readinessProbe:
   tcpSocket:
     port: 1636

@@ -79,7 +79,7 @@ public class UserPersistenceHelper {
         try {
             person = persistenceEntryManager.find(ScimCustomPerson.class, personService.getDnForPerson(inum));
         } catch (Exception e) {
-            log.error("Failed to find Person by Inum " + inum, e);
+            log.warn("Failed to find Person by Inum {}", inum);
         }
         return person;
 

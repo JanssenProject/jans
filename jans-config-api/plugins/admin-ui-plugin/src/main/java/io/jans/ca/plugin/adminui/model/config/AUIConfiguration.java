@@ -2,6 +2,7 @@ package io.jans.ca.plugin.adminui.model.config;
 
 public class AUIConfiguration {
 
+    private String appType;
     //auth server
     private String authServerHost;
     private String authServerClientId;
@@ -30,6 +31,13 @@ public class AUIConfiguration {
     private String tokenServerUserInfoEndpoint;
     private String tokenServerEndSessionEndpoint;
 
+    public String getAppType() {
+        return appType;
+    }
+
+    public void setAppType(String appType) {
+        this.appType = appType;
+    }
     // LicenseSpring
     private LicenseConfiguration licenseConfiguration;
 

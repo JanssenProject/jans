@@ -50,7 +50,7 @@ Create user custom defined  envs
 {{- define "auth-server-key-rotation.usr-envs"}}
 {{- range $key, $val := .Values.usrEnvs.normal }}
 - name: {{ $key }}
-  value: {{ $val }}
+  value: {{ $val | quote }}
 {{- end }}
 {{- end }}
 
@@ -63,6 +63,6 @@ Create user custom defined secret envs
   valueFrom:
     secretKeyRef:
       name: {{ $.Release.Name }}-{{ $.Chart.Name }}-user-custom-envs
-      key: {{ $key }}
+      key: {{ $key | quote }}
 {{- end }}
 {{- end }}

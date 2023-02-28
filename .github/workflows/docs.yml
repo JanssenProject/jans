@@ -10,6 +10,7 @@ on:
 
 jobs:
   docs:
+    if: github.repository_owner == 'JanssenProject'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -26,8 +27,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install jq
-          echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" > token.txt
-          gh auth login --with-token < token.txt
+          echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
           pull_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
           NUMBER_OF_FOLDERS_CHANGED=$( gh pr view $pull_number --json files --jq '.files.[].path' | cut -d/ -f1 | sort -u | wc -l)
           echo "The number of folders that changed are $NUMBER_OF_FOLDERS_CHANGED"

@@ -1,5 +1,79 @@
 # Changelog
 
+## 1.0.7-1 (2023-02-22)
+
+
+### Features
+
+* **docker-jans:** add support for mounted hybrid properties file ([#3623](https://github.com/JanssenProject/jans/issues/3623)) ([8c58a5a](https://github.com/JanssenProject/jans/commit/8c58a5a9530cc9c44e7009ce3952064f8610cc69))
+* **docker-jans:** enable prefix and group for stdout logs ([#3481](https://github.com/JanssenProject/jans/issues/3481)) ([e7684e7](https://github.com/JanssenProject/jans/commit/e7684e7f6da7c789d03311fe2df855c687aa7fa6))
+
+
+### Bug Fixes
+
+* modify clnId column type ([#3459](https://github.com/JanssenProject/jans/issues/3459)) ([701394c](https://github.com/JanssenProject/jans/commit/701394c3d7463ffb2bd223daf9662921244ad34d))
+* prepare 1.0.7 release ([ce02fd9](https://github.com/JanssenProject/jans/commit/ce02fd9322ab49d5bea4f6e88f316f931e9d2169))
+* prepare for 1.0.6 release ([9e4c8fb](https://github.com/JanssenProject/jans/commit/9e4c8fb4c0a1ef4779934558e8d8d40d8fedbabf))
+
+## [1.0.6-1](https://github.com/JanssenProject/jans/compare/docker-jans-fido2-v1.0.5-1...docker-jans-fido2-v1.0.6-1) (2023-01-09)
+
+
+### Features
+
+* **docker-jans:** enable prefix and group for stdout logs ([#3481](https://github.com/JanssenProject/jans/issues/3481)) ([e7684e7](https://github.com/JanssenProject/jans/commit/e7684e7f6da7c789d03311fe2df855c687aa7fa6))
+
+
+### Bug Fixes
+
+* modify clnId column type ([#3459](https://github.com/JanssenProject/jans/issues/3459)) ([701394c](https://github.com/JanssenProject/jans/commit/701394c3d7463ffb2bd223daf9662921244ad34d))
+* prepare for 1.0.6 release ([9e4c8fb](https://github.com/JanssenProject/jans/commit/9e4c8fb4c0a1ef4779934558e8d8d40d8fedbabf))
+
+## [1.0.5-1](https://github.com/JanssenProject/jans/compare/docker-jans-fido2-v1.0.4-1...docker-jans-fido2-v1.0.5-1) (2022-12-01)
+
+
+### Features
+
+* **jans-pycloudlib:** add AWS Secrets Manager support for configuration layers ([#3112](https://github.com/JanssenProject/jans/issues/3112)) ([0522e61](https://github.com/JanssenProject/jans/commit/0522e61809b9052adce4fdb0db77e2d71558144e))
+
+
+### Bug Fixes
+
+* getting ready for a release ([0bda832](https://github.com/JanssenProject/jans/commit/0bda832ebc1da7017231deb38fe9aa6c7c51360a))
+
+## [1.0.4-1](https://github.com/JanssenProject/jans/compare/docker-jans-fido2-v1.0.3-1...docker-jans-fido2-v1.0.4-1) (2022-11-08)
+
+
+### Bug Fixes
+
+* **image:** add missing write access in filesystem ([#2846](https://github.com/JanssenProject/jans/issues/2846)) ([db4670d](https://github.com/JanssenProject/jans/commit/db4670d3adabc38b42411fe11bdcb6d6a9b4a0bd)), closes [#2844](https://github.com/JanssenProject/jans/issues/2844)
+* **pycloudlib:** searching values from spanner returns empty set ([#2833](https://github.com/JanssenProject/jans/issues/2833)) ([861a065](https://github.com/JanssenProject/jans/commit/861a0657233f271ffa41c908ce68a2206ed970fd))
+
+## 1.0.3-1 (2022-11-01)
+
+
+### Features
+
+* **docker-jans-fido2:** allow creating initial persistence entry ([#2029](https://github.com/JanssenProject/jans/issues/2029)) ([41dfab7](https://github.com/JanssenProject/jans/commit/41dfab7a6d09d10b05954d4f5fae2437eb81a885))
+* **image:** add custom libs for couchbase and spanner persistence ([#2784](https://github.com/JanssenProject/jans/issues/2784)) ([db559dd](https://github.com/JanssenProject/jans/commit/db559ddc5e74cc7387720af7f084766c054541b5))
+* **image:** generate scopes from swagger/openapi files ([#2759](https://github.com/JanssenProject/jans/issues/2759)) ([63722ea](https://github.com/JanssenProject/jans/commit/63722ea7372f33bf2ad2c3ff01b068383e81e746))
+* sync mds v3 config in fido2 image ([#2531](https://github.com/JanssenProject/jans/issues/2531)) ([56c8442](https://github.com/JanssenProject/jans/commit/56c84422b9352dd16c8dbce8608b5327a92a2c2e))
+
+
+### Bug Fixes
+
+* **image:** handle vulnerabilities reported by artifacthub scanner ([#2436](https://github.com/JanssenProject/jans/issues/2436)) ([77d8d88](https://github.com/JanssenProject/jans/commit/77d8d888bf414e519345704d033e65fbf4bc4128))
+* **image:** remove metadata-root-ca.cer inside fido2 image ([#2603](https://github.com/JanssenProject/jans/issues/2603)) ([9461fbc](https://github.com/JanssenProject/jans/commit/9461fbcb193f0e9b929f53006d706bf3ef5bfc1a))
+* **images:** conform to new couchbase persistence configuration ([#2188](https://github.com/JanssenProject/jans/issues/2188)) ([c708542](https://github.com/JanssenProject/jans/commit/c7085427fd298f74e8809ef4d6c39f780fa83776))
+* jans-config-api/plugins/sample/helloworld/pom.xml to reduce vulnerabilities ([#972](https://github.com/JanssenProject/jans/issues/972)) ([e2ae05e](https://github.com/JanssenProject/jans/commit/e2ae05e5515dd85a95c0a8520de57f673aba7918))
+* jans-eleven/pom.xml to reduce vulnerabilities ([#2676](https://github.com/JanssenProject/jans/issues/2676)) ([d27a7f9](https://github.com/JanssenProject/jans/commit/d27a7f99f22cb8f4bd445a3400224a38cb91eedc))
+* **pycloudlib:** handle type mismatch for iterable ([#2004](https://github.com/JanssenProject/jans/issues/2004)) ([46e0b2e](https://github.com/JanssenProject/jans/commit/46e0b2e4aff70a97cdcdcd0102dc83d294e45fdc))
+* **pycloudlib:** set default values for JSONB column ([#2651](https://github.com/JanssenProject/jans/issues/2651)) ([9b536ab](https://github.com/JanssenProject/jans/commit/9b536ab2b5d398a41733790f2eeb70339f993fb7))
+
+
+### Miscellaneous Chores
+
+* release 1.0.2-1 ([d01b51a](https://github.com/JanssenProject/jans/commit/d01b51a847bb2f67b52da433ebd1c5e4a66b7c1a))
+
 ## 1.0.2-1 (2022-08-30)
 
 

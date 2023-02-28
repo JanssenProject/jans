@@ -13,6 +13,7 @@ import io.jans.configapi.service.auth.SessionService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -49,7 +50,7 @@ public class SessionResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_SESSION_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_SESSION_READ_ACCESS } , groupScopes = {}, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getAllSessions() {
         final List<SessionId> sessions = sessionService.getSessions();
         logger.debug("sessions:{}", sessions);
@@ -66,9 +67,9 @@ public class SessionResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_SESSION_DELETE_ACCESS,
-            ApiAccessConstants.JANS_AUTH_REVOKE_SESSION })
+            ApiAccessConstants.JANS_AUTH_REVOKE_SESSION } , groupScopes = {}, superScopes = { ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
     @Path(ApiConstants.USERDN_PATH)
-    public Response getAppConfiguration(@PathParam(ApiConstants.USERDN) @NotNull String userDn) {
+    public Response getAppConfiguration(@Parameter(description = "User domain name") @PathParam(ApiConstants.USERDN) @NotNull String userDn) {
         logger.debug("userDn:{}", userDn);
         sessionService.revokeSession(userDn);
         return Response.ok().build();

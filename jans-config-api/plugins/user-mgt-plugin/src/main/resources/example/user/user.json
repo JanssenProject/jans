@@ -1,0 +1,80 @@
+{
+    "dn": "inum=559a7e26-7a33-4e11-9d42-13266d33261e,ou=people,o=jans",
+    "userId": "testUser1",
+    "createdAt": "2022-10-27T22:45:48",
+    "customAttributes": [
+        {
+            "name": "birthdate",
+            "multiValued": false,
+            "values": [
+                "20001231041508.553Z"
+            ],
+            "value": "20001231041508.553Z",
+            "displayValue": "20001231041508.553Z"
+        },
+        {
+            "name": "emailVerified",
+            "multiValued": false,
+            "values": [
+                "TRUE"
+            ],
+            "value": "TRUE",
+            "displayValue": "TRUE"
+        },
+        {
+            "name": "jansAdminUIRole",
+            "multiValued": false,
+            "values": [
+                "api-admin"
+            ],
+            "value": "api-admin",
+            "displayValue": "api-admin"
+        },
+        {
+            "name": "memberOf",
+            "multiValued": false,
+            "values": [
+                "inum=60B7,ou=groups,o=jans"
+            ],
+            "value": "inum=60B7,ou=groups,o=jans",
+            "displayValue": "inum=60B7,ou=groups,o=jans"
+        },
+        {
+            "name": "middleName",
+            "multiValued": false,
+            "values": [
+                "Test USer 3"
+            ],
+            "value": "Test USer 3",
+            "displayValue": "Test USer 3"
+        },
+        {
+            "name": "nickname",
+            "multiValued": false,
+            "values": [
+                "Test USer 3"
+            ],
+            "value": "Test USer 3",
+            "displayValue": "Test USer 3"
+        },
+        {
+            "name": "sn",
+            "multiValued": false,
+            "values": [
+                "User3"
+            ],
+            "value": "User3",
+            "displayValue": "User3"
+        }
+    ],
+    "customObjectClasses": [
+        "top",
+        "jansCustomPerson"
+    ],
+    "inum": "559a7e26-7a33-4e11-9d42-13266d33261e",
+    "mail": "test3@jans.server",
+    "displayName": "Default Test User 32",
+    "jansStatus": "active",
+    "givenName": "Test3",
+    "baseDn": "inum=559a7e26-7a33-4e11-9d42-13266d33261e,ou=people,o=jans"
+}

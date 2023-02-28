@@ -119,17 +119,6 @@ jansScopeTyp: openid
 objectClass: top
 objectClass: jansScope
 
-dn: inum=6D90,ou=scopes,o=jans
-description: jans_client_api scope which is required to call jans_client_api API
-displayName: jans_client_api
-inum: 6D90
-jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
-jansDefScope: true
-jansId: jans_client_api
-jansScopeTyp: openid
-objectClass: top
-objectClass: jansScope
-
 dn: inum=7D90,ou=scopes,o=jans
 description: revoke_session scope which is required to be able call /revoke_session endpoint
 displayName: revoke_session
@@ -183,5 +172,26 @@ description: This scope is required for calling Statistic Endpoint
 jansDefScope: false
 jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":false}
 jansScopeTyp: openid
+objectClass: top
+objectClass: jansScope
+
+dn: inum=C4F8,ou=scopes,o=jans
+description: Native SSO scope which allows to issue device_secret
+displayName: device_sso
+inum: C4F8
+jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
+jansDefScope: true
+jansId: device_sso
+jansScopeTyp: openid
+objectClass: top
+objectClass: jansScope
+
+dn: inum=B9D2-D6E5,ou=scopes,o=jans
+displayName: SSA Admin
+inum: B9D2-D6E5
+jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
+jansId: https://jans.io/auth/ssa.admin
+jansScopeTyp: openid
+jansDefScope: false
 objectClass: top
 objectClass: jansScope

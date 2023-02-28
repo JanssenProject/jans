@@ -43,7 +43,7 @@ function() {
         issuer: issuer,
         accessToken: '123',
        
-       fido2Url: baseUrl + '/jans-config-api/fido2/config',
+       fido2Url: baseUrl + '/jans-config-api/fido2/fido2-config',
 	   
     };
 

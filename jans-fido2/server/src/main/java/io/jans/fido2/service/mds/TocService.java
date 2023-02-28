@@ -57,6 +57,10 @@ import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.ECDSAVerifier;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
 
+/**
+ * TOC is parsed and Hashmap containing JSON object of individual Authenticators is created.
+ *
+ */
 @ApplicationScoped
 public class TocService {
 

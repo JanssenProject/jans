@@ -46,6 +46,7 @@ public class ExecutionContext {
 
     private String dpop;
     private String certAsPem;
+    private String deviceSecret;
 
     private String nonce;
     private String state;
@@ -69,6 +70,14 @@ public class ExecutionContext {
     public ExecutionContext(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
         this.httpRequest = httpRequest;
         this.httpResponse = httpResponse;
+    }
+
+    public String getDeviceSecret() {
+        return deviceSecret;
+    }
+
+    public void setDeviceSecret(String deviceSecret) {
+        this.deviceSecret = deviceSecret;
     }
 
     @NotNull

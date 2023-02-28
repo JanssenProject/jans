@@ -17,6 +17,10 @@ from setup_app.installers.base import BaseInstaller
 
 class CouchbaseInstaller(PackageUtils, BaseInstaller):
 
+    source_files = [
+                    (os.path.join(Config.dist_jans_dir, 'jans-orm-couchbase-libs-distribution.zip'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-orm-couchbase-libs/{0}/jans-orm-couchbase-libs-{0}-distribution.zip'.format(base.current_app.app_info['ox_version']))),
+                    ]
+
     def __init__(self):
         setattr(base.current_app, self.__class__.__name__, self)
         self.service_name = 'couchbase-server'
@@ -31,9 +35,10 @@ class CouchbaseInstaller(PackageUtils, BaseInstaller):
         self.couchbaseIndexJson = os.path.join(Config.install_dir, 'static/couchbase/index.json')
         self.couchbaseInitScript = os.path.join(Config.install_dir, 'static/system/initd/couchbase-server')
         self.couchebaseCert = os.path.join(Config.certFolder, 'couchbase.pem')
-
+        self.common_lib_dir = os.path.join(Config.jetty_base, 'common/libs/couchbase')
 
     def install(self):
+        self.extract_libs()
 
         if Config.couchbase_hostname == 'localhost':
             Config.couchbase_hostname = Config.hostname
@@ -61,7 +66,7 @@ class CouchbaseInstaller(PackageUtils, BaseInstaller):
 
         if Config.cb_install == InstallTypes.LOCAL:
             self.add_couchbase_post_messages()
-            self.couchbaseInstall()
+            Config.pbar.progress(self.service_name, "Configuring Couchbase", incr=False)
             self.checkIfJansBucketReady()
             self.couchebaseCreateCluster()
 
@@ -88,7 +93,7 @@ class CouchbaseInstaller(PackageUtils, BaseInstaller):
 
     def couchbaseInstall(self):
         coucbase_package = None
-
+        Config.start_auth_after = 'couchbase-server.service'
         cb_package_list = glob.glob(os.path.join(self.couchbasePackageFolder, 'couchbase-server-enterprise*'))
 
         if not cb_package_list:
@@ -101,8 +106,10 @@ class CouchbaseInstaller(PackageUtils, BaseInstaller):
         if base.clone_type == 'deb':
             apt_path = shutil.which('apt')
             self.chown(self.couchbasePackageFolder, '_apt', 'nogroup', recursive=True)
-            install_output = self.run([apt_path, 'install', '-y', package_name])
+            install_output = self.run([apt_path, '--quiet', 'install', '-y', package_name])
         else:
+            if not self.check_installed('ncurses-compat-libs'):
+                self.installNetPackage('ncurses-compat-libs')
             install_output = self.installPackage(package_name)
 
         Config.post_messages.append(install_output)
@@ -383,8 +390,15 @@ class CouchbaseInstaller(PackageUtils, BaseInstaller):
             "See /opt/couchbase/LICENSE.txt"+e
             )
 
+    def extract_libs(self):
+        self.logIt("Extracting {}".format(self.source_files[0][0]))
+        if not os.path.exists(self.common_lib_dir):
+            self.createDirs(self.common_lib_dir)
+        shutil.unpack_archive(self.source_files[0][0], self.common_lib_dir)
+        self.chown(os.path.join(Config.jetty_base, 'common'), Config.jetty_user, Config.jetty_user, True)
+
     def installed(self):
-        
+
         if os.path.exists(self.couchebaseInstallDir):
             cb_install = InstallTypes.LOCAL
         elif os.path.exists(self.couchbaseTrustStoreFn):

@@ -1,4 +1,3 @@
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -38,6 +37,10 @@ spec:
       dnsConfig:
 {{ toYaml . | indent 8 }}
     {{- end }}
+      {{- if .Values.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- include "scim.topology-spread-constraints" . | indent 8 }}
+      {{- end }}
       containers:
       - name: {{ include "scim.name" . }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
@@ -56,7 +59,7 @@ spec:
               /usr/bin/python3 /scripts/updatelbip.py &
               /app/scripts/entrypoint.sh
         {{- end}}
-        {{- if or (eq .Values.global.storageClass.provisioner "microk8s.io/hostpath" ) (eq .Values.global.storageClass.provisioner "k8s.io/minikube-hostpath") }}
+        {{- if and ( .Values.global.opendj.enabled ) (or (eq .Values.global.storageClass.provisioner "microk8s.io/hostpath" ) (eq .Values.global.storageClass.provisioner "k8s.io/minikube-hostpath")) }}
         resources: {}
         {{- else if .Values.global.cloud.testEnviroment }}
         resources: {}
@@ -85,6 +88,17 @@ spec:
         volumeMounts:
         {{- with .Values.volumeMounts }}
 {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{ if or (eq .Values.global.configSecretAdapter "aws") (eq .Values.global.configAdapterName "aws") }}
+        - mountPath: {{ .Values.global.cnAwsSharedCredentialsFile }}
+          name: aws-shared-credential-file
+          subPath: aws_shared_credential_file
+        - mountPath: {{ .Values.global.cnAwsConfigFile }}
+          name: aws-config-file
+          subPath: aws_config_file
+        - mountPath: {{ .Values.global.cnAwsSecretsReplicaRegionsFile }}
+          name: aws-secrets-replica-regions
+          subPath: aws_secrets_replica_regions
         {{- end }}
         {{ if or (eq .Values.global.configSecretAdapter "google") (eq .Values.global.cnPersistenceType "spanner") }}
         - mountPath: {{ .Values.global.cnGoogleApplicationCredentials }}
@@ -115,6 +129,26 @@ spec:
       volumes:
       {{- with .Values.volumes }}
 {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{ if or (eq .Values.global.configSecretAdapter "aws") (eq .Values.global.configAdapterName "aws") }}
+        - name: aws-shared-credential-file
+          secret:
+            secretName: {{ .Release.Name }}-aws-config-creds
+            items:
+              - key: aws_shared_credential_file
+                path: aws_shared_credential_file
+        - name: aws-config-file
+          secret:
+            secretName: {{ .Release.Name }}-aws-config-creds
+            items:
+              - key: aws_config_file
+                path: aws_config_file
+        - name: aws-secrets-replica-regions
+          secret:
+            secretName: {{ .Release.Name }}-aws-config-creds
+            items:
+              - key: aws_secrets_replica_regions
+                path: aws_secrets_replica_regions
       {{- end }}
       {{ if or (eq .Values.global.configSecretAdapter "google") (eq .Values.global.cnPersistenceType "spanner") }}
         - name: google-sa

@@ -1,0 +1,2 @@
+
+[{ "op": "add", "path": "/clients", "value": ["inum=1800.d2d3ab98-e018-4a75-bc1d-15b5ac8cb455,ou=clients,o=jans", "inum=2000.9be7c8de-8fe9-49c6-adcb-b84871ade32e,ou=clients,o=jans"] }]

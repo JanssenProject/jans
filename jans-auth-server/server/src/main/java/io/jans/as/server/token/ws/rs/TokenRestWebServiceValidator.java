@@ -2,9 +2,16 @@ package io.jans.as.server.token.ws.rs;
 
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.common.model.session.SessionId;
+import io.jans.as.common.model.session.SessionIdState;
+import io.jans.as.model.authorize.CodeVerifier;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.error.ErrorResponseFactory;
+import io.jans.as.model.exception.CryptoProviderException;
+import io.jans.as.model.exception.InvalidJwtException;
+import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.token.TokenErrorResponseType;
 import io.jans.as.server.audit.ApplicationAuditLogger;
 import io.jans.as.server.model.audit.OAuth2AuditLog;
@@ -26,7 +33,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
-import static io.jans.as.model.config.Constants.REASON_CLIENT_NOT_AUTHORIZED;
+import static io.jans.as.model.config.Constants.*;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -46,6 +53,9 @@ public class TokenRestWebServiceValidator {
 
     @Inject
     private AppConfiguration appConfiguration;
+
+    @Inject
+    private AbstractCryptoProvider cryptoProvider;
 
     public void validateParams(String grantType, String code,
                                String redirectUri, String refreshToken, OAuth2AuditLog auditLog) {
@@ -169,6 +179,88 @@ public class TokenRestWebServiceValidator {
         if (user == null) {
             log.debug("Invalid user", new RuntimeException("User is empty"));
             throw new WebApplicationException(response(error(401, TokenErrorResponseType.INVALID_CLIENT, "Invalid user."), auditLog));
+        }
+    }
+
+    public void validateSubjectTokenType(String subjectTokenType, OAuth2AuditLog auditLog) {
+        if (!SUBJECT_TOKEN_TYPE_ID_TOKEN.equalsIgnoreCase(subjectTokenType)) {
+            String msg = String.format("Unsupported subject_token_type: %s", subjectTokenType);
+            log.trace(msg);
+            throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_REQUEST, msg), auditLog));
+        }
+    }
+
+    public void validateActorTokenType(String actorTokenType, OAuth2AuditLog auditLog) {
+        if (!ACTOR_TOKEN_TYPE_DEVICE_SECRET.equalsIgnoreCase(actorTokenType)) {
+            String msg = String.format("Unsupported actor_token_type: %s", actorTokenType);
+            log.trace(msg);
+            throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_REQUEST, msg), auditLog));
+        }
+    }
+
+    public void validateActorToken(String actorToken, OAuth2AuditLog auditLog) {
+        if (StringUtils.isBlank(actorToken)) {
+            String msg = "actor_token is blank";
+            log.trace(msg);
+            throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_REQUEST, msg), auditLog));
+        }
+    }
+
+    public void validateSessionForTokenExchange(SessionId session, String actorToken, OAuth2AuditLog auditLog) {
+        if (session == null) {
+            String msg = String.format("Unable to find session for device_secret (actor_token): %s", actorToken);
+            log.trace(msg);
+            throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_GRANT, msg), auditLog));
+        }
+        if (session.getState() != SessionIdState.AUTHENTICATED) {
+            String msg = String.format("Session found by device_secret (actor_token) '%s' is not authenticated. SessionId: %s", actorToken, session.getId());
+            log.trace(msg);
+            throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_GRANT, msg), auditLog));
+        }
+    }
+
+    public void validateSubjectToken(String deviceSecret, String subjectToken, SessionId sidSession, OAuth2AuditLog auditLog) {
+        try {
+            final Jwt jwt = Jwt.parse(subjectToken);
+            validateSubjectTokenSignature(deviceSecret, sidSession, jwt, auditLog);
+        } catch (InvalidJwtException e) {
+            log.error("Unable to parse subject_token as JWT, subjectToken: " + subjectToken, e);
+            throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_REQUEST, "Unable to parse subject_token as JWT."), auditLog));
+        } catch (WebApplicationException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Unable to validate subject_token, subjectToken: " + subjectToken, e);
+            throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_REQUEST, "Unable to validate subject_token as JWT."), auditLog));
+        }
+    }
+
+    private void validateSubjectTokenSignature(String deviceSecret, SessionId sidSession, Jwt jwt, OAuth2AuditLog auditLog) throws InvalidJwtException, CryptoProviderException {
+        // verify jwt signature if we can't find it in db
+        if (!cryptoProvider.verifySignature(jwt.getSigningInput(), jwt.getEncodedSignature(), jwt.getHeader().getKeyId(),
+                null, null, jwt.getHeader().getSignatureAlgorithm())) {
+            log.error("subject_token signature verification failed.");
+            throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_REQUEST, "subject_token signature verification failed."), auditLog));
+        }
+
+        final String sid = jwt.getClaims().getClaimAsString("sid");
+        if (StringUtils.isBlank(sid) || !StringUtils.equals(sidSession.getOutsideSid(), sid)) {
+            log.error("sid claim from subject_token does not match to session sid.");
+            throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_REQUEST, "sid claim from subject_token does not match to session sid."), auditLog));
+        }
+
+        final String dsHash = jwt.getClaims().getClaimAsString("ds_hash");
+        if (StringUtils.isBlank(dsHash) || !dsHash.equals(CodeVerifier.s256(deviceSecret))) {
+            final String msg = "ds_hash claim from subject_token does not match to hash of device_secret";
+            log.error(msg);
+            throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_REQUEST, msg), auditLog));
+        }
+    }
+
+    public void validateAudience(String audience, OAuth2AuditLog auditLog) {
+        if (StringUtils.isBlank(audience)) {
+            String msg = "audience is blank";
+            log.trace(msg);
+            throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_REQUEST, msg), auditLog));
         }
     }
 }

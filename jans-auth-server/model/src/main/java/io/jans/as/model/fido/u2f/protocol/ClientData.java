@@ -58,7 +58,12 @@ public class ClientData implements Serializable {
     }
 
     public String getString(String key) {
-        return data.get(key).asText();
+    	JsonNode node = data.get(key);
+    	if (node != null) {
+    		return data.get(key).asText();
+    	}
+    	
+    	return null;
     }
 
     public String getRawClientData() {

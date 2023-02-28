@@ -12,13 +12,12 @@ set -e
 # CN_STATE: i.e TX
 # CN_COUNTRY: i.e US
 # CN_ADMIN_PASS: LDAP or MYSQL and ADMIN user password
-# INSTALL_LDAP
+# CN_INSTALL_LDAP
 # CN_INSTALL_CONFIG_API
 # CN_INSTALL_SCIM
-# CN_INSTALL_CLIENT_API
-# MYSQL_DATABASE
-# MYSQL_USER
-# MYSQL_PASSWORD
+# RDBMS_DATABASE
+# RDBMS_USER
+# RDBMS_PASSWORD
 # ======================================================================================================================
 
 IS_JANS_DEPLOYED=/janssen/deployed
@@ -35,26 +34,36 @@ install_jans() {
   echo "countryCode=${CN_COUNTRY}" | tee -a setup.properties > /dev/null
   # shellcheck disable=SC2016
   echo "ldapPass=${CN_ADMIN_PASS}" | tee -a setup.properties > /dev/null
-  echo "installLdap=""$([[ ${INSTALL_LDAP} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
+  echo "installLdap=""$([[ ${CN_INSTALL_LDAP} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
   echo "install_config_api=""$([[ ${CN_INSTALL_CONFIG_API} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
   echo "install_scim_server=""$([[ ${CN_INSTALL_SCIM} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
   echo "installFido2=""$([[ ${CN_INSTALL_FIDO2} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
-  echo "install_client_api=""$([[ ${CN_INSTALL_CLIENT_API} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
 
-  if [[ "${INSTALL_LDAP}" == "false" ]]; then
+  if [[ "${CN_INSTALL_MYSQL}" == "true" ]] || [[ "${CN_INSTALL_PGSQL}" == "true" ]]; then
+    echo "Installing with RDBMS"
     echo "rdbm_install=2" | tee -a setup.properties > /dev/null
     echo "rdbm_install_type=2" | tee -a setup.properties > /dev/null
-    echo "rdbm_db=${MYSQL_DATABASE}" | tee -a setup.properties > /dev/null
-    echo "rdbm_user=${MYSQL_USER}" | tee -a setup.properties > /dev/null
-    echo "rdbm_password=${MYSQL_PASSWORD}" | tee -a setup.properties > /dev/null
+    echo "rdbm_db=${RDBMS_DATABASE}" | tee -a setup.properties > /dev/null
+    echo "rdbm_user=${RDBMS_USER}" | tee -a setup.properties > /dev/null
+    echo "rdbm_password=${RDBMS_PASSWORD}" | tee -a setup.properties > /dev/null
+    echo "rdbm_host=${RDBMS_HOST}" | tee -a setup.properties > /dev/null
+  fi
+  if [[ "${CN_INSTALL_MYSQL}" == "true" ]]; then
+    echo "Installing with MySql"
     echo "rdbm_type=mysql" | tee -a setup.properties > /dev/null
-    echo "rdbm_host=${MYSQL_HOST}" | tee -a setup.properties > /dev/null
+    echo "rdbm_port=3306" | tee -a setup.properties > /dev/null
+  elif [[ "${CN_INSTALL_PGSQL}" == "true" ]]; then
+    echo "Installing with Postgres"
+    echo "rdbm_type=pgsql" | tee -a setup.properties > /dev/null
+    echo "rdbm_port=5432" | tee -a setup.properties > /dev/null
   fi
 
   echo "*****   Running the setup script for ${CN_ORG_NAME}!!   *****"
   echo "*****   PLEASE NOTE THAT THIS MAY TAKE A WHILE TO FINISH. PLEASE BE PATIENT!!   *****"
+  echo "Executing https://raw.githubusercontent.com/JanssenProject/jans/${JANS_SOURCE_VERSION}/jans-linux-setup/jans_setup/install.py > install.py"
   curl https://raw.githubusercontent.com/JanssenProject/jans/"${JANS_SOURCE_VERSION}"/jans-linux-setup/jans_setup/install.py > install.py
-  python3 install.py -yes --args="-f setup.properties -n"
+  echo "Executing python3 install.py -yes --args=-f setup.properties -n -test-client-id=${TEST_CLIENT_ID} -test-client-secret=${TEST_CLIENT_SECRET} --test-client-trusted"
+  python3 install.py -yes --args="-f setup.properties -n -test-client-id=${TEST_CLIENT_ID} -test-client-secret=${TEST_CLIENT_SECRET} --test-client-trusted"
   echo "*****   Setup script completed!!    *****"
 
 }
@@ -72,7 +81,6 @@ check_installed_jans() {
 start_services() {
   /etc/init.d/apache2 start
   /opt/dist/scripts/jans-auth start
-  /opt/dist/scripts/jans-client-api start
   /opt/dist/scripts/jans-config-api start
   /opt/dist/scripts/jans-scim start
   /opt/dist/scripts/jans-fido2 start
@@ -82,7 +90,6 @@ check_installed_jans
 start_services
 
 tail -f /opt/jans/jetty/jans-auth/logs/*.log \
--f /opt/jans/jetty/jans-client-api/logs/*.log \
 -f /opt/jans/jetty/jans-config-api/logs/*.log \
 -f /opt/jans/jetty/jans-fido2/logs/*.log \
 -f /opt/jans/jetty/jans-scim/logs/*.log

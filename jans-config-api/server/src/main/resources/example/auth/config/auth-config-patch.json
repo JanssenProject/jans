@@ -1,0 +1,5 @@
+[
+{"op":"add","path":"/authenticationFilters","value":[{}]},
+{"op":"replace","path":"/useNestedJwtDuringEncryption","value":"true"},
+{"op":"add","path":"/loggingLevel","value":"TRACE"}
+]

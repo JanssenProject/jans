@@ -9,6 +9,8 @@ import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.DeviceAuthorizationService;
 import io.jans.as.server.service.RedirectionUriService;
 import io.jans.as.server.service.SessionIdService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.WebApplicationException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -16,9 +18,8 @@ import org.slf4j.Logger;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import static org.mockito.Mockito.*;
+import static org.testng.Assert.*;
 
 /**
  * @author Yuriy Z
@@ -73,5 +74,34 @@ public class AuthorizeRestWebServiceValidatorTest {
     @Test
     public void isAuthnMaxAgeValid_whenMaxAgeIsNull_shouldReturnTrue() {
         assertTrue(authorizeRestWebServiceValidator.isAuthnMaxAgeValid(0, new SessionId(), new Client()));
+    }
+
+    @Test
+    public void validateNotWebView_blockWebviewDisabled_valid() {
+        HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
+        when(appConfiguration.getBlockWebviewAuthorizationEnabled()).thenReturn(false);
+
+        authorizeRestWebServiceValidator.validateNotWebView(httpServletRequest);
+        verifyNoInteractions(log, httpServletRequest);
+    }
+
+    @Test
+    public void validateNotWebView_blockWebviewEnabled_valid() {
+        HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
+        when(appConfiguration.getBlockWebviewAuthorizationEnabled()).thenReturn(true);
+
+        authorizeRestWebServiceValidator.validateNotWebView(httpServletRequest);
+        verifyNoInteractions(log);
+    }
+
+    @Test
+    public void validateNotWebView_withRequestedWithHeader_throwUnauthorized() {
+        HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
+        when(appConfiguration.getBlockWebviewAuthorizationEnabled()).thenReturn(true);
+        String testPackage = "test.app.package";
+        when(httpServletRequest.getHeader(any())).thenReturn(testPackage);
+
+        assertThrows(WebApplicationException.class, () -> authorizeRestWebServiceValidator.validateNotWebView(httpServletRequest));
+        verify(log).error(anyString(), eq(testPackage));
     }
 }

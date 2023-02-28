@@ -82,7 +82,7 @@
       "`del`, `exp`"
     ]
   },
-  "token": {
+  "jansToken": {
     "fields": [
       "authzCode",
       "grtId",
@@ -115,7 +115,8 @@
   "jansSessId": {
     "fields": [
       "jansUsrDN",
-      "sid"
+      "sid",
+      "deviceSecret"
     ],
     "custom": [
       "`del`, `exp`"
@@ -193,17 +194,29 @@
     "fields": [
       "creationDate",
       "jansStatus",
-      "personInum"
+      "personInum",
+      "jansApp",
+      "jansCodeChallenge",
+      "jansCodeChallengeHash"
     ],
-    "custom": []
+    "custom": [
+      "`del`, `exp`"
+    ]
   },
   "jansFido2RegistrationEntry": {
     "fields": [
       "creationDate",
       "jansStatus",
-      "personInum"
+      "personInum",
+      "jansApp",
+      "jansPublicKeyId",
+      "jansPublicKeyIdHash",
+      "jansCodeChallenge",
+      "jansCodeChallengeHash"
     ],
-    "custom": []
+    "custom": [
+      "`del`, `exp`"
+    ]
   },
   "jansInumMap": {
     "fields": [

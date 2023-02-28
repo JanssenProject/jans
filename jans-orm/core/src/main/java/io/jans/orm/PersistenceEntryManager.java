@@ -35,6 +35,7 @@ import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SearchScope;
 import io.jans.orm.model.SortOrder;
 import io.jans.orm.operation.PersistenceOperationService;
+import io.jans.orm.reflect.property.PropertyAnnotation;
 import io.jans.orm.search.filter.Filter;
 
 /**
@@ -148,6 +149,7 @@ public interface PersistenceEntryManager extends EntityManager {
 			String propertyName);
 	List<Object> getCustomAttributesListFromAttributeDataList(Object entry, AttributesList attributesList,
 			String propertyName, Collection<AttributeData> attributes);
+	<T> List<PropertyAnnotation> getEntryPropertyAnnotations(Class<T> entryClass); 
 
     boolean destroy();
 

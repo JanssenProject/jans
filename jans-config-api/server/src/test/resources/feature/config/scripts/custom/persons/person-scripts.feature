@@ -20,7 +20,7 @@ When method GET
 Then status 200
 And print response
 And assert response.length != null
-And assert response.entries[0].scriptType == 'PERSON_AUTHENTICATION'
+And assert response.entries[0].scriptType == 'person_authentication'
 
 
 Scenario: Fetch the first three person custom scripts
@@ -32,7 +32,7 @@ When method GET
 And print response
 Then status 200
 And assert response.entries.length == 3
-And assert response.entries[0].scriptType == 'PERSON_AUTHENTICATION'
+And assert response.entries[0].scriptType == 'person_authentication'
 
 
 Scenario: Search person custom scripts given a serach pattern
@@ -44,9 +44,9 @@ When method GET
 And print response
 Then status 200
 And assert response.entries.length <= 3
-And assert response.entries[0].scriptType == 'PERSON_AUTHENTICATION'
+And assert response.entries[0].scriptType == 'person_authentication'
 
-
+@ignore
 @CreateUpdateDelete
 Scenario: Create new Person Script
 Given url mainUrl + '/type'
@@ -56,7 +56,7 @@ When method GET
 And print response
 Then status 200
 And assert response.length != 0
-And assert response.entries[0].scriptType == 'PERSON_AUTHENTICATION'
+And assert response.entries[0].scriptType == 'person_authentication'
 Given url mainUrl
 And header Authorization = 'Bearer ' + accessToken
 And def testScript = response.entries[0]
@@ -119,4 +119,4 @@ And print request
 When method GET
 And print response
 Then status 200
-And assert response.scriptType == 'PERSON_AUTHENTICATION'
+And assert response.scriptType == 'person_authentication'

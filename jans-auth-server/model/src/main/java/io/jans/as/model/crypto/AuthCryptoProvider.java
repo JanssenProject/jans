@@ -14,12 +14,7 @@ import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
 import io.jans.as.model.crypto.signature.AlgorithmFamily;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.exception.CryptoProviderException;
-import io.jans.as.model.jwk.Algorithm;
-import io.jans.as.model.jwk.JSONWebKey;
-import io.jans.as.model.jwk.JSONWebKeySet;
-import io.jans.as.model.jwk.JWKParameter;
-import io.jans.as.model.jwk.KeySelectionStrategy;
-import io.jans.as.model.jwk.Use;
+import io.jans.as.model.jwk.*;
 import io.jans.as.model.util.Base64Util;
 import io.jans.as.model.util.CertUtils;
 import io.jans.as.model.util.Util;
@@ -163,7 +158,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
     }
 
     @Override
-    public JSONObject generateKey(Algorithm algorithm, Long expirationTime, int keyLength) throws CryptoProviderException {
+    public JSONObject generateKey(Algorithm algorithm, Long expirationTime, int keyLength, KeyOpsType keyOpsType) throws CryptoProviderException {
         if (algorithm == null) {
             throw new IllegalArgumentException("The signature algorithm parameter cannot be null");
         }
@@ -171,9 +166,9 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
         try {
             Use algUse = algorithm.getUse();
             if (algUse == Use.SIGNATURE) {
-                jsonObject = generateKeySignature(algorithm, expirationTime, keyLength);
+                jsonObject = generateKeySignature(algorithm, expirationTime, keyLength, keyOpsType);
             } else if (algUse == Use.ENCRYPTION) {
-                jsonObject = generateKeyEncryption(algorithm, expirationTime, keyLength);
+                jsonObject = generateKeyEncryption(algorithm, expirationTime, keyLength, keyOpsType);
             }
         } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException | OperatorCreationException
                 | CertificateException | KeyStoreException | IOException e) {
@@ -182,18 +177,23 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
         return jsonObject;
     }
 
-    private static String getKidSuffix(Use use, Algorithm algorithm) {
-        return "_" + use.getParamName().toLowerCase() + "_" + algorithm.getParamName().toLowerCase();
+    @Override
+    public JSONObject generateKey(Algorithm algorithm, Long expirationTime, int keyLength) throws CryptoProviderException {
+        return generateKey(algorithm, expirationTime, keyLength, KeyOpsType.CONNECT);
     }
 
-    public String getAliasByAlgorithmForDeletion(Algorithm algorithm, String newAlias) throws KeyStoreException {
+    private static String getKidSuffix(Algorithm algorithm) {
+        return "_" + algorithm.getUse().getParamName().toLowerCase() + "_" + algorithm.getParamName().toLowerCase();
+    }
+
+    public String getAliasByAlgorithmForDeletion(Algorithm algorithm, String newAlias, KeyOpsType keyOpsType) throws KeyStoreException {
         for (String alias : Collections.list(keyStore.aliases())) {
 
-            if (newAlias.equals(alias)) { // skip newly created alias
+            if (newAlias.equals(alias)) { // skip newly created alias or ssa keys
                 continue;
             }
 
-            if (alias.endsWith(getKidSuffix(algorithm.getUse(), algorithm))) {
+            if (alias.startsWith(keyOpsType.getValue()) && alias.endsWith(getKidSuffix(algorithm))) {
                 return alias;
             }
         }
@@ -302,7 +302,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
     }
 
     @Override
-    public String getKeyId(JSONWebKeySet jsonWebKeySet, Algorithm algorithm, Use use) throws CryptoProviderException {
+    public String getKeyId(JSONWebKeySet jsonWebKeySet, Algorithm algorithm, Use use, KeyOpsType keyOpsType) throws CryptoProviderException {
         if (algorithm == null || AlgorithmFamily.HMAC.equals(algorithm.getFamily())) {
             return null;
         }
@@ -315,7 +315,8 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
             List<JSONWebKey> keysByAlgAndUse = new ArrayList<>();
 
             for (JSONWebKey key : keys) {
-                if (algorithm == key.getAlg() && (use == null || use == key.getUse())) {
+                boolean keyOpsCondition = keyOpsType == null || (key.getKeyOpsType() == null || key.getKeyOpsType().isEmpty() || key.getKeyOpsType().contains(keyOpsType));
+                if (algorithm == key.getAlg() && (use == null || use == key.getUse()) && keyOpsCondition) {
                     kid = key.getKid();
                     Key keyFromStore;
                     keyFromStore = keyStore.getKey(kid, keyStoreSecret.toCharArray());
@@ -326,7 +327,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
             }
 
             if (keysByAlgAndUse.isEmpty()) {
-                LOG.trace("kid is not in keystore, algorithm: " + algorithm + ", kid: " + kid + ", keyStorePath:" + keyStoreFile);
+                LOG.trace("kid is not in keystore, algorithm: {}" + algorithm + ", kid: " + kid + ", keyStorePath:" + keyStoreFile + ", keyOpsType: " + keyOpsType + ", use: " + use);
                 return kid;
             }
 
@@ -339,7 +340,6 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
         } catch (UnrecoverableKeyException | KeyStoreException | NoSuchAlgorithmException e) {
             throw new CryptoProviderException(e);
         }
-
     }
 
     @Override
@@ -429,7 +429,7 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
         return keyStore;
     }
 
-    private JSONObject generateKeySignature(Algorithm algorithm, Long expirationTime, int keyLength)
+    private JSONObject generateKeySignature(Algorithm algorithm, Long expirationTime, int keyLength, KeyOpsType keyOpsType)
             throws NoSuchAlgorithmException, NoSuchProviderException, InvalidAlgorithmParameterException, OperatorCreationException,
             CertificateException, KeyStoreException, IOException {
 
@@ -441,31 +441,28 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
         KeyPairGenerator keyGen = null;
         final AlgorithmFamily algorithmFamily = algorithm.getFamily();
         switch (algorithmFamily) {
-            case RSA: {
+            case RSA:
                 keyGen = KeyPairGenerator.getInstance(algorithmFamily.toString(), "BC");
                 keyGen.initialize(keyLength, new SecureRandom());
                 break;
-            }
-            case EC: {
+            case EC:
                 ECGenParameterSpec eccgen = new ECGenParameterSpec(signatureAlgorithm.getCurve().getAlias());
                 keyGen = KeyPairGenerator.getInstance(algorithmFamily.toString(), "BC");
                 keyGen.initialize(eccgen, new SecureRandom());
                 break;
-            }
-            case ED: {
+            case ED:
                 EdDSAParameterSpec edSpec = new EdDSAParameterSpec(signatureAlgorithm.getCurve().getAlias());
                 keyGen = KeyPairGenerator.getInstance(signatureAlgorithm.getName(), "BC");
                 keyGen.initialize(edSpec, new SecureRandom());
                 break;
-            }
-            default: {
+            default:
                 throw new IllegalStateException("The provided signature algorithm parameter is not supported: algorithmFamily = " + algorithmFamily);
-            }
+
         }
-        return getJson(algorithm, keyGen, signatureAlgorithm.getAlgorithm(), expirationTime);
+        return getJson(algorithm, keyGen, signatureAlgorithm.getAlgorithm(), expirationTime, keyOpsType);
     }
 
-    private JSONObject generateKeyEncryption(Algorithm algorithm, Long expirationTime, int keyLength) throws NoSuchAlgorithmException, NoSuchProviderException,
+    private JSONObject generateKeyEncryption(Algorithm algorithm, Long expirationTime, int keyLength, KeyOpsType keyOpsType) throws NoSuchAlgorithmException, NoSuchProviderException,
             InvalidAlgorithmParameterException, OperatorCreationException, CertificateException, KeyStoreException, IOException {
 
         KeyEncryptionAlgorithm keyEncryptionAlgorithm = KeyEncryptionAlgorithm.fromName(algorithm.getParamName());
@@ -477,28 +474,32 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
         String signatureAlgorithm = null;
         final AlgorithmFamily algorithmFamily = algorithm.getFamily();
         switch (algorithmFamily) {
-            case RSA: {
+            case RSA:
                 keyGen = KeyPairGenerator.getInstance(algorithmFamily.toString(), "BC");
                 keyGen.initialize(keyLength, new SecureRandom());
                 signatureAlgorithm = "SHA256WITHRSA";
                 break;
-            }
-            case EC: {
+            case EC:
                 ECGenParameterSpec eccgen = new ECGenParameterSpec(keyEncryptionAlgorithm.getCurve().getAlias());
                 keyGen = KeyPairGenerator.getInstance(algorithmFamily.toString(), "BC");
                 keyGen.initialize(eccgen, new SecureRandom());
                 signatureAlgorithm = "SHA256WITHECDSA";
                 break;
-            }
-            default: {
+            default:
                 throw new IllegalStateException(
                         "The provided key encryption algorithm parameter is not supported: algorithmFamily = " + algorithmFamily);
-            }
+
         }
-        return getJson(algorithm, keyGen, signatureAlgorithm, expirationTime);
+        return getJson(algorithm, keyGen, signatureAlgorithm, expirationTime, keyOpsType);
     }
 
-    private JSONObject getJson(final Algorithm algorithm, final KeyPairGenerator keyGen, final String signatureAlgorithmStr, final Long expirationTime) throws NoSuchAlgorithmException,
+    private String getKid(Algorithm algorithm, KeyOpsType keyOpsType) {
+        if (keyOpsType == null)
+            keyOpsType = KeyOpsType.CONNECT;
+        return keyOpsType.getValue() + "_" + UUID.randomUUID().toString() + getKidSuffix(algorithm);
+    }
+
+    private JSONObject getJson(final Algorithm algorithm, final KeyPairGenerator keyGen, final String signatureAlgorithmStr, final Long expirationTime, KeyOpsType keyOpsType) throws NoSuchAlgorithmException,
             OperatorCreationException, CertificateException, KeyStoreException, IOException {
 
         // Generate the key
@@ -511,10 +512,10 @@ public class AuthCryptoProvider extends AbstractCryptoProvider {
         X509Certificate[] chain = new X509Certificate[1];
         chain[0] = cert;
 
-        String alias = UUID.randomUUID().toString() + getKidSuffix(algorithm.getUse(), algorithm);
+        String alias = getKid(algorithm, keyOpsType);
         keyStore.setKeyEntry(alias, pk, keyStoreSecret.toCharArray(), chain);
 
-        final String oldAliasByAlgorithm = getAliasByAlgorithmForDeletion(algorithm, alias);
+        final String oldAliasByAlgorithm = getAliasByAlgorithmForDeletion(algorithm, alias, keyOpsType);
         if (StringUtils.isNotBlank(oldAliasByAlgorithm)) {
             keyStore.deleteEntry(oldAliasByAlgorithm);
             LOG.trace("New key: " + alias + ", deleted key: " + oldAliasByAlgorithm);

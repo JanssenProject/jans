@@ -16,9 +16,7 @@ import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
-import java.util.Date;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -62,12 +60,6 @@ public class SessionId implements Deletable, Serializable {
     @AttributeName(name = "jansPermissionGranted")
     private Boolean permissionGranted;
 
-    @AttributeName(name = "jansAsJwt")
-    private Boolean isJwt = false;
-
-    @AttributeName(name = "jansJwt")
-    private String jwt;
-
     @JsonObject
     @AttributeName(name = "jansPermissionGrantedMap")
     private SessionIdAccessMap permissionGrantedMap;
@@ -75,6 +67,9 @@ public class SessionId implements Deletable, Serializable {
     @JsonObject
     @AttributeName(name = "jansSessAttr")
     private Map<String, String> sessionAttributes;
+
+    @AttributeName(name = "deviceSecret")
+    private List<String> deviceSecrets;
 
     @AttributeName(name = "exp")
     private Date expirationDate;
@@ -94,6 +89,16 @@ public class SessionId implements Deletable, Serializable {
     @Expiration
     private int ttl;
 
+    @NotNull
+    public List<String> getDeviceSecrets() {
+        if (deviceSecrets == null) deviceSecrets = new ArrayList<>();
+        return deviceSecrets;
+    }
+
+    public void setDeviceSecrets(List<String> deviceSecrets) {
+        this.deviceSecrets = deviceSecrets;
+    }
+
     public int getTtl() {
         return ttl;
     }
@@ -108,22 +113,6 @@ public class SessionId implements Deletable, Serializable {
 
     public void setDn(String dn) {
         this.dn = dn;
-    }
-
-    public String getJwt() {
-        return jwt;
-    }
-
-    public void setJwt(String jwt) {
-        this.jwt = jwt;
-    }
-
-    public Boolean getIsJwt() {
-        return isJwt;
-    }
-
-    public void setIsJwt(Boolean isJwt) {
-        this.isJwt = isJwt;
     }
 
     public SessionIdState getState() {
@@ -300,11 +289,10 @@ public class SessionId implements Deletable, Serializable {
         sb.append(", expirationDate=").append(expirationDate);
         sb.append(", sessionState='").append(sessionState).append('\'');
         sb.append(", permissionGranted=").append(permissionGranted);
-        sb.append(", isJwt=").append(isJwt);
-        sb.append(", jwt=").append(jwt);
         sb.append(", permissionGrantedMap=").append(permissionGrantedMap);
         sb.append(", sessionAttributes=").append(sessionAttributes);
         sb.append(", persisted=").append(persisted);
+        sb.append(", deviceSecrets=").append(deviceSecrets);
         sb.append("}");
         return sb.toString();
     }

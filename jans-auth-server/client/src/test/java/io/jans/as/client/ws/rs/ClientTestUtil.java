@@ -8,7 +8,7 @@ package io.jans.as.client.ws.rs;
 
 import io.jans.as.client.RegisterResponse;
 
-import static io.jans.as.model.uma.TestUtil.assertNotBlank;
+import static io.jans.as.test.TestUtil.assertNotBlank;
 import static org.testng.Assert.assertNotNull;
 
 /**

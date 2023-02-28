@@ -5,6 +5,7 @@ from collections import defaultdict
 from string import Template
 from pathlib import Path
 
+from sqlalchemy import text
 from sqlalchemy.exc import OperationalError
 
 from jans.pycloudlib.persistence.sql import SqlClient
@@ -179,7 +180,8 @@ class SQLBackend:
 
         for i, custom in enumerate(self.sql_indexes.get(table_name, {}).get("custom", []), start=1):
             # jansPerson table has unsupported custom index expressions that need to be skipped if mysql < 8.0
-            if table_name == "jansPerson" and self.client.server_version < "8.0":
+            # if table_name == "jansPerson" and self.client.server_version < "8.0":
+            if table_name == "jansPerson" and self.client.get_server_version() < (8, 0):
                 continue
             name = f"{table_name}_CustomIdx{i}"
             query = f"CREATE INDEX {self.client.quoted_id(name)} ON {self.client.quoted_id(table_name)} ({custom})"
@@ -194,7 +196,7 @@ class SQLBackend:
 
             index_name = f"{table_name}_{FIELD_RE.sub('_', column_name)}"
 
-            if column_type.lower() != "json":
+            if column_type.lower() != "jsonb":
                 query = f"CREATE INDEX {self.client.quoted_id(index_name)} ON {self.client.quoted_id(table_name)} ({self.client.quoted_id(column_name)})"
                 self.client.create_index(query)
             else:
@@ -203,12 +205,12 @@ class SQLBackend:
                         "field": column_name, "data_type": column_type,
                     })
                     name = f"{table_name}_json_{i}"
-                    query = f"CREATE INDEX {self.client.quoted_id(name)} ON {self.client.quoted_id(table_name)} (({index_str_fmt}))"
+                    query = f"CREATE INDEX {self.client.quoted_id(name)} ON {self.client.quoted_id(table_name)} {index_str_fmt}"
                     self.client.create_index(query)
 
         for i, custom in enumerate(self.sql_indexes.get(table_name, {}).get("custom", []), start=1):
             name = f"{table_name}_custom_{i}"
-            query = f"CREATE INDEX {self.client.quoted_id(name)} ON {self.client.quoted_id(table_name)} (({custom}))"
+            query = f"CREATE INDEX {self.client.quoted_id(name)} ON {self.client.quoted_id(table_name)} {custom}"
             self.client.create_index(query)
 
     def create_indexes(self):
@@ -299,8 +301,12 @@ class SQLBackend:
             if data_type == old_data_type:
                 return
 
-            query = f"ALTER TABLE {self.client.quoted_id(table_name)} " \
-                    f"MODIFY COLUMN {self.client.quoted_id(col_name)} {data_type}"
+            if self.client.dialect == "mysql":
+                query = f"ALTER TABLE {self.client.quoted_id(table_name)} " \
+                        f"MODIFY COLUMN {self.client.quoted_id(col_name)} {data_type}"
+            else:
+                query = f"ALTER TABLE {self.client.quoted_id(table_name)} " \
+                        f"ALTER COLUMN {self.client.quoted_id(col_name)} TYPE {data_type}"
             with self.client.engine.connect() as conn:
                 conn.execute(query)
 
@@ -317,9 +323,28 @@ class SQLBackend:
                 for row in self.client.search(table_name, ["doc_id", col_name])
             }
 
-            # to change the storage format of a JSON column, drop the column and
-            # add the column back specifying the new storage format
             with self.client.engine.connect() as conn:
+                # mysql will raise error if dropping column which has functional index,
+                # hence the associated index must be dropped first
+                if self.client.dialect == "mysql":
+                    for idx in conn.execute(
+                        text(
+                            "SELECT index_name "
+                            "FROM information_schema.statistics "
+                            "WHERE table_name = :table_name "
+                            "AND index_name LIKE :index_name '%' "
+                            "AND expression LIKE '%' :col_name '%';"
+                        ),
+                        {
+                            "table_name": table_name,
+                            "index_name": f"{table_name}_json_",
+                            "col_name": col_name
+                        },
+                    ):
+                        conn.execute(f"ALTER TABLE {table_name} DROP INDEX {idx[0]}")
+
+                # to change the storage format of a JSON column, drop the column and
+                # add the column back specifying the new storage format
                 conn.execute(f"ALTER TABLE {self.client.quoted_id(table_name)} DROP COLUMN {self.client.quoted_id(col_name)}")
                 conn.execute(f"ALTER TABLE {self.client.quoted_id(table_name)} ADD COLUMN {self.client.quoted_id(col_name)} {data_type}")
 
@@ -328,8 +353,10 @@ class SQLBackend:
 
             # pre-populate the modified column
             for doc_id, value in values.items():
-                if value and "v" in value and value["v"]:
+                if self.client.dialect == "mysql" and value and value.get("v", []):
                     new_value = value["v"][0]
+                elif self.client.dialect == "pgsql" and value:
+                    new_value = value[0]
                 else:
                     new_value = ""
                 self.client.update(table_name, doc_id, {col_name: new_value})
@@ -342,6 +369,7 @@ class SQLBackend:
             ("jansClnt", "jansLogoutURI"),
             ("jansPerson", "role"),
             ("jansPerson", "mobile"),
+            ("jansPerson", "jansPersistentJWT"),
             ("jansCustomScr", "jansAlias"),
             ("jansClnt", "jansReqURI"),
             ("jansClnt", "jansClaimRedirectURI"),
@@ -357,6 +385,27 @@ class SQLBackend:
             ("jansUmaPCT", "dpop"),
             ("jansClnt", "o"),
             ("jansClnt", "jansGrp"),
+            ("jansScope", "creatorId"),
+            ("jansScope", "creatorTyp"),
+            ("jansScope", "creatorAttrs"),
+            ("jansScope", "creationDate"),
+            ("jansStatEntry", "jansData"),
+            ("jansSessId", "deviceSecret"),
+            ("jansSsa", "jansState"),
+            ("jansClnt", "jansClntURILocalized"),
+            ("jansClnt", "jansLogoURILocalized"),
+            ("jansClnt", "jansPolicyURILocalized"),
+            ("jansClnt", "jansTosURILocalized"),
+            ("jansClnt", "displayNameLocalized"),
+            ("jansFido2AuthnEntry", "jansApp"),
+            ("jansFido2AuthnEntry", "jansCodeChallengeHash"),
+            ("jansFido2AuthnEntry", "exp"),
+            ("jansFido2AuthnEntry", "del"),
+            ("jansFido2RegistrationEntry", "jansApp"),
+            ("jansFido2RegistrationEntry", "jansPublicKeyIdHash"),
+            ("jansFido2RegistrationEntry", "jansDeviceData"),
+            ("jansFido2RegistrationEntry", "exp"),
+            ("jansFido2RegistrationEntry", "del"),
         ]:
             add_column(mod[0], mod[1])
 
@@ -396,6 +445,13 @@ class SQLBackend:
             ("jansU2fReq", "jansReq"),
             ("jansFido2AuthnEntry", "jansAuthData"),
             ("jansFido2RegistrationEntry", "jansCodeChallengeHash"),
+            ("agmFlowRun", "agFlowEncCont"),
+            ("agmFlowRun", "agFlowSt"),
+            ("agmFlowRun", "jansCustomMessage"),
+            ("agmFlow", "agFlowMeta"),
+            ("agmFlow", "agFlowTrans"),
+            ("agmFlow", "jansCustomMessage"),
+            ("jansOrganization", "jansCustomMessage"),
         ]:
             change_column_type(mod[0], mod[1])
 
@@ -403,6 +459,10 @@ class SQLBackend:
         for mod in [
             ("jansPerson", "jansMobileDevices"),
             ("jansPerson", "jansOTPDevices"),
+            ("jansToken", "clnId"),
+            ("jansUmaRPT", "clnId"),
+            ("jansUmaPCT", "clnId"),
+            ("jansCibaReq", "clnId"),
         ]:
             column_from_json(mod[0], mod[1])
 

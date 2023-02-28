@@ -38,8 +38,6 @@ import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
-import com.google.common.collect.Lists;
-
 /**
  * @author Mougang T.Gasmyr
  *
@@ -69,6 +67,9 @@ public class ClientService implements Serializable {
 
     @Inject
     transient AppConfiguration appConfiguration;
+
+    @Inject
+    transient ConfigurationService configurationService;
 
     public boolean contains(String clientDn) {
         return persistenceEntryManager.contains(clientDn, Client.class);
@@ -125,19 +126,26 @@ public class ClientService implements Serializable {
         logger.debug("Search Clients with searchRequest:{}", searchRequest);
 
         Filter searchFilter = null;
-        if (StringUtils.isNotEmpty(searchRequest.getFilter())) {
-            String[] targetArray = new String[] { searchRequest.getFilter() };
-            Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.DISPLAY_NAME, null, targetArray,
-                    null);
-            Filter descriptionFilter = Filter.createSubstringFilter(AttributeConstants.DESCRIPTION, null, targetArray,
-                    null);
-            Filter inumFilter = Filter.createSubstringFilter(AttributeConstants.INUM, null, targetArray, null);
-            searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter, inumFilter);
+        List<Filter> filters = new ArrayList<>();
+        if (searchRequest.getFilterAssertionValue() != null && !searchRequest.getFilterAssertionValue().isEmpty()) {
+
+            for (String assertionValue : searchRequest.getFilterAssertionValue()) {
+                String[] targetArray = new String[] { assertionValue };
+                Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.DISPLAY_NAME, null,
+                        targetArray, null);
+                Filter descriptionFilter = Filter.createSubstringFilter(AttributeConstants.DESCRIPTION, null,
+                        targetArray, null);
+                Filter inumFilter = Filter.createSubstringFilter(AttributeConstants.INUM, null, targetArray, null);
+                filters.add(Filter.createORFilter(displayNameFilter, descriptionFilter, inumFilter));
+            }
+            searchFilter = Filter.createORFilter(filters);
         }
+
+        logger.debug("Clients searchFilter:{}", searchFilter);
 
         return persistenceEntryManager.findPagedEntries(getDnForClient(null), Client.class, searchFilter, null,
                 searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
-                searchRequest.getStartIndex() - 1, searchRequest.getCount(), searchRequest.getMaxCount());
+                searchRequest.getStartIndex(), searchRequest.getCount(), searchRequest.getMaxCount());
 
     }
 
@@ -192,7 +200,7 @@ public class ClientService implements Serializable {
             return client;
         }
 
-        logger.debug("client.getApplicationType:{}, client.getRedirectUris():{}, client.getClaimRedirectUris():{}",
+        logger.trace("client.getApplicationType:{}, client.getRedirectUris():{}, client.getClaimRedirectUris():{}",
                 client.getApplicationType(), client.getRedirectUris(), client.getClaimRedirectUris());
 
         List<String> redirectUris = client.getRedirectUris() != null ? Arrays.asList(client.getRedirectUris()) : null;
@@ -207,6 +215,9 @@ public class ClientService implements Serializable {
             claimsRedirectUris = new ArrayList<>(new HashSet<>(claimsRedirectUris)); // Remove repeated elements
             client.setClaimRedirectUris(claimsRedirectUris.toArray(new String[0]));
         }
+        logger.trace(
+                "After setting client.getApplicationType:{}, client.getRedirectUris():{}, client.getClaimRedirectUris():{}",
+                client.getApplicationType(), client.getRedirectUris(), client.getClaimRedirectUris());
 
         client.setApplicationType(
                 client.getApplicationType() != null ? client.getApplicationType() : ApplicationType.WEB);
@@ -215,14 +226,14 @@ public class ClientService implements Serializable {
             client.setSectorIdentifierUri(client.getSectorIdentifierUri());
         }
 
-        logger.debug("client.getResponseTypes():{}, client.getGrantTypes():{}", client.getResponseTypes(),
-                client.getGrantTypes());
+        logger.trace("client.getApplicationType():{}, client.getResponseTypes():{}, client.getGrantTypes():{}",
+                client.getApplicationType(), client.getResponseTypes(), client.getGrantTypes());
         Set<ResponseType> responseTypeSet = client.getResponseTypes() != null
                 ? new HashSet<>(Arrays.asList(client.getResponseTypes()))
-                : null;
+                : new HashSet<>();
         Set<GrantType> grantTypeSet = client.getGrantTypes() != null
                 ? new HashSet<>(Arrays.asList(client.getGrantTypes()))
-                : null;
+                : new HashSet<>();
 
         if (isTrue(appConfiguration.getGrantTypesAndResponseTypesAutofixEnabled())) {
             if (isTrue(appConfiguration.getClientRegDefaultToCodeFlowWithRefresh())) {
@@ -248,11 +259,13 @@ public class ClientService implements Serializable {
 
         responseTypeSet.retainAll(appConfiguration.getAllResponseTypesSupported());
         grantTypeSet.retainAll(appConfiguration.getGrantTypesSupported());
+        logger.trace("After setting - client.getResponseTypes():{}, client.getGrantTypes():{}",
+                client.getResponseTypes(), client.getGrantTypes());
 
         Set<GrantType> dynamicGrantTypeDefault = appConfiguration.getDynamicGrantTypeDefault();
         grantTypeSet.retainAll(dynamicGrantTypeDefault);
 
-        if (!update || !responseTypeSet.isEmpty()) {
+        if (!update || (responseTypeSet != null && !responseTypeSet.isEmpty())) {
             client.setResponseTypes(responseTypeSet.toArray(new ResponseType[0]));
         }
         if (!update || (isTrue(appConfiguration.getEnableClientGrantTypeUpdate()))
@@ -260,7 +273,7 @@ public class ClientService implements Serializable {
             client.setGrantTypes(grantTypeSet.toArray(new GrantType[0]));
         }
 
-        logger.debug("Set client.getResponseTypes():{}, client.getGrantTypes():{}", client.getResponseTypes(),
+        logger.trace("Set client.getResponseTypes():{}, client.getGrantTypes():{}", client.getResponseTypes(),
                 client.getGrantTypes());
         List<String> contacts = client.getContacts() != null ? Arrays.asList(client.getContacts()) : null;
         if (contacts != null && !contacts.isEmpty()) {
@@ -268,13 +281,13 @@ public class ClientService implements Serializable {
             client.setContacts(contacts.toArray(new String[0]));
         }
 
-        logger.debug("client.getTokenEndpointAuthMethod():{}", client.getTokenEndpointAuthMethod());
+        logger.trace("client.getTokenEndpointAuthMethod():{}", client.getTokenEndpointAuthMethod());
         if (StringUtils.isBlank(client.getTokenEndpointAuthMethod())) {
             // If omitted, the default is client_secret_basic
             client.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_BASIC.toString());
         }
 
-        logger.debug("client.getDefaultAcrValues():{}", client.getDefaultAcrValues());
+        logger.trace("client.getDefaultAcrValues():{}", client.getDefaultAcrValues());
         List<String> defaultAcrValues = client.getDefaultAcrValues() != null
                 ? Arrays.asList(client.getDefaultAcrValues())
                 : null;
@@ -289,7 +302,8 @@ public class ClientService implements Serializable {
             client.setGroups(new HashSet<>(groups).toArray(new String[0])); // remove duplicates
         }
 
-        logger.debug("client.getGroups():{}, client.getPostLogoutRedirectUris():{}", client.getGroups(), client.getPostLogoutRedirectUris());
+        logger.debug("client.getGroups():{}, client.getPostLogoutRedirectUris():{}", client.getGroups(),
+                client.getPostLogoutRedirectUris());
         List<String> postLogoutRedirectUris = client.getPostLogoutRedirectUris() != null
                 ? Arrays.asList(client.getPostLogoutRedirectUris())
                 : null;
@@ -312,37 +326,11 @@ public class ClientService implements Serializable {
             client.setAuthorizedOrigins(authorizedOrigins.toArray(new String[authorizedOrigins.size()]));
         }
 
-        List<String> scopes = client.getScopes() != null ? Arrays.asList(client.getScopes()) : null;
-        if (grantTypeSet.contains(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS)
-                && !appConfiguration.getDynamicRegistrationAllowedPasswordGrantScopes().isEmpty()) {
-            scopes = Lists.newArrayList(scopes);
-            scopes.retainAll(appConfiguration.getDynamicRegistrationAllowedPasswordGrantScopes());
-        }
-        List<String> scopesDn;
-        if (scopes != null && !scopes.isEmpty()
-                && isTrue(appConfiguration.getDynamicRegistrationScopesParamEnabled())) {
-            List<String> defaultScopes = scopeService.getDefaultScopesDn();
-            List<String> requestedScopes = scopeService.getScopesDn(scopes);
-            Set<String> allowedScopes = new HashSet<>();
+        logger.debug("client.getScopes():{}, appConfiguration.getDynamicRegistrationScopesParamEnabled():{}",
+                client.getScopes(), appConfiguration.getDynamicRegistrationScopesParamEnabled());
 
-            for (String requestedScope : requestedScopes) {
-                if (defaultScopes.contains(requestedScope)) {
-                    allowedScopes.add(requestedScope);
-                }
-            }
-
-            scopesDn = new ArrayList<>(allowedScopes);
-            client.setScopes(scopesDn.toArray(new String[scopesDn.size()]));
-        } else {
-            scopesDn = scopeService.getDefaultScopesDn();
-            client.setScopes(scopesDn.toArray(new String[scopesDn.size()]));
-        }
-
-        List<String> claims = client.getClaims() != null ? Arrays.asList(client.getClaims()) : null;
-        if (claims != null && !claims.isEmpty()) {
-            List<String> claimsDn = attributeService.getAttributesDn(claims);
-            client.setClaims(claimsDn.toArray(new String[claimsDn.size()]));
-        }
+        logger.debug("client.getClaims():{}, client.getAttributes().getAuthorizedAcrValues():{}", client.getClaims(),
+                client.getAttributes().getAuthorizedAcrValues());
 
         List<String> authorizedAcrValues = client.getAttributes().getAuthorizedAcrValues();
         if (authorizedAcrValues != null && !authorizedAcrValues.isEmpty()) {
@@ -366,8 +354,12 @@ public class ClientService implements Serializable {
 
         // custom object class
         final String customOC = appConfiguration.getDynamicRegistrationCustomObjectClass();
-        if (StringUtils.isNotBlank(customOC)) {
+        String persistenceType = configurationService.getPersistenceType();
+        if (PersistenceEntryManager.PERSITENCE_TYPES.ldap.name().equals(persistenceType)
+                && StringUtils.isNotBlank(customOC)) {
             client.setCustomObjectClasses(new String[] { customOC });
+        } else {
+            client.setCustomObjectClasses(null);
         }
 
         // custom attributes (custom attributes must be in custom object class)
@@ -379,8 +371,7 @@ public class ClientService implements Serializable {
         logger.debug("ClientService::updateCustomAttributes() - client.getCustomAttributes():{}, attrList:{}",
                 client.getCustomAttributes(), attrList);
         for (String attr : attrList) {
-            logger.debug(
-                    "ClientService::updateCustomAttributes() - attr:{}",      attr);
+            logger.debug("ClientService::updateCustomAttributes() - attr:{}", attr);
 
         }
     }

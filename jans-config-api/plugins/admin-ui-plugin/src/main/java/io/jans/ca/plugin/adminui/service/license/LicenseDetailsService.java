@@ -74,7 +74,7 @@ public class LicenseDetailsService {
             auiConfigurationService.setAuiConfiguration(auiConfiguration);
 
             //save license spring credentials
-            AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.CONFIG_DN);
+            AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
             adminConf.getDynamic().setLicenseSpringCredentials(licenseSpringCredentials);
             entryManager.merge(adminConf);
 
@@ -157,7 +157,7 @@ public class LicenseDetailsService {
                 JsonObject entity = response.readEntity(JsonObject.class);
                 if (entity.getString("license_key").equals(licenseRequest.getLicenseKey())) {
                     //save license spring credentials
-                    AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.CONFIG_DN);
+                    AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
                     LicenseSpringCredentials licenseSpringCredentials = adminConf.getDynamic().getLicenseSpringCredentials();
                     licenseSpringCredentials.setLicenseKey(licenseRequest.getLicenseKey());
                     adminConf.getDynamic().setLicenseSpringCredentials(licenseSpringCredentials);

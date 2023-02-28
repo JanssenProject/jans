@@ -9,6 +9,7 @@ package io.jans.orm.ldap.impl;
 import com.unboundid.ldap.sdk.SearchResult;
 import com.unboundid.ldap.sdk.SearchResultEntry;
 import io.jans.orm.model.BatchOperation;
+import io.jans.orm.model.EntryData;
 import io.jans.orm.reflect.property.PropertyAnnotation;
 
 import java.util.ArrayList;
@@ -43,14 +44,12 @@ public class LdapBatchOperationWraper<T> {
         return batchOperation;
     }
 
-    public List<T> createEntities(SearchResult searchResult) {
+    public List<T> createEntities(List<EntryData> entryDataList) {
         if (ldapEntryManager == null) {
             return new ArrayList<T>(0);
         }
-        SearchResultEntry[] searchResultEntry = searchResult.getSearchEntries()
-                .toArray(new SearchResultEntry[searchResult.getSearchEntries().size()]);
 
-        return ldapEntryManager.createEntities(entryClass, propertiesAnnotations, searchResultEntry);
+        return ldapEntryManager.createEntities(entryClass, propertiesAnnotations, entryDataList);
     }
 
 }

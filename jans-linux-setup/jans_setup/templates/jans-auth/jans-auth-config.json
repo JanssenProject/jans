@@ -17,10 +17,10 @@
     "parEndpoint":"https://%(hostname)s/jans-auth/restv1/par",
     "umaConfigurationEndpoint":"https://%(hostname)s/jans-auth/restv1/uma2-configuration",
     "sectorIdentifierEndpoint":"https://%(hostname)s/jans-auth/sectoridentifier",
-    "oxElevenGenerateKeyEndpoint":"https://%(hostname)s/oxeleven/rest/oxeleven/generateKey",
-    "oxElevenSignEndpoint":"https://%(hostname)s/oxeleven/rest/oxeleven/sign",
-    "oxElevenVerifySignatureEndpoint":"https://%(hostname)s/oxeleven/rest/oxeleven/verifySignature",
-    "oxElevenDeleteKeyEndpoint":"https://%(hostname)s/oxeleven/rest/oxeleven/deleteKey",
+    "jansElevenGenerateKeyEndpoint":"https://%(hostname)s/oxeleven/rest/oxeleven/generateKey",
+    "jansElevenSignEndpoint":"https://%(hostname)s/oxeleven/rest/oxeleven/sign",
+    "jansElevenVerifySignatureEndpoint":"https://%(hostname)s/oxeleven/rest/oxeleven/verifySignature",
+    "jansElevenDeleteKeyEndpoint":"https://%(hostname)s/oxeleven/rest/oxeleven/deleteKey",
     "oxElevenJwksEndpoint":"https://%(hostname)s/oxeleven/rest/oxeleven/jwks",
     "backchannelAuthenticationEndpoint":"https://%(hostname)s/jans-auth/restv1/bc-authorize",
     "backchannelDeviceRegistrationEndpoint":"https://%(hostname)s/jans-auth/restv1/bc-deviceRegistration",
@@ -62,7 +62,8 @@
         "client_credentials",
         "refresh_token",
         "urn:ietf:params:oauth:grant-type:uma-ticket",
-        "urn:ietf:params:oauth:grant-type:device_code"
+        "urn:ietf:params:oauth:grant-type:device_code",
+        "urn:ietf:params:oauth:grant-type:token-exchange"
     ],
     "subjectTypesSupported":[
         "public",
@@ -278,7 +279,8 @@
         "client_credentials",
         "refresh_token",
         "urn:ietf:params:oauth:grant-type:uma-ticket",
-        "urn:ietf:params:oauth:grant-type:device_code"
+        "urn:ietf:params:oauth:grant-type:device_code",
+        "urn:ietf:params:oauth:grant-type:token-exchange"
     ],
     "claimsParameterSupported":false,
     "requestParameterSupported":true,
@@ -292,15 +294,14 @@
     "introspectionAccessTokenMustHaveUmaProtectionScope":false,
     "requestUriHashVerificationEnabled": false,
     "idTokenFilterClaimsBasedOnAccessToken": false,
-    "opPolicyUri":"http://www.jans.io/doku.php?id=jans:policy",
-    "opTosUri":"http://www.jans.io/doku.php?id=jans:tos",
+    "opPolicyUri":"https://%(hostname)s/opPolicy",
+    "opTosUri":"https://%(hostname)s/tos",
     "authorizationCodeLifetime":60,
     "refreshTokenLifetime":14400,
     "idTokenLifetime":3600,
     "spontaneousScopeLifetime":86400,
     "accessTokenLifetime":300,
     "umaResourceLifetime":1728000,
-    "sessionAsJwt":false,
     "umaRptLifetime": 3600,
     "umaTicketLifetime": 3600,
     "umaPctLifetime": 1728000,
@@ -315,8 +316,8 @@
     "keyRegenerationEnabled":true,
     "keyRegenerationInterval":48,
     "defaultSignatureAlgorithm":"RS256",
-    "oxOpenIdConnectVersion":"openidconnect-1.0",
-    "oxId":"https://%(hostname)s/oxid/service/jans/inum",
+    "jansOpenIdConnectVersion":"openidconnect-1.0",
+    "jansId":"https://%(hostname)s/oxid/service/jans/inum",
     "dynamicRegistrationExpirationTime":-1,
     "dynamicRegistrationPersistClientAuthorizations":true,
     "trustedClientEnabled":true,
@@ -324,8 +325,8 @@
     "dynamicRegistrationScopesParamEnabled":true,
     "dynamicRegistrationCustomObjectClass":"",
     "personCustomObjectClassList": %(person_custom_object_class_list)s,
-    "persistIdTokenInLdap":false,
-    "persistRefreshTokenInLdap":true,
+    "persistIdToken":false,
+    "persistRefreshToken":true,
     "authenticationFiltersEnabled":false,
     "invalidateSessionCookiesAfterAuthorizationFlow":false,
     "clientAuthenticationFiltersEnabled":false,
@@ -422,6 +423,10 @@
         {
             "paramName": "customParam5",
             "returnInResponse": true
+        },
+        {
+            "paramName": "agama_flow",
+            "returnInResponse": false
         }
     ],
     "legacyDynamicRegistrationScopeParam": false,
@@ -458,7 +463,8 @@
     "ssaConfiguration": {
         "ssaEndpoint":"https://%(hostname)s/jans-auth/restv1/ssa",
         "ssaSigningAlg": "RS256",
-        "ssaExpirationInDays": 30
+        "ssaExpirationInDays": 30,
+        "ssaCustomAttributes": []
     },
     "cibaEndUserNotificationConfig": {
         "apiKey": "",
@@ -491,5 +497,9 @@
         "defaultResponseHeaders": {
             "Cache-Control": "max-age=0, no-store"
         }
+    },
+    "blockWebviewAuthorizationEnabled": false,
+    "dateFormatterPatterns": {
+        "birthdate": "yyyy-MM-dd"
     }
 }

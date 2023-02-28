@@ -227,6 +227,24 @@ public enum RegisterRequestParam {
     DEFAULT_ACR_VALUES("default_acr_values"),
 
     /**
+     * Integer value which sets minimum acr level.
+     */
+    MINIMUM_ACR_LEVEL("minimum_acr_level"),
+
+    /**
+     * Boolean value,
+     * - if false and minimumAcrLevel is higher then current acr_values then reject request
+     * - if true - resolve acr according to either client's minimumAcrPriorityList or AS auth_level_mapping
+     */
+    MINIMUM_ACR_LEVEL_AUTORESOLVE("minimum_acr_level_autoresolve"),
+
+    /**
+     * Array of strings,
+     * - enables client to specify the acr order of preference, rather then just the next lowest integer value
+     */
+    MINIMUM_ACR_PRIORITY_LIST("minimum_acr_priority_list"),
+
+    /**
      * URI using the https scheme that the Authorization Server can call to initiate a login at the Client.
      */
     INITIATE_LOGIN_URI("initiate_login_uri"),
@@ -295,6 +313,47 @@ public enum RegisterRequestParam {
      * list of spontaneous scopes
      */
     SPONTANEOUS_SCOPES("spontaneous_scopes"),
+
+    /**
+     * list of additional audiences
+     */
+    ADDITIONAL_AUDIENCE("additional_audience"),
+
+    /**
+     * list of spontaneous scope script dns
+     */
+    SPONTANEOUS_SCOPE_SCRIPT_DNS("spontaneous_scope_script_dns"),
+
+    /**
+     * list of update token script dns
+     */
+    UPDATE_TOKEN_SCRIPT_DNS("update_token_script_dns"),
+
+    /**
+     * list of post authn script dns
+     */
+    POST_AUTHN_SCRIPT_DNS("post_authn_script_dns"),
+
+    /**
+     * list of consent gathering script dns
+     */
+    CONSENT_GATHERING_SCRIPT_DNS("consent_gathering_script_dns"),
+
+    /**
+     * list of introspection script dns
+     */
+    INTROSPECTION_SCRIPT_DNS("introspection_script_dns"),
+
+    /**
+     * list of rpt claims script dns
+     */
+    RPT_CLAIMS_SCRIPT_DNS("rpt_claims_script_dns"),
+
+    /**
+     * list of ropc script dns
+     */
+    ROPC_SCRIPT_DNS("ropc_script_dns"),
+
 
     /**
      * boolean property which indicates whether to run introspection script and then include claims from result into access_token as JWT

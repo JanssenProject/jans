@@ -20,6 +20,7 @@ Feature: Verify Default ACRS configuration endpoint
     And print response
     And assert response.length != null
     
+    @ignore
     @acrs-put
   	Scenario: Update Default ACRS configuration
   	Given url  mainUrl

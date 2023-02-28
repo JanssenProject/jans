@@ -1,5 +1,64 @@
 # Changelog
 
+## [1.0.7](https://github.com/JanssenProject/jans/compare/jans-bom-v1.0.6...jans-bom-v1.0.7) (2023-02-22)
+
+
+### Features
+
+* add Jupiter+Weld+Mockito+Extension to Fido2 ([#3875](https://github.com/JanssenProject/jans/issues/3875)) ([0152435](https://github.com/JanssenProject/jans/commit/01524358cbd720ad547c6b0d622c2cc32e76a125))
+
+
+### Bug Fixes
+
+* prepare 1.0.7 release ([ce02fd9](https://github.com/JanssenProject/jans/commit/ce02fd9322ab49d5bea4f6e88f316f931e9d2169))
+
+## 1.0.6 (2023-01-09)
+
+
+### Bug Fixes
+
+* add 'java' to the list of restricted variable names [#3533](https://github.com/JanssenProject/jans/issues/3533) ([#3534](https://github.com/JanssenProject/jans/issues/3534)) ([a970d88](https://github.com/JanssenProject/jans/commit/a970d88d81f920973f3ba812db97448f135090a9))
+* **agama:** fix agama auth dependency which blocks build process [#3149](https://github.com/JanssenProject/jans/issues/3149) ([#3244](https://github.com/JanssenProject/jans/issues/3244)) ([8f9fee3](https://github.com/JanssenProject/jans/commit/8f9fee31c66ce08046258694e5e2d83a31e38b5d))
+* getting ready for a release ([0bda832](https://github.com/JanssenProject/jans/commit/0bda832ebc1da7017231deb38fe9aa6c7c51360a))
+* prepare for 1.0.6 release ([9e4c8fb](https://github.com/JanssenProject/jans/commit/9e4c8fb4c0a1ef4779934558e8d8d40d8fedbabf))
+
+
+### Documentation
+
+* prepare for 1.0.4 release ([c23a2e5](https://github.com/JanssenProject/jans/commit/c23a2e505b7eb325a293975d60bbc65d5e367c7d))
+
+## [1.0.5](https://github.com/JanssenProject/jans/compare/jans-bom-v1.0.4...jans-bom-v1.0.5) (2022-12-01)
+
+
+### Bug Fixes
+
+* getting ready for a release ([0bda832](https://github.com/JanssenProject/jans/commit/0bda832ebc1da7017231deb38fe9aa6c7c51360a))
+
+## [1.0.4](https://github.com/JanssenProject/jans/compare/jans-bom-v1.0.3...jans-bom-v1.0.4) (2022-11-08)
+
+
+### Documentation
+
+* prepare for 1.0.4 release ([c23a2e5](https://github.com/JanssenProject/jans/commit/c23a2e505b7eb325a293975d60bbc65d5e367c7d))
+
+## 1.0.3 (2022-11-01)
+
+
+### Features
+
+* **agama:** add utility classes for inbound identity ([#2204](https://github.com/JanssenProject/jans/issues/2204)) ([29f58ee](https://github.com/JanssenProject/jans/commit/29f58ee0e6c84b4af5493cabcb19167bc7ffbe40))
+
+
+### Bug Fixes
+
+* jans-config-api/plugins/sample/helloworld/pom.xml to reduce vulnerabilities ([#972](https://github.com/JanssenProject/jans/issues/972)) ([e2ae05e](https://github.com/JanssenProject/jans/commit/e2ae05e5515dd85a95c0a8520de57f673aba7918))
+* jans-eleven/pom.xml to reduce vulnerabilities ([#2676](https://github.com/JanssenProject/jans/issues/2676)) ([d27a7f9](https://github.com/JanssenProject/jans/commit/d27a7f99f22cb8f4bd445a3400224a38cb91eedc))
+
+
+### Miscellaneous Chores
+
+* release 1.0.2 ([43dead6](https://github.com/JanssenProject/jans/commit/43dead615f3508ca393c330c2db27a8fb9d1017a))
+
 ## 1.0.2 (2022-08-30)
 
 

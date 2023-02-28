@@ -702,7 +702,7 @@ public class AppInitializer {
      * should be more than 0 seconds of interval
      */
     private void initCibaRequestsProcessor() {
-        final Set<FeatureFlagType> featureFlags = appConfiguration.getEnabledFeatureFlags();
+        final Set<FeatureFlagType> featureFlags = FeatureFlagType.from(appConfiguration);
         if ((featureFlags.isEmpty() || featureFlags.contains(FeatureFlagType.CIBA)) && appConfiguration.getBackchannelRequestsProcessorJobIntervalSec() > 0) {
             if (cibaRequestsProcessorJob != null) {
                 cibaRequestsProcessorJob.initTimer();

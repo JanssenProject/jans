@@ -24,7 +24,9 @@ import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.core.model.SearchRequest;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.model.PagedResult;
+
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -60,20 +62,22 @@ public class AgamaResource extends ConfigBaseResource {
     AgamaFlowService agamaFlowService;
 
     @Operation(summary = "Fetches all agama flow.", description = "Fetches all agama flow.", operationId = "get-agama-flows", tags = {
-            "Configuration – Agama Flow" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/agama.readonly" }))
+            "Agama - Configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    ApiAccessConstants.AGAMA_READ_ACCESS, ApiAccessConstants.AGAMA_WRITE_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Agama Flows", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PagedResult.class))),
+            @ApiResponse(responseCode = "200", description = "Agama Flows", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PagedResult.class), examples = @ExampleObject(name = "Response json example", value = "example/agama/agama-get-all.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_READ_ACCESS })
-    public Response getFlows(@DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
-            @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
-            @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
-            @DefaultValue("agFlowQname") @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
-            @DefaultValue(ApiConstants.ASCENDING) @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder,
-            @DefaultValue("false") @QueryParam(value = ApiConstants.INCLUDE_SOURCE) boolean includeSource) {
+    @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.AGAMA_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    public Response getFlows(@Parameter(description = "Search pattern") @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
+            @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
+            @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
+            @Parameter(description = "Attribute whose value will be used to order the returned response") @DefaultValue("agFlowQname") @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
+            @Parameter(description = "Order in which the sortBy param is applied. Allowed values are \"ascending\" and \"descending\"") @DefaultValue(ApiConstants.ASCENDING) @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder,
+            @Parameter(description = "Boolean flag to indicate agama source is to be included") @DefaultValue("false") @QueryParam(value = ApiConstants.INCLUDE_SOURCE) boolean includeSource) {
 
         if (logger.isDebugEnabled()) {
             logger.debug(
@@ -89,17 +93,19 @@ public class AgamaResource extends ConfigBaseResource {
     }
 
     @Operation(summary = "Gets an agama flow based on Qname.", description = "Gets an agama flow based on Qname.", operationId = "get-agama-flow", tags = {
-            "Configuration – Agama Flow" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/agama.readonly" }))
+            "Agama - Configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    ApiAccessConstants.AGAMA_READ_ACCESS, ApiAccessConstants.AGAMA_WRITE_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Agama Flow", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Flow.class))),
+            @ApiResponse(responseCode = "200", description = "Agama Flow", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Flow.class), examples = @ExampleObject(name = "Response json example", value = "example/agama/agama-get.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.AGAMA_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Path(ApiConstants.QNAME_PATH)
-    public Response getFlowByName(@PathParam(ApiConstants.QNAME) @NotNull String flowName,
-            @DefaultValue("false") @QueryParam(value = ApiConstants.INCLUDE_SOURCE) boolean includeSource) {
+    public Response getFlowByName(@Parameter(description = "Agama Flow name") @PathParam(ApiConstants.QNAME) @NotNull String flowName,
+            @Parameter(description = "Boolean flag to indicate agama source is to be included")  @DefaultValue("false") @QueryParam(value = ApiConstants.INCLUDE_SOURCE) boolean includeSource) {
         if (logger.isDebugEnabled()) {
             logger.debug("Search Agama with flowName:{}, includeSource:{}", escapeLog(flowName),
                     escapeLog(includeSource));
@@ -113,15 +119,16 @@ public class AgamaResource extends ConfigBaseResource {
     }
 
     @Operation(summary = "Create a new agama flow", description = "Create a new agama flow", operationId = "post-agama-flow", tags = {
-            "Configuration – Agama Flow" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/agama.write" }))
-    @RequestBody(description = "Agama Flow", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Flow.class), examples = @ExampleObject(name = "Request json example" , value ="{\"source\":\"Flow test\\n\\tBasepath \\\"hello\\\"\\n\\nin = { name: \\\"John\\\" }\\nRRF \\\"index.ftlh\\\" in\\n\\nLog \\\"Done!\\\"\\nFinish \\\"john_doe\\\"\",\"qname\":\"test\"}")))
+            "Agama - Configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    ApiAccessConstants.AGAMA_WRITE_ACCESS }))
+    @RequestBody(description = "Agama Flow", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Flow.class), examples = @ExampleObject(name = "Request example", value = "example/agama/agama.json")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Flow.class))),
+            @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Flow.class), examples = @ExampleObject(name = "Response example", value = "example/agama/agama.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
-    @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_WRITE_ACCESS }, superScopes = {
+            ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response createFlow(@Valid Flow flow)
             throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         logger.debug(" Flow to be added flow:{}, flow.getQName():{}, flow.getSource():{} ", flow, flow.getQname(),
@@ -131,7 +138,7 @@ public class AgamaResource extends ConfigBaseResource {
         Flow existingFlow = findFlow(flow.getQname(), false);
         logger.debug(" existingFlow:{}", existingFlow);
         if (existingFlow != null) {
-            thorwBadRequestException("Flow identified by name '" + flow.getQname() + "' already exists!");
+            throwBadRequestException("Flow identified by name '" + flow.getQname() + "' already exists!");
         }
 
         // validate flow data
@@ -143,20 +150,49 @@ public class AgamaResource extends ConfigBaseResource {
         return Response.status(Response.Status.CREATED).entity(minimize(flow, false)).build();
     }
 
-    @Operation(summary = "Create a new agama flow from source", description = "Create a new agama flow from source.", operationId = "post-agama-flow-from-source", tags = {
-            "Configuration – Agama Flow" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/agama.write" }))
-    @RequestBody(description = "Agama Flow", content = @Content(mediaType = MediaType.TEXT_PLAIN, schema = @Schema(implementation = String.class)))
+    @Operation(summary = "Determine if the text passed is valid Agama code", description = "Determine if the text passed is valid Agama code", operationId = "agama-syntax-check", tags = {
+            "Agama - Configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    ApiAccessConstants.AGAMA_READ_ACCESS, ApiAccessConstants.AGAMA_WRITE_ACCESS,
+                    ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Flow.class))),
+            @ApiResponse(responseCode = "200", description = "Agama Syntax Check message", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Exception.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
+    @POST
+    @Consumes(MediaType.TEXT_PLAIN)
+    @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.AGAMA_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    @Path("/syntax-check/" + ApiConstants.QNAME_PATH)
+    public Response doSyntaxCheck(@Parameter(description = "Agama Flow name") @PathParam(ApiConstants.QNAME) String qname, String source) {
+
+        Exception e = null;
+        try {
+            Transpiler.runSyntaxCheck(qname, source);
+            e = new TranspilerException("");
+        } catch (SyntaxException | TranspilerException te) {
+            logger.info("Syntax check failed");
+            e = te;
+        }
+        e.setStackTrace(new StackTraceElement[0]);
+        return Response.ok().entity(e).build();
+
+    }
+
+    @Operation(summary = "Create a new agama flow from source", description = "Create a new agama flow from source.", operationId = "post-agama-flow-from-source", tags = {
+            "Agama - Configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    ApiAccessConstants.AGAMA_WRITE_ACCESS }))
+    @RequestBody(description = "Agama Flow", content = @Content(mediaType = MediaType.TEXT_PLAIN, schema = @Schema(implementation = String.class), examples = @ExampleObject(name = "Request example", value = "example/agama/test-agama-source.json")))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Flow.class), examples = @ExampleObject(name = "Response example", value = "example/agama/agama.json"))),
             @ApiResponse(responseCode = "400", description = "Bad Request"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
     @Consumes(MediaType.TEXT_PLAIN)
     @Path(ApiConstants.QNAME_PATH)
-    @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_WRITE_ACCESS })
-    public Response createFlowFromSource(@PathParam(ApiConstants.QNAME) @NotNull String flowName, @Valid String source)
+    @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_WRITE_ACCESS }, superScopes = {
+            ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+    public Response createFlowFromSource(@Parameter(description = "Agama Flow name") @PathParam(ApiConstants.QNAME) @NotNull String flowName, @Valid String source)
             throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         logger.debug(" Flow to be created flowName:{}, source:{}", flowName, source);
 
@@ -167,7 +203,7 @@ public class AgamaResource extends ConfigBaseResource {
         Flow existingFlow = findFlow(decodedFlowName, false);
         logger.debug(" existing-flow:{}", existingFlow);
         if (existingFlow != null) {
-            thorwBadRequestException("Flow identified by name '" + decodedFlowName + "' already exists!");
+            throwBadRequestException("Flow identified by name '" + decodedFlowName + "' already exists!");
         }
 
         Flow flow = new Flow();
@@ -185,19 +221,20 @@ public class AgamaResource extends ConfigBaseResource {
     }
 
     @Operation(summary = "Update agama flow from source file", description = "Update agama flow from source file.", operationId = "put-agama-flow-from-source", tags = {
-            "Configuration – Agama Flow" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/agama.write" }))
-    @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.TEXT_PLAIN, schema = @Schema(implementation = String.class)))
+            "Agama - Configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    ApiAccessConstants.AGAMA_WRITE_ACCESS }))
+    @RequestBody(description = "String representing patch-document.", content = @Content(mediaType = MediaType.TEXT_PLAIN, schema = @Schema(implementation = String.class), examples = @ExampleObject(name = "Request example", value = "example/agama/test-agama-source.json")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Flow.class))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Flow.class), examples = @ExampleObject(name = "Response example", value = "example/agama/agama.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PUT
     @Consumes(MediaType.TEXT_PLAIN)
     @Path(ApiConstants.SOURCE + ApiConstants.QNAME_PATH)
-    @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_WRITE_ACCESS })
-    public Response updateFlowSource(@PathParam(ApiConstants.QNAME) @NotNull String flowName, @Valid String source)
+    @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_WRITE_ACCESS }, superScopes = {
+            ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+    public Response updateFlowSource(@Parameter(description = "Agama Flow name") @PathParam(ApiConstants.QNAME) @NotNull String flowName, @Valid String source)
             throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         logger.debug(" Flow to be updated flowName:{}, source:{}", flowName, source);
 
@@ -221,19 +258,20 @@ public class AgamaResource extends ConfigBaseResource {
     }
 
     @Operation(summary = "Partially modify a Agama Flow", description = "Partially modify a Agama Flow", operationId = "patch-agama-flow", tags = {
-            "Configuration – Agama Flow" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/agama.write" }))
-    @RequestBody(description = "JsonPatch object", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class))))
+            "Agama - Configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    ApiAccessConstants.AGAMA_WRITE_ACCESS }))
+    @RequestBody(description = "JsonPatch object", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, array = @ArraySchema(schema = @Schema(implementation = JsonPatch.class)), examples = @ExampleObject(name = "Request example", value = "example/agama/agama-patch.json")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Patched Agama Flow", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Flow.class))),
+            @ApiResponse(responseCode = "200", description = "Patched Agama Flow", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Flow.class), examples = @ExampleObject(name = "Response example", value = "example/agama/agama.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON_PATCH_JSON)
     @Path(ApiConstants.QNAME_PATH)
-    @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_WRITE_ACCESS })
-    public Response patchFlow(@PathParam(ApiConstants.QNAME) @NotNull String flowName, @NotNull JsonPatch jsonPatch)
+    @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_WRITE_ACCESS }, superScopes = {
+            ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+    public Response patchFlow(@Parameter(description = "Agama Flow name") @PathParam(ApiConstants.QNAME) @NotNull String flowName, @NotNull JsonPatch jsonPatch)
             throws JsonPatchException, IOException, NoSuchMethodException, IllegalAccessException,
             InvocationTargetException {
         if (logger.isDebugEnabled()) {
@@ -259,16 +297,17 @@ public class AgamaResource extends ConfigBaseResource {
     }
 
     @Operation(summary = "Deletes an agama flow based on Qname", description = "Deletes an agama flow based on Qname", operationId = "delete-agama-flow", tags = {
-            "Configuration – Agama Flow" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    "https://jans.io/oauth/config/agama.delete" }))
+            "Agama - Configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    ApiAccessConstants.AGAMA_DELETE_ACCESS }))
     @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "No Content"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @DELETE
     @Path(ApiConstants.QNAME_PATH)
-    @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_DELETE_ACCESS })
-    public Response delete(@PathParam(ApiConstants.QNAME) @NotNull String flowName) {
+    @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_DELETE_ACCESS }, superScopes = {
+            ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
+    public Response delete(@Parameter(description = "Agama Flow name") @PathParam(ApiConstants.QNAME) @NotNull String flowName) {
         logger.debug(" Flow to delete - flowName:{}", flowName);
         String decodedFlowName = getURLDecodedValue(flowName);
         logger.trace(" Agama Decoded flow name is:{}", decodedFlowName);
@@ -284,6 +323,9 @@ public class AgamaResource extends ConfigBaseResource {
         Flow flow = null;
         try {
             flow = agamaFlowService.getFlowByName(flowName);
+            if (flow == null && throwError) {
+                throw new NotFoundException(getNotFoundError("Flow - '" + flowName + "'"));
+            }
         } catch (EntryPersistenceException e) {
             logger.error("No flow found with the name:{} ", flowName);
             if (throwError) {
@@ -305,7 +347,7 @@ public class AgamaResource extends ConfigBaseResource {
         String validateMsg = agamaFlowService.validateFlowFields(flow, checkNonMandatoryFields);
         logger.debug("Agama Flow to be validation msg:{} ", validateMsg);
         if (StringUtils.isNotBlank(validateMsg)) {
-            thorwBadRequestException(validateMsg);
+            throwBadRequestException(validateMsg);
         }
 
         // validate syntax
@@ -323,7 +365,7 @@ public class AgamaResource extends ConfigBaseResource {
         } catch (SyntaxException | TranspilerException e) {
             logger.error("Transpiler exception", e);
             e.setStackTrace(new StackTraceElement[0]);
-            thorwBadRequestException(e);
+            throwBadRequestException(e);
         }
     }
 
@@ -397,12 +439,15 @@ public class AgamaResource extends ConfigBaseResource {
     }
 
     private Flow minimize(Flow flow, boolean includeSource) {
-
+        if (flow == null) {
+            return flow;
+        }
         flow.setTranspiled(null);
         flow.setTransHash(null);
         if (!includeSource) {
             flow.setSource(null);
         }
+
         return flow;
 
     }

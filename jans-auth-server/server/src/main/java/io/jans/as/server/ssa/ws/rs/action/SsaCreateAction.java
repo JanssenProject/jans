@@ -6,16 +6,15 @@
 
 package io.jans.as.server.ssa.ws.rs.action;
 
-import io.jans.as.client.SsaRequest;
+import io.jans.as.client.ssa.create.SsaCreateRequest;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.model.ssa.Ssa;
-import io.jans.as.common.service.AttributeService;
+import io.jans.as.common.model.ssa.SsaState;
 import io.jans.as.common.service.common.InumService;
 import io.jans.as.model.common.CreatorType;
 import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.config.Constants;
 import io.jans.as.model.config.StaticConfiguration;
-import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.jwt.Jwt;
@@ -38,13 +37,15 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.SecurityContext;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
 import java.util.*;
 import java.util.function.Function;
 
+/**
+ * Provides required methods to create a new SSA considering all required conditions.
+ */
 @Stateless
 @Named
 public class SsaCreateAction {
@@ -71,64 +72,80 @@ public class SsaCreateAction {
     private AppConfiguration appConfiguration;
 
     @Inject
-    private AttributeService attributeService;
-
-    @Inject
     private ModifySsaResponseService modifySsaResponseService;
 
     @Inject
     private SsaRestWebServiceValidator ssaRestWebServiceValidator;
 
     @Inject
-    private WebKeysConfiguration webKeysConfiguration;
-
-    @Inject
     private SsaContextBuilder ssaContextBuilder;
 
-    public Response create(String requestParams, HttpServletRequest httpRequest, SecurityContext securityContext) {
+    /**
+     * Creates an SSA from the requested parameters.
+     * <p>
+     * Method will return a {@link WebApplicationException} with status {@code 401} if this functionality is not enabled,
+     * request has to have at least scope "ssa.admin",
+     * it will also return a {@link WebApplicationException} with status {@code 500} in case an uncontrolled
+     * error occurs when processing the method.
+     * <p/>
+     * <p>
+     * Response of this method can be modified using the following custom script
+     * <a href="https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/extension/ssa_modify_response/ssa_modify_response.py">SSA Custom Script</a>,
+     * method create.
+     * </p>
+     * <p>
+     * SSA returned by this method is stored in the corresponding database, so it can be later retrieved, validated or revoked.
+     * <p/>
+     *
+     * @param requestParams Valid json request
+     * @param httpRequest   Http request
+     * @return {@link Response} with status {@code 201} (Created) and response body containing the SSA in JWT format.
+     */
+    public Response create(String requestParams, HttpServletRequest httpRequest) {
         errorResponseFactory.validateFeatureEnabled(FeatureFlagType.SSA);
         Response.ResponseBuilder builder = Response.status(Response.Status.CREATED);
         try {
             JSONObject jsonRequest = new JSONObject(requestParams);
-            final SsaRequest ssaRequest = SsaRequest.fromJson(jsonRequest);
-            log.debug("Attempting to create ssa: {}", ssaRequest);
+            final SsaCreateRequest ssaCreateRequest = SsaCreateRequest.fromJson(jsonRequest);
+            log.debug("Attempting to create ssa: {}", ssaCreateRequest);
+            log.trace("Ssa request = {}", requestParams);
 
             String ssaBaseDN = staticConfiguration.getBaseDn().getSsa();
             String inum = inumService.generateDefaultId();
-            Client client = ssaRestWebServiceValidator.validateClient();
+            Client client = ssaRestWebServiceValidator.getClientFromSession();
             ssaRestWebServiceValidator.checkScopesPolicy(client, SsaScopeType.SSA_ADMIN.getValue());
 
             final Date creationDate = new Date();
-            final Date expirationDate = getExpiration(ssaRequest);
+            final Date expirationDate = getExpiration(ssaCreateRequest);
 
             final Ssa ssa = new Ssa();
             ssa.setDn("inum=" + inum + "," + ssaBaseDN);
             ssa.setId(inum);
             ssa.setDeletable(true);
-            ssa.setOrgId(ssaRequest.getOrgId() != null ? ssaRequest.getOrgId().toString() : null); // should orgId be long or string? e.g. guid as orgId sounds common
+            ssa.setOrgId(ssaCreateRequest.getOrgId());
             ssa.setExpirationDate(expirationDate);
             ssa.setTtl(ServerUtil.calculateTtl(creationDate, expirationDate));
-            ssa.setDescription(ssaRequest.getDescription());
-            ssa.getAttributes().setSoftwareId(ssaRequest.getSoftwareId());
-            ssa.getAttributes().setSoftwareRoles(ssaRequest.getSoftwareRoles());
-            ssa.getAttributes().setGrantTypes(ssaRequest.getGrantTypes());
+            ssa.setDescription(ssaCreateRequest.getDescription());
+            ssa.getAttributes().setSoftwareId(ssaCreateRequest.getSoftwareId());
+            ssa.getAttributes().setSoftwareRoles(ssaCreateRequest.getSoftwareRoles());
+            ssa.getAttributes().setGrantTypes(ssaCreateRequest.getGrantTypes());
             ssa.getAttributes().setCustomAttributes(getCustomAttributes(jsonRequest));
             ssa.getAttributes().setClientDn(client.getDn());
-            ssa.getAttributes().setOneTimeUse(ssaRequest.getOneTimeUse());
-            ssa.getAttributes().setRotateSsa(ssaRequest.getRotateSsa());
+            ssa.getAttributes().setOneTimeUse(ssaCreateRequest.getOneTimeUse());
+            ssa.getAttributes().setRotateSsa(ssaCreateRequest.getRotateSsa());
             ssa.setCreatorType(CreatorType.CLIENT);
+            ssa.setState(SsaState.ACTIVE);
             ssa.setCreatorId(client.getClientId());
-
             ssa.setCreationDate(creationDate);
-            ssaService.persist(ssa);
-            log.info("Ssa created: {}", ssa);
 
-            ModifySsaResponseContext context = ssaContextBuilder.buildModifySsaResponseContext(httpRequest, null, client, appConfiguration, attributeService);
+            ModifySsaResponseContext context = ssaContextBuilder.buildModifySsaResponseContext(httpRequest, client);
             Function<JsonWebResponse, Void> postProcessor = modifySsaResponseService.buildCreateProcessor(context);
             final ExecutionContext executionContext = context.toExecutionContext();
             executionContext.setPostProcessor(postProcessor);
 
-            Jwt jwt = ssaService.generateJwt(ssa, executionContext, webKeysConfiguration, null);
+            Jwt jwt = ssaService.generateJwt(ssa, executionContext);
+            ssaService.persist(ssa);
+            log.info("Ssa created: {}", ssa);
             JSONObject jsonResponse = ssaJsonService.getJSONObject(jwt.toString());
             builder.entity(ssaJsonService.jsonObjectToString(jsonResponse));
 
@@ -149,6 +166,15 @@ public class SsaCreateAction {
         return builder.build();
     }
 
+    /**
+     * Get custom attributes from a request, previously configured in SSA global parameters.
+     * <p>
+     * Method prints the warning type in case a request parameter does not exist in the SSA model or SSA global parameter settings.
+     * </p>
+     *
+     * @param jsonRequest Valid json request
+     * @return Map containing all custom attributes where key is the attribute name.
+     */
     private Map<String, String> getCustomAttributes(JSONObject jsonRequest) {
         if (appConfiguration.getSsaConfiguration().getSsaCustomAttributes().isEmpty())
             return new HashMap<>();
@@ -179,10 +205,20 @@ public class SsaCreateAction {
         return customAttributes;
     }
 
-    private Date getExpiration(SsaRequest ssaRequest) {
+    /**
+     * Get request expiration date using UTC timezone.
+     * <p>
+     * Method converts from epoch time to Date or generates a date based on the global SSA setting when the Date field
+     * of the request is null.
+     * </p>
+     *
+     * @param ssaCreateRequest Request of SSA
+     * @return Respective new Date instance.
+     */
+    private Date getExpiration(SsaCreateRequest ssaCreateRequest) {
         Calendar calendar = GregorianCalendar.getInstance(TimeZone.getTimeZone("UTC"));
-        if (ssaRequest.getExpiration() != null && ssaRequest.getExpiration() > 0) {
-            calendar.setTimeInMillis(ssaRequest.getExpiration() * 1000L);
+        if (ssaCreateRequest.getExpiration() != null && ssaCreateRequest.getExpiration() > 0) {
+            calendar.setTimeInMillis(ssaCreateRequest.getExpiration() * 1000L);
             return calendar.getTime();
         }
         calendar.add(Calendar.DATE, appConfiguration.getSsaConfiguration().getSsaExpirationInDays());

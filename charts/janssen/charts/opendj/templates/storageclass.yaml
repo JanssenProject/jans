@@ -1,4 +1,3 @@
-
 {{- if or (eq .Values.global.cnPersistenceType "ldap") (eq .Values.global.cnPersistenceType "hybrid") }}
 apiVersion: storage.k8s.io/v1
 kind: StorageClass

@@ -37,4 +37,14 @@ public class DummyModifySsaResponseType implements ModifySsaResponseType {
     public boolean create(Object jwr, Object tokenContext) {
         return false;
     }
+
+    @Override
+    public boolean get(Object jsonArray, Object ssaContext) {
+        return true;
+    }
+
+    @Override
+    public boolean revoke(Object ssaList, Object ssaContext) {
+        return false;
+    }
 }

@@ -1,0 +1,10 @@
+{
+    "dn": "agFlowQname=test,ou=flows,ou=agama,o=jans",
+    "qname": "test",
+    "revision": -1,
+    "enabled": false,
+    "metadata": {
+        "timestamp": 1666786067495
+    },
+    "baseDn": "agFlowQname=test,ou=flows,ou=agama,o=jans"
+}

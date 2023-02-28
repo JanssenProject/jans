@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>io.jans</groupId>
 	<artifactId>jans-config-api-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>1.0.3-SNAPSHOT</version>
+	<version>1.0.8-SNAPSHOT</version>
 	<name>jans-config-api-parent</name>
 
 	<distributionManagement>
@@ -31,8 +29,8 @@
 		<jans.version>${project.version}</jans.version>
 
 		<jackson.version>2.13.2</jackson.version>
-		<jetty.version>11.0.8</jetty.version>
-		<weld.version>4.0.3.Final</weld.version>
+		<jetty.version>11.0.10</jetty.version>
+		<weld.version>4.0.3.Final</weld.version>	
 
 		<microprofile.config.version>3.0.1</microprofile.config.version>
 		<microprofile.health.version>4.0</microprofile.health.version>
@@ -43,12 +41,13 @@
 		<smallrye.metrics.version>4.0.0-RC1</smallrye.metrics.version>
 		<org.jboss.resteasy.client.microprofile.version>4.7.5.Final</org.jboss.resteasy.client.microprofile.version>
 
-		<rest-assured.version>4.3.3</rest-assured.version>
+		<rest-assured.version>5.0.1</rest-assured.version>
 		<karate.version>0.9.5</karate.version>
+		<snake.version>1.33</snake.version>
 		<jupiter.version>5.7.0</jupiter.version>
 		<cucumber.version>3.8.0</cucumber.version>
 		<jacoco.version>0.8.5</jacoco.version>
-		<swagger.version>2.2.2</swagger.version>
+		<swagger.version>2.2.7</swagger.version>
 
 		<sonar.projectKey>JanssenProject_jans-config-api</sonar.projectKey>
 		<sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
@@ -210,17 +209,6 @@
 			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
-				<artifactId>jans-client-api</artifactId>
-				<version>${jans.version}</version>
-				<exclusions>
-					<exclusion>
-						<artifactId>org.jboss.resteasy</artifactId>
-						<groupId>*</groupId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-			<dependency>
-				<groupId>io.jans</groupId>
 				<artifactId>jans-orm-annotation</artifactId>
 				<version>${jans.version}</version>
 			</dependency>
@@ -245,12 +233,12 @@
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
 				<artifactId>bcprov-jdk15on</artifactId>
-				<version>1.67</version>
+				<version>1.69</version>
 			</dependency>
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
 				<artifactId>bcpkix-jdk15on</artifactId>
-				<version>1.67</version>
+				<version>1.69</version>
 			</dependency>
 			<dependency>
 				<groupId>com.nimbusds</groupId>
@@ -346,12 +334,23 @@
 				<artifactId>karate-junit5</artifactId>
 				<version>${karate.version}</version>
 				<scope>test</scope>
+				<exclusions>
+					<exclusion>
+						<artifactId>snakeyaml</artifactId>
+						<groupId>*</groupId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>com.intuit.karate</groupId>
 				<artifactId>karate-apache</artifactId>
 				<version>${karate.version}</version>
 				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.yaml</groupId>
+				<artifactId>snakeyaml</artifactId>
+				<version>${snake.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.junit.jupiter</groupId>
@@ -373,11 +372,11 @@
 			</dependency>
 
 			<!-- Others -->
-			<dependency>
+			<!--<dependency>
 				<groupId>com.github.fge</groupId>
 				<artifactId>json-patch</artifactId>
 				<version>1.9</version>
-			</dependency>
+			</dependency>-->
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-collections4</artifactId>
@@ -395,7 +394,6 @@
 				<artifactId>swagger-core-jakarta</artifactId>
 				<version>${swagger.version}</version>
 			</dependency>
-
 
 		</dependencies>
 	</dependencyManagement>
@@ -571,6 +569,7 @@
 								<outputFormat>YAML</outputFormat>
 								<outputPath>${project.parent.basedir}/docs</outputPath>
 								<prettyPrint>true</prettyPrint>
+								<filterClass>io.jans.configapi.filters.SpecFilter</filterClass>
 							</configuration>
 							<phase>compile</phase>
 							<goals>

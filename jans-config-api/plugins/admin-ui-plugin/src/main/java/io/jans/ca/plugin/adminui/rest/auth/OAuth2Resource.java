@@ -23,13 +23,13 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 @Hidden
-@Path("/admin-ui/oauth2")
+@Path("/app")
 public class OAuth2Resource {
-
-    static final String OAUTH2_CONFIG = "/config";
-    static final String OAUTH2_ACCESS_TOKEN = "/access-token";
-    static final String OAUTH2_API_PROTECTION_TOKEN = "/api-protection-token";
-    static final String OAUTH2_API_USER_INFO = "/user-info";
+    //appType: admin-ui, ads
+    static final String OAUTH2_CONFIG = "/{appType}/oauth2/config";
+    static final String OAUTH2_ACCESS_TOKEN = "/{appType}/oauth2/access-token";
+    static final String OAUTH2_API_PROTECTION_TOKEN = "/{appType}/oauth2/api-protection-token";
+    static final String OAUTH2_API_USER_INFO = "/{appType}/oauth2/user-info";
 
     public static final String SCOPE_OPENID = "openid";
 
@@ -46,9 +46,9 @@ public class OAuth2Resource {
     @Path(OAUTH2_CONFIG)
     @Produces(MediaType.APPLICATION_JSON)
     @ProtectedApi(scopes = {SCOPE_OPENID})
-    public Response getOAuth2Config() {
+    public Response getOAuth2Config(@PathParam("appType") String appType) {
 
-        AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
+        AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration(appType);
 
         OAuth2ConfigResponse oauth2Config = new OAuth2ConfigResponse();
         oauth2Config.setAuthzBaseUrl(auiConfiguration.getAuthServerAuthzBaseUrl());
@@ -67,11 +67,11 @@ public class OAuth2Resource {
     @GET
     @Path(OAUTH2_ACCESS_TOKEN)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAccessToken(@QueryParam("code") String code) {
+    public Response getAccessToken(@QueryParam("code") String code, @PathParam("appType") String appType) {
 
         try {
             log.info("Access token request to Auth Server.");
-            TokenResponse tokenResponse = oAuth2Service.getAccessToken(code);
+            TokenResponse tokenResponse = oAuth2Service.getAccessToken(code, appType);
             log.info("Access token received from Auth Server.");
             return Response.ok(tokenResponse).build();
         } catch (ApplicationException e) {
@@ -86,10 +86,10 @@ public class OAuth2Resource {
     @GET
     @Path(OAUTH2_API_PROTECTION_TOKEN)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getApiProtectionToken(@QueryParam("ujwt") String ujwt) {
+    public Response getApiProtectionToken(@QueryParam("ujwt") String ujwt, @PathParam("appType") String appType) {
         try {
             log.info("Api protection token request to Auth Server.");
-            TokenResponse tokenResponse = oAuth2Service.getApiProtectionToken(ujwt);
+            TokenResponse tokenResponse = oAuth2Service.getApiProtectionToken(ujwt, appType);
             log.info("Api protection token received from Auth Server.");
             return Response.ok(tokenResponse).build();
         } catch (ApplicationException e) {
@@ -104,10 +104,10 @@ public class OAuth2Resource {
     @POST
     @Path(OAUTH2_API_USER_INFO)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getUserInfo(@Valid @NotNull UserInfoRequest userInfoRequest) {
+    public Response getUserInfo(@Valid @NotNull UserInfoRequest userInfoRequest, @PathParam("appType") String appType) {
         try {
             log.info("Get User-Info request to Auth Server.");
-            UserInfoResponse userInfoResponse = oAuth2Service.getUserInfo(userInfoRequest);
+            UserInfoResponse userInfoResponse = oAuth2Service.getUserInfo(userInfoRequest, appType);
             log.info("Get User-Info received from Auth Server.");
             return Response.ok(userInfoResponse).build();
         } catch (ApplicationException e) {

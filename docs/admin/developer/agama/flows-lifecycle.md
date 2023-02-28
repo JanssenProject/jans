@@ -75,8 +75,6 @@ The overriden template `cust_enter_otp.ftlh` would have a form like:
 </form>
 ```
 
-(if `webCtx` is not familiar to you, check [Contextual objects](./flows-lifecycle.md#contextual-objects)).
-
 Ideas for a good experience:
 
 - `SmsOTP` and `EmailOTP` should account for retries in their implementation, e.g. give the user 2-3 opportunities to enter an OTP. This can be parameterized, for instance.

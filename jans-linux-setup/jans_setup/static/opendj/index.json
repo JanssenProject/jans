@@ -243,6 +243,13 @@
     },
 
     {
+        "attribute": "jansPublicKeyIdHash",
+        "type": "integer",
+        "index": ["equality"],
+        "backend": ["userRoot"]
+    },
+
+    {
         "attribute": "jansAttrs",
         "type": "string",
         "index": ["equality"],

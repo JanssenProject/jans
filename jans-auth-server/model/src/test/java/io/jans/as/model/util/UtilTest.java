@@ -20,6 +20,14 @@ import static org.testng.Assert.*;
 public class UtilTest extends BaseTest {
 
     @Test
+    public void putArray_whenListIsNull_shouldNotFail() {
+        JSONObject json = new JSONObject();
+        Util.putArray(json, null, "key");
+
+        assertNull(json.optJSONArray("key"));
+    }
+
+    @Test
     public void putArray_whenListIsNotEmpty_shouldAddArray() {
         JSONObject json = new JSONObject();
         Util.putArray(json, Lists.newArrayList("a"), "key");

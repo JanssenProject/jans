@@ -221,7 +221,7 @@ public final class JwtClaimName {
     public static final String ADDRESS_COUNTRY = "country";
 
     // Custom attributes
-    public static final String OX_OPENID_CONNECT_VERSION = "oxOpenIDConnectVersion";
+    public static final String JANS_OPENID_CONNECT_VERSION = "jansOpenIDConnectVersion";
 
     // CIBA
     public static final String REFRESH_TOKEN_HASH = "urn:openid:params:jwt:claim:rt_hash";

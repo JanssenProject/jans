@@ -1,81 +1,91 @@
 ---
 tags:
-  - administration
-  - installation
-  - vm
-  - ubuntu
+- administration
+- installation
+- vm
+- ubuntu
 ---
 
-# Install Janssen Server using Ubuntu Linux Package
+# Ubuntu Janssen Installation
 
-Janssen Server can be installed using Linux package for Ubuntu
+Before you install, check the [VM system requirements](vm-requirements.md).
 
 ## Supported Versions
 - Ubuntu 20.04
 
-!!! note
-    [SELinux](https://wiki.ubuntu.com/SELinux) should be disabled
+## Install the Package
 
-## System Requirements
-
-System should meet [minimum VM system requirements](vm-requirements.md)
-
-## Prerequisites
-
-- `curl` should be instlled. This can be easily installed using command below
-
- ```
- apt install curl
- ```
-
-## Install
-
-- Download the installer from Janssen Project site using command below
+- Download the release package from the Github Janssen Project
+[Releases](https://github.com/JanssenProject/jans/releases)
 
 ```
-wget http:$(curl -s -L https://api.github.com/repos/JanssenProject/jans/releases/latest | egrep -o '/.*ubuntu20.04_amd64.deb' | head -n 1) -O /tmp/jans.ubuntu20.04_amd64.deb
+wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version.ubuntu20.04_amd64.deb -P /tmp
 ```
 
-- Unpack/install the installer package
+- Verify integrity of the downloaded package by verifying published `sha256sum`.   
+
+    Download `sha256sum` file for the package
+
+    ```shell
+    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version.ubuntu20.04_amd64.deb.sha256sum -P /tmp
+    ```
+
+    Check the hash if it is matching. 
+
+    ```shell
+    sha256sum -c /tmp/jans_replace-janssen-version.ubuntu20.04_amd64.deb.sha256sum
+    ```
+
+    Output similar to below should confirm the integrity of the downloaded package.
+    
+    ```text
+    <package-name>: OK
+    ```
+
+- Install the package
 
 ```
-apt install -y /tmp/jans.ubuntu20.04_amd64.deb
+apt install -y /tmp/jans_replace-janssen-version.ubuntu20.04_amd64.deb
 ```
 
-- Initiate setup process using command below. Setup process will prompt for user for inputs.
+## Run the setup script
+
+- Run the setup script in interactive mode:
 
 ```
 python3 /opt/jans/jans-setup/setup.py
 ```
 
+See more detailed [instructions](../setup.md) on the setup script if you're
+confused how to answer any of the questions, for details about command line
+arguments, or you would prefer to use a properties file instead of
+interactive mode.
+
 ## Verify the Installation
 
 After the successful completion of setup process, [verify the system health](../install-faq.md#after-installation-how-do-i-verify-that-the-janssen-server-is-up-and-running).
 
+## Ubuntu Janssen Un-Installation
 
-## Uninstall 
+Removing Janssen is a two step process:
 
-Uninstall process involves two steps
+1. Delete files installed by Janssen
+1. Remove and purge the `jans` package
 
-1. Uninstall Janssen Server
-2. Remove and purge `jans` package
+Use the command below to uninstall the Janssen server
 
-### Uninstall Janssen Server 
-
-Use command below to uninstall Janssen server
-
-```commandline
+```
 python3 /opt/jans/jans-setup/install.py -uninstall
 ```
 
-Console output like below will confirm the successful uninstallation of Janssen Server
+You'll see the following confirmation:
 
 ```text
 This process is irreversible.
 You will lose all data related to Janssen Server.
 
 
- 
+
 Are you sure to uninstall Janssen Server? [yes/N] yes
 
 Uninstalling Jannsen Server...
@@ -90,7 +100,6 @@ Stopping jans-auth
 Removing /etc/default/jans-client-api
 Stopping jans-client-api
 Stopping OpenDj Server
-sh: 1: /opt/opendj/bin/stop-ds: not found
 Executing rm -r -f /etc/certs
 Executing rm -r -f /etc/jans
 Executing rm -r -f /opt/jans
@@ -103,20 +112,17 @@ Executing rm -r -f /opt/opendj
 Executing rm -r -f /opt/dist
 Removing /etc/apache2/sites-enabled/https_jans.conf
 Removing /etc/apache2/sites-available/https_jans.conf
-
 ```
 
-### Remove the linux package
+The command below removes and purges the `jans` package
 
-Use command below to remove and purge `jans` package
-
-```text
+```
 apt-get --purge remove jans
 ```
 
-Successful removal will provide output as below:
+Which should result in the following:
 
-```text
+```
 Reading package lists... Done
 Building dependency tree       
 Reading state information... Done
@@ -130,7 +136,7 @@ The following packages will be REMOVED:
 After this operation, 1,257 MB disk space will be freed.
 Do you want to continue? [Y/n] y
 (Reading database ... 166839 files and directories currently installed.)
-Removing jans (1.0.2~ubuntu20.04) ...
+Removing jans (replace-janssen-version~ubuntu20.04) ...
 Checking to make sure service is down...
 
 ```

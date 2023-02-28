@@ -123,7 +123,7 @@ public class EnableClientToRestrictJavascriptOrigin extends BaseTest {
         // 4. Validate id_token
         AssertBuilder.jwtParse(idToken)
                 .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS256)
-                .notNullOxOpenIDConnectVersion()
+                .notNullJansOpenIDConnectVersion()
                 .claimsPresence(JwtClaimName.CODE_HASH)
                 .check();
 

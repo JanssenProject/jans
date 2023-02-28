@@ -25,6 +25,10 @@ import io.jans.fido2.model.auth.CredAndCounterData;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.jans.orm.model.fido2.Fido2RegistrationData;
 
+/**
+ * Interface class for AttestationFormatProcessor
+ *
+ */
 public interface AttestationFormatProcessor {
     AttestationFormat getAttestationFormat();
 

@@ -1,5 +1,66 @@
 # Changelog
 
+## [1.0.7](https://github.com/JanssenProject/jans/compare/jans-scim-v1.0.6...jans-scim-v1.0.7) (2023-02-22)
+
+
+### Bug Fixes
+
+* prepare 1.0.7 release ([ce02fd9](https://github.com/JanssenProject/jans/commit/ce02fd9322ab49d5bea4f6e88f316f931e9d2169))
+
+## 1.0.6 (2023-01-09)
+
+
+### Features
+
+* add custom annotation for configuration property and feature flag documentation ([#2852](https://github.com/JanssenProject/jans/issues/2852)) ([9991d1c](https://github.com/JanssenProject/jans/commit/9991d1ce1fe1b8ce3a65a72e0a72aeee78ba6c2e))
+
+
+### Bug Fixes
+
+* getting ready for a release ([0bda832](https://github.com/JanssenProject/jans/commit/0bda832ebc1da7017231deb38fe9aa6c7c51360a))
+* prepare for 1.0.6 release ([9e4c8fb](https://github.com/JanssenProject/jans/commit/9e4c8fb4c0a1ef4779934558e8d8d40d8fedbabf))
+* user attributes not updated [#2753](https://github.com/JanssenProject/jans/issues/2753) ([#3403](https://github.com/JanssenProject/jans/issues/3403)) ([f793f92](https://github.com/JanssenProject/jans/commit/f793f92fa275da2e57b2302dcb5c6fdb27666e67))
+
+## [1.0.5](https://github.com/JanssenProject/jans/compare/jans-scim-v1.0.3...jans-scim-v1.0.5) (2022-12-01)
+
+
+### Features
+
+* add custom annotation for configuration property and feature flag documentation ([#2852](https://github.com/JanssenProject/jans/issues/2852)) ([9991d1c](https://github.com/JanssenProject/jans/commit/9991d1ce1fe1b8ce3a65a72e0a72aeee78ba6c2e))
+
+
+### Bug Fixes
+
+* getting ready for a release ([0bda832](https://github.com/JanssenProject/jans/commit/0bda832ebc1da7017231deb38fe9aa6c7c51360a))
+
+## 1.0.3 (2022-11-01)
+
+
+### Features
+
+* **jans-scim:** make max no. of operations and payload size of bulks operations parameterizable ([#1872](https://github.com/JanssenProject/jans/issues/1872)) ([c27a45b](https://github.com/JanssenProject/jans/commit/c27a45bb0a19257c824c4e195f203e9b9b45ec88))
+* merge ORM from Gluu ([#2468](https://github.com/JanssenProject/jans/issues/2468)) ([93149fd](https://github.com/JanssenProject/jans/commit/93149fd2d1db1eacf37d76af9df25ed40fb16b79))
+* update search by example to use multivalued property ([#2298](https://github.com/JanssenProject/jans/issues/2298)) ([8ed3007](https://github.com/JanssenProject/jans/commit/8ed3007ec3406ac7c0adf81ce339f6672b76a147))
+
+
+### Bug Fixes
+
+* jans-config-api/plugins/sample/helloworld/pom.xml to reduce vulnerabilities ([#972](https://github.com/JanssenProject/jans/issues/972)) ([e2ae05e](https://github.com/JanssenProject/jans/commit/e2ae05e5515dd85a95c0a8520de57f673aba7918))
+* jans-eleven/pom.xml to reduce vulnerabilities ([#2676](https://github.com/JanssenProject/jans/issues/2676)) ([d27a7f9](https://github.com/JanssenProject/jans/commit/d27a7f99f22cb8f4bd445a3400224a38cb91eedc))
+* **jans-scim:** improper handling response of get user operation ([#2420](https://github.com/JanssenProject/jans/issues/2420)) ([b9e00af](https://github.com/JanssenProject/jans/commit/b9e00af483f81280ae80ab6ad732d4f98c30c8a5))
+* **jans-scim:** X509 cert not set after successful POST request ([#2407](https://github.com/JanssenProject/jans/issues/2407)) ([fd616c4](https://github.com/JanssenProject/jans/commit/fd616c49df088dfa7c6fae4bd56ed4ecf4e26418))
+* update authn schemes in yaml descriptor [#2414](https://github.com/JanssenProject/jans/issues/2414) ([#2415](https://github.com/JanssenProject/jans/issues/2415)) ([4b239af](https://github.com/JanssenProject/jans/commit/4b239af72d8aa9e3a09ff6de19cf315b3863bda2))
+
+
+### Miscellaneous Chores
+
+* release 1.0.2 ([43dead6](https://github.com/JanssenProject/jans/commit/43dead615f3508ca393c330c2db27a8fb9d1017a))
+
+
+### Documentation
+
+* **jans-scim:** add json payload examples to the generated swagger ([#2532](https://github.com/JanssenProject/jans/issues/2532)) ([fe6de83](https://github.com/JanssenProject/jans/commit/fe6de830bc483308df9450d3ef70fe1973bd86ca))
+
 ## 1.0.2 (2022-08-30)
 
 

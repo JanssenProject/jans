@@ -458,4 +458,14 @@ public class AuthorizeRestWebServiceValidator {
             throw createInvalidJwtRequestException(authzRequest.getRedirectUriResponse(), "A signed request object is required");
         }
     }
+
+    public void validateNotWebView(HttpServletRequest httpRequest) {
+        if (appConfiguration.getBlockWebviewAuthorizationEnabled()) {
+            String headerRequestedWith = httpRequest.getHeader("X-Requested-With");
+            if (headerRequestedWith != null) {
+                log.error("Unauthorized, request contains X-Requested-With: {}", headerRequestedWith);
+                throw new WebApplicationException(Response.status(Response.Status.UNAUTHORIZED).build());
+            }
+        }
+    }
 }

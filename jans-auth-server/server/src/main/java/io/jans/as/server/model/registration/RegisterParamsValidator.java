@@ -80,7 +80,10 @@ public class RegisterParamsValidator {
 
         if (grantTypes != null &&
                 (grantTypes.contains(GrantType.AUTHORIZATION_CODE) || grantTypes.contains(GrantType.IMPLICIT)
-                        || (responseTypes.contains(ResponseType.CODE) && !grantTypes.contains(GrantType.DEVICE_CODE))
+                        || (responseTypes.contains(ResponseType.CODE) && (
+                        !grantTypes.contains(GrantType.DEVICE_CODE) &&
+                                !grantTypes.contains(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS) &&
+                                !grantTypes.contains(GrantType.CLIENT_CREDENTIALS)))
                         || responseTypes.contains(ResponseType.TOKEN) || responseTypes.contains(ResponseType.ID_TOKEN))) {
             if (redirectUris == null || redirectUris.isEmpty()) {
                 return new Pair<>(false, "Redirect uris are empty.");
@@ -284,7 +287,10 @@ public class RegisterParamsValidator {
                 }
             }
         } else valid = !grantTypes.contains(GrantType.AUTHORIZATION_CODE) && !grantTypes.contains(GrantType.IMPLICIT) &&
-                (!responseTypes.contains(ResponseType.CODE) || grantTypes.contains(GrantType.DEVICE_CODE))
+                (!responseTypes.contains(ResponseType.CODE) || (
+                        grantTypes.contains(GrantType.DEVICE_CODE) ||
+                                grantTypes.contains(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS) ||
+                                grantTypes.contains(GrantType.CLIENT_CREDENTIALS)))
                 && !responseTypes.contains(ResponseType.TOKEN) && !responseTypes.contains(ResponseType.ID_TOKEN);
 
 
@@ -306,6 +312,7 @@ public class RegisterParamsValidator {
         }
 
         // Validate Sector Identifier URL
+        boolean noRedirectUriInSectorIdentifierUri = false;
         if (valid && StringUtils.isNotBlank(sectorIdentifierUrl)) {
             try {
                 URI uri = new URI(sectorIdentifierUrl);
@@ -331,12 +338,20 @@ public class RegisterParamsValidator {
             } catch (Exception e) {
                 log.debug(e.getMessage(), e);
                 valid = false;
+            } finally {
+                if (!valid) {
+                    noRedirectUriInSectorIdentifierUri = true;
+                }
             }
         }
 
         // Validate Redirect Uris checking the white list and black list
         if (valid) {
             valid = checkWhiteListRedirectUris(redirectUris) && checkBlackListRedirectUris(redirectUris);
+        }
+
+        if (noRedirectUriInSectorIdentifierUri) {
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Failed to validate redirect uris. No redirect_uri in sector_identifier_uri content.");
         }
 
         return valid;

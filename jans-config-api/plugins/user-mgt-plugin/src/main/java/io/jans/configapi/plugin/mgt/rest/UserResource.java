@@ -2,7 +2,6 @@ package io.jans.configapi.plugin.mgt.rest;
 
 import com.github.fge.jsonpatch.JsonPatchException;
 import io.jans.as.common.model.common.User;
-import io.jans.as.common.service.common.EncryptionService;
 import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.plugin.mgt.model.user.CustomUser;
@@ -25,6 +24,7 @@ import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -56,13 +56,8 @@ public class UserResource extends BaseResource {
     private static final String INUM = "inum";
     private class UserPagedResult extends PagedResult<CustomUser>{};
 
-
-
     @Inject
     Logger logger;
-
-    @Inject
-    EncryptionService encryptionService;
 
     @Inject
     MgtUtil mgtUtil;
@@ -74,17 +69,17 @@ public class UserResource extends BaseResource {
             "Configuration – User Management" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.USER_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = UserPagedResult.class))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = UserPagedResult.class), examples = @ExampleObject(name = "Response json example", value = "example/user/user-all.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.USER_READ_ACCESS })
     public Response getUsers(
-            @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
-            @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
-            @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
-            @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
-            @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder)
+            @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
+            @Parameter(description = "Search pattern") @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
+            @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
+            @Parameter(description = "Attribute whose value will be used to order the returned response") @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
+            @Parameter(description = "Order in which the sortBy param is applied. Allowed values are \"ascending\" and \"descending\"") @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder)
             throws IllegalAccessException, InvocationTargetException {
         if (logger.isDebugEnabled()) {
             logger.debug("User search param - limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}",
@@ -101,14 +96,14 @@ public class UserResource extends BaseResource {
             "Configuration – User Management" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.USER_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomUser.class, description = "CustomUser identified by inum"))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomUser.class, description = "CustomUser identified by inum"), examples = @ExampleObject(name = "Response json example", value = "example/user/user.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.USER_READ_ACCESS })
     @Path(ApiConstants.INUM_PATH)
-    public Response getUserByInum(@PathParam(ApiConstants.INUM) @NotNull String inum)
+    public Response getUserByInum(@Parameter(description = "User identifier") @PathParam(ApiConstants.INUM) @NotNull String inum)
             throws IllegalAccessException, InvocationTargetException {
         if (logger.isDebugEnabled()) {
             logger.debug("User search by inum:{}", escapeLog(inum));
@@ -131,8 +126,9 @@ public class UserResource extends BaseResource {
     @Operation(summary = "Create new User", description = "Create new User", operationId = "post-user", tags = {
             "Configuration – User Management" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.USER_WRITE_ACCESS }))
+    @RequestBody(description = "User object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomUser.class), examples = @ExampleObject(name = "Request json example", value = "example/user/user-post.json")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomUser.class, description = "Created Object"))),
+            @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomUser.class, description = "Created Object"), examples = @ExampleObject(name = "Response json example", value = "example/user/user.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
@@ -170,8 +166,9 @@ public class UserResource extends BaseResource {
     @Operation(summary = "Update User", description = "Update User", operationId = "put-user", tags = {
             "Configuration – User Management" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.USER_WRITE_ACCESS }))
+    @RequestBody(description = "User object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomUser.class), examples = @ExampleObject(name = "Request json example", value = "example/user/user.json")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomUser.class))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomUser.class), examples = @ExampleObject(name = "Response json example", value = "example/user/user.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
@@ -194,9 +191,13 @@ public class UserResource extends BaseResource {
         List<String> excludeAttributes = List.of(USER_PWD);
         checkMissingAttributes(user, excludeAttributes);
         ignoreCustomObjectClassesForNonLDAP(user);
-
-        user = userMgmtSrv.updateUser(user);
-        logger.debug("Updated user:{}", user);
+        try {
+            user = userMgmtSrv.updateUser(user);
+            logger.debug("Updated user:{}", user);
+        } catch (Exception ex) {
+            logger.error("Error while updating user", ex);
+            throwInternalServerException(ex);
+        }
 
         // excludedAttributes
         user = excludeUserAttributes(user);
@@ -206,22 +207,22 @@ public class UserResource extends BaseResource {
         logger.debug("updated customUser:{}", customUser);
 
         return Response.ok(customUser).build();
+
     }
 
     @Operation(summary = "Patch user properties by Inum", description = "Patch user properties by Inum", operationId = "patch-user-by-inum", tags = {
             "Configuration – User Management" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.USER_WRITE_ACCESS }))
-    @RequestBody(description = "UserPatchRequest", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, schema = @Schema(implementation = UserPatchRequest.class), examples = {
-            @ExampleObject(value = "[ {\"jsonPatchString\": {\"op\": \"add\", \"path\": \"userId\",\"value\": \"test-user\" }, \"customAttributes\": [{\"name\": \"name, displayName, birthdate, email\",\"multiValued\": true,\"values\": [\"string\"]}]}]") }))
+    @RequestBody(description = "UserPatchRequest", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = UserPatchRequest.class), examples = @ExampleObject(name = "Request json example", value = "example/user/user-patch.json")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomUser.class, description = "Patched CustomUser Object"))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomUser.class, description = "Patched CustomUser Object"), examples = @ExampleObject(name = "Response json example", value = "example/user/user.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PATCH
     @ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS })
     @Path(ApiConstants.INUM_PATH)
-    public Response patchUser(@PathParam(ApiConstants.INUM) @NotNull String inum,
+    public Response patchUser(@Parameter(description = "User identifier") @PathParam(ApiConstants.INUM) @NotNull String inum,
             @NotNull UserPatchRequest userPatchRequest)
             throws IllegalAccessException, InvocationTargetException, JsonPatchException, IOException {
         if (logger.isDebugEnabled()) {
@@ -259,7 +260,7 @@ public class UserResource extends BaseResource {
     @DELETE
     @Path(ApiConstants.INUM_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.USER_DELETE_ACCESS })
-    public Response deleteUser(@PathParam(ApiConstants.INUM) @NotNull String inum) {
+    public Response deleteUser(@Parameter(description = "User identifier") @PathParam(ApiConstants.INUM) @NotNull String inum) {
         if (logger.isDebugEnabled()) {
             logger.debug("User to be deleted - inum:{} ", escapeLog(inum));
         }
@@ -269,8 +270,7 @@ public class UserResource extends BaseResource {
         return Response.noContent().build();
     }
 
-    private UserPagedResult doSearch(SearchRequest searchReq)
-            throws IllegalAccessException, InvocationTargetException {
+    private UserPagedResult doSearch(SearchRequest searchReq) throws IllegalAccessException, InvocationTargetException {
         if (logger.isDebugEnabled()) {
             logger.debug("User search params - searchReq:{} ", escapeLog(searchReq));
         }

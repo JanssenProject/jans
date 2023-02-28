@@ -9,15 +9,6 @@ package io.jans.orm.ldap.operation;
 import java.util.Collection;
 import java.util.List;
 
-import io.jans.orm.ldap.impl.LdapBatchOperationWraper;
-import io.jans.orm.exception.operation.ConnectionException;
-import io.jans.orm.exception.operation.DuplicateEntryException;
-import io.jans.orm.exception.operation.SearchException;
-import io.jans.orm.ldap.operation.impl.LdapConnectionProvider;
-import io.jans.orm.model.PagedResult;
-import io.jans.orm.model.SortOrder;
-import io.jans.orm.operation.PersistenceOperationService;
-
 import com.unboundid.ldap.sdk.Attribute;
 import com.unboundid.ldap.sdk.Control;
 import com.unboundid.ldap.sdk.Filter;
@@ -25,10 +16,18 @@ import com.unboundid.ldap.sdk.LDAPConnection;
 import com.unboundid.ldap.sdk.LDAPConnectionPool;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.Modification;
-import com.unboundid.ldap.sdk.SearchResult;
-import com.unboundid.ldap.sdk.SearchResultEntry;
 import com.unboundid.ldap.sdk.SearchScope;
 import com.unboundid.ldif.LDIFChangeRecord;
+
+import io.jans.orm.exception.operation.ConnectionException;
+import io.jans.orm.exception.operation.DuplicateEntryException;
+import io.jans.orm.exception.operation.SearchException;
+import io.jans.orm.ldap.impl.LdapBatchOperationWraper;
+import io.jans.orm.ldap.operation.impl.LdapConnectionProvider;
+import io.jans.orm.model.EntryData;
+import io.jans.orm.model.PagedResult;
+import io.jans.orm.model.SortOrder;
+import io.jans.orm.operation.PersistenceOperationService;
 
 public interface LdapOperationService extends PersistenceOperationService {
 
@@ -54,26 +53,22 @@ public interface LdapOperationService extends PersistenceOperationService {
 
     void releaseConnection(LDAPConnection connection);
 
-    <T> SearchResult search(String dn, Filter filter, SearchScope scope, LdapBatchOperationWraper<T> batchOperationWraper, int start,
-                            int searchLimit, int count, Control[] controls, String... attributes) throws SearchException;
+    <T> PagedResult<EntryData> search(String dn, Filter filter, SearchScope scope, LdapBatchOperationWraper<T> batchOperationWraper, int start,
+                            int count, int pageSize, Control[] controls, String... attributes) throws SearchException;
 
-    List<SearchResultEntry> searchSearchResultEntryList(String dn, Filter filter, SearchScope scope, int startIndex,
+    <T> PagedResult<EntryData> searchPagedEntries(String dn, Filter filter, SearchScope scope, int startIndex,
                                                         int count, int pageSize, String sortBy, SortOrder sortOrder,
-                                                        PagedResult vlvResponse, String... attributes) throws Exception;
-
-    SearchResult searchVirtualListView(String dn, Filter filter, SearchScope scope, int start, int count,
-            String sortBy, SortOrder sortOrder, PagedResult vlvResponse, String... attributes)
-            throws Exception;
+                                                        String... attributes) throws Exception;
 
     /**
      * Lookup entry in the directory
      *
      * @param dn
      * @param attributes
-     * @return SearchResultEntry
+     * @return EntryData
      * @throws ConnectionException
      */
-    SearchResultEntry lookup(String dn, String... attributes) throws ConnectionException, SearchException;
+    EntryData lookup(String dn, String... attributes) throws ConnectionException, SearchException;
 
     /**
      * Use this method to add new entry

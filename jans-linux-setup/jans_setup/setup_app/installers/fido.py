@@ -53,8 +53,6 @@ class FidoInstaller(JettyInstaller):
 
         self.renderTemplateInOut(self.ldif_fido2, self.template_folder, self.output_folder)
 
-        self.write_webapps_xml()
-
         ldif_files = [self.ldif_fido2]
         self.dbUtils.import_ldif(ldif_files)
 
@@ -70,12 +68,6 @@ class FidoInstaller(JettyInstaller):
         for f in ('yubico-u2f-ca-cert.crt', 'HyperFIDO_CA_Cert_V1.pem', 'HyperFIDO_CA_Cert_V2.pem'):
             src = os.path.join(Config.install_dir, 'static/fido2/authenticator_cert/', f)
             self.copyFile(src, target_dir)
-
-        # Fido2 MDS TOC cert
-        self.copyFile(
-            os.path.join(Config.install_dir, 'static/fido2/mds_toc_cert/metadata-root-ca.cer'),
-            os.path.join(self.fido2ConfigFolder, 'mds/cert')
-            )
 
         #copy fido2 server metadata
         src_dir = os.path.join(Config.install_dir, 'static/fido2/server_metadata')

@@ -46,6 +46,10 @@ import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+/**
+ * Attestation processor for attestations of fmt = android-key
+ *
+ */
 @ApplicationScoped
 public class AndroidKeyAttestationProcessor implements AttestationFormatProcessor {
 

@@ -31,6 +31,10 @@ import org.slf4j.Logger;
 import com.fasterxml.jackson.databind.JsonNode;
 
 /**
+ * The FIDO2 server has a local database of authenticator data in json format.
+ * It is parsed before MDS blob is looked up. This data has to be obtained from
+ * the vendor and placed in the local folder for metadata
+ * 
  * @author Yuriy Movchan
  * @version May 08, 2020
  */

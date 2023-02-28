@@ -88,6 +88,15 @@ public class ScopeService {
         persistenceEntryManager.merge(scope);
     }
 
+    public Scope getScope(String inum) {
+        try {
+            return persistenceEntryManager.find(Scope.class, getDnForScope(inum));
+        } catch (Exception ex) {
+            logger.error("Error while finding scope with inum:{} is:{}", inum, ex);
+        }
+        return null;
+    }
+
     public CustomScope getScopeByInum(String inum) {
         return getScopeByInum(inum, false);
     }
@@ -303,21 +312,33 @@ public class ScopeService {
         logger.debug("Search Scope with searchRequest:{}, scopeType:{}, withAssociatedClients:{}", searchRequest,
                 scopeType, withAssociatedClients);
 
-        String[] targetArray = new String[] { searchRequest.getFilter() };
+        Filter searchFilter = null;
+        List<Filter> filters = new ArrayList<>();
+        if (searchRequest.getFilterAssertionValue() != null && !searchRequest.getFilterAssertionValue().isEmpty()) {
 
-        Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.DISPLAY_NAME, null, targetArray,
-                null);
-        Filter descriptionFilter = Filter.createSubstringFilter(AttributeConstants.DESCRIPTION, null, targetArray,
-                null);
-        Filter searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter);
-        if (StringHelper.isNotEmpty(scopeType)) {
-            searchFilter = Filter.createANDFilter(Filter.createEqualityFilter(JANS_SCOPE_TYP, scopeType), searchFilter);
+            for (String assertionValue : searchRequest.getFilterAssertionValue()) {
+                String[] targetArray = new String[] { assertionValue };
+                Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.DISPLAY_NAME, null,
+                        targetArray, null);
+                Filter descriptionFilter = Filter.createSubstringFilter(AttributeConstants.DESCRIPTION, null,
+                        targetArray, null);
+                Filter nameFilter = Filter.createSubstringFilter(AttributeConstants.JANS_ID, null, targetArray, null);
+                Filter inumFilter = Filter.createSubstringFilter(AttributeConstants.INUM, null, targetArray, null);
+                filters.add(Filter.createORFilter(displayNameFilter, descriptionFilter, nameFilter, inumFilter));
+            }
+            searchFilter = Filter.createORFilter(filters);
         }
-        logger.debug("Search Scope with searchFilter:{}", searchFilter);
+
+        if (StringHelper.isNotEmpty(scopeType)) {
+            searchFilter = Filter.createANDFilter(Filter.createORFilter(filters),
+                    Filter.createEqualityFilter(JANS_SCOPE_TYP, scopeType));
+        }
+
+        logger.debug("Final Scope searchFilter:{}", searchFilter);
 
         PagedResult<CustomScope> pagedResult = persistenceEntryManager.findPagedEntries(getDnForScope(null),
                 CustomScope.class, searchFilter, null, searchRequest.getSortBy(),
-                SortOrder.getByValue(searchRequest.getSortOrder()), searchRequest.getStartIndex() - 1,
+                SortOrder.getByValue(searchRequest.getSortOrder()), searchRequest.getStartIndex(),
                 searchRequest.getCount(), searchRequest.getMaxCount());
 
         if (pagedResult != null) {

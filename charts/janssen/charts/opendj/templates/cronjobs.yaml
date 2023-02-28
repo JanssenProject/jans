@@ -1,7 +1,6 @@
 {{- if .Values.backup.enabled }}
-
 kind: CronJob
-apiVersion: batch/v1beta1
+apiVersion: batch/v1
 metadata:
   name: {{ include "opendj.fullname" . }}-backup
 spec:

@@ -25,7 +25,7 @@ from setup_app.utils.db_utils import dbUtils
 from setup_app.pylib.jproperties import Properties
 
 if base.current_app.profile == 'jans':
-    from setup_app.utils.spanner import Spanner
+    from setup_app.utils.spanner_rest_client import SpannerClient
 
 
 class PropertiesUtils(SetupUtils):
@@ -208,6 +208,9 @@ class PropertiesUtils(SetupUtils):
         if p.get('enable-script'):
             base.argsp.enable_script = p['enable-script'].split()
 
+        if p.get('rdbm_type') == 'pgsql' and not p.get('rdbm_port'):
+            p['rdbm_port'] = '5432'
+
         properties_list = list(p.keys())
 
         for prop in properties_list:
@@ -241,7 +244,7 @@ class PropertiesUtils(SetupUtils):
             elif p.get('installLdap','').lower() == 'true':
                 Config.opendj_install = InstallTypes.LOCAL
             elif p.get('opendj_install'):
-                Config.opendj_install = p['opendj_install']   
+                Config.opendj_install = p['opendj_install']
             else:
                 Config.opendj_install = InstallTypes.NONE
 
@@ -263,7 +266,6 @@ class PropertiesUtils(SetupUtils):
             if 'couchbase' not in available_backends:
                 print("Couchbase package is not available exiting.")
                 sys.exit(1)
-
 
         if ('cb_password' not in properties_list) and Config.cb_install:
             Config.cb_password = p.get('ldapPass')
@@ -606,23 +608,6 @@ class PropertiesUtils(SetupUtils):
             Config.addPostSetupService.append('install_config_api')
 
 
-    def prompt_for_client_api(self):
-
-        prompt = self.getPrompt("Install Jans Client API?", 
-                            self.getDefaultOption(Config.install_client_api)
-                            )[0].lower()
-
-        Config.install_client_api = prompt == 'y'
-
-        if Config.installed_instance and Config.install_client_api:
-            Config.addPostSetupService.append('install_client_api')
-
-        if Config.install_client_api:
-            prompt = self.getPrompt("  Use Jans Storage for Client API?", 'y')[0].lower()
-            if prompt == 'n':
-                Config.client_api_storage_type = 'h2'
-
-
     def prompt_for_rdbm(self):
         while True:
             Config.rdbm_type = self.getPrompt("RDBM Type", Config.rdbm_type)
@@ -668,10 +653,9 @@ class PropertiesUtils(SetupUtils):
                     BackendStrings.REMOTE_PGSQL,
                     ]
 
-        if not os.path.exists(os.path.join(Config.install_dir, 'package')):
-            backend_types += [BackendStrings.REMOTE_COUCHBASE, BackendStrings.CLOUD_SPANNER]
-            if 'couchbase' in self.getBackendTypes():
-                backend_types.insert(2, BackendStrings.LOCAL_COUCHBASE)
+        backend_types += [BackendStrings.REMOTE_COUCHBASE, BackendStrings.CLOUD_SPANNER]
+        if 'couchbase' in self.getBackendTypes():
+            backend_types.insert(2, BackendStrings.LOCAL_COUCHBASE)
 
         nlist = []
         for i, btype in enumerate(backend_types):
@@ -826,8 +810,14 @@ class PropertiesUtils(SetupUtils):
 
             print("  Checking spanner connection")
             try:
-                spanner = Spanner()
-                spanner.get_session()
+                SpannerClient(
+                            project_id=Config.spanner_project,
+                            instance_id=Config.spanner_instance,
+                            database_id=Config.spanner_database,
+                            google_application_credentials=Config.google_application_credentials,
+                            emulator_host=Config.spanner_emulator_host,
+                            log_dir=os.path.join(Config.install_dir, 'logs')
+                    )
                 print("  {}Spanner connection was successfull{}".format(colors.OKGREEN, colors.ENDC))
             except Exception as e:
                 print("{}ERROR getting session from spanner: {}{}".format(colors.DANGER, e, colors.ENDC))
@@ -947,7 +937,6 @@ class PropertiesUtils(SetupUtils):
             self.promptForScimServer()
             self.promptForFido2Server()
             #self.promptForEleven()
-            self.prompt_for_client_api()
             #if (not Config.installOxd) and Config.oxd_package:
             #    self.promptForOxd()
 

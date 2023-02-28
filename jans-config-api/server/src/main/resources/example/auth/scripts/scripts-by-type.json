@@ -1,0 +1,29 @@
+{
+    "start": 0,
+    "totalEntriesCount": 1,
+    "entriesCount": 1,
+    "entries": [
+        {
+            "dn": "inum=0300-BA90,ou=scripts,o=jans",
+            "inum": "0300-BA90",
+            "name": "discovery_java_params",
+            "description": "Java Custom Sample Script",
+            "script": "/* Copyright (c) 2022, Gluu\n Author: Yuriy Z\n */\n\nimport io.jans.model.SimpleCustomProperty;\nimport io.jans.model.custom.script.model.CustomScript;\nimport io.jans.model.custom.script.type.discovery.DiscoveryType;\nimport io.jans.service.custom.script.CustomScriptManager;\nimport org.slf4j.Logger;\nimport org.slf4j.LoggerFactory;\nimport org.json.JSONObject;\n\nimport java.util.Map;\n\npublic class Discovery implements DiscoveryType {\n\n    private static final Logger log = LoggerFactory.getLogger(Discovery.class);\n    private static final Logger scriptLogger = LoggerFactory.getLogger(CustomScriptManager.class);\n\n    @Override\n    public boolean init(Map<String, SimpleCustomProperty> configurationAttributes) {\n        log.info(\"Init of Discovery Java custom script\");\n        return true;\n    }\n\n    @Override\n    public boolean init(CustomScript customScript, Map<String, SimpleCustomProperty> configurationAttributes) {\n        log.info(\"Init of Discovery Java custom script\");\n        return true;\n    }\n\n    @Override\n    public boolean destroy(Map<String, SimpleCustomProperty> configurationAttributes) {\n        log.info(\"Destroy of Discovery Java custom script\");\n        return true;\n    }\n\n    @Override\n    public int getApiVersion() {\n        log.info(\"getApiVersion Discovery Java custom script: 11\");\n        return 11;\n    }\n\n    @Override\n    public boolean modifyResponse(Object responseAsJsonObject, Object context) {\n        scriptLogger.info(\"write to script logger\");\n        JSONObject response = (JSONObject) responseAsJsonObject;\n        response.accumulate(\"key_from_java\", \"value_from_script_on_java\");\n        return true;\n    }\n}\n",
+            "scriptType": "discovery",
+            "programmingLanguage": "java",
+            "moduleProperties": [
+                {
+                    "value1": "location_type",
+                    "value2": "ldap"
+                }
+            ],
+            "level": 1,
+            "revision": 11,
+            "enabled": true,
+            "modified": false,
+            "internal": false,
+            "locationType": "ldap",
+            "baseDn": "inum=0300-BA90,ou=scripts,o=jans"
+        }
+    ]
+}

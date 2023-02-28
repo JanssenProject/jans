@@ -114,7 +114,6 @@ Command above should list services along with its current status.
 ```commandline
 UNIT                    LOAD   ACTIVE SUB     DESCRIPTION               
 jans-auth.service       loaded active running Janssen OAauth service    
-jans-client-api.service loaded active running Janssen Client API service
 jans-config-api.service loaded active running Janssen Config API service
 jans-fido2.service      loaded active running Janssen Fido2 Service     
 jans-scim.service       loaded active running Janssen Scim service      
@@ -144,3 +143,17 @@ Individual modules of the Janssen Server will continue to write their operationa
 ```commandline
 /opt/jans/jetty/<module-name>/logs/
 ```
+
+-----------------------------
+
+## How do I check the version of Janssen server?
+
+```commandline
+/opt/jans/bin/show_version.py
+```
+
+-----------------------------
+
+## After installation, what's next?
+
+After successful installation of the Janssen Server, move on to the [configuration steps](../config-guide/jans-cli/cli-index/) in the Command Line Interface documentation to align Janssen with your organizational requirements.

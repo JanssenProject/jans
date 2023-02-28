@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>io.jans</groupId>
 		<artifactId>jans-core-parent</artifactId>
-		<version>1.0.3-SNAPSHOT</version>
+		<version>1.0.8-SNAPSHOT</version>
 	</parent>
 
 	<dependencies>
@@ -99,6 +99,12 @@
 			<groupId>jakarta.xml.bind</groupId>
 			<artifactId>jakarta.xml.bind-api</artifactId>
 		</dependency>
+
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+        </dependency>
+
 	</dependencies>
 
 </project>

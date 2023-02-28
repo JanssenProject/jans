@@ -1,6 +1,7 @@
 package io.jans.scim.model.conf;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import io.jans.doc.annotation.DocProperty;
 
 import java.io.Serializable;
 
@@ -14,31 +15,41 @@ public class AppConfiguration implements Configuration, Serializable {
 
     private static final long serialVersionUID = -8991383390239617013L;
 
+    @DocProperty(description = "Application config Base DN")
     private String baseDN;
-
+    @DocProperty(description = "Application base URL")
     private String applicationUrl;
-
+    @DocProperty(description = "SCIM base endpoint URL")
     private String baseEndpoint;
-
+    @DocProperty(description = "Person Object Class")
     private String personCustomObjectClass;
-
+    @DocProperty(description = "Jans Auth - Issuer identifier")
     private String oxAuthIssuer;
-    
+    @DocProperty(description = "SCIM Protection Mode")
     private ScimMode protectionMode;
+    @DocProperty(description = "Maximum number of results per page")
     private int maxCount;
+    @DocProperty(description = "Specifies maximum bulk operations")
     private int bulkMaxOperations;
+    @DocProperty(description = "Specifies maximum payload size of bulk operations")
     private long bulkMaxPayloadSize;
+    @DocProperty(description = "User Extension Schema URI")
     private String userExtensionSchemaURI;
-
+    @DocProperty(description = "Logging level for scim logger")
     private String loggingLevel;
+    @DocProperty(description = "Logging layout used for Server loggers")
     private String loggingLayout;
+    @DocProperty(description = "Path to external log4j2 logging configuration")
     private String externalLoggerConfiguration;
-
+    @DocProperty(description = "The interval for metric reporter in seconds")
     private int metricReporterInterval;
+    @DocProperty(description = "The days to keep metric reported data")
     private int metricReporterKeepDataDays;
+    @DocProperty(description = "Metric reported data enabled flag")
     private Boolean metricReporterEnabled;
+    @DocProperty(description = "Boolean value specifying whether to enable JDK Loggers")
     private Boolean disableJdkLogger = true;
-
+    @DocProperty(description = "Boolean value specifying whether to enable local in-memory cache")
     private Boolean useLocalCache = false;
 
     public String getBaseDN() {

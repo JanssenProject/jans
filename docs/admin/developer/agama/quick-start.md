@@ -43,9 +43,7 @@ These are elements used to build the user interface such as templates, images, s
 
 Templates are written using [FreeMarker Template Language](https://freemarker.apache.org/docs/index.html) (FTL). This is a simple and highly productive language to produce HTML and other forms of output. By convention templates generating HTML markup in Agama have the extension `ftlh`.
 
-In Agama, templates must reside in the filesystem under `/opt/jans/jetty/jans-auth/agama/ftl` directory.
-
-All the other assets (CSS, JS, etc.) are expected to be under `/opt/jans/jetty/jans-auth/agama/fl`.
+In Agama, templates must reside in the filesystem under `/opt/jans/jetty/jans-auth/agama/ftl` directory. All other assets (CSS, JS, etc.) are expected to be under `/opt/jans/jetty/jans-auth/agama/fl`. Later we'll see a flow can designate a given directory for its assets, thus, such directory must be created at both places (inside `ftl` and `fl` folders).
 
 ### Java classes
 
@@ -98,21 +96,14 @@ This flow is extremely static and unrealistic but showcases minimal key elements
 
 In order to add/modify flows, you will interact with a small REST API which is protected by bearer token. To be able to get tokens, SSH to your server and perform the following steps:
 
-- Run `python3 /opt/jans/jans-cli/config-cli.py`
-- In the menu enter to `OAuth` > `OIDC clients` > `Get list of clients`
-- Accept the default parameters, for `pattern` enter `config`
+- Run `python3 /opt/jans/jans-cli/config-cli.py --operation-id get-oauth-openid-clients --endpoint-args pattern:config`
 - Follow the instructions (in a web browser) to get authorized access
-- A list of results will be shown, pick the value in the `inum` column for the client with display name `Jans Config Api Client`
-- Choose `back`, and enter to `Get client by inum`
-- Enter the collected `inum` and grab the value of `clientSecret` in the resulting JSON document
-- Finally, choose `logout and quit`
-
-The collected secret is encoded, run `python3 /opt/jans/bin/encode.py -D <clientSecret>` to decode it.
+- A list of results will be shown in JSON format. Pick the value of the `inum` property for the client with display name `Jans Config Api Client`. Do the same for `clientSecret`
 
 The following is an example of how to get a token using `curl`. Replace data in the placeholders appropriately:
 
 ```
-curl -u '<client-inum:client-secret-decoded>'
+curl -u '<client-inum>:<client-secret>'
      -d scope='https://jans.io/oauth/config/agama.write'
      -d grant_type=client_credentials https://<your-host>/jans-auth/restv1/token
 ```
@@ -180,30 +171,30 @@ curl -k -i -H 'Authorization: Bearer <token>'
 
 Note the source code is not part of the response by default. Append `?includeSource=true` to the URL for the source to be included.
 
-
-!!! Important  
+!!! Important
     There are different, more detailed ways to retrieve, create and update flows but they are regarded in the [Development lifecycle](./lifecycle.md) doc page.
-
 
 Finally the flow assets must be uploaded. You can SFTP/SCP or use other means to do so. In our example, only two steps are required:
 
 - Create a directory `hello` under `/opt/jans/jetty/jans-auth/agama/ftl`
 - Upload the [template](https://github.com/JanssenProject/jans/raw/main/docs/admin/developer/agama/index.ftlh) there
 
+There is an alternative way to manage flows and is via deployment of `.gama` files. This is a more elaborate technique that allows bundling several flows and their required assets and classes for bulk deployment. Learn more about it [here](#gama-deployment.md).
+
 ### Craft an authentication request
 
 This section assumes your [client application](#client-application) is ready, or at least you have made the configurations required so that you can trigger an (OpendId Connect) authentication request.
 
-This usually boils down to create and launch a URL looking like `https://<your-host>/jans-auth/restv1/authorize?acr_values=agama&customParam1=flow-qname&scope=...&response_type=...&redirect_uri=https...&client_id=...&state=...`. You may like to check the [spec](https://openid.net/specs/openid-connect-core-1_0.html) for more details, however, keep in mind that:
+This usually boils down to create and launch a URL looking like `https://<your-host>/jans-auth/restv1/authorize?acr_values=agama&agama_flow=flow-qname&scope=...&response_type=...&redirect_uri=https...&client_id=...&state=...`. You may like to check the [spec](https://openid.net/specs/openid-connect-core-1_0.html) for more details, however, keep in mind that:
 
 - To trigger an Agama flow, the `acr_values` parameter must be equal to `agama`
 
-- The qualified name (identifier) of the flow to trigger is passed using the parameter referenced in property `cust_param_name` of the Agama bridge script. `customParam1` will work in most cases since this is the default value employed by the Jans installer. For the current example `customParam1=test` should be fine
+- The qualified name (identifier) of the flow to trigger is passed using the parameter referenced in property `cust_param_name` of the Agama bridge script. `agama_flow` will work in most cases since this is the default value employed by the Jans installer. For the current example `agama_flow=test` should be fine
 
 !!! Note
     To use a different parameter name ensure to register the given parameter in the [server configuration](../../config-guide/jans-cli/im/im-jans-authorization-server.md) (property `authorizationRequestCustomAllowedParameters`) and update the bridge accordingly
 
-- If the flow to call receives input parameters, their values can be passed in the custom parameter as well. Use a hyphen to separate the flow name and the parameters expressed in JSON object format. For example, if the flow had inputs  `height` and `color`, you can use `test-{"height": 190, "color": "blue"}` for the value of `customParam1`. Ensure to apply proper URL-encoding beforehand. In this case, the actual value would be `test-%7B%22height%22%3A+190%2C+%22color%22%3A+%22blue%22%7D`. If certain inputs are not provided, `null` values will be assigned for them
+- If the flow to call receives input parameters, their values can be passed in the custom parameter as well. Use a hyphen to separate the flow name and the parameters expressed in JSON object format. For example, if the flow had inputs  `height` and `color`, you can use `test-{"height": 190, "color": "blue"}` for the value of `agama_flow`. Ensure to apply proper URL-encoding beforehand. In this case, the actual value would be `test-%7B%22height%22%3A+190%2C+%22color%22%3A+%22blue%22%7D`. If certain inputs are not provided, `null` values will be assigned for them
 
 ### Testing
 
@@ -232,6 +223,8 @@ We have barely scratched the surface so far. There is lots more to learn in orde
 - [Writing UI pages](./ui-pages.md)
 
 - [Flows lifecycle](./flows-lifecycle.md)
+
+- [`.gama` files deployment](#gama-deployment.md)
 
 - [Engine configuration](./engine-config.md)
 

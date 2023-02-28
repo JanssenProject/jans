@@ -27,9 +27,6 @@ import java.util.UUID;
  */
 public abstract class AttributeService extends io.jans.service.AttributeService {
 
-    /**
-     *
-     */
     private static final long serialVersionUID = -990409035168814270L;
 
     @Inject

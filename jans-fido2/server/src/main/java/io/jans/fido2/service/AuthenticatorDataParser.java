@@ -40,6 +40,11 @@ import com.fasterxml.jackson.dataformat.cbor.CBORParser;
  * @author Yuriy Movchan
  * @version March 9, 2020
  */
+/**
+ * authData � a raw buffer struct containing user info.
+ * Parser for authData or authenticatorData
+ *
+ */
 @ApplicationScoped
 public class AuthenticatorDataParser {
 
@@ -151,7 +156,7 @@ public class AuthenticatorDataParser {
 		    while (!parser.isClosed()) {
 		        JsonToken t = parser.nextToken();
 		        if (t.isStructEnd()) {
-		            JsonLocation tocloc = parser.getTokenLocation();
+		            JsonLocation tocloc = parser.getCurrentLocation();
 		            keySize = tocloc.getByteOffset();
 		            break;
 		        }

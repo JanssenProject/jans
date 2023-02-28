@@ -6,15 +6,28 @@ on:
     - 'v**'
 
   workflow_dispatch:
-
+    inputs:
+      nightly:
+        description: 'Enable nightly build'
+        default: "false"
+        required: false
+  schedule:
+    - cron: "0 0 * * *"
 jobs:
   publish_binary_packages:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     strategy:
       matrix:
-        name: [ubuntu20, el8, suse15]
+        name: [ubuntu22, ubuntu20, el8, suse15]
 
         include:
+          - name: ubuntu22
+            asset_suffix: ~ubuntu22.04_amd64.deb
+            build_files: deb/jammy
+            asset_prefix: '_'
+            asset_path: jans
+            sign_cmd: dpkg-sig -s builder -k DE92BEF14A1A4E542F678B64DC3C790386C73900
+            python_version: 3.8                
           - name: ubuntu20
             asset_suffix: ~ubuntu20.04_amd64.deb
             build_files: deb/focal
@@ -49,6 +62,8 @@ jobs:
          sudo apt-get update
          sudo apt-get install -y python${{ matrix.python_version }}
          sudo apt install -y build-essential devscripts debhelper rpm dpkg-sig python3-ldap3 python3-requests python3-ruamel.yaml python3-pymysql python3-crypto python3-distutils python3-prompt-toolkit python${{ matrix.python_version }}-distutils
+         sudo cp -r /usr/lib/python3/dist-packages /usr/lib/python${{ matrix.python_version }}/
+         sudo python${{ matrix.python_version }} -m pip install psycopg2-binary
     - name: Import GPG key
       id: import_gpg
       continue-on-error: true
@@ -64,8 +79,21 @@ jobs:
     - name: Get latest tag
       id: previoustag
       run: |
-        echo "::set-output name=tag::$(curl https://api.github.com/repos/${{ github.repository }}/releases -s | grep "tag_name" | cut -d '"' -f 4 | grep -o '^\v.*' | head -n 1)"
-        echo "::set-output name=version::$(curl https://api.github.com/repos/${{ github.repository }}/releases -s | grep "tag_name" | cut -d '"' -f 4 | grep -o '^\v.*' | head -n 1 | cut -d 'v' -f 2)"
+        echo "version=$(curl https://api.github.com/repos/${{ github.repository }}/releases -s | grep "tag_name" | cut -d '"' -f 4 | grep -o '^\v.*' | head -n 1 | cut -d 'v' -f 2)" >> $GITHUB_OUTPUT
+        TAG=$(curl https://api.github.com/repos/${{ github.repository }}/releases -s | grep "tag_name" | cut -d '"' -f 4 | grep -o '^\v.*' | head -n 1)
+        echo "tag=$TAG" >> $GITHUB_OUTPUT
+        echo "PACKAGE_PREFIX=jans" >> ${GITHUB_ENV}
+        #If on schedule build nightly packages
+        if [ ${{ github.event_name }} = "schedule" ] || [ ${{ github.event.inputs.nightly }} = true ]; then
+          echo "Activating nightly build"
+          mkdir test && cd test
+          git clone https://github.com/JanssenProject/jans
+          VERSION=$(cat jans/docker-jans-auth-server/Dockerfile | grep "ENV CN_VERSION" | awk -F "[=-]" '{print $2}')
+          cd ../../
+          echo "PACKAGE_PREFIX=jans-nightly-build" >> ${GITHUB_ENV}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+        fi
+
     - name: Print Version
       run: |
         echo "${{ steps.previoustag.outputs.version }}"
@@ -77,7 +105,7 @@ jobs:
          cp -r /opt/dist jans-src/opt/
          cp -r /opt/jans jans-src/opt/
          touch jans-src/opt/jans/jans-setup/package
-         rm -rf install.py install jans-cli
+         rm -rf install.py install jans-cli-tui
          rm -rf jans-src/opt/jans/jans-setup/logs/setup.log
          rm -rf jans-src/opt/jans/jans-setup/logs/setup_error.log         
          sed -i "s/%VERSION%/${{ steps.previoustag.outputs.version }}/g" run-build.sh
@@ -100,18 +128,20 @@ jobs:
       with:
         repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
         file: ${{github.workspace}}/${{ matrix.asset_path }}/jans${{ matrix.asset_prefix }}${{ steps.previoustag.outputs.version }}${{ matrix.asset_suffix }}
-        asset_name: jans${{ matrix.asset_prefix }}${{ steps.previoustag.outputs.version }}${{ matrix.asset_suffix }}
+        asset_name: ${{ env.PACKAGE_PREFIX }}${{ matrix.asset_prefix }}${{ steps.previoustag.outputs.version }}${{ matrix.asset_suffix }}
         tag: ${{ steps.previoustag.outputs.tag }}
+        overwrite: true
     - name: Upload checksum to release
       id: upload_shas
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
         file: ${{github.workspace}}/${{ matrix.asset_path }}/jans${{ matrix.asset_prefix }}${{ steps.previoustag.outputs.version }}${{ matrix.asset_suffix }}.sha256sum
-        asset_name: jans${{ matrix.asset_prefix }}${{ steps.previoustag.outputs.version }}${{ matrix.asset_suffix }}.sha256sum
+        asset_name: ${{ env.PACKAGE_PREFIX }}${{ matrix.asset_prefix }}${{ steps.previoustag.outputs.version }}${{ matrix.asset_suffix }}.sha256sum
         tag: ${{ steps.previoustag.outputs.tag }}
+        overwrite: true
   build_python_packages:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -127,46 +157,20 @@ jobs:
           zypper --non-interactive install -y gcc-c++ make gcc automake autoconf libtool python3-pip python3-setuptools python3-wheel          
           zypper addrepo https://download.opensuse.org/repositories/home:smarty12:Python/RaspberryPi_Leap_15.2/home:smarty12:Python.repo
           zypper --gpg-auto-import-keys refresh
-          zypper --non-interactive install -y python3-dev
+          zypper download python3-dev
+          rpm -i --nodeps /var/cache/zypp/packages/home_smarty12_Python/noarch/python3-dev-0.4.0-lp152.1.4.noarch.rpm
+          zypper --non-interactive install -y python3
+          zypper --non-interactive install -y python3-devel
           echo "Building jans-linux-setup package"
           cd /suse/jans-linux-setup
           pip install shiv
           make zipapp
           mv jans-linux-setup.pyz jans-linux-suse-X86-64-setup.pyz
           sha256sum jans-linux-suse-X86-64-setup.pyz > jans-linux-suse-X86-64-setup.pyz.sha256sum
-          cd ../jans-cli
+          cd ../jans-cli-tui
           make zipapp 
-          mv jans-cli.pyz jans-cli-linux-suse-X86-64.pyz
-          sha256sum jans-cli-linux-suse-X86-64.pyz > jans-cli-linux-suse-X86-64.pyz.sha256sum
-    # To be removed once we get SUSE build working
-    - uses: addnab/docker-run-action@v3
-      name: Build with CentOS7
-      continue-on-error: true
-      with:
-        image: centos:centos7
-        options: -v ${{ github.workspace }}:/centos
-        run: |
-          yum install python36u python36u-devel python36u-pip -y
-          yum install gcc openssl-devel bzip2-devel libffi-devel zlib-devel -y
-          curl https://www.python.org/ftp/python/3.7.9/Python-3.7.9.tgz --output Python-3.7.9.tgz
-          tar xzf Python-3.7.9.tgz
-          cd Python-3.7.9
-          ./configure --enable-optimizations
-          yum install make -y
-          make altinstall
-          yum -y install epel-release
-          curl https://bootstrap.pypa.io/get-pip.py --output get-pip.py
-          python3.7 get-pip.py
-          echo "Building jans-linux-setup package"
-          cd /centos/jans-linux-setup
-          pip install shiv
-          make zipapp
-          mv jans-linux-setup.pyz jans-linux-X86-64-setup.pyz
-          sha256sum jans-linux-X86-64-setup.pyz > jans-linux-X86-64-setup.pyz.sha256sum
-          cd ../jans-cli
-          make zipapp 
-          mv jans-cli.pyz jans-cli-linux-X86-64.pyz
-          sha256sum jans-cli-linux-X86-64.pyz > jans-cli-linux-X86-64.pyz.sha256sum
+          mv jans-cli-tui.pyz jans-cli-tui-linux-suse-X86-64.pyz
+          sha256sum jans-cli-tui-linux-suse-X86-64.pyz > jans-cli-tui-linux-suse-X86-64.pyz.sha256sum
     - name: Set up Python 3.6
       uses: actions/setup-python@v4
       with:
@@ -175,42 +179,39 @@ jobs:
       continue-on-error: true
       run: |
         sudo apt-get update
-        sudo apt-get install build-essential python3-venv python3-pip -y
+        sudo apt-get install -y python3 build-essential ca-certificates dbus systemd iproute2 gpg python3-pip python3-dev libpq-dev gcc
         python3 -m pip install --upgrade pip
-        pip3 install shiv
+        pip3 install shiv wheel setuptools
         echo "Building jans-linux-setup package"
+        sudo chown -R runner:docker /home/runner/work/jans/jans        
         cd jans-linux-setup
-        make zipapp
-        mv jans-linux-setup.pyz jans-linux-ubuntu-X86-64-setup.pyz
-        sha256sum jans-linux-ubuntu-X86-64-setup.pyz > jans-linux-ubuntu-X86-64-setup.pyz.sha256sum
-        cd ../jans-cli
+        make zipapp || echo "Creating linux setup failed for ubuntu"
+        mv jans-linux-setup.pyz jans-linux-ubuntu-X86-64-setup.pyz || echo "Failed"
+        sha256sum jans-linux-ubuntu-X86-64-setup.pyz > jans-linux-ubuntu-X86-64-setup.pyz.sha256sum || echo "Failed"
+        cd ../jans-cli-tui
         make zipapp 
-        mv jans-cli.pyz jans-cli-linux-ubuntu-X86-64.pyz
-        sha256sum jans-cli-linux-ubuntu-X86-64.pyz > jans-cli-linux-ubuntu-X86-64.pyz.sha256sum
+        mv jans-cli-tui.pyz jans-cli-tui-linux-ubuntu-X86-64.pyz
+        sha256sum jans-cli-tui-linux-ubuntu-X86-64.pyz > jans-cli-tui-linux-ubuntu-X86-64.pyz.sha256sum
     - uses: actions/cache@v3
       id: cache-installers
       with:
         path: |
-          ${{github.workspace}}/jans-linux-setup/jans-linux-X86-64-setup.pyz
-          ${{github.workspace}}/jans-linux-setup/jans-linux-X86-64-setup.pyz.sha256sum
           ${{github.workspace}}/jans-linux-setup/jans-linux-suse-X86-64-setup.pyz
           ${{github.workspace}}/jans-linux-setup/jans-linux-suse-X86-64-setup.pyz.sha256sum
           ${{github.workspace}}/jans-linux-setup/jans-linux-ubuntu-X86-64-setup.pyz
           ${{github.workspace}}/jans-linux-setup/jans-linux-ubuntu-X86-64-setup.pyz.sha256sum
-          ${{github.workspace}}/jans-cli/jans-cli-linux-X86-64.pyz
-          ${{github.workspace}}/jans-cli/jans-cli-linux-X86-64.pyz.sha256sum
-          ${{github.workspace}}/jans-cli/jans-cli-linux-suse-X86-64.pyz
-          ${{github.workspace}}/jans-cli/jans-cli-linux-suse-X86-64.pyz.sha256sum
-          ${{github.workspace}}/jans-cli/jans-cli-linux-ubuntu-X86-64.pyz
-          ${{github.workspace}}/jans-cli/jans-cli-linux-ubuntu-X86-64.pyz.sha256sum
+          ${{github.workspace}}/jans-cli-tui/jans-cli-tui-linux-suse-X86-64.pyz
+          ${{github.workspace}}/jans-cli-tui/jans-cli-tui-linux-suse-X86-64.pyz.sha256sum
+          ${{github.workspace}}/jans-cli-tui/jans-cli-tui-linux-ubuntu-X86-64.pyz
+          ${{github.workspace}}/jans-cli-tui/jans-cli-tui-linux-ubuntu-X86-64.pyz.sha256sum
         key: ${{ github.sha }}
 
   upload_python_packages:
     needs: build_python_packages
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     strategy:
       matrix:
-        name: [centos, ubuntu, suse]
+        name: [ubuntu, suse]
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -218,23 +219,29 @@ jobs:
       id: cache-installers
       with:
         path: |
-          ${{github.workspace}}/jans-linux-setup/jans-linux-X86-64-setup.pyz
-          ${{github.workspace}}/jans-linux-setup/jans-linux-X86-64-setup.pyz.sha256sum
           ${{github.workspace}}/jans-linux-setup/jans-linux-suse-X86-64-setup.pyz
           ${{github.workspace}}/jans-linux-setup/jans-linux-suse-X86-64-setup.pyz.sha256sum
           ${{github.workspace}}/jans-linux-setup/jans-linux-ubuntu-X86-64-setup.pyz
           ${{github.workspace}}/jans-linux-setup/jans-linux-ubuntu-X86-64-setup.pyz.sha256sum
-          ${{github.workspace}}/jans-cli/jans-cli-linux-X86-64.pyz
-          ${{github.workspace}}/jans-cli/jans-cli-linux-X86-64.pyz.sha256sum
-          ${{github.workspace}}/jans-cli/jans-cli-linux-suse-X86-64.pyz
-          ${{github.workspace}}/jans-cli/jans-cli-linux-suse-X86-64.pyz.sha256sum
-          ${{github.workspace}}/jans-cli/jans-cli-linux-ubuntu-X86-64.pyz
-          ${{github.workspace}}/jans-cli/jans-cli-linux-ubuntu-X86-64.pyz.sha256sum
+          ${{github.workspace}}/jans-cli-tui/jans-cli-tui-linux-suse-X86-64.pyz
+          ${{github.workspace}}/jans-cli-tui/jans-cli-tui-linux-suse-X86-64.pyz.sha256sum
+          ${{github.workspace}}/jans-cli-tui/jans-cli-tui-linux-ubuntu-X86-64.pyz
+          ${{github.workspace}}/jans-cli-tui/jans-cli-tui-linux-ubuntu-X86-64.pyz.sha256sum
         key: ${{ github.sha }}
     - name: Get latest tag
       id: previoustag
       run: |
-        echo "::set-output name=tag::$(curl https://api.github.com/repos/${{ github.repository }}/releases -s | grep "tag_name" | cut -d '"' -f 4 | grep -o '^\v.*' | head -n 1)"
+        TAG=$(curl https://api.github.com/repos/${{ github.repository }}/releases -s | grep "tag_name" | cut -d '"' -f 4 | grep -o '^\v.*' | head -n 1)
+        echo "tag=$TAG" >> $GITHUB_OUTPUT
+        echo "SETUP_PREFIX=jans-linux" >> ${GITHUB_ENV}
+        echo "TUI_PREFIX=jans-cli-tui-linux" >> ${GITHUB_ENV}
+        #If on schedule build nightly packages
+        if [ ${{ github.event_name }} = "schedule" ] || [ ${{ github.event.inputs.nightly }} = true ]; then
+          echo "Activating nightly build"
+          VERSION=$(cat docker-jans-auth-server/Dockerfile | grep "ENV CN_VERSION" | awk -F "[=-]" '{print $2}')
+          echo "SETUP_PREFIX=jans-linux-$VERSION-nightly-build" >> ${GITHUB_ENV}
+          echo "TUI_PREFIX=jans-cli-tui-linux-$VERSION-nightly-build" >> ${GITHUB_ENV}
+        fi
     - name: Print Version
       run: |
         echo "${{ steps.previoustag.outputs.tag }}"
@@ -245,8 +252,9 @@ jobs:
       with:
         repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
         file: ${{github.workspace}}/jans-linux-setup/jans-linux-${{ matrix.name }}-X86-64-setup.pyz
-        asset_name: jans-linux-${{ matrix.name }}-X86-64-setup.pyz
+        asset_name: ${{ env.SETUP_PREFIX }}-${{ matrix.name }}-X86-64-setup.pyz
         tag: ${{ steps.previoustag.outputs.tag }}
+        overwrite: true
     - name: Upload checksum to release
       id: upload_shas_setup
       continue-on-error: true
@@ -254,23 +262,26 @@ jobs:
       with:
         repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
         file: ${{github.workspace}}/jans-linux-setup/jans-linux-${{ matrix.name }}-X86-64-setup.pyz.sha256sum
-        asset_name: jans-linux-${{ matrix.name }}-X86-64-setup.pyz.sha256sum
+        asset_name: ${{ env.SETUP_PREFIX }}-${{ matrix.name }}-X86-64-setup.pyz.sha256sum
         tag: ${{ steps.previoustag.outputs.tag }}
+        overwrite: true
     - name: Upload binaries to release
       id: upload_binaries_cli
       continue-on-error: true
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
-        file: ${{github.workspace}}/jans-cli/jans-cli-linux-${{ matrix.name }}-X86-64.pyz
-        asset_name: jans-cli-linux-${{ matrix.name }}-X86-64.pyz
+        file: ${{github.workspace}}/jans-cli-tui/jans-cli-tui-linux-${{ matrix.name }}-X86-64.pyz
+        asset_name: ${{ env.TUI_PREFIX }}-${{ matrix.name }}-X86-64.pyz
         tag: ${{ steps.previoustag.outputs.tag }}
+        overwrite: true
     - name: Upload checksum to release
       id: upload_shas_cli
       continue-on-error: true
       uses: svenstaro/upload-release-action@v2
       with:
         repo_token: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
-        file: ${{github.workspace}}/jans-cli/jans-cli-linux-${{ matrix.name }}-X86-64.pyz.sha256sum
-        asset_name: jans-cli-linux-${{ matrix.name }}-X86-64.pyz.sha256sum
+        file: ${{github.workspace}}/jans-cli-tui/jans-cli-tui-linux-${{ matrix.name }}-X86-64.pyz.sha256sum
+        asset_name: ${{ env.TUI_PREFIX }}-${{ matrix.name }}-X86-64.pyz.sha256sum
         tag: ${{ steps.previoustag.outputs.tag }}
+        overwrite: true

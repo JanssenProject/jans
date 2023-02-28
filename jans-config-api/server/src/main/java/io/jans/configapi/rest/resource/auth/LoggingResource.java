@@ -17,6 +17,7 @@ import io.jans.configapi.util.ApiConstants;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -46,11 +47,12 @@ public class LoggingResource {
             "Configuration – Logging" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.LOGGING_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Logging.class))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Logging.class) , examples = @ExampleObject(name = "Response json example", value = "example/logging/logging.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.LOGGING_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.LOGGING_READ_ACCESS } , groupScopes = {
+            ApiAccessConstants.LOGGING_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getLogging() {
         return Response.ok(this.getLoggingConfiguration()).build();
     }
@@ -58,13 +60,13 @@ public class LoggingResource {
     @Operation(summary = "Updates Jans Authorization Server logging settings", description = "Updates Jans Authorization Server logging settings", operationId = "put-config-logging", tags = {
             "Configuration – Logging" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.LOGGING_WRITE_ACCESS }))
-    @RequestBody(description = "Logging object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Logging.class)))
+    @RequestBody(description = "Logging object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Logging.class) , examples = @ExampleObject(name = "Request json example", value = "example/logging/logging.json")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Logging.class))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Logging.class) , examples = @ExampleObject(name = "Response json example", value = "example/logging/logging.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PUT
-    @ProtectedApi(scopes = { ApiAccessConstants.LOGGING_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.LOGGING_WRITE_ACCESS }, groupScopes = {}, superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response updateLogConf(@Valid Logging logging) {
         log.debug("LOGGING configuration to be updated -logging:{}", logging);
         Conf conf = configurationService.findConf();

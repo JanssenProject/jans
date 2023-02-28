@@ -1,0 +1,7 @@
+Flow flow
+    Basepath ""
+    
+    When day is rainy
+        Log me
+
+//Failure reason: When expected to be aligned to Flow 

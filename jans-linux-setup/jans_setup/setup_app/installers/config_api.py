@@ -11,6 +11,7 @@ from string import Template
 from setup_app import paths
 from setup_app.static import AppType, InstallOption
 from setup_app.utils import base
+from setup_app.utils.ldif_utils import create_client_ldif
 from setup_app.config import Config
 from setup_app.installers.jetty import JettyInstaller
 from setup_app.pylib.ldif4.ldif import LDIFWriter
@@ -77,7 +78,7 @@ class ConfigApiInstaller(JettyInstaller):
     def extract_files(self):
         base.extract_file(base.current_app.jans_zip, 'jans-config-api/server/src/main/resources/log4j2.xml', self.custom_config_dir)
         base.extract_file(base.current_app.jans_zip, 'jans-config-api/docs/jans-config-api-swagger.yaml', Config.data_dir)
-
+        base.extract_file(base.current_app.jans_zip, 'jans-config-api/server/src/main/resources/config-api-rs-protect.json', Config.data_dir)
 
     def create_folders(self):
         for d in (self.output_folder, self.custom_config_dir):
@@ -87,20 +88,14 @@ class ConfigApiInstaller(JettyInstaller):
         self.run([paths.cmd_chown, '-R', 'jetty:jetty', os.path.join(Config.jetty_base, self.service_name)])
 
 
-    def read_config_api_swagger(self):
-        config_api_swagger_yaml_fn = os.path.join(Config.data_dir, 'jans-config-api-swagger.yaml')
-        yml_str = self.readFile(config_api_swagger_yaml_fn)
-        yml_str = yml_str.replace('\t', ' ')
-        cfg_yml = ruamel.yaml.load(yml_str, ruamel.yaml.RoundTripLoader)
-        return cfg_yml
-
+    def get_scope_defs(self):
+        config_api_rs_protect_fn = os.path.join(Config.data_dir, 'config-api-rs-protect.json')
+        scopes_def = base.readJsonFile(config_api_rs_protect_fn)
+        return scopes_def
 
     def generate_configuration(self):
-        try:
-            cfg_yml = self.read_config_api_swagger()
-            scopes_def = cfg_yml['components']['securitySchemes']['oauth2']['flows']['clientCredentials']['scopes']
-        except:
-            scopes_def = {}
+
+        scopes_def = self.get_scope_defs()
 
         scope_type = 'oauth'
         self.check_clients([('jca_client_id', '1800.')])
@@ -109,7 +104,6 @@ class ConfigApiInstaller(JettyInstaller):
             Config.jca_client_pw = self.getPW()
             Config.jca_client_encoded_pw = self.obscure(Config.jca_client_pw)
 
-        scopes = ''
         scope_ldif_fd = open(self.scope_ldif_fn, 'wb')
         ldif_scopes_writer = LDIFWriter(scope_ldif_fd, cols=1000)
         scopes = {}
@@ -119,71 +113,56 @@ class ConfigApiInstaller(JettyInstaller):
             scim_scopes = base.current_app.ScimInstaller.create_user_scopes()
             jansUmaScopes_all += scim_scopes
 
-        for scope in scopes_def:
+        scope_levels = {'scopes':'1', 'groupScopes':'2', 'superScopes':'3'}
 
-            jansUmaScopes = []
+        for resource in scopes_def['resources']:
 
-            if Config.installed_instance and self.dbUtils.search('ou=scopes,o=jans', search_filter='(&(jansId={})(objectClass=jansScope))'.format(scope)):
-                continue
+            for condition in resource.get('conditions', []):
+                for scope_level in scope_levels:
+                    for scope in (condition.get(scope_level, [])):
 
-            if not scope in scopes:
-                inum = '1800.' + os.urandom(3).hex().upper()
-                scope_dn = 'inum={},ou=scopes,o=jans'.format(inum)
-                scopes[scope] = {'dn': scope_dn}
-                display_name = 'Config API scope {}'.format(scope)
-                ldif_scopes_writer.unparse(
-                        scope_dn, {
-                            'objectclass': ['top', 'jansScope'],
-                            'description': [scopes_def[scope]],
-                            'displayName': [display_name],
-                            'inum': [inum],
-                            'jansDefScope': ['false'],
-                            'jansId': [scope],
-                            'jansScopeTyp': [scope_type],
-                            'jansAttrs': [json.dumps({"spontaneousClientId":None, "spontaneousClientScopes":[], "showInConfigurationEndpoint": False})],
-                        })
+                        if not scope.get('inum'):
+                            continue
 
-                jansUmaScopes.append(scopes[scope]['dn'])
-                jansUmaScopes_all.append(scopes[scope]['dn'])
+                        if Config.installed_instance and self.dbUtils.search('ou=scopes,o=jans', search_filter='(&(jansId={})(objectClass=jansScope))'.format(scope['name'])):
+                            continue
+
+                        if not scope['name'] in scopes:
+                            scope_dn = 'inum={},ou=scopes,o=jans'.format(scope['inum'])
+                            scopes[scope['name']] = {'dn': scope_dn}
+                            display_name = 'Config API scope {}'.format(scope['name'])
+                            description = 'Config API {} scope {}'.format(scope_level, scope['name'])
+                            ldif_dict = {
+                                        'objectClass': ['top', 'jansScope'],
+                                        'description': [description],
+                                        'displayName': [display_name],
+                                        'inum': [scope['inum']],
+                                        'jansDefScope': ['false'],
+                                        'jansId': [scope['name']],
+                                        'jansScopeTyp': [scope_type],
+                                        'jansAttrs': [json.dumps({"spontaneousClientId":None, "spontaneousClientScopes":[], "showInConfigurationEndpoint": False})],
+                                    }
+                            ldif_scopes_writer.unparse(scope_dn, ldif_dict)
+                            jansUmaScopes_all.append(scope_dn)
 
         scope_ldif_fd.close()
 
-        createClient = True
-        config_api_dn = 'inum={},ou=clients,o=jans'.format(Config.jca_client_id)
+        create_client = True
         if Config.installed_instance and self.dbUtils.search('ou=clients,o=jans', search_filter='(&(inum={})(objectClass=jansClnt))'.format(Config.jca_client_id)):
-            createClient = False
+            create_client = False
 
-        if createClient:
-            clients_ldif_fd = open(self.clients_ldif_fn, 'wb')
-            ldif_clients_writer = LDIFWriter(clients_ldif_fd, cols=1000)
-            ldif_clients_writer.unparse(
-                config_api_dn, {
-                'objectClass': ['top', 'jansClnt'],
-                'del': ['false'],
-                'displayName': ['Jans Config Api Client'],
-                'inum': [Config.jca_client_id],
-                'jansAccessTknAsJwt': ['false'],
-                'jansAccessTknSigAlg': ['RS256'],
-                'jansAppTyp': ['web'],
-                'jansAttrs': ['{"tlsClientAuthSubjectDn":"","runIntrospectionScriptBeforeJwtCreation":false,"keepClientAuthorizationAfterExpiration":false,"allowSpontaneousScopes":false,"spontaneousScopes":[],"spontaneousScopeScriptDns":[],"backchannelLogoutUri":[],"backchannelLogoutSessionRequired":false,"additionalAudience":[],"postAuthnScripts":[],"consentGatheringScripts":[],"introspectionScripts":[],"rptClaimsScripts":[]}'],
-                'jansClntSecret': [Config.jca_client_encoded_pw],
-                'jansDisabled': ['false'],
-                'jansGrantTyp': ['authorization_code', 'refresh_token', 'client_credentials'],
-                'jansIdTknSignedRespAlg': ['RS256'],
-                'jansInclClaimsInIdTkn': ['false'],
-                'jansLogoutSessRequired': ['false'],
-                'jansPersistClntAuthzs': ['true'],
-                'jansRespTyp': ['code'],
-                'jansRptAsJwt': ['false'],
-                'jansScope': jansUmaScopes_all,
-                'jansSubjectTyp': ['pairwise'],
-                'jansTknEndpointAuthMethod': ['client_secret_basic'],
-                'jansTrustedClnt': ['false'],
-                'jansRedirectURI': ['https://{}/admin-ui'.format(Config.hostname), 'http://localhost:4100']
-                })
+        if create_client:
+            create_client_ldif(
+                ldif_fn=self.clients_ldif_fn,
+                client_id=Config.jca_client_id,
+                encoded_pw=Config.jca_client_encoded_pw,
+                scopes=jansUmaScopes_all,
+                redirect_uri=['https://{}/admin-ui'.format(Config.hostname), 'http://localhost:4100'],
+                display_name="Jans Config Api Client"
+                )
 
-            clients_ldif_fd.close()
             self.load_ldif_files.append(self.clients_ldif_fn)
+
 
     def render_import_templates(self):
 

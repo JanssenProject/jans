@@ -11,6 +11,7 @@ import json
 import string
 import random
 import hashlib
+import grp
 
 from pathlib import Path
 from urllib.parse import urlparse
@@ -385,18 +386,20 @@ class SetupUtils(Crypto64):
         return text % dictionary
 
 
-    def renderTemplateInOut(self, file_path, template_folder, output_dir, pystring=False):
+    def renderTemplateInOut(self, file_path, template_folder, output_dir=None, pystring=False, out_file=None):
         fn = os.path.basename(file_path)
         in_fp = os.path.join(template_folder, fn)
-        out_fp = os.path.join(output_dir, fn)
         self.logIt("Rendering template %s" % in_fp)
+
+        if not output_dir:
+            output_dir = os.path.dirname(out_file)
 
         # Create output folder if needed
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
         rendered_text = self.render_template(in_fp, pystring)
-
+        out_fp = out_file or os.path.join(output_dir, fn)
         self.writeFile(out_fp, rendered_text)
 
     def renderTemplate(self, filePath):
@@ -405,8 +408,20 @@ class SetupUtils(Crypto64):
     def createUser(self, userName, homeDir, shell='/bin/bash'):
 
         try:
+            grp.getgrnam(userName)
+            user_group_exists = True
+        except KeyError:
+            user_group_exists = False
+
+        try:
             useradd = '/usr/sbin/useradd'
-            cmd = [useradd, '--system', '--user-group', '--shell', shell, userName]
+            cmd = [useradd, '--system', '--shell', shell, userName]
+            if user_group_exists:
+                cmd.insert(1, '-g')
+                cmd.insert(2, userName)
+            else:
+                cmd.insert(1, '--user-group')
+
             if homeDir:
                 cmd.insert(-1, '--create-home')
                 cmd.insert(-1, '--home-dir')
@@ -418,8 +433,9 @@ class SetupUtils(Crypto64):
                 self.logOSChanges("User %s with homedir %s was created" % (userName, homeDir))
             else:
                 self.logOSChanges("User %s without homedir was created" % (userName))
-        except:
-            self.logIt("Error adding user", True)
+
+        except Exception as e:
+            self.logIt("Error adding user: {}".format(e), True)
 
     def createGroup(self, groupName):
         try:

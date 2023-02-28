@@ -34,11 +34,11 @@ public class CryptoProviderFactory {
             cryptoProvider = getKeyStoreProvider(configuration);
         } else if (webKeyStorage == WebKeyStorage.PKCS11) {
             cryptoProvider = new ElevenCryptoProvider(
-                    configuration.getOxElevenGenerateKeyEndpoint(),
-                    configuration.getOxElevenSignEndpoint(),
-                    configuration.getOxElevenVerifySignatureEndpoint(),
-                    configuration.getOxElevenDeleteKeyEndpoint(),
-                    configuration.getOxElevenTestModeToken());
+                    configuration.getJansElevenGenerateKeyEndpoint(),
+                    configuration.getJansElevenSignEndpoint(),
+                    configuration.getJansElevenVerifySignatureEndpoint(),
+                    configuration.getJansElevenDeleteKeyEndpoint(),
+                    configuration.getJansElevenTestModeToken());
         }
 
         if (cryptoProvider != null && configuration.getKeyRegenerationEnabled()) { // set interval only if re-generation is enabled

@@ -7,5 +7,5 @@
         <Property name="jetty.webapps" default="." />/jans-scim.war
     </Set>
     <Set name="extractWAR">true</Set>
-    <!-- <Set name="extraClasspath">%(extra_classpath)s</Set> -->
+    <Set name="extraClasspath">%(extra_classpath)s</Set>
 </Configure>

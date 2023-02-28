@@ -56,6 +56,7 @@ let idx = [], _items = []
 
     <#if catch>
 try {
+    var ${.node.preassign_catch.short_var} = null
     </#if>
     <@util_preassign node=.node /> _actionCall(
     <#if .node.static_call?size gt 0>
@@ -69,7 +70,7 @@ try {
 
     <#if catch>
 } catch (_e) {
-     var ${.node.preassign_catch.short_var} = _e.javaException
+    ${.node.preassign_catch.short_var} = _e.javaException
 }
     </#if>
 </#macro>

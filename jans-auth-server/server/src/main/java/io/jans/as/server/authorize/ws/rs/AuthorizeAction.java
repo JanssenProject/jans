@@ -32,7 +32,7 @@ import io.jans.as.common.model.session.SessionId;
 import io.jans.as.common.model.session.SessionIdState;
 import io.jans.as.server.model.config.Constants;
 import io.jans.as.server.model.exception.AcrChangedException;
-import io.jans.as.server.model.ldap.ClientAuthorization;
+import io.jans.as.persistence.model.ClientAuthorization;
 import io.jans.as.server.security.Identity;
 import io.jans.as.server.service.*;
 import io.jans.as.server.service.ciba.CibaRequestService;
@@ -392,7 +392,13 @@ public class AuthorizeAction {
             return;
         }
 
-        ExternalPostAuthnContext postAuthnContext = new ExternalPostAuthnContext(client, session, (HttpServletRequest) externalContext.getRequest(), (HttpServletResponse) externalContext.getResponse());
+        AuthzRequest authzRequest = new AuthzRequest();
+        authzRequest.setHttpRequest((HttpServletRequest) externalContext.getRequest());
+        authzRequest.setHttpResponse((HttpServletResponse) externalContext.getResponse());
+        authzRequest.setClient(client);
+        authzRequest.setSessionId(sessionId);
+
+        ExternalPostAuthnContext postAuthnContext = new ExternalPostAuthnContext(client, session, authzRequest, prompts);
         final boolean forceAuthorization = externalPostAuthnService.externalForceAuthorization(client, postAuthnContext);
 
         final boolean hasConsentPrompt = prompts.contains(io.jans.as.model.common.Prompt.CONSENT);

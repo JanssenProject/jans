@@ -28,6 +28,7 @@ public final class AuthorizeResponseParam {
     public static final String ISS = "iss";
     public static final String AUD = "aud";
     public static final String EXP = "exp";
+    public static final String DEVICE_SECRET = "device_secret";
 
     /**
      * String that represents the End-User's login state at the OP.

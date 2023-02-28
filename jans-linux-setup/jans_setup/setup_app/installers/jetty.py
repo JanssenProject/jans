@@ -2,6 +2,8 @@ import os
 import glob
 import re
 import shutil
+import zipfile
+
 import xml.etree.ElementTree as ET
 
 from setup_app import paths
@@ -191,7 +193,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         self.copyFile(jetty_service_configuration, Config.os_default)
         self.chown(os.path.join(Config.os_default, service_name), Config.root_user)
 
-        # Render web eources file
+        # Render web reources file
         try:
             web_resources = '%s_web_resources.xml' % service_name
             if os.path.exists(os.path.join(Config.templateFolder, NAME_STR, web_resources)):
@@ -210,16 +212,15 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         # Render web context file
         try:
             web_context = '%s.xml' % service_name
-            if os.path.exists(os.path.join(Config.templateFolder, NAME_STR, web_context)):
-                self.renderTemplateInOut(
-                        web_context,
-                        os.path.join(Config.templateFolder, NAME_STR),
-                        os.path.join(Config.output_dir, NAME_STR)
-                        )
-                self.copyFile(
-                        os.path.join(Config.output_dir, NAME_STR, web_context),
-                        os.path.join(self.jetty_base, service_name, WEBAPPS)
-                        )
+            jetty_temp_dir = os.path.join(Config.templateFolder, 'jetty')
+            if not os.path.exists(os.path.join(jetty_temp_dir, web_context)):
+                web_context = 'default_webcontext.xml'
+
+            self.renderTemplateInOut(
+                    web_context,
+                    os.path.join(Config.templateFolder, NAME_STR),
+                    out_file=os.path.join(self.jetty_base, service_name, 'webapps/{}.xml'.format(service_name))
+                )
         except:
             self.logIt("Error rendering service '%s' context xml" % service_name, True)
 
@@ -247,7 +248,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
                 self.run([paths.cmd_mkdir, '-p', run_dir])
 
         self.write_webapps_xml()
-
+        self.configure_extra_libs(self.source_files[0][0])
 
     def set_jetty_param(self, jettyServiceName, jetty_param, jetty_val, inifile='start.ini'):
 
@@ -346,7 +347,6 @@ class JettyInstaller(BaseInstaller, SetupUtils):
                                     ('installFido2', 'jans-fido2'),
                                     ('install_config_api', 'jans-config-api'),
                                     ('installEleven', 'jans-eleven'),
-                                    ('install_client_api', 'jans-client-api'),
                                     ]:
 
             if Config.get(config_var) and service in self.jetty_app_configuration:
@@ -398,7 +398,8 @@ class JettyInstaller(BaseInstaller, SetupUtils):
             root = tree.getroot()
 
             for app_set in root.findall("Set"):
-                if app_set.get('name') == 'extraClasspath':
+                if app_set.get('name') == 'extraClasspath' and app_set.text:
+
                     path_list = app_set.text.split(',')
                     if paths:
                         return path_list
@@ -412,3 +413,39 @@ class JettyInstaller(BaseInstaller, SetupUtils):
 
     def installed(self):
         return os.path.exists(os.path.join(Config.jetty_base, self.service_name, 'start.ini')) or os.path.exists(os.path.join(Config.jetty_base, self.service_name, 'start.d/server.ini'))
+
+    def configure_extra_libs(self, target_war_fn):
+        version_rec = re.compile('-(\d+)?\.')
+
+        builtin_libs = []
+        war_zip = zipfile.ZipFile(target_war_fn)
+        for builtin_path in war_zip.namelist():
+            if  builtin_path.endswith('.jar'):
+                builtin_libs.append(os.path.basename( builtin_path))
+        war_zip.close()
+
+        def in_war(name):
+            for fn in builtin_libs:
+                if fn.startswith(name):
+                     return fn
+
+        common_lib_dir = None
+
+        if Config.cb_install:
+            common_lib_dir = base.current_app.CouchbaseInstaller.common_lib_dir
+
+        elif Config.rdbm_install and Config.rdbm_type == 'spanner':
+            common_lib_dir = base.current_app.RDBMInstaller.common_lib_dir
+
+        if common_lib_dir:
+
+            add_custom_lib_dir = []
+            for extra_lib_fn in os.listdir(common_lib_dir):
+                version_search = version_rec.search(extra_lib_fn)
+                if version_search:
+                    version_start_index = version_search.start()
+                    name = extra_lib_fn[:version_start_index]
+                    if not in_war(name):
+                        add_custom_lib_dir.append(os.path.join(common_lib_dir, extra_lib_fn))
+
+            self.add_extra_class(','.join(add_custom_lib_dir))

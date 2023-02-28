@@ -1,0 +1,7 @@
+Flow P.O.N.X
+    Basepath "punx"
+
+punk = Trigger co.co.nut
+    Override templates "path/form.ftl" "myform.ftl" "formly.ftl"
+
+//Failure reason: odd number of parameters passed to Override templates; 2, 4, 6 ... expected 

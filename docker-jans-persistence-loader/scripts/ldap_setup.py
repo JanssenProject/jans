@@ -7,7 +7,7 @@ from ldap3.core.exceptions import LDAPSessionTerminatedByServerError
 from ldap3.core.exceptions import LDAPSocketOpenError
 
 from jans.pycloudlib.persistence.ldap import LdapClient
-from jans.pycloudlib.persistence.utils import PersistenceMapper
+# from jans.pycloudlib.persistence.utils import PersistenceMapper
 
 from settings import LOGGING_CONFIG
 from utils import prepare_template_ctx

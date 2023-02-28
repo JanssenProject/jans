@@ -1,9 +1,9 @@
 package io.jans.as.client.client.assertbuilders;
 
 import io.jans.as.client.TokenResponse;
-import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.token.TokenErrorResponseType;
 
+import static io.jans.as.client.client.Asserter.assertNotBlank;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
@@ -12,6 +12,7 @@ public class TokenResponseAssertBuilder extends BaseAssertBuilder {
     private TokenResponse response;
     private int status = 200;
     private boolean notNullRefreshToken;
+    private boolean notBlankDeviceToken;
     private boolean notNullIdToken;
     private boolean notNullScope;
     private boolean nullRefreshToken;
@@ -53,6 +54,11 @@ public class TokenResponseAssertBuilder extends BaseAssertBuilder {
         return this;
     }
 
+    public TokenResponseAssertBuilder notBlankDeviceToken() {
+        this.notBlankDeviceToken = true;
+        return this;
+    }
+
     public TokenResponseAssertBuilder notNullIdToken() {
         this.notNullIdToken = true;
         return this;
@@ -88,6 +94,9 @@ public class TokenResponseAssertBuilder extends BaseAssertBuilder {
             }
             if (notNullRefreshToken) {
                 assertNotNull(response.getRefreshToken(), "The refresh token is null");
+            }
+            if (notBlankDeviceToken) {
+                assertNotBlank(response.getDeviceToken(), "The device token is blank");
             }
         } else {
             assertEquals(response.getStatus(), status, "Unexpected HTTP status response: " + response.getEntity());

@@ -84,8 +84,9 @@ class Config:
         self.jetty_user = self.jetty_group = 'jetty'
         self.root_user = self.root_group = 'root'
         self.ldap_user = self.ldap_group = 'ldap'
-
+        self.start_auth_after = 'network.target'
         self.dump_config_on_error = False
+
         if not self.output_dir:
             self.output_dir = os.path.join(install_dir, 'output')
 
@@ -204,7 +205,6 @@ class Config:
         self.install_jans_cli = True
         self.loadTestData = False
         self.allowPreReleasedFeatures = False
-        self.install_client_api = True
 
         # backward compatibility
         self.os_type = base.os_type
@@ -228,7 +228,6 @@ class Config:
         self.cache_provider_type = 'NATIVE_PERSISTENCE'
 
         self.java_type = 'jre'
-        self.client_api_storage_type = 'jans_server_configuration'
 
         self.hostname = None
         self.ip = None

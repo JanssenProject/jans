@@ -1,6 +1,6 @@
 [Unit]
-Description=Janssen OAauth service
-After=opendj.service
+Description=Janssen Auth Server
+After=%(start_auth_after)s
 
 [Service]
 Type=forking

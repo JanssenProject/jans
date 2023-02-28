@@ -31,7 +31,6 @@ OPTIONAL_SCOPES = (
 
     # these scopes are no longer needed; not removed for backward-compat
     "fido2",
-    "client-api",
     "casa",
     "scim",
 )
@@ -81,6 +80,15 @@ class ParamSchema(Schema):
     auth_sig_keys = Str(missing="")
 
     auth_enc_keys = Str(missing="")
+
+    salt = Str(
+        validate=[
+            Length(equal=24),
+            Predicate("isalnum", error="Only alphanumeric characters are allowed"),
+        ],
+        missing="",
+        default="",
+    )
 
     @validates("hostname")
     def validate_fqdn(self, value):
