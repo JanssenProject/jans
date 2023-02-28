@@ -118,7 +118,7 @@
 			<AppenderRef ref="$script_log_target" />
 		</logger>
 
-        <Root level="ERROR">
+        <Root level="INFO">
             <AppenderRef ref="STDOUT" />
         </Root>
     </Loggers>
