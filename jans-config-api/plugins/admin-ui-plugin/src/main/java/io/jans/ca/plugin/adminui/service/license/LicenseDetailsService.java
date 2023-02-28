@@ -105,10 +105,9 @@ public class LicenseDetailsService {
         if (licenseApiResponse.isApiResult()) {
             return createLicenseResponse(false, 500, "The license has been already activated.");
         }
-        AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
-        LicenseConfiguration licenseConfiguration = auiConfiguration.getLicenseConfiguration();
-
         try {
+            AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
+            LicenseConfiguration licenseConfiguration = auiConfiguration.getLicenseConfiguration();
             log.debug("Trying to activate License.");
             String activateLicenseUrl = (new StringBuffer()).append(AppConstants.LICENSE_SPRING_API_URL)
                     .append("activate_license").toString();

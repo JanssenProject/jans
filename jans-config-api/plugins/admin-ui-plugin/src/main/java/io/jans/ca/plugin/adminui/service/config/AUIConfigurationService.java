@@ -11,6 +11,7 @@ import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.ca.plugin.adminui.model.config.AUIConfiguration;
 import io.jans.ca.plugin.adminui.model.config.LicenseConfiguration;
 import io.jans.ca.plugin.adminui.model.config.LicenseSpringCredentials;
+import io.jans.ca.plugin.adminui.model.exception.ApplicationException;
 import io.jans.ca.plugin.adminui.rest.license.LicenseResource;
 import io.jans.ca.plugin.adminui.service.BaseService;
 import io.jans.ca.plugin.adminui.utils.AppConstants;
@@ -52,7 +53,7 @@ public class AUIConfigurationService extends BaseService {
     @Inject
     ConfigurationService configurationService;
 
-    public AUIConfiguration getAUIConfiguration() {
+    public AUIConfiguration getAUIConfiguration() throws ApplicationException {
         return getAUIConfiguration(null);
     }
 
@@ -62,7 +63,7 @@ public class AUIConfigurationService extends BaseService {
      * @param appType The application type. This is either "adminUI" or "ads".
      * @return The AUIConfiguration object
      */
-    public AUIConfiguration getAUIConfiguration(String appType) {
+    public AUIConfiguration getAUIConfiguration(String appType) throws ApplicationException {
 
         try {
             if (Strings.isNullOrEmpty(appType)) {
@@ -87,10 +88,14 @@ public class AUIConfigurationService extends BaseService {
                 }
             }
 
+
             return appConfigurationMap.get(appType);
+        } catch (ApplicationException e) {
+            log.error(ErrorResponse.ERROR_READING_CONFIG.getDescription(), e);
+            throw e;
         } catch (Exception e) {
             log.error(ErrorResponse.ERROR_READING_CONFIG.getDescription(), e);
-            return null;
+            throw e;
         }
 
     }
@@ -127,7 +132,7 @@ public class AUIConfigurationService extends BaseService {
         return auiConfig;
     }
 
-    private LicenseConfiguration addPropertiesToLicenseConfiguration(AdminConf appConf) {
+    private LicenseConfiguration addPropertiesToLicenseConfiguration(AdminConf appConf) throws ApplicationException {
         LicenseConfiguration licenseConfiguration = new LicenseConfiguration();
         LicenseConfig licenseConfig = appConf.getMainSettings().getLicenseConfig();
 
@@ -149,7 +154,7 @@ public class AUIConfigurationService extends BaseService {
      *
      * @param licenseConfig This is the object that contains the configuration parameters for the license.
      */
-    private LicenseSpringCredentials requestLicenseCredentialsFromScan(LicenseConfig licenseConfig) {
+    private LicenseSpringCredentials requestLicenseCredentialsFromScan(LicenseConfig licenseConfig) throws ApplicationException {
         try {
             log.info("Inside method to request license credentials from SCAN api.");
             TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
@@ -160,7 +165,13 @@ public class AUIConfigurationService extends BaseService {
 
             log.info("Truing to get access token from auth server.");
             String scanLicenseApiHostname = (new StringBuffer()).append(licenseConfig.getScanLicenseAuthServerHostname()).append("/jans-auth/restv1/token").toString();
-            io.jans.as.client.TokenResponse tokenResponse = getToken(tokenRequest, scanLicenseApiHostname);
+            io.jans.as.client.TokenResponse tokenResponse = null;
+            try {
+                tokenResponse = getToken(tokenRequest, scanLicenseApiHostname);
+            } catch (Exception e) {
+                log.error("Error in generating token from server: {}", scanLicenseApiHostname);
+                throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Error in generating token from server: " + scanLicenseApiHostname);
+            }
             // create request header
             MultivaluedMap<String, Object> headers = new MultivaluedHashMap<>();
             headers.putSingle("Content-Type", "application/json");
@@ -198,11 +209,11 @@ public class AUIConfigurationService extends BaseService {
                     return licenseSpringCredentials;
                 }
             }
-            log.error("license Activation error response: {}", response.readEntity(String.class));
-            return null;
+            log.error("license Activation error response: {}, code: {}", response.readEntity(String.class), response.getStatus());
+            throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), ErrorResponse.LICENSE_SPRING_CREDENTIALS_ERROR.getDescription());
         } catch (Exception e) {
             log.error(ErrorResponse.LICENSE_SPRING_CREDENTIALS_ERROR.getDescription(), e);
-            return null;
+            throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), ErrorResponse.LICENSE_SPRING_CREDENTIALS_ERROR.getDescription());
         }
     }
 }

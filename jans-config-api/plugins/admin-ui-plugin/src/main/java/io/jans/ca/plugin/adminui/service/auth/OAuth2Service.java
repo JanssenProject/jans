@@ -135,26 +135,6 @@ public class OAuth2Service extends BaseService {
         }
     }
 
-    public Map<String, Object> introspectToken(String accessToken, String appType) {
-        log.info("Token introspection from auth-server.");
-        AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration(appType);
-        Invocation.Builder request = ClientFactory.instance().getClientBuilder(auiConfiguration.getAuthServerIntrospectionEndpoint());
-        request.header("Authorization", "Bearer " + accessToken);
-
-        MultivaluedMap<String, String> body = new MultivaluedHashMap<>();
-        body.putSingle("token", accessToken);
-
-        Response response = request.post(Entity.form(body));
-
-        log.info("Introspection response status code: {}", response.getStatus());
-
-        if (response.getStatus() == 200) {
-            Map<String, Object> entity = response.readEntity(Map.class);
-            log.info("Introspection response entity: {}", entity);
-            return entity;
-        }
-        return null;
-    }
     public UserInfoResponse getUserInfo(UserInfoRequest userInfoRequest, String appType) throws ApplicationException {
         try {
             log.debug("Getting User-Info from auth-server: {}", userInfoRequest.getAccessToken());
@@ -172,7 +152,6 @@ public class OAuth2Service extends BaseService {
                 accessToken = tokenResponse.getAccessToken();
             }
             log.debug("Access Token : {}", accessToken);
-            Map<String, Object> introspectionResponse = introspectToken(accessToken, appType);
 
             MultivaluedMap<String, String> body = new MultivaluedHashMap<>();
             body.putSingle("access_token", accessToken);
@@ -195,9 +174,6 @@ public class OAuth2Service extends BaseService {
                 UserInfoResponse userInfoResponse = new UserInfoResponse();
                 userInfoResponse.setClaims(getClaims(jwtUserInfo));
                 userInfoResponse.setJwtUserInfo(entity);
-                if(introspectionResponse.get("customClaims") != null) {
-                    userInfoResponse.addClaims("customClaims", introspectionResponse.get("customClaims"));
-                }
 
                 log.debug("User-Info response userInfoResponse: {}", userInfoResponse);
                 return userInfoResponse;
