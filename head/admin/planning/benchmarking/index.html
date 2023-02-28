@@ -1889,10 +1889,59 @@
   
   
   
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_6_3" type="checkbox" id="__nav_1_6_3" >
+      
+      
+      
+        
+          
+            
+          
+        
+          
+        
+      
+      
+        
+        
+        <div class="md-nav__link md-nav__link--index ">
+          <a href="../../config-guide/jans-tui/">Text-Based User Interface (TUI)</a>
+          
+            <label for="__nav_1_6_3">
+              <span class="md-nav__icon md-icon"></span>
+            </label>
+          
+        </div>
+      
+      <nav class="md-nav" aria-label="Text-Based User Interface (TUI)" data-md-level="3">
+        <label class="md-nav__title" for="__nav_1_6_3">
+          <span class="md-nav__icon md-icon"></span>
+          Text-Based User Interface (TUI)
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+          
+            
+              
+  
+  
+  
     <li class="md-nav__item">
-      <a href="../../config-guide/tui/" class="md-nav__link">
-        Text-Based User Interface (TUI)
+      <a href="../../config-guide/jans-tui/navigation-guide/" class="md-nav__link">
+        Navigation Guide
       </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
     </li>
   
 
@@ -8840,7 +8889,7 @@ cat <span class="s">&lt;&lt; EOF &gt; auth_code_client.json</span>
 <span class="s">EOF</span>
 </code></pre></div></li>
 </ol>
-<p>Download or build <a href="../../config-guide/tui/">config-cli-tui</a> and run:</p>
+<p>Download or build <a href="../config-guide/tui.md">config-cli-tui</a> and run:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># add -noverify if your fqdn is not registered</span>
 ./config-cli-tui.pyz --host &lt;FQDN&gt; --client-id &lt;ROLE_BASED_CLIENT_ID&gt; --client-secret &lt;ROLE_BASED_CLIENT_SECRET&gt; --no-tui --operation-id<span class="o">=</span>post-oauth-openid-client --data<span class="o">=</span>auth_code_client.json
 </code></pre></div>

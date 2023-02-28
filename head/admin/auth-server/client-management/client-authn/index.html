@@ -1830,10 +1830,59 @@
   
   
   
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_6_3" type="checkbox" id="__nav_1_6_3" >
+      
+      
+      
+        
+          
+            
+          
+        
+          
+        
+      
+      
+        
+        
+        <div class="md-nav__link md-nav__link--index ">
+          <a href="../../../config-guide/jans-tui/">Text-Based User Interface (TUI)</a>
+          
+            <label for="__nav_1_6_3">
+              <span class="md-nav__icon md-icon"></span>
+            </label>
+          
+        </div>
+      
+      <nav class="md-nav" aria-label="Text-Based User Interface (TUI)" data-md-level="3">
+        <label class="md-nav__title" for="__nav_1_6_3">
+          <span class="md-nav__icon md-icon"></span>
+          Text-Based User Interface (TUI)
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+          
+            
+              
+  
+  
+  
     <li class="md-nav__item">
-      <a href="../../../config-guide/tui/" class="md-nav__link">
-        Text-Based User Interface (TUI)
+      <a href="../../../config-guide/jans-tui/navigation-guide/" class="md-nav__link">
+        Navigation Guide
       </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
     </li>
   
 
@@ -9039,7 +9088,7 @@ the same token in case it is compromised.</li>
 <p>Algorithms supported by Janssen Server are listed in the response of Janssen Server's well-known
 <a href="../../endpoints/configuration/">configuration endpoint</a>. From the response, the claim 
 <code>token_endpoint_auth_signing_alg_values_supported</code> lists the supported algorithms.</p>
-<p>To specify preferred algorithm for a client, using <a href="../../../config-guide/tui/">Janssen Text-based UI(TUI)</a>,
+<p>To specify preferred algorithm for a client, using <a href="../../config-guide/tui.md">Janssen Text-based UI(TUI)</a>,
 navigate via <code>Auth Server</code> -&gt; Get or add clients -&gt; <code>encryption/signing</code> -&gt; TODO: which exact properties.</p>
 <h2 id="private_key_jwt">private_key_jwt<a class="headerlink" href="#private_key_jwt" title="Permanent link">#</a></h2>
 <p><code>private_key_jwt</code> is private key based method where secret is not shared between client and authorization server. 
@@ -9078,7 +9127,7 @@ can be found at <a href="https://jwt.io/libraries">jwt.io</a>. Psudocode impleme
 <h3 id="client-configuration-for-using-private_key_jwt">Client Configuration For Using private_key_jwt<a class="headerlink" href="#client-configuration-for-using-private_key_jwt" title="Permanent link">#</a></h3>
 <p>Janssen Server clients can specify signing and encryption keys using client configuration. Clients can either specify
 JWKS as value or as reference URI. </p>
-<p>To specify JWKS values or reference URI, using <a href="../../../config-guide/tui/">Janssen Text-based UI(TUI)</a>,
+<p>To specify JWKS values or reference URI, using <a href="../../config-guide/tui.md">Janssen Text-based UI(TUI)</a>,
 navigate via <code>Auth Server</code> -&gt; Get or add clients -&gt; <code>encryption/signing</code> -&gt; set value for <code>Client JWKS URI</code> or 
 <code>Client JWKS</code>.</p>
 <h2 id="tls_client_auth">tls_client_auth<a class="headerlink" href="#tls_client_auth" title="Permanent link">#</a></h2>

@@ -1830,10 +1830,59 @@
   
   
   
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_6_3" type="checkbox" id="__nav_1_6_3" >
+      
+      
+      
+        
+          
+            
+          
+        
+          
+        
+      
+      
+        
+        
+        <div class="md-nav__link md-nav__link--index ">
+          <a href="../../../config-guide/jans-tui/">Text-Based User Interface (TUI)</a>
+          
+            <label for="__nav_1_6_3">
+              <span class="md-nav__icon md-icon"></span>
+            </label>
+          
+        </div>
+      
+      <nav class="md-nav" aria-label="Text-Based User Interface (TUI)" data-md-level="3">
+        <label class="md-nav__title" for="__nav_1_6_3">
+          <span class="md-nav__icon md-icon"></span>
+          Text-Based User Interface (TUI)
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+          
+            
+              
+  
+  
+  
     <li class="md-nav__item">
-      <a href="../../../config-guide/tui/" class="md-nav__link">
-        Text-Based User Interface (TUI)
+      <a href="../../../config-guide/jans-tui/navigation-guide/" class="md-nav__link">
+        Navigation Guide
       </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
     </li>
   
 
@@ -8854,13 +8903,13 @@ access the endpoint. More information about request and response of the userinfo
 the OpenAPI specification of <a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/User_Info">jans-auth-server module</a>.</p>
 <h2 id="disabling-the-endpoint-using-feature-flag">Disabling The Endpoint Using Feature Flag<a class="headerlink" href="#disabling-the-endpoint-using-feature-flag" title="Permanent link">#</a></h2>
 <p><code>userinfo</code> endpoint can be enabled or disable using <a href="../../../reference/json/feature-flags/janssenauthserver-feature-flags/#userinfo">USERINFO feature flag</a>.
-Use <a href="../../../config-guide/tui/">Janssen Text-based UI(TUI)</a> or <a href="../../../config-guide/jans-cli/">Janssen command-line interface</a> to perform this task.</p>
+Use <a href="../../config-guide/tui.md">Janssen Text-based UI(TUI)</a> or <a href="../../../config-guide/jans-cli/">Janssen command-line interface</a> to perform this task.</p>
 <p>When using TUI, navigate via <code>Auth Server</code>-&gt;<code>Properties</code>-&gt;<code>enabledFeatureFlags</code> to screen below. From here, enable or
 disable <code>USERINFO</code> flag as required.</p>
 <p><img alt="" src="../../../../assets/image-tui-enable-components.png" /></p>
 <h2 id="configuration-properties">Configuration Properties<a class="headerlink" href="#configuration-properties" title="Permanent link">#</a></h2>
 <p>Userinfo endpoint can be further configured using Janssen Server configuration properties listed below. When using
-<a href="../../../config-guide/tui/">Janssen Text-based UI(TUI)</a> to configure the properties, 
+<a href="../../config-guide/tui.md">Janssen Text-based UI(TUI)</a> to configure the properties, 
 navigate via <code>Auth Server</code>-&gt;<code>Properties</code>.</p>
 <ul>
 <li><a href="../../../reference/json/properties/janssenauthserver-properties/#mtlsuserinfoendpoint">mtlsUserInfoEndpoint</a></li>
@@ -8876,16 +8925,16 @@ navigate via <code>Auth Server</code>-&gt;<code>Properties</code>.</p>
 scopes. Janssen Server supports all <a href="https://openid.net/specs/openid-connect-core-1_0.html#ScopeClaims">standard scopes</a>
 and releases corresponding claims as per OpenID Connect specification. Administrator can customise standard scopes and 
 define claims to be linked to each standard scope.</p>
-<p>When using <a href="../../../config-guide/tui/">Janssen Text-based UI(TUI)</a> to configure the scopes, navigate via 
+<p>When using <a href="../../config-guide/tui.md">Janssen Text-based UI(TUI)</a> to configure the scopes, navigate via 
 <code>Auth Server</code>-&gt;<code>Scopes</code>-&gt;<code>Add Scopes</code>-&gt;<code>Scope Type</code> as <code>OpenID</code>-&gt;search for a standard scope like <code>address</code></p>
 <h3 id="dynamic-scopes">Dynamic Scopes<a class="headerlink" href="#dynamic-scopes" title="Permanent link">#</a></h3>
 <p>In addition to standard scopes, Janssen server allows defining custom scopes which can be associated to user-defined 
 list of claims. This allows administrators to create custom groupings of claims.</p>
-<p>When using <a href="../../../config-guide/tui/">Janssen Text-based UI(TUI)</a>, navigate via
+<p>When using <a href="../../config-guide/tui.md">Janssen Text-based UI(TUI)</a>, navigate via
 <code>Auth Server</code>-&gt;<code>Scopes</code>-&gt;<code>Add Scopes</code>-&gt;<code>Scope Type</code> as <code>Dynamic</code></p>
 <h3 id="interception-scripts">Interception Scripts<a class="headerlink" href="#interception-scripts" title="Permanent link">#</a></h3>
 <p>Response from userinfo can be further customized using <a href="../../../developer/scripts/dynamic-scope/">dynamic scope</a> interception script.</p>
-<p>Administrator can attach a dynamic scope script to a dynamic scope using <a href="../../../config-guide/tui/">Janssen Text-based UI(TUI)</a>. 
+<p>Administrator can attach a dynamic scope script to a dynamic scope using <a href="../../config-guide/tui.md">Janssen Text-based UI(TUI)</a>. 
 Navigate to <code>Auth Server</code>-&gt;<code>Scopes</code>-&gt;<code>Add Scopes</code>-&gt;<code>Scope Type</code> as <code>Dynamic</code>-&gt;<code>Dynamic Scope Script</code></p>
 <h2 id="want-to-contribute">Want to contribute?<a class="headerlink" href="#want-to-contribute" title="Permanent link">#</a></h2>
 <p>If you have content you'd like to contribute to this page in the meantime, you can get started with our <a href="https://docs.jans.io/head/CONTRIBUTING/">Contribution guide</a>.</p>

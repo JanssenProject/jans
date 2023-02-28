@@ -1830,10 +1830,59 @@
   
   
   
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_6_3" type="checkbox" id="__nav_1_6_3" >
+      
+      
+      
+        
+          
+            
+          
+        
+          
+        
+      
+      
+        
+        
+        <div class="md-nav__link md-nav__link--index ">
+          <a href="../../../config-guide/jans-tui/">Text-Based User Interface (TUI)</a>
+          
+            <label for="__nav_1_6_3">
+              <span class="md-nav__icon md-icon"></span>
+            </label>
+          
+        </div>
+      
+      <nav class="md-nav" aria-label="Text-Based User Interface (TUI)" data-md-level="3">
+        <label class="md-nav__title" for="__nav_1_6_3">
+          <span class="md-nav__icon md-icon"></span>
+          Text-Based User Interface (TUI)
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+          
+            
+              
+  
+  
+  
     <li class="md-nav__item">
-      <a href="../../../config-guide/tui/" class="md-nav__link">
-        Text-Based User Interface (TUI)
+      <a href="../../../config-guide/jans-tui/navigation-guide/" class="md-nav__link">
+        Navigation Guide
       </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
     </li>
   
 
@@ -8941,7 +8990,7 @@ of <a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/J
 <p>TODO: It seems this endpoint can't be disabled using featureflags. Confirm this.</p>
 <h2 id="configuration-properties">Configuration Properties<a class="headerlink" href="#configuration-properties" title="Permanent link">#</a></h2>
 <p>Authorization endpoint can be further configured using Janssen Server configuration properties listed below. When using
-<a href="../../../config-guide/tui/">Janssen Text-based UI(TUI)</a> to configure the properties,
+<a href="../../config-guide/tui.md">Janssen Text-based UI(TUI)</a> to configure the properties,
 navigate via <code>Auth Server</code>-&gt;<code>Properties</code>.</p>
 <ul>
 <li><a href="../../../reference/json/properties/janssenauthserver-properties/#issuer">issuer</a></li>
@@ -8965,7 +9014,7 @@ navigate via <code>Auth Server</code>-&gt;<code>Properties</code>.</p>
 <h2 id="required-client-configuration">Required Client Configuration<a class="headerlink" href="#required-client-configuration" title="Permanent link">#</a></h2>
 <p>Clients must be registered with Janssen Server as using <a href="https://www.rfc-editor.org/rfc/rfc6749#section-4.1">code</a> 
 and/or <a href="https://www.rfc-editor.org/rfc/rfc6749#section-4.2">implicit</a> grant types in order to use authorization endpoint.</p>
-<p>Using <a href="../../../config-guide/tui/">Janssen Text-based UI(TUI)</a>, client can be registered for appropriate grant type by
+<p>Using <a href="../../config-guide/tui.md">Janssen Text-based UI(TUI)</a>, client can be registered for appropriate grant type by
 navigating to <code>Auth-Server</code>-&gt;<code>Clients</code>-&gt;<code>Add Client</code></p>
 <h2 id="using-pkce">Using PKCE<a class="headerlink" href="#using-pkce" title="Permanent link">#</a></h2>
 <p>Janssen Server <a href="../../oauth-features/pkce/">supports PKCE</a>, which recommended and more secure method for using <code>code</code>
