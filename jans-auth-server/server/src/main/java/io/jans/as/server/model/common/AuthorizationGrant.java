@@ -379,6 +379,8 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
             metricService.incCounter(MetricType.TOKEN_ID_TOKEN_COUNT);
 
             return idToken;
+        } catch (WebApplicationException e) {
+            throw e;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             return null;
