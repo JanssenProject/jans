@@ -196,7 +196,9 @@ nav:
             - 'Monitoring': 'admin/config-guide/config-api/monitoring.md'
             - 'Plugins': 'admin/config-guide/config-api/plugins.md'
         - 'CURL Guide': 'admin/config-guide/curl.md'
-        - 'Text-Based User Interface (TUI)': 'admin/config-guide/tui.md'
+        - 'Text-Based User Interface (TUI)':
+            - 'admin/config-guide/jans-tui/README.md'
+            - 'Navigation Guide': 'admin/config-guide/jans-tui/navigation-guide.md'
         - 'Command Line Interface (CLI)':
             - 'admin/config-guide/jans-cli/README.md'
             - 'Standalone Installation': 'admin/config-guide/jans-cli/install.md'
