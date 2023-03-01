@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.8](https://github.com/JanssenProject/jans/compare/jans-pycloudlib-v1.0.7...jans-pycloudlib-v1.0.8) (2023-03-01)
+
+
+### Bug Fixes
+
+* **jans-pycloudlib:** split aws secrets when payload is larger than 65536 bytes ([#3971](https://github.com/JanssenProject/jans/issues/3971)) ([bd3d59b](https://github.com/JanssenProject/jans/commit/bd3d59b28259982fc803b0dccdbeda07f328bf92))
+
 ## [1.0.7](https://github.com/JanssenProject/jans/compare/jans-pycloudlib-v1.0.6...jans-pycloudlib-v1.0.7) (2023-02-22)
 
 
