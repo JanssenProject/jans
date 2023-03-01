@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.8](https://github.com/JanssenProject/jans/compare/jans-cli-tui-v1.0.7...jans-cli-tui-v1.0.8) (2023-03-01)
+
+
+### Features
+
+* **jans-cli-tui:** enable super gluu option ([#3970](https://github.com/JanssenProject/jans/issues/3970)) ([0200751](https://github.com/JanssenProject/jans/commit/020075109f9e204ad35b85a6cd9c0470977b805a))
+
 ## [1.0.7](https://github.com/JanssenProject/jans/compare/jans-cli-tui-v1.0.6...jans-cli-tui-v1.0.7) (2023-02-22)
 
 
