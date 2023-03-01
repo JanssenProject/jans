@@ -164,3 +164,4 @@ The `client` instance resembles quite close the SCIM specification, so it is gen
 
 Note that `ScimClientFactory` provides several methods that allow you to use OAuth clients which employ mechanisms other than the default (`client_secret_basic`) to request tokens. Also, you can make `client` belong to more restrictive interfaces limiting the operations available in your code.
 
+
