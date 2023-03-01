@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.8](https://github.com/JanssenProject/jans/compare/jans-fido2-v1.0.7...jans-fido2-v1.0.8) (2023-03-01)
+
+
+### Bug Fixes
+
+* fix user publicKey search ([#3982](https://github.com/JanssenProject/jans/issues/3982)) ([d0584dd](https://github.com/JanssenProject/jans/commit/d0584dd3b67039c3bff76649547401e50012cce5))
+
 ## 1.0.7 (2023-02-22)
 
 
