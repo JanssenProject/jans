@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.8-1](https://github.com/JanssenProject/jans/compare/docker-jans-config-api-v1.0.7-1...docker-jans-config-api-v1.0.8-1) (2023-03-01)
+
+
+### Bug Fixes
+
+* **docker-jans:** add missing logs due to improper configuration ([#3994](https://github.com/JanssenProject/jans/issues/3994)) ([c041f12](https://github.com/JanssenProject/jans/commit/c041f1274296fe89d997e6e3afaf91bc5c0af540))
+
 ## 1.0.7-1 (2023-02-22)
 
 
