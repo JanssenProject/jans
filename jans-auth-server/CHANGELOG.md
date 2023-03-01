@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.8](https://github.com/JanssenProject/jans/compare/jans-auth-server-v1.0.7...jans-auth-server-v1.0.8) (2023-03-01)
+
+
+### Bug Fixes
+
+* **jans-auth-server:** WebApplicationException is not propagated out of "Update Token" script [#3996](https://github.com/JanssenProject/jans/issues/3996) ([#3997](https://github.com/JanssenProject/jans/issues/3997)) ([d561f14](https://github.com/JanssenProject/jans/commit/d561f14a04fec8f3b8b56d60d53f5954c12482fa))
+* solved error when generate jwt of ssa return error, but ssa persist in database ([#3985](https://github.com/JanssenProject/jans/issues/3985)) ([768fd04](https://github.com/JanssenProject/jans/commit/768fd0440e87930733cf3a463692823c5a105d4a))
+
 ## [1.0.7](https://github.com/JanssenProject/jans/compare/jans-auth-server-v1.0.6...jans-auth-server-v1.0.7) (2023-02-22)
 
 
