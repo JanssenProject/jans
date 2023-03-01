@@ -84,7 +84,7 @@ import jakarta.inject.Inject;
 @AddBeanClasses(io.jans.service.util.Resources.class)
 @AddBeanClasses(io.jans.service.net.NetworkService.class)
 @ExplicitParamInjection
-public class FullFlowAndroidTest {
+public class FullFlowAppleTest {
 
 	private String issuer;
 	private String attestationChallenge;
@@ -223,7 +223,7 @@ public class FullFlowAndroidTest {
 				.thenReturn(true).getMock();
 	}
 
-	public void testStartAttestationTwoStepAndroidImpl(String issuer, String challenge, String userName,
+	public void testStartAttestationTwoStepAppleImpl(String issuer, String challenge, String userName,
 			String applicationId, String sessionId) {
 		this.issuer = issuer;
 		this.attestationChallenge = challenge;
@@ -247,7 +247,7 @@ public class FullFlowAndroidTest {
         assertEquals(registrationEntry.getRegistrationStatus(), Fido2RegistrationStatus.pending);
 	}
 
-	public void testFinishAssertionTwoStepAndroidAuthenticatedImpl(String userName, String registerFinishResponse, String registeredPublicKey) {
+	public void testFinishAssertionTwoStepAppleAuthenticatedImpl(String userName, String registerFinishResponse, String registeredPublicKey) {
 		// Parse register response
 		RegisterResponse registerResponse = attestationSuperGluuController.parseRegisterResponse(registerFinishResponse);
 
@@ -267,19 +267,19 @@ public class FullFlowAndroidTest {
         assertEquals(response.get("createdCredentials").get("id").asText(), registeredPublicKey);
 	}
 
-	public void testFinishAssertionTwoStepAndroidAuthenticatedRegistered(String userName, String registerFinishResponse, String registeredPublicKey) {
-		testFinishAssertionTwoStepAndroidAuthenticatedImpl(userName, registerFinishResponse, registeredPublicKey);
+	public void testFinishAssertionTwoStepAppleAuthenticatedRegistered(String userName, String registerFinishResponse, String registeredPublicKey) {
+		testFinishAssertionTwoStepAppleAuthenticatedImpl(userName, registerFinishResponse, registeredPublicKey);
 
         assertEquals(registrationEntry.getRegistrationStatus(), Fido2RegistrationStatus.registered);
 	}
 
-	public void testFinishAssertionTwoStepAndroidAuthenticatedCanceled(String userName, String registerFinishResponse, String registeredPublicKey) {
-		testFinishAssertionTwoStepAndroidAuthenticatedImpl(userName, registerFinishResponse, registeredPublicKey);
+	public void testFinishAssertionTwoStepAppleAuthenticatedCanceled(String userName, String registerFinishResponse, String registeredPublicKey) {
+		testFinishAssertionTwoStepAppleAuthenticatedImpl(userName, registerFinishResponse, registeredPublicKey);
 
         assertEquals(registrationEntry.getRegistrationStatus(), Fido2RegistrationStatus.canceled);
 	}
 
-	public void testStartAssertionTwoStepAndroidImpl(String issuer, String challenge, String userName,
+	public void testStartAssertionTwoStepAppleImpl(String issuer, String challenge, String userName,
 			String applicationId, String sessionId) {
 		this.issuer = issuer;
 		this.assertionChallenge = challenge;
@@ -305,7 +305,7 @@ public class FullFlowAndroidTest {
         assertEquals(authenticationEntry.getAuthenticationStatus(), Fido2AuthenticationStatus.pending);
 	}
 
-	public void testFinishAssertionTwoStepAndroidImpl(String userName, String authenticateFinishResponse) {
+	public void testFinishAssertionTwoStepAppleImpl(String userName, String authenticateFinishResponse) {
 		// Parse register response
 		AuthenticateResponse authenticateResponse = assertionSuperGluuController.parseAuthenticateResponse(authenticateFinishResponse);
 
@@ -329,14 +329,14 @@ public class FullFlowAndroidTest {
         assertEquals(response.get("authenticatedCredentials").get("id").asText(), registrationEntry.getPublicKeyId());
 	}
 
-	public void testFinishAssertionTwoStepAndroidAuthenticated(String userName, String authenticateFinishResponse) {
-		testFinishAssertionTwoStepAndroidImpl(userName, authenticateFinishResponse);
+	public void testFinishAssertionTwoStepAppleAuthenticated(String userName, String authenticateFinishResponse) {
+		testFinishAssertionTwoStepAppleImpl(userName, authenticateFinishResponse);
 
         assertEquals(authenticationEntry.getAuthenticationStatus(), Fido2AuthenticationStatus.authenticated);
 	}
 
-	public void testFinishAssertionTwoStepAndroidCanceled(String userName, String authenticateFinishResponse) {
-		testFinishAssertionTwoStepAndroidImpl(userName, authenticateFinishResponse);
+	public void testFinishAssertionTwoStepAppleCanceled(String userName, String authenticateFinishResponse) {
+		testFinishAssertionTwoStepAppleImpl(userName, authenticateFinishResponse);
 
         assertEquals(authenticationEntry.getAuthenticationStatus(), Fido2AuthenticationStatus.canceled);
 	}
@@ -344,100 +344,100 @@ public class FullFlowAndroidTest {
 	@Test
 	@Order(1)
     @ExtendWith(FileParameterExtension.class)
-	public void testStartAttestationTwoStepAndroid(@Name("attestation.android.two-step.issuer") String issuer, @Name("attestation.android.two-step.challenge") String challenge,
-			@Name("attestation.android.two-step.userName") String userName, @Name("attestation.android.two-step.applicationId") String applicationId,
-			@Name("attestation.android.two-step.sessionId") String sessionId, @Name("attestation.android.two-step.enrollmentCode") String enrollmentCode) {
-		testStartAttestationTwoStepAndroidImpl(issuer, challenge, userName, applicationId, sessionId);
+	public void testStartAttestationTwoStepApple(@Name("attestation.apple.two-step.issuer") String issuer, @Name("attestation.apple.two-step.challenge") String challenge,
+			@Name("attestation.apple.two-step.userName") String userName, @Name("attestation.apple.two-step.applicationId") String applicationId,
+			@Name("attestation.apple.two-step.sessionId") String sessionId, @Name("attestation.apple.two-step.enrollmentCode") String enrollmentCode) {
+		testStartAttestationTwoStepAppleImpl(issuer, challenge, userName, applicationId, sessionId);
 	}
 
 	@Test
 	@Order(2)
     @ExtendWith(FileParameterExtension.class)
-	public void testFinishAttestationTwoStepAndroid(@Name("attestation.android.two-step.userName") String userName,
-			@Name("attestation.android.two-step.finish.request") String registerFinishResponse, @Name("attestation.android.two-step.finish.publicKeyId") String publicKeyId) {
-		testFinishAssertionTwoStepAndroidAuthenticatedRegistered(userName, registerFinishResponse, publicKeyId);
+	public void testFinishAttestationTwoStepApple(@Name("attestation.apple.two-step.userName") String userName,
+			@Name("attestation.apple.two-step.finish.request") String registerFinishResponse, @Name("attestation.apple.two-step.finish.publicKeyId") String publicKeyId) {
+		testFinishAssertionTwoStepAppleAuthenticatedRegistered(userName, registerFinishResponse, publicKeyId);
 	}
 
 	@Test
 	@Order(3)
     @ExtendWith(FileParameterExtension.class)
-	public void testStartAssertionTwoStepAndroid(@Name("attestation.android.two-step.issuer") String issuer, @Name("assertion.android.two-step.challenge") String challenge,
-			@Name("attestation.android.two-step.userName") String userName, @Name("attestation.android.two-step.applicationId") String applicationId,
-			@Name("attestation.android.two-step.sessionId") String sessionId) {
+	public void testStartAssertionTwoStepApple(@Name("attestation.apple.two-step.issuer") String issuer, @Name("assertion.apple.two-step.challenge") String challenge,
+			@Name("attestation.apple.two-step.userName") String userName, @Name("attestation.apple.two-step.applicationId") String applicationId,
+			@Name("attestation.apple.two-step.sessionId") String sessionId) {
 
-		testStartAssertionTwoStepAndroidImpl(issuer, challenge, userName, applicationId, sessionId);
+		testStartAssertionTwoStepAppleImpl(issuer, challenge, userName, applicationId, sessionId);
 	}
 
 	@Test
 	@Order(4)
     @ExtendWith(FileParameterExtension.class)
-	public void testFinishAssertionTwoStepAndroid(@Name("attestation.android.two-step.userName") String userName,
-			@Name("assertion.android.two-step.finish.request") String authenticateFinishResponse) {
-		testFinishAssertionTwoStepAndroidAuthenticated(userName, authenticateFinishResponse);
+	public void testFinishAssertionTwoStepApple(@Name("attestation.apple.two-step.userName") String userName,
+			@Name("assertion.apple.two-step.finish.request") String authenticateFinishResponse) {
+		testFinishAssertionTwoStepAppleAuthenticated(userName, authenticateFinishResponse);
         assertTrue(registrationEntry.getCounter() == 1);
 	}
 
 	@Test
 	@Order(5)
     @ExtendWith(FileParameterExtension.class)
-	public void testSecondStartAssertionTwoStepAndroid(@Name("attestation.android.two-step.issuer") String issuer, @Name("assertion.android.two-step.challenge2") String challenge,
-			@Name("attestation.android.two-step.userName") String userName, @Name("attestation.android.two-step.applicationId") String applicationId,
-			@Name("attestation.android.two-step.sessionId") String sessionId) {
-		testStartAssertionTwoStepAndroidImpl(issuer, challenge, userName, applicationId, sessionId);
+	public void testSecondStartAssertionTwoStepApple(@Name("attestation.apple.two-step.issuer") String issuer, @Name("assertion.apple.two-step.challenge2") String challenge,
+			@Name("attestation.apple.two-step.userName") String userName, @Name("attestation.apple.two-step.applicationId") String applicationId,
+			@Name("attestation.apple.two-step.sessionId") String sessionId) {
+		testStartAssertionTwoStepAppleImpl(issuer, challenge, userName, applicationId, sessionId);
 	}
 
 	@Test
 	@Order(6)
     @ExtendWith(FileParameterExtension.class)
-	public void testSecondFinishAssertionTwoStepAndroid(@Name("attestation.android.two-step.userName") String userName,
-			@Name("assertion.android.two-step.finish.request2") String authenticateFinishResponse) {
-		testFinishAssertionTwoStepAndroidAuthenticated(userName, authenticateFinishResponse);
+	public void testSecondFinishAssertionTwoStepApple(@Name("attestation.apple.two-step.userName") String userName,
+			@Name("assertion.apple.two-step.finish.request2") String authenticateFinishResponse) {
+		testFinishAssertionTwoStepAppleAuthenticated(userName, authenticateFinishResponse);
         assertTrue(registrationEntry.getCounter() == 2);
 	}
 
 	@Test
 	@Order(7)
     @ExtendWith(FileParameterExtension.class)
-	public void testThirdStartAssertionTwoStepCancelAndroid(@Name("attestation.android.two-step.issuer") String issuer, @Name("assertion.android.two-step.cancel.challenge3") String challenge,
-			@Name("attestation.android.two-step.userName") String userName, @Name("attestation.android.two-step.applicationId") String applicationId,
-			@Name("attestation.android.two-step.sessionId") String sessionId) {
-		testStartAssertionTwoStepAndroidImpl(issuer, challenge, userName, applicationId, sessionId);
+	public void testThirdStartAssertionTwoStepCancelApple(@Name("attestation.apple.two-step.issuer") String issuer, @Name("assertion.apple.two-step.cancel.challenge3") String challenge,
+			@Name("attestation.apple.two-step.userName") String userName, @Name("attestation.apple.two-step.applicationId") String applicationId,
+			@Name("attestation.apple.two-step.sessionId") String sessionId) {
+		testStartAssertionTwoStepAppleImpl(issuer, challenge, userName, applicationId, sessionId);
 	}
 
 	@Test
 	@Order(8)
     @ExtendWith(FileParameterExtension.class)
-	public void testThirdFinishAssertionTwoStepACancelndroid(@Name("attestation.android.two-step.userName") String userName,
-			@Name("assertion.android.two-step.cancel.finish.request3") String authenticateFinishResponse) {
-		testFinishAssertionTwoStepAndroidCanceled(userName, authenticateFinishResponse);
+	public void testThirdFinishAssertionTwoStepACancelndroid(@Name("attestation.apple.two-step.userName") String userName,
+			@Name("assertion.apple.two-step.cancel.finish.request3") String authenticateFinishResponse) {
+		testFinishAssertionTwoStepAppleCanceled(userName, authenticateFinishResponse);
         assertTrue(registrationEntry.getCounter() == 3);
 	}
 
 	@Test
 	@Order(9)
     @ExtendWith(FileParameterExtension.class)
-	public void testFourthStartAssertionTwoStepAndroid(@Name("attestation.android.two-step.issuer") String issuer, @Name("assertion.android.two-step.challenge4") String challenge,
-			@Name("attestation.android.two-step.userName") String userName, @Name("attestation.android.two-step.applicationId") String applicationId,
-			@Name("attestation.android.two-step.sessionId") String sessionId) {
-		testStartAssertionTwoStepAndroidImpl(issuer, challenge, userName, applicationId, sessionId);
+	public void testFourthStartAssertionTwoStepApple(@Name("attestation.apple.two-step.issuer") String issuer, @Name("assertion.apple.two-step.challenge4") String challenge,
+			@Name("attestation.apple.two-step.userName") String userName, @Name("attestation.apple.two-step.applicationId") String applicationId,
+			@Name("attestation.apple.two-step.sessionId") String sessionId) {
+		testStartAssertionTwoStepAppleImpl(issuer, challenge, userName, applicationId, sessionId);
 	}
 
 	@Test
 	@Order(10)
     @ExtendWith(FileParameterExtension.class)
-	public void tesFourthFinishAssertionTwoStepAndroid(@Name("attestation.android.two-step.userName") String userName,
-			@Name("assertion.android.two-step.finish.request4") String authenticateFinishResponse) {
-		testFinishAssertionTwoStepAndroidAuthenticated(userName, authenticateFinishResponse);
+	public void tesFourthFinishAssertionTwoStepApple(@Name("attestation.apple.two-step.userName") String userName,
+			@Name("assertion.apple.two-step.finish.request4") String authenticateFinishResponse) {
+		testFinishAssertionTwoStepAppleAuthenticated(userName, authenticateFinishResponse);
         assertTrue(registrationEntry.getCounter() == 4);
 	}
 
 	@Test
 	@Order(11)
     @ExtendWith(FileParameterExtension.class)
-	public void testSecondReplyFinishAssertionTwoStepAndroid(@Name("attestation.android.two-step.userName") String userName,
-			@Name("assertion.android.two-step.finish.request4") String authenticateFinishResponse) {
+	public void testSecondReplyFinishAssertionTwoStepApple(@Name("attestation.apple.two-step.userName") String userName,
+			@Name("assertion.apple.two-step.finish.request4") String authenticateFinishResponse) {
 		try {
-			testFinishAssertionTwoStepAndroidAuthenticated(userName, authenticateFinishResponse);
+			testFinishAssertionTwoStepAppleAuthenticated(userName, authenticateFinishResponse);
 		} catch (Fido2RuntimeException ex) {
 			if (!(ex.getCause() instanceof Fido2CompromisedDevice)) {
 				throw ex;
@@ -448,18 +448,18 @@ public class FullFlowAndroidTest {
 	@Test
 	@Order(12)
     @ExtendWith(FileParameterExtension.class)
-	public void testStartAttestationTwoStepCancelAndroid(@Name("attestation.android.two-step.cancel.issuer") String issuer, @Name("attestation.android.two-step.cancel.challenge") String challenge,
-			@Name("attestation.android.two-step.cancel.userName") String userName, @Name("attestation.android.two-step.cancel.applicationId") String applicationId,
-			@Name("attestation.android.two-step.cancel.sessionId") String sessionId, @Name("attestation.android.two-step.cancel.enrollmentCode") String enrollmentCode) {
-		testStartAttestationTwoStepAndroidImpl(issuer, challenge, userName, applicationId, sessionId);
+	public void testStartAttestationTwoStepCancelApple(@Name("attestation.apple.two-step.cancel.issuer") String issuer, @Name("attestation.apple.two-step.cancel.challenge") String challenge,
+			@Name("attestation.apple.two-step.cancel.userName") String userName, @Name("attestation.apple.two-step.cancel.applicationId") String applicationId,
+			@Name("attestation.apple.two-step.cancel.sessionId") String sessionId, @Name("attestation.apple.two-step.cancel.enrollmentCode") String enrollmentCode) {
+		testStartAttestationTwoStepAppleImpl(issuer, challenge, userName, applicationId, sessionId);
 	}
 
 	@Test
 	@Order(13)
     @ExtendWith(FileParameterExtension.class)
-	public void testFinishAttestationTwoStepCancelAndroid(@Name("attestation.android.two-step.cancel.userName") String userName,
-			@Name("attestation.android.two-step.cancel.finish.request") String registerFinishResponse, @Name("attestation.android.two-step.cancel.finish.publicKeyId") String publicKeyId) {
-		testFinishAssertionTwoStepAndroidAuthenticatedCanceled(userName, registerFinishResponse, publicKeyId);
+	public void testFinishAttestationTwoStepCancelApple(@Name("attestation.apple.two-step.cancel.userName") String userName,
+			@Name("attestation.apple.two-step.cancel.finish.request") String registerFinishResponse, @Name("attestation.apple.two-step.cancel.finish.publicKeyId") String publicKeyId) {
+		testFinishAssertionTwoStepAppleAuthenticatedCanceled(userName, registerFinishResponse, publicKeyId);
 	}
 
 }
