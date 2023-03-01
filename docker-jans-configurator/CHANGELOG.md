@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.8-1](https://github.com/JanssenProject/jans/compare/docker-jans-configurator-v1.0.7-1...docker-jans-configurator-v1.0.8-1) (2023-03-01)
+
+
+### Bug Fixes
+
+* **docker-jans:** resolve required keys_ops_type for generating/rotating keys ([#3990](https://github.com/JanssenProject/jans/issues/3990)) ([0ed67fb](https://github.com/JanssenProject/jans/commit/0ed67fbdd5a9fb6a40072d0a8c027b626e3830b8))
+
 ## 1.0.7-1 (2023-02-22)
 
 
