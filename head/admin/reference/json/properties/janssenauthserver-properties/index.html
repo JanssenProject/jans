@@ -6314,6 +6314,20 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#disablepromptconsent" class="md-nav__link">
+    disablePromptConsent
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#disablepromptlogin" class="md-nav__link">
+    disablePromptLogin
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#disableu2fendpoint" class="md-nav__link">
     disableU2fEndpoint
   </a>
@@ -6400,6 +6414,13 @@
         <li class="md-nav__item">
   <a href="#dynamicregistrationcustomobjectclass" class="md-nav__link">
     dynamicRegistrationCustomObjectClass
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dynamicregistrationdefaultcustomattributes" class="md-nav__link">
+    dynamicRegistrationDefaultCustomAttributes
   </a>
   
 </li>
@@ -7231,6 +7252,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#rotateclientregistrationaccesstokenonusage" class="md-nav__link">
+    rotateClientRegistrationAccessTokenOnUsage
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#rotatedevicesecret" class="md-nav__link">
     rotateDeviceSecret
   </a>
@@ -7534,13 +7562,6 @@
         <li class="md-nav__item">
   <a href="#usenestedjwtduringencryption" class="md-nav__link">
     useNestedJwtDuringEncryption
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#userinfoconfiguration" class="md-nav__link">
-    userInfoConfiguration
   </a>
   
 </li>
@@ -11036,6 +11057,20 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#disablepromptconsent" class="md-nav__link">
+    disablePromptConsent
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#disablepromptlogin" class="md-nav__link">
+    disablePromptLogin
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#disableu2fendpoint" class="md-nav__link">
     disableU2fEndpoint
   </a>
@@ -11122,6 +11157,13 @@
         <li class="md-nav__item">
   <a href="#dynamicregistrationcustomobjectclass" class="md-nav__link">
     dynamicRegistrationCustomObjectClass
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dynamicregistrationdefaultcustomattributes" class="md-nav__link">
+    dynamicRegistrationDefaultCustomAttributes
   </a>
   
 </li>
@@ -11953,6 +11995,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#rotateclientregistrationaccesstokenonusage" class="md-nav__link">
+    rotateClientRegistrationAccessTokenOnUsage
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#rotatedevicesecret" class="md-nav__link">
     rotateDeviceSecret
   </a>
@@ -12256,13 +12305,6 @@
         <li class="md-nav__item">
   <a href="#usenestedjwtduringencryption" class="md-nav__link">
     useNestedJwtDuringEncryption
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#userinfoconfiguration" class="md-nav__link">
-    userInfoConfiguration
   </a>
   
 </li>
@@ -12641,8 +12683,8 @@
 </tr>
 <tr>
 <td>dateFormatterPatterns</td>
-<td>List of key value, e.g. 'birthdate: 'yyyy-MM-dd', etc.</td>
-<td><a href="#dateformatterpattern">Details</a></td>
+<td>List of key value date formatters, e.g. 'userinfo: 'yyyy-MM-dd', etc.</td>
+<td><a href="#dateformatterpatterns">Details</a></td>
 </tr>
 <tr>
 <td>dcrAuthorizationWithClientCredentials</td>
@@ -12735,6 +12777,16 @@
 <td><a href="#disablejdklogger">Details</a></td>
 </tr>
 <tr>
+<td>disablePromptConsent</td>
+<td>Boolean value specifying whether to disable prompt=consent</td>
+<td><a href="#disablepromptconsent">Details</a></td>
+</tr>
+<tr>
+<td>disablePromptLogin</td>
+<td>Boolean value specifying whether to disable prompt=login</td>
+<td><a href="#disablepromptlogin">Details</a></td>
+</tr>
+<tr>
 <td>disableU2fEndpoint</td>
 <td>Choose whether to disable U2F endpoints</td>
 <td><a href="#disableu2fendpoint">Details</a></td>
@@ -12791,13 +12843,18 @@
 </tr>
 <tr>
 <td>dynamicRegistrationCustomAttributes</td>
-<td>This list details the custom attributes for dynamic registration</td>
+<td>This list details the custom attributes allowed for dynamic registration</td>
 <td><a href="#dynamicregistrationcustomattributes">Details</a></td>
 </tr>
 <tr>
 <td>dynamicRegistrationCustomObjectClass</td>
 <td>LDAP custom object class for dynamic registration</td>
 <td><a href="#dynamicregistrationcustomobjectclass">Details</a></td>
+</tr>
+<tr>
+<td>dynamicRegistrationDefaultCustomAttributes</td>
+<td>This map provides default custom attributes with values for dynamic registration</td>
+<td><a href="#dynamicregistrationdefaultcustomattributes">Details</a></td>
 </tr>
 <tr>
 <td>dynamicRegistrationExpirationTime</td>
@@ -13262,12 +13319,12 @@
 <tr>
 <td>persistIdToken</td>
 <td>Specifies whether to persist id_token (otherwise saves into cache)</td>
-<td><a href="#persistIdToken">Details</a></td>
+<td><a href="#persistidtoken">Details</a></td>
 </tr>
 <tr>
 <td>persistRefreshToken</td>
 <td>Specifies whether to persist refresh_token (otherwise saves into cache)</td>
-<td><a href="#persistRefreshToken">Details</a></td>
+<td><a href="#persistrefreshtoken">Details</a></td>
 </tr>
 <tr>
 <td>personCustomObjectClassList</td>
@@ -13311,7 +13368,7 @@
 </tr>
 <tr>
 <td>removeRefreshTokensForClientOnLogout</td>
-<td>Boolean value specifying whether to remove Refresh Tokens on logout. Default value is false</td>
+<td>Boolean value specifying whether to remove Refresh Tokens on logout. Default value is true</td>
 <td><a href="#removerefreshtokensforclientonlogout">Details</a></td>
 </tr>
 <tr>
@@ -13388,6 +13445,11 @@
 <td>returnDeviceSecretFromAuthzEndpoint</td>
 <td></td>
 <td><a href="#returndevicesecretfromauthzendpoint">Details</a></td>
+</tr>
+<tr>
+<td>rotateClientRegistrationAccessTokenOnUsage</td>
+<td>Boolean value specifying whether to rotate client registration access token after each usage</td>
+<td><a href="#rotateclientregistrationaccesstokenonusage">Details</a></td>
 </tr>
 <tr>
 <td>rotateDeviceSecret</td>
@@ -13608,11 +13670,6 @@
 <td>useNestedJwtDuringEncryption</td>
 <td>Boolean value specifying whether to use nested Jwt during encryption</td>
 <td><a href="#usenestedjwtduringencryption">Details</a></td>
-</tr>
-<tr>
-<td>userInfoConfiguration</td>
-<td>UserInfo Configuration</td>
-<td><a href="#userinfoconfiguration">Details</a></td>
 </tr>
 <tr>
 <td>userInfoEncryptionAlgValuesSupported</td>
@@ -14316,7 +14373,7 @@
 <h3 id="dateformatterpatterns">dateFormatterPatterns<a class="headerlink" href="#dateformatterpatterns" title="Permanent link">#</a></h3>
 <ul>
 <li>
-<p>Description: List of key value, e.g. 'birthdate: 'yyyy-MM-dd', etc.</p>
+<p>Description: List of key value date formatters, e.g. 'userinfo: 'yyyy-MM-dd', etc.</p>
 </li>
 <li>
 <p>Required: No</p>
@@ -14541,6 +14598,30 @@
 <p>Default value: true</p>
 </li>
 </ul>
+<h3 id="disablepromptconsent">disablePromptConsent<a class="headerlink" href="#disablepromptconsent" title="Permanent link">#</a></h3>
+<ul>
+<li>
+<p>Description: Boolean value specifying whether to disable prompt=consent</p>
+</li>
+<li>
+<p>Required: No</p>
+</li>
+<li>
+<p>Default value: false</p>
+</li>
+</ul>
+<h3 id="disablepromptlogin">disablePromptLogin<a class="headerlink" href="#disablepromptlogin" title="Permanent link">#</a></h3>
+<ul>
+<li>
+<p>Description: Boolean value specifying whether to disable prompt=login</p>
+</li>
+<li>
+<p>Required: No</p>
+</li>
+<li>
+<p>Default value: false</p>
+</li>
+</ul>
 <h3 id="disableu2fendpoint">disableU2fEndpoint<a class="headerlink" href="#disableu2fendpoint" title="Permanent link">#</a></h3>
 <ul>
 <li>
@@ -14676,7 +14757,7 @@
 <h3 id="dynamicregistrationcustomattributes">dynamicRegistrationCustomAttributes<a class="headerlink" href="#dynamicregistrationcustomattributes" title="Permanent link">#</a></h3>
 <ul>
 <li>
-<p>Description: This list details the custom attributes for dynamic registration</p>
+<p>Description: This list details the custom attributes allowed for dynamic registration</p>
 </li>
 <li>
 <p>Required: No</p>
@@ -14689,6 +14770,18 @@
 <ul>
 <li>
 <p>Description: LDAP custom object class for dynamic registration</p>
+</li>
+<li>
+<p>Required: No</p>
+</li>
+<li>
+<p>Default value: None</p>
+</li>
+</ul>
+<h3 id="dynamicregistrationdefaultcustomattributes">dynamicRegistrationDefaultCustomAttributes<a class="headerlink" href="#dynamicregistrationdefaultcustomattributes" title="Permanent link">#</a></h3>
+<ul>
+<li>
+<p>Description: This map provides default custom attributes with values for dynamic registration</p>
 </li>
 <li>
 <p>Required: No</p>
@@ -15924,7 +16017,7 @@
 <h3 id="removerefreshtokensforclientonlogout">removeRefreshTokensForClientOnLogout<a class="headerlink" href="#removerefreshtokensforclientonlogout" title="Permanent link">#</a></h3>
 <ul>
 <li>
-<p>Description: Boolean value specifying whether to remove Refresh Tokens on logout. Default value is false</p>
+<p>Description: Boolean value specifying whether to remove Refresh Tokens on logout. Default value is true</p>
 </li>
 <li>
 <p>Required: No</p>
@@ -16105,6 +16198,18 @@
 <ul>
 <li>
 <p>Description: </p>
+</li>
+<li>
+<p>Required: No</p>
+</li>
+<li>
+<p>Default value: false</p>
+</li>
+</ul>
+<h3 id="rotateclientregistrationaccesstokenonusage">rotateClientRegistrationAccessTokenOnUsage<a class="headerlink" href="#rotateclientregistrationaccesstokenonusage" title="Permanent link">#</a></h3>
+<ul>
+<li>
+<p>Description: Boolean value specifying whether to rotate client registration access token after each usage</p>
 </li>
 <li>
 <p>Required: No</p>
@@ -16641,18 +16746,6 @@
 <p>Default value: true</p>
 </li>
 </ul>
-<h3 id="userinfoconfiguration">userInfoConfiguration<a class="headerlink" href="#userinfoconfiguration" title="Permanent link">#</a></h3>
-<ul>
-<li>
-<p>Description: UserInfo Configuration</p>
-</li>
-<li>
-<p>Required: No</p>
-</li>
-<li>
-<p>Default value: None</p>
-</li>
-</ul>
 <h3 id="userinfoencryptionalgvaluessupported">userInfoEncryptionAlgValuesSupported<a class="headerlink" href="#userinfoencryptionalgvaluessupported" title="Permanent link">#</a></h3>
 <ul>
 <li>
@@ -16719,7 +16812,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-02-10T13:22:40+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-02-10</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-03-01T14:10:20+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-03-01</span>
       
         <br>
         Created:
