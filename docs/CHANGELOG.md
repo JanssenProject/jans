@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.8](https://github.com/JanssenProject/jans/compare/docs-v1.0.7...docs-v1.0.8) (2023-03-01)
+
+
+### Features
+
+* add to AS session the data passed in `Finish` ([#3978](https://github.com/JanssenProject/jans/issues/3978)) ([12bedb7](https://github.com/JanssenProject/jans/commit/12bedb756ae978678a77ceabfdc2879b6f9c1429))
+* Include additional attributes on SSA Get endpoint ([#3983](https://github.com/JanssenProject/jans/issues/3983)) ([4fded3e](https://github.com/JanssenProject/jans/commit/4fded3e0ca337bf51176699c7699a7d93bd6d665))
+
 ## 1.0.7 (2023-02-22)
 
 
