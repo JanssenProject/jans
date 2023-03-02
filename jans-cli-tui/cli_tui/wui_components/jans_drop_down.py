@@ -42,7 +42,7 @@ class JansSelectBox:
         """
 
         self.values = values
-        self.values_flag = (values[0],values[-1])
+        self.values_flag = (values[0], values[-1]) if values else []
         self.set_value(value)
         # --------------------------------------------------- #
         self.height = min(len(self.values), height)
@@ -50,7 +50,7 @@ class JansSelectBox:
         self.rotatable_down = rotatable_down
         # --------------------------------------------------- #
 
-        self.container = HSplit(children=[Window(
+        self.window = Window(
             content=FormattedTextControl(
                 text=self._get_formatted_text,
                 focusable=True,
@@ -59,10 +59,12 @@ class JansSelectBox:
             cursorline=False,
             width=D(),  # 15,
             style='bg:#4D4D4D',
-            right_margins=[ScrollbarMargin(display_arrows=True), ],
+            right_margins=[ScrollbarMargin(display_arrows=True)],
             wrap_lines=True,
             allow_scroll_beyond_bottom=True,
-        )])
+        )
+
+        self.container = HSplit(children=[self.window])
 
     def set_value(
         self, 
@@ -119,7 +121,7 @@ class JansSelectBox:
         """_summary_
         """
         if self.selected_line == 0:
-            if self.rotatable_up and self.values[self.selected_line] == self.values_flag[0]:
+            if self.rotatable_up and self.values_flag and self.values[self.selected_line] == self.values_flag[0]:
                 pass
             else:
                 self.values = self.shift(self.values, -1)
@@ -132,7 +134,7 @@ class JansSelectBox:
         """_summary_
         """
         if self.selected_line + 1 == (self.height):
-            if self.rotatable_down and self.values[self.selected_line] == self.values_flag[-1]:
+            if self.rotatable_down and self.values_flag and self.values[self.selected_line] == self.values_flag[-1]:
                 pass
             else:
                 self.values = self.shift(self.values, 1)
@@ -153,27 +155,32 @@ class DropDownWidget:
         self,
         values: Optional[list] = [],
         value: Optional[str] = '',
-        on_value_changed: Callable= None, 
+        on_value_changed: Callable= None,
+        select_one_option: Optional[bool] = True,
         )->Window:
         """init for DropDownWidget
         Args:
             values (list, optional): List of values to select one from them. Defaults to [].
             value (str, optional): The defualt selected value. Defaults to None.
+            select_one_option(bool, optional): Add 'Select One' as first option
 
         Examples:
             widget=DropDownWidget(
                 values=[('client_secret_basic', 'client_secret_basic'), ('client_secret_post', 'client_secret_post'), ('client_secret_jwt', 'client_secret_jwt'), ('private_key_jwt', 'private_key_jwt')],
                 value=self.data.get('tokenEndpointAuthMethodsSupported'))
         """
-        self.values = values
+        self.value_list = values
         self.on_value_changed = on_value_changed
-        values.insert(0, (None, 'Select One'))
-        for val in values:
+        if select_one_option:
+            self.value_list.insert(0, (None, 'Select One'))
+
+        for val in self.value_list:
             if val[0] == value:
                 self.text = val[1]
                 break
         else:
-            self.text = self.values[0][1] if self.values else "Enter to Select"
+            if select_one_option:
+                self.text = self.value_list[0][1] if self.value_list else "Enter to Select"
 
         self.dropdown = True
         self.window = Window(
@@ -184,9 +191,18 @@ class DropDownWidget:
             ), height=D())  # 5  ## large sized enties get >> (window too small)
 
         self.select_box = JansSelectBox(
-            values=self.values, value=value, rotatable_down=True, rotatable_up=True, height=4)
+                                values=self.value_list,
+                                value=value,
+                                rotatable_down=True,
+                                rotatable_up=True,
+                                height=4
+                                )
+
         self.select_box_float = Float(
-            content=self.select_box, xcursor=True, ycursor=True)
+                            content=self.select_box,
+                            xcursor=True,
+                            ycursor=True
+                            )
 
     @property
     def value(self)-> str:
@@ -202,9 +218,29 @@ class DropDownWidget:
         self, 
         value:str,
         )-> None:
+        self.text = value
         self.select_box.set_value(value)
         if self.on_value_changed:
             self.on_value_changed(value)
+
+    @property
+    def values(self) -> list:
+        """Getter for the values property
+
+        Returns:
+            list: values of dropdown widget
+        """
+        return self.value_list
+
+    @values.setter
+    def values(
+        self, 
+        values:list,
+        )-> None:
+        self.value_list = values
+        self.select_box.values = values
+        self.select_box.window.height = len(values)
+        self.select_box.height = self.select_box.window.height
 
     def _get_text(self)-> AnyFormattedText:
         """To get The selected value

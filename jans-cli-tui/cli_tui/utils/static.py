@@ -20,6 +20,7 @@ class cli_style:
     scim_widget = 'class:scim-widget'
     black_bg = 'class:plugin-black-bg'
     textarea = 'class:textarea'
+    drop_down = 'class:plugin-dropdown'
 
 class common_strings:
     enter_to_search = "Press enter to perform search"

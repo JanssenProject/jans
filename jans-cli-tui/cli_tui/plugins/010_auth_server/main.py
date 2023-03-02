@@ -38,6 +38,7 @@ from edit_client_dialog import EditClientDialog
 from edit_scope_dialog import EditScopeDialog
 from ssa import SSA
 from agama import Agama
+from defaults import Defaults
 
 from prompt_toolkit.widgets import (
     HorizontalLine,
@@ -64,13 +65,12 @@ class Plugin(DialogUtils):
         self.oauth_update_properties_start_index = 0
         self.ssa = SSA(app)
         self.agama = Agama(app)
-        self.app_configuration = {}
+        self.defaults = Defaults(app)
         self.oauth_containers = {}
 
         self.oauth_prepare_navbar()
         self.oauth_prepare_containers()
         self.oauth_nav_selection_changed(self.nav_bar.navbar_entries[0][0])
-        
 
     def init_plugin(self) -> None:
         """The initialization for this plugin
@@ -94,7 +94,7 @@ class Plugin(DialogUtils):
             self.app.show_message(_("Error getting Jans configuration"), str(response.text), tobefocused=self.app.center_frame)
             return
 
-        self.app_configuration = response.json()
+        self.app.app_configuration = response.json()
         self.oauth_logging()
 
 
@@ -106,6 +106,9 @@ class Plugin(DialogUtils):
         response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
         common_data.scopes = response.json()['entries']
         self.app.logger.debug("scopes retreived")
+
+    def on_cli_object_ready(self):
+        self.defaults.on_cli_object_ready()
 
     def process(self):
         """No pre-processing for this plugin.
@@ -190,6 +193,7 @@ class Plugin(DialogUtils):
 
         self.oauth_containers['ssa'] = self.ssa.main_container
         self.oauth_containers['agama'] = self.agama.main_container
+        self.oauth_containers['defaults'] = self.defaults.main_container
         self.oauth_containers['logging'] = DynamicContainer(lambda: self.oauth_data_container['logging'])
 
         self.oauth_main_container = HSplit([
@@ -485,7 +489,7 @@ class Plugin(DialogUtils):
         missing_properties = []
 
         for prop in self.schema['properties']:
-            if prop not in self.app_configuration:
+            if prop not in self.app.app_configuration:
                 missing_properties.append(prop)
         missing_properties.sort()
         missing_properties_data = [ [prop] for prop in missing_properties ]
@@ -550,12 +554,12 @@ class Plugin(DialogUtils):
         data =[]
         
         if pattern:
-            for k in self.app_configuration:
+            for k in self.app.app_configuration:
                 if pattern.lower() in k.lower():
-                    data.append([k, self.app_configuration[k]])
+                    data.append([k, self.app.app_configuration[k]])
         else:
-            for d in self.app_configuration:
-                data.append([d, self.app_configuration[d]])
+            for d in self.app.app_configuration:
+                data.append([d, self.app.app_configuration[d]])
 
         # ------------------------------------------------------------------------------- #
         # --------------------------------- View Data ----------------------------------- #
@@ -595,7 +599,7 @@ class Plugin(DialogUtils):
                     selectes=0,
                     headerColor=cli_style.navbar_headcolor,
                     entriesColor=cli_style.navbar_entriescolor,
-                    all_data=list(self.app_configuration.values())
+                    all_data=list(self.app.app_configuration.values())
             )
             ])
 
@@ -905,7 +909,7 @@ class Plugin(DialogUtils):
                                 name='loggingLevel',
                                 widget=DropDownWidget(
                                     values=[('TRACE', 'TRACE'), ('DEBUG', 'DEBUG'), ('INFO', 'INFO'), ('WARN', 'WARN'), ('ERROR', 'ERROR'), ('FATAL', 'FATAL'), ('OFF', 'OFF')],
-                                    value=self.app_configuration.get('loggingLevel')
+                                    value=self.app.app_configuration.get('loggingLevel')
                                     ),
                                 jans_help=self.app.get_help_from_schema(self.schema, 'loggingLevel'),
                                 ),
@@ -914,28 +918,28 @@ class Plugin(DialogUtils):
                                 name='loggingLayout',
                                 widget=DropDownWidget(
                                     values=[('text', 'text'), ('json', 'json')],
-                                    value=self.app_configuration.get('loggingLayout')
+                                    value=self.app.app_configuration.get('loggingLayout')
                                     ),
                                 jans_help=self.app.get_help_from_schema(self.schema, 'loggingLayout'),
                                 ),
                         self.app.getTitledCheckBox(
                             _("Enable HTTP Logging"), 
                             name='httpLoggingEnabled',
-                            checked=self.app_configuration.get('httpLoggingEnabled'),
+                            checked=self.app.app_configuration.get('httpLoggingEnabled'),
                             jans_help=self.app.get_help_from_schema(self.schema, 'httpLoggingEnabled'),
                             style=cli_style.check_box
                             ),
                         self.app.getTitledCheckBox(
                             _("Disable JDK Logger"), 
                             name='disableJdkLogger',
-                            checked=self.app_configuration.get('disableJdkLogger'),
+                            checked=self.app.app_configuration.get('disableJdkLogger'),
                             jans_help=self.app.get_help_from_schema(self.schema, 'disableJdkLogger'),
                             style=cli_style.check_box
                             ),
                         self.app.getTitledCheckBox(
                             _("Enable Oauth Audit Logging"), 
                             name='enabledOAuthAuditLogging',
-                            checked=self.app_configuration.get('enabledOAuthAuditLogging'),
+                            checked=self.app.app_configuration.get('enabledOAuthAuditLogging'),
                             jans_help=self.app.get_help_from_schema(self.schema, 'enabledOAuthAuditLogging'),
                             style=cli_style.check_box
                             ),
@@ -952,7 +956,7 @@ class Plugin(DialogUtils):
         mod_data = self.make_data_from_dialog({'logging':self.oauth_data_container['logging']})
         pathches = []
         for key_ in mod_data:
-            if self.app_configuration.get(key_) != mod_data[key_]:
+            if self.app.app_configuration.get(key_) != mod_data[key_]:
                 pathches.append({'op':'replace', 'path': key_, 'value': mod_data[key_]})
 
         if pathches:
