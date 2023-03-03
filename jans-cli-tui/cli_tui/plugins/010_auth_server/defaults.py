@@ -18,7 +18,6 @@ class Defaults(DialogUtils):
         ) -> None:
 
         self.app = self.myparent = app
-        self.save_config = True
 
         self.acr_values_widget = DropDownWidget(
                                             values=[],
@@ -38,9 +37,6 @@ class Defaults(DialogUtils):
                                     width=D()
                                     )
 
-
-    def set_save_true(self) -> None:
-        self.save_config = True
 
     def on_cli_object_ready(self) -> None:
         self.populate_acr_values()

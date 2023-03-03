@@ -39,6 +39,7 @@ from edit_scope_dialog import EditScopeDialog
 from ssa import SSA
 from agama import Agama
 from defaults import Defaults
+from attributes import Attributes
 
 from prompt_toolkit.widgets import (
     HorizontalLine,
@@ -66,6 +67,7 @@ class Plugin(DialogUtils):
         self.ssa = SSA(app)
         self.agama = Agama(app)
         self.defaults = Defaults(app)
+        self.attributes = Attributes(app)
         self.oauth_containers = {}
 
         self.oauth_prepare_navbar()
@@ -194,6 +196,7 @@ class Plugin(DialogUtils):
         self.oauth_containers['ssa'] = self.ssa.main_container
         self.oauth_containers['agama'] = self.agama.main_container
         self.oauth_containers['defaults'] = self.defaults.main_container
+        self.oauth_containers['attributes'] = self.attributes.main_container
         self.oauth_containers['logging'] = DynamicContainer(lambda: self.oauth_data_container['logging'])
 
         self.oauth_main_container = HSplit([
@@ -209,7 +212,7 @@ class Plugin(DialogUtils):
         """
         self.nav_bar = JansNavBar(
                     self.app,
-                    entries=[('clients', 'C[l]ients'), ('scopes', 'Sc[o]pes'), ('keys', '[K]eys'), ('defaults', '[D]efaults'), ('properties', 'Properti[e]s'), ('logging', 'Lo[g]ging'), ('ssa', '[S]SA'), ('agama', 'Aga[m]a')],
+                    entries=[('clients', 'C[l]ients'), ('scopes', 'Sc[o]pes'), ('keys', '[K]eys'), ('defaults', '[D]efaults'), ('properties', 'Properti[e]s'), ('logging', 'Lo[g]ging'), ('ssa', '[S]SA'), ('agama', 'Aga[m]a'), ('attributes', 'A[t]tributes')],
                     selection_changed=self.oauth_nav_selection_changed,
                     select=0,
                     jans_name='oauth:nav_bar'

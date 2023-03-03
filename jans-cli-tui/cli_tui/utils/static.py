@@ -10,6 +10,7 @@ class cli_style:
     edit_text = 'class:plugin-text'
     edit_text_required = 'class:plugin-textrequired'
     check_box = 'class:plugin-checkbox'
+    check_box_list = 'class:plugin-checkboxlist'
     radio_button = 'class:plugin-radiobutton'
     tabs = 'class:plugin-tabs'
     label = 'class:plugin-label'
