@@ -189,7 +189,7 @@ class Attributes(DialogUtils):
                 operation_id = 'put-attributes' if 'inum' in dialog.data  else 'post-attributes'
                 cli_args = {'operation_id': operation_id, 'data': new_data}
                 self.app.start_progressing(_("Saving Attribute ..."))
-                result = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+                await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
                 self.app.stop_progressing()
                 self.get_attributes()
             asyncio.ensure_future(coroutine())
@@ -280,7 +280,7 @@ class Attributes(DialogUtils):
             async def coroutine():
                 cli_args = {'operation_id': 'delete-attributes-by-inum', 'url_suffix':'inum:{}'.format(selected_attribute['inum'])}
                 self.app.start_progressing(_("Deleting attribute {}").format(selected_attribute['name']))
-                response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+                await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
                 self.app.stop_progressing()
                 self.get_attributes()
 
