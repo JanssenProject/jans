@@ -139,8 +139,8 @@ public class RegistrationBuilder implements Builder {
         return this;
     }
 
-    public RegistrationBuilder withAdditionalTokenEndPointAuthMethod(List<AuthenticationMethod> additionalTokenEndPointAuthenticationMethod) {
-        this.additionalTokenEndpointAuthMethod= additionalTokenEndpointAuthMethod;
+    public RegistrationBuilder withAdditionalTokenEndPointAuthMethod(List<AuthenticationMethod> tokenEndPointAuthenticationMethod) {
+        this.additionalTokenEndpointAuthMethod = tokenEndPointAuthenticationMethod;
         return this;
     }
 
