@@ -64,6 +64,7 @@ These labels enrich issue/PR with metadata that will help during triage process 
 ### Bot labeling methodology
 
 The following labels are automatically assigned to Issues and PRs in GitHub following the schema provided in this [file](../../automation/github-labels/labels-schema.json).
+
 | Label               | Method                                                                                                                                                                                                                                               |
 |---------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `comp-<module>`     | The bot will detect from the title the component between the parentheses. `feat(jans-auth-server): detect` will result in the label `comp-jans-auth-server` added to the issue or PR. In a PR these labels are also detected by modified files path  |
