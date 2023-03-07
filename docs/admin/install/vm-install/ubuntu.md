@@ -11,9 +11,47 @@ tags:
 Before you install, check the [VM system requirements](vm-requirements.md).
 
 ## Supported Versions
+- Ubuntu 22.04
 - Ubuntu 20.04
 
 ## Install the Package
+
+### Ubuntu 22.04
+
+- Download the release package from the Github Janssen Project
+[Releases](https://github.com/JanssenProject/jans/releases)
+
+```
+wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version.ubuntu22.04_amd64.deb -P /tmp
+```
+
+- Verify integrity of the downloaded package by verifying published `sha256sum`.   
+
+    Download `sha256sum` file for the package
+
+    ```shell
+    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version.ubuntu20.04_amd64.deb.sha256sum -P /tmp
+    ```
+
+    Check the hash if it is matching. 
+
+    ```shell
+    sha256sum -c /tmp/jans_replace-janssen-version.ubuntu22.04_amd64.deb.sha256sum
+    ```
+
+    Output similar to below should confirm the integrity of the downloaded package.
+    
+    ```text
+    <package-name>: OK
+    ```
+
+- Install the package
+
+```
+apt install -y /tmp/jans_replace-janssen-version.ubuntu22.04_amd64.deb
+```
+
+### Ubuntu 20.04
 
 - Download the release package from the Github Janssen Project
 [Releases](https://github.com/JanssenProject/jans/releases)
