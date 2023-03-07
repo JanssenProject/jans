@@ -8,7 +8,7 @@ public enum ErrorResponse {
     USER_INFO_JWT_BLANK("User-Info jwt is blank or empty. Generating token with default scopes."),
     CODE_OR_TOKEN_REQUIRED("Bad Request: Either `code` or `access_token` is required."),
     CHECK_LICENSE_ERROR("Error in checking license status."),
-    SAVE_LICENSE_SPRING_CREDENTIALS_ERROR("Error in saving license spring credentials."),
+    LICENSE_SPRING_CREDENTIALS_ERROR("Error in fetching license spring credentials from SCAN Api."),
     ACTIVATE_LICENSE_ERROR("Error in activating License."),
     GET_LICENSE_DETAILS_ERROR("Error in fetching license details."),
     UPDATE_LICENSE_DETAILS_ERROR("Problem in updating license details"),
@@ -33,7 +33,9 @@ public enum ErrorResponse {
     DELETE_ADMIUI_PERMISSIONS_ERROR("Error in deleting Admin UI permissions."),
     ROLE_MARKED_UNDELETABLE("Role cannot be deleted. Please set ‘deletable’ property of role to true."),
     UNABLE_TO_DELETE_ROLE_MAPPED_TO_PERMISSIONS("Role is mapped to permissions so cannot be deleted. Please remove the permissions mapped before deleting the role."),
-    UNABLE_TO_DELETE_PERMISSION_MAPPED_TO_ROLE("Permission is mapped to role so cannot be deleted. Please remove the permission mapped to the role before deleting it.");
+    UNABLE_TO_DELETE_PERMISSION_MAPPED_TO_ROLE("Permission is mapped to role so cannot be deleted. Please remove the permission mapped to the role before deleting it."),
+    ERROR_IN_READING_CONFIGURATION("Error in reading Admin UI configuration."),
+    ;
 
     private final String description;
 
