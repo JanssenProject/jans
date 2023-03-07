@@ -1,4 +1,4 @@
-package io.jans.as.model.config.adminui;
+package io.jans.ca.plugin.adminui.model.config;
 
 public class LicenseSpringCredentials {
     private String apiKey;

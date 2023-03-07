@@ -7,7 +7,6 @@ public class DynamicConfig {
     private List<AdminRole> roles;
     private List<AdminPermission> permissions;
     private List<RolePermissionMapping> rolePermissionMapping;
-    private LicenseSpringCredentials licenseSpringCredentials;
 
     public List<AdminRole> getRoles() {
         return roles;
@@ -31,13 +30,5 @@ public class DynamicConfig {
 
     public void setRolePermissionMapping(List<RolePermissionMapping> rolePermissionMapping) {
         this.rolePermissionMapping = rolePermissionMapping;
-    }
-
-    public LicenseSpringCredentials getLicenseSpringCredentials() {
-        return licenseSpringCredentials;
-    }
-
-    public void setLicenseSpringCredentials(LicenseSpringCredentials licenseSpringCredentials) {
-        this.licenseSpringCredentials = licenseSpringCredentials;
     }
 }
