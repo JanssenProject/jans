@@ -113,6 +113,9 @@ public class ClientAttributes implements Serializable {
     @JsonProperty("minimumAcrLevelAutoresolve")
     private Boolean minimumAcrLevelAutoresolve;
 
+    @JsonProperty("additionalTokenEndpointAuthMethods")
+    private List<String> additionalTokenEndpointAuthMethods;
+
     @JsonProperty("minimumAcrPriorityList")
     private List<String> minimumAcrPriorityList;
 
@@ -122,6 +125,15 @@ public class ClientAttributes implements Serializable {
 
     public void setMinimumAcrLevelAutoresolve(Boolean minimumAcrLevelAutoresolve) {
         this.minimumAcrLevelAutoresolve = minimumAcrLevelAutoresolve;
+    }
+
+    public List<String> getAdditionalTokenEndpointAuthMethods() {
+        if (additionalTokenEndpointAuthMethods == null) additionalTokenEndpointAuthMethods = new ArrayList<>();
+        return additionalTokenEndpointAuthMethods;
+    }
+
+    public void setAdditionalTokenEndpointAuthMethods(List<String> additionalTokenEndpointAuthMethods) {
+        this.additionalTokenEndpointAuthMethods = additionalTokenEndpointAuthMethods;
     }
 
     public List<String> getMinimumAcrPriorityList() {
@@ -415,6 +427,7 @@ public class ClientAttributes implements Serializable {
                 ", allowOfflineAccessWithoutConsent=" + allowOfflineAccessWithoutConsent +
                 ", minimumAcrLevel=" + minimumAcrLevel +
                 ", minimumAcrLevelAutoresolve=" + minimumAcrLevelAutoresolve +
+                ", additionalTokenEndpointAuthMethods=" + additionalTokenEndpointAuthMethods +
                 ", minimumAcrPriorityList=" + minimumAcrPriorityList +
                 ", defaultPromptLogin=" + defaultPromptLogin +
                 '}';

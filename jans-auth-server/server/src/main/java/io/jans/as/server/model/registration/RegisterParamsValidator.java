@@ -7,6 +7,7 @@
 package io.jans.as.server.model.registration;
 
 import io.jans.as.client.RegisterRequest;
+import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.common.SubjectType;
@@ -20,10 +21,6 @@ import io.jans.as.model.util.Pair;
 import io.jans.as.model.util.URLPatternList;
 import io.jans.as.model.util.Util;
 import io.jans.as.server.util.ServerUtil;
-import org.apache.commons.lang.StringUtils;
-import org.json.JSONArray;
-import org.slf4j.Logger;
-
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
@@ -31,6 +28,10 @@ import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.apache.commons.lang.StringUtils;
+import org.json.JSONArray;
+import org.slf4j.Logger;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashSet;
@@ -193,6 +194,16 @@ public class RegisterParamsValidator {
             log.debug("Parameter token_endpoint_auth_method is not valid.");
             throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
                     RegisterErrorResponseType.INVALID_CLIENT_METADATA, "Parameter token_endpoint_auth_method is not valid.");
+        }
+
+        if (registerRequest.getAdditionalTokenEndpointAuthMethods() != null && !registerRequest.getAdditionalTokenEndpointAuthMethods().isEmpty()) {
+            for (AuthenticationMethod authenticationMethod : registerRequest.getAdditionalTokenEndpointAuthMethods()) {
+                if (!appConfiguration.getTokenEndpointAuthMethodsSupported().contains(authenticationMethod.toString())) {
+                    log.debug("additional_token_endpoint_auth_method contains not valid value: {}", authenticationMethod);
+                    throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST,
+                            RegisterErrorResponseType.INVALID_CLIENT_METADATA, "additional_token_endpoint_auth_method contains not valid value.");
+                }
+            }
         }
 
         if (registerRequest.getTokenEndpointAuthSigningAlg() != null &&
