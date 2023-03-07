@@ -1,6 +1,11 @@
 package io.jans.configapi.rest.resource.auth;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.jans.ads.model.Deployment;
+import io.jans.agama.model.Flow;
+import io.jans.as.model.util.Pair;
 import io.jans.orm.model.PagedResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -13,11 +18,20 @@ import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.service.auth.AgamaDeploymentsService;
+import io.jans.configapi.service.auth.AgamaFlowService;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeMap;
+
+import org.slf4j.Logger;
 
 @Path(ApiConstants.AGAMA_DEPLOYMENTS)
 @Produces(MediaType.APPLICATION_JSON)
@@ -25,6 +39,14 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
 
     @Inject
     private AgamaDeploymentsService ads;
+
+    @Inject
+    private AgamaFlowService flowService;
+    
+    @Inject
+    private Logger logger;
+    
+    private ObjectMapper mapper;
 
     @Operation(summary = "Retrieve the list of projects deployed currently.", description = "Retrieve the list of projects deployed currently.", operationId = "get-agama-dev-prj", tags = {
     "Agama - Developer Studio" }, security = @SecurityRequirement(name = "oauth2", scopes = {
@@ -146,6 +168,97 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
             
         return Response.noContent().build();
         
+    }
+
+    @GET
+    @Path("configs")
+    @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.AGAMA_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    public Response getConfigs(@QueryParam("name") String projectName) throws JsonProcessingException {
+        
+        Pair<Response, Set<String>> pair = projectFlows(projectName);
+        Response resp = pair.getFirst();
+        if (resp != null) return resp;
+
+        Map<String, Map<String, Object>> configs = new TreeMap<>();
+
+        for (String qname : pair.getSecond()) {
+            Map<String, Object> config = Optional.ofNullable(flowService.getFlowByName(qname))
+                    .map(f -> f.getMetadata().getProperties()).orElse(null);
+
+            if (config == null) {
+                logger.warn("Flow {} does not exist or has no configuration properties defined", qname);
+            } else {
+                logger.debug("Adding flow properties of {}", qname);
+                configs.put(qname, config);
+            }
+        }
+        //Use own mapper so any empty maps that may be found inside flows configurations are not ignored 
+        return Response.ok(mapper.writeValueAsString(configs)).build();
+
+    }
+
+    @PUT
+    @Path("configs")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_WRITE_ACCESS }, 
+            superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+    public Response setConfigs(@QueryParam("name") String projectName,
+            TreeMap<String, TreeMap<String, Object>> flowsConfigs) {
+
+        if (flowsConfigs == null) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("Mapping of flows vs. configs not provided").build();
+        }
+                    
+        Pair<Response, Set<String>> pair = projectFlows(projectName);
+        Response resp = pair.getFirst(); 
+        if (resp != null) return resp;
+        
+        Set<String> flowIds = pair.getSecond();
+        Map<String, Boolean> results = new TreeMap<>();
+
+        for (String qname : flowsConfigs.keySet()) {
+            if (qname != null && flowIds.contains(qname)) {
+
+                Flow flow = flowService.getFlowByName(qname);
+                boolean success = false;
+
+                if (flow == null) {
+                    logger.warn("Unable to retrieve flow {}", qname);
+                } else {
+                    try {
+                        flow.getMetadata().setProperties(flowsConfigs.get(qname));
+                        flowService.updateFlow(flow);
+                        success = true;
+                    } catch (Exception e) {
+                        logger.error(e.getMessage(), e);
+                    }
+                }
+                results.put(qname, success);
+
+            } else {
+                logger.warn("Flow {} is not part of project {}, config ignored", qname, projectName);
+            }
+        } 
+        return Response.ok(results).build();
+
+    }    
+ 
+    private Pair<Response, Set<String>> projectFlows(String projectName) {        
+
+        Response res = getDeployment(projectName);
+        if (res.getStatus() != Response.Status.OK.getStatusCode()) return new Pair<>(res, null);
+
+        Deployment d = (Deployment) res.getEntity();
+        //Retrieve the flows this project contains
+        return new Pair<>(null, d.getDetails().getFlowsError().keySet());
+
+    }
+
+    @PostConstruct
+    private void init() {
+        mapper = new ObjectMapper();
     }
 
 }
