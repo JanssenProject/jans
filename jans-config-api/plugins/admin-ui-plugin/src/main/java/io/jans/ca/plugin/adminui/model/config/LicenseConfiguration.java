@@ -1,8 +1,7 @@
 package io.jans.ca.plugin.adminui.model.config;
 
-import org.slf4j.Logger;
-
 import jakarta.inject.Inject;
+import org.slf4j.Logger;
 
 public class LicenseConfiguration {
 
@@ -12,18 +11,16 @@ public class LicenseConfiguration {
     private String apiKey;
     private String productCode;
     private String sharedKey;
-    private String managementKey;
     private String hardwareId;
     private String licenseKey;
 
     public LicenseConfiguration() {
     }
 
-    public LicenseConfiguration(String apiKey, String productCode, String sharedKey, String managementKey) {
+    public LicenseConfiguration(String apiKey, String productCode, String sharedKey) {
         this.apiKey = apiKey;
         this.productCode = productCode;
         this.sharedKey = sharedKey;
-        this.managementKey = managementKey;
     }
 
     public String getApiKey() {
@@ -50,14 +47,6 @@ public class LicenseConfiguration {
         this.sharedKey = sharedKey;
     }
 
-    public String getManagementKey() {
-        return managementKey;
-    }
-
-    public void setManagementKey(String managementKey) {
-        this.managementKey = managementKey;
-    }
-
     public String getHardwareId() {
         return hardwareId;
     }
@@ -73,4 +62,5 @@ public class LicenseConfiguration {
     public void setLicenseKey(String licenseKey) {
         this.licenseKey = licenseKey;
     }
+
 }

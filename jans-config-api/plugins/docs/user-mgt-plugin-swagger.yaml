@@ -794,10 +794,10 @@ components:
           type: array
           items:
             type: object
-        displayValue:
-          type: string
         value:
           type: object
+        displayValue:
+          type: string
     CustomUser:
       type: object
       properties:

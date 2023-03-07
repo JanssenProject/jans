@@ -96,4 +96,19 @@ public class OIDCClientSettings {
     public void setFrontchannelLogoutUri(String frontchannelLogoutUri) {
         this.frontchannelLogoutUri = frontchannelLogoutUri;
     }
+
+    @Override
+    public String toString() {
+        return "OIDCClientSettings{" +
+                "opHost='" + opHost + '\'' +
+                ", clientId='" + clientId + '\'' +
+                ", clientSecret='" + clientSecret + '\'' +
+                ", tokenEndpoint='" + tokenEndpoint + '\'' +
+                ", redirectUri='" + redirectUri + '\'' +
+                ", postLogoutUri='" + postLogoutUri + '\'' +
+                ", frontchannelLogoutUri='" + frontchannelLogoutUri + '\'' +
+                ", scopes=" + scopes +
+                ", acrValues=" + acrValues +
+                '}';
+    }
 }
