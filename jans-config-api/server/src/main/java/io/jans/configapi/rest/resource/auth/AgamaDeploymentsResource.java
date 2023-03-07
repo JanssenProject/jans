@@ -232,8 +232,9 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
                 }
                 results.put(qname, success);
 
-            } else {
-                logger.warn("Flow {} is not part of project {}, config ignored", qname, projectName.replaceAll("[\n\r]", "_"));
+            } else if (logger.isWarnEnabled()) {
+                logger.warn("Flow {} is not part of project {}, config ignored", qname, 
+                        projectName.replaceAll("[\n\r]", "_"));
             }
         } 
         return Response.ok(results).build();
