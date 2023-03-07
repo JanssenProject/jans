@@ -46,6 +46,7 @@ public class OAuth2Service extends BaseService {
 
     @Inject
     EncryptionService encryptionService;
+
     /**
      * Calls token endpoint from the Identity Provider and returns a valid Access Token.
      */
@@ -128,7 +129,9 @@ public class OAuth2Service extends BaseService {
             }
 
             return tokenResp;
-
+        } catch (ApplicationException e) {
+            log.error(ErrorResponse.GET_ACCESS_TOKEN_ERROR.getDescription());
+            throw e;
         } catch (Exception e) {
             log.error(ErrorResponse.GET_API_PROTECTION_TOKEN_ERROR.getDescription(), e);
             throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), ErrorResponse.GET_API_PROTECTION_TOKEN_ERROR.getDescription());

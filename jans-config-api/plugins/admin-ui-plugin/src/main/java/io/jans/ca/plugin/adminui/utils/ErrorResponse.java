@@ -33,7 +33,9 @@ public enum ErrorResponse {
     DELETE_ADMIUI_PERMISSIONS_ERROR("Error in deleting Admin UI permissions."),
     ROLE_MARKED_UNDELETABLE("Role cannot be deleted. Please set ‘deletable’ property of role to true."),
     UNABLE_TO_DELETE_ROLE_MAPPED_TO_PERMISSIONS("Role is mapped to permissions so cannot be deleted. Please remove the permissions mapped before deleting the role."),
-    UNABLE_TO_DELETE_PERMISSION_MAPPED_TO_ROLE("Permission is mapped to role so cannot be deleted. Please remove the permission mapped to the role before deleting it.");
+    UNABLE_TO_DELETE_PERMISSION_MAPPED_TO_ROLE("Permission is mapped to role so cannot be deleted. Please remove the permission mapped to the role before deleting it."),
+    ERROR_IN_READING_CONFIGURATION("Error in reading Admin UI configuration."),
+    ;
 
     private final String description;
 
