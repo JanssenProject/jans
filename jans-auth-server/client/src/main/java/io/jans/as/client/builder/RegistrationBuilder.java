@@ -29,6 +29,7 @@ public class RegistrationBuilder implements Builder {
     private BackchannelTokenDeliveryMode backchannelTokenDeliveryMode;
     private AsymmetricSignatureAlgorithm backchannekAuthRequestSigningAlgorithm;
     private AuthenticationMethod tokenEndpointAuthMethod;
+    private List<AuthenticationMethod> additionalTokenEndpointAuthMethod;
     private Boolean backchannelUserCodeParameter;
     private SignatureAlgorithm tokenSignedResponseAlgorithm;
     private List<GrantType> grantTypeList;
@@ -138,6 +139,16 @@ public class RegistrationBuilder implements Builder {
         return this;
     }
 
+    public RegistrationBuilder withAdditionalTokenEndPointAuthMethod(List<AuthenticationMethod> tokenEndPointAuthenticationMethod) {
+        this.additionalTokenEndpointAuthMethod = tokenEndPointAuthenticationMethod;
+        return this;
+    }
+
+    public RegistrationBuilder missingAdditionalTokenEndPointAuthMethod() {
+        this.additionalTokenEndpointAuthMethod = null;
+        return this;
+    }
+
     public RegistrationBuilder withTokenEndPointAuthSigningAlgorithm(SignatureAlgorithm tokenEndpointAuthSigningAlgorithm) {
         this.tokenEndpointAuthSigningAlgorithm = tokenEndpointAuthSigningAlgorithm;
         return this;
@@ -200,6 +211,9 @@ public class RegistrationBuilder implements Builder {
 
         if (tokenEndpointAuthMethod != null) {
             registerRequest.setTokenEndpointAuthMethod(tokenEndpointAuthMethod);
+        }
+        if (additionalTokenEndpointAuthMethod != null) {
+            registerRequest.setAdditionalTokenEndpointAuthMethods(additionalTokenEndpointAuthMethod);
         }
         if (tokenSignedResponseAlgorithm != null) {
             registerRequest.setIdTokenSignedResponseAlg(tokenSignedResponseAlgorithm);

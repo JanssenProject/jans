@@ -73,7 +73,7 @@ public class MTLSService {
 
     public boolean processMTLS(HttpServletRequest httpRequest, HttpServletResponse httpResponse, FilterChain filterChain, Client client) throws Exception {
         log.debug("Trying to authenticate client {} via {} ...", client.getClientId(),
-                client.getAuthenticationMethod());
+                client.getAllAuthenticationMethods());
 
         final String clientCertAsPem = httpRequest.getHeader("X-ClientCert");
         if (StringUtils.isBlank(clientCertAsPem)) {
@@ -101,7 +101,7 @@ public class MTLSService {
             }
         }
 
-        if (client.getAuthenticationMethod() == AuthenticationMethod.TLS_CLIENT_AUTH) {
+        if (client.hasAuthenticationMethod(AuthenticationMethod.TLS_CLIENT_AUTH)) {
             log.debug("Authenticating with tls_client_auth ...");
 
             final String subjectDn = client.getAttributes().getTlsClientAuthSubjectDn();
@@ -124,7 +124,7 @@ public class MTLSService {
             log.debug("Client's subject dn: {}, cert subject dn: {}", subjectDn, cert.getSubjectDN().getName());
         }
 
-        if (client.getAuthenticationMethod() == AuthenticationMethod.SELF_SIGNED_TLS_CLIENT_AUTH) { // disable it
+        if (client.hasAuthenticationMethod(AuthenticationMethod.SELF_SIGNED_TLS_CLIENT_AUTH)) { // disable it
             log.debug("Authenticating with self_signed_tls_client_auth ...");
             final PublicKey publicKey = cert.getPublicKey();
             final byte[] encodedKey = publicKey.getEncoded();

@@ -161,7 +161,7 @@ public class ClientService {
     }
 
     public boolean isPublic(Client client) {
-        return client != null && client.getAuthenticationMethod() == AuthenticationMethod.NONE;
+        return client != null && client.hasAuthenticationMethod(AuthenticationMethod.NONE);
     }
 
     public Client getClient(String clientId, String registrationAccessToken) {

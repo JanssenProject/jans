@@ -8,6 +8,7 @@ package io.jans.as.client.client;
 
 import com.google.common.collect.Lists;
 import io.jans.as.client.RegisterRequest;
+import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.register.RegisterRequestParam;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -56,5 +57,23 @@ public class RegisterRequestTest {
         request.setBackchannelLogoutUris(value);
 
         assertEquals(value, request.getJSONParameters().getJSONArray(RegisterRequestParam.BACKCHANNEL_LOGOUT_URI.getName()).toList());
+    }
+
+    @Test
+    public void fromJson_forAdditionalTokenEndpointAuthMethod_shouldReturnCorrectValue() {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("additional_token_endpoint_auth_methods", new JSONArray(Lists.newArrayList("client_secret_basic")));
+
+        final RegisterRequest registerRequest = RegisterRequest.fromJson(jsonObject.toString());
+
+        assertEquals(Lists.newArrayList(AuthenticationMethod.CLIENT_SECRET_BASIC), registerRequest.getAdditionalTokenEndpointAuthMethods());
+    }
+
+    @Test
+    public void getJSONParameters_forAdditionalTokenEndpointAuthMethod_shouldReturnCorrectValue() {
+        RegisterRequest request = new RegisterRequest();
+        request.setAdditionalTokenEndpointAuthMethods(Lists.newArrayList(AuthenticationMethod.CLIENT_SECRET_BASIC));
+
+        assertEquals(Lists.newArrayList("client_secret_basic"), request.getJSONParameters().getJSONArray(RegisterRequestParam.ADDITIONAL_TOKEN_ENDPOINT_AUTH_METHODS.getName()).toList());
     }
 }
