@@ -29,9 +29,7 @@ import jakarta.ws.rs.core.Response;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.TreeMap;
-
-import org.slf4j.Logger;
+import java.util.HashMap;
 
 @Path(ApiConstants.AGAMA_DEPLOYMENTS)
 @Produces(MediaType.APPLICATION_JSON)
@@ -42,9 +40,6 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
 
     @Inject
     private AgamaFlowService flowService;
-    
-    @Inject
-    private Logger logger;
     
     private ObjectMapper mapper;
 
@@ -180,7 +175,7 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
         Response resp = pair.getFirst();
         if (resp != null) return resp;
 
-        Map<String, Map<String, Object>> configs = new TreeMap<>();
+        Map<String, Map<String, Object>> configs = new HashMap<>();
 
         for (String qname : pair.getSecond()) {
             Map<String, Object> config = Optional.ofNullable(flowService.getFlowByName(qname))
@@ -204,7 +199,7 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_WRITE_ACCESS }, 
             superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response setConfigs(@QueryParam("name") String projectName,
-            TreeMap<String, TreeMap<String, Object>> flowsConfigs) {
+            Map<String, Map<String, Object>> flowsConfigs) {
 
         if (flowsConfigs == null) {
             return Response.status(Response.Status.BAD_REQUEST)
@@ -216,7 +211,7 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
         if (resp != null) return resp;
         
         Set<String> flowIds = pair.getSecond();
-        Map<String, Boolean> results = new TreeMap<>();
+        Map<String, Boolean> results = new HashMap<>();
 
         for (String qname : flowsConfigs.keySet()) {
             if (qname != null && flowIds.contains(qname)) {
@@ -238,7 +233,7 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
                 results.put(qname, success);
 
             } else {
-                logger.warn("Flow {} is not part of project {}, config ignored", qname, projectName);
+                logger.warn("Flow {} is not part of project {}, config ignored", qname, projectName.replaceAll("[\n\r]", "_"));
             }
         } 
         return Response.ok(results).build();
