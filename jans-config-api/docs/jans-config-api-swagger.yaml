@@ -7535,19 +7535,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        adminCanEdit:
-          type: boolean
-        userCanView:
-          type: boolean
         adminCanView:
           type: boolean
-        userCanEdit:
+        adminCanEdit:
           type: boolean
         userCanAccess:
           type: boolean
-        adminCanAccess:
+        userCanView:
           type: boolean
         whitePagesCanView:
+          type: boolean
+        userCanEdit:
+          type: boolean
+        adminCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -7899,6 +7899,8 @@ components:
           type: boolean
         returnClientSecretOnRead:
           type: boolean
+        rotateClientRegistrationAccessTokenOnUsage:
+          type: boolean
         rejectJwtWithNoneAlg:
           type: boolean
         expirationNotificatorEnabled:
@@ -7952,6 +7954,8 @@ components:
         includeSidInResponse:
           type: boolean
         disablePromptLogin:
+          type: boolean
+        disablePromptConsent:
           type: boolean
         sessionIdLifetime:
           type: integer
@@ -8268,6 +8272,8 @@ components:
           type: object
           additionalProperties:
             type: string
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8277,8 +8283,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -8915,10 +8919,10 @@ components:
           type: array
           items:
             type: object
-        displayValue:
-          type: string
         value:
           type: object
+        displayValue:
+          type: string
     LocalizedString:
       type: object
       properties:
