@@ -59,10 +59,7 @@ Use external key? [Y|n] : y
  /opt/jans/jans-cli/config-cli.py -CC /opt/jans/jans-setup/output/CA/client.crt -CK /opt/jans/jans-setup/output/CA/client.key
 ```
 
-### Test
-
-
-## How to test OpenBanking?
+## Test
 
 This test uses Gluu Testing certificate.
 
