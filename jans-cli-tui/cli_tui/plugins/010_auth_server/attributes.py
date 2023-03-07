@@ -8,8 +8,10 @@ from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.layout.containers import HSplit, VSplit, DynamicContainer, HorizontalAlign
 from prompt_toolkit.widgets import Button
 from prompt_toolkit.buffer import Buffer
+from prompt_toolkit.formatted_text import HTML, merge_formatted_text
 
 from utils.multi_lang import _
+from utils.utils import common_data
 from utils.utils import DialogUtils
 from utils.static import cli_style, common_strings
 from wui_components.jans_drop_down import DropDownWidget
@@ -27,7 +29,7 @@ class Attributes(DialogUtils):
         self.prev_next_buttons = VSplit([], width=D())
         self.working_container = JansVerticalNav(
                 myparent=app,
-                headers=[_("Name"), _("Origin"), _("Status")],
+                headers=[_("Name"), _("Data Type"), _("Status")],
                 preferred_size= self.app.get_column_sizes(.5, .3 , .2),
                 on_enter=self.edit_attribute,
                 on_display=self.app.data_display_dialog,
@@ -54,6 +56,9 @@ class Attributes(DialogUtils):
 
     def edit_attribute(self, **params: Any) -> None:
         """This method displays the attribute editing dialog
+
+        Args:
+            params (dict): arguments passed by Nav Bar or add button
         """
         data = params['data']
 
@@ -170,9 +175,17 @@ class Attributes(DialogUtils):
         self.app.show_jans_dialog(dialog)
 
     def add_attributes(self) -> None:
+        """Calls edit_attribute() with empty data for adding an attribute."""
+
         self.edit_attribute(data={})
 
-    def save_attribute(self, dialog):
+    def save_attribute(self, dialog: JansGDialog) -> None:
+        """Saves attribute
+
+        Args:
+            dialog (JansGDialog): dialog object
+        """
+
         new_data = self.make_data_from_dialog(tabs={'attributes': dialog.body})
 
         for key in dialog.data:
@@ -199,13 +212,19 @@ class Attributes(DialogUtils):
             pattern: Optional[str] = '',
             data: Optional[dict] = {}
         ) -> None:
+        """This fucntion updates working container
+
+        Args:
+            pattern (str, optional): an optional argument for searching attribute. This argument is passed to get_attributes().
+            data (dict, optional): the data to be displayed
+        """
 
         self.working_container.clear()
 
         for attribute in data.get('entries', []):
             self.working_container.add_item((
                         attribute['name'],
-                        attribute['origin'],
+                        attribute['dataType'],
                         attribute['status'],
                     ))
 
@@ -234,6 +253,12 @@ class Attributes(DialogUtils):
             start_index: Optional[int]= 0,
             pattern: Optional[str]= '',
         ) -> None:
+        """Retireives attrbiutes from server according to pattern
+
+        Args:
+            start_index (int, optional): an optional argument for start index
+            pattern (str, optional): an optional argument for searching attribute.
+        """
 
         async def coroutine():
 
@@ -270,7 +295,10 @@ class Attributes(DialogUtils):
 
 
     def delete_attribute(self, **kwargs: Any) -> None:
-        """This method is for deleting attribute
+        """This method is for deleting attribute.
+
+        Args:
+            kwargs (dict): arguments given by on_delete() function of Nav Bar
         """
 
         selected_idx = kwargs['selected_idx']
@@ -286,8 +314,22 @@ class Attributes(DialogUtils):
 
             asyncio.ensure_future(coroutine())
 
+        used_by = []
+        for scope in common_data.scopes:
+            if selected_attribute['dn'] in scope.get('claims', []):
+                used_by.append(scope['id'])
+
+        confirm_msg = [_("You are about to delete attribute <b>{}</b>.").format(selected_attribute['name'])]
+        if used_by:
+            confirm_msg.append(_("This user attribute is associated with the following OpenID scopes:\n<b>{}</b>.").format(', '.join(used_by)))
+
+        confirm_msg.append(_("Other scripts or customizations may reference this attribute. <b>REMOVE AT YOUR OWN PERIL!</b>"))
+        confirm_msg.append(_("Are you sure want to delete ?"))
+
+        confirm_msg = [HTML(msg+'\n') for msg in confirm_msg]
+
         confirm_dialog = self.app.get_confirm_dialog(
-                _("Are you sure want to delete attribute {} ?").format(selected_attribute['name']),
+                merge_formatted_text(confirm_msg),
                 confirm_handler=do_delete_attribute
                 )
 
