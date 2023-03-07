@@ -1,6 +1,9 @@
 package io.jans.ads.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ProjectMetadata {
@@ -9,6 +12,9 @@ public class ProjectMetadata {
     private String author;
     private String type;
     private String description;
+
+    @JsonProperty("configs")
+    private Map<String, Object> configHints;
 
     public String getProjectName() {
         return projectName;
@@ -40,6 +46,14 @@ public class ProjectMetadata {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Map<String, Object> getConfigHints() {
+        return configHints;
+    }
+
+    public void setConfigHints(Map<String, Object> configHints) {
+        this.configHints = configHints;
     }
 
 }
