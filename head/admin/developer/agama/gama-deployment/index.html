@@ -8936,6 +8936,7 @@ list = Call com.foods.RecipeUtils#retrieveIngredients choice.meal
 <ol>
 <li>Send (POST) the archive contents to the deployment endpoint. Normally a 202 response should be obtained meaning a task has been queued for processing</li>
 <li>Poll (via GET) the status of the deployment. When the archive has been effectively deployed a status of 200 should be obtained. It may take up to 30 seconds for the process to complete once the archive is sent. This time may extend if there is another deployment in course</li>
+<li>Optionally supply configuration parameters for flows if needed. This is done via PUT to the <code>/configs</code> endpoint. The response of the previous step may contain descriptive/sample configurations that can be used as a guide</li>
 <li>Test the deployed flows and adjust the archive for any changes required</li>
 <li>Go to point 1 if needed</li>
 <li>If desired, a request can be sent to undeploy the flows (via DELETE)</li>
@@ -9110,6 +9111,66 @@ list = Call com.foods.RecipeUtils#retrieveIngredients choice.meal
 <thead>
 <tr>
 <th>Endpoint -&gt;</th>
+<th><code>/agama-deployment/configs</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Purpose</td>
+<td>Retrieve the configurations associated to flows that belong to the project of interest. The project must have been already processed fully</td>
+</tr>
+<tr>
+<td>Method</td>
+<td>GET</td>
+</tr>
+<tr>
+<td>Query params</td>
+<td><code>name</code> (the project's name) - mandatory</td>
+</tr>
+<tr>
+<td>Output</td>
+<td>A JSON object whose properties are flow names and values correspond to configuration properties defined (JSON objects too)</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>200 (successful response), 409 (the project is being deployed currently), 404 (unknown project), 400 (a param is missing)</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Endpoint -&gt;</th>
+<th><code>/agama-deployment/configs</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Purpose</td>
+<td>Set or replace the configurations associated to flows that belong to the project of interest. The project must have been already processed fully</td>
+</tr>
+<tr>
+<td>Method</td>
+<td>PUT</td>
+</tr>
+<tr>
+<td>Query params</td>
+<td><code>name</code> (the project's name) - mandatory</td>
+</tr>
+<tr>
+<td>Output</td>
+<td>A JSON object whose properties are flow names and values correspond to a boolean indicating the success of the update for the given flow</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>200 (successful response), 409 (the project is being deployed currently), 404 (unknown project), 400 (a param is missing)</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Endpoint -&gt;</th>
 <th><code>/agama-deployment</code></th>
 </tr>
 </thead>
@@ -9170,7 +9231,7 @@ list = Call com.foods.RecipeUtils#retrieveIngredients choice.meal
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-02-15T12:07:34+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-02-15</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-03-07T16:24:04+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-03-07</span>
       
         <br>
         Created:
