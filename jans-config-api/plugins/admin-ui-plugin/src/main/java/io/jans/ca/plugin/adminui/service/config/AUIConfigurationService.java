@@ -64,7 +64,7 @@ public class AUIConfigurationService extends BaseService {
      * @return The AUIConfiguration object
      */
     public AUIConfiguration getAUIConfiguration(String appType) throws ApplicationException {
-
+        log.info("Inside method to read the configuration from the LDAP server and stores it in a map.");
         try {
             if (Strings.isNullOrEmpty(appType)) {
                 appType = AppConstants.APPLICATION_KEY_ADMIN_UI;
@@ -73,22 +73,31 @@ public class AUIConfigurationService extends BaseService {
             if (appConfigurationMap == null) {
                 appConfigurationMap = Maps.newHashMap();
             }
+            AUIConfiguration auiConfiguration = null;
+            AdminConf appConf = null;
+            if (appType.equals(AppConstants.APPLICATION_KEY_ADMIN_UI)) {
+                appConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
+            } else if (appType.equals(AppConstants.APPLICATION_KEY_ADS)) {
+                appConf = entryManager.find(AdminConf.class, AppConstants.ADS_CONFIG_DN);
+            }
 
             if (appConfigurationMap.get(appType) == null) {
-                AdminConf appConf = null;
-                if (appType.equals(AppConstants.APPLICATION_KEY_ADMIN_UI)) {
-                    appConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
-                } else if (appType.equals(AppConstants.APPLICATION_KEY_ADS)) {
-                    appConf = entryManager.find(AdminConf.class, AppConstants.ADS_CONFIG_DN);
-                }
-                AUIConfiguration auiConfiguration = addPropertiesToAUIConfiguration(appType, appConf);
+                auiConfiguration = addPropertiesToAUIConfiguration(appType, appConf);
                 if (!appType.equals(AppConstants.APPLICATION_KEY_ADS)) {
                     auiConfiguration.setLicenseConfiguration(addPropertiesToLicenseConfiguration(appConf));
                     appConfigurationMap.put(appType, auiConfiguration);
                 }
             }
-
-
+            //check if LicenseConfiguration contains valid values in every request
+            log.info("Checking if LicenseConfiguration present.");
+            if (!appType.equals(AppConstants.APPLICATION_KEY_ADS)) {
+                LicenseConfiguration lc = appConfigurationMap.get(appType).getLicenseConfiguration();
+                if (lc == null || Strings.isNullOrEmpty(lc.getApiKey())) {
+                    log.info("Trying to add properties to LicenseConfiguration.");
+                    auiConfiguration.setLicenseConfiguration(addPropertiesToLicenseConfiguration(appConf));
+                    appConfigurationMap.put(appType, auiConfiguration);
+                }
+            }
             return appConfigurationMap.get(appType);
         } catch (ApplicationException e) {
             log.error(ErrorResponse.ERROR_READING_CONFIG.getDescription(), e);
