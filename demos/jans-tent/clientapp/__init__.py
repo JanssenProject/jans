@@ -186,7 +186,7 @@ def create_app():
             query_args['acr_values'] = cfg.ACR_VALUES
         
         if cfg.PROVIDER_HOST_STRING is not None:
-             query_args["providerHost"] = get_provider_host()
+            query_args["providerHost"] = get_provider_host()
 
         response = oauth.op.authorize_redirect(**query_args)
 
@@ -218,8 +218,8 @@ def create_app():
         except Exception as error:
             print('exception!')
             print(error)
-            app.logger.error(error)
-            return {'error': error}, 400
+            app.logger.error(str(error))
+            return {'error': str(error)}, 400
 
     @app.route("/configuration", methods=["POST"])
     def configuration():
