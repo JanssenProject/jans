@@ -63,7 +63,7 @@ public class AUIConfigurationService extends BaseService {
      * @param appType The application type. This is either "adminUI" or "ads".
      * @return The AUIConfiguration object
      */
-    public AUIConfiguration getAUIConfiguration(String appType) throws ApplicationException {
+    public AUIConfiguration getAUIConfiguration(String appType) throws Exception {
         log.info("Inside method to read the configuration from the LDAP server and stores it in a map.");
         try {
             if (Strings.isNullOrEmpty(appType)) {
@@ -101,14 +101,10 @@ public class AUIConfigurationService extends BaseService {
                 }
             }
             return appConfigurationMap.get(appType);
-        } catch (ApplicationException e) {
-            log.error(ErrorResponse.ERROR_READING_CONFIG.getDescription(), e);
-            throw e;
         } catch (Exception e) {
             log.error(ErrorResponse.ERROR_READING_CONFIG.getDescription(), e);
             throw e;
         }
-
     }
 
     public void setAuiConfiguration(AUIConfiguration auiConfiguration) {
@@ -143,7 +139,7 @@ public class AUIConfigurationService extends BaseService {
         return auiConfig;
     }
 
-    private LicenseConfiguration addPropertiesToLicenseConfiguration(AdminConf appConf) throws ApplicationException {
+    private LicenseConfiguration addPropertiesToLicenseConfiguration(AdminConf appConf) throws Exception {
         LicenseConfiguration licenseConfiguration = new LicenseConfiguration();
         LicenseConfig licenseConfig = appConf.getMainSettings().getLicenseConfig();
 
@@ -165,7 +161,7 @@ public class AUIConfigurationService extends BaseService {
      *
      * @param licenseConfig This is the object that contains the configuration parameters for the license.
      */
-    private LicenseSpringCredentials requestLicenseCredentialsFromScan(LicenseConfig licenseConfig) throws ApplicationException {
+    private LicenseSpringCredentials requestLicenseCredentialsFromScan(LicenseConfig licenseConfig) throws Exception {
         try {
             log.info("Inside method to request license credentials from SCAN api.");
             TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
