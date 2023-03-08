@@ -42,7 +42,7 @@ public class AUIConfigurationService extends BaseService {
     private Map<String, AUIConfiguration> appConfigurationMap;
 
     @Inject
-    Logger log;
+    Logger logger;
 
     @Inject
     private PersistenceEntryManager entryManager;
@@ -64,7 +64,7 @@ public class AUIConfigurationService extends BaseService {
      * @return The AUIConfiguration object
      */
     public AUIConfiguration getAUIConfiguration(String appType) throws Exception {
-        log.info("Inside method to read the configuration from the LDAP server and stores it in a map.");
+        logger.info("Inside method to read the configuration from the LDAP server and stores it in a map.");
         try {
             if (Strings.isNullOrEmpty(appType)) {
                 appType = AppConstants.APPLICATION_KEY_ADMIN_UI;
@@ -89,11 +89,11 @@ public class AUIConfigurationService extends BaseService {
                 }
             }
             //check if LicenseConfiguration contains valid values in every request
-            log.info("Checking if LicenseConfiguration present.");
+            logger.info("Checking if LicenseConfiguration present.");
             if (!appType.equals(AppConstants.APPLICATION_KEY_ADS)) {
                 LicenseConfiguration lc = appConfigurationMap.get(appType).getLicenseConfiguration();
                 if (lc == null || Strings.isNullOrEmpty(lc.getApiKey())) {
-                    log.info("Trying to add properties to LicenseConfiguration.");
+                    logger.info("Trying to add properties to LicenseConfiguration.");
                     AdminConf appConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
                     auiConfiguration = appConfigurationMap.get(appType);
                     auiConfiguration.setLicenseConfiguration(addPropertiesToLicenseConfiguration(appConf));
@@ -102,7 +102,7 @@ public class AUIConfigurationService extends BaseService {
             }
             return appConfigurationMap.get(appType);
         } catch (Exception e) {
-            log.error(ErrorResponse.ERROR_READING_CONFIG.getDescription(), e);
+            logger.error(ErrorResponse.ERROR_READING_CONFIG.getDescription());
             throw e;
         }
     }
@@ -163,28 +163,24 @@ public class AUIConfigurationService extends BaseService {
      */
     private LicenseSpringCredentials requestLicenseCredentialsFromScan(LicenseConfig licenseConfig) throws Exception {
         try {
-            log.info("Inside method to request license credentials from SCAN api.");
+            logger.info("Inside method to request license credentials from SCAN api.");
             TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
             tokenRequest.setAuthUsername(licenseConfig.getOidcClient().getClientId());
             tokenRequest.setAuthPassword(licenseConfig.getOidcClient().getClientSecret());
             tokenRequest.setGrantType(GrantType.CLIENT_CREDENTIALS);
             tokenRequest.setScope(LicenseResource.SCOPE_LICENSE_READ);
 
-            log.info("Truing to get access token from auth server.");
+            logger.info("Truing to get access token from auth server.");
             String scanLicenseApiHostname = (new StringBuffer()).append(licenseConfig.getScanLicenseAuthServerHostname()).append("/jans-auth/restv1/token").toString();
             io.jans.as.client.TokenResponse tokenResponse = null;
-            try {
-                tokenResponse = getToken(tokenRequest, scanLicenseApiHostname);
-            } catch (Exception e) {
-                log.error("Error in generating token from server: {}", scanLicenseApiHostname);
-                throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Error in generating token from server: " + scanLicenseApiHostname);
-            }
+            tokenResponse = getToken(tokenRequest, scanLicenseApiHostname);
+
             // create request header
             MultivaluedMap<String, Object> headers = new MultivaluedHashMap<>();
             headers.putSingle("Content-Type", "application/json");
             headers.putSingle("Authorization", "Bearer " + tokenResponse.getAccessToken());
 
-            log.info("Trying to get license credentials from SCAN api.");
+            logger.info("Trying to get license credentials from SCAN api.");
             String licenseCredentailsUrl = (new StringBuffer()).append(licenseConfig.getScanLicenseApiHostname())
                     .append("/scan/license/credentials").toString();
 
@@ -195,7 +191,7 @@ public class AUIConfigurationService extends BaseService {
             body.put("pubKey", licenseConfig.getCredentialsEncryptionKey().getPublicKey());
 
             Response response = request.post(Entity.entity(body, MediaType.APPLICATION_JSON));
-            log.info(" license credentials from scan request status code: {}", response.getStatus());
+            logger.info(" license credentials from scan request status code: {}", response.getStatus());
             if (response.getStatus() == 200) {
                 JsonObject entity = response.readEntity(JsonObject.class);
                 if (!Strings.isNullOrEmpty(entity.getString("apiKey"))) {
@@ -207,19 +203,18 @@ public class AUIConfigurationService extends BaseService {
                             .replace("-----BEGIN PRIVATE KEY-----", "")
                             .replaceAll(System.lineSeparator(), "")
                             .replace("-----END PRIVATE KEY-----", "");
-                    ;
                     licenseSpringCredentials.setApiKey(CommonUtils.decode(entity.getString("apiKey"), privateKey));
                     licenseSpringCredentials.setProductCode(CommonUtils.decode(entity.getString("productCode"), privateKey));
                     licenseSpringCredentials.setSharedKey(CommonUtils.decode(entity.getString("sharedKey"), privateKey));
 
-                    log.info(" licenseSpringCredentials.toString(): {}", licenseSpringCredentials.toString());
                     return licenseSpringCredentials;
                 }
             }
-            log.error("license Activation error response: {}, code: {}", response.readEntity(String.class), response.getStatus());
+            String errorResponse = response.readEntity(String.class);
+            logger.error("license Activation error response: {}, code: {}", errorResponse, response.getStatus());
             throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), ErrorResponse.LICENSE_SPRING_CREDENTIALS_ERROR.getDescription());
         } catch (Exception e) {
-            log.error(ErrorResponse.LICENSE_SPRING_CREDENTIALS_ERROR.getDescription(), e);
+            logger.error(ErrorResponse.LICENSE_SPRING_CREDENTIALS_ERROR.getDescription());
             throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), ErrorResponse.LICENSE_SPRING_CREDENTIALS_ERROR.getDescription());
         }
     }
