@@ -3,12 +3,12 @@ astroid==2.12.5
 asttokens==2.0.8
 async-generator==1.10
 attrs==22.1.0
-Authlib==1.0.1
+Authlib==1.2.0
 autopep8==1.7.0
 backcall==0.2.0
 bandit==1.7.4
 behave==1.2.6
-certifi==2022.6.15
+certifi==2022.12.7
 cffi==1.15.1
 chardet==5.0.0
 charset-normalizer==2.1.1
@@ -26,7 +26,7 @@ flask-oidc==1.4.0
 gitdb==4.0.9
 GitPython==3.1.27
 h11==0.13.0
-httplib2==0.20.4
+httplib2==0.21.0
 idna==3.3
 importlib-metadata==4.12.0
 iniconfig==1.1.1
