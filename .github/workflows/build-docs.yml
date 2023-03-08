@@ -97,6 +97,7 @@ jobs:
          git clone  https://mo-auto:${{ secrets.MOAUTO_WORKFLOW_TOKEN }}@github.com/JanssenProject/jans.git
          cd jans
          git checkout -b cn-jans-update-auto-generated-docs
+         git pull origin cn-jans-update-auto-generated-docs || echo "Nothing to pull"
          echo "Custom work on generating docs can go here."
           
          # Run cn docs 
