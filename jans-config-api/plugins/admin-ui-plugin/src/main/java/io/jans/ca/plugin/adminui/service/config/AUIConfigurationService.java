@@ -53,7 +53,7 @@ public class AUIConfigurationService extends BaseService {
     @Inject
     ConfigurationService configurationService;
 
-    public AUIConfiguration getAUIConfiguration() throws ApplicationException {
+    public AUIConfiguration getAUIConfiguration() throws Exception {
         return getAUIConfiguration(null);
     }
 
