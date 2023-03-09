@@ -1,0 +1,156 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                template="/WEB-INF/incl/layout/login-extended-template.xhtml">
+    <f:metadata>
+        <f:viewAction action="#{authenticator.prepareAuthenticationForStep}"
+                      if="#{not identity.loggedIn}"/>
+
+        <f:viewParam name="login_hint" value="#{loginAction.loginHint}"/>
+    </f:metadata>
+
+    <ui:define name="head">
+        <meta name="description" content="Gluu, Inc."/>
+    </ui:define>
+
+    <ui:define name="pageTitle">
+        <h:outputText value="#{msgs['login.pageTitle']}"/>
+    </ui:define>
+
+    <ui:define name="body">
+        <header class="bs-docs-nav navbar navbar-static-top" id="top">
+            <div class="container">
+                <!-- start logo-->
+                <div class="logo span2">
+                    <ui:param name="client"
+                              value="#{clientService.getClient(identity.sessionId.sessionAttributes['client_id'])}"/>
+
+                    <h:panelGroup layout="block" rendered='#{!empty client.logoUri}'>
+                        <h:graphicImage url='#{client.logoUri}'/>
+                    </h:panelGroup>
+                    <h:panelGroup layout="block" rendered='#{empty client.logoUri}'>
+                       <object data="ext/resources/img/logo.png" type="image/png">
+                                         <img src="img/logo.png" />
+                       </object>
+                    </h:panelGroup>
+                </div>
+                <!-- end logo-->
+            </div>
+        </header>
+        <!-- end header-->
+        <div class="bs-docs-section">
+            <div class="container">
+
+                <h:panelGroup>
+                    <div class="login_bx_1">
+                        <div class="row">
+                            <div class="col-md-6_1 col-sm-5_1 ">
+                                <div class="left_form_bx">
+
+                                    <h:form id="loginForm" class="form-horizontal">
+                                        <h:panelGroup
+                                                rendered="#{sessionIdService.notSessionIdAuthenticated}">
+
+                                            <h:messages style="color:red;"/>
+
+                                            <div class="form-group">
+                                                <h:outputLabel styleClass="col-sm-3 control-label"
+                                                               value="#{msgs['login.username']}"/>
+                                                <div class="col-sm-9">
+                                                	<h:outputLabel styleClass="control-label"
+                                                	value="#{identity.sessionId.sessionAttributes['roUserName']}" />
+                                                    <!--h:inputText id="username" value="#{credentials.username}"
+                                                                 styleClass="form-control"
+                                                                 autocomplete="off" readonly="true" /-->
+                                                    <h:inputHidden id="username" value="#{credentials.username}" />
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <h:outputLabel styleClass="col-sm-3 control-label" for="password"
+                                                               value="#{msgs['login.password']}"/>
+                                                <div class="col-sm-9">
+                                                    <h:inputSecret id="password" value="#{credentials.password}"
+                                                                   styleClass="form-control"
+                                                                   autocomplete="off"/>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <div class="col-sm-offset-3 col-sm-9">
+                                                    <h:commandButton id="loginButton" styleClass="btn btn-primary"
+                                                                     value="#{msgs['login.login']}"
+                                                                     action="#{authenticator.authenticate}"/>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <div class="col-sm-offset-3 col-sm-9">
+                                                    <div class="forgot_link">
+                                                        <a href="/identity/person/passwordReminder.htm">
+                                                            <h:outputText value="Forgot your Password?"/>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </h:panelGroup>
+                                    </h:form>
+                                </div>
+                                <!--h:panelGroup layout="block" rendered="#{external_registration_uri != Null}">
+                                    <div class="reg_link">
+                                        <a href="#{external_registration_uri}">
+                                            <h:outputText value="Register Now   "/>
+                                        </a>
+                                    </div>
+                                </h:panelGroup-->
+                            </div>
+                        </div>
+                    </div>
+
+                </h:panelGroup>
+            </div>
+        </div>
+
+        <div class="foot_bor">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="padding_spc">
+                            <p>
+                                <h:outputText value="#{msgs['common.gluuInc']}"/>
+                                |
+                                <a target="_blank" href="https://github.com/GluuFederation/oxAuth/blob/master/LICENSE">
+                                    <h:outputText value="#{msgs['common.caution']}" escape="false"/>
+                                </a>
+                                <h:panelGroup rendered='#{!empty client.policyUri}'>
+                                    |
+                                    <a target="_blank" href="#{client.policyUri}">
+                                        <h:outputText value="#{msgs['common.privacyPolicy']}" escape="false"/>
+                                    </a>
+                                </h:panelGroup>
+                                <h:panelGroup rendered='#{!empty client.tosUri}'>
+                                    |
+                                    <a target="_blank" href="#{client.tosUri}">
+                                        <h:outputText value="#{msgs['common.termsOfService']}" escape="false"/>
+                                    </a>
+                                </h:panelGroup>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+            window.onload = function () {
+            var userName='#{identity.sessionId.sessionAttributes["roUserName"]}';
+            var userNameField = document.getElementById("loginForm:username");
+            userNameField.value=userName;
+            var passwordField = document.getElementById("loginForm:password");
+            passwordField.focus();
+            };
+        </script>
+    </ui:define>
+</ui:composition>

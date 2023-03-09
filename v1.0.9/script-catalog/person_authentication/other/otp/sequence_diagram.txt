@@ -1,0 +1,31 @@
+Title OTP enrollment/authentication workflow
+
+Person->Browser: Open RP URL
+Browser->RP: Protected resource
+RP->Gluu Server: Start AuthZ & AuthN
+OTP Script->OTP Script: Verify user/password
+
+alt: User enrollment
+    OTP Script->OTP Script: Check if person not issued OTP key already
+    OTP Script->Browser: Render otpauth QR code with OTP key 
+    Person->OTP comp. auth.: Scan QR code
+    OTP comp. auth.->Person: New one time password
+    Person->Browser: Enter one time password
+    Browser->OTP Script:
+    OTP Script->OTP Script: Validate one time password
+    OTP Script->OTP Script: Strore OTP key in user entry
+    OTP Script->Gluu Server: User pass enrollment
+else User authentication
+    OTP Script->OTP Script: Check if person issued OTP key already
+    OTP comp. auth.->Person: New one time password
+    Person->Browser: Enter one time password
+    Browser->OTP Script:
+    OTP Script->OTP Script: Validate one time password
+    OTP Script->Gluu Server: User pass enrollment
+end
+
+Gluu Server->Browser: Return code
+Browser->RP: Return code
+
+RP->Gluu Server: Request tokens
+RP->Gluu Server: Request user_info
