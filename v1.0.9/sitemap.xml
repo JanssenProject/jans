@@ -1841,787 +1841,787 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/admin/scim/custom-attributes/</loc>
+         <loc>https://jans.io/docs/head/admin/scim/custom-attributes/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/admin/scim/logs/</loc>
+         <loc>https://jans.io/docs/head/admin/scim/logs/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/admin/scim/monitoring/</loc>
+         <loc>https://jans.io/docs/head/admin/scim/monitoring/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/admin/scim/oauth-protection/</loc>
+         <loc>https://jans.io/docs/head/admin/scim/oauth-protection/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/admin/scim/security/</loc>
+         <loc>https://jans.io/docs/head/admin/scim/security/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/admin/to-be-placed/add-custom-ldifs/</loc>
+         <loc>https://jans.io/docs/head/admin/to-be-placed/add-custom-ldifs/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/admin/to-be-placed/google/</loc>
+         <loc>https://jans.io/docs/head/admin/to-be-placed/google/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/admin/upgrade/</loc>
+         <loc>https://jans.io/docs/head/admin/upgrade/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/admin/upgrade/upgrade-faq/</loc>
+         <loc>https://jans.io/docs/head/admin/upgrade/upgrade-faq/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/admin/upgrade/kubernetes/</loc>
+         <loc>https://jans.io/docs/head/admin/upgrade/kubernetes/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/admin/upgrade/kubernetes/backup/</loc>
+         <loc>https://jans.io/docs/head/admin/upgrade/kubernetes/backup/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/admin/upgrade/kubernetes/paths/</loc>
+         <loc>https://jans.io/docs/head/admin/upgrade/kubernetes/paths/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/admin/upgrade/kubernetes/rollback/</loc>
+         <loc>https://jans.io/docs/head/admin/upgrade/kubernetes/rollback/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/admin/upgrade/vm/</loc>
+         <loc>https://jans.io/docs/head/admin/upgrade/vm/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/admin/upgrade/vm/backup/</loc>
+         <loc>https://jans.io/docs/head/admin/upgrade/vm/backup/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/admin/upgrade/vm/paths/</loc>
+         <loc>https://jans.io/docs/head/admin/upgrade/vm/paths/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/admin/upgrade/vm/rollback/</loc>
+         <loc>https://jans.io/docs/head/admin/upgrade/vm/rollback/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/admin/vm-ops/</loc>
+         <loc>https://jans.io/docs/head/admin/vm-ops/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/admin/vm-ops/backup/</loc>
+         <loc>https://jans.io/docs/head/admin/vm-ops/backup/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/admin/vm-ops/certificates/</loc>
+         <loc>https://jans.io/docs/head/admin/vm-ops/certificates/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/admin/vm-ops/checking-service-status/</loc>
+         <loc>https://jans.io/docs/head/admin/vm-ops/checking-service-status/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/admin/vm-ops/faq/</loc>
+         <loc>https://jans.io/docs/head/admin/vm-ops/faq/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/admin/vm-ops/logs/</loc>
+         <loc>https://jans.io/docs/head/admin/vm-ops/logs/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/admin/vm-ops/managing-key-rotation/</loc>
+         <loc>https://jans.io/docs/head/admin/vm-ops/managing-key-rotation/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/admin/vm-ops/restarting-services/</loc>
+         <loc>https://jans.io/docs/head/admin/vm-ops/restarting-services/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/admin/vm-ops/web-services/</loc>
+         <loc>https://jans.io/docs/head/admin/vm-ops/web-services/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/agama-catalog/community/</loc>
+         <loc>https://jans.io/docs/head/agama-catalog/community/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/agama-catalog/jans/</loc>
+         <loc>https://jans.io/docs/head/agama-catalog/jans/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/agama-catalog/jans/inboundID/</loc>
+         <loc>https://jans.io/docs/head/agama-catalog/jans/inboundID/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/agama-catalog/jans/inboundID/apple/</loc>
+         <loc>https://jans.io/docs/head/agama-catalog/jans/inboundID/apple/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/agama-catalog/vendor/</loc>
+         <loc>https://jans.io/docs/head/agama-catalog/vendor/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/assets/</loc>
+         <loc>https://jans.io/docs/head/assets/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/developer/</loc>
+         <loc>https://jans.io/docs/head/developer/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/developer/developer-faq/</loc>
+         <loc>https://jans.io/docs/head/developer/developer-faq/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/developer/development/</loc>
+         <loc>https://jans.io/docs/head/developer/development/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/developer/testing/</loc>
+         <loc>https://jans.io/docs/head/developer/testing/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/developer/useful-tools/</loc>
+         <loc>https://jans.io/docs/head/developer/useful-tools/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/developer/ci-cd/github-ci/</loc>
+         <loc>https://jans.io/docs/head/developer/ci-cd/github-ci/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/developer/ci-cd/jenkins-ci/</loc>
+         <loc>https://jans.io/docs/head/developer/ci-cd/jenkins-ci/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/developer/ci-cd/release-process/</loc>
+         <loc>https://jans.io/docs/head/developer/ci-cd/release-process/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/developer/implementation-design/</loc>
+         <loc>https://jans.io/docs/head/developer/implementation-design/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/developer/implementation-design/agama/</loc>
+         <loc>https://jans.io/docs/head/developer/implementation-design/agama/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/developer/implementation-design/jans-auth-server/</loc>
+         <loc>https://jans.io/docs/head/developer/implementation-design/jans-auth-server/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/developer/implementation-design/jans-cli/</loc>
+         <loc>https://jans.io/docs/head/developer/implementation-design/jans-cli/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/developer/implementation-design/jans-config-api/</loc>
+         <loc>https://jans.io/docs/head/developer/implementation-design/jans-config-api/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/developer/implementation-design/jans-core/</loc>
+         <loc>https://jans.io/docs/head/developer/implementation-design/jans-core/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/developer/implementation-design/jans-eleven/</loc>
+         <loc>https://jans.io/docs/head/developer/implementation-design/jans-eleven/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/developer/implementation-design/jans-fido2/</loc>
+         <loc>https://jans.io/docs/head/developer/implementation-design/jans-fido2/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/developer/implementation-design/jans-notify/</loc>
+         <loc>https://jans.io/docs/head/developer/implementation-design/jans-notify/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/developer/implementation-design/jans-orm/</loc>
+         <loc>https://jans.io/docs/head/developer/implementation-design/jans-orm/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/developer/implementation-design/jans-scim/</loc>
+         <loc>https://jans.io/docs/head/developer/implementation-design/jans-scim/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/developer/implementation-design/technical-overview-template/</loc>
+         <loc>https://jans.io/docs/head/developer/implementation-design/technical-overview-template/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/governance/</loc>
+         <loc>https://jans.io/docs/head/governance/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/governance/charter/</loc>
+         <loc>https://jans.io/docs/head/governance/charter/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/governance/copyright-notices/</loc>
+         <loc>https://jans.io/docs/head/governance/copyright-notices/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/governance/triage/</loc>
+         <loc>https://jans.io/docs/head/governance/triage/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/application_session/sample-script/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/application_session/sample-script/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/cache_refresh/sample-script/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/cache_refresh/sample-script/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/ciba/end-user-notification/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/ciba/end-user-notification/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/client_registration/OpenBanking/client-registration/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/client_registration/OpenBanking/client-registration/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/client_registration/sample-script/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/client_registration/sample-script/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/config_api/config-api-interception/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/config_api/config-api-interception/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/consent_gathering/sample-script/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/consent_gathering/sample-script/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/discovery/discovery/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/discovery/discovery/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/dynamic_scope/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/dynamic_scope/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/dynamic_scope/dynamic-permission/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/dynamic_scope/dynamic-permission/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/dynamic_scope/memberof-attribute/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/dynamic_scope/memberof-attribute/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/dynamic_scope/org-name/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/dynamic_scope/org-name/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/dynamic_scope/session-parameter/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/dynamic_scope/session-parameter/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/dynamic_scope/work-phone/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/dynamic_scope/work-phone/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/end_session/end-session/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/end_session/end-session/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/id_generator/sample-script/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/id_generator/sample-script/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/idp/sample-script/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/idp/sample-script/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/introspection/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/introspection/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/introspection/introspection/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/introspection/introspection/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/introspection/introspection-custom-parameters/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/introspection/introspection-custom-parameters/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/introspection/introspection-role-based-scope/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/introspection/introspection-role-based-scope/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/persistence_extension/sample-script/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/persistence_extension/sample-script/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/agama-bridge/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/agama-bridge/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/apple-external-authenticator/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/apple-external-authenticator/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/basic-external-authenticator/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/basic-external-authenticator/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/basic-lock-account-external-authenticator/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/basic-lock-account-external-authenticator/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/casa/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/casa/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/duo-external-authenticator/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/duo-external-authenticator/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/fido2-external-authenticator/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/fido2-external-authenticator/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/forgot_password/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/forgot_password/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/google-external-authenticator/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/google-external-authenticator/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/other/acr_router/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/acr_router/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/other/allowed_countries/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/allowed_countries/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/other/authz/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/authz/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/other/azuread/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/azuread/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/other/basic.change_password/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/basic.change_password/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/other/basic.client_group/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/basic.client_group/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/other/basic.external_logout/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/basic.external_logout/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/other/basic.lock.account/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/basic.lock.account/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/other/basic.multi_auth_conf/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/basic.multi_auth_conf/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/other/basic.multi_login/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/basic.multi_login/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/other/basic.multiple_test_email_addresses/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/basic.multiple_test_email_addresses/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/other/basic.one_session/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/basic.one_session/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/other/basic.password_expiration/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/basic.password_expiration/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/other/basic.reset_to_step/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/basic.reset_to_step/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/other/bcrypt_ssha_migration/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/bcrypt_ssha_migration/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/other/bioid/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/bioid/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/other/cas2/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/cas2/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/other/cas2_duo/Readme/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/cas2_duo/Readme/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/other/cert/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/cert/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/other/cert/Generate%20certs%20guide/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/cert/Generate%20certs%20guide/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/other/cert/Generate%20certs%20without%20configs/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/cert/Generate%20certs%20without%20configs/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/other/cert/Quick%20certs%20guide%20for%20testing/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/cert/Quick%20certs%20guide%20for%20testing/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/other/ciba/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/ciba/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/other/compromised_password/readme/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/compromised_password/readme/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/other/custom_registration/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/custom_registration/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/other/duo/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/duo/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/other/fortinet/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/fortinet/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/other/gplus/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/gplus/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/other/idfirst/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/idfirst/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/other/idfirst/README_idfirst/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/idfirst/README_idfirst/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/other/inwebo/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/inwebo/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/other/otp/Properties%20description/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/otp/Properties%20description/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/other/passport/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/passport/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/other/phonefactor/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/phonefactor/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/other/postauthn/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/postauthn/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/other/registration/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/registration/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/other/saml/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/saml/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/other/saml-passport/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/saml-passport/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/other/super_gluu/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/super_gluu/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/other/toopher/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/toopher/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/other/twilio_sms/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/twilio_sms/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/other/uaf/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/uaf/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/other/uaf/Properties%20description/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/uaf/Properties%20description/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/other/wikid/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/wikid/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/other/wwpass/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/wwpass/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/other/wwpass/INSTALLATION/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/wwpass/INSTALLATION/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/other/yubicloud/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/other/yubicloud/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/otp-external-authenticator/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/otp-external-authenticator/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/smpp-2fa/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/smpp-2fa/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/super-gluu-external-authenticator/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/super-gluu-external-authenticator/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/twilio-2fa/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/twilio-2fa/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/user-cert-external-authenticator/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/user-cert-external-authenticator/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/person_authentication/yubicloud-external-authenticator/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/person_authentication/yubicloud-external-authenticator/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/post_authn/post-authn/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/post_authn/post-authn/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/resource_owner_password_credentials/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/resource_owner_password_credentials/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/resource_owner_password_credentials/resource-owner-password-credentials/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/resource_owner_password_credentials/resource-owner-password-credentials/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/resource_owner_password_credentials/resource-owner-password-credentials-2fa/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/resource_owner_password_credentials/resource-owner-password-credentials-2fa/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/resource_owner_password_credentials/resource-owner-password-credentials-custom-params/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/resource_owner_password_credentials/resource-owner-password-credentials-custom-params/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/revoke_token/revoke-token/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/revoke_token/revoke-token/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/scim/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/scim/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/scim/sample-script/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/scim/sample-script/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/spontaneous_scope/spontaneous-scope/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/spontaneous_scope/spontaneous-scope/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/uma_claims_gathering/uma-claims-gathering/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/uma_claims_gathering/uma-claims-gathering/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/uma_rpt_claims/uma-rpt-claims/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/uma_rpt_claims/uma-rpt-claims/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/uma_rpt_policy/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/uma_rpt_policy/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/uma_rpt_policy/uma-client-authz-rpt-policy/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/uma_rpt_policy/uma-client-authz-rpt-policy/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/uma_rpt_policy/uma-rpt-policy/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/uma_rpt_policy/uma-rpt-policy/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.9/script-catalog/update_token/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/update_token/</loc>
          <lastmod>2023-03-09</lastmod>
          <changefreq>daily</changefreq>
     </url>
