@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.9](https://github.com/JanssenProject/jans/compare/jans-cli-tui-v1.0.8...jans-cli-tui-v1.0.9) (2023-03-09)
+
+
+### Bug Fixes
+
+* prepare 1.0.9 release ([55f7e0c](https://github.com/JanssenProject/jans/commit/55f7e0c308b869c2c4b5668aca751d022138a678))
+* update next SNAPSHOT and dev ([0df0e7a](https://github.com/JanssenProject/jans/commit/0df0e7ae06af64ac477955119c2522f03e0603c3))
+
 ## [1.0.8](https://github.com/JanssenProject/jans/compare/jans-cli-tui-v1.0.7...jans-cli-tui-v1.0.8) (2023-03-01)
 
 
