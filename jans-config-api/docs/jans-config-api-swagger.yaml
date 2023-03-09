@@ -8854,6 +8854,20 @@ components:
           - tls_client_auth
           - self_signed_tls_client_auth
           - none
+        allAuthenticationMethods:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+            enum:
+            - client_secret_basic
+            - client_secret_post
+            - client_secret_jwt
+            - private_key_jwt
+            - access_token
+            - tls_client_auth
+            - self_signed_tls_client_auth
+            - none
         baseDn:
           type: string
         inum:
@@ -8942,6 +8956,10 @@ components:
           format: int32
         minimumAcrLevelAutoresolve:
           type: boolean
+        additionalTokenEndpointAuthMethods:
+          type: array
+          items:
+            type: string
         minimumAcrPriorityList:
           type: array
           items:
@@ -8957,10 +8975,10 @@ components:
           type: array
           items:
             type: object
-        value:
-          type: object
         displayValue:
           type: string
+        value:
+          type: object
     LocalizedString:
       type: object
       properties:
