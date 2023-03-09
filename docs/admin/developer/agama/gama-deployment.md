@@ -168,7 +168,7 @@ The following tables summarize the available endpoints. All URLs are relative to
 |Method|GET|
 |Query params|`name` (the project's name) - mandatory|
 |Output|A JSON object whose properties are flow names and values correspond to configuration properties defined (JSON objects too)|
-|Status|200 (successful response), 409 (the project is being deployed currently), 404 (unknown project), 400 (a param is missing)|
+|Status|200 (successful response), 204 (this project is still in course of deployment), 404 (unknown project), 400 (a param is missing)|
 
 
 |Endpoint -> |`/agama-deployment/configs`|
@@ -177,7 +177,7 @@ The following tables summarize the available endpoints. All URLs are relative to
 |Method|PUT|
 |Query params|`name` (the project's name) - mandatory|
 |Output|A JSON object whose properties are flow names and values correspond to a boolean indicating the success of the update for the given flow|
-|Status|200 (successful response), 409 (the project is being deployed currently), 404 (unknown project), 400 (a param is missing)|
+|Status|200 (successful response), 204 (this project is still in course of deployment), 404 (unknown project), 400 (a param is missing)|
 
 
 |Endpoint -> |`/agama-deployment`|
