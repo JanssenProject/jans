@@ -103,8 +103,6 @@ public class LdapConnectionProvider {
      * @throws NumberFormatException
      * @throws LDAPException
      * @throws GeneralSecurityException
-     * @throws EncryptionException
-     * @throws EncryptionException
      */
     protected void init(Properties props) throws NumberFormatException, LDAPException, GeneralSecurityException {
         String serverProp = props.getProperty("servers");
