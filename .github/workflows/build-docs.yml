@@ -197,7 +197,7 @@ jobs:
 
           echo "Replacing release number markers with actual release number"
           cd ${LATEST}
-          egrep -lRZ --exclude=CONTRIBUTING.md . | xargs -0 -l sed -i -e "s/replace-janssen-version/${VERSION:1}/g"
+          egrep -lRZ --exclude=CONTRIBUTING.md . | xargs -0 -l sed -i -e "s/replace-janssen-version/${LATEST:1}/g"
           git add . && git update-index --refresh
           cd ..
 
