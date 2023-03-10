@@ -18,14 +18,14 @@ return encodedStrValue;
 """
 
 Scenario: Fetch all Agama deployment without bearer token 
-	Given url mainUrl 
+	Given url mainUrl + '/list'
 	When method GET 
 	Then status 401 
 	And print response
 
 
 Scenario: Fetch all Agama deployment  
-	Given url mainUrl 
+	Given url mainUrl + '/list'
 	And print 'accessToken = '+accessToken
 	And header Authorization = 'Bearer ' + accessToken
 	When method GET 
@@ -33,7 +33,7 @@ Scenario: Fetch all Agama deployment
 	And print response
 	
 Scenario: Fetch all Agama deployment  
-	Given url mainUrl 
+	Given url mainUrl + '/list'
 	And print 'accessToken = '+accessToken
 	And header Authorization = 'Bearer ' + accessToken
     And param start = 0
