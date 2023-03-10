@@ -196,11 +196,11 @@ public class GrantService {
 
     public void logout(String sessionDn) {
         final List<TokenEntity> tokens = getGrantsBySessionDn(sessionDn);
-        filterOutRefreshTokenForLogout(tokens);
+        filterOutRefreshTokenFromDeletion(tokens);
         removeSilently(tokens);
     }
 
-    public void filterOutRefreshTokenForLogout(List<TokenEntity> tokens) {
+    public void filterOutRefreshTokenFromDeletion(List<TokenEntity> tokens) {
         if (BooleanUtils.isTrue(appConfiguration.getRemoveRefreshTokensForClientOnLogout())) {
             return;
         }
