@@ -11,6 +11,7 @@ import io.jans.as.common.claims.Audience;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.AttributeService;
+import io.jans.as.model.common.ScopeConstants;
 import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.jwt.Jwt;
@@ -302,6 +303,10 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
                 if (!externalOk) {
                     log.trace("External script forbids refresh token creation.");
                     return null;
+                }
+
+                if (executionContext.getScopes().contains(ScopeConstants.ONLINE_ACCESS)) {
+                    entity.getAttributes().setOnlineAccess(true);
                 }
 
                 persist(entity);
