@@ -478,7 +478,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         addCustomHeaders(builder, authzRequest);
         updateSession(authzRequest, sessionUser);
 
-        runCiba(authzRequest.getAuthReqId(), client, authzRequest.getHttpRequest(), authzRequest.getHttpResponse());
+        runCiba(authzRequest, client);
         processDeviceAuthorization(deviceAuthzUserCode, user);
 
         return builder;
@@ -737,7 +737,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         return StringUtils.isNotBlank(acr) ? acr : acrValuesStr;
     }
 
-    private void runCiba(String authReqId, Client client, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
+    private void runCiba(AuthzRequest authzRequest, Client client) {
+        String authReqId = authzRequest.getAuthReqId();
         if (StringUtils.isBlank(authReqId)) {
             return;
         }
@@ -752,17 +753,18 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         cibaRequestService.removeCibaRequest(authReqId);
         CIBAGrant cibaGrant = authorizationGrantList.createCIBAGrant(cibaRequest);
 
-        ExecutionContext executionContext = new ExecutionContext(httpRequest, httpResponse);
+        ExecutionContext executionContext = new ExecutionContext(authzRequest.getHttpRequest(), authzRequest.getHttpResponse());
         executionContext.setAppConfiguration(appConfiguration);
         executionContext.setAttributeService(attributeService);
         executionContext.setGrant(cibaGrant);
         executionContext.setClient(client);
-        executionContext.setCertAsPem(httpRequest.getHeader("X-ClientCert"));
+        executionContext.setCertAsPem(authzRequest.getHttpRequest().getHeader("X-ClientCert"));
+        executionContext.setScopes(StringUtils.isNotBlank(authzRequest.getScope()) ? new HashSet<>(Arrays.asList(authzRequest.getScope().split(" "))) : new HashSet<>());
 
         AccessToken accessToken = cibaGrant.createAccessToken(executionContext);
         log.debug("Issuing access token: {}", accessToken.getCode());
 
-        ExternalUpdateTokenContext context = new ExternalUpdateTokenContext(httpRequest, cibaGrant, client, appConfiguration, attributeService);
+        ExternalUpdateTokenContext context = new ExternalUpdateTokenContext(authzRequest.getHttpRequest(), cibaGrant, client, appConfiguration, attributeService);
 
 
         final int refreshTokenLifetimeInSeconds = externalUpdateTokenService.getRefreshTokenLifetimeInSeconds(context);
