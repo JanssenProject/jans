@@ -3244,14 +3244,14 @@
         
           <li class="md-nav__item">
   <a href="#1-a-simple-client-registration-request-with-mandatory-parameter" class="md-nav__link">
-    1. A simple client registration request (with mandatory parameter):
+    1. A simple client registration request (with mandatory parameter)
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#2-a-typical-client-registration-request" class="md-nav__link">
-    2. A typical client registration request :
+    2. A typical client registration request
   </a>
   
 </li>
@@ -3293,6 +3293,26 @@
   <a href="#curl-commands-to-configure-jans-auth-server" class="md-nav__link">
     CURL commands to configure Jans-auth server
   </a>
+  
+    <nav class="md-nav" aria-label="CURL commands to configure Jans-auth server">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#obtain-the-access-token" class="md-nav__link">
+    Obtain the access token
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#patch-jans-auth-server-configurations" class="md-nav__link">
+    Patch jans-auth server configurations
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -8886,14 +8906,14 @@
         
           <li class="md-nav__item">
   <a href="#1-a-simple-client-registration-request-with-mandatory-parameter" class="md-nav__link">
-    1. A simple client registration request (with mandatory parameter):
+    1. A simple client registration request (with mandatory parameter)
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#2-a-typical-client-registration-request" class="md-nav__link">
-    2. A typical client registration request :
+    2. A typical client registration request
   </a>
   
 </li>
@@ -8935,6 +8955,26 @@
   <a href="#curl-commands-to-configure-jans-auth-server" class="md-nav__link">
     CURL commands to configure Jans-auth server
   </a>
+  
+    <nav class="md-nav" aria-label="CURL commands to configure Jans-auth server">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#obtain-the-access-token" class="md-nav__link">
+    Obtain the access token
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#patch-jans-auth-server-configurations" class="md-nav__link">
+    Patch jans-auth server configurations
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -9055,15 +9095,19 @@
   <h1>Client Registration</h1>
 
 <h3 id="dynamic-client-registration-dcr">Dynamic Client Registration (DCR)<a class="headerlink" href="#dynamic-client-registration-dcr" title="Permanent link">#</a></h3>
-<p>Dynamic client registration refers to the process by which a client submits a registration request to the Authorization server and how that request is served by the Authorization server. It is explained in the following specifications:</p>
-<ol>
-<li>For OpenID Connect relying parties - <a href="https://openid.net/specs/openid-connect-registration-1_0.html">OpenID Connect Dynamic Client Registration 1.0</a>.</li>
-<li>For OAuth 2.0 client (without OpenID Connect features) - <a href="https://tools.ietf.org/html/rfc7591">OAuth 2.0 Dynamic Client Registration Protocol - RFC 7591</a>.</li>
-<li>CRUD operations on client - <a href="https://tools.ietf.org/html/rfc7592">OAuth 2.0 Dynamic Client Registration Management Protocol - RFC 7592</a>.</li>
+<p>Dynamic client registration refers to the process by which a client submits a registration request to the Authorization 
+server and how that request is served by the Authorization server. It is explained in the following specifications:</p>
+<ul>
+<li><a href="https://openid.net/specs/openid-connect-registration-1_0.html">For OpenID Connect relying parties</a></li>
+<li><a href="https://tools.ietf.org/html/rfc7591">For OAuth 2.0 client (without OpenID Connect features)</a></li>
+<li><a href="https://tools.ietf.org/html/rfc7592">Client management (CRUD) operations</a></li>
 <li><a href="https://openbanking.atlassian.net/wiki/spaces/DZ/pages/36667724/OpenBanking+OpenID+Dynamic+Client+Registration+Specification+-+v1.0.0-rc2#OpenBankingOpenIDDynamicClientRegistrationSpecification-v1.0.0-rc2-ClientRegistrationRequest">OpenBanking OpenID Dynamic Client Registration</a> </li>
-</ol>
+</ul>
 <h3 id="client-registration-endpoint">Client Registration endpoint<a class="headerlink" href="#client-registration-endpoint" title="Permanent link">#</a></h3>
-<p>The URI to dynamically register a client to a Janssen Auth Server can be found by checking the <code>registration_endpoint</code> claim of the OpenID Connect configuration reponse, typically deployed at <code>https://&lt;my.jans.server&gt;/.well-known/openid-configuration</code></p>
+<p>The URI to dynamically register a client to a Janssen Auth Server can be found by checking the <code>registration_endpoint</code> 
+claim of the OpenID Connect configuration reponse, typically deployed at </p>
+<div class="highlight"><pre><span></span><code>https://&lt;my.jans.server&gt;/.well-known/openid-configuration
+</code></pre></div>
 <h3 id="configuring-janssen-as-to-allow-clients-to-dynamically-register">Configuring Janssen AS to allow clients to dynamically register<a class="headerlink" href="#configuring-janssen-as-to-allow-clients-to-dynamically-register" title="Permanent link">#</a></h3>
 <p>The Janssen Authorization server will serve a DCR request if the following configuration parameters are set:</p>
 <ol>
@@ -9072,36 +9116,34 @@
 </ol>
 <p>Configure the Janssen AS using steps explained in the <a href="#curl-commands-to-configure-jans-auth-server">link</a></p>
 <h3 id="client-registration-requests">Client registration Requests<a class="headerlink" href="#client-registration-requests" title="Permanent link">#</a></h3>
-<h4 id="1-a-simple-client-registration-request-with-mandatory-parameter">1. A simple client registration request (with mandatory parameter):<a class="headerlink" href="#1-a-simple-client-registration-request-with-mandatory-parameter" title="Permanent link">#</a></h4>
-<div class="codehilite"><pre><span></span><code><span class="err">```</span><span class="w"></span>
-<span class="n">curl</span><span class="w"> </span><span class="o">-</span><span class="n">X</span><span class="w"> </span><span class="n">POST</span><span class="w"> </span><span class="o">-</span><span class="n">k</span><span class="w"> </span><span class="o">-</span><span class="n">H</span><span class="w"> </span><span class="p">&#39;</span><span class="n">Content</span><span class="o">-</span><span class="nl">Type:</span><span class="w"> </span><span class="n">application</span><span class="o">/</span><span class="n">json</span><span class="p">&#39;</span><span class="w"> </span><span class="o">-</span><span class="n">i</span><span class="w"> </span><span class="p">&#39;</span><span class="nl">https:</span><span class="c1">//my.jans.server/jans-auth/restv1/register&#39; \</span>
-<span class="c1">             --data &#39;{&quot;redirect_uris&quot;: [&quot;https://my.jans.client/page&quot;]}&#39;</span>
-<span class="err">```</span><span class="w"></span>
+<h4 id="1-a-simple-client-registration-request-with-mandatory-parameter">1. A simple client registration request (with mandatory parameter)<a class="headerlink" href="#1-a-simple-client-registration-request-with-mandatory-parameter" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code>curl -X POST -k -H <span class="s1">&#39;Content-Type: application/json&#39;</span> -i <span class="s1">&#39;https://my.jans.server/jans-auth/restv1/register&#39;</span> <span class="se">\</span>
+             --data <span class="s1">&#39;{&quot;redirect_uris&quot;: [&quot;https://my.jans.client/page&quot;]}&#39;</span>
 </code></pre></div>
-
-<h4 id="2-a-typical-client-registration-request">2. A typical client registration request :<a class="headerlink" href="#2-a-typical-client-registration-request" title="Permanent link">#</a></h4>
-<p>A typical client registration request : A client or developer calls the client registration endpoint with a set of client metadata as specified in <a href="https://www.rfc-editor.org/rfc/rfc7591.html#page-8">RFC7591</a></p>
-<div class="highlight"><pre><span></span><code>   curl -X POST -k -i &#39;https://my.jans.server/jans-auth/restv1/register&#39;  \
-        --data &#39;{ \
-                      &quot;redirect_uris&quot;: [&quot;https://client.example.org/cb&quot;] \
-                  &quot;client_id&quot;: &quot;c3BhdRkqfX&quot;, \
-                  &quot;client_secret&quot;: &quot;bd136123eeffeef234235805d&quot;, \
-                  &quot;grant_types&quot;: [&quot;authorization_code&quot;, &quot;refresh_token&quot;], \
-                  &quot;token_endpoint_auth_method&quot;: &quot;client_secret_basic&quot;, \
-                  &quot;jwks_uri&quot;: &quot;https://client.example.org/my_public_keys.jwks&quot;, \
-                  &quot;client_name&quot;: &quot;My Example&quot;, \
-                  &quot;client_name#fr&quot;: &quot;Mon Exemple&quot; \
-            }&#39; \
+<h4 id="2-a-typical-client-registration-request">2. A typical client registration request<a class="headerlink" href="#2-a-typical-client-registration-request" title="Permanent link">#</a></h4>
+<p>A client or developer calls the client registration endpoint with a set of client metadata as specified in <a href="https://www.rfc-editor.org/rfc/rfc7591.html#page-8">RFC7591</a></p>
+<div class="highlight"><pre><span></span><code>curl -X POST -k -i <span class="s1">&#39;https://my.jans.server/jans-auth/restv1/register&#39;</span>  <span class="se">\</span>
+     --data <span class="s1">&#39;{ \</span>
+<span class="s1">                   &quot;redirect_uris&quot;: [&quot;https://client.example.org/cb&quot;] \</span>
+<span class="s1">               &quot;client_id&quot;: &quot;c3BhdRkqfX&quot;, \</span>
+<span class="s1">               &quot;client_secret&quot;: &quot;bd136123eeffeef234235805d&quot;, \</span>
+<span class="s1">               &quot;grant_types&quot;: [&quot;authorization_code&quot;, &quot;refresh_token&quot;], \</span>
+<span class="s1">               &quot;token_endpoint_auth_method&quot;: &quot;client_secret_basic&quot;, \</span>
+<span class="s1">               &quot;jwks_uri&quot;: &quot;https://client.example.org/my_public_keys.jwks&quot;, \</span>
+<span class="s1">               &quot;client_name&quot;: &quot;My Example&quot;, \</span>
+<span class="s1">               &quot;client_name#fr&quot;: &quot;Mon Exemple&quot; \</span>
+<span class="s1">         }&#39;</span> 
 </code></pre></div>
 <h4 id="3-client-registration-request-using-a-signed-request-object">3. Client Registration Request Using a signed request object<a class="headerlink" href="#3-client-registration-request-using-a-signed-request-object" title="Permanent link">#</a></h4>
-<p>In some usecases like FAPI implementation,  DCR request payload is a JWT.
-Example:<br />
-<div class="highlight"><pre><span></span><code>  curl -X POST -k -H &#39;Content-Type: application/jwt&#39; \
-       -H &#39;Accept: application/json&#39; \
-       -i &#39;https://my-jans-server/jans-auth/restv1/register&#39;  \
-       --data &#39;eyJraWQiOiJrWTIyZXBUT......ueOg2HkjpggwAEP84jq9Q&#39;
+<p>In some usecases like FAPI implementation,  DCR request payload is a JWT.</p>
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code>curl -X POST -k -H <span class="s1">&#39;Content-Type: application/jwt&#39;</span> <span class="se">\</span>
+    -H <span class="s1">&#39;Accept: application/json&#39;</span> <span class="se">\</span>
+    -i <span class="s1">&#39;https://my-jans-server/jans-auth/restv1/register&#39;</span>  <span class="se">\</span>
+    --data <span class="s1">&#39;eyJraWQiOiJrWTIyZXBUT......ueOg2HkjpggwAEP84jq9Q&#39;</span>
 </code></pre></div>
-When such will be the nature of client registration requests, the following configuration properties should be set in the authorization server:</p>
+<p>When such will be the nature of client registration requests, the following configuration properties should be set in 
+the authorization server:</p>
 <ul>
 <li><code>dcrSignatureValidationEnabled</code> - enables DCR signature validation</li>
 <li><code>dcrSignatureValidationJwksUri</code> - specifies JWKS URI for all DCR's validations.</li>
@@ -9109,17 +9151,19 @@ When such will be the nature of client registration requests, the following conf
 </ul>
 <p>Configure the Janssen AS using steps explained in the <a href="#curl-commands-to-configure-jans-auth-server">link</a></p>
 <h4 id="4-client-registration-using-software-statement">4. Client registration using software statement<a class="headerlink" href="#4-client-registration-using-software-statement" title="Permanent link">#</a></h4>
-<p>A signed assertion from a trusted party, a Software statement or Software Statement Assertion (SSA), is used to dynamically register clients to an Authorization server.
-Example:
-<div class="highlight"><pre><span></span><code>  #!/bin/bash curl -X POST https://my.jans.server/jans-auth/restv1/register \
-                   -H &quot;Content-Type: application/json&quot; \
-               --data-binary @- &lt;&lt;DATA \
-            { &quot;redirect_uris&quot;: [ &quot;https://client.example.org/cab1&quot; ], \
-              &quot;software_statement&quot;:&quot;eyJ0eXAi........j3ouyeYOv8&quot;, \
-              &quot;jwks_uri&quot;:&quot;https://my.portal/portal/jwks&quot; \
-            } DATA
-</code></pre></div></p>
-<p>For Client registrations using Software statements, the AS should be configured using the following configuration parameters:</p>
+<p>A signed assertion from a trusted party, a Software statement or Software Statement Assertion (SSA), is used to 
+dynamically register clients to an Authorization server.</p>
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code>curl -X POST https://my.jans.server/jans-auth/restv1/register <span class="se">\</span>
+       -H <span class="s2">&quot;Content-Type: application/json&quot;</span> <span class="se">\</span>
+   --data-binary @- <span class="s">&lt;&lt;DATA \</span>
+<span class="s">{ &quot;redirect_uris&quot;: [ &quot;https://client.example.org/cab1&quot; ], \</span>
+<span class="s">  &quot;software_statement&quot;:&quot;eyJ0eXAi........j3ouyeYOv8&quot;, \</span>
+<span class="s">  &quot;jwks_uri&quot;:&quot;https://my.portal/portal/jwks&quot; \</span>
+<span class="s">} DATA</span>
+</code></pre></div>
+<p>To enable client registrations using Software statements, the AS should be configured using the following configuration 
+parameters:</p>
 <ul>
 <li><code>softwareStatementValidationType</code> - The value of this variable is one of the following:<ul>
 <li>NONE - validation is skipped for software statement</li>
@@ -9128,209 +9172,216 @@ Example:
 <li>JWKS_URI - claim name within software statement that points to JWKS URI that should lead to keys.</li>
 </ul>
 </li>
-<li><code>dcrSignatureValidationSoftwareStatementJwksURIClaim</code> - specifies claim name inside software statement that should point to JWKS URI.</li>
-<li><code>dcrSignatureValidationSoftwareStatementJwksClaim</code> - specifies claim name inside software statement. Value of claim should point to inlined JWKS.</li>
+<li><code>dcrSignatureValidationSoftwareStatementJwksURIClaim</code> - specifies claim name inside software statement that should 
+point to JWKS URI.</li>
+<li><code>dcrSignatureValidationSoftwareStatementJwksClaim</code> - specifies claim name inside software statement. Value of claim 
+should point to inlined JWKS.</li>
 </ul>
 <p>Configure the AS using steps explained in the <a href="#curl-commands-to-configure-jans-auth-server">link</a></p>
 <h4 id="5-special-mention-about-fapi">5. Special mention about FAPI:<a class="headerlink" href="#5-special-mention-about-fapi" title="Permanent link">#</a></h4>
-<p>In case of a typical <a href="https://openbankinguk.github.io/dcr-docs-pub/v3.3/dynamic-client-registration.html">client registration request in FAPI implementation</a>, the request object which is a signed JWT (as seen in point 3) is also called an SSA (Software statement Assertion) or DCR payload. This SSA can contain the software_statement inside it which is also a signed JWT. Each of the JWTs, the outer JWT called the SSA and the inner JWT called the software_statement are signed by different entities - the TPP and OBIE respectively.</p>
+<p>In case of a typical <a href="https://openbankinguk.github.io/dcr-docs-pub/v3.3/dynamic-client-registration.html">client registration request in FAPI implementation</a>, 
+the request object which is a signed JWT (as seen in point 3) is also called an SSA (Software statement Assertion) or 
+DCR payload. This SSA can contain the software_statement inside it which is also a signed JWT. Each of the JWTs, the 
+outer JWT called the SSA and the inner JWT called the software_statement are signed by different entities - the TPP and 
+OBIE respectively.</p>
 <h3 id="security-pointers">Security Pointers<a class="headerlink" href="#security-pointers" title="Permanent link">#</a></h3>
-<p>If <code>dynamicRegistrationEnabled</code> is enabled in the Authorization Server, assess the following points to minimize potential exposure of sensitive personal data:</p>
+<p>If <code>dynamicRegistrationEnabled</code> is enabled in the Authorization Server, assess the following points to minimize 
+potential exposure of sensitive personal data:</p>
 <ol>
-<li><code>trustedClientEnabled</code> and <code>dynamicRegistrationPersistClientAuthorizations</code> properties determine whether clients are trusted and if consent should be sought from the user before releasing their personal data to the RP</li>
-<li><code>dynamicRegistrationScopesParamEnabled</code> controls whether default scopes are globally enabled. If <code>dynamicRegistrationScopesParamEnabled</code> is <code>true</code> then scopes defined as default will be automatically added to any dynamically registered client entry without consent of OP's administrator. Therefore, make an informed decision before setting this field to <code>true</code>.</li>
+<li><code>trustedClientEnabled</code> and <code>dynamicRegistrationPersistClientAuthorizations</code> properties determine whether clients 
+are trusted and if consent should be sought from the user before releasing their personal data to the RP</li>
+<li><code>dynamicRegistrationScopesParamEnabled</code> controls whether default scopes are globally enabled. 
+If <code>dynamicRegistrationScopesParamEnabled</code> is <code>true</code> then scopes defined as default will be automatically added to any 
+dynamically registered client entry without consent of OP's administrator. Therefore, make an informed decision before 
+setting this field to <code>true</code>.</li>
 </ol>
 <h3 id="curl-commands-to-configure-jans-auth-server">CURL commands to configure Jans-auth server<a class="headerlink" href="#curl-commands-to-configure-jans-auth-server" title="Permanent link">#</a></h3>
 <p>Jans-auth server is configured using <a href="https://github.com/JanssenProject/jans/tree/main/jans-config-api">Jans Config Api</a> :</p>
-<ol>
-<li>Obtain the access token
-   <div class="highlight"><pre><span></span><code>   curl -u &quot;put_client_id_here:put_config_api_client_secret_here&quot; https://&lt;your.jans.server&gt;/jans-auth/restv1/token \
-        -d  &quot;grant_type=client_credentials&amp;scope=https://jans.io/oauth/jans-auth-server/config/properties.write&quot;
-</code></pre></div></li>
-<li>Patch jans-auth server configurations to reflect <code>anExampleConfigField</code> with the value <code>anExampleConfigField_value</code></li>
-</ol>
-<p><div class="highlight"><pre><span></span><code> curl -X PATCH -k -H &#39;Content-Type: application/json-patch+json&#39; \
-    -i &#39;https://&lt;your.jans.server&gt;/jans-config-api/api/v1/jans-auth-server/config&#39; \
-    -H &quot;Authorization: Bearer put_access_token_here&quot; --data &#39;[
-       {
-        &quot;op&quot;: &quot;add&quot;,
-        &quot;path&quot;: &quot;anExampleConfigField&quot;,
-        &quot;value&quot;: &quot;anExampleConfigField_value&quot;
-        }
-       ]&#39;
+<h4 id="obtain-the-access-token">Obtain the access token<a class="headerlink" href="#obtain-the-access-token" title="Permanent link">#</a></h4>
+<div class="highlight"><pre><span></span><code>curl -u <span class="s2">&quot;put_client_id_here:put_config_api_client_secret_here&quot;</span> https://&lt;your.jans.server&gt;/jans-auth/restv1/token <span class="se">\</span>
+     -d  <span class="s2">&quot;grant_type=client_credentials&amp;scope=https://jans.io/oauth/jans-auth-server/config/properties.write&quot;</span>
 </code></pre></div>
- Example : Patch jans-auth server configurations to reflect <code>dynamicRegistrationEnabled</code> with value as <code>true</code></p>
-<div class="codehilite"><pre><span></span><code>  ```
-   curl -X PATCH -k -H &#39;Content-Type: application/json-patch+json&#39; \
-   -i &#39;https://&lt;your.jans.server&gt;/jans-config-api/api/v1/jans-auth-server/config&#39; \
-   -H &quot;Authorization: Bearer put_access_token_here&quot; --data &#39;[
-      {
-       &quot;op&quot;: &quot;add&quot;,
-       &quot;path&quot;: &quot;dynamicRegistrationEnabled&quot;,
-       &quot;value&quot;: &quot;true&quot;
-       }
-      ]&#39;
-   ```
+<h4 id="patch-jans-auth-server-configurations">Patch jans-auth server configurations<a class="headerlink" href="#patch-jans-auth-server-configurations" title="Permanent link">#</a></h4>
+<p>Patch jans-auth server configurations to reflect <code>anExampleConfigField</code> with the value <code>anExampleConfigField_value</code></p>
+<div class="highlight"><pre><span></span><code>curl -X PATCH -k -H <span class="s1">&#39;Content-Type: application/json-patch+json&#39;</span> <span class="se">\</span>
+ -i <span class="s1">&#39;https://&lt;your.jans.server&gt;/jans-config-api/api/v1/jans-auth-server/config&#39;</span> <span class="se">\</span>
+ -H <span class="s2">&quot;Authorization: Bearer put_access_token_here&quot;</span> --data <span class="s1">&#39;[</span>
+<span class="s1">    {</span>
+<span class="s1">     &quot;op&quot;: &quot;add&quot;,</span>
+<span class="s1">     &quot;path&quot;: &quot;anExampleConfigField&quot;,</span>
+<span class="s1">     &quot;value&quot;: &quot;anExampleConfigField_value&quot;</span>
+<span class="s1">     }</span>
+<span class="s1">    ]&#39;</span>
 </code></pre></div>
-
+<p>For example, to patch the jans-auth server configurations to reflect <code>dynamicRegistrationEnabled</code> with value as <code>true</code></p>
+<div class="highlight"><pre><span></span><code>curl -X PATCH -k -H <span class="s1">&#39;Content-Type: application/json-patch+json&#39;</span> <span class="se">\</span>
+-i <span class="s1">&#39;https://&lt;your.jans.server&gt;/jans-config-api/api/v1/jans-auth-server/config&#39;</span> <span class="se">\</span>
+-H <span class="s2">&quot;Authorization: Bearer put_access_token_here&quot;</span> --data <span class="s1">&#39;[</span>
+<span class="s1"> {</span>
+<span class="s1">  &quot;op&quot;: &quot;add&quot;,</span>
+<span class="s1">  &quot;path&quot;: &quot;dynamicRegistrationEnabled&quot;,</span>
+<span class="s1">  &quot;value&quot;: &quot;true&quot;</span>
+<span class="s1">  }</span>
+<span class="s1"> ]&#39;</span>
+</code></pre></div>
 <h3 id="client-metadata">Client metadata<a class="headerlink" href="#client-metadata" title="Permanent link">#</a></h3>
-<p>Command to obtain metadata schema:
+<p>Command to obtain metadata schema</p>
 <div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --schema /components/schemas/Client
 </code></pre></div>
-Output:
-<div class="highlight"><pre><span></span><code>{
-  &quot;dn&quot;: &quot;string&quot;,
-  &quot;inum&quot;: &quot;string&quot;,
-  &quot;displayName&quot;: &quot;string&quot;,
-  &quot;clientSecret&quot;: &quot;string&quot;,
-  &quot;frontChannelLogoutUri&quot;: &quot;string&quot;,
-  &quot;frontChannelLogoutSessionRequired&quot;: true,
-  &quot;registrationAccessToken&quot;: &quot;string&quot;,
-  &quot;clientIdIssuedAt&quot;: &quot;2022-08-31T10:39:31.385Z&quot;,
-  &quot;clientSecretExpiresAt&quot;: &quot;2022-08-31T10:39:31.385Z&quot;,
-  &quot;redirectUris&quot;: [
-    &quot;https://client.example.org/cb&quot;
-  ],
-  &quot;claimRedirectUris&quot;: [
-    &quot;string&quot;
-  ],
-  &quot;responseTypes&quot;: [
-    &quot;code&quot;
-  ],
-  &quot;grantTypes&quot;: [
-    &quot;authorization_code&quot;
-  ],
-  &quot;applicationType&quot;: &quot;web&quot;,
-  &quot;contacts&quot;: [
-    &quot;string&quot;
-  ],
-  &quot;idTokenTokenBindingCnf&quot;: &quot;string&quot;,
-  &quot;logoUri&quot;: &quot;string&quot;,
-  &quot;clientUri&quot;: &quot;string&quot;,
-  &quot;policyUri&quot;: &quot;string&quot;,
-  &quot;tosUri&quot;: &quot;string&quot;,
-  &quot;jwksUri&quot;: &quot;string&quot;,
-  &quot;jwks&quot;: &quot;{ \&quot;keys\&quot; : [ { \&quot;e\&quot; : \&quot;AQAB\&quot;, \&quot;n\&quot; : \&quot;gmlDX_mgMcHX..\&quot; ] }&quot;,
-  &quot;sectorIdentifierUri&quot;: &quot;string&quot;,
-  &quot;subjectType&quot;: &quot;pairwise&quot;,
-  &quot;idTokenSignedResponseAlg&quot;: &quot;HS256&quot;,
-  &quot;idTokenEncryptedResponseAlg&quot;: &quot;RSA1_5&quot;,
-  &quot;idTokenEncryptedResponseEnc&quot;: &quot;A128CBC+HS256&quot;,
-  &quot;userInfoSignedResponseAlg&quot;: &quot;HS256&quot;,
-  &quot;userInfoEncryptedResponseAlg&quot;: &quot;RSA1_5&quot;,
-  &quot;userInfoEncryptedResponseEnc&quot;: &quot;A128CBC+HS256&quot;,
-  &quot;requestObjectSigningAlg&quot;: &quot;HS256&quot;,
-  &quot;requestObjectEncryptionAlg&quot;: &quot;RSA1_5&quot;,
-  &quot;requestObjectEncryptionEnc&quot;: &quot;A128CBC+HS256&quot;,
-  &quot;tokenEndpointAuthMethod&quot;: &quot;client_secret_basic&quot;,
-  &quot;tokenEndpointAuthSigningAlg&quot;: &quot;HS256&quot;,
-  &quot;defaultMaxAge&quot;: 1000000,
-  &quot;requireAuthTime&quot;: true,
-  &quot;defaultAcrValues&quot;: [
-    &quot;string&quot;
-  ],
-  &quot;initiateLoginUri&quot;: &quot;string&quot;,
-  &quot;postLogoutRedirectUris&quot;: [
-    &quot;https://client.example.org/logout/page1&quot;,
-    &quot;https://client.example.org/logout/page2&quot;,
-    &quot;https://client.example.org/logout/page3&quot;
-  ],
-  &quot;requestUris&quot;: [
-    &quot;string&quot;
-  ],
-  &quot;scopes&quot;: [
-    &quot;read write dolphin&quot;
-  ],
-  &quot;claims&quot;: [
-    &quot;string&quot;
-  ],
-  &quot;trustedClient&quot;: false,
-  &quot;lastAccessTime&quot;: &quot;2022-08-31T10:39:31.385Z&quot;,
-  &quot;lastLogonTime&quot;: &quot;2022-08-31T10:39:31.385Z&quot;,
-  &quot;persistClientAuthorizations&quot;: true,
-  &quot;includeClaimsInIdToken&quot;: false,
-  &quot;refreshTokenLifetime&quot;: 100000000,
-  &quot;accessTokenLifetime&quot;: 100000000,
-  &quot;customAttributes&quot;: [
-    {
-      &quot;name&quot;: &quot;name, displayName, birthdate, email&quot;,
-      &quot;multiValued&quot;: true,
-      &quot;values&quot;: [
-        &quot;string&quot;
-      ]
-    }
-  ],
-  &quot;customObjectClasses&quot;: [
-    &quot;string&quot;
-  ],
-  &quot;rptAsJwt&quot;: true,
-  &quot;accessTokenAsJwt&quot;: true,
-  &quot;accessTokenSigningAlg&quot;: &quot;HS256&quot;,
-  &quot;disabled&quot;: false,
-  &quot;authorizedOrigins&quot;: [
-    &quot;string&quot;
-  ],
-  &quot;softwareId&quot;: &quot;4NRB1-0XZABZI9E6-5SM3R&quot;,
-  &quot;softwareVersion&quot;: &quot;2.1&quot;,
-  &quot;softwareStatement&quot;: &quot;string&quot;,
-  &quot;attributes&quot;: {
-    &quot;tlsClientAuthSubjectDn&quot;: &quot;string&quot;,
-    &quot;runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims&quot;: true,
-    &quot;keepClientAuthorizationAfterExpiration&quot;: true,
-    &quot;allowSpontaneousScopes&quot;: true,
-    &quot;spontaneousScopes&quot;: [
-      &quot;string&quot;
-    ],
-    &quot;spontaneousScopeScriptDns&quot;: [
-      &quot;string&quot;
-    ],
-    &quot;updateTokenScriptDns&quot;: [
-      &quot;string&quot;
-    ],
-    &quot;backchannelLogoutUri&quot;: [
-      &quot;string&quot;
-    ],
-    &quot;backchannelLogoutSessionRequired&quot;: true,
-    &quot;additionalAudience&quot;: [
-      &quot;string&quot;
-    ],
-    &quot;postAuthnScripts&quot;: [
-      &quot;string&quot;
-    ],
-    &quot;consentGatheringScripts&quot;: [
-      &quot;string&quot;
-    ],
-    &quot;introspectionScripts&quot;: [
-      &quot;string&quot;
-    ],
-    &quot;rptClaimsScripts&quot;: [
-      &quot;string&quot;
-    ],
-    &quot;ropcScripts&quot;: [
-      &quot;string&quot;
-    ],
-    &quot;parLifetime&quot;: 0,
-    &quot;requirePar&quot;: true,
-    &quot;jansAuthSignedRespAlg&quot;: &quot;string&quot;,
-    &quot;jansAuthEncRespAlg&quot;: &quot;string&quot;,
-    &quot;jansAuthEncRespEnc&quot;: &quot;string&quot;,
-    &quot;jansSubAttr&quot;: &quot;string&quot;,
-    &quot;redirectUrisRegex&quot;: &quot;string&quot;,
-    &quot;jansAuthorizedAcr&quot;: [
-      &quot;string&quot;
-    ],
-    &quot;jansDefaultPromptLogin&quot;: true
-  },
-  &quot;backchannelTokenDeliveryMode&quot;: &quot;poll&quot;,
-  &quot;backchannelClientNotificationEndpoint&quot;: &quot;string&quot;,
-  &quot;backchannelAuthenticationRequestSigningAlg&quot;: &quot;RS256&quot;,
-  &quot;backchannelUserCodeParameter&quot;: true,
-  &quot;expirationDate&quot;: &quot;2022-08-31T10:39:31.385Z&quot;,
-  &quot;deletable&quot;: false,
-  &quot;jansId&quot;: &quot;string&quot;,
-  &quot;description&quot;: &quot;string&quot;
-}
-</code></pre></div></p>
+<p>Output:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;dn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;inum&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;displayName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;clientSecret&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;frontChannelLogoutUri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;frontChannelLogoutSessionRequired&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;registrationAccessToken&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;clientIdIssuedAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2022-08-31T10:39:31.385Z&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;clientSecretExpiresAt&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2022-08-31T10:39:31.385Z&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;redirectUris&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;https://client.example.org/cb&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">],</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;claimRedirectUris&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;string&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">],</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;responseTypes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;code&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">],</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;grantTypes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;authorization_code&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">],</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;applicationType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;web&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;contacts&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;string&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">],</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;idTokenTokenBindingCnf&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;logoUri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;clientUri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;policyUri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;tosUri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;jwksUri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;jwks&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{ \&quot;keys\&quot; : [ { \&quot;e\&quot; : \&quot;AQAB\&quot;, \&quot;n\&quot; : \&quot;gmlDX_mgMcHX..\&quot; ] }&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;sectorIdentifierUri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;subjectType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pairwise&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;idTokenSignedResponseAlg&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;HS256&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;idTokenEncryptedResponseAlg&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RSA1_5&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;idTokenEncryptedResponseEnc&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;A128CBC+HS256&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;userInfoSignedResponseAlg&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;HS256&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;userInfoEncryptedResponseAlg&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RSA1_5&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;userInfoEncryptedResponseEnc&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;A128CBC+HS256&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;requestObjectSigningAlg&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;HS256&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;requestObjectEncryptionAlg&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RSA1_5&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;requestObjectEncryptionEnc&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;A128CBC+HS256&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;tokenEndpointAuthMethod&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;client_secret_basic&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;tokenEndpointAuthSigningAlg&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;HS256&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;defaultMaxAge&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1000000</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;requireAuthTime&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;defaultAcrValues&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;string&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">],</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;initiateLoginUri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;postLogoutRedirectUris&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;https://client.example.org/logout/page1&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;https://client.example.org/logout/page2&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;https://client.example.org/logout/page3&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">],</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;requestUris&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;string&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">],</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;scopes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;read write dolphin&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">],</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;claims&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;string&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">],</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;trustedClient&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;lastAccessTime&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2022-08-31T10:39:31.385Z&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;lastLogonTime&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2022-08-31T10:39:31.385Z&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;persistClientAuthorizations&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;includeClaimsInIdToken&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;refreshTokenLifetime&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">100000000</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;accessTokenLifetime&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">100000000</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;customAttributes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;name, displayName, birthdate, email&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;multiValued&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;values&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">        </span><span class="s2">&quot;string&quot;</span><span class="w"></span>
+<span class="w">      </span><span class="p">]</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">  </span><span class="p">],</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;customObjectClasses&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;string&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">],</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;rptAsJwt&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;accessTokenAsJwt&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;accessTokenSigningAlg&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;HS256&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;disabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;authorizedOrigins&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;string&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">],</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;softwareId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;4NRB1-0XZABZI9E6-5SM3R&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;softwareVersion&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2.1&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;softwareStatement&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;attributes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;tlsClientAuthSubjectDn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;runIntrospectionScriptBeforeAccessTokenAsJwtCreationAndIncludeClaims&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;keepClientAuthorizationAfterExpiration&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;allowSpontaneousScopes&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;spontaneousScopes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">      </span><span class="s2">&quot;string&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;spontaneousScopeScriptDns&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">      </span><span class="s2">&quot;string&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;updateTokenScriptDns&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">      </span><span class="s2">&quot;string&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;backchannelLogoutUri&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">      </span><span class="s2">&quot;string&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;backchannelLogoutSessionRequired&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;additionalAudience&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">      </span><span class="s2">&quot;string&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;postAuthnScripts&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">      </span><span class="s2">&quot;string&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;consentGatheringScripts&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">      </span><span class="s2">&quot;string&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;introspectionScripts&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">      </span><span class="s2">&quot;string&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;rptClaimsScripts&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">      </span><span class="s2">&quot;string&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;ropcScripts&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">      </span><span class="s2">&quot;string&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;parLifetime&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;requirePar&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;jansAuthSignedRespAlg&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;jansAuthEncRespAlg&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;jansAuthEncRespEnc&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;jansSubAttr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;redirectUrisRegex&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;jansAuthorizedAcr&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">      </span><span class="s2">&quot;string&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;jansDefaultPromptLogin&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"></span>
+<span class="w">  </span><span class="p">},</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;backchannelTokenDeliveryMode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;poll&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;backchannelClientNotificationEndpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;backchannelAuthenticationRequestSigningAlg&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RS256&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;backchannelUserCodeParameter&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;expirationDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2022-08-31T10:39:31.385Z&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;deletable&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;jansId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
 <h3 id="signed-dcr-and-ssa-validation">Signed DCR and SSA validation<a class="headerlink" href="#signed-dcr-and-ssa-validation" title="Permanent link">#</a></h3>
 <p>In OpenBanking case DCR (Dynamic Client Request) is signed and must contain SSA (Software Statement Assertion) inside it.</p>
 <p>Non-Normative Example:
@@ -9447,7 +9498,7 @@ eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJJREFtYX...
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-02-08T06:38:07+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-02-08</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-03-10T09:00:28+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-03-10</span>
       
         <br>
         Created:

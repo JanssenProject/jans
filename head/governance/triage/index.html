@@ -9005,23 +9005,52 @@
 </tbody>
 </table>
 <h3 id="bot-labeling-methodology">Bot labeling methodology<a class="headerlink" href="#bot-labeling-methodology" title="Permanent link">#</a></h3>
-<p>The following labels are automatically assigned to Issues and PRs in GitHub following the schema provided in this <a href="../../automation/github-labels/labels-schema.json">file</a>.
-| Label               | Method                                                                                                                                                                                                                                               |
-|---------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| <code>comp-&lt;module&gt;</code>     | The bot will detect from the title the component between the parentheses. <code>feat(jans-auth-server): detect</code> will result in the label <code>comp-jans-auth-server</code> added to the issue or PR. In a PR these labels are also detected by modified files path  |
-| <code>area-&lt;concern&gt;</code>    | The bot will detect from the title the area appropriate. <code>ci: adding something new to our ci</code> will result in the label <code>area-CI</code> added to the issue or PR. In a PR these labels are also detected by modified files path.                            |
-| <code>kind-bug</code>          | The bot will detect this from the conventional commit written title                                                                                                                                                                                  |
-| <code>kind-enhancement</code>  | The bot will detect this from the conventional commit written title                                                                                                                                                                                  |
-| <code>kind-feature</code>      | The bot will detect this from the conventional commit written title                                                                                                                                                                                  |
-| <code>kind-question</code>     | Issue/PR is a question that can be addressed via pointers to documentation or user education                                                                                                                                                         |
-| <code>kind-dependencies</code> | The bot will detect this from the conventional commit written title                                                                                                                                                                                  |</p>
+<p>The following labels are automatically assigned to Issues and PRs in GitHub following the schema provided in this <a href="../../automation/github-labels/labels-schema.json">file</a>.</p>
+<table>
+<thead>
+<tr>
+<th>Label</th>
+<th>Method</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>comp-&lt;module&gt;</code></td>
+<td>The bot will detect from the title the component between the parentheses. <code>feat(jans-auth-server): detect</code> will result in the label <code>comp-jans-auth-server</code> added to the issue or PR. In a PR these labels are also detected by modified files path</td>
+</tr>
+<tr>
+<td><code>area-&lt;concern&gt;</code></td>
+<td>The bot will detect from the title the area appropriate. <code>ci: adding something new to our ci</code> will result in the label <code>area-CI</code> added to the issue or PR. In a PR these labels are also detected by modified files path.</td>
+</tr>
+<tr>
+<td><code>kind-bug</code></td>
+<td>The bot will detect this from the conventional commit written title</td>
+</tr>
+<tr>
+<td><code>kind-enhancement</code></td>
+<td>The bot will detect this from the conventional commit written title</td>
+</tr>
+<tr>
+<td><code>kind-feature</code></td>
+<td>The bot will detect this from the conventional commit written title</td>
+</tr>
+<tr>
+<td><code>kind-question</code></td>
+<td>Issue/PR is a question that can be addressed via pointers to documentation or user education</td>
+</tr>
+<tr>
+<td><code>kind-dependencies</code></td>
+<td>The bot will detect this from the conventional commit written title</td>
+</tr>
+</tbody>
+</table>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-06-15T08:30:59+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-06-15</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-03-10T09:00:28+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-03-10</span>
       
         <br>
         Created:
