@@ -42,7 +42,7 @@ Agama already makes use of macros for this purpose. Take a look at the `ftlh` fi
 
 ### Example
 
-Here, two pages will be built to demostrate the concept of composition in FreeMarker templates: a homepage and an "about us" page. These will be made up of a header, a sidebar, and their respective main content. Assume the sidebar should be shown only for the home page. 
+Here, two pages will be built to demonstrate the concept of composition in FreeMarker templates: a homepage and an "about us" page. These will be made up of a header, a sidebar, and their respective main content. Assume the sidebar should be shown only for the home page. 
 
 !!! Note
     FreeMarker comments are of the form `<#-- This won't be printed in the output -->`

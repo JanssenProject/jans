@@ -6,15 +6,16 @@
 
 package io.jans.scim.model;
 
-import java.io.Serializable;
-import java.util.Date;
-
+import io.jans.scim.model.fido2.Fido2DeviceData;
 import io.jans.scim.model.fido2.Fido2Data;
 import io.jans.scim.model.fido2.Fido2Entry;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.JsonObject;
 import io.jans.orm.annotation.ObjectClass;
+
+import java.io.Serializable;
+import java.util.Date;
 
 @SuppressWarnings("serial")
 @DataEntry
@@ -30,6 +31,10 @@ public class GluuFido2Device extends Fido2Entry implements Serializable {
 
     @AttributeName(name = "displayName")
     private String displayName;
+
+    @JsonObject
+	@AttributeName(name = "jansDeviceData")
+	private Fido2DeviceData deviceData;
 
     public GluuFido2Device() {
     }
@@ -63,5 +68,13 @@ public class GluuFido2Device extends Fido2Entry implements Serializable {
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
     }
+
+	public Fido2DeviceData getDeviceData() {
+		return deviceData;
+	}
+
+	public void setDeviceData(Fido2DeviceData deviceData) {
+		this.deviceData = deviceData;
+	}
 
 }

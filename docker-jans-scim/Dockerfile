@@ -45,8 +45,8 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # SCIM
 # ====
 
-ENV CN_VERSION=1.0.9-SNAPSHOT
-ENV CN_BUILD_DATE='2023-03-01 13:15'
+ENV CN_VERSION=1.0.10-SNAPSHOT
+ENV CN_BUILD_DATE='2023-03-09 10:25'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-scim-server/${CN_VERSION}/jans-scim-server-${CN_VERSION}.war
 
 # Install SCIM
@@ -80,7 +80,7 @@ COPY conf/prometheus-config.yaml /opt/prometheus/
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_SOURCE_VERSION=8c551c0c09aaaf13898e047e7c30c96531d37518
+ENV JANS_SOURCE_VERSION=da87cef4efd88796260d123054575c3aceb1ed38
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCIM_RESOURCE_DIR=jans-scim/server/src/main/resources
 
@@ -210,7 +210,7 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
 LABEL name="janssenproject/scim" \
     maintainer="Janssen Project <support@jans.io>" \
     vendor="Janssen Project" \
-    version="1.0.9" \
+    version="1.0.10" \
     release="dev" \
     summary="Janssen SCIM" \
     description="SCIM server"

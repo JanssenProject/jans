@@ -16,7 +16,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 
-
 from flask_oidc import registration, discovery
 import json
 from httplib2 import RelativeURIError
@@ -27,7 +26,7 @@ class ClientHandler:
     __client_url = None
     __client_id = None
     __client_secret = None
-    __metadata_url= None
+    __metadata_url = None
     __op_url = None
     op_data = None
 
@@ -43,23 +42,20 @@ class ClientHandler:
         self.__client_url = client_url
         self.__metadata_url = '%s/.well-known/openid-configuration' % op_url
         self.op_data = self.discover(op_url)
-        self.reg_info = self.register_client(op_data=self.op_data,client_url=client_url)
+        self.reg_info = self.register_client(op_data=self.op_data, client_url=client_url)
         self.__client_id = self.reg_info['web']['client_id']
         self.__client_secret = self.reg_info['web']['client_secret']
 
-
-
     def get_client_dict(self) -> dict:
         r = {
-            'op_metadata_url' : self.__metadata_url,
-            'client_id' : self.__client_id,
-            'client_secret' : self.__client_secret
+            'op_metadata_url': self.__metadata_url,
+            'client_id': self.__client_id,
+            'client_secret': self.__client_secret
         }
 
         return r
 
-
-    def register_client(self, op_data: Optional[dict]=op_data, client_url: Optional[str]=__client_url) -> dict:
+    def register_client(self, op_data: Optional[dict] = op_data, client_url: Optional[str] = __client_url) -> dict:
         """[register client and returns client information]
 
         :param op_data: [description]
@@ -73,7 +69,7 @@ class ClientHandler:
         reg_info = registration.register_client(op_data, [redirect_uri])
         return reg_info
 
-    def discover(self, op_url: Optional[str]=__op_url, disc:discovery=discovery) -> dict :
+    def discover(self, op_url: Optional[str] = __op_url, disc: discovery = discovery) -> dict:
         """Discover op information on .well-known/open-id-configuration
         :param op_url: [description], defaults to __op_url
         :type op_url: str, optional
@@ -98,4 +94,3 @@ class ClientHandler:
             print('An unexpected ocurred: %s' % e)
 
         return op_data
-
