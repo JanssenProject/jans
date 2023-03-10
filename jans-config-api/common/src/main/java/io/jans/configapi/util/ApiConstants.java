@@ -12,6 +12,7 @@ public class ApiConstants {
 
     public static final String BASE_API_URL = "/";
     public static final String CONFIG = "/config";
+    public static final String CONFIGS = "/configs";
     public static final String API_CONFIG = "/api-config";
     public static final String JWKS = "/jwks";
     public static final String JANS_AUTH = "/jans-auth-server";
@@ -113,6 +114,7 @@ public class ApiConstants {
     public static final String ACTIVE = "active";
     public static final String INACTIVE = "inactive"; 
     public static final String ADD_SCRIPT_TEMPLATE = "addScriptTemplate";
+    public static final String REMOVE_NON_LDAP_ATTRIBUTES = "removeNonLDAPAttributes";    
 
     // API Protection
     public static final String PROTECTION_TYPE_OAUTH2 = "oauth2";
