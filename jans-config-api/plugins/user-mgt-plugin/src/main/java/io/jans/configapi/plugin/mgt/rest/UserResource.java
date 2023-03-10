@@ -47,384 +47,395 @@ import static io.jans.as.model.util.Util.escapeLog;
 @ApplicationScoped
 public class UserResource extends BaseResource {
 
-	private static final String USER = "user";
-	private static final String MAIL = "mail";
-	private static final String DISPLAY_NAME = "displayName";
-	private static final String JANS_STATUS = "jansStatus";
-	private static final String GIVEN_NAME = "givenName";
-	private static final String USER_PWD = "userPassword";
-	private static final String INUM = "inum";
+    private static final String USER = "user";
+    private static final String MAIL = "mail";
+    private static final String DISPLAY_NAME = "displayName";
+    private static final String JANS_STATUS = "jansStatus";
+    private static final String GIVEN_NAME = "givenName";
+    private static final String USER_PWD = "userPassword";
+    private static final String INUM = "inum";
 
-	private class UserPagedResult extends PagedResult<CustomUser> {
-	};
+    private class UserPagedResult extends PagedResult<CustomUser> {
+    };
 
-	@Inject
-	Logger logger;
+    @Inject
+    Logger logger;
 
-	@Inject
-	MgtUtil mgtUtil;
+    @Inject
+    MgtUtil mgtUtil;
 
-	@Inject
-	UserMgmtService userMgmtSrv;
+    @Inject
+    UserMgmtService userMgmtSrv;
 
-	@Operation(summary = "Gets list of users", description = "Gets list of users", operationId = "get-user", tags = {
-			"Configuration – User Management" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-					ApiAccessConstants.USER_READ_ACCESS }))
-	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = UserPagedResult.class), examples = @ExampleObject(name = "Response json example", value = "example/user/user-all.json"))),
-			@ApiResponse(responseCode = "401", description = "Unauthorized"),
-			@ApiResponse(responseCode = "500", description = "InternalServerError") })
-	@GET
-	@ProtectedApi(scopes = { ApiAccessConstants.USER_READ_ACCESS })
-	public Response getUsers(
-			@Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
-			@Parameter(description = "Search pattern") @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
-			@Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
-			@Parameter(description = "Attribute whose value will be used to order the returned response") @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
-			@Parameter(description = "Order in which the sortBy param is applied. Allowed values are \"ascending\" and \"descending\"") @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder)
-			throws IllegalAccessException, InvocationTargetException {
-		if (logger.isDebugEnabled()) {
-			logger.debug("User search param - limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}",
-					escapeLog(limit), escapeLog(pattern), escapeLog(startIndex), escapeLog(sortBy),
-					escapeLog(sortOrder));
-		}
-		SearchRequest searchReq = createSearchRequest(userMgmtSrv.getPeopleBaseDn(), pattern, sortBy, sortOrder,
-				startIndex, limit, null, userMgmtSrv.getUserExclusionAttributesAsString(), mgtUtil.getRecordMaxCount());
+    @Operation(summary = "Gets list of users", description = "Gets list of users", operationId = "get-user", tags = {
+            "Configuration – User Management" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    ApiAccessConstants.USER_READ_ACCESS }))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = UserPagedResult.class), examples = @ExampleObject(name = "Response json example", value = "example/user/user-all.json"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
+    @GET
+    @ProtectedApi(scopes = { ApiAccessConstants.USER_READ_ACCESS })
+    public Response getUsers(
+            @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
+            @Parameter(description = "Search pattern") @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
+            @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
+            @Parameter(description = "Attribute whose value will be used to order the returned response") @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
+            @Parameter(description = "Order in which the sortBy param is applied. Allowed values are \"ascending\" and \"descending\"") @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder)
+            throws IllegalAccessException, InvocationTargetException {
+        if (logger.isDebugEnabled()) {
+            logger.debug("User search param - limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}",
+                    escapeLog(limit), escapeLog(pattern), escapeLog(startIndex), escapeLog(sortBy),
+                    escapeLog(sortOrder));
+        }
+        SearchRequest searchReq = createSearchRequest(userMgmtSrv.getPeopleBaseDn(), pattern, sortBy, sortOrder,
+                startIndex, limit, null, userMgmtSrv.getUserExclusionAttributesAsString(), mgtUtil.getRecordMaxCount());
 
-		return Response.ok(this.doSearch(searchReq)).build();
-	}
+        return Response.ok(this.doSearch(searchReq, true)).build();
+    }
 
-	@Operation(summary = "Get User by Inum", description = "Get User by Inum", operationId = "get-user-by-inum", tags = {
-			"Configuration – User Management" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-					ApiAccessConstants.USER_READ_ACCESS }))
-	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomUser.class, description = "CustomUser identified by inum"), examples = @ExampleObject(name = "Response json example", value = "example/user/user.json"))),
-			@ApiResponse(responseCode = "401", description = "Unauthorized"),
-			@ApiResponse(responseCode = "404", description = "Not Found"),
-			@ApiResponse(responseCode = "500", description = "InternalServerError") })
-	@GET
-	@ProtectedApi(scopes = { ApiAccessConstants.USER_READ_ACCESS })
-	@Path(ApiConstants.INUM_PATH)
-	public Response getUserByInum(
-			@Parameter(description = "User identifier") @PathParam(ApiConstants.INUM) @NotNull String inum)
-			throws IllegalAccessException, InvocationTargetException {
-		if (logger.isDebugEnabled()) {
-			logger.debug("User search by inum:{}", escapeLog(inum));
-		}
-		User user = userMgmtSrv.getUserBasedOnInum(inum);
-		checkResourceNotNull(user, USER);
-		logger.debug("user:{}", user);
+    @Operation(summary = "Get User by Inum", description = "Get User by Inum", operationId = "get-user-by-inum", tags = {
+            "Configuration – User Management" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    ApiAccessConstants.USER_READ_ACCESS }))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomUser.class, description = "CustomUser identified by inum"), examples = @ExampleObject(name = "Response json example", value = "example/user/user.json"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not Found"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
+    @GET
+    @ProtectedApi(scopes = { ApiAccessConstants.USER_READ_ACCESS })
+    @Path(ApiConstants.INUM_PATH)
+    public Response getUserByInum(
+            @Parameter(description = "User identifier") @PathParam(ApiConstants.INUM) @NotNull String inum)
+            throws IllegalAccessException, InvocationTargetException {
+        if (logger.isDebugEnabled()) {
+            logger.debug("User search by inum:{}", escapeLog(inum));
+        }
+        User user = userMgmtSrv.getUserBasedOnInum(inum);
+        checkResourceNotNull(user, USER);
+        logger.debug("user:{}", user);
 
-		// excludedAttributes
-		user = excludeUserAttributes(user);
-		logger.debug("user:{}", user);
+        // excludedAttributes
+        user = excludeUserAttributes(user);
+        logger.debug("user:{}", user);
 
-		// get custom user
-		CustomUser customUser = getCustomUser(user);
-		logger.debug("customUser:{}", customUser);
+        // get custom user
+        CustomUser customUser = getCustomUser(user, true);
+        logger.debug("customUser:{}", customUser);
 
-		return Response.ok(customUser).build();
-	}
+        return Response.ok(customUser).build();
+    }
 
-	@Operation(summary = "Create new User", description = "Create new User", operationId = "post-user", tags = {
-			"Configuration – User Management" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-					ApiAccessConstants.USER_WRITE_ACCESS }))
-	@RequestBody(description = "User object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomUser.class), examples = @ExampleObject(name = "Request json example", value = "example/user/user-post.json")))
-	@ApiResponses(value = {
-			@ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomUser.class, description = "Created Object"), examples = @ExampleObject(name = "Response json example", value = "example/user/user.json"))),
-			@ApiResponse(responseCode = "401", description = "Unauthorized"),
-			@ApiResponse(responseCode = "500", description = "InternalServerError") })
-	@POST
-	@ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS })
-	public Response createUser(@Valid CustomUser customUser)
-			throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-		if (logger.isDebugEnabled()) {
-			logger.debug("User details to be added - customUser:{}", escapeLog(customUser));
-		}
+    @Operation(summary = "Create new User", description = "Create new User", operationId = "post-user", tags = {
+            "Configuration – User Management" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    ApiAccessConstants.USER_WRITE_ACCESS }))
+    @RequestBody(description = "User object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomUser.class), examples = @ExampleObject(name = "Request json example", value = "example/user/user-post.json")))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomUser.class, description = "Created Object"), examples = @ExampleObject(name = "Response json example", value = "example/user/user.json"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
+    @POST
+    @ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS })
+    public Response createUser(@Valid CustomUser customUser,
+            @Parameter(description = "Boolean flag to indicate if attributes to be removed for non-LDAP DB. Default value is true, indicating non-LDAP attributes will be removed from request.") @DefaultValue("true") @QueryParam(value = ApiConstants.REMOVE_NON_LDAP_ATTRIBUTES) boolean removeNonLDAPAttributes)
+            throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        if (logger.isDebugEnabled()) {
+            logger.debug("User details to be added - customUser:{}, removeNonLDAPAttributes:{}", escapeLog(customUser),
+                    removeNonLDAPAttributes);
+        }
 
-		// get User object
-		User user = setUserAttributes(customUser);
+        // get User object
+        User user = setUserAttributes(customUser);
 
-		// parse birthdate if present
-		userMgmtSrv.parseBirthDateAttribute(user);
-		logger.debug("Create  user:{}", user);
+        // parse birthdate if present
+        userMgmtSrv.parseBirthDateAttribute(user);
+        logger.debug("Create  user:{}", user);
 
-		// checking mandatory attributes
-		checkMissingAttributes(user, null);
-		validateCustomObjectClasses(user);
+        // checking mandatory attributes
+        checkMissingAttributes(user, null);
+        ignoreCustomAttributes(user, removeNonLDAPAttributes);
 
-		user = userMgmtSrv.addUser(user, true);
-		logger.debug("User created {}", user);
+        user = userMgmtSrv.addUser(user, true);
+        logger.debug("User created {}", user);
 
-		// excludedAttributes
-		user = excludeUserAttributes(user);
+        // excludedAttributes
+        user = excludeUserAttributes(user);
 
-		// get custom user
-		customUser = getCustomUser(user);
-		logger.debug("newly created customUser:{}", customUser);
+        // get custom user
+        customUser = getCustomUser(user, removeNonLDAPAttributes);
+        logger.debug("newly created customUser:{}", customUser);
 
-		return Response.status(Response.Status.CREATED).entity(customUser).build();
-	}
+        return Response.status(Response.Status.CREATED).entity(customUser).build();
+    }
 
-	@Operation(summary = "Update User", description = "Update User", operationId = "put-user", tags = {
-			"Configuration – User Management" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-					ApiAccessConstants.USER_WRITE_ACCESS }))
-	@RequestBody(description = "User object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomUser.class), examples = @ExampleObject(name = "Request json example", value = "example/user/user.json")))
-	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomUser.class), examples = @ExampleObject(name = "Response json example", value = "example/user/user.json"))),
-			@ApiResponse(responseCode = "401", description = "Unauthorized"),
-			@ApiResponse(responseCode = "404", description = "Not Found"),
-			@ApiResponse(responseCode = "500", description = "InternalServerError") })
-	@PUT
-	@ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS })
-	public Response updateUser(@Valid CustomUser customUser)
-			throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-		if (logger.isDebugEnabled()) {
-			logger.debug("User details to be updated - customUser:{}", escapeLog(customUser));
-		}
+    @Operation(summary = "Update User", description = "Update User", operationId = "put-user", tags = {
+            "Configuration – User Management" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    ApiAccessConstants.USER_WRITE_ACCESS }))
+    @RequestBody(description = "User object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomUser.class), examples = @ExampleObject(name = "Request json example", value = "example/user/user.json")))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomUser.class), examples = @ExampleObject(name = "Response json example", value = "example/user/user.json"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not Found"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
+    @PUT
+    @ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS })
+    public Response updateUser(@Valid CustomUser customUser,
+            @Parameter(description = "Boolean flag to indicate if attributes to be removed for non-LDAP DB. Default value is true, indicating non-LDAP attributes will be removed from request.") @DefaultValue("true") @QueryParam(value = ApiConstants.REMOVE_NON_LDAP_ATTRIBUTES) boolean removeNonLDAPAttributes)
+            throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        if (logger.isDebugEnabled()) {
+            logger.debug("User details to be updated - customUser:{}, removeNonLDAPAttributes:{}",
+                    escapeLog(customUser), removeNonLDAPAttributes);
+        }
 
-		// get User object
-		User user = setUserAttributes(customUser);
+        // get User object
+        User user = setUserAttributes(customUser);
 
-		// parse birthdate if present
-		userMgmtSrv.parseBirthDateAttribute(user);
-		logger.debug("Create  user:{}", user);
+        // parse birthdate if present
+        userMgmtSrv.parseBirthDateAttribute(user);
+        logger.debug("Create  user:{}", user);
 
-		// checking mandatory attributes
-		List<String> excludeAttributes = List.of(USER_PWD);
-		checkMissingAttributes(user, excludeAttributes);
-		validateCustomObjectClasses(user);
-		try {
-			user = userMgmtSrv.updateUser(user);
-			logger.debug("Updated user:{}", user);
-		} catch (Exception ex) {
-			logger.error("Error while updating user", ex);
-			throwInternalServerException(ex);
-		}
+        // checking mandatory attributes
+        List<String> excludeAttributes = List.of(USER_PWD);
+        checkMissingAttributes(user, excludeAttributes);
+        ignoreCustomAttributes(user, removeNonLDAPAttributes);
 
-		// excludedAttributes
-		user = excludeUserAttributes(user);
+        try {
+            user = userMgmtSrv.updateUser(user);
+            logger.debug("Updated user:{}", user);
+        } catch (Exception ex) {
+            logger.error("Error while updating user", ex);
+            throwInternalServerException(ex);
+        }
 
-		// get custom user
-		customUser = getCustomUser(user);
-		logger.debug("updated customUser:{}", customUser);
+        // excludedAttributes
+        user = excludeUserAttributes(user);
 
-		return Response.ok(customUser).build();
+        // get custom user
+        customUser = getCustomUser(user, removeNonLDAPAttributes);
+        logger.debug("updated customUser:{}", customUser);
 
-	}
+        return Response.ok(customUser).build();
 
-	@Operation(summary = "Patch user properties by Inum", description = "Patch user properties by Inum", operationId = "patch-user-by-inum", tags = {
-			"Configuration – User Management" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-					ApiAccessConstants.USER_WRITE_ACCESS }))
-	@RequestBody(description = "UserPatchRequest", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = UserPatchRequest.class), examples = @ExampleObject(name = "Request json example", value = "example/user/user-patch.json")))
-	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomUser.class, description = "Patched CustomUser Object"), examples = @ExampleObject(name = "Response json example", value = "example/user/user.json"))),
-			@ApiResponse(responseCode = "401", description = "Unauthorized"),
-			@ApiResponse(responseCode = "404", description = "Not Found"),
-			@ApiResponse(responseCode = "500", description = "InternalServerError") })
-	@PATCH
-	@ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS })
-	@Path(ApiConstants.INUM_PATH)
-	public Response patchUser(
-			@Parameter(description = "User identifier") @PathParam(ApiConstants.INUM) @NotNull String inum,
-			@NotNull UserPatchRequest userPatchRequest)
-			throws IllegalAccessException, InvocationTargetException, JsonPatchException, IOException {
-		if (logger.isDebugEnabled()) {
-			logger.debug("User:{} to be patched with :{} ", escapeLog(inum), escapeLog(userPatchRequest));
-		}
-		// check if user exists
-		User existingUser = userMgmtSrv.getUserBasedOnInum(inum);
+    }
 
-		// parse birthdate if present
-		userMgmtSrv.parseBirthDateAttribute(existingUser);
-		checkResourceNotNull(existingUser, USER);
-		validateCustomObjectClasses(existingUser);
+    @Operation(summary = "Patch user properties by Inum", description = "Patch user properties by Inum", operationId = "patch-user-by-inum", tags = {
+            "Configuration – User Management" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    ApiAccessConstants.USER_WRITE_ACCESS }))
+    @RequestBody(description = "UserPatchRequest", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = UserPatchRequest.class), examples = @ExampleObject(name = "Request json example", value = "example/user/user-patch.json")))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomUser.class, description = "Patched CustomUser Object"), examples = @ExampleObject(name = "Response json example", value = "example/user/user.json"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not Found"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
+    @PATCH
+    @ProtectedApi(scopes = { ApiAccessConstants.USER_WRITE_ACCESS })
+    @Path(ApiConstants.INUM_PATH)
+    public Response patchUser(
+            @Parameter(description = "User identifier") @PathParam(ApiConstants.INUM) @NotNull String inum,
+            @NotNull UserPatchRequest userPatchRequest,
+            @Parameter(description = "Boolean flag to indicate if attributes to be removed for non-LDAP DB. Default value is true, indicating non-LDAP attributes will be removed from request.") @DefaultValue("true") @QueryParam(value = ApiConstants.REMOVE_NON_LDAP_ATTRIBUTES) boolean removeNonLDAPAttributes)
+            throws IllegalAccessException, InvocationTargetException, JsonPatchException, IOException {
+        if (logger.isDebugEnabled()) {
+            logger.debug("User:{} to be patched with :{}, removeNonLDAPAttributes:{} ", escapeLog(inum),
+                    escapeLog(userPatchRequest), removeNonLDAPAttributes);
+        }
+        // check if user exists
+        User existingUser = userMgmtSrv.getUserBasedOnInum(inum);
 
-		// patch user
-		existingUser = userMgmtSrv.patchUser(inum, userPatchRequest);
-		logger.debug("Patched user:{}", existingUser);
+        // parse birthdate if present
+        userMgmtSrv.parseBirthDateAttribute(existingUser);
+        checkResourceNotNull(existingUser, USER);
+        ignoreCustomAttributes(existingUser, removeNonLDAPAttributes);
 
-		// excludedAttributes
-		existingUser = excludeUserAttributes(existingUser);
+        // patch user
+        existingUser = userMgmtSrv.patchUser(inum, userPatchRequest);
+        logger.debug("Patched user:{}", existingUser);
 
-		// get custom user
-		CustomUser customUser = getCustomUser(existingUser);
-		logger.debug("patched customUser:{}", customUser);
+        // excludedAttributes
+        existingUser = excludeUserAttributes(existingUser);
 
-		return Response.ok(customUser).build();
-	}
+        // get custom user
+        CustomUser customUser = getCustomUser(existingUser, removeNonLDAPAttributes);
+        logger.debug("patched customUser:{}", customUser);
 
-	@Operation(summary = "Delete User", description = "Delete User", operationId = "delete-user", tags = {
-			"Configuration – User Management" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-					ApiAccessConstants.USER_DELETE_ACCESS }))
-	@ApiResponses(value = { @ApiResponse(responseCode = "204", description = "No Content"),
-			@ApiResponse(responseCode = "401", description = "Unauthorized"),
-			@ApiResponse(responseCode = "404", description = "Not Found"),
-			@ApiResponse(responseCode = "500", description = "InternalServerError") })
-	@DELETE
-	@Path(ApiConstants.INUM_PATH)
-	@ProtectedApi(scopes = { ApiAccessConstants.USER_DELETE_ACCESS })
-	public Response deleteUser(
-			@Parameter(description = "User identifier") @PathParam(ApiConstants.INUM) @NotNull String inum) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("User to be deleted - inum:{} ", escapeLog(inum));
-		}
-		User user = userMgmtSrv.getUserBasedOnInum(inum);
-		checkResourceNotNull(user, USER);
-		userMgmtSrv.removeUser(user);
-		return Response.noContent().build();
-	}
+        return Response.ok(customUser).build();
+    }
 
-	private UserPagedResult doSearch(SearchRequest searchReq) throws IllegalAccessException, InvocationTargetException {
-		if (logger.isDebugEnabled()) {
-			logger.debug("User search params - searchReq:{} ", escapeLog(searchReq));
-		}
+    @Operation(summary = "Delete User", description = "Delete User", operationId = "delete-user", tags = {
+            "Configuration – User Management" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    ApiAccessConstants.USER_DELETE_ACCESS }))
+    @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "No Content"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not Found"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
+    @DELETE
+    @Path(ApiConstants.INUM_PATH)
+    @ProtectedApi(scopes = { ApiAccessConstants.USER_DELETE_ACCESS })
+    public Response deleteUser(
+            @Parameter(description = "User identifier") @PathParam(ApiConstants.INUM) @NotNull String inum) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("User to be deleted - inum:{} ", escapeLog(inum));
+        }
+        User user = userMgmtSrv.getUserBasedOnInum(inum);
+        checkResourceNotNull(user, USER);
+        userMgmtSrv.removeUser(user);
+        return Response.noContent().build();
+    }
 
-		PagedResult<User> pagedResult = userMgmtSrv.searchUsers(searchReq);
-		if (logger.isTraceEnabled()) {
-			logger.debug("PagedResult  - pagedResult:{}", pagedResult);
-		}
+    private UserPagedResult doSearch(SearchRequest searchReq, Boolean removeNonLDAPAttributes)
+            throws IllegalAccessException, InvocationTargetException {
+        if (logger.isDebugEnabled()) {
+            logger.debug("User search params - searchReq:{}, removeNonLDAPAttributes:{} ", escapeLog(searchReq),
+                    removeNonLDAPAttributes);
+        }
 
-		UserPagedResult pagedCustomUser = new UserPagedResult();
-		if (pagedResult != null) {
-			logger.debug("Users fetched  - pagedResult.getEntries():{}", pagedResult.getEntries());
-			List<User> users = pagedResult.getEntries();
+        PagedResult<User> pagedResult = userMgmtSrv.searchUsers(searchReq);
+        if (logger.isTraceEnabled()) {
+            logger.debug("PagedResult  - pagedResult:{}", pagedResult);
+        }
 
-			// excludedAttributes
-			users = userMgmtSrv.excludeAttributes(users, searchReq.getExcludedAttributesStr());
-			logger.debug("Users fetched  - users:{}", users);
+        UserPagedResult pagedCustomUser = new UserPagedResult();
+        if (pagedResult != null) {
+            logger.debug("Users fetched  - pagedResult.getEntries():{}", pagedResult.getEntries());
+            List<User> users = pagedResult.getEntries();
 
-			// parse birthdate if present
-			users = users.stream().map(user -> userMgmtSrv.parseBirthDateAttribute(user)).collect(Collectors.toList());
+            // excludedAttributes
+            users = userMgmtSrv.excludeAttributes(users, searchReq.getExcludedAttributesStr());
+            logger.debug("Users fetched  - users:{}", users);
 
-			// get customUser()
-			List<CustomUser> customUsers = getCustomUserList(users);
-			pagedCustomUser.setStart(pagedResult.getStart());
-			pagedCustomUser.setEntriesCount(pagedResult.getEntriesCount());
-			pagedCustomUser.setTotalEntriesCount(pagedResult.getTotalEntriesCount());
-			pagedCustomUser.setEntries(customUsers);
-		}
+            // parse birthdate if present
+            users = users.stream().map(user -> userMgmtSrv.parseBirthDateAttribute(user)).collect(Collectors.toList());
 
-		logger.debug("User pagedCustomUser:{}", pagedCustomUser);
-		return pagedCustomUser;
+            // get customUser()
+            List<CustomUser> customUsers = getCustomUserList(users, removeNonLDAPAttributes);
+            pagedCustomUser.setStart(pagedResult.getStart());
+            pagedCustomUser.setEntriesCount(pagedResult.getEntriesCount());
+            pagedCustomUser.setTotalEntriesCount(pagedResult.getTotalEntriesCount());
+            pagedCustomUser.setEntries(customUsers);
+        }
 
-	}
+        logger.debug("User pagedCustomUser:{}", pagedCustomUser);
+        return pagedCustomUser;
 
-	private User excludeUserAttributes(User user) throws IllegalAccessException, InvocationTargetException {
-		return userMgmtSrv.excludeAttributes(user, userMgmtSrv.getUserExclusionAttributesAsString());
-	}
+    }
 
-	private void checkMissingAttributes(User user, List<String> excludeAttributes)
-			throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-		String missingAttributes = userMgmtSrv.checkMandatoryFields(user, excludeAttributes);
-		logger.debug("missingAttributes:{}", missingAttributes);
+    private User excludeUserAttributes(User user) throws IllegalAccessException, InvocationTargetException {
+        return userMgmtSrv.excludeAttributes(user, userMgmtSrv.getUserExclusionAttributesAsString());
+    }
 
-		if (StringHelper.isEmpty(missingAttributes)) {
-			return;
-		}
+    private void checkMissingAttributes(User user, List<String> excludeAttributes)
+            throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        String missingAttributes = userMgmtSrv.checkMandatoryFields(user, excludeAttributes);
+        logger.debug("missingAttributes:{}", missingAttributes);
 
-		throwMissingAttributeError(missingAttributes);
-	}
+        if (StringHelper.isEmpty(missingAttributes)) {
+            return;
+        }
 
-	private List<CustomUser> getCustomUserList(List<User> users) {
-		List<CustomUser> customUserList = new ArrayList<>();
-		if (users == null || users.isEmpty()) {
-			return customUserList;
-		}
+        throwMissingAttributeError(missingAttributes);
+    }
 
-		for (User user : users) {
-			CustomUser customUser = new CustomUser();
-			setParentAttributes(customUser, user);
-			customUserList.add(customUser);
-			validateCustomObjectClasses(customUser);
-		}
-		logger.debug("Custom Users - customUserList:{}", customUserList);
-		return customUserList;
-	}
+    private List<CustomUser> getCustomUserList(List<User> users, Boolean removeNonLDAPAttributes) {
+        List<CustomUser> customUserList = new ArrayList<>();
+        if (users == null || users.isEmpty()) {
+            return customUserList;
+        }
 
-	private CustomUser getCustomUser(User user) {
-		CustomUser customUser = new CustomUser();
-		if (user == null) {
-			return customUser;
-		}
-		setParentAttributes(customUser, user);
-		logger.debug("Custom User - customUser:{}", customUser);
-		return customUser;
-	}
+        for (User user : users) {
+            CustomUser customUser = new CustomUser();
+            setParentAttributes(customUser, user, removeNonLDAPAttributes);
+            customUserList.add(customUser);
+            ignoreCustomAttributes(customUser, removeNonLDAPAttributes);
+        }
+        logger.debug("Custom Users - customUserList:{}", customUserList);
+        return customUserList;
+    }
 
-	public CustomUser setParentAttributes(CustomUser customUser, User user) {
-		customUser.setBaseDn(user.getBaseDn());
-		customUser.setCreatedAt(user.getCreatedAt());
-		customUser.setCustomAttributes(user.getCustomAttributes());
-		customUser.setCustomObjectClasses(user.getCustomObjectClasses());
-		customUser.setDn(user.getDn());
-		customUser.setOxAuthPersistentJwt(user.getOxAuthPersistentJwt());
-		customUser.setUpdatedAt(user.getUpdatedAt());
-		customUser.setUserId(user.getUserId());
+    private CustomUser getCustomUser(User user, Boolean ignoreCustomAttributes) {
+        CustomUser customUser = new CustomUser();
+        if (user == null) {
+            return customUser;
+        }
+        setParentAttributes(customUser, user, ignoreCustomAttributes);
+        logger.debug("Custom User - customUser:{}", customUser);
+        return customUser;
+    }
 
-		validateCustomObjectClasses(customUser);
-		return setCustomUserAttributes(customUser, user);
-	}
+    public CustomUser setParentAttributes(CustomUser customUser, User user, Boolean removeNonLDAPAttributes) {
+        customUser.setBaseDn(user.getBaseDn());
+        customUser.setCreatedAt(user.getCreatedAt());
+        customUser.setCustomAttributes(user.getCustomAttributes());
+        customUser.setCustomObjectClasses(user.getCustomObjectClasses());
+        customUser.setDn(user.getDn());
+        customUser.setOxAuthPersistentJwt(user.getOxAuthPersistentJwt());
+        customUser.setUpdatedAt(user.getUpdatedAt());
+        customUser.setUserId(user.getUserId());
 
-	public CustomUser setCustomUserAttributes(CustomUser customUser, User user) {
-		customUser.setMail(user.getAttribute(MAIL));
-		customUser.setDisplayName(user.getAttribute(DISPLAY_NAME));
-		customUser.setJansStatus(user.getAttribute(JANS_STATUS));
-		customUser.setGivenName(user.getAttribute(GIVEN_NAME));
-		customUser.setUserPassword(user.getAttribute(USER_PWD));
-		customUser.setInum(user.getAttribute(INUM));
+        ignoreCustomAttributes(customUser, removeNonLDAPAttributes);
+        return setCustomUserAttributes(customUser, user);
+    }
 
-		customUser.removeAttribute(MAIL);
-		customUser.removeAttribute(DISPLAY_NAME);
-		customUser.removeAttribute(JANS_STATUS);
-		customUser.removeAttribute(GIVEN_NAME);
-		customUser.removeAttribute(USER_PWD);
-		customUser.removeAttribute(INUM);
+    public CustomUser setCustomUserAttributes(CustomUser customUser, User user) {
+        customUser.setMail(user.getAttribute(MAIL));
+        customUser.setDisplayName(user.getAttribute(DISPLAY_NAME));
+        customUser.setJansStatus(user.getAttribute(JANS_STATUS));
+        customUser.setGivenName(user.getAttribute(GIVEN_NAME));
+        customUser.setUserPassword(user.getAttribute(USER_PWD));
+        customUser.setInum(user.getAttribute(INUM));
 
-		return customUser;
-	}
+        customUser.removeAttribute(MAIL);
+        customUser.removeAttribute(DISPLAY_NAME);
+        customUser.removeAttribute(JANS_STATUS);
+        customUser.removeAttribute(GIVEN_NAME);
+        customUser.removeAttribute(USER_PWD);
+        customUser.removeAttribute(INUM);
 
-	private User setUserAttributes(CustomUser customUser) {
-		User user = new User();
-		user.setBaseDn(customUser.getBaseDn());
-		user.setCreatedAt(customUser.getCreatedAt());
-		user.setCustomAttributes(customUser.getCustomAttributes());
-		user.setCustomObjectClasses(customUser.getCustomObjectClasses());
-		user.setDn(customUser.getDn());
-		user.setOxAuthPersistentJwt(customUser.getOxAuthPersistentJwt());
-		user.setUpdatedAt(customUser.getUpdatedAt());
-		user.setUserId(customUser.getUserId());
-		return setUserCustomAttributes(customUser, user);
-	}
+        return customUser;
+    }
 
-	private User setUserCustomAttributes(CustomUser customUser, User user) {
-		user.setAttribute(MAIL, customUser.getMail(), false);
-		user.setAttribute(DISPLAY_NAME, customUser.getDisplayName(), false);
-		user.setAttribute(JANS_STATUS, customUser.getJansStatus(), false);
-		user.setAttribute(GIVEN_NAME, customUser.getGivenName(), false);
-		user.setAttribute(USER_PWD, customUser.getUserPassword(), false);
-		user.setAttribute(INUM, customUser.getInum(), false);
+    private User setUserAttributes(CustomUser customUser) {
+        User user = new User();
+        user.setBaseDn(customUser.getBaseDn());
+        user.setCreatedAt(customUser.getCreatedAt());
+        user.setCustomAttributes(customUser.getCustomAttributes());
+        user.setCustomObjectClasses(customUser.getCustomObjectClasses());
+        user.setDn(customUser.getDn());
+        user.setOxAuthPersistentJwt(customUser.getOxAuthPersistentJwt());
+        user.setUpdatedAt(customUser.getUpdatedAt());
+        user.setUserId(customUser.getUserId());
+        return setUserCustomAttributes(customUser, user);
+    }
 
-		logger.debug("Custom User - user:{}", user);
-		return user;
-	}
+    private User setUserCustomAttributes(CustomUser customUser, User user) {
+        user.setAttribute(MAIL, customUser.getMail(), false);
+        user.setAttribute(DISPLAY_NAME, customUser.getDisplayName(), false);
+        user.setAttribute(JANS_STATUS, customUser.getJansStatus(), false);
+        user.setAttribute(GIVEN_NAME, customUser.getGivenName(), false);
+        user.setAttribute(USER_PWD, customUser.getUserPassword(), false);
+        user.setAttribute(INUM, customUser.getInum(), false);
 
-	private User validateCustomObjectClasses(User user) {
-		logger.info("validate User CustomObjectClasses - User user:{}", user);
-		if (user == null || (user.getCustomObjectClasses() == null || user.getCustomObjectClasses().length == 0)) {
-			return user;
-		}
-		logger.trace("user.getCustomObjectClasses():{}, userMgmtSrv.getPersistenceType():{}, userMgmtSrv.isLDAP():?{}",
-				user.getCustomObjectClasses(), userMgmtSrv.getPersistenceType(), userMgmtSrv.isLDAP());
+        logger.debug("Custom User - user:{}", user);
+        return user;
+    }
 
-		if (user.getCustomObjectClasses().length > 0 && !userMgmtSrv.isLDAP()) {
+    private User ignoreCustomAttributes(User user, Boolean removeNonLDAPAttributes) {
+        logger.info("validate User CustomObjectClasses - User user:{}, removeNonLDAPAttributes:{}", user,
+                removeNonLDAPAttributes);
+        if (user == null || (user.getCustomObjectClasses() == null || user.getCustomObjectClasses().length == 0)) {
+            return user;
+        }
 
-			throwBadRequestException(
-					"'customObjectClasses' attribute supported only for 'LDAP'. Current Persistence type is '"
-							+ userMgmtSrv.getPersistenceType() + "'. Kindly remove it.");
-		}
+        logger.trace("user.getCustomObjectClasses():{}, userMgmtSrv.getPersistenceType():{}, userMgmtSrv.isLDAP():?{}",
+                user.getCustomObjectClasses(), userMgmtSrv.getPersistenceType(), userMgmtSrv.isLDAP());
 
-		return userMgmtSrv.ignoreCustomObjectClassesForNonLDAP(user);
-	}
+        if (removeNonLDAPAttributes) {
+            return userMgmtSrv.ignoreCustomObjectClassesForNonLDAP(user);
+        }
+        return user;
+
+    }
 
 }
