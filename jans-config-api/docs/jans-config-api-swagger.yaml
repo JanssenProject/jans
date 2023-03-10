@@ -173,7 +173,7 @@ paths:
       - oauth2:
         - https://jans.io/oauth/config/acrs.write
         - https://jans.io/oauth/config/write-all
-  /api/v1/agama-deployment/{name}:
+  /api/v1/agama-deployment:
     get:
       tags:
       - Agama - Developer Studio
@@ -182,9 +182,7 @@ paths:
       operationId: get-agama-dev-studio-prj-by-name
       parameters:
       - name: name
-        in: path
-        description: Agama project name
-        required: true
+        in: query
         schema:
           type: string
       responses:
@@ -219,9 +217,7 @@ paths:
       operationId: post-agama-dev-studio-prj
       parameters:
       - name: name
-        in: path
-        description: Agama project name
-        required: true
+        in: query
         schema:
           type: string
       requestBody:
@@ -262,9 +258,7 @@ paths:
       operationId: delete-agama-dev-studio-prj
       parameters:
       - name: name
-        in: path
-        description: Agama project name
-        required: true
+        in: query
         schema:
           type: string
       responses:
@@ -283,7 +277,7 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/agama.delete
-  /api/v1/agama-deployment/configs/{name}:
+  /api/v1/agama-deployment/configs:
     get:
       tags:
       - Agama - Developer Studio
@@ -292,9 +286,7 @@ paths:
       operationId: get-agama-dev-prj-configs
       parameters:
       - name: name
-        in: path
-        description: Agama project name
-        required: true
+        in: query
         schema:
           type: string
       responses:
@@ -323,9 +315,7 @@ paths:
       operationId: put-agama-dev-studio-prj
       parameters:
       - name: name
-        in: path
-        description: Agama project name
-        required: true
+        in: query
         schema:
           type: string
       requestBody:
@@ -7618,17 +7608,17 @@ components:
           type: string
         whitePagesCanView:
           type: boolean
-        adminCanAccess:
-          type: boolean
         adminCanView:
-          type: boolean
-        adminCanEdit:
           type: boolean
         userCanAccess:
           type: boolean
+        userCanView:
+          type: boolean
         userCanEdit:
           type: boolean
-        userCanView:
+        adminCanAccess:
+          type: boolean
+        adminCanEdit:
           type: boolean
         baseDn:
           type: string
@@ -8353,6 +8343,8 @@ components:
           type: object
           additionalProperties:
             type: string
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8362,8 +8354,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn

@@ -8,7 +8,6 @@ import io.jans.agama.model.Flow;
 import io.jans.as.model.util.Pair;
 import io.jans.orm.model.PagedResult;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -23,7 +22,6 @@ import io.jans.configapi.service.auth.AgamaFlowService;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
-import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -77,8 +75,7 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_READ_ACCESS }, groupScopes = {ApiAccessConstants.AGAMA_WRITE_ACCESS}, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Produces(MediaType.APPLICATION_JSON)
-    @Path(ApiConstants.NAME_PARAM_PATH)
-    public Response getDeployment(@Parameter(description = "Agama project name") @PathParam(ApiConstants.NAME) @NotNull String projectName) {
+    public Response getDeployment(@QueryParam("name") String projectName) {
         
         if (projectName == null) {
             return Response.status(Response.Status.BAD_REQUEST)
@@ -111,8 +108,7 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
     @Consumes("application/zip")
     @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_WRITE_ACCESS }, groupScopes = {},
             superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
-    @Path(ApiConstants.NAME_PARAM_PATH)
-    public Response deploy(@Parameter(description = "Agama project name") @PathParam(ApiConstants.NAME) @NotNull String projectName, byte[] gamaBinary) {
+    public Response deploy(@QueryParam("name") String projectName, byte[] gamaBinary) {
         
         if (projectName == null || gamaBinary == null)
             return Response.status(Response.Status.BAD_REQUEST)
@@ -141,8 +137,7 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
     @DELETE
     @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_DELETE_ACCESS }, groupScopes = {},
             superScopes = { ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
-    @Path(ApiConstants.NAME_PARAM_PATH)
-    public Response undeploy(@Parameter(description = "Agama project name") @PathParam(ApiConstants.NAME) @NotNull String projectName) {
+    public Response undeploy(@QueryParam("name") String projectName) {
         
         if (projectName == null)
             return Response.status(Response.Status.BAD_REQUEST)
@@ -169,9 +164,10 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
     @ApiResponse(responseCode = "401", description = "Unauthorized"),
     @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_READ_ACCESS }, groupScopes = {ApiAccessConstants.AGAMA_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
-    @Path(ApiConstants.CONFIGS + ApiConstants.NAME_PARAM_PATH)
-    public Response getConfigs(@Parameter(description = "Agama project name") @PathParam(ApiConstants.NAME) @NotNull String projectName) throws JsonProcessingException {
+    @Path("configs")
+    @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.AGAMA_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    public Response getConfigs(@QueryParam("name") String projectName) throws JsonProcessingException {
         
         Pair<Response, Set<String>> pair = projectFlows(projectName);
         Response resp = pair.getFirst();
@@ -204,11 +200,11 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
     @ApiResponse(responseCode = "409", description = "Conflict"),
     @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PUT
+    @Path("configs")
     @Consumes(MediaType.APPLICATION_JSON)
     @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_WRITE_ACCESS }, groupScopes = {},
             superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
-    @Path(ApiConstants.CONFIGS + ApiConstants.NAME_PARAM_PATH)
-    public Response setConfigs(@Parameter(description = "Agama project name") @PathParam(ApiConstants.NAME) @NotNull String projectName,
+    public Response setConfigs(@QueryParam("name") String projectName,
             Map<String, Map<String, Object>> flowsConfigs) {
 
         if (flowsConfigs == null) {
