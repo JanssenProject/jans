@@ -7577,15 +7577,15 @@ components:
           type: boolean
         adminCanView:
           type: boolean
-        adminCanEdit:
-          type: boolean
         userCanAccess:
           type: boolean
         userCanView:
           type: boolean
-        whitePagesCanView:
+        adminCanEdit:
           type: boolean
         userCanEdit:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -8854,6 +8854,20 @@ components:
           - tls_client_auth
           - self_signed_tls_client_auth
           - none
+        allAuthenticationMethods:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+            enum:
+            - client_secret_basic
+            - client_secret_post
+            - client_secret_jwt
+            - private_key_jwt
+            - access_token
+            - tls_client_auth
+            - self_signed_tls_client_auth
+            - none
         baseDn:
           type: string
         inum:
@@ -8942,6 +8956,10 @@ components:
           format: int32
         minimumAcrLevelAutoresolve:
           type: boolean
+        additionalTokenEndpointAuthMethods:
+          type: array
+          items:
+            type: string
         minimumAcrPriorityList:
           type: array
           items:
