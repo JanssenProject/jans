@@ -282,8 +282,8 @@ public class AuthenticationFilter implements Filter {
         if (StringUtils.isNotBlank(clientId)) {
             final Client client = clientService.getClient(clientId);
             if (client != null &&
-                    (client.getAuthenticationMethod() == io.jans.as.model.common.AuthenticationMethod.TLS_CLIENT_AUTH ||
-                            client.getAuthenticationMethod() == io.jans.as.model.common.AuthenticationMethod.SELF_SIGNED_TLS_CLIENT_AUTH)) {
+                    (client.hasAuthenticationMethod(AuthenticationMethod.TLS_CLIENT_AUTH)||
+                            client.hasAuthenticationMethod(AuthenticationMethod.SELF_SIGNED_TLS_CLIENT_AUTH))) {
                 return mtlsService.processMTLS(httpRequest, httpResponse, filterChain, client);
             }
         } else {
@@ -385,7 +385,7 @@ public class AuthenticationFilter implements Filter {
                             || servletRequest.getRequestURI().endsWith("/device_authorization")) {
                         Client client = clientService.getClient(username);
                         if (client == null
-                                || io.jans.as.model.common.AuthenticationMethod.CLIENT_SECRET_BASIC != client.getAuthenticationMethod()) {
+                                || !client.hasAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_BASIC)) {
                             throw new Exception("The Token Authentication Method is not valid.");
                         }
                         requireAuth = !authenticator.authenticateClient(servletRequest);
@@ -441,7 +441,7 @@ public class AuthenticationFilter implements Filter {
             if (requireAuth) {
                 if (isExistUserPassword) {
                     Client client = clientService.getClient(clientId);
-                    if (client != null && io.jans.as.model.common.AuthenticationMethod.CLIENT_SECRET_POST == client.getAuthenticationMethod()) {
+                    if (client != null && client.hasAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_POST)) {
                         // Only authenticate if username doesn't match
                         // Identity.username and user isn't authenticated
                         if (!clientId.equals(identity.getCredentials().getUsername()) || !identity.isLoggedIn()) {
@@ -470,7 +470,7 @@ public class AuthenticationFilter implements Filter {
                     }
                 } else if (tokenEndpoint) {
                     Client client = clientService.getClient(servletRequest.getParameter(Constants.CLIENT_ID));
-                    if (client != null && client.getAuthenticationMethod() == AuthenticationMethod.NONE) {
+                    if (client != null && client.hasAuthenticationMethod(AuthenticationMethod.NONE)) {
                         identity.logout();
 
                         identity.getCredentials().setUsername(client.getClientId());

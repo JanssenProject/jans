@@ -60,7 +60,7 @@ style = Style.from_dict(
 
         "outh-titledtext":"green",
         "outh-label":"blue",
-        
+
         # PLUGINS
         "plugin-navbar":"#2600ff",
         "plugin-navbar-headcolor":"green",
@@ -78,6 +78,7 @@ style = Style.from_dict(
         "plugin-container":"",
         "plugin-container.text":"green",
         "plugin-black-bg": "bg: black",
+        "plugin-titledtext":"green",
 
         ## edit_client_dialog
         "outh-client-navbar":"#2600ff",

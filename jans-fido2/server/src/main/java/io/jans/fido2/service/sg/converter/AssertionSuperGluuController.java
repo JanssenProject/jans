@@ -87,28 +87,7 @@ public class AssertionSuperGluuController {
      *             "keyHandle":"YJvWD9n40eIurInJvPKUoxpKzrleUMWgu9w3v_NUBu7BiGAclgkH_Zg88_T5y6Rh78imTxTh0djWFYG4jxOixw","version":"U2F_V2"}]}
      */
     public JsonNode startAuthentication(String userName, String keyHandle, String appId, String sessionId) {
-        boolean oneStep = StringHelper.isEmpty(userName);
-
-        boolean valid = userSessionIdService.isValidSessionId(sessionId, userName);
-        if (!valid) {
-            throw new Fido2RuntimeException(String.format("session_id '%s' is invalid", sessionId));
-        }
-
-        if (StringHelper.isEmpty(userName) && StringHelper.isEmpty(keyHandle)) {
-            throw new Fido2RuntimeException("The request should contains either username or keyhandle");
-        }
-
-        ObjectNode params = dataMapperService.createObjectNode();
-        // Add all required parameters from request to allow process U2F request 
-        params.put(CommonVerifiers.SUPER_GLUU_REQUEST, true);
-        params.put(CommonVerifiers.SUPER_GLUU_APP_ID, appId);
-        params.put(CommonVerifiers.SUPER_GLUU_KEY_HANDLE, keyHandle);
-        params.put(CommonVerifiers.SUPER_GLUU_MODE, oneStep ? SuperGluuMode.ONE_STEP.getMode() : SuperGluuMode.TWO_STEP.getMode());
-
-        params.put("username", userName);
-        params.put("session_id", sessionId);
-
-        log.debug("Prepared U2F_V2 assertions options request: {}", params.toString());
+        ObjectNode params = buildFido2AssertionStartResponse(userName, keyHandle, appId, sessionId);
 
         ObjectNode result = assertionService.options(params);
 
@@ -135,6 +114,33 @@ public class AssertionSuperGluuController {
         return superGluuResult;
     }
 
+	public ObjectNode buildFido2AssertionStartResponse(String userName, String keyHandle, String appId,
+			String sessionId) {
+		boolean oneStep = StringHelper.isEmpty(userName);
+
+        boolean valid = userSessionIdService.isValidSessionId(sessionId, userName);
+        if (!valid) {
+            throw new Fido2RuntimeException(String.format("session_id '%s' is invalid", sessionId));
+        }
+
+        if (StringHelper.isEmpty(userName) && StringHelper.isEmpty(keyHandle)) {
+            throw new Fido2RuntimeException("The request should contains either username or keyhandle");
+        }
+
+        ObjectNode params = dataMapperService.createObjectNode();
+        // Add all required parameters from request to allow process U2F request 
+        params.put(CommonVerifiers.SUPER_GLUU_REQUEST, true);
+        params.put(CommonVerifiers.SUPER_GLUU_APP_ID, appId);
+        params.put(CommonVerifiers.SUPER_GLUU_KEY_HANDLE, keyHandle);
+        params.put(CommonVerifiers.SUPER_GLUU_MODE, oneStep ? SuperGluuMode.ONE_STEP.getMode() : SuperGluuMode.TWO_STEP.getMode());
+
+        params.put("username", userName);
+        params.put("session_id", sessionId);
+
+        log.debug("Prepared U2F_V2 assertions options request: {}", params.toString());
+		return params;
+	}
+
     /* Example for one_step:
      *  - request:
      *             username: null
@@ -159,14 +165,20 @@ public class AssertionSuperGluuController {
      *            
      */
     public JsonNode finishAuthentication(String userName, String authenticateResponseString) {
-        AuthenticateResponse authenticateResponse;
-        try {
-        	authenticateResponse = dataMapperService.readValue(authenticateResponseString, AuthenticateResponse.class);
-        } catch (IOException ex) {
-            throw new Fido2RpRuntimeException("Failed to parse options assertion request", ex);
-        }
+        AuthenticateResponse authenticateResponse = parseAuthenticateResponse(authenticateResponseString);
 
-        if (!ArrayUtils.contains(RawAuthenticationService.SUPPORTED_AUTHENTICATE_TYPES, authenticateResponse.getClientData().getTyp())) {
+        ObjectNode params = buildFido2AuthenticationVerifyResponse(userName, authenticateResponseString, authenticateResponse);
+
+        ObjectNode result = assertionService.verify(params);
+
+        result.put("status", "success");
+        result.put("challenge", authenticateResponse.getClientData().getChallenge());
+
+        return result;
+    }
+
+	public ObjectNode buildFido2AuthenticationVerifyResponse(String userName, String authenticateResponseString, AuthenticateResponse authenticateResponse) {
+		if (!ArrayUtils.contains(RawAuthenticationService.SUPPORTED_AUTHENTICATE_TYPES, authenticateResponse.getClientData().getTyp())) {
             throw new Fido2RuntimeException("Invalid options attestation request type");
         }
 
@@ -216,14 +228,18 @@ public class AssertionSuperGluuController {
 		}
 
         log.debug("Prepared U2F_V2 assertion verify request: {}", params.toString());
+		return params;
+	}
 
-        ObjectNode result = assertionService.verify(params);
-
-        result.put("status", "success");
-        result.put("challenge", authenticateResponse.getClientData().getChallenge());
-
-        return result;
-    }
+	public AuthenticateResponse parseAuthenticateResponse(String authenticateResponseString) {
+		AuthenticateResponse authenticateResponse;
+        try {
+        	authenticateResponse = dataMapperService.readValue(authenticateResponseString, AuthenticateResponse.class);
+        } catch (IOException ex) {
+            throw new Fido2RpRuntimeException("Failed to parse options assertion request", ex);
+        }
+		return authenticateResponse;
+	}
 
     private byte[] generateAuthData(ClientData clientData, RawAuthenticateResponse rawAuthenticateResponse) throws IOException {
     	byte[] rpIdHash = digestService.hashSha256(clientData.getOrigin());

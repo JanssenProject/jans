@@ -8,9 +8,10 @@ import (
 )
 
 var (
-	host = ""
-	user = ""
-	pass = ""
+	host              = ""
+	user              = ""
+	pass              = ""
+	skipKnownFailures = false
 )
 
 func TestMain(m *testing.M) {
@@ -50,4 +51,74 @@ func TestClient(t *testing.T) {
 		t.Fatal(err)
 	}
 
+}
+
+func TestSortArrays(t *testing.T) {
+
+	cfg := AppConfiguration{
+		AuthorizationEncryptionEncValuesSupported: []string{
+			"A128CBC+HS256",
+			"A256CBC+HS512",
+			"A128GCM",
+			"A256GCM",
+		},
+		AuthorizationRequestCustomAllowedParameters: []CustomAllowedParameter{
+			{
+				ParamName:        "customParam2",
+				ReturnInResponse: true,
+			},
+			{
+				ParamName:        "customParam1",
+				ReturnInResponse: false,
+			},
+			{
+				ParamName:        "customParam3",
+				ReturnInResponse: false,
+			},
+		},
+	}
+
+	sortArrays(&cfg)
+
+	if cfg.AuthorizationEncryptionEncValuesSupported[0] != "A128CBC+HS256" ||
+		cfg.AuthorizationEncryptionEncValuesSupported[1] != "A128GCM" ||
+		cfg.AuthorizationEncryptionEncValuesSupported[2] != "A256CBC+HS512" ||
+		cfg.AuthorizationEncryptionEncValuesSupported[3] != "A256GCM" {
+		t.Errorf("unexpected value in AuthorizationEncryptionEncValuesSupported: %#v", cfg.AuthorizationEncryptionEncValuesSupported)
+	}
+
+	if cfg.AuthorizationRequestCustomAllowedParameters[0].ParamName != "customParam1" ||
+		cfg.AuthorizationRequestCustomAllowedParameters[1].ParamName != "customParam2" ||
+		cfg.AuthorizationRequestCustomAllowedParameters[2].ParamName != "customParam3" {
+		t.Errorf("unexpected value in AuthorizationRequestCustomAllowedParameters: %#v", cfg.AuthorizationRequestCustomAllowedParameters)
+	}
+
+	arr := []AdminUIRolePermissionMapping{
+		{
+			Role: "admin",
+			Permissions: []string{
+				"permission3",
+				"permission1",
+				"permission2",
+			},
+		},
+		{
+			Role: "user",
+			Permissions: []string{
+				"permission2",
+				"permission3",
+				"permission1",
+			},
+		},
+	}
+
+	sortArrays(&arr)
+
+	for _, v := range arr {
+		if v.Permissions[0] != "permission1" ||
+			v.Permissions[1] != "permission2" ||
+			v.Permissions[2] != "permission3" {
+			t.Errorf("unexpected value in Permissions: %#v", v.Permissions)
+		}
+	}
 }

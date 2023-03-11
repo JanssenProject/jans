@@ -49,4 +49,5 @@ jobs:
         run: |
           git add -A
           git commit -S -s -m "chore(jans-pycloudlib): updated build"
+          git push origin ${{ env.PR_DOCKER_BRANCH_NAME }}
           PR=$(gh pr create --assignee "moabu" --base "main" --body "Updated build date. Auto-generated." --label "enhancement,bot" --reviewer "moabu" --title "chore(Dockerfile): updated build dates" || echo "PR Branch is already open")

@@ -1,6 +1,9 @@
 # Janssen Project software is available under the Apache 2.0 License (2004). See http://www.apache.org/licenses/ for full text.
 # Copyright (c) 2020, Janssen Project
 #
+
+from com.fasterxml.jackson.databind import ObjectMapper
+
 from io.jans.agama import NativeJansFlowBridge
 from io.jans.agama.engine.misc import FlowUtils
 from io.jans.as.server.security import Identity
@@ -13,6 +16,7 @@ from io.jans.service.cdi.util import CdiUtil
 from io.jans.util import StringHelper
 
 from jakarta.faces.application import FacesMessage
+from java.util import Arrays
 
 import java
 import sys
@@ -22,7 +26,9 @@ class PersonAuthentication(PersonAuthenticationType):
         self.currentTimeMillis = currentTimeMillis
 
     def init(self, customScript, configurationAttributes):
-        print "Agama. Initialization"        
+        print "Agama. Initialization"
+        self.resultParam = "agamaData"
+
         prop = "cust_param_name"
         self.cust_param_name = self.configProperty(configurationAttributes, prop)
         
@@ -78,6 +84,9 @@ class PersonAuthentication(PersonAuthenticationType):
                     if not authenticated:
                         print "Agama. Unable to authenticate %s" % userId
                         return False
+                    
+                    jsonData = CdiUtil.bean(ObjectMapper).writeValueAsString(data) 
+                    CdiUtil.bean(Identity).setWorkingParameter(self.resultParam, jsonData)
             except:
                 print "Agama. Exception: ", sys.exc_info()[1]
                 return False
@@ -132,7 +141,7 @@ class PersonAuthentication(PersonAuthenticationType):
             return True
         
     def getExtraParametersForStep(self, configurationAttributes, step):
-        return None
+        return Arrays.asList(self.resultParam)
 
     def getCountAuthenticationSteps(self, configurationAttributes):
         return 1

@@ -125,7 +125,7 @@ public class AssertionService {
 		optionsResponseNode.put("userVerification", userVerification.name());
 
 		// Generate and put challenge
-		String challenge = challengeGenerator.getChallenge();
+		String challenge = challengeGenerator.getAssertionChallenge();
 		optionsResponseNode.put("challenge", challenge);
 		log.debug("Put challenge {}", challenge);
 
@@ -171,11 +171,13 @@ public class AssertionService {
 			if (optionsResponseNode.hasNonNull("extensions")) {
 				ObjectNode extensions = (ObjectNode) optionsResponseNode.get("extensions");
 				extensions.put("appid", fidoApplicationId);
-			} else {
+			} 
+			// TODO: this doesnt make any sense - test and remove
+			/*else {
 				ObjectNode extensions = dataMapperService.createObjectNode();
 				extensions.put("appid", fidoApplicationId);
 				optionsResponseNode.set("extensions", extensions);
-			}
+			}*/
 		}
 
 		// optionsResponseNode.put("status", "ok");
@@ -322,7 +324,7 @@ public class AssertionService {
 
 		List<Fido2RegistrationEntry> existingFido2Registrations;
 		if (superGluu && StringHelper.isNotEmpty(requestedKeyHandle)) {
-			Fido2RegistrationEntry fido2RegistrationEntry = registrationPersistenceService.findByPublicKeyId(requestedKeyHandle, documentDomain).orElseThrow(() -> new Fido2RuntimeException(
+			Fido2RegistrationEntry fido2RegistrationEntry = registrationPersistenceService.findByPublicKeyId(username, requestedKeyHandle, documentDomain).orElseThrow(() -> new Fido2RuntimeException(
 						String.format("Can't find associated key '%s' for application '%s'", requestedKeyHandle, documentDomain)));
 			existingFido2Registrations = Arrays.asList(fido2RegistrationEntry);
 		} else {
@@ -355,7 +357,8 @@ public class AssertionService {
 		Optional<Fido2RegistrationEntry> fidoRegistration = allowedFido2Registrations.parallelStream()
 				.filter(f -> StringUtils.isNotEmpty(f.getRegistrationData().getApplicationId())).findAny();
 		String applicationId = null;
-		if (fidoRegistration.isPresent()) {
+		// applicationId should not be sent incase of pure fido2
+		if (fidoRegistration.isPresent() && superGluu) {
 			applicationId = fidoRegistration.get().getRegistrationData().getApplicationId();
 		}
 

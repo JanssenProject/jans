@@ -14,6 +14,7 @@ import io.jans.ca.plugin.adminui.model.auth.UserInfoResponse;
 import io.jans.ca.plugin.adminui.model.config.AUIConfiguration;
 import io.jans.ca.plugin.adminui.model.exception.ApplicationException;
 import io.jans.ca.plugin.adminui.rest.auth.OAuth2Resource;
+import io.jans.ca.plugin.adminui.service.BaseService;
 import io.jans.ca.plugin.adminui.service.config.AUIConfigurationService;
 import io.jans.ca.plugin.adminui.utils.ClientFactory;
 import io.jans.ca.plugin.adminui.utils.CommonUtils;
@@ -36,7 +37,7 @@ import java.util.Map;
 import java.util.Set;
 
 @Singleton
-public class OAuth2Service {
+public class OAuth2Service extends BaseService {
     @Inject
     Logger log;
 
@@ -45,6 +46,7 @@ public class OAuth2Service {
 
     @Inject
     EncryptionService encryptionService;
+
     /**
      * Calls token endpoint from the Identity Provider and returns a valid Access Token.
      */
@@ -127,33 +129,15 @@ public class OAuth2Service {
             }
 
             return tokenResp;
-
+        } catch (ApplicationException e) {
+            log.error(ErrorResponse.GET_ACCESS_TOKEN_ERROR.getDescription());
+            throw e;
         } catch (Exception e) {
             log.error(ErrorResponse.GET_API_PROTECTION_TOKEN_ERROR.getDescription(), e);
             throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), ErrorResponse.GET_API_PROTECTION_TOKEN_ERROR.getDescription());
         }
     }
 
-    public Map<String, Object> introspectToken(String accessToken, String appType) {
-        log.info("Token introspection from auth-server.");
-        AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration(appType);
-        Invocation.Builder request = ClientFactory.instance().getClientBuilder(auiConfiguration.getAuthServerIntrospectionEndpoint());
-        request.header("Authorization", "Bearer " + accessToken);
-
-        MultivaluedMap<String, String> body = new MultivaluedHashMap<>();
-        body.putSingle("token", accessToken);
-
-        Response response = request.post(Entity.form(body));
-
-        log.info("Introspection response status code: {}", response.getStatus());
-
-        if (response.getStatus() == 200) {
-            Map<String, Object> entity = response.readEntity(Map.class);
-            log.info("Introspection response entity: {}", entity);
-            return entity;
-        }
-        return null;
-    }
     public UserInfoResponse getUserInfo(UserInfoRequest userInfoRequest, String appType) throws ApplicationException {
         try {
             log.debug("Getting User-Info from auth-server: {}", userInfoRequest.getAccessToken());
@@ -171,7 +155,6 @@ public class OAuth2Service {
                 accessToken = tokenResponse.getAccessToken();
             }
             log.debug("Access Token : {}", accessToken);
-            Map<String, Object> introspectionResponse = introspectToken(accessToken, appType);
 
             MultivaluedMap<String, String> body = new MultivaluedHashMap<>();
             body.putSingle("access_token", accessToken);
@@ -194,9 +177,6 @@ public class OAuth2Service {
                 UserInfoResponse userInfoResponse = new UserInfoResponse();
                 userInfoResponse.setClaims(getClaims(jwtUserInfo));
                 userInfoResponse.setJwtUserInfo(entity);
-                if(introspectionResponse.get("customClaims") != null) {
-                    userInfoResponse.addClaims("customClaims", introspectionResponse.get("customClaims"));
-                }
 
                 log.debug("User-Info response userInfoResponse: {}", userInfoResponse);
                 return userInfoResponse;
@@ -215,54 +195,6 @@ public class OAuth2Service {
     /**
      * Calls token endpoint from the Identity Provider and returns a valid Token.
      */
-
-    public io.jans.as.client.TokenResponse getToken(TokenRequest tokenRequest, String tokenEndpoint) {
-        return getToken(tokenRequest, tokenEndpoint, null);
-    }
-
-    public io.jans.as.client.TokenResponse getToken(TokenRequest tokenRequest, String tokenEndpoint, String userInfoJwt) {
-
-        try {
-            MultivaluedMap<String, String> body = new MultivaluedHashMap<>();
-            if (!Strings.isNullOrEmpty(tokenRequest.getCode())) {
-                body.putSingle("code", tokenRequest.getCode());
-            }
-
-            if (!Strings.isNullOrEmpty(tokenRequest.getScope())) {
-                body.putSingle("scope", tokenRequest.getScope());
-            }
-
-            if (!Strings.isNullOrEmpty(userInfoJwt)) {
-                body.putSingle("ujwt", userInfoJwt);
-            }
-
-            body.putSingle("grant_type", tokenRequest.getGrantType().getValue());
-            body.putSingle("redirect_uri", tokenRequest.getRedirectUri());
-            body.putSingle("client_id", tokenRequest.getAuthUsername());
-
-            Invocation.Builder request = ClientFactory.instance().getClientBuilder(tokenEndpoint);
-            Response response = request
-                    .header("Authorization", "Basic " + tokenRequest.getEncodedCredentials())
-                    .post(Entity.form(body));
-
-            log.debug("Get Access Token status code: {}", response.getStatus());
-            if (response.getStatus() == 200) {
-                String entity = response.readEntity(String.class);
-
-                io.jans.as.client.TokenResponse tokenResponse = new io.jans.as.client.TokenResponse();
-                tokenResponse.setEntity(entity);
-                tokenResponse.injectDataFromJson(entity);
-
-                return tokenResponse;
-            }
-
-        } catch (Exception e) {
-            log.error("Problems processing token call");
-            throw e;
-
-        }
-        return null;
-    }
 
     private Map<String, Object> getClaims(Jwt jwtObj) {
         Map<String, Object> claims = Maps.newHashMap();

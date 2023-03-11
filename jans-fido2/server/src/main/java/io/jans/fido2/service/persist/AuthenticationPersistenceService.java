@@ -6,7 +6,6 @@
 
 package io.jans.fido2.service.persist;
 
-import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -23,13 +22,9 @@ import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.service.ChallengeGenerator;
 import io.jans.fido2.service.shared.UserService;
 import io.jans.orm.PersistenceEntryManager;
-import io.jans.orm.model.BatchOperation;
-import io.jans.orm.model.ProcessBatchOperation;
-import io.jans.orm.model.SearchScope;
 import io.jans.orm.model.base.SimpleBranch;
 import io.jans.orm.model.fido2.Fido2AuthenticationData;
 import io.jans.orm.model.fido2.Fido2AuthenticationEntry;
-import io.jans.orm.model.fido2.Fido2AuthenticationStatus;
 import io.jans.orm.search.filter.Filter;
 import io.jans.util.StringHelper;
 import jakarta.enterprise.context.ApplicationScoped;

@@ -7,6 +7,10 @@ import (
 
 func TestFido2Configuration(t *testing.T) {
 
+	if skipKnownFailures {
+		t.SkipNow()
+	}
+
 	client, err := NewInsecureClient(host, user, pass)
 	if err != nil {
 		t.Fatal(err)

@@ -107,151 +107,6 @@ paths:
                 $ref: '#/components/schemas/StatsData'
         "500":
           description: InternalServerError
-  /api/v1/ads-deployment:
-    get:
-      tags:
-      - Agama - Developer Studio
-      summary: Fetches deployed Agama project based on name.
-      description: Fetches deployed Agama project based on name.
-      operationId: get-agama-dev-studio-prj-by-name
-      parameters:
-      - name: name
-        in: query
-        schema:
-          type: string
-      responses:
-        "200":
-          description: Agama project
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Deployment'
-              examples:
-                Response json example:
-                  description: Response json example
-                  value: ""
-        "204":
-          description: No Content
-        "400":
-          description: Bad Request
-        "401":
-          description: Unauthorized
-        "404":
-          description: Not Found
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/agama.readonly
-        - https://jans.io/oauth/config/agama.write
-        - https://jans.io/oauth/config/read-all
-    post:
-      tags:
-      - Agama - Developer Studio
-      summary: Deploy an Agama project.
-      description: Deploy an Agama project.
-      operationId: post-agama-dev-studio-prj
-      parameters:
-      - name: name
-        in: query
-        schema:
-          type: string
-      requestBody:
-        content:
-          application/zip:
-            schema:
-              type: array
-              items:
-                type: string
-                format: byte
-      responses:
-        "202":
-          description: Agama project accepted
-          content:
-            application/zip:
-              schema:
-                type: string
-              examples:
-                Response json example:
-                  description: Response json example
-                  value: ""
-        "400":
-          description: Bad Request
-        "401":
-          description: Unauthorized
-        "409":
-          description: Conflict
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/agama.write
-        - https://jans.io/oauth/config/write-all
-    delete:
-      tags:
-      - Agama - Developer Studio
-      summary: Delete a deployed Agama project.
-      description: Delete a deployed Agama project.
-      operationId: delete-agama-dev-studio-prj
-      parameters:
-      - name: name
-        in: query
-        schema:
-          type: string
-      responses:
-        "204":
-          description: No Content
-        "400":
-          description: Bad Request
-        "401":
-          description: Unauthorized
-        "404":
-          description: Not Found
-        "409":
-          description: Conflict
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/agama.delete
-  /api/v1/ads-deployment/list:
-    get:
-      tags:
-      - Agama - Developer Studio
-      summary: Retrieve the list of projects deployed currently.
-      description: Retrieve the list of projects deployed currently.
-      operationId: get-agama-dev-prj
-      parameters:
-      - name: start
-        in: query
-        schema:
-          type: integer
-          format: int32
-      - name: count
-        in: query
-        schema:
-          type: integer
-          format: int32
-      responses:
-        "200":
-          description: Agama projects
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PagedResult'
-              examples:
-                Response json example:
-                  description: Response json example
-                  value: ""
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/agama.readonly
-        - https://jans.io/oauth/config/agama.write
-        - https://jans.io/oauth/config/read-all
   /api/v1/acrs:
     get:
       tags:
@@ -318,6 +173,218 @@ paths:
       - oauth2:
         - https://jans.io/oauth/config/acrs.write
         - https://jans.io/oauth/config/write-all
+  /api/v1/agama-deployment:
+    get:
+      tags:
+      - Agama - Developer Studio
+      summary: Fetches deployed Agama project based on name.
+      description: Fetches deployed Agama project based on name.
+      operationId: get-agama-dev-studio-prj-by-name
+      parameters:
+      - name: name
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Agama project
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Deployment'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: ""
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/agama.readonly
+    post:
+      tags:
+      - Agama - Developer Studio
+      summary: Deploy an Agama project.
+      description: Deploy an Agama project.
+      operationId: post-agama-dev-studio-prj
+      parameters:
+      - name: name
+        in: query
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/zip:
+            schema:
+              type: array
+              items:
+                type: string
+                format: byte
+      responses:
+        "202":
+          description: Agama project accepted
+          content:
+            application/zip:
+              schema:
+                type: string
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: ""
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "409":
+          description: Conflict
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/agama.write
+    delete:
+      tags:
+      - Agama - Developer Studio
+      summary: Delete a deployed Agama project.
+      description: Delete a deployed Agama project.
+      operationId: delete-agama-dev-studio-prj
+      parameters:
+      - name: name
+        in: query
+        schema:
+          type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "409":
+          description: Conflict
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/agama.delete
+  /api/v1/agama-deployment/configs:
+    get:
+      tags:
+      - Agama - Developer Studio
+      summary: Retrieve the list of configs based on name.
+      description: Retrieve the list of configs based on name.
+      operationId: get-agama-dev-prj-configs
+      parameters:
+      - name: name
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Agama projects configs
+          content:
+            application/json:
+              schema:
+                type: string
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: ""
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/agama.readonly
+    put:
+      tags:
+      - Agama - Developer Studio
+      summary: Update an Agama project.
+      description: Update an Agama project.
+      operationId: put-agama-dev-studio-prj
+      parameters:
+      - name: name
+        in: query
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties:
+                type: object
+                additionalProperties:
+                  type: object
+      responses:
+        "202":
+          description: Agama project accepted
+          content:
+            application/json:
+              schema:
+                type: string
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: ""
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "409":
+          description: Conflict
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/agama.write
+  /api/v1/agama-deployment/list:
+    get:
+      tags:
+      - Agama - Developer Studio
+      summary: Retrieve the list of projects deployed currently.
+      description: Retrieve the list of projects deployed currently.
+      operationId: get-agama-dev-prj
+      parameters:
+      - name: start
+        in: query
+        schema:
+          type: integer
+          format: int32
+      - name: count
+        in: query
+        schema:
+          type: integer
+          format: int32
+      responses:
+        "200":
+          description: Agama projects
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedResult'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: ""
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/agama.readonly
   /api/v1/agama:
     get:
       tags:
@@ -7299,6 +7366,11 @@ components:
           format: date-time
         facterData:
           $ref: '#/components/schemas/FacterData'
+    AuthenticationMethod:
+      type: object
+      properties:
+        defaultAcr:
+          type: string
     Deployment:
       type: object
       properties:
@@ -7350,6 +7422,10 @@ components:
           type: string
         description:
           type: string
+        configs:
+          type: object
+          additionalProperties:
+            type: object
     PagedResult:
       type: object
       properties:
@@ -7366,11 +7442,6 @@ components:
           type: array
           items:
             type: object
-    AuthenticationMethod:
-      type: object
-      properties:
-        defaultAcr:
-          type: string
     Flow:
       type: object
       properties:
@@ -7537,17 +7608,17 @@ components:
           type: string
         whitePagesCanView:
           type: boolean
-        userCanEdit:
-          type: boolean
-        adminCanEdit:
-          type: boolean
         adminCanView:
           type: boolean
         userCanAccess:
           type: boolean
         userCanView:
           type: boolean
+        userCanEdit:
+          type: boolean
         adminCanAccess:
+          type: boolean
+        adminCanEdit:
           type: boolean
         baseDn:
           type: string
@@ -7899,6 +7970,8 @@ components:
           type: boolean
         returnClientSecretOnRead:
           type: boolean
+        rotateClientRegistrationAccessTokenOnUsage:
+          type: boolean
         rejectJwtWithNoneAlg:
           type: boolean
         expirationNotificatorEnabled:
@@ -7952,6 +8025,8 @@ components:
         includeSidInResponse:
           type: boolean
         disablePromptLogin:
+          type: boolean
+        disablePromptConsent:
           type: boolean
         sessionIdLifetime:
           type: integer
@@ -8268,6 +8343,8 @@ components:
           type: object
           additionalProperties:
             type: string
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8277,8 +8354,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -8812,6 +8887,20 @@ components:
           - tls_client_auth
           - self_signed_tls_client_auth
           - none
+        allAuthenticationMethods:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+            enum:
+            - client_secret_basic
+            - client_secret_post
+            - client_secret_jwt
+            - private_key_jwt
+            - access_token
+            - tls_client_auth
+            - self_signed_tls_client_auth
+            - none
         baseDn:
           type: string
         inum:
@@ -8900,6 +8989,10 @@ components:
           format: int32
         minimumAcrLevelAutoresolve:
           type: boolean
+        additionalTokenEndpointAuthMethods:
+          type: array
+          items:
+            type: string
         minimumAcrPriorityList:
           type: array
           items:
@@ -9132,14 +9225,14 @@ components:
           type: boolean
         internal:
           type: boolean
-        locationPath:
-          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
+        locationPath:
+          type: string
         baseDn:
           type: string
     ScriptError:
@@ -9247,11 +9340,13 @@ components:
         "y":
           type: string
         key_ops_type:
-          type: string
-          enum:
-          - "KeyOpsType{value='connect'} CONNECT"
-          - "KeyOpsType{value='ssa'} SSA"
-          - "KeyOpsType{value='all'} ALL"
+          type: array
+          items:
+            type: string
+            enum:
+            - "KeyOps{value='connect'} CONNECT"
+            - "KeyOps{value='ssa'} SSA"
+            - "KeyOps{value='all'} ALL"
     WebKeysConfiguration:
       type: object
       properties:
@@ -9723,3 +9818,5 @@ components:
               configuration properties
             https://jans.io/oauth/config/properties.write: Manage Config-API related
               configuration properties
+            https://jans.io/oauth/client/authorizations.readonly: View ClientAuthorizations
+            https://jans.io/oauth/client/authorizations.delete: Revoke ClientAuthorizations

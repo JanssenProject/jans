@@ -191,7 +191,9 @@ public class CustomScriptResource extends ConfigBaseResource {
         if (StringHelper.isEmpty(inum)) {
             inum = UUID.randomUUID().toString();
         }
+        logger.info("Custom Script to create - StringUtils.isBlank(customScript.getScript()):{}, addScriptTemplate:{}", StringUtils.isBlank(customScript.getScript()), addScriptTemplate);
         if (StringUtils.isBlank(customScript.getScript()) && !addScriptTemplate) {
+            logger.info("\n Default Script Template is not added!!!");
             customScript.setScript(""); // this will ensure that default Script Template is not added
         }
 

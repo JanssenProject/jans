@@ -8,7 +8,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/moabu/terraform-provider-jans/jans"
+	"github.com/jans/terraform-provider-jans/jans"
 )
 
 func TestResourceAuthServiceConfig_Mapping(t *testing.T) {
@@ -45,6 +45,10 @@ func TestResourceAuthServiceConfig_Mapping(t *testing.T) {
 			"implicit",
 			"refresh_token",
 			"client_credentials",
+		},
+		ResponseTypesSupported: [][]string{
+			{"code", "token"},
+			{"code", "id_token"},
 		},
 	}
 

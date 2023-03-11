@@ -7,6 +7,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"reflect"
+	"sort"
 
 	"net/http"
 	"net/url"
@@ -378,4 +380,62 @@ func (c *Client) request(ctx context.Context, params requestParams) error {
 	}
 
 	return nil
+}
+
+// Since some arrays in the JSON we get from the server are unsorted,
+// but HCL is sorted, we sort all arrays we from the API before we
+// compare them with the HCL arrays. This way we can avoid getting
+// diverging plans.
+func sortArrays(entity any) {
+
+	if reflect.ValueOf(entity).Kind() != reflect.Ptr {
+		panic("entity is not a pointer")
+	}
+
+	t := reflect.TypeOf(entity).Elem()
+	v := reflect.ValueOf(entity).Elem()
+
+	if t.Kind() == reflect.Slice {
+
+		if t.Elem().Kind() == reflect.Struct {
+
+			// slices of structs are recursively sorted
+			for i := 0; i < v.Len(); i++ {
+				sortArrays(v.Index(i).Addr().Interface())
+			}
+
+		}
+
+		// all slices are then sorted themselves. We use
+		// the string representation. More complex sorting
+		// can be added here if needed.
+		sort.Slice(v.Interface(), func(i, j int) bool {
+			a := fmt.Sprintf("%v", v.Index(i).Interface())
+			b := fmt.Sprintf("%v", v.Index(j).Interface())
+			return a < b
+		})
+
+		return
+	}
+
+	if v.Kind() != reflect.Struct {
+		panic("entity is not a pointer to struct, nor to a slice")
+	}
+
+	// iterate over all fields of the entity
+	for i := 0; i < v.NumField(); i++ {
+
+		field := v.Field(i)
+
+		// check if the field is an array
+		if field.Kind() == reflect.Slice {
+
+			sort.Slice(field.Interface(), func(i, j int) bool {
+				a := fmt.Sprintf("%v", field.Index(i).Interface())
+				b := fmt.Sprintf("%v", field.Index(j).Interface())
+				return a < b
+			})
+		}
+	}
+
 }

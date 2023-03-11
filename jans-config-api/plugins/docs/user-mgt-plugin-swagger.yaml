@@ -121,6 +121,15 @@ paths:
       summary: Update User
       description: Update User
       operationId: put-user
+      parameters:
+      - name: removeNonLDAPAttributes
+        in: query
+        description: "Boolean flag to indicate if attributes to be removed for non-LDAP\
+          \ DB. Default value is true, indicating non-LDAP attributes will be removed\
+          \ from request."
+        schema:
+          type: boolean
+          default: true
       requestBody:
         description: User object
         content:
@@ -302,6 +311,8 @@ paths:
                         "givenName": "Test3",
                         "baseDn": "inum=559a7e26-7a33-4e11-9d42-13266d33261e,ou=people,o=jans"
                     }
+        "400":
+          description: Bad Request
         "401":
           description: Unauthorized
         "404":
@@ -317,6 +328,15 @@ paths:
       summary: Create new User
       description: Create new User
       operationId: post-user
+      parameters:
+      - name: removeNonLDAPAttributes
+        in: query
+        description: "Boolean flag to indicate if attributes to be removed for non-LDAP\
+          \ DB. Default value is true, indicating non-LDAP attributes will be removed\
+          \ from request."
+        schema:
+          type: boolean
+          default: true
       requestBody:
         description: User object
         content:
@@ -495,6 +515,8 @@ paths:
                         "givenName": "Test3",
                         "baseDn": "inum=559a7e26-7a33-4e11-9d42-13266d33261e,ou=people,o=jans"
                     }
+        "400":
+          description: Bad Request
         "401":
           description: Unauthorized
         "500":
@@ -654,6 +676,14 @@ paths:
         required: true
         schema:
           type: string
+      - name: removeNonLDAPAttributes
+        in: query
+        description: "Boolean flag to indicate if attributes to be removed for non-LDAP\
+          \ DB. Default value is true, indicating non-LDAP attributes will be removed\
+          \ from request."
+        schema:
+          type: boolean
+          default: true
       requestBody:
         description: UserPatchRequest
         content:
@@ -772,6 +802,8 @@ paths:
                         "givenName": "Test3",
                         "baseDn": "inum=559a7e26-7a33-4e11-9d42-13266d33261e,ou=people,o=jans"
                     }
+        "400":
+          description: Bad Request
         "401":
           description: Unauthorized
         "404":

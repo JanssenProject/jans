@@ -25,6 +25,8 @@ class BaseInstaller:
             pbar_text = self.pbar_text
         self.logIt(pbar_text, pbar=self.service_name)
 
+        self.pre_install()
+
         if self.needdb:
             self.dbUtils.bind()
 
@@ -35,10 +37,11 @@ class BaseInstaller:
 
         self.create_folders()
 
-        # copy unit file
-        unit_file = os.path.join(Config.staticFolder, 'system/systemd', self.service_name + '.service')
+        # render unit file
+        unit_files_dir = os.path.join(Config.staticFolder, 'system/systemd')
+        unit_file = os.path.join(unit_files_dir, self.service_name + '.service')
         if os.path.exists(unit_file):
-            self.copyFile(unit_file, Config.unit_files_path)
+            self.renderTemplateInOut(unit_file, unit_files_dir, Config.unit_files_path)
 
         self.install()
         self.copy_static()
@@ -159,6 +162,10 @@ class BaseInstaller:
                 self.run([base.service_path, 'daemon-reload'])
             elif base.os_name == 'ubuntu16':
                 self.run([paths.cmd_update_rc, service, 'defaults'])
+
+    def pre_install(self):
+        """Installer may require some settings before installation"""
+        pass
 
     def generate_configuration(self):
         pass

@@ -20,13 +20,13 @@ class Plugin:
         """
         self.app = app
         self.pid = 'jans-menu'
-        self.name = '[J]ans CLI'
+        self.name = '[J]ans TUI'
 
         self.menu_container = Frame(
                             body=HSplit([
-                                Button(text=_("Exit Jans CLI"), handler=self.exit_cli),
-                                Button(text=_("Logout and Exit Jans CLI"), handler=self.logout_exit_cli),
-                                Button(text=_("Configure Jans CLI"), handler=self.configure_cli),
+                                Button(text=_("Exit Jans TUI"), handler=self.exit_cli),
+                                Button(text=_("Logout and Exit Jans TUI"), handler=self.logout_exit_cli),
+                                Button(text=_("Configure Jans TUI"), handler=self.configure_cli),
                             ],
                             width=D()
                         ),

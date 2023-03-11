@@ -38,12 +38,12 @@ func TestScripts(t *testing.T) {
 		Enabled:             true,
 		Modified:            false,
 		Internal:            false,
-		LocationType:        "ldap",
+		LocationType:        "db",
 		BaseDN:              "inum=4A4E-4F3D,ou=scripts,o=jans",
 		ModuleProperties: []SimpleCustomProperty{
 			{
 				Value1: "location_type",
-				Value2: "ldap",
+				Value2: "db",
 			},
 			{
 				Value1: "location_option",
@@ -62,7 +62,12 @@ func TestScripts(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if diff := cmp.Diff(newScript, loadScript); diff != "" {
+	// for new script a default source code is set, so we need to ignore it
+	filter := cmp.FilterPath(func(p cmp.Path) bool {
+		return p.String() == "Script"
+	}, cmp.Ignore())
+
+	if diff := cmp.Diff(newScript, loadScript, filter); diff != "" {
 		t.Errorf("Got different script after mapping: %s", diff)
 	}
 

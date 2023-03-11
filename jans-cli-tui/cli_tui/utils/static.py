@@ -6,6 +6,7 @@ class DialogResult(Enum):
     OK = 2
 
 class cli_style:
+    titled_text = 'class:plugin-titledtext'
     edit_text = 'class:plugin-text'
     edit_text_required = 'class:plugin-textrequired'
     check_box = 'class:plugin-checkbox'
@@ -23,3 +24,4 @@ class cli_style:
 class common_strings:
     enter_to_search = "Press enter to perform search"
     no_matching_result = "No matching result"
+    error = "Error!"

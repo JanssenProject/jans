@@ -46,6 +46,10 @@ To fix a serialization problem, try some of the following:
 
 This is a limitation of the scripting engine. Here, classes have to be imported even if they belong to the same package, or the fully qualified name used.
 
+### A class is still available after removing the corresponding file
+
+This is because the JVM does not support unloading: even if a given source file is removed, its corresponding class will still be accessible - it remains in the classpath. The classpath will be clean again after a service restart.
+
 ### How to append data to a flow's log directly?
 
 Call method `log` of class `io.jans.agama.engine.script.LogUtils`. This method receives a variable number of arguments as DSL's `Log` does. Thus you can do `LogUtils.log("@w Today is Friday %th", 13)`, as in the logging [examples](./dsl-full.md#logging).

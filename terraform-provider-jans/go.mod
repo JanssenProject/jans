@@ -1,4 +1,4 @@
-module github.com/moabu/terraform-provider-jans
+module github.com/jans/terraform-provider-jans
 
 go 1.18
 

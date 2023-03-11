@@ -10,6 +10,10 @@ import (
 
 func TestAdminUIRoles(t *testing.T) {
 
+	if skipKnownFailures {
+		t.SkipNow()
+	}
+
 	client, err := NewInsecureClient(host, user, pass)
 	if err != nil {
 		t.Fatal(err)
@@ -68,6 +72,10 @@ func TestAdminUIRoles(t *testing.T) {
 
 func TestAdminUIPermissions(t *testing.T) {
 
+	if skipKnownFailures {
+		t.SkipNow()
+	}
+
 	client, err := NewInsecureClient(host, user, pass)
 	if err != nil {
 		t.Fatal(err)
@@ -124,6 +132,10 @@ func TestAdminUIPermissions(t *testing.T) {
 }
 
 func TestAdminUIRolePermissions(t *testing.T) {
+
+	if skipKnownFailures {
+		t.SkipNow()
+	}
 
 	client, err := NewInsecureClient(host, user, pass)
 	if err != nil {

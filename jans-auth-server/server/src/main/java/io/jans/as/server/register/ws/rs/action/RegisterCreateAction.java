@@ -22,7 +22,6 @@ import io.jans.as.server.model.audit.Action;
 import io.jans.as.server.model.audit.OAuth2AuditLog;
 import io.jans.as.server.model.common.ExecutionContext;
 import io.jans.as.server.model.registration.RegisterParamsValidator;
-import io.jans.as.server.model.token.HandleTokenFactory;
 import io.jans.as.server.register.ws.rs.RegisterJsonService;
 import io.jans.as.server.register.ws.rs.RegisterService;
 import io.jans.as.server.register.ws.rs.RegisterValidator;
@@ -30,10 +29,6 @@ import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.external.ExternalDynamicClientRegistrationService;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.util.security.StringEncrypter;
-import org.apache.commons.lang.StringUtils;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
@@ -42,12 +37,12 @@ import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.SecurityContext;
+import org.apache.commons.lang.StringUtils;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+
 import java.net.URI;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.TimeZone;
-import java.util.UUID;
+import java.util.*;
 
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
@@ -144,7 +139,7 @@ public class RegisterCreateAction {
             client.setClientId(inum);
             client.setDeletable(true);
             client.setClientSecret(clientService.encryptSecret(generatedClientSecret));
-            client.setRegistrationAccessToken(HandleTokenFactory.generateHandleToken());
+            client.setRegistrationAccessToken(clientService.generateRegistrationAccessToken());
             client.setIdTokenTokenBindingCnf(r.getIdTokenTokenBindingCnf());
 
             final Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));

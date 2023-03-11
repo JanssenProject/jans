@@ -178,6 +178,14 @@ def _transform_auth_dynamic_config(conf):
         }
         should_update = True
 
+    if "persistIdToken" not in conf:
+        conf["persistIdToken"] = conf.pop("persistIdTokenInLdap", False)
+        should_update = True
+
+    if "persistRefreshToken" not in conf:
+        conf["persistRefreshToken"] = conf.pop("persistRefreshTokenInLdap", True)
+        should_update = True
+
     # specific config per distribution
     if distribution == "openbanking":
         if "dcrAuthorizationWithMTLS" not in conf:

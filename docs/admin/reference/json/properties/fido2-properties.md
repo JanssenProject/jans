@@ -27,10 +27,12 @@ tags:
 | metricReporterEnabled | Boolean value specifying whether metric reporter is enabled | [Details](#metricreporterenabled) |
 | metricReporterInterval | The interval for metric reporter in seconds | [Details](#metricreporterinterval) |
 | metricReporterKeepDataDays | The days to keep report data | [Details](#metricreporterkeepdatadays) |
+| oldU2fMigrationEnabled | Boolean value to enable disable old oxAuth U2F enrollments migration | [Details](#oldu2fmigrationenabled) |
 | personCustomObjectClassList | Custom object class list for dynamic person enrolment | [Details](#personcustomobjectclasslist) |
 | requestedCredentialTypes | List of Requested Credential Types | [Details](#requestedcredentialtypes) |
 | requestedParties | Authenticators metadata in json format | [Details](#requestedparties) |
 | serverMetadataFolder | Authenticators metadata in json format | [Details](#servermetadatafolder) |
+| superGluuEnabled | Boolean value to enable disable Super Gluu extension | [Details](#supergluuenabled) |
 | unfinishedRequestExpiration | Expiration time in seconds for pending enrollment/authentication requests | [Details](#unfinishedrequestexpiration) |
 | useLocalCache | Boolean value to indicate if Local Cache is to be used | [Details](#uselocalcache) |
 | userAutoEnrollment | Allow to enroll users on enrollment/authentication requests | [Details](#userautoenrollment) |
@@ -189,6 +191,15 @@ tags:
 - Default value: None
 
 
+### oldU2fMigrationEnabled
+
+- Description: Boolean value to enable disable old oxAuth U2F enrollments migration
+
+- Required: No
+
+- Default value: None
+
+
 ### personCustomObjectClassList
 
 - Description: Custom object class list for dynamic person enrolment
@@ -219,6 +230,15 @@ tags:
 ### serverMetadataFolder
 
 - Description: Authenticators metadata in json format
+
+- Required: No
+
+- Default value: None
+
+
+### superGluuEnabled
+
+- Description: Boolean value to enable disable Super Gluu extension
 
 - Required: No
 

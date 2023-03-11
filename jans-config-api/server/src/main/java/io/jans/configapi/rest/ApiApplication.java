@@ -100,7 +100,9 @@ import jakarta.ws.rs.core.Application;
         @OAuthScope(name = ApiAccessConstants.UMA_DELETE_ACCESS, description = "Delete UMA functionality"),
         @OAuthScope(name = ApiAccessConstants.PLUGIN_READ_ACCESS, description = "View Plugin information"),
         @OAuthScope(name = ApiAccessConstants.CONFIG_READ_ACCESS, description = "View Config-API related configuration properties"),
-        @OAuthScope(name = ApiAccessConstants.CONFIG_WRITE_ACCESS, description = "Manage Config-API related configuration properties") }
+        @OAuthScope(name = ApiAccessConstants.CONFIG_WRITE_ACCESS, description = "Manage Config-API related configuration properties"),
+        @OAuthScope(name = ApiAccessConstants.CLIENT_AUTHORIZATIONS_READ_ACCESS, description = "View ClientAuthorizations"),
+        @OAuthScope(name = ApiAccessConstants.CLIENT_AUTHORIZATIONS_DELETE_ACCESS, description = "Revoke ClientAuthorizations") }
 
 )))
 public class ApiApplication extends Application {

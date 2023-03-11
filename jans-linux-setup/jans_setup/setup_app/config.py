@@ -84,8 +84,9 @@ class Config:
         self.jetty_user = self.jetty_group = 'jetty'
         self.root_user = self.root_group = 'root'
         self.ldap_user = self.ldap_group = 'ldap'
-
+        self.start_auth_after = 'network.target'
         self.dump_config_on_error = False
+
         if not self.output_dir:
             self.output_dir = os.path.join(install_dir, 'output')
 

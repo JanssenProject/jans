@@ -382,6 +382,9 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Boolean value specifying whether a client_secret is returned on client GET or PUT. Set to true by default which means to return secret", defaultValue = "false")
     private Boolean returnClientSecretOnRead = false;
 
+    @DocProperty(description = "Boolean value specifying whether to rotate client registration access token after each usage", defaultValue = "false")
+    private Boolean rotateClientRegistrationAccessTokenOnUsage = false;
+
     @DocProperty(description = "Boolean value specifying whether reject JWT requested or validated with algorithm None. Default value is true", defaultValue = "true")
     private Boolean rejectJwtWithNoneAlg = true;
 
@@ -448,6 +451,8 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Boolean value specifying whether to disable prompt=login", defaultValue = "false")
     private Boolean disablePromptLogin = false;
 
+    @DocProperty(description = "Boolean value specifying whether to disable prompt=consent", defaultValue = "false")
+    private Boolean disablePromptConsent = false;
 
     /**
      * SessionId will be expired after sessionIdLifetime seconds
@@ -1122,6 +1127,15 @@ public class AppConfiguration implements Configuration {
         this.disablePromptLogin = disablePromptLogin;
     }
 
+    public Boolean getDisablePromptConsent() {
+        if (disablePromptConsent == null) disablePromptConsent = false;
+        return disablePromptConsent;
+    }
+
+    public void setDisablePromptConsent(Boolean disablePromptConsent) {
+        this.disablePromptConsent = disablePromptConsent;
+    }
+
     public Boolean getIncludeSidInResponse() {
         if (includeSidInResponse == null) includeSidInResponse = false;
         return includeSidInResponse;
@@ -1147,6 +1161,15 @@ public class AppConfiguration implements Configuration {
 
     public void setChangeSessionIdOnAuthentication(Boolean changeSessionIdOnAuthentication) {
         this.changeSessionIdOnAuthentication = changeSessionIdOnAuthentication;
+    }
+
+    public Boolean getRotateClientRegistrationAccessTokenOnUsage() {
+        if (rotateClientRegistrationAccessTokenOnUsage == null) rotateClientRegistrationAccessTokenOnUsage = false;
+        return rotateClientRegistrationAccessTokenOnUsage;
+    }
+
+    public void setRotateClientRegistrationAccessTokenOnUsage(Boolean rotateClientRegistrationAccessTokenOnUsage) {
+        this.rotateClientRegistrationAccessTokenOnUsage = rotateClientRegistrationAccessTokenOnUsage;
     }
 
     public Boolean getReturnClientSecretOnRead() {

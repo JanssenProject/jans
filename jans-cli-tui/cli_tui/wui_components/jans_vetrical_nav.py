@@ -1,5 +1,7 @@
-from prompt_toolkit.layout.containers import HSplit, Window, FloatContainer
+from typing import Tuple, TypeVar, Callable, Optional, Sequence, Union
 
+
+from prompt_toolkit.layout.containers import HSplit, Window, FloatContainer
 from prompt_toolkit.layout.controls import FormattedTextControl
 from prompt_toolkit.layout.margins import ScrollbarMargin
 from prompt_toolkit.formatted_text import merge_formatted_text
@@ -7,9 +9,7 @@ from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.widgets import HorizontalLine
 from prompt_toolkit.widgets.base import Border
-from typing import Tuple, TypeVar, Callable
 from prompt_toolkit.layout.dimension import AnyDimension
-from typing import Optional, Sequence, Union
 from prompt_toolkit.formatted_text import AnyFormattedText
 from prompt_toolkit.key_binding.key_bindings import KeyBindings, KeyBindingsBase
 
@@ -113,7 +113,7 @@ class JansVerticalNav():
         data:list
         ) -> list:
         result = []
-        for i, entry in enumerate(data): ## entry = ['1800.6c5faa', 'Jans Config Api Client', 'authorization_code,refresh_...', 'Reference]
+        for i, entry in enumerate(data):
             mod_entry = []
             for col in range(len(entry)) :
                 if self.preferred_size[col] == 0:
@@ -131,7 +131,7 @@ class JansVerticalNav():
     def create_window(self) -> None:
         """This method creat the dialog it self
         """
-        
+
         self.list_box = Window(
                             content=FormattedTextControl(
                                 text=self._get_formatted_text,
@@ -143,7 +143,7 @@ class JansVerticalNav():
                             height=D(preferred=len(self.data), max=len(self.data)),
                             cursorline=True,
                             always_hide_cursor=True,
-                            right_margins=[ScrollbarMargin(display_arrows=True), ],
+                            right_margins=[ScrollbarMargin(display_arrows=True)],
                         )
         if self.jans_help:
             self.list_box.jans_help = self.jans_help
@@ -162,7 +162,7 @@ class JansVerticalNav():
                             height=D(preferred=headers_height, max=headers_height),
                             cursorline=False,
                         ),
-                        self.list_box ,
+                        self.list_box,
                     ]
 
         self.container = FloatContainer(
@@ -251,7 +251,7 @@ class JansVerticalNav():
 
         result = []
         spaced_data = self.get_spaced_data()
-        for i, entry in enumerate(spaced_data): ## entry = ['1800.6c5faa', 'Jans Config Api Client', 'authorization_code,refresh_...', 'Reference]
+        for i, entry in enumerate(spaced_data):
             if i == self.selectes:
                 result.append([('[SetCursorPosition]', '')])
 
@@ -304,7 +304,7 @@ class JansVerticalNav():
             if not self.data:
                 return
             self.selectes = (self.selectes - 1) % len(self.data)
-            
+
             if self.get_help :
                 self.get_help(data=self.data[self.selectes],scheme=self.scheme)
 

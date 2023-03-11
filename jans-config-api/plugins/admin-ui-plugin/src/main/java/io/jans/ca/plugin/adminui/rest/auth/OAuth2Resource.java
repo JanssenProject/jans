@@ -47,21 +47,28 @@ public class OAuth2Resource {
     @Produces(MediaType.APPLICATION_JSON)
     @ProtectedApi(scopes = {SCOPE_OPENID})
     public Response getOAuth2Config(@PathParam("appType") String appType) {
+        try {
+            AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration(appType);
 
-        AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration(appType);
+            OAuth2ConfigResponse oauth2Config = new OAuth2ConfigResponse();
+            oauth2Config.setAuthzBaseUrl(auiConfiguration.getAuthServerAuthzBaseUrl());
+            oauth2Config.setClientId(auiConfiguration.getAuthServerClientId());
+            oauth2Config.setResponseType("code");
+            oauth2Config.setScope(auiConfiguration.getAuthServerScope());
+            oauth2Config.setRedirectUrl(auiConfiguration.getAuthServerRedirectUrl());
+            oauth2Config.setAcrValues(auiConfiguration.getAuthServerAcrValues());
+            oauth2Config.setFrontChannelLogoutUrl(auiConfiguration.getAuthServerFrontChannelLogoutUrl());
+            oauth2Config.setPostLogoutRedirectUri(auiConfiguration.getAuthServerPostLogoutRedirectUri());
+            oauth2Config.setEndSessionEndpoint(auiConfiguration.getAuthServerEndSessionEndpoint());
 
-        OAuth2ConfigResponse oauth2Config = new OAuth2ConfigResponse();
-        oauth2Config.setAuthzBaseUrl(auiConfiguration.getAuthServerAuthzBaseUrl());
-        oauth2Config.setClientId(auiConfiguration.getAuthServerClientId());
-        oauth2Config.setResponseType("code");
-        oauth2Config.setScope(auiConfiguration.getAuthServerScope());
-        oauth2Config.setRedirectUrl(auiConfiguration.getAuthServerRedirectUrl());
-        oauth2Config.setAcrValues(auiConfiguration.getAuthServerAcrValues());
-        oauth2Config.setFrontChannelLogoutUrl(auiConfiguration.getAuthServerFrontChannelLogoutUrl());
-        oauth2Config.setPostLogoutRedirectUri(auiConfiguration.getAuthServerPostLogoutRedirectUri());
-        oauth2Config.setEndSessionEndpoint(auiConfiguration.getAuthServerEndSessionEndpoint());
-
-        return Response.ok(oauth2Config).build();
+            return Response.ok(oauth2Config).build();
+        } catch (ApplicationException e) {
+            log.error(ErrorResponse.ERROR_IN_READING_CONFIGURATION.getDescription(), e);
+            return Response.status(e.getErrorCode()).entity(e.getMessage()).build();
+        } catch (Exception e) {
+            log.error(ErrorResponse.ERROR_IN_READING_CONFIGURATION.getDescription(), e);
+            return Response.serverError().entity(e.getMessage()).build();
+        }
     }
 
     @GET
