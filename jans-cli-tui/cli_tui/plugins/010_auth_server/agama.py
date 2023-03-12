@@ -38,7 +38,9 @@ class Agama(DialogUtils):
                 selectes=0,
                 headerColor=cli_style.navbar_headcolor,
                 entriesColor=cli_style.navbar_entriescolor,
-                hide_headers = True
+                hide_headers = True,
+                custom_key_bindings=([('c', self.display_config)]),
+                jans_help=_("Press c to display configuration for project")
             )
 
         self.main_container =  HSplit([
@@ -52,6 +54,31 @@ class Agama(DialogUtils):
                     ),
                     DynamicContainer(lambda: self.working_container)
                     ], style=cli_style.container)
+
+
+    def display_config(self, event):
+
+        project_data = self.working_container.all_data[self.working_container.selectes]
+        project_name = project_data['details']['projectMetadata']['projectName']
+
+        async def coroutine():
+            cli_args = {'operation_id': 'get-agama-dev-prj-configs', 'endpoint_args':'name:{}'.format(project_name)}
+            self.app.start_progressing(_("Retreiving project configuration..."))
+            response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+            self.app.stop_progressing()
+
+            try:
+                result = response.json()
+            except Exception:
+                result = result.text
+
+            if result:
+                self.app.data_display_dialog(title=_("Configuration for") + " " + project_name, data=response.json())
+            else:
+                self.app.show_message(_(common_strings.error), "Server did not return configuration for {}".format(project_name), tobefocused=self.working_container)
+
+
+        asyncio.ensure_future(coroutine())
 
 
     def update_agama_container(self, start_index=0, search_str=''):

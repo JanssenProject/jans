@@ -20,23 +20,24 @@ class JansVerticalNav():
         self,
         myparent,
         headers: list,
-        on_display: Callable= None, 
-        selectes: Optional[int]= 0, 
-        on_enter: Callable= None,
-        get_help: Tuple= None,
-        on_delete: Callable= None,
-        change_password: Callable= None,
-        all_data: Optional[list]= [], 
-        preferred_size: Optional[list]= [], 
-        data: Optional[list]= [], 
-        headerColor: Optional[str]= "green",
-        entriesColor: Optional[str]= "white",
-        underline_headings: Optional[bool]= True, 
+        on_display: Callable = None, 
+        selectes: Optional[int] = 0, 
+        on_enter: Callable = None,
+        get_help: Tuple = None,
+        on_delete: Callable = None,
+        change_password: Callable = None,
+        all_data: Optional[list] = [], 
+        preferred_size: Optional[list] = [], 
+        data: Optional[list] = [], 
+        headerColor: Optional[str] = "green",
+        entriesColor: Optional[str] = "white",
+        underline_headings: Optional[bool] = True, 
         max_width: AnyDimension = None,
-        jans_name: Optional[str]= '', 
+        jans_name: Optional[str] = '', 
         max_height: AnyDimension = None,
-        jans_help: Optional[str]= '',
-        hide_headers: Optional[bool]= False,
+        jans_help: Optional[str] = '',
+        hide_headers: Optional[bool] = False,
+        custom_key_bindings: Optional[list] = []
         )->FloatContainer :
         """init for JansVerticalNav
 
@@ -58,6 +59,7 @@ class JansVerticalNav():
             max_height (int, optional): Maximum hegight of container
             jans_help (str, optional): Status bar help message
             hide_headers (bool, optional): Hide or display headers
+            custom_key_bindings (list, optional): List of custom keybindings. Each entry is a tuple of (key, callable)
         Examples:
             clients = JansVerticalNav(
                 myparent=self,
@@ -92,6 +94,7 @@ class JansVerticalNav():
         self.on_display = on_display
         self.change_password = change_password
         self.hide_headers = hide_headers
+        self.custom_key_bindings = custom_key_bindings
         self.spaces = [len(header)+1 for header in self.headers]
 
         if get_help:
@@ -101,7 +104,7 @@ class JansVerticalNav():
         else:
             self.get_help= None
 
-        self.all_data=all_data
+        self.all_data = all_data
         self.underline_headings = underline_headings
 
         self.handle_header_spaces()
@@ -351,6 +354,10 @@ class JansVerticalNav():
             if self.data and self.on_delete:
                 selected_line = self.data[self.selectes]
                 self.on_delete(selected=selected_line, selected_idx=self.selectes, event=event, jans_name=self.jans_name)
+
+        if self.custom_key_bindings:
+            for key, func in self.custom_key_bindings:
+                kb.add(key)(func)
 
         return kb
 

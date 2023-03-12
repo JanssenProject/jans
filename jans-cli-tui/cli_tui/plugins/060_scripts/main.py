@@ -199,6 +199,7 @@ class Plugin():
 
         async def coroutine():
             import json
+            open("/tmp/scrm.json", "w").write(json.dumps(dialog.new_data, indent=2))
             operation_id = 'put-config-scripts' if dialog.new_data.get('baseDn') else 'post-config-scripts'
             cli_args = {'operation_id': operation_id, 'data': dialog.new_data}
             self.app.start_progressing()
