@@ -1,15 +1,12 @@
 
 from prompt_toolkit.application.current import get_app
 from prompt_toolkit.key_binding import KeyBindings
-from prompt_toolkit.layout.containers import Float, HSplit, Window
+from prompt_toolkit.layout.containers import Float, HSplit, Window, ScrollOffsets, AnyContainer
 from prompt_toolkit.layout.controls import FormattedTextControl
 from prompt_toolkit.formatted_text import HTML, merge_formatted_text
 from prompt_toolkit.layout.margins import ScrollbarMargin
 from prompt_toolkit.key_binding.bindings.focus import focus_next, focus_previous
 from prompt_toolkit.layout.dimension import D
-from prompt_toolkit.layout.containers import (
-    AnyContainer,
-)
 from prompt_toolkit.formatted_text import AnyFormattedText
 from prompt_toolkit.key_binding.key_bindings import KeyBindings, KeyBindingsBase
 
@@ -27,9 +24,7 @@ class JansSelectBox:
         self,
         values: Optional[list] = [],
         value: Optional[str] = '',
-        height: AnyDimension= 4,
-        rotatable_up: Optional[bool] = True,
-        rotatable_down: Optional[bool] = True,
+        height: AnyDimension = 4,
         ) -> HSplit:
         """_summary_
 
@@ -37,18 +32,11 @@ class JansSelectBox:
             values (list, optional): _description_. Defaults to [].
             value (_type_, optional): _description_. Defaults to None.
             height (int, optional): _description_. Defaults to 4.
-            rotatable_up (bool, optional): _description_. Defaults to True.
-            rotatable_down (bool, optional): _description_. Defaults to True.
         """
 
         self.values = values
-        self.values_flag = (values[0], values[-1]) if values else []
         self.set_value(value)
-        # --------------------------------------------------- #
         self.height = min(len(self.values), height)
-        self.rotatable_up = rotatable_up
-        self.rotatable_down = rotatable_down
-        # --------------------------------------------------- #
 
         self.window = Window(
             content=FormattedTextControl(
@@ -57,11 +45,10 @@ class JansSelectBox:
             ),
             height=self.height,
             cursorline=False,
-            width=D(),  # 15,
+            width=D(),
             style='bg:#4D4D4D',
+            scroll_offsets=ScrollOffsets(top=2, bottom=2),
             right_margins=[ScrollbarMargin(display_arrows=True)],
-            wrap_lines=True,
-            allow_scroll_beyond_bottom=True,
         )
 
         self.container = HSplit(children=[self.window])
@@ -93,6 +80,7 @@ class JansSelectBox:
         result = []
         for i, entry in enumerate(self.values):
             if i == self.selected_line:
+                result.append([("[SetCursorPosition]", "")])
                 result.append(
                     HTML('<style fg="ansired" bg="{}">{}</style>'.format(cli_style.drop_down_itemSelect, entry[1])))
             else:
@@ -101,48 +89,26 @@ class JansSelectBox:
 
         return merge_formatted_text(result)
 
-    def shift(
-        self, 
-        seq:str, 
-        n:int,
-        )-> str:
-        """_summary_
 
-        Args:
-            seq (_type_): _description_
-            n (_type_): _description_
 
-        Returns:
-            _type_: _description_
-        """
-        return seq[n:]+seq[:n]
+    def _set_value(self):
+        self.value = self.values[self.selected_line][0]
 
     def up(self)-> None:
         """_summary_
         """
-        if self.selected_line == 0:
-            if self.rotatable_up and self.values_flag and self.values[self.selected_line] == self.values_flag[0]:
-                pass
-            else:
-                self.values = self.shift(self.values, -1)
-        else:
-            self.selected_line = (self.selected_line - 1) % (self.height)
+        if self.selected_line < len(self.values) and self.selected_line > 0:
+            self.selected_line = self.selected_line - 1
+            self._set_value()
 
-        self.set_value(self.values[self.selected_line][0])
 
     def down(self)-> None:
         """_summary_
         """
-        if self.selected_line + 1 == (self.height):
-            if self.rotatable_down and self.values_flag and self.values[self.selected_line] == self.values_flag[-1]:
-                pass
-            else:
-                self.values = self.shift(self.values, 1)
-        else:
-            self.selected_line = (self.selected_line + 1) % (self.height)
+        if self.selected_line < len(self.values) - 1:
+            self.selected_line = self.selected_line + 1
+            self._set_value()
 
-        self.set_value(self.values[self.selected_line][0])
-        
     def __pt_container__(self)-> HSplit:
         return self.container
 
@@ -157,7 +123,7 @@ class DropDownWidget:
         value: Optional[str] = '',
         on_value_changed: Callable= None,
         select_one_option: Optional[bool] = True,
-        )->Window:
+        ) -> Window:
         """init for DropDownWidget
         Args:
             values (list, optional): List of values to select one from them. Defaults to [].
@@ -176,11 +142,11 @@ class DropDownWidget:
 
         for val in self.value_list:
             if val[0] == value:
-                self.text = val[1]
+                self.display_value = val[1]
                 break
         else:
             if select_one_option:
-                self.text = self.value_list[0][1] if self.value_list else "Enter to Select"
+                self.display_value = self.value_list[0][1] if self.value_list else "Enter to Select"
 
         self.dropdown = True
         self.window = Window(
@@ -188,13 +154,11 @@ class DropDownWidget:
                 text=self._get_text,
                 focusable=True,
                 key_bindings=self._get_key_bindings(),
-            ), height=D())  # 5  ## large sized enties get >> (window too small)
+            ), height=D())
 
         self.select_box = JansSelectBox(
                                 values=self.value_list,
                                 value=value,
-                                rotatable_down=True,
-                                rotatable_up=True,
                                 height=4
                                 )
 
@@ -218,7 +182,6 @@ class DropDownWidget:
         self, 
         value:str,
         )-> None:
-        self.text = value
         self.select_box.set_value(value)
         if self.on_value_changed:
             self.on_value_changed(value)
@@ -249,8 +212,8 @@ class DropDownWidget:
             str: The selected value
         """
         if get_app().layout.current_window is self.window:
-            return HTML('&gt; <style fg="ansired" bg="{}">{}</style> &lt;'.format(cli_style.drop_down_hover, self.text))
-        return '> {} <'.format(self.text)
+            return HTML('&gt; <style fg="ansired" bg="{}">{}</style> &lt;'.format(cli_style.drop_down_hover, self.display_value))
+        return '> {} <'.format(self.display_value)
 
     def _get_key_bindings(self)-> KeyBindingsBase:
         """All key binding for the Dialog with Navigation bar
@@ -271,18 +234,20 @@ class DropDownWidget:
             if self.select_box_float not in get_app().layout.container.floats:
                 get_app().layout.container.floats.append(self.select_box_float)
             else:
-                self.text = self.select_box.values[self.select_box.selected_line][1]
+                self.display_value = self.select_box.values[self.select_box.selected_line][1]
                 get_app().layout.container.floats.remove(self.select_box_float)
 
-            self.value = self.select_box.value
+            self.value = self.select_box.values[self.select_box.selected_line][0]
 
         @kb.add('up')
         def _up(event):
-            self.select_box.up()
+            if self.select_box_float in get_app().layout.container.floats:
+                self.select_box.up()
 
         @kb.add('down')
         def _down(event):
-            self.select_box.down()
+            if self.select_box_float in get_app().layout.container.floats:
+                self.select_box.down()
 
         @kb.add('escape')
         @kb.add('tab')

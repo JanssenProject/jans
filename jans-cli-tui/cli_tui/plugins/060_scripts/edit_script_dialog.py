@@ -107,9 +107,6 @@ class EditScriptDialog(JansGDialog, DialogUtils):
         self.new_data = data
         close_me = True
 
-        import json
-        open("/tmp/scr.json", "w").write(json.dumps(self.data, indent=2))
-
         if self.save_handler:
             close_me = self.save_handler(self)
 
