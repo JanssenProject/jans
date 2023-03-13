@@ -120,7 +120,7 @@ Disable the flow. It will still be callable from other flows.
 
 ### Updates in a flow's code are not reflected in its execution
 
-Ensure the engine is [enabled](./quick-start.md#enable-the-engine). Use the REST API (PUT method) to [update](./lifecycle.md#flow-updates) the flow's code. Wait one minute and then retrieve (GET) this flow's data. The property `codeError` in the response should have the cause.   
+Ensure the engine is [enabled](./engine-config.md#engine-availability). Use the REST API (PUT method) to [update](./lifecycle.md#flow-updates) the flow's code. Wait one minute and then retrieve (GET) this flow's data. The property `codeError` in the response should have the cause.   
 
 ### Why are the contents of a list or map logged partially?
 

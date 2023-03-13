@@ -13,13 +13,6 @@ In this page a high-level overview of the flow development process is presented.
 
 These are key concepts to keep in mind before starting.
 
-### Enable the engine
-
-Ensure the Agama engine is enabled in your installation. Do the following:
-
-- Enable Agama bridge script. You can find details on how to manage custom scripts in [this](../../config-guide/jans-cli/im/im-custom-scripts.md) page. Here, set property `enabled` to `true` and increase `revision` value by one
-- Set `enabled` property in Agama configuration to `true`. This is located in the `agamaConfiguration` section of the [auth server configuration](../../config-guide/jans-cli/im/im-jans-authorization-server.md)
-
 ### Flow data
 
 Every flow has some associated information. At minimum this is required:
