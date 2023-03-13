@@ -20,15 +20,15 @@ class JansVerticalNav():
         self,
         myparent,
         headers: list,
-        on_display: Callable = None, 
-        selectes: Optional[int] = 0, 
+        on_display: Callable = None,
+        selectes: Optional[int] = 0,
         on_enter: Callable = None,
         get_help: Tuple = None,
         on_delete: Callable = None,
         change_password: Callable = None,
-        all_data: Optional[list] = [], 
-        preferred_size: Optional[list] = [], 
-        data: Optional[list] = [], 
+        all_data: Optional[list] = None,
+        preferred_size: Optional[list] = None,
+        data: Optional[list] = None,
         headerColor: Optional[str] = "green",
         entriesColor: Optional[str] = "white",
         underline_headings: Optional[bool] = True, 
@@ -37,7 +37,7 @@ class JansVerticalNav():
         max_height: AnyDimension = None,
         jans_help: Optional[str] = '',
         hide_headers: Optional[bool] = False,
-        custom_key_bindings: Optional[list] = []
+        custom_key_bindings: Optional[list] = None
         )->FloatContainer :
         """init for JansVerticalNav
 
@@ -82,9 +82,9 @@ class JansVerticalNav():
         self.headers = headers              # ListBox headers
         self.selectes = selectes            # ListBox initial selection
         self.max_width = max_width
-        self.data = data                    # ListBox Data (Can be renderable ?!!! #TODO )
+        self.data = data if data else []    # ListBox Data (Can be renderable ?!!! #TODO )
         self.jans_name = jans_name
-        self.preferred_size = preferred_size
+        self.preferred_size = preferred_size if preferred_size else []
         self.headerColor = headerColor
         self.entriesColor = entriesColor
         self.max_height = max_height
@@ -94,7 +94,7 @@ class JansVerticalNav():
         self.on_display = on_display
         self.change_password = change_password
         self.hide_headers = hide_headers
-        self.custom_key_bindings = custom_key_bindings
+        self.custom_key_bindings = custom_key_bindings if custom_key_bindings else []
         self.spaces = [len(header)+1 for header in self.headers]
 
         if get_help:
@@ -104,7 +104,7 @@ class JansVerticalNav():
         else:
             self.get_help= None
 
-        self.all_data = all_data
+        self.all_data = all_data if all_data else []
         self.underline_headings = underline_headings
 
         self.handle_header_spaces()
