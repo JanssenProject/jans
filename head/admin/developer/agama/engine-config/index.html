@@ -4938,9 +4938,40 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Engine Configuration
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         Engine Configuration
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#engine-availability" class="md-nav__link">
+    Engine availability
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -8686,6 +8717,21 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#engine-availability" class="md-nav__link">
+    Engine availability
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -8727,11 +8773,11 @@
 
 
 <h1 id="agama-engine-configuration">Agama engine configuration<a class="headerlink" href="#agama-engine-configuration" title="Permanent link">#</a></h1>
-<p>The <a href="../#agama-engine">engine</a> is a piece of software in charge of parsing flows written in Agama DSL and put them into action. Some aspects of the engine are configurable and this is integral part of the general authentication server's JSON configuration. To learn how to perform changes in the server's configuration click <a href="../../config-guide/jans-cli/im/im-jans-authorization-server.md">here</a>.</p>
+<p>The <a href="../#agama-engine">engine</a> is a piece of software in charge of parsing flows written in Agama DSL and put them into action. Some aspects of the engine are configurable and they are part of the general authentication server's JSON configuration - specifically the section labeled <code>agamaConfiguration</code>. To learn how to perform changes in the server's configuration click <a href="../../config-guide/jans-cli/im/im-jans-authorization-server.md">here</a>.</p>
 <p>The properties of Agama engine configuration are described in the following:</p>
 <ul>
 <li>
-<p><code>enabled</code>: A boolean value that specifies if the engine is enabled. Default value is <code>false</code> </p>
+<p><code>enabled</code>: A boolean value that specifies if the engine is enabled. Read more about <a href="#engine-availability">engine availability</a> below </p>
 </li>
 <li>
 <p><code>templatesPath</code>: A path relative to <code>/opt/jans/jetty/jans-auth/server/agama</code> that servers as the root of Agama flow pages. Default value is <code>/ftl</code></p>
@@ -8766,12 +8812,19 @@
             "Expires": "0"
         }-->
 
+<h2 id="engine-availability">Engine availability<a class="headerlink" href="#engine-availability" title="Permanent link">#</a></h2>
+<p>By default the engine is enabled. It might be the case your administrator temporarily disabled Agama. Do the following to restore its availability:</p>
+<ul>
+<li>Enable Agama bridge script. You can find details on how to manage custom scripts in <a href="../../config-guide/jans-cli/im/im-custom-scripts.md">this</a> page. Here, set property <code>enabled</code> to <code>true</code> and increase <code>revision</code> value by one</li>
+<li>Set <code>enabled</code> property in Agama configuration to <code>true</code>. This is the property listed above in this page</li>
+</ul>
+
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-10-13T09:25:55+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-10-13</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-03-13T19:36:38+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-03-13</span>
       
         <br>
         Created:
