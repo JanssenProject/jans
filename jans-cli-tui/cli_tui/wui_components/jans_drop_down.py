@@ -22,7 +22,7 @@ class JansSelectBox:
 
     def __init__(
         self,
-        values: Optional[list] = [],
+        values: Optional[list] = None,
         value: Optional[str] = '',
         height: AnyDimension = 4,
         ) -> HSplit:
@@ -34,7 +34,7 @@ class JansSelectBox:
             height (int, optional): _description_. Defaults to 4.
         """
 
-        self.values = values
+        self.values = values if values else []
         self.set_value(value)
         self.height = min(len(self.values), height)
 
@@ -119,7 +119,7 @@ class DropDownWidget:
 
     def __init__(
         self,
-        values: Optional[list] = [],
+        values: Optional[list] = None,
         value: Optional[str] = '',
         on_value_changed: Callable= None,
         select_one_option: Optional[bool] = True,
@@ -135,7 +135,7 @@ class DropDownWidget:
                 values=[('client_secret_basic', 'client_secret_basic'), ('client_secret_post', 'client_secret_post'), ('client_secret_jwt', 'client_secret_jwt'), ('private_key_jwt', 'private_key_jwt')],
                 value=self.data.get('tokenEndpointAuthMethodsSupported'))
         """
-        self.value_list = values
+        self.value_list = values if values else []
         self.on_value_changed = on_value_changed
         if select_one_option:
             self.value_list.insert(0, (None, 'Select One'))
