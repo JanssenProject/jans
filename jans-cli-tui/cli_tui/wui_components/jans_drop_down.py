@@ -136,6 +136,7 @@ class DropDownWidget:
                 value=self.data.get('tokenEndpointAuthMethodsSupported'))
         """
         self.value_list = values if values else []
+        self._value = value
         self.on_value_changed = on_value_changed
         if select_one_option:
             self.value_list.insert(0, (None, 'Select One'))
@@ -175,13 +176,14 @@ class DropDownWidget:
         Returns:
             str: The selected value
         """
-        return self.select_box.value
+        return self._value
 
     @value.setter
     def value(
         self, 
         value:str,
         )-> None:
+        self._value = value
         self.select_box.set_value(value)
         if self.on_value_changed:
             self.on_value_changed(value)
@@ -231,13 +233,12 @@ class DropDownWidget:
 
         @kb.add("enter")
         def _enter(event) -> None:
-            if self.select_box_float not in get_app().layout.container.floats:
-                get_app().layout.container.floats.append(self.select_box_float)
-            else:
+            if self.select_box_float in get_app().layout.container.floats:
                 self.display_value = self.select_box.values[self.select_box.selected_line][1]
+                self._value = self.select_box.values[self.select_box.selected_line][0]
                 get_app().layout.container.floats.remove(self.select_box_float)
-
-            self.value = self.select_box.values[self.select_box.selected_line][0]
+            else:
+                get_app().layout.container.floats.append(self.select_box_float)
 
         @kb.add('up')
         def _up(event):
