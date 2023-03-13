@@ -55,7 +55,8 @@ A minimal DCR request with only mandatory parameters, looks like the one below.
               --data '{"redirect_uris": ["https://my.jans.client/page"]}'
  ```
 
-If the registration is successful, Janssen Server will send response as below:
+If the registration is successful, Janssen Server will respond with http response code `201` with JSON body as shown
+in example below:
 
 ```json
 {
@@ -523,6 +524,35 @@ Further reading [here](../../developer/scripts/client-registration.md)
 
 
 ### CRUD Operations
+
+Janssen Server allows client management through client configuration endpoint 
+[(RFC 7592)](https://www.rfc-editor.org/rfc/rfc7592). 
+
+[JSON response](#using-request-body) to client registration request contains `registration_client_uri` and
+`registration_access_token` data elements. The URI mentioned using `registration_client_uri` provides functionality to
+read, update and delete the client. This endpoint is a protected endpoint where request has to be authenticated using
+access token `registration_access_token`.
+
+#### Read client metadata 
+
+A read request to the same client that got created in [earlier](#using-request-body) section should be as shown in the 
+example below. HTTP method `GET` is used to send the request which signifies that it is a request to `read` client 
+metadata.
+
+```shell
+curl -k -H 'Authorization: Bearer eaee20de-54ce-4217-b960-6b72b55e6cab' \
+-i 'https://my.jans.server/jans-auth/restv1/register?client_id=85192707-a38c-496c-806c-ef01a6a3ae4a'
+```
+
+JSON response from Janssen Server will contain the current state of client metadata. 
+
+#### Update client metadata
+
+Client metadata can be updated by sending request with `PUT` HTTP method to `registration_client_uri`. Janssen Server 
+replaces current metadata with the one sent with update request as outlined in 
+[the specification](https://www.rfc-editor.org/rfc/rfc7592#section-2.2) 
+
+
 
    TODO: what does jans store about state of the client with respect to [this](https://www.rfc-editor.org/rfc/rfc7591#appendix-A.5.1)
 
