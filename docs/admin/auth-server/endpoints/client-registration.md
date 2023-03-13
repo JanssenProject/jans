@@ -36,16 +36,67 @@ Configure the Janssen AS using steps explained in the [link](#curl-commands-to-c
 
 ### Client registration Requests
 
-#### 1. A simple client registration request (with mandatory parameter)
+Client registration request primarily does two things: Communicate client metadata to the authorization server, and 
+optionally authenticate. 
+
+There are different ways in which the client metadata is communicated to the authorization server using
+dynamic client registration requests.
+
+- [Using request body](#using-request-body)
+- [Using signed request object (JWT)](#using-signed-request-object--jwt-)
+- [Using software statement](#using-software-statement)
+
+#### Using request body
+
+A minimal DCR request with only mandatory parameters, looks like the one below.
 
  ```shell
  curl -X POST -k -H 'Content-Type: application/json' -i 'https://my.jans.server/jans-auth/restv1/register' \
               --data '{"redirect_uris": ["https://my.jans.client/page"]}'
  ```
 
-#### 2. A typical client registration request 
+If the registration is successful, Janssen Server will send response as below:
 
-A client or developer calls the client registration endpoint with a set of client metadata as specified in [RFC7591](https://www.rfc-editor.org/rfc/rfc7591.html#page-8)
+```json
+{
+    "allow_spontaneous_scopes": false,
+    "application_type": "web",
+    "rpt_as_jwt": false,
+    "registration_client_uri": "https://my.jans.server/jans-auth/restv1/register?client_id=85192707-a38c-496c-806c-ef01a6a3ae4a",
+    "tls_client_auth_subject_dn": "",
+    "run_introspection_script_before_jwt_creation": false,
+    "registration_access_token": "eaee20de-54ce-4217-b960-6b72b55e6cab",
+    "client_id": "85192707-a38c-496c-806c-ef01a6a3ae4a",
+    "token_endpoint_auth_method": "client_secret_basic",
+    "scope": "profile work_phone phone user_name device_sso openid permission uma_protection address email clientinfo org_name offline_access https://jans.io/auth/ssa.portal test https://jans.io/auth/ssa.admin https://jans.io/auth/ssa.developer",
+    "client_secret": "4148f812-92d6-4245-80e0-243524b3b6a4",
+    "client_id_issued_at": 1678700818,
+    "backchannel_logout_uri": [],
+    "backchannel_logout_session_required": false,
+    "client_name": "my.jans.client",
+    "par_lifetime": 600,
+    "spontaneous_scopes": [],
+    "id_token_signed_response_alg": "RS256",
+    "access_token_as_jwt": false,
+    "grant_types": [
+        "authorization_code",
+        "refresh_token"
+    ],
+    "subject_type": "pairwise",
+    "keep_client_authorization_after_expiration": false,
+    "require_par": false,
+    "redirect_uris": ["https://my.jans.client/page"],
+    "redirect_uris_regex": "",
+    "additional_audience": [],
+    "frontchannel_logout_session_required": false,
+    "client_secret_expires_at": 1678787218,
+    "access_token_signing_alg": "RS256",
+    "response_types": ["code"]
+}
+```
+
+In a typical DCR request the client or developer calls the client registration endpoint with a set of client metadata 
+as specified in [RFC7591](https://www.rfc-editor.org/rfc/rfc7591.html#page-8)
 
 ```shell
 curl -X POST -k -i 'https://my.jans.server/jans-auth/restv1/register'  \
@@ -60,9 +111,9 @@ curl -X POST -k -i 'https://my.jans.server/jans-auth/restv1/register'  \
                "client_name#fr": "Mon Exemple" \
          }' 
 ```
-#### 3. Client Registration Request Using a signed request object
+#### Using signed request object (JWT)
 
-In some usecases like FAPI implementation,  DCR request payload is a JWT.
+In some use-cases like FAPI implementation, DCR request payload is a JWT.
 
 Example:
 
@@ -82,7 +133,7 @@ the authorization server:
 
 Configure the Janssen AS using steps explained in the [link](#curl-commands-to-configure-jans-auth-server)
 
-#### 4. Client registration using software statement
+#### Using software statement
 
 A signed assertion from a trusted party, a Software statement or Software Statement Assertion (SSA), is used to 
 dynamically register clients to an Authorization server.
@@ -114,7 +165,7 @@ should point to inlined JWKS.
 
 Configure the AS using steps explained in the [link](#curl-commands-to-configure-jans-auth-server)
 
-#### 5. Special mention about FAPI:
+#### Special mention about FAPI:
 
 In case of a typical [client registration request in FAPI implementation]( https://openbankinguk.github.io/dcr-docs-pub/v3.3/dynamic-client-registration.html), 
 the request object which is a signed JWT (as seen in point 3) is also called an SSA (Software statement Assertion) or 
@@ -472,5 +523,7 @@ Further reading [here](../../developer/scripts/client-registration.md)
 
 
 ### CRUD Operations
+
+   TODO: what does jans store about state of the client with respect to [this](https://www.rfc-editor.org/rfc/rfc7591#appendix-A.5.1)
 
 ### Internationalization for Client metadata
