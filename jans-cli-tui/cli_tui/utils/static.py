@@ -10,6 +10,7 @@ class cli_style:
     edit_text = 'class:plugin-text'
     edit_text_required = 'class:plugin-textrequired'
     check_box = 'class:plugin-checkbox'
+    check_box_list = 'class:plugin-checkboxlist'
     radio_button = 'class:plugin-radiobutton'
     tabs = 'class:plugin-tabs'
     label = 'class:plugin-label'
@@ -20,6 +21,7 @@ class cli_style:
     scim_widget = 'class:scim-widget'
     black_bg = 'class:plugin-black-bg'
     textarea = 'class:textarea'
+    drop_down = 'class:plugin-dropdown'
 
 class common_strings:
     enter_to_search = "Press enter to perform search"
