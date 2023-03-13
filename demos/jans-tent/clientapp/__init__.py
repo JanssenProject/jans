@@ -188,6 +188,11 @@ def create_app():
         if cfg.PROVIDER_HOST_STRING is not None:
             query_args["providerHost"] = get_provider_host()
 
+
+        if cfg.ADDITIONAL_PARAMS is not None:
+            query_args |= cfg.ADDITIONAL_PARAMS
+
+
         response = oauth.op.authorize_redirect(**query_args)
 
         app.logger.debug('/login authorize_redirect(redirect_uri) url = %s' %
