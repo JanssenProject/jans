@@ -103,7 +103,17 @@ interactive mode.
 
 After the successful completion of setup process, [verify the system health](../install-faq.md#after-installation-how-do-i-verify-that-the-janssen-server-is-up-and-running).
 
-## Ubuntu Janssen Un-Installation
+## Log in to Text User Interface (TUI)
+
+Begin configuration by accessing the TUI with the following command:
+
+```
+/opt/jans/jans-cli/jans_cli_tui.py
+```
+
+Full TUI documentation can be found [here](../../config-guide/jans-tui.md)
+
+## Uninstall
 
 Removing Janssen is a two step process:
 
