@@ -111,7 +111,7 @@ Begin configuration by accessing the TUI with the following command:
 /opt/jans/jans-cli/jans_cli_tui.py
 ```
 
-Full TUI documentation can be found [here](../../config-guide/jans-tui.md)
+Full TUI documentation can be found [here](../../config-guide/jans-tui/README.md)
 
 ## Uninstall
 
