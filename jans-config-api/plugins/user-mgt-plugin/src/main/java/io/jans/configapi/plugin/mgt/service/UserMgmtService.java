@@ -68,8 +68,8 @@ public class UserMgmtService {
     }
 
     public PagedResult<User> searchUsers(SearchRequest searchRequest) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Search Users with searchRequest:{}, getPeopleBaseDn():{}", escapeLog(searchRequest),
+        if (logger.isInfoEnabled()) {
+            logger.info("Search Users with searchRequest:{}, getPeopleBaseDn():{}", escapeLog(searchRequest),
                     getPeopleBaseDn());
         }
         Filter searchFilter = null;
@@ -88,7 +88,7 @@ public class UserMgmtService {
             }
             searchFilter = Filter.createORFilter(filters);
         }
-        logger.debug("Users searchFilter:{}", searchFilter);
+        logger.info("Users searchFilter:{}", searchFilter);
         return persistenceEntryManager.findPagedEntries(userService.getPeopleBaseDn(), User.class, searchFilter, null,
                 searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
                 searchRequest.getStartIndex(), searchRequest.getCount(), searchRequest.getMaxCount());
@@ -100,8 +100,8 @@ public class UserMgmtService {
     }
 
     public User patchUser(String inum, UserPatchRequest userPatchRequest) throws JsonPatchException, IOException {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Details to patch user  inum:{}, UserPatchRequest:{} ", escapeLog(inum),
+        if (logger.isInfoEnabled()) {
+            logger.info("Details to patch user  inum:{}, UserPatchRequest:{} ", escapeLog(inum),
                     escapeLog(userPatchRequest));
         }
         if (StringHelper.isEmpty(inum)) {
@@ -131,7 +131,7 @@ public class UserMgmtService {
         // persist user
         ignoreCustomObjectClassesForNonLDAP(user);
         user = userService.updateUser(user);
-        logger.debug("User after patch user:{}", user);
+        logger.info("User after patch user:{}", user);
         return user;
 
     }
@@ -147,7 +147,7 @@ public class UserMgmtService {
     }
 
     private User updateCustomAttributes(User user, List<CustomObjectAttribute> customAttributes) {
-        logger.debug("Custom Attributes to update for - user:{}, customAttributes:{} ", user, customAttributes);
+        logger.info("Custom Attributes to update for - user:{}, customAttributes:{} ", user, customAttributes);
 
         if (customAttributes == null || customAttributes.isEmpty()) {
             return user;
@@ -174,7 +174,7 @@ public class UserMgmtService {
                 existingAttribute.setValues(attribute.getValues());
             }
             // Final attribute
-            logger.debug("Finally user CustomAttributes user.getCustomAttributes:{} ", user.getCustomAttributes());
+            logger.info("Finally user CustomAttributes user.getCustomAttributes:{} ", user.getCustomAttributes());
 
         }
 
@@ -192,7 +192,7 @@ public class UserMgmtService {
         for (User user : users) {
             excludeAttributes(user, commaSeparatedString);
         }
-        logger.debug("Users:{} after excluding attribute:{} ", users, commaSeparatedString);
+        logger.info("Users:{} after excluding attribute:{} ", users, commaSeparatedString);
 
         return users;
     }
@@ -224,7 +224,7 @@ public class UserMgmtService {
             }
         }
 
-        logger.debug("Attributes map:{} to be excluded ", map);
+        logger.info("Attributes map:{} to be excluded ", map);
         if (!map.isEmpty()) {
             logger.debug("Removing simple attributes:{} from user object ", map);
             BeanUtilsBean.getInstance().getConvertUtils().register(false, false, 0);
@@ -283,7 +283,7 @@ public class UserMgmtService {
             missingAttributes.replace(missingAttributes.lastIndexOf(","), missingAttributes.length(), "");
         }
 
-        logger.debug("Returning missingAttributes:{} ", missingAttributes);
+        logger.info("Returning missingAttributes:{} ", missingAttributes);
         return missingAttributes.toString();
     }
 
@@ -321,7 +321,7 @@ public class UserMgmtService {
         String persistenceType = configurationService.getPersistenceType();
         logger.debug("persistenceType: {}, isLDAP?:{}", persistenceType, isLDAP());
         if (!isLDAP()) {
-            logger.debug(
+            logger.info(
                     "Setting CustomObjectClasses :{} to null as its used only for LDAP and current persistenceType is {} ",
                     user.getCustomObjectClasses(), persistenceType);
             user.setCustomObjectClasses(null);
