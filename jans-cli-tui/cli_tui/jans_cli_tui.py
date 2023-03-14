@@ -119,6 +119,7 @@ class JansCliApp(Application):
         self.progressing_text = ""
         self.mouse_float=True
         self.browse_path = '/'
+        self.app_configuration = {}
 
         self.not_implemented = Frame(
                             body=HSplit([Label(text=_("Not imlemented yet")), Button(text=_("MyButton"))], width=D()),
@@ -353,6 +354,8 @@ class JansCliApp(Application):
                 for pp in self._plugins:
                     if getattr(pp, 'server_side_plugin', False) and pp.pid not in self.available_plugins:
                         self.disable_plugin(pp.pid)
+                    if hasattr(pp, 'on_cli_object_ready'):
+                        pp.on_cli_object_ready()
 
                 self.init_plugins()
 

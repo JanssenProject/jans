@@ -107,7 +107,8 @@ class Plugin(DialogUtils):
                                     name='loggingLevel',
                                     widget=DropDownWidget(
                                         values=[('TRACE', 'TRACE'), ('DEBUG', 'DEBUG'), ('INFO', 'INFO'), ('WARN', 'WARN'),('ERROR', 'ERROR'),('FATAL', 'FATAL'),('OFF', 'OFF')],
-                                        value=self.data.get('loggingLevel')
+                                        value=self.data.get('loggingLevel'),
+                                        select_one_option=False
                                         ),
                                     jans_help=self.app.get_help_from_schema(self.schema, 'loggingLevel'),
                                     style=cli_style.edit_text
@@ -296,9 +297,9 @@ class Plugin(DialogUtils):
 
         async def coroutine():
             cli_args = {'operation_id': 'put-properties-fido2', 'data': fido2_config}
-            self.app.start_progressing()
+            self.app.start_progressing(_("Saving FIDO Configuration..."))
             response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-            self.app.stop_progressing()
+            self.app.stop_progressing(_("FIDO Configuration was saved."))
 
         asyncio.ensure_future(coroutine())
 
