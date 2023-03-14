@@ -552,8 +552,12 @@ Client metadata can be updated by sending request with `PUT` HTTP method to `reg
 replaces current metadata with the one sent with update request as outlined in 
 [the specification](https://www.rfc-editor.org/rfc/rfc7592#section-2.2) 
 
+#### Delete Client
 
+Client can be deleted by sending a request using `DELETE` method to `registration_client_uri`.
 
-   TODO: what does jans store about state of the client with respect to [this](https://www.rfc-editor.org/rfc/rfc7591#appendix-A.5.1)
+A successful delete action will invalidate the "client_id", "client_secret", and "registration_access_token" for this 
+client, thereby preventing the "client_id" from being used at either the authorization endpoint or token endpoint of the
+authorization server.
 
 ### Internationalization for Client metadata
