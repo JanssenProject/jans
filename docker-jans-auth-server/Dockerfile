@@ -292,6 +292,7 @@ RUN chmod -R g=u ${JETTY_BASE}/jans-auth/custom \
     && chmod 664 /opt/jetty/etc/jetty.xml \
     && chmod 664 /opt/jetty/etc/webdefault.xml \
     && chown -R 1000:0 ${JETTY_BASE}/jans-auth/agama \
+    && chown -R 1000:0 ${JETTY_BASE}/jans-auth/custom \
     && chown -R 1000:0 /opt/jans/python/libs \
     && chown -R 1000:0 ${JETTY_BASE}/common/libs \
     && chown -R 1000:0 /usr/share/java \
