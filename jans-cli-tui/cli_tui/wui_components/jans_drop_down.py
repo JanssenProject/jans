@@ -15,6 +15,7 @@ from typing import Optional, Sequence, Union
 from typing import TypeVar, Callable
 
 import cli_style
+from utils.multi_lang import _
 
 class JansSelectBox:
     """_summary_
@@ -139,7 +140,10 @@ class DropDownWidget:
         self._value = value
         self.on_value_changed = on_value_changed
         if select_one_option:
-            self.value_list.insert(0, (None, 'Select One'))
+            self.value_list.insert(0, (None, _("Select One")))
+
+        if not self.value_list:
+            self.display_value = _("No option was provided")
 
         for val in self.value_list:
             if val[0] == value:
@@ -147,7 +151,7 @@ class DropDownWidget:
                 break
         else:
             if select_one_option:
-                self.display_value = self.value_list[0][1] if self.value_list else "Enter to Select"
+                self.display_value = self.value_list[0][1] if self.value_list else _("Enter to Select")
 
         self.dropdown = True
         self.window = Window(
@@ -185,6 +189,14 @@ class DropDownWidget:
         )-> None:
         self._value = value
         self.select_box.set_value(value)
+        for val in self.value_list:
+            if val[0] == value:
+                self.display_value = val[1]
+                break
+        else:
+            if self.value_list:
+                self.display_value = self.value_list[0][1]
+
         if self.on_value_changed:
             self.on_value_changed(value)
 
