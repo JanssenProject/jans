@@ -3243,36 +3243,29 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#1-a-simple-client-registration-request-with-mandatory-parameter" class="md-nav__link">
-    1. A simple client registration request (with mandatory parameter)
+  <a href="#using-request-body" class="md-nav__link">
+    Using request body
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#2-a-typical-client-registration-request" class="md-nav__link">
-    2. A typical client registration request
+  <a href="#using-signed-request-object-jwt" class="md-nav__link">
+    Using signed request object (JWT)
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#3-client-registration-request-using-a-signed-request-object" class="md-nav__link">
-    3. Client Registration Request Using a signed request object
+  <a href="#using-software-statement" class="md-nav__link">
+    Using software statement
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#4-client-registration-using-software-statement" class="md-nav__link">
-    4. Client registration using software statement
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#5-special-mention-about-fapi" class="md-nav__link">
-    5. Special mention about FAPI:
+  <a href="#special-mention-about-fapi" class="md-nav__link">
+    Special mention about FAPI:
   </a>
   
 </li>
@@ -3368,6 +3361,33 @@
   <a href="#crud-operations" class="md-nav__link">
     CRUD Operations
   </a>
+  
+    <nav class="md-nav" aria-label="CRUD Operations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#read-client-metadata" class="md-nav__link">
+    Read client metadata
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#update-client-metadata" class="md-nav__link">
+    Update client metadata
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#delete-client" class="md-nav__link">
+    Delete Client
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -8905,36 +8925,29 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#1-a-simple-client-registration-request-with-mandatory-parameter" class="md-nav__link">
-    1. A simple client registration request (with mandatory parameter)
+  <a href="#using-request-body" class="md-nav__link">
+    Using request body
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#2-a-typical-client-registration-request" class="md-nav__link">
-    2. A typical client registration request
+  <a href="#using-signed-request-object-jwt" class="md-nav__link">
+    Using signed request object (JWT)
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#3-client-registration-request-using-a-signed-request-object" class="md-nav__link">
-    3. Client Registration Request Using a signed request object
+  <a href="#using-software-statement" class="md-nav__link">
+    Using software statement
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#4-client-registration-using-software-statement" class="md-nav__link">
-    4. Client registration using software statement
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#5-special-mention-about-fapi" class="md-nav__link">
-    5. Special mention about FAPI:
+  <a href="#special-mention-about-fapi" class="md-nav__link">
+    Special mention about FAPI:
   </a>
   
 </li>
@@ -9031,6 +9044,33 @@
     CRUD Operations
   </a>
   
+    <nav class="md-nav" aria-label="CRUD Operations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#read-client-metadata" class="md-nav__link">
+    Read client metadata
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#update-client-metadata" class="md-nav__link">
+    Update client metadata
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#delete-client" class="md-nav__link">
+    Delete Client
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -9116,12 +9156,60 @@ claim of the OpenID Connect configuration reponse, typically deployed at </p>
 </ol>
 <p>Configure the Janssen AS using steps explained in the <a href="#curl-commands-to-configure-jans-auth-server">link</a></p>
 <h3 id="client-registration-requests">Client registration Requests<a class="headerlink" href="#client-registration-requests" title="Permanent link">#</a></h3>
-<h4 id="1-a-simple-client-registration-request-with-mandatory-parameter">1. A simple client registration request (with mandatory parameter)<a class="headerlink" href="#1-a-simple-client-registration-request-with-mandatory-parameter" title="Permanent link">#</a></h4>
+<p>Client registration request primarily does two things: Communicate client metadata to the authorization server, and 
+optionally authenticate. </p>
+<p>There are different ways in which the client metadata is communicated to the authorization server using
+dynamic client registration requests.</p>
+<ul>
+<li><a href="#using-request-body">Using request body</a></li>
+<li><a href="#using-signed-request-object--jwt-">Using signed request object (JWT)</a></li>
+<li><a href="#using-software-statement">Using software statement</a></li>
+</ul>
+<h4 id="using-request-body">Using request body<a class="headerlink" href="#using-request-body" title="Permanent link">#</a></h4>
+<p>A minimal DCR request with only mandatory parameters, looks like the one below.</p>
 <div class="highlight"><pre><span></span><code>curl -X POST -k -H <span class="s1">&#39;Content-Type: application/json&#39;</span> -i <span class="s1">&#39;https://my.jans.server/jans-auth/restv1/register&#39;</span> <span class="se">\</span>
              --data <span class="s1">&#39;{&quot;redirect_uris&quot;: [&quot;https://my.jans.client/page&quot;]}&#39;</span>
 </code></pre></div>
-<h4 id="2-a-typical-client-registration-request">2. A typical client registration request<a class="headerlink" href="#2-a-typical-client-registration-request" title="Permanent link">#</a></h4>
-<p>A client or developer calls the client registration endpoint with a set of client metadata as specified in <a href="https://www.rfc-editor.org/rfc/rfc7591.html#page-8">RFC7591</a></p>
+<p>If the registration is successful, Janssen Server will respond with http response code <code>201</code> with JSON body as shown
+in example below:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;allow_spontaneous_scopes&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;application_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;web&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;rpt_as_jwt&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;registration_client_uri&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://my.jans.server/jans-auth/restv1/register?client_id=85192707-a38c-496c-806c-ef01a6a3ae4a&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;tls_client_auth_subject_dn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;run_introspection_script_before_jwt_creation&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;registration_access_token&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;eaee20de-54ce-4217-b960-6b72b55e6cab&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;client_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;85192707-a38c-496c-806c-ef01a6a3ae4a&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;token_endpoint_auth_method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;client_secret_basic&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;scope&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;profile work_phone phone user_name device_sso openid permission uma_protection address email clientinfo org_name offline_access https://jans.io/auth/ssa.portal test https://jans.io/auth/ssa.admin https://jans.io/auth/ssa.developer&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;client_secret&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;4148f812-92d6-4245-80e0-243524b3b6a4&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;client_id_issued_at&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1678700818</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;backchannel_logout_uri&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;backchannel_logout_session_required&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;client_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;my.jans.client&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;par_lifetime&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">600</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;spontaneous_scopes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;id_token_signed_response_alg&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RS256&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;access_token_as_jwt&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;grant_types&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">        </span><span class="s2">&quot;authorization_code&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="s2">&quot;refresh_token&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;subject_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pairwise&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;keep_client_authorization_after_expiration&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;require_par&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;redirect_uris&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;https://my.jans.client/page&quot;</span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;redirect_uris_regex&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;additional_audience&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;frontchannel_logout_session_required&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;client_secret_expires_at&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1678787218</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;access_token_signing_alg&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RS256&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;response_types&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;code&quot;</span><span class="p">]</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
+<p>In a typical DCR request the client or developer calls the client registration endpoint with a set of client metadata 
+as specified in <a href="https://www.rfc-editor.org/rfc/rfc7591.html#page-8">RFC7591</a></p>
 <div class="highlight"><pre><span></span><code>curl -X POST -k -i <span class="s1">&#39;https://my.jans.server/jans-auth/restv1/register&#39;</span>  <span class="se">\</span>
      --data <span class="s1">&#39;{ \</span>
 <span class="s1">                   &quot;redirect_uris&quot;: [&quot;https://client.example.org/cb&quot;] \</span>
@@ -9134,8 +9222,8 @@ claim of the OpenID Connect configuration reponse, typically deployed at </p>
 <span class="s1">               &quot;client_name#fr&quot;: &quot;Mon Exemple&quot; \</span>
 <span class="s1">         }&#39;</span> 
 </code></pre></div>
-<h4 id="3-client-registration-request-using-a-signed-request-object">3. Client Registration Request Using a signed request object<a class="headerlink" href="#3-client-registration-request-using-a-signed-request-object" title="Permanent link">#</a></h4>
-<p>In some usecases like FAPI implementation,  DCR request payload is a JWT.</p>
+<h4 id="using-signed-request-object-jwt">Using signed request object (JWT)<a class="headerlink" href="#using-signed-request-object-jwt" title="Permanent link">#</a></h4>
+<p>In some use-cases like FAPI implementation, DCR request payload is a JWT.</p>
 <p>Example:</p>
 <div class="highlight"><pre><span></span><code>curl -X POST -k -H <span class="s1">&#39;Content-Type: application/jwt&#39;</span> <span class="se">\</span>
     -H <span class="s1">&#39;Accept: application/json&#39;</span> <span class="se">\</span>
@@ -9150,7 +9238,7 @@ the authorization server:</p>
 <li><code>dcrSignatureValidationJwks</code> - specifies JWKS for all DCR's validations.</li>
 </ul>
 <p>Configure the Janssen AS using steps explained in the <a href="#curl-commands-to-configure-jans-auth-server">link</a></p>
-<h4 id="4-client-registration-using-software-statement">4. Client registration using software statement<a class="headerlink" href="#4-client-registration-using-software-statement" title="Permanent link">#</a></h4>
+<h4 id="using-software-statement">Using software statement<a class="headerlink" href="#using-software-statement" title="Permanent link">#</a></h4>
 <p>A signed assertion from a trusted party, a Software statement or Software Statement Assertion (SSA), is used to 
 dynamically register clients to an Authorization server.</p>
 <p>Example:</p>
@@ -9178,7 +9266,7 @@ point to JWKS URI.</li>
 should point to inlined JWKS.</li>
 </ul>
 <p>Configure the AS using steps explained in the <a href="#curl-commands-to-configure-jans-auth-server">link</a></p>
-<h4 id="5-special-mention-about-fapi">5. Special mention about FAPI:<a class="headerlink" href="#5-special-mention-about-fapi" title="Permanent link">#</a></h4>
+<h4 id="special-mention-about-fapi">Special mention about FAPI:<a class="headerlink" href="#special-mention-about-fapi" title="Permanent link">#</a></h4>
 <p>In case of a typical <a href="https://openbankinguk.github.io/dcr-docs-pub/v3.3/dynamic-client-registration.html">client registration request in FAPI implementation</a>, 
 the request object which is a signed JWT (as seen in point 3) is also called an SSA (Software statement Assertion) or 
 DCR payload. This SSA can contain the software_statement inside it which is also a signed JWT. Each of the JWTs, the 
@@ -9491,6 +9579,29 @@ eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJJREFtYX...
 <p>Further reading <a href="../../../developer/scripts/client-registration/">here</a></p>
 <h3 id="dynamic-registration-custom-attributes">Dynamic registration custom attributes<a class="headerlink" href="#dynamic-registration-custom-attributes" title="Permanent link">#</a></h3>
 <h3 id="crud-operations">CRUD Operations<a class="headerlink" href="#crud-operations" title="Permanent link">#</a></h3>
+<p>Janssen Server allows client management through client configuration endpoint 
+<a href="https://www.rfc-editor.org/rfc/rfc7592">(RFC 7592)</a>. </p>
+<p><a href="#using-request-body">JSON response</a> to client registration request contains <code>registration_client_uri</code> and
+<code>registration_access_token</code> data elements. The URI mentioned using <code>registration_client_uri</code> provides functionality to
+read, update and delete the client. This endpoint is a protected endpoint where request has to be authenticated using
+access token <code>registration_access_token</code>.</p>
+<h4 id="read-client-metadata">Read client metadata<a class="headerlink" href="#read-client-metadata" title="Permanent link">#</a></h4>
+<p>A read request to the same client that got created in <a href="#using-request-body">earlier</a> section should be as shown in the 
+example below. HTTP method <code>GET</code> is used to send the request which signifies that it is a request to <code>read</code> client 
+metadata.</p>
+<div class="highlight"><pre><span></span><code>curl -k -H <span class="s1">&#39;Authorization: Bearer eaee20de-54ce-4217-b960-6b72b55e6cab&#39;</span> <span class="se">\</span>
+-i <span class="s1">&#39;https://my.jans.server/jans-auth/restv1/register?client_id=85192707-a38c-496c-806c-ef01a6a3ae4a&#39;</span>
+</code></pre></div>
+<p>JSON response from Janssen Server will contain the current state of client metadata. </p>
+<h4 id="update-client-metadata">Update client metadata<a class="headerlink" href="#update-client-metadata" title="Permanent link">#</a></h4>
+<p>Client metadata can be updated by sending request with <code>PUT</code> HTTP method to <code>registration_client_uri</code>. Janssen Server 
+replaces current metadata with the one sent with update request as outlined in 
+<a href="https://www.rfc-editor.org/rfc/rfc7592#section-2.2">the specification</a> </p>
+<h4 id="delete-client">Delete Client<a class="headerlink" href="#delete-client" title="Permanent link">#</a></h4>
+<p>Client can be deleted by sending a request using <code>DELETE</code> method to <code>registration_client_uri</code>.</p>
+<p>A successful delete action will invalidate the "client_id", "client_secret", and "registration_access_token" for this 
+client, thereby preventing the "client_id" from being used at either the authorization endpoint or token endpoint of the
+authorization server.</p>
 <h3 id="internationalization-for-client-metadata">Internationalization for Client metadata<a class="headerlink" href="#internationalization-for-client-metadata" title="Permanent link">#</a></h3>
 
   <hr>
@@ -9498,7 +9609,7 @@ eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJJREFtYX...
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-03-10T09:00:28+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-03-10</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-03-14T06:34:46+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-03-14</span>
       
         <br>
         Created:
