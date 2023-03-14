@@ -144,7 +144,7 @@ public class ScopeService {
         
             return persistenceEntryManager.findEntries(getDnForScope(null), Scope.class, Filter.createORFilter(filters));
         } catch (Exception e) {
-            logger.error("No scopes found by pattern: " + scopeIds, e);
+            logger.error("No scopes found by Ids: " + scopeIds, e);
             return new ArrayList<>();
         }
     }
@@ -178,7 +178,7 @@ public class ScopeService {
 
             return scopes;
         } catch (Exception e) {
-            logger.error("No scopes found by pattern: " + pattern, e);
+            logger.error("No scopes found by patterns: " + pattern, e);
             return new ArrayList<>();
         }
     }

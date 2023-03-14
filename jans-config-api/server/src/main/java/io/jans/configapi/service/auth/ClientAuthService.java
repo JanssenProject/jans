@@ -100,7 +100,7 @@ public class ClientAuthService {
         clientAuth.setClientId(clientId);
         clientAuth.setUserId(userId);
         clientAuth.setDn(getClientAuthorizationDn(userId));
-        logger.debug("{} client-authorization entries filter:{}", clientAuth);
+        logger.debug("client-authorization entries filter:{}", clientAuth);
 
         List<ClientAuthorization> authorizations = persistenceEntryManager.findEntries(clientAuth);
         logger.debug("{} client-authorization entries found", authorizations);
@@ -130,7 +130,6 @@ public class ClientAuthService {
         tokens.forEach(token -> {
             logger.debug("Deleting token {}", token.getTokenCode());
             persistenceEntryManager.remove(token);
-            ;
         });
 
     }
