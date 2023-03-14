@@ -5025,6 +5025,13 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#smtp-configurations" class="md-nav__link">
+    SMTP configurations
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -8846,6 +8853,13 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#smtp-configurations" class="md-nav__link">
+    SMTP configurations
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -8974,7 +8988,7 @@
 </li>
 </ul>
 <h2 id="email-otp-authentication">Email OTP authentication<a class="headerlink" href="#email-otp-authentication" title="Permanent link">#</a></h2>
-<p>This is a two-stepped flow where the end-user initially is prompted to enter a username and corresponding password. Upon successful validation and assuming the user has an e-mail designated in his profile, a message with a one-time passcode (OTP) is sent to his inbox. The user is expected to enter the code in the browser to complete the authentication.</p>
+<p>This is a two-stepped flow where the end-user initially is prompted to enter a username and corresponding password. Upon successful validation and assuming the user has an e-mail designated in his profile, a message with a one-time passcode (OTP) is sent to his inbox. The user is expected to enter the code in the browser to complete the authentication. Note your server is required to have <a href="#smtp-configurations">SMTP settings</a> set. </p>
 <h3 id="implementation_1">Implementation<a class="headerlink" href="#implementation_1" title="Permanent link">#</a></h3>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -9005,7 +9019,7 @@
 <p>Lines 16-18. Initializes utility variables and declares that the block of indented statements (lines 20-35) will be executed repeatedly three times at most</p>
 </li>
 <li>
-<p>Lines 20-22. Sends a message with a passcode to the e-mail of the user (stored in variable <code>email</code>) by calling method <code>send</code> of class <code>EmailOTPUtil</code>. If delivery was successful this method returns the passcode sent, otherwise <code>null</code>. The value is store in <code>otpCode</code> variable</p>
+<p>Lines 20-22. Sends a message with a passcode to the e-mail of the user (stored in variable <code>email</code>) by calling method <code>send</code> of class <code>EmailOTPUtil</code>. If delivery was successful this method returns the passcode sent, otherwise <code>null</code>. The value is stored in <code>otpCode</code> variable. For this code to work properly you have to configure the <strong>SMTP settings</strong> in your server as explaind <a href="#smtp-configurations">below</a></p>
 </li>
 <li>
 <p>Lines 24-26. If delivery failed, the flow is finished</p>
@@ -9037,6 +9051,25 @@
 </li>
 </ul>
 <p>If the user presses the enter key when the focus is on the text field, the form is submitted by means of the standard submission button.</p>
+<h3 id="smtp-configurations">SMTP configurations<a class="headerlink" href="#smtp-configurations" title="Permanent link">#</a></h3>
+<p>To supply details of the mail server to employ for message delivery, create a json file like the below with your specific details:</p>
+<div class="highlight"><pre><span></span><code>{
+  &quot;valid&quot;: true,
+  &quot;host&quot;: &quot;outgoing-smtp-server.acme.co&quot;,
+  &quot;port&quot;: 587,
+  &quot;requires_ssl&quot;: true,
+  &quot;trust_host&quot;: true,
+  &quot;from_name&quot;: &quot;Acme nofications&quot;,
+  &quot;from_email_address&quot;: &quot;no-reply@acme.co&quot;,
+  &quot;requires_authentication&quot;: true,
+  &quot;user_name&quot;: &quot;admin@acme.co&quot;,
+  &quot;password&quot;: &quot;secret&quot;
+}
+</code></pre></div>
+<p>Then log into your server, transfer the file to some location, <code>cd</code> to it, and run:</p>
+<div class="highlight"><pre><span></span><code>python3 /opt/jans/jans-cli/config-cli.py --operation-id=post-config-smtp --data path/to/your/file.json
+</code></pre></div>
+<p>If you had previously set a configuration, you may have to pass <code>put-config-smtp</code> instead for <code>operation-id</code>.</p>
 <h2 id="combined-registration-and-authentication-flow">Combined registration and authentication flow<a class="headerlink" href="#combined-registration-and-authentication-flow" title="Permanent link">#</a></h2>
 <p>In this flow features like <a href="../dsl-full/#template-overrides">template overrides</a> and <a href="../flows-lifecycle/#cancellation">flow cancellation</a> are leveraged to bring a more sophisticated authentication journey. A description follows:</p>
 <ul>
@@ -9082,7 +9115,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-02-03T13:56:02+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-02-03</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-03-14T16:22:31+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-03-14</span>
       
         <br>
         Created:
