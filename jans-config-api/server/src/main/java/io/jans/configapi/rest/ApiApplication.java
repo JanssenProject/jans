@@ -136,6 +136,7 @@ public class ApiApplication extends Application {
         classes.add(SessionResource.class);
         classes.add(PluginResource.class);
         classes.add(ConfigApiResource.class);
+        classes.add(ClientAuthResource.class);
 
         return classes;
     }
