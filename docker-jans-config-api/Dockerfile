@@ -43,7 +43,7 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # ==========
 
 ENV CN_VERSION=1.0.10-SNAPSHOT
-ENV CN_BUILD_DATE='2023-03-09 10:26'
+ENV CN_BUILD_DATE='2023-03-15 10:03'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api-server/${CN_VERSION}/jans-config-api-server-${CN_VERSION}.war
 
 # Install Jans Config API
@@ -231,7 +231,7 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_AWS_SECRETS_ENDPOINT_URL="" \
     CN_AWS_SECRETS_PREFIX=jans \
     CN_AWS_SECRETS_REPLICA_FILE="" \
-    CN_CONFIG_API_CREATE_SCOPES=true
+    CN_CONFIG_API_CREATE_SCOPES=false
 
 # ====
 # misc
