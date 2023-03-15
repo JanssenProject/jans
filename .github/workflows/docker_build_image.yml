@@ -89,8 +89,8 @@ jobs:
             DOCKER_FILE_LOCATION=./demos/benchmarking/docker-jans-loadtesting-jmeter
           fi
           MAIN_VERSION=$(python3 -c "from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('$DOCKER_FILE_LOCATION') ; print(dfparser.labels['version'])")
-          DOCKER_IMAGE=janssenproject/${{ matrix.docker-images }}
-          VERSION=${MAIN_VERSION}_dev
+          DOCKER_IMAGE=ghcr.io/${{ github.repository }}/${{ matrix.docker-images }}
+          VERSION=ghcr.io/${{ github.repository }}/${MAIN_VERSION}_dev
           BUILD=true
           if [[ $GITHUB_REF == refs/tags/docker-jans-${{ matrix.docker-images }}-* ]]; then
             VERSION=${GITHUB_REF#refs/tags/docker-jans-${{ matrix.docker-images }}-v}
@@ -168,12 +168,6 @@ jobs:
           username: mo-auto
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@v4
-        with:
-          images: ghcr.io/${{ github.repository }}
-
       - name: Build and push
         if: steps.build_docker_image.outputs.build && steps.prep.outputs.build
         id: docker_build
@@ -192,11 +186,7 @@ jobs:
 
           platforms: linux/amd64
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          #cache-from: type=local,src=/tmp/.buildx-cache
-          #cache-to: type=local,dest=/tmp/.buildx-cache
-
+          tags: ${{ steps.prep.outputs.tags }}
       - name: Image digest
         if: steps.build_docker_image.outputs.build && steps.prep.outputs.build
         run: echo ${{ steps.docker_build.outputs.digest }}
