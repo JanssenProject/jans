@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<Configuration packages="org.gluu.log">
+<Configuration packages="io.jans.log">
     <Properties>
         <Property name="log.console.prefix" value="fido2" />
     </Properties>
@@ -20,7 +20,7 @@
             <DefaultRolloverStrategy max="15" />
         </RollingFile>
 
-		<RollingFile name="PERSISTENCE_FILE" fileName="${sys:log.base}/logs/fido2_persistence.log" filePattern="${sys:log.base}/logs/fido2_persistence-%d{yyyy-MM-dd}-%i.log">
+		<RollingFile name="FIDO2_PERSISTENCE_FILE" fileName="${sys:log.base}/logs/fido2_persistence.log" filePattern="${sys:log.base}/logs/fido2_persistence-%d{yyyy-MM-dd}-%i.log">
             <PatternLayout pattern="%d{dd-MM HH:mm:ss.SSS} %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
 
 			<Policies>
@@ -28,6 +28,26 @@
 				<SizeBasedTriggeringPolicy size="250 MB" />
 			</Policies>
 			<DefaultRolloverStrategy max="15" />
+		</RollingFile>
+
+		<RollingFile name="FIDO2_PERSISTENCE_DURATION_FILE" fileName="${sys:log.base}/logs/fido2_persistence_duration.log" filePattern="${sys:log.base}/logs/fido2_persistence_duration-%d{yyyy-MM-dd}-%i.log">
+			<PatternLayout pattern="%d %-5p [%t] %X{X-Correlation-Id} [%C{6}] (%F:%L) - %m%n" />
+
+			<Policies>
+				<TimeBasedTriggeringPolicy interval="1" modulate="true" />
+				<SizeBasedTriggeringPolicy size="250 MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="30" />
+		</RollingFile>
+
+		<RollingFile name="FIDO2_SCRIPT_LOG_FILE" fileName="${sys:log.base}/logs/fido2_script.log" filePattern="${sys:log.base}/logs/fido2_script-%d{yyyy-MM-dd}-%i.log">
+			<PatternLayout pattern="%d %-5p [%t] %X{X-Correlation-Id} [%C{6}] (%F:%L) - %m%n" />
+
+			<Policies>
+				<TimeBasedTriggeringPolicy interval="1" modulate="true" />
+				<SizeBasedTriggeringPolicy size="250 MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="30" />
 		</RollingFile>
     </Appenders>
 
@@ -53,6 +73,37 @@
             <Property name="log.console.group">-persistence</Property>
 			<AppenderRef ref="$persistence_log_target" />
 		</logger>
+
+		<Logger name="io.jans.orm.ldap.operation.watch" level="$persistence_duration_log_level" additivity="false">
+            <Property name="log.console.group">-persistence-duration</Property>
+			<AppenderRef ref="$persistence_duration_log_target" />
+		</Logger>
+
+		<Logger name="io.jans.orm.couchbase.operation.watch" level="$persistence_duration_log_level" additivity="false">
+            <Property name="log.console.group">-persistence-duration</Property>
+			<AppenderRef ref="$persistence_duration_log_target" />
+		</Logger>
+
+		<Logger name="io.jans.orm.watch" level="$persistence_duration_log_level" additivity="false">
+            <Property name="log.console.group">-persistence-duration</Property>
+			<AppenderRef ref="$persistence_duration_log_target" />
+		</Logger>
+
+		<Logger name="io.jans.service.PythonService" level="$script_log_level" additivity="false">
+            <Property name="log.console.group">-script</Property>
+			<AppenderRef ref="$script_log_target" />
+		</Logger>
+
+		<Logger name="io.jans.service.custom.script" level="$script_log_level" additivity="false">
+            <Property name="log.console.group">-script</Property>
+			<AppenderRef ref="$script_log_target" />
+		</Logger>
+
+		<Logger name="io.jans.fido2.service.shared" level="$script_log_level" additivity="false">
+            <Property name="log.console.group">-script</Property>
+			<AppenderRef ref="$script_log_target" />
+		</Logger>
+
 
         <Root level="INFO">
 			<AppenderRef ref="STDOUT" />

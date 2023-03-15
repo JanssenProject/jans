@@ -11,11 +11,9 @@ import io.jans.as.common.model.ssa.Ssa;
 import io.jans.as.common.model.ssa.SsaState;
 import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.config.Constants;
-import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.ssa.SsaErrorResponseType;
 import io.jans.as.model.ssa.SsaScopeType;
-import io.jans.as.server.service.AttributeService;
 import io.jans.as.server.service.external.ModifySsaResponseService;
 import io.jans.as.server.service.external.context.ModifySsaResponseContext;
 import io.jans.as.server.ssa.ws.rs.SsaContextBuilder;
@@ -59,12 +57,6 @@ public class SsaRevokeAction {
     @Inject
     private SsaContextBuilder ssaContextBuilder;
 
-    @Inject
-    private AppConfiguration appConfiguration;
-
-    @Inject
-    private AttributeService attributeService;
-
     /**
      * Revoked existing active SSA based on "jti" or "org_id".
      *
@@ -90,7 +82,7 @@ public class SsaRevokeAction {
      * @param httpRequest Http request
      * @return {@link Response} with status {@code 200 (Ok)} if SSA has been revoked.
      */
-    public Response revoke(String jti, Long orgId, HttpServletRequest httpRequest) {
+    public Response revoke(String jti, String orgId, HttpServletRequest httpRequest) {
         log.debug("Attempting to revoke ssa, jti: '{}', orgId: {}", jti, orgId);
 
         errorResponseFactory.validateFeatureEnabled(FeatureFlagType.SSA);
@@ -113,7 +105,7 @@ public class SsaRevokeAction {
                 log.info("Ssa jti: '{}' updated status to '{}'", ssa.getId(), ssa.getState().getValue());
             }
 
-            ModifySsaResponseContext context = ssaContextBuilder.buildModifySsaResponseContext(httpRequest, null, client, appConfiguration, attributeService);
+            ModifySsaResponseContext context = ssaContextBuilder.buildModifySsaResponseContext(httpRequest, client);
             modifySsaResponseService.revoke(ssaList, context);
 
         } catch (WebApplicationException e) {
@@ -136,11 +128,11 @@ public class SsaRevokeAction {
     /**
      * Validate "jti" or "org_id" parameters
      *
-     * @param jti Unique identifier
+     * @param jti   Unique identifier
      * @param orgId Organization ID
      * @return true if the parameters are valid or false otherwise.
      */
-    private boolean isNotValidParam(String jti, Long orgId) {
-        return StringUtils.isBlank(jti) && orgId == null;
+    private boolean isNotValidParam(String jti, String orgId) {
+        return StringUtils.isBlank(jti) && StringUtils.isBlank(orgId);
     }
 }

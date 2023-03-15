@@ -27,6 +27,7 @@ get_prometheus_lib
 python3 /app/scripts/wait.py
 python3 /app/scripts/bootstrap.py
 python3 /app/scripts/mod_context.py jans-fido2
+python3 /app/scripts/upgrade.py
 
 cd /opt/jans/jetty/jans-fido2
 exec java \
@@ -39,6 +40,7 @@ exec java \
     -Dlog.base=/opt/jans/jetty/jans-fido2 \
     -Djava.io.tmpdir=/tmp \
     -Dlog4j2.configurationFile=resources/log4j2.xml \
+    -Dpython.home=/opt/jython \
     $(get_prometheus_opt) \
     ${CN_JAVA_OPTIONS} \
     -jar /opt/jetty/start.jar jetty.deploy.scanInterval=0 jetty.httpConfig.sendServerVersion=false

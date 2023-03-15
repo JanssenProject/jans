@@ -21,8 +21,14 @@ from prompt_toolkit.widgets import (
     TextArea
 )
 from prompt_toolkit.lexers import PygmentsLexer, DynamicLexer
+from prompt_toolkit.buffer import Buffer
+from prompt_toolkit.application import Application
+
 from utils.static import DialogResult, cli_style, common_strings
 from utils.utils import DialogUtils
+from utils.utils import common_data
+from utils.multi_lang import _
+
 from wui_components.jans_nav_bar import JansNavBar
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from wui_components.jans_drop_down import DropDownWidget
@@ -30,10 +36,15 @@ from wui_components.jans_cli_dialog import JansGDialog
 from view_property import ViewProperty
 from edit_client_dialog import EditClientDialog
 from edit_scope_dialog import EditScopeDialog
-from prompt_toolkit.buffer import Buffer
-from prompt_toolkit.application import Application
-from utils.multi_lang import _
+from ssa import SSA
+from agama import Agama
+from defaults import Defaults
+from attributes import Attributes
 
+from prompt_toolkit.widgets import (
+    HorizontalLine,
+    VerticalLine,
+)
 QUESTION_TEMP = "\n {} ?"
 
 class Plugin(DialogUtils):
@@ -53,8 +64,12 @@ class Plugin(DialogUtils):
         self.name = '[A]uth Server'
         self.search_text= None
         self.oauth_update_properties_start_index = 0
-        self.app_configuration = {}
+        self.ssa = SSA(app)
+        self.agama = Agama(app)
+        self.defaults = Defaults(app)
+        self.attributes = Attributes(app)
         self.oauth_containers = {}
+
         self.oauth_prepare_navbar()
         self.oauth_prepare_containers()
         self.oauth_nav_selection_changed(self.nav_bar.navbar_entries[0][0])
@@ -66,9 +81,14 @@ class Plugin(DialogUtils):
         self.app.create_background_task(self.get_appconfiguration())
         self.schema = self.app.cli_object.get_schema_from_reference('', '#/components/schemas/AppConfiguration')
 
+        if not hasattr(common_data, 'scopes'):
+            self.app.create_background_task(self.retrieve_sopes())
+
+        self.ssa.init_cli_object()
+
     async def get_appconfiguration(self) -> None:
         'Coroutine for getting application configuration.'
-         
+
         cli_args = {'operation_id': 'get-properties'}
         response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
 
@@ -76,8 +96,21 @@ class Plugin(DialogUtils):
             self.app.show_message(_("Error getting Jans configuration"), str(response.text), tobefocused=self.app.center_frame)
             return
 
-        self.app_configuration = response.json()
+        self.app.app_configuration = response.json()
         self.oauth_logging()
+
+
+    async def retrieve_sopes(self) -> None:
+        """asyncio corotune for retreiving scopes
+        """
+        self.app.logger.debug("retreiving scopes")
+        cli_args = {'operation_id': 'get-oauth-scopes', 'endpoint_args': 'limit:200,startIndex:0'}
+        response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+        common_data.scopes = response.json()['entries']
+        self.app.logger.debug("scopes retreived")
+
+    def on_cli_object_ready(self):
+        self.defaults.on_cli_object_ready()
 
     def process(self):
         """No pre-processing for this plugin.
@@ -119,7 +152,7 @@ class Plugin(DialogUtils):
                         self.app.getButton(text=_("Get Clients"), name='oauth:clients:get', jans_help=_("Retreive first {} OpenID Connect clients").format(self.app.entries_per_page), handler=self.oauth_update_clients),
                         self.app.getTitledText(_("Search"), name='oauth:clients:search', jans_help=_(common_strings.enter_to_search), accept_handler=self.search_clients,style='class:outh_containers_clients.text'),
                         self.app.getButton(text=_("Add Client"), name='oauth:clients:add', jans_help=_("To add a new client press this button"), handler=self.add_client),
-                        
+
                         ],
                         padding=3,
                         width=D(),
@@ -140,19 +173,30 @@ class Plugin(DialogUtils):
 
         self.oauth_containers['properties'] = HSplit([
                     VSplit([
-                        self.app.getTitledText(
-                            _("Search"), 
-                            name='oauth:properties:search', 
-                            jans_help=_(common_strings.enter_to_search), 
-                            accept_handler=self.search_properties,
-                            style='class:outh_containers_scopes.text')
+                            self.app.getTitledText(
+                                _("Search"), 
+                                name='oauth:properties:search', 
+                                jans_help=_(common_strings.enter_to_search), 
+                                accept_handler=self.search_properties,
+                                style='class:outh_containers_scopes.text'
+                            ),
+                            self.app.getButton(
+                                _("Add Property"),
+                                name='oauth:properties:add',
+                                jans_help=_("Press this button to add a missing preperty"),
+                                handler=self.add_property
+                            ),
                         ],
-                        padding=3,
-                        width=D(),
+                    padding=3,
+                    width=D(),
                     ),
                     DynamicContainer(lambda: self.oauth_data_container['properties'])
                     ],style='class:outh_containers_scopes')
 
+        self.oauth_containers['ssa'] = self.ssa.main_container
+        self.oauth_containers['agama'] = self.agama.main_container
+        self.oauth_containers['defaults'] = self.defaults.main_container
+        self.oauth_containers['attributes'] = self.attributes.main_container
         self.oauth_containers['logging'] = DynamicContainer(lambda: self.oauth_data_container['logging'])
 
         self.oauth_main_container = HSplit([
@@ -168,7 +212,7 @@ class Plugin(DialogUtils):
         """
         self.nav_bar = JansNavBar(
                     self.app,
-                    entries=[('clients', 'C[l]ients'), ('scopes', 'Sc[o]pes'), ('keys', '[K]eys'), ('defaults', '[D]efaults'), ('properties', 'Properti[e]s'), ('logging', 'Lo[g]ging')],
+                    entries=[('clients', 'C[l]ients'), ('scopes', 'Sc[o]pes'), ('keys', '[K]eys'), ('defaults', '[D]efaults'), ('properties', 'Properti[e]s'), ('logging', 'Lo[g]ging'), ('ssa', '[S]SA'), ('agama', 'Aga[m]a'), ('attributes', 'A[t]tributes')],
                     selection_changed=self.oauth_nav_selection_changed,
                     select=0,
                     jans_name='oauth:nav_bar'
@@ -234,20 +278,23 @@ class Plugin(DialogUtils):
                 )
 
             if data:
-                clients = JansVerticalNav(
-                    myparent=self.app,
-                    headers=['Client ID', 'Client Name', 'Grant Types', 'Subject Type'],
-                    preferred_size= [0,0,30,0],
-                    data=data,
-                    on_enter=self.edit_client_dialog,
-                    on_display=self.app.data_display_dialog,
-                    on_delete=self.delete_client,
-                    get_help=(self.get_help,'Client'),
-                    selectes=0,
-                    headerColor=cli_style.navbar_headcolor,
-                    entriesColor=cli_style.navbar_entriescolor,
-                    all_data=result['entries']
-                )
+                clients = VSplit([
+                    Label(text=" ",width=1),
+                    JansVerticalNav(
+                        myparent=self.app,
+                        headers=['Client ID', 'Client Name', 'Grant Types', 'Subject Type'],
+                        preferred_size= [0,0,30,0],
+                        data=data,
+                        on_enter=self.edit_client,
+                        on_display=self.app.data_display_dialog,
+                        on_delete=self.delete_client,
+                        get_help=(self.get_help,'Client'),
+                        selectes=0,
+                        headerColor=cli_style.navbar_headcolor,
+                        entriesColor=cli_style.navbar_entriescolor,
+                        all_data=result['entries']
+                    )
+                ])
                 buttons = []
                 if start_index > 0:
                     handler_partial = partial(self.oauth_update_clients, start_index-self.app.entries_per_page, pattern)
@@ -273,6 +320,47 @@ class Plugin(DialogUtils):
                 self.app.show_message(_("Oops"), _(common_strings.no_matching_result),tobefocused = self.oauth_containers['clients'])
 
         asyncio.ensure_future(coroutine())
+
+
+    def get_scopes(self, client_data) -> None:
+
+        async def coroutine():
+            cli_args = {'operation_id': 'get-oauth-scopes', 'endpoint_args':'limit:200,startIndex:0'}
+            self.app.start_progressing(_("Retreiving client Scopes..."))
+            response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+            self.app.stop_progressing()
+
+            if response.status_code not in (200, 201):
+                self.app.show_message(_("Error getting client Scopes"), str(response.text),tobefocused=self.oauth_containers['clients'])
+                return
+
+            try:
+                result = response.json()
+            except Exception:
+                self.app.show_message(_("Error getting client Scopes"), str(response.text),tobefocused=self.oauth_containers['clients'])
+                return
+
+            data_display_name =[]
+            data_base_dn =[]
+
+            for d in result.get('entries', []):
+                data_display_name.append(d.get('displayName',d.get('baseDn')))
+                data_base_dn.append(d.get('baseDn'))
+
+
+
+            for client_num in range(len(client_data)):
+
+                for scope_dn_num in range(len(client_data[client_num]['scopes'])):
+                    if client_data[client_num]['scopes'][scope_dn_num] in data_base_dn:
+
+                        index = data_base_dn.index(client_data[client_num]['scopes'][scope_dn_num])
+
+                        client_data[client_num]['scopes'][scope_dn_num] = [data_display_name[index],data_base_dn[index].replace(',ou=scopes,o=jans','')]
+
+
+        asyncio.ensure_future(coroutine())
+        return client_data
 
     def delete_client(self, **kwargs: Any) -> None:
         """This method for the deletion of the clients data
@@ -355,20 +443,23 @@ class Plugin(DialogUtils):
 
             if data:
 
-                scopes = JansVerticalNav(
-                        myparent=self.app,
-                        headers=['id', 'Description', 'Type','inum'],
-                        preferred_size= [30,40,8,12],
-                        data=data,
-                        on_enter=self.edit_scope_dialog,
-                        on_display=self.app.data_display_dialog,
-                        on_delete=self.delete_scope,
-                        get_help=(self.get_help,'Scope'),
-                        selectes=0,
-                        headerColor=cli_style.navbar_headcolor,
-                        entriesColor=cli_style.navbar_entriescolor,
-                        all_data=result['entries']
-                    )
+                scopes =VSplit([
+                    Label(text=" ",width=1),
+                    JansVerticalNav(
+                            myparent=self.app,
+                            headers=['id', 'Description', 'Type','inum'],
+                            preferred_size= [30,40,8,12],
+                            data=data,
+                            on_enter=self.edit_scope_dialog,
+                            on_display=self.app.data_display_dialog,
+                            on_delete=self.delete_scope,
+                            get_help=(self.get_help,'Scope'),
+                            selectes=0,
+                            headerColor=cli_style.navbar_headcolor,
+                            entriesColor=cli_style.navbar_entriescolor,
+                            all_data=result['entries']
+                        )
+                ])
 
                 buttons = []
                 if start_index > 0:
@@ -396,6 +487,53 @@ class Plugin(DialogUtils):
 
         asyncio.ensure_future(coroutine())
 
+
+    def add_property(self):
+        missing_properties = []
+
+        for prop in self.schema['properties']:
+            if prop not in self.app.app_configuration:
+                missing_properties.append(prop)
+        missing_properties.sort()
+        missing_properties_data = [ [prop] for prop in missing_properties ]
+
+        def add_property(**params: Any) -> None:
+            self.add_property_dialog.future.set_result('add_property')
+            prop_name = params['passed'][0]
+            prop_val = ''
+            prop_type = self.schema['properties'][prop_name]['type']
+
+            if prop_type == 'string':
+                prop_val = ''
+            elif prop_type == 'array':
+                prop_val = []
+
+            passed = [prop_name, prop_val]
+
+            self.view_property(passed=passed, op_type='add')
+
+        properties = VSplit([
+                Label(text=" ",width=1),
+                JansVerticalNav(
+                        myparent=self.app,
+                        headers=['Property Name'],
+                        preferred_size=[0],
+                        data=missing_properties_data,
+                        on_enter=add_property,
+                        get_help=(self.get_help,'AppConfiguration'),
+                        selectes=0,
+                        headerColor=cli_style.navbar_headcolor,
+                        entriesColor=cli_style.navbar_entriescolor,
+                        all_data=missing_properties
+                    )
+        ])
+
+        body = HSplit([properties])
+        buttons = [Button(_("Cancel"))]
+        self.add_property_dialog = JansGDialog(self.app, title=_("Select Property"), body=body, buttons=buttons)
+        self.app.show_jans_dialog(self.add_property_dialog)
+
+
     def oauth_update_properties(
         self,
         start_index: Optional[int]= 0,
@@ -415,29 +553,16 @@ class Plugin(DialogUtils):
         # ------------------------------------------------------------------------------- #
         # ----------------------------------- Search ------------------------------------ #
         # ------------------------------------------------------------------------------- #
-        porp_schema = self.app.cli_object.get_schema_from_reference('', '#/components/schemas/AppConfiguration')
 
         data =[]
         
         if pattern:
-            for k in self.app_configuration:
+            for k in self.app.app_configuration:
                 if pattern.lower() in k.lower():
-                    if k in porp_schema.get('properties', {}):
-                        data.append(
-                            [
-                            k,
-                            self.app_configuration[k],
-                            ]
-                        )
+                    data.append([k, self.app.app_configuration[k]])
         else:
-            for d in self.app_configuration:
-                if d in porp_schema.get('properties', {}):
-                    data.append(
-                        [
-                        d,
-                        self.app_configuration[d],
-                        ]
-                    )
+            for d in self.app.app_configuration:
+                data.append([d, self.app.app_configuration[d]])
 
         # ------------------------------------------------------------------------------- #
         # --------------------------------- View Data ----------------------------------- #
@@ -445,9 +570,10 @@ class Plugin(DialogUtils):
 
 
         if data:
+            data.sort()
             buttons = []
 
-            if len(data)/20 >=1:
+            if len(data) > 20:
 
                 if start_index!=0:
                     handler_partial = partial(self.oauth_update_properties, start_index-1, pattern)
@@ -463,19 +589,23 @@ class Plugin(DialogUtils):
 
             data_now = data[start_index*20:start_index*20+20]
 
-            properties = JansVerticalNav(
-                myparent=self.app,
-                headers=['Property Name', 'Property Value'],
-                preferred_size= [0,0],
-                data=data_now,
-                on_enter=self.view_property,
-                on_display=self.properties_display_dialog,
-                get_help=(self.get_help,'AppConfiguration'),
-                selectes=0,
-                headerColor=cli_style.navbar_headcolor,
-                entriesColor=cli_style.navbar_entriescolor,
-                all_data=list(self.app_configuration.values())
+            properties =VSplit([
+                Label(text=" ",width=1),
+                JansVerticalNav(
+                    myparent=self.app,
+                    headers=['Property Name', 'Property Value'],
+                    preferred_size= [0,0],
+                    data=data_now,
+                    on_enter=self.view_property,
+                    on_display=self.properties_display_dialog,
+                    get_help=(self.get_help,'AppConfiguration'),
+                    selectes=0,
+                    headerColor=cli_style.navbar_headcolor,
+                    entriesColor=cli_style.navbar_entriescolor,
+                    all_data=list(self.app.app_configuration.values())
             )
+            ])
+
 
             self.oauth_data_container['properties'] = HSplit([
                 properties,
@@ -485,7 +615,7 @@ class Plugin(DialogUtils):
             if tofocus:
                 self.app.layout.focus(properties)
         else:
-            self.app.show_message(_("Oops"), _(common_strings.no_matching_result),tobefocused = self.oauth_containers['properties'])
+            self.app.show_message(_("Oops"), _(common_strings.no_matching_result), tobefocused= self.oauth_containers['properties'])
 
     def properties_display_dialog(self, **params: Any) -> None:
         """Display the properties as Text
@@ -515,7 +645,7 @@ class Plugin(DialogUtils):
 
         title = _("Edit property")
 
-        dialog = ViewProperty(app=self.app, parent=self, title=title, data=selected_line_data)
+        dialog = ViewProperty(app=self.app, parent=self, title=title, data=selected_line_data, op_type=params.get('op_type', 'replace'))
 
         self.app.show_jans_dialog(dialog)
  
@@ -547,22 +677,26 @@ class Plugin(DialogUtils):
                 [
                 d['name'],
                 exps,
+                d['kid']
                 ]
             )
 
         if data:
 
-            keys = JansVerticalNav(
+            keys = VSplit([
+                Label(text=" ",width=1),
+                JansVerticalNav(
                     myparent=self.app,
-                    headers=['Name', 'Expiration'],
+                    headers=['Name', 'Expiration','Kid'],
                     data=data,
-                    preferred_size=[0,0],
+                    preferred_size=[0,0,0],
                     on_display=self.app.data_display_dialog,
                     selectes=0,
                     headerColor=cli_style.navbar_headcolor,
                     entriesColor=cli_style.navbar_entriescolor,
                     all_data=self.jwks_keys['keys']
                 )
+            ])
 
             self.oauth_data_container['keys'] = HSplit([keys])
             get_app().invalidate()
@@ -588,19 +722,26 @@ class Plugin(DialogUtils):
     def edit_scope_dialog(self, **params: Any) -> None:
         """This Method show the scopes dialog for edit
         """
-        selected_line_data = params['data']  
+        selected_line_data = params['data']
 
         dialog = EditScopeDialog(self.app, title=_("Edit Scopes"), data=selected_line_data, save_handler=self.save_scope)
         self.app.show_jans_dialog(dialog)
 
-    def edit_client_dialog(self, **params: Any) -> None:
+    def edit_client(self, **params: Any) -> None:
         """This Method show the scopes dialog for edit
         """
-        selected_line_data = params['data']  
-        title = _("Edit user Data (Clients)")
+        selected_line_data = params['data']
+        title = _("Edit Clients")
 
-        self.EditClientDialog = EditClientDialog(self.app, title=title, data=selected_line_data, save_handler=self.save_client, delete_uma_resource=self.delete_uma_resource)
-        self.app.show_jans_dialog(self.EditClientDialog)
+        self.edit_client_dialog = EditClientDialog(
+                                parent=self.app,
+                                title=title,
+                                data=selected_line_data,
+                                save_handler=self.save_client,
+                                delete_uma_resource=self.delete_uma_resource
+                                )
+
+        self.app.show_jans_dialog(self.edit_client_dialog)
 
     def save_client(self, dialog: Dialog) -> None:
         """This method to save the client data to server
@@ -612,21 +753,22 @@ class Plugin(DialogUtils):
             _type_: bool value to check the status code response
         """
 
+        async def coroutine():
+            self.app.start_progressing(_("Saving clinet ..."))
+            operation_id='put-oauth-openid-client' if dialog.data.get('inum') else 'post-oauth-openid-client'
+            cli_args = {'operation_id': operation_id, 'data': dialog.data}
+            response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
 
-        response = self.app.cli_object.process_command_by_id(
-            operation_id='put-oauth-openid-client' if dialog.data.get('inum') else 'post-oauth-openid-client',
-            url_suffix='',
-            endpoint_args='',
-            data_fn='',
-            data=dialog.data
-        )
-  
-        self.app.stop_progressing()
-        if response.status_code in (200, 201):
-            self.oauth_update_clients()
-            return None
+            dialog.future.set_result(DialogResult.ACCEPT)
+            self.app.stop_progressing()
 
-        self.app.show_message(_("Error!"), _("An error ocurred while saving client:\n") + str(response.text))
+            if response.status_code in (200, 201):
+                self.oauth_update_clients()
+            else:
+                self.app.show_message(_("Error!"), _("An error ocurred while saving client:\n") + str(response.text), tobefocused=self.app.center_frame)
+
+        asyncio.ensure_future(coroutine())
+
 
     def save_scope(self, dialog: Dialog) -> None:
         """This method to save the client data to server
@@ -648,11 +790,12 @@ class Plugin(DialogUtils):
             if response.status_code == 500:
                 self.app.show_message(_('Error'), response.text + '\n' + response.reason)
             else:
+                self.app.create_background_task(self.retrieve_sopes())
                 self.oauth_get_scopes()
 
         asyncio.ensure_future(coroutine())
 
-    def search_scope(self, tbuffer:Buffer,) -> None:
+    def search_scope(self, tbuffer:Buffer) -> None:
         """This method handel the search for Scopes
 
         Args:
@@ -661,7 +804,7 @@ class Plugin(DialogUtils):
 
         self.oauth_get_scopes(pattern=tbuffer.text)
 
-    def search_clients(self, tbuffer:Buffer,) -> None:
+    def search_clients(self, tbuffer:Buffer) -> None:
         """This method handel the search for Clients
 
         Args:
@@ -726,6 +869,7 @@ class Plugin(DialogUtils):
                     data={}
                 )
                 self.oauth_get_scopes()
+                self.app.create_background_task(self.retrieve_sopes())
             return result
 
         asyncio.ensure_future(coroutine())
@@ -743,7 +887,7 @@ class Plugin(DialogUtils):
             try:
                 self.app.layout.focus(focused_before)
             except Exception:
-                self.app.layout.focus(self.EditClientDialog)
+                self.app.layout.focus(self.edit_client_dialog)
 
             if result.lower() == 'yes':
                 result = self.app.cli_object.process_command_by_id(
@@ -753,7 +897,7 @@ class Plugin(DialogUtils):
                     data_fn=None,
                     data={}
                     )
-                self.EditClientDialog.oauth_get_uma_resources()
+                self.edit_client_dialog.oauth_get_uma_resources()
 
             return result
 
@@ -768,7 +912,7 @@ class Plugin(DialogUtils):
                                 name='loggingLevel',
                                 widget=DropDownWidget(
                                     values=[('TRACE', 'TRACE'), ('DEBUG', 'DEBUG'), ('INFO', 'INFO'), ('WARN', 'WARN'), ('ERROR', 'ERROR'), ('FATAL', 'FATAL'), ('OFF', 'OFF')],
-                                    value=self.app_configuration.get('loggingLevel')
+                                    value=self.app.app_configuration.get('loggingLevel')
                                     ),
                                 jans_help=self.app.get_help_from_schema(self.schema, 'loggingLevel'),
                                 ),
@@ -777,28 +921,28 @@ class Plugin(DialogUtils):
                                 name='loggingLayout',
                                 widget=DropDownWidget(
                                     values=[('text', 'text'), ('json', 'json')],
-                                    value=self.app_configuration.get('loggingLayout')
+                                    value=self.app.app_configuration.get('loggingLayout')
                                     ),
                                 jans_help=self.app.get_help_from_schema(self.schema, 'loggingLayout'),
                                 ),
                         self.app.getTitledCheckBox(
                             _("Enable HTTP Logging"), 
                             name='httpLoggingEnabled',
-                            checked=self.app_configuration.get('httpLoggingEnabled'),
+                            checked=self.app.app_configuration.get('httpLoggingEnabled'),
                             jans_help=self.app.get_help_from_schema(self.schema, 'httpLoggingEnabled'),
                             style=cli_style.check_box
                             ),
                         self.app.getTitledCheckBox(
                             _("Disable JDK Logger"), 
                             name='disableJdkLogger',
-                            checked=self.app_configuration.get('disableJdkLogger'),
+                            checked=self.app.app_configuration.get('disableJdkLogger'),
                             jans_help=self.app.get_help_from_schema(self.schema, 'disableJdkLogger'),
                             style=cli_style.check_box
                             ),
                         self.app.getTitledCheckBox(
                             _("Enable Oauth Audit Logging"), 
                             name='enabledOAuthAuditLogging',
-                            checked=self.app_configuration.get('enabledOAuthAuditLogging'),
+                            checked=self.app.app_configuration.get('enabledOAuthAuditLogging'),
                             jans_help=self.app.get_help_from_schema(self.schema, 'enabledOAuthAuditLogging'),
                             style=cli_style.check_box
                             ),
@@ -815,7 +959,7 @@ class Plugin(DialogUtils):
         mod_data = self.make_data_from_dialog({'logging':self.oauth_data_container['logging']})
         pathches = []
         for key_ in mod_data:
-            if self.app_configuration.get(key_) != mod_data[key_]:
+            if self.app.app_configuration.get(key_) != mod_data[key_]:
                 pathches.append({'op':'replace', 'path': key_, 'value': mod_data[key_]})
 
         if pathches:

@@ -74,7 +74,6 @@ import static org.apache.commons.lang.BooleanUtils.isTrue;
 @Named
 public class SessionIdService {
 
-    public static final String SESSION_CUSTOM_STATE = "session_custom_state";
     private static final int MAX_MERGE_ATTEMPTS = 3;
     private static final int DEFAULT_LOCAL_CACHE_EXPIRATION = 2;
 
@@ -335,13 +334,21 @@ public class SessionIdService {
             sessionId = identity.getSessionId().getId();
         }
 
+        SessionId result = null; 
         if (StringHelper.isNotEmpty(sessionId)) {
-            return getSessionId(sessionId);
+        	result = getSessionId(sessionId);
+        	if ((result == null) && identity.getSessionId() != null) {
+        		// Here we cover scenario when user were redirected from /device-code to ACR method
+        		// which call this method in prepareForStep for step 1. The cookie in this case is not updated yet.
+        		// hence actual information about session_id only in identity.
+                sessionId = identity.getSessionId().getId();
+            	result = getSessionId(sessionId);
+        	}
         } else {
             log.trace("Session cookie not exists");
         }
 
-        return null;
+        return result;
     }
 
     public Map<String, String> getSessionAttributes(SessionId sessionId) {

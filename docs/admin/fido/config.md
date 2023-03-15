@@ -42,44 +42,47 @@ Use the following command to obtain configuration parameters:
 Response:
 ```
 {
-   "issuer":"https://.jans.io",
-   "baseEndpoint":"https://my-jans-server.jans.io/jans-fido2/restv1",
-   "cleanServiceInterval":60,
-   "cleanServiceBatchChunkSize":10000,
-   "useLocalCache":true,
-   "disableJdkLogger":true,
-   "loggingLevel":"INFO",
-   "loggingLayout":"text",
-   "externalLoggerConfiguration":"",
-   "metricReporterInterval":300,
-   "metricReporterKeepDataDays":15,
-   "metricReporterEnabled":true,
-   "personCustomObjectClassList":[
-      "jansCustomPerson",
-      "jansPerson"
-   ],
-   "fido2Configuration":{
-      "authenticatorCertsFolder":"/etc/jans/conf/fido2/authenticator_cert",
-      "mdsCertsFolder":"/etc/jans/conf/fido2/mds/cert",
-      "mdsTocsFolder":"/etc/jans/conf/fido2/mds/toc",
-      "serverMetadataFolder":"/etc/jans/conf/fido2/server_metadata",
-      "requestedCredentialTypes":[
-         "RS256",
-         "ES256"
-      ],
-      "requestedParties":[
-         {
-            "name":"https://my-jans-server.jans.io",
-            "domains":[
-               "my-jans-server.jans.io"
-            ]
-         }
-      ],
-      "userAutoEnrollment":false,
-      "unfinishedRequestExpiration":180,
-      "authenticationHistoryExpiration":1296000
-   }
+  "issuer": "https://my.jans.server",
+  "baseEndpoint": "https://my.jans.server/jans-fido2/restv1",
+  "cleanServiceInterval": 60,
+  "cleanServiceBatchChunkSize": 10000,
+  "useLocalCache": true,
+  "disableJdkLogger": true,
+  "loggingLevel": "DEBUG",
+  "loggingLayout": "text",
+  "metricReporterInterval": 300,
+  "metricReporterKeepDataDays": 15,
+  "metricReporterEnabled": true,
+  "personCustomObjectClassList": [
+    "jansCustomPerson",
+    "jansPerson"
+  ],
+  "superGluuEnabled": true,
+  "oldU2fMigrationEnabled": true,
+  "fido2Configuration": {
+    "authenticatorCertsFolder": "/etc/jans/conf/fido2/authenticator_cert",
+    "mdsCertsFolder": "/etc/jans/conf/fido2/mds/cert",
+    "mdsTocsFolder": "/etc/jans/conf/fido2/mds/toc",
+    "checkU2fAttestations": false,
+    "userAutoEnrollment": false,
+    "unfinishedRequestExpiration": 180,
+    "authenticationHistoryExpiration": 1296000,
+    "serverMetadataFolder": "/etc/jans/conf/fido2/server_metadata",
+    "requestedCredentialTypes": [
+      "RS256",
+      "ES256"
+    ],
+    "requestedParties": [
+      {
+        "name": "https://my.jans.server",
+        "domains": [
+          "my.jans.server"
+        ]
+      }
+    ]
+  }
 }
+
 
 ```
 

@@ -325,8 +325,8 @@
     "dynamicRegistrationScopesParamEnabled":true,
     "dynamicRegistrationCustomObjectClass":"",
     "personCustomObjectClassList": %(person_custom_object_class_list)s,
-    "persistIdTokenInLdap":false,
-    "persistRefreshTokenInLdap":true,
+    "persistIdToken":false,
+    "persistRefreshToken":true,
     "authenticationFiltersEnabled":false,
     "invalidateSessionCookiesAfterAuthorizationFlow":false,
     "clientAuthenticationFiltersEnabled":false,
@@ -463,7 +463,8 @@
     "ssaConfiguration": {
         "ssaEndpoint":"https://%(hostname)s/jans-auth/restv1/ssa",
         "ssaSigningAlg": "RS256",
-        "ssaExpirationInDays": 30
+        "ssaExpirationInDays": 30,
+        "ssaCustomAttributes": []
     },
     "cibaEndUserNotificationConfig": {
         "apiKey": "",
@@ -483,7 +484,7 @@
     "redirectUrisRegexEnabled": true,
     "useHighestLevelScriptIfAcrScriptNotFound": true,
     "agamaConfiguration": {
-        "enabled": false,
+        "enabled": true,
         "templatesPath": "/ftl",
         "scriptsPath": "/scripts",
         "serializerType": "KRYO",

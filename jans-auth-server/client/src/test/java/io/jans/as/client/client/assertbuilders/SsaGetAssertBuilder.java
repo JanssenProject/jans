@@ -53,6 +53,7 @@ public class SsaGetAssertBuilder extends BaseAssertBuilder {
                     assertTrue(ssaWrapper.has(CREATED_AT.getName()));
                     assertTrue(ssaWrapper.has(EXPIRATION.getName()));
                     assertTrue(ssaWrapper.has(ISSUER.getName()));
+                    assertTrue(ssaWrapper.has(STATUS.getName()));
 
                     JSONObject ssaJson = ssaWrapper.getJSONObject(SSA.getName());
                     assertNotNull(ssaJson);
@@ -63,6 +64,9 @@ public class SsaGetAssertBuilder extends BaseAssertBuilder {
                     assertTrue(ssaJson.has(SOFTWARE_ROLES.getName()));
                     assertTrue(ssaJson.has(GRANT_TYPES.getName()));
                     assertTrue(ssaJson.has(EXP.getName()));
+                    assertTrue(ssaJson.has(DESCRIPTION.getName()));
+                    assertTrue(ssaJson.has(ONE_TIME_USE.getName()));
+                    assertTrue(ssaJson.has(ROTATE_SSA.getName()));
                 });
             }
         }

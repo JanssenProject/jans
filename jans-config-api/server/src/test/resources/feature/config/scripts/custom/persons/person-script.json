@@ -4,13 +4,13 @@
 	"enabled": false,
 	"internal": false,
 	"level": 30,
-	"locationType": "ldap",
+	"locationType": "db",
 	"modified": false,
 	"moduleProperties": [
 		{
 			"description": "",
 			"value1": "location_type",
-			"value2": "ldap"
+			"value2": "db"
 		},
 		{
 			"description": "",

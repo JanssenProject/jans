@@ -23,6 +23,8 @@ public class TokenAttributes implements Serializable {
 
     @JsonProperty("x5cs256")
     private String x5cs256;
+    @JsonProperty("online_access")
+    private boolean onlineAccess;
     @JsonProperty("attributes")
     private Map<String, String> attributes;
 
@@ -43,11 +45,20 @@ public class TokenAttributes implements Serializable {
         this.x5cs256 = x5cs256;
     }
 
+    public boolean isOnlineAccess() {
+        return onlineAccess;
+    }
+
+    public void setOnlineAccess(boolean onlineAccess) {
+        this.onlineAccess = onlineAccess;
+    }
+
     @Override
     public String toString() {
         return "TokenAttributes{" +
                 "attributes='" + attributes + '\'' +
                 "x5cs256='" + x5cs256 + '\'' +
+                "onlineAccess='" + onlineAccess + '\'' +
                 '}';
     }
 }

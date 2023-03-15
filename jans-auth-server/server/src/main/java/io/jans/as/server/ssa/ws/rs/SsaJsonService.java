@@ -77,10 +77,11 @@ public class SsaJsonService {
             Util.addToJSONObjectIfNotNull(responseJsonObject, CREATED_AT.getName(), DateUtil.dateToUnixEpoch(ssa.getCreationDate()));
             Util.addToJSONObjectIfNotNull(responseJsonObject, EXPIRATION.getName(), DateUtil.dateToUnixEpoch(ssa.getExpirationDate()));
             Util.addToJSONObjectIfNotNull(responseJsonObject, ISSUER.getName(), ssa.getCreatorId());
+            Util.addToJSONObjectIfNotNull(responseJsonObject, STATUS.getName(), ssa.getState());
 
             JSONObject jsonSsa = new JSONObject();
             JsonApplier.getInstance().apply(ssa, jsonSsa);
-            Util.addToJSONObjectIfNotNull(jsonSsa, ORG_ID.getName(), Long.parseLong(ssa.getOrgId()));
+            Util.addToJSONObjectIfNotNull(jsonSsa, ORG_ID.getName(), ssa.getOrgId());
             Util.addToJSONObjectIfNotNull(jsonSsa, SOFTWARE_ID.getName(), ssa.getAttributes().getSoftwareId());
             Util.addToJSONObjectIfNotNull(jsonSsa, SOFTWARE_ROLES.getName(), ssa.getAttributes().getSoftwareRoles());
             Util.addToJSONObjectIfNotNull(jsonSsa, GRANT_TYPES.getName(), ssa.getAttributes().getGrantTypes());
@@ -88,6 +89,12 @@ public class SsaJsonService {
             Util.addToJSONObjectIfNotNull(jsonSsa, IAT.getName(), DateUtil.dateToUnixEpoch(ssa.getCreationDate()));
             Util.addToJSONObjectIfNotNull(jsonSsa, EXP.getName(), DateUtil.dateToUnixEpoch(ssa.getExpirationDate()));
             Util.addToJSONObjectIfNotNull(jsonSsa, JTI.getName(), ssa.getId());
+            Util.addToJSONObjectIfNotNull(jsonSsa, DESCRIPTION.getName(), ssa.getDescription());
+            Util.addToJSONObjectIfNotNull(jsonSsa, ONE_TIME_USE.getName(), ssa.getAttributes().getOneTimeUse());
+            Util.addToJSONObjectIfNotNull(jsonSsa, ROTATE_SSA.getName(), ssa.getAttributes().getRotateSsa());
+            if (!ssa.getAttributes().getCustomAttributes().isEmpty()) {
+                ssa.getAttributes().getCustomAttributes().forEach((key, value) -> Util.addToJSONObjectIfNotNull(jsonSsa, key, value));
+            }
 
             Util.addToJSONObjectIfNotNull(responseJsonObject, SSA.getName(), jsonSsa);
             jsonArray.put(responseJsonObject);

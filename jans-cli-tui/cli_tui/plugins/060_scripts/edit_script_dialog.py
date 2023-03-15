@@ -1,34 +1,28 @@
 from functools import partial
-from prompt_toolkit.layout.dimension import D
-from prompt_toolkit.layout.containers import (
-    HSplit,
-    VSplit,
-    Window
-)
-from prompt_toolkit.widgets import (
-    Button,
-    Label,
-    TextArea,
-    RadioList,
-    Button,
-    Dialog,
-)
-import asyncio
-from prompt_toolkit.lexers import PygmentsLexer
+
+
 from pygments.lexers.python import PythonLexer
+import asyncio
+from typing import Optional, Sequence, Callable, Any
+
 from pygments.lexers.jvm import JavaLexer
+
+from prompt_toolkit.layout.dimension import D
+from prompt_toolkit.layout.containers import HSplit, VSplit, Window
+from prompt_toolkit.lexers import PygmentsLexer
+from prompt_toolkit.formatted_text import AnyFormattedText
+from prompt_toolkit.widgets import Button, Label, TextArea, RadioList,\
+    Button, Dialog, Frame
+
+from utils.multi_lang import _
+from utils.utils import DialogUtils
 from utils.static import DialogResult
 from wui_components.jans_dialog_with_nav import JansDialogWithNav
 from wui_components.jans_cli_dialog import JansGDialog
 from wui_components.jans_drop_down import DropDownWidget
-from utils.utils import DialogUtils
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from wui_components.jans_spinner import Spinner
-from prompt_toolkit.formatted_text import AnyFormattedText
-from typing import Optional, Sequence
-from typing import Callable
-from typing import Any, Optional
-from utils.multi_lang import _
+from wui_components.jans_path_browser import jans_file_browser_dialog, BrowseType
 
 class EditScriptDialog(JansGDialog, DialogUtils):
     """This Script editing dialog
@@ -96,16 +90,26 @@ class EditScriptDialog(JansGDialog, DialogUtils):
         data['script'] = self.script
 
         if data['locationType'] != 'file':
-            data.pop('locationPath', None)
+            data['locationType'] = 'db'
+
+        if not 'moduleProperties' in data:
+            data['moduleProperties'] = []
+
+        for prop in data['moduleProperties'][:]:
+            if prop['value1'] == 'location_type':
+                data['moduleProperties'].remove(prop)
+
+        data['moduleProperties'].append({'value1': 'location_type', 'value2': data['locationType']})
 
         if self.data.get('baseDn'):
             data['baseDn'] = self.data['baseDn']
 
         self.new_data = data
-
         close_me = True
+
         if self.save_handler:
             close_me = self.save_handler(self)
+
         if close_me:
             self.future.set_result(DialogResult.ACCEPT)
 
@@ -187,6 +191,8 @@ class EditScriptDialog(JansGDialog, DialogUtils):
 
         module_properties_data = []
         for prop in self.data.get('moduleProperties', []):
+            if prop['value1'] == 'location_type':
+                continue
             module_properties_data.append([prop['value1'], prop.get('value2', '')])
 
         self.module_properties_container = JansVerticalNav(
@@ -212,6 +218,10 @@ class EditScriptDialog(JansGDialog, DialogUtils):
         open_editor_button = Button(text=open_editor_button_title, width=len(open_editor_button_title)+2, handler=self.edit_script_dialog)
         open_editor_button.window.jans_help="Enter to open editing window"
 
+        import_script_button_title = _("Import Script")
+        import_script_button = Button(text=import_script_button_title, width=len(import_script_button_title)+2, handler=self.import_script_dialog)
+        import_script_button.window.jans_help="Enter to import script for local file"
+
         self.edit_dialog_content = [
                     self.myparent.getTitledText(_("Inum"), name='inum', value=self.data.get('inum',''), style='class:script-titledtext', jans_help=self.myparent.get_help_from_schema(schema, 'inum'), read_only=True),
                     self.myparent.getTitledWidget(
@@ -228,11 +238,12 @@ class EditScriptDialog(JansGDialog, DialogUtils):
                     self.myparent.getTitledText(_("Name"), name='name', value=self.data.get('name',''), style='class:script-titledtext', jans_help=self.myparent.get_help_from_schema(schema, 'name')),
                     self.myparent.getTitledText(_("Description"), name='description', value=self.data.get('description',''), style='class:script-titledtext', jans_help=self.myparent.get_help_from_schema(schema, 'description')),
 
+
                     self.myparent.getTitledRadioButton(
                             _("Location"),
                             name='locationType',
-                            values=[('ldap', _("Database")), ('file', _("File System"))],
-                            current_value= 'file' if self.data.get('locationType') == 'file' else 'ldap',
+                            values=[('db', _("Database")), ('file', _("File System"))],
+                            current_value= 'file' if self.data.get('locationType') == 'file' else 'db',
                             jans_help=_("Where to save script"),
                             style='class:outh-client-radiobutton',
                             on_selection_changed=self.script_location_changed,
@@ -283,7 +294,7 @@ class EditScriptDialog(JansGDialog, DialogUtils):
                             ],
                              height=5
                             ),
-                    VSplit([open_editor_button, Window(width=D())]),
+                    VSplit([open_editor_button, import_script_button, Window(width=D())], padding=2),
                     ]
 
 
@@ -298,7 +309,7 @@ class EditScriptDialog(JansGDialog, DialogUtils):
             height=self.myparent.dialog_height,
             width=self.myparent.dialog_width,
             )
-    
+
     def get_help(self, **kwargs: Any):
         """This method get focused field Description to display on statusbar
         """
@@ -395,7 +406,7 @@ class EditScriptDialog(JansGDialog, DialogUtils):
             result = await self.myparent.show_dialog_as_float(dialog)
             try:
                 self.myparent.layout.focus(focused_before)
-            except:
+            except Exception:
                 self.myparent.stop_progressing()
                 self.myparent.layout.focus(self.myparent.center_frame)
 
@@ -405,11 +416,29 @@ class EditScriptDialog(JansGDialog, DialogUtils):
                 else:
                     self.module_properties_container.remove_item(kwargs['selected'])
                 self.myparent.stop_progressing()
-                
+
             return result
 
         asyncio.ensure_future(coroutine())
 
+
+
+    def import_script_dialog(self) -> None:
+
+        def set_script(path):
+            with open(path, 'rb') as f:
+                script_content = f.read()
+            self.script = script_content.decode()
+
+        def open_file_browser_dialog(dialog=None):
+            file_browser_dialog = jans_file_browser_dialog(self.myparent, path=self.myparent.browse_path, browse_type=BrowseType.file, ok_handler=set_script)
+            self.myparent.show_jans_dialog(file_browser_dialog)
+
+        if self.script:
+            dialog = self.myparent.get_confirm_dialog(_("Are you sure want to replace script?"), confirm_handler=open_file_browser_dialog)
+            self.myparent.show_jans_dialog(dialog)
+        else:
+            open_file_browser_dialog()
 
 
     def edit_script_dialog(self) -> None:
@@ -424,6 +453,7 @@ class EditScriptDialog(JansGDialog, DialogUtils):
                 focusable=True,
                 scrollbar=True,
                 line_numbers=True,
+                wrap_lines=False,
                 lexer=PygmentsLexer(PythonLexer if self.cur_lang == 'PYTHON' else JavaLexer),
             )
 

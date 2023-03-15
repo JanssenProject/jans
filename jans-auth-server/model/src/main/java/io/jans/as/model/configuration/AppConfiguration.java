@@ -367,11 +367,11 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "This list details LDAP custom object classes for dynamic person enrollment")
     private List<String> personCustomObjectClassList;
 
-    @DocProperty(description = "Specifies whether to persist id_token into LDAP (otherwise saves into cache)", defaultValue = "false")
-    private Boolean persistIdTokenInLdap = false;
+    @DocProperty(description = "Specifies whether to persist id_token (otherwise saves into cache)", defaultValue = "false")
+    private Boolean persistIdToken = false;
 
-    @DocProperty(description = "Specifies whether to persist refresh_token into LDAP (otherwise saves into cache)", defaultValue = "true")
-    private Boolean persistRefreshTokenInLdap = true;
+    @DocProperty(description = "Specifies whether to persist refresh_token (otherwise saves into cache)", defaultValue = "true")
+    private Boolean persistRefreshToken = true;
 
     @DocProperty(description = "Allows post-logout redirect without validation for the End Session endpoint (still AS validates it against clientWhiteList url pattern property)", defaultValue = "false")
     private Boolean allowPostLogoutRedirectWithoutValidation = false;
@@ -381,6 +381,9 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "Boolean value specifying whether a client_secret is returned on client GET or PUT. Set to true by default which means to return secret", defaultValue = "false")
     private Boolean returnClientSecretOnRead = false;
+
+    @DocProperty(description = "Boolean value specifying whether to rotate client registration access token after each usage", defaultValue = "false")
+    private Boolean rotateClientRegistrationAccessTokenOnUsage = false;
 
     @DocProperty(description = "Boolean value specifying whether reject JWT requested or validated with algorithm None. Default value is true", defaultValue = "true")
     private Boolean rejectJwtWithNoneAlg = true;
@@ -397,9 +400,6 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "The expiration notificator interval in second")
     private int expirationNotificatorIntervalInSeconds = 600;
 
-
-
-    //feature flags
     @DocProperty(description = "Enable/Disable redirect uris validation using regular expression", defaultValue = "false")
     private Boolean redirectUrisRegexEnabled = false;
 
@@ -451,6 +451,8 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Boolean value specifying whether to disable prompt=login", defaultValue = "false")
     private Boolean disablePromptLogin = false;
 
+    @DocProperty(description = "Boolean value specifying whether to disable prompt=consent", defaultValue = "false")
+    private Boolean disablePromptConsent = false;
 
     /**
      * SessionId will be expired after sessionIdLifetime seconds
@@ -674,7 +676,7 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Boolean value specifying whether to return detailed reason of the error from AS. Default value is false", defaultValue = "false")
     private Boolean errorReasonEnabled = false;
 
-    @DocProperty(description = "Boolean value specifying whether to remove Refresh Tokens on logout. Default value is false", defaultValue = "true")
+    @DocProperty(description = "Boolean value specifying whether to remove Refresh Tokens on logout. Default value is true", defaultValue = "true")
     private Boolean removeRefreshTokensForClientOnLogout = true;
 
     @DocProperty(description = "Boolean value specifying whether to skip refreshing tokens on refreshing", defaultValue = "false")
@@ -1125,6 +1127,15 @@ public class AppConfiguration implements Configuration {
         this.disablePromptLogin = disablePromptLogin;
     }
 
+    public Boolean getDisablePromptConsent() {
+        if (disablePromptConsent == null) disablePromptConsent = false;
+        return disablePromptConsent;
+    }
+
+    public void setDisablePromptConsent(Boolean disablePromptConsent) {
+        this.disablePromptConsent = disablePromptConsent;
+    }
+
     public Boolean getIncludeSidInResponse() {
         if (includeSidInResponse == null) includeSidInResponse = false;
         return includeSidInResponse;
@@ -1150,6 +1161,15 @@ public class AppConfiguration implements Configuration {
 
     public void setChangeSessionIdOnAuthentication(Boolean changeSessionIdOnAuthentication) {
         this.changeSessionIdOnAuthentication = changeSessionIdOnAuthentication;
+    }
+
+    public Boolean getRotateClientRegistrationAccessTokenOnUsage() {
+        if (rotateClientRegistrationAccessTokenOnUsage == null) rotateClientRegistrationAccessTokenOnUsage = false;
+        return rotateClientRegistrationAccessTokenOnUsage;
+    }
+
+    public void setRotateClientRegistrationAccessTokenOnUsage(Boolean rotateClientRegistrationAccessTokenOnUsage) {
+        this.rotateClientRegistrationAccessTokenOnUsage = rotateClientRegistrationAccessTokenOnUsage;
     }
 
     public Boolean getReturnClientSecretOnRead() {
@@ -2161,20 +2181,20 @@ public class AppConfiguration implements Configuration {
         this.dynamicRegistrationScopesParamEnabled = dynamicRegistrationScopesParamEnabled;
     }
 
-    public Boolean getPersistIdTokenInLdap() {
-        return persistIdTokenInLdap;
+    public Boolean getPersistIdToken() {
+        return persistIdToken;
     }
 
-    public void setPersistIdTokenInLdap(Boolean persistIdTokenInLdap) {
-        this.persistIdTokenInLdap = persistIdTokenInLdap;
+    public void setPersistIdToken(Boolean persistIdToken) {
+        this.persistIdToken = persistIdToken;
     }
 
-    public Boolean getPersistRefreshTokenInLdap() {
-        return persistRefreshTokenInLdap;
+    public Boolean getPersistRefreshToken() {
+        return persistRefreshToken;
     }
 
-    public void setPersistRefreshTokenInLdap(Boolean persistRefreshTokenInLdap) {
-        this.persistRefreshTokenInLdap = persistRefreshTokenInLdap;
+    public void setPersistRefreshToken(Boolean persistRefreshToken) {
+        this.persistRefreshToken = persistRefreshToken;
     }
 
     public Boolean getAllowPostLogoutRedirectWithoutValidation() {

@@ -30,7 +30,7 @@ import jakarta.ws.rs.core.Response;
 
 import org.slf4j.Logger;
 
-@Path(Constants.CONFIG)
+@Path(Constants.FIDO2_CONFIG)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class Fido2ConfigResource extends BaseResource {

@@ -13,13 +13,6 @@ In this page a high-level overview of the flow development process is presented.
 
 These are key concepts to keep in mind before starting.
 
-### Enable the engine
-
-Ensure the Agama engine is enabled in your installation. Do the following:
-
-- Enable Agama bridge script. You can find details on how to manage custom scripts in [this](../../config-guide/jans-cli/im/im-custom-scripts.md) page. Here, set property `enabled` to `true` and increase `revision` value by one
-- Set `enabled` property in Agama configuration to `true`. This is located in the `agamaConfiguration` section of the [auth server configuration](../../config-guide/jans-cli/im/im-jans-authorization-server.md)
-
 ### Flow data
 
 Every flow has some associated information. At minimum this is required:
@@ -96,21 +89,14 @@ This flow is extremely static and unrealistic but showcases minimal key elements
 
 In order to add/modify flows, you will interact with a small REST API which is protected by bearer token. To be able to get tokens, SSH to your server and perform the following steps:
 
-- Run `python3 /opt/jans/jans-cli/config-cli.py`
-- In the menu enter to `OAuth` > `OIDC clients` > `Get list of clients`
-- Accept the default parameters, for `pattern` enter `config`
+- Run `python3 /opt/jans/jans-cli/config-cli.py --operation-id get-oauth-openid-clients --endpoint-args pattern:config`
 - Follow the instructions (in a web browser) to get authorized access
-- A list of results will be shown, pick the value in the `inum` column for the client with display name `Jans Config Api Client`
-- Choose `back`, and enter to `Get client by inum`
-- Enter the collected `inum` and grab the value of `clientSecret` in the resulting JSON document
-- Finally, choose `logout and quit`
-
-The collected secret is encoded, run `python3 /opt/jans/bin/encode.py -D <clientSecret>` to decode it.
+- A list of results will be shown in JSON format. Pick the value of the `inum` property for the client with display name `Jans Config Api Client`. Do the same for `clientSecret`
 
 The following is an example of how to get a token using `curl`. Replace data in the placeholders appropriately:
 
 ```
-curl -u '<client-inum:client-secret-decoded>'
+curl -u '<client-inum>:<client-secret>'
      -d scope='https://jans.io/oauth/config/agama.write'
      -d grant_type=client_credentials https://<your-host>/jans-auth/restv1/token
 ```
@@ -178,15 +164,15 @@ curl -k -i -H 'Authorization: Bearer <token>'
 
 Note the source code is not part of the response by default. Append `?includeSource=true` to the URL for the source to be included.
 
-
-!!! Important  
+!!! Important
     There are different, more detailed ways to retrieve, create and update flows but they are regarded in the [Development lifecycle](./lifecycle.md) doc page.
-
 
 Finally the flow assets must be uploaded. You can SFTP/SCP or use other means to do so. In our example, only two steps are required:
 
 - Create a directory `hello` under `/opt/jans/jetty/jans-auth/agama/ftl`
 - Upload the [template](https://github.com/JanssenProject/jans/raw/main/docs/admin/developer/agama/index.ftlh) there
+
+There is an alternative way to manage flows and is via deployment of `.gama` files. This is a more elaborate technique that allows bundling several flows and their required assets and classes for bulk deployment. Learn more about it [here](#gama-deployment.md).
 
 ### Craft an authentication request
 
@@ -230,6 +216,8 @@ We have barely scratched the surface so far. There is lots more to learn in orde
 - [Writing UI pages](./ui-pages.md)
 
 - [Flows lifecycle](./flows-lifecycle.md)
+
+- [`.gama` files deployment](#gama-deployment.md)
 
 - [Engine configuration](./engine-config.md)
 

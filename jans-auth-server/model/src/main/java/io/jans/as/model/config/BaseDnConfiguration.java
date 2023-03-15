@@ -61,6 +61,10 @@ public class BaseDnConfiguration {
     private String par;
     @XmlElement(name = "ssa")
     private String ssa;
+	@XmlElement(name = "fido2Attestation")
+	private String fido2Attestation;
+	@XmlElement(name = "fido2Assertion")
+	private String fido2Assertion;
 
     public String getStat() {
         return stat;
@@ -213,4 +217,21 @@ public class BaseDnConfiguration {
     public void setSsa(String ssa) {
         this.ssa = ssa;
     }
+
+	public String getFido2Attestation() {
+		return fido2Attestation;
+	}
+
+	public void setFido2Attestation(String fido2Attestation) {
+		this.fido2Attestation = fido2Attestation;
+	}
+
+	public String getFido2Assertion() {
+		return fido2Assertion;
+	}
+
+	public void setFido2Assertion(String fido2Assertion) {
+		this.fido2Assertion = fido2Assertion;
+	}
+
 }

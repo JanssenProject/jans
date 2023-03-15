@@ -160,7 +160,7 @@ var gluu_auth = {
 
 		(function worker() {
 			$.ajax({
-				url: '/oxauth/restv1/session_status',
+				url: '/jans-auth/restv1/session_status',
 				cache: false,
 				timeout: gluu_auth.checker.timeout,
 				success: function(result, status, xhr) {

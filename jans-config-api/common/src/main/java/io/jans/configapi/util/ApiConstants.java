@@ -12,6 +12,8 @@ public class ApiConstants {
 
     public static final String BASE_API_URL = "/";
     public static final String CONFIG = "/config";
+    public static final String CONFIGS = "/configs";
+    public static final String API_CONFIG = "/api-config";
     public static final String JWKS = "/jwks";
     public static final String JANS_AUTH = "/jans-auth-server";
     public static final String LOGGING = "/logging";
@@ -78,7 +80,7 @@ public class ApiConstants {
     public static final String SESSIONID_PATH = "/{sessionId}";
     public static final String USERDN_PATH = "/{userDn}";
     public static final String AGAMA = "/agama";
-    public static final String ADS_DEPLOYMENTS = "/ads-deployment";
+    public static final String AGAMA_DEPLOYMENTS = "/agama-deployment";
     public static final String QNAME_PATH = "{qname}";
     public static final String ENABLED = "enabled";
     public static final String QNAME = "qname";
@@ -86,6 +88,7 @@ public class ApiConstants {
     public static final String SOURCE = "/source/";
     public static final String PLUGIN = "/plugin";
     public static final String PLUGIN_NAME_PATH = "{pluginName}";
+    public static final String AUTHORIZATIONS = "/authorizations";
 
     public static final String LIMIT = "limit";
     public static final String START_INDEX = "startIndex";
@@ -105,10 +108,13 @@ public class ApiConstants {
     public static final String SESSIONID = "sessionId";
     public static final String USERDN = "userDn";
     public static final String PLUGIN_NAME = "pluginName";
+    
 
     public static final String ALL = "all";
     public static final String ACTIVE = "active";
     public static final String INACTIVE = "inactive"; 
+    public static final String ADD_SCRIPT_TEMPLATE = "addScriptTemplate";
+    public static final String REMOVE_NON_LDAP_ATTRIBUTES = "removeNonLDAPAttributes";    
 
     // API Protection
     public static final String PROTECTION_TYPE_OAUTH2 = "oauth2";

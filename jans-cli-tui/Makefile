@@ -10,4 +10,4 @@ uninstall:
 	pip3 uninstall jans-cli-tui -y
 
 zipapp:
-	shiv --compressed -o config-cli-tui.pyz -p '/usr/bin/env python3' -e cli_tui.jans_cli_tui:run . --no-cache
+	shiv --compressed -o jans-cli-tui.pyz -p '/usr/bin/env python3' -e cli_tui.jans_cli_tui:run . --no-cache

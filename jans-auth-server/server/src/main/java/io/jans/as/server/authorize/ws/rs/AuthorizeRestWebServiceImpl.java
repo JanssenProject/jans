@@ -34,7 +34,7 @@ import io.jans.as.server.model.config.Constants;
 import io.jans.as.server.model.exception.AcrChangedException;
 import io.jans.as.server.model.exception.InvalidRedirectUrlException;
 import io.jans.as.server.model.exception.InvalidSessionStateException;
-import io.jans.as.server.model.ldap.ClientAuthorization;
+import io.jans.as.persistence.model.ClientAuthorization;
 import io.jans.as.server.model.token.JwrService;
 import io.jans.as.server.security.Identity;
 import io.jans.as.server.service.*;
@@ -352,7 +352,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
         authzRequest.getAuditLog().setUsername(user.getUserId());
 
-        ExternalPostAuthnContext postAuthnContext = new ExternalPostAuthnContext(client, sessionUser, authzRequest.getHttpRequest(), authzRequest.getHttpResponse());
+        ExternalPostAuthnContext postAuthnContext = new ExternalPostAuthnContext(client, sessionUser, authzRequest, prompts);
         checkForceReAuthentication(authzRequest, prompts, client, postAuthnContext);
         checkForceAuthorization(authzRequest, prompts, client, postAuthnContext);
 
@@ -478,7 +478,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         addCustomHeaders(builder, authzRequest);
         updateSession(authzRequest, sessionUser);
 
-        runCiba(authzRequest.getAuthReqId(), client, authzRequest.getHttpRequest(), authzRequest.getHttpResponse());
+        runCiba(authzRequest, client);
         processDeviceAuthorization(deviceAuthzUserCode, user);
 
         return builder;
@@ -533,6 +533,12 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     }
 
     private void checkPromptConsent(AuthzRequest authzRequest, List<Prompt> prompts, SessionId sessionUser, User user, ClientAuthorization clientAuthorization, boolean clientAuthorizationFetched) {
+        if (isTrue(appConfiguration.getDisablePromptConsent())) {
+            log.trace("Disabled prompt=consent (because disablePromptConsent=true).");
+            prompts.remove(Prompt.CONSENT);
+            return;
+        }
+
         if (prompts.contains(Prompt.CONSENT) || !isTrue(sessionUser.isPermissionGrantedForClient(authzRequest.getClientId()))) {
             if (!clientAuthorizationFetched) {
                 clientAuthorization = clientAuthorizationsService.find(user.getAttribute("inum"), authzRequest.getClient().getClientId());
@@ -731,7 +737,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         return StringUtils.isNotBlank(acr) ? acr : acrValuesStr;
     }
 
-    private void runCiba(String authReqId, Client client, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
+    private void runCiba(AuthzRequest authzRequest, Client client) {
+        String authReqId = authzRequest.getAuthReqId();
         if (StringUtils.isBlank(authReqId)) {
             return;
         }
@@ -746,17 +753,18 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         cibaRequestService.removeCibaRequest(authReqId);
         CIBAGrant cibaGrant = authorizationGrantList.createCIBAGrant(cibaRequest);
 
-        ExecutionContext executionContext = new ExecutionContext(httpRequest, httpResponse);
+        ExecutionContext executionContext = new ExecutionContext(authzRequest.getHttpRequest(), authzRequest.getHttpResponse());
         executionContext.setAppConfiguration(appConfiguration);
         executionContext.setAttributeService(attributeService);
         executionContext.setGrant(cibaGrant);
         executionContext.setClient(client);
-        executionContext.setCertAsPem(httpRequest.getHeader("X-ClientCert"));
+        executionContext.setCertAsPem(authzRequest.getHttpRequest().getHeader("X-ClientCert"));
+        executionContext.setScopes(StringUtils.isNotBlank(authzRequest.getScope()) ? new HashSet<>(Arrays.asList(authzRequest.getScope().split(" "))) : new HashSet<>());
 
         AccessToken accessToken = cibaGrant.createAccessToken(executionContext);
         log.debug("Issuing access token: {}", accessToken.getCode());
 
-        ExternalUpdateTokenContext context = new ExternalUpdateTokenContext(httpRequest, cibaGrant, client, appConfiguration, attributeService);
+        ExternalUpdateTokenContext context = new ExternalUpdateTokenContext(authzRequest.getHttpRequest(), cibaGrant, client, appConfiguration, attributeService);
 
 
         final int refreshTokenLifetimeInSeconds = externalUpdateTokenService.getRefreshTokenLifetimeInSeconds(context);

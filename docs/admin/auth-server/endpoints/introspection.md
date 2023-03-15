@@ -18,11 +18,15 @@ introspection](https://datatracker.ietf.org/doc/html/rfc7662) specifications.
 The URI to invoke the introspection endpoint in Janssen Server 
 can be found by checking the `introspection_endpoint` claim of the OpenID Connect configuration response, typically deployed at `https://janssen.server.host/.well-known/openid-configuration`
 
-` "introspection_endpoint" : "https://janssen.server.host/jans-auth/restv1/introspection" `
+ "introspection_endpoint" : "https://janssen.server.host/jans-auth/restv1/introspection" `
 
 More information about request and response of the Introspection endpoint can be found in
 the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/Token/get-introspection).
 
+**Request parameters**
+- `token` - REQUIRED.  The string value of the token.  For access tokens, this is the "access_token" value returned from the token endpoint
+- `token_type_hint` - OPTIONAL.  A hint about the type of the token submitted for introspection. Not used in current implementation of the AS. 
+- `response_as_jwt` - OPTIONAL. Boolean value with default value false. If true, returns introspection response as JWT (signed based on client configuration used for authentication to Introspection Endpoint).
 
 ## Sample GET Request
 
@@ -85,6 +89,8 @@ curl -X 'POST' \
     "username": null
 }
 ```
+
+## Response as JWT
 
 ## Disabling The Endpoint Using Feature Flag
 

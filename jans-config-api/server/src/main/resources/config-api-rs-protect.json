@@ -2141,6 +2141,52 @@
           ]
         }
       ]
+    },
+    {
+      "path": "/jans-config-api/api/v1/config",
+      "conditions": [
+        {
+          "httpMethods": [
+            "GET"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.50",
+              "name": "https://jans.io/oauth/config/properties.readonly"
+            }
+          ],
+          "groupScopes": [
+            {
+              "inum": "1800.01.51",
+              "name": "https://jans.io/oauth/config/properties.write"
+            }
+          ],
+          "superScopes": [
+            {
+              "inum": "1800.03.1",
+              "name": "https://jans.io/oauth/config/read-all"
+            }
+          ]
+        },
+        {
+          "httpMethods": [
+            "PATCH"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.51",
+              "name": "https://jans.io/oauth/config/properties.write"
+            }
+          ],
+          "groupScopes": [],
+          "superScopes": [
+            {
+              "inum": "1800.03.2",
+              "name": "https://jans.io/oauth/config/write-all"
+            }
+          ]
+        }
+      ]
     }
   ]
 }

@@ -42,7 +42,7 @@ public class SsaCreateTest extends BaseTest {
 
         // Ssa create
         SsaCreateClient ssaCreateClient = new SsaCreateClient(ssaEndpoint);
-        Long orgId = 1L;
+        String orgId = "org-id-test";
         Calendar calendar = GregorianCalendar.getInstance(TimeZone.getTimeZone("UTC"));
         calendar.add(Calendar.HOUR, 24);
         Long expirationDate = DateUtil.dateToUnixEpoch(calendar.getTime());
@@ -75,7 +75,7 @@ public class SsaCreateTest extends BaseTest {
 
         // Ssa create
         SsaCreateClient ssaCreateClient = new SsaCreateClient(ssaEndpoint);
-        Long orgId = 1L;
+        String orgId = "org-id-test";
         Calendar calendar = GregorianCalendar.getInstance(TimeZone.getTimeZone("UTC"));
         calendar.add(Calendar.HOUR, 24);
         Long expirationDate = DateUtil.dateToUnixEpoch(calendar.getTime());
@@ -109,7 +109,7 @@ public class SsaCreateTest extends BaseTest {
 
         // Ssa create
         SsaCreateClient ssaCreateClient = new SsaCreateClient(ssaEndpoint);
-        Long orgId = 1L;
+        String orgId = "org-id-test";
         String description = "test description";
         String softwareId = "gluu-scan-api";
         List<String> softwareRoles = Collections.singletonList("password");

@@ -1,3 +1,6 @@
+from typing import Tuple, TypeVar, Callable, Optional, Sequence, Union
+
+
 from prompt_toolkit.layout.containers import HSplit, Window, FloatContainer
 from prompt_toolkit.layout.controls import FormattedTextControl
 from prompt_toolkit.layout.margins import ScrollbarMargin
@@ -5,9 +8,8 @@ from prompt_toolkit.formatted_text import merge_formatted_text
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.widgets import HorizontalLine
-from typing import Tuple, TypeVar, Callable
+from prompt_toolkit.widgets.base import Border
 from prompt_toolkit.layout.dimension import AnyDimension
-from typing import Optional, Sequence, Union
 from prompt_toolkit.formatted_text import AnyFormattedText
 from prompt_toolkit.key_binding.key_bindings import KeyBindings, KeyBindingsBase
 
@@ -18,20 +20,24 @@ class JansVerticalNav():
         self,
         myparent,
         headers: list,
-        on_display: Callable= None, 
-        selectes: Optional[int]= 0, 
-        on_enter: Callable= None,
-        get_help: Tuple= None,
-        on_delete: Callable= None,
-        all_data: Optional[list]= [], 
-        preferred_size: Optional[list]= [], 
-        data: Optional[list]= [], 
-        headerColor: Optional[str]= "green",
-        entriesColor: Optional[str]= "white",
-        underline_headings: Optional[bool]= True, 
+        on_display: Callable = None,
+        selectes: Optional[int] = 0,
+        on_enter: Callable = None,
+        get_help: Tuple = None,
+        on_delete: Callable = None,
+        change_password: Callable = None,
+        all_data: Optional[list] = None,
+        preferred_size: Optional[list] = None,
+        data: Optional[list] = None,
+        headerColor: Optional[str] = "green",
+        entriesColor: Optional[str] = "white",
+        underline_headings: Optional[bool] = True, 
         max_width: AnyDimension = None,
-        jans_name: Optional[str]= '', 
+        jans_name: Optional[str] = '', 
         max_height: AnyDimension = None,
+        jans_help: Optional[str] = '',
+        hide_headers: Optional[bool] = False,
+        custom_key_bindings: Optional[list] = None
         )->FloatContainer :
         """init for JansVerticalNav
 
@@ -51,7 +57,9 @@ class JansVerticalNav():
             max_width (int, optional): Maximum width of container.
             jans_name (str, optional): Widget name
             max_height (int, optional): Maximum hegight of container
-        
+            jans_help (str, optional): Status bar help message
+            hide_headers (bool, optional): Hide or display headers
+            custom_key_bindings (list, optional): List of custom keybindings. Each entry is a tuple of (key, callable)
         Examples:
             clients = JansVerticalNav(
                 myparent=self,
@@ -74,35 +82,41 @@ class JansVerticalNav():
         self.headers = headers              # ListBox headers
         self.selectes = selectes            # ListBox initial selection
         self.max_width = max_width
-        self.data = data                    # ListBox Data (Can be renderable ?!!! #TODO )
+        self.data = data if data else []    # ListBox Data (Can be renderable ?!!! #TODO )
         self.jans_name = jans_name
-        self.preferred_size = preferred_size
+        self.preferred_size = preferred_size if preferred_size else []
         self.headerColor = headerColor
         self.entriesColor = entriesColor
         self.max_height = max_height
-
+        self.jans_help = jans_help
         self.on_enter = on_enter
         self.on_delete = on_delete
         self.on_display = on_display
+        self.change_password = change_password
+        self.hide_headers = hide_headers
+        self.custom_key_bindings = custom_key_bindings if custom_key_bindings else []
+        self.spaces = [len(header)+1 for header in self.headers]
+
         if get_help:
             self.get_help, self.scheme = get_help
             if self.data :
-                self.get_help(data=self.data[self.selectes],scheme=self.scheme)
+                self.get_help(data=self.data[self.selectes], scheme=self.scheme)
         else:
             self.get_help= None
-        self.all_data=all_data
+
+        self.all_data = all_data if all_data else []
         self.underline_headings = underline_headings
 
         self.handle_header_spaces()
         self.create_window()
-            
+
 
     def view_data(
         self,
         data:list
         ) -> list:
         result = []
-        for i, entry in enumerate(data): ## entry = ['1800.6c5faa', 'Jans Config Api Client', 'authorization_code,refresh_...', 'Reference]
+        for i, entry in enumerate(data):
             mod_entry = []
             for col in range(len(entry)) :
                 if self.preferred_size[col] == 0:
@@ -120,19 +134,8 @@ class JansVerticalNav():
     def create_window(self) -> None:
         """This method creat the dialog it self
         """
-        self.container_content = [
-                        Window(
-                            content=FormattedTextControl(
-                                text=self._get_head_text,
-                                focusable=False,
-                                key_bindings=self._get_key_bindings(),
-                                style=self.headerColor,
-                            ),
-                            style='class:select-box',
-                            height=D(preferred=1, max=1),
-                            cursorline=False,
-                        ),
-                        Window(
+
+        self.list_box = Window(
                             content=FormattedTextControl(
                                 text=self._get_formatted_text,
                                 focusable=True,
@@ -142,12 +145,28 @@ class JansVerticalNav():
                             style='class:select-box',
                             height=D(preferred=len(self.data), max=len(self.data)),
                             cursorline=True,
-                            right_margins=[ScrollbarMargin(display_arrows=True), ],
-                        ),
-                    ]
+                            always_hide_cursor=True,
+                            right_margins=[ScrollbarMargin(display_arrows=True)],
+                        )
+        if self.jans_help:
+            self.list_box.jans_help = self.jans_help
 
-        if self.underline_headings:
-            self.container_content.insert(1, HorizontalLine())
+        headers_height = 2 if self.underline_headings else 1
+
+        self.container_content = [
+                        Window(
+                            content=FormattedTextControl(
+                                text=self._get_head_text,
+                                focusable=False,
+                                key_bindings=self._get_key_bindings(),
+                                style=self.headerColor,
+                            ),
+                            style='class:select-box',
+                            height=D(preferred=headers_height, max=headers_height),
+                            cursorline=False,
+                        ),
+                        self.list_box,
+                    ]
 
         self.container = FloatContainer(
             content=HSplit(self.container_content+[Window(height=1)], width=D(max=self.max_width)),
@@ -157,7 +176,8 @@ class JansVerticalNav():
     def handle_header_spaces(self) -> None:
         """Make header evenlly spaced
         """
-
+        if not self.data:
+            return
         data = self.view_data(self.data)
         self.spaces = []
         data_length_list = []
@@ -203,6 +223,9 @@ class JansVerticalNav():
         return spaced_data
 
     def _get_head_text(self) -> AnyFormattedText:
+        if self.hide_headers:
+            return ''
+
         """Get all headers entries
 
         Returns:
@@ -214,7 +237,11 @@ class JansVerticalNav():
         for k in range(len(self.headers)):
             y += self.headers[k] + ' ' * \
                 (self.spaces[k] - len(self.headers[k]) + 3)
+
         result.append(y)
+
+        if self.underline_headings:
+            result.append('\n' + Border.HORIZONTAL*len(y))
 
         return merge_formatted_text(result)
 
@@ -227,7 +254,7 @@ class JansVerticalNav():
 
         result = []
         spaced_data = self.get_spaced_data()
-        for i, entry in enumerate(spaced_data): ## entry = ['1800.6c5faa', 'Jans Config Api Client', 'authorization_code,refresh_...', 'Reference]
+        for i, entry in enumerate(spaced_data):
             if i == self.selectes:
                 result.append([('[SetCursorPosition]', '')])
 
@@ -262,6 +289,11 @@ class JansVerticalNav():
         self.data[item_index] = item
         self.handle_header_spaces()
 
+    def clear(self) -> None:
+        self.data = []
+        self.container_content[-1].height = self.max_height
+
+
     def _get_key_bindings(self) -> KeyBindingsBase:
         """All key binding for the Dialog with Navigation bar
 
@@ -275,7 +307,7 @@ class JansVerticalNav():
             if not self.data:
                 return
             self.selectes = (self.selectes - 1) % len(self.data)
-            
+
             if self.get_help :
                 self.get_help(data=self.data[self.selectes],scheme=self.scheme)
 
@@ -294,6 +326,13 @@ class JansVerticalNav():
             size = self.myparent.output.get_size()
             if self.on_enter :
                 self.on_enter(passed=self.data[self.selectes], event=event, size=size, data=self.all_data[self.selectes], selected=self.selectes, jans_name=self.jans_name)
+
+        @kb.add('p')
+        def _(event):
+            if not self.data:
+                return
+            if self.change_password:
+                self.change_password(data=self.all_data[self.selectes])
 
 
         @kb.add('d')
@@ -314,7 +353,11 @@ class JansVerticalNav():
         def _(event):
             if self.data and self.on_delete:
                 selected_line = self.data[self.selectes]
-                self.on_delete(selected=selected_line, event=event, jans_name=self.jans_name)
+                self.on_delete(selected=selected_line, selected_idx=self.selectes, event=event, jans_name=self.jans_name)
+
+        if self.custom_key_bindings:
+            for key, func in self.custom_key_bindings:
+                kb.add(key)(func)
 
         return kb
 

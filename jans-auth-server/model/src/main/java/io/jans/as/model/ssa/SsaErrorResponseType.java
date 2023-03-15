@@ -21,9 +21,14 @@ public enum SsaErrorResponseType implements IErrorType {
     INVALID_CLIENT("invalid_client"),
 
     /**
-     * When creating an ssa, if you get an internal error.
+     * When creating a ssa, if you get an internal error.
      */
     UNKNOWN_ERROR("unknown_error"),
+
+    /**
+     * When the signature has expired or the algorithm for signing does not exist
+     */
+    INVALID_SIGNATURE("invalid_signature"),
     ;
 
     private final String paramName;

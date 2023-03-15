@@ -4,134 +4,882 @@ tags:
   - reference
   - database
 ---
+|DN |
+|-|
+|o=jans|
+|ou=people,o=jans|
+|ou=groups,o=jans|
+|ou=attributes,o=jans|
+|ou=scopes,o=jans|
+|ou=clients,o=jans|
+|ou=stat,o=jans|
+|ou=par,o=jans|
+|ou=sessions,o=jans|
+|ou=tokens,o=jans|
+|ou=authorizations,o=jans|
+|ou=scripts,o=jans|
+|ou=resetPasswordRequests,o=jans|
+|ou=uma,o=jans|
+|ou=resources,ou=uma,o=jans|
+|ou=pct,ou=uma,o=jans|
+|ou=push,o=jans|
+|ou=application,ou=push,o=jans|
+|ou=device,ou=push,o=jans|
+|ou=u2f,o=jans|
+|ou=registration_requests,ou=u2f,o=jans|
+|ou=authentication_requests,ou=u2f,o=jans|
+|ou=registered_devices,ou=u2f,o=jans|
+|ou=metric,o=jans|
+|ou=sector_identifiers,o=jans|
+|ou=ciba,o=jans|
+|ou=trustRelationships,o=jans|
+|ou=ssa,o=jans|
 
-``` mermaid
-graph LR
-    A[ou=jans] --> B(ou=agama)
-    B --> B1[ou=flows]
-    B1 --> B11[agFlowQname=flow_name1]
-    B1 --> B12[agFlowQname=flow_name2]
-    B1 --> B13[agFlowQname=flow_name3]
-    B1 --> B14[agFlowQname=flow_name4]
+## ObjectClasses
 
-    B --> B2[ou=runs]
-    B2 --> B21[jansId=....]
-    B2 --> B22[jansId=....]
+| ObjectClasses|
+|-|
+| agmFlow                    |
+| agmFlowRun                 |
+| jansAdminConfDyn           |
+| jansAppConf                |
+| jansAttr                   |
+| jansCache                  |
+| jansCibaReq                |
+| jansClnt                   |
+| jansClntAuthz              |
+| jansCustomScr              |
+| jansDeviceRegistration     |
+| jansDocument               |
+| jansFido2AuthnEntry        |
+| jansFido2RegistrationEntry |
+| jansGrant                  |
+| jansGrp                    |
+| jansInumMap                |
+| jansMetric                 |
+| jansOrganization           |
+| jansPairwiseIdentifier     |
+| jansPar                    |
+| jansPassResetReq           |
+| jansPerson                 |
+| jansPushApp                |
+| jansPushDevice             |
+| jansRp                     |
+| jansScope                  |
+| jansScr                    |
+| jansSectorIdentifier       |
+| jansSessId                 |
+| jansSsa                    |
+| jansStatEntry              |
+| jansToken                  |
+| jansU2fReq                 |
+| jansUmaPCT                 |
+| jansUmaRPT                 |
+| jansUmaResource            |
+| jansUmaResourcePermission  |
 
-    A[ou=jans] --> C(ou=attributes)
-    C --> C1[inum=.....]
-    C --> C2[inum=.....]
-    C --> Cn[inum=.....]
+### ObjectClass: agmFlow
 
-    A[ou=jans] --> D(ou=authorizations)
-    D --> D1[jansId=...]
-    D --> D2[jansId=...]
-    D --> D3[jansId=...]
-    D --> Dn[jansId=...]
+| Field             |Description |
+| -| -|
+| dn            | |
+| objectClass       | |
+| agFlowQname       | |
+| agFlowMeta        | |
+| jansScr           | |
+| jansEnabled       | |
+| jansScrError      | |
+| agFlowTrans       | |
+| jansRevision      | |
+| jansCustomMessage | |
 
-    A[ou=jans] --> E(ou=cache)
-    E --> E1[uuid.....]
-
-    A[ou=jans] --> F(ou=ciba)
-
-    A[ou=jans] --> G(ou=clients)
-    G --> G1[inum=....]
-    G1 --> G12[ou=uma_permission]
-    G12 --> G121[jansTicket=.....]
-    G12 --> G122[jansTicket=.....]
-    
-    G --> G2[inum=....]
-    G2 --> G21[ou=uma_permission]
-    G21 --> G211[jansTicket=.....]
-    G21 --> G212[jansTicket=.....]
-
-    G --> Gn[inum=....]
-
-    A[ou=jans] --> H(ou=groups)
-    H --> H1[inum=...]
-    H --> H2[inum=...]
-    H --> Hn[inum=...]
+### agmFlowRun
 
 
-    A[ou=jans] --> I(ou=metric)
-    
+| Field             | Description |
+| -| -|
+| jansId           | |
+| objectClass       | |
+| dn                | |
+| agFlowSt          | |
+| agFlowEncCont     | |
+| jansCustomMessage | |
+| exp               | |
 
-    A[ou=jans] --> J(ou=par)
+### jansAdminConfDyn
 
-    A[ou=jans] --> K(ou=people)
-    K --> K1[inum=....]
-    K1 --> K11[ou=fido2_register]
-    K11 --> K111[jansId=....]
-    K11 --> K112[jansId=....]
-    K11 --> K112[jansId=....]
+| Field        |Description |
+|  -| -|
+| inum         |       |
+| objectClass  | |
+| dn           | |
+| c            | |
+| ou           | |
+| description  | |
+| displayName  | |
+| jansConfDyn  | |
+| o            | |
+| jansRevision | |
 
-    K1 --> K12[ou=fido2_auth]
-    K12 --> K121[jansId=....]
-    K12 --> K122[jansId=....]
-    K12 --> K123[jansId=....]
+### jansAppConf
 
-    K --> K2[inum=....]
-    K --> K3[inum=....]
-    K --> K4[inum=....]
-    K --> K5[inum=....]
+| Field                 | |
+| -| -|
+| objectClass           | |
+| ou                    | |
+| description           | |
+| displayName           | |
+| jansHostname          | |
+| jansLastUpd           | |
+| jansManager           | |
+| jansOrgProfileMgt     | |
+| jansScimEnabled       | |
+| jansEmail             | |
+| jansSmtpConf          | |
+| jansSslExpiry         | |
+| jansStatus            | |
+| jansUrl               | |
+| o                     | |
+| jansAuthMode          | |
+| jansDbAuth            | |
+| jansLogViewerConfig   | |
+| jansLogConfigLocation | |
+| jansCacheConf         | |
+| jansDocStoreConf      | |
+| jansSoftVer           | |
+| userPassword          | |
+| jansConfDyn           | |
+| jansConfErrors        | |
+| jansConfStatic        | |
+| jansConfWebKeys       | |
+| jansWebKeysSettings   | |
+| jansConfApp           | |
+| jansRevision          | |
 
-    A[ou=jans] --> L(ou=push)
-    L --> L1[ou=application]
-    L --> L2[ou=device]
 
-    A[ou=jans] --> M(ou=resetPasswordRequests)
-    
+###  jansAttr       
 
-    A[ou=jans] --> N(ou=scope)
-    N --> N1[inum=...]
-    N --> N2[inum=...]
-    N --> N3[inum=...]
+| Field                 | Description|Datatype|Usage|
+| -| -| -|-|
+| inum                  | | | | 
+| objectClass           | | | | 
+| dn                    | | | | 
+| description           | | | | 
+| displayName           | |||
+| jansAttrEditTyp       | |||
+| jansAttrName          | |||
+| jansAttrOrigin        | |||
+| jansAttrSystemEditTyp | |||
+| jansAttrTyp           | |||
+| jansClaimName         | |||
+| jansAttrUsgTyp        | |||
+| jansAttrViewTyp       | |||
+| jansSAML1URI          | |||
+| jansSAML2URI          | |||
+| jansStatus            | |||
+| jansMultivaluedAttr   | |||
+| jansHideOnDiscovery   | |||
+| jansNameIdTyp         | |||
+| jansScimCustomAttr    | |||
+| jansSourceAttr        | |||
+| seeAlso               | |||
+| urn                   | |||
+| jansRegExp            | |||
+| jansTooltip           | |||
+| jansValidation        | |||
 
-    A[ou=jans] --> O(ou=scripts)
-    O --> O1[inum=...]
-    O --> O2[inum=...]
+            
+### jansCache                  
 
-    A[ou=jans] --> P(ou=sector_identifiers)
-    
+| Field                 |  |
+| -| -| 
+| objectClass | |
+| dn          | |
+| uuid        | |
+| iat         | |
+| exp         | |
+| del         | |
+| dat         | |
 
-    A[ou=jans] --> Q(ou=sessions)
-    Q --> Q1[jansId=....]
-    Q --> Q2[jansId=....]
-    Q --> Q3[jansId=....]
+### jansCibaReq             
+| Field                 | |
+| -| -| 
+| objectClass  | |
+| dn           | |
+| authReqId    | |
+| clnId        | |
+| usrId        | |
+| creationDate | |
+| exp          | |
+| jansStatus   | |
+   
+### jansClnt                   
+| Field                 | |
+| -| -|
+|inum| |
+| objectClass                             | |
+| dn                                      | |
+| o                                       | |
+| jansGrp                                 | |
+| displayName                             | |
+| displayNameLocalized                    | |
+| description                             | |
+| jansAppTyp                              | |
+| jansClntIdIssuedAt                      | |
+| jansClntSecret                          | |
+| jansClntSecretExpAt                     | |
+| exp                                     | |
+| del                                     | |
+| jansClntURI                             | |
+| jansClntURILocalized                    | |
+| jansContact                             | |
+| jansDefAcrValues                        | |
+| jansDefMaxAge                           | |
+| jansGrantTyp                            | |
+| jansIdTknEncRespAlg                     | |
+| jansIdTknEncRespEnc                     | |
+| jansIdTknSignedRespAlg                  | |
+| jansInitiateLoginURI                    | |
+| jansJwksURI                             | |
+| jansJwks                                | |
+| jansLogoURI                             | |
+| jansLogoURILocalized                    | |
+| jansPolicyURI                           | |
+| jansPolicyURILocalized||
+| jansPostLogoutRedirectURI               | |
+| jansRedirectURI                         | |
+| jansRegistrationAccessTkn               | |
+| jansReqObjSigAlg                        | |
+| jansReqObjEncAlg                        | |
+| jansReqObjEncEnc                        | |
+| jansReqURI                              | |
+| jansRespTyp                             | |
+| jansScope                               | |
+| jansClaim                               | |
+| jansSectorIdentifierURI                 | |
+| jansSignedRespAlg                       | |
+| jansSubjectTyp                          | |
+| jansTknEndpointAuthMethod               | |
+| jansTknEndpointAuthSigAlg               | |
+| jansTosURI                              | |
+| jansTosURILocalized                     | |
+| jansTrustedClnt                         | |
+| jansUsrInfEncRespAlg                    | |
+| jansUsrInfEncRespEnc                    | |
+| jansExtraConf                           | |
+| jansClaimRedirectURI                    | |
+| jansLastAccessTime                      | |
+| jansLastLogonTime                       | |
+| jansPersistClntAuthzs                   | |
+| jansInclClaimsInIdTkn                   | |
+| jansRefreshTknLife                      | |
+| jansDisabled                            | |
+| jansLogoutURI                           | |
+| jansLogoutSessRequired                  | |
+| jansdId                                 | |
+| jansAuthorizedOrigins                   | |
+| tknBndCnf                               | |
+| jansAccessTknAsJwt                      | |
+| jansAccessTknSigAlg                     | |
+| jansAccessTknLife                       | |
+| jansSoftId                              | |
+| jansSoftVer                             | |
+| jansSoftStatement                       | |
+| jansRptAsJwt                            | |
+| jansAttrs                               | |
+| jansBackchannelTknDeliveryMode          | |
+| jansBackchannelClntNotificationEndpoint | |
+| jansBackchannelAuthnReqSigAlg           | |
+| jansBackchannelUsrCodeParameter         | |
 
-    A[ou=jans] --> R(ou=stat)
-    R --> R1[ou=yyyymm]
-    R --> R2[ou=yyyymm]
-    
+### jansClntAuthz              
+| Field                 | |
+| -| -| 
+| jansId      | |
+| objectClass | |
+| dn          | |
+| jansClntId  | |
+| jansUsrId   | |
+| exp         | |
+| del         | |
+| jansScope   | |
 
-    A[ou=jans] --> S(ou=tokens)
-    S --> S1[ou=uma_rpt]
-    S --> S2[tknCde=....]
-    S --> S3[tknCde=....]
-    S --> S4[tknCde=....]
+### jansCustomScr              
+| Field                 ||
+| -| -| 
+| inum               | |
+| objectClass        | |
+| dn                 | |
+| displayName        | |
+| description        | |
+| jansScr            | |
+| jansScrTyp         | |
+| jansProgLng        | |
+| jansModuleProperty | |
+| jansConfProperty   | |
+| jansLevel          | |
+| jansRevision       | |
+| jansEnabled        | |
+| jansScrError       | |
+| jansAlias          | |
 
-    A[ou=jans] --> T(ou=trustRelationships)
-    T --> T1[inum=...]
-    T --> T2[inum=...]
-    T --> T3[inum=...]
+### jansDeviceRegistration     
+| Field                 | |
+| -| -| 
+| jansId   | |
+| objectClass                | |
+| dn                         | |
+| displayName                | |
+| description                | |
+| jansDeviceKeyHandle        | |
+| jansDeviceHashCode         | |
+| jansApp                    | |
+| jansDeviceRegistrationConf | |
+| jansDeviceNotificationConf | |
+| jansNickName               | |
+| jansDeviceData             | |
+| jansCounter                | |
+| jansStatus                 | |
+| del                        | |
+| exp                        | |
+| personInum                 | |
+| creationDate               | |
+| jansLastAccessTime         | |
+| jansMetaLastMod            | |
+| jansMetaLocation           | |
+| jansMetaVer                | |
 
-    A[ou=jans] --> U(ou=uma)
-    U --> W[ou=pct]
-    W --> W1[tknCde=...]
-    W --> W2[tknCde=...]
-    W --> W3[tknCde=...]
-    
+### jansDocument               
+| Field                 |  |
+| -| -| 
+| inum               | |
+| objectClass        | |
+| dn                 | |
+| ou                 | |
+| displayName        | |
+| description        | |
+| document           | |
+| creationDate       | |
+| jansModuleProperty | |
+| jansLevel          | |
+| jansRevision       | |
+| jansEnabled        | |
+| jansAlias          | |
 
-    U --> X[ou=resources]
-    X --> X1[jansId=...]
-    X --> X2[jansId=...]
-    X --> X3[jansId=...]
+### jansFido2AuthnEntry        
+| Field                 | |
+| -| -| 
+| jansId          | |
+| objectClass       | |
+| dn                | |
+| creationDate      | |
+| jansSessStateId   | |
+| jansCodeChallenge | |
+| personInum        | |
+| jansAuthData      | |
+| jansStatus        | |
 
-    A[ou=jans] --> V(ou=configuration)
-    V --> V1[ou=admin-ui]
-    V --> V2[ou=casa]
-    V --> V3[ou=jans-auth]
-    V --> V4[ou=jans-config-api]
-    V --> V5[ou=jans-fido2]
-    V --> V6[ou=jans-scim]
-``` 
+### jansFido2RegistrationEntry 
+| Field                 | |
+| -| -| 
+| jansId                                          | |
+| objectClass                | |
+| dn                         | |
+| creationDate               | |
+| displayName                | |
+| jansSessStateId            | |
+| jansCodeChallenge          | |
+| jansCodeChallengeHash      | |
+| jansPublicKeyId            | |
+| personInum                 | |
+| jansRegistrationData       | |
+| jansDeviceNotificationConf | |
+| jansCounter                | |
+| jansStatus                 | |
+
+### jansGrant                  
+| Field                 | |
+| -| -| 
+| grtId       | |
+| objectClass | |
+| dn          | |
+| iat         | |
+
+### jansGrp                    
+| Field                 |  |
+| -| -|
+| inum             | |
+| objectClass      | |
+| dn               | |
+| c                | |
+| description      | |
+| displayName      | |
+| jansStatus       | |
+| member           | |
+| o                | |
+| owner            | |
+| seeAlso          | |
+| jansMetaCreated  | |
+| jansMetaLastMod  | |
+| jansMetaLocation | |
+| jansMetaVer      | |
+
+### jansInumMap                
+| Field                 | |
+| -| -| 
+| inum                     | |
+| objectClass              | |
+| dn                       | |
+| jansStatus               | |
+| jansPrimaryKeyAttrName   | |
+| jansPrimaryKeyValue      | |
+| jansSecondaryKeyAttrName | |
+| jansSecondaryKeyValue    | |
+| jansTertiaryKeyAttrName  | |
+| jansTertiaryKeyValue     | |
+
+### jansMetric                 
+| Field                 | |
+| -| -| 
+| uniqueIdentifier | |
+| objectClass      | |
+| dn               | |
+| jansStartDate    | |
+| jansEndDate      | |
+| jansAppTyp       | |
+| jansMetricTyp    | |
+| creationDate     | |
+| del              | |
+| exp              | |
+| jansData         | |
+| jansHost         | |
+
+### jansOrganization           
+| Field                 | |
+| -| -| 
+| objectClass           | |
+| dn                    | |
+| c                     | |
+| county                | |
+| description           | |
+| displayName           | |
+| jansCustomMessage     | |
+| jansFaviconImage      | |
+| jansLogoImage         | |
+| jansManager           | |
+| jansManagerGrp        | |
+| jansOrgShortName      | |
+| jansThemeColor        | |
+| inum                  | |
+| l                     | |
+| mail                  | |
+| memberOf              | |
+| o                     | |
+| jansCreationTimestamp | |
+| jansRegistrationConf  | |
+| postalCode            | |
+| st                    | |
+| street                | |
+| telephoneNumber       | |
+| title                 | |
+| uid                   | |
+| jansLogoPath          | |
+| jansStatus            | |
+| jansFaviconPath       | |
+
+### jansPairwiseIdentifier     
+| Field                 | |
+| -| -| 
+| jansId               | |
+| objectClass          | |
+| dn                   | |
+| jansSectorIdentifier | |
+| jansClntId           | |
+| jansUsrId            | |
+
+### jansPar                    
+| Field                 | |
+| -| -| 
+| jansId      | |
+| objectClass | |
+| dn          | |
+| jansAttrs   | |
+| exp         | |
+| del         | |
+
+### jansPassResetReq           
+| Field                 | |
+| -| -| 
+| jansGuid     | |
+| objectClass  | |
+| dn           | |
+| creationDate | |
+| personInum   | |
+
+### jansPerson                 
+| Field                 | |
+| -| -| 
+| inum| |
+| objectClass                          | |
+| jansAssociatedClnt                   ||
+| c                                    | |
+| displayName                          | |
+| givenName                            | |
+| jansManagedOrganizations             | |
+| jansOptOuts                          | |
+| jansStatus                           | |
+| inum                                 | |
+| mail                                 | |
+| memberOf                             | |
+| o                                    | |
+| jansPersistentJWT                    | |
+| jansCreationTimestamp                | |
+| jansExtUid                           | |
+| jansOTPCache                         | |
+| jansLastLogonTime                    | |
+| jansActive                           | |
+| jansAddres                           | |
+| jansEmail                            | |
+| jansEntitlements                     | |
+| jansExtId                            | |
+| jansImsValue                         | |
+| jansMetaCreated                      | |
+| jansMetaLastMod                      | |
+| jansMetaLocation                     | |
+| jansMetaVer                          | |
+| jansNameFormatted                    | |
+| jansPhoneValue                       | |
+| jansPhotos                           | |
+| jansProfileURL                       | |
+| jansRole                             | |
+| jansTitle                            | |
+| jansUsrTyp                           | |
+| jansHonorificPrefix                  | |
+| jansHonorificSuffix                  | |
+| jans509Certificate                   | |
+| jansPassExpDate                      | |
+| persistentId                         | |
+| middleName                           | |
+| nickname                             | |
+| jansPrefUsrName                      | |
+| profile                              | |
+| picture                              | |
+| website                              | |
+| emailVerified                        | |
+| gender                               | |
+| birthdate                            | |
+| zoneinfo                             | |
+| locale                               | |
+| phoneNumberVerified                  | |
+| address                              | |
+| updatedAt                            | |
+| preferredLanguage                    | |
+| role                                 | |
+| secretAnswer                         | |
+| secretQuestion                       | |
+| seeAlso                              | |
+| sn                                   | |
+| cn                                   | |
+| transientId                          | |
+| uid                                  | |
+| userPassword                         | |
+| st                                   | |
+| street                               | |
+| l                                    | |
+| jansCountInvalidLogin                | |
+| jansEnrollmentCode                   | |
+| jansIMAPData                         | |
+| jansPPID                             | |
+| jansGuid                             | |
+| jansPreferredMethod                  | |
+| userCertificate                      | |
+| jansOTPDevices                       | |
+| jansMobileDevices                    | |
+| jansTrustedDevices                   | |
+| jansStrongAuthPolicy                 | |
+| jansUnlinkedExternalUids             | |
+| jansBackchannelDeviceRegistrationTkn | |
+| jansBackchannelUsrCode               | |
+| telephoneNumber                      | |
+| mobile                               | |
+| carLicense                           | |
+| facsimileTelephoneNumber             | |
+| departmentNumber                     | |
+| employeeType                         | |
+| manager                              | |
+| postOfficeBox                        | |
+| employeeNumber                       | |
+| preferredDeliveryMethod              | |
+| roomNumber                           | |
+| secretary                            | |
+| homePostalAddress                    | |
+| postalCode                           | |
+| description                          | |
+| title                                | |
+| jansAdminUIRole                      | |
+
+### jansPushApp                
+| Field                 | |
+| -| -| 
+| jansId          | |
+| objectClass     | |
+| dn              | |
+| displayName     | |
+| jansName        | |
+| jansPushAppConf | |
+
+### jansPushDevice             
+| Field                 | |
+| -| -|
+| jansId             | |
+| objectClass        | |
+| dn                 | |
+| jansUsrId          | |
+| jansPushApp        | |
+| jansPushDeviceConf | |
+| jansTyp            | |
+
+### jansRp                     
+| Field                 | |
+| -| -| 
+| jansId      | |
+| objectClass | |
+| dn          | |
+| dat         | |
+
+### jansScope                  
+| Field                 | |
+| -| -|
+| inum               | |
+| jansId             | |
+| objectClass        | |
+| dn                 | |
+| jansDefScope       | |
+| description        | |
+| displayName        | |
+| jansScopeTyp       | |
+| creatorId          | |
+| creatorTyp         | |
+| creatorAttrs       | |
+| creationDate       | |
+| jansClaim          | |
+| jansScrDn          | |
+| jansGrpClaims      | |
+| jansIconUrl        | |
+| jansUmaPolicyScrDn | |
+| jansAttrs          | |
+| exp                | |
+| del                | |
+
+### jansScr                    
+| Field                 |  |
+| -| -|
+| inum        | |
+| objectClass | |
+| dn          | |
+| inum        | |
+| jansScrTyp  | |
+
+### jansSectorIdentifier       
+| Field                 | |
+| -| -| 
+| jansId          | |
+| objectClass     | |
+| dn              | |
+| jansId          | |
+| description     | |
+| jansRedirectURI | |
+| jansClntId      | |
+
+### jansSessId                 
+| Field                 | |
+| -| -| 
+| jansId                   | |
+| objectClass              | |
+| dn                       | |
+| sid                      | |
+| creationDate             | |
+| exp                      | |
+| del                      | |
+| jansLastAccessTime       | |
+| jansUsrDN                | |
+| authnTime                | |
+| jansState                | |
+| jansSessState            | |
+| jansPermissionGranted    | |
+| jansAsJwt                | |
+| jansJwt                  | |
+| jansPermissionGrantedMap | |
+| jansInvolvedClnts        | |
+| deviceSecret             | |
+| jansSessAttr             | |
+
+### jansSsa                    
+| Field                 | |
+| -| -| 
+| inum         | |
+| objectClass  | |
+| dn           | |
+| o            | |
+| jansAttrs    | |
+| description  | |
+| exp          | |
+| del          | |
+| jansState    | |
+| creatorId    | |
+| creatorTyp   | |
+| creationDate | |
+
+### jansStatEntry              
+| Field                 | |
+| -| -| 
+| jansId      | |
+| objectClass | |
+| dn          | |
+| dat         | |
+| jansData    | |
+| attr        | |
+
+### jansToken                  
+| Field                 ||
+| -| -| 
+| tknCde      | |
+| objectClass | |
+| dn          | |
+| authnTime   | |
+| authzCode   | |
+| iat         | |
+| exp         | |
+| del         | |
+| grtId       | |
+| grtTyp      | |
+| jwtReq      | |
+| nnc         | |
+| scp         | |
+| tknTyp      | |
+| usrId       | |
+| jansUsrDN   | |
+| clnId       | |
+| acr         | |
+| uuid        | |
+| chlng       | |
+| chlngMth    | |
+| clms        | |
+| ssnId       | |
+| attr        | |
+| tknBndCnf   | |
+| dpop        | |
+
+### jansU2fReq                 
+| Field                 | |
+| -| -|
+| jansId          | |
+| objectClass     | |
+| dn              | |
+| jansReqId       | |
+| jansReq         | |
+| jansSessStateId | |
+| del             | |
+| exp             | |
+| personInum      | |
+| creationDate    | |
+
+### jansUmaPCT                 
+| Field                 ||
+|  -| -|
+| objectClass     | |
+| dn              | |
+| clnId           | |
+| iat             | |
+| exp             | |
+| del             | |
+| tknCde          | |
+| ssnId           | |
+| jansClaimValues | |
+| dpop            | |
+| authnTime       | |
+| authzCode       | |
+| grtId           | |
+| grtTyp          | |
+| jwtReq          | |
+| nnc             | |
+| scp             | |
+| tknTyp          | |
+| usrId           | |
+| jansUsrDN       | |
+| acr             | |
+| uuid            | |
+| chlng           | |
+| chlngMth        | |
+| clms            | |
+| attr            | |
+| tknBndCnf       | |
+
+### jansUmaRPT                 
+| Field                 |  |
+|  -| -|
+| objectClass       | |
+| dn                | |
+| authnTime         | |
+| clnId             | |
+| iat               | |
+| exp               | |
+| del               | |
+| tknCde            | |
+| usrId             | |
+| ssnId             | |
+| jansUmaPermission | |
+| uuid              | |
+| dpop              | |
+| authzCode         | |
+| grtId             | |
+| grtTyp            | |
+| jwtReq            | |
+| nnc               | |
+| scp               | |
+| tknTyp            | |
+| jansUsrDN         | |
+| acr               | |
+| chlng             | |
+| chlngMth          | |
+| clms              | |
+| attr              | |
+| tknBndCnf         |     |
+
+### jansUmaResource            
+| Field                 | Description|
+| -| -|
+| objectClass         | |
+| dn                  | |
+| displayName         | |
+| inum                | |
+| owner               | |
+| jansAssociatedClnt  | |
+| jansUmaScope        | |
+| jansFaviconImage    | |
+| jansGrp             | |
+| jansId              | |
+| jansResource        | |
+| jansRevision        | |
+| jansTyp             | |
+| jansScopeExpression | |
+| iat                 | |
+| exp                 | |
+| del                 | |
+| description         | |
+
+### jansUmaResourcePermission  
+| Field                 | |
+| -|-|
+| objectClass       | |
+| dn                | |
+| exp               | |
+| del               | |
+| jansUmaScope      | |
+| jansConfCode      | |
+| jansResourceSetId | |
+| jansAttrs         | |
+| jansTicket        | |
+| jansStatus        | |
+
+

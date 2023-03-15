@@ -42,6 +42,9 @@ class DialogUtils:
                 if value_:
                     value_ = int(value_)
 
+            if getattr(item, 'jans_list_type', False):
+                value_ = value_.split('\n')
+
             return {'key':key_, 'value':value_}
 
 
@@ -62,15 +65,19 @@ class DialogUtils:
         return data
 
 
-    def check_required_fields(self, container=None):
+    def check_required_fields(self, container=None, data=None):
         missing_fields = []
+        if not data:
+            data = self.data
+
         containers = [container] if container else [self.tabs[tab] for tab in self.tabs]
 
         for container in containers:
             for item in container.children:
                 if hasattr(item, 'children') and len(item.children)>1 and hasattr(item.children[1], 'jans_name'):
-                    if 'required' in item.children[0].style and not self.data.get(item.children[1].jans_name, None):
+                    if 'required' in item.children[0].style and not data.get(item.children[1].jans_name, None):
                         missing_fields.append(item.children[1].jans_name)
+
         if missing_fields:
             self.myparent.show_message("Please fill required fields", "The following fields are required:\n" + ', '.join(missing_fields))
             return False

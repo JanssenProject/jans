@@ -30,6 +30,7 @@ import org.json.JSONObject;
 
 import java.util.*;
 import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 
 import static io.jans.as.client.util.ClientUtil.*;
 import static io.jans.as.model.register.RegisterRequestParam.*;
@@ -81,6 +82,13 @@ public class RegisterRequest extends BaseRequest {
     private String tlsClientAuthSubjectDn;
     private Boolean allowSpontaneousScopes;
     private List<String> spontaneousScopes;
+    private List<String> spontaneousScopeScriptDns;
+    private List<String> updateTokenScriptDns;
+    private List<String> postAuthnScriptDns;
+    private List<String> consentGatheringScriptDns;
+    private List<String> introspectionScriptDns;
+    private List<String> rptClaimsScriptDns;
+    private List<String> ropcScriptDns;
     private Boolean runIntrospectionScriptBeforeJwtCreation;
     private Boolean keepClientAuthorizationAfterExpiration;
     private SubjectType subjectType;
@@ -101,6 +109,7 @@ public class RegisterRequest extends BaseRequest {
     private KeyEncryptionAlgorithm requestObjectEncryptionAlg;
     private BlockEncryptionAlgorithm requestObjectEncryptionEnc;
     private AuthenticationMethod tokenEndpointAuthMethod;
+    private List<AuthenticationMethod> additionalTokenEndpointAuthMethods;
     private SignatureAlgorithm tokenEndpointAuthSigningAlg;
     private Integer defaultMaxAge;
     private List<String> defaultAcrValues;
@@ -167,11 +176,19 @@ public class RegisterRequest extends BaseRequest {
         this.customAttributes = new HashMap<>();
         this.authorizedAcrValues = new ArrayList<>();
 
-        clientName = new LocalizedString();
-        logoUri = new LocalizedString();
-        clientUri = new LocalizedString();
-        policyUri = new LocalizedString();
-        tosUri = new LocalizedString();
+        this.clientName = new LocalizedString();
+        this.logoUri = new LocalizedString();
+        this.clientUri = new LocalizedString();
+        this.policyUri = new LocalizedString();
+        this.tosUri = new LocalizedString();
+        this.additionalAudience = new ArrayList<>();
+        this.spontaneousScopeScriptDns = new ArrayList<>();
+        this.updateTokenScriptDns = new ArrayList<>();
+        this.postAuthnScriptDns = new ArrayList<>();
+        this.consentGatheringScriptDns = new ArrayList<>();
+        this.introspectionScriptDns = new ArrayList<>();
+        this.rptClaimsScriptDns = new ArrayList<>();
+        this.ropcScriptDns = new ArrayList<>();
     }
 
     /**
@@ -1007,6 +1024,14 @@ public class RegisterRequest extends BaseRequest {
         this.tokenEndpointAuthMethod = tokenEndpointAuthMethod;
     }
 
+    public List<AuthenticationMethod> getAdditionalTokenEndpointAuthMethods() {
+        return additionalTokenEndpointAuthMethods;
+    }
+
+    public void setAdditionalTokenEndpointAuthMethods(List<AuthenticationMethod> additionalTokenEndpointAuthMethods) {
+        this.additionalTokenEndpointAuthMethods = additionalTokenEndpointAuthMethods;
+    }
+
     /**
      * Returns the Requested Client Authentication method for the Token Endpoint.
      *
@@ -1379,6 +1404,132 @@ public class RegisterRequest extends BaseRequest {
     }
 
     /**
+     * Gets spontaneous scope script dns
+     *
+     * @return spontaneous scope script dns
+     */
+    public List<String> getSpontaneousScopeScriptDns() {
+        return spontaneousScopeScriptDns;
+    }
+
+    /**
+     * Sets spontaneous scope script dns
+     *
+     * @param spontaneousScopeScriptDns spontaneous scope script dns
+     */
+    public void setSpontaneousScopeScriptDns(List<String> spontaneousScopeScriptDns) {
+        this.spontaneousScopeScriptDns = spontaneousScopeScriptDns;
+    }
+
+    /**
+     * Gets update token script dns
+     *
+     * @return update token script dns
+     */
+    public List<String> getUpdateTokenScriptDns() {
+        return updateTokenScriptDns;
+    }
+
+    /**
+     * Sets update token script dns
+     *
+     * @param updateTokenScriptDns update token script dns
+     */
+    public void setUpdateTokenScriptDns(List<String> updateTokenScriptDns) {
+        this.updateTokenScriptDns = updateTokenScriptDns;
+    }
+
+    /**
+     * Gets post authn script dns
+     *
+     * @return post authn script dns
+     */
+    public List<String> getPostAuthnScriptDns() {
+        return postAuthnScriptDns;
+    }
+
+    /**
+     * Sets post authn script dns
+     *
+     * @param postAuthnScriptDns post authn script dns
+     */
+    public void setPostAuthnScriptDns(List<String> postAuthnScriptDns) {
+        this.postAuthnScriptDns = postAuthnScriptDns;
+    }
+
+    /**
+     * Gets consent gathering script dns
+     *
+     * @return consent gathering script dns
+     */
+    public List<String> getConsentGatheringScriptDns() {
+        return consentGatheringScriptDns;
+    }
+
+    /**
+     * Sets consent gathering script dns
+     *
+     * @param consentGatheringScriptDns consent gathering script dns
+     */
+    public void setConsentGatheringScriptDns(List<String> consentGatheringScriptDns) {
+        this.consentGatheringScriptDns = consentGatheringScriptDns;
+    }
+
+    /**
+     * Gets introspection script dns
+     *
+     * @return introspection script dns
+     */
+    public List<String> getIntrospectionScriptDns() {
+        return introspectionScriptDns;
+    }
+
+    /**
+     * Sets introspection script dns
+     *
+     * @param introspectionScriptDns introspection script dns
+     */
+    public void setIntrospectionScriptDns(List<String> introspectionScriptDns) {
+        this.introspectionScriptDns = introspectionScriptDns;
+    }
+
+    /**
+     * Gets rpt claims script dns
+     *
+     * @return rpt claims script dns
+     */
+    public List<String> getRptClaimsScriptDns() {
+        return rptClaimsScriptDns;
+    }
+
+    /**
+     * Sets rpt claims script dns
+     *
+     * @param rptClaimsScriptDns rpt claims script dns
+     */
+    public void setRptClaimsScriptDns(List<String> rptClaimsScriptDns) {
+        this.rptClaimsScriptDns = rptClaimsScriptDns;
+    }
+
+    /**
+     * Gets ropc script dns
+     *
+     * @return ropc script dns
+     */
+    public List<String> getRopcScriptDns() {
+        return ropcScriptDns;
+    }
+
+    /**
+     * Sets ropc script dns
+     *
+     * @param ropcScriptDns ropc script dns
+     */
+    public void setRopcScriptDns(List<String> ropcScriptDns) {
+        this.ropcScriptDns = ropcScriptDns;
+    }
+
+    /**
      * Gets custom attribute map copy.
      *
      * @return custom attribute map copy
@@ -1451,6 +1602,14 @@ public class RegisterRequest extends BaseRequest {
         result.setTlsClientAuthSubjectDn(requestObject.optString(TLS_CLIENT_AUTH_SUBJECT_DN.toString()));
         result.setAllowSpontaneousScopes(requestObject.optBoolean(ALLOW_SPONTANEOUS_SCOPES.toString()));
         result.setSpontaneousScopes(extractListByKey(requestObject, SPONTANEOUS_SCOPES.toString()));
+        result.setAdditionalAudience(extractListByKey(requestObject, ADDITIONAL_AUDIENCE.toString()));
+        result.setSpontaneousScopeScriptDns(extractListByKey(requestObject, SPONTANEOUS_SCOPE_SCRIPT_DNS.toString()));
+        result.setUpdateTokenScriptDns(extractListByKey(requestObject, UPDATE_TOKEN_SCRIPT_DNS.toString()));
+        result.setPostAuthnScriptDns(extractListByKey(requestObject, POST_AUTHN_SCRIPT_DNS.toString()));
+        result.setConsentGatheringScriptDns(extractListByKey(requestObject, CONSENT_GATHERING_SCRIPT_DNS.toString()));
+        result.setIntrospectionScriptDns(extractListByKey(requestObject, INTROSPECTION_SCRIPT_DNS.toString()));
+        result.setRptClaimsScriptDns(extractListByKey(requestObject, RPT_CLAIMS_SCRIPT_DNS.toString()));
+        result.setRopcScriptDns(extractListByKey(requestObject, ROPC_SCRIPT_DNS.toString()));
         result.setRunIntrospectionScriptBeforeJwtCreation(requestObject.optBoolean(RUN_INTROSPECTION_SCRIPT_BEFORE_JWT_CREATION.toString()));
         result.setKeepClientAuthorizationAfterExpiration(requestObject.optBoolean(KEEP_CLIENT_AUTHORIZATION_AFTER_EXPIRATION.toString()));
         result.setRptAsJwt(requestObject.optBoolean(RPT_AS_JWT.toString()));
@@ -1469,6 +1628,7 @@ public class RegisterRequest extends BaseRequest {
         result.setRequestObjectEncryptionAlg(KeyEncryptionAlgorithm.fromName(requestObject.optString(REQUEST_OBJECT_ENCRYPTION_ALG.toString())));
         result.setRequestObjectEncryptionEnc(BlockEncryptionAlgorithm.fromName(requestObject.optString(REQUEST_OBJECT_ENCRYPTION_ENC.toString())));
         result.setTokenEndpointAuthMethod(AuthenticationMethod.fromString(requestObject.optString(TOKEN_ENDPOINT_AUTH_METHOD.toString())));
+        result.setAdditionalTokenEndpointAuthMethods(AuthenticationMethod.fromList(extractListByKey(requestObject, ADDITIONAL_TOKEN_ENDPOINT_AUTH_METHODS.toString())));
         result.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.fromString(requestObject.optString(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString())));
         result.setRedirectUris(extractListByKey(requestObject, REDIRECT_URIS.toString()));
         result.setScope(extractListByKey(requestObject, SCOPE.toString()));
@@ -1640,6 +1800,9 @@ public class RegisterRequest extends BaseRequest {
         if (tokenEndpointAuthMethod != null) {
             function.apply(TOKEN_ENDPOINT_AUTH_METHOD.toString(), tokenEndpointAuthMethod.toString());
         }
+        if (additionalTokenEndpointAuthMethods != null) {
+            function.apply(ADDITIONAL_TOKEN_ENDPOINT_AUTH_METHODS.toString(), toJSONArray(additionalTokenEndpointAuthMethods.stream().map(AuthenticationMethod::toString).collect(Collectors.toList())));
+        }
         if (tokenEndpointAuthSigningAlg != null) {
             function.apply(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString(), tokenEndpointAuthSigningAlg.toString());
         }
@@ -1723,6 +1886,16 @@ public class RegisterRequest extends BaseRequest {
         if (spontaneousScopes != null && !spontaneousScopes.isEmpty()) {
             function.apply(SPONTANEOUS_SCOPES.toString(), implode(spontaneousScopes, " "));
         }
+
+        applyArray(function, ADDITIONAL_AUDIENCE, additionalAudience);
+        applyArray(function, SPONTANEOUS_SCOPE_SCRIPT_DNS, spontaneousScopeScriptDns);
+        applyArray(function, UPDATE_TOKEN_SCRIPT_DNS, updateTokenScriptDns);
+        applyArray(function, POST_AUTHN_SCRIPT_DNS, postAuthnScriptDns);
+        applyArray(function, CONSENT_GATHERING_SCRIPT_DNS, consentGatheringScriptDns);
+        applyArray(function, INTROSPECTION_SCRIPT_DNS, introspectionScriptDns);
+        applyArray(function, RPT_CLAIMS_SCRIPT_DNS, rptClaimsScriptDns);
+        applyArray(function, ROPC_SCRIPT_DNS, ropcScriptDns);
+
         if (runIntrospectionScriptBeforeJwtCreation != null) {
             function.apply(RUN_INTROSPECTION_SCRIPT_BEFORE_JWT_CREATION.toString(), runIntrospectionScriptBeforeJwtCreation.toString());
         }
@@ -1762,6 +1935,12 @@ public class RegisterRequest extends BaseRequest {
                     function.apply(name, value);
                 }
             }
+        }
+    }
+
+    private static void applyArray(BiFunction<String, Object, Void> function, RegisterRequestParam key, List<String> list) {
+        if (list != null && !list.isEmpty()) {
+            function.apply(key.toString(), toJSONArray(list));
         }
     }
 

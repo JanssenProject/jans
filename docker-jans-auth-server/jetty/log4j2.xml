@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<Configuration packages="org.gluu.log">
+<Configuration packages="io.jans.log">
     <Properties>
         <Property name="log.console.prefix" value="auth" />
     </Properties>

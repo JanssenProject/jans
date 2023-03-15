@@ -65,7 +65,7 @@ public class CertificateService {
         }
     }
 
-    public List<X509Certificate> getCertificates(List<String> certificatePath) {
+    public List<X509Certificate> getCertificates(List<String> certificatePath, boolean checkValidaty) {
         final CertificateFactory cf;
         try {
             cf = CertificateFactory.getInstance("X.509");
@@ -80,15 +80,22 @@ public class CertificateService {
                 throw new Fido2RuntimeException(e.getMessage(), e);
             }
         }).filter(c -> {
-            try {
-                c.checkValidity();
-                return true;
-            } catch (CertificateException e) {
-                log.warn("Certificate not valid {}", c.getIssuerDN().getName());
-                throw new Fido2RuntimeException("Certificate not valid", e);
-            }
+        	if (checkValidaty) {
+	            try {
+	                c.checkValidity();
+	                return true;
+	            } catch (CertificateException e) {
+	                log.warn("Certificate not valid {}", c.getIssuerDN().getName());
+	                throw new Fido2RuntimeException("Certificate not valid", e);
+	            }
+        	}
+            return true;
         }).collect(Collectors.toList());
 
+    }
+
+    public List<X509Certificate> getCertificates(List<String> certificatePath) {
+    	return getCertificates(certificatePath, true);
     }
 
     public Map<String, X509Certificate> getCertificatesMap(String rootCertificatePath) {

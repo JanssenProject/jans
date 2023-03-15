@@ -26,7 +26,7 @@ public class SsaRevokeClient extends BaseClient<SsaRevokeRequest, SsaRevokeRespo
         return HttpMethod.DELETE;
     }
 
-    public SsaRevokeResponse execSsaRevoke(String accessToken, String jti, Long orgId) {
+    public SsaRevokeResponse execSsaRevoke(String accessToken, String jti, String orgId) {
         SsaRevokeRequest req = new SsaRevokeRequest();
         req.setAccessToken(accessToken);
         req.setJti(jti);

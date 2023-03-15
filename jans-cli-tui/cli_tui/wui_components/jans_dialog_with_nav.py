@@ -62,7 +62,7 @@ class JansDialogWithNav():
         self.button_functions = button_functions
         self.title = title
         self.height = height
-        self.width =width
+        self.width = width
         self.content = content
         self.create_window()
 
@@ -71,7 +71,7 @@ class JansDialogWithNav():
         Todo:
             * Change `max_data_str` to be dynamic 
         """
-        max_data_str = 30 ## TODO TO BE Dynamic
+        max_data_str = 22 ## TODO TO BE Dynamic
         wwidth, wheight = get_terminal_size()
 
         height = 19 if wheight <= 30 else wheight - 11

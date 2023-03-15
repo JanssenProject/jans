@@ -32,6 +32,7 @@ jansScope: inum=C4F6,ou=scopes,o=jans
 jansScope: inum=43F1,ou=scopes,o=jans
 jansScope: inum=764C,ou=scopes,o=jans
 jansScope: inum=F0C4,ou=scopes,o=jans
+jansScope: inum=B9D2-D6E5,ou=scopes,o=jans
 jansSignedRespAlg: RS256
 jansSubjectTyp: pairwise
 jansTknEndpointAuthMethod: client_secret_basic

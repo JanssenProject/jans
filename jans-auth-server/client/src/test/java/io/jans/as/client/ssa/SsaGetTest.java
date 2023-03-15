@@ -44,9 +44,9 @@ public class SsaGetTest extends BaseTest {
         String accessToken = tokenResponse.getAccessToken();
 
         // Create ssa
-        Long orgId1 = 1000L;
-        Long orgId2 = 2000L;
-        List<Long> ssaCreateOrgId = Arrays.asList(orgId1, orgId1, orgId2);
+        String orgId1 = "org-id-test-1";
+        String orgId2 = "org-id-test-2";
+        List<String> ssaCreateOrgId = Arrays.asList(orgId1, orgId1, orgId2);
         List<String> jtiList = createSsaList(accessToken, ssaCreateOrgId);
 
         // Ssa get
@@ -75,8 +75,8 @@ public class SsaGetTest extends BaseTest {
         String accessToken = tokenResponse.getAccessToken();
 
         // Create ssa
-        Long orgId1 = 1000L;
-        List<Long> ssaCreateOrgId = Arrays.asList(orgId1, orgId1);
+        String orgId1 = "org-id-test-1";
+        List<String> ssaCreateOrgId = Arrays.asList(orgId1, orgId1);
         List<String> jtiList = createSsaList(accessToken, ssaCreateOrgId);
         String jti = jtiList.get(0);
 
@@ -106,9 +106,9 @@ public class SsaGetTest extends BaseTest {
         String accessToken = tokenResponse.getAccessToken();
 
         // Create ssa
-        Long orgId1 = 1000L;
-        Long orgId2 = 2000L;
-        List<Long> ssaCreateOrgId = Arrays.asList(orgId1, orgId1, orgId2);
+        String orgId1 = "org-id-test-1";
+        String orgId2 = "org-id-test-2";
+        List<String> ssaCreateOrgId = Arrays.asList(orgId1, orgId1, orgId2);
         List<String> jtiList = createSsaList(accessToken, ssaCreateOrgId);
         String jti = jtiList.get(0);
 
@@ -138,8 +138,8 @@ public class SsaGetTest extends BaseTest {
         String accessToken = tokenResponse.getAccessToken();
 
         // Create ssa
-        Long orgId1 = 1000L;
-        List<Long> ssaCreateOrgId = Arrays.asList(orgId1, orgId1);
+        String orgId1 = "org-id-test-1";
+        List<String> ssaCreateOrgId = Arrays.asList(orgId1, orgId1);
         List<String> jtiList = createSsaList(accessToken, ssaCreateOrgId);
         String jti = "jti-not-found";
 
@@ -152,10 +152,10 @@ public class SsaGetTest extends BaseTest {
                 .check();
     }
 
-    private List<String> createSsaList(String accessToken, List<Long> ssaCreateRequestList) {
+    private List<String> createSsaList(String accessToken, List<String> ssaCreateRequestList) {
         List<String> jtiList = new ArrayList<>();
         for (int i = 0; i < ssaCreateRequestList.size(); i++) {
-            Long orgId = ssaCreateRequestList.get(i);
+            String orgId = ssaCreateRequestList.get(i);
             SsaCreateResponse ssaCreateResponse = createSsaWithDefaultValues(accessToken, orgId, null, Boolean.TRUE);
             Assert.assertNotNull(ssaCreateResponse, "Ssa create response is null, index: " + i);
             jtiList.add(ssaCreateResponse.getJti());

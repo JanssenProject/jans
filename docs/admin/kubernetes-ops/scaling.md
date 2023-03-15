@@ -3,16 +3,60 @@ tags:
   - administration
   - kubernetes
   - operations
+  - scaling
 ---
 
-## This content is in progress
+## Overview 
+Scaling is the ability of handling the increase of usage by expanding the existing resources(nodes/pods).
 
-The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.
+## Scaling types
+Scaling in Kubernetes can be done `automatically` and `manually`.
 
-## Have questions in the meantime?
+### Automatic Scaling
+Kubernetes has the capability to provision resources `automatically` in order to match the needed demand.
 
-While this documentation is in progress, you can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussion) or the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). Any questions you have will help determine what information our documentation should cover.
+#### Horizontal Pod Autoscaler (HPA)
 
-## Want to contribute?
+[HPA](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/) automatically resizes the number of `pods` to match demand.
 
-If you have content you'd like to contribute to this page in the meantime, you can get started with our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/).
+  In order for `hpa` to work, you have to:
+
+  1.  Install metrics server
+
+      ```yaml
+      kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+      ```
+
+  2.  Define `requests`for the metric used
+
+It is configured and enabled by default in the deployed `jans` components. 
+
+The default configuration scales in and out based on the CPU utilization of the pods.
+
+```yaml
+<component-name>:
+    hpa:
+      enabled: true
+      minReplicas: 1
+      maxReplicas: 10
+      targetCPUUtilizationPercentage: 50
+      # -- metrics if targetCPUUtilizationPercentage is not set
+      metrics: []
+      # -- Scaling Policies
+      behavior: {}
+```
+
+#### Cluster Autoscaler
+Cluster Autoscaler automatically resizes the number of `nodes` in a given node pool, based on the demands of your workloads. 
+
+Cluster Autoscaler is available in [AWS](https://docs.aws.amazon.com/eks/latest/userguide/autoscaling.html), [GCP](https://cloud.google.com/kubernetes-engine/docs/concepts/cluster-autoscaler) and [Azure](https://learn.microsoft.com/en-us/azure/aks/cluster-autoscaler).
+
+
+### Manual Scaling
+Kubernetes also offers the option to manually scale your resources.
+
+For example you can increase `manually` the pod replicas of auth-server deployment using the following command: 
+
+```bash
+kubectl scale --replicas=3 deployment/auth-server -n <namespace>
+```

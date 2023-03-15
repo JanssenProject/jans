@@ -59,6 +59,40 @@ def _transform_api_dynamic_config(conf):
             "headerAttributes": ["User-inum"],
         }
         should_update = True
+
+    if "dataFormatConversionConf" not in conf:
+        conf["dataFormatConversionConf"] = {
+            "enabled": True,
+            "ignoreHttpMethod": [
+                "@jakarta.ws.rs.GET()",
+            ],
+        }
+        should_update = True
+
+    if "plugins" not in conf:
+        conf["plugins"] = [
+            {
+                "name": "admin",
+                "description": "admin-ui plugin",
+                "className": "io.jans.ca.plugin.adminui.rest.ApiApplication",
+            },
+            {
+                "name": "fido2",
+                "description": "fido2 plugin",
+                "className": "io.jans.configapi.plugin.fido2.rest.ApiApplication",
+            },
+            {
+                "name": "scim",
+                "description": "scim plugin",
+                "className": "io.jans.configapi.plugin.scim.rest.ApiApplication",
+            },
+            {
+                "name": "user-management",
+                "description": "user-management plugin",
+                "className": "io.jans.configapi.plugin.mgt.rest.ApiApplication",
+            },
+        ]
+        should_update = True
     return conf, should_update
 
 

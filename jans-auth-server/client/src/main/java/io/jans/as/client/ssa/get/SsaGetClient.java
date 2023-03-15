@@ -26,7 +26,7 @@ public class SsaGetClient extends BaseClient<SsaGetRequest, SsaGetResponse> {
         return HttpMethod.GET;
     }
 
-    public SsaGetResponse execSsaGet(String accessToken, String jti, Long orgId) {
+    public SsaGetResponse execSsaGet(String accessToken, String jti, String orgId) {
         SsaGetRequest ssaGetRequest = new SsaGetRequest();
         ssaGetRequest.setAccessToken(accessToken);
         ssaGetRequest.setJti(jti);

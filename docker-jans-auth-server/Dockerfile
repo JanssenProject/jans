@@ -35,7 +35,7 @@ EXPOSE 8080
 # ======
 
 ARG JYTHON_VERSION=2.7.3
-ARG JYTHON_BUILD_DATE='2022-08-01 07:49'
+ARG JYTHON_BUILD_DATE='2022-08-01 17:37'
 RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSION}/jython-installer-${JYTHON_VERSION}.jar -O /tmp/jython-installer.jar \
     && mkdir -p /opt/jython \
     && java -jar /tmp/jython-installer.jar -v -s -d /opt/jython \
@@ -48,15 +48,15 @@ RUN wget -q https://github.com/fabioz/PyDev.Debugger/archive/refs/tags/pydev_deb
     && /opt/jython/bin/pip install . \
     && rm -rf /tmp/pydev_debugger* /tmp/PyDev.Debugger-*
 
-# uninstall Jython pip and easy_install to reduce vulnerabilities
-RUN /opt/jython/bin/pip uninstall -y pip
+# uninstall modules included in Jython ensurepip to reduce vulnerabilities
+RUN /opt/jython/bin/pip uninstall -y pip setuptools
 
 # ===========
 # Auth server
 # ===========
 
-ENV CN_VERSION=1.0.7-SNAPSHOT
-ENV CN_BUILD_DATE='2023-01-09 12:19'
+ENV CN_VERSION=1.0.10-SNAPSHOT
+ENV CN_BUILD_DATE='2023-03-09 10:23'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-server/${CN_VERSION}/jans-auth-server-${CN_VERSION}.war
 
 # Install Jans Auth
@@ -84,19 +84,19 @@ RUN wget -q https://repo1.maven.org/maven2/org/jsmpp/jsmpp/${JSMPP_VERSION}/jsmp
 
 # This will later be refactored and moved to be pulled from persitence or a central bucket
 ARG CASA_CONFIG_VERSION=5.0.0-SNAPSHOT
-ARG CASA_CONFIG_BUILD_DATE="2022-05-26 13:56"
+ARG CASA_CONFIG_BUILD_DATE="2023-02-13 11:44"
 RUN wget -q https://jenkins.gluu.org/maven/org/gluu/casa-config/${CASA_CONFIG_VERSION}/casa-config-${CASA_CONFIG_VERSION}.jar -P /usr/share/java/
 
 # A workaround for Fido2 integration
-ARG FIDO2_CLIENT_VERSION=1.0.7-SNAPSHOT
-ARG FIDO2_CLIENT_BUILD_DATE="2022-12-27 10:01"
+ARG FIDO2_CLIENT_VERSION=1.0.10-SNAPSHOT
+ARG FIDO2_CLIENT_BUILD_DATE="2023-01-31 15:04"
 RUN wget -q https://jenkins.jans.io/maven/io/jans/jans-fido2-client/${FIDO2_CLIENT_VERSION}/jans-fido2-client-${FIDO2_CLIENT_VERSION}.jar -P /usr/share/java/
 
 # =====================
 # Casa external scripts
 # =====================
 
-ARG FLEX_SOURCE_VERSION=5f065b7fb931199a26817ee22ffe5c2a9cc1e3f9
+ARG FLEX_SOURCE_VERSION=3f0281bbf381a63b28229388d6b0ae536902b455
 ARG CASA_EXTRAS_DIR=casa/extras
 
 RUN mkdir -p /opt/jans/python/libs
@@ -118,7 +118,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/agama/fl \
     ${JETTY_BASE}/jans-auth/agama/scripts
 
 # janssenproject/jans SHA commit
-ENV JANS_SOURCE_VERSION=a970d88d81f920973f3ba812db97448f135090a9
+ENV JANS_SOURCE_VERSION=da87cef4efd88796260d123054575c3aceb1ed38
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the agama code
@@ -254,7 +254,7 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
 LABEL name="janssenproject/auth-server" \
     maintainer="Janssen Project <support@jans.io>" \
     vendor="Janssen Project" \
-    version="1.0.7" \
+    version="1.0.10" \
     release="dev" \
     summary="Janssen Authorization Server" \
     description="OAuth 2.0 server and client; OpenID Connect Provider (OP) & UMA Authorization Server (AS)"
@@ -292,6 +292,7 @@ RUN chmod -R g=u ${JETTY_BASE}/jans-auth/custom \
     && chmod 664 /opt/jetty/etc/jetty.xml \
     && chmod 664 /opt/jetty/etc/webdefault.xml \
     && chown -R 1000:0 ${JETTY_BASE}/jans-auth/agama \
+    && chown -R 1000:0 ${JETTY_BASE}/jans-auth/custom \
     && chown -R 1000:0 /opt/jans/python/libs \
     && chown -R 1000:0 ${JETTY_BASE}/common/libs \
     && chown -R 1000:0 /usr/share/java \

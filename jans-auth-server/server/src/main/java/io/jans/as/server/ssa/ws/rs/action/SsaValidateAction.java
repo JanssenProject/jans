@@ -12,6 +12,7 @@ import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.config.Constants;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.ssa.SsaErrorResponseType;
+import io.jans.as.server.ssa.ws.rs.SsaRestWebServiceValidator;
 import io.jans.as.server.ssa.ws.rs.SsaService;
 import io.jans.as.server.util.ServerUtil;
 import jakarta.ejb.Stateless;
@@ -21,9 +22,6 @@ import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
-
-import java.util.Calendar;
-import java.util.TimeZone;
 
 /**
  * Provides the method to validate an existing SSA considering certain conditions.
@@ -40,6 +38,9 @@ public class SsaValidateAction {
 
     @Inject
     private SsaService ssaService;
+
+    @Inject
+    private SsaRestWebServiceValidator ssaRestWebServiceValidator;
 
     /**
      * Validates an existing SSA for a given "jti".
@@ -60,19 +61,18 @@ public class SsaValidateAction {
         errorResponseFactory.validateFeatureEnabled(FeatureFlagType.SSA);
         Response.ResponseBuilder builder = Response.ok();
         try {
-            Ssa ssa = ssaService.findSsaByJti(jti);
-            if (ssa == null ||
-                    Calendar.getInstance(TimeZone.getTimeZone("UTC")).getTime().after(ssa.getExpirationDate()) ||
-                    !ssa.getState().equals(SsaState.ACTIVE)) {
-                log.warn("Ssa jti: '{}' is null or status (expired, used or revoked)", jti);
-                return ssaService.createUnprocessableEntityResponse().build();
-            }
+            Ssa ssa = ssaRestWebServiceValidator.getValidSsaByJti(jti);
             if (ssa.getAttributes().getOneTimeUse()) {
                 ssa.setState(SsaState.USED);
                 ssaService.merge(ssa);
                 log.info("Ssa jti: '{}', updated with status: {}", ssa.getId(), ssa.getState());
             }
 
+        } catch (WebApplicationException e) {
+            if (log.isErrorEnabled()) {
+                log.error(e.getMessage(), e);
+            }
+            throw e;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             throw errorResponseFactory.createWebApplicationException(Response.Status.INTERNAL_SERVER_ERROR, SsaErrorResponseType.UNKNOWN_ERROR, "Unknown error");

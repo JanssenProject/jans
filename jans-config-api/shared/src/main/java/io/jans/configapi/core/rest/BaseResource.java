@@ -119,19 +119,19 @@ public class BaseResource {
         }
     }
 
-    public static void thorwBadRequestException(String msg) {
+    public static void throwBadRequestException(String msg) {
         throw new BadRequestException(getBadRequestException(msg));
     }
 
-    public static void thorwBadRequestException(Object obj) {
+    public static void throwBadRequestException(Object obj) {
         throw new BadRequestException(getBadRequestException(obj));
     }
 
-    public static void thorwInternalServerException(String msg) {
+    public static void throwInternalServerException(String msg) {
         throw new InternalServerErrorException(getInternalServerException(msg));
     }
 
-    public static void thorwInternalServerException(Throwable throwable) {
+    public static void throwInternalServerException(Throwable throwable) {
         throwable = findRootError(throwable);
         if (throwable != null) {
             throw new InternalServerErrorException(getInternalServerException(throwable.getMessage()));
@@ -194,7 +194,7 @@ public class BaseResource {
         int maxCount = maximumRecCount;
         log.debug(" count:{}, maxCount:{}", count, maxCount);
         if (count > maxCount) {
-            thorwBadRequestException("Maximum number of results per page is " + maxCount);
+            throwBadRequestException("Maximum number of results per page is " + maxCount);
         }
 
         count = count == null ? maxCount : count;

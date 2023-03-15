@@ -11,7 +11,6 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import io.jans.as.model.configuration.Configuration;
-
 import io.jans.doc.annotation.DocProperty;
 import jakarta.enterprise.inject.Vetoed;
 /**
@@ -50,6 +49,10 @@ public class AppConfiguration implements Configuration {
     private boolean metricReporterEnabled = true;
 	@DocProperty(description = "Custom object class list for dynamic person enrolment")
     private List<String> personCustomObjectClassList;
+	@DocProperty(description = "Boolean value to enable disable Super Gluu extension")
+    private boolean superGluuEnabled;
+	@DocProperty(description = "Boolean value to enable disable old oxAuth U2F enrollments migration")
+    private boolean oldU2fMigrationEnabled;
 
     private Fido2Configuration fido2Configuration;
 
@@ -141,11 +144,11 @@ public class AppConfiguration implements Configuration {
 		this.metricReporterKeepDataDays = metricReporterKeepDataDays;
 	}
 
-	public Boolean getMetricReporterEnabled() {
+	public boolean getMetricReporterEnabled() {
 		return metricReporterEnabled;
 	}
 
-	public void setMetricReporterEnabled(Boolean metricReporterEnabled) {
+	public void setMetricReporterEnabled(boolean metricReporterEnabled) {
 		this.metricReporterEnabled = metricReporterEnabled;
 	}
 
@@ -163,6 +166,22 @@ public class AppConfiguration implements Configuration {
 
 	public void setFido2Configuration(Fido2Configuration fido2Configuration) {
 		this.fido2Configuration = fido2Configuration;
+	}
+
+	public boolean isSuperGluuEnabled() {
+		return superGluuEnabled;
+	}
+
+	public void setSuperGluuEnabled(boolean superGluuEnabled) {
+		this.superGluuEnabled = superGluuEnabled;
+	}
+
+	public boolean isOldU2fMigrationEnabled() {
+		return oldU2fMigrationEnabled;
+	}
+
+	public void setOldU2fMigrationEnabled(boolean oldU2fMigrationEnabled) {
+		this.oldU2fMigrationEnabled = oldU2fMigrationEnabled;
 	}
 
 }

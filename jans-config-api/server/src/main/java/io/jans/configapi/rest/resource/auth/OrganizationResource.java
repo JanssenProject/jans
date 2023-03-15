@@ -76,7 +76,7 @@ public class OrganizationResource extends ConfigBaseResource {
 
         } catch (Exception ex) {
             logger.error("Error while patching Organization details", ex);
-            thorwInternalServerException(ex);
+            throwInternalServerException(ex);
         }
         return Response.ok(organizationService.getOrganization()).build();
     }

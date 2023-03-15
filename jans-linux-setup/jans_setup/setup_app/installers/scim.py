@@ -112,7 +112,7 @@ class ScimInstaller(JettyInstaller):
             display_name = 'Scim {}'.format(os.path.basename(scope))
             ldif_scopes_writer.unparse(
                     scope_dn, {
-                                'objectclass': ['top', 'jansScope'],
+                                'objectClass': ['top', 'jansScope'],
                                 'description': [config_scopes[scope]],
                                 'displayName': [display_name],
                                 'inum': [inum],

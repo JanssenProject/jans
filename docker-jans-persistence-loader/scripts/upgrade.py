@@ -140,6 +140,10 @@ def _transform_auth_dynamic_config(conf):
         }
         should_update = True
 
+    if "ssaCustomAttributes" not in conf["ssaConfiguration"]:
+        conf["ssaConfiguration"]["ssaCustomAttributes"] = []
+        should_update = True
+
     for grant_type in [
         "urn:ietf:params:oauth:grant-type:device_code",
         "urn:ietf:params:oauth:grant-type:token-exchange",
@@ -166,12 +170,21 @@ def _transform_auth_dynamic_config(conf):
         conf["blockWebviewAuthorizationEnabled"] = False
         should_update = True
 
-    if "userInfoConfiguration" not in conf:
-        conf["userInfoConfiguration"] = {
-            "dateFormatterPattern": {
-                "birthdate": "yyyy-MM-dd",
-            },
+    if "dateFormatterPatterns" not in conf:
+        # remove old config
+        conf.pop("userInfoConfiguration", None)
+        conf["dateFormatterPatterns"] = {
+            "birthdate": "yyyy-MM-dd",
         }
+        should_update = True
+
+    if "persistIdToken" not in conf:
+        conf["persistIdToken"] = conf.pop("persistIdTokenInLdap", False)
+        should_update = True
+
+    if "persistRefreshToken" not in conf:
+        conf["persistRefreshToken"] = conf.pop("persistRefreshTokenInLdap", True)
+        should_update = True
 
     # specific config per distribution
     if distribution == "openbanking":
@@ -501,6 +514,7 @@ class Upgrade:
         self.update_attributes_entries()
         self.update_scripts_entries()
         self.update_admin_ui_config()
+        self.update_tui_client()
 
     def update_scripts_entries(self):
         # default to ldap persistence
@@ -777,20 +791,20 @@ class Upgrade:
                 break
 
         try:
-            current_role_mapping = json.loads(entry.attrs["jansConfDyn"])
+            conf = json.loads(entry.attrs["jansConfDyn"])
         except TypeError:
-            current_role_mapping = entry.attrs["jansConfDyn"]
+            conf = entry.attrs["jansConfDyn"]
 
         should_update = False
 
         # check for rolePermissionMapping
         #
         # - compare role permissions for api-admin
-        for i, api_role in enumerate(current_role_mapping["rolePermissionMapping"]):
+        for i, api_role in enumerate(conf["rolePermissionMapping"]):
             if api_role["role"] == "api-admin":
                 # compare permissions between the ones from persistence (current) and newer permissions
                 if sorted(api_role["permissions"]) != sorted(api_admin_perms):
-                    current_role_mapping["rolePermissionMapping"][i]["permissions"] = api_admin_perms
+                    conf["rolePermissionMapping"][i]["permissions"] = api_admin_perms
                     should_update = True
                 break
 
@@ -802,24 +816,29 @@ class Upgrade:
         # determine current permission with index/position
         current_perms = {
             permission["permission"]: {"index": i}
-            for i, permission in enumerate(current_role_mapping["permissions"])
+            for i, permission in enumerate(conf["permissions"])
         }
 
         for perm in role_mapping["permissions"]:
             if perm["permission"] not in current_perms:
                 # add missing permission
-                current_role_mapping["permissions"].append(perm)
+                conf["permissions"].append(perm)
                 should_update = True
             else:
                 # add missing defaultPermissionInToken
                 index = current_perms[perm["permission"]]["index"]
-                if "defaultPermissionInToken" in current_role_mapping["permissions"][index]:
+                if "defaultPermissionInToken" in conf["permissions"][index]:
                     continue
-                current_role_mapping["permissions"][index]["defaultPermissionInToken"] = perm["defaultPermissionInToken"]
+                conf["permissions"][index]["defaultPermissionInToken"] = perm["defaultPermissionInToken"]
                 should_update = True
 
+        # licenseSpringCredentials must be removed in favor of SCAN license credentials
+        if "licenseSpringCredentials" in conf:
+            conf.pop("licenseSpringCredentials", None)
+            should_update = True
+
         if should_update:
-            entry.attrs["jansConfDyn"] = json.dumps(current_role_mapping)
+            entry.attrs["jansConfDyn"] = json.dumps(conf)
             entry.attrs["jansRevision"] += 1
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
 
@@ -881,6 +900,40 @@ class Upgrade:
             entry.attrs["jansRevision"] += 1
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
 
+    def update_tui_client(self):
+        kwargs = {}
+        tui_client_id = self.manager.config.get("tui_client_id")
+        id_ = f"inum={tui_client_id},ou=clients,o=jans"
+
+        if self.backend.type in ("sql", "spanner"):
+            kwargs = {"table_name": "jansClnt"}
+            id_ = doc_id_from_dn(id_)
+        elif self.backend.type == "couchbase":
+            kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
+            id_ = id_from_dn(id_)
+
+        entry = self.backend.get_entry(id_, **kwargs)
+
+        if not entry:
+            return
+
+        should_update = False
+
+        # add SSA scope inum=B9D2-D6E5,ou=scopes,o=jans to tui client
+        ssa_scope = "inum=B9D2-D6E5,ou=scopes,o=jans"
+
+        if isinstance(entry.attrs["jansScope"], dict):  # likely mysql
+            if ssa_scope not in entry.attrs["jansScope"]["v"]:
+                entry.attrs["jansScope"]["v"].append(ssa_scope)
+                should_update = True
+        else:
+            if ssa_scope not in entry.attrs["jansScope"]:
+                entry.attrs["jansScope"].append(ssa_scope)
+                should_update = True
+
+        if should_update:
+            self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
+
 
 def _transform_auth_errors_config(conf):
     should_update = False
@@ -908,6 +961,17 @@ def _transform_auth_errors_config(conf):
                 "uri": None,
             },
         ]
+        should_update = True
+
+    # add new ssa error
+    ssa_errors = [err["id"] for err in conf["ssa"]]
+
+    if "invalid_signature" not in ssa_errors:
+        conf["ssa"].append({
+            "id": "invalid_signature",
+            "description": "No algorithm found to sign the JWT.",
+            "uri": None,
+        })
         should_update = True
     return conf, should_update
 

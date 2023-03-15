@@ -10,10 +10,12 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 import org.apache.commons.codec.binary.Hex;
-import io.jans.fido2.ctap.UserVerification;
+
 import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.auth.AuthData;
 import io.jans.fido2.service.AuthenticatorDataParser;
+import io.jans.orm.model.fido2.UserVerification;
+
 import org.slf4j.Logger;
 
 /**

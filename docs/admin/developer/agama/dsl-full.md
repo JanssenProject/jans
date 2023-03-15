@@ -445,7 +445,8 @@ Finish it.nonsense
 
 - Any statements found after `Finish` is not reached and thus, not executed
 - If no `Finish` statement is found in a flow's execution, this will degenerate in flow crash 
-- When a flow is finished and was used as subflow (part of the execution of a bigger parent flow), the parent does not terminate. Execution continues at the following instruction that triggered the subflow. More on `Trigger` later
+- When a flow is finished and was used as [subflow](#subflows) (part of the execution of a bigger parent flow), the parent does not terminate. Execution continues at the following instruction that triggered the subflow. More on `Trigger` later
+- Using `data` in the `Finish` directive is an effective way to communicate information to callers (parent flows). If a  flow has no parents, `data` is stored in the authentication server's session of the given user under the key `agamaData`. Contents are serialized to a JSON string previously 
 - A flow cannot be aborted by itself. This can only be achieved through a parent flow. Learn more about aborted flows [here](./flows-lifecycle.md#cancellation)
 - Check the best practices on finishing flows [here](./flows-lifecycle.md#finishing-flows)
 

@@ -92,7 +92,8 @@ import static org.apache.commons.lang3.BooleanUtils.isTrue;
                 "/restv1/par",
                 "/restv1/device_authorization",
                 "/restv1/register",
-                "/restv1/ssa"
+                "/restv1/ssa",
+                "/restv1/ssa/jwt",
         },
         displayName = "oxAuth")
 public class AuthenticationFilter implements Filter {
@@ -168,6 +169,7 @@ public class AuthenticationFilter implements Filter {
             boolean isParEndpoint = requestUrl.endsWith("/par");
             boolean ssaEndpoint = requestUrl.endsWith("/ssa") &&
                     (Arrays.asList(HttpMethod.POST, HttpMethod.GET, HttpMethod.DELETE).contains(httpRequest.getMethod()));
+            boolean ssaJwtEndpoint = requestUrl.endsWith("/ssa/jwt") && httpRequest.getMethod().equals(HttpMethod.GET);
             String authorizationHeader = httpRequest.getHeader(Constants.AUTHORIZATION);
             String dpopHeader = httpRequest.getHeader("DPoP");
 
@@ -181,7 +183,7 @@ public class AuthenticationFilter implements Filter {
                 return;
             }
 
-            if (tokenEndpoint || revokeSessionEndpoint || tokenRevocationEndpoint || deviceAuthorizationEndpoint || isParEndpoint || ssaEndpoint) {
+            if (tokenEndpoint || revokeSessionEndpoint || tokenRevocationEndpoint || deviceAuthorizationEndpoint || isParEndpoint || ssaEndpoint || ssaJwtEndpoint) {
                 log.debug("Starting endpoint authentication {}", requestUrl);
 
                 // #686 : allow authenticated client via user access_token
@@ -280,8 +282,8 @@ public class AuthenticationFilter implements Filter {
         if (StringUtils.isNotBlank(clientId)) {
             final Client client = clientService.getClient(clientId);
             if (client != null &&
-                    (client.getAuthenticationMethod() == io.jans.as.model.common.AuthenticationMethod.TLS_CLIENT_AUTH ||
-                            client.getAuthenticationMethod() == io.jans.as.model.common.AuthenticationMethod.SELF_SIGNED_TLS_CLIENT_AUTH)) {
+                    (client.hasAuthenticationMethod(AuthenticationMethod.TLS_CLIENT_AUTH)||
+                            client.hasAuthenticationMethod(AuthenticationMethod.SELF_SIGNED_TLS_CLIENT_AUTH))) {
                 return mtlsService.processMTLS(httpRequest, httpResponse, filterChain, client);
             }
         } else {
@@ -383,7 +385,7 @@ public class AuthenticationFilter implements Filter {
                             || servletRequest.getRequestURI().endsWith("/device_authorization")) {
                         Client client = clientService.getClient(username);
                         if (client == null
-                                || io.jans.as.model.common.AuthenticationMethod.CLIENT_SECRET_BASIC != client.getAuthenticationMethod()) {
+                                || !client.hasAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_BASIC)) {
                             throw new Exception("The Token Authentication Method is not valid.");
                         }
                         requireAuth = !authenticator.authenticateClient(servletRequest);
@@ -439,7 +441,7 @@ public class AuthenticationFilter implements Filter {
             if (requireAuth) {
                 if (isExistUserPassword) {
                     Client client = clientService.getClient(clientId);
-                    if (client != null && io.jans.as.model.common.AuthenticationMethod.CLIENT_SECRET_POST == client.getAuthenticationMethod()) {
+                    if (client != null && client.hasAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_POST)) {
                         // Only authenticate if username doesn't match
                         // Identity.username and user isn't authenticated
                         if (!clientId.equals(identity.getCredentials().getUsername()) || !identity.isLoggedIn()) {
@@ -468,7 +470,7 @@ public class AuthenticationFilter implements Filter {
                     }
                 } else if (tokenEndpoint) {
                     Client client = clientService.getClient(servletRequest.getParameter(Constants.CLIENT_ID));
-                    if (client != null && client.getAuthenticationMethod() == AuthenticationMethod.NONE) {
+                    if (client != null && client.hasAuthenticationMethod(AuthenticationMethod.NONE)) {
                         identity.logout();
 
                         identity.getCredentials().setUsername(client.getClientId());
@@ -566,7 +568,7 @@ public class AuthenticationFilter implements Filter {
             } else if (grantType == GrantType.REFRESH_TOKEN) {
                 final String refreshTokenCode = servletRequest.getParameter("refresh_token");
                 TokenEntity tokenEntity;
-                if (!isTrue(appConfiguration.getPersistRefreshTokenInLdap())) {
+                if (!isTrue(appConfiguration.getPersistRefreshToken())) {
                     tokenEntity = (TokenEntity) cacheService.get(TokenHashUtil.hash(refreshTokenCode));
                 } else {
                     tokenEntity = grantService.getGrantByCode(refreshTokenCode);

@@ -91,7 +91,7 @@ A Kubernetes cluster can be created with three nodes or more in one region and t
    config:
       image:
         repository: janssenproject/configurator
-        tag: 1.0.7_dev 
+        tag: 1.0.10_dev 
       countryCode: US
       email: support@gluu.org
       orgName: Gluu
@@ -135,17 +135,17 @@ A Kubernetes cluster can be created with three nodes or more in one region and t
      image:
        pullPolicy: IfNotPresent
        repository: janssenproject/auth-server
-       tag: 1.0.7_dev
+       tag: 1.0.10_dev
    config-api:
      image:
        pullPolicy: IfNotPresent
        repository: janssenproject/config-api
-       tag: 1.0.7_dev
+       tag: 1.0.10_dev
    persistence:
      image:
        pullPolicy: IfNotPresent
        repository: janssenproject/persistence-loader
-       tag: 1.0.7_dev 
+       tag: 1.0.10_dev 
    nginx-ingress:
      ingress:
        path: /
@@ -263,10 +263,10 @@ Create the client needed to run the test by executing the following. Make sure t
 
     ```bash
     # Notice the namespace is jans here . Change it if it was changed during installation of janssen previously
-    ROLE_BASED_CLIENT_ID=$(kubectl get cm cn -o json -n jans | grep '"role_based_client_id":' | sed -e 's#.*:\(\)#\1#' | tr -d '"' | tr -d "," | tr -d '[:space:]')
-    ROLE_BASED_CLIENT_SECRET=$(kubectl get secret cn -o json -n jans | grep '"role_based_client_pw":' | sed -e 's#.*:\(\)#\1#' | tr -d '"' | tr -d "," | tr -d '[:space:]' | base64 -d)
+    TUI_CLIENT_ID=$(kubectl get cm cn -o json -n jans | grep '"tui_client_id":' | sed -e 's#.*:\(\)#\1#' | tr -d '"' | tr -d "," | tr -d '[:space:]')
+    TUI_CLIENT_SECRET=$(kubectl get secret cn -o json -n jans | grep '"tui_client_pw":' | sed -e 's#.*:\(\)#\1#' | tr -d '"' | tr -d "," | tr -d '[:space:]' | base64 -d)
     # add -noverify if your fqdn is not registered
-    ./config-cli-tui.pyz --host $FQDN --client-id $ROLE_BASED_CLIENT_ID --client-secret $ROLE_BASED_CLIENT_SECRET --no-tui --operation-id=post-oauth-openid-client --data=auth_code_client.json
+    ./config-cli-tui.pyz --host $FQDN --client-id $TUI_CLIENT_ID --client-secret $TUI_CLIENT_SECRET --no-tui --operation-id=post-oauth-openid-client --data=auth_code_client.json
     ```
 
 5. Save the client id and secret from the response and enter them along with your FQDN in the yaml file `load_test_auth_code.yaml`  under `AUTHZ_CLIENT_ID`, `AUTHZ_CLIENT_SECRET` and `FQDN` respectively then execute :

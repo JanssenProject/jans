@@ -207,7 +207,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
 
     @Override
     public AuthorizationGrant getAuthorizationGrantByRefreshToken(String clientId, String refreshTokenCode) {
-        if (isFalse(appConfiguration.getPersistRefreshTokenInLdap())) {
+        if (isFalse(appConfiguration.getPersistRefreshToken())) {
             return assertTokenType((TokenEntity) cacheService.get(TokenHashUtil.hash(refreshTokenCode)), io.jans.as.server.model.ldap.TokenType.REFRESH_TOKEN, clientId);
         }
         return assertTokenType(grantService.getGrantByCode(refreshTokenCode), io.jans.as.server.model.ldap.TokenType.REFRESH_TOKEN, clientId);

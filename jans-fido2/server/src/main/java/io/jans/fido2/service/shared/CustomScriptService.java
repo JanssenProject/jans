@@ -11,7 +11,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Alternative;
 import jakarta.inject.Inject;
 import jakarta.interceptor.Interceptor;
-
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.service.custom.script.AbstractCustomScriptService;
 

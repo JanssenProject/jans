@@ -1,11 +1,8 @@
-import json
 from functools import partial
 from asyncio import Future
 from prompt_toolkit.widgets import Button, Dialog
 from typing import Optional, Sequence, Union
-from prompt_toolkit.layout.containers import (
-    AnyContainer,
-)
+from prompt_toolkit.layout.containers import AnyContainer
 from prompt_toolkit.layout.dimension import AnyDimension
 from prompt_toolkit.formatted_text import AnyFormattedText
 from utils.multi_lang import _
@@ -16,11 +13,11 @@ class JansGDialog:
     def __init__(
         self, 
         parent, 
-        body: AnyContainer,
-        title: Optional[str]= '',
-        buttons: Optional[Sequence[Button]]= [],
-        width: AnyDimension= None
-        )-> Dialog:  
+        body: Optional[AnyContainer] = None,
+        title: Optional[str] = '',
+        buttons: Optional[Sequence[Button]] = None,
+        width: AnyDimension = None
+        )-> Dialog:
         
         """init for JansGDialog
 
@@ -37,7 +34,7 @@ class JansGDialog:
         self.future = Future()
         self.body = body
         self.myparent = parent
-
+        self.title = title
 
         if not width:
             width = parent.dialog_width
@@ -45,13 +42,15 @@ class JansGDialog:
         if not buttons:
             buttons = [Button(text=_("OK"))]
 
-        def do_handler(button_text, handler):
+        def do_handler(button_text, handler, keep_dialog):
             if handler:
                 handler(self)
-            self.future.set_result(button_text)
+
+            if not (keep_dialog or self.future.done()):
+                self.future.set_result(button_text)
 
         for button in buttons:
-            button.handler = partial(do_handler, button.text, button.handler)
+            button.handler = partial(do_handler, button.text, button.handler, getattr(button, 'keep_dialog', False))
 
         self.dialog = Dialog(
             title=title,

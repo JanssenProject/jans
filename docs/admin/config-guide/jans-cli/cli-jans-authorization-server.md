@@ -362,8 +362,8 @@ It returns all the information of the Jans Authorization server.
     "jansCustomPerson",
     "jansPerson"
   ],
-  "persistIdTokenInLdap": false,
-  "persistRefreshTokenInLdap": true,
+  "persistIdToken": false,
+  "persistRefreshToken": true,
   "allowPostLogoutRedirectWithoutValidation": false,
   "invalidateSessionCookiesAfterAuthorizationFlow": false,
   "returnClientSecretOnRead": true,
