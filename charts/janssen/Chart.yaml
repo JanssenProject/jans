@@ -5,21 +5,21 @@ annotations:
   artifacthub.io/containsSecurityUpdates: 'true'
   artifacthub.io/images: |
     - name: auth-server
-      image: janssenproject/auth-server:1.0.10_dev
+      image: ghcr.io/janssenproject/jans/auth-server:1.0.10_dev
     - name: auth-server-key-rotation
-      image: janssenproject/certmanager:1.0.10_dev
+      image: ghcr.io/janssenproject/jans/certmanager:1.0.10_dev
     - name: configuration-manager
-      image: janssenproject/configurator:1.0.10_dev
+      image: ghcr.io/janssenproject/jans/configurator:1.0.10_dev
     - name:  config-api
-      image: janssenproject/config-api:1.0.10_dev
+      image: ghcr.io/janssenproject/jans/config-api:1.0.10_dev
     - name: fido2
-      image: janssenproject/fido2:1.0.10_dev
+      image: ghcr.iTo/janssenproject/jans/fido2:1.0.10_dev
     - name: opendj
       image: gluufederation/opendj:5.0.0_dev
     - name: persistence
-      image: janssenproject/persistence-loader:1.0.10_dev
+      image: ghcr.io/janssenproject/jans/persistence-loader:1.0.10_dev
     - name: scim
-      image: janssenproject/scim:1.0.10_dev
+      image: ghcr.io/janssenproject/jans/scim:1.0.10_dev
   artifacthub.io/license: Apache-2.0
   artifacthub.io/prerelease: 'true'
   catalog.cattle.io/certified: partner
