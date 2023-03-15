@@ -67,10 +67,12 @@ public class ConfigSmtpResource extends ConfigBaseResource {
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.SMTP_READ_ACCESS }, groupScopes = {
             ApiAccessConstants.SMTP_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
-    public Response getSmtpServerConfiguration() {
+    public Response getSmtpServerConfiguration() throws EncryptionException {
         SmtpConfiguration smtpConfiguration = configurationService.getConfiguration().getSmtpConfiguration();
-        log.debug(SMTP_CONFIGURATION + ":{}", smtpConfiguration);
-        return Response.ok(Objects.requireNonNullElseGet(smtpConfiguration, SmtpConfiguration::new)).build();
+        log.info(SMTP_CONFIGURATION + ":{} from DB", smtpConfiguration);
+        decryptPassword(smtpConfiguration);
+        log.info(SMTP_CONFIGURATION + ":{} fetched", smtpConfiguration);
+        return Response.ok(smtpConfiguration).build();
     }
 
     @Operation(summary = "Adds SMTP server configuration", description = "Adds SMTP server configuration", operationId = "post-config-smtp", tags = {
@@ -86,17 +88,15 @@ public class ConfigSmtpResource extends ConfigBaseResource {
             ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response setupSmtpConfiguration(@Valid SmtpConfiguration smtpConfiguration) throws EncryptionException {
         log.debug(SMTP_CONFIGURATION + ":{}", smtpConfiguration);
-        String password = smtpConfiguration.getPassword();
-        if (password != null && !password.isEmpty()) {
-            smtpConfiguration.setPassword(encryptionService.encrypt(password));
-        }
-
+        encryptPassword(smtpConfiguration);
         GluuConfiguration configurationUpdate = configurationService.getConfiguration();
         log.debug("configurationUpdate:{}", configurationUpdate);
         configurationUpdate.setSmtpConfiguration(smtpConfiguration);
         configurationService.updateConfiguration(configurationUpdate);
-        return Response.status(Response.Status.CREATED)
-                .entity(configurationService.getConfiguration().getSmtpConfiguration()).build();
+        smtpConfiguration = configurationService.getConfiguration().getSmtpConfiguration();
+        decryptPassword(smtpConfiguration);
+        log.debug("After creeation " + SMTP_CONFIGURATION + ":{}", smtpConfiguration);
+        return Response.status(Response.Status.CREATED).entity(smtpConfiguration).build();
     }
 
     @Operation(summary = "Updates SMTP server configuration", description = "Updates SMTP server configuration", operationId = "put-config-smtp", tags = {
@@ -113,16 +113,15 @@ public class ConfigSmtpResource extends ConfigBaseResource {
             ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response updateSmtpConfiguration(@Valid SmtpConfiguration smtpConfiguration) throws EncryptionException {
         log.debug(SMTP_CONFIGURATION + ":{}", smtpConfiguration);
-        String password = smtpConfiguration.getPassword();
-        if (password != null && !password.isEmpty()) {
-            smtpConfiguration.setPassword(encryptionService.encrypt(password));
-        }
-        log.debug(SMTP_CONFIGURATION + ":{}", smtpConfiguration);
+        encryptPassword(smtpConfiguration);
         GluuConfiguration configurationUpdate = configurationService.getConfiguration();
         log.debug("configurationUpdate:{}", configurationUpdate);
         configurationUpdate.setSmtpConfiguration(smtpConfiguration);
         configurationService.updateConfiguration(configurationUpdate);
-        return Response.ok(configurationService.getConfiguration().getSmtpConfiguration()).build();
+        smtpConfiguration = configurationService.getConfiguration().getSmtpConfiguration();
+        decryptPassword(smtpConfiguration);
+        log.debug("After update " + SMTP_CONFIGURATION + ":{}", smtpConfiguration);
+        return Response.ok(smtpConfiguration).build();
     }
 
     @Operation(summary = "Test SMTP server configuration", description = "Test SMTP server configuration", operationId = "test-config-smtp", tags = {
@@ -145,7 +144,7 @@ public class ConfigSmtpResource extends ConfigBaseResource {
                 smtpConfiguration.getFromName(), smtpConfiguration.getFromEmailAddress(), null,
                 "SMTP Configuration verification", "Mail to test smtp configuration",
                 "Mail to test smtp configuration");
-        log.debug("smtpConfiguration test status:{}", status);
+        log.info("smtpConfiguration test status:{}", status);
         return Response.ok(status).build();
     }
 
@@ -163,6 +162,34 @@ public class ConfigSmtpResource extends ConfigBaseResource {
         configurationUpdate.setSmtpConfiguration(new SmtpConfiguration());
         configurationService.updateConfiguration(configurationUpdate);
         return Response.noContent().build();
+    }
+
+    private SmtpConfiguration encryptPassword(SmtpConfiguration smtpConfiguration) throws EncryptionException {
+        if (smtpConfiguration == null) {
+            return smtpConfiguration;
+        }
+        String password = smtpConfiguration.getPassword();
+        if (password != null && !password.isEmpty()) {
+            try {
+                encryptionService.decrypt(password);
+            } catch (Exception ex) {
+                log.error("Exception while decryption of smtpConfiguration password hence will encrypt it!!!");
+                smtpConfiguration.setPassword(encryptionService.encrypt(password));
+            }
+        }
+        return smtpConfiguration;
+    }
+
+    private SmtpConfiguration decryptPassword(SmtpConfiguration smtpConfiguration) throws EncryptionException {
+        if (smtpConfiguration != null) {
+            String password = smtpConfiguration.getPassword();
+            if (password != null && !password.isEmpty()) {
+                smtpConfiguration.setPassword(encryptionService.decrypt(password));
+            }
+        } else {
+            smtpConfiguration = new SmtpConfiguration();
+        }
+        return smtpConfiguration;
     }
 
 }
