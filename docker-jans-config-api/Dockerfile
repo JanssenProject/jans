@@ -110,7 +110,7 @@ COPY conf/prometheus-config.yaml /opt/prometheus/
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_SOURCE_VERSION=da87cef4efd88796260d123054575c3aceb1ed38
+ENV JANS_SOURCE_VERSION=22323cebe180c6e224baf28d66cb435982880df7
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
 
@@ -230,7 +230,8 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_PROMETHEUS_PORT="" \
     CN_AWS_SECRETS_ENDPOINT_URL="" \
     CN_AWS_SECRETS_PREFIX=jans \
-    CN_AWS_SECRETS_REPLICA_FILE=""
+    CN_AWS_SECRETS_REPLICA_FILE="" \
+    CN_CONFIG_API_CREATE_SCOPES=true
 
 # ====
 # misc
