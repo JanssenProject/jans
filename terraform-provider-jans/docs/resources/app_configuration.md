@@ -37,7 +37,7 @@ resource "jans_app_configuration" "global" {
 - `authorization_encryption_alg_values_supported` (List of String) A list of the authorization encryption algorithms supported.
 - `authorization_encryption_enc_values_supported` (List of String) A list of the authorization encryption algorithms supported.
 - `authorization_endpoint` (String) The authorization endpoint URL. Example: https://server.example.com/restv1/authorize
-- `authorization_request_custom_allowed_parameters` (Block List) Authorization Request Custom Allowed Parameters. (see [below for nested schema](#nestedblock--authorization_request_custom_allowed_parameters))
+- `authorization_request_custom_allowed_parameters` (Block List) Authorization Request Custom Allowed Parameters. To avoid diverging state, those should be defined in alphabetical order. (see [below for nested schema](#nestedblock--authorization_request_custom_allowed_parameters))
 - `authorization_signing_alg_values_supported` (List of String) A list of the authorization signing algorithms supported.
 - `backchannel_authentication_endpoint` (String) Backchannel Authentication Endpoint. Example: https://server.example.com/oxeleven/rest/backchannel/backchannelAuthenticationEndpoint()
 - `backchannel_authentication_request_signing_alg_values_supported` (List of String) Backchannel Authentication Request Signing Alg Values Supported.
@@ -131,8 +131,9 @@ resource "jans_app_configuration" "global" {
 - `force_signed_request_object` (Boolean) Boolean value true indicates that signed request object is mandatory.
 - `front_channel_logout_session_supported` (Boolean) Boolean value to specify support for front channel logout session.
 - `grant_types_and_response_types_autofix_enabled` (Boolean) Boolean value specifying whether to Grant types and Response types can be auto fixed.
-- `grant_types_supported` (List of String) A list of the OAuth 2.0 Grant Type values that this OP supports. One of "authorization_code",
-							"implicit", "password", "client_credentials", "refresh_token", "urn:ietf:params:oauth:grant-type:uma-ticket",
+- `grant_types_supported` (List of String) A list of the OAuth 2.0 Grant Type values that this OP supports. One of"none", "authorization_code", 
+							"client_credentials", "implicit", "password", "refresh_token", "urn:ietf:params:oauth:grant-type:device_code", 
+							"urn:ietf:params:oauth:grant-type:token-exchange", "urn:ietf:params:oauth:grant-type:uma-ticket", 
 							"urn:openid:params:grant-type:ciba".
 - `http_logging_enabled` (Boolean) Enable/Disable request/response logging filter.
 - `http_logging_exclude_paths` (List of String) List of base URI for which request/response logging filter should not record activity. Example: "/auth/img", "/auth/stylesheet"
@@ -240,7 +241,8 @@ resource "jans_app_configuration" "global" {
 - `require_request_object_encryption` (Boolean) Boolean value true encrypts request object
 - `require_request_uri_registration` (Boolean) Boolean value specifying whether the OP requires any request_uri values used to be 
 								pre-registered using the request_uris registration parameter.
-- `response_modes_supported` (List of String) A list of the OAuth 2.0 Response Mode values that this OP supports. One of "query¡¡", "fragment", "form_post".
+- `response_modes_supported` (List of String) A list of the OAuth 2.0 Response Mode values that this OP supports. One of "query", 
+							"fragment", "form_post", "query.jwt", "fragment.jwt", "form_post.jwt", "jwt".
 - `response_types_supported` (List of List of String) A list of the OAuth 2.0 response_type values that this OP supports. One of "code", "token", "id_token".
 - `return_client_secret_on_read` (Boolean) Boolean value specifying whether a client_secret is returned on client GET or PUT. False value means not to return secret.
 - `sector_identifier_cache_lifetime` (Number) The cache lifetime in minutes of the sector identifier.
@@ -268,13 +270,13 @@ resource "jans_app_configuration" "global" {
 - `subject_identifiers_per_client_supported` (List of String) A list of the subject identifiers supported per client.
 - `subject_types_supported` (List of String) A list of the Subject Identifier types that this OP supports. Valid types include pairwise and public.
 - `token_endpoint` (String) The token endpoint URL. Example: https://server.example.com/restv1/token
-- `token_endpoint_auth_methods_supported` (List of String) A list of Client Authentication methods supported by this Token Endpoint. One of 'client_secret_basic', 'client_secret_post', 'client_secret_jwt', 'private_key_jwt'.
+- `token_endpoint_auth_methods_supported` (List of String) A list of Client Authentication methods supported by this Token Endpoint.
 - `token_endpoint_auth_signing_alg_values_supported` (List of String) A list of the JWS signing algorithms (alg values) supported by the Token Endpoint for the signature 
 							on the JWT used to authenticate the Client at the Token Endpoint for the private_key_jwt and client_secret_jwt 
 							authentication methods. One of 'HS256', 'HS384', 'HS512', 'RS256", 'RS384', 'RS512', 'ES256', 'ES384', 'ES512', 'PS256', 'PS384', 'PS512'.
 - `token_revocation_endpoint` (String) The URL for the access_token or refresh_token revocation endpoint. Example: https://server.example.com/restv1/revoke
 - `trusted_client_enabled` (Boolean) Boolean value specifying whether a client is trusted and no authorization is required.
-- `ui_locales_supported` (List of String) Languages and scripts supported for the user interface. One of 'en', 'es'.
+- `ui_locales_supported` (List of String) Languages and scripts supported for the user interface. One of "en", "bg", "de", "es", "fr", "it", "ru", "tr".
 - `uma_add_scopes_automatically` (Boolean) Add scopes automatically.
 - `uma_configuration_endpoint` (String) URL for the UMA Configuration Endpoint. Example: https://server.example.com/restv1/uma2-configuration
 - `uma_grant_access_if_no_policies` (Boolean) Specifies whether to grant access to resources if there are no any policies associated with scopes.
