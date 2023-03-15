@@ -90,7 +90,7 @@ jobs:
           fi
           MAIN_VERSION=$(python3 -c "from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('$DOCKER_FILE_LOCATION') ; print(dfparser.labels['version'])")
           DOCKER_IMAGE=ghcr.io/${{ github.repository }}/${{ matrix.docker-images }}
-          VERSION=ghcr.io/${{ github.repository }}/${MAIN_VERSION}_dev
+          VERSION=${MAIN_VERSION}_dev
           BUILD=true
           if [[ $GITHUB_REF == refs/tags/docker-jans-${{ matrix.docker-images }}-* ]]; then
             VERSION=${GITHUB_REF#refs/tags/docker-jans-${{ matrix.docker-images }}-v}
