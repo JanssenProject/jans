@@ -5,9 +5,9 @@ import (
 	"fmt"
 )
 
-// AgamaConfiguration enables an alternative way to build authentication
+// EngineConfiguration enables an alternative way to build authentication
 // flows in the Janssen server.
-type AgamaConfiguration struct {
+type EngineConfiguration struct {
 	Enabled                     bool              `schema:"enabled" json:"enabled"`
 	RootDir                     string            `schema:"root_dir" json:"rootDir"`
 	TemplatesPath               string            `schema:"templates_path" json:"templatesPath"`
@@ -308,7 +308,7 @@ type AppConfiguration struct {
 	HttpLoggingEnabled                                        bool                                  `schema:"http_logging_enabled" json:"httpLoggingEnabled"`
 	HttpLoggingExcludePaths                                   []string                              `schema:"http_logging_exclude_paths" json:"httpLoggingExcludePaths"`
 	ExternalLoggerConfiguration                               string                                `schema:"external_logger_configuration" json:"externalLoggerConfiguration"`
-	AgamaConfiguration                                        AgamaConfiguration                    `schema:"agama_configuration" json:"agamaConfiguration"`
+	AgamaConfiguration                                        EngineConfiguration                   `schema:"agama_configuration" json:"agamaConfiguration"`
 	EnabledComponents                                         []string                              `schema:"enabled_components" json:"enabledComponents"`
 	PersonCustomObjectClassList                               []string                              `schema:"person_custom_object_class_list" json:"personCustomObjectClassList"`
 	StatWebServiceIntervalLimitInSeconds                      int                                   `schema:"stat_web_service_interval_limit_in_seconds" json:"statWebServiceIntervalLimitInSeconds"`

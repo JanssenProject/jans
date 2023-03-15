@@ -22,7 +22,7 @@ func TestResourceAuthServiceConfig_Mapping(t *testing.T) {
 		AuthenticationProtectionConfiguration: jans.AuthenticationProtectionConfiguration{
 			DelayTime: 16,
 		},
-		AgamaConfiguration: jans.AgamaConfiguration{
+		AgamaConfiguration: jans.EngineConfiguration{
 			DefaultResponseHeaders: map[string]string{
 				"X-Frame-Options": "SAMEORIGIN",
 			},
