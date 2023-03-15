@@ -172,7 +172,7 @@ public class ApiProtectionService {
             log.debug("Re-verify ConfigApiScope rsScope.getName():{} with rsScope.getInum():{} in DB - scope:{} ",
                     rsScope.getName(), rsScope.getInum(), scope);
             if (scope == null) {
-                log.debug("Scope - '{}' does not exist, hence creating it.", scope);
+                log.info("Scope - '{}' does not exist, hence creating it.", scope);
                 // Scope does not exists hence create Scope
                 scope = new Scope();
                 String inum = rsScope.getInum();
