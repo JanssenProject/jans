@@ -1,6 +1,13 @@
 # Changelog
 
-## [0.2.0](https://github.com/JannsenProject/terraform-provider-jans/compare/v0.1.0...v0.2.0) (2023-02-16)
+## [0.3.0](https://github.com/techtative/terraform-provider-jans/compare/v0.2.0...v0.3.0) (2023-03-15)
+
+
+### Features
+
+* added new resource for manaing api app config 
+
+## [0.2.0](https://github.com/techtative/terraform-provider-jans/compare/v0.1.0...v0.2.0) (2023-02-16)
 
 
 ### Features
