@@ -45,7 +45,7 @@ auth-server:
     # -- Image pullPolicy to use for deploying.
     pullPolicy: IfNotPresent
     # -- Image  to use for deploying.
-    repository: janssenproject/auth-server
+    repository: ghcr.io/janssenproject/jans/auth-server
     # -- Image  tag to use for deploying.
     tag: 1.0.10_dev
     # -- Image Pull Secrets
@@ -112,7 +112,7 @@ auth-server-key-rotation:
     # -- Image pullPolicy to use for deploying.
     pullPolicy: IfNotPresent
     # -- Image  to use for deploying.
-    repository: janssenproject/certmanager
+    repository: ghcr.io/janssenproject/jans/certmanager
     # -- Image  tag to use for deploying.
     tag: 1.0.10_dev
     # -- Image Pull Secrets
@@ -267,7 +267,7 @@ config:
   email: support@jans.io
   image:
     # -- Image  to use for deploying.
-    repository: janssenproject/configurator
+    repository: ghcr.io/janssenproject/jans/configurator
     # -- Image  tag to use for deploying.
     tag: 1.0.10_dev
     # -- Image Pull Secrets
@@ -350,7 +350,7 @@ config-api:
     # -- Image pullPolicy to use for deploying.
     pullPolicy: IfNotPresent
     # -- Image  to use for deploying.
-    repository: janssenproject/config-api
+    repository: ghcr.io/janssenproject/jans/config-api
     # -- Image  tag to use for deploying.
     tag: 1.0.10_dev
     # -- Image Pull Secrets
@@ -442,7 +442,7 @@ fido2:
     # -- Image pullPolicy to use for deploying.
     pullPolicy: IfNotPresent
     # -- Image  to use for deploying.
-    repository: janssenproject/fido2
+    repository: ghcr.io/janssenproject/jans/fido2
     # -- Image  tag to use for deploying.
     tag: 1.0.10_dev
     # -- Image Pull Secrets
@@ -973,7 +973,7 @@ persistence:
     # -- Image pullPolicy to use for deploying.
     pullPolicy: IfNotPresent
     # -- Image  to use for deploying.
-    repository: janssenproject/persistence-loader
+    repository: ghcr.io/janssenproject/jans/persistence-loader
     # -- Image  tag to use for deploying.
     tag: 1.0.10_dev
     # -- Image Pull Secrets
@@ -1046,7 +1046,7 @@ scim:
     # -- Image pullPolicy to use for deploying.
     pullPolicy: IfNotPresent
     # -- Image  to use for deploying.
-    repository: janssenproject/scim
+    repository: ghcr.io/janssenproject/jans/scim
     # -- Image  tag to use for deploying.
     tag: 1.0.10_dev
     # -- Image Pull Secrets
