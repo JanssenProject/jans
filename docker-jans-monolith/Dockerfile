@@ -78,13 +78,12 @@ ENV CN_HOSTNAME="demoexample.jans.io" \
 # misc stuff
 # ==========
 
-LABEL name="janssenproject/monolith" \
-    maintainer="Janssen Project <support@jans.io>" \
-    vendor="Janssen Project" \
-    version="1.0.11" \
-    release="dev" \
-    summary="Janssen Monolith Image" \
-    description="Janssen Authorization server"
+LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/monolith" \
+    org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
+    org.opencontainers.image.vendor="Janssen Project" \
+    org.opencontainers.image.version="1.0.11" \
+    org.opencontainers.image.title="Janssen Monolith Image" \
+    org.opencontainers.image.description="Janssen Authorization server"
 
 COPY scripts /app/scripts
 RUN chmod +x /app/scripts/entrypoint.sh

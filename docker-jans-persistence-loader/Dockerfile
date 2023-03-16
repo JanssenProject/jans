@@ -167,13 +167,12 @@ ENV CN_CACHE_TYPE=NATIVE_PERSISTENCE \
 # misc
 # ====
 
-LABEL name="janssenproject/persistence-loader" \
-    maintainer="Janssen Project <support@jans.io>" \
-    vendor="Janssen Project" \
-    version="1.0.11" \
-    release="dev" \
-    summary="Janssen Authorization Server Persistence loader" \
-    description="Generate initial data for persistence layer"
+LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/persistence-loader" \
+    org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
+    org.opencontainers.image.vendor="Janssen Project" \
+    org.opencontainers.image.version="1.0.11" \
+    org.opencontainers.image.title="Janssen Authorization Server Persistence loader" \
+    org.opencontainers.image.description="Generate initial data for persistence layer"
 
 RUN mkdir -p /app/custom_ldif /etc/certs /etc/jans/conf
 

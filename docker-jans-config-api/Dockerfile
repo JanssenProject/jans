@@ -237,13 +237,12 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
 # misc
 # ====
 
-LABEL name="janssenproject/config-api" \
-    maintainer="Janssen Project <support@jans.io>" \
-    vendor="Janssen Project" \
-    version="1.0.11" \
-    release="dev" \
-    summary="Janssen Config API" \
-    description=""
+LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/config-api" \
+    org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
+    org.opencontainers.image.vendor="Janssen Project" \
+    org.opencontainers.image.version="1.0.11" \
+    org.opencontainers.image.title="Janssen Config API" \
+    org.opencontainers.image.description=""
 
 RUN mkdir -p /etc/certs \
     /app/templates/ \
