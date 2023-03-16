@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/techtative/terraform-provider-jans/compare/v0.3.0...v0.4.0) (2023-03-16)
+
+
+### Features
+
+* added data source for plugins 
+
 ## [0.3.0](https://github.com/techtative/terraform-provider-jans/compare/v0.2.0...v0.3.0) (2023-03-15)
 
 
