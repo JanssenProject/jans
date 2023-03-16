@@ -1,4 +1,4 @@
-CN_VERSION?=1.0.10
+CN_VERSION?=1.0.11-SNAPSHOT
 IMAGE_NAME=janssenproject/scim
 DEV_VERSION?=$(shell echo ${CN_VERSION} | cut -d '-' -f 1)_dev
 
