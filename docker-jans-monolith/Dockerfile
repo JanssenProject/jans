@@ -81,8 +81,8 @@ ENV CN_HOSTNAME="demoexample.jans.io" \
 LABEL name="janssenproject/monolith" \
     maintainer="Janssen Project <support@jans.io>" \
     vendor="Janssen Project" \
-    version="1.0.10" \
-    release="1.0.10" \
+    version="1.0.11" \
+    release="dev" \
     summary="Janssen Monolith Image" \
     description="Janssen Authorization server"
 
