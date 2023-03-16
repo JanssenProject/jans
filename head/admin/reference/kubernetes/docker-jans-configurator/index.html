@@ -8925,7 +8925,7 @@
 <p>Configuration manager is a special container used to load (generate/restore) and dump (backup) the configuration and secrets.</p>
 <h2 id="versions">Versions<a class="headerlink" href="#versions" title="Permanent link">#</a></h2>
 <p>See <a href="https://github.com/JanssenProject/docker-jans-configurator/releases">Releases</a> for stable versions.
-For bleeding-edge/unstable version, use <code>janssenproject/configurator:1.0.10_dev</code>.</p>
+For bleeding-edge/unstable version, use <code>janssenproject/configurator:1.0.11_dev</code>.</p>
 <h2 id="environment-variables">Environment Variables<a class="headerlink" href="#environment-variables" title="Permanent link">#</a></h2>
 <p>The following environment variables are supported by the container:</p>
 <ul>
@@ -9025,7 +9025,7 @@ python -c &#39;import random, string; print(&quot;&quot;.join(random.choices(str
     -v /path/to/host/volume:/app/db <span class="se">\</span>
     -v /path/to/vault_role_id.txt:/etc/certs/vault_role_id <span class="se">\</span>
     -v /path/to/vault_secret_id.txt:/etc/certs/vault_secret_id <span class="se">\</span>
-    janssenproject/configurator:1.0.10_dev load
+    janssenproject/configurator:1.0.11_dev load
 </code></pre></div>
 </li>
 </ol>
@@ -9052,7 +9052,7 @@ python -c &#39;import random, string; print(&quot;&quot;.join(random.choices(str
 <span class="w">            </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">config-generate-params</span><span class="w"></span>
 <span class="w">      </span><span class="nt">containers</span><span class="p">:</span><span class="w"></span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">configurator-load</span><span class="w"></span>
-<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">janssenproject/configurator:1.0.10_dev</span><span class="w"></span>
+<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">janssenproject/configurator:1.0.11_dev</span><span class="w"></span>
 <span class="w">          </span><span class="nt">volumeMounts</span><span class="p">:</span><span class="w"></span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/app/db/generate.json</span><span class="w"></span>
 <span class="w">              </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">config-generate-params</span><span class="w"></span>
@@ -9094,7 +9094,7 @@ spec:
             name: secret-params
       containers:
         - name: configurator-load
-          image: janssenproject/configurator:1.0.10_dev
+          image: janssenproject/configurator:1.0.11_dev
           volumeMounts:
             - mountPath: /app/db/config.json
               name: config-params
@@ -9122,7 +9122,7 @@ spec:
     -v /path/to/host/volume:/app/db <span class="se">\</span>
     -v /path/to/vault_role_id.txt:/etc/certs/vault_role_id <span class="se">\</span>
     -v /path/to/vault_secret_id.txt:/etc/certs/vault_secret_id <span class="se">\</span>
-    janssenproject/configurator:1.0.10_dev dump
+    janssenproject/configurator:1.0.11_dev dump
 </code></pre></div>
 <h4 id="kubernetes_1">Kubernetes<a class="headerlink" href="#kubernetes_1" title="Permanent link">#</a></h4>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">batch/v1</span><span class="w"></span>
@@ -9135,7 +9135,7 @@ spec:
 <span class="w">      </span><span class="nt">restartPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Never</span><span class="w"></span>
 <span class="w">      </span><span class="nt">containers</span><span class="p">:</span><span class="w"></span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">configurator-dump-job</span><span class="w"></span>
-<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">janssenproject/configurator:1.0.10_dev</span><span class="w"></span>
+<span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">janssenproject/configurator:1.0.11_dev</span><span class="w"></span>
 <span class="w">          </span><span class="nt">command</span><span class="p">:</span><span class="w"></span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/bin/sh</span><span class="w"></span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-c</span><span class="w"></span>
@@ -9154,7 +9154,7 @@ spec:
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-03-16T12:26:58+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-03-16</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-03-16T15:13:53+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-03-16</span>
       
         <br>
         Created:
