@@ -69,8 +69,8 @@ RUN mkdir -p /root/.bzt/jmeter-taurus \
 LABEL name="janssenproject/demo_loadtesting" \
     maintainer="Janssen Project <support@jans.io>" \
     vendor="Janssen Project" \
-    version="1.0.10" \
-    release="1.0.10" \
+    version="1.0.11" \
+    release="dev" \
     summary="Janssen Jmeter tests" \
     description="Janssen Jmeter and user loader image"
 
