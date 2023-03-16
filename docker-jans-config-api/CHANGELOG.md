@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.0.10-1](https://github.com/JanssenProject/jans/compare/docker-jans-config-api-v1.0.9-1...docker-jans-config-api-v1.0.10-1) (2023-03-16)
+
+
+### Features
+
+* **docker-jans:** add client auth scopes ([#4156](https://github.com/JanssenProject/jans/issues/4156)) ([1ae907b](https://github.com/JanssenProject/jans/commit/1ae907b3abda9f2df03cfcab805931fdbd1bfc11))
+
+
+### Bug Fixes
+
+* prepare release for 1.0.10 ([e996926](https://github.com/JanssenProject/jans/commit/e99692692ef04d881468d120f7c7d462568dce36))
+
 ## [1.0.9-1](https://github.com/JanssenProject/jans/compare/docker-jans-config-api-v1.0.8-1...docker-jans-config-api-v1.0.9-1) (2023-03-09)
 
 
