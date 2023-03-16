@@ -45,7 +45,7 @@ public class ClientAuthService {
 
         ClientAuthorization clientAuth = new ClientAuthorization();
         clientAuth.setDn(getClientAuthorizationDn(null));
-        clientAuth.setId(userId);
+        clientAuth.setUserId(userId);
         List<ClientAuthorization> authorizations = persistenceEntryManager.findEntries(clientAuth);
         logger.info("{} client-authorization entries found", authorizations);
 
