@@ -1,6 +1,6 @@
 # janssen
 
-![Version: 1.0.10](https://img.shields.io/badge/Version-1.0.10-informational?style=flat-square) ![AppVersion: 1.0.10](https://img.shields.io/badge/AppVersion-1.0.10-informational?style=flat-square)
+![Version: 1.0.11](https://img.shields.io/badge/Version-1.0.11-informational?style=flat-square) ![AppVersion: 1.0.10](https://img.shields.io/badge/AppVersion-1.0.10-informational?style=flat-square)
 
 Janssen Access and Identity Management
 
@@ -23,15 +23,15 @@ Kubernetes: `>=v1.21.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
-|  | auth-server | 1.0.10 |
-|  | auth-server-key-rotation | 1.0.10 |
-|  | config | 1.0.10 |
-|  | config-api | 1.0.10 |
-|  | fido2 | 1.0.10 |
-|  | nginx-ingress | 1.0.10 |
-|  | opendj | 1.0.10 |
-|  | persistence | 1.0.10 |
-|  | scim | 1.0.10 |
+|  | auth-server | 1.0.11 |
+|  | auth-server-key-rotation | 1.0.11 |
+|  | config | 1.0.11 |
+|  | config-api | 1.0.11 |
+|  | fido2 | 1.0.11 |
+|  | nginx-ingress | 1.0.11 |
+|  | opendj | 1.0.11 |
+|  | persistence | 1.0.11 |
+|  | scim | 1.0.11 |
 
 ## Values
 
