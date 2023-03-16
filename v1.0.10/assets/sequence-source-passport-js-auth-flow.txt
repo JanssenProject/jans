@@ -1,0 +1,28 @@
+fontawesome f268 "++**User Agent**++" as browser #blue
+fontawesome5solid f2d0 "++**RP**++" as rp #purple
+fontawesome5solid f233 "++**Jans AS**++" as jans #green
+fontawesome5solid f5fd "++**           External Social Provider**++" as eidp #orange
+fontawesome5solid f1e6 "++**Passport**++" as passport #green
+
+browser->rp: 1. Request protected page
+rp->jans: 2. Invoke /authorize endpoint
+jans->browser: 3. Discovery: Present list of remote IDPs (Google, Apple, FB...)
+browser->jans: 4. Select IDP (e.g. click on button)
+jans->passport: 5. Securly request for auth and redirect
+passport->eidp: 6. Redirects login request to IDP
+loop n times - (multistep authentication)
+eidp->browser: 7. Present login screen
+browser->eidp: 8. Present credentials
+end
+eidp->passport: 9. Return success response(id_token, user_claims)
+passport->passport: 10. validate id_token, userinfo
+note over passport: map userinfo remote attribute to ldap local attribute
+passport->jans: 11. send user profile jwt
+jans->jans: 12. validate jwt
+opt if new user
+jans->jans: 13. Dynamic enrollment or registration
+end
+jans->jans: 14. create internal Jans session
+jans->rp: 15. Redirect with success response(e.g. code)
+rp->rp: 16. Validate response
+rp->browser: 17. Show protected page
