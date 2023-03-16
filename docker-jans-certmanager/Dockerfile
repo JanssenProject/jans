@@ -16,7 +16,7 @@ RUN apk update \
 # ===========
 
 # JAR files required to generate OpenID Connect keys
-ENV CN_VERSION=1.0.10
+ENV CN_VERSION=1.0.11-SNAPSHOT
 ENV CN_BUILD_DATE='2023-03-16 11:40'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-client/${CN_VERSION}/jans-auth-client-${CN_VERSION}-jar-with-dependencies.jar
 
@@ -139,8 +139,8 @@ ENV CN_WAIT_MAX_TIME=300 \
 LABEL name="janssenproject/certmanager" \
     maintainer="Janssen Project <support@jans.io>" \
     vendor="Janssen Project" \
-    version="1.0.10" \
-    release="1.0.10" \
+    version="1.0.11" \
+    release="dev" \
     summary="Janssen Certmanager" \
     description="Manage certs and crypto keys for Janssen Server"
 
