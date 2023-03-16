@@ -229,9 +229,9 @@ public class FullFlowAppleTest {
 		this.attestationChallenge = challenge;
 
 		JsonNode request = attestationSuperGluuController.buildFido2AttestationStartResponse(userName, applicationId, sessionId);
-        assertEquals(request.get(CommonVerifiers.SUPER_GLUU_REQUEST).asBoolean(), true);
-        assertEquals(request.get(CommonVerifiers.SUPER_GLUU_MODE).asText(), SuperGluuMode.TWO_STEP.getMode());
-        assertEquals(request.get(CommonVerifiers.SUPER_GLUU_APP_ID).asText(), applicationId);
+        assertEquals(true, request.get(CommonVerifiers.SUPER_GLUU_REQUEST).asBoolean());
+        assertEquals(SuperGluuMode.TWO_STEP.getMode(), request.get(CommonVerifiers.SUPER_GLUU_MODE).asText());
+        assertEquals(applicationId, request.get(CommonVerifiers.SUPER_GLUU_APP_ID).asText());
 
 		ObjectNode response = attestationService.options(request);
 		
@@ -242,9 +242,9 @@ public class FullFlowAppleTest {
 
         assertNotNull(registrationEntry);
         assertNotNull(response);
-        assertEquals(response.get("challenge").asText(), challenge);
+        assertEquals(challenge, response.get("challenge").asText());
 
-        assertEquals(registrationEntry.getRegistrationStatus(), Fido2RegistrationStatus.pending);
+        assertEquals(Fido2RegistrationStatus.pending, registrationEntry.getRegistrationStatus());
 	}
 
 	public void testFinishAssertionTwoStepAppleAuthenticatedImpl(String userName, String registerFinishResponse, String registeredPublicKey) {
@@ -252,8 +252,8 @@ public class FullFlowAppleTest {
 		RegisterResponse registerResponse = attestationSuperGluuController.parseRegisterResponse(registerFinishResponse);
 
 		JsonNode request = attestationSuperGluuController.buildFido2AttestationVerifyResponse(userName, registerResponse);
-        assertEquals(request.get(CommonVerifiers.SUPER_GLUU_REQUEST).asBoolean(), true);
-        assertEquals(request.get(CommonVerifiers.SUPER_GLUU_MODE).asText(), SuperGluuMode.TWO_STEP.getMode());
+        assertEquals(true, request.get(CommonVerifiers.SUPER_GLUU_REQUEST).asBoolean());
+        assertEquals(SuperGluuMode.TWO_STEP.getMode(), request.get(CommonVerifiers.SUPER_GLUU_MODE).asText());
 
 		ObjectNode response = attestationService.verify(request);
 
@@ -263,20 +263,20 @@ public class FullFlowAppleTest {
         registrationEntry = captor.getValue();
 
 		assertNotNull(response);
-        assertEquals(response.get("status").asText(), "ok");
-        assertEquals(response.get("createdCredentials").get("id").asText(), registeredPublicKey);
+        assertEquals("ok", response.get("status").asText());
+        assertEquals(registeredPublicKey, response.get("createdCredentials").get("id").asText());
 	}
 
 	public void testFinishAssertionTwoStepAppleAuthenticatedRegistered(String userName, String registerFinishResponse, String registeredPublicKey) {
 		testFinishAssertionTwoStepAppleAuthenticatedImpl(userName, registerFinishResponse, registeredPublicKey);
 
-        assertEquals(registrationEntry.getRegistrationStatus(), Fido2RegistrationStatus.registered);
+        assertEquals(Fido2RegistrationStatus.registered, registrationEntry.getRegistrationStatus());
 	}
 
 	public void testFinishAssertionTwoStepAppleAuthenticatedCanceled(String userName, String registerFinishResponse, String registeredPublicKey) {
 		testFinishAssertionTwoStepAppleAuthenticatedImpl(userName, registerFinishResponse, registeredPublicKey);
 
-        assertEquals(registrationEntry.getRegistrationStatus(), Fido2RegistrationStatus.canceled);
+        assertEquals(Fido2RegistrationStatus.canceled, registrationEntry.getRegistrationStatus());
 	}
 
 	public void testStartAssertionTwoStepAppleImpl(String issuer, String challenge, String userName,
@@ -285,10 +285,10 @@ public class FullFlowAppleTest {
 		this.assertionChallenge = challenge;
 
 		JsonNode request = assertionSuperGluuController.buildFido2AssertionStartResponse(userName, registrationEntry.getPublicKeyId(), applicationId, sessionId);
-        assertEquals(request.get(CommonVerifiers.SUPER_GLUU_REQUEST).asBoolean(), true);
-        assertEquals(request.get(CommonVerifiers.SUPER_GLUU_MODE).asText(), SuperGluuMode.TWO_STEP.getMode());
-        assertEquals(request.get(CommonVerifiers.SUPER_GLUU_KEY_HANDLE).asText(), registrationEntry.getPublicKeyId());
-        assertEquals(request.get(CommonVerifiers.SUPER_GLUU_APP_ID).asText(), applicationId);
+        assertEquals(true, request.get(CommonVerifiers.SUPER_GLUU_REQUEST).asBoolean());
+        assertEquals(SuperGluuMode.TWO_STEP.getMode(), request.get(CommonVerifiers.SUPER_GLUU_MODE).asText());
+        assertEquals(registrationEntry.getPublicKeyId(), request.get(CommonVerifiers.SUPER_GLUU_KEY_HANDLE).asText());
+        assertEquals(applicationId, request.get(CommonVerifiers.SUPER_GLUU_APP_ID).asText());
 
 		ObjectNode response = assertionService.options(request);
 		
@@ -300,9 +300,9 @@ public class FullFlowAppleTest {
         assertNotNull(authenticationEntry);
         assertNotNull(response);
         assertTrue(response.get("allowCredentials").size() > 0);
-        assertEquals(response.get("allowCredentials").get(0).get("id").asText(), registrationEntry.getPublicKeyId());
+        assertEquals(registrationEntry.getPublicKeyId(), response.get("allowCredentials").get(0).get("id").asText());
 
-        assertEquals(authenticationEntry.getAuthenticationStatus(), Fido2AuthenticationStatus.pending);
+        assertEquals(Fido2AuthenticationStatus.pending, authenticationEntry.getAuthenticationStatus());
 	}
 
 	public void testFinishAssertionTwoStepAppleImpl(String userName, String authenticateFinishResponse) {
@@ -310,8 +310,8 @@ public class FullFlowAppleTest {
 		AuthenticateResponse authenticateResponse = assertionSuperGluuController.parseAuthenticateResponse(authenticateFinishResponse);
 
 		JsonNode request = assertionSuperGluuController.buildFido2AuthenticationVerifyResponse(userName, authenticateFinishResponse, authenticateResponse);
-        assertEquals(request.get(CommonVerifiers.SUPER_GLUU_REQUEST).asBoolean(), true);
-        assertEquals(request.get(CommonVerifiers.SUPER_GLUU_MODE).asText(), SuperGluuMode.TWO_STEP.getMode());
+        assertEquals(true, request.get(CommonVerifiers.SUPER_GLUU_REQUEST).asBoolean());
+        assertEquals(SuperGluuMode.TWO_STEP.getMode(), request.get(CommonVerifiers.SUPER_GLUU_MODE).asText());
 
 		ObjectNode response = assertionService.verify(request);
 
@@ -325,20 +325,20 @@ public class FullFlowAppleTest {
         registrationEntry = captorAttestation.getValue();
 
 		assertNotNull(response);
-        assertEquals(response.get("status").asText(), "ok");
-        assertEquals(response.get("authenticatedCredentials").get("id").asText(), registrationEntry.getPublicKeyId());
+        assertEquals("ok", response.get("status").asText());
+        assertEquals(registrationEntry.getPublicKeyId(), response.get("authenticatedCredentials").get("id").asText());
 	}
 
 	public void testFinishAssertionTwoStepAppleAuthenticated(String userName, String authenticateFinishResponse) {
 		testFinishAssertionTwoStepAppleImpl(userName, authenticateFinishResponse);
 
-        assertEquals(authenticationEntry.getAuthenticationStatus(), Fido2AuthenticationStatus.authenticated);
+        assertEquals(Fido2AuthenticationStatus.authenticated, authenticationEntry.getAuthenticationStatus());
 	}
 
 	public void testFinishAssertionTwoStepAppleCanceled(String userName, String authenticateFinishResponse) {
 		testFinishAssertionTwoStepAppleImpl(userName, authenticateFinishResponse);
 
-        assertEquals(authenticationEntry.getAuthenticationStatus(), Fido2AuthenticationStatus.canceled);
+        assertEquals(Fido2AuthenticationStatus.canceled, authenticationEntry.getAuthenticationStatus());
 	}
 
 	@Test
@@ -407,7 +407,7 @@ public class FullFlowAppleTest {
 	@Test
 	@Order(8)
     @ExtendWith(FileParameterExtension.class)
-	public void testThirdFinishAssertionTwoStepACancelndroid(@Name("attestation.apple.two-step.userName") String userName,
+	public void testThirdFinishAssertionTwoStepCancelApple(@Name("attestation.apple.two-step.userName") String userName,
 			@Name("assertion.apple.two-step.cancel.finish.request3") String authenticateFinishResponse) {
 		testFinishAssertionTwoStepAppleCanceled(userName, authenticateFinishResponse);
         assertTrue(registrationEntry.getCounter() == 3);
