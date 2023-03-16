@@ -274,16 +274,16 @@ public class AssertionService {
 		// Store original response
 		authenticationData.setAssertionResponse(params.toString());
 
-		authenticationData.setStatus(Fido2AuthenticationStatus.authenticated);
+        // Support cancel request
+        if (cancelRequest) {
+        	authenticationData.setStatus(Fido2AuthenticationStatus.canceled);
+        } else {
+        	authenticationData.setStatus(Fido2AuthenticationStatus.authenticated);
+        }
 
 		// Set expiration
 		int unfinishedRequestExpiration = appConfiguration.getFido2Configuration().getAuthenticationHistoryExpiration();
 		authenticationEntity.setExpiration(unfinishedRequestExpiration);
-
-        // Support cancel request
-        if (cancelRequest) {
-        	authenticationData.setStatus(Fido2AuthenticationStatus.canceled);
-        }
 
 		authenticationPersistenceService.update(authenticationEntity);
 
