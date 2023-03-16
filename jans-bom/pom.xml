@@ -271,6 +271,11 @@
 				<version>${bc.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bcmail-jdk15on</artifactId>
+				<version>${bc.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>com.nimbusds</groupId>
 				<artifactId>nimbus-jose-jwt</artifactId>
 				<version>9.28</version>

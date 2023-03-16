@@ -31,9 +31,9 @@ import org.slf4j.Logger;
 import io.jans.as.model.fido.u2f.exception.BadInputException;
 import io.jans.as.model.fido.u2f.message.RawRegisterResponse;
 import io.jans.as.model.util.Base64Util;
-import io.jans.as.model.util.SecurityProviderUtility;
 import io.jans.fido2.service.Base64Service;
 import io.jans.util.io.ByteDataInputStream;
+import io.jans.util.security.SecurityProviderUtility;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 /**

@@ -23,7 +23,8 @@ import jakarta.inject.Inject;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import io.jans.fido2.exception.Fido2RuntimeException;
-import io.jans.as.model.util.SecurityProviderUtility;
+import io.jans.util.security.SecurityProviderUtility;
+
 import org.slf4j.Logger;
 
 /**
