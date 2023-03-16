@@ -41,20 +41,23 @@ public class ClientAuthService {
 
     public Map<Client, Set<Scope>> getUserAuthorizations(String userId) {
 
-        logger.debug(" Authorizations details to be fetched for userId:{} ", userId);
+        logger.info(" Authorizations details to be fetched for userId:{} ", userId);
 
         ClientAuthorization clientAuth = new ClientAuthorization();
+        clientAuth.setDn(getClientAuthorizationDn(null));
         clientAuth.setId(userId);
         List<ClientAuthorization> authorizations = persistenceEntryManager.findEntries(clientAuth);
-        logger.debug("{} client-authorization entries found", authorizations);
+        logger.info("{} client-authorization entries found", authorizations);
 
         if (authorizations == null || authorizations.isEmpty()) {
             return Collections.emptyMap();
         }
 
-        // Obtain client id
+        // Get client id
         Set<String> clientIds = authorizations.stream().map(ClientAuthorization::getClientId)
                 .collect(Collectors.toSet());
+        logger.info("clientIds:{}", clientIds);
+
 
         // Create a filter based on client Id
         Filter[] filters = clientIds.stream().map(id -> Filter.createEqualityFilter("inum", id))
@@ -64,14 +67,15 @@ public class ClientAuthService {
 
         Set<String> scopeIds = authorizations.stream().map(ClientAuthorization::getScopes).flatMap(Arrays::stream)
                 .collect(Collectors.toSet());
-
+        logger.info("scopeIds:{}", scopeIds);
+        
         // Do the analog for scopes
         filters = scopeIds.stream().map(id -> Filter.createEqualityFilter("jansId", id)).collect(Collectors.toList())
                 .toArray(new Filter[] {});
         List<Scope> scopes = persistenceEntryManager.findEntries(scopeService.getDnForScope(null), Scope.class,
                 Filter.createORFilter(filters));
 
-        logger.debug("Found {} client authorizations for user {}", clients.size(), userId);
+        logger.info("Found {} client authorizations for user {}", clients.size(), userId);
         Map<Client, Set<Scope>> perms = new HashMap<>();
 
         for (Client client : clients) {
@@ -88,7 +92,7 @@ public class ClientAuthService {
             }
             perms.put(client, clientScopes);
         }
-        logger.debug("perms {}", perms);
+        logger.info("perms {}", perms);
         return perms;
     }
 

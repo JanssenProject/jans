@@ -52,6 +52,7 @@ public class ClientAuthResource extends ConfigBaseResource {
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.CLIENT_AUTHORIZATIONS_READ_ACCESS }, groupScopes = {
             ApiAccessConstants.OPENID_READ_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    @Path(ApiConstants.USERID_PATH)
     public Response getClientAuthorization(
             @Parameter(description = "User identifier") @PathParam(ApiConstants.USERID) @NotNull String userId) {
 
@@ -74,10 +75,12 @@ public class ClientAuthResource extends ConfigBaseResource {
     @DELETE
     @ProtectedApi(scopes = { ApiAccessConstants.CLIENT_AUTHORIZATIONS_DELETE_ACCESS }, groupScopes = {}, superScopes = {
             ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
+    @Path(ApiConstants.USERID_PATH + ApiConstants.USERNAME_PATH + ApiConstants.CLIENTID_PATH)
     public Response deleteClientAuthorization(
             @Parameter(description = "User identifier") @PathParam(ApiConstants.USERID) @NotNull String userId,
             @Parameter(description = "User name") @PathParam(ApiConstants.USERNAME) @NotNull String userName,
             @Parameter(description = "Client identifier") @PathParam(ApiConstants.CLIENTID) @NotNull String clientId) {
+
         if (logger.isInfoEnabled()) {
             logger.info("Param for ClientAuthorization to be deleted - userId:{}, userName:{}, clientId:{}",
                     escapeLog(userId), escapeLog(userName), escapeLog(clientId));
