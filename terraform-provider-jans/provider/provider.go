@@ -95,6 +95,7 @@ func Provider() *schema.Provider {
 		DataSourcesMap: map[string]*schema.Resource{
 			"jans_fido2_configuration":     dataSourceFido2Configuration(),
 			"jans_persistence_config":      dataSourcePersistenceConfiguration(),
+			"jans_plugins":                 dataSourcePlugins(),
 			"jans_schema":                  dataSourceSchema(),
 			"jans_service_provider_config": dataSourceServiceProviderConfig(),
 		},

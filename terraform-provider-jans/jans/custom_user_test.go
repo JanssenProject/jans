@@ -74,10 +74,6 @@ func TestCustomUsers(t *testing.T) {
 				DisplayValue: "exampleUsr1",
 			},
 		},
-		CustomObjectClasses: []string{
-			"top",
-			"jansCustomPerson",
-		},
 		Mail:                "exampleUsr1@jans.io",
 		OxAuthPersistentJwt: []string{"jwt1", "jwt2"},
 		DisplayName:         "Default Test User",
