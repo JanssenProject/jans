@@ -1,0 +1,15 @@
+io.jans.ca.plugin.adminui.extensions
+io.jans.ca.plugin.adminui.model.auth
+io.jans.ca.plugin.adminui.model.config
+io.jans.ca.plugin.adminui.model.exception
+io.jans.ca.plugin.adminui.rest
+io.jans.ca.plugin.adminui.rest.auth
+io.jans.ca.plugin.adminui.rest.license
+io.jans.ca.plugin.adminui.rest.logging
+io.jans.ca.plugin.adminui.rest.user
+io.jans.ca.plugin.adminui.service
+io.jans.ca.plugin.adminui.service.auth
+io.jans.ca.plugin.adminui.service.config
+io.jans.ca.plugin.adminui.service.license
+io.jans.ca.plugin.adminui.service.user
+io.jans.ca.plugin.adminui.utils
