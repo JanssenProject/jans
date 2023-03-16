@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.0.10](https://github.com/JanssenProject/jans/compare/jans-linux-setup-v1.0.9...jans-linux-setup-v1.0.10) (2023-03-16)
+
+
+### Features
+
+* **jans-auth-server:** added online_access scope to issue session bound refresh token [#3012](https://github.com/JanssenProject/jans/issues/3012) ([#4106](https://github.com/JanssenProject/jans/issues/4106)) ([635f611](https://github.com/JanssenProject/jans/commit/635f6119fdf4cdf3b3aed33515854ef68257c98f))
+* **jans-linux-setup:** enable agama engine by default  ([#4131](https://github.com/JanssenProject/jans/issues/4131)) ([7e432dc](https://github.com/JanssenProject/jans/commit/7e432dcde57657d1cfa1cd45bde2206156dc6905))
+
+
+### Bug Fixes
+
+* **jans-linux-setup:** set jansAuthMode - default acr mode ([#4162](https://github.com/JanssenProject/jans/issues/4162)) ([f7d0489](https://github.com/JanssenProject/jans/commit/f7d0489e47a86ce146846dda2064d378dd4a0897))
+* prepare release for 1.0.10 ([e996926](https://github.com/JanssenProject/jans/commit/e99692692ef04d881468d120f7c7d462568dce36))
+
 ## [1.0.9](https://github.com/JanssenProject/jans/compare/jans-linux-setup-v1.0.8...jans-linux-setup-v1.0.9) (2023-03-09)
 
 
