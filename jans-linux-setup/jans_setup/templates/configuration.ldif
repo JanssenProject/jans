@@ -5,6 +5,7 @@ jansDbAuth: {"type": "auth", "name": null, "level": 0, "priority": 1, "enabled":
 jansSmtpConf: {"valid": true, "host": "SMTP Host", "port": 1111, "trust-host": true, "from-name": "From Name", "from-email-address": "From Name", "requires-authentication": true, "user-name": "From Name", "password": "xAGVIW6KrSr82FIMADaPlw=="}
 jansOrgProfileMgt: false
 jansScimEnabled: false
+jansAuthMode: simple_password_auth
 objectClass: top
 objectClass: jansAppConf
 ou: configuration
