@@ -9899,3 +9899,6 @@ components:
               configuration properties
             https://jans.io/oauth/client/authorizations.readonly: View ClientAuthorizations
             https://jans.io/oauth/client/authorizations.delete: Revoke ClientAuthorizations
+
+			
+			
