@@ -251,13 +251,12 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
 # misc stuff
 # ==========
 
-LABEL name="janssenproject/auth-server" \
-    maintainer="Janssen Project <support@jans.io>" \
-    vendor="Janssen Project" \
-    version="1.0.11" \
-    release="dev" \
-    summary="Janssen Authorization Server" \
-    description="OAuth 2.0 server and client; OpenID Connect Provider (OP) & UMA Authorization Server (AS)"
+LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/auth-server" \
+    org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
+    org.opencontainers.image.vendor="Janssen Project" \
+    org.opencontainers.image.version="1.0.11" \
+    org.opencontainers.image.title="Janssen Authorization Server" \
+    org.opencontainers.image.description="OAuth 2.0 server and client; OpenID Connect Provider (OP) & UMA Authorization Server (AS)"
 
 RUN mkdir -p ${JETTY_BASE}/jans-auth/custom/pages \
     ${JETTY_BASE}/jans-auth/custom/static \
