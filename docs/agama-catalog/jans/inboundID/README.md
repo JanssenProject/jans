@@ -90,7 +90,7 @@ The basic authentication flow is employed when no provider is picked from the li
 
 ### Add the main inbound flow
 
-- Download the flow [source](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/docs/script-catalog/agama/inboundID/io.jans.inbound.ExternalSiteLogin) and add it as you did with the basic flow, ensure you use `io.jans.inbound.ExternalSiteLogin` this time
+- Download the flow [source](https://raw.githubusercontent.com/JanssenProject/jans/main/docs/agama-catalog/jans/inboundID/io.jans.inbound.ExternalSiteLogin) and add it as you did with the basic flow, ensure you use `io.jans.inbound.ExternalSiteLogin` this time
 
 - In the server, navigate to `/opt/jans/jetty/jans-auth/agama`. Create folders named `inboundID` inside existing `ftl` and `fl` subdirectories
 
