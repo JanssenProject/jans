@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.10-1](https://github.com/JanssenProject/jans/compare/docker-jans-configurator-v1.0.9-1...docker-jans-configurator-v1.0.10-1) (2023-03-16)
+
+
+### Bug Fixes
+
+* prepare release for 1.0.10 ([e996926](https://github.com/JanssenProject/jans/commit/e99692692ef04d881468d120f7c7d462568dce36))
+
 ## [1.0.9-1](https://github.com/JanssenProject/jans/compare/docker-jans-configurator-v1.0.8-1...docker-jans-configurator-v1.0.9-1) (2023-03-09)
 
 

@@ -1,25 +1,25 @@
 kubeVersion: ">=v1.21.0-0"
 annotations:
   artifacthub.io/changes: |
-    - 1.0.10 official chart release
+    - 1.0.11 dev chart release
   artifacthub.io/containsSecurityUpdates: 'true'
   artifacthub.io/images: |
     - name: auth-server
-      image: ghcr.io/janssenproject/jans/auth-server:1.0.10
+      image: ghcr.io/janssenproject/jans/auth-server:1.0.11_dev
     - name: auth-server-key-rotation
-      image: ghcr.io/janssenproject/jans/certmanager:1.0.10
+      image: ghcr.io/janssenproject/jans/certmanager:1.0.11_dev
     - name: configuration-manager
-      image: ghcr.io/janssenproject/jans/configurator:1.0.10
+      image: ghcr.io/janssenproject/jans/configurator:1.0.11_dev
     - name:  config-api
-      image: ghcr.io/janssenproject/jans/config-api:1.0.10
+      image: ghcr.io/janssenproject/jans/config-api:1.0.11_dev
     - name: fido2
-      image: ghcr.io/janssenproject/jans/fido2:1.0.10
+      image: ghcr.io/janssenproject/jans/fido2:1.0.11_dev
     - name: opendj
       image: gluufederation/opendj:5.0.0_dev
     - name: persistence
-      image: ghcr.io/janssenproject/jans/persistence-loader:1.0.10
+      image: ghcr.io/janssenproject/jans/persistence-loader:1.0.11_dev
     - name: scim
-      image: ghcr.io/janssenproject/jans/scim:1.0.10
+      image: ghcr.io/janssenproject/jans/scim:1.0.11_dev
   artifacthub.io/license: Apache-2.0
   artifacthub.io/prerelease: 'true'
   catalog.cattle.io/certified: partner
@@ -38,40 +38,40 @@ maintainers:
     email: support@jans.io
 description: Janssen Access and Identity Management
 name: janssen
-version: 1.0.10
+version: 1.0.11
 dependencies:
     - name: config
       condition: global.config.enabled
-      version: 1.0.10
+      version: 1.0.11
 
     - name: config-api
       condition: global.config-api.enabled
-      version: 1.0.10
+      version: 1.0.11
 
     - name: opendj
       condition: global.opendj.enabled
-      version: 1.0.10
+      version: 1.0.11
 
     - name: auth-server
       condition: global.auth-server.enabled
-      version: 1.0.10
+      version: 1.0.11
 
     - name: fido2
       condition: global.fido2.enabled
-      version: 1.0.10
+      version: 1.0.11
 
     - name: scim
       condition: global.scim.enabled
-      version: 1.0.10
+      version: 1.0.11
 
     - name: nginx-ingress
       condition: global.nginx-ingress.enabled
-      version: 1.0.10
+      version: 1.0.11
 
     - name: auth-server-key-rotation
       condition: global.auth-server-key-rotation.enabled
-      version: 1.0.10
+      version: 1.0.11
 
     - name: persistence
       condition: global.persistence.enabled
-      version: 1.0.10
+      version: 1.0.11

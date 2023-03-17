@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.0.10-1](https://github.com/JanssenProject/jans/compare/docker-jans-persistence-loader-v1.0.9-1...docker-jans-persistence-loader-v1.0.10-1) (2023-03-16)
+
+
+### Features
+
+* **docker-jans-persistence-loader:** add online_access scope and enable agama engine by default ([#4136](https://github.com/JanssenProject/jans/issues/4136)) ([8c0bbb3](https://github.com/JanssenProject/jans/commit/8c0bbb3b564623407c66ae934be77ca16ac94c42))
+* **docker-jans:** add client auth scopes ([#4156](https://github.com/JanssenProject/jans/issues/4156)) ([1ae907b](https://github.com/JanssenProject/jans/commit/1ae907b3abda9f2df03cfcab805931fdbd1bfc11))
+
+
+### Bug Fixes
+
+* **docker-jans-config-api:** remove licenseSpringCredentials from admin-ui jansConfDyn ([#4125](https://github.com/JanssenProject/jans/issues/4125)) ([2cf8aa0](https://github.com/JanssenProject/jans/commit/2cf8aa01b65c809a9bb6c3576cf949ddd23a5fdd))
+* prepare release for 1.0.10 ([e996926](https://github.com/JanssenProject/jans/commit/e99692692ef04d881468d120f7c7d462568dce36))
+
 ## [1.0.9-1](https://github.com/JanssenProject/jans/compare/docker-jans-persistence-loader-v1.0.7-1...docker-jans-persistence-loader-v1.0.9-1) (2023-03-09)
 
 
