@@ -7,53 +7,53 @@ tags:
 
 # Sector Identifier
 
-Janssen Server supports sector identifier values for OpenId Connect relying party configuration. As defined in
-[OpenId Connect core specification](https://openid.net/specs/openid-connect-core-1_0.html#Terminology), the
-sector identifiers can be used by a group of websites under the same administrative control to receive same pairwise
-subject identifiers. Using sector identifiers also allows clients to change host component of redirect URI and still
-keep the subject identifiers unchanged. 
+Janssen Server supports sector identifier URI and pairwise subject IDs for OpenId Connect relying party configuration. 
+As defined in [OpenId Connect core specification](https://openid.net/specs/openid-connect-core-1_0.html#Terminology), the
+sector identifiers value is used to derive pairwise subject IDs. Janssen Server also supports `Sector Identifier URI` as
+part of client configuration. `Sector Identifier URI` enables a group of websites under the same 
+administrative control to receive same pairwise subject identifiers. `Sector Identifier URI` also allows clients to 
+change host component of redirect URI and still keep the subject identifiers unchanged. 
 
-How sector identifier value is used to derive value for pairwise subject identifier is detailed in the 
-[OIDC core specification](https://openid.net/specs/openid-connect-core-1_0.html#PairwiseAlg).
+## Configuring Sector Identifier
+
+Janssen Server needs the `Sector Identifier URI` to fulfil below-mentioned checks:
+- URI should have `https` schema
+- URI should be accessible to Janssen Server and response should be a valid JSON array of redirect URIs
+- All redirect URI received in response must exist in the list of redirect URI provided by client at the registration time
+
+!!! Note
+    If the client can not host an endpoint which will be reachable by `Sector Identifier URI`, then to use `pairwise` 
+    subject IDs, the client must supply `Redirect URI` list where URI's have the same host component. The host component
+    will be used as sector identifier.
 
 ## Configuration With Pairwise Subject Type
 
-Janssen Server allows clients/RPs to set subject type. `public` subject type is default and client/RP can choose
+How sector identifier value is used to derive value for pairwise subject identifier is detailed in the
+[OIDC core specification](https://openid.net/specs/openid-connect-core-1_0.html#PairwiseAlg).
+
+Janssen Server allows clients/RPs to set subject type. `public` subject type is the default and client/RP can choose
 to use `pairwise` type. When using TUI, this setting can be opted from client configuration screen below when 
 creating or updating the client configuration.
 
 ![](../../../assets/image-tui-client-registration-basic.png)
 
-When `pairwise` subject type is selected, the value for `Sector Identifier URI` can be left blank if the redirect
-URI list for the client has the same host names. If the list of redirect URIs contain multiple host names,
-providing `Sector Identifier URI` is must.
+When `pairwise` subject type is selected, the value for `Sector Identifier URI` can be left blank if the all redirect
+URIs for the client use the same host name. If the list of redirect URIs contain multiple host names,
+providing `Sector Identifier URI` is must. When `Sector Identifier URI` is provided, the host component of the URI is
+used as sector identifier.
 
-## Pairwise Identifier Generation
+### Pairwise Identifier Generation
 
 Janssen Server uses the `Sector Identifier URI` host name string, local user ID and a salt string as 
 initial input. This input is then signed with HS256 signing algorithm to generating pairwise identifier. 
 
+## Configuration Properties
 
+Janssen Server allows customisation with respect to sector identifiers using properties below:
 
-TODO: Do we validate the `Sector Identifier URI` by checking if it returns a JSON list of redirect URIs, or we 
-don't validate?
+ - [sectorIdentifierCacheLifetimeInMinutes](https://docs.jans.io/v1.0.10/admin/reference/json/properties/janssenauthserver-properties/#sectoridentifiercachelifetimeinminutes)
+ - [shareSubjectIdBetweenClientsWithSameSectorId](https://docs.jans.io/v1.0.10/admin/reference/json/properties/janssenauthserver-properties/#sharesubjectidbetweenclientswithsamesectorid)
 
-TODO: what if the client/RP is of type which can not expose an API. Like native client. Then we can't validate 
-the `Sector Identifier URI`. What do we do in that scenario.
-
-## Properties and Feature Flags
-
-
-
-
-
-## This content is in progress
-
-The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.
-
-## Have questions in the meantime?
-
-While this documentation is in progress, you can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussion) or the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). Any questions you have will help determine what information our documentation should cover.
 
 ## Want to contribute?
 
