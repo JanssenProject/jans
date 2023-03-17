@@ -9011,6 +9011,53 @@ the OpenAPI specification of <a href="https://gluu.org/swagger-ui/?url=https://r
 }
 </code></pre></div>
 <h2 id="response-as-jwt">Response as JWT<a class="headerlink" href="#response-as-jwt" title="Permanent link">#</a></h2>
+<p>Response is returned as JWT if <code>Accept</code> header has value <code>application/token-introspection+jwt</code> or otherwise if explicit endpoint parameter <code>response_as_jwt</code> is set to <code>true</code>.</p>
+<div class="highlight"><pre><span></span><code>POST /introspect HTTP/1.1
+Host: as.example.com
+Accept: application/token-introspection+jwt
+</code></pre></div>
+<p>Sample decoded JWT payload
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;iss&quot;</span><span class="p">:</span><span class="s2">&quot;https://as.example.com/&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;aud&quot;</span><span class="p">:</span><span class="s2">&quot;https://rs.example.com/resource&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;iat&quot;</span><span class="p">:</span><span class="mi">1514797892</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;token_introspection&quot;</span><span class="p">:</span><span class="w"></span>
+<span class="w">     </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;active&quot;</span><span class="p">:</span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;iss&quot;</span><span class="p">:</span><span class="s2">&quot;https://as.example.com/&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;aud&quot;</span><span class="p">:</span><span class="s2">&quot;https://rs.example.com/resource&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;iat&quot;</span><span class="p">:</span><span class="mi">1514797822</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;exp&quot;</span><span class="p">:</span><span class="mi">1514797942</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;client_id&quot;</span><span class="p">:</span><span class="s2">&quot;paiB2goo0a&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;scope&quot;</span><span class="p">:</span><span class="s2">&quot;read write dolphin&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;sub&quot;</span><span class="p">:</span><span class="s2">&quot;Z5O3upPC88QrAjx00dis&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;birthdate&quot;</span><span class="p">:</span><span class="s2">&quot;1982-02-01&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;given_name&quot;</span><span class="p">:</span><span class="s2">&quot;John&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;family_name&quot;</span><span class="p">:</span><span class="s2">&quot;Doe&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;jti&quot;</span><span class="p">:</span><span class="s2">&quot;t1FoCCaZd4Xv4ORJUWVUeTZfsKhW30CQCrWDDjwXy6w&quot;</span><span class="w"></span>
+<span class="w">     </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"> </span>
+</code></pre></div></p>
+<p>Sample response (line breaks in payload is for convenience)</p>
+<div class="highlight"><pre><span></span><code>HTTP/1.1 200 OK
+Content-Type: application/token-introspection+jwt
+
+eyJraWQiOiJ3RzZEIiwidHlwIjoidG9rZW4taW50cm9zcGVjdGlvbitqd3QiLCJhbGc
+iOiJSUzI1NiJ9.eyJpc3MiOiJodHRwczovL2FzLmV4YW1wbGUuY29tLyIsImF1ZCI6I
+mh0dHBzOi8vcnMuZXhhbXBsZS5jb20vcmVzb3VyY2UiLCJpYXQiOjE1MTQ3OTc4OTIs
+InRva2VuX2ludHJvc3BlY3Rpb24iOnsiYWN0aXZlIjp0cnVlLCJpc3MiOiJodHRwczo
+vL2FzLmV4YW1wbGUuY29tLyIsImF1ZCI6Imh0dHBzOi8vcnMuZXhhbXBsZS5jb20vcm
+Vzb3VyY2UiLCJpYXQiOjE1MTQ3OTc4MjIsImV4cCI6MTUxNDc5Nzk0MiwiY2xpZW50X
+2lkIjoicGFpQjJnb28wYSIsInNjb3BlIjoicmVhZCB3cml0ZSBkb2xwaGluIiwic3Vi
+IjoiWjVPM3VwUEM4OFFyQWp4MDBkaXMiLCJiaXJ0aGRhdGUiOiIxOTgyLTAyLTAxIiw
+iZ2l2ZW5fbmFtZSI6IkpvaG4iLCJmYW1pbHlfbmFtZSI6IkRvZSIsImp0aSI6InQxRm
+9DQ2FaZDRYdjRPUkpVV1ZVZVRaZnNLaFczMENRQ3JXRERqd1h5NncifX0.przJMU5Gh
+mNzvwtt1Sr-xa9xTkpiAg5IshbQsRiRVP_7eGR1GHYrNwQh84kxOkHCyje2g5WSRcYo
+sGEVIiC-eoPJJ-qBwqwSlgx9JEeCDw2W5DjrblOI_N0Jvsq_dUeOyoWVMqlOydOBhKN
+Y0smBrI4NZvEExucOm9WUJXMuJtvq1gBes-0go5j4TEv9sOP9uu81gqWTr_LOo6pgT0
+tFFyZfWC4kbXPXiQ2YT6mxCiQRRNM-l9cBdF6Jx6IOrsfFhBuYdYQ_mlL19HgDDOFal
+eyqmru6lKlASOsaE8dmLSeKcX91FbG79FKN8un24iwIDCbKT9xlUFl54xWVShNDFA
+</code></pre></div>
 <h2 id="disabling-the-endpoint-using-feature-flag">Disabling The Endpoint Using Feature Flag<a class="headerlink" href="#disabling-the-endpoint-using-feature-flag" title="Permanent link">#</a></h2>
 <p><code>/introspection</code> endpoint can be enabled or disable using <a href="../../../reference/json/feature-flags/janssenauthserver-feature-flags/#introspection">END_SESSION feature flag</a>.
 Use <a href="../../config-guide/tui.md">Janssen Text-based UI(TUI)</a> or <a href="../../../config-guide/jans-cli/">Janssen command-line interface</a> to perform this task.</p>
@@ -9058,7 +9105,7 @@ navigate to</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-24T10:11:21+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-24</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-03-17T07:39:01+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-03-17</span>
       
         <br>
         Created:
