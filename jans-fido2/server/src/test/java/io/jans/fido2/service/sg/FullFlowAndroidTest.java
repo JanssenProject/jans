@@ -249,7 +249,7 @@ public class FullFlowAndroidTest {
         assertEquals(Fido2RegistrationStatus.pending, registrationEntry.getRegistrationStatus());
 	}
 
-	public void testFinishAssertionTwoStepAndroidAuthenticatedImpl(String userName, String registerFinishResponse, String registeredPublicKey) {
+	public void testFinishAttestationTwoStepAndroidAuthenticatedImpl(String userName, String registerFinishResponse, String registeredPublicKey) {
 		// Parse register response
 		RegisterResponse registerResponse = attestationSuperGluuController.parseRegisterResponse(registerFinishResponse);
 
@@ -269,14 +269,14 @@ public class FullFlowAndroidTest {
         assertEquals(registeredPublicKey, response.get("createdCredentials").get("id").asText());
 	}
 
-	public void testFinishAssertionTwoStepAndroidAuthenticatedRegistered(String userName, String registerFinishResponse, String registeredPublicKey) {
-		testFinishAssertionTwoStepAndroidAuthenticatedImpl(userName, registerFinishResponse, registeredPublicKey);
+	public void testFinishAttestationTwoStepAndroidAuthenticatedRegistered(String userName, String registerFinishResponse, String registeredPublicKey) {
+		testFinishAttestationTwoStepAndroidAuthenticatedImpl(userName, registerFinishResponse, registeredPublicKey);
 
         assertEquals(Fido2RegistrationStatus.registered, registrationEntry.getRegistrationStatus());
 	}
 
 	public void testFinishAssertionTwoStepAndroidAuthenticatedCanceled(String userName, String registerFinishResponse, String registeredPublicKey) {
-		testFinishAssertionTwoStepAndroidAuthenticatedImpl(userName, registerFinishResponse, registeredPublicKey);
+		testFinishAttestationTwoStepAndroidAuthenticatedImpl(userName, registerFinishResponse, registeredPublicKey);
 
         assertEquals(Fido2RegistrationStatus.canceled, registrationEntry.getRegistrationStatus());
 	}
@@ -357,7 +357,7 @@ public class FullFlowAndroidTest {
     @ExtendWith(FileParameterExtension.class)
 	public void testFinishAttestationTwoStepAndroid(@Name("attestation.android.two-step.userName") String userName,
 			@Name("attestation.android.two-step.finish.request") String registerFinishResponse, @Name("attestation.android.two-step.finish.publicKeyId") String publicKeyId) {
-		testFinishAssertionTwoStepAndroidAuthenticatedRegistered(userName, registerFinishResponse, publicKeyId);
+		testFinishAttestationTwoStepAndroidAuthenticatedRegistered(userName, registerFinishResponse, publicKeyId);
 	}
 
 	@Test
