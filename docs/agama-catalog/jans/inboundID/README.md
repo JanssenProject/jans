@@ -42,7 +42,7 @@ To facilitate administrators' work, the following flows are already implemented:
 
 ### Main flow
 
-The actual process of inbound identity occurs here. This flow is already [implemented](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/docs/script-catalog/agama/inboundID/io.jans.inbound.ExternalSiteLogin) and ready to use. The following is a summary of the steps involved:
+The actual process of inbound identity occurs here. This flow is already [implemented](https://github.com/JanssenProject/jans/raw/main/docs/agama-catalog/jans/inboundID/io.jans.inbound.ExternalSiteLogin) and ready to use. The following is a summary of the steps involved:
 
 1. A provider selection page is displayed. The list includes all (*enabled*) providers defined in the configuration of this flow. Additionally an option to use an existing local account is displayed (i.e. no inbound identity)
 
@@ -282,7 +282,7 @@ Note property `mappingClassField` of every provider defined in the [main flow](#
 - Not all mappings have to belong to the same class
 - Several providers can use the same mapping
 
-While working on a mapping, having to pack the class in a jar file, uploading it to the server, and then restarting  every time a modification is made can be a big burden. To avoid this you can upload the source (java) file to the scripts directory of Agama and leverage hot reloading as outlined [here](https://docs.jans.io/head/admin/developer/agama/java-classpath/). A "template" for quickly start writing a mapping is already [available](https://github.com/JanssenProject/jans/raw/main/jans-auth-server/agama/inboundID/CustomMappings.java.txt). Save with `.java` extension only, edit the body of the lambda expression, upload to the server, and then update the main flow as follows:   
+While working on a mapping, having to pack the class in a jar file, uploading it to the server, and then restarting  every time a modification is made can be a big burden. To avoid this you can upload the source (java) file to the scripts directory of Agama and leverage hot reloading as outlined [here](https://docs.jans.io/head/admin/developer/agama/java-classpath/). A "template" for quickly start writing a mapping is already [available](https://raw.githubusercontent.com/JanssenProject/jans/main/jans-auth-server/agama/inboundID/CustomMappings.java.txt). Save with `.java` extension only, edit the body of the lambda expression, upload to the server, and then update the main flow as follows:   
 
 - Add an instruction like `Call io.jans.inbound.CustomMappings#class` at the beginning of the flow body for the class to be effectively reloaded when the file is modified
 - Set `mappingClassField` to `io.jans.inbound.CustomMappings.SAMPLE_MAPPING` for the provider of interest. You may like the idea of using a different name for the field - update the java file accordingly
@@ -297,8 +297,8 @@ A couple of utility flows are available for developers writing flows:
 
 |Qualified name|Source code|
 |-|-|
-|`io.jans.inbound.oauth2.AuthzCode`|[link](https://github.com/JanssenProject/jans/raw/main/docs/script-catalog/agama/inboundID/io.jans.inbound.oauth2.AuthzCode)|
-|`io.jans.inbound.oauth2.AuthzCodeWithUserInfo`|[link](https://github.com/JanssenProject/jans/raw/main/docs/script-catalog/agama/inboundID/io.jans.inbound.oauth2.AuthzCodeWithUserInfo)|
+|`io.jans.inbound.oauth2.AuthzCode`|[link](https://github.com/JanssenProject/jans/raw/main/docs/agama-catalog/jans/inboundID/io.jans.inbound.oauth2.AuthzCode)|
+|`io.jans.inbound.oauth2.AuthzCodeWithUserInfo`|[link](https://github.com/JanssenProject/jans/raw/main/docs/agama-catalog/jans/inboundID/io.jans.inbound.oauth2.AuthzCodeWithUserInfo)|
 
 - Authorization Code flow (`io.jans.inbound.oauth2.AuthzCode`): This flow implements the OAuth 2.0 authorization code grant where client authentication at the token endpoint occurs as described in section 2.3.1 of [RFC 6749](https://www.ietf.org/rfc/rfc6749) (HTTP basic authentication scheme). In summary, this flow redirects the browser to the external provider's site where the user will enter his credentials, then back at the Janssen redirect URL a `code` is obtained which is employed to issue an access token request. The flow returns the token response as received by the provider
 
@@ -308,4 +308,4 @@ The above means that often, when writing a new flow for a provider, the task boi
 
 ## Creating a provider flow
 
-A provider flow must fulfil the conditions as summarized [earlier](#provider). Developers have to figure out if the OAuth2 `code` authorization grant is supported, where the task is simplified to get the required [configurations](#provider-flow-configurations). Here, the source code flow of a flow like [Facebook](https://github.com/JanssenProject/jans/raw/main/docs/script-catalog/agama/inboundID/facebook/io.jans.inbound.Facebook) can be re-used - probably without modification other than in the header.
+A provider flow must fulfil the conditions as summarized [earlier](#provider). Developers have to figure out if the OAuth2 `code` authorization grant is supported, where the task is simplified to get the required [configurations](#provider-flow-configurations). Here, the source code flow of a flow like [Facebook](https://github.com/JanssenProject/jans/raw/main/docs/agama-catalog/jans/inboundID/facebook/io.jans.inbound.Facebook) can be re-used - probably without modification other than in the header.
