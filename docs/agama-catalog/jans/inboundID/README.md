@@ -7,7 +7,7 @@ This process is usually referred to as "inbound identity". In this document the 
 ## Requisites
 
 - A Janssen server with config-api installed
-- Understanding of how to [add and modify Agama flows](https://jans.io/docs/admin/developer/agama/quick-start/#add-the-flow-to-the-server) in your server
+- Understanding of how to [add and modify Agama flows](https://docs.jans.io/head/admin/developer/agama/quick-start/#add-the-flow-to-the-server) in your server
 - Starter knowledge of [OAuth2](https://www.ietf.org/rfc/rfc6749) and the Java programming language
 
 ## Terminology
@@ -73,11 +73,11 @@ To start, let's add the required libraries to the authentication server:
 
 ### Add the basic authentication flow
 
-The basic authentication flow is employed when no provider is picked from the list (step 1 [here](#main-flow)) but the option to use an existing local account is taken. This flow is detailed in the Agama sample flows [page](https://jans.io/docs/admin/developer/agama/samples/#basic-authentication), however those contents can be skipped for the purpose of this setup.
+The basic authentication flow is employed when no provider is picked from the list (step 1 [here](#main-flow)) but the option to use an existing local account is taken. This flow is detailed in the Agama sample flows [page](https://docs.jans.io/head/admin/developer/agama/samples/#basic-authentication), however those contents can be skipped for the purpose of this setup.
 
-- Ensure Agama engine is [enabled](https://jans.io/docs/admin/developer/agama/quick-start/#enable-the-engine). Download the basic flow [source](https://raw.githubusercontent.com/JanssenProject/jans/main/docs/admin/developer/agama/basic/io.jans.flow.sample.basic) file
+- Ensure Agama engine is [enabled](https://docs.jans.io/head/admin/developer/agama/quick-start/#enable-the-engine). Download the basic flow [source](https://raw.githubusercontent.com/JanssenProject/jans/main/docs/admin/developer/agama/basic/io.jans.flow.sample.basic) file
 
-- Use the API for adding flows as explained [here](https://jans.io/docs/admin/developer/agama/quick-start/#getting-an-access-token) and [here](https://jans.io/docs/admin/developer/agama/quick-start/#add-the-flow-to-the-server). A sample `curl` command would look like this: 
+- Use the API for adding flows as explained [here](https://docs.jans.io/head/admin/developer/agama/quick-start/#getting-an-access-token) and [here](https://docs.jans.io/head/admin/developer/agama/quick-start/#add-the-flow-to-the-server). A sample `curl` command would look like this: 
 
     ```
     curl -k -i -H 'Authorization: Bearer <token>' -H 'Content-Type: text/plain'
@@ -141,7 +141,7 @@ Later, we'll dive into the meaning of the [configuration parameters](#provider-f
 
 ### Parameterize the main flow
 
-So far, if the main flow is launched (learn about this topic [here](https://jans.io/docs/admin/developer/agama/quick-start/#craft-an-authentication-request)) a screen with an empty "Sign in with" list will be shown. Adding information about the known providers is required.
+So far, if the main flow is launched (learn about this topic [here](https://docs.jans.io/head/admin/developer/agama/quick-start/#craft-an-authentication-request)) a screen with an empty "Sign in with" list will be shown. Adding information about the known providers is required.
 
 - Create a JSON file like the below:
 
@@ -174,7 +174,7 @@ Later, we'll dive into the meaning of the [configuration parameters](#main-flow-
 
 ### Test
 
-Launch the main flow (learn about this topic [here](https://jans.io/docs/admin/developer/agama/quick-start/#craft-an-authentication-request)). If everything was setup correctly, a screen with a "Sign in using" heading will be shown and next to it a link titled "Facebook". When clicking on the link, the browser will be taken to the Facebook website for authentication. A prompt for consent of release of personal information may appear as well. Finally, the browser is taken back to your server and then to the target application as described [here](#main-flow). 
+Launch the main flow (learn about this topic [here](https://docs.jans.io/head/admin/developer/agama/quick-start/#craft-an-authentication-request)). If everything was setup correctly, a screen with a "Sign in using" heading will be shown and next to it a link titled "Facebook". When clicking on the link, the browser will be taken to the Facebook website for authentication. A prompt for consent of release of personal information may appear as well. Finally, the browser is taken back to your server and then to the target application as described [here](#main-flow). 
 
 ## Configuration parameters of flows 
     
@@ -225,7 +225,7 @@ The table below explains the meaning of properties:
     
 ### Provider flow configurations
 
-Configurations for this kind of flows don't have to adhere to any specific structure. Developers are free to choose what fits best for their needs. Also note provider flows **must not** receive any inputs: the main flow won't pass any arguments when triggering them. Thus, design your flows so there is no use of `Inputs` but `Configs` directive in the [header](https://jans.io/docs/admin/developer/agama/dsl-full/#header-basics).
+Configurations for this kind of flows don't have to adhere to any specific structure. Developers are free to choose what fits best for their needs. Also note provider flows **must not** receive any inputs: the main flow won't pass any arguments when triggering them. Thus, design your flows so there is no use of `Inputs` but `Configs` directive in the [header](https://docs.jans.io/head/admin/developer/agama/dsl-full/#header-basics).
 
 In practice many identity providers adhere to the OAuth2 `code` grant, so you can re-use the structure represented by [this](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/agama/inboundID/src/main/java/io/jans/inbound/oauth2/OAuthParams.java) Java class for the purpose. Particularly, the already implemented flows (like Facebook) use it for their configuration.
 
@@ -282,14 +282,14 @@ Note property `mappingClassField` of every provider defined in the [main flow](#
 - Not all mappings have to belong to the same class
 - Several providers can use the same mapping
 
-While working on a mapping, having to pack the class in a jar file, uploading it to the server, and then restarting  every time a modification is made can be a big burden. To avoid this you can upload the source (java) file to the scripts directory of Agama and leverage hot reloading as outlined [here](https://jans.io/docs/admin/developer/agama/java-classpath/). A "template" for quickly start writing a mapping is already [available](https://github.com/JanssenProject/jans/raw/main/jans-auth-server/agama/inboundID/CustomMappings.java.txt). Save with `.java` extension only, edit the body of the lambda expression, upload to the server, and then update the main flow as follows:   
+While working on a mapping, having to pack the class in a jar file, uploading it to the server, and then restarting  every time a modification is made can be a big burden. To avoid this you can upload the source (java) file to the scripts directory of Agama and leverage hot reloading as outlined [here](https://docs.jans.io/head/admin/developer/agama/java-classpath/). A "template" for quickly start writing a mapping is already [available](https://github.com/JanssenProject/jans/raw/main/jans-auth-server/agama/inboundID/CustomMappings.java.txt). Save with `.java` extension only, edit the body of the lambda expression, upload to the server, and then update the main flow as follows:   
 
 - Add an instruction like `Call io.jans.inbound.CustomMappings#class` at the beginning of the flow body for the class to be effectively reloaded when the file is modified
 - Set `mappingClassField` to `io.jans.inbound.CustomMappings.SAMPLE_MAPPING` for the provider of interest. You may like the idea of using a different name for the field - update the java file accordingly
 
 From there onwards, you only need to re-upload the file as many times as needed.
 
-If you use `DEBUG` [logging](https://jans.io/docs/admin/developer/agama/) level in your server, you will see in the log the result of the mapping every time it is applied. Check for a message like "Mapped profile is".
+If you use `DEBUG` [logging](https://docs.jans.io/head/admin/developer/agama/) level in your server, you will see in the log the result of the mapping every time it is applied. Check for a message like "Mapped profile is".
 
 ## Utility flows
  
