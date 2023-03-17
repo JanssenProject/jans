@@ -94,9 +94,9 @@ The basic authentication flow is employed when no provider is picked from the li
 
 - In the server, navigate to `/opt/jans/jetty/jans-auth/agama`. Create folders named `inboundID` inside existing `ftl` and `fl` subdirectories
 
-- Download the default [logo](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/docs/script-catalog/agama/inboundID/none.png) and place it inside `/opt/jans/jetty/jans-auth/agama/fl/inboundID` folder
+- Download the default [logo](https://github.com/JanssenProject/jans/blob/main/docs/agama-catalog/jans/inboundID/none.png) and place it inside `/opt/jans/jetty/jans-auth/agama/fl/inboundID` folder
 
-- Download the provider selector [template](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/docs/script-catalog/agama/inboundID/login-chooser.ftlh) and place it inside `/opt/jans/jetty/jans-auth/agama/ftl/inboundID` folder. Note templates go under **ftl**, not **fl**. Do the same with the e-mail prompt [template](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/docs/script-catalog/agama/inboundID/email-prompt.ftlh)
+- Download the provider selector [template](https://raw.githubusercontent.com/JanssenProject/jans/main/docs/agama-catalog/jans/inboundID/login-chooser.ftlh) and place it inside `/opt/jans/jetty/jans-auth/agama/ftl/inboundID` folder. Note templates go under **ftl**, not **fl**. Do the same with the e-mail prompt [template](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/docs/script-catalog/agama/inboundID/email-prompt.ftlh)
 
 ### Add a provider flow
 
