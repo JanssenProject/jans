@@ -104,9 +104,9 @@ For simplicity, we'll illustrate here how to add one of the already implemented 
 
 - Download the [utility flows](#utility-flows). Add them to the server as you did with the main flow
 
-- Download the Facebook flow [code](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/docs/script-catalog/agama/inboundID/facebook/io.jans.inbound.Facebook). Add it using the API as well
+- Download the Facebook flow [code](https://raw.githubusercontent.com/JanssenProject/jans/main/docs/agama-catalog/jans/inboundID/facebook/io.jans.inbound.Facebook). Add it using the API as well
 
-- Download the [logo](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/docs/script-catalog/agama/inboundID/facebook/facebook.png) image and place it in `/opt/jans/jetty/jans-auth/agama/fl/inboundID`
+- Download the [logo](https://github.com/JanssenProject/jans/blob/main/docs/agama-catalog/jans/inboundID/facebook/facebook.png) image and place it in `/opt/jans/jetty/jans-auth/agama/fl/inboundID`
 
 - Login to Facebook and [register](https://developers.facebook.com/docs/development/register) as developer. Create an application with *Facebook login* capabilities. In the *Facebook login* settings add  `https://<your-host>/jans-auth/fl/callback` as a valid OAuth redirect URI. Finally grab the app Id and secret from the app settings page
 
