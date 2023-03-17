@@ -86,7 +86,7 @@ The basic authentication flow is employed when no provider is picked from the li
     ```
 - In the server, navigate to `/opt/jans/jetty/jans-auth/agama/ftl`. Create the folder hierarchy `samples/basic` there
 
-- Download the login [template](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/docs/admin/developer/agama/basic/login.ftlh) to `basic` directory 
+- Download the login [template](https://raw.githubusercontent.com/JanssenProject/jans/main/docs/admin/developer/agama/basic/login.ftlh) to `basic` directory 
 
 ### Add the main inbound flow
 
