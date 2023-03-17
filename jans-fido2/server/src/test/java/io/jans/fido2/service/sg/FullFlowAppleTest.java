@@ -185,6 +185,7 @@ public class FullFlowAppleTest {
 		if (registrationEntry != null) {
 			Mockito.when(registrationPersistenceService.findByChallenge(eq(registrationEntry.getChallange()), anyBoolean())).thenReturn(Arrays.asList(registrationEntry));
 			Mockito.when(registrationPersistenceService.findByPublicKeyId(eq(registrationEntry.getPublicKeyId()), eq(registrationEntry.getRpId()))).thenReturn(Optional.of(registrationEntry));
+			Mockito.when(registrationPersistenceService.findByPublicKeyId(anyString(), eq(registrationEntry.getPublicKeyId()), eq(registrationEntry.getRpId()))).thenReturn(Optional.of(registrationEntry));
 		}
 
 		Mockito.when(userService.getUser(anyString(), any())).thenReturn(new User());
@@ -247,7 +248,7 @@ public class FullFlowAppleTest {
         assertEquals(Fido2RegistrationStatus.pending, registrationEntry.getRegistrationStatus());
 	}
 
-	public void testFinishAssertionTwoStepAppleAuthenticatedImpl(String userName, String registerFinishResponse, String registeredPublicKey) {
+	public void testFinishAttestationTwoStepAppleAuthenticatedImpl(String userName, String registerFinishResponse, String registeredPublicKey) {
 		// Parse register response
 		RegisterResponse registerResponse = attestationSuperGluuController.parseRegisterResponse(registerFinishResponse);
 
@@ -267,14 +268,14 @@ public class FullFlowAppleTest {
         assertEquals(registeredPublicKey, response.get("createdCredentials").get("id").asText());
 	}
 
-	public void testFinishAssertionTwoStepAppleAuthenticatedRegistered(String userName, String registerFinishResponse, String registeredPublicKey) {
-		testFinishAssertionTwoStepAppleAuthenticatedImpl(userName, registerFinishResponse, registeredPublicKey);
+	public void testFinishAttestationTwoStepAppleAuthenticatedRegistered(String userName, String registerFinishResponse, String registeredPublicKey) {
+		testFinishAttestationTwoStepAppleAuthenticatedImpl(userName, registerFinishResponse, registeredPublicKey);
 
         assertEquals(Fido2RegistrationStatus.registered, registrationEntry.getRegistrationStatus());
 	}
 
 	public void testFinishAssertionTwoStepAppleAuthenticatedCanceled(String userName, String registerFinishResponse, String registeredPublicKey) {
-		testFinishAssertionTwoStepAppleAuthenticatedImpl(userName, registerFinishResponse, registeredPublicKey);
+		testFinishAttestationTwoStepAppleAuthenticatedImpl(userName, registerFinishResponse, registeredPublicKey);
 
         assertEquals(Fido2RegistrationStatus.canceled, registrationEntry.getRegistrationStatus());
 	}
@@ -355,7 +356,7 @@ public class FullFlowAppleTest {
     @ExtendWith(FileParameterExtension.class)
 	public void testFinishAttestationTwoStepApple(@Name("attestation.apple.two-step.userName") String userName,
 			@Name("attestation.apple.two-step.finish.request") String registerFinishResponse, @Name("attestation.apple.two-step.finish.publicKeyId") String publicKeyId) {
-		testFinishAssertionTwoStepAppleAuthenticatedRegistered(userName, registerFinishResponse, publicKeyId);
+		testFinishAttestationTwoStepAppleAuthenticatedRegistered(userName, registerFinishResponse, publicKeyId);
 	}
 
 	@Test
