@@ -75,7 +75,7 @@ To start, let's add the required libraries to the authentication server:
 
 The basic authentication flow is employed when no provider is picked from the list (step 1 [here](#main-flow)) but the option to use an existing local account is taken. This flow is detailed in the Agama sample flows [page](https://jans.io/docs/admin/developer/agama/samples/#basic-authentication), however those contents can be skipped for the purpose of this setup.
 
-- Ensure Agama engine is [enabled](https://jans.io/docs/admin/developer/agama/quick-start/#enable-the-engine). Download the basic flow [source](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/docs/admin/developer/agama/basic/io.jans.flow.sample.basic) file
+- Ensure Agama engine is [enabled](https://jans.io/docs/admin/developer/agama/quick-start/#enable-the-engine). Download the basic flow [source](https://raw.githubusercontent.com/JanssenProject/jans/main/docs/admin/developer/agama/basic/io.jans.flow.sample.basic) file
 
 - Use the API for adding flows as explained [here](https://jans.io/docs/admin/developer/agama/quick-start/#getting-an-access-token) and [here](https://jans.io/docs/admin/developer/agama/quick-start/#add-the-flow-to-the-server). A sample `curl` command would look like this: 
 
