@@ -216,13 +216,12 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
 # misc stuff
 # ==========
 
-LABEL name="janssenproject/fido2" \
-    maintainer="Janssen Project <support@jans.io>" \
-    vendor="Janssen Project" \
-    version="1.0.11" \
-    release="dev" \
-    summary="Janssen FIDO2" \
-    description="FIDO2 server"
+LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/fido2" \
+    org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
+    org.opencontainers.image.vendor="Janssen Project" \
+    org.opencontainers.image.version="1.0.11" \
+    org.opencontainers.image.title="Janssen FIDO2" \
+    org.opencontainers.image.description="FIDO2 server"
 
 RUN mkdir -p /etc/certs \
     ${JETTY_BASE}/jans-fido2/logs \

@@ -136,13 +136,12 @@ ENV CN_WAIT_MAX_TIME=300 \
 # misc
 # ====
 
-LABEL name="janssenproject/certmanager" \
-    maintainer="Janssen Project <support@jans.io>" \
-    vendor="Janssen Project" \
-    version="1.0.11" \
-    release="dev" \
-    summary="Janssen Certmanager" \
-    description="Manage certs and crypto keys for Janssen Server"
+LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/certmanager" \
+    org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
+    org.opencontainers.image.vendor="Janssen Project" \
+    org.opencontainers.image.version="1.0.11" \
+    org.opencontainers.image.title="Janssen Certmanager" \
+    org.opencontainers.image.description="Manage certs and crypto keys for Janssen Server"
 
 RUN mkdir -p /etc/certs /etc/jans/conf
 

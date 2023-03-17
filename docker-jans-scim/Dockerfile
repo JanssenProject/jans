@@ -207,13 +207,12 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
 # misc stuff
 # ==========
 
-LABEL name="janssenproject/scim" \
-    maintainer="Janssen Project <support@jans.io>" \
-    vendor="Janssen Project" \
-    version="1.0.11" \
-    release="dev" \
-    summary="Janssen SCIM" \
-    description="SCIM server"
+LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/scim" \
+    org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
+    org.opencontainers.image.vendor="Janssen Project" \
+    org.opencontainers.image.version="1.0.11" \
+    org.opencontainers.image.title="Janssen SCIM" \
+    org.opencontainers.image.description="SCIM server"
 
 RUN mkdir -p /etc/certs \
     /etc/jans/conf \
