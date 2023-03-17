@@ -8882,7 +8882,7 @@
 <li><a href="./google">Google</a></li>
 </ul>
 <h3 id="main-flow">Main flow<a class="headerlink" href="#main-flow" title="Permanent link">#</a></h3>
-<p>The actual process of inbound identity occurs here. This flow is already <a href="https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/docs/script-catalog/agama/inboundID/io.jans.inbound.ExternalSiteLogin">implemented</a> and ready to use. The following is a summary of the steps involved:</p>
+<p>The actual process of inbound identity occurs here. This flow is already <a href="https://github.com/JanssenProject/jans/raw/main/docs/agama-catalog/jans/inboundID/io.jans.inbound.ExternalSiteLogin">implemented</a> and ready to use. The following is a summary of the steps involved:</p>
 <ol>
 <li>
 <p>A provider selection page is displayed. The list includes all (<em>enabled</em>) providers defined in the configuration of this flow. Additionally an option to use an existing local account is displayed (i.e. no inbound identity)</p>
@@ -9187,7 +9187,7 @@
 <li>Not all mappings have to belong to the same class</li>
 <li>Several providers can use the same mapping</li>
 </ul>
-<p>While working on a mapping, having to pack the class in a jar file, uploading it to the server, and then restarting  every time a modification is made can be a big burden. To avoid this you can upload the source (java) file to the scripts directory of Agama and leverage hot reloading as outlined <a href="https://docs.jans.io/head/admin/developer/agama/java-classpath/">here</a>. A "template" for quickly start writing a mapping is already <a href="https://github.com/JanssenProject/jans/raw/main/jans-auth-server/agama/inboundID/CustomMappings.java.txt">available</a>. Save with <code>.java</code> extension only, edit the body of the lambda expression, upload to the server, and then update the main flow as follows:   </p>
+<p>While working on a mapping, having to pack the class in a jar file, uploading it to the server, and then restarting  every time a modification is made can be a big burden. To avoid this you can upload the source (java) file to the scripts directory of Agama and leverage hot reloading as outlined <a href="https://docs.jans.io/head/admin/developer/agama/java-classpath/">here</a>. A "template" for quickly start writing a mapping is already <a href="https://raw.githubusercontent.com/JanssenProject/jans/main/jans-auth-server/agama/inboundID/CustomMappings.java.txt">available</a>. Save with <code>.java</code> extension only, edit the body of the lambda expression, upload to the server, and then update the main flow as follows:   </p>
 <ul>
 <li>Add an instruction like <code>Call io.jans.inbound.CustomMappings#class</code> at the beginning of the flow body for the class to be effectively reloaded when the file is modified</li>
 <li>Set <code>mappingClassField</code> to <code>io.jans.inbound.CustomMappings.SAMPLE_MAPPING</code> for the provider of interest. You may like the idea of using a different name for the field - update the java file accordingly</li>
@@ -9206,11 +9206,11 @@
 <tbody>
 <tr>
 <td><code>io.jans.inbound.oauth2.AuthzCode</code></td>
-<td><a href="https://github.com/JanssenProject/jans/raw/main/docs/script-catalog/agama/inboundID/io.jans.inbound.oauth2.AuthzCode">link</a></td>
+<td><a href="https://github.com/JanssenProject/jans/raw/main/docs/agama-catalog/jans/inboundID/io.jans.inbound.oauth2.AuthzCode">link</a></td>
 </tr>
 <tr>
 <td><code>io.jans.inbound.oauth2.AuthzCodeWithUserInfo</code></td>
-<td><a href="https://github.com/JanssenProject/jans/raw/main/docs/script-catalog/agama/inboundID/io.jans.inbound.oauth2.AuthzCodeWithUserInfo">link</a></td>
+<td><a href="https://github.com/JanssenProject/jans/raw/main/docs/agama-catalog/jans/inboundID/io.jans.inbound.oauth2.AuthzCodeWithUserInfo">link</a></td>
 </tr>
 </tbody>
 </table>
@@ -9224,14 +9224,14 @@
 </ul>
 <p>The above means that often, when writing a new flow for a provider, the task boils down to calling the latter flow and returning profile data only.</p>
 <h2 id="creating-a-provider-flow">Creating a provider flow<a class="headerlink" href="#creating-a-provider-flow" title="Permanent link">#</a></h2>
-<p>A provider flow must fulfil the conditions as summarized <a href="#provider">earlier</a>. Developers have to figure out if the OAuth2 <code>code</code> authorization grant is supported, where the task is simplified to get the required <a href="#provider-flow-configurations">configurations</a>. Here, the source code flow of a flow like <a href="https://github.com/JanssenProject/jans/raw/main/docs/script-catalog/agama/inboundID/facebook/io.jans.inbound.Facebook">Facebook</a> can be re-used - probably without modification other than in the header.</p>
+<p>A provider flow must fulfil the conditions as summarized <a href="#provider">earlier</a>. Developers have to figure out if the OAuth2 <code>code</code> authorization grant is supported, where the task is simplified to get the required <a href="#provider-flow-configurations">configurations</a>. Here, the source code flow of a flow like <a href="https://github.com/JanssenProject/jans/raw/main/docs/agama-catalog/jans/inboundID/facebook/io.jans.inbound.Facebook">Facebook</a> can be re-used - probably without modification other than in the header.</p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-03-17T13:14:13+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-03-17</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-03-17T19:34:49+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-03-17</span>
       
         <br>
         Created:
