@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#this-content-is-in-progress" class="md-skip">
+        <a href="#sector-identifier" class="md-skip">
           Skip to content
         </a>
       
@@ -4318,6 +4318,8 @@
       <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
       
       
+        
+      
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
           Sector Identifiers
@@ -4334,6 +4336,8 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -4342,15 +4346,35 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#this-content-is-in-progress" class="md-nav__link">
-    This content is in progress
+  <a href="#configuring-sector-identifier" class="md-nav__link">
+    Configuring Sector Identifier
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#have-questions-in-the-meantime" class="md-nav__link">
-    Have questions in the meantime?
+  <a href="#configuration-with-pairwise-subject-type" class="md-nav__link">
+    Configuration With Pairwise Subject Type
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration With Pairwise Subject Type">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pairwise-identifier-generation" class="md-nav__link">
+    Pairwise Identifier Generation
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-properties" class="md-nav__link">
+    Configuration Properties
   </a>
   
 </li>
@@ -8708,6 +8732,8 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -8716,15 +8742,35 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#this-content-is-in-progress" class="md-nav__link">
-    This content is in progress
+  <a href="#configuring-sector-identifier" class="md-nav__link">
+    Configuring Sector Identifier
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#have-questions-in-the-meantime" class="md-nav__link">
-    Have questions in the meantime?
+  <a href="#configuration-with-pairwise-subject-type" class="md-nav__link">
+    Configuration With Pairwise Subject Type
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration With Pairwise Subject Type">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pairwise-identifier-generation" class="md-nav__link">
+    Pairwise Identifier Generation
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-properties" class="md-nav__link">
+    Configuration Properties
   </a>
   
 </li>
@@ -8763,6 +8809,11 @@
         <span class="md-tag">client</span>
       
     
+      
+      
+        <span class="md-tag">sector-identifier</span>
+      
+    
   </nav>
 
 
@@ -8773,12 +8824,47 @@
   </a>
 
 
-  <h1>Sector Identifiers</h1>
-
-<h2 id="this-content-is-in-progress">This content is in progress<a class="headerlink" href="#this-content-is-in-progress" title="Permanent link">#</a></h2>
-<p>The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.</p>
-<h2 id="have-questions-in-the-meantime">Have questions in the meantime?<a class="headerlink" href="#have-questions-in-the-meantime" title="Permanent link">#</a></h2>
-<p>While this documentation is in progress, you can ask questions through <a href="https://github.com/JanssenProject/jans/discussion">GitHub Discussions</a> or the <a href="https://gitter.im/JanssenProject/Lobby">community chat on Gitter</a>. Any questions you have will help determine what information our documentation should cover.</p>
+<h1 id="sector-identifier">Sector Identifier<a class="headerlink" href="#sector-identifier" title="Permanent link">#</a></h1>
+<p>Janssen Server supports sector identifier URI and pairwise subject IDs for OpenId Connect relying party.
+As defined in <a href="https://openid.net/specs/openid-connect-core-1_0.html#Terminology">OpenId Connect core specification</a>, the
+sector identifiers value is used to derive pairwise subject IDs. Janssen Server also supports <code>Sector Identifier URI</code> as
+part of client configuration. <code>Sector Identifier URI</code> when used with <code>pairwise</code> subject type, enables a group of 
+websites under the same administrative control to receive the same subject identifiers. 
+<code>Sector Identifier URI</code> also allows clients to
+change the host component of the redirect URI and still keep the subject identifiers unchanged.</p>
+<h2 id="configuring-sector-identifier">Configuring Sector Identifier<a class="headerlink" href="#configuring-sector-identifier" title="Permanent link">#</a></h2>
+<p>Janssen Server runs below mentioned checks on value configured for <code>Sector Identifier URI</code>:</p>
+<ul>
+<li>URI should have a <code>https</code> schema</li>
+<li>URI should be accessible to Janssen Server and the response should be a valid JSON array of redirect URIs</li>
+<li>All redirect URI received in response must exist in the list of the redirect URI provided by the client at the registration time</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+</div>
+<p>If the client can not host an endpoint that will be reachable by <code>Sector Identifier URI</code>, then in order to use the <code>pairwise</code>
+subject IDs, the client must supply a <code>Redirect URI</code> list where URIs have the same host component. The host component
+value will be used as the sector identifier.</p>
+<h2 id="configuration-with-pairwise-subject-type">Configuration With Pairwise Subject Type<a class="headerlink" href="#configuration-with-pairwise-subject-type" title="Permanent link">#</a></h2>
+<p>How sector identifier value is used to derive value for the pairwise subject identifier is detailed in the
+<a href="https://openid.net/specs/openid-connect-core-1_0.html#PairwiseAlg">OIDC core specification</a>.</p>
+<p>Janssen Server allows clients/RPs to set subject type. The <code>public</code> subject type is the default and the client/RP can choose
+to use the <code>pairwise</code> type. When using TUI, this can be configured from the client configuration screen below:</p>
+<p><img alt="" src="../../../../assets/image-tui-client-registration-basic.png" /></p>
+<p>When the <code>pairwise</code> subject type is selected, the value for <code>Sector Identifier URI</code> can be left blank if all redirect
+URIs have the same host component. If the list of redirect URIs contains multiple host names,
+providing a <code>Sector Identifier URI</code> is a must. When <code>Sector Identifier URI</code> is provided, the host component of the URI is
+used as a sector identifier.</p>
+<h3 id="pairwise-identifier-generation">Pairwise Identifier Generation<a class="headerlink" href="#pairwise-identifier-generation" title="Permanent link">#</a></h3>
+<p>Janssen Server uses the <code>Sector Identifier URI</code> host name string, local user ID, and a salt string as
+initial input to generate pairwise identifiers. This input is then signed with the HS256 signing algorithm to generate 
+a pairwise identifier.</p>
+<h2 id="configuration-properties">Configuration Properties<a class="headerlink" href="#configuration-properties" title="Permanent link">#</a></h2>
+<p>Janssen Server allows customization concerning sector identifiers using the properties below:</p>
+<ul>
+<li><a href="https://docs.jans.io/v1.0.10/admin/reference/json/properties/janssenauthserver-properties/#sectoridentifiercachelifetimeinminutes">sectorIdentifierCacheLifetimeInMinutes</a></li>
+<li><a href="https://docs.jans.io/v1.0.10/admin/reference/json/properties/janssenauthserver-properties/#sharesubjectidbetweenclientswithsamesectorid">shareSubjectIdBetweenClientsWithSameSectorId</a></li>
+</ul>
 <h2 id="want-to-contribute">Want to contribute?<a class="headerlink" href="#want-to-contribute" title="Permanent link">#</a></h2>
 <p>If you have content you'd like to contribute to this page in the meantime, you can get started with our <a href="https://docs.jans.io/head/CONTRIBUTING/">Contribution guide</a>.</p>
 
@@ -8787,7 +8873,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-08T20:20:00+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-08</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-03-17T08:05:56+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-03-17</span>
       
         <br>
         Created:
