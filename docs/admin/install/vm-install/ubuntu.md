@@ -30,17 +30,17 @@ wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-v
     Download `sha256sum` file for the package
 
     ```shell
-    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version.ubuntu20.04_amd64.deb.sha256sum -P /tmp
+    wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version.ubuntu22.04_amd64.deb.sha256sum -P /tmp
     ```
 
-    Check the hash if it is matching. 
+    Check the hash if it is matching.
 
     ```shell
     sha256sum -c /tmp/jans_replace-janssen-version.ubuntu22.04_amd64.deb.sha256sum
     ```
 
     Output similar to below should confirm the integrity of the downloaded package.
-    
+
     ```text
     <package-name>: OK
     ```
@@ -68,14 +68,14 @@ wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-v
     wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version.ubuntu20.04_amd64.deb.sha256sum -P /tmp
     ```
 
-    Check the hash if it is matching. 
+    Check the hash if it is matching.
 
     ```shell
     sha256sum -c /tmp/jans_replace-janssen-version.ubuntu20.04_amd64.deb.sha256sum
     ```
 
     Output similar to below should confirm the integrity of the downloaded package.
-    
+
     ```text
     <package-name>: OK
     ```
