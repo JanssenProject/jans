@@ -52,7 +52,7 @@ public class SignatureVerifier {
     }
 
     public Signature getSignatureChecker(int signatureAlgorithm) {
-        Provider provider = SecurityProviderUtility.getInstance();
+        Provider provider = SecurityProviderUtility.getBCProvider();
 
         // https://www.iana.org/assignments/cose/cose.xhtml#algorithms
         try {

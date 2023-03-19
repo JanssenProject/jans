@@ -11,8 +11,15 @@ from setup_app.installers.jetty import JettyInstaller
 
 class FidoInstaller(JettyInstaller):
 
+#    source_files = [
+#                (os.path.join(Config.dist_jans_dir, 'jans-fido2.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-fido2-server/{0}/jans-fido2-server-{0}.war').format(base.current_app.app_info['ox_version'])),
+#                (os.path.join(Config.dist_app_dir, os.path.basename(base.current_app.app_info['APPLE_WEBAUTHN'])), base.current_app.app_info['APPLE_WEBAUTHN']),
+#                (os.path.join(Config.dist_app_dir, 'fido2/mds/toc/toc.jwt'), 'https://mds.fidoalliance.org/'),
+#                (os.path.join(Config.dist_app_dir, 'fido2/mds/cert/root-r3.crt'), 'https://secure.globalsign.com/cacert/root-r3.crt'),
+#                ]
+
     source_files = [
-                (os.path.join(Config.dist_jans_dir, 'jans-fido2.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-fido2-server/{0}/jans-fido2-server-{0}.war').format(base.current_app.app_info['ox_version'])),
+                (os.path.join(Config.dist_jans_dir, 'jans-fido2.war'), os.path.join(base.current_app.app_info['BASE_SERVER'], '_out/fido2-server.war')),
                 (os.path.join(Config.dist_app_dir, os.path.basename(base.current_app.app_info['APPLE_WEBAUTHN'])), base.current_app.app_info['APPLE_WEBAUTHN']),
                 (os.path.join(Config.dist_app_dir, 'fido2/mds/toc/toc.jwt'), 'https://mds.fidoalliance.org/'),
                 (os.path.join(Config.dist_app_dir, 'fido2/mds/cert/root-r3.crt'), 'https://secure.globalsign.com/cacert/root-r3.crt'),

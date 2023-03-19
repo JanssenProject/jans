@@ -81,7 +81,7 @@ public class RawRegistrationService {
 	}
 
     public X509Certificate parseDer(InputStream is) throws CertificateException, NoSuchProviderException {
-            return (X509Certificate) CertificateFactory.getInstance("X.509", SecurityProviderUtility.getInstance()).generateCertificate(is);
+            return (X509Certificate) CertificateFactory.getInstance("X.509", SecurityProviderUtility.getBCProvider()).generateCertificate(is);
     }
 
 
