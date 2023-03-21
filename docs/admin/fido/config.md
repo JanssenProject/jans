@@ -28,7 +28,7 @@ tags:
 | serverMetadataFolder | /etc/jans/conf/fido2/server_metadata | Authenticators metadata in json format. Example: virtual devices.|
 |requestedCredentialTypes|["RS256","ES256"]| |
 |  requestedParties| [{"name":"https://my-jans-server.jans.io","domains":["my-jans-server.jans.io"]}]| Requested party name.|
-  |userAutoEnrollment |false|Allow to enroll users on enrollment/authentication requests.|
+  |userAutoEnrollment |false|Allow to enroll users on enrollment/authentication requests. (Useful while running tests)|
   |unfinishedRequestExpiration| 180|Expiration time in seconds for pending enrollment/authentication requests|
   |authenticationHistoryExpiration|1296000|Expiration time in seconds for approved authentication requests.|
 
