@@ -1,0 +1,723 @@
+#!/usr/bin/expect -f
+
+set HOST [lindex $argv 0]
+set USERNAME [lindex $argv 1]
+set OPENIDINUM [lindex $argv 2] 
+set timeout 3
+set umaID 7a55c863-a86b-411b-b71a-0c6c37747a3f
+spawn $env(SHELL)
+match_max 100000
+expect  "$"
+send "ssh ${USERNAME}@${HOST}"
+expect -exact "${HOST}"
+send "\r"
+expect -re "(.*)\n"
+
+#--no-suggestion
+send "/opt/jans/jans-cli/config-cli.py -use-test-client --no-suggestion"
+expect  "/opt/jans/jans-cli/config-cli.py -use-test-client --no-suggestion"
+send "\r"
+expect { "Selection:"
+		timeout {puts "timed out"; exit}
+	}
+	
+	for
+proc Attribute {} {
+		puts "checking Attriute"
+		send "1"
+		
+		expect {
+		 "1" {send "\r" }    "limit" {send "\r" }  "pattern" {send "\r" {timeout {puts "timed out"; exit}}}  "status" {send "\r" {timeout {puts "timed out"; exit}}} \
+		 "Selection:" {send "2\r" {timeout {puts "timed out"; exit}}}  "Selection:" {send "2\r" {timeout {puts "timed out"; exit}}} 	"name:" {send "myAttr\r" {timeout {puts "timed out"; exit}}}  "displayName:" {send "myAttr\r" {timeout {puts "timed out"; exit}}} \
+		 "description:" {send "myAttr\r" {timeout {puts "timed out"; exit}}} 	 "dataType:"    {send "STRING\r" {timeout {puts "timed out"; exit}}}  "status:"	{send "ACTIVE\r" {timeout {puts "timed out"; exit}}}  "editType"  {send "ADMIN\r"}	 "Populate optional fields?"	{send "n\r"} \
+		 "Continue?"		{send "y\r"}  "Selection:" 	{timeout {puts "timed out"; exit} 	{send "b\r"}}  "Selection:"		{send "3"}  "3"		{send "\r"}  "inum:"		{send "3B47\r"} \
+		 "Selection:"		{send "3\r"}  "dataType"	{ send "JSON\r"}  "Selection:"		{send "s\r"}  "Continue?"		{send "y\r"}  "Selection:"		{send "b\r"}  "Selection:"		{send "4\r"} \
+		 "inum:"		{send "3B47\r"}	 "Selection:"		{send "b\r"}  "Selection:"		{send "6\r"} 	 "inum:"		{send "3B47\r"}  "op:"		{send "replace\r"}  "path:"		{send "dataType\r"}  "value"		{send "STRING\r"} \
+		 "Another patch operation?"		{send "n\r"}	 "Continue?"		{send "y\r"} {send "\r"}  "Selection:"	{timeout {puts "timed out"; exit} 		{send "b\r"}}  "Selection:"		{send "b\r"}  "Selection:" \
+		puts "Attribute tests passed"
+		}
+	}
+
+	
+	
+proc defaultMethods {} {
+			puts "checking  Default Authentication Method" 
+			
+			send "2\r"
+			for i in ( "Selection:" "defaultAcr" "Selection:""Selection:" "defaultAcr" "Selection:" "Selection:" "Selection:" )
+				do
+			expect {
+			"Selection:"			{send "1\r"}
+			"defaultAcr"		{send "b\r"}
+			"Selection:"			{send "2\r"}
+			"Selection:"			{send "1\r"}
+			"defaultAcr"			{send "passwd_auth\r"}
+			"Selection:"			{send "s\r"}
+			"Continue?"			{send "y\r"}
+			"Selection:"			{send "b\r"}
+			"Selection:"
+			puts "defaultMethods tests passed"
+			}
+		    }
+
+proc cacheconfg {} {
+			puts "Cache Configuration"
+			send "3\r"
+			expect {
+			"Selection:"			{send "1\r"}
+			"Selection:"			{send "b\r"}
+			"Selection:"			{send "2\r"}
+			"op:"			{send "replace\r"}
+			"path:"		{send "memcachedConfiguration\/bufferSize\r"}
+			"value"		{send "33768\r"}
+			"Another patch operation?"			{send "n\r"}
+			"Continue?"			{send "y\r"}
+			 "33768"	{timeout {puts "timed out"; exit}	{send "b\r"}}
+			"Selection:"			{send "b\r"}
+            "Attribute"
+			#puts "cacheconfig tests passed"
+			}
+		}
+proc  memcacheconf {} {
+			puts "Cache Configuration"
+
+			send "3\r"
+
+			expect {
+			"Memcached"			{send "3\r"}
+			"Memcached"			{send "1\r"}
+			"bufferSize"			{send "b\r"}
+			"Cache Configuration"			{send "2\r"}
+			"Selection:"			{send "1\r"}
+			"bufferSize"			{send "33456\r"}
+			"Selection:"			{send "s\r"}
+			"Continue?"			{send "y\r"}
+			"33456"			{send "b\r"}
+			"Cache Configuration"				{send "3\r"}
+			"Selection:"		
+			"op:"			{send "replace\r"}
+			"path:"			{send "bufferSize\r"}
+			"value"			{send "33768\r"}
+			"Another patch operation?"			{send "n\r"}
+			"Continue?"			{send "y\r"}
+			 "33768"		{timeout {puts "timed out"; exit}     {send "b\r"}}
+			"Selection:"		{send "b\r"}
+	            "Selection:"			{send "b\r"}
+			"Attribute"
+			puts "memory-cache-configue tests passed"
+			}
+		}
+
+proc rediscacheconf {} {
+
+				puts "Cache Configuration – Redis"
+				send "3\r"
+				expect {
+					"Redis"				{send "4\r"}
+				"Configuration"				{send "1\r"}
+				"servers"				{send "b\r"}
+				"Cache Configuration"				{send "3\r"}
+				"Selection:"
+				"op:"			{send "replace\r"}
+				"path:"				{send "connectionTimeout\r"}
+				"value"				{send "3000\r"}
+				"Another patch operation?"				{send "n\r"}
+				"Continue?"				{send "y\r"}
+				"3000"				{send "b\r"}
+				"Selection:"				{send "2\r"}
+                "Returns Redis cache configuration"                {send "1\r"}
+                "connectionTimeout" {send "33456\r"}
+                "Selection:"                               {send "s\r"}
+                "Continue?"                                {send "y\r"}
+                "33456"                                {send "b\r"}
+                "Selection:"				{send "b\r"}
+				"Selection:"				{send "b\r"}
+				"Attribute"
+				puts "redis-cache-configuration tests passed"
+			}
+			}
+
+proc  inmemcacheconf {} {
+
+				puts "Cache Configuration: in-Memory"
+				send "3\r"
+				expect {
+				"in-Memory"					{send "5\r"}
+				"in-Memory"				{send "1\r"}
+				"defaultPutExpiration"				{send "b\r"}
+				"in-Memory"				{send "2\r"}
+				"Returns in-Memory cache configuration"				{send "1\r"}
+				"defaultPutExpiration"				{send "80\r"}
+				"Selection:"				{send "s\r"}
+				"Continue?"				{send "y\r"}
+				expect  "80"				{send "b\r"}
+				"Selection:"				{send "3\r"}
+				"Selection:"		
+				"op:"				{send "replace\r"}	
+				"path:"				{send "defaultPutExpiration\r"}	
+				"value"				{send "60\r"}				
+				"Another patch operation?"				{send "n\r"}
+				"Continue?"				{send "y\r"}
+				"60"				{timeout {puts "timed out"; exit} {send "b\r"}}
+				"Selection:"				{send "b\r"}
+		                "Selection:"				{send "b\r"}
+				"Attribute"
+				puts "in-Memory-cache-configuration tests passed"
+					}
+			}
+			
+proc nativepersistcacheconf {} {
+					puts "Cache Configuration – Native-Persistence"
+					send "3\r"
+					expect {
+					"Native-Persistence"				{send "6\r"}
+					"Native-Persistence"					{send "1\r"}
+					"defaultPutExpiration"					{send "b\r"}
+					"Native-Persistence"					{send "2\r"}
+					"defaultCleanupBatchSize"					{send "2\r"}
+					"defaultPutExpiration"					{send "80\r"}
+					"Selection:"					{send "s\r"}
+					"Continue?"					{send "y\r"}
+					"80"		{timeout {puts "timed out"; exit}    {send "b\r"}}
+					"Selection:"					{send "3\r"}
+					"Selection:"
+					"op:"					{send "replace\r"}
+					"path:"					{send "defaultPutExpiration\r"}
+					"value"					{send "60\r"}
+					"Another patch operation?"				{send "n\r"}
+					"Continue?"					{send "y\r"}
+					"60"		{timeout {puts "timed out"; exit}       {send "b\r"}}
+					"Selection:"			{send "b\r"}
+		                  	  "Selection:"			{send "b\r"}
+					"Attribute"
+					puts "native-persist-cacheconf tests passed"	
+					}
+				}
+proc Configuration {}	{
+				
+				puts "Configuration"
+				send "4\r"	
+				expect {
+					"Properties"		{send "1\r"}
+				"Configuration: Properties"			{send "1\r"}
+				"useHighestLevelScriptIfAcrScriptNotFound"			{send "b\r"}
+				"Configuration: Properties"				{send "3\r"}
+				"persistenceType"				{send "b\r"}
+				"Selection:"				{send "2\r"}
+				"op:"				{send "replace\r"}
+				"path:"				{send "issuer\r"}	
+				"value"				{send "http://glubuntu1\r"}
+				"Another patch operation?"				{send "n\r"}
+				"Continue?"				{send "y\r"}
+				"http://glubuntu1"		{timeout {puts "timed out"; exit} {send "b\r"}}
+				"Selection:"				{send "b\r"}
+		                "Selection:"				{send "b\r"}
+				"Attribute"
+				puts "Configuration-property tests passed"
+				}
+			}
+
+proc fido2conf {} {
+		
+
+					puts "Fido2"
+
+					send "5\r"
+					expect {
+						"Configuration"					{send "1\r"}
+		                        "Fido2: Configuration"		{send "1\r"}
+					"Fido2: Configuration"		{send "b\r"}
+					"Configuration – Fido2"		{send "2\r"}
+					"Gets Jans Authorization Server Fido2 configuration properties"		{send "1\r"}
+					"baseEndpoint"			{send "https://gluubuntu/jans-fido2/restv2\r"}
+					"Selection:"					{send "s\r"}
+					"Continue?"					{send "y\r"}
+					"https://gluubuntu/jans-fido2/restv2" {	timeout {puts "timed out"; exit}	{send "b\r"}}
+					"Selection:"					{send "2\r"}
+					"Gets Jans Authorization Server Fido2 configuration properties"			{send "1\r"}
+					"baseEndpoint"				{send "https://gluubuntu/jans-fido2/restv1\r"}
+					"Selection:"					{send "s\r"}
+					"Continue?"					{send "y\r"}
+					"https://gluubuntu/jans-fido2/restv1" {	timeout {puts "timed out"; exit} 	{send "b\r"}}
+					"Selection:"					{send "b\r"}
+					"Attribute"
+										puts "fido2-configuration tests passed"
+					}
+			}
+			
+proc smtpconf  {} {
+
+					puts "Configuration – SMTP"
+					send "4\r"
+					expect {
+						"SMTP"			{send "2\r"}
+					"Configuration: SMTP"					{send "1\r"}
+					"host"					{send "b\r"}
+					"Configuration: SMTP"				{send "2\r"}
+					"host"					{send "localhost\r"}
+					"port"					send "12134\r"
+					"requires_ssl"					{send "\r"}
+					"trust_host"					{send "\r"}
+					"from_name"					send "manoj\r"
+					sleep 5
+					"from_email_address"				{send  "manojsurya78@gmail.com\r"}
+					"requires_authentication"					{send "\r"}
+					"user_name"					{send "manoj\r"}
+					"password"					{send "manoj\r"}
+					"Populate optional fields?"	{send "n\r"}
+					"Continue?"					{send "y\r"}
+					"manojsurya78@gmail.com"	{send "b\r"}
+					"Configuration: SMTP"		{send "3\r"}
+					"from_email_address"			{send "1\r"}
+					"from_email_address"			send "manojsurya@gmail.com\r"
+					{send "s\r"}
+					"Continue?"					{send "y\r"}
+					 "manojsurya@gmail.com"					{send "b\r"}
+					sleep 5
+					"Configuration: SMTP"					{send "4\r"}
+					"Are you sure want to delete"					{send "y\r"}
+					"Entry  was deleted successfully"					{send "b\r"}
+					sleep 5
+					"Configuration: SMTP"					{send "b\r"}
+					"Selection"					{send "b\r"}
+                    "Attribute"
+					puts "SMTP-configuration tests passed"
+					}
+
+		}
+proc Logging {} {
+					puts "Logging"
+					send "4\r"
+					expect {
+						"Logging"					{send "3\r"}
+					"Configuration: Logging"					{send "1\r"}
+					"loggingLevel"					{send "b\r"}
+					"Configuration: Logging"				{send "2\r"}
+					"Returns Jans Authorization Server logging settings"				{send "7\r"}
+					"loggingLevel"					{send "TRACE\r"}
+					"Selection:"					{send "s\r"}
+					"Continue?"					{send "y\r"}
+					"TRACE"					{send "b\r"}
+					"Configuration: Logging"					{send "b\r"}
+                    "Selection"					{send "b\r"}
+					"Attribute"
+					puts "Logconfiguration tests passed "
+					}
+			}
+			
+proc ldapconf {} {
+
+
+					puts "Database - LDAP configuration"
+					send "7\r"
+                    expect {
+						"Database"					{send "1\r"}
+					"Database: LDAP configuration"					{send "1\r"}
+					"auth_ldap_server"					{send "b\r"}
+					"Database: LDAP configuration"					{send "2\r"}
+					"configId"					{send "auth_ldap_server1\r"}
+					"bindDN"					{send "cn=jans,dc=company,dc=org\r"}
+					"bindPassword"				{send "manoj\r"}
+					"servers"					{send "localhost\r"}
+					"maxConnections"					{send "\r"}
+					"useSSL"					{send "_true\r"}
+					"baseDNs"					{send "mannoj\r"}
+					"primaryKey"					{send "manoj123\r"}
+					"localPrimaryKey"					{send "manoj123\r"}
+					"opulate optional fields?"					{send "n\r"}
+					"Continue?"					{send "y\r"}
+					"auth_ldap_server1"					{send "b\r"}
+					"Database: LDAP configuration"					{send "3\r"}
+					"name:"					{send "auth_ldap_server1\r"}
+					"maxConnections"					{send "8\r"}
+					"maxConnections"					{send "10\r"}
+					"Selection:"					{send "s\r"}
+					"Continue?"					{send "y\r"}
+					"Selection:"					{send "b\r"}
+					"Database: LDAP configuration"					{send "4\r"}
+					"name:"					{send "auth_ldap_server1\r"}
+					"maxConnections"					{send "b\r"}
+					"Database: LDAP configuration"					send "6\r"
+					"name:"					send "auth_ldap_server1\r"
+					"op:"					{send "replace\r"}
+					"path:"					{send "maxConnections\r"}
+					"value"					{send "10\r"}
+					"Another patch operation?"					{send "n\r"}
+					"Continue?"					{send "y\r"}
+					"Selection:"					{send "b\r"}
+					"Database: LDAP configuration"					{send "5\r"}
+					"name:"					{send "auth_ldap_server1\r"}
+					"Are you sure want to delete auth_ldap_server1 ?"					{send "y\r"}
+					"Entry auth_ldap_server1 was deleted successfully"					{send "b\r"}
+					"Database: LDAP configuration"					{send "b\r"}
+                    "Selection"					{send "b\r"}
+					"Attribute"
+					puts "LDAP-configuration tests passed "
+					}
+			}
+proc cochbaseDbconf {}	{
+								
+					puts "Couchbase configuration"
+					send "7\r"
+                    expect {
+						"Database"					{send "2\r"}
+					"Couchbase configuration"					{send "1\r"}
+					"Selection:"					{send "b\r"}
+					"Couchbase configuration"					{send "2\r"}
+					sleep 4
+					"configId"					send "couchbasetest\r"
+					"userName" send "couchbasetest\r"
+					sleep 4
+					"userPassword"					send "couchbasetest\r"
+					"servers"					send "localhost\r"
+					"defaultBucket"					send "couchbasetest\r"
+					"buckets"					send "couchbasetest\r"
+					"passwordEncryptionMethod"					send "SHA\r"
+					"sslTrustStoreFile"					send "couchbasetest\r"
+					"sslTrustStorePin"					send "couchbasetest\r"
+					"sslTrustStoreFormat"					send "couchbasetest\r"
+					"Populate optional fields?"					{send "n\r"}
+					"Continue?"					{send "y\r"}
+					"couchbasetest"					{send "b\r"}
+					"Couchbase configuration"					{send "3\r"}
+					"name"					send "couchbasetest\r"
+					"connectTimeout"					send "6\r"
+					"connectTimeout"					send "100\r"
+					"Selection"					{send "s\r"}
+					"Continue?"					{send "y\r"}
+					"100"					{send "b\r"}
+					"Couchbase configuration"					{send "4\r"}
+					"name"					send "couchbasetest\r"
+					"connectTimeout"					{send "b\r"}
+					"Couchbase configuration"					send "5\r"
+					"name"					send "couchbasetest\r"
+					"op:"					{send "replace\r"}
+					"path:"					send "connectTimeout\r"
+					"value"					send "120\r"
+					"Another patch operation?"					{send "n\r"}
+					"Continue?"					{send "y\r"}
+					"120"					{send "b\r"}
+					"Couchbase configuration"					send "6\r"
+					"name"					send "couchbasetest\r"
+					"re you sure want to delete couchbasetest ?"					{send "y\r"}
+					expect  "deleted successfully"					{send "b\r"}
+					"Couchbase configuration"					{send "b\r"}
+                    "Selection"					{send "b\r"}
+					"Attribute"
+					puts "couchbaseDB-configuration tests passed "
+					}
+
+				}
+				
+proc openIdconnet {OPENIDINUM}	{
+
+				puts "OAuth - OpenID Connect - Clients"
+				send "8\r"
+                                expect {
+				 "OpenID Connect - Clients"				{send "1\r"}
+				"OAuth: OpenID Connect - Clients"				{send "1\r"}
+				"Gets list of OpenID Connect clients"				{send "\r"}
+				"pattern:"				{send "\r"}
+				"startIndex"				{send "\r"}
+				"sortBy"				{send "\r"}
+				"sortOrder"				{send "\r"}
+				"Jans Config Api Client"				{send "b\r"}
+				"OAuth: OpenID Connect - Clients"		{send "2\r"}
+				"displayName"				send "myopenclient\r"
+				"applicationType"				send "web\r"
+				"includeClaimsInIdToken"				{send "\r"}
+				"Populate optional fields?"				{send "n\r"}
+				"Continue?"				{send "y\r"}
+				"myopenclient"				{send "b\r"}
+				"OAuth: OpenID Connect - Clients"				{send "3\r"}
+				"Get OpenId Connect Client by Inum"				send "${OPENIDINUM}\r"
+				"clientName"				send "18\r"
+				"displayName"				{send "\r"}	
+				"multiValued"				{send "\r"}
+				"values"                       send "jansApiclient\r"
+				"Add CustomAttribute"				{send "n\r"}
+				"Selection:"				{send "s\r"}
+				"Continue?"				{send "y\r"}
+				"jansApiclient"				{send "b\r"}
+				"OAuth: OpenID Connect - Clients"				{send "4\r"}
+				"Get OpenId Connect Client by Inum"			send "$OPENIDINUM\r"
+				"${OPENIDINUM}"				{send "b\r"}
+				"OAuth: OpenID Connect - Clients"			{send "b\r"}
+                                "Selection"				{send "b\r"}
+				"Attribute"
+				puts "openID-connnect tests passed "
+								}
+
+			}
+			
+#----------------------------------------------------
+proc uma  {}	{
+
+				puts " UMA resource test started"
+				send "17\r"
+				expect {
+					"OAuth - UMA Resources"				send  "2\r"
+				"id:"				send "manojUMA\r"
+				"iconUri"				send "http://google.com\r"
+				"type"				send "WEB\r"
+				"Populate optional fields?"				{send "y\r"}
+				"Selection:"				send "8\r"
+				"description"				send "umadesc\r"
+				"Selection:"				send "#\r"
+				"Selection:"				{send "1\r"}
+				"name"				send "UMAresource\r"
+				"Selection:"				send "c\r"
+				"Continue?"				{send "y\r"}
+				"UMAresource"				{send "b\r"}
+				"OAuth - UMA Resources"				send  "1\r"
+				"limit"				send  "\r"
+				"pattern"				send  "\r"
+				"UMAresource"				{send "b\r"}
+				"OAuth - UMA Resources"				send  "3\r"
+				"id:"				send "$umaID\r"
+				"Fields"				send "10\r"
+				"name"				send "UMAresourceId\r"
+				"Selection:"				{send "s\r"}
+				"Continue?"				{send "y\r"}
+				"UMAresourceId"			{send "b\r"}
+				"OAuth - UMA Resources"				send  "4\r"
+				"id:"				send "$umaID\r"
+				"$umaID"				{send "b\r"}
+				"OAuth - UMA Resources"				send  "6\r"
+				"id:"				send "$umaID\r"
+				"op:"				{send "replace\r"}
+				"path:"				send "name\r"
+				"value"				send "UMAResource\r"
+				"Another patch operation?"				{send "n\r"}
+				"Continue?"				{send "y\r"}
+				"UMAResource"				{send "b\r"}
+				"OAuth - UMA Resources"				{send "b\r"}
+				"Attribute"
+				puts "UMA tests passed "
+				}
+		}
+		
+#--------------------------------------------------------
+proc oauth {} {
+				puts "OAuth - Scopes"
+
+				send "8\r"
+				expect {
+				"OAuth"				{send "3\r"}
+				"OAuth: Scopes"				{send  "1\r"}
+				"type:"				{send "\r"}
+				"limit"				{send "\r"}
+				"pattern"				{send "\r"}
+				"C4F6"				{send "b\r"}
+				"OAuth: Scopes"				{send  "2\r"}
+				"id:"				{send "testscope\r"}
+				"scopeType"				{send  "openid\r"}
+				"Populate optional fields?"				{send "n\r"}
+				"Continue?"				{send "y\r"}
+				"testscope"				{send "b\r"}
+				"OAuth: Scopes"				{send  "3\r"}
+				"inum"				{send "C4F6\r"}
+				"expirationDate"				{send "4\r"}
+				"deletable"				{send "_true\r"}
+				"Selection:"				{send "s\r"}
+				"Continue?"				{send "y\r"}
+				"deletable"				{send "b\r"}
+				"OAuth: Scopes"				{send  "4\r"}
+				"inum"				{send "C4F6\r"}
+				"C4F6"				{send "b\r"}
+				"OAuth: Scopes"				{send "b\r"}
+				"OAuth"				{send "b\r"}
+				"Attribute"
+				puts "OAuth-Scopes tests passed "
+				}
+			}
+			
+proc stats {}	{
+			
+				puts "Statistics - User testing started"
+
+				send "9\r"
+				expect {
+					"Statistics"				{send  "1\r"}
+				"Provides server with basic statistic"				{send "1\r"}
+				"month:"				{send "202206\r"}
+				"format"				{send "\r"}
+				"monthly_active_users"				{send "b\r"}
+				"Provides server with basic statistic"		{send "b\r"}
+                "Statistics"				{send "b\r"}
+				"Attribute"
+								puts "Statistics tests passed "
+				}
+			}
+			
+proc  health {}	{
+						
+			puts "Health - Check"
+
+			send "10\r"
+			expect {
+				"Health"		{send "1\r"}
+			"Health: Check"			{send "1\r"}
+			"\"status\": \"UP\""			{send "b\r"}
+			"Health: Check"			{send "2\r"}
+			"\"status\": \"UP\""			{send "b\r"}
+			"Health: Check"			{send "3\r"}
+			"\"status\": \"UP\""			{send "b\r"}
+			"Health: Check"			{send "b\r"}
+                        "Health"			{send "b\r"}
+			"Attribute"
+			puts "health tests passed "
+			}
+		}
+		
+proc serverstats  {}  {
+
+			puts "Server Stats"
+
+			send "11\r"
+			expect {
+				"Server Stats"			{send "1\r"}
+			"\"dbType\": \"ldap\""			{send "b\r"}
+			"Server Stats"			{send "b\r"}
+			"Attribute"
+					}
+			puts "server-Statistics tests passed "
+		}
+		
+proc scimusrmgmt {}	{
+				puts " SCIM - User Management"
+
+				send "22\r"
+				expect {
+					"SCIM - User Management"				{send "1\r"}
+				"filter:"				{send "\r"}
+				"startIndex"				{send "\r"}
+				"count"				{send "\r"}
+				"sortBy"				{send "\r"}
+				"sortOrder"				{send "\r"}
+				"attributes"				{send "\r"}
+				"excludedAttributes"				{send "\r"}
+				"schemas"				{send "b\r"}
+				"SCIM - User Management"				{send "2\r"}
+				"schemas"				send "urn:ietf:params:scim:schemas:core:2.0:User"
+				"id"				{send "\r"}
+				"resourceType"				send "user\r"
+				"created"				{send "\r"}
+				"lastModified"				{send "\r"}
+				"location"				{send "\r"}
+				"externalId"				{send "\r"}
+				"userName"				{send "manojadmin\r"}
+				"familyName"				{send "manojadmin\r"}
+				"givenName"				{send "manojadmin\r"}
+				"middleName"				{send "manojadmin\r"}
+				"honorificPrefix"				{send "\r"}
+				"honorificSuffix"				{send "\r"}
+				"formatted"				{send "manojadmin manojadmin\r"}
+				"displayName"				{send "manojadmin\r"}
+				"nickName"				{send "manojadmin\r"}
+				"profileUrl"				{send "\r"}
+				"title"				{send "\r"}
+				"userType"				{send "\r"}
+				"preferredLanguage"				{send "\r"}
+				"locale"				{send "\r"}
+				"timezone"				{send "\r"}
+				"active"				{send "_true\r"}
+				"password"				{send "\r"}
+				"Add Email?"				{send "y\r"}
+				"value"				{send "manojsu@gmail.com\r"}
+				"display"				{send "\r"}
+				"type"				{send "\r"}
+				"primary"				{send "\r"}
+				"Add another Email?"				{send "n\r"}
+				"Add PhoneNumber?"				{send "n\r"}
+				"Add InstantMessagingAddress?"				{send "n\r"}
+				"Add Photo?"				{send "n\r"}
+				"Add Address?"				{send "n\r"}
+				"Add Group?"				{send "n\r"}
+				"Add Entitlement?"				{send "n\r"}
+				"Add Role?"				{send "n\r"}
+				"Add X509Certificate?"				{send "n\r"}
+				"Populate optional fields?"				{send "n\r"}
+				"Continue?"				{send "y\r"}
+				"urn:ietf:params:scim:schemas:core:2.0:User"				{send "b\r"}
+				"SCIM - User Management"				{send "b\r"}
+				"Attribute"
+				}
+				puts "scim-user-mgmt tests passed "
+				
+			}
+
+proc orgConfiguration {} {
+
+				send "13\r"
+				expect {
+					"Organization Configuration"				{send "1\r"}
+				"displayName"				{send "b\r"}
+				"Organization Configuration"				{send "2\r"}
+				"op:"				{send "replace\r"}
+				"path:"				{send "displayName\r"}
+				"value"				{send "gluu.org\r"}
+				"Another patch operation?"				{send "n\r"}
+				"Continue?"				{send "y\r"}
+				"gluu.org"				{send "b\r"}
+				"Organization Configuration"				{send "b\r"}
+                "Attribute"
+				puts "Organization-Configuration tests passed "
+				}
+			
+
+			}
+		
+proc AuthServer {}     {
+
+			send "14\r"
+			expect {
+				"Auth Server Health"			{send "1\r"}
+			"Auth Server Health: Check"			{send "1\r"}
+			"online"			{send "b\r"}
+			"Auth Server Health: Check"			{send "b\r"}
+			"Auth Server Health"			{send "b\r"}
+			    "Attribute"
+			puts "AuthServerHealth tests passed "
+			}
+
+			}
+
+proc AdminUI {} 	{
+
+
+			send "15\r"
+			expect {
+				"Admin UI"			{send "1\r"}
+			"Admin UI: Role"			{send "2\r"}		
+			"role:"			{send "admin\r"}
+			}
+
+			} 
+	
+Attribute
+defaultMethods
+# cacheconfg
+# memcacheconf
+# rediscacheconf
+# inmemcacheconf
+# nativepersistcacheconf
+# Configuration	
+# #fido2conf
+# smtpconf
+# Logging
+# ldapconf
+# cochbaseDbconf
+# openIdconnet [lindex $argv 2]
+# ##uma
+# oauth
+# stats
+# health
+# serverstats
+# ##scimusrmgmt
+# orgConfiguration
+# AuthServer
+##AdminUI
+#send "exit\r"
+#expect -exact "exit"
+expect eof

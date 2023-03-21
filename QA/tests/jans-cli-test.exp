@@ -1,0 +1,1315 @@
+#!/usr/bin/expect -f
+
+set HOST [lindex $argv 0]
+set USERNAME [lindex $argv 1]
+set OPENIDINUM [lindex $argv 2] 
+set timeout 3
+set umaID 7a55c863-a86b-411b-b71a-0c6c37747a3f
+spawn $env(SHELL)
+match_max 100000
+expect  "$"
+send -- "ssh ${USERNAME}@${HOST}"
+expect -exact "${HOST}"
+send -- "\r"
+expect -re "(.*)\n"
+
+#--no-suggestion
+#send -- "/opt/jans/jans-cli/config-cli.py -CC /opt/jans/jans-setup/output/CA/client.crt -CK /opt/jans/jans-setup/output/CA/client.key"
+#expect -exact "/opt/jans/jans-cli/config-cli.py -CC /opt/jans/jans-setup/output/CA/client.crt -CK /opt/jans/jans-setup/output/CA/client.key"
+
+#-use-test-client
+send "/opt/jans/jans-cli/config-cli.py  --no-suggestion"
+expect  "/opt/jans/jans-cli/config-cli.py  --no-suggestion"
+send -- "\r"
+expect { "Selection:"
+		timeout {puts "timed out"; exit}
+	}
+
+proc Attribute {} {
+
+		puts "checking Attriute"
+
+		send -- "1"
+		expect -exact "1" 
+		send -- "\r"
+		puts "Gets a list of Gluu attributes"
+		expect  "Selection:"
+		send -- "1\r"
+		expect { "limit" 
+			timeout exit} 
+
+		send -- "\r"
+
+		expect { "pattern" 
+			timeout exit }
+		send -- "\r"
+		expect { "status" 
+			timeout exit }
+		send -- "\r"
+		expect "Selection:"
+		send -- "b\r"
+		expect "Selection:"
+		puts  "Adds a new attribute"
+
+		send -- "2"
+
+		expect "2"
+		send -- "\r"
+
+		expect { "name"
+			timeout exit }
+
+		send -- "myAttr\r"
+		expect { "displayName"
+			timeout exit }
+		send -- "myAttr\r"
+
+		expect { "description"
+			timeout exit }
+		send -- "myAttr\r"
+
+		expect { "dataType"
+			timeout exit }
+		send -- "STRING\r"
+
+		expect { "status"
+			timeout exit }
+		send -- "ACTIVE\r"
+
+		expect { "editType"
+			timeout exit }
+		send -- "ADMIN\r"
+
+		expect "viewType"
+		send -- "ADMIN\r"
+
+		expect "Populate optional fields?"
+		send -- "n\r"
+
+		expect "Continue?"
+		send -- "y\r"
+
+		#if { $expect_out(buffer) ne "0" }
+		# puts $expect_out(0,string) 
+
+
+		#if { $expect_out(1,string)} 
+		#       puts $expect_out(1,string) 
+
+
+		#set var $expect_out(buffer);
+		#set fid [open /tmp/capture.txt w]
+		#puts $fid $var
+
+		expect { "Selection:"
+		timeout {puts "timed out"; exit}
+       			 }
+		send -- "b\r"
+		expect "Selection:"
+		send -- "3"
+		expect -exact "3"
+		send -- "\r"
+
+		expect "inum:"
+		send -- "3B47\r"
+		expect "Selection:"
+		send -- "3\r"
+		expect "dataType"
+
+		send -- "JSON\r"
+		expect "Selection:"
+		send -- "s\r" 
+
+		expect "Continue?"
+		send -- "y\r"
+		expect "Selection:"
+		send -- "b\r"
+		expect "Selection:"
+		send -- "4\r"
+
+		expect "inum:"
+
+		send -- "3B47\r"
+
+		expect "Selection:"
+		send -- "b\r"
+		expect "Selection:"
+		send -- "6\r"
+		expect "inum:"
+		send -- "3B47\r"
+		expect "op:"
+		send -- "replace\r"
+		expect "path:"
+		send -- "dataType\r"
+		expect "value"
+		send -- "STRING\r"
+		expect "Another patch operation?"
+		send -- "n\r"
+		expect "Continue?"
+		send -- "y\r"
+		#expect { -re inum=(.*?) {send_error "inum not found" exit} }
+
+		send -- "\r"
+		expect { "Selection:"
+			timeout {puts "timed out"; exit}
+       			 }
+		send -- "b\r"
+		expect "Selection:"
+		send -- "b\r"
+		expect "Selection:"
+		puts "Attribute tests passed"
+
+	}
+	
+proc defaultMethods {} {
+			puts "checking  Default Authentication Method" 
+
+			send -- "2\r"
+			expect "Selection:"
+			send -- "1\r"
+			expect "defaultAcr"
+			#expect  {"defaultAcr:" {send_error "inum not found" 
+			#	break }} 
+			#send -- "\r"
+			#expect "Selection:"
+			send -- "b\r"
+			expect "Selection:"
+			send -- "2\r"
+			expect "Selection:"
+			send -- "1\r"
+			expect "defaultAcr"
+			send -- "passwd_auth\r"
+			expect "Selection:"
+
+
+			send -- "s\r"
+			expect "Continue?"
+			send -- "y\r"
+			#expect { "passwd_auth" {send_error "inum not found" exit} }
+
+			send -- "b\r"
+			expect "Selection:"
+			send -- "b\r"
+			expect "Selection:"
+			puts "defaultMethods tests passed"
+		    }
+
+proc cacheconfg {} {
+
+			puts "Cache Configuration"
+
+			send -- "3\r"
+			expect "Selection:"
+			send -- "1\r"
+			expect "Selection:"
+			send -- "b\r"
+			expect "Selection:"
+			send -- "2\r"
+			expect "op:"
+			send -- "replace\r"
+			expect "path:"
+			send -- "memcachedConfiguration/bufferSize\r"
+			expect "value"
+			send -- "33768\r"
+			expect "Another patch operation?"
+			send -- "n\r"
+			expect "Continue?"
+			send -- "y\r"
+			expect { "33768"
+				timeout {puts "timed out"; exit}
+        			}
+			send -- "b\r"
+			expect "Selection:"
+			send -- "b\r"
+                        expect { "Attribute" 
+				timeout {puts "timed out"; exit }
+        			}
+			puts "cacheconfig tests passed"
+		}
+proc  memcacheconf {} {
+			puts "Cache Configuration"
+
+			send -- "3\r"
+
+			expect "Memcached"
+			send -- "3\r"
+			expect "Memcached"
+			send -- "1\r"
+			expect "bufferSize"
+			send -- "b\r"
+			expect "Cache Configuration"
+			send -- "2\r"
+
+			expect "Selection:"
+			send -- "1\r"
+			expect "bufferSize"
+			send -- "33456\r"
+			expect "Selection:"
+			send -- "s\r"
+			expect "Continue?"
+			send -- "y\r"
+			expect "33456"
+			send -- "b\r"
+			expect "Cache Configuration"	
+			send -- "3\r"
+			expect "Selection:"
+			expect "op:"
+			send -- "replace\r"
+			expect "path:"
+			send -- "bufferSize\r"
+			expect "value"
+			send -- "33768\r"
+			expect "Another patch operation?"
+			send -- "n\r"
+			expect "Continue?"
+			send -- "y\r"
+			expect { "33768"
+				timeout {puts "timed out"; exit}
+			        }
+			send -- "b\r"
+			expect "Selection:"
+			send -- "b\r"
+                        expect "Selection:"
+			send -- "b\r"
+			expect "Attribute"
+			puts "memory-cache-configue tests passed"
+		}
+
+proc rediscacheconf {} {
+
+				puts "Cache Configuration – Redis"
+
+				send -- "3\r"
+				expect "Redis"
+				send -- "4\r"
+				expect "Configuration"
+				send -- "1\r"
+				expect "servers"
+				send -- "b\r"
+				expect "Cache Configuration"
+				send -- "3\r"
+				expect "Selection:"
+				expect "op:"
+				send -- "replace\r"
+				expect "path:"
+				send -- "connectionTimeout\r"
+				expect "value" 
+				send -- "3000\r"
+				expect "Another patch operation?"
+				send -- "n\r"
+				expect "Continue?"
+				send -- "y\r"
+				expect {
+					timeout { puts “timeout”; exit 0;}
+					“connection refused” {exit 1}
+					“unknown host” {exit 1}
+					"3000"
+				
+					}
+			#	expect "3000" continue
+				send -- "b\r"
+				expect "Selection:"
+				send -- "2\r"
+                                expect "Returns Redis cache configuration"
+                                send -- "1\r"
+                                expect { "connectionTimeout"
+					timeout {puts "timed out"; exit}
+        				}
+                                send -- "33456\r"
+                                expect "Selection:"
+                                send -- "s\r"
+                                expect "Continue?"
+                                send -- "y\r"
+                                expect "33456"
+                                send -- "b\r"
+                                expect "Selection:"
+				send -- "b\r"
+				expect "Selection:"
+				send -- "b\r"
+				expect "Attribute"
+				puts "redis-cache-configuration tests passed"
+			}
+
+proc  inmemcacheconf {} {
+
+				puts "Cache Configuration: in-Memory"
+				send -- "3\r"
+				expect "in-Memory"	
+				send -- "5\r"
+				expect "in-Memory"
+				send -- "1\r"
+				expect "defaultPutExpiration"
+				send -- "b\r"
+				expect "in-Memory"
+				send -- "2\r"
+				expect "Returns in-Memory cache configuration"
+				send -- "1\r"
+				expect "defaultPutExpiration"
+				send -- "80\r"
+				expect "Selection:"
+				send -- "s\r"
+				expect "Continue?"
+				send -- "y\r"
+				expect { "80"
+					timeout {puts "timed out"; exit}
+        				}
+				send -- "b\r"
+				expect "Selection:"
+				send -- "3\r"
+				expect "Selection:"
+				expect "op:"
+				send -- "replace\r"
+				expect "path:"
+				send -- "defaultPutExpiration\r"
+				expect "value"
+				send -- "60\r"
+				expect "Another patch operation?"
+				send -- "n\r"
+				expect "Continue?"
+				send -- "y\r"
+				expect { "60"
+					timeout {puts "timed out"; exit}
+				        }
+				send -- "b\r"
+				expect "Selection:"
+				send -- "b\r"
+                                expect "Selection:"
+				send -- "b\r"
+				expect "Attribute"
+				puts "in-Memory-cache-configuration tests passed"
+			}
+			
+proc nativepersistcacheconf {} {
+			
+					puts "Cache Configuration – Native-Persistence"
+					send -- "3\r"
+					expect "Native-Persistence"
+					send -- "6\r"
+					expect "Native-Persistence"
+					send -- "1\r"
+					expect "defaultPutExpiration"
+					send -- "b\r"
+					expect "Native-Persistence"
+					send -- "2\r"
+					expect "defaultCleanupBatchSize"
+					send -- "2\r"
+					expect "defaultPutExpiration"
+					send -- "80\r"
+					expect "Selection:"
+					send -- "s\r"
+					expect "Continue?"
+					send -- "y\r"
+					expect { "80"
+						timeout {puts "timed out"; exit}
+					        }
+					send -- "b\r"
+					expect "Selection:"
+					send -- "3\r"
+					expect "Selection:"
+					expect "op:"
+					send -- "replace\r"
+					expect "path:"
+					send -- "defaultPutExpiration\r"
+					expect "value"
+					send -- "60\r"
+					expect "Another patch operation?"
+					send -- "n\r"
+					expect "Continue?"
+					send -- "y\r"
+					expect { "60"
+						timeout {puts "timed out"; exit}
+					        }
+					send -- "b\r"
+					expect "Selection:"
+					send -- "b\r"
+                                        expect "Selection:"
+					send -- "b\r"
+					expect "Attribute"
+					puts "native-persist-cacheconf tests passed"	
+				}
+proc Configuration {}	{
+				
+				puts "Configuration"
+				send -- "4\r"	
+				expect "Properties"	
+				send -- "1\r"
+				expect "Configuration: Properties"
+				send -- "1\r"
+				expect "useHighestLevelScriptIfAcrScriptNotFound"
+				send -- "b\r"
+				expect "Configuration: Properties"
+				send -- "3\r"
+				expect "persistenceType"
+				send -- "b\r"
+				expect "Selection:"
+				send -- "2\r"
+				expect "op:"
+				send -- "replace\r"
+				expect "path:"
+				send -- "issuer\r"
+				expect "value"
+				send -- "http://glubuntu1\r"
+				expect "Another patch operation?"
+				send -- "n\r"
+				expect "Continue?"
+				send -- "y\r"
+				expect { "http://glubuntu1"
+					timeout {puts "timed out"; exit}
+       					 }
+				send -- "b\r"
+				expect "Selection:"
+				send -- "b\r"
+                                expect "Selection:"
+				send -- "b\r"
+				expect "Attribute"
+				puts "Configuration-property tests passed"
+			}
+
+proc fido2conf {} {
+		
+
+					puts "Fido2"
+
+					send -- "5\r"
+					expect "Configuration"
+					send -- "1\r"
+                                        expect "Fido2: Configuration"
+					send -- "1\r"
+					expect "Fido2: Configuration"
+					send -- "b\r"
+					expect "Configuration – Fido2"
+					send -- "2\r"
+					expect "Gets Jans Authorization Server Fido2 configuration properties"
+					send -- "1\r"
+					expect "baseEndpoint"
+					send -- "https://gluubuntu/jans-fido2/restv2\r"
+					expect "Selection:"
+					send -- "s\r"
+					expect "Continue?"
+					send -- "y\r"
+					expect  { "https://gluubuntu/jans-fido2/restv2"
+							timeout {puts "timed out"; exit}
+        					}
+					send -- "b\r"
+					expect "Selection:"
+					send -- "2\r"
+					expect "Gets Jans Authorization Server Fido2 configuration properties"
+					send -- "1\r"
+					expect "baseEndpoint"
+					send -- "https://gluubuntu/jans-fido2/restv1\r"
+					expect "Selection:"
+					send -- "s\r"
+					expect "Continue?"
+					send -- "y\r"
+					expect { "https://gluubuntu/jans-fido2/restv1"
+						timeout {puts "timed out"; exit}
+       						 }
+					send -- "b\r"
+					expect "Selection:"
+					send -- "b\r"
+					expect "Attribute"
+					puts "fido2-configuration tests passed"
+			}
+			
+proc smtpconf  {} {
+
+					puts "Configuration – SMTP"
+					send -- "4\r"
+					expect "SMTP"
+					send -- "2\r"
+					expect "Configuration: SMTP"
+					send -- "1\r"
+					expect "host"
+					send -- "b\r"
+					expect "Configuration: SMTP"
+					send -- "2\r"
+					expect "host"
+					send -- "localhost\r"
+					expect "port"
+					send -- "12134\r"
+					expect "requires_ssl"
+					send -- "\r"
+					expect "trust_host"
+					send -- "\r"
+					expect "from_name"
+					send -- "manoj\r"
+					sleep 5
+					expect "from_email_address"
+					send  -- "manojsurya78@gmail.com\r"
+					expect "requires_authentication"
+					send -- "\r"
+					expect "user_name"
+					send -- "manoj\r"
+					expect "password"
+					send -- "manoj\r"
+					expect "Populate optional fields?"
+					send -- "n\r"
+					expect "Continue?"
+					send -- "y\r"
+					expect  "manojsurya78@gmail.com"
+					send -- "b\r"
+					expect "Configuration: SMTP"
+					send -- "3\r"
+					expect "from_email_address"
+					send -- "1\r"
+					expect "from_email_address"
+					send -- "manojsurya@gmail.com\r"
+					send -- "s\r"
+					expect "Continue?"
+					send -- "y\r"
+					expect  "manojsurya@gmail.com"
+					send -- "b\r"
+					sleep 5
+					expect "Configuration: SMTP"
+					send -- "4\r"
+					expect "Are you sure want to delete"
+					send -- "y\r"
+					expect "Entry  was deleted successfully"
+					send -- "b\r"
+					sleep 5
+					expect "Configuration: SMTP"
+					send -- "b\r"
+					expect "Selection"
+					send -- "b\r"
+                                        expect "Attribute"
+					puts "SMTP-configuration tests passed"
+
+		}
+proc Logging {} {
+					puts "Logging"
+					send -- "4\r"
+					expect "Logging"
+					send -- "3\r"
+					expect "Configuration: Logging"
+					send -- "1\r"
+					expect "loggingLevel"
+					send -- "b\r"
+					expect "Configuration: Logging"
+					send -- "2\r"
+					expect "Returns Jans Authorization Server logging settings"
+					send -- "7\r"
+					expect "loggingLevel"
+					send -- "TRACE\r"
+					expect "Selection:"
+					send -- "s\r"
+					expect "Continue?"
+					send -- "y\r"
+					expect "TRACE"
+					send -- "b\r"
+					expect "Configuration: Logging"
+					send -- "b\r"
+                                        expect "Selection"
+					send -- "b\r"
+					expect "Attribute"
+					puts "Logconfiguration tests passed "
+			}
+			
+proc ldapconf {} {
+
+
+					puts "Database - LDAP configuration"
+					send -- "7\r"
+                                        expect "Database"
+					send -- "1\r"
+					expect "Database: LDAP configuration"
+					send -- "1\r"
+					expect "auth_ldap_server"
+					send -- "b\r"
+					expect "Database: LDAP configuration"
+					send -- "2\r"
+					expect "configId"
+					send -- "auth_ldap_server1\r"
+					expect "bindDN"
+					send -- "cn=jans,dc=company,dc=org\r"
+					expect "bindPassword"
+					send -- "manoj\r"
+					expect "servers"
+					send -- "localhost\r"
+					expect "maxConnections"
+					send -- "\r"
+					expect "useSSL"
+					send -- "_true\r"
+					expect "baseDNs"
+					send -- "mannoj\r"
+					expect "primaryKey"
+					send -- "manoj123\r"
+					expect "localPrimaryKey"
+					send -- "manoj123\r"
+					expect "opulate optional fields?"
+					send -- "n\r"
+					expect "Continue?"
+					send -- "y\r"
+					expect "auth_ldap_server1"
+					send -- "b\r"
+					expect "Database: LDAP configuration"
+					send -- "3\r"
+					expect "name:"
+					send -- "auth_ldap_server1\r"
+					expect "maxConnections"
+					send -- "8\r"
+					expect "maxConnections"
+					send -- "10\r"
+					expect "Selection:"
+					send -- "s\r"
+					expect "Continue?"
+					send -- "y\r"
+					expect "Selection:"
+					send -- "b\r"
+					expect "Database: LDAP configuration"
+					send -- "4\r"
+					expect "name:"
+					send -- "auth_ldap_server1\r"
+					expect "maxConnections"
+					send -- "b\r"
+					expect "Database: LDAP configuration"
+					send -- "6\r"
+					expect "name:"
+					send -- "auth_ldap_server1\r"
+					expect "op:"
+					send -- "replace\r"
+					expect "path:"
+					send -- "maxConnections\r"
+					expect "value"
+					send -- "10\r"
+					expect "Another patch operation?"
+					send -- "n\r"
+					expect "Continue?"
+					send -- "y\r"
+					expect "Selection:"
+					send -- "b\r"
+					expect "Database: LDAP configuration"
+					send -- "5\r"
+					expect "name:"
+					send -- "auth_ldap_server1\r"
+					expect "Are you sure want to delete auth_ldap_server1 ?"
+					send -- "y\r"
+					expect "Entry auth_ldap_server1 was deleted successfully"
+					send -- "b\r"
+					expect "Database: LDAP configuration"
+					send -- "b\r"
+                                        expect "Selection"
+					send -- "b\r"
+					expect "Attribute"
+					puts "LDAP-configuration tests passed "
+			}
+proc cochbaseDbconf {}	{
+								
+					puts "Couchbase configuration"
+					send -- "7\r"
+                                        expect "Database"
+					send -- "2\r"
+					expect "Couchbase configuration"
+					send -- "1\r"
+					expect "Selection:"
+					send -- "b\r"
+					expect "Couchbase configuration"
+					send -- "2\r"
+					sleep 4
+					expect "configId"
+					send -- "couchbasetest\r"
+					expect "userName"
+					sleep 4
+					send -- "couchbasetest\r"
+					expect "userPassword"
+					send -- "couchbasetest\r"
+					expect "servers"
+					send -- "localhost\r"
+					expect "defaultBucket"
+					send -- "couchbasetest\r"
+					expect "buckets"
+					send -- "couchbasetest\r"
+					expect "passwordEncryptionMethod"
+					send -- "SHA\r"
+					expect "sslTrustStoreFile"
+					send -- "couchbasetest\r"
+					expect "sslTrustStorePin"
+					send -- "couchbasetest\r"
+					expect "sslTrustStoreFormat"
+					send -- "couchbasetest\r"
+					expect "Populate optional fields?"
+					send -- "n\r"
+					expect "Continue?"
+					send -- "y\r"
+					expect "couchbasetest"
+					send -- "b\r"
+					expect "Couchbase configuration"
+					send -- "3\r"
+					expect "name"
+					send -- "couchbasetest\r"
+					expect "connectTimeout"
+					send -- "6\r"
+					expect "connectTimeout"
+					send -- "100\r"
+					expect "Selection"
+					send -- "s\r"
+					expect "Continue?"
+					send -- "y\r"
+					expect "100"
+					send -- "b\r"
+					expect "Couchbase configuration"
+					send -- "4\r"
+					expect "name"
+					send -- "couchbasetest\r"
+					expect "connectTimeout"
+					send -- "b\r"
+					expect "Couchbase configuration"
+					send -- "5\r"
+					expect "name"
+					send -- "couchbasetest\r"
+					expect "op:"
+					send -- "replace\r"
+					expect "path:"
+					send -- "connectTimeout\r"
+					expect "value"
+					send -- "120\r"
+					expect "Another patch operation?"
+					send -- "n\r"
+					expect "Continue?"
+					send -- "y\r"
+					expect "120"
+					send -- "b\r"
+					expect "Couchbase configuration"
+					send -- "6\r"
+					expect "name"
+					send -- "couchbasetest\r"
+					expect "re you sure want to delete couchbasetest ?"
+					send -- "y\r"
+					expect  "deleted successfully"
+					send -- "b\r"
+					expect "Couchbase configuration"
+					send -- "b\r"
+                                        expect "Selection"
+					send -- "b\r"
+					expect "Attribute"
+					puts "couchbaseDB-configuration tests passed "
+
+				}
+				
+proc openIdconnet {OPENIDINUM}	{
+
+				puts "OAuth - OpenID Connect - Clients"
+				wait 5
+				send -- "8\r"
+                                expect "OpenID Connect - Clients"
+
+				send -- "1\r"
+				expect "OAuth: OpenID Connect - Clients"
+				send -- "1\r"
+				expect "Gets list of OpenID Connect clients"
+				send -- "\r"
+				expect "pattern:"
+				send -- "\r"
+				expect "startIndex"
+				send -- "\r"
+				expect "sortBy"
+				send -- "\r"
+
+				expect "sortOrder"
+				send -- "\r"
+				expect "Jans Config Api Client"
+				send -- "b\r"
+				expect "OAuth: OpenID Connect - Clients"
+				send -- "2\r"
+				expect "displayName"
+				send -- "myopenclient\r"
+				expect "applicationType"
+				send -- "web\r"
+				expect "includeClaimsInIdToken"
+				send -- "\r"
+				expect "Populate optional fields?"
+				send -- "n\r"
+				expect "Continue?"
+				send -- "y\r"
+				expect "myopenclient"
+				puts "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+				set output "$expect_out(buffer)"
+				puts "$output"
+				puts "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+				#expect -re {^(inum)\=(.*)(\,)$}
+				#puts "expect_out (0, string)"
+				#------------------------------------
+			
+				send -- "b\r"
+				expect "OAuth: OpenID Connect - Clients"
+				send -- "3\r"
+				expect "Get OpenId Connect Client by Inum"
+				send -- "${OPENIDINUM}\r"
+				expect "clientName"
+				send -- "18\r"
+				expect "displayName"
+				send "\r"	
+				expect "multiValued"
+				send "\r"
+				expect "values"
+                                send "jansApiclient\r"
+	
+				expect "Add CustomAttribute"
+				send -- "n\r"
+				expect "Selection:"
+				send -- "s\r"
+				expect "Continue?"
+				send -- "y\r"
+				expect "jansApiclient"
+				send -- "b\r"
+				expect "OAuth: OpenID Connect - Clients"
+
+				send -- "4\r"
+				expect "Get OpenId Connect Client by Inum"
+				send -- "$OPENIDINUM\r"
+				expect "${OPENIDINUM}"
+				send -- "b\r"
+				expect "OAuth: OpenID Connect - Clients"
+				#send -- "6\r"
+				#expect "inum:"
+				#send -- "${OPENIDINUM}\r"
+			#	expect "op:"
+			#	send -- "replace\r"
+			#	expect "path:"
+
+		#		send -- "clientName\r"
+		#		expect "value"
+		#		send -- "myopenidclient1\r"
+			#	expect "Another patch operation?"
+			#	send -- "n\r"
+			#	expect "Continue?"
+			#	send -- "y\r"
+			#	expect "Jans Config Api Client"  
+			#	timeout {
+			#	    puts "unable to save client name"
+			#	 expect eof 
+			#	} 
+			#	send -- "b\r"
+			#	expect "OAuth: OpenID Connect - Clients"
+				#send -- "5\r"
+				#expect "inum:"
+				#send -- "$openidinum\r"
+				#expect "Are you sure want to delete"
+				#send -- "y\r"
+				#expect "Selection:"
+				#send -- "b\r"
+				#expect "OAuth: OpenID Connect - Clients"
+				send -- "b\r"
+                                expect "Selection"
+				send -- "b\r"
+				expect "Attribute"
+				puts "openID-connnect tests passed "
+
+			}
+			
+#----------------------------------------------------
+proc uma  {}	{
+
+				puts " UMA resource test started"
+				send -- "17\r"
+				expect "OAuth - UMA Resources"
+				send  -- "2\r"
+				expect "id:"
+				send -- "manojUMA\r"
+				expect "iconUri"
+				send -- "http://google.com\r"
+				expect "type"
+				send -- "WEB\r"
+				expect "Populate optional fields?"
+				send -- "y\r"
+				expect "Selection:"
+				send -- "8\r"
+				expect "description"
+				send -- "umadesc\r"
+				expect "Selection:"
+				send -- "#\r"
+				expect "Selection:"
+				send -- "1\r"
+				expect "name"
+				send -- "UMAresource\r"
+				expect "Selection:"
+				send -- "c\r"
+				expect "Continue?"
+				send -- "y\r"
+				expect "UMAresource"
+				send -- "b\r"
+				expect "OAuth - UMA Resources"
+				send  -- "1\r"
+				expect "limit"
+				send  -- "\r"
+				expect "pattern"
+
+				send  -- "\r"
+				expect "UMAresource"
+				send -- "b\r"
+				expect "OAuth - UMA Resources"
+				send  -- "3\r"
+				expect "id:"
+				send -- "$umaID\r"
+				expect "Fields"
+				send -- "10\r"
+				expect "name"
+				send -- "UMAresourceId\r"
+				expect "Selection:"
+				send -- "s\r"
+				expect "Continue?"
+				send -- "y\r"
+				expect "UMAresourceId"
+
+				send -- "b\r"
+				expect "OAuth - UMA Resources"
+
+				send  -- "4\r"
+				expect "id:"
+				send -- "$umaID\r"
+				expect "$umaID"
+
+				send -- "b\r"
+				expect "OAuth - UMA Resources"
+
+				send  -- "6\r"
+				expect "id:"
+				send -- "$umaID\r"
+
+				expect "op:"
+				send -- "replace\r"
+				expect "path:"
+				send -- "name\r"
+				expect "value"
+				send -- "UMAResource\r"
+				expect "Another patch operation?"
+				send -- "n\r"
+
+				expect "Continue?"
+				send -- "y\r"
+				expect "UMAResource"
+				send -- "b\r"
+				expect "OAuth - UMA Resources"
+		
+				send -- "b\r"
+				expect "Attribute"
+				puts "UMA tests passed "
+		}
+		
+#--------------------------------------------------------
+proc oauth {} {
+				puts "OAuth - Scopes"
+
+				send -- "8\r"
+				expect "OAuth"
+				send -- "3\r"
+				expect "OAuth: Scopes"
+				send  -- "1\r"
+				expect "type:"
+				send -- "\r"
+				expect "limit"
+				send -- "\r"
+				expect "pattern"
+				send -- "\r"
+				expect "C4F6"
+				send -- "b\r"
+				expect "OAuth: Scopes"
+				send  -- "2\r"
+				expect "id:"
+				send -- "testscope\r"
+				expect "scopeType"
+				send  -- "openid\r"
+				expect "Populate optional fields?"
+				send -- "n\r"
+				expect "Continue?"
+				send -- "y\r"
+				expect "testscope"
+				send -- "b\r"
+				expect "OAuth: Scopes"
+				send  -- "3\r"
+				expect "inum"
+				send -- "C4F6\r"
+				expect "expirationDate"
+				send -- "4\r"
+				expect "deletable"
+				send -- "_true\r"
+				expect "Selection:"
+				send -- "s\r"
+				expect "Continue?"
+				send -- "y\r"
+				expect "deletable"
+				send -- "b\r"
+				expect "OAuth: Scopes"
+				send  -- "4\r"
+				expect "inum"
+				send -- "C4F6\r"
+				expect "C4F6"
+				send -- "b\r"
+				expect "OAuth: Scopes"
+				send -- "b\r"
+				expect "OAuth"
+				send -- "b\r"
+				expect "Attribute"
+				puts "OAuth-Scopes tests passed "
+			}
+			
+proc stats {}	{
+			
+				puts "Statistics - User testing started"
+
+				send -- "9\r"
+				expect "Statistics"
+				send  -- "1\r"
+				expect "Provides server with basic statistic"
+				send -- "1\r"
+				expect "month:"
+				send -- "202206\r"
+				expect "format"
+				send -- "\r"
+				expect "monthly_active_users"
+				send -- "b\r"
+				expect "Provides server with basic statistic"
+				send -- "b\r"
+                                expect "Statistics"
+				send -- "b\r"
+				expect "Attribute"
+				puts "Statistics tests passed "
+			}
+			
+proc  health {}	{
+						
+			puts "Health - Check"
+
+			send -- "10\r"
+			expect "Health"
+			send -- "1\r"
+			expect "Health: Check"
+			send -- "1\r"
+			expect "\"status\": \"UP\""
+			send -- "b\r"
+			expect "Health: Check"
+			send -- "2\r"
+			expect "\"status\": \"UP\""
+			send -- "b\r"
+			expect "Health: Check"
+			send -- "3\r"
+			expect "\"status\": \"UP\""
+			send -- "b\r"
+			expect "Health: Check"
+			send -- "b\r"
+                        expect "Health"
+			send -- "b\r"
+			expect "Attribute"
+
+			puts "health tests passed "
+		}
+		
+proc serverstats  {}  {
+
+			puts "Server Stats"
+
+			send -- "11\r"
+			expect "Server Stats"
+			send -- "1\r"
+			expect "\"dbType\": \"ldap\""
+			send -- "b\r"
+			expect "Server Stats"
+			send -- "b\r"
+			expect "Attribute"
+			puts "server-Statistics tests passed "
+		}
+		
+proc scimusrmgmt {}	{
+				puts " SCIM - User Management"
+
+				send -- "22\r"
+				expect "SCIM - User Management"
+				send -- "1\r"
+				expect "filter:"
+				send -- "\r"
+				expect "startIndex"
+				send -- "\r"
+				expect "count"
+				send -- "\r"
+				expect "sortBy"
+				send -- "\r"
+				expect "sortOrder"
+				send -- "\r"
+				expect "attributes"
+				send -- "\r"
+				expect "excludedAttributes"
+				send -- "\r"
+				expect "schemas"
+				send -- "b\r"
+				expect "SCIM - User Management"
+				send -- "2\r"
+				expect "schemas"
+				send -- "urn:ietf:params:scim:schemas:core:2.0:User"
+				expect "id"
+				send -- "\r"
+				expect "resourceType"
+				send -- "user\r"
+				expect "created"
+				send -- "\r"
+				expect "lastModified"
+				send -- "\r"
+				expect "location"
+				send -- "\r"
+				expect "externalId"
+				send -- "\r"
+				expect "userName		"
+				send -- "manojadmin\r"
+				expect "familyName"
+				send -- "manojadmin\r"
+				expect "givenName"
+				send -- "manojadmin\r"
+				expect "middleName"
+				send -- "manojadmin\r"
+				expect "honorificPrefix"
+				send -- "\r"
+				expect "honorificSuffix"
+				send -- "\r"
+				expect "formatted"
+				send -- "manojadmin manojadmin\r"
+				expect "displayName"
+				send -- "manojadmin\r"
+				expect "nickName"
+				send -- "manojadmin\r"
+				expect "profileUrl"
+				send -- "\r"
+				expect "title"
+				send -- "\r"
+				expect "userType"
+				send -- "\r"
+				expect "preferredLanguage"
+				send -- "\r"
+				expect "locale"
+				send -- "\r"
+				expect "timezone"
+				send -- "\r"
+				expect "active"
+				send -- "_true\r"
+				expect "password"
+				send -- "\r"
+
+				expect "Add Email?"
+				send -- "y\r"
+				expect "value"
+				send -- "manojsu@gmail.com\r"
+				expect "display"
+				send -- "\r"
+				expect "type"
+				send -- "\r"
+				expect "primary"
+				send -- "\r"
+				expect "Add another Email?"
+				send -- "n\r"
+				expect "Add PhoneNumber?"
+				send -- "n\r"
+				expect "Add InstantMessagingAddress?"
+				send -- "n\r"
+				expect "Add Photo?"
+				send -- "n\r"
+				expect "Add Address?"
+				send -- "n\r"
+				expect "Add Group?"
+				send -- "n\r"
+				expect "Add Entitlement?"
+				send -- "n\r"
+				expect "Add Role?"
+				send -- "n\r"
+				expect "Add X509Certificate?"
+				send -- "n\r"
+				expect "Populate optional fields?"
+				send -- "n\r"
+				expect "Continue?"
+				send -- "y\r"
+				expect "urn:ietf:params:scim:schemas:core:2.0:User"
+
+				send -- "b\r"
+				expect "SCIM - User Management"
+				send -- "b\r"
+				expect "Attribute"
+				puts "scim-user-mgmt tests passed "
+			}
+
+proc orgConfiguration {} {
+
+
+
+				send -- "13\r"
+				expect "Organization Configuration"
+				send -- "1\r"
+				expect "displayName"
+				send -- "b\r"
+				expect "Organization Configuration"
+				send -- "2\r"
+				expect "op:"
+				send -- "replace\r"
+				expect "path:"
+				send -- "displayName\r"
+				expect "value"
+				send -- "gluu.org\r"
+				expect "Another patch operation?"
+				send -- "n\r"
+				expect "Continue?"
+				send -- "y\r"
+				expect "gluu.org"
+				send -- "b\r"
+				expect "Organization Configuration"
+				send -- "b\r"
+                                expect "Attribute"
+				puts "Organization-Configuration tests passed "
+			
+
+			}
+		
+proc AuthServer {}     {
+
+			send -- "14\r"
+			expect "Auth Server Health"
+			send -- "1\r"
+			expect "Auth Server Health: Check"
+			send -- "1\r"
+			expect "online"
+			send -- "b\r"
+			expect "Auth Server Health: Check"
+			send -- "b\r"
+			expect "Auth Server Health"
+			send -- "b\r"
+                        expect "Attribute"
+			puts "AuthServerHealth tests passed "
+
+			}
+
+proc AdminUI {} 	{
+
+
+			send -- "15\r"
+			expect "Admin UI"
+			send -- "1\r"
+			expect "Admin UI: Role"
+			send -- "2\r"		
+			expect "role:"
+			send -- "admin\r"
+
+			} 
+	
+Attribute
+#defaultMethods
+#cacheconfg
+#memcacheconf
+#rediscacheconf
+#inmemcacheconf
+#nativepersistcacheconf
+#Configuration	
+##fido2conf
+#smtpconf
+#Logging
+#ldapconf
+#cochbaseDbconf
+#openIdconnet [lindex $argv 2]
+uma
+oauth
+stats
+health
+serverstats
+##scimusrmgmt
+orgConfiguration
+AuthServer
+##AdminUI
+
+
+
+#send -- "exit\r"
+#expect -exact "exit"
+expect eof
