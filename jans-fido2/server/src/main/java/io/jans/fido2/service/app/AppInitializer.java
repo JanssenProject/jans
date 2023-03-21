@@ -137,7 +137,7 @@ public class AppInitializer {
 		// Schedule timer tasks
 		metricService.initTimer();
 		configurationFactory.initTimer();
-		loggerService.initTimer();
+		loggerService.initTimer(true);
 		cleanerTimer.initTimer();
 		mds3UpdateTimer.initTimer();
 		customScriptManager.initTimer(supportedCustomScriptTypes);
