@@ -228,7 +228,7 @@ public class AppInitializer {
         // Schedule timer tasks
         metricService.initTimer();
         configurationFactory.initTimer();
-        loggerService.initTimer();
+        loggerService.initTimer(true);
         ldapStatusTimer.initTimer();
         cleanerTimer.initTimer();
         customScriptManager.initTimer(supportedCustomScriptTypes);
