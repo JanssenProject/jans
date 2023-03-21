@@ -83,7 +83,7 @@ public class AppInitializer {
         quartzSchedulerManager.start();
 		
         configurationFactory.initTimer();
-        loggerService.initTimer();
+        loggerService.initTimer(true);
         //externalScimService.init();
         customScriptManager.initTimer(Arrays.asList(
             CustomScriptType.SCIM, CustomScriptType.PERSISTENCE_EXTENSION, CustomScriptType.ID_GENERATOR));
