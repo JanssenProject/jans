@@ -241,10 +241,10 @@ nav:
             - 'Spanner Schema': 'admin/reference/database/spanner-schema.md'
             - 'Spanner Configuration': 'admin/reference/database/spanner-config.md'
             - 'Spanner Operation': 'admin/reference/database/spanner-ops.md'
- #       - 'PostgreSQL':    
- #           - 'PostgreSQL Schema': 'admin/reference/database/postgres-schema.md'
- #           - 'PostgreSQL Configuration': 'admin/reference/database/postgres-config.md'
- #           - 'PostgreSQL Operation': 'admin/reference/database/postgres-ops.md'
+        - 'PostgreSQL':    
+            - 'PostgreSQL Schema': 'admin/reference/database/postgres-schema.md'
+            - 'PostgreSQL Configuration': 'admin/reference/database/postgres-config.md'
+            - 'PostgreSQL Operation': 'admin/reference/database/postgres-ops.md'
         - 'Converting Data': 'admin/reference/database/converting-data.md'
     - 'Auth Server Admin Guide':
         - 'admin/auth-server/README.md'
