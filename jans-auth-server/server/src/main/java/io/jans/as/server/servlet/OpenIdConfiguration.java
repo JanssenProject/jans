@@ -21,6 +21,7 @@ import io.jans.as.server.service.external.ExternalDiscoveryService;
 import io.jans.as.server.service.external.ExternalDynamicScopeService;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.model.GluuAttribute;
+import io.jans.util.OxConstants;
 import jakarta.inject.Inject;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -159,7 +160,7 @@ public class OpenIdConfiguration extends HttpServlet {
 
             jsonObj.put(AUTH_LEVEL_MAPPING, createAuthLevelMapping());
 
-            Util.putArray(jsonObj, externalAuthenticationService.getAcrValuesList(), ACR_VALUES_SUPPORTED);
+            Util.putArray(jsonObj, getAcrValuesList(), ACR_VALUES_SUPPORTED);
 
             Util.putArray(jsonObj, appConfiguration.getSubjectTypesSupported(), SUBJECT_TYPES_SUPPORTED);
 
@@ -247,6 +248,17 @@ public class OpenIdConfiguration extends HttpServlet {
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    public List<String> getAcrValuesList() {
+        return getAcrValuesList(externalAuthenticationService.getAcrValuesList());
+    }
+
+    public static List<String> getAcrValuesList(final List<String> scriptAliases) {
+        if (!scriptAliases.contains(OxConstants.SCRIPT_TYPE_INTERNAL_RESERVED_NAME)) {
+            scriptAliases.add(OxConstants.SCRIPT_TYPE_INTERNAL_RESERVED_NAME);
+        }
+        return scriptAliases;
     }
 
     @SuppressWarnings("java:S3776")
