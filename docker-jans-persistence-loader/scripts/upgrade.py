@@ -117,7 +117,7 @@ def _transform_auth_dynamic_config(conf):
         should_update = True
 
     if "useHighestLevelScriptIfAcrScriptNotFound" not in conf:
-        conf["useHighestLevelScriptIfAcrScriptNotFound"] = True
+        conf["useHighestLevelScriptIfAcrScriptNotFound"] = False
         should_update = True
 
     if "httpLoggingExcludePaths" not in conf:
