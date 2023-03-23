@@ -42,8 +42,20 @@ class Defaults(DialogUtils):
         self.populate_acr_values()
         self.app.create_background_task(self.get_default_acr())
 
+
+
     def populate_acr_values(self):
-        self.acr_values_widget.values = [(acr, acr) for acr in self.app.cli_object.openid_configuration['acr_values_supported']]
+
+        if self.app.cli_object.openid_configuration:
+            acr_values = [(acr, acr) for acr in self.app.cli_object.openid_configuration['acr_values_supported']]
+            if not 'simple_password_auth' in self.app.cli_object.openid_configuration['acr_values_supported']:
+                acr_values.imsert(('simple_password_auth', 'simple_password_auth'))
+            self.acr_values_widget.values = acr_values
+            if hasattr(self, 'default_acr'):
+                self.acr_values_widget.value = self.default_acr
+
+        else:
+            self.app.retreive_openid_configuration(self.populate_acr_values)
 
     async def get_default_acr(self) -> None:
         response = self.app.cli_requests({'operation_id': 'get-acrs'})
