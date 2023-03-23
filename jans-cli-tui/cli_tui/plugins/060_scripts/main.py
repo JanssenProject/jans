@@ -208,6 +208,9 @@ class Plugin():
             else:
                 dialog.future.set_result(DialogResult.OK)
                 self.get_scripts()
+                # we need to refresh OpenID configuration for acr_values_supported if script enabled or disabled
+                if dialog.new_data['scriptType'] == 'person_authentication' and dialog.script_enabled != dialog.new_data.get('enabled'):
+                    self.app.retreive_openid_configuration()
 
         asyncio.ensure_future(coroutine())
 

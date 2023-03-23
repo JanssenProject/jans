@@ -200,9 +200,10 @@ class JansCliApp(Application):
 
 
     def retreive_openid_configuration(
-        self, 
+        self,
         call_after: Optional[Callable] = None
         ) -> None:
+        """Retreives OpenID configuration via CLI Object"""
 
         self.logger.debug('Retreiving OpenID configuration')
 
