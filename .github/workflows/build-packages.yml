@@ -51,6 +51,21 @@ jobs:
             python_version: 3.6
 
     steps:
+    - name: set nightly version
+      id: nightly
+      continue-on-error: false
+      if: ${{ github.event_name }} == 'schedule' || ${{ github.event.inputs.nightly }} == 'true'
+      run: |
+        VERSION=`curl  "https://api.github.com/repos/cli/cli/releases/latest" | grep '"tag_name"' | sed -E 's/.*"([^"]+)".*/\1/' | cut -c2-` 
+        echo $VERSION
+        curl -sSL https://github.com/cli/cli/releases/download/v${VERSION}/gh_${VERSION}_linux_amd64.tar.gz -o gh_${VERSION}_linux_amd64.tar.gz
+        tar xvf gh_${VERSION}_linux_amd64.tar.gz
+        sudo cp gh_${VERSION}_linux_amd64/bin/gh /usr/local/bin/
+        gh version
+        NIGHTLY_VERSION=$(cat docker-jans-auth-server/Dockerfile | grep "ENV CN_VERSION" | awk -F "[=-]" '{print $2}')
+        gh release delete v$NIGHTLY_VERSION-nightly --cleanup-tag --yes || echo "v$NIGHTLY_VERSION-nightly" does not exist
+        gh release create v$NIGHTLY_VERSION-nightly --generate-notes --prerelease --title "v$NIGHTLY_VERSION-nightly"
+        echo "nightlyversion=$NIGHTLY_VERSION" >> $GITHUB_OUTPUT
     - name: Getting build dependencies
       id: get_dependencies
       run: |      
@@ -81,11 +96,11 @@ jobs:
       run: |
         echo "version=$(curl https://api.github.com/repos/${{ github.repository }}/releases -s | grep "tag_name" | cut -d '"' -f 4 | grep -o '^\v.*' | head -n 1 | cut -d 'v' -f 2)" >> $GITHUB_OUTPUT
         TAG=$(curl https://api.github.com/repos/${{ github.repository }}/releases -s | grep "tag_name" | cut -d '"' -f 4 | grep -o '^\v.*' | head -n 1)
-        echo "tag=$TAG" >> $GITHUB_OUTPUT
         echo "PACKAGE_PREFIX=jans" >> ${GITHUB_ENV}
         #If on schedule build nightly packages
         if [ ${{ github.event_name }} = "schedule" ] || [ ${{ github.event.inputs.nightly }} = true ]; then
           echo "Activating nightly build"
+          TAG=${{ steps.nightly.outputs.nightlyversion }}
           mkdir test && cd test
           git clone https://github.com/JanssenProject/jans
           VERSION=$(cat jans/docker-jans-auth-server/Dockerfile | grep "ENV CN_VERSION" | awk -F "[=-]" '{print $2}')
@@ -93,6 +108,7 @@ jobs:
           echo "PACKAGE_PREFIX=jans-nightly-build" >> ${GITHUB_ENV}
           echo "version=$VERSION" >> $GITHUB_OUTPUT
         fi
+        echo "tag=$TAG" >> $GITHUB_OUTPUT
 
     - name: Print Version
       run: |
@@ -228,20 +244,30 @@ jobs:
           ${{github.workspace}}/jans-cli-tui/jans-cli-tui-linux-ubuntu-X86-64.pyz
           ${{github.workspace}}/jans-cli-tui/jans-cli-tui-linux-ubuntu-X86-64.pyz.sha256sum
         key: ${{ github.sha }}
+    - name: set nightly version
+      id: nightly
+      continue-on-error: false
+      if: ${{ github.event_name }} == 'schedule' || ${{ github.event.inputs.nightly }} == 'true'
+      run: |
+        NIGHTLY_VERSION=$(cat docker-jans-auth-server/Dockerfile | grep "ENV CN_VERSION" | awk -F "[=-]" '{print $2}')
+        gh release delete v$NIGHTLY_VERSION-nightly --cleanup-tag --yes || echo "v$NIGHTLY_VERSION-nightly" does not exist
+        gh release create v$NIGHTLY_VERSION-nightly --generate-notes --prerelease --title "v$NIGHTLY_VERSION-nightly"
+        echo "nightlyversion=$NIGHTLY_VERSION" >> $GITHUB_OUTPUT
     - name: Get latest tag
       id: previoustag
       run: |
         TAG=$(curl https://api.github.com/repos/${{ github.repository }}/releases -s | grep "tag_name" | cut -d '"' -f 4 | grep -o '^\v.*' | head -n 1)
-        echo "tag=$TAG" >> $GITHUB_OUTPUT
         echo "SETUP_PREFIX=jans-linux" >> ${GITHUB_ENV}
         echo "TUI_PREFIX=jans-cli-tui-linux" >> ${GITHUB_ENV}
         #If on schedule build nightly packages
         if [ ${{ github.event_name }} = "schedule" ] || [ ${{ github.event.inputs.nightly }} = true ]; then
           echo "Activating nightly build"
+          TAG=${{ steps.nightly.outputs.nightlyversion }}
           VERSION=$(cat docker-jans-auth-server/Dockerfile | grep "ENV CN_VERSION" | awk -F "[=-]" '{print $2}')
           echo "SETUP_PREFIX=jans-linux-$VERSION-nightly-build" >> ${GITHUB_ENV}
           echo "TUI_PREFIX=jans-cli-tui-linux-$VERSION-nightly-build" >> ${GITHUB_ENV}
         fi
+        echo "tag=$TAG" >> $GITHUB_OUTPUT
     - name: Print Version
       run: |
         echo "${{ steps.previoustag.outputs.tag }}"
