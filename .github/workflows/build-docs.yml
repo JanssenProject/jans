@@ -163,7 +163,7 @@ jobs:
         run: |
           TAGS=$(gh release list -L 1000 -R ${{ github.repository }} | grep -o '^\v.*'| grep -v Draft | cut -f 1 | sed '/-/!{s/$/_/}' | sort -V | sed 's/_$//')
           LATEST=$(echo "${TAGS}" | tail -1)
-          STABLE=$(echo "${TAGS}" | grep -v -- "-" | tail -1)
+          STABLE=$(echo "${TAGS}" | grep -v -- "nightly" | tail -1)
           echo "Latest is $LATEST and Stable is $STABLE"
           # remove below two lines after first release
           #LATEST="head"
