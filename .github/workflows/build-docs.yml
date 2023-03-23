@@ -149,8 +149,7 @@ jobs:
           github.event_name == 'release' &&
           github.event.action == 'published' &&
           startsWith(github.event.release.name, 'v') &&
-          !github.event.release.draft &&
-          !github.event.release.prerelease
+          !github.event.release.draft
         env:
           VERSION: ${{ github.event.release.tag_name }}
         run: |
