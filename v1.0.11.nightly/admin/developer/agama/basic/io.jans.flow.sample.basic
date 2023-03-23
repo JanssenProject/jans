@@ -1,0 +1,16 @@
+Flow io.jans.flow.sample.basic
+    Basepath "samples/basic"
+    
+asrv = Call io.jans.as.server.service.AuthenticationService#class 
+asrv = Call io.jans.service.cdi.util.CdiUtil#bean asrv
+obj = {}
+
+Repeat 3 times max
+    creds = RRF "login.ftlh" obj
+    obj.success = Call asrv authenticate creds.username creds.password
+    obj.uid = creds.username
+
+    When obj.success is true
+        Finish obj.uid    
+
+Finish false
