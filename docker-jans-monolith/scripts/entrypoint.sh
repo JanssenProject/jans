@@ -32,6 +32,9 @@ install_jans() {
   echo "city=${CN_CITY}" | tee -a setup.properties > /dev/null
   echo "state=${CN_STATE}" | tee -a setup.properties > /dev/null
   echo "countryCode=${CN_COUNTRY}" | tee -a setup.properties > /dev/null
+  echo "test_client_id=${TEST_CLIENT_ID}"| tee -a setup.properties > /dev/null
+  echo "test_client_pw=${TEST_CLIENT_SECRET}" | tee -a setup.properties > /dev/null
+  echo "test_client_trusted=""$([[ ${TEST_CLIENT_TRUSTED} == true ]] && echo True || echo True)" | tee -a setup.properties > /dev/null
   # shellcheck disable=SC2016
   echo "ldapPass=${CN_ADMIN_PASS}" | tee -a setup.properties > /dev/null
   echo "installLdap=""$([[ ${CN_INSTALL_LDAP} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
@@ -63,7 +66,7 @@ install_jans() {
   echo "Executing https://raw.githubusercontent.com/JanssenProject/jans/${JANS_SOURCE_VERSION}/jans-linux-setup/jans_setup/install.py > install.py"
   curl https://raw.githubusercontent.com/JanssenProject/jans/"${JANS_SOURCE_VERSION}"/jans-linux-setup/jans_setup/install.py > install.py
   echo "Executing python3 install.py -yes --args=-f setup.properties -n -test-client-id=${TEST_CLIENT_ID} -test-client-secret=${TEST_CLIENT_SECRET} --test-client-trusted"
-  python3 install.py -yes --args="-f setup.properties -n -test-client-id=${TEST_CLIENT_ID} -test-client-secret=${TEST_CLIENT_SECRET} --test-client-trusted"
+  python3 install.py -yes --args="-f setup.properties -n"
   echo "*****   Setup script completed!!    *****"
 
 }

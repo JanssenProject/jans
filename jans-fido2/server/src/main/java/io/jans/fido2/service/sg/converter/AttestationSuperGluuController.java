@@ -250,7 +250,7 @@ public class AttestationSuperGluuController {
 		response.put("clientDataJSON", base64Service.urlEncodeToString(clientData.toString().getBytes(Charset.forName("UTF-8"))));
 
 		// Store cancel type
-		response.put(CommonVerifiers.SUPER_GLUU_REQUEST_CANCEL, StringHelper.equals(RawRegistrationService.REGISTER_CANCEL_TYPE, registerResponse.getClientData().getTyp()));
+		params.put(CommonVerifiers.SUPER_GLUU_REQUEST_CANCEL, StringHelper.equals(RawRegistrationService.REGISTER_CANCEL_TYPE, registerResponse.getClientData().getTyp()));
 
 		// Prepare attestationObject
         RawRegisterResponse rawRegisterResponse = rawRegistrationService.parseRawRegisterResponse(registerResponse.getRegistrationData());

@@ -58,7 +58,7 @@ public class KeySignatureVerifierTest {
 	 * Additional steps which can be used in Vender cert generation:
 	 * 
 	 * openssl req -new -key private.pem -x509 -nodes -days 3650 -out cert.pem
-	 * openssl x509 -outform der -in cert.pem -out cert.de
+	 * openssl x509 -outform der -in cert.pem -out cert.der
 	 */
 	@Test
 	public void testSHA256withECDSASignature() throws IOException, NoSuchAlgorithmException, NoSuchProviderException, InvalidKeySpecException, InvalidKeyException, SignatureException {

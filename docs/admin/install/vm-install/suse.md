@@ -5,7 +5,6 @@ tags:
 - vm
 - SUSE
 - SLES
-- Tumbleweed
 ---
 
 # SUSE Janssen Installation
@@ -15,7 +14,6 @@ Before you install, check the [VM system requirements](vm-requirements.md).
 ## Supported versions
 - SUSE Linux Enterprise Server (SLES) 15
 - openSUSE Leap 15.4
-- openSUSE Tumbleweed (non-production)
 
 ## Install the Package
 

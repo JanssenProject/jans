@@ -852,14 +852,14 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
         for scope in common_data.scopes:
             if not self.scope_exists(scope['dn']):
-                scopes_list.append((scope['dn'], scope.get('displayName', '') or scope['inum']))
+                scopes_list.append((scope['dn'], scope.get('id', '') or scope['inum']))
 
         scopes_list.sort(key=lambda x: x[1])
 
         check_box_list = CheckboxList(values=scopes_list)
 
         buttons = [Button(_("Cancel")), Button(_("OK"), handler=add_selected_claims)]
-        dialog = JansGDialog(self.myparent, title=_("Select Scopes to add"), body=check_box_list, buttons=buttons)
+        dialog = JansGDialog(self.myparent, title=_("Select scopes to add"), body=check_box_list, buttons=buttons)
         self.myparent.show_jans_dialog(dialog)
 
 

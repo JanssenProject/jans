@@ -5,6 +5,7 @@ jansDbAuth: {"type": "auth", "name": null, "level": 0, "priority": 1, "enabled":
 jansSmtpConf: {"key-store":"%(smtp_jks_fn)s", "key-store-password":"%(smtp_jks_pass_enc)s", "key-store-alias":"%(smtp_alias)s", "signing-algorithm":"%(smtp_signing_alg)s"}
 jansOrgProfileMgt: false
 jansScimEnabled: false
+jansAuthMode: simple_password_auth
 objectClass: top
 objectClass: jansAppConf
 ou: configuration

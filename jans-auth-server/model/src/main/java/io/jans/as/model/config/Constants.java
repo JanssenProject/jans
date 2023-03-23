@@ -22,6 +22,8 @@ public class Constants {
     public static final String SALT_FILE_NAME = "salt";
     public static final String CERTS_DIR = "certsDir";
 
+    public static final String APPLICATION_TOKEN_INTROSPECTION_JWT = "application/token-introspection+jwt";
+
     public static final String ERROR = "error";
     public static final String ERROR_DESCRIPTION = "error_description";
     public static final String ERROR_URI = "error_uri";

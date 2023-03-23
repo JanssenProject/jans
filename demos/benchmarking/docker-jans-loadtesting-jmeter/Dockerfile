@@ -1,4 +1,5 @@
-FROM blazemeter/taurus:master-f96971fa-2022-12-12
+# FROM blazemeter/taurus:master-f96971fa-2022-12-12
+FROM blazemeter/taurus:1.16.21
 
 # ===============
 # Ubuntu packages
@@ -66,12 +67,11 @@ RUN mkdir -p /root/.bzt/jmeter-taurus \
     && tar zxvf /scripts/apache-jmeter-5.5.tgz -C /root/.bzt/jmeter-taurus \
     && mv /root/.bzt/jmeter-taurus/apache-jmeter-5.5 /root/.bzt/jmeter-taurus/5.5
 
-LABEL name="janssenproject/demo_loadtesting" \
-    maintainer="Janssen Project <support@jans.io>" \
-    vendor="Janssen Project" \
-    version="1.0.10" \
-    release="dev" \
-    summary="Janssen Jmeter tests" \
-    description="Janssen Jmeter and user loader image"
+LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/demo_loadtesting" \
+    org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
+    org.opencontainers.image.vendor="Janssen Project" \
+    org.opencontainers.image.version="1.0.11" \
+    org.opencontainers.image.title="Janssen Jmeter tests" \
+    org.opencontainers.image.description="Janssen Jmeter and user loader image"
 
 ENTRYPOINT ["bash", "/scripts/entrypoint.sh"]

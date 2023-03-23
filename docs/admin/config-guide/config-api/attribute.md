@@ -128,7 +128,7 @@ Attributes are individual pieces of user data, like uid or email, that are requi
 
 > | name       |  param type | data type      | type      |default value | description                            |
 > |------------|-------------|----------------|-----------|--------------|----------------------------------------|
-> | `inum`     |  path       | string         | required  | NA           | Attribute unique idendifier            |
+> | `inum`     |  path       | string         | required  | NA           | Attribute unique identifier            |
 
 ### Responses
 
@@ -325,7 +325,7 @@ Attributes are individual pieces of user data, like uid or email, that are requi
 
 > | name       |  param type | data type          | type      |default value | description                            |
 > |------------|-------------|--------------------|-----------|--------------|----------------------------------------|
-> | inum       |  path       | string             | required  | NA           | Attribute unique idendifier            |
+> | inum       |  path       | string             | required  | NA           | Attribute unique identifier            |
 > | None       |  request    | json-patch object  | required  | NA           | json-patch request                     |
 
 
@@ -363,7 +363,7 @@ Attributes are individual pieces of user data, like uid or email, that are requi
 
 > | name       |  param type | data type          | type      |default value | description                            |
 > |------------|-------------|--------------------|-----------|--------------|----------------------------------------|
-> | inum       |  path       | string             | required  | NA           | Attribute unique idendifier            |
+> | inum       |  path       | string             | required  | NA           | Attribute unique identifier            |
 
 
 ### Responses

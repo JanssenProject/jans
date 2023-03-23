@@ -3628,6 +3628,184 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/properties.write
+  /api/v1/config/smtp:
+    get:
+      tags:
+      - Configuration – SMTP
+      summary: Returns SMTP server configuration
+      description: Returns SMTP server configuration
+      operationId: get-config-smtp
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SmtpConfiguration'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    {
+                        "valid": false,
+                        "port": 0,
+                        "requires_ssl": false,
+                        "trust_host": false,
+                        "requires_authentication": false
+                    }
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/smtp.readonly
+    put:
+      tags:
+      - Configuration – SMTP
+      summary: Updates SMTP server configuration
+      description: Updates SMTP server configuration
+      operationId: put-config-smtp
+      requestBody:
+        description: SmtpConfiguration object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SmtpConfiguration'
+            examples:
+              Request json example:
+                description: Request json example
+                value: |
+                  {
+                      "valid": true,
+                      "host": "localhost",
+                      "port": 260,
+                      "requires_ssl": true,
+                      "trust_host": true,
+                      "from_name": "John",
+                      "from_email_address": "john@grow.org",
+                      "requires_authentication": true,
+                      "user_name": "smtp_user",
+                      "password": "password"
+                  }
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SmtpConfiguration'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    {
+                        "valid": false,
+                        "port": 0,
+                        "requires_ssl": false,
+                        "trust_host": false,
+                        "requires_authentication": false
+                    }
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/smtp.write
+    post:
+      tags:
+      - Configuration – SMTP
+      summary: Adds SMTP server configuration
+      description: Adds SMTP server configuration
+      operationId: post-config-smtp
+      requestBody:
+        description: SmtpConfiguration object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SmtpConfiguration'
+            examples:
+              Request json example:
+                description: Request json example
+                value: |
+                  {
+                      "valid": true,
+                      "host": "localhost",
+                      "port": 260,
+                      "requires_ssl": true,
+                      "trust_host": true,
+                      "from_name": "John",
+                      "from_email_address": "john@grow.org",
+                      "requires_authentication": true,
+                      "user_name": "smtp_user",
+                      "password": "password"
+                  }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SmtpConfiguration'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    {
+                        "valid": false,
+                        "port": 0,
+                        "requires_ssl": false,
+                        "trust_host": false,
+                        "requires_authentication": false
+                    }
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/smtp.write
+    delete:
+      tags:
+      - Configuration – SMTP
+      summary: Deletes SMTP server configuration
+      description: Deletes SMTP server configuration
+      operationId: delete-config-smtp
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/smtp.delete
+  /api/v1/config/smtp/test:
+    post:
+      tags:
+      - Configuration – SMTP
+      summary: Test SMTP server configuration
+      description: Test SMTP server configuration
+      operationId: test-config-smtp
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: boolean
+                description: boolean value true if successful
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/smtp.readonly
   /api/v1/config/scripts:
     get:
       tags:
@@ -7507,19 +7685,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        userCanView:
-          type: boolean
-        userCanAccess:
-          type: boolean
         adminCanAccess:
           type: boolean
         adminCanView:
           type: boolean
-        userCanEdit:
-          type: boolean
         adminCanEdit:
           type: boolean
+        userCanAccess:
+          type: boolean
+        userCanView:
+          type: boolean
         whitePagesCanView:
+          type: boolean
+        userCanEdit:
           type: boolean
         baseDn:
           type: string
@@ -8777,6 +8955,17 @@ components:
           format: int32
         displayName:
           type: string
+        authenticationMethod:
+          type: string
+          enum:
+          - client_secret_basic
+          - client_secret_post
+          - client_secret_jwt
+          - private_key_jwt
+          - access_token
+          - tls_client_auth
+          - self_signed_tls_client_auth
+          - none
         allAuthenticationMethods:
           uniqueItems: true
           type: array
@@ -8791,17 +8980,6 @@ components:
             - tls_client_auth
             - self_signed_tls_client_auth
             - none
-        authenticationMethod:
-          type: string
-          enum:
-          - client_secret_basic
-          - client_secret_post
-          - client_secret_jwt
-          - private_key_jwt
-          - access_token
-          - tls_client_auth
-          - self_signed_tls_client_auth
-          - none
         baseDn:
           type: string
         inum:
@@ -8909,10 +9087,10 @@ components:
           type: array
           items:
             type: object
-        value:
-          type: object
         displayValue:
           type: string
+        value:
+          type: object
     LocalizedString:
       type: object
       properties:
@@ -9028,6 +9206,30 @@ components:
           type: string
         className:
           type: string
+    SmtpConfiguration:
+      type: object
+      properties:
+        valid:
+          type: boolean
+        host:
+          type: string
+        port:
+          type: integer
+          format: int32
+        requires_ssl:
+          type: boolean
+        trust_host:
+          type: boolean
+        from_name:
+          type: string
+        from_email_address:
+          type: string
+        requires_authentication:
+          type: boolean
+        user_name:
+          type: string
+        password:
+          type: string
     CustomScript:
       type: object
       properties:
@@ -9102,14 +9304,14 @@ components:
           type: boolean
         internal:
           type: boolean
-        locationPath:
-          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
+        locationPath:
+          type: string
         baseDn:
           type: string
     ScriptError:

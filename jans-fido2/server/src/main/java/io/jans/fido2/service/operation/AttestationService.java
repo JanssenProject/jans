@@ -150,15 +150,16 @@ public class AttestationService {
 			log.debug("Put extensions {}", extensions);
 		}
 		// incase of Apple's Touch ID and Window's Hello; timeout,status and error message cause a NotAllowedError on the browser, so skipping these attributes
-		if(AuthenticatorAttachment.CROSS_PLATFORM.equals(authenticatorSelectionNode.get("authenticatorAttachment").asText()))
-		{
-			// Put timeout
-			int timeout = commonVerifiers.verifyTimeout(params);
-			log.debug("Put timeout {}", timeout);
-			optionsResponseNode.put("timeout", timeout);
+		if (params.hasNonNull("authenticatorAttachment")) {
+			if (AuthenticatorAttachment.CROSS_PLATFORM.equals(authenticatorSelectionNode.get("authenticatorAttachment").asText())) {
+				// Put timeout
+				int timeout = commonVerifiers.verifyTimeout(params);
+				log.debug("Put timeout {}", timeout);
+				optionsResponseNode.put("timeout", timeout);
 
-			optionsResponseNode.put("status", "ok");
-			optionsResponseNode.put("errorMessage", "");
+				optionsResponseNode.put("status", "ok");
+				optionsResponseNode.put("errorMessage", "");
+			}
 		}
 		
 		// Store request in DB
@@ -237,7 +238,13 @@ public class AttestationService {
 
 		registrationData.setPublicKeyId(keyId);
 		registrationData.setType("public-key");
-		registrationData.setStatus(Fido2RegistrationStatus.registered);
+
+        // Support cancel request
+        if (cancelRequest) {
+        	registrationData.setStatus(Fido2RegistrationStatus.canceled);
+        } else {
+        	registrationData.setStatus(Fido2RegistrationStatus.registered);
+        }
 
 		// Store original response
 		registrationData.setAttenstationResponse(params.toString());
@@ -273,11 +280,6 @@ public class AttestationService {
         	registrationEntry.setExpiration(unfinishedRequestExpiration);
         } else {
         	registrationEntry.clearExpiration();
-        }
-
-        // Support cancel request
-        if (cancelRequest) {
-        	registrationData.setStatus(Fido2RegistrationStatus.canceled);
         }
         
 		registrationPersistenceService.update(registrationEntry);

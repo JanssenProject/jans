@@ -394,7 +394,7 @@
     "staticKid": "%(static_kid)s",
     "forceOfflineAccessScopeToEnableRefreshToken" : false,
     "redirectUrisRegexEnabled": false,
-    "useHighestLevelScriptIfAcrScriptNotFound": true,
+    "useHighestLevelScriptIfAcrScriptNotFound": false,
     "blockWebviewAuthorizationEnabled": false,
     "dateFormatterPatterns": {
         "birthdate": "yyyy-MM-dd"
