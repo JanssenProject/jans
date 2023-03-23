@@ -52,7 +52,7 @@ pip3 install -r requirements.txt
   * redirect_uri `https://localhost:9090/oidc_callback`
   * Grants `authorization_code`
   * client authn at token endpoint `client_secret_post`
-  * scopes `openid` `username` `profile` `email`
+  * scopes `openid` `profile` `email`
   Please notice: You may also use the `register` endpoint, still to be documented.
 
 * Copy `auth-tdd-client/config_dummy.py` to `config.py` and use data according to your needs, i.e.:
