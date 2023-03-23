@@ -77,7 +77,7 @@ def get_preselected_provider():
     return base64url_value
 
 def get_provider_host():
-    provider_host_string  = cfg.PROVIDER_HOST_STRING
+    provider_host_string = cfg.PROVIDER_HOST_STRING
     provider_object = '{ "providerHost" : "%s" }' % provider_host_string
     provider_object_bytes = provider_object.encode()
     base64url_bytes = base64.urlsafe_b64encode(provider_object_bytes)
@@ -108,20 +108,19 @@ def create_app():
     app.config['OP_CLIENT_SECRET'] = cfg.CLIENT_SECRET
     oauth.init_app(app)
     oauth.register(
-                    'op',
-                   server_metadata_url=cfg.SERVER_META_URL,
-                   client_kwargs={
-                       'scope': 'openid profile email',
-                       'acr_value': cfg.ACR_VALUES
-                   },
-                   token_endpoint_auth_method=cfg.SERVER_TOKEN_AUTH_METHOD)
+            'op',
+            server_metadata_url=cfg.SERVER_META_URL,
+            client_kwargs={
+                'scope': 'openid profile email'
+            },
+            token_endpoint_auth_method=cfg.SERVER_TOKEN_AUTH_METHOD
+            )
 
     @app.route('/')
     def index():
         user = session.get('user')
         id_token = session.get('id_token')
         return render_template("home.html", user=user, id_token=id_token)
-        
 
     @app.route('/register', methods=['POST'])
     def register():
@@ -148,7 +147,8 @@ def create_app():
             if op_parsed_url.scheme != 'https' or client_parsed_url.scheme != 'https':
                 status = 400
 
-            elif (((op_parsed_url.path != '' or op_parsed_url.query != '') or client_parsed_url.path != '') or client_parsed_url.query != ''):
+            elif (((
+                           op_parsed_url.path != '' or op_parsed_url.query != '') or client_parsed_url.path != '') or client_parsed_url.query != ''):
                 status = 400
 
             else:
@@ -178,20 +178,21 @@ def create_app():
         query_args = {
             'redirect_uri': redirect_uri,
         }
-        if cfg.PRE_SELECTED_PROVIDER is True:
-            query_args[
-                'preselectedExternalProvider'] = get_preselected_provider()
 
         if cfg.ACR_VALUES is not None:
             query_args['acr_values'] = cfg.ACR_VALUES
-        
-        if cfg.PROVIDER_HOST_STRING is not None:
-            query_args["providerHost"] = get_provider_host()
 
+        # used for inbound-saml, uncomment and set config.py to use it
+        # if cfg.PRE_SELECTED_PROVIDER is True:
+        #     query_args[
+        #         'preselectedExternalProvider'] = get_preselected_provider()
+
+        # used for gluu-passport, , uncomment and set config.py to use it
+        # if cfg.PROVIDER_HOST_STRING is not None:
+        #     query_args["providerHost"] = get_provider_host()
 
         if cfg.ADDITIONAL_PARAMS is not None:
             query_args |= cfg.ADDITIONAL_PARAMS
-
 
         response = oauth.op.authorize_redirect(**query_args)
 
