@@ -27,10 +27,15 @@ import io.swagger.v3.oas.annotations.security.*;
 
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
-import jakarta.ws.rs.*;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import java.util.Objects;
 
 import org.slf4j.Logger;
 
@@ -131,7 +136,8 @@ public class ConfigSmtpResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(name = "status", type = "boolean", description = "boolean value true if successful"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
-    @POST
+//    @POST
+    @GET    
     @Path(ApiConstants.TEST)
     @ProtectedApi(scopes = { ApiAccessConstants.SMTP_READ_ACCESS }, groupScopes = {
             ApiAccessConstants.SMTP_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
@@ -140,6 +146,7 @@ public class ConfigSmtpResource extends ConfigBaseResource {
         SmtpConfiguration smtpConfiguration = configurationService.getConfiguration().getSmtpConfiguration();
         log.debug("Testing smtpConfiguration:{}", smtpConfiguration);
         smtpConfiguration.setPasswordDecrypted(encryptionService.decrypt(smtpConfiguration.getPassword()));
+        smtpConfiguration.setKeyStorePasswordDecrypted(encryptionService.decrypt(smtpConfiguration.getKeyStorePassword()));
         boolean status = mailService.sendMail(smtpConfiguration, smtpConfiguration.getFromEmailAddress(),
                 smtpConfiguration.getFromName(), smtpConfiguration.getFromEmailAddress(), null,
                 "SMTP Configuration verification", "Mail to test smtp configuration",
@@ -177,6 +184,15 @@ public class ConfigSmtpResource extends ConfigBaseResource {
                 smtpConfiguration.setPassword(encryptionService.encrypt(password));
             }
         }
+        password = smtpConfiguration.getKeyStorePassword();
+        if (password != null && !password.isEmpty()) {
+            try {
+                encryptionService.decrypt(password);
+            } catch (Exception ex) {
+                log.error("Exception while decryption of smtpConfiguration password hence will encrypt it!!!");
+                smtpConfiguration.setKeyStorePassword(encryptionService.encrypt(password));
+            }
+        }
         return smtpConfiguration;
     }
 
@@ -184,7 +200,11 @@ public class ConfigSmtpResource extends ConfigBaseResource {
         if (smtpConfiguration != null) {
             String password = smtpConfiguration.getPassword();
             if (password != null && !password.isEmpty()) {
-                smtpConfiguration.setPassword(encryptionService.decrypt(password));
+                smtpConfiguration.setPasswordDecrypted(encryptionService.decrypt(password));
+            }
+            password = smtpConfiguration.getKeyStorePassword();
+            if (password != null && !password.isEmpty()) {
+                smtpConfiguration.setKeyStorePasswordDecrypted(encryptionService.decrypt(password));
             }
         } else {
             smtpConfiguration = new SmtpConfiguration();

@@ -437,7 +437,7 @@
     "deviceAuthzTokenPollInterval": 5,
     "deviceAuthzResponseTypeToProcessAuthz": "code",
     "agamaConfiguration": {
-        "enabled": true,
+        "enabled": false,
         "templatesPath": "/ftl",
         "scriptsPath": "/scripts",
         "serializerType": "KRYO",

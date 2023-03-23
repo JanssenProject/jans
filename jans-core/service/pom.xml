@@ -80,28 +80,28 @@
 		</dependency>
 
 		<!-- CDI -->
-        <dependency>
-		    <groupId>jakarta.enterprise</groupId>
-		    <artifactId>jakarta.enterprise.cdi-api</artifactId>
-		    <scope>provided</scope>
+		<dependency>
+			<groupId>jakarta.enterprise</groupId>
+			<artifactId>jakarta.enterprise.cdi-api</artifactId>
+			<scope>provided</scope>
    		</dependency>
 		<dependency>
-		    <groupId>jakarta.inject</groupId>
-        	<artifactId>jakarta.inject-api</artifactId>
-   		</dependency>
-        <dependency>
-            <groupId>jakarta.mail</groupId>
-        	<artifactId>jakarta.mail-api</artifactId>
-      	</dependency>
+			<groupId>jakarta.inject</groupId>
+			<artifactId>jakarta.inject-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.mail</groupId>
+			<artifactId>jakarta.mail-api</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>jakarta.servlet</groupId>
 			<artifactId>jakarta.servlet-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-            <groupId>jakarta.validation</groupId>
-            <artifactId>jakarta.validation-api</artifactId>
-        </dependency>
+			<groupId>jakarta.validation</groupId>
+			<artifactId>jakarta.validation-api</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.jboss.spec.javax.annotation</groupId>
 			<artifactId>jboss-annotations-api_1.3_spec</artifactId>
