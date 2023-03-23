@@ -24,7 +24,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 #                    ]
 
     source_files = [
-                    (os.path.join(Config.dist_jans_dir, 'jans-orm-spanner-libs-distribution.zip'), os.path.join(base.current_app.app_info['BASE_SERVER'], '_out/jans-orm-spanner-libs-1.0.10-SNAPSHOT-distribution.zip')),
+                    (os.path.join(Config.dist_jans_dir, 'jans-orm-spanner-libs-distribution.zip'), os.path.join(base.current_app.app_info['BASE_SERVER'], '_out/jans-orm-spanner-libs-1.0.11-SNAPSHOT-distribution.zip')),
                     ]
 
     def __init__(self):

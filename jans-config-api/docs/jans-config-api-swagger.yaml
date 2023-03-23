@@ -3785,7 +3785,7 @@ paths:
       - oauth2:
         - https://jans.io/oauth/config/smtp.delete
   /api/v1/config/smtp/test:
-    post:
+    get:
       tags:
       - Configuration – SMTP
       summary: Test SMTP server configuration
@@ -7685,19 +7685,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        adminCanAccess:
-          type: boolean
         adminCanView:
           type: boolean
         adminCanEdit:
           type: boolean
-        userCanAccess:
-          type: boolean
         userCanView:
           type: boolean
-        whitePagesCanView:
-          type: boolean
         userCanEdit:
+          type: boolean
+        adminCanAccess:
+          type: boolean
+        userCanAccess:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -9087,10 +9087,10 @@ components:
           type: array
           items:
             type: object
-        displayValue:
-          type: string
         value:
           type: object
+        displayValue:
+          type: string
     LocalizedString:
       type: object
       properties:
@@ -9211,13 +9211,25 @@ components:
       properties:
         valid:
           type: boolean
+        connectProtectionList:
+          type: array
+          items:
+            type: string
+            enum:
+            - None
+            - StartTls
+            - SslTls
         host:
           type: string
         port:
           type: integer
           format: int32
-        requires_ssl:
-          type: boolean
+        connect-protection:
+          type: string
+          enum:
+          - None
+          - StartTls
+          - SslTls
         trust_host:
           type: boolean
         from_name:
@@ -9229,6 +9241,14 @@ components:
         user_name:
           type: string
         password:
+          type: string
+        key-store:
+          type: string
+        key-store-password:
+          type: string
+        key-store-alias:
+          type: string
+        signing-algorithm:
           type: string
     CustomScript:
       type: object
