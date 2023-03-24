@@ -6,15 +6,10 @@
 
 package io.jans.cacherefresh.service;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.List;
-import java.util.Properties;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -62,7 +57,7 @@ public class ConfigurationService implements Serializable {
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     public boolean contains(String configurationDn) {
-        return persistenceEntryManager.contains(configurationDn, GluuConfiguration.class);
+        return getPersistenceEntryManager().contains(configurationDn, GluuConfiguration.class);
     }
 
     /**
@@ -72,7 +67,7 @@ public class ConfigurationService implements Serializable {
      *            Configuration
      */
     public void addConfiguration(GluuConfiguration configuration) {
-        persistenceEntryManager.persist(configuration);
+        getPersistenceEntryManager().persist(configuration);
     }
 
     /**
@@ -83,7 +78,7 @@ public class ConfigurationService implements Serializable {
      */
     public void updateConfiguration(GluuConfiguration configuration) {
         try {
-            persistenceEntryManager.merge(configuration);
+            getPersistenceEntryManager().merge(configuration);
         } catch (Exception e) {
             log.info("", e);
         }
@@ -95,7 +90,7 @@ public class ConfigurationService implements Serializable {
      * @return True if configuration with specified attributes exist
      */
     public boolean containsConfiguration(String dn) {
-        return persistenceEntryManager.contains(dn, GluuConfiguration.class);
+        return getPersistenceEntryManager().contains(dn, GluuConfiguration.class);
     }
 
     /**
@@ -107,7 +102,7 @@ public class ConfigurationService implements Serializable {
      * @throws Exception
      */
     public GluuConfiguration getConfigurationByInum(String inum) {
-        return persistenceEntryManager.find(GluuConfiguration.class, getDnForConfiguration());
+        return getPersistenceEntryManager().find(GluuConfiguration.class, getDnForConfiguration());
     }
 
     /**
@@ -118,7 +113,7 @@ public class ConfigurationService implements Serializable {
      */
     public GluuConfiguration getConfiguration(String[] returnAttributes) {
         GluuConfiguration result = null;
-        result = persistenceEntryManager.find(getDnForConfiguration(), GluuConfiguration.class, returnAttributes);
+        result = getPersistenceEntryManager().find(getDnForConfiguration(), GluuConfiguration.class, returnAttributes);
         return result;
     }
 
@@ -141,7 +136,7 @@ public class ConfigurationService implements Serializable {
      * @throws Exception
      */
     public List<GluuConfiguration> getConfigurations() {
-        return persistenceEntryManager.findEntries(getDnForConfiguration(), GluuConfiguration.class, null);
+        return getPersistenceEntryManager().findEntries(getDnForConfiguration(), GluuConfiguration.class, null);
     }
 
     /**
@@ -218,4 +213,11 @@ public class ConfigurationService implements Serializable {
         }
     }
 
+    public PersistenceEntryManager getPersistenceEntryManager() {
+        return persistenceEntryManager;
+    }
+
+    public void setPersistenceEntryManager(PersistenceEntryManager persistenceEntryManager) {
+        this.persistenceEntryManager = persistenceEntryManager;
+    }
 }

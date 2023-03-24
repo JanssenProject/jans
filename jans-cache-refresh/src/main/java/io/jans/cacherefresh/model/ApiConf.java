@@ -1,10 +1,10 @@
 package io.jans.cacherefresh.model;
 
-import io.jans.configapi.core.model.Conf;
 import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.DataEntry;
 import io.jans.orm.annotation.JsonObject;
 import io.jans.orm.annotation.ObjectClass;
+import io.jans.config.oxtrust.CacheRefreshConfiguration;
 
 @DataEntry
 @ObjectClass(value = "jansAppConf")

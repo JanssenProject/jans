@@ -7,6 +7,7 @@
 package io.jans.cacherefresh.service;
 
 import java.io.File;
+import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.inject.Inject;
@@ -16,6 +17,7 @@ import io.jans.cacherefresh.config.ApplicationFactory;
 import io.jans.config.oxtrust.AttributeResolverConfiguration;
 import io.jans.config.oxtrust.Configuration;
 import io.jans.exception.ConfigurationException;
+import io.jans.exception.OxIntializationException;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.PersistenceConfiguration;
 import io.jans.orm.service.PersistanceFactoryService;
@@ -26,10 +28,13 @@ import io.jans.service.timer.event.TimerEvent;
 import io.jans.service.timer.schedule.TimerSchedule;
 import io.jans.util.StringHelper;
 import io.jans.util.init.Initializable;
+import io.jans.util.security.PropertiesDecrypter;
+import io.jans.util.security.StringEncrypter;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.inject.Instance;
+import jakarta.enterprise.inject.Produces;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
@@ -141,6 +146,28 @@ public abstract class ConfigurationFactory<C> extends Initializable {
 			throw new ConfigurationException("Failed to load configuration from LDAP.");
 		} else {
 			log.info("Configuration loaded successfully.");
+		}
+	}
+
+	public Properties getDecryptedConnectionProperties() throws OxIntializationException {
+		FileConfiguration persistenceConfig = persistenceConfiguration.getConfiguration();
+		Properties connectionProperties = persistenceConfig.getProperties();
+		if (connectionProperties == null || connectionProperties.isEmpty())
+			return connectionProperties;
+
+		return PropertiesDecrypter.decryptAllProperties(getStringEncrypter(), connectionProperties);
+	}
+
+	@Produces
+	@ApplicationScoped
+	public StringEncrypter getStringEncrypter() throws OxIntializationException {
+		if (StringHelper.isEmpty(cryptoConfigurationSalt)) {
+			throw new OxIntializationException("Encode salt isn't defined");
+		}
+		try {
+			return StringEncrypter.instance(cryptoConfigurationSalt);
+		} catch (StringEncrypter.EncryptionException ex) {
+			throw new OxIntializationException("Failed to create StringEncrypter instance", ex);
 		}
 	}
 

@@ -1,6 +1,5 @@
 package io.jans.cacherefresh.model;
 
-import io.jans.as.model.config.StaticConfiguration;
 import io.jans.orm.annotation.*;
 
 @DataEntry

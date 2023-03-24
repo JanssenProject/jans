@@ -6,8 +6,13 @@
 
 package org.example;
 
+import io.jans.cacherefresh.config.ConfigurationFactory;
+import io.jans.cacherefresh.model.GluuConfiguration;
+import io.jans.cacherefresh.service.ConfigurationService;
 import io.jans.cacherefresh.timer.CacheRefreshTimer;
+import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.ldap.impl.LdapEntryManager;
+import jakarta.enterprise.inject.Instance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,11 +32,20 @@ public final class LdapSample {
         LdapEntryManagerSample entryManagerSample = new LdapEntryManagerSample();
 
         // Create LDAP entry manager
-        LdapEntryManager entryManager = entryManagerSample.createLdapEntryManager();
+        PersistenceEntryManager entryManager = entryManagerSample.createLdapEntryManager();
 
         //gluucacherefresh
-        CacheRefreshTimer CacheRefreshTimer = new CacheRefreshTimer();
-        CacheRefreshTimer.processInt();
+        //GluuConfiguration GluuConfiguration = new GluuConfiguration();
+        CacheRefreshTimer cacheRefreshTimer = new CacheRefreshTimer();
+        cacheRefreshTimer.setLdapEntryManager(entryManager);
+        ConfigurationFactory configurationFactory = new ConfigurationFactory();
+        configurationFactory.setPersistenceEntryManagerInstance(entryManager);
+        configurationFactory.create();
+        cacheRefreshTimer.setConfigurationFactory(configurationFactory);
+        ConfigurationService configurationService = new ConfigurationService();
+        configurationService.setPersistenceEntryManager(entryManager);
+        cacheRefreshTimer.setConfigurationService(configurationService);
+        cacheRefreshTimer.processInt();
 
 
     }
