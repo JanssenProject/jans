@@ -107,36 +107,34 @@ flowchart TD
 
 #### Default ACR
 
-`default_acr`: This is the default authentication mechanism exposed to all applications that send users to the 
+This is the default authentication mechanism exposed to all applications that send users to the 
 Janssen Server for sign-in. Unless an app specifically requests, or falls back on a different form of authentication,
 users will receive the form of authentication specified in this field. Using Janssen Text base UI (TUI) configuration 
 tool, this value can be configured by navigating to `Auth Server`->`Defaults` as show below:
 
 ![](../../../../docs/assets/jans-tui-auth-server-default.png)
 
-- default should be `simple_password_auth`, is internal value which represents no script actually.
-- by default `useHighestLevelScriptIfAcrScriptNotFound` should be false. Effective only when no specific value for 
-  `acr_values` is provided in request, or no default acr is mentioned at the jans level, or not ACR values are provided
-  in client configuration. Confirm this with Yuriyz.
-- mention in AS admin guide on how to use `useHighestLevelScriptIfAcrScriptNotFound`
-- 
-
 #### Internal ACR
-If a default ACR is not specified, Janssen will determine it based on enabled scripts and the internal user/password ACR. This internal ACR, `simple_password_auth`, is set to level -1. This means that it has lower priority than any scripts, so Janssen server will use it only if no other authentication method is set.
 
-Use the jans-cli to [update / look-up the default authentication method](https://github.com/JanssenProject/jans-cli/edit/main/docs/cli/cli-default-authentication-method.md).
+If a default ACR is not specified, Janssen will determine it based on enabled scripts and the 
+internal user/password ACR. This internal ACR, `simple_password_auth`, is set to level -1. This means that it has lower 
+priority than any scripts, so Janssen server will use it only if no other authentication method is set.
 
-#### Authentication method for a client (RP):
+#### Authentication method for a client (RP)
+
 A client may also specify `default_acr_values` during registration (and omit the parameter `acr_values` while making an authentication request).
 
 #### Multiple Authentication Mechanisms
+
 The Jans Server can concurrently support multiple authentication mechanisms, enabling Web and mobile apps (clients) to request a specific type of authentication using the standard OpenID Connect request parameter: `acr_values`.
 Learn more about acr_values in the [OpenID Connect core spec](http://openid.net/specs/openid-connect-core-1_0.html#acrSemantics).
 
 #### Enabling an authentication mechanism
+
 An Authentication method is offered by the AS if its ACR value i.e. its corresponding custom script is `enabled`.
 
-By default, users will get the default authentication mechanism as specified above. However, **using the OpenID Connect acr_values parameter, web and mobile clients can request any enabled authentication mechanism**.
+By default, users will get the default authentication mechanism as specified above. However, **using the OpenID Connect 
+acr_values parameter, web and mobile clients can request any enabled authentication mechanism**.
 
 1. Obtain the json contents of a custom script by using a jans-cli command like `get-config-scripts-by-type`, `get-config-scripts-by-inum` etc.
 	Example :
@@ -145,8 +143,17 @@ By default, users will get the default authentication mechanism as specified abo
 
 2. [Update the custom script](https://github.com/JanssenProject/jans-cli/blob/main/docs/cli/cli-custom-scripts.md#update-an-existing-custom-script) and change the `enabled` attribute to `true`  
 
-#### Level (rank) of an Authentication mechanism :
-Each authentication mechanism (script) has a "Level" assigned to it which describes how secure and reliable it is. **The higher the "Level", higher is the reliability represented by the script.** Though several mechanisms can be enabled at the same Janssen server instance at the same time, for any specific user's session only one of them can be set as the current one (and will be returned as `acr` claim of id_token for them). If after initial session is created a new authorization request from a RP comes in specifying another authentication method, its "Level" will be compared to that of the method currently associated with this session. If requested method's "Level" is lower or equal to it, nothing is changed and the usual SSO behavior is observed. If it's higher (i.e. a more secure method is requested), it's not possible to serve such request using the existing session's context, and user must re-authenticate themselves to continue. If they succeed, a new session becomes associated with that requested mechanism instead.
+#### Level (rank) of an Authentication mechanism
+
+Each authentication mechanism (script) has a "Level" assigned to it which describes how secure and reliable it is. 
+**The higher the "Level", higher is the reliability represented by the script.** Though several mechanisms can be 
+enabled at the same Janssen server instance at the same time, for any specific user's session only one of them can be 
+set as the current one (and will be returned as `acr` claim of id_token for them). If after initial session is created 
+a new authorization request from a RP comes in specifying another authentication method, its "Level" will be compared 
+to that of the method currently associated with this session. If requested method's "Level" is lower or equal to it, 
+nothing is changed and the usual SSO behavior is observed. If it's higher (i.e. a more secure method is requested), 
+it's not possible to serve such request using the existing session's context, and user must re-authenticate themselves 
+to continue. If they succeed, a new session becomes associated with that requested mechanism instead.
 
 ## Usage scenarios
 
