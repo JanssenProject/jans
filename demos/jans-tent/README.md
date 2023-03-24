@@ -22,7 +22,7 @@ A reliable OpenID client to be used in auth testing.
 
 ## Setup
 
-* Create client on Auth server, i.e.:
+### 1. Create client on Auth server, i.e.:
   * response_type `code`
   * redirect_uri `https://localhost:9090/oidc_callback`
   * Grants `authorization_code`
@@ -30,18 +30,18 @@ A reliable OpenID client to be used in auth testing.
   * scopes `openid` `profile` `email`
   Please notice: You may also use the `register` endpoint, still to be documented.
 
-* Edit configuration file `clientapp/config.py` according to your needs. I.e:
+### 2. Edit configuration file `clientapp/config.py` according to your needs. I.e:
   * Input client_id and secret from above step
   * Set OpenID configuration endpoint URL (`SERVER_META_URL`)
 
-* Generate test RP server self signed certs
+### 3. Generate test RP server self signed certs
 
-Generate `key.pem` and `cert.pem` at `jans-tent` project root folder (`jans/demos/jans-tent`) i.e:
-`openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -sha256 -days 365 -nodes`
+Generate `key.pem` and `cert.pem` at `jans-tent` project root folder (`jans/demos/jans-tent`). i.e: 
+```bash
+openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -sha256 -days 365 -nodes
+```
 
-* Import your Auth Server certificate and add it to `CERT_PATH`, `SSL_CERT_FILE`, `REQUESTS_CA_BUNDLE`.
-
-Example:
+### 4. Import your Auth Server certificate and add it to `CERT_PATH`, `SSL_CERT_FILE`, `REQUESTS_CA_BUNDLE`.
 
 (remember to be inside your virtual environment)
 
@@ -53,15 +53,22 @@ echo | openssl s_client -servername modena.gluu.me \
 export CERT_PATH=$(python3 -m certifi)
 export SSL_CERT_FILE=${CERT_PATH}
 export REQUESTS_CA_BUNDLE=${CERT_PATH}
-mv issuer.cer $(python3 -m certifi)
+mv op_web_cert.cer $(python3 -m certifi)
 ```
 
-* Run server:
+## Using the server
+
+### Start the server
+
+(remember to be inside your virtual environment)
 ```bash
-python3 main.py
+python main.py
 ```
 
-* navigate to `https://localhost:9090/protected-content`
+### Start the flow
+
+Navigate to `https://localhost:9090` and click the link to start.
+
 
 ## Extra Features
 
