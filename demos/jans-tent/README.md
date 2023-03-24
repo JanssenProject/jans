@@ -4,11 +4,21 @@ A reliable OpenID client to be used in auth testing.
 
 ## Installation
 
-* Install dependencies
+1. Navigate tho the project root folder `jans/demos/jans-tent`
+2. Create virtual environment
+  ```bash
+  python3 -m venv venv
+  ```
+3. Activate the virtual virtual environment
+  ```bash
+   source venv/bin/activate 
+  ```
+4. Install dependencies
+  ```bash
+  pip install -r requirements.txt
+  ```
 
-```bash
-pip3 install -r requirements.txt
-```
+## Setup
 
 * Create client on Auth server, i.e.:
   * response_type `code`
