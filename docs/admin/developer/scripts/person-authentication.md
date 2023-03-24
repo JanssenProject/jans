@@ -74,11 +74,51 @@ Jans-auth server uses Weld 3.0 (JSR-365 aka CDI 2.0) for managed beans. The most
 Java or Python libraries to be imported and used very easily. Remember, you can import a python library only if it has been written in "pure python".
 More details of this mentioned [here](../interception-scripts.md#using-python-libraries-in-a-script)
 
-### E. Configuring the `acr` parameter in the Jans-auth server:
-The `acr` parameter can be configured in the following ways :
-#### 1. Default authentication method:
+### How The Applicable Authentication Mechanism Gets Determined
 
-`default_acr`: This is the default authentication mechanism exposed to all applications that send users to the Janssen Server for sign-in. Unless an app specifically requests a different form of authentication using the OpenID Connect acr_values parameter (as specified below), users will receive the form of authentication specified in this field.
+```mermaid
+flowchart TD
+    A[Start] --> B{Is it?}
+    B -->|Yes| C[OK]
+    C --> D[Rethink]
+    D --> B
+    B ---->|No| E[End]
+
+```
+
+
+- When authentication request is received from a client(RP), the Janssen Server looks for `acr_values` parameter in 
+  the request. This parameter is defined in OpenId Connect core specification, 
+  section [3.1.2.1](https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest).
+  Supported list of acr values for given Janssen Server deployment can be found in the response of .well-known endpoint 
+  under `acr_values_supported` claim. List of supported values also depend on what methods are 
+  [enabled](#enabling-an-authentication-mechanism).
+- If the `acr_values` parameter is not received as part of request from client(RP), then Janssen Server uses the
+  [default_acr_values](#authentication-method-for-a-client--rp--) configuration parameter from the client configuration.
+  Like `acr_values` request parameter, this configuration parameter lists ACR values in order of preference.
+- If Janssen Server doesn't find `acr_values` request parameter nor does it find the `default_acr_values` configuration
+  parameter configured for the client, then Janssen Server checks the flag 
+  [useHighestLevelScriptIfAcrScriptNotFound](../../reference/json/properties/janssenauthserver-properties.md#usehighestlevelscriptifacrscriptnotfound). 
+  If this property is set to true, then Janssen Server invokes the authentication mechanism for which the corresponding
+  script is enabled. Choosing the script with the highest [level](#level--rank--of-an-authentication-mechanism-).
+- If there is no script that can be invoked, Janssen Server invokes the [default ACR](#default-acr)
+- If default ACR is not configured for Janssen Server, then the server uses [internal ACR](#internal-acr)
+
+#### Default ACR
+
+`default_acr`: This is the default authentication mechanism exposed to all applications that send users to the 
+Janssen Server for sign-in. Unless an app specifically requests, or falls back on a different form of authentication,
+users will receive the form of authentication specified in this field. Using Janssen Text base UI (TUI) configuration 
+tool, this value can be configured by navigating to `Auth Server`->`Defaults` as show below:
+
+![](../../../../docs/assets/jans-tui-auth-server-default.png)
+
+- default should be `simple_password_auth`, is internal value which represents no script actually.
+- by default `useHighestLevelScriptIfAcrScriptNotFound` should be false. Effective only when no specific value for 
+  `acr_values` is provided in request, or no default acr is mentioned at the jans level, or not ACR values are provided
+  in client configuration. Confirm this with Yuriyz.
+- mention in AS admin guide on how to use `useHighestLevelScriptIfAcrScriptNotFound`
+- 
 
 #### Internal ACR
 If a default ACR is not specified, Janssen will determine it based on enabled scripts and the internal user/password ACR. This internal ACR, `simple_password_auth`, is set to level -1. This means that it has lower priority than any scripts, so Janssen server will use it only if no other authentication method is set.
