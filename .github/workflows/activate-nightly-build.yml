@@ -25,4 +25,6 @@ jobs:
         echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
         NIGHTLY_VERSION=$(cat docker-jans-auth-server/Dockerfile | grep "ENV CN_VERSION" | awk -F "[=-]" '{print $2}')
         gh release delete v${NIGHTLY_VERSION}.nightly --cleanup-tag --yes || echo "v${NIGHTLY_VERSION}.nightly" does not exist
+        gh release delete v${NIGHTLY_VERSION}.nightly --cleanup-tag --yes || echo "v${NIGHTLY_VERSION}.nightly" does not exist
+        git push --delete origin v${NIGHTLY_VERSION}.nightly || echo "v${NIGHTLY_VERSION}.nightly" does not exist
         gh release create v${NIGHTLY_VERSION}.nightly --generate-notes --prerelease --title "v${NIGHTLY_VERSION}.nightly"
