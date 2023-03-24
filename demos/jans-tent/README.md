@@ -52,22 +52,21 @@ pip3 install -r requirements.txt
   * redirect_uri `https://localhost:9090/oidc_callback`
   * Grants `authorization_code`
   * client authn at token endpoint `client_secret_post`
-  * scopes `openid` `username` `profile` `email`
+  * scopes `openid` `profile` `email`
   Please notice: You may also use the `register` endpoint, still to be documented.
 
-* Copy `auth-tdd-client/config_dummy.py` to `config.py` and use data according to your needs, i.e.:
+* Edit configuration file `clientapp/config.py` according to your needs. I.e:
   * Input client_id and secret from above step
-  * Set configuration endpoint URL
-  * Set `ISSUER`
-  * Set `ACR_VALUES='basic'`
+  * Set OpenID configuration endpoint URL (`SERVER_META_URL`)
 
 * Generate test RP server self signed certs
 
 Generate `key.pem` and `cert.pem` at `jans-tent` project root, i.e:
 `openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -sha256 -days 365 -nodes`
 
-* Import your Auth Server certificate
+* Import your Auth Server certificate and add it to `CERT_PATH`, `SSL_CERT_FILE`, `REQUESTS_CA_BUNDLE`.
 
+Example:
 ```bash
 export CERT_PATH=$(python3 -m certifi)
 export SSL_CERT_FILE=${CERT_PATH}
@@ -106,6 +105,6 @@ Sending a `POST` request to `/configuration` endpoint, containing client id, cli
 {
     "client_id": "e4f2c3a9-0797-4c6c-9268-35c5546fb3e9",
     "client_secret": "5c9e4775-0f1d-4a56-87c9-a629e1f88b9b",
-    "op_metadata_url": "https://t1.techno24x7.com/.well-known/openid-configuration"
+    "op_metadata_url": "https://oidc-provider.jans.io/.well-known/openid-configuration"
 }
 ```
