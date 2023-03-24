@@ -42,15 +42,21 @@ Generate `key.pem` and `cert.pem` at `jans-tent` project root, i.e:
 * Import your Auth Server certificate and add it to `CERT_PATH`, `SSL_CERT_FILE`, `REQUESTS_CA_BUNDLE`.
 
 Example:
+
+(remember to be inside your virtual environment)
+
 ```bash
+echo | openssl s_client -servername modena.gluu.me \
+ -connect modena.gluu.me:443 | sed -ne \
+ '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' \
+ > op_web_cert.cer
 export CERT_PATH=$(python3 -m certifi)
 export SSL_CERT_FILE=${CERT_PATH}
 export REQUESTS_CA_BUNDLE=${CERT_PATH}
 mv issuer.cer $(python3 -m certifi)
 ```
 
-* Run server
-
+* Run server:
 ```bash
 python3 main.py
 ```
