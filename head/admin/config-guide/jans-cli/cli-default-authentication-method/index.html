@@ -8805,16 +8805,16 @@
 <p>Prerequisite: Know how to use the Janssen CLI in <a href="cli-index.md">command-line mode</a></p>
 </blockquote>
 <p>Let's get the information of <strong>Default Authentication Method</strong>:</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --info DefaultAuthenticationMethod
-
-Operation ID: get-acrs
+<p><div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --info DefaultAuthenticationMethod
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>Operation ID: get-acrs
   Description: Gets default authentication method.
 Operation ID: put-acrs
   Description: Updates default authentication method.
   Schema: /components/schemas/AuthenticationMethod
 
 To get sample shema type /opt/jans/jans-cli/config-cli.py --schema &lt;schma&gt;, for example /opt/jans/jans-cli/config-cli.py --schema /components/schemas/AuthenticationMethod
-</code></pre></div>
+</code></pre></div></p>
 <h1 id="table-of-contents">Table of Contents<a class="headerlink" href="#table-of-contents" title="Permanent link">#</a></h1>
 <ul>
 <li><a href="#default-authentication-method">Default AUthentication Method</a></li>
@@ -8824,9 +8824,8 @@ To get sample shema type /opt/jans/jans-cli/config-cli.py --schema &lt;schma&gt;
 <h2 id="find-current-authentication-method">Find Current Authentication Method<a class="headerlink" href="#find-current-authentication-method" title="Permanent link">#</a></h2>
 <p>To get the default authentication method:
 <div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-acrs
-
-
-Getting access token for scope https://jans.io/oauth/config/acrs.readonly
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>Getting access token for scope https://jans.io/oauth/config/acrs.readonly
 {
   &quot;defaultAcr&quot;: &quot;simple_password_auth&quot;
 }
@@ -8834,18 +8833,17 @@ Getting access token for scope https://jans.io/oauth/config/acrs.readonly
 <h2 id="update-default-authentication-method">Update Default Authentication Method<a class="headerlink" href="#update-default-authentication-method" title="Permanent link">#</a></h2>
 <p>Let's update the <em>Default Authentication Method</em> using janssen CLI command line. To perform the <em>put-acrs</em> operation, we have to use its schema.
 To get its schema:</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --schema /components/schemas/AuthenticationMethod &gt; /tmp/patch-default-auth.json
-
-
-{
+<p><div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --schema AuthenticationMethod &gt; /tmp/patch-default-auth.json
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>{
   &quot;defaultAcr&quot;: null
 }
-</code></pre></div>
+</code></pre></div></p>
 <p>It will create a <code>.json</code> file with a schema. It comes with a <code>null</code> value. We need to modify this file to update default acr.
 we have seen that our Default Authentication Method is <code>simple_password_auth</code>. We are going to update it with <code>passport_saml</code> authenitcation method.</p>
-<p><div class="highlight"><pre><span></span><code>nano /tmp/patch-default-auth.json
+<div class="highlight"><pre><span></span><code>nano /tmp/patch-default-auth.json
 </code></pre></div>
-<img alt="update default authentication method" src="../../../../assets/image-cl-update-default-auth-03042021.png" /></p>
+<p><img alt="update default authentication method" src="../../../../assets/image-cl-update-default-auth-03042021.png" /></p>
 <p>Now let's do the operation:
 <div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id put-acrs --data /tmp/patch-default-auth.json
 </code></pre></div></p>
@@ -8857,7 +8855,7 @@ we have seen that our Default Authentication Method is <code>simple_password_aut
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-09-27T11:17:38+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-03-24T05:06:10+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-03-24</span>
       
         <br>
         Created:
