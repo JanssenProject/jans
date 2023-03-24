@@ -78,14 +78,14 @@ More details of this mentioned [here](../interception-scripts.md#using-python-li
 
 ```mermaid
 flowchart TD
-    A[Start] --> B{Is it?}
-    B -->|Yes| C[OK]
-    C --> D[Rethink]
-    D --> B
-    B ---->|No| E[End]
-
+    A[RP send authentication request] --> B{Request contains <br /><code>acr_values</code> parameter}
+    B -->|Yes| C[Perform Authentication]
+    B -->|No| D{<code>Default ACR</code> <br />configured for <br />client}
+    D -->|Yes| C
+    D -->|No| E{<code>Default ACR</code> value <br />configured for <br />Janssen Server}
+    E --> |Yes| C
+    E --> |No| F[Select <br />internal ACR as<br /> Authentication method] --> C
 ```
-
 
 - When authentication request is received from a client(RP), the Janssen Server looks for `acr_values` parameter in 
   the request. This parameter is defined in OpenId Connect core specification, 
@@ -97,11 +97,12 @@ flowchart TD
   [default_acr_values](#authentication-method-for-a-client--rp--) configuration parameter from the client configuration.
   Like `acr_values` request parameter, this configuration parameter lists ACR values in order of preference.
 - If Janssen Server doesn't find `acr_values` request parameter nor does it find the `default_acr_values` configuration
-  parameter configured for the client, then Janssen Server checks the flag 
+  parameter configured for the client, then Janssen Server checks the server configuration property 
   [useHighestLevelScriptIfAcrScriptNotFound](../../reference/json/properties/janssenauthserver-properties.md#usehighestlevelscriptifacrscriptnotfound). 
   If this property is set to true, then Janssen Server invokes the authentication mechanism for which the corresponding
   script is enabled. Choosing the script with the highest [level](#level--rank--of-an-authentication-mechanism-).
-- If there is no script that can be invoked, Janssen Server invokes the [default ACR](#default-acr)
+- If there is no script that can be invoked or the `useHighestLevelScriptIfAcrScriptNotFound` property is set to false, 
+  then the Janssen Server authenticates using the [default ACR](#default-acr)
 - If default ACR is not configured for Janssen Server, then the server uses [internal ACR](#internal-acr)
 
 #### Default ACR
