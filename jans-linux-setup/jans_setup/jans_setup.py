@@ -463,7 +463,7 @@ def main():
         do_installation()
         print('\n', static.colors.OKGREEN)
         if Config.install_config_api or Config.install_scim_server:
-            msg.installation_completed += "Experimental CLI TUI is available to manage Jannsen Server:\n"
+            msg.installation_completed += "To manage your Janssen Identity Provider:\n"
             if Config.install_config_api:
                 msg.installation_completed += '/opt/jans/jans-cli/config-cli-tui.py'
                 if base.current_app.profile == static.SetupProfiles.OPENBANKING:
