@@ -1,18 +1,8 @@
 # Jans Tent
 
-This client aims to be a reliable client build with BDD / TDD metologies to be used in auth testing.
-
-Flask based auth/identity app based on test-first, made to encourage and learn BDD and TDD.
+A reliable OpenID client to be used in auth testing.
 
 ## Contributing
-
-### Code of Conduct
-
-[Janssen code of conduct](https://docs.jans.io/head/CODE_OF_CONDUCT/) ensures that Janssen community is a welcoming place for everyone.
-
-### Contribution Guidelines
-
-[Contribution guide](https://docs.jans.io/head/CONTRIBUTING/) will give you all necessary information and `howto` to get started. Janssen community welcomes all types of contributions. Be it an interesting comment on an open issue or implementing a feature.  Welcome aboard! ✈️
 
 ## Authorization code flow / Protected Ressources
 
