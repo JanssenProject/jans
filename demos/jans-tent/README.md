@@ -4,6 +4,8 @@ A reliable OpenID client to be used in auth testing.
 
 ## Installation
 
+**Note**: *If you are using Mac, **or** want to use different python versions, use **Pyenv**.*
+
 1. Navigate tho the project root folder `jans/demos/jans-tent`
 2. Create virtual environment
   ```bash
