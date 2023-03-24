@@ -42,9 +42,6 @@ keys of the OpenID Provider.
 * **Integration Guide** A collection of docs about configuring third party
 software and SaaS providers.
 
-* **Client API Admin Guide** If you need advanced OpenID signing and encryption
-features, the Client API does some of the heavy lifting for developers.
-
 * **Config API Admin Guide** This required component is used by all
 configuration tools to write Janssen software configuration to the database.
 

@@ -18,12 +18,12 @@
 
 package io.jans.fido2.service.verifier;
 
+import io.jans.orm.model.fido2.Fido2AuthenticationData;
 import io.jans.orm.model.fido2.Fido2RegistrationData;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 import io.jans.fido2.exception.Fido2RuntimeException;
-import io.jans.fido2.model.entry.Fido2AuthenticationData;
 import io.jans.fido2.service.processor.assertion.AssertionProcessorFactory;
 import io.jans.fido2.service.processors.AssertionFormatProcessor;
 import org.slf4j.Logger;

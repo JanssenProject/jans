@@ -1,0 +1,42 @@
+{
+    "start": 0,
+    "totalEntriesCount": 23,
+    "entriesCount": 2,
+    "entries": [
+        {
+            "dn": "inum=XXXX.DDDD-4444,ou=people,o=jans",
+            "userId": "dddd4444",
+            "customAttributes": [
+                {
+                    "name": "sn",
+                    "multiValued": false,
+                    "values": [
+                        "FilterTest"
+                    ],
+                    "value": "FilterTest",
+                    "displayValue": "FilterTest"
+                }
+            ],
+            "customObjectClasses": [
+                "top",
+                "jansCustomPerson"
+            ],
+            "inum": "XXXX.DDDD-4444",
+            "displayName": "Test Dddd 4444",
+            "jansStatus": "active",
+            "givenName": "(special chars\\)/*",
+            "baseDn": "inum=XXXX.DDDD-4444,ou=people,o=jans"
+        },
+        {
+            "dn": "inum=XXXX.EEEE-1111,ou=people,o=jans",
+            "userId": "eeee1111",
+            "customObjectClasses": [
+                "top",
+                "jansCustomPerson"
+            ],
+            "inum": "XXXX.EEEE-1111",
+            "jansStatus": "active",
+            "baseDn": "inum=XXXX.EEEE-1111,ou=people,o=jans"
+        }
+    ]
+}

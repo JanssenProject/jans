@@ -24,11 +24,14 @@ public class Fido2RegistrationEntry extends Fido2Entry implements Serializable {
 
     private static final long serialVersionUID = -2242931562244920584L;
 
+    @AttributeName(name = "displayName")
+    private String displayName;
+
     @AttributeName(name = "jansPublicKeyId")
     protected String publicKeyId;
 
-    @AttributeName(name = "displayName")
-    private String displayName;
+	@AttributeName(name = "jansPublicKeyIdHash")
+	private Integer publicKeyIdHash;
 
     @JsonObject
     @AttributeName(name = "jansRegistrationData")
@@ -44,8 +47,9 @@ public class Fido2RegistrationEntry extends Fido2Entry implements Serializable {
     @AttributeName(name = "jansDeviceNotificationConf")
     private String deviceNotificationConf;
 
-    @AttributeName(name = "jansCodeChallengeHash")
-    private String challangeHash;
+    @JsonObject
+	@AttributeName(name = "jansDeviceData")
+	private Fido2DeviceData deviceData;
 
     public Fido2RegistrationEntry() {
     }
@@ -88,7 +92,7 @@ public class Fido2RegistrationEntry extends Fido2Entry implements Serializable {
         this.registrationStatus = registrationStatus;
     }
 
-    public String getDeviceNotificationConf() {
+	public String getDeviceNotificationConf() {
         return deviceNotificationConf;
     }
 
@@ -104,19 +108,28 @@ public class Fido2RegistrationEntry extends Fido2Entry implements Serializable {
         this.displayName = displayName;
     }
 
-    public String getChallangeHash() {
-        return challangeHash;
-    }
+	public Integer getPublicKeyIdHash() {
+		return publicKeyIdHash;
+	}
 
-    public void setChallangeHash(String challangeHash) {
-        this.challangeHash = challangeHash;
-    }
+	public void setPublicKeyIdHash(Integer publicKeyIdHash) {
+		this.publicKeyIdHash = publicKeyIdHash;
+	}
 
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("Fido2RegistrationEntry [publicKeyId=").append(publicKeyId).append(", registrationData=").append(registrationData).append("]");
-        return builder.toString();
-    }
+	public Fido2DeviceData getDeviceData() {
+		return deviceData;
+	}
+
+	public void setDeviceData(Fido2DeviceData deviceData) {
+		this.deviceData = deviceData;
+	}
+
+	@Override
+	public String toString() {
+		return "Fido2RegistrationEntry [displayName=" + displayName + ", publicKeyId=" + publicKeyId
+				+ ", publicKeyIdHash=" + publicKeyIdHash + ", registrationData=" + registrationData + ", counter="
+				+ counter + ", registrationStatus=" + registrationStatus + ", deviceNotificationConf="
+				+ deviceNotificationConf + ", deviceData=" + deviceData + "]";
+	}
 
 }

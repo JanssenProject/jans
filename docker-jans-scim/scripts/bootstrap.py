@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 import json
+import logging.config
 import os
 import re
 import typing as _t
 from functools import cached_property
 from string import Template
 from uuid import uuid4
+
+from ldif import LDIFWriter
 
 from jans.pycloudlib import get_manager
 from jans.pycloudlib.persistence import render_couchbase_properties
@@ -27,9 +30,10 @@ from jans.pycloudlib.utils import cert_to_truststore
 from jans.pycloudlib.utils import encode_text
 from jans.pycloudlib.utils import generate_base64_contents
 from jans.pycloudlib.utils import get_random_chars
+from jans.pycloudlib.utils import as_boolean
 
-import logging.config
 from settings import LOGGING_CONFIG
+from utils import parse_swagger_file
 
 if _t.TYPE_CHECKING:  # pragma: no cover
     # imported objects for function type hint, completion, etc.
@@ -87,7 +91,9 @@ def main():
     persistence_groups = mapper.groups()
 
     if persistence_type == "hybrid":
-        render_hybrid_properties("/etc/jans/conf/jans-hybrid.properties")
+        hybrid_prop = "/etc/jans/conf/jans-hybrid.properties"
+        if not os.path.exists(hybrid_prop):
+            render_hybrid_properties(hybrid_prop)
 
     if "ldap" in persistence_groups:
         render_ldap_properties(
@@ -106,9 +112,11 @@ def main():
         sync_couchbase_truststore(manager)
 
     if "sql" in persistence_groups:
+        db_dialect = os.environ.get("CN_SQL_DB_DIALECT", "mysql")
+
         render_sql_properties(
             manager,
-            "/app/templates/jans-sql.properties.tmpl",
+            f"/app/templates/jans-{db_dialect}.properties.tmpl",
             "/etc/jans/conf/jans-sql.properties",
         )
 
@@ -150,6 +158,7 @@ def configure_logging():
         "ldap_stats_log_level": "INFO",
         "script_log_target": "FILE",
         "script_log_level": "INFO",
+        "log_prefix": "",
     }
 
     # pre-populate custom config; format is JSON string of ``dict``
@@ -197,10 +206,13 @@ def configure_logging():
         if config[key] == "FILE":
             config[key] = value
 
-    logfile = "/opt/jans/jetty/jans-scim/resources/log4j2.xml"
-    with open(logfile) as f:
+    if as_boolean(custom_config.get("enable_stdout_log_prefix")):
+        config["log_prefix"] = "${sys:log.console.prefix}%X{log.console.group} - "
+
+    with open("/app/templates/log4j2.xml") as f:
         txt = f.read()
 
+    logfile = "/opt/jans/jetty/jans-scim/resources/log4j2.xml"
     tmpl = Template(txt)
     with open(logfile, "w") as f:
         f.write(tmpl.safe_substitute(config))
@@ -271,9 +283,72 @@ class PersistenceSetup:
         return files
 
     def import_ldif_files(self) -> None:
+        # temporarily disable dynamic scopes creation
+        # see https://github.com/JanssenProject/jans/issues/2869
+        # self.generate_scopes_ldif()
+
         for file_ in self.ldif_files:
             logger.info(f"Importing {file_}")
             self.client.create_from_ldif(file_, self.ctx)
+
+    def get_scope_jans_ids(self):
+        if self.persistence_type in ("sql", "spanner"):
+            entries = self.client.search("jansScope", ["jansId"])
+            return [entry["jansId"] for entry in entries]
+
+        if self.persistence_type == "couchbase":
+            bucket = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
+            req = self.client.exec_query(
+                f"SELECT {bucket}.jansId FROM {bucket} WHERE objectClass = 'jansScope'",
+            )
+            results = req.json()["results"]
+            return [item["jansId"] for item in results]
+
+        # likely ldap
+        entries = self.client.search("ou=scopes,o=jans", "(objectClass=jansScope)", ["jansId"])
+        return [entry.entry_attributes_as_dict["jansId"][0] for entry in entries]
+
+    def generate_scopes_ldif(self):
+        # jansId to compare to
+        existing_jans_ids = self.get_scope_jans_ids()
+
+        def generate_scim_scopes():
+            swagger = parse_swagger_file()
+            scopes = swagger["components"]["securitySchemes"]["scim_oauth"]["flows"]["clientCredentials"]["scopes"]
+
+            generated_scopes = []
+            for jans_id, desc in scopes.items():
+                if jans_id in existing_jans_ids:
+                    continue
+
+                inum = f"1200.{generate_hex()}-{generate_hex()}"
+                attrs = {
+                    "description": [desc],
+                    "displayName": [f"SCIM scope {jans_id}"],
+                    "inum": [inum],
+                    "jansAttrs": [json.dumps({"spontaneousClientScopes": None, "showInConfigurationEndpoint": True})],
+                    "jansId": [jans_id],
+                    "jansScopeTyp": ["oauth"],
+                    "objectClass": ["top", "jansScope"],
+                    "jansDefScope": ["false"],
+                }
+                generated_scopes.append(attrs)
+            return generated_scopes
+
+        # prepare required scopes (if any)
+        scopes = []
+
+        scim_scopes = generate_scim_scopes()
+        scopes += scim_scopes
+
+        with open("/app/templates/jans-scim/scopes.ldif", "wb") as fd:
+            writer = LDIFWriter(fd, cols=1000)
+            for scope in scopes:
+                writer.unparse(f"inum={scope['inum'][0]},ou=scopes,o=jans", scope)
+
+
+def generate_hex(size: int = 3):
+    return os.urandom(size).hex().upper()
 
 
 if __name__ == "__main__":

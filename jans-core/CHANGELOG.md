@@ -1,5 +1,95 @@
 # Changelog
 
+## 1.0.7 (2023-02-22)
+
+
+### Features
+
+* add Jupiter+Weld+Mockito+Extension to Fido2 ([#3875](https://github.com/JanssenProject/jans/issues/3875)) ([0152435](https://github.com/JanssenProject/jans/commit/01524358cbd720ad547c6b0d622c2cc32e76a125))
+* **config-api:** health check response rectification and Agama ADS swagger spec ([#3293](https://github.com/JanssenProject/jans/issues/3293)) ([faf2888](https://github.com/JanssenProject/jans/commit/faf2888f3d58d14fc6361d5a9ff5f743984cea4f))
+* **jans-core:** add AES utility class [#3215](https://github.com/JanssenProject/jans/issues/3215) ([#3242](https://github.com/JanssenProject/jans/issues/3242)) ([7e59795](https://github.com/JanssenProject/jans/commit/7e59795e21bc63b173802346b614e7ae6112de4e))
+
+
+### Bug Fixes
+
+* **config-api:** user service conflict with fido2 and script enhancement ([#3767](https://github.com/JanssenProject/jans/issues/3767)) ([5753d39](https://github.com/JanssenProject/jans/commit/5753d3989b96d76699f234cc87f58e355ba313b0))
+* login page doesn't display the correct localized characters ([#3528](https://github.com/JanssenProject/jans/issues/3528)) ([395b376](https://github.com/JanssenProject/jans/commit/395b3769750d2d32f624060c0b6e6ceeee7df0be)), closes [#1660](https://github.com/JanssenProject/jans/issues/1660)
+* prepare 1.0.7 release ([ce02fd9](https://github.com/JanssenProject/jans/commit/ce02fd9322ab49d5bea4f6e88f316f931e9d2169))
+* prepare for 1.0.6 release ([9e4c8fb](https://github.com/JanssenProject/jans/commit/9e4c8fb4c0a1ef4779934558e8d8d40d8fedbabf))
+* store correct script revision after script reload from file ([#3704](https://github.com/JanssenProject/jans/issues/3704)) ([2ca6a83](https://github.com/JanssenProject/jans/commit/2ca6a833132b129c29924106ed65db430917cb8c)), closes [#3703](https://github.com/JanssenProject/jans/issues/3703)
+
+## 1.0.6 (2023-01-09)
+
+
+### Features
+
+* add custom annotation for configuration property and feature flag documentation ([#2852](https://github.com/JanssenProject/jans/issues/2852)) ([9991d1c](https://github.com/JanssenProject/jans/commit/9991d1ce1fe1b8ce3a65a72e0a72aeee78ba6c2e))
+* **config-api:** health check response rectification and Agama ADS swagger spec ([#3293](https://github.com/JanssenProject/jans/issues/3293)) ([faf2888](https://github.com/JanssenProject/jans/commit/faf2888f3d58d14fc6361d5a9ff5f743984cea4f))
+* for file based scripts check both script revision and file ([#2878](https://github.com/JanssenProject/jans/issues/2878)) ([97ab071](https://github.com/JanssenProject/jans/commit/97ab0712e39605520b3ac8fb8df1c00bf0437797))
+* **jans-core:** add AES utility class [#3215](https://github.com/JanssenProject/jans/issues/3215) ([#3242](https://github.com/JanssenProject/jans/issues/3242)) ([7e59795](https://github.com/JanssenProject/jans/commit/7e59795e21bc63b173802346b614e7ae6112de4e))
+* ssa revoke endpoint ([#2865](https://github.com/JanssenProject/jans/issues/2865)) ([9c68f91](https://github.com/JanssenProject/jans/commit/9c68f914e155de492e54121033c8f0ed45d66817))
+
+
+### Bug Fixes
+
+* getting ready for a release ([0bda832](https://github.com/JanssenProject/jans/commit/0bda832ebc1da7017231deb38fe9aa6c7c51360a))
+* **jans-fido2:** [#2971](https://github.com/JanssenProject/jans/issues/2971) ([#2972](https://github.com/JanssenProject/jans/issues/2972)) ([2f15cf8](https://github.com/JanssenProject/jans/commit/2f15cf8aba64410fe1dd0ef71e9860ae0ec919bd))
+* login page doesn't display the correct localized characters ([#3528](https://github.com/JanssenProject/jans/issues/3528)) ([395b376](https://github.com/JanssenProject/jans/commit/395b3769750d2d32f624060c0b6e6ceeee7df0be)), closes [#1660](https://github.com/JanssenProject/jans/issues/1660)
+* prepare for 1.0.6 release ([9e4c8fb](https://github.com/JanssenProject/jans/commit/9e4c8fb4c0a1ef4779934558e8d8d40d8fedbabf))
+
+
+### Documentation
+
+* prepare for 1.0.4 release ([c23a2e5](https://github.com/JanssenProject/jans/commit/c23a2e505b7eb325a293975d60bbc65d5e367c7d))
+
+## [1.0.5](https://github.com/JanssenProject/jans/compare/jans-core-v1.0.4...jans-core-v1.0.5) (2022-12-01)
+
+
+### Features
+
+* add custom annotation for configuration property and feature flag documentation ([#2852](https://github.com/JanssenProject/jans/issues/2852)) ([9991d1c](https://github.com/JanssenProject/jans/commit/9991d1ce1fe1b8ce3a65a72e0a72aeee78ba6c2e))
+
+
+### Bug Fixes
+
+* getting ready for a release ([0bda832](https://github.com/JanssenProject/jans/commit/0bda832ebc1da7017231deb38fe9aa6c7c51360a))
+* **jans-fido2:** [#2971](https://github.com/JanssenProject/jans/issues/2971) ([#2972](https://github.com/JanssenProject/jans/issues/2972)) ([2f15cf8](https://github.com/JanssenProject/jans/commit/2f15cf8aba64410fe1dd0ef71e9860ae0ec919bd))
+
+## [1.0.4](https://github.com/JanssenProject/jans/compare/jans-core-v1.0.3...jans-core-v1.0.4) (2022-11-08)
+
+
+### Features
+
+* for file based scripts check both script revision and file ([#2878](https://github.com/JanssenProject/jans/issues/2878)) ([97ab071](https://github.com/JanssenProject/jans/commit/97ab0712e39605520b3ac8fb8df1c00bf0437797))
+* ssa revoke endpoint ([#2865](https://github.com/JanssenProject/jans/issues/2865)) ([9c68f91](https://github.com/JanssenProject/jans/commit/9c68f914e155de492e54121033c8f0ed45d66817))
+
+
+### Documentation
+
+* prepare for 1.0.4 release ([c23a2e5](https://github.com/JanssenProject/jans/commit/c23a2e505b7eb325a293975d60bbc65d5e367c7d))
+
+## 1.0.3 (2022-11-01)
+
+
+### Features
+
+* **jans-config-api:** pagination functionality for endpoints and swagger spec rectification ([#2397](https://github.com/JanssenProject/jans/issues/2397)) ([d893e13](https://github.com/JanssenProject/jans/commit/d893e13efd57871ed0a09688b9b02f4294a10d4f))
+* **jans-core:** port Gluu ORM-based document store ([#2581](https://github.com/JanssenProject/jans/issues/2581)) ([b61df80](https://github.com/JanssenProject/jans/commit/b61df8094a390762395fae41bba394d4e6bbf796))
+* ssa creation endpoint ([#2495](https://github.com/JanssenProject/jans/issues/2495)) ([61c83e3](https://github.com/JanssenProject/jans/commit/61c83e3305beeaf1a3dbde39d70324153281f218))
+
+
+### Bug Fixes
+
+* **jans-auth-server:** ssa get endpoint ([#2719](https://github.com/JanssenProject/jans/issues/2719)) ([35ffbf0](https://github.com/JanssenProject/jans/commit/35ffbf041e7da7376e07d8e7425a2925ce31f403))
+* jans-config-api/plugins/sample/helloworld/pom.xml to reduce vulnerabilities ([#972](https://github.com/JanssenProject/jans/issues/972)) ([e2ae05e](https://github.com/JanssenProject/jans/commit/e2ae05e5515dd85a95c0a8520de57f673aba7918))
+* **jans-core:** removed redundant reference [#1927](https://github.com/JanssenProject/jans/issues/1927) ([#1928](https://github.com/JanssenProject/jans/issues/1928)) ([064cbb8](https://github.com/JanssenProject/jans/commit/064cbb8040f4d7b21ff13e5f48c7f923c38f67b1))
+* jans-eleven/pom.xml to reduce vulnerabilities ([#2676](https://github.com/JanssenProject/jans/issues/2676)) ([d27a7f9](https://github.com/JanssenProject/jans/commit/d27a7f99f22cb8f4bd445a3400224a38cb91eedc))
+
+
+### Miscellaneous Chores
+
+* release 1.0.2 ([43dead6](https://github.com/JanssenProject/jans/commit/43dead615f3508ca393c330c2db27a8fb9d1017a))
+
 ## 1.0.2 (2022-08-30)
 
 

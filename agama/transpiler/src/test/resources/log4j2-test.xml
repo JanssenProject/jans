@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{HH:mm:ss} %-5p %F:%L - %m%n" />
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Logger name="io.jans.agama" level="INFO" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <Root level="error">
+            <AppenderRef ref="Console" />
+        </Root>
+    </Loggers>
+
+</Configuration>

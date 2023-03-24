@@ -20,7 +20,9 @@ class JansAuthInstaller(JettyInstaller):
     source_files = [
                     (os.path.join(Config.dist_jans_dir, 'jans-auth.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-auth-server/{0}/jans-auth-server-{0}.war'.format(base.current_app.app_info['ox_version']))),
                     (os.path.join(Config.dist_jans_dir, 'jans-auth-client-jar-with-dependencies.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-auth-client/{0}/jans-auth-client-{0}-jar-with-dependencies.jar'.format(base.current_app.app_info['ox_version']))),
-                    ]
+                    (os.path.join(Config.dist_jans_dir, 'jans-fido2-client.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-fido2-client/{0}/jans-fido2-client-{0}.jar'.format(base.current_app.app_info['ox_version']))),
+                    (os.path.join(Config.dist_app_dir, 'twilio.jar'), os.path.join(base.current_app.app_info['TWILIO_MAVEN'], '{0}/twilio-{0}.jar'.format(base.current_app.app_info['TWILIO_VERSION']))),
+                   ]
 
     def __init__(self):
         setattr(base.current_app, self.__class__.__name__, self)
@@ -43,6 +45,8 @@ class JansAuthInstaller(JettyInstaller):
         self.oxauth_openid_jks_fn = os.path.join(Config.certFolder, 'jans-auth-keys.p12')
         self.ldif_people = os.path.join(self.output_folder, 'people.ldif')
         self.ldif_groups = os.path.join(self.output_folder, 'groups.ldif')
+        self.agama_root = os.path.join(self.jetty_base, self.service_name, 'agama')
+        self.custom_lib_dir = os.path.join(self.jetty_base, self.service_name, 'custom/libs/')
 
         if Config.profile == SetupProfiles.OPENBANKING:
             Config.enable_ob_auth_script = '0' if base.argsp.disable_ob_auth_script else '1'
@@ -53,6 +57,7 @@ class JansAuthInstaller(JettyInstaller):
 
         self.installJettyService(self.jetty_app_configuration[self.service_name], True)
         self.copyFile(self.source_files[0][0], self.jetty_service_webapps)
+        self.external_libs()
         self.setup_agama()
         self.enable()
 
@@ -76,15 +81,16 @@ class JansAuthInstaller(JettyInstaller):
 
 
     def get_config_api_scopes(self):
-        data = base.current_app.ConfigApiInstaller.read_config_api_swagger()
+        scopes_def = base.current_app.ConfigApiInstaller.get_scope_defs()
         scope_list = []
 
-        for epath in data['paths']:
-            for m in data['paths'][epath]:
-                if 'security' in data['paths'][epath][m]:
-                    scope_items = [item['oauth2'] for item in data['paths'][epath][m]['security']]
-                    for scopes in scope_items:
-                        scope_list += scopes
+        for resource in scopes_def['resources']:
+
+            for condition in resource.get('conditions', []):
+
+                for scope in condition.get('scopes', []):
+                    if scope.get('inum') and scope.get('name'):
+                        scope_list.append(scope['name'])
 
         return scope_list
 
@@ -184,17 +190,26 @@ class JansAuthInstaller(JettyInstaller):
         if os.path.isfile(Config.ob_key_fn) and os.path.isfile(Config.ob_cert_fn):
             self.import_key_cert_into_keystore('obsigning', self.oxauth_openid_jks_fn, Config.oxauth_openid_jks_pass, Config.ob_key_fn, Config.ob_cert_fn, Config.ob_alias)
 
+    def external_libs(self):
+        extra_libs = []
+
+        for extra_lib in (self.source_files[2][0], self.source_files[3][0]):
+            self.copyFile(extra_lib, self.custom_lib_dir)
+            extra_lib_path = os.path.join(self.custom_lib_dir, os.path.basename(extra_lib))
+            extra_libs.append(extra_lib_path)
+
+        self.add_extra_class(','.join(extra_libs))
+
+
     def setup_agama(self):
-        agama_root = os.path.join(self.jetty_base, self.service_name, 'agama')
-        self.createDirs(agama_root)
+        self.createDirs(self.agama_root)
         for adir in ('fl', 'ftl', 'scripts'):
-            self.createDirs(os.path.join(agama_root, adir))
-        base.extract_from_zip(base.current_app.jans_zip, 'agama/misc', agama_root)
-        self.chown(agama_root, Config.jetty_user, Config.jetty_group, recursive=True)
+            self.createDirs(os.path.join(self.agama_root, adir))
+        base.extract_from_zip(base.current_app.jans_zip, 'agama/misc', self.agama_root)
+        self.chown(self.agama_root, Config.jetty_user, Config.jetty_group, recursive=True)
 
         tmp_dir = os.path.join(Config.templateFolder, 'jetty')
         src_xml = os.path.join(tmp_dir, 'agama_web_resources.xml')
         self.renderTemplateInOut(src_xml, tmp_dir, self.jetty_service_webapps)
         self.chown(os.path.join(self.jetty_service_webapps, os.path.basename(src_xml)), Config.jetty_user, Config.jetty_group)
 
-        

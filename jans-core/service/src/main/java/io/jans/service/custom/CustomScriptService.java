@@ -67,7 +67,7 @@ public class CustomScriptService extends AbstractCustomScriptService {
         log.debug("Searching CustomScript Flow with filter:{}", filter);
 
         return persistenceEntryManager.findPagedEntries(baseDn(), CustomScript.class, filter, null, sortBy,
-                SortOrder.getByValue(sortOrder), startIndex - 1, limit, maximumRecCount);
+                SortOrder.getByValue(sortOrder), startIndex , limit, maximumRecCount);
 
     }
 }

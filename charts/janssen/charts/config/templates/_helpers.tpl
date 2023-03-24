@@ -50,7 +50,7 @@ Create user custom defined  envs
 {{- define "config.usr-envs"}}
 {{- range $key, $val := .Values.usrEnvs.normal }}
 - name: {{ $key }}
-  value: {{ $val }}
+  value: {{ $val | quote }}
 {{- end }}
 {{- end }}
 
@@ -63,7 +63,7 @@ Create user custom defined secret envs
   valueFrom:
     secretKeyRef:
       name: {{ $.Release.Name }}-{{ $.Chart.Name }}-user-custom-envs
-      key: {{ $key }}
+      key: {{ $key | quote }}
 {{- end }}
 {{- end }}
 
@@ -89,9 +89,6 @@ Create optional scopes list
 {{- end}}
 {{- if .Values.global.scim.enabled}}
 {{ $newList = append $newList ("scim" | quote) }}
-{{- end}}
-{{- if index .Values "global" "client-api" "enabled"}}
-{{ $newList = append $newList ("client-api" |quote) }}
 {{- end}}
 {{ toJson $newList }}
 {{- end }}

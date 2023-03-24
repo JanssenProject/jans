@@ -44,6 +44,7 @@ import io.jans.as.server.util.TokenHashUtil;
 import io.jans.model.security.Identity;
 import io.jans.service.CacheService;
 import io.jans.util.StringHelper;
+import jakarta.ws.rs.HttpMethod;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpHeaders;
@@ -67,6 +68,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -90,7 +92,8 @@ import static org.apache.commons.lang3.BooleanUtils.isTrue;
                 "/restv1/par",
                 "/restv1/device_authorization",
                 "/restv1/register",
-                "/restv1/ssa"
+                "/restv1/ssa",
+                "/restv1/ssa/jwt",
         },
         displayName = "oxAuth")
 public class AuthenticationFilter implements Filter {
@@ -164,7 +167,9 @@ public class AuthenticationFilter implements Filter {
             boolean deviceAuthorizationEndpoint = requestUrl.endsWith("/device_authorization");
             boolean revokeSessionEndpoint = requestUrl.endsWith("/revoke_session");
             boolean isParEndpoint = requestUrl.endsWith("/par");
-            boolean ssaEndpoint = requestUrl.endsWith("/ssa");
+            boolean ssaEndpoint = requestUrl.endsWith("/ssa") &&
+                    (Arrays.asList(HttpMethod.POST, HttpMethod.GET, HttpMethod.DELETE).contains(httpRequest.getMethod()));
+            boolean ssaJwtEndpoint = requestUrl.endsWith("/ssa/jwt") && httpRequest.getMethod().equals(HttpMethod.GET);
             String authorizationHeader = httpRequest.getHeader(Constants.AUTHORIZATION);
             String dpopHeader = httpRequest.getHeader("DPoP");
 
@@ -178,7 +183,7 @@ public class AuthenticationFilter implements Filter {
                 return;
             }
 
-            if (tokenEndpoint || revokeSessionEndpoint || tokenRevocationEndpoint || deviceAuthorizationEndpoint || isParEndpoint || ssaEndpoint) {
+            if (tokenEndpoint || revokeSessionEndpoint || tokenRevocationEndpoint || deviceAuthorizationEndpoint || isParEndpoint || ssaEndpoint || ssaJwtEndpoint) {
                 log.debug("Starting endpoint authentication {}", requestUrl);
 
                 // #686 : allow authenticated client via user access_token
@@ -563,7 +568,7 @@ public class AuthenticationFilter implements Filter {
             } else if (grantType == GrantType.REFRESH_TOKEN) {
                 final String refreshTokenCode = servletRequest.getParameter("refresh_token");
                 TokenEntity tokenEntity;
-                if (!isTrue(appConfiguration.getPersistRefreshTokenInLdap())) {
+                if (!isTrue(appConfiguration.getPersistRefreshToken())) {
                     tokenEntity = (TokenEntity) cacheService.get(TokenHashUtil.hash(refreshTokenCode));
                 } else {
                     tokenEntity = grantService.getGrantByCode(refreshTokenCode);

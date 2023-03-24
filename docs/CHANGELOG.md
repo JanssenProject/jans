@@ -1,5 +1,160 @@
 # Changelog
 
+## 1.0.7 (2023-02-22)
+
+
+### Features
+
+* add benchmark demo ([#3325](https://github.com/JanssenProject/jans/issues/3325)) ([26bbb0c](https://github.com/JanssenProject/jans/commit/26bbb0ca2ef9ec5ac72f80ee3641d222036d55b2))
+* add custom Github External Authenticator script for ADS [#3625](https://github.com/JanssenProject/jans/issues/3625) ([#3626](https://github.com/JanssenProject/jans/issues/3626)) ([f922a7a](https://github.com/JanssenProject/jans/commit/f922a7a7b075a43750dd792a91a11399517dbb9b))
+* added custom resource owner password script fro two-factor twilio authentication ([#3208](https://github.com/JanssenProject/jans/issues/3208)) ([eae0ca1](https://github.com/JanssenProject/jans/commit/eae0ca1704da961de84e7a7ce665a7c3b0bb3567))
+* Change org_id to String type and Add status in get SSA ([#3763](https://github.com/JanssenProject/jans/issues/3763)) ([d01269a](https://github.com/JanssenProject/jans/commit/d01269aa6f51ec9f028da53962d9beaf1cf8a3f9))
+* **docs:** jans TUI SCIM configuration -- screenshot ([#3318](https://github.com/JanssenProject/jans/issues/3318)) ([7b463b0](https://github.com/JanssenProject/jans/commit/7b463b01ec36153948110a59010fb9a4b347eae9))
+* **docs:** jans TUI SCIM configuration feature - screenshot1 ([#3306](https://github.com/JanssenProject/jans/issues/3306)) ([d1adc98](https://github.com/JanssenProject/jans/commit/d1adc9826dee5bfaf4e36c6a080684e803d869ce))
+* **docs:** jans TUI SCIM configuration feature ([#3305](https://github.com/JanssenProject/jans/issues/3305)) ([70e358e](https://github.com/JanssenProject/jans/commit/70e358e49949cec50a1784dc229678451b95c424))
+* **jans-auth-server:** added flexible date formatter handler to AS (required by certification tools) [#3600](https://github.com/JanssenProject/jans/issues/3600) ([#3601](https://github.com/JanssenProject/jans/issues/3601)) ([f646d73](https://github.com/JanssenProject/jans/commit/f646d734d79f9da83cfe51103811efd1f8677d7f))
+* **jans-auth-server:** renamed "key_ops" -&gt; "key_ops_type" [#3790](https://github.com/JanssenProject/jans/issues/3790) ([#3792](https://github.com/JanssenProject/jans/issues/3792)) ([7a6bcba](https://github.com/JanssenProject/jans/commit/7a6bcba5ca3597f7556d406e4a572c76a229bbdf))
+* process lib directory in `.gama` files for ADS projects deployment ([#3644](https://github.com/JanssenProject/jans/issues/3644)) ([40268ad](https://github.com/JanssenProject/jans/commit/40268adda27ab2929115e3e2117d43fed499a2ce))
+* Support Super Gluu one step authentication to Fido2 server [#3593](https://github.com/JanssenProject/jans/issues/3593) ([#3599](https://github.com/JanssenProject/jans/issues/3599)) ([c013b16](https://github.com/JanssenProject/jans/commit/c013b161f2eb47f5952cbb80c8740f8d62d302c3))
+
+
+### Bug Fixes
+
+* [#2201](https://github.com/JanssenProject/jans/issues/2201) ([#3365](https://github.com/JanssenProject/jans/issues/3365)) ([ebca16b](https://github.com/JanssenProject/jans/commit/ebca16bc8dae14b86582ed584292eb610efd0621))
+* [#2201](https://github.com/JanssenProject/jans/issues/2201) ([#3451](https://github.com/JanssenProject/jans/issues/3451)) ([0417c2a](https://github.com/JanssenProject/jans/commit/0417c2a641a810dacee6fcd3dfc2a0d71eb32142))
+* add link to api reference ([#3394](https://github.com/JanssenProject/jans/issues/3394)) ([f091045](https://github.com/JanssenProject/jans/commit/f0910452b33f24dc220d5123c853f11326a920df))
+* docs/requirements.txt to reduce vulnerabilities ([#3523](https://github.com/JanssenProject/jans/issues/3523)) ([82efd8f](https://github.com/JanssenProject/jans/commit/82efd8f503bc2966483f07fff2a77f5c1321c7a2))
+* **docs:** jans logging configuration - VM Operation Guide - 1 ([#3348](https://github.com/JanssenProject/jans/issues/3348)) ([e0f8c71](https://github.com/JanssenProject/jans/commit/e0f8c7120e8074ae54ff3abb9b4e654cdde64e44))
+* **docs:** jans TUI administration -- Config Guide - TUI -- Auth server ([#3227](https://github.com/JanssenProject/jans/issues/3227)) ([16ab709](https://github.com/JanssenProject/jans/commit/16ab709cca92620a409611521885c14029b8ba0d))
+* **docs:** jans TUI configuration -- Auth Server - TUI - image ([#3237](https://github.com/JanssenProject/jans/issues/3237)) ([3fbc9e7](https://github.com/JanssenProject/jans/commit/3fbc9e7d08ff0c9ef55f009dea77e675d652ee7e))
+* **docs:** jans TUI configuration -- Config Guide - Auth Server - Client configuration - TUI ([#3233](https://github.com/JanssenProject/jans/issues/3233)) ([ee8e056](https://github.com/JanssenProject/jans/commit/ee8e0564a1eeadaee12ab80078c3802822ab4d1a))
+* **docs:** jans TUI configuration -- Fido - TUI ([#3251](https://github.com/JanssenProject/jans/issues/3251)) ([cd6eef1](https://github.com/JanssenProject/jans/commit/cd6eef1503375c39468d82263e0e342b3aace5be))
+* **docs:** jans TUI configuration -- Fido Administration - TUI ([#3252](https://github.com/JanssenProject/jans/issues/3252)) ([a371cda](https://github.com/JanssenProject/jans/commit/a371cda85da66a956ca2d0a15200a6c6d2c29ca0))
+* **docs:** jans TUI installation -- Config Guide - TUI ([#3224](https://github.com/JanssenProject/jans/issues/3224)) ([cc00a71](https://github.com/JanssenProject/jans/commit/cc00a71af6b82ca969b62a835a24733041ac676d))
+* **docs:** missing single quotes ([#3239](https://github.com/JanssenProject/jans/issues/3239)) ([9f38c6a](https://github.com/JanssenProject/jans/commit/9f38c6a216a0dd4afdbec4080f312180ab7858b3))
+* hash ([cdb5204](https://github.com/JanssenProject/jans/commit/cdb52047c5847e2eafbaf2f7692211e72b8fde12))
+* hash ([156fb2f](https://github.com/JanssenProject/jans/commit/156fb2f697dd4f292659ad9963e7044a7137a583))
+* **jans-auth-server:** jansApp attribute only relevant for SG ([#3782](https://github.com/JanssenProject/jans/issues/3782)) ([6153a13](https://github.com/JanssenProject/jans/commit/6153a139d584e69088f8d9202ce072ae10a2dc73))
+* minor ([#3334](https://github.com/JanssenProject/jans/issues/3334)) ([3225455](https://github.com/JanssenProject/jans/commit/32254553a7bb5c58f265f29c3613ecc8f81f44b8))
+* prepare 1.0.7 release ([ce02fd9](https://github.com/JanssenProject/jans/commit/ce02fd9322ab49d5bea4f6e88f316f931e9d2169))
+* prepare for 1.0.6 release ([9e4c8fb](https://github.com/JanssenProject/jans/commit/9e4c8fb4c0a1ef4779934558e8d8d40d8fedbabf))
+* rename role_based_client as tui_client ([#3657](https://github.com/JanssenProject/jans/issues/3657)) ([c393cb2](https://github.com/JanssenProject/jans/commit/c393cb2052f7e73cc6a02b84bbc673bcc93dc13d))
+
+## 1.0.6 (2023-01-09)
+
+
+### Features
+
+* add benchmark demo ([#3325](https://github.com/JanssenProject/jans/issues/3325)) ([26bbb0c](https://github.com/JanssenProject/jans/commit/26bbb0ca2ef9ec5ac72f80ee3641d222036d55b2))
+* add custom annotation for configuration property and feature flag documentation ([#2852](https://github.com/JanssenProject/jans/issues/2852)) ([9991d1c](https://github.com/JanssenProject/jans/commit/9991d1ce1fe1b8ce3a65a72e0a72aeee78ba6c2e))
+* add feature to include custom-claims in user-info endpoint of admin-ui plugin [#2969](https://github.com/JanssenProject/jans/issues/2969) ([#2970](https://github.com/JanssenProject/jans/issues/2970)) ([0549879](https://github.com/JanssenProject/jans/commit/054987944d91fe2021092c30b337e880421533ff))
+* added custom resource owner password script fro two-factor twilio authentication ([#3208](https://github.com/JanssenProject/jans/issues/3208)) ([eae0ca1](https://github.com/JanssenProject/jans/commit/eae0ca1704da961de84e7a7ce665a7c3b0bb3567))
+* **docs:** jans TUI SCIM configuration -- screenshot ([#3318](https://github.com/JanssenProject/jans/issues/3318)) ([7b463b0](https://github.com/JanssenProject/jans/commit/7b463b01ec36153948110a59010fb9a4b347eae9))
+* **docs:** jans TUI SCIM configuration feature - screenshot1 ([#3306](https://github.com/JanssenProject/jans/issues/3306)) ([d1adc98](https://github.com/JanssenProject/jans/commit/d1adc9826dee5bfaf4e36c6a080684e803d869ce))
+* **docs:** jans TUI SCIM configuration feature ([#3305](https://github.com/JanssenProject/jans/issues/3305)) ([70e358e](https://github.com/JanssenProject/jans/commit/70e358e49949cec50a1784dc229678451b95c424))
+* documentation for ssa and remove softwareRoles query param of get ssa ([#3031](https://github.com/JanssenProject/jans/issues/3031)) ([d8e14eb](https://github.com/JanssenProject/jans/commit/d8e14ebbeee357c8c2c31808243cf82933ae4a9b))
+* **jans-auth-server:** draft for - improve dcr / ssa validation for dynamic  registration [#2980](https://github.com/JanssenProject/jans/issues/2980) ([#3109](https://github.com/JanssenProject/jans/issues/3109)) ([233a78c](https://github.com/JanssenProject/jans/commit/233a78c8e48fb8de353629bc16fc6af1d80fb910))
+* **jans-auth-server:** specify minimum acr for clients [#343](https://github.com/JanssenProject/jans/issues/343) ([#3083](https://github.com/JanssenProject/jans/issues/3083)) ([b0034ec](https://github.com/JanssenProject/jans/commit/b0034ec509ace1a4e30a7e9c6dd23dca48178c62))
+* jans-linux-setup include permission of all user roles ([#3009](https://github.com/JanssenProject/jans/issues/3009)) ([62a421d](https://github.com/JanssenProject/jans/commit/62a421df821067432cbcced0e89cc2a410cd40be))
+
+
+### Bug Fixes
+
+* [#2201](https://github.com/JanssenProject/jans/issues/2201) ([#3365](https://github.com/JanssenProject/jans/issues/3365)) ([ebca16b](https://github.com/JanssenProject/jans/commit/ebca16bc8dae14b86582ed584292eb610efd0621))
+* [#2201](https://github.com/JanssenProject/jans/issues/2201) ([#3451](https://github.com/JanssenProject/jans/issues/3451)) ([0417c2a](https://github.com/JanssenProject/jans/commit/0417c2a641a810dacee6fcd3dfc2a0d71eb32142))
+* [#2487](https://github.com/JanssenProject/jans/issues/2487) - irrelevant folder, agama script is in agama-bridge ([#2993](https://github.com/JanssenProject/jans/issues/2993)) ([d19b13a](https://github.com/JanssenProject/jans/commit/d19b13ab31e1dbfee9288c6569b289eae213b528))
+* [#2487](https://github.com/JanssenProject/jans/issues/2487) - SIWA and SIWG (Sign in with Apple-Google), moved to script-catalog ([#2983](https://github.com/JanssenProject/jans/issues/2983)) ([402e7ae](https://github.com/JanssenProject/jans/commit/402e7aebd20322ef465a3805d3834c7174bc9bbc))
+* [#2487](https://github.com/JanssenProject/jans/issues/2487) removing duplicated files ([#3007](https://github.com/JanssenProject/jans/issues/3007)) ([9f3d051](https://github.com/JanssenProject/jans/commit/9f3d051308e7b29e5f112e74601aa05c42ed559c))
+* [#2487](https://github.com/JanssenProject/jans/issues/2487) scripts-catalog folder restructuring ([#2999](https://github.com/JanssenProject/jans/issues/2999)) ([7b66f2b](https://github.com/JanssenProject/jans/commit/7b66f2b27517ba560555f64d0ab4e49f10ddb374))
+* [#2666](https://github.com/JanssenProject/jans/issues/2666) ([#3011](https://github.com/JanssenProject/jans/issues/3011)) ([f98cbc5](https://github.com/JanssenProject/jans/commit/f98cbc5d43b12b56b81debd367fcfdfdc75830e4))
+* [#2825](https://github.com/JanssenProject/jans/issues/2825) ([#2828](https://github.com/JanssenProject/jans/issues/2828)) ([5ce21aa](https://github.com/JanssenProject/jans/commit/5ce21aac5df54d2fe9402479fd221fffe9dc77ef))
+* add link to api reference ([#3394](https://github.com/JanssenProject/jans/issues/3394)) ([f091045](https://github.com/JanssenProject/jans/commit/f0910452b33f24dc220d5123c853f11326a920df))
+* docs/requirements.txt to reduce vulnerabilities ([#3523](https://github.com/JanssenProject/jans/issues/3523)) ([82efd8f](https://github.com/JanssenProject/jans/commit/82efd8f503bc2966483f07fff2a77f5c1321c7a2))
+* **docs:** jans logging configuration - VM Operation Guide - 1 ([#3348](https://github.com/JanssenProject/jans/issues/3348)) ([e0f8c71](https://github.com/JanssenProject/jans/commit/e0f8c7120e8074ae54ff3abb9b4e654cdde64e44))
+* **docs:** jans TUI administration -- Config Guide - TUI -- Auth server ([#3227](https://github.com/JanssenProject/jans/issues/3227)) ([16ab709](https://github.com/JanssenProject/jans/commit/16ab709cca92620a409611521885c14029b8ba0d))
+* **docs:** jans TUI configuration -- Auth Server - TUI - image ([#3237](https://github.com/JanssenProject/jans/issues/3237)) ([3fbc9e7](https://github.com/JanssenProject/jans/commit/3fbc9e7d08ff0c9ef55f009dea77e675d652ee7e))
+* **docs:** jans TUI configuration -- Config Guide - Auth Server - Client configuration - TUI ([#3233](https://github.com/JanssenProject/jans/issues/3233)) ([ee8e056](https://github.com/JanssenProject/jans/commit/ee8e0564a1eeadaee12ab80078c3802822ab4d1a))
+* **docs:** jans TUI configuration -- Fido - TUI ([#3251](https://github.com/JanssenProject/jans/issues/3251)) ([cd6eef1](https://github.com/JanssenProject/jans/commit/cd6eef1503375c39468d82263e0e342b3aace5be))
+* **docs:** jans TUI configuration -- Fido Administration - TUI ([#3252](https://github.com/JanssenProject/jans/issues/3252)) ([a371cda](https://github.com/JanssenProject/jans/commit/a371cda85da66a956ca2d0a15200a6c6d2c29ca0))
+* **docs:** jans TUI installation -- Config Guide - TUI ([#3224](https://github.com/JanssenProject/jans/issues/3224)) ([cc00a71](https://github.com/JanssenProject/jans/commit/cc00a71af6b82ca969b62a835a24733041ac676d))
+* **docs:** missing single quotes ([#3239](https://github.com/JanssenProject/jans/issues/3239)) ([9f38c6a](https://github.com/JanssenProject/jans/commit/9f38c6a216a0dd4afdbec4080f312180ab7858b3))
+* getting ready for a release ([0bda832](https://github.com/JanssenProject/jans/commit/0bda832ebc1da7017231deb38fe9aa6c7c51360a))
+* hash ([cdb5204](https://github.com/JanssenProject/jans/commit/cdb52047c5847e2eafbaf2f7692211e72b8fde12))
+* hash ([156fb2f](https://github.com/JanssenProject/jans/commit/156fb2f697dd4f292659ad9963e7044a7137a583))
+* **jans-fido2:** [#2840](https://github.com/JanssenProject/jans/issues/2840) ([#2974](https://github.com/JanssenProject/jans/issues/2974)) ([d3351e1](https://github.com/JanssenProject/jans/commit/d3351e141fa546074ad98891e655247a0c23e30a))
+* minor ([#2786](https://github.com/JanssenProject/jans/issues/2786)) ([3f67763](https://github.com/JanssenProject/jans/commit/3f677636cc2f871e5a9c683634334578405f18f3))
+* minor ([#3334](https://github.com/JanssenProject/jans/issues/3334)) ([3225455](https://github.com/JanssenProject/jans/commit/32254553a7bb5c58f265f29c3613ecc8f81f44b8))
+* prepare for 1.0.6 release ([9e4c8fb](https://github.com/JanssenProject/jans/commit/9e4c8fb4c0a1ef4779934558e8d8d40d8fedbabf))
+* typo ([#2950](https://github.com/JanssenProject/jans/issues/2950)) ([6df810b](https://github.com/JanssenProject/jans/commit/6df810b36c68303f458f694e4ba6ec9c3768364c))
+
+## [1.0.5](https://github.com/JanssenProject/jans/compare/docs-v1.0.4...docs-v1.0.5) (2022-12-01)
+
+
+### Features
+
+* add custom annotation for configuration property and feature flag documentation ([#2852](https://github.com/JanssenProject/jans/issues/2852)) ([9991d1c](https://github.com/JanssenProject/jans/commit/9991d1ce1fe1b8ce3a65a72e0a72aeee78ba6c2e))
+* add feature to include custom-claims in user-info endpoint of admin-ui plugin [#2969](https://github.com/JanssenProject/jans/issues/2969) ([#2970](https://github.com/JanssenProject/jans/issues/2970)) ([0549879](https://github.com/JanssenProject/jans/commit/054987944d91fe2021092c30b337e880421533ff))
+* documentation for ssa and remove softwareRoles query param of get ssa ([#3031](https://github.com/JanssenProject/jans/issues/3031)) ([d8e14eb](https://github.com/JanssenProject/jans/commit/d8e14ebbeee357c8c2c31808243cf82933ae4a9b))
+* **jans-auth-server:** specify minimum acr for clients [#343](https://github.com/JanssenProject/jans/issues/343) ([#3083](https://github.com/JanssenProject/jans/issues/3083)) ([b0034ec](https://github.com/JanssenProject/jans/commit/b0034ec509ace1a4e30a7e9c6dd23dca48178c62))
+* jans-linux-setup include permission of all user roles ([#3009](https://github.com/JanssenProject/jans/issues/3009)) ([62a421d](https://github.com/JanssenProject/jans/commit/62a421df821067432cbcced0e89cc2a410cd40be))
+
+
+### Bug Fixes
+
+* [#2487](https://github.com/JanssenProject/jans/issues/2487) - irrelevant folder, agama script is in agama-bridge ([#2993](https://github.com/JanssenProject/jans/issues/2993)) ([d19b13a](https://github.com/JanssenProject/jans/commit/d19b13ab31e1dbfee9288c6569b289eae213b528))
+* [#2487](https://github.com/JanssenProject/jans/issues/2487) - SIWA and SIWG (Sign in with Apple-Google), moved to script-catalog ([#2983](https://github.com/JanssenProject/jans/issues/2983)) ([402e7ae](https://github.com/JanssenProject/jans/commit/402e7aebd20322ef465a3805d3834c7174bc9bbc))
+* [#2487](https://github.com/JanssenProject/jans/issues/2487) removing duplicated files ([#3007](https://github.com/JanssenProject/jans/issues/3007)) ([9f3d051](https://github.com/JanssenProject/jans/commit/9f3d051308e7b29e5f112e74601aa05c42ed559c))
+* [#2487](https://github.com/JanssenProject/jans/issues/2487) scripts-catalog folder restructuring ([#2999](https://github.com/JanssenProject/jans/issues/2999)) ([7b66f2b](https://github.com/JanssenProject/jans/commit/7b66f2b27517ba560555f64d0ab4e49f10ddb374))
+* [#2666](https://github.com/JanssenProject/jans/issues/2666) ([#3011](https://github.com/JanssenProject/jans/issues/3011)) ([f98cbc5](https://github.com/JanssenProject/jans/commit/f98cbc5d43b12b56b81debd367fcfdfdc75830e4))
+* getting ready for a release ([0bda832](https://github.com/JanssenProject/jans/commit/0bda832ebc1da7017231deb38fe9aa6c7c51360a))
+* **jans-fido2:** [#2840](https://github.com/JanssenProject/jans/issues/2840) ([#2974](https://github.com/JanssenProject/jans/issues/2974)) ([d3351e1](https://github.com/JanssenProject/jans/commit/d3351e141fa546074ad98891e655247a0c23e30a))
+* typo ([#2950](https://github.com/JanssenProject/jans/issues/2950)) ([6df810b](https://github.com/JanssenProject/jans/commit/6df810b36c68303f458f694e4ba6ec9c3768364c))
+
+## [1.0.4](https://github.com/JanssenProject/jans/compare/docs-v1.0.3...docs-v1.0.4) (2022-11-08)
+
+
+### Bug Fixes
+
+* [#2825](https://github.com/JanssenProject/jans/issues/2825) ([#2828](https://github.com/JanssenProject/jans/issues/2828)) ([5ce21aa](https://github.com/JanssenProject/jans/commit/5ce21aac5df54d2fe9402479fd221fffe9dc77ef))
+
+## 1.0.3 (2022-11-01)
+
+
+### Features
+
+* **agama:** add utility classes for inbound identity ([#2204](https://github.com/JanssenProject/jans/issues/2204)) ([29f58ee](https://github.com/JanssenProject/jans/commit/29f58ee0e6c84b4af5493cabcb19167bc7ffbe40))
+* **agama:** add utility classes for inbound identity ([#2231](https://github.com/JanssenProject/jans/issues/2231)) ([96e32a4](https://github.com/JanssenProject/jans/commit/96e32a407ec6c545b73a6fd103ed2ae5876bd500))
+* **agama:** add utility classes for inbound identity ([#2280](https://github.com/JanssenProject/jans/issues/2280)) ([ca6fdc9](https://github.com/JanssenProject/jans/commit/ca6fdc90256e4ef103bf50dc27cb694c940ba70b))
+* **agama:** add utility classes for inbound identity ([#2417](https://github.com/JanssenProject/jans/issues/2417)) ([2878bdd](https://github.com/JanssenProject/jans/commit/2878bdd737b4bd7f8f080113826a4bc4bf49ffba))
+* **jans-linux-setup:** added token exchange grant type ([#2768](https://github.com/JanssenProject/jans/issues/2768)) ([b3abcfe](https://github.com/JanssenProject/jans/commit/b3abcfeb8fbaddd6d39eeacba018b6baaf6a2d75))
+* **jans-scim:** make max no. of operations and payload size of bulks operations parameterizable ([#1872](https://github.com/JanssenProject/jans/issues/1872)) ([c27a45b](https://github.com/JanssenProject/jans/commit/c27a45bb0a19257c824c4e195f203e9b9b45ec88))
+
+
+### Bug Fixes
+
+* [#2143](https://github.com/JanssenProject/jans/issues/2143) ([#2144](https://github.com/JanssenProject/jans/issues/2144)) ([ff7f9f4](https://github.com/JanssenProject/jans/commit/ff7f9f4110d72b333aae0d2332b429dcbd067da3))
+* [#2157](https://github.com/JanssenProject/jans/issues/2157) ([#2159](https://github.com/JanssenProject/jans/issues/2159)) ([dc8cb60](https://github.com/JanssenProject/jans/commit/dc8cb60990052256b46842f85ebf4961beee82dd))
+* [#776](https://github.com/JanssenProject/jans/issues/776) ([#2503](https://github.com/JanssenProject/jans/issues/2503)) ([a564431](https://github.com/JanssenProject/jans/commit/a564431c8b6e503a36dbaf7ccc8f79e6b8adb95f))
+* [#817](https://github.com/JanssenProject/jans/issues/817) - script for DUO should have the universal prompt, other APIs are deprecated + documentation minor fixes ([#2363](https://github.com/JanssenProject/jans/issues/2363)) ([ccc13af](https://github.com/JanssenProject/jans/commit/ccc13afdd2cfefecc19aa926a46815d119e6ad76))
+* [#817](https://github.com/JanssenProject/jans/issues/817) ([#2364](https://github.com/JanssenProject/jans/issues/2364)) ([bbcd87a](https://github.com/JanssenProject/jans/commit/bbcd87a374f2efca3f87b00bfa21900b2b450c1b))
+* **docs:** fix MarkupSafe hash ([#2699](https://github.com/JanssenProject/jans/issues/2699)) ([adf2a6d](https://github.com/JanssenProject/jans/commit/adf2a6d929082da8884973855a095153c1268269))
+* **docs:** revert MarkupSafe hash ([#2701](https://github.com/JanssenProject/jans/issues/2701)) ([e722aed](https://github.com/JanssenProject/jans/commit/e722aedd2b8fbbba770cea1112e2757f6e32d10c))
+* incorrect contents [#817](https://github.com/JanssenProject/jans/issues/817) ([#2365](https://github.com/JanssenProject/jans/issues/2365)) ([746b33f](https://github.com/JanssenProject/jans/commit/746b33f16c46e2be7381f266e631047e21f17565))
+* jans-config-api/plugins/sample/helloworld/pom.xml to reduce vulnerabilities ([#972](https://github.com/JanssenProject/jans/issues/972)) ([e2ae05e](https://github.com/JanssenProject/jans/commit/e2ae05e5515dd85a95c0a8520de57f673aba7918))
+* jans-eleven/pom.xml to reduce vulnerabilities ([#2676](https://github.com/JanssenProject/jans/issues/2676)) ([d27a7f9](https://github.com/JanssenProject/jans/commit/d27a7f99f22cb8f4bd445a3400224a38cb91eedc))
+* **jans-linux-setup:** review columns size for Agama tables ([#2324](https://github.com/JanssenProject/jans/issues/2324)) ([55d7a7e](https://github.com/JanssenProject/jans/commit/55d7a7e855d1a2ba2cf550e0ddb3a8e9f948456a))
+* **jans-scim:** improper handling response of get user operation ([#2420](https://github.com/JanssenProject/jans/issues/2420)) ([b9e00af](https://github.com/JanssenProject/jans/commit/b9e00af483f81280ae80ab6ad732d4f98c30c8a5))
+* **jans-scim:** X509 cert not set after successful POST request ([#2407](https://github.com/JanssenProject/jans/issues/2407)) ([fd616c4](https://github.com/JanssenProject/jans/commit/fd616c49df088dfa7c6fae4bd56ed4ecf4e26418))
+* minor ([#2470](https://github.com/JanssenProject/jans/issues/2470)) ([657b9f7](https://github.com/JanssenProject/jans/commit/657b9f7589538bb4f1d61ce44fbf6f4da0e63d39))
+* minor ([#2786](https://github.com/JanssenProject/jans/issues/2786)) ([3f67763](https://github.com/JanssenProject/jans/commit/3f677636cc2f871e5a9c683634334578405f18f3))
+* moved contents under scripts-catalog ([#2370](https://github.com/JanssenProject/jans/issues/2370)) ([fa2273a](https://github.com/JanssenProject/jans/commit/fa2273a6400d512d13fb08ea6685d6ff56faf973))
+* update error pages ([#1957](https://github.com/JanssenProject/jans/issues/1957)) ([3d63f4d](https://github.com/JanssenProject/jans/commit/3d63f4d3d58e86d499271ebafdbc0dd56f5c4e98))
+
+
+### Miscellaneous Chores
+
+* release 1.0.2 ([43dead6](https://github.com/JanssenProject/jans/commit/43dead615f3508ca393c330c2db27a8fb9d1017a))
+
 ## 1.0.2 (2022-08-30)
 
 

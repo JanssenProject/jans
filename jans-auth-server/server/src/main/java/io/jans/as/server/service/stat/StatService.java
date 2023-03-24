@@ -73,7 +73,7 @@ public class StatService {
 
     public boolean init() {
         try {
-            final Set<FeatureFlagType> featureFlags = appConfiguration.getEnabledFeatureFlags();
+            final Set<FeatureFlagType> featureFlags = FeatureFlagType.from(appConfiguration);
             if (!featureFlags.isEmpty() && !featureFlags.contains(FeatureFlagType.STAT)) {
                 log.trace("Stat service is not enabled.");
                 return false;

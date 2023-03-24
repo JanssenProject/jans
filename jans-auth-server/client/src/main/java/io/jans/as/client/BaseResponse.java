@@ -35,7 +35,9 @@ public abstract class BaseResponse {
             if (clientResponse.getLocation() != null) {
                 location = clientResponse.getLocation().toString();
             }
-            entity = clientResponse.readEntity(String.class);
+            if (clientResponse.getEntity() != null) {
+                entity = clientResponse.readEntity(String.class);
+            }
             headers = clientResponse.getMetadata();
         }
     }

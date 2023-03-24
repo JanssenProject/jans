@@ -101,6 +101,63 @@ public class ClientAttributes implements Serializable {
     @JsonProperty("jansDefaultPromptLogin")
     private Boolean defaultPromptLogin = false;
 
+    @JsonProperty("idTokenLifetime")
+    private Integer idTokenLifetime;
+
+    @JsonProperty("allowOfflineAccessWithoutConsent")
+    private Boolean allowOfflineAccessWithoutConsent;
+
+    @JsonProperty("minimumAcrLevel")
+    private Integer minimumAcrLevel = -1;
+
+    @JsonProperty("minimumAcrLevelAutoresolve")
+    private Boolean minimumAcrLevelAutoresolve;
+
+    @JsonProperty("minimumAcrPriorityList")
+    private List<String> minimumAcrPriorityList;
+
+    public Boolean getMinimumAcrLevelAutoresolve() {
+        return minimumAcrLevelAutoresolve;
+    }
+
+    public void setMinimumAcrLevelAutoresolve(Boolean minimumAcrLevelAutoresolve) {
+        this.minimumAcrLevelAutoresolve = minimumAcrLevelAutoresolve;
+    }
+
+    public List<String> getMinimumAcrPriorityList() {
+        if (minimumAcrPriorityList == null) minimumAcrPriorityList = new ArrayList<>();
+        return minimumAcrPriorityList;
+    }
+
+    public void setMinimumAcrPriorityList(List<String> minimumAcrPriorityList) {
+        this.minimumAcrPriorityList = minimumAcrPriorityList;
+    }
+
+    public Integer getMinimumAcrLevel() {
+        if (minimumAcrLevel == null) minimumAcrLevel = -1;
+        return minimumAcrLevel;
+    }
+
+    public void setMinimumAcrLevel(Integer minimumAcrLevel) {
+        this.minimumAcrLevel = minimumAcrLevel;
+    }
+
+    public Boolean getAllowOfflineAccessWithoutConsent() {
+        return allowOfflineAccessWithoutConsent;
+    }
+
+    public void setAllowOfflineAccessWithoutConsent(Boolean allowOfflineAccessWithoutConsent) {
+        this.allowOfflineAccessWithoutConsent = allowOfflineAccessWithoutConsent;
+    }
+
+    public Integer getIdTokenLifetime() {
+        return idTokenLifetime;
+    }
+
+    public void setIdTokenLifetime(Integer idTokenLifetime) {
+        this.idTokenLifetime = idTokenLifetime;
+    }
+
     public List<String> getRopcScripts() {
         if (ropcScripts == null) ropcScripts = new ArrayList<>();
         return ropcScripts;
@@ -355,6 +412,10 @@ public class ClientAttributes implements Serializable {
                 ", authorizationEncryptedResponseEnc=" + authorizationEncryptedResponseEnc +
                 ", publicSubjectIdentifierAttribute=" + publicSubjectIdentifierAttribute +
                 ", redirectUrisRegex=" + redirectUrisRegex +
+                ", allowOfflineAccessWithoutConsent=" + allowOfflineAccessWithoutConsent +
+                ", minimumAcrLevel=" + minimumAcrLevel +
+                ", minimumAcrLevelAutoresolve=" + minimumAcrLevelAutoresolve +
+                ", minimumAcrPriorityList=" + minimumAcrPriorityList +
                 ", defaultPromptLogin=" + defaultPromptLogin +
                 '}';
     }

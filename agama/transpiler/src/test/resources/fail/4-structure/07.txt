@@ -1,0 +1,9 @@
+Flow flow
+    Basepath ""
+
+Repeat k times max
+    Quit When there is cold
+    Otherwise
+        Log me
+
+//Failure reason: unexpected Otherwise block

@@ -9,7 +9,7 @@ package io.jans.as.server.service;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.server.model.ldap.ClientAuthorization;
+import io.jans.as.persistence.model.ClientAuthorization;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.model.base.SimpleBranch;

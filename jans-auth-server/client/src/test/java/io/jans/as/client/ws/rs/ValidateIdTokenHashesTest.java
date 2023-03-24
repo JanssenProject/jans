@@ -102,7 +102,7 @@ public class ValidateIdTokenHashesTest extends BaseTest {
                 .accessToken(accessToken)
                 .state(state)
                 .notNullAuthenticationTime()
-                .notNullOxOpenIDConnectVersion()
+                .notNullJansOpenIDConnectVersion()
                 .notNullAuthenticationContextClassReference()
                 .notNullAuthenticationMethodReferences()
                 .check();
@@ -134,7 +134,7 @@ public class ValidateIdTokenHashesTest extends BaseTest {
                 .accessToken(accessToken2)
                 .claimsNoPresence(JwtClaimName.STATE_HASH)
                 .notNullAuthenticationTime()
-                .notNullOxOpenIDConnectVersion()
+                .notNullJansOpenIDConnectVersion()
                 .notNullAuthenticationContextClassReference()
                 .notNullAuthenticationMethodReferences()
                 .check();

@@ -362,6 +362,9 @@ public class Util {
     }
 
     public static void putArray(JSONObject jsonObj, List<String> list, String key) {
+        if (list == null || list.isEmpty()) {
+            return;
+        }
         JSONArray jsonArray = new JSONArray();
         for (String alg : list) {
             jsonArray.put(alg);

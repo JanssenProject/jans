@@ -142,10 +142,6 @@ public abstract class BaseClient<T extends BaseRequest, V extends BaseResponse> 
                     String accessToken = ((UserInfoRequest) request).getAccessToken();
                     sb.append("\n");
                     sb.append(Constants.AUTHORIZATION_BEARER).append(accessToken);
-                } else if (request.getAuthorizationMethod() == AuthorizationMethod.AUTHORIZATION_REQUEST_HEADER_FIELD && request instanceof SsaRequest) {
-                    String accessToken = ((SsaRequest) request).getAccessToken();
-                    sb.append("\n");
-                    sb.append(Constants.AUTHORIZATION_BEARER).append(accessToken);
                 }
 
                 sb.append("\n");

@@ -7,7 +7,11 @@ tags:
 
 # Overview
 
-Please use the left navigation menu to browse the content of this section while we are still working on developing content for `Overview` page.
+Janssen enables organizations to build a scalable centralized authentication and authorization service using free open source software.
 
-!!! Contribute
-If you’d like to contribute to this document, get started with the [Contribution Guide](https://docs.jans.io/head/CONTRIBUTING/#contributing-to-the-documentation)
+The components of the project include client and server implementations of the OAuth, OpenID Connect, SCIM and FIDO standards.
+
+All these components are deployed using janssen [helm chart](https://github.com/JanssenProject/jans/tree/main/charts/janssen).
+
+You can check the [reference](../../reference/kubernetes/helm-chart.md) guide to view the list of the chart components and values.
+

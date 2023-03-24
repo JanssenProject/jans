@@ -1,0 +1,12 @@
+{
+    "valid": true,
+    "host": "localhost",
+    "port": 260,
+    "requires_ssl": true,
+    "trust_host": true,
+    "from_name": "John",
+    "from_email_address": "john@grow.org",
+    "requires_authentication": true,
+    "user_name": "smtp_user",
+    "password": "password"
+}

@@ -1,0 +1,8 @@
+Flow flow
+    Basepath ""
+
+Trigger co.wboy.music
+    When there is cold
+        Override Templates "path/basic.ftl" ""
+
+//Failure reason: unexpected When block under Trigger

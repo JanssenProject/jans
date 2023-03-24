@@ -65,8 +65,7 @@ jobs:
         git push origin
         MESSAGE="feat(janssen): update janssen helm partner chart"
         BODY=$(<../automation/rancher-partner-charts/pull_request_body.md)
-        echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" > token.txt
-        gh auth login --with-token < token.txt
+        echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
         PR=$(gh pr create --base "main-source" --body "${BODY}" --title "${MESSAGE}")        
 
 #TODO: Add docker test before opening a PR in rancher-partner charts.

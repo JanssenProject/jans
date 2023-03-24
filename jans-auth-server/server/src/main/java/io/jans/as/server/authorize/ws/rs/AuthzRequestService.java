@@ -1,14 +1,20 @@
 package io.jans.as.server.authorize.ws.rs;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.common.model.session.SessionId;
 import io.jans.as.common.util.CommonUtils;
 import io.jans.as.common.util.RedirectUri;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
+import io.jans.as.model.authorize.AuthorizeResponseParam;
+import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseMode;
+import io.jans.as.model.common.ScopeConstants;
 import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
@@ -20,6 +26,7 @@ import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.jwe.Jwe;
 import io.jans.as.model.jwk.Algorithm;
 import io.jans.as.model.jwk.JSONWebKeySet;
+import io.jans.as.model.jwk.KeyOpsType;
 import io.jans.as.model.jwk.Use;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
@@ -34,8 +41,10 @@ import io.jans.as.server.model.authorize.Claim;
 import io.jans.as.server.model.authorize.IdTokenMember;
 import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.server.model.authorize.ScopeChecker;
+import io.jans.as.server.model.token.HandleTokenFactory;
 import io.jans.as.server.par.ws.rs.ParService;
 import io.jans.as.server.service.*;
+import io.jans.as.server.service.external.ExternalAuthenticationService;
 import io.jans.as.server.util.ServerUtil;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
@@ -44,6 +53,7 @@ import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
@@ -52,9 +62,8 @@ import org.slf4j.Logger;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.security.PrivateKey;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import static io.jans.as.model.util.StringUtils.implode;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
@@ -67,6 +76,8 @@ import static org.apache.commons.lang3.BooleanUtils.isTrue;
 public class AuthzRequestService {
 
     public static final String INVALID_JWT_AUTHORIZATION_REQUEST = "Invalid JWT authorization request";
+    private static final long ACR_TO_LEVEL_CACHE_LIFETIME_IN_MINUTES = 15;
+    private static final String ACR_TO_LEVEL_KEY = "ACR_TO_LEVEL_KEY";
 
     @Inject
     private Logger log;
@@ -100,6 +111,43 @@ public class AuthzRequestService {
 
     @Inject
     private RedirectionUriService redirectionUriService;
+
+    @Inject
+    private ExternalAuthenticationService externalAuthenticationService;
+
+    private final Cache<String, Map<String, Integer>> acrToLevelCache = CacheBuilder.newBuilder()
+            .expireAfterWrite(ACR_TO_LEVEL_CACHE_LIFETIME_IN_MINUTES, TimeUnit.MINUTES).build();
+
+    public Map<String, Integer> getAcrToLevelMap() {
+        Map<String, Integer> map = acrToLevelCache.getIfPresent(ACR_TO_LEVEL_KEY);
+        if (map != null) {
+            return map;
+        }
+        map = externalAuthenticationService.acrToLevelMapping();
+        acrToLevelCache.put(ACR_TO_LEVEL_KEY, map);
+        return map;
+    }
+
+    public void addDeviceSecretToSession(AuthzRequest authzRequest, SessionId sessionId) {
+        if (BooleanUtils.isFalse(appConfiguration.getReturnDeviceSecretFromAuthzEndpoint())) {
+            return;
+        }
+        if (!Arrays.asList(authzRequest.getScope().split(" ")).contains(ScopeConstants.DEVICE_SSO)) {
+            return;
+        }
+        if (!ArrayUtils.contains(authzRequest.getClient().getGrantTypes(), GrantType.TOKEN_EXCHANGE)) {
+            log.debug("Skip device secret. Scope has {} value but client does not have Token Exchange Grant Type enabled ('urn:ietf:params:oauth:grant-type:token-exchange')", ScopeConstants.DEVICE_SSO);
+            return;
+        }
+
+        final String newDeviceSecret = HandleTokenFactory.generateDeviceSecret();
+
+        final List<String> deviceSecrets = sessionId.getDeviceSecrets();
+        deviceSecrets.add(newDeviceSecret);
+
+        authzRequest.getRedirectUriResponse().getRedirectUri().addResponseParameter(AuthorizeResponseParam.DEVICE_SECRET, newDeviceSecret);
+    }
+
 
     public boolean processPar(AuthzRequest authzRequest) {
         boolean isPar = Util.isPar(authzRequest.getRequestUri());
@@ -387,7 +435,7 @@ public class AuthzRequestService {
                             .fromString(client.getAttributes().getAuthorizationSignedResponseAlg());
 
                     String nestedKeyId = new ServerCryptoProvider(cryptoProvider).getKeyId(webKeysConfiguration,
-                            Algorithm.fromString(signatureAlgorithm.getName()), Use.SIGNATURE);
+                            Algorithm.fromString(signatureAlgorithm.getName()), Use.SIGNATURE, KeyOpsType.CONNECT);
 
                     JSONObject jsonWebKeys = CommonUtils.getJwks(client);
                     redirectUriResponse.getRedirectUri().setNestedJsonWebKeys(jsonWebKeys);
@@ -402,7 +450,7 @@ public class AuthzRequestService {
                 if (jsonWebKeys != null) {
                     keyId = new ServerCryptoProvider(cryptoProvider).getKeyId(JSONWebKeySet.fromJSONObject(jsonWebKeys),
                             Algorithm.fromString(client.getAttributes().getAuthorizationEncryptedResponseAlg()),
-                            Use.ENCRYPTION);
+                            Use.ENCRYPTION, KeyOpsType.CONNECT);
                 }
                 String sharedSecret = clientService.decryptSecret(client.getClientSecret());
                 byte[] sharedSymmetricKey = sharedSecret.getBytes(StandardCharsets.UTF_8);
@@ -417,7 +465,7 @@ public class AuthzRequestService {
                 }
 
                 keyId = new ServerCryptoProvider(cryptoProvider).getKeyId(webKeysConfiguration,
-                        Algorithm.fromString(signatureAlgorithm.getName()), Use.SIGNATURE);
+                        Algorithm.fromString(signatureAlgorithm.getName()), Use.SIGNATURE, KeyOpsType.CONNECT);
 
                 JSONObject jsonWebKeys = CommonUtils.getJwks(client);
                 redirectUriResponse.getRedirectUri().setJsonWebKeys(jsonWebKeys);
@@ -431,10 +479,73 @@ public class AuthzRequestService {
         }
     }
 
-    public void setDefaultAcrsIfNeeded(AuthzRequest authzRequest, Client client) {
-        if (StringUtils.isBlank(authzRequest.getAcrValues()) && !ArrayUtils.isEmpty(client.getDefaultAcrValues())) {
-            authzRequest.setAcrValues(implode(client.getDefaultAcrValues(), " "));
+    public void setAcrsIfNeeded(AuthzRequest authzRequest) {
+        Client client = authzRequest.getClient();
+
+        // explicitly set acrs via getDefaultAcrValues()
+        if (StringUtils.isBlank(authzRequest.getAcrValues())) {
+            if (!ArrayUtils.isEmpty(client.getDefaultAcrValues())) {
+                authzRequest.setAcrValues(implode(client.getDefaultAcrValues(), " "));
+            }
+            return;
         }
+
+        final int currentMinAcrLevel = getCurrentMinAcrLevel(authzRequest);
+        if (currentMinAcrLevel >= client.getAttributes().getMinimumAcrLevel()) {
+            return; // do nothing -> current level is enough
+        }
+
+        if (BooleanUtils.isNotTrue(client.getAttributes().getMinimumAcrLevelAutoresolve())) {
+            log.error("Current acr level is less then minimum required. currentMinAcrLevel: {}, clientMinAcrLevel: {}", currentMinAcrLevel, client.getAttributes().getMinimumAcrLevel());
+            throw new WebApplicationException(Response
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST, authzRequest.getState(), "Current acr level is less then minimum required by client"))
+                    .build());
+        }
+
+        final Map<String, Integer> acrToLevelMap = getAcrToLevelMap();
+        if (client.getAttributes().getMinimumAcrPriorityList().isEmpty()) { // no priority list -> pick up next higher then minimum
+            for (Map.Entry<String, Integer> entry : acrToLevelMap.entrySet()) {
+                if (currentMinAcrLevel < entry.getValue()) {
+                    authzRequest.setAcrValues(entry.getKey());
+                    return;
+                }
+            }
+        }
+
+        for (String acr : client.getAttributes().getMinimumAcrPriorityList()) {
+            final Integer acrLevel = acrToLevelMap.get(acr);
+            if (acrLevel != null && acrLevel >= currentMinAcrLevel) {
+                authzRequest.setAcrValues(acr);
+                return;
+            }
+        }
+
+        log.error("Current acr level is less then minimum required by client. currentMinAcrLevel: {}, clientAttributes: {}", currentMinAcrLevel, client.getAttributes());
+        throw new WebApplicationException(Response
+                .status(Response.Status.BAD_REQUEST)
+                .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.INVALID_REQUEST, authzRequest.getState(), "Current acr level is less then minimum required by client:" + client.getClientId()))
+                .build());
+    }
+
+    public int getCurrentMinAcrLevel(AuthzRequest authzRequest) {
+        if (StringUtils.isBlank(authzRequest.getAcrValues())) {
+            return -1;
+        }
+
+        Integer currentLevel = null;
+        final Map<String, Integer> acrToLevelMap = getAcrToLevelMap();
+        for (String acr : authzRequest.getAcrValuesList()) {
+            Integer level = acrToLevelMap.get(acr);
+            if (currentLevel == null) {
+                currentLevel = level;
+                continue;
+            }
+            if (level != null && level < currentLevel) {
+                currentLevel = level;
+            }
+        }
+        return currentLevel != null ? currentLevel : -1;
     }
 
     public void createRedirectUriResponse(AuthzRequest authzRequest) {

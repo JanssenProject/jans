@@ -116,6 +116,8 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
     def install_opendj(self):
         self.logIt("Running OpenDJ Setup")
 
+        Config.start_auth_after = 'opendj.service'
+
         # Copy opendj-setup.properties so user ldap can find it in /opt/opendj
         setup_props_fn = os.path.join(Config.ldap_base_dir, 'opendj-setup.properties')
         shutil.copy("%s/opendj-setup.properties" % Config.output_dir, setup_props_fn)
@@ -344,14 +346,8 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
         self.start()
 
     def setup_opendj_service(self):
-        if not base.snap:
-            self.copyFile(self.unit_file, Config.unit_files_path)
-            init_script_fn = '/etc/init.d/opendj'
-            if os.path.exists(init_script_fn):
-                self.removeFile(init_script_fn)
-            self.run([self.ldapDsCreateRcCommand, '--outputFile', init_script_fn, '--userName', Config.ldap_user])
-            self.reload_daemon()
-
+        self.copyFile(self.unit_file, Config.unit_files_path)
+        self.reload_daemon()
 
     def installed(self):
         if os.path.exists(self.openDjSchemaFolder):

@@ -5,6 +5,7 @@ import jakarta.ws.rs.core.Application;
 import java.util.HashSet;
 import java.util.Set;
 
+import io.jans.configapi.util.ApiAccessConstants;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.info.Contact;
@@ -27,9 +28,9 @@ tags = { @Tag(name = "Configuration – User Management") },
 servers = { @Server(url = "https://jans.io/", description = "The Jans server") })
 
 @SecurityScheme(name = "oauth2", type = SecuritySchemeType.OAUTH2, flows = @OAuthFlows(clientCredentials = @OAuthFlow(tokenUrl = "https://{op-hostname}/.../token", scopes = {
-@OAuthScope(name = "https://jans.io/oauth/config/user.readonly", description = "View user related information"),
-@OAuthScope(name = "https://jans.io/oauth/config/user.write", description = "Manage user related information"),
-@OAuthScope(name = "https://jans.io/oauth/config/user.delete", description = "Delete user related information")}
+@OAuthScope(name = ApiAccessConstants.USER_READ_ACCESS, description = "View user related information"),
+@OAuthScope(name = ApiAccessConstants.USER_WRITE_ACCESS, description = "Manage user related information"),
+@OAuthScope(name = ApiAccessConstants.USER_DELETE_ACCESS, description = "Delete user related information")}
 )))
 public class ApiApplication extends Application {
 

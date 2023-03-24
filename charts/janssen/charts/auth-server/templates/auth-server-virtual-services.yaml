@@ -1,5 +1,4 @@
-{{- if .Values.global.istio.enabled }}
-
+{{- if .Values.global.istio.ingress }}
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
@@ -18,9 +17,15 @@ metadata:
 spec:
   hosts:
   - {{ .Values.global.fqdn }}
+{{- if .Values.global.istio.gateways }}
   gateways:
-  - {{ .Release.Name }}-global-gtw # can omit the namespace if gateway is in same namespace as virtual service.
+{{ toYaml .Values.global.istio.gateways | indent 2 }}
+{{- else }}
+  gateways:
+  - {{ .Release.Name }}-global-gtw
+{{- end }}
   http:
+  {{ if index .Values "global" "auth-server" "ingress" "openidConfigEnabled" -}}
   - name: "{{ .Release.Name }}-istio-openid-config"
     match:
     - uri:
@@ -33,6 +38,8 @@ spec:
           port:
             number: 8080
         weight: 100
+  {{- end }}
+  {{ if index .Values "global" "auth-server" "ingress" "deviceCodeEnabled" -}}
   - name: "{{ .Release.Name }}-istio-device-code"
     match:
     - uri:
@@ -45,6 +52,8 @@ spec:
           port:
             number: 8080
         weight: 100
+  {{- end }}
+  {{ if index .Values "global" "auth-server" "ingress" "firebaseMessagingEnabled" -}}
   - name: "{{ .Release.Name }}-istio-firebase-messaging"
     match:
     - uri:
@@ -57,6 +66,8 @@ spec:
           port:
             number: 8080
         weight: 100
+  {{- end }}
+  {{ if index .Values "global" "auth-server" "ingress" "uma2ConfigEnabled" -}}
   - name: "{{ .Release.Name }}-istio-uma2-config"
     match:
     - uri:
@@ -69,27 +80,8 @@ spec:
           port:
             number: 8080
         weight: 100
-  - name: "{{ .Release.Name }}-istio-webdiscovery"
-    match:
-    - uri:
-        prefix: "/.well-known/simple-web-discovery"
-    rewrite:
-      uri: "/jans-auth/.well-known/simple-web-discovery"
-    route:
-    - destination:
-        host: {{ index .Values "global" "auth-server" "authServerServiceName" }}.{{ .Release.Namespace }}.svc.cluster.local
-        port:
-          number: 8080
-      weight: 100
-  - name: "{{ .Release.Name }}-istio-cn"
-    match:
-    - uri:
-        prefix: "/jans-auth"
-    route:
-    - destination:
-        host: {{ index .Values "global" "auth-server" "authServerServiceName" }}.{{ .Release.Namespace }}.svc.cluster.local
-        port:
-          number: 8080
+  {{- end }}
+  {{ if index .Values "global" "auth-server" "ingress" "webfingerEnabled" -}}
   - name: "{{ .Release.Name }}-istio-webfinger"
     match:
     - uri:
@@ -102,6 +94,33 @@ spec:
         port:
           number: 8080
       weight: 100
+  {{- end }}
+  {{ if index .Values "global" "auth-server" "ingress" "webdiscoveryEnabled" -}}
+  - name: "{{ .Release.Name }}-istio-webdiscovery"
+    match:
+    - uri:
+        prefix: "/.well-known/simple-web-discovery"
+    rewrite:
+      uri: "/jans-auth/.well-known/simple-web-discovery"
+    route:
+    - destination:
+        host: {{ index .Values "global" "auth-server" "authServerServiceName" }}.{{ .Release.Namespace }}.svc.cluster.local
+        port:
+          number: 8080
+      weight: 100
+  {{- end }}
+  {{ if index .Values "global" "auth-server" "ingress" "authServerEnabled" -}}
+  - name: "{{ .Release.Name }}-istio-cn"
+    match:
+    - uri:
+        prefix: "/jans-auth"
+    route:
+    - destination:
+        host: {{ index .Values "global" "auth-server" "authServerServiceName" }}.{{ .Release.Namespace }}.svc.cluster.local
+        port:
+          number: 8080
+  {{- end }}
+  {{ if index .Values "global" "auth-server" "ingress" "u2fConfigEnabled" -}}
   - name: "{{ .Release.Name }}-istio-u2f-config"
     match:
     - uri:
@@ -114,4 +133,5 @@ spec:
         port:
           number: 8080
       weight: 100
+  {{- end }}
 {{- end }}

@@ -27,8 +27,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -104,7 +106,7 @@ public class CorsFilter extends AbstractCorsFilter {
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
             throws IOException, ServletException {
-        Collection<String> globalAllowedOrigins = null;
+        Collection<String> globalAllowedOrigins = new ArrayList<>(0);
         if (this.filterEnabled) {
             try {
                 globalAllowedOrigins = doFilterImpl(servletRequest);

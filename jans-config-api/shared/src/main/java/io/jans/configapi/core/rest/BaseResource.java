@@ -7,16 +7,23 @@
 package io.jans.configapi.core.rest;
 
 import static io.jans.as.model.util.Util.escapeLog;
+
+import io.jans.configapi.core.interceptor.RequestAuditInterceptor;
+import io.jans.configapi.core.interceptor.RequestInterceptor;
 import io.jans.configapi.core.model.ApiError;
 import io.jans.configapi.core.model.SearchRequest;
 import io.jans.configapi.core.util.Util;
 import io.jans.orm.model.SortOrder;
 
 import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
 
 import java.util.List;
 import java.util.Map;
@@ -27,17 +34,40 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@RequestAuditInterceptor
+@RequestInterceptor
 public class BaseResource {
-    
+   
     @Inject
     Util util;
+    
+    @Context
+    UriInfo uriInfo;
+    
+    @Context
+    private HttpServletRequest httpRequest;
+
+    @Context
+    private HttpHeaders httpHeaders;
+    
+    public UriInfo getUriInfo() {
+        return uriInfo;
+    }
+
+    public HttpServletRequest getHttpRequest() {
+        return httpRequest;
+    }
+    
+    public HttpHeaders getHttpHeaders() {
+        return httpHeaders;
+    }    
 
     private static Logger log = LoggerFactory.getLogger(BaseResource.class);
 
     public static final String MISSING_ATTRIBUTE_CODE = "OCA001";
     public static final String MISSING_ATTRIBUTE_MESSAGE = "A required attribute is missing.";
     public static final String TOKEN_DELIMITER = ",";
-    
+
     public static <T> void checkResourceNotNull(T resource, String objectName) {
         if (resource == null) {
             throw new NotFoundException(getNotFoundError(objectName));
@@ -89,16 +119,23 @@ public class BaseResource {
         }
     }
 
-    public static void thorwBadRequestException(String msg) {
+    public static void throwBadRequestException(String msg) {
         throw new BadRequestException(getBadRequestException(msg));
     }
 
-    public static void thorwBadRequestException(Object obj) {
+    public static void throwBadRequestException(Object obj) {
         throw new BadRequestException(getBadRequestException(obj));
     }
 
-    public static void thorwInternalServerException(String msg) {
+    public static void throwInternalServerException(String msg) {
         throw new InternalServerErrorException(getInternalServerException(msg));
+    }
+
+    public static void throwInternalServerException(Throwable throwable) {
+        throwable = findRootError(throwable);
+        if (throwable != null) {
+            throw new InternalServerErrorException(getInternalServerException(throwable.getMessage()));
+        }
     }
 
     /**
@@ -157,7 +194,7 @@ public class BaseResource {
         int maxCount = maximumRecCount;
         log.debug(" count:{}, maxCount:{}", count, maxCount);
         if (count > maxCount) {
-            thorwBadRequestException("Maximum number of results per page is " + maxCount);
+            throwBadRequestException("Maximum number of results per page is " + maxCount);
         }
 
         count = count == null ? maxCount : count;
@@ -167,13 +204,10 @@ public class BaseResource {
             count = 0;
         }
 
-        // SCIM searches are 1 indexed
-        startIndex = (startIndex == null || startIndex < 1) ? 1 : startIndex;
-
         if (StringUtils.isEmpty(sortOrder) || !sortOrder.equals(SortOrder.DESCENDING.getValue())) {
             sortOrder = SortOrder.ASCENDING.getValue();
         }
-        log.debug(" util.getTokens(filter,TOKEN_DELIMITER):{} ", util.getTokens(filter,TOKEN_DELIMITER));
+        log.debug(" util.getTokens(filter,TOKEN_DELIMITER):{} ", util.getTokens(filter, TOKEN_DELIMITER));
         searchRequest.setSchemas(schemas);
         searchRequest.setAttributes(attrsList);
         searchRequest.setExcludedAttributes(excludedAttrsList);
@@ -183,9 +217,20 @@ public class BaseResource {
         searchRequest.setStartIndex(startIndex);
         searchRequest.setCount(count);
         searchRequest.setMaxCount(maximumRecCount);
-        searchRequest.setFilterAssertionValue(util.getTokens(filter,TOKEN_DELIMITER));
+        searchRequest.setFilterAssertionValue(util.getTokens(filter, TOKEN_DELIMITER));
         return searchRequest;
 
+    }
+
+    public static Throwable findRootError(Throwable throwable) {
+        if (throwable == null) {
+            return throwable;
+        }
+        Throwable rootCause = throwable;
+        while (rootCause.getCause() != null && rootCause.getCause() != rootCause) {
+            rootCause = rootCause.getCause();
+        }
+        return rootCause;
     }
 
 }

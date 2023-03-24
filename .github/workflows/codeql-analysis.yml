@@ -7,7 +7,7 @@ name: "CodeQL"
 
 on:
   push:
-    branches: [master]
+    branches: [main]
     paths:
       - "jans-pycloudlib/jans/**"
       - "jans-pycloudlib/tests/**"
@@ -17,7 +17,7 @@ on:
       - "!**.md"
   pull_request:
     # The branches below must be a subset of the branches above
-    branches: [master]
+    branches: [main]
     paths:
       - "jans-pycloudlib/jans/**"
       - "jans-pycloudlib/tests/**"

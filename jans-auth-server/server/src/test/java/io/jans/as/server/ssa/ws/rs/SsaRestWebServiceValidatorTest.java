@@ -1,8 +1,11 @@
 package io.jans.as.server.ssa.ws.rs;
 
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.common.model.ssa.Ssa;
+import io.jans.as.common.model.ssa.SsaState;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.ssa.SsaErrorResponseType;
+import io.jans.as.model.ssa.SsaScopeType;
 import io.jans.as.server.model.session.SessionClient;
 import io.jans.as.server.security.Identity;
 import io.jans.as.server.service.ScopeService;
@@ -16,11 +19,15 @@ import org.slf4j.Logger;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
-import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.*;
 
 @Listeners(MockitoTestNGListener.class)
 public class SsaRestWebServiceValidatorTest {
@@ -40,21 +47,24 @@ public class SsaRestWebServiceValidatorTest {
     @Mock
     private ScopeService scopeService;
 
+    @Mock
+    private SsaService ssaService;
+
     @Test
-    public void validateClient_sessionClient_validClient() {
+    public void getClientFromSession_sessionClient_validClient() {
         SessionClient sessionClient = new SessionClient();
         Client client = new Client();
         client.setClientId("test_id");
         sessionClient.setClient(client);
         doReturn(sessionClient).when(identity).getSessionClient();
 
-        Client clientAux = ssaRestWebServiceValidator.validateClient();
+        Client clientAux = ssaRestWebServiceValidator.getClientFromSession();
         assertNotNull(clientAux, "client is null");
         verify(log).debug(anyString(), anyString());
     }
 
     @Test
-    public void validateClient_sessionClientNull_invalidClientResponse() {
+    public void getClientFromSession_sessionClientNull_invalidClientResponse() {
         WebApplicationException error = new WebApplicationException(Response
                 .status(Response.Status.BAD_REQUEST)
                 .entity("Invalid client")
@@ -65,7 +75,7 @@ public class SsaRestWebServiceValidatorTest {
         when(errorResponseFactory.createBadRequestException(eq(SsaErrorResponseType.INVALID_CLIENT), anyString())).thenThrow(error);
 
         try {
-            ssaRestWebServiceValidator.validateClient();
+            ssaRestWebServiceValidator.getClientFromSession();
         } catch (WebApplicationException e) {
             assertNotNull(e, "WebApplicationException is null");
             assertNotNull(e.getResponse(), "WebApplicationException Response is null");
@@ -75,7 +85,7 @@ public class SsaRestWebServiceValidatorTest {
     }
 
     @Test
-    public void checkScopesPolicy_clientAndScopeConstains_validScope() {
+    public void checkScopesPolicySingleScope_clientAndScopeContains_validScope() {
         String scope = "test_id";
         Client client = new Client();
         client.setScopes(new String[]{});
@@ -86,7 +96,7 @@ public class SsaRestWebServiceValidatorTest {
     }
 
     @Test
-    public void checkScopesPolicy_clientAndScopeNotConstains_unauthorizedResponse() {
+    public void checkScopesPolicySingleScope_clientAndScopeNotContains_unauthorizedResponse() {
         String scope = "test_id";
         Client client = new Client();
         client.setScopes(new String[]{});
@@ -98,11 +108,148 @@ public class SsaRestWebServiceValidatorTest {
         when(scopeService.getScopeIdsByDns(anyList())).thenReturn(Collections.singletonList("test_id_fail"));
         when(errorResponseFactory.createWebApplicationException(eq(Response.Status.UNAUTHORIZED), eq(SsaErrorResponseType.UNAUTHORIZED_CLIENT), anyString())).thenThrow(error);
 
+        WebApplicationException wae = null;
         try {
             ssaRestWebServiceValidator.checkScopesPolicy(client, scope);
         } catch (WebApplicationException e) {
-            assertNotNull(e, "WebApplicationException is null");
-            assertNotNull(e.getResponse(), "WebApplicationException Response is null");
+            wae = e;
         }
+        assertNotNull(wae, "WebApplicationException is null");
+        assertNotNull(wae.getResponse(), "WebApplicationException Response is null");
+    }
+
+    @Test
+    public void checkScopesPolicyListScope_clientNull_unauthorizedResponse() {
+        WebApplicationException error = new WebApplicationException(Response
+                .status(Response.Status.UNAUTHORIZED)
+                .entity("Invalid client")
+                .type(MediaType.APPLICATION_JSON_TYPE)
+                .build());
+        when(errorResponseFactory.createWebApplicationException(eq(Response.Status.UNAUTHORIZED), eq(SsaErrorResponseType.UNAUTHORIZED_CLIENT), anyString())).thenThrow(error);
+
+        Client client = null;
+        List<String> scopeList = Collections.singletonList(SsaScopeType.SSA_ADMIN.getValue());
+        assertThrows(WebApplicationException.class, () -> ssaRestWebServiceValidator.checkScopesPolicy(client, scopeList));
+        verify(errorResponseFactory).createWebApplicationException(any(), any(), anyString());
+        verifyNoInteractions(scopeService);
+        verifyNoMoreInteractions(errorResponseFactory);
+    }
+
+    @Test
+    public void checkScopesPolicyListScope_scopeListNull_unauthorizedResponse() {
+        WebApplicationException error = new WebApplicationException(Response
+                .status(Response.Status.UNAUTHORIZED)
+                .entity("Invalid client")
+                .type(MediaType.APPLICATION_JSON_TYPE)
+                .build());
+        when(errorResponseFactory.createWebApplicationException(eq(Response.Status.UNAUTHORIZED), eq(SsaErrorResponseType.UNAUTHORIZED_CLIENT), anyString())).thenThrow(error);
+
+        Client client = new Client();
+        List<String> scopeList = null;
+        assertThrows(WebApplicationException.class, () -> ssaRestWebServiceValidator.checkScopesPolicy(client, scopeList));
+        verify(errorResponseFactory).createWebApplicationException(any(), any(), anyString());
+        verifyNoInteractions(scopeService);
+        verifyNoMoreInteractions(errorResponseFactory);
+    }
+
+    @Test
+    public void checkScopesPolicyListScope_scopeListEmpty_unauthorizedResponse() {
+        WebApplicationException error = new WebApplicationException(Response
+                .status(Response.Status.UNAUTHORIZED)
+                .entity("Invalid client")
+                .type(MediaType.APPLICATION_JSON_TYPE)
+                .build());
+        when(errorResponseFactory.createWebApplicationException(eq(Response.Status.UNAUTHORIZED), eq(SsaErrorResponseType.UNAUTHORIZED_CLIENT), anyString())).thenThrow(error);
+
+        Client client = new Client();
+        List<String> scopeList = new ArrayList<>();
+        assertThrows(WebApplicationException.class, () -> ssaRestWebServiceValidator.checkScopesPolicy(client, scopeList));
+        verify(errorResponseFactory).createWebApplicationException(any(), any(), anyString());
+        verifyNoInteractions(scopeService);
+        verifyNoMoreInteractions(errorResponseFactory);
+    }
+
+    @Test
+    public void checkScopesPolicyListScope_clientAndScopeAdmin_valid() {
+        String scope = SsaScopeType.SSA_ADMIN.getValue();
+        Client client = new Client();
+        client.setScopes(new String[]{});
+        when(scopeService.getScopeIdsByDns(anyList())).thenReturn(Collections.singletonList(scope));
+
+        List<String> scopeList = new ArrayList<>();
+        scopeList.add(SsaScopeType.SSA_ADMIN.getValue());
+
+        ssaRestWebServiceValidator.checkScopesPolicy(client, scopeList);
+        verify(scopeService).getScopeIdsByDns(any());
+        verifyNoInteractions(errorResponseFactory);
+    }
+
+    @Test
+    public void checkScopesPolicyListScope_clientAndScopeNotContains_unauthorizedResponse() {
+        String scope = SsaScopeType.SSA_ADMIN.getValue();
+        Client client = new Client();
+        client.setScopes(new String[]{});
+        when(scopeService.getScopeIdsByDns(anyList())).thenReturn(Collections.singletonList(scope));
+        WebApplicationException error = new WebApplicationException(Response
+                .status(Response.Status.UNAUTHORIZED)
+                .entity("Invalid client")
+                .type(MediaType.APPLICATION_JSON_TYPE)
+                .build());
+        when(errorResponseFactory.createWebApplicationException(eq(Response.Status.UNAUTHORIZED), eq(SsaErrorResponseType.UNAUTHORIZED_CLIENT), anyString())).thenThrow(error);
+
+        List<String> scopeList = new ArrayList<>();
+        scopeList.add(SsaScopeType.SSA_PORTAL.getValue());
+        assertThrows(WebApplicationException.class, () -> ssaRestWebServiceValidator.checkScopesPolicy(client, scopeList));
+        verify(scopeService).getScopeIdsByDns(anyList());
+        verify(errorResponseFactory).createWebApplicationException(any(), any(), anyString());
+        verifyNoMoreInteractions(errorResponseFactory);
+    }
+
+    @Test
+    public void getValidSsaByJti_validJti_validSsa() {
+        String jti = "test-jti";
+        Ssa ssa = new Ssa();
+        ssa.setExpirationDate(Date.from(ZonedDateTime.now().plusHours(24).toInstant()));
+        ssa.setState(SsaState.ACTIVE);
+        when(ssaService.findSsaByJti(jti)).thenReturn(ssa);
+
+        Ssa result = ssaRestWebServiceValidator.getValidSsaByJti(jti);
+        assertNotNull(result, "ssa is null");
+        verifyNoInteractions(log);
+    }
+
+    @Test
+    public void getValidSsaByJti_ssaNull_422Status() {
+        String jti = "test-jti";
+        when(ssaService.findSsaByJti(jti)).thenReturn(null);
+
+        WebApplicationException ex = expectThrows(WebApplicationException.class, () -> ssaRestWebServiceValidator.getValidSsaByJti(jti));
+        assertEquals(ex.getResponse().getStatus(), 422);
+        verify(log).warn(anyString(), eq(jti));
+    }
+
+    @Test
+    public void getValidSsaByJti_ssaExpired_422Status() {
+        String jti = "test-jti";
+        Ssa ssa = new Ssa();
+        ssa.setExpirationDate(Date.from(ZonedDateTime.now().minusHours(24).toInstant()));
+        when(ssaService.findSsaByJti(jti)).thenReturn(ssa);
+
+        WebApplicationException ex = expectThrows(WebApplicationException.class, () -> ssaRestWebServiceValidator.getValidSsaByJti(jti));
+        assertEquals(ex.getResponse().getStatus(), 422);
+        verify(log).warn(anyString(), eq(jti));
+    }
+
+    @Test
+    public void getValidSsaByJti_ssaWithUsedStatus_422Status() {
+        String jti = "test-jti";
+        Ssa ssa = new Ssa();
+        ssa.setExpirationDate(Date.from(ZonedDateTime.now().plusHours(24).toInstant()));
+        ssa.setState(SsaState.USED);
+        when(ssaService.findSsaByJti(jti)).thenReturn(ssa);
+
+        WebApplicationException ex = expectThrows(WebApplicationException.class, () -> ssaRestWebServiceValidator.getValidSsaByJti(jti));
+        assertEquals(ex.getResponse().getStatus(), 422);
+        verify(log).warn(anyString(), eq(jti));
     }
 }

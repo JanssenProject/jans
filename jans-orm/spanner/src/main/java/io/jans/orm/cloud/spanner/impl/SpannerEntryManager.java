@@ -567,7 +567,7 @@ public class SpannerEntryManager extends BaseEntryManager<SpannerOperationServic
             count++;
             EntryData entryData = searchResultEntries[i];
             
-            AttributeData attributeDataDn = entryData.getAttributeDate(SpannerOperationService.DN);
+            AttributeData attributeDataDn = entryData.getAttributeData(SpannerOperationService.DN);
             if ((attributeDataDn == null) || (attributeDataDn.getValue() == null)) {
                 throw new MappingException("Failed to convert EntryData to Entry because DN is missing");
             }
@@ -631,7 +631,7 @@ public class SpannerEntryManager extends BaseEntryManager<SpannerOperationServic
                 return false;
             }
 
-            AttributeData attributeData = searchResult.getEntries().get(0).getAttributeDate(SpannerOperationService.DN);
+            AttributeData attributeData = searchResult.getEntries().get(0).getAttributeData(SpannerOperationService.DN);
             if ((attributeData == null) || (attributeData.getValue() == null)) {
                 throw new AuthenticationException("Failed to find user DN in entry: '%s'");
             }

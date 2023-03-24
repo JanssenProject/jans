@@ -1,0 +1,4 @@
+[
+    { "op": "add", "path": "/customMessages", "value": ["customMessages1","customMessages2"] },
+    { "op": "add", "path": "/jsFaviconPath", "value": "/opt/jans/jetty/jans-auth/custom/static" }
+] 

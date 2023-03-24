@@ -207,7 +207,7 @@ login-panel {
 
             .login-panel-header {
                             background-color: #D4CFC7;
-                                            background-image: url("#{oxAuthConfigurationService.getImgLocation()}/panel_header_bg.png");
+                                            background-image: url("#{webConfigurationService.getImgLocation()}/panel_header_bg.png");
                                                             background-position: left top;
                                                                             background-repeat: repeat-x;
                                                                                             border-style: solid;

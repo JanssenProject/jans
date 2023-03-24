@@ -1,5 +1,86 @@
 # Changelog
 
+## 1.0.7 (2023-02-22)
+
+
+### Features
+
+* add authentication SG flow tests ([#3877](https://github.com/JanssenProject/jans/issues/3877)) ([d5c3fac](https://github.com/JanssenProject/jans/commit/d5c3fac2ee16d0d8276da880b78cc5e676a2f302))
+* add debug SG logging ([#3730](https://github.com/JanssenProject/jans/issues/3730)) ([a0c9ca2](https://github.com/JanssenProject/jans/commit/a0c9ca28e3558a8c85502d134a81d9f5bdd78b12))
+* add Jupiter+Weld+Mockito+Extension to Fido2 ([#3875](https://github.com/JanssenProject/jans/issues/3875)) ([0152435](https://github.com/JanssenProject/jans/commit/01524358cbd720ad547c6b0d622c2cc32e76a125))
+* add more loggers ([#3742](https://github.com/JanssenProject/jans/issues/3742)) ([919bc86](https://github.com/JanssenProject/jans/commit/919bc869fd3f2e0be143c5bfddc7ba3629178e86))
+* optmize cleander job ([#3737](https://github.com/JanssenProject/jans/issues/3737)) ([2a864d9](https://github.com/JanssenProject/jans/commit/2a864d98b0d3e1983aead62ef9f95e6191248de5))
+* support cancel request ([#3733](https://github.com/JanssenProject/jans/issues/3733)) ([2741e51](https://github.com/JanssenProject/jans/commit/2741e511bc7244a764a43d4dd8d4bb13da87aabb))
+* Support Super Gluu one step authentication to Fido2 server [#3593](https://github.com/JanssenProject/jans/issues/3593) ([#3599](https://github.com/JanssenProject/jans/issues/3599)) ([c013b16](https://github.com/JanssenProject/jans/commit/c013b161f2eb47f5952cbb80c8740f8d62d302c3))
+
+
+### Bug Fixes
+
+* cbor data stream lenght calculatro return wrong lengh [#3614](https://github.com/JanssenProject/jans/issues/3614) ([#3615](https://github.com/JanssenProject/jans/issues/3615)) ([22065ea](https://github.com/JanssenProject/jans/commit/22065ea14fcaa523531a738f53d6659a790155c5))
+* **fido2-client:** conflict of log4j config ([#3636](https://github.com/JanssenProject/jans/issues/3636)) ([77412d5](https://github.com/JanssenProject/jans/commit/77412d5ca1be8dd99797489db22a4e22c7a5cc13))
+* fix authenticatorData encoding ([#3815](https://github.com/JanssenProject/jans/issues/3815)) ([687cb2a](https://github.com/JanssenProject/jans/commit/687cb2a3b12980f360a113c88e7cc295c1a4a752))
+* fix fmt name ([#3900](https://github.com/JanssenProject/jans/issues/3900)) ([4a6a0c1](https://github.com/JanssenProject/jans/commit/4a6a0c19126220ae783a343d4fe1a54c99ed4475))
+* fixes for cancel support ([#3735](https://github.com/JanssenProject/jans/issues/3735)) ([3e64530](https://github.com/JanssenProject/jans/commit/3e64530f3196e4f396c7e8a95d6fd722efa9a816))
+* **jans-auth-server:** jansApp attribute only relevant for SG ([#3782](https://github.com/JanssenProject/jans/issues/3782)) ([6153a13](https://github.com/JanssenProject/jans/commit/6153a139d584e69088f8d9202ce072ae10a2dc73))
+* **jans-fido2:** RegistrationPersistenceService implemntation ([#3728](https://github.com/JanssenProject/jans/issues/3728)) ([d5b8b67](https://github.com/JanssenProject/jans/commit/d5b8b67e10bd6d9bc93d831bef8198f406873b0e))
+* prepare 1.0.7 release ([ce02fd9](https://github.com/JanssenProject/jans/commit/ce02fd9322ab49d5bea4f6e88f316f931e9d2169))
+* prepare for 1.0.6 release ([9e4c8fb](https://github.com/JanssenProject/jans/commit/9e4c8fb4c0a1ef4779934558e8d8d40d8fedbabf))
+
+## 1.0.6 (2023-01-09)
+
+
+### Features
+
+* add custom annotation for configuration property and feature flag documentation ([#2852](https://github.com/JanssenProject/jans/issues/2852)) ([9991d1c](https://github.com/JanssenProject/jans/commit/9991d1ce1fe1b8ce3a65a72e0a72aeee78ba6c2e))
+
+
+### Bug Fixes
+
+* getting ready for a release ([0bda832](https://github.com/JanssenProject/jans/commit/0bda832ebc1da7017231deb38fe9aa6c7c51360a))
+* **jans-fido2:** [#1120](https://github.com/JanssenProject/jans/issues/1120) ([#2928](https://github.com/JanssenProject/jans/issues/2928)) ([0fea95a](https://github.com/JanssenProject/jans/commit/0fea95a181811de2f592debcec5af76f9adda5b2))
+* **jans-fido2:** [#2971](https://github.com/JanssenProject/jans/issues/2971) ([#2972](https://github.com/JanssenProject/jans/issues/2972)) ([2f15cf8](https://github.com/JanssenProject/jans/commit/2f15cf8aba64410fe1dd0ef71e9860ae0ec919bd))
+* prepare for 1.0.6 release ([9e4c8fb](https://github.com/JanssenProject/jans/commit/9e4c8fb4c0a1ef4779934558e8d8d40d8fedbabf))
+
+
+### Documentation
+
+* prepare for 1.0.4 release ([c23a2e5](https://github.com/JanssenProject/jans/commit/c23a2e505b7eb325a293975d60bbc65d5e367c7d))
+
+## [1.0.5](https://github.com/JanssenProject/jans/compare/jans-fido2-v1.0.4...jans-fido2-v1.0.5) (2022-12-01)
+
+
+### Features
+
+* add custom annotation for configuration property and feature flag documentation ([#2852](https://github.com/JanssenProject/jans/issues/2852)) ([9991d1c](https://github.com/JanssenProject/jans/commit/9991d1ce1fe1b8ce3a65a72e0a72aeee78ba6c2e))
+
+
+### Bug Fixes
+
+* getting ready for a release ([0bda832](https://github.com/JanssenProject/jans/commit/0bda832ebc1da7017231deb38fe9aa6c7c51360a))
+* **jans-fido2:** [#1120](https://github.com/JanssenProject/jans/issues/1120) ([#2928](https://github.com/JanssenProject/jans/issues/2928)) ([0fea95a](https://github.com/JanssenProject/jans/commit/0fea95a181811de2f592debcec5af76f9adda5b2))
+* **jans-fido2:** [#2971](https://github.com/JanssenProject/jans/issues/2971) ([#2972](https://github.com/JanssenProject/jans/issues/2972)) ([2f15cf8](https://github.com/JanssenProject/jans/commit/2f15cf8aba64410fe1dd0ef71e9860ae0ec919bd))
+
+## [1.0.4](https://github.com/JanssenProject/jans/compare/jans-fido2-v1.0.3...jans-fido2-v1.0.4) (2022-11-08)
+
+
+### Documentation
+
+* prepare for 1.0.4 release ([c23a2e5](https://github.com/JanssenProject/jans/commit/c23a2e505b7eb325a293975d60bbc65d5e367c7d))
+
+## 1.0.3 (2022-11-01)
+
+
+### Bug Fixes
+
+* [#776](https://github.com/JanssenProject/jans/issues/776) ([#2503](https://github.com/JanssenProject/jans/issues/2503)) ([a564431](https://github.com/JanssenProject/jans/commit/a564431c8b6e503a36dbaf7ccc8f79e6b8adb95f))
+* jans-config-api/plugins/sample/helloworld/pom.xml to reduce vulnerabilities ([#972](https://github.com/JanssenProject/jans/issues/972)) ([e2ae05e](https://github.com/JanssenProject/jans/commit/e2ae05e5515dd85a95c0a8520de57f673aba7918))
+* jans-eleven/pom.xml to reduce vulnerabilities ([#2676](https://github.com/JanssenProject/jans/issues/2676)) ([d27a7f9](https://github.com/JanssenProject/jans/commit/d27a7f99f22cb8f4bd445a3400224a38cb91eedc))
+
+
+### Miscellaneous Chores
+
+* release 1.0.2 ([43dead6](https://github.com/JanssenProject/jans/commit/43dead615f3508ca393c330c2db27a8fb9d1017a))
+
 ## 1.0.2 (2022-08-30)
 
 

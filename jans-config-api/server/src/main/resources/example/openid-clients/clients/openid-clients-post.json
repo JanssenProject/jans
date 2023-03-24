@@ -1,0 +1,62 @@
+{
+    "deletable": false,
+    "clientSecret": "test1234",
+    "frontChannelLogoutSessionRequired": false,
+    "redirectUris": [
+        "https://jans.server2/admin-ui",
+        "http://localhost:4100"
+    ],
+    "responseTypes": [
+        "code"
+    ],
+    "grantTypes": [
+        "authorization_code",
+        "refresh_token",
+        "client_credentials"
+    ],
+    "applicationType": "web",
+    "clientName": "",
+    "logoUri": "",
+    "clientUri": "",
+    "policyUri":"",
+    "tosUri": "",
+    "subjectType": "pairwise",
+    "idTokenSignedResponseAlg": "RS256",
+    "tokenEndpointAuthMethod": "client_secret_basic",
+    "scopes": [
+        "inum=C4F7,ou=scopes,o=jans"
+    ],
+    "trustedClient": false,
+    "persistClientAuthorizations": true,
+    "includeClaimsInIdToken": false,
+    "customAttributes": [
+        {
+            "name": "displayName",
+            "multiValued": false,
+            "values": [
+                "Api Client"
+            ],
+            "value": "Api Client",
+            "displayValue": "Api Client"
+        }
+    ],
+    "customObjectClasses": [
+        "top"
+    ],
+    "rptAsJwt": false,
+    "accessTokenAsJwt": false,
+    "accessTokenSigningAlg": "RS256",
+    "disabled": false,
+    "attributes": {
+        "runIntrospectionScriptBeforeJwtCreation": false,
+        "keepClientAuthorizationAfterExpiration": false,
+        "allowSpontaneousScopes": false,
+        "backchannelLogoutSessionRequired": false,
+        "parLifetime": 600,
+        "requirePar": false,
+        "jansDefaultPromptLogin": false
+    },
+    "tokenBindingSupported": false,
+    "authenticationMethod": "client_secret_basic",
+    "displayName": "Api Client"
+}

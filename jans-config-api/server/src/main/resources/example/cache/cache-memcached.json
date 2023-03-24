@@ -1,0 +1,7 @@
+{
+    "servers": "localhost:11211",
+    "maxOperationQueueLength": 100000,
+    "bufferSize": 32768,
+    "defaultPutExpiration": 80,
+    "connectionFactoryType": "DEFAULT"
+}

@@ -102,7 +102,7 @@ public class TokenEncryptionHttpDeprecated extends BaseTest {
 
             Jwe jwe = Jwe.parse(idToken, privateKey, null);
             AssertBuilder.jwe(jwe)
-                    .claimsPresence(JwtClaimName.OX_OPENID_CONNECT_VERSION)
+                    .claimsPresence(JwtClaimName.JANS_OPENID_CONNECT_VERSION)
                     .check();
         } catch (Exception ex) {
             fail(ex.getMessage(), ex);
@@ -170,7 +170,7 @@ public class TokenEncryptionHttpDeprecated extends BaseTest {
 
             Jwe jwe = Jwe.parse(idToken, privateKey, null);
             AssertBuilder.jwe(jwe)
-                    .claimsPresence(JwtClaimName.OX_OPENID_CONNECT_VERSION)
+                    .claimsPresence(JwtClaimName.JANS_OPENID_CONNECT_VERSION)
                     .check();
         } catch (Exception ex) {
             fail(ex.getMessage(), ex);
@@ -238,7 +238,7 @@ public class TokenEncryptionHttpDeprecated extends BaseTest {
 
             Jwe jwe = Jwe.parse(idToken, privateKey, null);
             AssertBuilder.jwe(jwe)
-                    .claimsPresence(JwtClaimName.OX_OPENID_CONNECT_VERSION)
+                    .claimsPresence(JwtClaimName.JANS_OPENID_CONNECT_VERSION)
                     .check();
         } catch (Exception ex) {
             fail(ex.getMessage(), ex);
@@ -300,7 +300,7 @@ public class TokenEncryptionHttpDeprecated extends BaseTest {
             // 3. Read Encrypted ID Token
             Jwe jwe = Jwe.parse(idToken, null, clientSecret.getBytes(StandardCharsets.UTF_8));
             AssertBuilder.jwe(jwe)
-                    .claimsPresence(JwtClaimName.OX_OPENID_CONNECT_VERSION)
+                    .claimsPresence(JwtClaimName.JANS_OPENID_CONNECT_VERSION)
                     .check();
         } catch (Exception ex) {
             fail(ex.getMessage(), ex);
@@ -362,7 +362,7 @@ public class TokenEncryptionHttpDeprecated extends BaseTest {
             // 3. Read Encrypted ID Token
             Jwe jwe = Jwe.parse(idToken, null, clientSecret.getBytes(StandardCharsets.UTF_8));
             AssertBuilder.jwe(jwe)
-                    .claimsPresence(JwtClaimName.OX_OPENID_CONNECT_VERSION)
+                    .claimsPresence(JwtClaimName.JANS_OPENID_CONNECT_VERSION)
                     .check();
         } catch (Exception ex) {
             fail(ex.getMessage(), ex);

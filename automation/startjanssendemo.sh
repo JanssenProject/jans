@@ -43,7 +43,7 @@ sudo pip3 install requests --upgrade
 sudo pip3 install shiv
 sudo snap install microk8s --classic
 sudo microk8s.status --wait-ready
-sudo microk8s.enable dns registry ingress storage
+sudo microk8s.enable dns registry ingress hostpath-storage
 sudo microk8s kubectl get daemonset.apps/nginx-ingress-microk8s-controller -n ingress -o yaml | sed -s "s@ingress-class=public@ingress-class=nginx@g" | microk8s kubectl apply -f -
 sudo apt-get update
 sudo apt-get install apt-transport-https ca-certificates curl gnupg-agent software-properties-common -y
@@ -128,11 +128,6 @@ global:
       scriptLogLevel: "$LOG_LEVEL"
       auditStatsLogTarget: "$LOG_TARGET"
       auditStatsLogLevel: "$LOG_LEVEL"
-  client-api:
-    enabled: true
-    appLoggers:
-      clientApiLogTarget: "$LOG_TARGET"
-      clientApiLogLevel: "$LOG_LEVEL"
   config-api:
     enabled: true
     appLoggers:
@@ -210,7 +205,7 @@ opendj:
     repository: gluufederation/opendj
     tag: 5.0.0_dev
 EOF
-sudo helm repo add janssen https://docs.jans.io
+sudo helm repo add janssen https://docs.jans.io/charts
 sudo helm repo update
 # remove --devel once we issue the first prod chart
 sudo helm install janssen janssen/janssen --devel -n jans -f override.yaml --kubeconfig="$KUBECONFIG"

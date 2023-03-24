@@ -6,8 +6,9 @@
 
 package io.jans.configapi.plugin.fido2.service;
 
-import io.jans.config.oxtrust.DbApplicationConfiguration;
 import io.jans.configapi.configuration.ConfigurationFactory;
+import io.jans.fido2.model.conf.Conf;
+import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.BasePersistenceException;
 import org.slf4j.Logger;
@@ -27,21 +28,30 @@ public class Fido2Service {
     @Inject
     ConfigurationFactory configurationFactory;
 
-    public DbApplicationConfiguration find() {
+    public Conf findConf() {
         try {
             String configurationDn = configurationFactory.getBaseConfiguration()
                     .getString("fido2_ConfigurationEntryDN");
-            return persistenceManager.find(DbApplicationConfiguration.class, configurationDn);
+            return persistenceManager.find(Conf.class, configurationDn);
         } catch (BasePersistenceException var3) {
             logger.error("Failed to load Fido2 configuration from LDAP");
             return null;
         }
     }
 
-    public void merge(String fido2ConfigJson) {
-        DbApplicationConfiguration fido2Configuration = this.find();
-        fido2Configuration.setDynamicConf(fido2ConfigJson);
-        fido2Configuration.setRevision(fido2Configuration.getRevision() + 1L);
-        persistenceManager.merge(fido2Configuration);
+    public AppConfiguration find() {
+        final Conf conf = findConf();
+        return conf.getDynamicConf();
+    }
+
+    public void mergeConf(Conf conf) {
+        conf.setRevision(conf.getRevision() + 1);
+        persistenceManager.merge(conf);
+    }
+
+    public void merge(AppConfiguration fido2ConfigJson) {
+        Conf conf = this.findConf();
+        conf.setDynamicConf(fido2ConfigJson);
+        mergeConf(conf);
     }
 }

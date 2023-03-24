@@ -19,6 +19,7 @@ import io.jans.util.security.StringEncrypter.EncryptionException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -60,11 +61,12 @@ public class ConfigSmtpResource extends ConfigBaseResource {
             "Configuration – SMTP" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.SMTP_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SmtpConfiguration.class))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SmtpConfiguration.class), examples = @ExampleObject(name = "Response json example", value = "example/auth/smtp/smtp-get.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.SMTP_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.SMTP_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.SMTP_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getSmtpServerConfiguration() {
         SmtpConfiguration smtpConfiguration = configurationService.getConfiguration().getSmtpConfiguration();
         log.debug(SMTP_CONFIGURATION + ":{}", smtpConfiguration);
@@ -73,14 +75,15 @@ public class ConfigSmtpResource extends ConfigBaseResource {
 
     @Operation(summary = "Adds SMTP server configuration", description = "Adds SMTP server configuration", operationId = "post-config-smtp", tags = {
             "Configuration – SMTP" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.SMTP_WRITE_ACCESS  }))
-    @RequestBody(description = "SmtpConfiguration object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SmtpConfiguration.class)))
+                    ApiAccessConstants.SMTP_WRITE_ACCESS }))
+    @RequestBody(description = "SmtpConfiguration object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SmtpConfiguration.class), examples = @ExampleObject(name = "Request json example", value = "example/auth/smtp/smtp.json")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SmtpConfiguration.class))),
+            @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SmtpConfiguration.class), examples = @ExampleObject(name = "Response json example", value = "example/auth/smtp/smtp-get.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
-    @ProtectedApi(scopes = { ApiAccessConstants.SMTP_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.SMTP_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response setupSmtpConfiguration(@Valid SmtpConfiguration smtpConfiguration) throws EncryptionException {
         log.debug(SMTP_CONFIGURATION + ":{}", smtpConfiguration);
         String password = smtpConfiguration.getPassword();
@@ -99,14 +102,15 @@ public class ConfigSmtpResource extends ConfigBaseResource {
     @Operation(summary = "Updates SMTP server configuration", description = "Updates SMTP server configuration", operationId = "put-config-smtp", tags = {
             "Configuration – SMTP" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.SMTP_WRITE_ACCESS }))
-    @RequestBody(description = "SmtpConfiguration object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SmtpConfiguration.class)))
+    @RequestBody(description = "SmtpConfiguration object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SmtpConfiguration.class), examples = @ExampleObject(name = "Request json example", value = "example/auth/smtp/smtp.json")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SmtpConfiguration.class))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SmtpConfiguration.class), examples = @ExampleObject(name = "Response json example", value = "example/auth/smtp/smtp-get.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PUT
-    @ProtectedApi(scopes = { ApiAccessConstants.SMTP_WRITE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.SMTP_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response updateSmtpConfiguration(@Valid SmtpConfiguration smtpConfiguration) throws EncryptionException {
         log.debug(SMTP_CONFIGURATION + ":{}", smtpConfiguration);
         String password = smtpConfiguration.getPassword();
@@ -130,7 +134,8 @@ public class ConfigSmtpResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
     @Path(ApiConstants.TEST)
-    @ProtectedApi(scopes = { ApiAccessConstants.SMTP_READ_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.SMTP_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.SMTP_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response testSmtpConfiguration() throws EncryptionException {
 
         SmtpConfiguration smtpConfiguration = configurationService.getConfiguration().getSmtpConfiguration();
@@ -151,7 +156,8 @@ public class ConfigSmtpResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @DELETE
-    @ProtectedApi(scopes = { ApiAccessConstants.SMTP_DELETE_ACCESS })
+    @ProtectedApi(scopes = { ApiAccessConstants.SMTP_DELETE_ACCESS }, groupScopes = {}, superScopes = {
+            ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
     public Response removeSmtpConfiguration() {
         GluuConfiguration configurationUpdate = configurationService.getConfiguration();
         configurationUpdate.setSmtpConfiguration(new SmtpConfiguration());

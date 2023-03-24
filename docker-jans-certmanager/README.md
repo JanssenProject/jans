@@ -1,3 +1,11 @@
+---
+tags:
+- administration
+- reference
+- kubernetes
+- docker image
+---
+
 ## Overview
 
 Container image to manage X.509 certificates and crypto keys in Janssen Server.
@@ -12,7 +20,7 @@ For bleeding-edge/unstable version, use `janssenproject/certmanager:1.0.1_dev`.
 
 The following environment variables are supported by the container:
 
-- `CN_CONFIG_ADAPTER`: The config backend adapter, can be `consul` (default), `kubernetes`, or `google`.
+- `CN_CONFIG_ADAPTER`: The config backend adapter, can be `consul` (default), `kubernetes`, `google`, or `aws`.
 - `CN_CONFIG_CONSUL_HOST`: hostname or IP of Consul (default to `localhost`).
 - `CN_CONFIG_CONSUL_PORT`: port of Consul (default to `8500`).
 - `CN_CONFIG_CONSUL_CONSISTENCY`: Consul consistency mode (choose one of `default`, `consistent`, or `stale`). Default to `stale` mode.
@@ -25,12 +33,7 @@ The following environment variables are supported by the container:
 - `CN_CONFIG_KUBERNETES_NAMESPACE`: Kubernetes namespace (default to `default`).
 - `CN_CONFIG_KUBERNETES_CONFIGMAP`: Kubernetes configmaps name (default to `jans`).
 - `CN_CONFIG_KUBERNETES_USE_KUBE_CONFIG`: Load credentials from `$HOME/.kube/config`, only useful for non-container environment (default to `false`).
-- `CN_CONFIG_GOOGLE_SECRET_VERSION_ID`: Janssen configuration secret version ID in Google Secret Manager. Defaults to `latest`, which is recommended.
-- `CN_CONFIG_GOOGLE_SECRET_NAME_PREFIX`: Prefix for Janssen configuration secret in Google Secret Manager. Defaults to `jans`. If left intact `jans-configuration` secret will be created.
-- `CN_SECRET_GOOGLE_SECRET_VERSION_ID`:  Janssen secret version ID in Google Secret Manager. Defaults to `latest`, which is recommended.
-- `CN_SECRET_GOOGLE_SECRET_MANAGER_PASSPHRASE`: Passphrase for Janssen secret in Google Secret Manager. This is recommended to be changed and defaults to `secret`.
-- `CN_SECRET_GOOGLE_SECRET_NAME_PREFIX`: Prefix for Janssen secret in Google Secret Manager. Defaults to `jans`. If left `jans-secret` secret will be created.
-- `CN_SECRET_ADAPTER`: The secrets' adapter, can be `vault` (default), `kubernetes`, or `google`.
+- `CN_SECRET_ADAPTER`: The secrets' adapter, can be `vault` (default), `kubernetes`, `google`, or `aws`.
 - `CN_SECRET_VAULT_SCHEME`: supported Vault scheme (`http` or `https`).
 - `CN_SECRET_VAULT_HOST`: hostname or IP of Vault (default to `localhost`).
 - `CN_SECRET_VAULT_PORT`: port of Vault (default to `8200`).
@@ -62,10 +65,27 @@ The following environment variables are supported by the container:
 - `CN_COUCHBASE_KEEPALIVE_INTERVAL`: Keep-alive interval for Couchbase connection (default to `30000` milliseconds).
 - `CN_COUCHBASE_KEEPALIVE_TIMEOUT`: Keep-alive timeout for Couchbase connection (default to `2500` milliseconds).
 - `CN_CONTAINER_METADATA`: The name of scheduler to pull container metadata (one of `docker` or `kubernetes`; default to `docker`).
-- `GOOGLE_PROJECT_ID`: Google Project ID (default to empty string). Used when `CN_CONFIG_ADAPTER` or `CN_SECRET_ADAPTER` set to `google`.
-- `GOOGLE_APPLICATION_CREDENTIALS`: Path to Google credentials JSON file (default to `/etc/jans/conf/google-credentials.json`). Used when `CN_CONFIG_ADAPTER` or `CN_SECRET_ADAPTER` set to `google`.
+- `GOOGLE_APPLICATION_CREDENTIALS`: JSON file (contains Google credentials) that should be injected into container.
+- `GOOGLE_PROJECT_ID`: ID of Google project.
+- `CN_GOOGLE_SECRET_VERSION_ID`: Janssen secret version ID in Google Secret Manager. Defaults to `latest`, which is recommended.
+- `CN_GOOGLE_SECRET_NAME_PREFIX`: Prefix for Janssen secret in Google Secret Manager. Defaults to `jans`. If left `jans-secret` secret will be created.
+- `CN_GOOGLE_SECRET_MANAGER_PASSPHRASE`: Passphrase for Janssen secret in Google Secret Manager. This is recommended to be changed and defaults to `secret`.
 - `CN_GOOGLE_SPANNER_INSTANCE_ID`: Google Spanner instance ID.
 - `CN_GOOGLE_SPANNER_DATABASE_ID`: Google Spanner database ID.
+- `CN_SQL_DB_HOST`: Hostname of the SQL database (default to `localhost`).
+- `CN_SQL_DB_PORT`: Port of the SQL database (default to `3306` for MySQL).
+- `CN_SQL_DB_NAME`: SQL database name (default to `jans`).
+- `CN_SQL_DB_USER`: User name to access the SQL database (default to `jans`).
+- `CN_SQL_DB_DIALECT`: Dialect name of the SQL (`mysql` for MySQL  or `pgsql` for PostgreSQL; default to `mysql`).
+- `CN_SQL_DB_TIMEZONE`: Timezone used by the SQL database (default to `UTC`).
+- `CN_SQL_DB_SCHEMA`: Schema name used by SQL database (default to empty-string; if using MySQL, the schema name will be resolved as the database name, whereas in PostgreSQL the schema name will be resolved as `"public"`).
+- `CN_AWS_SECRETS_ENDPOINT_URL`: The URL of AWS secretsmanager service (if omitted, will use the one in specified region).
+- `CN_AWS_SECRETS_PREFIX`: The prefix name of the secrets (default to `jans`).
+- `CN_AWS_SECRETS_REPLICA_FILE`: The location of file contains replica regions definition (if any). This file is mostly used in primary region. Example of contents of the file: `[{"Region": "us-west-1"}]`.
+- `AWS_DEFAULT_REGION`: The default AWS Region to use, for example, `us-west-1` or `us-west-2`.
+- `AWS_SHARED_CREDENTIALS_FILE`: The location of the shared credentials file used by the client (see https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html).
+- `AWS_CONFIG_FILE`: The location of the config file used by the client (see https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html).
+- `AWS_PROFILE`: The default profile to use, if any.
 
 ## Usage
 
@@ -141,22 +161,6 @@ Supported services:
     - `subj-alt-name`: Subject Alternative Name (SAN) for certificate (default to `localhost`)
     - `valid-to`: Validity length in days (default to `365`)
 
-4. `client-api`
-
-    Re-generate:
-
-    - `/etc/certs/client_api_application.crt`
-    - `/etc/certs/client_api_application.key`
-    - `/etc/certs/client_api_application.keystore`
-    - `/etc/certs/client_api_admin.crt`
-    - `/etc/certs/client_api_admin.key`
-    - `/etc/certs/client_api_admin.keystore`
-
-    Options:
-
-    - `application-cn`: Subject alternative name for application certificate (default to `localhost`)
-    - `admin-cn`: Subject alternative name for admin certificate (default to `localhost`)
-    - `valid-to`: Validity length in days (default to `365`)
 
 #### prune
 
@@ -229,7 +233,7 @@ spec:
         spec:
           containers:
             - name: auth-key-rotation
-              image: janssenproject/certmanager:1.0.3_dev
+              image: janssenproject/certmanager:1.0.4-1
               resources:
                 requests:
                   memory: "300Mi"

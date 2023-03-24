@@ -15,7 +15,7 @@ import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.register.RegisterResponseParam;
-import io.jans.as.model.uma.TestUtil;
+import io.jans.as.test.TestUtil;
 import io.jans.as.model.util.StringUtils;
 import io.jans.as.server.BaseTest;
 import io.jans.as.server.util.ServerUtil;

@@ -46,6 +46,7 @@ setup(
         "ldap3",
         "PyMySQL",
         "pycrypto",
+        "PyJWT>=2.3.0",
     ],
     classifiers=[
         "Intended Audience :: Developers",

@@ -10,7 +10,7 @@ info:
   license:
     name: License
     url: https://github.com/JanssenProject/jans-fido2/blob/master/LICENSE
-  version: 1.0.0-SNAPSHOT
+  version: 1.0.8-SNAPSHOT
 tags:
   - name: developers
     description: Janssen includes a FIDO2 component to implement a two-step, two-factor authentication (2FA) with username / password as the first step, and any FIDO2 device as the second step.

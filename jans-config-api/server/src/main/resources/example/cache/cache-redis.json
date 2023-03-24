@@ -1,0 +1,11 @@
+{
+    "redisProviderType": "STANDALONE",
+    "servers": "localhost:6379",
+    "defaultPutExpiration": 60,
+    "useSSL": false,
+    "maxIdleConnections": 10,
+    "maxTotalConnections": 500,
+    "connectionTimeout": 3000,
+    "soTimeout": 3000,
+    "maxRetryAttempts": 5
+}

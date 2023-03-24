@@ -1,0 +1,6 @@
+Flow oh.whammy.bar
+    Basepath "bar"
+
+Finish { success: true }
+
+//Failure reason: Expected boolean/string literal or a variable expression for Finish

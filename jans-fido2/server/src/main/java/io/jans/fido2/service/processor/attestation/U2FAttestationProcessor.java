@@ -47,6 +47,10 @@ import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+/**
+ * Attestation processor for attestations of fmt =fido-u2f
+ *
+ */
 @ApplicationScoped
 public class U2FAttestationProcessor implements AttestationFormatProcessor {
 

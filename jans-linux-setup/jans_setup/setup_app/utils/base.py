@@ -383,10 +383,11 @@ def extract_from_zip(zip_file, sub_dir, target_dir, remove_target_dir=False):
                 target_fn.write_bytes(zipobj.read(member))
     zipobj.close()
 
-def extract_subdir(zip_fn, sub_dir, target_dir):
-    zip_obj = zipfile.ZipFile(zip_fn, 'r')
-    par_dir = zip_obj.namelist()[0]
-    zip_obj.close()
+def extract_subdir(zip_fn, sub_dir, target_dir, par_dir=None):
+    if par_dir is None:
+        zip_obj = zipfile.ZipFile(zip_fn, 'r')
+        par_dir = zip_obj.namelist()[0]
+        zip_obj.close()
 
     if not sub_dir.endswith('/'):
         sub_dir += '/'
@@ -397,7 +398,7 @@ def extract_subdir(zip_fn, sub_dir, target_dir):
         shutil.rmtree(target_dir_path)
 
     with tempfile.TemporaryDirectory() as unpack_dir:
-        shutil.unpack_archive(zip_fn, unpack_dir)
+        shutil.unpack_archive(zip_fn, unpack_dir, format='zip')
         shutil.copytree(os.path.join(unpack_dir, par_dir, sub_dir), target_dir)
 
 current_app.app_info = readJsonFile(os.path.join(par_dir, 'app_info.json'))

@@ -31,6 +31,8 @@ public interface IAuthorizationGrantList {
 
     ResourceOwnerPasswordCredentialsGrant createResourceOwnerPasswordCredentialsGrant(User user, Client client);
 
+    TokenExchangeGrant createTokenExchangeGrant(User user, Client client);
+
     CIBAGrant createCIBAGrant(CibaRequestCacheControl request);
 
     AuthorizationCodeGrant getAuthorizationCodeGrant(String authorizationCode);

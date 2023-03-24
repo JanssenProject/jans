@@ -23,4 +23,4 @@ Definitions of all objects used in the script
 
 ## Common Use Cases
 
-Descriptions of common use cases for this script, including a code snippet for eachThis file is a placeholder.
+Descriptions of common use cases for this script, including a code snippet for each

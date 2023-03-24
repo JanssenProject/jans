@@ -3,7 +3,9 @@ tags:
   - administration
   - kubernetes
   - operations
+  - start order
 ---
 
-This is a placeholder
+## Service Start Order
 
+![svg](../../../assets/kubernetes-services-start-order.svg)

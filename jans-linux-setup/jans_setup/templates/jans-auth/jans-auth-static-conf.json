@@ -14,7 +14,6 @@
         "scripts": "ou=scripts,o=jans",
         "umaBase":"ou=uma,o=jans",
         "umaPolicy":"ou=policies,ou=uma,o=jans",
-        "u2fBase":"ou=u2f,o=jans",
         "metric":"ou=statistic,o=metric",
         "sectorIdentifiers": "ou=sector_identifiers,o=jans",
         "ciba": "ou=ciba,o=jans",

@@ -47,6 +47,8 @@ import java.util.List;
 import java.util.Properties;
 
 /**
+ * 
+ * FIDO2 server initializer
  * @author Yuriy MOvchan
  * @version May 12, 2020
  */

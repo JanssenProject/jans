@@ -291,6 +291,10 @@ public class ConfigurationFactory {
         return this.baseConfiguration.getString(Constants.SERVER_KEY_OF_CONFIGURATION_ENTRY);
     }
 
+    public String getApiAppConfigurationDn() {
+        return this.baseConfiguration.getString(CONFIGAPI_CONFIGURATION_ENTRY);
+    }
+    
     public String getConfigurationDn(String key) {
         return this.baseConfiguration.getString(key);
     }

@@ -18,5 +18,9 @@ import java.lang.annotation.Target;
 public @interface ProtectedApi {
 
     String[] scopes() default {};
+    
+    String[] groupScopes() default {};
+
+    String[] superScopes() default {};
 
 }

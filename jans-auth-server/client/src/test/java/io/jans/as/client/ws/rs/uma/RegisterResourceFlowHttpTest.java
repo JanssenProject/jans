@@ -14,7 +14,7 @@ import io.jans.as.model.uma.UmaMetadata;
 import io.jans.as.model.uma.UmaResource;
 import io.jans.as.model.uma.UmaResourceResponse;
 import io.jans.as.model.uma.UmaResourceWithId;
-import io.jans.as.model.uma.UmaTestUtil;
+import io.jans.as.test.UmaTestUtil;
 import io.jans.as.model.uma.wrapper.Token;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Parameters;

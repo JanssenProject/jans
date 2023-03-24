@@ -45,6 +45,7 @@ class Introspection(IntrospectionType):
     # context is reference of io.jans.as.service.external.context.ExternalIntrospectionContext (in https://github.com/JanssenFederation/oxauth project, )
     def modifyResponse(self, responseAsJsonObject, context):
         print "Inside modifyResponse method of introspection script ...."
+        scopes = []
         try:
             # Getting user-info-jwt
             ujwt = context.getHttpRequest().getParameter("ujwt")
@@ -55,7 +56,7 @@ class Introspection(IntrospectionType):
                 adminConf = AdminConf()
                 adminUIConfig = entryManager.find(adminConf.getClass(), "ou=admin-ui,ou=configuration,o=jans")
                 permissions = adminUIConfig.getDynamic().getPermissions()
-                scopes = []
+                
                 for ele in permissions:
                     if ele.getDefaultPermissionInToken() is not None and ele.getDefaultPermissionInToken():
                         scopes.append(ele.getPermission())
@@ -77,9 +78,8 @@ class Introspection(IntrospectionType):
             if validJwt == True:
                 # Get claims from parsed JWT
                 jwtClaims = userInfoJwt.getClaims()
-                jansAdminUIRole = jwtClaims.getClaim("jansAdminUIRole")
+                jansAdminUIRole = list(jwtClaims.getClaim("jansAdminUIRole"))
                 # fetch role-scope mapping from database
-                scopes = None
                 try:
                     entryManager = CdiUtil.bean(PersistenceEntryManager)
                     adminConf = AdminConf()
@@ -87,8 +87,10 @@ class Introspection(IntrospectionType):
                     roleScopeMapping = adminUIConfig.getDynamic().getRolePermissionMapping()
 
                     for ele in roleScopeMapping:
-                        if ele.getRole() == jansAdminUIRole.getString(0):
-                            scopes = ele.getPermissions()
+                        if ele.getRole() in jansAdminUIRole:
+                            for scope in ele.getPermissions():
+                                if not scope in scopes:
+                                    scopes.append(scope)
                 except Exception as e:
                     print "Error:  Failed to fetch/parse Admin UI roleScopeMapping from DB"
                     print e

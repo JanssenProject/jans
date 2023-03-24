@@ -5,5 +5,7 @@ tags:
   - session
 ---
 
-This is a placeholder
+## Multiple Browser Authentication
 
+Unfortunately, each browser has its own session cookies, and therefore
+its own sessions.

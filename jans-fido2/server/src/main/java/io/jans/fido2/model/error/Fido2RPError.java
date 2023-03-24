@@ -18,6 +18,10 @@
 
 package io.jans.fido2.model.error;
 
+/**
+ * Error class for FIDO2 RP Errors
+ *
+ */
 public class Fido2RPError {
 
     private final String status;

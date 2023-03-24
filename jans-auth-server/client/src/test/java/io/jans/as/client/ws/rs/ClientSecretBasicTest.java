@@ -167,7 +167,7 @@ public class ClientSecretBasicTest extends BaseTest {
         AssertBuilder.jwtParse(idToken)
                 .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS256)
                 .notNullAuthenticationTime()
-                .notNullOxOpenIDConnectVersion()
+                .notNullJansOpenIDConnectVersion()
                 .claimsPresence(JwtClaimName.CODE_HASH)
                 .check();
 

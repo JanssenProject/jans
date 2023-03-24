@@ -13,6 +13,10 @@ import jakarta.inject.Named;
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.model.ApplicationType;
 
+/**
+ * Obtain Organization Info
+ *
+ */
 @ApplicationScoped
 @Named("organizationService")
 public class OrganizationService extends io.jans.as.common.service.OrganizationService {

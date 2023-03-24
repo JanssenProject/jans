@@ -39,7 +39,7 @@ Operation ID: delete-config-scripts-by-inum
   Description: Deletes a custom script.
   url-suffix: inum
 
-To get sample schema type /opt/jans/jans-cli/config-cli.py --schema <schma>, for example /opt/jans/jans-cli/config-cli.py --schema /components/schemas/CustomScript
+To get sample schema type /opt/jans/jans-cli/config-cli.py --schema <schma>, for example /opt/jans/jans-cli/config-cli.py --schema CustomScript
 ```
 
 Let's perform each of this operation.
@@ -71,7 +71,7 @@ Operation ID: post-config-scripts
 So, let's get the schema first:
 
 ```
-/opt/jans/jans-cli/config-cli.py --schema /components/schemas/CustomScript > /tmp/cs.json
+/opt/jans/jans-cli/config-cli.py CustomScript > /tmp/cs.json
 ```
 
 ```

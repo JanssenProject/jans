@@ -5,7 +5,7 @@ The Janssen Authorization Server uses **interception scripts** to enable you to 
 
 ## Configuration Prerequisites
 - A Janssen Authorization Server installation
-- [Client Registration script](https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/openbanking/static/extension/client_registration/Registration.py) - included in the default Janssen OpenBanking distribution
+- [Client Registration script](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-linux-setup/jans_setup/openbanking/static/extension/client_registration/Registration.py) - included in the default Janssen OpenBanking distribution
 - Setting configuration parameters
 - Setting third party library (Jose4j) in classpath 
  

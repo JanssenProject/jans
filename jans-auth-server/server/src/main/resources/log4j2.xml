@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<Configuration packages="org.gluu.log">
+<Configuration packages="io.jans.log">
 	<Appenders>
 		<Console name="STDOUT" target="SYSTEM_OUT">
 			<PatternLayout pattern="%d %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
@@ -97,7 +97,7 @@
 		<!-- ############### Hibernate logging ################# -->
 		<Logger name="org.hibernate" level="error" />
 
-		<Logger name="org.gluu.jans-auth.audit.debug" level="${log4j.default.log.level}" additivity="false">
+		<Logger name="io.jans.as.server.audit.debug" level="${log4j.default.log.level}" additivity="false">
 			<AppenderRef ref="JANS_AUTH_HTTP_REQUEST_RESPONSE_FILE" />
 		</Logger>
 

@@ -30,6 +30,10 @@ import io.jans.fido2.ctap.AttestationFormat;
 import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.service.processors.AssertionFormatProcessor;
 
+/**
+ * Factory Class that returns Processor based on the attestationType value in Fido2RegistrationData
+ *
+ */
 @ApplicationScoped
 public class AssertionProcessorFactory {
 

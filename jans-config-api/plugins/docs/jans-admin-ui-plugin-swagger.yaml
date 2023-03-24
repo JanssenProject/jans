@@ -412,6 +412,7 @@ paths:
       parameters:
       - name: adminUIPermission
         in: path
+        description: Admin UI Permission
         required: true
         schema:
           type: string
@@ -442,6 +443,7 @@ paths:
       parameters:
       - name: adminUIPermission
         in: path
+        description: Admin UI Permission
         required: true
         schema:
           type: string
@@ -462,7 +464,7 @@ paths:
           description: InternalServerError
       security:
       - oauth2:
-        - https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.write
+        - https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.delete
   /admin-ui/adminUIRoles/{adminUIRole}:
     get:
       tags:
@@ -473,6 +475,7 @@ paths:
       parameters:
       - name: adminUIRole
         in: path
+        description: Admin UI role
         required: true
         schema:
           type: string
@@ -503,6 +506,7 @@ paths:
       parameters:
       - name: adminUIRole
         in: path
+        description: Admin UI role
         required: true
         schema:
           type: string
@@ -523,7 +527,7 @@ paths:
           description: InternalServerError
       security:
       - oauth2:
-        - https://jans.io/oauth/jans-auth-server/config/adminui/user/role.write
+        - https://jans.io/oauth/jans-auth-server/config/adminui/user/role.delete
   /admin-ui/adminUIRolePermissionsMapping/{adminUIRole}:
     get:
       tags:
@@ -534,6 +538,7 @@ paths:
       parameters:
       - name: adminUIRole
         in: path
+        description: Admin UI Role
         required: true
         schema:
           type: string
@@ -564,6 +569,7 @@ paths:
       parameters:
       - name: adminUIRole
         in: path
+        description: role
         required: true
         schema:
           type: string
@@ -584,7 +590,7 @@ paths:
           description: InternalServerError
       security:
       - oauth2:
-        - https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.write
+        - https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.delete
 components:
   schemas:
     LicenseRequest:

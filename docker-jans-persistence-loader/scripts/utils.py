@@ -1,14 +1,9 @@
-import base64
 import contextlib
 import json
 import os
 import typing as _t
-from itertools import chain
 from pathlib import Path
-from urllib.parse import urlparse
 from uuid import uuid4
-
-import ruamel.yaml
 
 from jans.pycloudlib.utils import as_boolean
 from jans.pycloudlib.utils import encode_text
@@ -200,86 +195,28 @@ def merge_auth_ctx(ctx):
     return ctx
 
 
-def merge_config_api_ctx(ctx):
-    def transform_url(url):
-        auth_server_url = os.environ.get("CN_AUTH_SERVER_URL", "")
-
-        if not auth_server_url:
-            return url
-
-        parse_result = urlparse(url)
-        if parse_result.path.startswith("/.well-known"):
-            path = f"/jans-auth{parse_result.path}"
-        else:
-            path = parse_result.path
-        url = f"http://{auth_server_url}{path}"
-        return url
-
-    def get_injected_urls():
-        auth_config = json.loads(
-            base64.b64decode(ctx["auth_config_base64"]).decode()
-        )
-        urls = (
-            "issuer",
-            "openIdConfigurationEndpoint",
-            "introspectionEndpoint",
-            "tokenEndpoint",
-            "tokenRevocationEndpoint",
-        )
-        return {
-            url: transform_url(auth_config[url])
-            for url in urls
-        }
-
-    approved_issuer = [ctx["hostname"]]
-    token_server_hostname = os.environ.get("CN_TOKEN_SERVER_BASE_HOSTNAME")
-    if token_server_hostname and token_server_hostname not in approved_issuer:
-        approved_issuer.append(token_server_hostname)
-
-    local_ctx = {
-        "apiApprovedIssuer": ",".join([f'"https://{issuer}"' for issuer in approved_issuer]),
-        "apiProtectionType": "oauth2",
-        "jca_client_id": ctx["jca_client_id"],
-        "jca_client_encoded_pw": ctx["jca_client_encoded_pw"],
-        "endpointInjectionEnabled": "true",
-        "configOauthEnabled": str(os.environ.get("CN_CONFIG_API_OAUTH_ENABLED") or True).lower(),
-    }
-    local_ctx.update(get_injected_urls())
-
-    basedir = '/app/templates/jans-config-api'
-    file_mappings = {
-        "config_api_dynamic_conf_base64": "dynamic-conf.json",
-    }
-    for key, file_ in file_mappings.items():
-        file_path = os.path.join(basedir, file_)
-        with open(file_path) as fp:
-            ctx[key] = generate_base64_contents(fp.read() % local_ctx)
-    return ctx
-
-
 def merge_jans_cli_ctx(manager, ctx):
-    # WARNING:
-    # - deprecated configs and secrets for role_based
-    # - move the configs and secrets creation to configurator
-    # - remove them on future release
+    # jans-cli-tui client
+    ctx["tui_client_id"] = manager.config.get("tui_client_id")
+    if not ctx["tui_client_id"]:
+        # migrate from old configs/secrets (if any)
+        ctx["tui_client_id"] = manager.config.get("role_based_client_id", f"2000.{uuid4()}")
+        manager.config.set("tui_client_id", ctx["tui_client_id"])
 
-    # jans-cli client
-    ctx["role_based_client_id"] = manager.config.get("role_based_client_id")
-    if not ctx["role_based_client_id"]:
-        ctx["role_based_client_id"] = f"2000.{uuid4()}"
-        manager.config.set("role_based_client_id", ctx["role_based_client_id"])
+    ctx["tui_client_pw"] = manager.secret.get("tui_client_pw")
+    if not ctx["tui_client_pw"]:
+        # migrate from old configs/secrets (if any)
+        ctx["tui_client_pw"] = manager.secret.get("role_based_client_pw", get_random_chars())
+        manager.secret.set("tui_client_pw", ctx["tui_client_pw"])
 
-    ctx["role_based_client_pw"] = manager.secret.get("role_based_client_pw")
-    if not ctx["role_based_client_pw"]:
-        ctx["role_based_client_pw"] = get_random_chars()
-        manager.secret.set("role_based_client_pw", ctx["role_based_client_pw"])
-
-    ctx["role_based_client_encoded_pw"] = manager.secret.get("role_based_client_encoded_pw")
-    if not ctx["role_based_client_encoded_pw"]:
-        ctx["role_based_client_encoded_pw"] = encode_text(
-            ctx["role_based_client_pw"], manager.secret.get("encoded_salt"),
-        ).decode()
-        manager.secret.set("role_based_client_encoded_pw", ctx["role_based_client_encoded_pw"])
+    ctx["tui_client_encoded_pw"] = manager.secret.get("tui_client_encoded_pw")
+    if not ctx["tui_client_encoded_pw"]:
+        # migrate from old configs/secrets (if any)
+        ctx["tui_client_encoded_pw"] = manager.secret.get(
+            "role_based_client_encoded_pw",
+            encode_text(ctx["tui_client_pw"], manager.secret.get("encoded_salt")).decode(),
+        )
+        manager.secret.set("tui_client_encoded_pw", ctx["tui_client_encoded_pw"])
     return ctx
 
 
@@ -287,7 +224,6 @@ def prepare_template_ctx(manager):
     ctx = get_base_ctx(manager)
     ctx = merge_extension_ctx(ctx)
     ctx = merge_auth_ctx(ctx)
-    ctx = merge_config_api_ctx(ctx)
     ctx = merge_jans_cli_ctx(manager, ctx)
     return ctx
 
@@ -301,7 +237,6 @@ def get_ldif_mappings(group, optional_scopes=None):
     def default_files():
         files = [
             "base.ldif",
-            "jans-config-api/scopes.ldif",
         ]
 
         if dist == "openbanking":
@@ -310,7 +245,6 @@ def get_ldif_mappings(group, optional_scopes=None):
                 "scopes.ob.ldif",
                 "scripts.ob.ldif",
                 "configuration.ob.ldif",
-                "jans-config-api/clients.ob.ldif",
             ]
         else:
             files += [
@@ -319,15 +253,13 @@ def get_ldif_mappings(group, optional_scopes=None):
                 "scripts.ldif",
                 "configuration.ldif",
                 "o_metric.ldif",
-                "jans-config-api/clients.ldif",
                 "agama.ldif",
             ]
 
         files += [
-            "jans-config-api/config.ldif",
-            "jans-auth/configuration.ldif",
             "jans-auth/role-scope-mappings.ldif",
             "jans-cli/client.ldif",
+            "jans-auth/configuration.ldif",
         ]
 
         return files
@@ -368,25 +300,22 @@ def get_ldif_mappings(group, optional_scopes=None):
     return ldif_mappings
 
 
-def get_config_api_swagger(path="/app/static/jans-config-api-swagger.yaml"):
+def get_config_api_scopes(path="/app/static/config-api-rs-protect.json"):
+    scopes = []
+
     with open(path) as f:
-        txt = f.read()
-    txt = txt.replace("\t", " ")
-    return ruamel.yaml.load(txt, Loader=ruamel.yaml.RoundTripLoader)
+        scope_defs = json.loads(f.read())
 
+    for resource in scope_defs["resources"]:
+        for condition in resource["conditions"]:
+            scopes += [
+                scope["name"]
+                for scope in condition["scopes"]
+                if scope.get("inum") and scope.get("name")
+            ]
 
-def get_config_api_scopes():
-    swagger = get_config_api_swagger()
-    scope_list = []
-
-    for _, methods in swagger["paths"].items():
-        for _, attrs in methods.items():
-            if "security" not in attrs:
-                continue
-            scope_list += [attr["oauth2"] for attr in attrs["security"]]
-
-    # make sure there's no duplication
-    return list(set(chain(*scope_list)))
+    # ensure no duplicates and sorted
+    return sorted(set(scopes))
 
 
 def get_role_scope_mappings(path="/app/templates/jans-auth/role-scope-mappings.json"):
@@ -398,7 +327,7 @@ def get_role_scope_mappings(path="/app/templates/jans-auth/role-scope-mappings.j
     for i, api_role in enumerate(role_mapping["rolePermissionMapping"]):
         if api_role["role"] == "api-admin":
             # merge scopes without duplication
-            role_mapping["rolePermissionMapping"][i]["permissions"] = list(set(
+            role_mapping["rolePermissionMapping"][i]["permissions"] = sorted(set(
                 role_mapping["rolePermissionMapping"][i]["permissions"] + scope_list
             ))
             break

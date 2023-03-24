@@ -209,7 +209,7 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
             resultAttributes.add(new AttributeData(SqlOperationService.DN, dn));
             resultAttributes.add(new AttributeData(SqlOperationService.DOC_ID, parsedKey.getKey()));
 
-            boolean result = getOperationService().addEntry(parsedKey.getKey(), getBaseObjectClass(objectClasses), resultAttributes);
+            boolean result = getOperationService().addEntry(parsedKey.getKey(), getBaseObjectClassForDataOperation(objectClasses), resultAttributes);
             if (!result) {
                 throw new EntryPersistenceException(String.format("Failed to persist entry: '%s'", dn));
             }
@@ -266,7 +266,7 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
             }
 
             if (modifications.size() > 0) {
-                boolean result = getOperationService().updateEntry(toSQLKey(dn).getKey(), getBaseObjectClass(objectClasses), modifications);
+                boolean result = getOperationService().updateEntry(toSQLKey(dn).getKey(), getBaseObjectClassForDataOperation(objectClasses), modifications);
                 if (!result) {
                     throw new EntryPersistenceException(String.format("Failed to update entry: '%s'", dn));
                 }
@@ -577,7 +577,7 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
             count++;
             EntryData entryData = searchResultEntries[i];
             
-            AttributeData attributeDataDn = entryData.getAttributeDate(SqlOperationService.DN);
+            AttributeData attributeDataDn = entryData.getAttributeData(SqlOperationService.DN);
             if ((attributeDataDn == null) || (attributeDataDn.getValue() == null)) {
                 throw new MappingException("Failed to convert EntryData to Entry because DN is missing");
             }
@@ -639,7 +639,7 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
                 return false;
             }
 
-            AttributeData attributeData = searchResult.getEntries().get(0).getAttributeDate(SqlOperationService.DN);
+            AttributeData attributeData = searchResult.getEntries().get(0).getAttributeData(SqlOperationService.DN);
             if ((attributeData == null) || (attributeData.getValue() == null)) {
                 throw new AuthenticationException("Failed to find user DN in entry: '%s'");
             }
@@ -986,6 +986,14 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
 
 	protected boolean isSupportForceUpdate() {
 		return true;
+	}
+
+	private String getBaseObjectClassForDataOperation(String[] objectClasses) {
+		if (ArrayHelper.isNotEmpty(objectClasses) && objectClasses.length > 1) {
+			throw new MappingException("SQL ORM supports only one OC!");
+		}
+		
+		return getBaseObjectClass(objectClasses);
 	}
 
 	private String getBaseObjectClass(String[] objectClasses) {

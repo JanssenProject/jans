@@ -53,7 +53,42 @@
 	 "serialVersionUID",
 	 "enabled"
      ]
-  }
+  },
+  "auditLogConf": {
+    "enabled": true,
+    "ignoreHttpMethod": [],
+    "headerAttributes": [
+      "User-inum"
+    ]
+  },
+  "dataFormatConversionConf": {
+    "enabled": true,
+    "ignoreHttpMethod": [
+      "@jakarta.ws.rs.GET()"
+    ]
+  },
+  "plugins": [
+    {
+      "name": "admin",
+      "description": "admin-ui plugin",
+      "className": "io.jans.ca.plugin.adminui.rest.ApiApplication"
+    },
+    {
+      "name": "fido2",
+      "description": "fido2 plugin",
+      "className": "io.jans.configapi.plugin.fido2.rest.ApiApplication"
+    },
+    {
+      "name": "scim",
+      "description": "scim plugin",
+      "className": "io.jans.configapi.plugin.scim.rest.ApiApplication"
+    },
+    {
+      "name": "user-management",
+      "description": "user-management plugin",
+      "className": "io.jans.configapi.plugin.mgt.rest.ApiApplication"
+    }
+  ]
 }
 
 

@@ -32,15 +32,17 @@ import io.jans.as.server.service.external.ExternalUpdateTokenService;
 import io.jans.as.server.service.external.context.ExternalIntrospectionContext;
 import io.jans.as.server.service.external.context.ExternalUpdateTokenContext;
 import io.jans.as.server.service.stat.StatService;
+import io.jans.as.server.util.ServerUtil;
 import io.jans.as.server.util.TokenHashUtil;
 import io.jans.model.metric.MetricType;
 import io.jans.service.CacheService;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.inject.Inject;
 import java.util.Date;
 import java.util.List;
 import java.util.function.Supplier;
@@ -191,14 +193,24 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
                 log.trace("Failed to create access token with negative expiration time");
                 return null;
             }
+
+            JwtSigner jwtSigner = null;
             if (getClient().isAccessTokenAsJwt()) {
-                accessToken.setCode(createAccessTokenAsJwt(accessToken, context));
+                jwtSigner = createAccessTokenAsJwt(accessToken, context);
             }
 
-            boolean externalOk = externalUpdateTokenService.modifyAccessToken(accessToken, ExternalUpdateTokenContext.of(context));
+            boolean externalOk = externalUpdateTokenService.modifyAccessToken(accessToken, ExternalUpdateTokenContext.of(context, jwtSigner));
             if (!externalOk) {
                 log.trace("External script forbids access token creation.");
                 return null;
+            }
+
+            if (getClient().isAccessTokenAsJwt() && jwtSigner != null) {
+                final String accessTokenCode = jwtSigner.sign().toString();
+                if (log.isTraceEnabled())
+                    log.trace("Created access token JWT: {}", accessTokenCode + ", claims: " + jwtSigner.getJwt().getClaims().toJsonString());
+
+                accessToken.setCode(accessTokenCode);
             }
 
             final TokenEntity tokenEntity = asToken(accessToken);
@@ -212,13 +224,15 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
                 log.trace("Created plain access token: {}", accessToken.getCode());
 
             return accessToken;
+        } catch (WebApplicationException e) {
+            throw e;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             return null;
         }
     }
 
-    public String createAccessTokenAsJwt(AccessToken accessToken, ExecutionContext context) throws Exception {
+    public JwtSigner createAccessTokenAsJwt(AccessToken accessToken, ExecutionContext context) throws Exception {
         final User user = getUser();
         final Client client = getClient();
 
@@ -237,6 +251,8 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
         jwt.getClaims().setClaim("username", user != null ? user.getAttribute("displayName") : null);
         jwt.getClaims().setClaim("token_type", accessToken.getTokenType().getName());
         jwt.getClaims().setClaim("code", accessToken.getCode()); // guarantee uniqueness : without it we can get race condition
+        jwt.getClaims().setClaim("acr", getAcrValues());
+        jwt.getClaims().setClaim("auth_time", ServerUtil.dateToSeconds(getAuthenticationTime()));
         jwt.getClaims().setExpirationTime(accessToken.getExpirationDate());
         jwt.getClaims().setIssuedAt(accessToken.getCreationDate());
         jwt.getClaims().setSubjectIdentifier(getSub());
@@ -257,11 +273,7 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
             runIntrospectionScriptAndInjectValuesIntoJwt(jwt, context);
         }
 
-        final String accessTokenCode = jwtSigner.sign().toString();
-        if (log.isTraceEnabled())
-            log.trace("Created access token JWT: {}", accessTokenCode + ", claims: " + jwt.getClaims().toJsonString());
-
-        return accessTokenCode;
+        return jwtSigner;
     }
 
     private void runIntrospectionScriptAndInjectValuesIntoJwt(Jwt jwt, ExecutionContext executionContext) {
@@ -367,6 +379,8 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
             metricService.incCounter(MetricType.TOKEN_ID_TOKEN_COUNT);
 
             return idToken;
+        } catch (WebApplicationException e) {
+            throw e;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             return null;

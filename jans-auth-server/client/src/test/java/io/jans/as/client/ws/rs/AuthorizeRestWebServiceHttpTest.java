@@ -623,7 +623,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
                 .accessToken(accessToken)
                 .claimsPresence(JwtClaimName.ACCESS_TOKEN_HASH)
                 .notNullAuthenticationTime()
-                .notNullOxOpenIDConnectVersion()
+                .notNullJansOpenIDConnectVersion()
                 .notNullAuthenticationContextClassReference()
                 .notNullAuthenticationMethodReferences()
                 .check();
@@ -692,7 +692,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
                 .accessToken(accessToken)
                 .claimsPresence(JwtClaimName.ACCESS_TOKEN_HASH)
                 .notNullAuthenticationTime()
-                .notNullOxOpenIDConnectVersion()
+                .notNullJansOpenIDConnectVersion()
                 .notNullAuthenticationContextClassReference()
                 .notNullAuthenticationMethodReferences()
                 .check();
@@ -764,7 +764,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
                 .authorizationCode(code)
                 .claimsPresence(JwtClaimName.CODE_HASH)
                 .notNullAuthenticationTime()
-                .notNullOxOpenIDConnectVersion()
+                .notNullJansOpenIDConnectVersion()
                 .notNullAuthenticationContextClassReference()
                 .notNullAuthenticationMethodReferences()
                 .check();
@@ -836,7 +836,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
                 .authorizationCode(code)
                 .claimsPresence(JwtClaimName.CODE_HASH)
                 .notNullAuthenticationTime()
-                .notNullOxOpenIDConnectVersion()
+                .notNullJansOpenIDConnectVersion()
                 .notNullAuthenticationContextClassReference()
                 .notNullAuthenticationMethodReferences()
                 .check();
@@ -1028,7 +1028,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
                 .accessToken(accessToken)
                 .claimsPresence(JwtClaimName.CODE_HASH, JwtClaimName.ACCESS_TOKEN_HASH)
                 .notNullAuthenticationTime()
-                .notNullOxOpenIDConnectVersion()
+                .notNullJansOpenIDConnectVersion()
                 .notNullAuthenticationContextClassReference()
                 .notNullAuthenticationMethodReferences()
                 .check();
@@ -1105,7 +1105,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
                 .accessToken(accessToken)
                 .claimsPresence(JwtClaimName.CODE_HASH, JwtClaimName.ACCESS_TOKEN_HASH)
                 .notNullAuthenticationTime()
-                .notNullOxOpenIDConnectVersion()
+                .notNullJansOpenIDConnectVersion()
                 .notNullAuthenticationContextClassReference()
                 .notNullAuthenticationMethodReferences()
                 .check();
@@ -2459,7 +2459,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
                 .validateSignatureRSA(jwksUri, SignatureAlgorithm.RS256)
                 .claimsPresence(JwtClaimName.ACCESS_TOKEN_HASH)
                 .notNullAuthenticationTime()
-                .notNullOxOpenIDConnectVersion()
+                .notNullJansOpenIDConnectVersion()
                 .notNullAuthenticationContextClassReference()
                 .notNullAuthenticationMethodReferences()
                 .check();

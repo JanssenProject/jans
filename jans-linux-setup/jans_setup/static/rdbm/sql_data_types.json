@@ -26,6 +26,17 @@
       "type": "STRING"
     }
   },
+  "displayNameLocalized": {
+    "mysql": {
+      "type": "JSON"
+    },
+    "pgsql": {
+      "type": "JSONB"
+    },
+    "spanner": {
+      "type": "ARRAY<STRING(MAX)>"
+    }
+  },
   "givenName": {
     "mysql": {
       "size": 128,
@@ -301,6 +312,17 @@
       "type": "STRING(MAX)"
     }
   },
+  "jansLogoURILocalized": {
+    "mysql": {
+      "type": "JSON"
+    },
+    "pgsql": {
+      "type": "JSONB"
+    },
+    "spanner": {
+      "type": "ARRAY<STRING(MAX)>"
+    }
+  },
   "jansPolicyURI": {
     "mysql": {
       "type": "TINYTEXT"
@@ -310,6 +332,17 @@
     },
     "spanner": {
       "type": "STRING(MAX)"
+    }
+  },
+  "jansPolicyURILocalized": {
+    "mysql": {
+      "type": "JSON"
+    },
+    "pgsql": {
+      "type": "JSONB"
+    },
+    "spanner": {
+      "type": "ARRAY<STRING(MAX)>"
     }
   },
   "jansSectorIdentifierURI": {
@@ -334,6 +367,17 @@
       "type": "STRING(MAX)"
     }
   },
+  "jansClntURILocalized": {
+    "mysql": {
+      "type": "JSON"
+    },
+    "pgsql": {
+      "type": "JSONB"
+    },
+    "spanner": {
+      "type": "ARRAY<STRING(MAX)>"
+    }
+  },
   "jansTosURI": {
     "mysql": {
       "type": "TINYTEXT"
@@ -343,6 +387,17 @@
     },
     "spanner": {
       "type": "STRING(MAX)"
+    }
+  },
+  "jansTosURILocalized": {
+    "mysql": {
+      "type": "JSON"
+    },
+    "pgsql": {
+      "type": "JSONB"
+    },
+    "spanner": {
+      "type": "ARRAY<STRING(MAX)>"
     }
   },
   "jansJwt": {
@@ -777,6 +832,9 @@
     "mysql": {
       "type": "TEXT"
     },
+    "pgsql": {
+      "type": "TEXT"
+    },
     "spanner": {
       "type": "STRING(MAX)"
     }
@@ -785,12 +843,18 @@
     "mysql": {
       "type": "TEXT"
     },
+    "pgsql": {
+      "type": "TEXT"
+    },
     "spanner": {
       "type": "STRING(MAX)"
     }
   },
   "agFlowSt": {
     "mysql": {
+      "type": "TEXT"
+    },
+    "pgsql": {
       "type": "TEXT"
     },
     "spanner": {
@@ -802,9 +866,38 @@
       "size": 128,
       "type": "VARCHAR"
     },
+    "pgsql": {
+      "size": 128,
+      "type": "VARCHAR"
+    },
     "spanner": {
       "size": 128,
       "type": "STRING"
     }      
+  },
+  "adsPrjAssets": {
+    "mysql": {
+      "type": "LONGTEXT"
+    },
+    "pgsql": {
+      "type": "TEXT"
+    },
+    "spanner": {
+      "type": "STRING(MAX)"
+    }
+  },
+  "adsPrjDeplDetails": {
+    "mysql": {
+      "size": 2048,
+      "type": "VARCHAR"
+    },
+    "pgsql": {
+      "size": 2048,
+      "type": "VARCHAR"
+    },
+    "spanner": {
+      "size": 2048,
+      "type": "STRING"
+    }
   }
 }

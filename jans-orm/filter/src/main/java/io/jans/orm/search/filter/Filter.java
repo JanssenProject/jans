@@ -9,6 +9,7 @@ package io.jans.orm.search.filter;
 import java.util.List;
 
 import io.jans.orm.util.ArrayHelper;
+import io.jans.orm.util.StringHelper;
 
 /**
  * Simple filter without dependency to specific persistence filter mechanism
@@ -271,22 +272,22 @@ public class Filter {
         		return sb.append(this.filters[0].toString()).append(this.type.getSign()).append(this.assertionValue).append(')')
                 .toString();
         	} else {
-	            return sb.append(this.attributeName).append(this.type.getSign()).append(this.assertionValue).append(')')
+	            return sb.append(toStringAttributeName()).append(this.type.getSign()).append(this.assertionValue).append(')')
 	                    .toString();
         	}
         }
 
         if (FilterType.PRESENCE == this.type) {
-            return sb.append(this.attributeName).append("=").append(this.type.getSign()).append(')').toString();
+            return sb.append(toStringAttributeName()).append("=").append(this.type.getSign()).append(')').toString();
         }
 
         if (FilterType.APPROXIMATE_MATCH == this.type) {
-            return sb.append(this.attributeName).append(this.type.getSign()).append("=").append(this.assertionValue)
+            return sb.append(toStringAttributeName()).append(this.type.getSign()).append("=").append(this.assertionValue)
                     .append(')').toString();
         }
 
         if (FilterType.SUBSTRING == this.type) {
-            sb.append(this.attributeName).append(this.type.getSign());
+            sb.append(toStringAttributeName()).append(this.type.getSign());
             if (this.subInitial != null) {
                 sb.append(this.subInitial);
                 sb.append('*');
@@ -313,5 +314,17 @@ public class Filter {
 
         return super.toString();
     }
+
+	private String toStringAttributeName() {
+		if (StringHelper.isNotEmpty(this.attributeName)) {
+			return this.attributeName;
+		}
+		
+		if (ArrayHelper.isNotEmpty(this.filters)) {
+			return this.filters[0].toString();
+		}
+
+		return ""; 
+	}
 
 }

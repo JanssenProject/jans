@@ -5,7 +5,7 @@
 	<groupId>io.jans</groupId>
 	<artifactId>agama</artifactId>
 	<packaging>pom</packaging>
-	<version>1.0.3-SNAPSHOT</version>
+	<version>1.0.8-SNAPSHOT</version>
 	<name>agama parent</name>
 
     <prerequisites>
@@ -41,10 +41,7 @@
     </repositories>
 
     <modules>
-        <module>model</module>
         <module>transpiler</module>
-        <module>engine</module>
-        <module>inboundID</module>
     </modules>
 
     <dependencyManagement>

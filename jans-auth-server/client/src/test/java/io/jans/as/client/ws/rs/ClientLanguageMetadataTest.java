@@ -126,7 +126,7 @@ public class ClientLanguageMetadataTest extends BaseTest {
                 .validateSignatureRSAClientEngine(jwksUri, SignatureAlgorithm.RS256)
                 .claimsPresence(JwtClaimName.CODE_HASH)
                 .notNullAuthenticationTime()
-                .notNullOxOpenIDConnectVersion()
+                .notNullJansOpenIDConnectVersion()
                 .notNullAuthenticationContextClassReference()
                 .notNullAuthenticationMethodReferences()
                 .check();
@@ -146,16 +146,6 @@ public class ClientLanguageMetadataTest extends BaseTest {
                 .claimsPresence(JwtClaimName.WEBSITE, JwtClaimName.EMAIL_VERIFIED, JwtClaimName.PHONE_NUMBER)
                 .claimsPresence(JwtClaimName.PHONE_NUMBER_VERIFIED, JwtClaimName.ADDRESS, JwtClaimName.USER_NAME)
                 .claimsNoPresence("org_name", "work_phone")
-                .check();
-
-        // 7. Request client info
-        ClientInfoClient clientInfoClient = new ClientInfoClient(clientInfoEndpoint);
-        ClientInfoResponse clientInfoResponse = clientInfoClient.execClientInfo(accessToken);
-
-        showClient(clientInfoClient);
-        AssertBuilder.clientInfoResponse(clientInfoResponse)
-                .notNullClientInfoClaims()
-                .claimsPresence(CLIENT_INFO_NAME_CLAIMS)
                 .check();
     }
 
@@ -222,16 +212,6 @@ public class ClientLanguageMetadataTest extends BaseTest {
         AssertBuilder.userInfoResponse(response3)
                 .notNullClaimsPersonalData()
                 .claimsPresence(JwtClaimName.EMAIL)
-                .check();
-
-        // 5. Request client info
-        ClientInfoClient clientInfoClient = new ClientInfoClient(clientInfoEndpoint);
-        ClientInfoResponse clientInfoResponse = clientInfoClient.execClientInfo(accessToken);
-
-        showClient(clientInfoClient);
-        AssertBuilder.clientInfoResponse(clientInfoResponse)
-                .notNullClientInfoClaims()
-                .claimsPresence(CLIENT_INFO_NAME_CLAIMS)
                 .check();
     }
 

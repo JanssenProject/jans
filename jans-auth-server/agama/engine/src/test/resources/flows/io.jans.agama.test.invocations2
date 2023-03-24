@@ -1,0 +1,67 @@
+Flow io.jans.agama.test.invocations2
+    Basepath ""
+
+s = "agama"
+
+// null value passed for a primitive argument
+| E = Call s charAt null
+When E is null or E.class.name is not "java.lang.IllegalArgumentException"  
+    Finish false
+
+// pass null to a method that accepts it
+| E = Call s equals null
+When E is not null
+    Finish false
+    
+// pass null to a method that cannot accept it
+| E = Call s compareTo null
+When E is null or E.class.name is not "java.lang.NullPointerException"  
+    Finish false
+
+// pass an agama number where int expected
+i | E = Call java.lang.Integer#hashCode 10
+When E is not null
+    Finish false
+
+// pass an agama number where int expected
+i | E = Call java.lang.Integer#hashCode -10.5
+When E is not null
+    Finish false
+
+// pass an Integer where Integer expected
+i = Call java.lang.Integer#valueOf "10" 10
+| E = Call i compareTo i
+When E is not null
+    Finish false
+
+// pass an Integer where double expected
+| E = Call java.lang.Math#pow 3.1416 i
+When E is not null
+    Finish false
+
+// pass an agama number where String expected
+| E = Call java.lang.Integer#valueOf 10 2
+When E is null or E.class.name is not "java.lang.IllegalArgumentException"  
+    Finish false
+    
+// pass a one-lengthed agama string where char expected
+| E = Call java.lang.Character#hashCode "a"
+When E is not null
+    Finish false
+    
+// pass an agama string where char expected
+| E = Call java.lang.Character#hashCode s
+When E is null or E.class.name is not "java.lang.IllegalArgumentException"  
+    Finish false
+    
+// pass an Integer where String expected
+| E = Call java.lang.Integer#valueOf i 2
+When E is null or E.class.name is not "java.lang.IllegalArgumentException"  
+    Finish false
+    
+// invoke a static method using an object
+| E = Call i toBinaryString 255
+When E is not null
+    Finish false
+
+Finish true

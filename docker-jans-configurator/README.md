@@ -1,3 +1,11 @@
+---
+tags:
+- administration
+- reference
+- kubernetes
+- docker image
+---
+
 ## Overview
 
 Configuration manager is a special container used to load (generate/restore) and dump (backup) the configuration and secrets.
@@ -11,7 +19,7 @@ For bleeding-edge/unstable version, use `janssenproject/configurator:1.0.1_dev`.
 
 The following environment variables are supported by the container:
 
-- `CN_CONFIG_ADAPTER`: The config backend adapter, can be `consul` (default), `kubernetes`, or `google`.
+- `CN_CONFIG_ADAPTER`: The config backend adapter, can be `consul` (default), `kubernetes`, `google`, or `aws`.
 - `CN_CONFIG_CONSUL_HOST`: hostname or IP of Consul (default to `localhost`).
 - `CN_CONFIG_CONSUL_PORT`: port of Consul (default to `8500`).
 - `CN_CONFIG_CONSUL_CONSISTENCY`: Consul consistency mode (choose one of `default`, `consistent`, or `stale`). Default to `stale` mode.
@@ -24,9 +32,7 @@ The following environment variables are supported by the container:
 - `CN_CONFIG_KUBERNETES_NAMESPACE`: Kubernetes namespace (default to `default`).
 - `CN_CONFIG_KUBERNETES_CONFIGMAP`: Kubernetes configmaps name (default to `jans`).
 - `CN_CONFIG_KUBERNETES_USE_KUBE_CONFIG`: Load credentials from `$HOME/.kube/config`, only useful for non-container environment (default to `false`).
-- `CN_CONFIG_GOOGLE_SECRET_VERSION_ID`: Janssen configuration secret version ID in Google Secret Manager. Defaults to `latest`, which is recommended.
-- `CN_CONFIG_GOOGLE_SECRET_NAME_PREFIX`: Prefix for Janssen configuration secret in Google Secret Manager. Defaults to `jans`. If left intact `jans-configuration` secret will be created.
-- `CN_SECRET_ADAPTER`: The secrets' adapter, can be `vault` (default), `kubernetes`, or `google`.
+- `CN_SECRET_ADAPTER`: The secrets' adapter, can be `vault` (default), `kubernetes`, `google`, or `aws`.
 - `CN_SECRET_VAULT_SCHEME`: supported Vault scheme (`http` or `https`).
 - `CN_SECRET_VAULT_HOST`: hostname or IP of Vault (default to `localhost`).
 - `CN_SECRET_VAULT_PORT`: port of Vault (default to `8200`).
@@ -39,14 +45,21 @@ The following environment variables are supported by the container:
 - `CN_SECRET_KUBERNETES_NAMESPACE`: Kubernetes namespace (default to `default`).
 - `CN_SECRET_KUBERNETES_SECRET`: Kubernetes secrets name (default to `jans`).
 - `CN_SECRET_KUBERNETES_USE_KUBE_CONFIG`: Load credentials from `$HOME/.kube/config`, only useful for non-container environment (default to `false`).
-- `CN_SECRET_GOOGLE_SECRET_VERSION_ID`:  Janssen secret version ID in Google Secret Manager. Defaults to `latest`, which is recommended.
-- `CN_SECRET_GOOGLE_SECRET_MANAGER_PASSPHRASE`: Passphrase for Janssen secret in Google Secret Manager. This is recommended to be changed and defaults to `secret`.
-- `CN_SECRET_GOOGLE_SECRET_NAME_PREFIX`: Prefix for Janssen secret in Google Secret Manager. Defaults to `jans`. If left `jans-secret` secret will be created.
 - `CN_WAIT_MAX_TIME`: How long the startup "health checks" should run (default to `300` seconds).
 - `CN_WAIT_SLEEP_DURATION`: Delay between startup "health checks" (default to `10` seconds).
-- `GOOGLE_PROJECT_ID`: Google Project ID (default to empty string). Used when `CN_CONFIG_ADAPTER` or `CN_SECRET_ADAPTER` set to `google`.
-- `GOOGLE_APPLICATION_CREDENTIALS`: Path to Google credentials JSON file (default to `/etc/jans/conf/google-credentials.json`). Used when `CN_CONFIG_ADAPTER` or `CN_SECRET_ADAPTER` set to `google`.
+- `GOOGLE_APPLICATION_CREDENTIALS`: JSON file (contains Google credentials) that should be injected into container.
+- `GOOGLE_PROJECT_ID`: ID of Google project.
+- `CN_GOOGLE_SECRET_VERSION_ID`: Janssen secret version ID in Google Secret Manager. Defaults to `latest`, which is recommended.
+- `CN_GOOGLE_SECRET_NAME_PREFIX`: Prefix for Janssen secret in Google Secret Manager. Defaults to `jans`. If left `jans-secret` secret will be created.
+- `CN_GOOGLE_SECRET_MANAGER_PASSPHRASE`: Passphrase for Janssen secret in Google Secret Manager. This is recommended to be changed and defaults to `secret`.
 - `CN_CONFIGURATION_SKIP_INITIALIZED`: skip initialization if backend already initialized (default to `false`).
+- `CN_AWS_SECRETS_ENDPOINT_URL`: The URL of AWS secretsmanager service (if omitted, will use the one in specified region).
+- `CN_AWS_SECRETS_PREFIX`: The prefix name of the secrets (default to `jans`).
+- `CN_AWS_SECRETS_REPLICA_FILE`: The location of file contains replica regions definition (if any). This file is mostly used in primary region. Example of contents of the file: `[{"Region": "us-west-1"}]`.
+- `AWS_DEFAULT_REGION`: The default AWS Region to use, for example, `us-west-1` or `us-west-2`.
+- `AWS_SHARED_CREDENTIALS_FILE`: The location of the shared credentials file used by the client (see https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html).
+- `AWS_CONFIG_FILE`: The location of the config file used by the client (see https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html).
+- `AWS_PROFILE`: The default profile to use, if any.
 
 ## Commands
 
@@ -59,34 +72,46 @@ The following commands are supported by the container:
 
 The load command can be used either to generate or restore config and secret for the cluster.
 
+For fresh installation, generate the initial configuration and secret by creating `/path/to/host/volume/generate.json` similar to example below:
+```json
+{
+    "hostname": "demoexample.jans.io",
+    "country_code": "US",
+    "state": "TX",
+    "city": "Austin",
+    "admin_pw": "S3cr3t+pass",
+    "ldap_pw": "S3cr3t+pass",
+    "email": "s@jans.io",
+    "org_name": "Gluu Inc."
+}
+```
+
+**NOTE**: `generate.json` has optional attributes as seen below.
+
+- `auth_sig_keys`: space-separated key algorithm for signing (default to `RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512`)
+- `auth_enc_keys`: space-separated key algorithm for encryption (default to `RSA1_5 RSA-OAEP`)
+- `optional_scopes`: list of scopes that will be used (supported scopes are `ldap`, `scim`, `fido2`, `couchbase`, `redis`, `sql`, `casa`; default to empty list)
+- `ldap_pw`: user's password to access LDAP database (only used if `optional_scopes` list contains `ldap` scope)
+- `sql_pw`: user's password to access SQL database (only used if `optional_scopes` list contains `sql` scope)
+- `couchbase_pw`: user's password to access Couchbase database (only used if `optional_scopes` list contains `couchbase` scope)
+- `couchbase_superuser_pw`: superusers password to access Couchbase database (only used if `optional_scopes` list contains `couchbase` scope)
+- `salt`: user-defined salt (24 characters length); if omitted, salt will be generated automatically
+
+Example of generating `salt` value:
+
+```
+# using shell script
+cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 24 | head -n 1
+# output: NFAG5g4R0NSkAZXHL8t2DScL
+
+# using python oneliner
+python -c 'import random, string; print("".join(random.choices(string.ascii_letters + string.digits, k=24)))'
+# ouput: HsPzqiPkRzNySWlOVui8Ilmw
+```
+
 #### Docker
 
-1. To generate the initial configuration and secret, create `/path/to/host/volume/generate.json` similar to example below:
-
-    ```json
-    {
-        "hostname": "demoexample.jans.io",
-        "country_code": "US",
-        "state": "TX",
-        "city": "Austin",
-        "admin_pw": "S3cr3t+pass",
-        "ldap_pw": "S3cr3t+pass",
-        "email": "s@jans.io",
-        "org_name": "Gluu Inc."
-    }
-    ```
-
-    **NOTE**: `generate.json` has optional attributes to generate oxAuth signing and encryption keys based on specific algorithms.
-
-    - `auth_sig_keys`: space-separated key algorithm for signing (default to `RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512`)
-    - `auth_enc_keys`: space-separated key algorithm for encryption (default to `RSA1_5 RSA-OAEP`)
-    - `optional_scopes`: list of scopes that will be used (supported scopes are `ldap`, `scim`, `fido2`, `client-api`, `couchbase`, `redis`, `sql`, `casa`; default to empty list)
-    - `ldap_pw`: user's password to access LDAP database (only used if `optional_scopes` list contains `ldap` scope)
-    - `sql_pw`: user's password to access SQL database (only used if `optional_scopes` list contains `sql` scope)
-    - `couchbase_pw`: user's password to access Couchbase database (only used if `optional_scopes` list contains `couchbase` scope)
-    - `couchbase_superuser_pw`: superusers password to access Couchbase database (only used if `optional_scopes` list contains `couchbase` scope)
-
-2. Mount the volume into container:
+1. Mount the `generate.json` into container:
 
     ```sh
     docker run \
@@ -104,33 +129,13 @@ The load command can be used either to generate or restore config and secret for
 
 #### Kubernetes
 
-1. To generate the initial configuration and secret, create `/path/to/host/volume/generate.json` similar to example below:
-
-    ```json
-    {
-        "hostname": "demoexample.jans.io",
-        "country_code": "US",
-        "state": "TX",
-        "city": "Austin",
-        "admin_pw": "S3cr3t+pass",
-        "ldap_pw": "S3cr3t+pass",
-        "email": "s@gluu.local",
-        "org_name": "Gluu Inc."
-    }
-    ```
-
-    **NOTE**: `generate.json` has optional attributes to generate oxAuth signing and encryption keys based on specific algorithms.
-
-    - `auth_sig_keys`: space-separated key algorithm for signing (default to `RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512`)
-    - `auth_enc_keys`: space-separated key algorithm for encryption (default to `RSA1_5 RSA-OAEP`)
-
-2. Create config map `config-generate-params`
+1. Create config map `config-generate-params` to store the contents of `generate.json`
 
    ```sh
    kubectl create cm config-generate-params --from-file=generate.json
    ```
 
-3. Mount the configmap into container and apply the yaml:
+1. Mount the configmap into container and apply the yaml:
 
     ```yaml
     apiVersion: batch/v1

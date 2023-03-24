@@ -9,17 +9,13 @@ package io.jans.as.server.authorize.ws.rs;
 import com.google.common.collect.Maps;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.common.model.session.SessionId;
+import io.jans.as.common.model.session.SessionIdState;
 import io.jans.as.common.util.RedirectUri;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.authorize.AuthorizeRequestParam;
 import io.jans.as.model.authorize.AuthorizeResponseParam;
-import io.jans.as.model.common.BackchannelTokenDeliveryMode;
-import io.jans.as.model.common.GrantType;
-import io.jans.as.model.common.Prompt;
-import io.jans.as.model.common.ResponseMode;
-import io.jans.as.model.common.ResponseType;
-import io.jans.as.model.common.ScopeConstants;
-import io.jans.as.model.common.SubjectType;
+import io.jans.as.model.common.*;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.binding.TokenBindingMessage;
 import io.jans.as.model.crypto.binding.TokenBindingParseException;
@@ -32,39 +28,16 @@ import io.jans.as.server.ciba.CIBAPingCallbackService;
 import io.jans.as.server.ciba.CIBAPushTokenDeliveryService;
 import io.jans.as.server.model.authorize.AuthorizeParamsValidator;
 import io.jans.as.server.model.authorize.ScopeChecker;
-import io.jans.as.server.model.common.AccessToken;
-import io.jans.as.server.model.common.AuthorizationCode;
-import io.jans.as.server.model.common.AuthorizationGrant;
-import io.jans.as.server.model.common.AuthorizationGrantList;
-import io.jans.as.server.model.common.CIBAGrant;
-import io.jans.as.server.model.common.CibaRequestCacheControl;
-import io.jans.as.server.model.common.CibaRequestStatus;
-import io.jans.as.server.model.common.DefaultScope;
-import io.jans.as.server.model.common.DeviceAuthorizationCacheControl;
-import io.jans.as.server.model.common.DeviceAuthorizationStatus;
-import io.jans.as.server.model.common.DeviceCodeGrant;
-import io.jans.as.server.model.common.ExecutionContext;
-import io.jans.as.server.model.common.IdToken;
-import io.jans.as.server.model.common.RefreshToken;
-import io.jans.as.common.model.session.SessionId;
-import io.jans.as.common.model.session.SessionIdState;
+import io.jans.as.server.model.common.*;
 import io.jans.as.server.model.config.ConfigurationFactory;
 import io.jans.as.server.model.config.Constants;
 import io.jans.as.server.model.exception.AcrChangedException;
 import io.jans.as.server.model.exception.InvalidRedirectUrlException;
 import io.jans.as.server.model.exception.InvalidSessionStateException;
-import io.jans.as.server.model.ldap.ClientAuthorization;
+import io.jans.as.persistence.model.ClientAuthorization;
 import io.jans.as.server.model.token.JwrService;
 import io.jans.as.server.security.Identity;
-import io.jans.as.server.service.AttributeService;
-import io.jans.as.server.service.AuthenticationFilterService;
-import io.jans.as.server.service.ClientAuthorizationsService;
-import io.jans.as.server.service.ClientService;
-import io.jans.as.server.service.CookieService;
-import io.jans.as.server.service.DeviceAuthorizationService;
-import io.jans.as.server.service.RequestParameterService;
-import io.jans.as.server.service.SessionIdService;
-import io.jans.as.server.service.UserService;
+import io.jans.as.server.service.*;
 import io.jans.as.server.service.ciba.CibaRequestService;
 import io.jans.as.server.service.external.ExternalPostAuthnService;
 import io.jans.as.server.service.external.ExternalUpdateTokenService;
@@ -93,17 +66,12 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
 import java.net.URI;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.function.Function;
 
 import static io.jans.as.model.util.StringUtils.implode;
-import static org.apache.commons.lang3.BooleanUtils.isTrue;
+import static org.apache.commons.lang3.BooleanUtils.*;
 
 /**
  * Implementation for request authorization through REST web services.
@@ -113,6 +81,8 @@ import static org.apache.commons.lang3.BooleanUtils.isTrue;
  */
 @Path("/")
 public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
+
+    private static final String SUCCESSFUL_RP_REDIRECT_COUNT = "successful_rp_redirect_count";
 
     @Inject
     private Logger log;
@@ -198,6 +168,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             String codeChallenge, String codeChallengeMethod, String customResponseHeaders, String claims, String authReqId,
             HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext securityContext) {
 
+        authorizeRestWebServiceValidator.validateNotWebView(httpRequest);
+
         AuthzRequest authzRequest = new AuthzRequest();
         authzRequest.setHttpMethod(HttpMethod.GET);
         authzRequest.setScope(scope);
@@ -239,6 +211,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             String sessionId, String originHeaders,
             String codeChallenge, String codeChallengeMethod, String customResponseHeaders, String claims, String authReqId,
             HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext securityContext) {
+
+        authorizeRestWebServiceValidator.validateNotWebView(httpRequest);
 
         AuthzRequest authzRequest = new AuthzRequest();
         authzRequest.setHttpMethod(HttpMethod.POST);
@@ -361,9 +335,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         authorizeRestWebServiceValidator.validate(authzRequest, responseTypes, client);
         authorizeRestWebServiceValidator.validatePkce(authzRequest.getCodeChallenge(), authzRequest.getRedirectUriResponse());
 
-        authzRequestService.setDefaultAcrsIfNeeded(authzRequest, client);
+        authzRequestService.setAcrsIfNeeded(authzRequest);
 
-        checkScopes(responseTypes, prompts, client, scopes);
+        checkOfflineAccessScopes(responseTypes, prompts, client, scopes);
         checkResponseType(authzRequest, responseTypes, client);
 
         AuthorizationGrant authorizationGrant = null;
@@ -378,7 +352,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
         authzRequest.getAuditLog().setUsername(user.getUserId());
 
-        ExternalPostAuthnContext postAuthnContext = new ExternalPostAuthnContext(client, sessionUser, authzRequest.getHttpRequest(), authzRequest.getHttpResponse());
+        ExternalPostAuthnContext postAuthnContext = new ExternalPostAuthnContext(client, sessionUser, authzRequest, prompts);
         checkForceReAuthentication(authzRequest, prompts, client, postAuthnContext);
         checkForceAuthorization(authzRequest, prompts, client, postAuthnContext);
 
@@ -502,7 +476,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         ResponseBuilder builder = RedirectUtil.getRedirectResponseBuilder(authzRequest.getRedirectUriResponse().getRedirectUri(), authzRequest.getHttpRequest());
 
         addCustomHeaders(builder, authzRequest);
-        updateSessionRpRedirect(sessionUser);
+        updateSession(authzRequest, sessionUser);
 
         runCiba(authzRequest.getAuthReqId(), client, authzRequest.getHttpRequest(), authzRequest.getHttpResponse());
         processDeviceAuthorization(deviceAuthzUserCode, user);
@@ -559,6 +533,12 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     }
 
     private void checkPromptConsent(AuthzRequest authzRequest, List<Prompt> prompts, SessionId sessionUser, User user, ClientAuthorization clientAuthorization, boolean clientAuthorizationFetched) {
+        if (isTrue(appConfiguration.getDisablePromptConsent())) {
+            log.trace("Disabled prompt=consent (because disablePromptConsent=true).");
+            prompts.remove(Prompt.CONSENT);
+            return;
+        }
+
         if (prompts.contains(Prompt.CONSENT) || !isTrue(sessionUser.isPermissionGrantedForClient(authzRequest.getClientId()))) {
             if (!clientAuthorizationFetched) {
                 clientAuthorization = clientAuthorizationsService.find(user.getAttribute("inum"), authzRequest.getClient().getClientId());
@@ -571,7 +551,12 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         }
     }
 
-    private void checkPromptLogin(AuthzRequest authzRequest, List<Prompt> prompts) {
+    public void checkPromptLogin(AuthzRequest authzRequest, List<Prompt> prompts) {
+        if (isTrue(appConfiguration.getDisablePromptLogin())) {
+            log.trace("Disabled prompt=login (because disablePromptLogin=true).");
+            prompts.remove(Prompt.LOGIN);
+            return;
+        }
         if (prompts.contains(Prompt.LOGIN)) {
             boolean sessionUnauthenticated = false;
 
@@ -686,17 +671,19 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         }
     }
 
-    private void checkScopes(List<ResponseType> responseTypes, List<Prompt> prompts, Client client, Set<String> scopes) {
-        if (scopes.contains(ScopeConstants.OFFLINE_ACCESS) && !client.getTrustedClient()) {
-            if (!responseTypes.contains(ResponseType.CODE)) {
-                log.trace("Removed (ignored) offline_scope. Can't find `code` in response_type which is required.");
-                scopes.remove(ScopeConstants.OFFLINE_ACCESS);
-            }
+    public void checkOfflineAccessScopes(List<ResponseType> responseTypes, List<Prompt> prompts, Client client, Set<String> scopes) {
+        if (!scopes.contains(ScopeConstants.OFFLINE_ACCESS) || client.getTrustedClient()) {
+            return;
+        }
 
-            if (scopes.contains(ScopeConstants.OFFLINE_ACCESS) && !prompts.contains(Prompt.CONSENT)) {
-                log.error("Removed offline_access. Can't find prompt=consent. Consent is required for offline_access.");
-                scopes.remove(ScopeConstants.OFFLINE_ACCESS);
-            }
+        if (!responseTypes.contains(ResponseType.CODE)) {
+            log.trace("Removed (ignored) offline_scope. Can't find `code` in response_type which is required.");
+            scopes.remove(ScopeConstants.OFFLINE_ACCESS);
+        }
+
+        if (scopes.contains(ScopeConstants.OFFLINE_ACCESS) && !prompts.contains(Prompt.CONSENT) && !toBoolean(client.getAttributes().getAllowOfflineAccessWithoutConsent())) {
+            log.error("Removed offline_access. Can't find prompt=consent. Consent is required for offline_access.");
+            scopes.remove(ScopeConstants.OFFLINE_ACCESS);
         }
     }
 
@@ -910,11 +897,13 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         return builder.build();
     }
 
-    private void updateSessionRpRedirect(SessionId sessionUser) {
-        int rpRedirectCount = Util.parseIntSilently(sessionUser.getSessionAttributes().get("successful_rp_redirect_count"), 0);
+    private void updateSession(AuthzRequest authzRequest, SessionId sessionUser) {
+        authzRequestService.addDeviceSecretToSession(authzRequest, sessionUser);
+
+        int rpRedirectCount = Util.parseIntSilently(sessionUser.getSessionAttributes().get(SUCCESSFUL_RP_REDIRECT_COUNT), 0);
         rpRedirectCount++;
 
-        sessionUser.getSessionAttributes().put("successful_rp_redirect_count", Integer.toString(rpRedirectCount));
+        sessionUser.getSessionAttributes().put(SUCCESSFUL_RP_REDIRECT_COUNT, Integer.toString(rpRedirectCount));
         sessionIdService.updateSessionId(sessionUser);
     }
 
@@ -925,7 +914,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     private boolean unauthenticateSession(String sessionId, HttpServletRequest httpRequest, boolean isPromptFromJwt) {
         SessionId sessionUser = identity.getSessionId();
 
-        if (isPromptFromJwt && sessionUser != null && !sessionUser.getSessionAttributes().containsKey("successful_rp_redirect_count")) {
+        if (isPromptFromJwt && sessionUser != null && !sessionUser.getSessionAttributes().containsKey(SUCCESSFUL_RP_REDIRECT_COUNT)) {
             return false; // skip unauthentication because there were no at least one successful rp redirect
         }
 

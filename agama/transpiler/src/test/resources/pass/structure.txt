@@ -1,0 +1,38 @@
+//This flow does not make sense, however is syntactically valid and must pass validation
+Flow flow
+    Basepath ""
+    Inputs a1 a_1 a1A_
+
+When null is false or it is late
+    // °!"#$%&/()=?¡
+    Log "a" "A" "aha!" -10
+    Finish me
+Otherwise
+    When 1 is not 100000 and
+    car.model is "mayhem"
+        Finish "you"
+        
+    Match pi to
+        3.14
+            Finish obj
+        2.71
+            Finish nonsense.phi
+    Otherwise
+        Finish a[0]
+
+Repeat x[1] times max
+    o."-x" = RFAC "jojo.ftlh"
+    RFAC o[Y]
+
+    Quit When it is not early    
+    Log idx[0]
+    When number is prime
+        Finish men
+        
+Iterate over centuries using glasses
+    k9 = Iterate over planets using a_skirt
+        RRF "day_dream.ftl"
+        RRF "night_dream.ftl" angus
+        o = RRF "night_dream.ftl" angus true
+        
+    Log "what % % %?" "are" "you" "smoking"

@@ -7,7 +7,7 @@ tags:
 
 # Agama engine configuration
 
-The [engine](./index.md#agama-engine) is a piece of software in charge of parsing flows written in Agama DSL and put them into action. Some aspects of the engine are configurable and this is integral part of the general authentication server's JSON configuration. To learn how to perform changes in the server's configuration click [here](../../config-guide/jans-cli/im/im-jans-authorization-server.md).
+The [engine](README.md#agama-engine) is a piece of software in charge of parsing flows written in Agama DSL and put them into action. Some aspects of the engine are configurable and this is integral part of the general authentication server's JSON configuration. To learn how to perform changes in the server's configuration click [here](../../config-guide/jans-cli/im/im-jans-authorization-server.md).
 
 The properties of Agama engine configuration are described in the following:
 

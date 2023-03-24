@@ -1,5 +1,60 @@
 # Changelog
 
+## 1.0.7 (2023-02-22)
+
+
+### Bug Fixes
+
+* add 'java' to the list of restricted variable names [#3533](https://github.com/JanssenProject/jans/issues/3533) ([#3534](https://github.com/JanssenProject/jans/issues/3534)) ([a970d88](https://github.com/JanssenProject/jans/commit/a970d88d81f920973f3ba812db97448f135090a9))
+* **agama:** fix agama auth dependency which blocks build process [#3149](https://github.com/JanssenProject/jans/issues/3149) ([#3244](https://github.com/JanssenProject/jans/issues/3244)) ([8f9fee3](https://github.com/JanssenProject/jans/commit/8f9fee31c66ce08046258694e5e2d83a31e38b5d))
+* prepare 1.0.7 release ([ce02fd9](https://github.com/JanssenProject/jans/commit/ce02fd9322ab49d5bea4f6e88f316f931e9d2169))
+* prepare for 1.0.6 release ([9e4c8fb](https://github.com/JanssenProject/jans/commit/9e4c8fb4c0a1ef4779934558e8d8d40d8fedbabf))
+
+## 1.0.6 (2023-01-09)
+
+
+### Bug Fixes
+
+* add 'java' to the list of restricted variable names [#3533](https://github.com/JanssenProject/jans/issues/3533) ([#3534](https://github.com/JanssenProject/jans/issues/3534)) ([a970d88](https://github.com/JanssenProject/jans/commit/a970d88d81f920973f3ba812db97448f135090a9))
+* **agama:** fix agama auth dependency which blocks build process [#3149](https://github.com/JanssenProject/jans/issues/3149) ([#3244](https://github.com/JanssenProject/jans/issues/3244)) ([8f9fee3](https://github.com/JanssenProject/jans/commit/8f9fee31c66ce08046258694e5e2d83a31e38b5d))
+* avoid NPE when configuration is missing [#2857](https://github.com/JanssenProject/jans/issues/2857) ([#2863](https://github.com/JanssenProject/jans/issues/2863)) ([4a27091](https://github.com/JanssenProject/jans/commit/4a2709185bd7ba84c3230cb94d4efea940681742))
+* ensure non-empty array is generated [#2672](https://github.com/JanssenProject/jans/issues/2672) ([#3047](https://github.com/JanssenProject/jans/issues/3047)) ([47902bd](https://github.com/JanssenProject/jans/commit/47902bd8a5c7fe60cbac6f819787ee90726ac4a0))
+* prepare for 1.0.6 release ([9e4c8fb](https://github.com/JanssenProject/jans/commit/9e4c8fb4c0a1ef4779934558e8d8d40d8fedbabf))
+
+## [1.0.4](https://github.com/JanssenProject/jans/compare/agama-v1.0.3...agama-v1.0.4) (2022-11-08)
+
+
+### Bug Fixes
+
+* avoid NPE when configuration is missing [#2857](https://github.com/JanssenProject/jans/issues/2857) ([#2863](https://github.com/JanssenProject/jans/issues/2863)) ([4a27091](https://github.com/JanssenProject/jans/commit/4a2709185bd7ba84c3230cb94d4efea940681742))
+
+## 1.0.3 (2022-11-01)
+
+
+### Features
+
+* **agama:** add utility classes for inbound identity ([#2204](https://github.com/JanssenProject/jans/issues/2204)) ([29f58ee](https://github.com/JanssenProject/jans/commit/29f58ee0e6c84b4af5493cabcb19167bc7ffbe40))
+* **agama:** add utility classes for inbound identity ([#2231](https://github.com/JanssenProject/jans/issues/2231)) ([96e32a4](https://github.com/JanssenProject/jans/commit/96e32a407ec6c545b73a6fd103ed2ae5876bd500))
+* **agama:** add utility classes for inbound identity ([#2280](https://github.com/JanssenProject/jans/issues/2280)) ([ca6fdc9](https://github.com/JanssenProject/jans/commit/ca6fdc90256e4ef103bf50dc27cb694c940ba70b))
+* **agama:** add utility classes for inbound identity ([#2417](https://github.com/JanssenProject/jans/issues/2417)) ([2878bdd](https://github.com/JanssenProject/jans/commit/2878bdd737b4bd7f8f080113826a4bc4bf49ffba))
+* **jans-config-api:** agama flow endpoint ([#1898](https://github.com/JanssenProject/jans/issues/1898)) ([0e73306](https://github.com/JanssenProject/jans/commit/0e73306f7642a74a3ed2cf8a8687a1ea447aa7bd))
+
+
+### Bug Fixes
+
+* jans-config-api/plugins/sample/helloworld/pom.xml to reduce vulnerabilities ([#972](https://github.com/JanssenProject/jans/issues/972)) ([e2ae05e](https://github.com/JanssenProject/jans/commit/e2ae05e5515dd85a95c0a8520de57f673aba7918))
+* jans-eleven/pom.xml to reduce vulnerabilities ([#2676](https://github.com/JanssenProject/jans/issues/2676)) ([d27a7f9](https://github.com/JanssenProject/jans/commit/d27a7f99f22cb8f4bd445a3400224a38cb91eedc))
+
+
+### Documentation
+
+* add instructions to setup inbound identity flows [#2198](https://github.com/JanssenProject/jans/issues/2198) ([#2222](https://github.com/JanssenProject/jans/issues/2222)) ([d959b32](https://github.com/JanssenProject/jans/commit/d959b32cc9de0b8311d13ce25fcba162d0b0c5a3))
+
+
+### Miscellaneous Chores
+
+* release 1.0.2 ([43dead6](https://github.com/JanssenProject/jans/commit/43dead615f3508ca393c330c2db27a8fb9d1017a))
+
 ## 1.0.2 (2022-08-30)
 
 

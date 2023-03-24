@@ -11,10 +11,12 @@ import shutil
 import traceback
 import code
 import site
+import warnings
 
 from pathlib import Path
-
 from queue import Queue
+
+warnings.filterwarnings("ignore")
 
 __STATIC_SETUP_DIR__ = '/opt/jans/jans-setup/'
 queue = Queue()
@@ -128,7 +130,6 @@ from setup_app.installers.config_api import ConfigApiInstaller
 from setup_app.installers.jans_cli import JansCliInstaller
 from setup_app.installers.rdbm import RDBMInstaller
 # from setup_app.installers.oxd import OxdInstaller
-from setup_app.installers.client_api import ClientApiInstaller
 
 
 if base.snap:
@@ -242,7 +243,7 @@ if Config.profile == 'jans':
     fidoInstaller = FidoInstaller()
     scimInstaller = ScimInstaller()
     elevenInstaller = ElevenInstaller()
-    client_api_installer = ClientApiInstaller()
+
 jansCliInstaller = JansCliInstaller()
 
 # oxdInstaller = OxdInstaller()
@@ -324,6 +325,10 @@ def main():
 
         if Config.rdbm_install_type == static.InstallTypes.LOCAL:
             packageUtils.check_and_install_packages()
+
+        if Config.cb_install == static.InstallTypes.LOCAL:
+            print("Please wait while setup is installing couchbase package ...")
+            couchbaseInstaller.couchbaseInstall()
 
     # register post setup progress
     class PostSetup:
@@ -414,10 +419,6 @@ def main():
                         not Config.installed_instance and Config.get(elevenInstaller.install_var)):
                     elevenInstaller.start_installation()
 
-                if (Config.installed_instance and client_api_installer.install_var in Config.addPostSetupService) or (
-                        not Config.installed_instance and Config.get(client_api_installer.install_var)):
-                    client_api_installer.start_installation()
-
 
             if Config.install_jans_cli:
                 jansCliInstaller.start_installation()
@@ -425,7 +426,7 @@ def main():
 
             # if (Config.installed_instance and 'installOxd' in Config.addPostSetupService) or (not Config.installed_instance and Config.installOxd):
             #    oxdInstaller.start_installation()
-
+            jansInstaller.post_install_before_saving_properties()
             jansProgress.progress(PostSetup.service_name, "Saving properties")
             propertiesUtils.save_properties()
             time.sleep(2)
@@ -462,17 +463,17 @@ def main():
         do_installation()
         print('\n', static.colors.OKGREEN)
         if Config.install_config_api or Config.install_scim_server:
-            msg.installation_completed += "CLI available to manage Jannsen Server:\n"
+            msg.installation_completed += "Experimental CLI TUI is available to manage Jannsen Server:\n"
             if Config.install_config_api:
-                msg.installation_completed += "/opt/jans/jans-cli/config-cli.py"
+                msg.installation_completed += '/opt/jans/jans-cli/config-cli-tui.py'
                 if base.current_app.profile == static.SetupProfiles.OPENBANKING:
                     ca_dir = os.path.join(Config.output_dir, 'CA')
                     crt_fn = os.path.join(ca_dir, 'client.crt')
                     key_fn = os.path.join(ca_dir, 'client.key')
                     msg.installation_completed += ' -CC {} -CK {}'.format(crt_fn, key_fn)
                 msg.installation_completed +="\n"
-            if  Config.profile == 'jans' and Config.install_scim_server:
-                msg.installation_completed += "/opt/jans/jans-cli/scim-cli.py"
+            #if  Config.profile == 'jans' and Config.install_scim_server:
+            #    msg.installation_completed += "/opt/jans/jans-cli/scim-cli.py"
 
         msg_text = msg.post_installation if Config.installed_instance else msg.installation_completed.format(
             Config.hostname)
