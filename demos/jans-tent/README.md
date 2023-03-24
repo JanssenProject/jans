@@ -72,7 +72,7 @@ Sending a `POST` request to `/register` endpoint containing a `JSON` with the OP
 ```json
 {
     "op_url": "https://oidc-provider.jans.io",
-    "client_url": "https://my-client.mydomain.com"
+    "client_url": "https://localhost:9090"
 }
 ```
 
