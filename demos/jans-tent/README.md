@@ -36,7 +36,7 @@ A reliable OpenID client to be used in auth testing.
 
 * Generate test RP server self signed certs
 
-Generate `key.pem` and `cert.pem` at `jans-tent` project root, i.e:
+Generate `key.pem` and `cert.pem` at `jans-tent` project root folder (`jans/demos/jans-tent`) i.e:
 `openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -sha256 -days 365 -nodes`
 
 * Import your Auth Server certificate and add it to `CERT_PATH`, `SSL_CERT_FILE`, `REQUESTS_CA_BUNDLE`.
