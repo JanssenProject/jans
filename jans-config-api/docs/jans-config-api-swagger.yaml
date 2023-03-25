@@ -7685,19 +7685,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        adminCanAccess:
-          type: boolean
-        adminCanView:
-          type: boolean
-        adminCanEdit:
-          type: boolean
-        userCanAccess:
+        whitePagesCanView:
           type: boolean
         userCanView:
           type: boolean
-        whitePagesCanView:
+        userCanAccess:
           type: boolean
         userCanEdit:
+          type: boolean
+        adminCanEdit:
+          type: boolean
+        adminCanAccess:
+          type: boolean
+        adminCanView:
           type: boolean
         baseDn:
           type: string
@@ -8422,8 +8422,6 @@ components:
           type: object
           additionalProperties:
             type: string
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8433,6 +8431,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -8955,17 +8955,6 @@ components:
           format: int32
         displayName:
           type: string
-        authenticationMethod:
-          type: string
-          enum:
-          - client_secret_basic
-          - client_secret_post
-          - client_secret_jwt
-          - private_key_jwt
-          - access_token
-          - tls_client_auth
-          - self_signed_tls_client_auth
-          - none
         allAuthenticationMethods:
           uniqueItems: true
           type: array
@@ -8980,6 +8969,17 @@ components:
             - tls_client_auth
             - self_signed_tls_client_auth
             - none
+        authenticationMethod:
+          type: string
+          enum:
+          - client_secret_basic
+          - client_secret_post
+          - client_secret_jwt
+          - private_key_jwt
+          - access_token
+          - tls_client_auth
+          - self_signed_tls_client_auth
+          - none
         baseDn:
           type: string
         inum:
@@ -9087,10 +9087,10 @@ components:
           type: array
           items:
             type: object
-        displayValue:
-          type: string
         value:
           type: object
+        displayValue:
+          type: string
     LocalizedString:
       type: object
       properties:
