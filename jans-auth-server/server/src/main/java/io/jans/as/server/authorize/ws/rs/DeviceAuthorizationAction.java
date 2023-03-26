@@ -109,6 +109,7 @@ public class DeviceAuthorizationAction implements Serializable {
         SessionId sessionId = sessionIdService.getSessionId();
         Map<String, String> sessionAttributes = sessionId != null ? sessionId.getSessionAttributes() : new HashMap<>();
         sessionAttributes.put(Constants.DEVICE_AUTHORIZATION, Boolean.TRUE.toString());
+        sessionAttributes.remove(SESSION_USER_CODE);
 
         if (StringUtils.isNotBlank(userCode)) {
             sessionAttributes.put(SESSION_USER_CODE, userCode);
