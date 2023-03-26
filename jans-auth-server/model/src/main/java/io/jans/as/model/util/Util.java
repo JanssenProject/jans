@@ -303,6 +303,10 @@ public class Util {
         }
     }
 
+    public static int asInt(Integer integer, int fallback) {
+        return integer != null ? integer : fallback;
+    }
+
     public static Integer parseIntegerSilently(String intString) {
         try {
             return Integer.parseInt(intString);
