@@ -7,6 +7,7 @@
 package io.jans.as.server.authorize.ws.rs;
 
 import io.jans.as.common.util.RedirectUri;
+import io.jans.as.model.config.Constants;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.util.Util;
 import io.jans.as.server.i18n.LanguageBean;
@@ -39,9 +40,7 @@ import static io.jans.as.model.authorize.AuthorizeRequestParam.RESPONSE_TYPE;
 import static io.jans.as.model.authorize.AuthorizeRequestParam.SCOPE;
 import static io.jans.as.model.authorize.AuthorizeRequestParam.STATE;
 import static io.jans.as.model.util.StringUtils.EASY_TO_READ_CHARACTERS;
-import static io.jans.as.server.service.DeviceAuthorizationService.SESSION_ATTEMPTS;
-import static io.jans.as.server.service.DeviceAuthorizationService.SESSION_LAST_ATTEMPT;
-import static io.jans.as.server.service.DeviceAuthorizationService.SESSION_USER_CODE;
+import static io.jans.as.server.service.DeviceAuthorizationService.*;
 
 /**
  * Action used to process all requests related to device authorization.
@@ -113,6 +112,8 @@ public class DeviceAuthorizationAction implements Serializable {
     public void initializeSession() {
         SessionId sessionId = sessionIdService.getSessionId();
         Map<String, String> sessionAttributes = new HashMap<>();
+        sessionAttributes.put(Constants.DEVICE_AUTHORIZATION, Boolean.TRUE.toString());
+
         if (StringUtils.isNotBlank(userCode)) {
             sessionAttributes.put(SESSION_USER_CODE, userCode);
         }

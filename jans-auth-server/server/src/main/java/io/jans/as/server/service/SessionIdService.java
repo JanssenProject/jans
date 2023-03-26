@@ -178,8 +178,11 @@ public class SessionIdService {
             String sessionAcr = getAcr(session);
 
             if (StringUtils.isBlank(sessionAcr)) {
+                final boolean isDeviceAuthorization = sessionAttributes.containsKey(io.jans.as.model.config.Constants.DEVICE_AUTHORIZATION);
                 log.trace("Failed to fetch acr from session, attributes: {}", sessionAttributes);
-                return session;
+                if (isDeviceAuthorization) {
+                    return session;
+                }
             }
 
             List<String> acrValuesList = acrValuesList(acrValuesStr);
@@ -187,6 +190,8 @@ public class SessionIdService {
             if (isAcrChanged) {
                 Map<String, Integer> acrToLevel = externalAuthenticationService.acrToLevelMapping();
                 Integer sessionAcrLevel = Util.asInt(acrToLevel.get(externalAuthenticationService.scriptName(sessionAcr)), -1);
+
+                log.trace("acrChanged, acrToLevel: {}, sessionAcrLevel: {}", acrToLevel, sessionAcrLevel);
 
                 for (String acrValue : acrValuesList) {
                     Integer currentAcrLevel = acrToLevel.get(externalAuthenticationService.scriptName(acrValue));
