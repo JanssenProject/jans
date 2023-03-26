@@ -189,6 +189,8 @@ This usually boils down to create and launch a URL looking like `https://<your-h
 
 - If the flow to call receives input parameters, their values can be passed in the custom parameter as well. Use a hyphen to separate the flow name and the parameters expressed in JSON object format. For example, if the flow had inputs  `height` and `color`, you can use `test-{"height": 190, "color": "blue"}` for the value of `agama_flow`. Ensure to apply proper URL-encoding beforehand. In this case, the actual value would be `test-%7B%22height%22%3A+190%2C+%22color%22%3A+%22blue%22%7D`. If certain inputs are not provided, `null` values will be assigned for them
 
+- If for some reason you are not able to set the given custom parameter in the authorization request, you can set its value in the configuration property `default_flow_name` of the bridge script. Note this will launch the same fixed flow at all times
+
 ### Testing
 
 Launch the authentication request in a web browser - preferably in a private window, a.k.a. incognito. You will be taken to a plain HTML page with a salutation and a "continue" button. After submission, a quick "Redirecting you" page will be shown and you will be taken probably to an error page showing "Unable to determine identity of user". That's expected.
