@@ -180,7 +180,7 @@ public class SessionIdService {
             if (StringUtils.isBlank(sessionAcr)) {
                 final boolean isDeviceAuthorization = sessionAttributes.containsKey(io.jans.as.model.config.Constants.DEVICE_AUTHORIZATION);
                 log.trace("Failed to fetch acr from session, attributes: {}", sessionAttributes);
-                if (isDeviceAuthorization) {
+                if (!isDeviceAuthorization) { // force initialization if session acr is not set and session was created by device authorization
                     return session;
                 }
             }
