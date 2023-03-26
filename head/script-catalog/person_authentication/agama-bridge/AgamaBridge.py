@@ -35,8 +35,13 @@ class PersonAuthentication(PersonAuthenticationType):
         if self.cust_param_name == None:
             print "Agama. Custom parameter name not referenced via property '%s'" % prop
             return False
+
+        prop = "default_flow_name"
+        self.default_flow_name = self.configProperty(configurationAttributes, prop)
             
-        print "Agama. Request param '%s' will be used to pass flow inputs" % self.cust_param_name
+        print "Agama. Request param '%s' will be used to pass flow name and inputs" % self.cust_param_name
+        print "Agama. When '%s' is missing, the flow to launch will be '%s'" % (self.cust_param_name, self.default_flow_name)
+
         print "Agama. Initialized successfully"
         return True
 
@@ -109,9 +114,15 @@ class PersonAuthentication(PersonAuthenticationType):
                 return False
                 
             param = session.getSessionAttributes().get(self.cust_param_name) 
-            if param == None:
+            if StringHelper.isEmpty(param):
                 print "Agama. Request param '%s' is missing or has no value" % self.cust_param_name
-                return False
+                
+                param = self.default_flow_name
+                if StringHelper.isEmpty(param):
+                    print "Agama. Default flow name is not set either..." 
+
+                    print "Agama. Unable to determine the Agama flow to launch. Check the docs"
+                    return False
             
             (qn, ins) = self.extractParams(param)
             if qn == None:
