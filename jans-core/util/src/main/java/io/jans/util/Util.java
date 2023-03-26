@@ -21,6 +21,10 @@ public final class Util {
 
     private Util() { }
 
+    public static boolean isBuiltInPasswordAuthn(String acr) {
+        return OxConstants.SCRIPT_TYPE_INTERNAL_RESERVED_NAME.equalsIgnoreCase(acr);
+    }
+
     /**
      * Converts an array to the appropriate ArrayList
      *
