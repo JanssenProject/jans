@@ -185,6 +185,7 @@ public class AuthorizeService {
 
             if (sessionAttribute.containsKey(AuthorizeRequestParam.PROMPT)) {
                 List<Prompt> prompts = Prompt.fromString(sessionAttribute.get(AuthorizeRequestParam.PROMPT), " ");
+                prompts.remove(Prompt.LOGIN);
                 prompts.remove(Prompt.CONSENT);
                 sessionAttribute.put(AuthorizeRequestParam.PROMPT, io.jans.as.model.util.StringUtils.implodeEnum(prompts, " "));
             }
