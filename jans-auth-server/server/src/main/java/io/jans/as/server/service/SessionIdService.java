@@ -201,7 +201,7 @@ public class SessionIdService {
 
                     // Requested acr method not enabled
                     if (currentAcrLevel == null) {
-                        if (io.jans.util.Util.isBuiltInPasswordAuthn(acrValue)) {
+                        if (Util.isBuiltInPasswordAuthn(acrValue)) {
                             return session;
                         }
                         throw new AcrChangedException(false);
