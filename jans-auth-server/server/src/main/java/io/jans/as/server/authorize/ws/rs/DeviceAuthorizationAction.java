@@ -30,6 +30,7 @@ import org.slf4j.Logger;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -106,7 +107,7 @@ public class DeviceAuthorizationAction implements Serializable {
      */
     public void initializeSession() {
         SessionId sessionId = sessionIdService.getSessionId();
-        Map<String, String> sessionAttributes = sessionId.getSessionAttributes();
+        Map<String, String> sessionAttributes = sessionId != null ? sessionId.getSessionAttributes() : new HashMap<>();
         sessionAttributes.put(Constants.DEVICE_AUTHORIZATION, Boolean.TRUE.toString());
 
         if (StringUtils.isNotBlank(userCode)) {
