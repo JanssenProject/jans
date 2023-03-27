@@ -643,6 +643,9 @@ class PropertiesUtils(SetupUtils):
 
 
     def prompt_for_backend(self):
+        if Config.installed_instance:
+            return
+
         print('Chose Backend Type:')
 
         backend_types = [
@@ -918,16 +921,16 @@ class PropertiesUtils(SetupUtils):
             Config.jans_max_mem = self.getPrompt("Enter maximum RAM for applications in MB", str(Config.jans_max_mem))
 
 
-        admin_password =  Config.ldapPass or Config.cb_password or Config.rdbm_password or self.getPW(special='.*=!%&+/-')
+            admin_password =  Config.ldapPass or Config.cb_password or Config.rdbm_password or self.getPW(special='.*=!%&+/-')
 
-        while True:
-            adminPass = self.getPrompt("Enter Password for Admin User", admin_password)
-            if len(adminPass) > 3:
-                break
-            else:
-                print("Admin password should be at least four characters in length.")
+            while True:
+                adminPass = self.getPrompt("Enter Password for Admin User", admin_password)
+                if len(adminPass) > 3:
+                    break
+                else:
+                    print("Admin password should be at least four characters in length.")
 
-        Config.admin_password = adminPass
+            Config.admin_password = adminPass
 
         if Config.profile == 'openbanking':
             self.openbanking_properties()
