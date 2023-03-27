@@ -58,22 +58,25 @@ class ConfigApiInstaller(JettyInstaller):
         jettyServiceWebapps = os.path.join(self.jetty_base, self.service_name, 'webapps')
         self.copyFile(self.source_files[0][0], jettyServiceWebapps)
 
-        self.copyFile(self.source_files[3][0], self.libDir)
-        user_mgt_plugin_path = os.path.join(self.libDir, os.path.basename(self.source_files[3][0]))
-        self.add_extra_class(user_mgt_plugin_path)
+        self.install_plugin('user-mgt-plugin')
 
         if Config.install_scim_server:
-            self.copyFile(self.source_files[2][0], self.libDir)
-            scim_plugin_path = os.path.join(self.libDir, os.path.basename(self.source_files[2][0]))
-            self.add_extra_class(scim_plugin_path)
+            self.install_plugin('scim-plugin')
 
         if Config.installFido2:
-            self.copyFile(self.source_files[4][0], self.libDir)
-            fido2_plugin_path = os.path.join(self.libDir, os.path.basename(self.source_files[4][0]))
-            self.add_extra_class(fido2_plugin_path)
+            self.install_plugin('fido2-plugin')
 
         self.enable()
 
+
+    def install_plugin(self, plugin):
+        for source_file in self.source_files:
+            if plugin in source_file[0]:
+                self.logIt("Installing Jans Config Api Plugin {}".format(plugin))
+                self.copyFile(source_file[0], self.libDir)
+                plugin_path = os.path.join(self.libDir, os.path.basename(source_file[0]))
+                self.add_extra_class(plugin_path)
+                break
 
     def extract_files(self):
         base.extract_file(base.current_app.jans_zip, 'jans-config-api/server/src/main/resources/log4j2.xml', self.custom_config_dir)
