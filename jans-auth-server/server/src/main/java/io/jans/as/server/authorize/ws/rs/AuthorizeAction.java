@@ -284,6 +284,7 @@ public class AuthorizeAction {
             Map<String, String> requestParameterMap = requestParameterService.getAllowedParameters(parameterMap);
 
             String redirectTo = "/login.xhtml";
+            requestParameterMap.put(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, OxConstants.SCRIPT_TYPE_INTERNAL_RESERVED_NAME);
 
             List<String> acrValuesList = sessionIdService.acrValuesList(this.acrValues);
             boolean useExternalAuthenticator = externalAuthenticationService.isEnabled(AuthenticationScriptUsageType.INTERACTIVE);

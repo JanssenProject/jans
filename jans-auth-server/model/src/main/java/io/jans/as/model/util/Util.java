@@ -16,6 +16,7 @@ import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
 import io.jans.as.model.common.HasParamName;
 import io.jans.orm.annotation.AttributeEnum;
 import io.jans.orm.model.base.LocalizedString;
+import io.jans.util.OxConstants;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -301,6 +302,14 @@ public class Util {
         } catch (Exception e) {
             return defaultValue;
         }
+    }
+
+    public static boolean isBuiltInPasswordAuthn(String acr) {
+        return OxConstants.SCRIPT_TYPE_INTERNAL_RESERVED_NAME.equalsIgnoreCase(acr);
+    }
+
+    public static int asInt(Integer integer, int fallback) {
+        return integer != null ? integer : fallback;
     }
 
     public static Integer parseIntegerSilently(String intString) {
