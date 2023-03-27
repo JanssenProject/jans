@@ -117,12 +117,6 @@ paths:
       summary: Is license configuration valid
       description: Is license configuration valid
       operationId: check-adminui-license-config
-      requestBody:
-        description: LicenseRequest object
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/LicenseRequest'
       responses:
         "200":
           description: Ok
