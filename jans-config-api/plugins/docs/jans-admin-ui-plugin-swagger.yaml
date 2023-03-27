@@ -149,11 +149,11 @@ paths:
       description: Save SSA in configuration
       operationId: adminui-post-ssa
       requestBody:
-        description: LicenseRequest object
+        description: SSARequest object
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/LicenseRequest'
+              $ref: '#/components/schemas/SSARequest'
       responses:
         "200":
           description: Ok

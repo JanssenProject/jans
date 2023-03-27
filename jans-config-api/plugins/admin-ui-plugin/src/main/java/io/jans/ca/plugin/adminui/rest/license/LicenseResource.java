@@ -98,7 +98,7 @@ public class LicenseResource {
     @Operation(summary = "Save SSA in configuration", description = "Save SSA in configuration", operationId = "adminui-post-ssa", tags = {
             "Admin UI - License"}, security = @SecurityRequirement(name = "oauth2", scopes = {
             SCOPE_LICENSE_WRITE}))
-    @RequestBody(description = "LicenseRequest object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LicenseRequest.class)))
+    @RequestBody(description = "SSARequest object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SSARequest.class)))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LicenseApiResponse.class, description = "License response"))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LicenseApiResponse.class, description = "License response"))),
