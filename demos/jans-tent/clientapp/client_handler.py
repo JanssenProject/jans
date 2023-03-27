@@ -1,7 +1,7 @@
 '''
 Project: Test Auth Client
 Author: Christian Hawk
-Copyright 2023 Christian Hawk
+
 
 Licensed under the Apache License, Version 2.0 (the 'License');
 you may not use this file except in compliance with the License.
@@ -73,8 +73,8 @@ class ClientHandler:
         """Discover op information on .well-known/open-id-configuration
         :param op_url: [description], defaults to __op_url
         :type op_url: str, optional
-        :param discovery: [flask_oidc.discovery injection], defaults to discovery
-        :type discovery: discovery, optional
+        :param disc: [flask_oidc.discovery injection], defaults to discovery
+        :type disc: discovery, optional
         :return: [data retrieved from OP url]
         :rtype: dict3
         """
