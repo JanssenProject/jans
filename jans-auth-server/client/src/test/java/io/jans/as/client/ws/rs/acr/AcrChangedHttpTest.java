@@ -30,7 +30,7 @@ import static org.testng.Assert.*;
 public class AcrChangedHttpTest extends BaseTest {
 
     /**
-     * Device authorization complete flow.
+     * Acr change complete flow.
      */
     @Parameters({"userId", "userSecret"})
     @Test

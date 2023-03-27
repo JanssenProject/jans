@@ -28,7 +28,10 @@ import java.util.Set;
  */
 public class AuthorizeParamsValidator {
 
-    private final static Logger log = LoggerFactory.getLogger(AuthorizeParamsValidator.class);
+    private static final Logger log = LoggerFactory.getLogger(AuthorizeParamsValidator.class);
+
+    private AuthorizeParamsValidator() {
+    }
 
     /**
      * Validates the parameters for an authorization request.
