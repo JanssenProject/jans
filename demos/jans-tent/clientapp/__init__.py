@@ -1,7 +1,7 @@
 '''
 Project: Test Auth Client
 Author: Christian Hawk
-Copyright 2023 Christian Hawk
+
 
 Licensed under the Apache License, Version 2.0 (the 'License');
 you may not use this file except in compliance with the License.
@@ -26,13 +26,17 @@ from flask import (Flask, jsonify, redirect, render_template, request, session,
 
 from . import config as cfg
 from .client_handler import ClientHandler
+from flask.logging import default_handler
+
 
 oauth = OAuth()
-
+logging.getLogger("flask-oidc")
 logging.basicConfig(
     level=logging.DEBUG,
     format='[%(asctime)s] %(levelname)s %(name)s in %(module)s : %(message)s',
     filename='test-client.log')
+root = logging.getLogger()
+root.addHandler(default_handler)
 '''
 dictConfig({
     'version': 1,
