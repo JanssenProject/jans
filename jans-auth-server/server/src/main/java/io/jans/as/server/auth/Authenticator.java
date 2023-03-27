@@ -28,6 +28,7 @@ import io.jans.jsf2.service.FacesService;
 import io.jans.model.AuthenticationScriptUsageType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.security.Credentials;
+import io.jans.util.OxConstants;
 import io.jans.util.StringHelper;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -314,7 +315,8 @@ public class Authenticator {
         initCustomAuthenticatorVariables(sessionIdAttributes);
         boolean useExternalAuthenticator = externalAuthenticationService
                 .isEnabled(AuthenticationScriptUsageType.INTERACTIVE);
-        if (useExternalAuthenticator && !StringHelper.isEmpty(this.authAcr)) {
+        if (useExternalAuthenticator && !StringHelper.isEmpty(this.authAcr) &&
+                !OxConstants.SCRIPT_TYPE_INTERNAL_RESERVED_NAME.equalsIgnoreCase(authAcr)) {
             initCustomAuthenticatorVariables(sessionIdAttributes);
             if ((this.authStep == null) || StringHelper.isEmpty(this.authAcr)) {
                 logger.error("Failed to determine authentication mode");
@@ -604,7 +606,7 @@ public class Authenticator {
         }
 
         initCustomAuthenticatorVariables(sessionIdAttributes);
-        if (StringHelper.isEmpty(this.authAcr)) {
+        if (StringHelper.isEmpty(this.authAcr) || OxConstants.SCRIPT_TYPE_INTERNAL_RESERVED_NAME.equalsIgnoreCase(this.authAcr)) {
             return Constants.RESULT_SUCCESS;
         }
 
