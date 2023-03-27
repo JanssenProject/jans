@@ -24,7 +24,7 @@ RUN python3 -m ensurepip \
 # =====================
 
 # janssenproject/jans SHA commit
-ENV JANS_SOURCE_VERSION=60f66f17cb1b00136a0c7ec4ae30ef3e867ab558
+ENV JANS_SOURCE_VERSION=b3756af0077aa38e1d8d2b11521c0e6897d3f739
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCRIPT_CATALOG_DIR=docs/script-catalog
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
@@ -167,13 +167,12 @@ ENV CN_CACHE_TYPE=NATIVE_PERSISTENCE \
 # misc
 # ====
 
-LABEL name="janssenproject/persistence-loader" \
-    maintainer="Janssen Project <support@jans.io>" \
-    vendor="Janssen Project" \
-    version="1.0.11" \
-    release="dev" \
-    summary="Janssen Authorization Server Persistence loader" \
-    description="Generate initial data for persistence layer"
+LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/persistence-loader" \
+    org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
+    org.opencontainers.image.vendor="Janssen Project" \
+    org.opencontainers.image.version="1.0.11" \
+    org.opencontainers.image.title="Janssen Authorization Server Persistence loader" \
+    org.opencontainers.image.description="Generate initial data for persistence layer"
 
 RUN mkdir -p /app/custom_ldif /etc/certs /etc/jans/conf
 

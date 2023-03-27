@@ -113,13 +113,12 @@ ENV CN_WAIT_MAX_TIME=300 \
 # misc
 # ====
 
-LABEL name="janssenproject/configurator" \
-    maintainer="Janssen Project <support@jans.io>" \
-    vendor="Janssen Project" \
-    version="1.0.11" \
-    release="dev" \
-    summary="Janssen Configuration Manager" \
-    description="Manage config and secret"
+LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/configurator" \
+    org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
+    org.opencontainers.image.vendor="Janssen Project" \
+    org.opencontainers.image.version="1.0.11" \
+    org.opencontainers.image.title="Janssen Configuration Manager" \
+    org.opencontainers.image.description="Manage config and secret"
 
 RUN mkdir -p /etc/certs \
     /etc/jans/conf \

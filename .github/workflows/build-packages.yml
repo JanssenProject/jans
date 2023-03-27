@@ -53,7 +53,7 @@ jobs:
     steps:
     - name: Getting build dependencies
       id: get_dependencies
-      run: |      
+      run: |
          git clone -b jans https://github.com/GluuFederation/packaging
          mkdir -p jans/jans-src/opt/
          cp -rp packaging/${{ matrix.build_files }}/* jans/
@@ -81,11 +81,11 @@ jobs:
       run: |
         echo "version=$(curl https://api.github.com/repos/${{ github.repository }}/releases -s | grep "tag_name" | cut -d '"' -f 4 | grep -o '^\v.*' | head -n 1 | cut -d 'v' -f 2)" >> $GITHUB_OUTPUT
         TAG=$(curl https://api.github.com/repos/${{ github.repository }}/releases -s | grep "tag_name" | cut -d '"' -f 4 | grep -o '^\v.*' | head -n 1)
-        echo "tag=$TAG" >> $GITHUB_OUTPUT
         echo "PACKAGE_PREFIX=jans" >> ${GITHUB_ENV}
         #If on schedule build nightly packages
         if [ ${{ github.event_name }} = "schedule" ] || [ ${{ github.event.inputs.nightly }} = true ]; then
           echo "Activating nightly build"
+          TAG=$(curl https://api.github.com/repos/${{ github.repository }}/releases -s | grep "tag_name" | grep "nightly" | cut -d '"' -f 4 | grep -o '^\v.*' | head -n 1)
           mkdir test && cd test
           git clone https://github.com/JanssenProject/jans
           VERSION=$(cat jans/docker-jans-auth-server/Dockerfile | grep "ENV CN_VERSION" | awk -F "[=-]" '{print $2}')
@@ -93,6 +93,7 @@ jobs:
           echo "PACKAGE_PREFIX=jans-nightly-build" >> ${GITHUB_ENV}
           echo "version=$VERSION" >> $GITHUB_OUTPUT
         fi
+        echo "tag=$TAG" >> $GITHUB_OUTPUT
 
     - name: Print Version
       run: |
@@ -232,16 +233,17 @@ jobs:
       id: previoustag
       run: |
         TAG=$(curl https://api.github.com/repos/${{ github.repository }}/releases -s | grep "tag_name" | cut -d '"' -f 4 | grep -o '^\v.*' | head -n 1)
-        echo "tag=$TAG" >> $GITHUB_OUTPUT
         echo "SETUP_PREFIX=jans-linux" >> ${GITHUB_ENV}
         echo "TUI_PREFIX=jans-cli-tui-linux" >> ${GITHUB_ENV}
         #If on schedule build nightly packages
         if [ ${{ github.event_name }} = "schedule" ] || [ ${{ github.event.inputs.nightly }} = true ]; then
           echo "Activating nightly build"
+          TAG=$(curl https://api.github.com/repos/${{ github.repository }}/releases -s | grep "tag_name" | grep "nightly" | cut -d '"' -f 4 | grep -o '^\v.*' | head -n 1)
           VERSION=$(cat docker-jans-auth-server/Dockerfile | grep "ENV CN_VERSION" | awk -F "[=-]" '{print $2}')
           echo "SETUP_PREFIX=jans-linux-$VERSION-nightly-build" >> ${GITHUB_ENV}
           echo "TUI_PREFIX=jans-cli-tui-linux-$VERSION-nightly-build" >> ${GITHUB_ENV}
         fi
+        echo "tag=$TAG" >> $GITHUB_OUTPUT
     - name: Print Version
       run: |
         echo "${{ steps.previoustag.outputs.tag }}"
