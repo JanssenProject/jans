@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#janssen-servers-fido-u2f-endpoint" class="md-skip">
+        <a href="#janssens-super-gluu-endpoint" class="md-skip">
           Skip to content
         </a>
       
@@ -8742,9 +8742,57 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#janssen-servers-fido-u2f-endpoint" class="md-nav__link">
-    Janssen Server's FIDO U2F endpoint
+  <a href="#janssens-super-gluu-endpoint" class="md-nav__link">
+    Janssen's Super Gluu endpoint
   </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    Prerequisites:
+  </a>
+  
+    <nav class="md-nav" aria-label="Prerequisites:">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-install-the-fido2-server" class="md-nav__link">
+    A. Install the FIDO2 server:
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#b-enable-the-super-gluu-endpoint" class="md-nav__link">
+    B. Enable the Super Gluu endpoint:
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#c-mobile-device-with-super-gluu-installed" class="md-nav__link">
+    C. Mobile device with Super Gluu installed
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#d-publicly-discoverable-dns" class="md-nav__link">
+    D. Publicly Discoverable DNS :
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#e-push-notification-server" class="md-nav__link">
+    E. Push Notification server:
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -8756,25 +8804,18 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#prerequisites" class="md-nav__link">
-    Prerequisites
+  <a href="#interception-script" class="md-nav__link">
+    Interception script
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#authentication-workflows" class="md-nav__link">
-    Authentication Workflows
+  <a href="#a-two-step-flow-default-mode" class="md-nav__link">
+    A. Two step flow (Default mode):
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#a-default-two-step-flow" class="md-nav__link">
-    A. Default Two step flow:
-  </a>
-  
-    <nav class="md-nav" aria-label="A. Default Two step flow:">
+    <nav class="md-nav" aria-label="A. Two step flow (Default mode):">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -8800,8 +8841,8 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#c-device-data" class="md-nav__link">
-    C. Device data
+  <a href="#c-registration-data" class="md-nav__link">
+    C. Registration data
   </a>
   
 </li>
@@ -8841,26 +8882,6 @@
   <a href="#notes-for-administrator" class="md-nav__link">
     Notes for administrator:
   </a>
-  
-    <nav class="md-nav" aria-label="Notes for administrator:">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#a-configure-etccertssuper_gluu_credsjson" class="md-nav__link">
-    A. Configure /etc/certs/super_gluu_creds.json:
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#b-notification-server" class="md-nav__link">
-    B. Notification server:
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -8938,26 +8959,27 @@
 
   <h1>Index</h1>
 
-<p><a href="supergluu.md">Super Gluu</a> is a push-notification two-factor authentication (2FA) mobile app built to work with the Janssen Server. </p>
-<h3 id="janssen-servers-fido-u2f-endpoint">Janssen Server's FIDO U2F endpoint<a class="headerlink" href="#janssen-servers-fido-u2f-endpoint" title="Permanent link">#</a></h3>
-<p>Super Gluu uses public-key encryption as specified in the <a href="https://fidoalliance.org/specifications/overview/">FIDO U2F authentication standard</a>. Upon device enrollment, Super Gluu registers its public key against the Janssen Server's FIDO U2F endpoint. When authentication happens, there is a challenge response to ensure that the device has the corresponding private key. </p>
-<p>The URI to invoke registeration and authentication of Super Gluu credentials in the Janssen Auth Server can be found at <code>https://&lt;my.jans.server&gt;/.well-known/fido-configuration</code></p>
-<h3 id="user-and-developer-guides">User and Developer Guides<a class="headerlink" href="#user-and-developer-guides" title="Permanent link">#</a></h3>
-<p>User and Developer Guides can be found on the <a href="https://gluu.org/docs/supergluu">Super Gluu docs site</a>. </p>
-<h3 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">#</a></h3>
-<ul>
-<li>
-<p>An Internet accessible (non-internal or localhost) Janssen Server with DNS pointing at the public Internet address of the server </p>
-</li>
-<li>
-<p><a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/script-catalog/person_authentication/super-gluu-external-authenticator/SuperGluuExternalAuthenticator.py">Super Gluu interception script</a> (included in the default Janssen Server distribution)</p>
-</li>
-<li>
-<p>An Android or iOS device with Super Gluu installed </p>
+<p><a href="supergluu.md">Super Gluu</a> is Janssen's own push-notification two-factor authentication (2FA) mobile app built to work with the Janssen Server.
+Super Gluu uses public-key encryption as specified in the <a href="https://fidoalliance.org/specifications/overview/">FIDO U2F authentication standard</a>. Upon device enrollment, Super Gluu registers its public key against the Janssen's FIDO Server's <code>super_gluu_registration_endpoint</code> endpoint. Authentication takes place at <code>super_gluu_authentication_endpoint</code> where a challenge response ensures that the device has the corresponding private key.</p>
+<h3 id="janssens-super-gluu-endpoint">Janssen's Super Gluu endpoint<a class="headerlink" href="#janssens-super-gluu-endpoint" title="Permanent link">#</a></h3>
+<p>The fido2 server serves the registration and authentication of Super Gluu credentials, the URI of which can be found at <code>https://&lt;my.jans.server&gt;/.well-known/fido2-configuration</code>. However, <strong>this feature has to be enabled</strong> first, else the endpoints <code>super_gluu_registration_endpoint</code> and <code>super_gluu_authentication_endpoint</code> will not show up by default.</p>
+<h3 id="prerequisites">Prerequisites:<a class="headerlink" href="#prerequisites" title="Permanent link">#</a></h3>
+<h4 id="a-install-the-fido2-server">A. Install the FIDO2 server:<a class="headerlink" href="#a-install-the-fido2-server" title="Permanent link">#</a></h4>
+<p>Ensure that the Fido2 server is installed during the initial server setup.</p>
+<h4 id="b-enable-the-super-gluu-endpoint">B. Enable the Super Gluu endpoint:<a class="headerlink" href="#b-enable-the-super-gluu-endpoint" title="Permanent link">#</a></h4>
+<ol>
+<li>Use the TUI to enable "Super Gluu" feature
+<img alt="sg diagram" src="../../../assets/jans-tui-super-gluu-conf.png" /></li>
+</ol>
+<h4 id="c-mobile-device-with-super-gluu-installed">C. Mobile device with Super Gluu installed<a class="headerlink" href="#c-mobile-device-with-super-gluu-installed" title="Permanent link">#</a></h4>
 <ul>
 <li><a href="https://itunes.apple.com/us/app/super-gluu/id1093479646?mt=8">Super Gluu for iOS</a>     </li>
 <li><a href="https://play.google.com/store/apps/details?id=gluu.org.super.gluu">Super Gluu for Android</a>   </li>
 </ul>
+<h4 id="d-publicly-discoverable-dns">D. Publicly Discoverable DNS :<a class="headerlink" href="#d-publicly-discoverable-dns" title="Permanent link">#</a></h4>
+<ul>
+<li>
+<p>An Internet accessible (non-internal or localhost) Janssen Server with DNS pointing at the public Internet address of the server</p>
 </li>
 <li>
 <p>If the Jannsen Server is using a self-signed certificate, <code>Trust All</code> <strong>must</strong> be enabled in Super Gluu (open the app, navigate to <code>Menu</code> &gt; <code>Trust all (SSL)</code> and enable)</p>
@@ -8965,13 +8987,21 @@
 </ul>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The Janssen Server and Super Gluu can work in the same network, without a DNS server hostname and with a self-signed certificate. There is only one limitation: both components should belong to the same network. Instead of assigning a hostname during Janssen Server installation, an IP address can be specified. In the Super Gluu mobile app, enable <code>Trust all (SSL)</code>.    </p>
+<p>The Janssen Server and Super Gluu can work in the same network, without a DNS server hostname and with a self-signed certificate. There is only one limitation: both components should belong to the same network. Instead of assigning a hostname during Janssen Server installation, an IP address can be specified. In the Super Gluu mobile app, enable <code>Trust all (SSL)</code>.</p>
 </div>
-<h3 id="authentication-workflows">Authentication Workflows<a class="headerlink" href="#authentication-workflows" title="Permanent link">#</a></h3>
-<p>The authentication workflow for Super Gluu is defined in the <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/script-catalog/person_authentication/super-gluu-external-authenticator/SuperGluuExternalAuthenticator.py">Super Gluu interception script</a> (included in the default Janssen Server distribution). </p>
-<h3 id="a-default-two-step-flow">A. Default Two step flow:<a class="headerlink" href="#a-default-two-step-flow" title="Permanent link">#</a></h3>
+<h4 id="e-push-notification-server">E. Push Notification server:<a class="headerlink" href="#e-push-notification-server" title="Permanent link">#</a></h4>
+<h3 id="user-and-developer-guides">User and Developer Guides<a class="headerlink" href="#user-and-developer-guides" title="Permanent link">#</a></h3>
+<p>User and Developer Guides can be found on the <a href="https://gluu.org/docs/supergluu">Super Gluu docs site</a>.</p>
+<h3 id="interception-script">Interception script<a class="headerlink" href="#interception-script" title="Permanent link">#</a></h3>
+<ul>
+<li><a href="../SuperGluuExternalAuthenticator.py">Super Gluu interception script</a> is included in the default Janssen Server distribution</li>
+</ul>
+<p>The Super Gluu Interception script can be configured to work in 2 modes:
+A. Two step Flow (Default mode)
+B. One step Flow</p>
+<h3 id="a-two-step-flow-default-mode">A. Two step flow (Default mode):<a class="headerlink" href="#a-two-step-flow-default-mode" title="Permanent link">#</a></h3>
 <h4 id="enrollment">Enrollment:<a class="headerlink" href="#enrollment" title="Permanent link">#</a></h4>
-<p>By default, users are put through a two-step, two-factor authentication process with username and password first, and then push notification via Super Gluu second. 
+<p>By default, users are put through a two-step, two-factor authentication process with username and password in the first step, and then push notification via Super Gluu in the second step.
 <pre class="mermaid"><code>sequenceDiagram
 title SuperGluu Flow Enrollment "Two step"
 
@@ -9012,9 +9042,30 @@ Jans AS-&gt;&gt;Browser: Enrollment completed.
   &quot;push_token&quot;: &quot;8fc4bd31e2ddbc5c5d83e4955cfd36f663ab37b426d0a4ec5c685c3a6335dd2c&quot;
 }
 </code></pre></div>
-The push_token is used by the Notification server.</p>
-<h5 id="c-device-data">C. Device data<a class="headerlink" href="#c-device-data" title="Permanent link">#</a></h5>
-<p>This data contains following information: counter, status, rp-application, userInum, keyHandle, Public Key, attestation certificates</p>
+The push_token is used by the <strong>Push Notification server</strong>.</p>
+<h5 id="c-registration-data">C. Registration data<a class="headerlink" href="#c-registration-data" title="Permanent link">#</a></h5>
+<p>This data contains following information: counter, status, rp-application, userInum, keyHandle, Public Key, attestation certificates
+<div class="highlight"><pre><span></span><code>{
+  &quot;createdDate&quot;: 1678374227774,
+  &quot;updatedDate&quot;: 1678374228300,
+  &quot;createdBy&quot;: &quot;johndoe&quot;,
+  &quot;updatedBy&quot;: &quot;johndoe&quot;,
+  &quot;username&quot;: &quot;johndoe&quot;,
+  &quot;domain&quot;: &quot;/my.jans.server&quot;,
+  &quot;userId&quot;: &quot;DAY7UJzdHaIXuEbQlNwBomQEPmqjsKbN4lblYqfbCZo&quot;,
+  &quot;challenge&quot;: &quot;jr2LtLFRF2YG65pyo__gaKoiyP9oQbPyW6hGxdZBAS8&quot;,
+  &quot;attenstationRequest&quot;: &quot;{\&quot;super_gluu_request\&quot;:true,\&quot;super_gluu_request_mode\&quot;:\&quot;two_step\&quot;,\&quot;super_gluu_app_id\&quot;:\&quot;https:///my.jans.server/.well-known/openid-configuration\&quot;,\&quot;username\&quot;:\&quot;madhu1\&quot;,\&quot;displayName\&quot;:\&quot;madhu1\&quot;,\&quot;session_id\&quot;:\&quot;3d3f7560-8d83-4770-a6fb-cc83c787a511\&quot;,\&quot;attestation\&quot;:\&quot;direct\&quot;}&quot;,
+  &quot;attenstationResponse&quot;: &quot;{\&quot;super_gluu_request\&quot;:true,\&quot;super_gluu_request_mode\&quot;:\&quot;two_step\&quot;,\&quot;type\&quot;:\&quot;public-key\&quot;,\&quot;response\&quot;:{\&quot;deviceData\&quot;:\&quot;eyJuYW1lIjoiTmV4dXMgN......lLWU2ZjMtMzRlNC1hYWMxLTlhYTViOGI3MTUyOCJ9\&quot;,\&quot;clientDataJSON\&quot;:\&quot;eyJjaGFsbGVuZ2UiOiJqcjJM....QuZmluaXNoRW5yb2xsbWVudCJ9\&quot;,\&quot;super_gluu_request_cancel\&quot;:false,\&quot;attestationObject\&quot;:\&quot;v2NmbXRzZmlkby11MmYtc3VwZXItZ2x1....gC5NYTNE-GAS3AUoD-DI9R__8\&quot;},\&quot;id\&quot;:\&quot;-G1Bpm_7j0A2UIciKSPz7ku7pA2d9azzJyFQCd4Xh67Hh0gBDXAH9B--IX3hZYxtGEmY7nM01PV5Gq53O5FSsg\&quot;}&quot;,
+  &quot;uncompressedECPoint&quot;: &quot;v2ExAmEzJmItMQFiLTJYINmwCcnnXf6CxMCOG6bjAT5aXHCqIhgYDrBvEuKW6bWuYi0zWCARbzLZN8ytE1JiVAs0UMLoAuTWEzRPhgEtwFKA_gyPUf8&quot;,
+  &quot;publicKeyId&quot;: &quot;-G1Bpm_7j0A2UIciKSPz7ku7pA2d9azzJyFQCd4Xh67Hh0gBDXAH9B--IX3hZYxtGEmY7nM01PV5Gq53O5FSsg&quot;,
+  &quot;type&quot;: &quot;public-key&quot;,
+  &quot;status&quot;: &quot;registered&quot;,
+  &quot;counter&quot;: 0,
+  &quot;attestationType&quot;: &quot;fido-u2f-super-gluu&quot;,
+  &quot;signatureAlgorithm&quot;: -7,
+  &quot;applicationId&quot;: &quot;https:///my.jans.server/.well-known/openid-configuration&quot;
+}
+</code></pre></div></p>
 <h4 id="authentication">Authentication:<a class="headerlink" href="#authentication" title="Permanent link">#</a></h4>
 <pre class="mermaid"><code>sequenceDiagram
 title Super Gluu Authentication flow "Two step"
@@ -9027,9 +9078,9 @@ Notification server-&gt;&gt;Mobile App: Sends push to mobile device
 Jans AS-&gt;&gt;Browser:  Present option of authenticating with QR code
 User-&gt;&gt;Mobile App: Approve / Reject Push
 Mobile App-&gt;&gt;Jans AS: Complete (finish) authentication process, send push_token for storing in Device entry of Gluu server
-Jans AS-&gt;Jans AS: validate response, If successful, update device entry, </code></pre>
+Jans AS-&gt;Jans AS: validate response, If successful, update device entry,</code></pre>
 <h3 id="b-one-step-flow">B. One step flow<a class="headerlink" href="#b-one-step-flow" title="Permanent link">#</a></h3>
-<p>An alternative authentication workflow, password-less authentication, can be configured by adjusting the script property <code>authentication_mode</code>. </p>
+<p>An alternative authentication workflow, password-less authentication, can be configured by adjusting the script property <code>authentication_mode</code>.</p>
 <p><pre class="mermaid"><code>sequenceDiagram
 title SuperGluu Flow Enrollment "One step"
 
@@ -9046,7 +9097,7 @@ User-&gt;&gt;Mobile App:  Scans the QR code
 Mobile App-&gt;&gt; Mobile App: Enrollment saved on app \n ( appId, keyHandle, date)
 Mobile App-&gt;&gt;Jans AS :  Enrollment completed, &lt;br/&gt;enrollment data (registrationData, clientData, deviceData ) sent to Jans AS
 Jans AS-&gt;&gt;Jans AS: Enrollment entry stored temp entry in database under ou=registered_devices
-Jans AS-&gt;&gt;Browser: Prompt user to login page, to attach the enrollment to a user
+Jans AS-&gt;&gt;Browser: Prompt user to username-password page, inorder to link the enrollment to a user
 Browser-&gt;&gt;Jans AS: send user creds
 Jans AS-&gt;&gt;Jans AS: create enrollment entry attached to the user and delete temp entry under ou=registered_device
 Jans AS-&gt;&gt;Browser: enrollment completed
@@ -9063,13 +9114,13 @@ participant Browser
 Browser-&gt;&gt;Jans AS: /authorize request
 Jans AS-&gt;&gt;Browser: Present QR code for scanning
 Mobile App-&gt;&gt;Browser: Code is scanned
-User-&gt;&gt;Mobile App: Approve / Reject 
-Mobile App-&gt;&gt; Jans AS:Send authentication request 
+User-&gt;&gt;Mobile App: Approve / Reject
+Mobile App-&gt;&gt; Jans AS:Send authentication request
 Jans AS-&gt;&gt; Jans AS: no username, search by keyhandle
 Jans AS-&gt;&gt; Jans AS: verify Super Gluu credentials,  If successful, update device entry
 Jans AS-&gt;&gt;Browser: Authentication completed</code></pre></p>
 <h3 id="custom-script-properties">Custom script Properties<a class="headerlink" href="#custom-script-properties" title="Permanent link">#</a></h3>
-<p>The Super Gluu authentication script has the following properties: </p>
+<p>The Super Gluu authentication script has the following properties:</p>
 <table>
 <thead>
 <tr>
@@ -9122,13 +9173,7 @@ Jans AS-&gt;&gt;Browser: Authentication completed</code></pre></p>
 </tbody>
 </table>
 <h3 id="notes-for-administrator">Notes for administrator:<a class="headerlink" href="#notes-for-administrator" title="Permanent link">#</a></h3>
-<h4 id="a-configure-etccertssuper_gluu_credsjson">A. Configure <code>/etc/certs/super_gluu_creds.json</code>:<a class="headerlink" href="#a-configure-etccertssuper_gluu_credsjson" title="Permanent link">#</a></h4>
-<p>for each Android and apple app: 
-* a. GCM API key <strong>OR</strong>
-* b. SNS platform_arn <strong>OR</strong>
-* c. Access key / Secret key of oxNotify server (which hides the creds of GCM or SNS)</p>
-<h4 id="b-notification-server">B. Notification server:<a class="headerlink" href="#b-notification-server" title="Permanent link">#</a></h4>
-<p>Configure <code>accessKeyId</code> and <code>secretAccessKey</code> which allows access to SNS services / GCM services -  <code>/etc/gluu/conf/oxnotify-access.json</code></p>
+<p>Configure <code>/etc/certs/super_gluu_creds.json</code>: For each Android and apple app, configure Access key / Secret key of oxNotify server</p>
 <h3 id="enable-sign-in-with-super-gluu-authentication-script">Enable Sign-in with Super-Gluu Authentication script<a class="headerlink" href="#enable-sign-in-with-super-gluu-authentication-script" title="Permanent link">#</a></h3>
 <p>Using the OpenID Connect acr_values parameter, web and mobile clients can request any enabled authentication mechanism. To enable Super Gluu as an authentication method, follow the steps below:</p>
 <ol>
@@ -9158,33 +9203,33 @@ Now Sign-in with Super-Gluu is an available authentication mechanism for your Ja
 </code></pre></div></p>
 <h3 id="customizations-to-super-gluu-login-pages">Customizations to Super Gluu Login Pages<a class="headerlink" href="#customizations-to-super-gluu-login-pages" title="Permanent link">#</a></h3>
 <p>The Gluu Server includes a <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-auth-server/server/src/main/webapp/auth/super-gluu/login.xhtml">default public-facing pages for Super Gluu </a> for enrollment and authentication.</p>
-<p>To customize the look and feel of the pages, follow the <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/admin/developer/customization/customize-web-pages.md">customization guide</a>. </p>
+<p>To customize the look and feel of the pages, follow the <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/admin/developer/customization/customize-web-pages.md">customization guide</a>.</p>
 <h3 id="self-service">Self-service<a class="headerlink" href="#self-service" title="Permanent link">#</a></h3>
-<p>To offer end-users a portal where they can manage their own account security preferences, including two-factor authentication credentials like Super Gluu, check out our new app, <a href="https://casa.gluu.org">Gluu Casa</a>. </p>
+<p>To offer end-users a portal where they can manage their own account security preferences, including two-factor authentication credentials like Super Gluu, check out our new app, <a href="https://casa.gluu.org">Gluu Casa</a>.</p>
 <h3 id="manual-device-management">Manual Device Management<a class="headerlink" href="#manual-device-management" title="Permanent link">#</a></h3>
-<p><img alt="image" src="https://user-images.githubusercontent.com/12072533/207616512-d4486a9d-f4cf-4d56-9256-d558e2ab567f.png" /></p>
-<p>A user's Super Gluu device(s) can be removed by a Janssen administrator by directly locating the user entry in LDAP. For example, let's say user <code>abc</code> loses their device and wants to enroll a new device to use Super Gluu. </p>
+<p><img alt="image" src="../../../assets/SG_registration.png" /></p>
+<p>A user's Super Gluu device(s) can be removed by a Janssen administrator by directly locating the user entry in LDAP. For example, let's say user <code>abc</code> loses their device and wants to enroll a new device to use Super Gluu.</p>
 <ol>
 <li>
-<p>Find the <code>DN</code> of the user in LDAP </p>
+<p>Find the <code>DN</code> of the user in LDAP</p>
 </li>
 <li>
-<p>Find the <code>jansId DN</code> associated with the user</p>
+<p>Find the registation under <code>ou=fido2_register</code> for associated with the user</p>
 </li>
 <li>
-<p>Remove the <code>jansId DN</code> </p>
+<p>Remove the <code>jansId DN</code></p>
 </li>
 </ol>
-<p>Now the old device is gone and the user can enroll a new device </p>
+<p>Now the old device is gone and the user can enroll a new device</p>
 <h3 id="device-management-using-scim">Device management using SCIM<a class="headerlink" href="#device-management-using-scim" title="Permanent link">#</a></h3>
-<p>See the <a href="...">SCIM documentation</a> for a discussion on how to manage FIDO devices, including Super Gluu, using the SCIM protocol. </p>
+<p>See the <a href="...">SCIM documentation</a> on how to manage Super Gluu devices, using the SCIM protocol.</p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-01-13T08:34:37+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-01-13</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-03-27T17:19:43+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-03-27</span>
       
         <br>
         Created:
