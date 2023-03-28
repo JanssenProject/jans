@@ -22,14 +22,6 @@ A reliable OpenID client to be used in auth testing.
 
 ## Setup
 
-### 1. Create client on Auth server, i.e.:
-  * response_type `code`
-  * redirect_uri `https://localhost:9090/oidc_callback`
-  * Grants `authorization_code`
-  * client authn at token endpoint `client_secret_post`
-  * scopes `openid` `profile` `email`
-  Please notice: You may also use the `register` endpoint, still to be documented.
-
 ### 1. Edit configuration file `clientapp/config.py` according to your needs:
   * Set `ISSUER`, replace `op_hostname` (required)
   * Set any other desired configuration
