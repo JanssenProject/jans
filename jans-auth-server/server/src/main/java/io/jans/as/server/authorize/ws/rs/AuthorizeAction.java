@@ -284,11 +284,11 @@ public class AuthorizeAction {
             Map<String, String> requestParameterMap = requestParameterService.getAllowedParameters(parameterMap);
 
             String redirectTo = "/login.xhtml";
+            requestParameterMap.put(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, OxConstants.SCRIPT_TYPE_INTERNAL_RESERVED_NAME);
 
             List<String> acrValuesList = sessionIdService.acrValuesList(this.acrValues);
             boolean useExternalAuthenticator = externalAuthenticationService.isEnabled(AuthenticationScriptUsageType.INTERACTIVE);
-            boolean skipScript = acrValuesList.isEmpty() && BooleanUtils.isFalse(appConfiguration.getUseHighestLevelScriptIfAcrScriptNotFound())
-                    && OxConstants.SCRIPT_TYPE_INTERNAL_RESERVED_NAME.equalsIgnoreCase(defaultAuthenticationMode.getName());
+            boolean skipScript = shouldSkipScript(acrValuesList);
             if (useExternalAuthenticator && !skipScript) {
                 if (acrValuesList.isEmpty()) {
                     acrValuesList = Arrays.asList(defaultAuthenticationMode.getName());
@@ -452,6 +452,14 @@ public class AuthorizeAction {
                 return;
             }
         }
+    }
+
+    public boolean shouldSkipScript(List<String> acrValues) {
+        if (acrValues.size() == 1 && acrValues.contains(OxConstants.SCRIPT_TYPE_INTERNAL_RESERVED_NAME)) {
+            return true;
+        }
+        return acrValues.isEmpty() && BooleanUtils.isFalse(appConfiguration.getUseHighestLevelScriptIfAcrScriptNotFound())
+                && OxConstants.SCRIPT_TYPE_INTERNAL_RESERVED_NAME.equalsIgnoreCase(defaultAuthenticationMode.getName());
     }
 
     private SessionId handleAcrChange(SessionId session, List<io.jans.as.model.common.Prompt> prompts) {

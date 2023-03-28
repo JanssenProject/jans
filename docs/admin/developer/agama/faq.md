@@ -110,6 +110,10 @@ The quick start guide is a must, followed by [A closer look to Hello world flow]
 
 ## Miscellaneous
 
+### How to launch a flow?
+
+A flow is launched by issuing an authentication request in a browser as explained [here](./quick-start.md#craft-an-authentication-request). 
+
 ### Does flow execution timeout?
 
 Yes. The maximum amount of time an end-user can take to fully complete a flow is driven by the configuration of the authentication server and can be constrained even more in the flow itself. Read about timeouts [here](./flows-lifecycle.md#timeouts).
