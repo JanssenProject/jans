@@ -9,7 +9,16 @@ The fido2 server serves the registration and authentication of Super Gluu creden
 ### Prerequisites:
 
 #### A. Install the FIDO2 server:
-Ensure that the Fido2 server is installed during the initial server setup.
+The Fido2 server would have been installed during the initial server setup.
+
+If not installed, follow these steps to install the FIDO2 server.
+1. `setup.py` was already run during installation. Run `setup.py` once again.
+```
+python3 /opt/jans/jans-setup/setup.py
+```
+2.  The script will detect that you already have a jans installation and you will be prompted to install the uninstalled components.
+3. Select the `FIDO2 server` and complete the post install process.
+
 
 #### B. Enable the Super Gluu endpoint:
 
@@ -28,7 +37,9 @@ Ensure that the Fido2 server is installed during the initial server setup.
 !!! Note
     The Janssen Server and Super Gluu can work in the same network, without a DNS server hostname and with a self-signed certificate. There is only one limitation: both components should belong to the same network. Instead of assigning a hostname during Janssen Server installation, an IP address can be specified. In the Super Gluu mobile app, enable `Trust all (SSL)`.
 
-#### E. Push Notification server:
+#### E. Configuring Push notification server (push-api-server):
+
+Configure `/etc/certs/super_gluu_creds.json`. For each Mobile app (Android, iOS); place the Access key / Secret key of `push-api-server`.  
 
 
 ### User and Developer Guides
