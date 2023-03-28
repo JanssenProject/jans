@@ -29,14 +29,28 @@ from .client_handler import ClientHandler
 from flask.logging import default_handler
 
 
+from logging.handlers import TimedRotatingFileHandler
+import logging
+
+
+FORMATTER = logging.Formatter("[%(asctime)s] %(levelname)s %(name)s in %(module)s : %(message)s")
+LOG_FILE = "test-client.log"
+file_handler = TimedRotatingFileHandler(LOG_FILE, when='midnight')
+file_handler.setFormatter(FORMATTER)
+file_handler.setLevel(logging.DEBUG)
+logging.getLogger("oic").addHandler(file_handler)
+logging.getLogger("oauth").addHandler(file_handler)
+logging.getLogger("flask-oidc").addHandler(file_handler)
+logging.basicConfig(level=logging.DEBUG, handlers=[file_handler])
 oauth = OAuth()
-logging.getLogger("flask-oidc")
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='[%(asctime)s] %(levelname)s %(name)s in %(module)s : %(message)s',
-    filename='test-client.log')
+
+
+# logging.basicConfig(
+#     level=logging.DEBUG,
+#     format='[%(asctime)s] %(levelname)s %(name)s in %(module)s : %(message)s',
+#     filename='test-client.log')
 root = logging.getLogger()
-root.addHandler(default_handler)
+root.addHandler(file_handler)
 '''
 dictConfig({
     'version': 1,
