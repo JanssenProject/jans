@@ -9096,10 +9096,10 @@ Jans AS-&gt;&gt;Browser: validate, present enrollment (QR code) of SG
 User-&gt;&gt;Mobile App:  Scans the QR code
 Mobile App-&gt;&gt; Mobile App: Enrollment saved on app \n ( appId, keyHandle, date)
 Mobile App-&gt;&gt;Jans AS :  Enrollment completed, &lt;br/&gt;enrollment data (registrationData, clientData, deviceData ) sent to Jans AS
-Jans AS-&gt;&gt;Jans AS: Enrollment entry stored temp entry in database under ou=registered_devices
+Jans AS-&gt;&gt;Jans AS: Enrollment entry stored temp entry in database under ou=fido2_register,ou=fido2,o=jans
 Jans AS-&gt;&gt;Browser: Prompt user to username-password page, inorder to link the enrollment to a user
 Browser-&gt;&gt;Jans AS: send user creds
-Jans AS-&gt;&gt;Jans AS: create enrollment entry attached to the user and delete temp entry under ou=registered_device
+Jans AS-&gt;&gt;Jans AS: create enrollment entry attached to the user and delete temp entry under ou=fido2_register,ou=fido2,o=jans
 Jans AS-&gt;&gt;Browser: enrollment completed
 </code></pre>
 <pre class="mermaid"><code>sequenceDiagram
@@ -9229,7 +9229,7 @@ Now Sign-in with Super-Gluu is an available authentication mechanism for your Ja
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-03-27T17:19:43+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-03-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-03-28T08:46:32+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-03-28</span>
       
         <br>
         Created:
