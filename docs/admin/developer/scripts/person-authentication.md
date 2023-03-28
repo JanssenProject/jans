@@ -74,52 +74,6 @@ Jans-auth server uses Weld 3.0 (JSR-365 aka CDI 2.0) for managed beans. The most
 Java or Python libraries to be imported and used very easily. Remember, you can import a python library only if it has been written in "pure python".
 More details of this mentioned [here](../interception-scripts.md#using-python-libraries-in-a-script)
 
-### How The Applicable Authentication Mechanism Gets Determined
-
-```mermaid
-flowchart TD
-    A[RP send authentication request] --> B{Request contains <br /><code>acr_values</code> parameter}
-    B -->|Yes| C[Perform Authentication]
-    B -->|No| D{<code>Default ACR</code> <br />configured for <br />client}
-    D -->|Yes| C
-    D -->|No| E{<code>Default ACR</code> value <br />configured for <br />Janssen Server}
-    E --> |Yes| C
-    E --> |No| F[Select <br />internal ACR as<br /> Authentication method] --> C
-```
-
-- When authentication request is received from a client(RP), the Janssen Server looks for `acr_values` parameter in 
-  the request. This parameter is defined in OpenId Connect core specification, 
-  section [3.1.2.1](https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest).
-  Supported list of acr values for given Janssen Server deployment can be found in the response of .well-known endpoint 
-  under `acr_values_supported` claim. List of supported values also depend on what methods are 
-  [enabled](#enabling-an-authentication-mechanism).
-- If the `acr_values` parameter is not received as part of request from client(RP), then Janssen Server uses the
-  [default_acr_values](#authentication-method-for-a-client--rp--) configuration parameter from the client configuration.
-  Like `acr_values` request parameter, this configuration parameter lists ACR values in order of preference.
-- If Janssen Server doesn't find `acr_values` request parameter nor does it find the `default_acr_values` configuration
-  parameter configured for the client, then Janssen Server checks the server configuration property 
-  [useHighestLevelScriptIfAcrScriptNotFound](../../reference/json/properties/janssenauthserver-properties.md#usehighestlevelscriptifacrscriptnotfound). 
-  If this property is set to true, then Janssen Server invokes the authentication mechanism for which the corresponding
-  script is enabled. Choosing the script with the highest [level](#level--rank--of-an-authentication-mechanism-).
-- If there is no script that can be invoked or the `useHighestLevelScriptIfAcrScriptNotFound` property is set to false, 
-  then the Janssen Server authenticates using the [default ACR](#default-acr)
-- If default ACR is not configured for Janssen Server, then the server uses [internal ACR](#internal-acr)
-
-#### Default ACR
-
-This is the default authentication mechanism exposed to all applications that send users to the 
-Janssen Server for sign-in. Unless an app specifically requests, or falls back on a different form of authentication,
-users will receive the form of authentication specified in this field. Using Janssen Text base UI (TUI) configuration 
-tool, this value can be configured by navigating to `Auth Server`->`Defaults` as show below:
-
-![](../../../../docs/assets/jans-tui-auth-server-default.png)
-
-#### Internal ACR
-
-If a default ACR is not specified, Janssen will determine it based on enabled scripts and the 
-internal user/password ACR. This internal ACR, `simple_password_auth`, is set to level -1. This means that it has lower 
-priority than any scripts, so Janssen server will use it only if no other authentication method is set.
-
 #### Authentication method for a client (RP)
 
 A client may also specify `default_acr_values` during registration (and omit the parameter `acr_values` while making an authentication request).
@@ -146,14 +100,8 @@ acr_values parameter, web and mobile clients can request any enabled authenticat
 #### Level (rank) of an Authentication mechanism
 
 Each authentication mechanism (script) has a "Level" assigned to it which describes how secure and reliable it is. 
-**The higher the "Level", higher is the reliability represented by the script.** Though several mechanisms can be 
-enabled at the same Janssen server instance at the same time, for any specific user's session only one of them can be 
-set as the current one (and will be returned as `acr` claim of id_token for them). If after initial session is created 
-a new authorization request from a RP comes in specifying another authentication method, its "Level" will be compared 
-to that of the method currently associated with this session. If requested method's "Level" is lower or equal to it, 
-nothing is changed and the usual SSO behavior is observed. If it's higher (i.e. a more secure method is requested), 
-it's not possible to serve such request using the existing session's context, and user must re-authenticate themselves 
-to continue. If they succeed, a new session becomes associated with that requested mechanism instead.
+Read [here](../../auth-server/openid-features/acrs.md#acr-precedence-levels) how level affects which ACR gets selected 
+by Janssen Server for this session
 
 ## Usage scenarios
 
