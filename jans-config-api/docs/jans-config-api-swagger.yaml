@@ -3797,6 +3797,10 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/SmtpTest'
+            examples:
+              Request json example:
+                description: Request json example
+                value: ""
       responses:
         "200":
           description: Ok
@@ -7691,7 +7695,7 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        userCanView:
+        whitePagesCanView:
           type: boolean
         adminCanAccess:
           type: boolean
@@ -7701,9 +7705,9 @@ components:
           type: boolean
         userCanAccess:
           type: boolean
-        userCanEdit:
+        userCanView:
           type: boolean
-        whitePagesCanView:
+        userCanEdit:
           type: boolean
         baseDn:
           type: string
@@ -8428,6 +8432,8 @@ components:
           type: object
           additionalProperties:
             type: string
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8437,8 +8443,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -8959,6 +8963,8 @@ components:
         ttl:
           type: integer
           format: int32
+        displayName:
+          type: string
         allAuthenticationMethods:
           uniqueItems: true
           type: array
@@ -8984,8 +8990,6 @@ components:
           - tls_client_auth
           - self_signed_tls_client_auth
           - none
-        displayName:
-          type: string
         baseDn:
           type: string
         inum:
@@ -9093,10 +9097,10 @@ components:
           type: array
           items:
             type: object
-        displayValue:
-          type: string
         value:
           type: object
+        displayValue:
+          type: string
     LocalizedString:
       type: object
       properties:
