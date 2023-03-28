@@ -19,12 +19,8 @@ from setup_app.utils.package_utils import packageUtils
 
 class RDBMInstaller(BaseInstaller, SetupUtils):
 
-#    source_files = [
-#                    (os.path.join(Config.dist_jans_dir, 'jans-orm-spanner-libs-distribution.zip'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-orm-spanner-libs/{0}/jans-orm-spanner-libs-{0}-distribution.zip'.format(base.current_app.app_info['ox_version']))),
-#                    ]
-
     source_files = [
-                    (os.path.join(Config.dist_jans_dir, 'jans-orm-spanner-libs-distribution.zip'), os.path.join(base.current_app.app_info['BASE_SERVER'], '_out/jans-orm-spanner-libs-1.0.11-SNAPSHOT-distribution.zip')),
+                    (os.path.join(Config.dist_jans_dir, 'jans-orm-spanner-libs-distribution.zip'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-orm-spanner-libs/{0}/jans-orm-spanner-libs-{0}-distribution.zip'.format(base.current_app.app_info['ox_version']))),
                     ]
 
     def __init__(self):

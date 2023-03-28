@@ -11,12 +11,8 @@ from setup_app.pylib.ldif4.ldif import LDIFWriter
 
 class ScimInstaller(JettyInstaller):
 
-#    source_files = [
-#            (os.path.join(Config.dist_jans_dir, 'jans-scim.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-scim-server/{0}/jans-scim-server-{0}.war').format(base.current_app.app_info['ox_version'])),
-#            ]
-
     source_files = [
-            (os.path.join(Config.dist_jans_dir, 'jans-scim.war'), os.path.join(base.current_app.app_info['BASE_SERVER'], '_out/jans-scim-server-1.0.11-SNAPSHOT.war')),
+            (os.path.join(Config.dist_jans_dir, 'jans-scim.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-scim-server/{0}/jans-scim-server-{0}.war').format(base.current_app.app_info['ox_version'])),
             ]
 
     def __init__(self):
