@@ -16,27 +16,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 import base64
-import logging
+import json
 import os
 from urllib.parse import urlparse
-
 from authlib.integrations.flask_client import OAuth
 from flask import (Flask, jsonify, redirect, render_template, request, session,
                    url_for)
-
 from . import config as cfg
 from .client_handler import ClientHandler
-from flask.logging import default_handler
-
+import logging
 
 oauth = OAuth()
-logging.getLogger("flask-oidc")
+
 logging.basicConfig(
     level=logging.DEBUG,
     format='[%(asctime)s] %(levelname)s %(name)s in %(module)s : %(message)s',
     filename='test-client.log')
-root = logging.getLogger()
-root.addHandler(default_handler)
+
 '''
 dictConfig({
     'version': 1,
@@ -69,6 +65,14 @@ dictConfig({
 '''
 
 
+def add_config_from_json():
+    with open('client_info.json', 'r') as openfile:
+        client_info = json.load(openfile)
+        cfg.SERVER_META_URL = client_info['op_metadata_url']
+        cfg.CLIENT_ID = client_info['client_id']
+        cfg.CLIENT_SECRET = client_info['client_secret']
+
+
 def get_preselected_provider():
     provider_id_string = cfg.PRE_SELECTED_PROVIDER_ID
     provider_object = '{ "provider" : "%s" }' % provider_id_string
@@ -79,6 +83,7 @@ def get_preselected_provider():
     #     base64url_value_unpad = base64url_value.replace('=', '')
     #     return base64url_value_unpad
     return base64url_value
+
 
 def get_provider_host():
     provider_host_string = cfg.PROVIDER_HOST_STRING
@@ -103,6 +108,7 @@ class BaseClientErrors(Exception):
 
 
 def create_app():
+    add_config_from_json()
     ssl_verify()
 
     app = Flask(__name__)
