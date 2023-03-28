@@ -8785,8 +8785,8 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#e-push-notification-server" class="md-nav__link">
-    E. Push Notification server:
+  <a href="#e-configuring-push-notification-server-push-api-server" class="md-nav__link">
+    E. Configuring Push notification server (push-api-server):
   </a>
   
 </li>
@@ -8965,7 +8965,13 @@ Super Gluu uses public-key encryption as specified in the <a href="https://fidoa
 <p>The fido2 server serves the registration and authentication of Super Gluu credentials, the URI of which can be found at <code>https://&lt;my.jans.server&gt;/.well-known/fido2-configuration</code>. However, <strong>this feature has to be enabled</strong> first, else the endpoints <code>super_gluu_registration_endpoint</code> and <code>super_gluu_authentication_endpoint</code> will not show up by default.</p>
 <h3 id="prerequisites">Prerequisites:<a class="headerlink" href="#prerequisites" title="Permanent link">#</a></h3>
 <h4 id="a-install-the-fido2-server">A. Install the FIDO2 server:<a class="headerlink" href="#a-install-the-fido2-server" title="Permanent link">#</a></h4>
-<p>Ensure that the Fido2 server is installed during the initial server setup.</p>
+<p>The Fido2 server would have been installed during the initial server setup.</p>
+<p>If not installed, follow these steps to install the FIDO2 server.
+1. <code>setup.py</code> was already run during installation. Run <code>setup.py</code> once again.
+<div class="highlight"><pre><span></span><code>python3 /opt/jans/jans-setup/setup.py
+</code></pre></div>
+2.  The script will detect that you already have a jans installation and you will be prompted to install the uninstalled components.
+3. Select the <code>FIDO2 server</code> and complete the post install process.</p>
 <h4 id="b-enable-the-super-gluu-endpoint">B. Enable the Super Gluu endpoint:<a class="headerlink" href="#b-enable-the-super-gluu-endpoint" title="Permanent link">#</a></h4>
 <ol>
 <li>Use the TUI to enable "Super Gluu" feature
@@ -8989,7 +8995,8 @@ Super Gluu uses public-key encryption as specified in the <a href="https://fidoa
 <p class="admonition-title">Note</p>
 <p>The Janssen Server and Super Gluu can work in the same network, without a DNS server hostname and with a self-signed certificate. There is only one limitation: both components should belong to the same network. Instead of assigning a hostname during Janssen Server installation, an IP address can be specified. In the Super Gluu mobile app, enable <code>Trust all (SSL)</code>.</p>
 </div>
-<h4 id="e-push-notification-server">E. Push Notification server:<a class="headerlink" href="#e-push-notification-server" title="Permanent link">#</a></h4>
+<h4 id="e-configuring-push-notification-server-push-api-server">E. Configuring Push notification server (push-api-server):<a class="headerlink" href="#e-configuring-push-notification-server-push-api-server" title="Permanent link">#</a></h4>
+<p>Configure <code>/etc/certs/super_gluu_creds.json</code>. For each Mobile app (Android, iOS); place the Access key / Secret key of <code>push-api-server</code>.  </p>
 <h3 id="user-and-developer-guides">User and Developer Guides<a class="headerlink" href="#user-and-developer-guides" title="Permanent link">#</a></h3>
 <p>User and Developer Guides can be found on the <a href="https://gluu.org/docs/supergluu">Super Gluu docs site</a>.</p>
 <h3 id="interception-script">Interception script<a class="headerlink" href="#interception-script" title="Permanent link">#</a></h3>
@@ -9096,10 +9103,10 @@ Jans AS-&gt;&gt;Browser: validate, present enrollment (QR code) of SG
 User-&gt;&gt;Mobile App:  Scans the QR code
 Mobile App-&gt;&gt; Mobile App: Enrollment saved on app \n ( appId, keyHandle, date)
 Mobile App-&gt;&gt;Jans AS :  Enrollment completed, &lt;br/&gt;enrollment data (registrationData, clientData, deviceData ) sent to Jans AS
-Jans AS-&gt;&gt;Jans AS: Enrollment entry stored temp entry in database under ou=registered_devices
+Jans AS-&gt;&gt;Jans AS: Enrollment entry stored temp entry in database under ou=fido2_register,ou=fido2,o=jans
 Jans AS-&gt;&gt;Browser: Prompt user to username-password page, inorder to link the enrollment to a user
 Browser-&gt;&gt;Jans AS: send user creds
-Jans AS-&gt;&gt;Jans AS: create enrollment entry attached to the user and delete temp entry under ou=registered_device
+Jans AS-&gt;&gt;Jans AS: create enrollment entry attached to the user and delete temp entry under ou=fido2_register,ou=fido2,o=jans
 Jans AS-&gt;&gt;Browser: enrollment completed
 </code></pre>
 <pre class="mermaid"><code>sequenceDiagram
@@ -9186,7 +9193,7 @@ Now Sign-in with Super-Gluu is an available authentication mechanism for your Ja
 </ol>
 <p>!!! Note To make sure <code>super_gluu</code> has been enabled successfully, you can check your Janssen's Auth Server OpenID Connect configuration by navigating to the following URL: https://<hostname>/.well-known/openid-configuration. Find "acr_values_supported": and you should see "super_gluu".</p>
 <h3 id="make-sign-in-with-super-gluu-script-as-default-authentication-script">Make Sign-in with Super-Gluu Script as default authentication script:<a class="headerlink" href="#make-sign-in-with-super-gluu-script-as-default-authentication-script" title="Permanent link">#</a></h3>
-<p>Use this <a href="https://github.com/JanssenProject/jans-cli-tui/blob/v1.0.11.nightly/docs/cli/cli-default-authentication-method.md">link</a> as a reference.</p>
+<p>Use this <a href="https://github.com/JanssenProject/jans-cli-tui/blob/vreplace-janssen-version/docs/cli/cli-default-authentication-method.md">link</a> as a reference.</p>
 <p>Steps:
 1. Create a file say <code>sg-auth-default.json</code> with the following contents
 <div class="highlight"><pre><span></span><code>{
@@ -9202,8 +9209,8 @@ Now Sign-in with Super-Gluu is an available authentication mechanism for your Ja
 <div class="highlight"><pre><span></span><code>https://&lt;your.jans.server&gt;/jans-auth/authorize.htm?response_type=code&amp;redirect_uri=https://&lt;your.jans.server&gt;/admin&amp;client_id=&lt;replace_with_inum_client_id&gt;&amp;scope=openid+profile+email+user_name&amp;state=faad2cdjfdddjfkdf&amp;nonce=dajdffdfsdcfff
 </code></pre></div></p>
 <h3 id="customizations-to-super-gluu-login-pages">Customizations to Super Gluu Login Pages<a class="headerlink" href="#customizations-to-super-gluu-login-pages" title="Permanent link">#</a></h3>
-<p>The Gluu Server includes a <a href="https://github.com/JanssenProject/jans/blob/v1.0.11.nightly/jans-auth-server/server/src/main/webapp/auth/super-gluu/login.xhtml">default public-facing pages for Super Gluu </a> for enrollment and authentication.</p>
-<p>To customize the look and feel of the pages, follow the <a href="https://github.com/JanssenProject/jans/blob/v1.0.11.nightly/docs/admin/developer/customization/customize-web-pages.md">customization guide</a>.</p>
+<p>The Gluu Server includes a <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-auth-server/server/src/main/webapp/auth/super-gluu/login.xhtml">default public-facing pages for Super Gluu </a> for enrollment and authentication.</p>
+<p>To customize the look and feel of the pages, follow the <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/admin/developer/customization/customize-web-pages.md">customization guide</a>.</p>
 <h3 id="self-service">Self-service<a class="headerlink" href="#self-service" title="Permanent link">#</a></h3>
 <p>To offer end-users a portal where they can manage their own account security preferences, including two-factor authentication credentials like Super Gluu, check out our new app, <a href="https://casa.gluu.org">Gluu Casa</a>.</p>
 <h3 id="manual-device-management">Manual Device Management<a class="headerlink" href="#manual-device-management" title="Permanent link">#</a></h3>
@@ -9229,7 +9236,7 @@ Now Sign-in with Super-Gluu is an available authentication mechanism for your Ja
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-03-27T17:19:43+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-03-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-03-28T10:09:05+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-03-28</span>
       
         <br>
         Created:
