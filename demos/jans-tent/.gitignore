@@ -1,5 +1,5 @@
-#auth-client-tdd-specific
-clientapp/client_secrets.json
+#jans-tent-specific
+client_info.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
