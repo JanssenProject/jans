@@ -7693,15 +7693,15 @@ components:
           type: string
         userCanView:
           type: boolean
-        userCanEdit:
+        adminCanAccess:
           type: boolean
         adminCanView:
           type: boolean
+        adminCanEdit:
+          type: boolean
         userCanAccess:
           type: boolean
-        adminCanAccess:
-          type: boolean
-        adminCanEdit:
+        userCanEdit:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -8959,19 +8959,6 @@ components:
         ttl:
           type: integer
           format: int32
-        displayName:
-          type: string
-        authenticationMethod:
-          type: string
-          enum:
-          - client_secret_basic
-          - client_secret_post
-          - client_secret_jwt
-          - private_key_jwt
-          - access_token
-          - tls_client_auth
-          - self_signed_tls_client_auth
-          - none
         allAuthenticationMethods:
           uniqueItems: true
           type: array
@@ -8986,6 +8973,19 @@ components:
             - tls_client_auth
             - self_signed_tls_client_auth
             - none
+        authenticationMethod:
+          type: string
+          enum:
+          - client_secret_basic
+          - client_secret_post
+          - client_secret_jwt
+          - private_key_jwt
+          - access_token
+          - tls_client_auth
+          - self_signed_tls_client_auth
+          - none
+        displayName:
+          type: string
         baseDn:
           type: string
         inum:
@@ -9093,10 +9093,10 @@ components:
           type: array
           items:
             type: object
-        value:
-          type: object
         displayValue:
           type: string
+        value:
+          type: object
     LocalizedString:
       type: object
       properties:
