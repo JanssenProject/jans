@@ -89,7 +89,13 @@ auth-server:
   volumes: []
   # -- Configure any additional volumesMounts that need to be attached to the containers
   volumeMounts: []
-
+  # Actions on lifecycle events such as postStart and preStop
+  # Example
+  # lifecycle:
+  #   postStart:
+  #     exec:
+  #       command: ["sh", "-c", "mkdir /opt/jans/jetty/jans-auth/custom/static/stylesheet/"]
+  lifecycle: {}
   # -- Additional labels that will be added across the gateway in the format of {mylabel: "myapp"}
   additionalLabels: { }
   # -- Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
