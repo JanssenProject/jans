@@ -13,6 +13,7 @@ import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.model.SmtpConfiguration;
+import io.jans.model.SmtpTest;
 import io.jans.service.MailService;
 import io.jans.util.security.StringEncrypter.EncryptionException;
 
@@ -129,6 +130,7 @@ public class ConfigSmtpResource extends ConfigBaseResource {
         return Response.ok(smtpConfiguration).build();
     }
 
+/*    
     @Operation(summary = "Test SMTP server configuration", description = "Test SMTP server configuration", operationId = "test-config-smtp", tags = {
             "Configuration – SMTP" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.SMTP_READ_ACCESS }))
@@ -142,7 +144,7 @@ public class ConfigSmtpResource extends ConfigBaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.SMTP_READ_ACCESS }, groupScopes = {
             ApiAccessConstants.SMTP_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response testSmtpConfiguration() throws EncryptionException {
-
+		log.info("testSmtpConfiguration");
         SmtpConfiguration smtpConfiguration = configurationService.getConfiguration().getSmtpConfiguration();
         log.debug("Testing smtpConfiguration:{}", smtpConfiguration);
         smtpConfiguration.setPasswordDecrypted(encryptionService.decrypt(smtpConfiguration.getPassword()));
@@ -151,6 +153,44 @@ public class ConfigSmtpResource extends ConfigBaseResource {
                 smtpConfiguration.getFromName(), smtpConfiguration.getFromEmailAddress(), null,
                 "SMTP Configuration verification", "Mail to test smtp configuration",
                 "Mail to test smtp configuration");
+        log.info("smtpConfiguration test status:{}", status);
+        return Response.ok(status).build();
+    }
+*/
+
+    @Operation(summary = "Signing Test SMTP server configuration", description = "Signing Test SMTP server configuration", operationId = "test-config-smtp", tags = {
+    "Configuration – SMTP" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+            ApiAccessConstants.SMTP_WRITE_ACCESS }))
+//    @RequestBody(description = "SmtpTest object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SmtpTest.class), examples = @ExampleObject(name = "Request json example", value = "example/auth/smtp/smtp_test.json")))    
+    @RequestBody(description = "SmtpTest object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SmtpTest.class)))    
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(name = "status", type = "boolean", description = "boolean value true if successful"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
+    @POST
+    @Path(ApiConstants.TEST)
+    @ProtectedApi(scopes = { ApiAccessConstants.SMTP_WRITE_ACCESS }, groupScopes = {
+            ApiAccessConstants.SMTP_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
+    public Response testSmtpConfiguration(@Valid SmtpTest smtpTest) throws EncryptionException {
+        log.info("testSmtpConfiguration : Sign = {}", smtpTest.getSign());
+        log.debug("Testing SignMessage: {}", smtpTest.getSign());
+        SmtpConfiguration smtpConfiguration = configurationService.getConfiguration().getSmtpConfiguration();
+        log.debug("Testing smtpConfiguration:{}", smtpConfiguration);
+        smtpConfiguration.setPasswordDecrypted(encryptionService.decrypt(smtpConfiguration.getPassword()));
+        smtpConfiguration.setKeyStorePasswordDecrypted(encryptionService.decrypt(smtpConfiguration.getKeyStorePassword()));
+        boolean status = false;
+        if (smtpTest.getSign()) {
+            status = mailService.sendMail(smtpConfiguration, smtpConfiguration.getFromEmailAddress(),
+                    smtpConfiguration.getFromName(), smtpConfiguration.getFromEmailAddress(), null,
+                    smtpTest.getSubject(), smtpTest.getMessage(),
+                    smtpTest.getMessage());
+        }
+        else {
+            status = mailService.sendMail(smtpConfiguration, smtpConfiguration.getFromEmailAddress(),
+                    smtpConfiguration.getFromName(), smtpConfiguration.getFromEmailAddress(), null,
+                    smtpTest.getSubject(), smtpTest.getMessage(),
+                    smtpTest.getMessage());
+        }
         log.info("smtpConfiguration test status:{}", status);
         return Response.ok(status).build();
     }

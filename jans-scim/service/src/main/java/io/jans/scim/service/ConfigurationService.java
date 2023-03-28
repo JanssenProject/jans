@@ -226,7 +226,7 @@ public class ConfigurationService implements Serializable {
 		}
 	}
 
-	public void decryptSmtpPassword(SmtpConfiguration smtpConfiguration) {
+	public void decryptSmtpPasswords(SmtpConfiguration smtpConfiguration) {
 		if (smtpConfiguration == null) {
 			return;
 		}
@@ -236,6 +236,14 @@ public class ConfigurationService implements Serializable {
 				smtpConfiguration.setPasswordDecrypted(encryptionService.decrypt(password));
 			} catch (EncryptionException ex) {
 				log.error("Failed to decrypt SMTP password", ex);
+			}
+		}
+		password = smtpConfiguration.getKeyStorePassword();
+		if (StringHelper.isNotEmpty(password)) {
+			try {
+				smtpConfiguration.setKeyStorePasswordDecrypted(encryptionService.decrypt(password));
+			} catch (EncryptionException ex) {
+				log.error("Failed to decrypt Kestore password", ex);
 			}
 		}
 	}
