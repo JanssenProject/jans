@@ -15,8 +15,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 '''
-
-from flask_oidc import registration, discovery
+import logging
 import json
 from httplib2 import RelativeURIError
 from typing import Optional, Dict, Any
@@ -24,6 +23,10 @@ from typing import Optional, Dict, Any
 from oic.oauth2 import ASConfigurationResponse
 from oic.oic import Client
 from oic.utils.authn.client import CLIENT_AUTHN_METHOD
+
+
+logger = logging.getLogger(__name__)
+
 
 class ClientHandler:
     __client_url = None
@@ -34,7 +37,7 @@ class ClientHandler:
     op_data = None
 
     def __init__(self, op_url: str, client_url: str):
-        """[intializes]
+        """[initializes]
 
         :param op_url: [url from oidc provider starting with https]
         :type op_url: str
@@ -42,7 +45,7 @@ class ClientHandler:
         :type client_url: str
         """
         self.clientAdapter = Client(client_authn_method=CLIENT_AUTHN_METHOD)
-        self.__op_url = op_url
+        self.__op_url = self.clientAdapter.discover(op_url)
         self.__client_url = client_url
         self.__metadata_url = '%s/.well-known/openid-configuration' % op_url
         self.op_data = self.discover(op_url)
@@ -88,16 +91,17 @@ class ClientHandler:
         :return: [data retrieved from OP url]
         :rtype: ASConfigurationResponse
         """
-
+        logger.debug('called discover')
         try:
-            op_data = self.clientAdapter.provider_config(self.__op_url)
+            op_data = self.clientAdapter.provider_config(op_url)
             return op_data
 
         except json.JSONDecodeError as err:
-            print('Error trying to decode JSON: %s' % err)
+            logger.error('Error trying to decode JSON: %s' % err)
 
         except RelativeURIError as err:
-            print(err)
+            logger.error(err)
 
         except Exception as e:
-            print('An unexpected ocurred: %s' % e)
+            logging.error('An unexpected ocurred: %s' % e)
+
