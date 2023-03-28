@@ -3,7 +3,6 @@ from client_handler import ClientHandler
 import logging
 import json
 
-logging.getLogger(__name__)
 logging.getLogger('oic')
 logging.getLogger('urllib3')
 logging.basicConfig(
@@ -12,11 +11,11 @@ logging.basicConfig(
     format='[%(asctime)s] %(levelname)s %(name)s in %(module)s : %(message)s')
 OP_URL = cfg.ISSUER
 CLIENT_URL = 'https://localhost:9090'
-
+logger = logging.getLogger(__name__)
 client = ClientHandler(OP_URL, CLIENT_URL)
 
-logging.info('Setting up registered client info')
-logging.info(client.get_client_dict())
+logger.info('Setting up registered client info')
+logger.info(client.get_client_dict())
 
 json_object = json.dumps(client.get_client_dict(), indent=4)
 
