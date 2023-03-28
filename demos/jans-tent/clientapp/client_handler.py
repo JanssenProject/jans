@@ -27,6 +27,7 @@ from oic.utils.authn.client import CLIENT_AUTHN_METHOD
 
 logger = logging.getLogger(__name__)
 
+
 class ClientHandler:
     __client_url = None
     __client_id = None
@@ -103,3 +104,4 @@ class ClientHandler:
 
         except Exception as e:
             logging.error('An unexpected ocurred: %s' % e)
+
