@@ -30,18 +30,18 @@ A reliable OpenID client to be used in auth testing.
   * scopes `openid` `profile` `email`
   Please notice: You may also use the `register` endpoint, still to be documented.
 
-### 2. Edit configuration file `clientapp/config.py` according to your needs. I.e:
-  * Input client_id and secret from above step
-  * Set OpenID configuration endpoint URL (`SERVER_META_URL`)
+### 1. Edit configuration file `clientapp/config.py` according to your needs:
+  * Set `ISSUER`, replace `op_hostname` (required)
+  * Set any other desired configuration
 
-### 3. Generate test RP server self signed certs
+### 2. Generate test RP server self signed certs
 
 Generate `key.pem` and `cert.pem` at `jans-tent` project root folder (`jans/demos/jans-tent`). i.e: 
 ```bash
 openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -sha256 -days 365 -nodes
 ```
 
-### 4. Import your Auth Server certificate and add it to `CERT_PATH`, `SSL_CERT_FILE`, `REQUESTS_CA_BUNDLE`.
+### 3. Import your Auth Server certificate and add it to `CERT_PATH`, `SSL_CERT_FILE`, `REQUESTS_CA_BUNDLE`.
 
 (remember to be inside your virtual environment)
 
@@ -55,6 +55,13 @@ export CERT_PATH=$(python3 -m certifi)
 export SSL_CERT_FILE=${CERT_PATH}
 export REQUESTS_CA_BUNDLE=${CERT_PATH}
 mv op_web_cert.cer $(python3 -m certifi)
+```
+
+### 4. Register your RP at OP
+
+(remember to be inside your virtual environment)
+```bash
+python clientapp/register_new_client.py
 ```
 
 ## Using the server
