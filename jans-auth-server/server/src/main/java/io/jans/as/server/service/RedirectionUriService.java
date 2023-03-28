@@ -127,7 +127,7 @@ public class RedirectionUriService {
                 }
 
                 if (BooleanUtils.isTrue(appConfiguration.getRedirectUrisRegexEnabled())) {
-                    if (redirectionUri.matches(client.getAttributes().getRedirectUrisRegex())) {
+                    if (isAllowedByRegExp(redirectionUri, client)) {
                         log.trace("RedirectionUri is allowed by regexp, clientId = {}, redirectionUri = {}, regexp = {}", client.getClientId(), redirectionUri, client.getAttributes().getRedirectUrisRegex());
                         return redirectionUri;
                     } else {
@@ -142,6 +142,14 @@ public class RedirectionUriService {
             return null;
         }
         return null;
+    }
+
+    public static boolean isAllowedByRegExp(String redirectUri, Client client) {
+        if (client == null) {
+            return false;
+        }
+        final String redirectUrisRegex = client.getAttributes().getRedirectUrisRegex();
+        return StringUtils.isNotBlank(redirectUrisRegex) && redirectUri.matches(redirectUrisRegex);
     }
 
     public static boolean isUriEqual(String redirectionUri, String[] redirectUris) {
