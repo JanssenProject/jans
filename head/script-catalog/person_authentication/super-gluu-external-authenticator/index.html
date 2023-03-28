@@ -8785,8 +8785,8 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#e-push-notification-server" class="md-nav__link">
-    E. Push Notification server:
+  <a href="#e-configuring-push-notification-server-push-api-server" class="md-nav__link">
+    E. Configuring Push notification server (push-api-server):
   </a>
   
 </li>
@@ -8965,7 +8965,13 @@ Super Gluu uses public-key encryption as specified in the <a href="https://fidoa
 <p>The fido2 server serves the registration and authentication of Super Gluu credentials, the URI of which can be found at <code>https://&lt;my.jans.server&gt;/.well-known/fido2-configuration</code>. However, <strong>this feature has to be enabled</strong> first, else the endpoints <code>super_gluu_registration_endpoint</code> and <code>super_gluu_authentication_endpoint</code> will not show up by default.</p>
 <h3 id="prerequisites">Prerequisites:<a class="headerlink" href="#prerequisites" title="Permanent link">#</a></h3>
 <h4 id="a-install-the-fido2-server">A. Install the FIDO2 server:<a class="headerlink" href="#a-install-the-fido2-server" title="Permanent link">#</a></h4>
-<p>Ensure that the Fido2 server is installed during the initial server setup.</p>
+<p>The Fido2 server would have been installed during the initial server setup.</p>
+<p>If not installed, follow these steps to install the FIDO2 server.
+1. <code>setup.py</code> was already run during installation. Run <code>setup.py</code> once again.
+<div class="highlight"><pre><span></span><code>python3 /opt/jans/jans-setup/setup.py
+</code></pre></div>
+2.  The script will detect that you already have a jans installation and you will be prompted to install the uninstalled components.
+3. Select the <code>FIDO2 server</code> and complete the post install process.</p>
 <h4 id="b-enable-the-super-gluu-endpoint">B. Enable the Super Gluu endpoint:<a class="headerlink" href="#b-enable-the-super-gluu-endpoint" title="Permanent link">#</a></h4>
 <ol>
 <li>Use the TUI to enable "Super Gluu" feature
@@ -8989,7 +8995,8 @@ Super Gluu uses public-key encryption as specified in the <a href="https://fidoa
 <p class="admonition-title">Note</p>
 <p>The Janssen Server and Super Gluu can work in the same network, without a DNS server hostname and with a self-signed certificate. There is only one limitation: both components should belong to the same network. Instead of assigning a hostname during Janssen Server installation, an IP address can be specified. In the Super Gluu mobile app, enable <code>Trust all (SSL)</code>.</p>
 </div>
-<h4 id="e-push-notification-server">E. Push Notification server:<a class="headerlink" href="#e-push-notification-server" title="Permanent link">#</a></h4>
+<h4 id="e-configuring-push-notification-server-push-api-server">E. Configuring Push notification server (push-api-server):<a class="headerlink" href="#e-configuring-push-notification-server-push-api-server" title="Permanent link">#</a></h4>
+<p>Configure <code>/etc/certs/super_gluu_creds.json</code>. For each Mobile app (Android, iOS); place the Access key / Secret key of <code>push-api-server</code>.  </p>
 <h3 id="user-and-developer-guides">User and Developer Guides<a class="headerlink" href="#user-and-developer-guides" title="Permanent link">#</a></h3>
 <p>User and Developer Guides can be found on the <a href="https://gluu.org/docs/supergluu">Super Gluu docs site</a>.</p>
 <h3 id="interception-script">Interception script<a class="headerlink" href="#interception-script" title="Permanent link">#</a></h3>
@@ -9229,7 +9236,7 @@ Now Sign-in with Super-Gluu is an available authentication mechanism for your Ja
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-03-28T08:46:32+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-03-28</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-03-28T10:09:05+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-03-28</span>
       
         <br>
         Created:
