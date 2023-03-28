@@ -180,7 +180,7 @@ public class ConfigSmtpResource extends ConfigBaseResource {
         smtpConfiguration.setKeyStorePasswordDecrypted(encryptionService.decrypt(smtpConfiguration.getKeyStorePassword()));
         boolean status = false;
         if (smtpTest.getSign()) {
-            status = mailService.sendMail(smtpConfiguration, smtpConfiguration.getFromEmailAddress(),
+            status = mailService.sendMailSigned(smtpConfiguration, smtpConfiguration.getFromEmailAddress(),
                     smtpConfiguration.getFromName(), smtpConfiguration.getFromEmailAddress(), null,
                     smtpTest.getSubject(), smtpTest.getMessage(),
                     smtpTest.getMessage());
