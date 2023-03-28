@@ -625,11 +625,10 @@ class JCA_CLI:
 
             result = response.json()
 
-            if 'verification_uri' in result and 'user_code' in result:
+            if 'verification_uri_complete' in result and 'user_code' in result:
 
-                msg = "Please visit verification url {} and enter user code {} within {} secods".format(
-                        self.colored_text(result['verification_uri'], success_color),
-                        self.colored_text(result['user_code'], bold_color),
+                msg = "Please visit verification url {} and authorize this device within {} secods".format(
+                        self.colored_text(result['verification_uri_complete'], success_color),
                         result['expires_in']
                         )
                 print(msg)
