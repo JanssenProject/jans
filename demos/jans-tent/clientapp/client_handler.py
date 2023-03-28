@@ -74,7 +74,7 @@ class ClientHandler:
                              'response_types': ['code'],
                              'grant_types': ['authorization_code'],
                              'application_type': 'web',
-                             'client_name': 'manual recreation',
+                             'client_name': 'Jans Tent',
                              'token_endpoint_auth_method': 'client_secret_post'
                              }
         reg_info = self.clientAdapter.register(op_data['registration_endpoint'], **registration_args)
