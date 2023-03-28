@@ -28,9 +28,20 @@ deployment.
 
 ### Internal Janssen Server ACR
 
-### ACR for authenticating using external LDAP or Active Directory
+Janssen server will use internal ACR only if no other authentication method is set or could be invoked.
+This internal ACR, `default_password_auth`, is set to level -1. This means that it has lower
+priority than any scripts. This ACR is always available and enabled on any Janssen Server deployment.
+
+### Pre-packaged ACR for authenticating using external LDAP or Active Directory
+
+All Janssen Server deployments has `default_ldap_server` ACR which can be enabled to perform authentication against a
+remote LDAP based IDP (e.g. ActiveDirectory). By default, this ACR is disabled.
+
+To enable this ACR using [LDAP configuration options](../../config-guide/jans-cli/cli-ldap-configuration.md) of command-line configuration tool jans-cli.
 
 ### Script based ACRs
+
+
 
 ## Configuring ACRs
 
