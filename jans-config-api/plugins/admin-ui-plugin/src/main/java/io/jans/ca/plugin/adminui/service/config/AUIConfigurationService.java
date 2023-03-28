@@ -143,18 +143,23 @@ public class AUIConfigurationService extends BaseService {
 
     private LicenseConfiguration addPropertiesToLicenseConfiguration(AdminConf appConf) throws Exception {
         LicenseConfiguration licenseConfiguration = new LicenseConfiguration();
-        LicenseConfig licenseConfig = appConf.getMainSettings().getLicenseConfig();
+        try {
+            LicenseConfig licenseConfig = appConf.getMainSettings().getLicenseConfig();
 
-        if (licenseConfig != null) {
+            if (licenseConfig != null) {
 
-            LicenseSpringCredentials licenseSpringCredentials = requestLicenseCredentialsFromScan(licenseConfig);
-            licenseConfiguration.setApiKey(licenseSpringCredentials.getApiKey());
-            licenseConfiguration.setProductCode(licenseSpringCredentials.getProductCode());
-            licenseConfiguration.setSharedKey(licenseSpringCredentials.getSharedKey());
-            licenseConfiguration.setHardwareId(licenseConfig.getLicenseHardwareKey());
-            licenseConfiguration.setLicenseKey(licenseConfig.getLicenseKey());
+                LicenseSpringCredentials licenseSpringCredentials = requestLicenseCredentialsFromScan(licenseConfig);
+                licenseConfiguration.setApiKey(licenseSpringCredentials.getApiKey());
+                licenseConfiguration.setProductCode(licenseSpringCredentials.getProductCode());
+                licenseConfiguration.setSharedKey(licenseSpringCredentials.getSharedKey());
+                licenseConfiguration.setHardwareId(licenseConfig.getLicenseHardwareKey());
+                licenseConfiguration.setLicenseKey(licenseConfig.getLicenseKey());
+            }
+            return licenseConfiguration;
+        } catch (Exception e) {
+            logger.error(ErrorResponse.LICENSE_SPRING_CREDENTIALS_ERROR.getDescription());
         }
-        return licenseConfiguration;
+        return null;
     }
 
     /**

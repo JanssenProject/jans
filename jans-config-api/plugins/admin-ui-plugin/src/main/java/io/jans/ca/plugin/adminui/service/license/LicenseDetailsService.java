@@ -56,17 +56,13 @@ public class LicenseDetailsService extends BaseService {
      * @return A LicenseApiResponse object is being returned.
      */
     public LicenseApiResponse validateLicenseConfiguration() {
-        try {
-            AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
-            return createLicenseResponse(true, 200, "No error in license configuration.");
-        } catch (Exception e) {
 
             AdminConf appConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
             LicenseConfig licenseConfig = appConf.getMainSettings().getLicenseConfig();
 
             io.jans.as.client.TokenResponse tokenResponse = generateToken(licenseConfig);
 
-            if (tokenResponse == null) {
+            if (tokenResponse == null || Strings.isNullOrEmpty(tokenResponse.getAccessToken())) {
                 //try to re-generate clients using old SSA
                 DCRResponse dcrResponse = executeDCR(licenseConfig.getSsa());
                 if (dcrResponse == null) {
@@ -79,7 +75,6 @@ public class LicenseDetailsService extends BaseService {
                 }
             }
             return createLicenseResponse(true, 200, "No error in license configuration.");
-        }
     }
 
     private io.jans.as.client.TokenResponse generateToken(LicenseConfig licenseConfig) {
