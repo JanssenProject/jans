@@ -152,10 +152,10 @@ Jans AS->>Browser: validate, present enrollment (QR code) of SG
 User->>Mobile App:  Scans the QR code
 Mobile App->> Mobile App: Enrollment saved on app \n ( appId, keyHandle, date)
 Mobile App->>Jans AS :  Enrollment completed, <br/>enrollment data (registrationData, clientData, deviceData ) sent to Jans AS
-Jans AS->>Jans AS: Enrollment entry stored temp entry in database under ou=registered_devices
+Jans AS->>Jans AS: Enrollment entry stored temp entry in database under ou=fido2_register,ou=fido2,o=jans
 Jans AS->>Browser: Prompt user to username-password page, inorder to link the enrollment to a user
 Browser->>Jans AS: send user creds
-Jans AS->>Jans AS: create enrollment entry attached to the user and delete temp entry under ou=registered_device
+Jans AS->>Jans AS: create enrollment entry attached to the user and delete temp entry under ou=fido2_register,ou=fido2,o=jans
 Jans AS->>Browser: enrollment completed
 
 ```
