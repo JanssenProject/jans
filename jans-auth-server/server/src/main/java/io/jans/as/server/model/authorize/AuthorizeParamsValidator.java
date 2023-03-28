@@ -28,7 +28,10 @@ import java.util.Set;
  */
 public class AuthorizeParamsValidator {
 
-    private final static Logger log = LoggerFactory.getLogger(AuthorizeParamsValidator.class);
+    private static final Logger log = LoggerFactory.getLogger(AuthorizeParamsValidator.class);
+
+    private AuthorizeParamsValidator() {
+    }
 
     /**
      * Validates the parameters for an authorization request.
@@ -67,31 +70,61 @@ public class AuthorizeParamsValidator {
     }
 
     public static boolean validateResponseTypes(List<ResponseType> responseTypes, Client client) {
-        if (responseTypes == null || responseTypes.isEmpty() || client == null || client.getResponseTypes() == null) {
+        if (responseTypes == null || responseTypes.isEmpty()) {
+            log.debug("Response type validation failed. Response type is not specified.");
+            return false;
+        }
+        if (client == null) {
+            log.debug("Response type validation failed. Client is null.");
+            return false;
+        }
+        if (client.getResponseTypes() == null) {
+            log.debug("Response type validation failed. Client does not have response type configured.");
             return false;
         }
 
         List<ResponseType> clientSupportedResponseTypes = Arrays.asList(client.getResponseTypes());
 
-        return clientSupportedResponseTypes.containsAll(responseTypes);
+        final boolean containsAll = clientSupportedResponseTypes.containsAll(responseTypes);
+        if (!containsAll) {
+            log.debug("Response type validation failed for {}. Client does not allow all values, clientSupportedResponseTypes {}", responseTypes, clientSupportedResponseTypes);
+        }
+        return containsAll;
     }
 
     public static boolean validateGrantType(List<ResponseType> responseTypes, GrantType[] clientGrantTypesArray, AppConfiguration appConfiguration) {
         List<GrantType> clientGrantTypes = Arrays.asList(clientGrantTypesArray);
         final Set<GrantType> grantTypesSupported = appConfiguration.getGrantTypesSupported();
 
-        if (responseTypes == null || grantTypesSupported == null) {
+        if (responseTypes == null) {
+            log.debug("Grant type validation failed. No response type in request.");
+            return false;
+        }
+        if (grantTypesSupported == null) {
+            log.debug("Grant type validation failed. No supported grant types in AS configuration ('grantTypesSupported').");
             return false;
         }
         if (responseTypes.contains(ResponseType.CODE)) {
             GrantType requestedGrantType = GrantType.AUTHORIZATION_CODE;
-            if (!clientGrantTypes.contains(requestedGrantType) || !grantTypesSupported.contains(requestedGrantType)) {
+            if (!clientGrantTypes.contains(requestedGrantType)) {
+                log.debug("Grant type validation failed. response_type=code but authorization_code grant type is not allowed by client configuration.");
+                return false;
+            }
+            if (!grantTypesSupported.contains(requestedGrantType)) {
+                log.debug("Grant type validation failed. response_type=code but authorization_code grant type is not allowed by AS configuration ('grantTypesSupported').");
                 return false;
             }
         }
         if (responseTypes.contains(ResponseType.TOKEN) || (responseTypes.contains(ResponseType.ID_TOKEN) && !appConfiguration.getAllowIdTokenWithoutImplicitGrantType())) {
             GrantType requestedGrantType = GrantType.IMPLICIT;
-            return clientGrantTypes.contains(requestedGrantType) && grantTypesSupported.contains(requestedGrantType);
+            if (!clientGrantTypes.contains(requestedGrantType)) {
+                log.debug("Grant type validation failed. response_type=token (or response_type=id_token) but 'implicit' grant type is not allowed by client configuration.");
+                return false;
+            }
+            if (!grantTypesSupported.contains(requestedGrantType)) {
+                log.debug("Grant type validation failed. response_type=token (or response_type=id_token) but 'implicit' grant type is not allowed by AS configuration ('grantTypesSupported').");
+                return false;
+            }
         }
 
         return true;
