@@ -533,16 +533,16 @@ nav:
 #        - 'FAQ': 'admin/recipes/faq.md'
     - 'Upgrade Guide':
         - 'admin/upgrade/README.md'
-        - 'VM':
-            - 'admin/upgrade/vm/README.md'
-            - 'Version Upgrade Paths': 'admin/upgrade/vm/paths.md'
-            - 'Backup': 'admin/upgrade/vm/backup.md'
-            - 'Rollback': 'admin/upgrade/vm/rollback.md'
-        - 'Kubernetes':
-            - 'admin/upgrade/kubernetes/README.md'
-            - 'Version Upgrade Paths': 'admin/upgrade/kubernetes/paths.md'
-            - 'Backup': 'admin/upgrade/kubernetes/backup.md'
-            - 'Rollback': 'admin/upgrade/kubernetes/rollback.md'
+#        - 'VM':
+#            - 'admin/upgrade/vm/README.md'
+#            - 'Version Upgrade Paths': 'admin/upgrade/vm/paths.md'
+#            - 'Backup': 'admin/upgrade/vm/backup.md'
+#            - 'Rollback': 'admin/upgrade/vm/rollback.md'
+#        - 'Kubernetes':
+#            - 'admin/upgrade/kubernetes/README.md'
+#            - 'Version Upgrade Paths': 'admin/upgrade/kubernetes/paths.md'
+#            - 'Backup': 'admin/upgrade/kubernetes/backup.md'
+#            - 'Rollback': 'admin/upgrade/kubernetes/rollback.md'
 #        - 'FAQ': 'admin/upgrade/upgrade-faq.md'
 - 'Developer':
       - 'Contribution Guidelines': 'CONTRIBUTING.md'
