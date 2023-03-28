@@ -41,22 +41,50 @@ To enable this ACR using [LDAP configuration options](../../config-guide/jans-cl
 
 ### Script based ACRs
 
-
+To enable highly flexible and pluggable authentication flows, Janssen Server allows script based ACRs. These ACRs are
+configured and backed by a [person authentication script](../../developer/scripts/person-authentication.md). For such
+ACRs to be used in the authentication flow, the corresponding 
+[script should be enabled](../../developer/scripts/person-authentication.md#enabling-an-authentication-mechanism).
 
 ## Configuring ACRs
 
+Janssen Server can be configured per client level and at the server level for ACRs. 
+
 ### Client Configuration
+
+A client may also specify `default_acr_values` during registration (and omit the parameter `acr_values` while making 
+an authentication request). Also, client can list ACR values that authentication requests can have as part of 
+`acr_values` parameter.
+
+Using Janssen Text base UI (TUI) configuration tool, these values can be configured by navigating to 
+`Auth Server`->`clients`->`get clients`->choose a client and press `enter`->`Advanced Client Prop.`. On this screen
+populate ACR values in `Default ACRs` and `Allowed ACRs`:
+
+![](../../../../docs/assets/image-tui-client-advance-properties.png)
 
 ### Server Configuration
 
-## ACR Precedence
+Using Janssen Text base UI (TUI) configuration
+tool, this value can be configured by navigating to `Auth Server`->`Defaults` as show below:
 
-Levels 
+![](../../../../docs/assets/jans-tui-auth-server-default.png)
 
-Not related to level defined in [ISO/IEC 29115](https://www.iso.org/standard/45138.html).
+This is the default authentication mechanism exposed to all applications that send users to the
+Janssen Server for sign-in.
 
+## ACR Precedence Levels
 
-### How The Applicable Authentication Mechanism Gets Determined
+Each authentication mechanism (script) has a "Level" assigned to it which describes how secure and reliable it is.
+**The higher the "Level", higher is the reliability represented by the script.** Though several mechanisms can be
+enabled at the same Janssen server instance at the same time, for any specific user's session only one of them can be
+set as the current one (and will be returned as `acr` claim of id_token for them). If after initial session is created
+a new authorization request from a RP comes in specifying another authentication method, its "Level" will be compared
+to that of the method currently associated with this session. If requested method's "Level" is lower or equal to it,
+nothing is changed and the usual SSO behavior is observed. If it's higher (i.e. a more secure method is requested),
+it's not possible to serve such request using the existing session's context, and user must re-authenticate themselves
+to continue. If they succeed, a new session becomes associated with that requested mechanism instead. 
+
+## How The Applicable Authentication Mechanism Gets Determined
 
 ```mermaid
 flowchart TD
@@ -88,20 +116,6 @@ flowchart TD
   configurable by Janssen Server administrator.
 - If default ACR for server is not configured for Janssen Server administrator, of it can not be invoked due to any
   issue, then the Janssen Server uses the [internal server ACR](#internal-acr).
-
-#### Default ACR At Server Level
-
-This is the default authentication mechanism exposed to all applications that send users to the
-Janssen Server for sign-in. Using Janssen Text base UI (TUI) configuration
-tool, this value can be configured by navigating to `Auth Server`->`Defaults` as show below:
-
-![](../../../../docs/assets/jans-tui-auth-server-default.png)
-
-#### Internal ACR
-
-Janssen server will use internal ACR only if no other authentication method is set or could be invoked.
-This internal ACR, `default_password_auth`, is set to level -1. This means that it has lower
-priority than any scripts. This ACR is not a configurable parameter.
 
 ## Want to contribute?
 
