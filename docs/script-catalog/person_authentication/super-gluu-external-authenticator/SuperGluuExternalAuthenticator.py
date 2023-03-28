@@ -584,7 +584,7 @@ class PersonAuthentication(PersonAuthenticationType):
             notificationServiceMode = configurationAttributes.get("notification_service_mode").getValue2()
             if StringHelper.equalsIgnoreCase(notificationServiceMode, "sns"):
                 return self.initSnsPushNotificationService(configurationAttributes)
-            elif StringHelper.equalsIgnoreCase(notificationServiceMode, "gluu"):
+            elif StringHelper.equalsIgnoreCase(notificationServiceMode, "jans"):
                 return self.initGluuPushNotificationService(configurationAttributes)
 
         return self.initNativePushNotificationService(configurationAttributes)
@@ -696,9 +696,9 @@ class PersonAuthentication(PersonAuthenticationType):
             return False
 
         try:
-            gluu_conf = creds["gluu"]
-            android_creds = creds["android"]["gluu"]
-            ios_creds = creds["ios"]["gluu"]
+            gluu_conf = creds["jans"]
+            android_creds = creds["android"]["jans"]
+            ios_creds = creds["ios"]["jans"]
         except:
             print "Super-Gluu. Initialize Gluu notification services. Invalid credentials file format"
             return False
@@ -791,11 +791,9 @@ class PersonAuthentication(PersonAuthenticationType):
         userService = CdiUtil.bean(UserService)
         registrationPersistenceService = CdiUtil.bean(RegistrationPersistenceService)
 
-        user_inum = userService.getUserInum(user_name)
-
         send_android = 0
         send_ios = 0
-        u2f_devices_list = registrationPersistenceService.findByRpRegisteredUserDevices(user_inum, client_redirect_uri, "jansId", "jansDeviceData", "jansDeviceNotificationConf")
+        u2f_devices_list = registrationPersistenceService.findByRpRegisteredUserDevices(user_name, client_redirect_uri, "jansId", "jansDeviceData", "jansDeviceNotificationConf")
         if u2f_devices_list.size() > 0:
             for u2f_device in u2f_devices_list:
                 device_data = u2f_device.getDeviceData()
@@ -958,9 +956,10 @@ class PersonAuthentication(PersonAuthenticationType):
 
         # Store created endpoint ARN in device entry
         userInum = user.getAttribute("inum")
-        u2fDeviceUpdate = registrationPersistenceService.findByRpRegisteredUserDevices(userInum, u2fDevice.getId())
+        u2fDeviceUpdate = registrationPersistenceService.findRegisteredUserDevice(userInum, u2fDevice.getId())
         u2fDeviceUpdate.setDeviceNotificationConf('{"sns_endpoint_arn" : "%s"}' % targetEndpointArn)
         registrationPersistenceService.update(u2fDeviceUpdate)
+        print "Super-Gluu. Send push notification. Stored ARN user's '%s' enpoint " % user.getUserId()
 
         return targetEndpointArn
 
