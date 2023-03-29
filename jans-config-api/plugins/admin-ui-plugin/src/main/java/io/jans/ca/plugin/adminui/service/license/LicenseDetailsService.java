@@ -155,7 +155,7 @@ public class LicenseDetailsService extends BaseService {
         try {
             AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
             LicenseConfiguration licenseConfiguration = auiConfiguration.getLicenseConfiguration();
-            if (Strings.isNullOrEmpty(licenseConfiguration.getApiKey()) || Strings.isNullOrEmpty(licenseConfiguration.getSharedKey())) {
+            if (licenseConfiguration == null || Strings.isNullOrEmpty(licenseConfiguration.getApiKey()) || Strings.isNullOrEmpty(licenseConfiguration.getSharedKey())) {
                 log.error("Unable to get license credentials from SCAN apis. Please contact your administrator.");
                 return createLicenseResponse(false, 500, "Unable to get license credentials from SCAN apis. Please contact your administrator.");
             }
