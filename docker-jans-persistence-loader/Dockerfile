@@ -1,4 +1,4 @@
-FROM alpine:3.16
+FROM bellsoft/liberica-openjre-alpine:11.0.16
 
 # ===============
 # Alpine packages
@@ -7,7 +7,9 @@ FROM alpine:3.16
 RUN apk update \
     && apk upgrade --available \
     && apk add --no-cache python3 curl tini py3-cryptography py3-psycopg2 py3-grpcio \
-    && apk add --no-cache --virtual .build-deps git wget
+    && apk add --no-cache --virtual .build-deps git wget \
+    && mkdir -p /usr/java/latest \
+    && ln -sf /usr/lib/jvm/jre /usr/java/latest/jre
 
 # ======
 # Python
