@@ -3788,9 +3788,19 @@ paths:
     post:
       tags:
       - Configuration – SMTP
-      summary: Test SMTP server configuration
-      description: Test SMTP server configuration
+      summary: Signing Test SMTP server configuration
+      description: Signing Test SMTP server configuration
       operationId: test-config-smtp
+      requestBody:
+        description: SmtpTest object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SmtpTest'
+            examples:
+              Request json example:
+                description: Request json example
+                value: ""
       responses:
         "200":
           description: Ok
@@ -3805,7 +3815,7 @@ paths:
           description: InternalServerError
       security:
       - oauth2:
-        - https://jans.io/oauth/config/smtp.readonly
+        - https://jans.io/oauth/config/smtp.write
   /api/v1/config/scripts:
     get:
       tags:
@@ -7685,6 +7695,12 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
+        whitePagesCanView:
+          type: boolean
+        userCanEdit:
+          type: boolean
+        userCanView:
+          type: boolean
         adminCanAccess:
           type: boolean
         adminCanView:
@@ -7692,12 +7708,6 @@ components:
         adminCanEdit:
           type: boolean
         userCanAccess:
-          type: boolean
-        userCanView:
-          type: boolean
-        whitePagesCanView:
-          type: boolean
-        userCanEdit:
           type: boolean
         baseDn:
           type: string
@@ -8431,6 +8441,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -8951,8 +8963,6 @@ components:
         ttl:
           type: integer
           format: int32
-        displayName:
-          type: string
         authenticationMethod:
           type: string
           enum:
@@ -8978,6 +8988,8 @@ components:
             - tls_client_auth
             - self_signed_tls_client_auth
             - none
+        displayName:
+          type: string
         baseDn:
           type: string
         inum:
@@ -9207,6 +9219,14 @@ components:
     SmtpConfiguration:
       type: object
       properties:
+        connectProtectionList:
+          type: array
+          items:
+            type: string
+            enum:
+            - None
+            - StartTls
+            - SslTls
         valid:
           type: boolean
         host:
@@ -9214,8 +9234,12 @@ components:
         port:
           type: integer
           format: int32
-        requires_ssl:
-          type: boolean
+        connect-protection:
+          type: string
+          enum:
+          - None
+          - StartTls
+          - SslTls
         trust_host:
           type: boolean
         from_name:
@@ -9227,6 +9251,23 @@ components:
         user_name:
           type: string
         password:
+          type: string
+        key-store:
+          type: string
+        key-store-password:
+          type: string
+        key-store-alias:
+          type: string
+        signing-algorithm:
+          type: string
+    SmtpTest:
+      type: object
+      properties:
+        sign:
+          type: boolean
+        subject:
+          type: string
+        message:
           type: string
     CustomScript:
       type: object
@@ -9302,14 +9343,14 @@ components:
           type: boolean
         internal:
           type: boolean
+        locationPath:
+          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
-        locationPath:
-          type: string
         baseDn:
           type: string
     ScriptError:
