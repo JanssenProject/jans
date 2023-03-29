@@ -192,37 +192,6 @@ public class OAuth2Service extends BaseService {
         return null;
     }
 
-    /**
-     * Calls token endpoint from the Identity Provider and returns a valid Token.
-     */
-
-    private Map<String, Object> getClaims(Jwt jwtObj) {
-        Map<String, Object> claims = Maps.newHashMap();
-        if (jwtObj == null) {
-            return claims;
-        }
-        JwtClaims jwtClaims = jwtObj.getClaims();
-        Set<String> keys = jwtClaims.keys();
-        keys.forEach(key -> {
-
-            if (jwtClaims.getClaim(key) instanceof String)
-                claims.put(key, jwtClaims.getClaim(key).toString());
-            if (jwtClaims.getClaim(key) instanceof Integer)
-                claims.put(key, Integer.valueOf(jwtClaims.getClaim(key).toString()));
-            if (jwtClaims.getClaim(key) instanceof Long)
-                claims.put(key, Long.valueOf(jwtClaims.getClaim(key).toString()));
-            if (jwtClaims.getClaim(key) instanceof Boolean)
-                claims.put(key, Boolean.valueOf(jwtClaims.getClaim(key).toString()));
-
-            else if (jwtClaims.getClaim(key) instanceof JSONArray) {
-                List<String> sourceArr = jwtClaims.getClaimAsStringList(key);
-                claims.put(key, sourceArr);
-            } else if (jwtClaims.getClaim(key) instanceof JSONObject)
-                claims.put(key, (jwtClaims.getClaim(key)));
-        });
-        return claims;
-    }
-
     private static String scopeAsString(List<String> scopes) throws UnsupportedEncodingException {
         Set<String> scope = Sets.newHashSet();
         scope.addAll(scopes);

@@ -9,15 +9,15 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OIDCClientSettings {
 
-    private String opHost;
-    private String clientId;
-    private String clientSecret;
     private String tokenEndpoint;
     private String redirectUri;
     private String postLogoutUri;
     private String frontchannelLogoutUri;
     private List<String> scopes;
     private List<String> acrValues;
+    private String opHost;
+    private String clientId;
+    private String clientSecret;
 
     public OIDCClientSettings() {
         //Do not remove
