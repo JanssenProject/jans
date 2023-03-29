@@ -13,6 +13,9 @@ In this page a high-level overview of the flow development process is presented.
 
 These are key concepts to keep in mind before starting.
 
+!!! Important
+    Ensure the engine is [enabled](./engine-config.md#engine-availability) in your installation.
+
 ### Flow data
 
 Every flow has some associated information. At minimum this is required:
