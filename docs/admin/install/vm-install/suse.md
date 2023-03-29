@@ -17,6 +17,13 @@ Before you install, check the [VM system requirements](vm-requirements.md).
 
 ## Install the Package
 
+- The firewall in SUSE is on by default. Make sure to disable it during installation. 
+
+```
+firewall-cmd --permanent --zone=public --add-service=https
+firewall-cmd --reload
+```
+
 - Download the release package from the GitHub Janssen Project
   [Releases](https://github.com/JanssenProject/jans/releases)
 
