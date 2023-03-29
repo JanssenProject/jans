@@ -1,12 +1,16 @@
 package io.jans.ca.plugin.adminui.service.license;
 
 import com.google.common.base.Strings;
+import io.jans.as.client.TokenRequest;
+import io.jans.as.model.common.GrantType;
 import io.jans.as.model.config.adminui.AdminConf;
-import io.jans.ca.plugin.adminui.model.auth.LicenseApiResponse;
-import io.jans.ca.plugin.adminui.model.auth.LicenseRequest;
-import io.jans.ca.plugin.adminui.model.auth.LicenseResponse;
+import io.jans.as.model.config.adminui.LicenseConfig;
+import io.jans.as.model.config.adminui.OIDCClientSettings;
+import io.jans.ca.plugin.adminui.model.auth.*;
 import io.jans.ca.plugin.adminui.model.config.AUIConfiguration;
 import io.jans.ca.plugin.adminui.model.config.LicenseConfiguration;
+import io.jans.ca.plugin.adminui.rest.license.LicenseResource;
+import io.jans.ca.plugin.adminui.service.BaseService;
 import io.jans.ca.plugin.adminui.service.config.AUIConfigurationService;
 import io.jans.ca.plugin.adminui.utils.AppConstants;
 import io.jans.ca.plugin.adminui.utils.ClientFactory;
@@ -22,6 +26,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 import javax.crypto.Mac;
@@ -34,7 +39,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Singleton
-public class LicenseDetailsService {
+public class LicenseDetailsService extends BaseService {
 
     @Inject
     Logger log;
@@ -50,6 +55,48 @@ public class LicenseDetailsService {
      *
      * @return A LicenseApiResponse object is being returned.
      */
+    public LicenseApiResponse validateLicenseConfiguration() {
+
+        AdminConf appConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
+        LicenseConfig licenseConfig = appConf.getMainSettings().getLicenseConfig();
+
+        io.jans.as.client.TokenResponse tokenResponse = generateToken(licenseConfig);
+
+        if (tokenResponse == null || Strings.isNullOrEmpty(tokenResponse.getAccessToken())) {
+            //try to re-generate clients using old SSA
+            DCRResponse dcrResponse = executeDCR(licenseConfig.getSsa());
+            if (dcrResponse == null) {
+                return createLicenseResponse(false, 500, ErrorResponse.ERROR_IN_DCR.getDescription());
+            }
+            tokenResponse = generateToken(licenseConfig);
+
+            if (tokenResponse == null) {
+                return createLicenseResponse(false, 500, ErrorResponse.TOKEN_GENERATION_ERROR.getDescription());
+            }
+        }
+        return createLicenseResponse(true, 200, "No error in license configuration.");
+    }
+
+    private io.jans.as.client.TokenResponse generateToken(LicenseConfig licenseConfig) {
+        try {
+            TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
+            tokenRequest.setAuthUsername(licenseConfig.getOidcClient().getClientId());
+            tokenRequest.setAuthPassword(licenseConfig.getOidcClient().getClientSecret());
+            tokenRequest.setGrantType(GrantType.CLIENT_CREDENTIALS);
+            tokenRequest.setScope(LicenseResource.SCOPE_LICENSE_READ);
+
+            log.info("Trying to get access token from auth server.");
+            String scanLicenseApiHostname = (new StringBuffer()).append(StringUtils.removeEnd(licenseConfig.getOidcClient().getOpHost(), "/"))
+                    .append("/jans-auth/restv1/token").toString();
+            io.jans.as.client.TokenResponse tokenResponse = null;
+            tokenResponse = getToken(tokenRequest, scanLicenseApiHostname);
+            return tokenResponse;
+        } catch (Exception e) {
+            log.error(ErrorResponse.TOKEN_GENERATION_ERROR.getDescription());
+            return null;
+        }
+    }
+
     public LicenseApiResponse checkLicense() {
         try {
             AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
@@ -108,6 +155,10 @@ public class LicenseDetailsService {
         try {
             AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
             LicenseConfiguration licenseConfiguration = auiConfiguration.getLicenseConfiguration();
+            if (licenseConfiguration == null || Strings.isNullOrEmpty(licenseConfiguration.getApiKey()) || Strings.isNullOrEmpty(licenseConfiguration.getSharedKey())) {
+                log.error("Unable to get license credentials from SCAN apis. Please contact your administrator.");
+                return createLicenseResponse(false, 500, "Unable to get license credentials from SCAN apis. Please contact your administrator.");
+            }
             log.debug("Trying to activate License.");
             String activateLicenseUrl = (new StringBuffer()).append(AppConstants.LICENSE_SPRING_API_URL)
                     .append("activate_license").toString();
@@ -234,5 +285,35 @@ public class LicenseDetailsService {
         licenseResponse.setResponseMessage(responseMessage);
         licenseResponse.setApiResult(result);
         return licenseResponse;
+    }
+
+    /**
+     * The function takes an SSA string as input, calls the DCR API to get the scan hostname and OIDC client settings, and
+     * saves the SSA string and the scan hostname and OIDC client settings in the Admin UI configuration
+     *
+     * @param ssaRequest The SSA request object.
+     * @return A LicenseApiResponse object.
+     */
+    public LicenseApiResponse postSSA(SSARequest ssaRequest) {
+        try {
+            DCRResponse dcrResponse = executeDCR(ssaRequest.getSsa());
+
+            if (dcrResponse == null) {
+                return createLicenseResponse(false, 500, ErrorResponse.ERROR_IN_DCR.getDescription());
+            }
+            AdminConf appConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
+            LicenseConfig licenseConfig = appConf.getMainSettings().getLicenseConfig();
+            licenseConfig.setSsa(ssaRequest.getSsa());
+            licenseConfig.setScanLicenseApiHostname(dcrResponse.getScanHostname());
+            OIDCClientSettings oidcClient = new OIDCClientSettings(dcrResponse.getOpHost(), dcrResponse.getClientId(), dcrResponse.getClientSecret());
+            licenseConfig.setOidcClient(oidcClient);
+            appConf.getMainSettings().setLicenseConfig(licenseConfig);
+            entryManager.merge(appConf);
+            return createLicenseResponse(true, 201, "SSA saved successfully.");
+
+        } catch (Exception e) {
+            log.error(ErrorResponse.CHECK_LICENSE_ERROR.getDescription(), e);
+            return createLicenseResponse(false, 500, ErrorResponse.ERROR_IN_DCR.getDescription());
+        }
     }
 }
