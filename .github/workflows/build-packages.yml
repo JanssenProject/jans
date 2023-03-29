@@ -4,15 +4,6 @@ on:
   push:
     tags:
     - 'v**'
-
-  workflow_dispatch:
-    inputs:
-      nightly:
-        description: 'Enable nightly build'
-        default: "false"
-        required: false
-  schedule:
-    - cron: "0 0 * * *"
 jobs:
   publish_binary_packages:
     runs-on: ubuntu-20.04
@@ -82,17 +73,6 @@ jobs:
         echo "version=$(curl https://api.github.com/repos/${{ github.repository }}/releases -s | grep "tag_name" | cut -d '"' -f 4 | grep -o '^\v.*' | head -n 1 | cut -d 'v' -f 2)" >> $GITHUB_OUTPUT
         TAG=$(curl https://api.github.com/repos/${{ github.repository }}/releases -s | grep "tag_name" | cut -d '"' -f 4 | grep -o '^\v.*' | head -n 1)
         echo "PACKAGE_PREFIX=jans" >> ${GITHUB_ENV}
-        #If on schedule build nightly packages
-        if [ ${{ github.event_name }} = "schedule" ] || [ ${{ github.event.inputs.nightly }} = true ]; then
-          echo "Activating nightly build"
-          TAG=$(curl https://api.github.com/repos/${{ github.repository }}/releases -s | grep "tag_name" | grep "nightly" | cut -d '"' -f 4 | grep -o '^\v.*' | head -n 1)
-          mkdir test && cd test
-          git clone https://github.com/JanssenProject/jans
-          VERSION=$(cat jans/docker-jans-auth-server/Dockerfile | grep "ENV CN_VERSION" | awk -F "[=-]" '{print $2}')
-          cd ../../
-          echo "PACKAGE_PREFIX=jans-nightly-build" >> ${GITHUB_ENV}
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-        fi
         echo "tag=$TAG" >> $GITHUB_OUTPUT
 
     - name: Print Version
@@ -235,14 +215,6 @@ jobs:
         TAG=$(curl https://api.github.com/repos/${{ github.repository }}/releases -s | grep "tag_name" | cut -d '"' -f 4 | grep -o '^\v.*' | head -n 1)
         echo "SETUP_PREFIX=jans-linux" >> ${GITHUB_ENV}
         echo "TUI_PREFIX=jans-cli-tui-linux" >> ${GITHUB_ENV}
-        #If on schedule build nightly packages
-        if [ ${{ github.event_name }} = "schedule" ] || [ ${{ github.event.inputs.nightly }} = true ]; then
-          echo "Activating nightly build"
-          TAG=$(curl https://api.github.com/repos/${{ github.repository }}/releases -s | grep "tag_name" | grep "nightly" | cut -d '"' -f 4 | grep -o '^\v.*' | head -n 1)
-          VERSION=$(cat docker-jans-auth-server/Dockerfile | grep "ENV CN_VERSION" | awk -F "[=-]" '{print $2}')
-          echo "SETUP_PREFIX=jans-linux-$VERSION-nightly-build" >> ${GITHUB_ENV}
-          echo "TUI_PREFIX=jans-cli-tui-linux-$VERSION-nightly-build" >> ${GITHUB_ENV}
-        fi
         echo "tag=$TAG" >> $GITHUB_OUTPUT
     - name: Print Version
       run: |
