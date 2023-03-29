@@ -11,6 +11,7 @@ import io.jans.as.persistence.model.Scope;
 
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.MapSchema;
 import io.swagger.v3.oas.models.responses.*;
@@ -20,6 +21,7 @@ import io.swagger.v3.core.model.ApiDescription;
 
 import java.io.*;
 import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -53,14 +55,18 @@ public class SpecFilter extends AbstractSpecFilter {
                 .addProperties("image",new Schema().example("https://robohash.org/John123.png"));
 
         
-        Schema clientAuthSchema =  new Schema()
-                .description("clientAuthSchema")
+        Schema clientAuthSchema1 =  new Schema()
+                .description("clientAuthSchema1")
                 .addProperties("children", new MapSchema()
                         .additionalProperties(new Schema().$ref("#/components/schemas/Scope")));
-                
         
+        Schema clientAuthMapSchema =  new Schema()
+                .description("clientAuthSchema2")
+                .additionalProperties(new Schema().$ref("#/components/schemas/Scope"));
+
         schema.addProperty("newUserSchema", newUserSchema);
-        schema.addProperty("clientAuthSchema", clientAuthSchema);
+        schema.addProperty("clientAuthSchema1", clientAuthSchema1);
+        schema.addProperty("clientAuthMapSchema", clientAuthMapSchema);
         
         return Optional.of(schema);
     }

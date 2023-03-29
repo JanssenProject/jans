@@ -53,8 +53,8 @@ public class ClientAuthResource extends ConfigBaseResource {
     @ApiResponses(value = {
             //@ApiResponse(responseCode = "200", description = "Ok", content = @Content(schema = @Schema(implementation = Client.class), additionalPropertiesSchema = @Schema( array = @ArraySchema(schema = @Schema(implementation = Scope.class))), examples = @ExampleObject(name = "Response json example", value = "example/client-auth/clients-auth-get.json")),
             //@ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(ref = "#/components/schemas/clientAuthSchema")))),
-            //@ApiResponse(responseCode = "200", description = "Ok", content = @Content(schema = @Schema(implementation = Client.class), array = @ArraySchema(schema = @Schema(implementation = Scope.class)))),
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(schema = @Schema(implementation = Client.class), additionalPropertiesSchema = @Schema(implementation = Scope.class))),
+            //@ApiResponse(responseCode = "200", description = "Ok", content = @Content(schema = @Schema(ref = "#/components/schemas/clientAuthMapSchema"))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(schema = @Schema(implementation = clientAuthorizationMap))),           
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
@@ -73,7 +73,7 @@ public class ClientAuthResource extends ConfigBaseResource {
         return Response.ok(clientAuths).build();
     }
 
-    @Operation(summary = "Revoke client authorization", description = "Revoke client authorizations", operationId = "get-client-authorization", tags = {
+    @Operation(summary = "Revoke client authorization", description = "Revoke client authorizations", operationId = "delete-client-authorization", tags = {
             "Client Authorization" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.CLIENT_AUTHORIZATIONS_DELETE_ACCESS }))
     @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "No Content"),

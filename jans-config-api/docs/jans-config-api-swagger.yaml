@@ -1975,7 +1975,7 @@ paths:
       - Client Authorization
       summary: Revoke client authorization
       description: Revoke client authorizations
-      operationId: get-client-authorization
+      operationId: delete-client-authorization
       parameters:
       - name: userId
         in: path
@@ -2013,7 +2013,7 @@ paths:
       - Client Authorization
       summary: Gets list of client authorization
       description: Gets list of client authorizations
-      operationId: get-client-authorization_1
+      operationId: get-client-authorization
       parameters:
       - name: userId
         in: path
@@ -2027,7 +2027,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Client'
+                $ref: '#/components/schemas/clientAuthMapSchema'
         "401":
           description: Unauthorized
         "500":
@@ -7416,13 +7416,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
     Status:
       type: object
       properties:
@@ -7440,13 +7447,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
     FacterData:
       type: object
       properties:
@@ -7472,13 +7486,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
     StatsData:
       type: object
       properties:
@@ -7497,13 +7518,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
     AuthenticationMethod:
       type: object
       properties:
@@ -7517,13 +7545,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
     Deployment:
       type: object
       properties:
@@ -7553,13 +7588,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
     DeploymentDetails:
       type: object
       properties:
@@ -7587,13 +7629,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
     ProjectMetadata:
       type: object
       properties:
@@ -7617,13 +7666,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
     PagedResult:
       type: object
       properties:
@@ -7648,13 +7704,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
     Flow:
       type: object
       properties:
@@ -7687,13 +7750,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
     FlowMetadata:
       type: object
       properties:
@@ -7727,13 +7797,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
     JsonPatch:
       type: object
       properties:
@@ -7745,13 +7822,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
     AttributeValidation:
       type: object
       properties:
@@ -7771,13 +7855,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
     GluuAttribute:
       required:
       - dataType
@@ -7880,19 +7971,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        userCanEdit:
+        whitePagesCanView:
           type: boolean
         userCanAccess:
           type: boolean
-        adminCanView:
-          type: boolean
-        userCanView:
+        adminCanEdit:
           type: boolean
         adminCanAccess:
           type: boolean
-        adminCanEdit:
+        userCanEdit:
           type: boolean
-        whitePagesCanView:
+        userCanView:
+          type: boolean
+        adminCanView:
           type: boolean
         baseDn:
           type: string
@@ -7904,13 +7995,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
     PatchRequest:
       type: object
       properties:
@@ -7928,13 +8026,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
     AppConfiguration:
       type: object
       properties:
@@ -8666,13 +8771,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
     AuthenticationFilter:
       required:
       - baseDn
@@ -8699,13 +8811,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
     AuthenticationProtectionConfiguration:
       type: object
       properties:
@@ -8728,13 +8847,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
     AuthorizationRequestCustomParameter:
       type: object
       properties:
@@ -8750,13 +8876,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
     CIBAEndUserNotificationConfig:
       type: object
       properties:
@@ -8788,13 +8921,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
     ClientAuthenticationFilter:
       required:
       - baseDn
@@ -8821,13 +8961,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
     CorsConfigurationFilter:
       type: object
       properties:
@@ -8860,13 +9007,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
     EngineConfig:
       type: object
       properties:
@@ -8910,13 +9064,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
     JsonNode:
       type: object
       properties:
@@ -8928,13 +9089,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
     SsaConfiguration:
       type: object
       properties:
@@ -8957,13 +9125,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
     SsaValidationConfig:
       type: object
       properties:
@@ -9009,13 +9184,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
     PersistenceConfiguration:
       type: object
       properties:
@@ -9029,13 +9211,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
     CacheConfiguration:
       type: object
       properties:
@@ -9062,13 +9251,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
     InMemoryConfiguration:
       type: object
       properties:
@@ -9083,13 +9279,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
     MemcachedConfiguration:
       type: object
       properties:
@@ -9117,13 +9320,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
     NativePersistenceConfiguration:
       type: object
       properties:
@@ -9145,13 +9355,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
     RedisConfiguration:
       type: object
       properties:
@@ -9204,13 +9421,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
     Client:
       type: object
       properties:
@@ -9473,13 +9697,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
     ClientAttributes:
       type: object
       properties:
@@ -9580,13 +9811,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
     CustomObjectAttribute:
       type: object
       properties:
@@ -9610,13 +9848,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
     LocalizedString:
       type: object
       properties:
@@ -9632,13 +9877,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
     AgamaConfiguration:
       type: object
       properties:
@@ -9658,13 +9910,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
     ApiAppConfiguration:
       type: object
       properties:
@@ -9739,13 +9998,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
     AuditLogConf:
       type: object
       properties:
@@ -9767,13 +10033,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
     DataFormatConversionConf:
       type: object
       properties:
@@ -9791,13 +10064,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
     PluginConf:
       type: object
       properties:
@@ -9815,13 +10095,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
     SmtpConfiguration:
       type: object
       properties:
@@ -9854,13 +10141,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
     CustomScript:
       type: object
       properties:
@@ -9953,13 +10247,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
     ScriptError:
       type: object
       properties:
@@ -9976,13 +10277,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
     SimpleCustomProperty:
       type: object
       properties:
@@ -10000,13 +10308,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
     SimpleExtendedCustomProperty:
       type: object
       properties:
@@ -10026,13 +10341,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
     JSONWebKey:
       type: object
       properties:
@@ -10125,13 +10447,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
     WebKeysConfiguration:
       type: object
       properties:
@@ -10147,13 +10476,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
     GluuLdapConfiguration:
       type: object
       properties:
@@ -10198,13 +10534,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
     Logging:
       type: object
       properties:
@@ -10233,13 +10576,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
     GluuOrganization:
       required:
       - description
@@ -10295,13 +10645,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
     Scope:
       type: object
       properties:
@@ -10376,13 +10733,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
     ScopeAttributes:
       type: object
       properties:
@@ -10400,13 +10764,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
     CustomScope:
       type: object
       properties:
@@ -10485,13 +10856,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
     SessionId:
       type: object
       properties:
@@ -10553,13 +10931,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
     SessionIdAccessMap:
       type: object
       properties:
@@ -10577,13 +10962,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
     User:
       type: object
       properties:
@@ -10621,13 +11013,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
     UmaResource:
       required:
       - name
@@ -10682,13 +11081,20 @@ components:
               example: P4SSW0RD
             image:
               example: https://robohash.org/John123.png
-        clientAuthSchema:
+        clientAuthSchema1:
           properties:
             children:
               type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            ? ""
+            : type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema2
   securitySchemes:
     oauth2:
       type: oauth2
