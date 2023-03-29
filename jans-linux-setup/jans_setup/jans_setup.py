@@ -356,11 +356,12 @@ def main():
                 jansInstaller.make_salt()
                 jansAuthInstaller.make_salt()
 
-
                 if not base.snap:
                     jreInstaller.start_installation()
                     jettyInstaller.start_installation()
                     jythonInstaller.start_installation()
+
+                jansInstaller.generate_configuration()
 
                 jansInstaller.copy_scripts()
                 jansInstaller.encode_passwords()
