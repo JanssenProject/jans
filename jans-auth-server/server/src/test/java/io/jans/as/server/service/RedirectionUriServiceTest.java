@@ -3,10 +3,8 @@ package io.jans.as.server.service;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
-import org.junit.Before;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-
 import org.mockito.Spy;
 import org.mockito.testng.MockitoTestNGListener;
 import org.slf4j.Logger;
@@ -43,8 +41,21 @@ public class RedirectionUriServiceTest {
     private LocalResponseCache localResponseCache;
 
     @Test
-    public void validateRedirectionUri_withValidRedirectUri_returnNotNullValue() throws Exception {
-        final String redirectURl = "https://test.gluu.org/jans-auth-rp/home.htm" ;
+    public void isAllowedByRegExp_withNullRegExp_shouldReturnFalse() {
+        assertFalse(RedirectionUriService.isAllowedByRegExp("https://test.gluu.org/jans-auth-rp/home.htm", new Client()));
+    }
+
+    @Test
+    public void validateRedirectionUri_regExpIsNull_returnNull() {
+        final String singleRedirectUri = "https://client.example.com/cb2";
+        final Client client = new Client();
+
+        assertNull(redirectionUriService.validateRedirectionUri(client, singleRedirectUri));
+    }
+
+    @Test
+    public void validateRedirectionUri_withValidRedirectUri_returnNotNullValue() {
+        final String redirectURl = "https://test.gluu.org/jans-auth-rp/home.htm";
 
         when(redirectionUriService.getSectorRedirectUris(anyString())).thenReturn(getSectorIdentifiers());
 
