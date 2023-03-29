@@ -12,9 +12,10 @@ import io.jans.as.model.crypto.encryption.KeyEncryptionAlgorithm;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.exception.CryptoProviderException;
 import io.jans.as.model.jwk.*;
-import io.jans.as.model.util.SecurityProviderUtility;
 import io.jans.as.model.util.StringUtils;
 import io.jans.util.StringHelper;
+import io.jans.util.security.SecurityProviderUtility;
+
 import org.apache.commons.cli.*;
 import org.apache.log4j.Logger;
 import org.apache.logging.log4j.Level;
