@@ -441,11 +441,6 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/head/admin/auth-server/session-management/multiple-browser-sessions/</loc>
-         <lastmod>2023-03-29</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
          <loc>https://jans.io/docs/head/admin/auth-server/session-management/multiple-sessions-one-browser/</loc>
          <lastmod>2023-03-29</lastmod>
          <changefreq>daily</changefreq>
@@ -661,22 +656,12 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/head/admin/developer/back-channel-scripts/</loc>
-         <lastmod>2023-03-29</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
          <loc>https://jans.io/docs/head/admin/developer/cors/</loc>
          <lastmod>2023-03-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/developer/external-libraries/</loc>
-         <lastmod>2023-03-29</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/admin/developer/front-channel-scripts/</loc>
          <lastmod>2023-03-29</lastmod>
          <changefreq>daily</changefreq>
     </url>
