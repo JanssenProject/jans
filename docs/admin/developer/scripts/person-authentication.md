@@ -74,21 +74,28 @@ Jans-auth server uses Weld 3.0 (JSR-365 aka CDI 2.0) for managed beans. The most
 Java or Python libraries to be imported and used very easily. Remember, you can import a python library only if it has been written in "pure python".
 More details of this mentioned [here](../interception-scripts.md#using-python-libraries-in-a-script)
 
-#### Authentication method for a client (RP)
+### E. Configuring the `acr` parameter in the Jans-auth server:
+The `acr` parameter can be configured in the following ways :
+#### 1. Default authentication method:
 
+`default_acr`: This is the default authentication mechanism exposed to all applications that send users to the Janssen Server for sign-in. Unless an app specifically requests a different form of authentication using the OpenID Connect acr_values parameter (as specified below), users will receive the form of authentication specified in this field.
+
+#### Internal ACR
+If a default ACR is not specified, Janssen will determine it based on enabled scripts and the internal user/password ACR. This internal ACR, `simple_password_auth`, is set to level -1. This means that it has lower priority than any scripts, so Janssen server will use it only if no other authentication method is set.
+
+Use the jans-cli to [update / look-up the default authentication method](https://github.com/JanssenProject/jans-cli/edit/main/docs/cli/cli-default-authentication-method.md).
+
+#### Authentication method for a client (RP):
 A client may also specify `default_acr_values` during registration (and omit the parameter `acr_values` while making an authentication request).
 
 #### Multiple Authentication Mechanisms
-
 The Jans Server can concurrently support multiple authentication mechanisms, enabling Web and mobile apps (clients) to request a specific type of authentication using the standard OpenID Connect request parameter: `acr_values`.
 Learn more about acr_values in the [OpenID Connect core spec](http://openid.net/specs/openid-connect-core-1_0.html#acrSemantics).
 
 #### Enabling an authentication mechanism
-
 An Authentication method is offered by the AS if its ACR value i.e. its corresponding custom script is `enabled`.
 
-By default, users will get the default authentication mechanism as specified above. However, **using the OpenID Connect 
-acr_values parameter, web and mobile clients can request any enabled authentication mechanism**.
+By default, users will get the default authentication mechanism as specified above. However, **using the OpenID Connect acr_values parameter, web and mobile clients can request any enabled authentication mechanism**.
 
 1. Obtain the json contents of a custom script by using a jans-cli command like `get-config-scripts-by-type`, `get-config-scripts-by-inum` etc.
 	Example :
@@ -97,11 +104,8 @@ acr_values parameter, web and mobile clients can request any enabled authenticat
 
 2. [Update the custom script](https://github.com/JanssenProject/jans-cli/blob/main/docs/cli/cli-custom-scripts.md#update-an-existing-custom-script) and change the `enabled` attribute to `true`  
 
-#### Level (rank) of an Authentication mechanism
-
-Each authentication mechanism (script) has a "Level" assigned to it which describes how secure and reliable it is. 
-Read [here](../../auth-server/openid-features/acrs.md#acr-precedence-levels) how level affects which ACR gets selected 
-by Janssen Server for this session
+#### Level (rank) of an Authentication mechanism :
+Each authentication mechanism (script) has a "Level" assigned to it which describes how secure and reliable it is. **The higher the "Level", higher is the reliability represented by the script.** Though several mechanisms can be enabled at the same Janssen server instance at the same time, for any specific user's session only one of them can be set as the current one (and will be returned as `acr` claim of id_token for them). If after initial session is created a new authorization request from a RP comes in specifying another authentication method, its "Level" will be compared to that of the method currently associated with this session. If requested method's "Level" is lower or equal to it, nothing is changed and the usual SSO behavior is observed. If it's higher (i.e. a more secure method is requested), it's not possible to serve such request using the existing session's context, and user must re-authenticate themselves to continue. If they succeed, a new session becomes associated with that requested mechanism instead.
 
 ## Usage scenarios
 
