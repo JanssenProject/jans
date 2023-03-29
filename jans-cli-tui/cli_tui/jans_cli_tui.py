@@ -623,7 +623,8 @@ class JansCliApp(Application):
             scrollbar: Optional[bool] = False,
             line_numbers: Optional[bool] = False,
             lexer: PygmentsLexer = None,
-            text_type: Optional[str] = 'string'
+            text_type: Optional[str] = 'string',
+            jans_list_type: Optional[bool] = False,
             ) -> AnyContainer:
 
         title += ': '
@@ -649,8 +650,13 @@ class JansCliApp(Application):
         ta.window.jans_name = name
         ta.window.jans_help = jans_help
 
+
+
         v = VSplit([Window(FormattedTextControl(title), width=len(title)+1, style=style, height=height), ta])
         v.me = ta
+
+        if jans_list_type:
+            v.jans_list_type = True
 
         return v
  
