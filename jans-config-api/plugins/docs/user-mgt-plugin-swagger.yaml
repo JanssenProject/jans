@@ -830,6 +830,21 @@ components:
           type: object
         displayValue:
           type: string
+        newUserSchema:
+          properties:
+            name:
+              example: John123
+            password:
+              example: P4SSW0RD
+            image:
+              example: https://robohash.org/John123.png
+        clientAuthSchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema
     CustomUser:
       type: object
       properties:
@@ -871,6 +886,21 @@ components:
           type: string
         baseDn:
           type: string
+        newUserSchema:
+          properties:
+            name:
+              example: John123
+            password:
+              example: P4SSW0RD
+            image:
+              example: https://robohash.org/John123.png
+        clientAuthSchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema
     UserPagedResult:
       type: object
       properties:
@@ -887,6 +917,21 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CustomUser'
+        newUserSchema:
+          properties:
+            name:
+              example: John123
+            password:
+              example: P4SSW0RD
+            image:
+              example: https://robohash.org/John123.png
+        clientAuthSchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema
     UserPatchRequest:
       type: object
       properties:
@@ -896,6 +941,21 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CustomObjectAttribute'
+        newUserSchema:
+          properties:
+            name:
+              example: John123
+            password:
+              example: P4SSW0RD
+            image:
+              example: https://robohash.org/John123.png
+        clientAuthSchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema
   securitySchemes:
     oauth2:
       type: oauth2

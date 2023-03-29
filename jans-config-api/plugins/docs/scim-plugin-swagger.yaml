@@ -115,8 +115,39 @@ components:
           type: boolean
         useLocalCache:
           type: boolean
+        newUserSchema:
+          properties:
+            name:
+              example: John123
+            password:
+              example: P4SSW0RD
+            image:
+              example: https://robohash.org/John123.png
+        clientAuthSchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema
     JsonPatch:
       type: object
+      properties:
+        newUserSchema:
+          properties:
+            name:
+              example: John123
+            password:
+              example: P4SSW0RD
+            image:
+              example: https://robohash.org/John123.png
+        clientAuthSchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema
   securitySchemes:
     oauth2:
       type: oauth2

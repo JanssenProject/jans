@@ -561,6 +561,21 @@ components:
       properties:
         licenseKey:
           type: string
+        newUserSchema:
+          properties:
+            name:
+              example: John123
+            password:
+              example: P4SSW0RD
+            image:
+              example: https://robohash.org/John123.png
+        clientAuthSchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema
     LicenseApiResponse:
       type: object
       properties:
@@ -571,6 +586,21 @@ components:
         responseCode:
           type: integer
           format: int32
+        newUserSchema:
+          properties:
+            name:
+              example: John123
+            password:
+              example: P4SSW0RD
+            image:
+              example: https://robohash.org/John123.png
+        clientAuthSchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema
     LicenseResponse:
       type: object
       properties:
@@ -599,6 +629,21 @@ components:
           type: string
         customerLastName:
           type: string
+        newUserSchema:
+          properties:
+            name:
+              example: John123
+            password:
+              example: P4SSW0RD
+            image:
+              example: https://robohash.org/John123.png
+        clientAuthSchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema
     AdminPermission:
       type: object
       properties:
@@ -608,6 +653,21 @@ components:
           type: string
         defaultPermissionInToken:
           type: boolean
+        newUserSchema:
+          properties:
+            name:
+              example: John123
+            password:
+              example: P4SSW0RD
+            image:
+              example: https://robohash.org/John123.png
+        clientAuthSchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema
     RolePermissionMapping:
       type: object
       properties:
@@ -617,6 +677,21 @@ components:
           type: array
           items:
             type: string
+        newUserSchema:
+          properties:
+            name:
+              example: John123
+            password:
+              example: P4SSW0RD
+            image:
+              example: https://robohash.org/John123.png
+        clientAuthSchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema
     AdminRole:
       type: object
       properties:
@@ -626,6 +701,21 @@ components:
           type: string
         deletable:
           type: boolean
+        newUserSchema:
+          properties:
+            name:
+              example: John123
+            password:
+              example: P4SSW0RD
+            image:
+              example: https://robohash.org/John123.png
+        clientAuthSchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema
   securitySchemes:
     oauth2:
       type: oauth2

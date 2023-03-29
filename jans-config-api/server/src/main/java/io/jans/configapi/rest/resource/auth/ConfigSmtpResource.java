@@ -121,7 +121,6 @@ public class ConfigSmtpResource extends ConfigBaseResource {
         checkResourceNotNull(smtpConfiguration, SMTP_CONFIGURATION);  
         encryptPassword(smtpConfiguration);
         GluuConfiguration configurationUpdate = configurationService.getConfiguration();
-        log.debug("configurationUpdate:{}", configurationUpdate);
         configurationUpdate.setSmtpConfiguration(smtpConfiguration);
         configurationService.updateConfiguration(configurationUpdate);
         smtpConfiguration = configurationService.getConfiguration().getSmtpConfiguration();

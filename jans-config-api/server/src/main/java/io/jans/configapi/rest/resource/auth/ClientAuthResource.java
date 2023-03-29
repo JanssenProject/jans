@@ -18,9 +18,12 @@ import io.jans.configapi.util.ApiConstants;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.SchemaProperty;
+import io.swagger.v3.oas.models.media.MapSchema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.*;
@@ -41,12 +44,17 @@ public class ClientAuthResource extends ConfigBaseResource {
 
     @Inject
     ClientAuthService clientAuthService;
+    
+    
 
     @Operation(summary = "Gets list of client authorization", description = "Gets list of client authorizations", operationId = "get-client-authorization", tags = {
             "Client Authorization" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.CLIENT_AUTHORIZATIONS_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = HashMap.class), examples = @ExampleObject(name = "Response json example", value = "example/client-auth/clients-auth-get.json"))),
+            //@ApiResponse(responseCode = "200", description = "Ok", content = @Content(schema = @Schema(implementation = Client.class), additionalPropertiesSchema = @Schema( array = @ArraySchema(schema = @Schema(implementation = Scope.class))), examples = @ExampleObject(name = "Response json example", value = "example/client-auth/clients-auth-get.json")),
+            //@ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(ref = "#/components/schemas/clientAuthSchema")))),
+            //@ApiResponse(responseCode = "200", description = "Ok", content = @Content(schema = @Schema(implementation = Client.class), array = @ArraySchema(schema = @Schema(implementation = Scope.class)))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(schema = @Schema(implementation = Client.class), additionalPropertiesSchema = @Schema(implementation = Scope.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
@@ -89,5 +97,7 @@ public class ClientAuthResource extends ConfigBaseResource {
         logger.info("ClientAuthorizations removed!!!");
         return Response.noContent().build();
     }
-
+    
+   
+   
 }
