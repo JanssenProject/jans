@@ -694,10 +694,10 @@ class PropertiesUtils(SetupUtils):
             while True:
                 ldapPass = self.getPrompt("Enter Password for LDAP Admin ({})".format(Config.ldap_binddn), ldapPass)
 
-                if self.checkPassword(ldapPass):
+                if len(ldapPass) >= 0:
                     break
                 else:
-                    print("Password must be at least 6 characters and include one uppercase letter, one lowercase letter, one digit, and one special character.")
+                    print("Password must be at least 1 character.")
 
             Config.ldapPass = ldapPass
 
