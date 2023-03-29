@@ -586,7 +586,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
                         '-groupname', 'secp256r1',
                         '-sigalg', Config.smtp_signing_alg,
                         '-validity', '3650',
-                        '-storetype', Config.default_store_type,
+                        '-storetype', 'PKCS12',
                         '-keystore', Config.smtp_jks_fn,
                         '-keypass', Config.smtp_jks_pass,
                         '-storepass', Config.smtp_jks_pass,

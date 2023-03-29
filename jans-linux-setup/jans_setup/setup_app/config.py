@@ -95,7 +95,7 @@ class Config:
             self.ldap_base_dir = os.path.join(base.snap_common, 'opendj')
             self.jetty_user = 'root'
 
-        self.default_store_type = 'pkcs12'
+        self.default_store_type = 'JKS'
 
         #create dummy progress bar that logs to file in case not defined
         progress_log_file = os.path.join(LOG_DIR, 'progress-bar.log')
@@ -315,7 +315,7 @@ class Config:
         self.default_enc_key_algs = 'RSA1_5 RSA-OAEP ECDH-ES'
         self.default_key_expiration = 365
 
-        self.smtp_jks_fn = os.path.join(self.certFolder, 'smtp-keys' + '.' + Config.default_store_type)
+        self.smtp_jks_fn = os.path.join(self.certFolder, 'smtp-keys.p12')
         self.smtp_alias = 'smtp_sig_ec256'
         self.smtp_signing_alg = 'SHA256withECDSA'
 
