@@ -3,6 +3,7 @@ package io.jans.ca.plugin.adminui.rest.license;
 import io.jans.ca.plugin.adminui.model.auth.LicenseApiResponse;
 import io.jans.ca.plugin.adminui.model.auth.LicenseRequest;
 import io.jans.ca.plugin.adminui.model.auth.LicenseResponse;
+import io.jans.ca.plugin.adminui.model.auth.SSARequest;
 import io.jans.ca.plugin.adminui.service.license.LicenseDetailsService;
 import io.jans.ca.plugin.adminui.utils.AppConstants;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
@@ -29,13 +30,13 @@ import org.slf4j.Logger;
 public class LicenseResource {
 
     static final String IS_ACTIVE = "/isActive";
-    static final String SAVE_API_CREDENTIALS = "/saveApiCredentials";
     static final String ACTIVATE_LICENSE = "/activateLicense";
     static final String LICENSE_DETAILS = "/licenseDetails";
+    static final String SSA = "/ssa";
+    static final String IS_LICENSE_CONFIG_VALID = "/isConfigValid";
 
-    public static final String SCOPE_OPENID = "openid";
     public static final String SCOPE_LICENSE_READ = "https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly";
-    static final String SCOPE_LICENSE_WRITE = "https://jans.io/oauth/jans-auth-server/config/adminui/license.write";
+    public static final String SCOPE_LICENSE_WRITE = "https://jans.io/oauth/jans-auth-server/config/adminui/license.write";
 
     @Inject
     Logger log;
@@ -87,6 +88,57 @@ public class LicenseResource {
             log.info("Trying to activate license using licese-key.");
             licenseResponse = licenseDetailsService.activateLicense(licenseRequest);
             log.info("License activated (true/false): {}", licenseResponse.isApiResult());
+            return Response.ok(licenseResponse).build();
+        } catch (Exception e) {
+            log.error(ErrorResponse.ACTIVATE_LICENSE_ERROR.getDescription(), e);
+            return Response.serverError().entity(licenseResponse).build();
+        }
+    }
+
+    @Operation(summary = "Save SSA in configuration", description = "Save SSA in configuration", operationId = "adminui-post-ssa", tags = {
+            "Admin UI - License"}, security = @SecurityRequirement(name = "oauth2", scopes = {
+            SCOPE_LICENSE_WRITE}))
+    @RequestBody(description = "SSARequest object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SSARequest.class)))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LicenseApiResponse.class, description = "License response"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LicenseApiResponse.class, description = "License response"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LicenseApiResponse.class, description = "License response")))})
+    @POST
+    @Path(SSA)
+    @ProtectedApi(scopes = {SCOPE_LICENSE_WRITE}, superScopes = {AppConstants.SCOPE_ADMINUI_WRITE})
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response postSSA(@Valid @NotNull SSARequest ssaRequest) {
+        LicenseApiResponse licenseResponse = null;
+        try {
+            log.info("Trying to execute post ssa.");
+            licenseResponse = licenseDetailsService.postSSA(ssaRequest);
+            log.info("SSA Saved (true/false): {}", licenseResponse.isApiResult());
+            return Response.ok(licenseResponse).build();
+        } catch (Exception e) {
+            log.error(ErrorResponse.ACTIVATE_LICENSE_ERROR.getDescription(), e);
+            return Response.serverError().entity(licenseResponse).build();
+        }
+    }
+
+    @Operation(summary = "Is license configuration valid", description = "Is license configuration valid", operationId = "check-adminui-license-config", tags = {
+            "Admin UI - License"}, security = @SecurityRequirement(name = "oauth2", scopes = {
+            SCOPE_LICENSE_READ}))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LicenseApiResponse.class, description = "License response"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LicenseApiResponse.class, description = "License response"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LicenseApiResponse.class, description = "License response")))})
+    @GET
+    @Path(IS_LICENSE_CONFIG_VALID)
+    @ProtectedApi(scopes = {SCOPE_LICENSE_READ}, groupScopes = {SCOPE_LICENSE_WRITE}, superScopes = {AppConstants.SCOPE_ADMINUI_READ})
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response isConfigValid() {
+        LicenseApiResponse licenseResponse = null;
+        try {
+            log.info("Check if license config valid.");
+            licenseResponse = licenseDetailsService.validateLicenseConfiguration();
+            log.info("License config valid (true/false): {}", licenseResponse.isApiResult());
             return Response.ok(licenseResponse).build();
         } catch (Exception e) {
             log.error(ErrorResponse.ACTIVATE_LICENSE_ERROR.getDescription(), e);
