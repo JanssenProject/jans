@@ -57,24 +57,24 @@ public class LicenseDetailsService extends BaseService {
      */
     public LicenseApiResponse validateLicenseConfiguration() {
 
-            AdminConf appConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
-            LicenseConfig licenseConfig = appConf.getMainSettings().getLicenseConfig();
+        AdminConf appConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
+        LicenseConfig licenseConfig = appConf.getMainSettings().getLicenseConfig();
 
-            io.jans.as.client.TokenResponse tokenResponse = generateToken(licenseConfig);
+        io.jans.as.client.TokenResponse tokenResponse = generateToken(licenseConfig);
 
-            if (tokenResponse == null || Strings.isNullOrEmpty(tokenResponse.getAccessToken())) {
-                //try to re-generate clients using old SSA
-                DCRResponse dcrResponse = executeDCR(licenseConfig.getSsa());
-                if (dcrResponse == null) {
-                    return createLicenseResponse(false, 500, ErrorResponse.ERROR_IN_DCR.getDescription());
-                }
-                tokenResponse = generateToken(licenseConfig);
-
-                if (tokenResponse == null) {
-                    return createLicenseResponse(false, 500, ErrorResponse.TOKEN_GENERATION_ERROR.getDescription());
-                }
+        if (tokenResponse == null || Strings.isNullOrEmpty(tokenResponse.getAccessToken())) {
+            //try to re-generate clients using old SSA
+            DCRResponse dcrResponse = executeDCR(licenseConfig.getSsa());
+            if (dcrResponse == null) {
+                return createLicenseResponse(false, 500, ErrorResponse.ERROR_IN_DCR.getDescription());
             }
-            return createLicenseResponse(true, 200, "No error in license configuration.");
+            tokenResponse = generateToken(licenseConfig);
+
+            if (tokenResponse == null) {
+                return createLicenseResponse(false, 500, ErrorResponse.TOKEN_GENERATION_ERROR.getDescription());
+            }
+        }
+        return createLicenseResponse(true, 200, "No error in license configuration.");
     }
 
     private io.jans.as.client.TokenResponse generateToken(LicenseConfig licenseConfig) {
@@ -155,6 +155,10 @@ public class LicenseDetailsService extends BaseService {
         try {
             AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
             LicenseConfiguration licenseConfiguration = auiConfiguration.getLicenseConfiguration();
+            if (Strings.isNullOrEmpty(licenseConfiguration.getApiKey()) || Strings.isNullOrEmpty(licenseConfiguration.getSharedKey())) {
+                log.error("Unable to get license credentials from SCAN apis. Please contact your administrator.");
+                return createLicenseResponse(false, 500, "Unable to get license credentials from SCAN apis. Please contact your administrator.");
+            }
             log.debug("Trying to activate License.");
             String activateLicenseUrl = (new StringBuffer()).append(AppConstants.LICENSE_SPRING_API_URL)
                     .append("activate_license").toString();
