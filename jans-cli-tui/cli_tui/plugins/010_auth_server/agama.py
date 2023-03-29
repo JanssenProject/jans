@@ -15,7 +15,7 @@ from prompt_toolkit.formatted_text import HTML
 from prompt_toolkit.widgets import Button
 
 from utils.multi_lang import _
-from utils.utils import DialogUtils
+from utils.utils import DialogUtils, fromisoformat
 from utils.static import cli_style, common_strings
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from wui_components.jans_path_browser import jans_file_browser_dialog, BrowseType
@@ -100,7 +100,7 @@ class Agama(DialogUtils):
                 if search_str not in project_str:
                     continue
 
-            dt_object = datetime.fromisoformat(agama['createdAt'])
+            dt_object = fromisoformat(agama['createdAt'])
             if agama.get('finishedAt'):
                 status = _("Pending")
                 error = ''
