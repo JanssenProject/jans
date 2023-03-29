@@ -45,7 +45,7 @@ class ClientHandler:
         :type client_url: str
         """
         self.clientAdapter = Client(client_authn_method=CLIENT_AUTHN_METHOD)
-        self.__op_url = self.clientAdapter.discover(op_url)
+        self.__op_url = op_url
         self.__client_url = client_url
         self.__metadata_url = '%s/.well-known/openid-configuration' % op_url
         self.op_data = self.discover(op_url)
