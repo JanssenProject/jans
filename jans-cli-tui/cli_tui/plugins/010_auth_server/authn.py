@@ -28,7 +28,7 @@ class Authn(DialogUtils):
         self.app = app
         self.default_acr = None
 
-        self.main_container = JansVerticalNav(
+        self.acr_container = JansVerticalNav(
                 myparent=app,
                 headers=[_("ACR"), _("SAML ACR"), _("Level"), _("Default")],
                 preferred_size= self.app.get_column_sizes(.2, .5 , .15, .15),
@@ -37,6 +37,13 @@ class Authn(DialogUtils):
                 entriesColor=cli_style.navbar_entriescolor,
                 on_enter=self.edit_acr,
             )
+        add_ldap_server_title = _("Add Source LDAP Server")
+        self.main_container = HSplit([
+                                self.acr_container,
+                                VSplit([Button(add_ldap_server_title, width=len(add_ldap_server_title)+2, handler=self.ldap_server_dialog)], align=HorizontalAlign.CENTER, width=D())
+                            ],
+                            width=D()
+                            )
 
         self.main_container.on_page_enter = self.on_page_enter
 
@@ -51,20 +58,20 @@ class Authn(DialogUtils):
 
         def populate_acr_list():
 
-            self.main_container.clear()
-            self.main_container.add_item((BUILTIN_AUTHN, BUILTIN_SAML, ' -1', 'X' if self.default_acr == BUILTIN_AUTHN else ' '))
+            self.acr_container.clear()
+            self.acr_container.add_item((BUILTIN_AUTHN, BUILTIN_SAML, ' -1', 'X' if self.default_acr == BUILTIN_AUTHN else ' '))
 
             # LDAP Servers
             for ldap_server in self.ldap_servers:
-                self.main_container.add_item((
+                self.acr_container.add_item((
                     ldap_server['configId'],
                     BUILTIN_SAML,
                     str(ldap_server['level']).rjust(3),
                     'X' if self.default_acr == ldap_server['configId'] else ' '
                     ))
 
-            self.main_container.all_data = self.main_container.data[:]
-            self.app.layout.focus(self.main_container)
+            self.acr_container.all_data = self.acr_container.data[:]
+            self.app.layout.focus(self.acr_container)
 
 
         async def coroutine():
@@ -109,6 +116,13 @@ class Authn(DialogUtils):
             result = response.json()
             self.default_acr = result.get('defaultAcr', BUILTIN_AUTHN)
 
+    def get_ldap_config(self, dialog):
+        data = self.make_data_from_dialog({'acr': dialog.body})
+        data['version'] = 0
+        data['useAnonymousBind'] = False
+        data.pop('default', False)
+        return data
+
     def simple_password_auth_dialog(self, acr_item: list) -> None:
 
 
@@ -139,55 +153,74 @@ class Authn(DialogUtils):
         self.app.show_jans_dialog(dialog)
 
 
-    def ldap_server_dialog(self, acr):
+    def ldap_server_dialog(self, acr=None):
         for ldap_server in self.ldap_servers:
             if ldap_server['configId'] == acr:
                 config = ldap_server
                 break
+        else:
+            config = {}
 
-        level = Spinner(value=config['level'], min_value=0, max_value=99)
+        level = Spinner(value=config.get('level', len(self.ldap_servers)), min_value=0, max_value=99)
         default_acr = acr == self.default_acr
+
         body = HSplit([
-                self.app.getTitledText(title="ACR", value=config['configId'], name='configId'),
+                self.app.getTitledText(title="ACR", value=config.get('configId', ''), name='configId', read_only=bool(config.get('configId', None)), style=cli_style.edit_text_required),
                 self.app.getTitledWidget(title=_("Level"), widget=level, name='level'),
                 self.app.getTitledCheckBox(title=_("Default Authn Method"), checked=default_acr, name='default'),
-                self.app.getTitledText(title="Bind DN", value=config['bindDN'], name='bindDN'),
-                self.app.getTitledText(title=_("Max Connections"), text_type='integer', value=config['maxConnections'], name='maxConnections'),
-                self.app.getTitledText(title="Remote Primary Key", value=config['primaryKey'], name='primaryKey'),
-                self.app.getTitledText(title="Local Primary Key", value=config['localPrimaryKey'], name='localPrimaryKey'),
-                self.app.getTitledText(title="Remote LDAP server:port", value='\n'.join(config['servers']), height=2, name='servers', jans_list_type=True),
-                self.app.getTitledText(title="Base DNs", value='\n'.join(config['baseDNs']), height=2, name='baseDNs', jans_list_type=True),
-                self.app.getTitledText(title="Bind Password", value=config['bindPassword'], name='bindPassword'),
-                self.app.getTitledCheckBox(title=_("Use SSL"), checked=config['useSSL'] , name='useSSL'),
-                self.app.getTitledCheckBox(title=_("Enabled"), checked=config['enabled'] , name='enabled'),
+                self.app.getTitledText(title="Bind DN", value=config.get('bindDN',''), name='bindDN', style=cli_style.edit_text_required),
+                self.app.getTitledText(title=_("Max Connections"), text_type='integer', value=config.get('maxConnections', 1000), name='maxConnections', style=cli_style.edit_text_required),
+                self.app.getTitledText(title=_("Remote Primary Key"), value=config.get('primaryKey', 'uid'), name='primaryKey', style=cli_style.edit_text_required),
+                self.app.getTitledText(title=_("Local Primary Key"), value=config.get('localPrimaryKey', 'uid'), name='localPrimaryKey', style=cli_style.edit_text_required),
+                self.app.getTitledText(title=_("Remote LDAP server:port"), value='\n'.join(config.get('servers','')), height=2, name='servers', jans_list_type=True, style=cli_style.edit_text_required),
+                self.app.getTitledText(title=_("Base DNs"), value='\n'.join(config.get('baseDNs','')), height=2, name='baseDNs', jans_list_type=True, style=cli_style.edit_text_required),
+                self.app.getTitledText(title=_("Bind Password"), value=config.get('bindPassword',''), name='bindPassword', style=cli_style.edit_text_required),
+                self.app.getTitledCheckBox(title=_("Use SSL"), checked=config.get('useSSL', True), name='useSSL'),
+                self.app.getTitledCheckBox(title=_("Enabled"), checked=config.get('enabled', False) , name='enabled'),
                 ],
                 width=D()
                 )
 
 
         def test_ldap(dialog):
-            data = self.make_data_from_dialog({'acr': dialog.body})
-            data['version'] = 0
-            data['useAnonymousBind'] = False
-            data.pop('default', False)
+            ldap_config = self.get_ldap_config(dialog)
 
             async def coroutine():
-                # save default acr
-                cli_args = {'operation_id': 'post-config-database-ldap-test', 'data': data}
+                cli_args = {'operation_id': 'post-config-database-ldap-test', 'data': ldap_config}
                 self.app.start_progressing(_("Testing LDAP Configuration..."))
                 result = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
                 self.app.stop_progressing()
 
-                
                 if result.status_code == 200 and result.text == 'true':
-                    ok_button = Button(_("OK"), lambda: dialog.future.set_result(True))
-                    self.app.show_message(title=_("Success"), message=_("LDAP Configuration test was successfull"), buttons=[ok_button])
+                    # if diolog needs to be closed, use handler: lambda: dialog.future.set_result(True)
+                    ok_button = Button(_("OK"))
+                    self.app.show_message(title=_("Success"), message=_("LDAP configuration test was successfull"), buttons=[ok_button])
                 else:
-                    self.app.show_message(title=_(common_strings.error), message=_("LDAP Configuration test was failed"))
+                    self.app.show_message(title=_(common_strings.error), message=_("LDAP configuration test was failed"))
 
             asyncio.ensure_future(coroutine())
 
-            
+
+        def save_ldap(dialog):
+
+            ldap_config = self.get_ldap_config(dialog)
+
+            operation_id = 'put-config-database-ldap' if config.get('configId') else 'post-config-database-ldap'
+
+            async def coroutine():
+                cli_args = {'operation_id': operation_id, 'data': ldap_config}
+                self.app.start_progressing(_("Saving LDAP configuration..."))
+                result = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+                self.app.stop_progressing()
+
+                if result.status_code not in (200, 201):
+                    self.app.show_message(title=_(common_strings.error), message=_("An error ocurred while saving LDAP configuration: {}").format(result.text))
+                else:
+                    dialog.future.set_result(True)
+
+                self.on_page_enter()
+
+            asyncio.ensure_future(coroutine())
 
 
         def save_default(dialog):
@@ -197,7 +230,9 @@ class Authn(DialogUtils):
 
         test_button = Button(_("Test"), test_ldap)
         test_button.keep_dialog = True
-        buttons = [Button(_("Save"), handler=save_default), test_button, Button(_("Cancel"))]
+        save_button = Button(_("Save"), save_ldap)
+        save_button.keep_dialog = True
+        buttons = [save_button, test_button, Button(_("Cancel"))]
         dialog = JansGDialog(self.app, body=body, title=acr, buttons=buttons, width=self.app.dialog_width)
         self.app.show_jans_dialog(dialog)
 
