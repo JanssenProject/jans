@@ -7479,7 +7479,7 @@ client configuration on Janssen Server.</p>
 <h3 id="available-algorithms-for-encryption-and-signing">Available Algorithms for Encryption and Signing<a class="headerlink" href="#available-algorithms-for-encryption-and-signing" title="Permanent link">#</a></h3>
 <p>The client can select algorithms for cryptographic and encryption during client configuration. Janssen 
 Server supports a list of algorithms as listed in response of Janssen Server's well-known
-<a href="./configuration.md">configuration endpoint</a> given below.</p>
+<a href="../../endpoints/configuration/">configuration endpoint</a> given below.</p>
 <div class="highlight"><pre><span></span><code>https://janssen.server.host/jans-auth/.well-known/openid-configuration
 </code></pre></div>
 <p>Claims that list supported algorithms:</p>
@@ -7506,13 +7506,14 @@ Server supports a list of algorithms as listed in response of Janssen Server's w
 <p>Grant defines how a client interacts with the token endpoint to get the tokens. Janssen Server supports grant types
 defined by OAuth 2.0, OAuth 2.1, and extension grants defined by other RFCs. A complete
 list of supported grant types can be found in the response of the Janssen Server's well-known
-<a href="./configuration.md">configuration endpoint</a> given below.</p>
+<a href="../../endpoints/configuration/">configuration endpoint</a> given below.</p>
 <div class="highlight"><pre><span></span><code>https://janssen.server.host/jans-auth/.well-known/openid-configuration
 </code></pre></div>
 <p>Claim <code>grant_types_supported</code> lists all the supported grant types in the response.</p>
 <h3 id="configuring-grant-type-for-client">Configuring Grant Type For Client<a class="headerlink" href="#configuring-grant-type-for-client" title="Permanent link">#</a></h3>
 <p>Janssen Server will allow requests from a client with grant types that the client is configured to use. Client can be
-configured to use or not use certain grant types using <a href="../../../config-guide/jans-cli/">CLI</a> or <a href="../../config-guide/tui.md">TUI</a> tools.</p>
+configured to use or not use certain grant types using <a href="../../../config-guide/jans-cli/">CLI</a> or 
+<a href="../../../config-guide/jans-tui/">TUI</a> tools.</p>
 <h3 id="recommendations-for-using-grant-types-and-flows">Recommendations For Using Grant Types and Flows<a class="headerlink" href="#recommendations-for-using-grant-types-and-flows" title="Permanent link">#</a></h3>
 <p>Developers should use the grant types based on the ability of the client to protect the client credentials as well as
 the security profile of the deployment. If the client software is a server-side component that can securely store the
@@ -7581,7 +7582,7 @@ client informs the authorization server of the desired grant. Response type para
 <a href="https://datatracker.ietf.org/doc/html/rfc6749#section-3.1.1">defined</a> in the OAuth 2.0 framework.</p>
 <p>Janssen Server supports response types
 defined by OAuth 2.0, OAuth 2.1.The complete list of supported response types can be found in the response of the 
-Janssen Server's well-known <a href="./configuration.md">configuration endpoint</a> given below.</p>
+Janssen Server's well-known <a href="../../endpoints/configuration/">configuration endpoint</a> given below.</p>
 <div class="highlight"><pre><span></span><code>https://janssen.server.host/jans-auth/.well-known/openid-configuration
 </code></pre></div>
 <p>Claim <code>response_types_supported</code> lists all the supported grant types in the response.</p>
@@ -7605,7 +7606,7 @@ authorization requests containing response types not permitted for respective cl
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-02-20T11:42:44+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-02-20</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-03-30T10:51:22+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-03-30</span>
       
         <br>
         Created:
