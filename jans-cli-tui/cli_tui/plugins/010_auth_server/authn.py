@@ -1,11 +1,13 @@
 import asyncio
 from typing import Any
+from functools import partial
 
 from prompt_toolkit.application import Application
 from prompt_toolkit.eventloop import get_event_loop
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.layout.containers import HSplit, VSplit, HorizontalAlign, Window
 from prompt_toolkit.widgets import Button, Label
+from prompt_toolkit.formatted_text import HTML
 
 from utils.multi_lang import _
 from utils.utils import DialogUtils
@@ -36,6 +38,7 @@ class Authn(DialogUtils):
                 headerColor=cli_style.navbar_headcolor,
                 entriesColor=cli_style.navbar_entriescolor,
                 on_enter=self.edit_acr,
+                on_delete=self.delete_ldap_server
             )
         add_ldap_server_title = _("Add Source LDAP Server")
         self.main_container = HSplit([
@@ -236,6 +239,28 @@ class Authn(DialogUtils):
         dialog = JansGDialog(self.app, body=body, title=acr, buttons=buttons, width=self.app.dialog_width)
         self.app.show_jans_dialog(dialog)
 
+
+    def delete_ldap_server(self, **params: Any) -> None:
+        async def coroutine(config_id):
+            cli_args = {'operation_id': 'delete-config-database-ldap-by-name', 'url_suffix':'name:{}'.format(config_id) }
+            self.app.start_progressing(_("Deleting Source LDAP..."))
+            await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+            self.app.stop_progressing()
+            self.on_page_enter()
+
+        def do_delete_ldap_server(config_id, dialog):
+            asyncio.ensure_future(coroutine(config_id))
+
+
+        for ldap_server in self.ldap_servers:
+            if ldap_server['configId'] == params['selected'][0]:
+                confirm_handler = partial(do_delete_ldap_server, ldap_server['configId'])
+                confirm_dialog = self.app.get_confirm_dialog(
+                            message=HTML(_("Are you sure deleting source LDAP Server <b>{}</b>?").format(ldap_server['configId'])),
+                            confirm_handler=confirm_handler
+                            )
+                self.app.show_jans_dialog(confirm_dialog)
+                break
 
 
     def save_default_acr(self, acr):
