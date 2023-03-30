@@ -153,11 +153,11 @@ components:
           description: clientAuthSchema1
         clientAuthMapSchema:
           properties:
-            ? ""
-            : type: object
+            children:
+              type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema2
+          description: clientAuthMapSchema
     Fido2Configuration:
       type: object
       properties:
@@ -206,11 +206,11 @@ components:
           description: clientAuthSchema1
         clientAuthMapSchema:
           properties:
-            ? ""
-            : type: object
+            children:
+              type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema2
+          description: clientAuthMapSchema
     RequestedParty:
       type: object
       properties:
@@ -237,11 +237,11 @@ components:
           description: clientAuthSchema1
         clientAuthMapSchema:
           properties:
-            ? ""
-            : type: object
+            children:
+              type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema2
+          description: clientAuthMapSchema
     Fido2DeviceData:
       type: object
       properties:
@@ -283,11 +283,11 @@ components:
           description: clientAuthSchema1
         clientAuthMapSchema:
           properties:
-            ? ""
-            : type: object
+            children:
+              type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema2
+          description: clientAuthMapSchema
     Fido2RegistrationData:
       type: object
       properties:
@@ -353,11 +353,11 @@ components:
           description: clientAuthSchema1
         clientAuthMapSchema:
           properties:
-            ? ""
-            : type: object
+            children:
+              type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema2
+          description: clientAuthMapSchema
     Fido2RegistrationEntry:
       type: object
       properties:
@@ -432,11 +432,11 @@ components:
           description: clientAuthSchema1
         clientAuthMapSchema:
           properties:
-            ? ""
-            : type: object
+            children:
+              type: object
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema2
+          description: clientAuthMapSchema
   securitySchemes:
     oauth2:
       type: oauth2

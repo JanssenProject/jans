@@ -53,8 +53,8 @@ public class ClientAuthResource extends ConfigBaseResource {
     @ApiResponses(value = {
             //@ApiResponse(responseCode = "200", description = "Ok", content = @Content(schema = @Schema(implementation = Client.class), additionalPropertiesSchema = @Schema( array = @ArraySchema(schema = @Schema(implementation = Scope.class))), examples = @ExampleObject(name = "Response json example", value = "example/client-auth/clients-auth-get.json")),
             //@ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(ref = "#/components/schemas/clientAuthSchema")))),
-            //@ApiResponse(responseCode = "200", description = "Ok", content = @Content(schema = @Schema(ref = "#/components/schemas/clientAuthMapSchema"))),
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(schema = @Schema(implementation = clientAuthorizationMap))),           
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(schema = @Schema(ref = "#/components/schemas/clientAuthMapSchema"))),
+            //@ApiResponse(responseCode = "200", description = "Ok", content = @Content(schema = @Schema(implementation = clientAuthorizationMap))),           
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
