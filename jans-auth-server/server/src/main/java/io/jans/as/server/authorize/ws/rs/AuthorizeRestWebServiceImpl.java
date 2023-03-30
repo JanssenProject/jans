@@ -23,6 +23,7 @@ import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.token.JsonWebResponse;
 import io.jans.as.model.util.QueryStringDecoder;
 import io.jans.as.model.util.Util;
+import io.jans.as.persistence.model.ClientAuthorization;
 import io.jans.as.server.audit.ApplicationAuditLogger;
 import io.jans.as.server.ciba.CIBAPingCallbackService;
 import io.jans.as.server.ciba.CIBAPushTokenDeliveryService;
@@ -34,7 +35,6 @@ import io.jans.as.server.model.config.Constants;
 import io.jans.as.server.model.exception.AcrChangedException;
 import io.jans.as.server.model.exception.InvalidRedirectUrlException;
 import io.jans.as.server.model.exception.InvalidSessionStateException;
-import io.jans.as.persistence.model.ClientAuthorization;
 import io.jans.as.server.model.token.JwrService;
 import io.jans.as.server.security.Identity;
 import io.jans.as.server.service.*;
@@ -63,6 +63,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
 import jakarta.ws.rs.core.SecurityContext;
 import org.apache.commons.lang.StringUtils;
+import org.jboss.resteasy.spi.NoLogWebApplicationException;
 import org.slf4j.Logger;
 
 import java.net.URI;
@@ -71,7 +72,8 @@ import java.util.Map.Entry;
 import java.util.function.Function;
 
 import static io.jans.as.model.util.StringUtils.implode;
-import static org.apache.commons.lang3.BooleanUtils.*;
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
+import static org.apache.commons.lang3.BooleanUtils.toBoolean;
 
 /**
  * Implementation for request authorization through REST web services.
@@ -546,8 +548,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             clientAuthorizationsService.clearAuthorizations(clientAuthorization, authzRequest.getClient().getPersistClientAuthorizations());
 
             prompts.remove(Prompt.CONSENT);
+            log.debug("Redirect to authorization page, request {}", authzRequest);
 
-            throw new WebApplicationException(redirectToAuthorizationPage(authzRequest, prompts));
+            throw new NoLogWebApplicationException(redirectToAuthorizationPage(authzRequest, prompts));
         }
     }
 
@@ -568,7 +571,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             prompts.remove(Prompt.LOGIN);
 
             if (sessionUnauthenticated) {
-                throw new WebApplicationException(redirectToAuthorizationPage(authzRequest, prompts));
+                log.debug("Redirect to authorization page, request {}", authzRequest);
+                throw new NoLogWebApplicationException(redirectToAuthorizationPage(authzRequest, prompts));
             }
         }
     }
@@ -589,7 +593,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         final List<Prompt> prompts = authzRequest.getPromptList();
 
         if (prompts.contains(Prompt.CONSENT)) {
-            throw new WebApplicationException(redirectToAuthorizationPage(authzRequest, prompts));
+            log.debug("Redirect to authorization page, request {}", authzRequest);
+            throw new NoLogWebApplicationException(redirectToAuthorizationPage(authzRequest, prompts));
         }
         // There is no need to present the consent page:
         // If Client is a Trusted Client.
@@ -608,7 +613,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                     sessionUser.addPermission(authzRequest.getClientId(), true);
                     sessionIdService.updateSessionId(sessionUser);
                 } else {
-                    throw new WebApplicationException(redirectToAuthorizationPage(authzRequest, prompts));
+                    log.debug("Redirect to authorization page, request {}", authzRequest);
+                    throw new NoLogWebApplicationException(redirectToAuthorizationPage(authzRequest, prompts));
                 }
             }
         }
@@ -647,7 +653,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     private void checkForceAuthorization(AuthzRequest authzRequest, List<Prompt> prompts, Client client, ExternalPostAuthnContext postAuthnContext) {
         final boolean forceAuthorization = externalPostAuthnService.externalForceAuthorization(client, postAuthnContext);
         if (forceAuthorization) {
-            throw new WebApplicationException(redirectToAuthorizationPage(authzRequest, prompts));
+            log.debug("Redirect to authorization page, request {}", authzRequest);
+            throw new NoLogWebApplicationException(redirectToAuthorizationPage(authzRequest, prompts));
         }
     }
 
@@ -657,7 +664,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             unauthenticateSession(authzRequest.getSessionId(), authzRequest.getHttpRequest());
             authzRequest.setSessionId(null);
 
-            throw new WebApplicationException(redirectToAuthorizationPage(authzRequest, prompts));
+            log.debug("Redirect to authorization page, request {}", authzRequest);
+            throw new NoLogWebApplicationException(redirectToAuthorizationPage(authzRequest, prompts));
         }
     }
 
@@ -667,7 +675,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             unauthenticateSession(authzRequest.getSessionId(), authzRequest.getHttpRequest());
             authzRequest.setSessionId(null);
 
-            throw new WebApplicationException(redirectToAuthorizationPage(authzRequest, prompts));
+            log.debug("Redirect to authorization page, request {}", authzRequest);
+            throw new NoLogWebApplicationException(redirectToAuthorizationPage(authzRequest, prompts));
         }
     }
 
@@ -728,7 +737,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 authzRequest.setPrompt(implode(prompts, " "));
             }
 
-            throw new WebApplicationException(redirectToAuthorizationPage(authzRequest, prompts));
+            log.debug("Redirect to authorization page, request {}", authzRequest);
+            throw new NoLogWebApplicationException(redirectToAuthorizationPage(authzRequest, prompts));
         }
     }
 

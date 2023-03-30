@@ -83,3 +83,7 @@ The OP doesn't know anything about end-user activity on the RP. Therefore, the R
 
 Setting `sessionIdLifetime` to `-1` value sets the `session_id` cookie value to `expires=session`, and sets the OP session object to not have an expiration time. Most browsers clear cookies with `expires=session` when the browser is closed, removing the session object at that time. Javascript may be necessary to override
 undesirable default browser behavior.
+
+### Can we have a single session across multiple browsers?
+
+Unfortunately, each browser has its own session cookies, and therefore its own sessions.

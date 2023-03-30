@@ -1,3 +1,5 @@
+import datetime
+
 from types import SimpleNamespace
 from typing import Optional
 
@@ -83,3 +85,12 @@ class DialogUtils:
             return False
 
         return True
+
+
+def fromisoformat(dt_str):
+    dt, _, us = dt_str.partition(".")
+    dt = datetime.datetime.strptime(dt, "%Y-%m-%dT%H:%M:%S")
+    if us:
+        us = int(us.rstrip("Z"), 10)
+        dt = dt + datetime.timedelta(microseconds=us)
+    return dt
