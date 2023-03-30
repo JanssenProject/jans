@@ -39,6 +39,7 @@ import io.jans.fido2.service.persist.UserSessionIdService;
 import io.jans.fido2.service.sg.RawAuthenticationService;
 import io.jans.fido2.service.verifier.CommonVerifiers;
 import io.jans.fido2.sg.SuperGluuMode;
+import io.jans.service.net.NetworkService;
 import io.jans.util.StringHelper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -71,6 +72,9 @@ public class AssertionSuperGluuController {
 
 	@Inject
 	private UserSessionIdService userSessionIdService;
+	
+	@Inject
+	private NetworkService networkService;
 
     /* Example for one_step:
      *  - request:
@@ -143,6 +147,7 @@ public class AssertionSuperGluuController {
         // Add all required parameters from request to allow process U2F request 
         params.put(CommonVerifiers.SUPER_GLUU_REQUEST, true);
         params.put(CommonVerifiers.SUPER_GLUU_APP_ID, appId);
+        params.put("documentDomain", networkService.getHost(appId));
         params.put(CommonVerifiers.SUPER_GLUU_KEY_HANDLE, keyHandle);
         params.put(CommonVerifiers.SUPER_GLUU_MODE, oneStep ? SuperGluuMode.ONE_STEP.getMode() : SuperGluuMode.TWO_STEP.getMode());
 
