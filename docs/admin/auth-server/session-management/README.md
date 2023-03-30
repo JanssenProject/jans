@@ -61,7 +61,7 @@ Jans Auth Server updates `lastUsedAt` property of the session object:
 ## Killing Sessions
 
 The [End Session endpoint](../endpoints/end-session.md) (`/end_session`)
-is where the user can end their own session. See [OpenID Logout](../logout/README.md) for more information.
+is where the user can end their own session. See [OpenID Logout](../openid-features/logout/README.md) for more information.
 
 To end another person's session, Jans Auth Server has a [Session Revocation Endpoint](../endpoints/session-revocation.md) (`/revoke_session`).
 
@@ -70,8 +70,8 @@ To end another person's session, Jans Auth Server has a [Session Revocation Endp
 It is possible to add custom business logic as Jans Auth Server detects
 session events, see:
 
-  * [Application Session](../../../developer/scripts/application-session.md)
-  * [End Session](../../../developer/scripts/end-session.md)
+  * [Application Session](../../developer/scripts/application-session.md)
+  * [End Session](../../developer/scripts/end-session.md)
 
 ## FAQ
 
