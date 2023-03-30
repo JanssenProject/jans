@@ -146,7 +146,7 @@ public class ConfigSmtpResource extends ConfigBaseResource {
         log.debug("smtpTest:{}", smtpTest);
         SmtpConfiguration smtpConfiguration = configurationService.getConfiguration().getSmtpConfiguration();
         log.debug(SMTP_CONFIGURATION + ":{}", smtpConfiguration);
-        smtpConfiguration.setPasswordDecrypted(encryptionService.decrypt(smtpConfiguration.getPassword()));
+        smtpConfiguration.setSmtpAuthenticationAccountPasswordDecrypted(encryptionService.decrypt(smtpConfiguration.getSmtpAuthenticationAccountPassword()));
         smtpConfiguration.setKeyStorePasswordDecrypted(encryptionService.decrypt(smtpConfiguration.getKeyStorePassword()));
         boolean status = false;
         if (smtpTest.getSign()) {
@@ -185,13 +185,13 @@ public class ConfigSmtpResource extends ConfigBaseResource {
         if (smtpConfiguration == null) {
             return smtpConfiguration;
         }
-        String password = smtpConfiguration.getPassword();
+        String password = smtpConfiguration.getSmtpAuthenticationAccountPassword();
         if (password != null && !password.isEmpty()) {
             try {
                 encryptionService.decrypt(password);
             } catch (Exception ex) {
                 log.error("Exception while decryption of smtpConfiguration password hence will encrypt it!!!");
-                smtpConfiguration.setPassword(encryptionService.encrypt(password));
+                smtpConfiguration.setSmtpAuthenticationAccountPassword(encryptionService.encrypt(password));
             }
         }
         password = smtpConfiguration.getKeyStorePassword();
@@ -208,9 +208,9 @@ public class ConfigSmtpResource extends ConfigBaseResource {
 
     private SmtpConfiguration decryptPassword(SmtpConfiguration smtpConfiguration) throws EncryptionException {
         if (smtpConfiguration != null) {
-            String password = smtpConfiguration.getPassword();
+            String password = smtpConfiguration.getSmtpAuthenticationAccountPassword();
             if (password != null && !password.isEmpty()) {
-                smtpConfiguration.setPasswordDecrypted(encryptionService.decrypt(password));
+                smtpConfiguration.setSmtpAuthenticationAccountPasswordDecrypted(encryptionService.decrypt(password));
             }
             password = smtpConfiguration.getKeyStorePassword();
             if (password != null && !password.isEmpty()) {

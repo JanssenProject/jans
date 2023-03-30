@@ -102,10 +102,10 @@ public class ConfigurationService {
         if (smtpConfiguration == null) {
             return;
         }
-        String password = smtpConfiguration.getPassword();
+        String password = smtpConfiguration.getSmtpAuthenticationAccountPassword();
         if (StringHelper.isNotEmpty(password)) {
             try {
-                smtpConfiguration.setPasswordDecrypted(encryptionService.decrypt(password));
+                smtpConfiguration.setSmtpAuthenticationAccountPasswordDecrypted(encryptionService.decrypt(password));
             } catch (EncryptionException ex) {
                 log.error("Failed to decrypt SMTP user password", ex);
             }
