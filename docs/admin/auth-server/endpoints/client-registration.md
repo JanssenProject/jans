@@ -43,7 +43,7 @@ There are different ways in which the client metadata is communicated to the aut
 dynamic client registration requests.
 
 - [Using request body](#using-request-body)
-- [Using signed request object (JWT)](#using-signed-request-object--jwt-)
+- [Using signed request object (JWT)](#using-signed-request-object-jwt)
 - [Using software statement](#using-software-statement)
 
 #### Using request body

@@ -33,7 +33,7 @@ This endpoint is always enabled and can not be disabled using feature flags.
 ## Configuration Properties
 
 End session endpoint can be further configured using Janssen Server configuration properties listed below. When using
-[Janssen Text-based UI(TUI)](../../config-guide/tui.md) to configure the properties,
+[Janssen Text-based UI(TUI)](../../config-guide/jans-tui/README.md) to configure the properties,
 navigate via `Auth Server`->`Properties`.
 
 - [jwksUri](../../reference/json/properties/janssenauthserver-properties.md#jwksuri)
