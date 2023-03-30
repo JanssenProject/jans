@@ -208,10 +208,6 @@ def _transform_auth_dynamic_config(conf):
         if "private_key_jwt" not in conf["tokenEndpointAuthMethodsSupported"]:
             conf["tokenEndpointAuthMethodsSupported"].append("private_key_jwt")
             should_update = True
-
-        # if conf["redirectUrisRegexEnabled"]:
-        #     conf["redirectUrisRegexEnabled"] = False
-        #     should_update = True
     else:
         if all([
             os.environ.get("CN_PERSISTENCE_TYPE") in ("sql", "spanner"),
@@ -960,15 +956,10 @@ class Upgrade:
 
         # default smtp config
         default_smtp_conf = {
-            "valid": True,
-            "host": "SMTP Host",
-            "port": 1111,
-            "trust-host": True,
-            "from-name": "From Name",
-            "from-email-address": "From Name",
-            "requires-authentication": True,
-            "user-name": "From Name",
-            "password": "xAGVIW6KrSr82FIMADaPlw==",
+            "key-store": "/etc/certs/smtp-keys.pkcs12",
+            "key-store-password": self.manager.secret.get("smtp_jks_pass_enc"),
+            "key-store-alias": self.manager.config.get("smtp_alias"),
+            "signing-algorithm": self.manager.config.get("smtp_signing_alg"),
         }
 
         # set jansSmtpConf if still empty
