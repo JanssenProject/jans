@@ -29,7 +29,7 @@ Server, which is defined by the `token_endpoint_auth_method` in OpenID Connect
 
 Obviously, using asynchronous secrets for authentication is more secure. The
 client configuration also determines what [crypto](client-configuration.md#cryptography) is used for signing and
-encryption of tokens, what [scopes](client-configuration.md#scopes) are available to the client (which determines
+encryption of tokens, what scopes are available to the client (which determines
 the extent of access to APIs), what [grants](client-configuration.md#grants) are available,  what is a valid
 [redirect_uri](client-configuration.md#redirect-uri), timeouts, whether to use a value or reference token, whether to
 expire the client, and several other options that impact security.
@@ -38,9 +38,9 @@ expire the client, and several other options that impact security.
 
 There are a few ways clients are created and managed in Jans Auth Server:
 
-* [Jans Config API](../../config-guide/config-api/)
-* [Command Line Tool (CLI)]((../../config-guide/jans-cli/README.md))
-* [Jans Text UI (TUI)](../../config-guide/tui.md)
+* [Jans Config API](../../config-guide/config-api/README.md)
+* [Command Line Tool (CLI)](../../config-guide/jans-cli/README.md)
+* [Jans Text UI (TUI)](../../config-guide/jans-tui/README.md)
 * [OpenID Connect Dynamic Client Registration](https://openid.net/specs/openid-connect-registration-1_0.html)
 
 Which mechanism to use depends on the deployment requirements. For *ad hoc*
@@ -83,7 +83,7 @@ with various sections to input client details.
 
 ![](../../../assets/Jans_TUI_Auth_Server_Add_new_client.png)
 
-Refer to complete documentation [here](../../config-guide/tui.md)
+Refer to complete documentation [here](../../config-guide/jans-tui/README.md)
 
 ### Using curl
 

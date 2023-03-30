@@ -71,7 +71,7 @@ the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-
 ## Configuration Properties
 
 Token endpoint and tokens issued by token endpoint can be further configured using Janssen Server configuration properties listed below. When using
-[Janssen Text-based UI(TUI)](../../config-guide/tui.md) to configure the properties,
+[Janssen Text-based UI(TUI)](../../config-guide/jans-tui/README.md) to configure the properties,
 navigate via `Auth Server`->`Properties`.
 
 - [tokenEndpoint](../../reference/json/properties/janssenauthserver-properties.md#tokenendpoint)
@@ -114,7 +114,7 @@ Refer to [Client Authentication](https://openid.net/specs/openid-connect-core-1_
 Connect core specification for more details on these authentication methods.
 
 Client can specify the default authentication method. To set default authentication method using
-[Janssen Text-based UI(TUI)](../../config-guide/tui.md),
+[Janssen Text-based UI(TUI)](../../config-guide/jans-tui/README.md),
 navigate via `Auth Server`->`Clients`->`Add Client`->`Basic`-> `Authn Method Token Endpoint`.
 
 ![](../../../assets/image-tui-client-registration-basic.png)
@@ -124,13 +124,13 @@ navigate via `Auth Server`->`Clients`->`Add Client`->`Basic`-> `Authn Method Tok
 Token endpoint supports below mentioned grant types. 
 
 - [Authorization Code](../oauth-features/auth-code-grant.md)
-- [Refresh Token](../oauth-features/refresh-token-grant.md)
+- [Refresh Token](../oauth-features/README.md)
 - [Client Credentials](../oauth-features/client-credential-grant.md)
 - [Password](../oauth-features/password-grant.md)
 
 Client can configure all the possible grant types it can request from token endpoint during client configuration.
 To select the available grant types using
-[Janssen Text-based UI(TUI)](../../config-guide/tui.md),
+[Janssen Text-based UI(TUI)](../../config-guide/jans-tui/README.md),
 navigate via `Auth Server`->`Clients`->`Add Client`/`search client`->`Basic`-> `Grant`. 
 
 ![](../../../assets/image-tui-client-registration-basic.png)
@@ -143,7 +143,7 @@ Following interception scripts are relevant to token endpoint:
 - [Update Token](../../developer/scripts/update-token.md)
 
 Client can configure a particular script to be executed using client configuration. To update configuration using
-[Janssen Text-based UI(TUI)](../../config-guide/tui.md) navigate via `Auth Server`->`Clients`->`Add Client`/`search`->
+[Janssen Text-based UI(TUI)](../../config-guide/jans-tui/README.md) navigate via `Auth Server`->`Clients`->`Add Client`/`search`->
 `Client Scripts`
 
 ![](../../../assets/image-tui-client-registration-scripts.png)
