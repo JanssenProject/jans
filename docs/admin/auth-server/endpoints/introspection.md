@@ -151,7 +151,7 @@ eyqmru6lKlASOsaE8dmLSeKcX91FbG79FKN8un24iwIDCbKT9xlUFl54xWVShNDFA
 ## Disabling The Endpoint Using Feature Flag
 
 `/introspection` endpoint can be enabled or disable using [END_SESSION feature flag](../../reference/json/feature-flags/janssenauthserver-feature-flags.md#introspection).
-Use [Janssen Text-based UI(TUI)](../../config-guide/tui.md) or [Janssen command-line interface](../../config-guide/jans-cli/README.md) to perform this task.
+Use [Janssen Text-based UI(TUI)](../../config-guide/jans-tui/README.md) or [Janssen command-line interface](../../config-guide/jans-cli/README.md) to perform this task.
 
 When using TUI, navigate via `Auth Server`->`Properties`->`enabledFeatureFlags` to screen below. From here, enable or
 disable `INTROSPECTION` flag as required.
@@ -161,7 +161,7 @@ disable `INTROSPECTION` flag as required.
 ## Configuration Properties
 
 Introspection endpoint can be further configured using Janssen Server configuration properties listed below. When using
-[Janssen Text-based UI(TUI)](../../config-guide/tui.md) to configure the properties,
+[Janssen Text-based UI(TUI)](../../config-guide/jans-tui/README.md) to configure the properties,
 navigate via `Auth Server`->`Properties`.
 
 - [introspectionEndpoint](../../reference/json/properties/janssenauthserver-properties.md#introspectionendpoint)
@@ -179,7 +179,7 @@ Customizing certain aspects of endpoint behaviour, for example, one can modify c
 id-token and access-token.
 
 Configure below-mentioned client properties to enable usage of introspection scripts.
-When using [Janssen Text-based UI(TUI)](../../config-guide/tui.md) to configure these client properties,
+When using [Janssen Text-based UI(TUI)](../../config-guide/jans-tui/README.md) to configure these client properties,
 navigate to
 
 - _accessTokenAsJwt_:
