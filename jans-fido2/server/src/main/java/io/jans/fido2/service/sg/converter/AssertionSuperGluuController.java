@@ -72,9 +72,6 @@ public class AssertionSuperGluuController {
 
 	@Inject
 	private UserSessionIdService userSessionIdService;
-	
-	@Inject
-	private NetworkService networkService;
 
     /* Example for one_step:
      *  - request:
@@ -147,7 +144,7 @@ public class AssertionSuperGluuController {
         // Add all required parameters from request to allow process U2F request 
         params.put(CommonVerifiers.SUPER_GLUU_REQUEST, true);
         params.put(CommonVerifiers.SUPER_GLUU_APP_ID, appId);
-        params.put("documentDomain", networkService.getHost(appId));
+        params.put("documentDomain", appId);
         params.put(CommonVerifiers.SUPER_GLUU_KEY_HANDLE, keyHandle);
         params.put(CommonVerifiers.SUPER_GLUU_MODE, oneStep ? SuperGluuMode.ONE_STEP.getMode() : SuperGluuMode.TWO_STEP.getMode());
 
