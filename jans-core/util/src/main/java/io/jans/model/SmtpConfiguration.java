@@ -43,15 +43,15 @@ public class SmtpConfiguration implements java.io.Serializable {
     @JsonProperty("requires_authentication")
     private boolean requiresAuthentication;
 
-    @JsonProperty("user_name")
-    private String userName;
+    @JsonProperty("smtp_authentication_account_username")
+    private String smtpAuthenticationAccountUsername;
 
-    @JsonProperty("password")
-    private String password;
+    @JsonProperty("smtp_authentication_account_password")
+    private String smtpAuthenticationAccountPassword;
 
     @Transient
     @JsonIgnore
-    private String passwordDecrypted;
+    private String smtpAuthenticationAccountPasswordDecrypted;
     
     @JsonProperty("key-store")
     private String keyStore;
@@ -128,31 +128,31 @@ public class SmtpConfiguration implements java.io.Serializable {
     public boolean isValid() {
         return getHost() != null && getPort() != 0
                 && ((!isRequiresAuthentication())
-                || (getUserName() != null && getPassword() != null));
+                || (getSmtpAuthenticationAccountUsername() != null && getSmtpAuthenticationAccountPassword() != null));
     }
 
-    public String getUserName() {
-        return userName;
+    public String getSmtpAuthenticationAccountUsername() {
+        return smtpAuthenticationAccountUsername;
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
+    public void setSmtpAuthenticationAccountUsername(String smtpAuthenticationAccountUsername) {
+        this.smtpAuthenticationAccountUsername = smtpAuthenticationAccountUsername;
     }
 
-    public String getPassword() {
-        return password;
+    public String getSmtpAuthenticationAccountPassword() {
+        return smtpAuthenticationAccountPassword;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setSmtpAuthenticationAccountPassword(String smtpAuthenticationAccountPassword) {
+        this.smtpAuthenticationAccountPassword = smtpAuthenticationAccountPassword;
     }
 
-    public String getPasswordDecrypted() {
-        return passwordDecrypted;
+    public String getSmtpAuthenticationAccountPasswordDecrypted() {
+        return smtpAuthenticationAccountPasswordDecrypted;
     }
 
-    public void setPasswordDecrypted(String passwordDecrypted) {
-        this.passwordDecrypted = passwordDecrypted;
+    public void setSmtpAuthenticationAccountPasswordDecrypted(String smtpAuthenticationAccountPasswordDecrypted) {
+        this.smtpAuthenticationAccountPasswordDecrypted = smtpAuthenticationAccountPasswordDecrypted;
     }
     
     public SmtpConnectProtectionType[] getConnectProtectionList() {
