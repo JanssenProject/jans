@@ -226,7 +226,7 @@ def _transform_auth_dynamic_config(conf):
                 "templatesPath": "/ftl",
                 "scriptsPath": "/scripts",
                 "serializerType": "KRYO",
-                "maxItemsLoggedInCollections": 3,
+                "maxItemsLoggedInCollections": 9,
                 "pageMismatchErrorPage": "mismatch.ftl",
                 "interruptionErrorPage": "timeout.ftl",
                 "crashErrorPage": "crash.ftl",
