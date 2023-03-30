@@ -13,13 +13,15 @@ public class SecurityProviderUtilityTest extends BaseTest {
     public void installBCProvider_silent_validInstance() {
         showTitle("installBCProvider_silent_validInstance");
         SecurityProviderUtility.installBCProvider(true);
-        assertNotNull(SecurityProviderUtility.getInstance());
+        assertNotNull(SecurityProviderUtility.getBCProvider());
+        assertNotNull(SecurityProviderUtility.getSecurityMode());
     }
 
     @Test
     public void installBCProvider_Nosilent_validInstance() {
         showTitle("installBCProvider_Nosilent_validInstance");
         SecurityProviderUtility.installBCProvider();
-        assertNotNull(SecurityProviderUtility.getInstance());
+        assertNotNull(SecurityProviderUtility.getBCProvider());
+        assertNotNull(SecurityProviderUtility.getSecurityMode());
     }
 }
