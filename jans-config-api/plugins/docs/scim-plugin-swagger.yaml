@@ -137,6 +137,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     JsonPatch:
       type: object
       properties:
@@ -162,6 +169,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
   securitySchemes:
     oauth2:
       type: oauth2

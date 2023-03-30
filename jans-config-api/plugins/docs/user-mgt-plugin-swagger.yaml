@@ -852,6 +852,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     CustomUser:
       type: object
       properties:
@@ -915,6 +922,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     UserPagedResult:
       type: object
       properties:
@@ -953,6 +967,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     UserPatchRequest:
       type: object
       properties:
@@ -984,6 +1005,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
   securitySchemes:
     oauth2:
       type: oauth2

@@ -53,8 +53,9 @@ public class ClientAuthResource extends ConfigBaseResource {
     @ApiResponses(value = {
             //@ApiResponse(responseCode = "200", description = "Ok", content = @Content(schema = @Schema(implementation = Client.class), additionalPropertiesSchema = @Schema( array = @ArraySchema(schema = @Schema(implementation = Scope.class))), examples = @ExampleObject(name = "Response json example", value = "example/client-auth/clients-auth-get.json")),
             //@ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(ref = "#/components/schemas/clientAuthSchema")))),
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(schema = @Schema(ref = "#/components/schemas/clientAuthMapSchema"))),
-            //@ApiResponse(responseCode = "200", description = "Ok", content = @Content(schema = @Schema(implementation = clientAuthorizationMap))),           
+            //@ApiResponse(responseCode = "200", description = "Ok", content = @Content(schema = @Schema(ref = "#/components/schemas/clientAuthMapArraySchema"))),
+            //@ApiResponse(responseCode = "200", description = "Ok", content = @Content(schema = @Schema(implementation = clientAuthorizationMap))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(schema = @Schema(implementation = java.util.Map.class), examples = @ExampleObject(name = "Response json example", value = "example/client-auth/clients-auth-get.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
@@ -86,14 +87,14 @@ public class ClientAuthResource extends ConfigBaseResource {
     @Path(ApiConstants.USERID_PATH + ApiConstants.USERNAME_PATH + ApiConstants.CLIENTID_PATH)
     public Response deleteClientAuthorization(
             @Parameter(description = "User identifier") @PathParam(ApiConstants.USERID) @NotNull String userId,
-            @Parameter(description = "User name") @PathParam(ApiConstants.USERNAME) @NotNull String userName,
-            @Parameter(description = "Client identifier") @PathParam(ApiConstants.CLIENTID) @NotNull String clientId) {
+            @Parameter(description = "Client identifier") @PathParam(ApiConstants.CLIENTID) @NotNull String clientId,
+            @Parameter(description = "User name") @PathParam(ApiConstants.USERNAME) @NotNull String userName) {
 
         if (logger.isInfoEnabled()) {
-            logger.info("Param for ClientAuthorization to be deleted - userId:{}, userName:{}, clientId:{}",
-                    escapeLog(userId), escapeLog(userName), escapeLog(clientId));
+            logger.info("ClientAuthorization to be deleted for - userId:{}, clientId:{}, userName:{}",
+                    escapeLog(userId), escapeLog(clientId), escapeLog(userName));
         }
-        clientAuthService.removeClientAuthorizations(userId, userName, clientId);
+        clientAuthService.removeClientAuthorizations(userId, clientId, userName);
         logger.info("ClientAuthorizations removed!!!");
         return Response.noContent().build();
     }

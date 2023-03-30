@@ -651,6 +651,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     LicenseApiResponse:
       type: object
       properties:
@@ -683,6 +690,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     LicenseResponse:
       type: object
       properties:
@@ -733,6 +747,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     SSARequest:
       type: object
       properties:
@@ -760,6 +781,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     AdminPermission:
       type: object
       properties:
@@ -791,6 +819,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     RolePermissionMapping:
       type: object
       properties:
@@ -822,6 +857,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     AdminRole:
       type: object
       properties:
@@ -853,6 +895,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
   securitySchemes:
     oauth2:
       type: oauth2

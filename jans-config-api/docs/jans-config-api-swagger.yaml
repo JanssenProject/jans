@@ -1983,15 +1983,15 @@ paths:
         required: true
         schema:
           type: string
-      - name: username
-        in: path
-        description: User name
-        required: true
-        schema:
-          type: string
       - name: clientId
         in: path
         description: Client identifier
+        required: true
+        schema:
+          type: string
+      - name: username
+        in: path
+        description: User name
         required: true
         schema:
           type: string
@@ -2027,7 +2027,11 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/clientAuthMapSchema'
+                type: string
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: ""
         "401":
           description: Unauthorized
         "500":
@@ -7430,6 +7434,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     Status:
       type: object
       properties:
@@ -7461,6 +7472,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     FacterData:
       type: object
       properties:
@@ -7500,6 +7518,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     StatsData:
       type: object
       properties:
@@ -7532,6 +7557,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     AuthenticationMethod:
       type: object
       properties:
@@ -7559,6 +7591,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     Deployment:
       type: object
       properties:
@@ -7602,6 +7641,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     DeploymentDetails:
       type: object
       properties:
@@ -7643,6 +7689,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     ProjectMetadata:
       type: object
       properties:
@@ -7680,6 +7733,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     PagedResult:
       type: object
       properties:
@@ -7718,6 +7778,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     Flow:
       type: object
       properties:
@@ -7764,6 +7831,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     FlowMetadata:
       type: object
       properties:
@@ -7811,6 +7885,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     JsonPatch:
       type: object
       properties:
@@ -7836,6 +7917,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     AttributeValidation:
       type: object
       properties:
@@ -7869,6 +7957,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     GluuAttribute:
       required:
       - dataType
@@ -7973,15 +8068,15 @@ components:
           type: string
         adminCanAccess:
           type: boolean
-        adminCanEdit:
-          type: boolean
-        userCanEdit:
-          type: boolean
         userCanAccess:
           type: boolean
         userCanView:
           type: boolean
         adminCanView:
+          type: boolean
+        userCanEdit:
+          type: boolean
+        adminCanEdit:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -8009,6 +8104,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     PatchRequest:
       type: object
       properties:
@@ -8040,6 +8142,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     AppConfiguration:
       type: object
       properties:
@@ -8785,6 +8894,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     AuthenticationFilter:
       required:
       - baseDn
@@ -8825,6 +8941,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     AuthenticationProtectionConfiguration:
       type: object
       properties:
@@ -8861,6 +8984,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     AuthorizationRequestCustomParameter:
       type: object
       properties:
@@ -8890,6 +9020,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     CIBAEndUserNotificationConfig:
       type: object
       properties:
@@ -8935,6 +9072,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     ClientAuthenticationFilter:
       required:
       - baseDn
@@ -8975,6 +9119,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     CorsConfigurationFilter:
       type: object
       properties:
@@ -9021,6 +9172,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     EngineConfig:
       type: object
       properties:
@@ -9078,6 +9236,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     JsonNode:
       type: object
       properties:
@@ -9103,6 +9268,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     SsaConfiguration:
       type: object
       properties:
@@ -9139,6 +9311,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     SsaValidationConfig:
       type: object
       properties:
@@ -9198,6 +9377,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     PersistenceConfiguration:
       type: object
       properties:
@@ -9225,6 +9411,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     CacheConfiguration:
       type: object
       properties:
@@ -9265,6 +9458,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     InMemoryConfiguration:
       type: object
       properties:
@@ -9293,6 +9493,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     MemcachedConfiguration:
       type: object
       properties:
@@ -9334,6 +9541,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     NativePersistenceConfiguration:
       type: object
       properties:
@@ -9369,6 +9583,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     RedisConfiguration:
       type: object
       properties:
@@ -9435,6 +9656,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     Client:
       type: object
       properties:
@@ -9660,17 +9888,6 @@ components:
           format: int32
         displayName:
           type: string
-        authenticationMethod:
-          type: string
-          enum:
-          - client_secret_basic
-          - client_secret_post
-          - client_secret_jwt
-          - private_key_jwt
-          - access_token
-          - tls_client_auth
-          - self_signed_tls_client_auth
-          - none
         allAuthenticationMethods:
           uniqueItems: true
           type: array
@@ -9685,6 +9902,17 @@ components:
             - tls_client_auth
             - self_signed_tls_client_auth
             - none
+        authenticationMethod:
+          type: string
+          enum:
+          - client_secret_basic
+          - client_secret_post
+          - client_secret_jwt
+          - private_key_jwt
+          - access_token
+          - tls_client_auth
+          - self_signed_tls_client_auth
+          - none
         baseDn:
           type: string
         inum:
@@ -9711,6 +9939,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     ClientAttributes:
       type: object
       properties:
@@ -9825,6 +10060,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     CustomObjectAttribute:
       type: object
       properties:
@@ -9862,6 +10104,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     LocalizedString:
       type: object
       properties:
@@ -9891,6 +10140,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     AgamaConfiguration:
       type: object
       properties:
@@ -9924,6 +10180,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     ApiAppConfiguration:
       type: object
       properties:
@@ -10012,6 +10275,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     AuditLogConf:
       type: object
       properties:
@@ -10047,6 +10317,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     DataFormatConversionConf:
       type: object
       properties:
@@ -10078,6 +10355,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     PluginConf:
       type: object
       properties:
@@ -10109,6 +10393,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     SmtpConfiguration:
       type: object
       properties:
@@ -10175,6 +10466,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     CustomScript:
       type: object
       properties:
@@ -10249,14 +10547,14 @@ components:
           type: boolean
         internal:
           type: boolean
+        locationPath:
+          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
-        locationPath:
-          type: string
         baseDn:
           type: string
         newUserSchema:
@@ -10281,6 +10579,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     ScriptError:
       type: object
       properties:
@@ -10311,6 +10616,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     SimpleCustomProperty:
       type: object
       properties:
@@ -10342,6 +10654,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     SimpleExtendedCustomProperty:
       type: object
       properties:
@@ -10375,6 +10694,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     JSONWebKey:
       type: object
       properties:
@@ -10481,6 +10807,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     WebKeysConfiguration:
       type: object
       properties:
@@ -10510,6 +10843,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     GluuLdapConfiguration:
       type: object
       properties:
@@ -10568,6 +10908,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     Logging:
       type: object
       properties:
@@ -10610,6 +10957,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     GluuOrganization:
       required:
       - description
@@ -10679,6 +11033,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     Scope:
       type: object
       properties:
@@ -10767,6 +11128,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     ScopeAttributes:
       type: object
       properties:
@@ -10798,6 +11166,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     CustomScope:
       type: object
       properties:
@@ -10890,6 +11265,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     SessionId:
       type: object
       properties:
@@ -10965,6 +11347,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     SessionIdAccessMap:
       type: object
       properties:
@@ -10996,6 +11385,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     User:
       type: object
       properties:
@@ -11047,6 +11443,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     UmaResource:
       required:
       - name
@@ -11115,6 +11518,13 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
   securitySchemes:
     oauth2:
       type: oauth2

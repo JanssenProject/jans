@@ -21,6 +21,9 @@ import org.slf4j.Logger;
 @ApplicationScoped
 public class ClientAuthService {
 
+    private static final String TOKENS_DN = "ou=tokens,o=jans";
+    private static final String AUTHORIZATIONS_DN = "ou=authorizations,o=jans";
+
     @Inject
     private Logger logger;
 
@@ -96,18 +99,22 @@ public class ClientAuthService {
         return perms;
     }
 
-    public void removeClientAuthorizations(String userId, String userName, String clientId) {
-        logger.info("Removing client authorizations for userId:{}, userName:{}, clientId:{}", userId, userName,
-                clientId);
+    public void removeClientAuthorizations(String userId, String clientId, String userName) {
+        logger.info("Removing client authorizations for userId:{}, clientId:{}, userName:{}", userId, clientId, userName);
 
+        String id = userId+"_"+clientId;
+        logger.debug("DN - getClientAuthorizationDn(id):{}, getClientAuthorizationDn(null):{}", getClientAuthorizationDn(id), getClientAuthorizationDn(null));
+
+        
         ClientAuthorization clientAuth = new ClientAuthorization();
-        clientAuth.setClientId(clientId);
+        //clientAuth.setDn(getClientAuthorizationDn(null));
+        clientAuth.setDn(getClientAuthorizationDn(AUTHORIZATIONS_DN));
         clientAuth.setUserId(userId);
-        clientAuth.setDn(getClientAuthorizationDn(userId));
-        logger.debug("client-authorization entries filter:{}", clientAuth);
+        clientAuth.setClientId(clientId);
+        logger.info("clientAuth:{} ", clientAuth);
 
         List<ClientAuthorization> authorizations = persistenceEntryManager.findEntries(clientAuth);
-        logger.debug("{} client-authorization entries found", authorizations);
+        logger.info("{} client-authorization entries found", authorizations);
 
         if (authorizations == null || authorizations.isEmpty()) {
             return;
@@ -130,7 +137,8 @@ public class ClientAuthService {
         logger.info("Removing refresh tokens associated to this user/client pair");
         // Here we ignore the return value of deletion
         List<Token> tokens = persistenceEntryManager.findEntries(sampleToken);
-
+        logger.debug("Client tokens:{}", tokens);
+        
         tokens.forEach(token -> {
             logger.debug("Deleting token {}", token.getTokenCode());
             persistenceEntryManager.remove(token);
@@ -139,19 +147,23 @@ public class ClientAuthService {
     }
 
     public String getClientAuthorizationDn(String id) {
+        logger.info("Get Client Authorization Dn for id:{}", id);
         String baseDn = staticConfiguration.getBaseDn().getAuthorizations();
-        if (StringUtils.isEmpty(id)) {
+        if (id==null || StringUtils.isEmpty(id)) {
             return baseDn;
         }
+        logger.info("Client Authorization Dn for id:{} is:{}", id, String.format("jansId=%s,%s", id, baseDn));
         return String.format("jansId=%s,%s", id, baseDn);
     }
 
     public String geTokenDn(String id) {
+        logger.info("Get Token Dn for id:{}", id);
         String baseDn = staticConfiguration.getBaseDn().getTokens();
         if (StringUtils.isEmpty(id)) {
             return baseDn;
         }
-        return String.format("jansId=%s,%s", id, baseDn);
+        logger.info("Token Dn for id:{} is:{}", id, String.format("tknCde=%s,%s", id, baseDn));
+        return String.format("tknCde=%s,%s", id, baseDn);
     }
 
     public String getDnForClient(String inum) {
