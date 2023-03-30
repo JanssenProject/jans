@@ -1,4 +1,4 @@
-FROM alpine:3.16
+FROM bellsoft/liberica-openjre-alpine:11.0.16
 
 # ===============
 # Alpine packages
@@ -7,7 +7,9 @@ FROM alpine:3.16
 RUN apk update \
     && apk upgrade --available \
     && apk add --no-cache python3 curl tini py3-cryptography py3-psycopg2 py3-grpcio \
-    && apk add --no-cache --virtual .build-deps git wget
+    && apk add --no-cache --virtual .build-deps git wget \
+    && mkdir -p /usr/java/latest \
+    && ln -sf /usr/lib/jvm/jre /usr/java/latest/jre
 
 # ======
 # Python
@@ -24,7 +26,7 @@ RUN python3 -m ensurepip \
 # =====================
 
 # janssenproject/jans SHA commit
-ENV JANS_SOURCE_VERSION=3b2248fdb2a8e842cde1baca81132fa47613c356
+ENV JANS_SOURCE_VERSION=cd62ff9fe8783f2e87dd5e47c2362d35ba9713ef
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCRIPT_CATALOG_DIR=docs/script-catalog
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
