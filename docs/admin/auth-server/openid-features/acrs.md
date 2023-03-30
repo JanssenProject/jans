@@ -18,7 +18,7 @@ required level of security for the application.
 ## Supported ACRs
 
 Janssen Server lists supported ACRs in the response from Janssen Server's well-known
-[configuration endpoint](./configuration.md) given below. Only ACRs that are supported and enabled by configuration
+[configuration endpoint](../endpoints/configuration.md) given below. Only ACRs that are supported and enabled by configuration
 will be part of the list.
 
 ```text

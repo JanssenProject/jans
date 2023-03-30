@@ -51,7 +51,7 @@ the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-
 ## Disabling The Endpoint Using Feature Flag
 
 `userinfo` endpoint can be enabled or disable using [USERINFO feature flag](../../reference/json/feature-flags/janssenauthserver-feature-flags.md#userinfo).
-Use [Janssen Text-based UI(TUI)](../../config-guide/tui.md) or [Janssen command-line interface](../../config-guide/jans-cli/README.md) to perform this task.
+Use [Janssen Text-based UI(TUI)](../../config-guide/jans-tui/README.md) or [Janssen command-line interface](../../config-guide/jans-cli/README.md) to perform this task.
 
 When using TUI, navigate via `Auth Server`->`Properties`->`enabledFeatureFlags` to screen below. From here, enable or
 disable `USERINFO` flag as required.
@@ -61,11 +61,10 @@ disable `USERINFO` flag as required.
 ## Configuration Properties
 
 Userinfo endpoint can be further configured using Janssen Server configuration properties listed below. When using
-[Janssen Text-based UI(TUI)](../../config-guide/tui.md) to configure the properties, 
+[Janssen Text-based UI(TUI)](../../config-guide/jans-tui/README.md) to configure the properties, 
 navigate via `Auth Server`->`Properties`.
 
 - [mtlsUserInfoEndpoint](../../reference/json/properties/janssenauthserver-properties.md#mtlsuserinfoendpoint)
-- [userInfoConfiguration](../../reference/json/properties/janssenauthserver-properties.md#userinfoconfiguration)
 - [userInfoEncryptionAlgValuesSupported](../../reference/json/properties/janssenauthserver-properties.md#userinfoencryptionalgvaluessupported)
 - [userInfoEncryptionEncValuesSupported](../../reference/json/properties/janssenauthserver-properties.md#userinfoencryptionencvaluessupported)
 - [userInfoEndpoint](../../reference/json/properties/janssenauthserver-properties.md#userinfoendpoint)
@@ -80,7 +79,7 @@ scopes. Janssen Server supports all [standard scopes](https://openid.net/specs/o
 and releases corresponding claims as per OpenID Connect specification. Administrator can customise standard scopes and 
 define claims to be linked to each standard scope.
 
-When using [Janssen Text-based UI(TUI)](../../config-guide/tui.md) to configure the scopes, navigate via 
+When using [Janssen Text-based UI(TUI)](../../config-guide/jans-tui/README.md) to configure the scopes, navigate via 
 `Auth Server`->`Scopes`->`Add Scopes`->`Scope Type` as `OpenID`->search for a standard scope like `address`
 
 ### Dynamic Scopes
@@ -88,14 +87,14 @@ When using [Janssen Text-based UI(TUI)](../../config-guide/tui.md) to configure 
 In addition to standard scopes, Janssen server allows defining custom scopes which can be associated to user-defined 
 list of claims. This allows administrators to create custom groupings of claims.
 
-When using [Janssen Text-based UI(TUI)](../../config-guide/tui.md), navigate via
+When using [Janssen Text-based UI(TUI)](../../config-guide/jans-tui/README.md), navigate via
 `Auth Server`->`Scopes`->`Add Scopes`->`Scope Type` as `Dynamic`
 
 ### Interception Scripts
 
 Response from userinfo can be further customized using [dynamic scope](../../developer/scripts/dynamic-scope.md) interception script.
 
-Administrator can attach a dynamic scope script to a dynamic scope using [Janssen Text-based UI(TUI)](../../config-guide/tui.md). 
+Administrator can attach a dynamic scope script to a dynamic scope using [Janssen Text-based UI(TUI)](../../config-guide/jans-tui/README.md). 
 Navigate to `Auth Server`->`Scopes`->`Add Scopes`->`Scope Type` as `Dynamic`->`Dynamic Scope Script`
 
 ## Want to contribute?

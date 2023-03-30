@@ -31,7 +31,7 @@ device flow to authenticate the person who is behind the config changes. See the
 3. TUI - The TUI, or Text User Interface, is a menu-based interactive tool that
 provides a more intuitive experience. When you make changes via the TUI, it also
 creates a log of the equivalent CLI command, in case you want a shortcut next
-time around. See the [TUI Guide](../config-guide/jans-tui.md)
+time around. See the [TUI Guide](../config-guide/jans-tui/README.md)
 for more info.
 
 ## Client versus Server Configuration
