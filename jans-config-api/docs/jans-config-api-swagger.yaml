@@ -7697,15 +7697,15 @@ components:
           type: string
         whitePagesCanView:
           type: boolean
-        userCanEdit:
-          type: boolean
-        userCanView:
-          type: boolean
         adminCanAccess:
           type: boolean
         adminCanView:
           type: boolean
         adminCanEdit:
+          type: boolean
+        userCanEdit:
+          type: boolean
+        userCanView:
           type: boolean
         userCanAccess:
           type: boolean
@@ -8432,6 +8432,8 @@ components:
           type: object
           additionalProperties:
             type: string
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8441,8 +8443,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -8963,6 +8963,8 @@ components:
         ttl:
           type: integer
           format: int32
+        displayName:
+          type: string
         authenticationMethod:
           type: string
           enum:
@@ -8988,8 +8990,6 @@ components:
             - tls_client_auth
             - self_signed_tls_client_auth
             - none
-        displayName:
-          type: string
         baseDn:
           type: string
         inum:
@@ -9219,6 +9219,8 @@ components:
     SmtpConfiguration:
       type: object
       properties:
+        valid:
+          type: boolean
         connectProtectionList:
           type: array
           items:
@@ -9227,8 +9229,6 @@ components:
             - None
             - StartTls
             - SslTls
-        valid:
-          type: boolean
         host:
           type: string
         port:
@@ -9248,9 +9248,9 @@ components:
           type: string
         requires_authentication:
           type: boolean
-        user_name:
+        smtp_authentication_account_username:
           type: string
-        password:
+        smtp_authentication_account_password:
           type: string
         key-store:
           type: string
