@@ -215,7 +215,7 @@ public class ConfigurationService implements Serializable {
 		if (smtpConfiguration == null) {
 			return;
 		}
-		String password = smtpConfiguration.getPasswordDecrypted();
+		String password = smtpConfiguration.getSmtpAuthenticationAccountPasswordDecrypted();
 		if (StringHelper.isNotEmpty(password)) {
 			try {
 				String encryptedPassword = encryptionService.encrypt(password);
