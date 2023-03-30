@@ -236,6 +236,17 @@ def main():
     # ensure we're using correct JKS file and JWKS uri
     modify_keystore_path(manager, keystore_path, jwks_uri)
 
+    try:
+        manager.secret.to_file(
+            "smtp_jks_base64",
+            "/etc/certs/smtp-keys.pkcs12",
+            decode=True,
+            binary_mode=True,
+        )
+    except ValueError:
+        # likely secret is not created yet
+        logger.warning("Unable to pull file smtp-keys.pkcs12 from secrets")
+
 
 def configure_logging():
     # default config
