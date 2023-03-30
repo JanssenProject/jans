@@ -33,7 +33,7 @@ Gluu Server documentation to understand how end session endpoint works in Jansse
 ## Disabling The Endpoint Using Feature Flag
 
 `/end_session` endpoint can be enabled or disable using [END_SESSION feature flag](../../reference/json/feature-flags/janssenauthserver-feature-flags.md#endsession).
-Use [Janssen Text-based UI(TUI)](../../config-guide/tui.md) or [Janssen command-line interface](../../config-guide/jans-cli/README.md) to perform this task.
+Use [Janssen Text-based UI(TUI)](../../config-guide/jans-tui/README.md) or [Janssen command-line interface](../../config-guide/jans-cli/README.md) to perform this task.
 
 When using TUI, navigate via `Auth Server`->`Properties`->`enabledFeatureFlags` to screen below. From here, enable or
 disable `END_SESSION` flag as required.
@@ -43,7 +43,7 @@ disable `END_SESSION` flag as required.
 ## Configuration Properties
 
 End session endpoint can be further configured using Janssen Server configuration properties listed below. When using
-[Janssen Text-based UI(TUI)](../../config-guide/tui.md) to configure the properties,
+[Janssen Text-based UI(TUI)](../../config-guide/jans-tui/README.md) to configure the properties,
 navigate via `Auth Server`->`Properties`.
 
 - [allowEndSessionWithUnmatchedSid](../../reference/json/properties/janssenauthserver-properties.md#allowendsessionwithunmatchedsid)
@@ -56,7 +56,7 @@ navigate via `Auth Server`->`Properties`.
 
 Apart from the above-mentioned server properties, the properties relevant to individual clients can be configured
 during client registration or can be edited later. When using 
-[Janssen Text-based UI(TUI)](../../config-guide/tui.md) to configure the properties, navigate via `Auth Server`->
+[Janssen Text-based UI(TUI)](../../config-guide/jans-tui/README.md) to configure the properties, navigate via `Auth Server`->
 `Clients`->`logout` as show in image below:
 
 ![](../../../assets/image-logout-client-config.png)
