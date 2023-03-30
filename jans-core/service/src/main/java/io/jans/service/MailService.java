@@ -175,8 +175,8 @@ public class MailService {
         if (mailSmtpConfiguration.isRequiresAuthentication()) {
             props.put("mail.smtp.auth", "true");
 
-            final String userName = mailSmtpConfiguration.getUserName();
-            final String password = mailSmtpConfiguration.getPasswordDecrypted();
+            final String userName = mailSmtpConfiguration.getSmtpAuthenticationAccountUsername();
+            final String password = mailSmtpConfiguration.getSmtpAuthenticationAccountPasswordDecrypted();
             
             session = Session.getInstance(props, new javax.mail.Authenticator() {
                 protected PasswordAuthentication getPasswordAuthentication() {
@@ -337,8 +337,8 @@ public class MailService {
                 props.put("mail.smtp.auth", "true");
             }
 
-            final String userName = mailSmtpConfiguration.getUserName();
-            final String password = mailSmtpConfiguration.getPasswordDecrypted();
+            final String userName = mailSmtpConfiguration.getSmtpAuthenticationAccountUsername();
+            final String password = mailSmtpConfiguration.getSmtpAuthenticationAccountPasswordDecrypted();
 
             session = Session.getInstance(props, new javax.mail.Authenticator() {
                 protected PasswordAuthentication getPasswordAuthentication() {

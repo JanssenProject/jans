@@ -215,11 +215,11 @@ public class ConfigurationService implements Serializable {
 		if (smtpConfiguration == null) {
 			return;
 		}
-		String password = smtpConfiguration.getPasswordDecrypted();
+		String password = smtpConfiguration.getSmtpAuthenticationAccountPasswordDecrypted();
 		if (StringHelper.isNotEmpty(password)) {
 			try {
 				String encryptedPassword = encryptionService.encrypt(password);
-				smtpConfiguration.setPassword(encryptedPassword);
+				smtpConfiguration.setSmtpAuthenticationAccountPassword(encryptedPassword);
 			} catch (EncryptionException ex) {
 				log.error("Failed to encrypt SMTP password", ex);
 			}
@@ -230,10 +230,10 @@ public class ConfigurationService implements Serializable {
 		if (smtpConfiguration == null) {
 			return;
 		}
-		String password = smtpConfiguration.getPassword();
+		String password = smtpConfiguration.getSmtpAuthenticationAccountPassword();
 		if (StringHelper.isNotEmpty(password)) {
 			try {
-				smtpConfiguration.setPasswordDecrypted(encryptionService.decrypt(password));
+				smtpConfiguration.setSmtpAuthenticationAccountPasswordDecrypted(encryptionService.decrypt(password));
 			} catch (EncryptionException ex) {
 				log.error("Failed to decrypt SMTP password", ex);
 			}
