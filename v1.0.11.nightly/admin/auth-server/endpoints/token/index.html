@@ -7354,10 +7354,10 @@ sample response. Actual response can greatly vary in its contents based on reque
   }
 </code></pre></div>
 <p>More information about request and response of the token endpoint can be found in
-the OpenAPI specification of <a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/v1.0.11.nightly/jans-auth-server/docs/swagger.yaml#/Token/post-token">jans-auth-server module</a>.</p>
+the OpenAPI specification of <a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/Token/post-token">jans-auth-server module</a>.</p>
 <h2 id="configuration-properties">Configuration Properties<a class="headerlink" href="#configuration-properties" title="Permanent link">#</a></h2>
 <p>Token endpoint and tokens issued by token endpoint can be further configured using Janssen Server configuration properties listed below. When using
-<a href="../../config-guide/tui.md">Janssen Text-based UI(TUI)</a> to configure the properties,
+<a href="../../../config-guide/jans-tui/">Janssen Text-based UI(TUI)</a> to configure the properties,
 navigate via <code>Auth Server</code>-&gt;<code>Properties</code>.</p>
 <ul>
 <li><a href="../../../reference/json/properties/janssenauthserver-properties/#tokenendpoint">tokenEndpoint</a></li>
@@ -7398,20 +7398,20 @@ authentication method listed below:</p>
 <p>Refer to <a href="https://openid.net/specs/openid-connect-core-1_0.html#ClientAuthentication">Client Authentication</a> section of OpenID
 Connect core specification for more details on these authentication methods.</p>
 <p>Client can specify the default authentication method. To set default authentication method using
-<a href="../../config-guide/tui.md">Janssen Text-based UI(TUI)</a>,
+<a href="../../../config-guide/jans-tui/">Janssen Text-based UI(TUI)</a>,
 navigate via <code>Auth Server</code>-&gt;<code>Clients</code>-&gt;<code>Add Client</code>-&gt;<code>Basic</code>-&gt; <code>Authn Method Token Endpoint</code>.</p>
 <p><img alt="" src="../../../../assets/image-tui-client-registration-basic.png" /></p>
 <h2 id="supported-grant-types">Supported Grant Types<a class="headerlink" href="#supported-grant-types" title="Permanent link">#</a></h2>
 <p>Token endpoint supports below mentioned grant types. </p>
 <ul>
 <li><a href="../../oauth-features/auth-code-grant/">Authorization Code</a></li>
-<li><a href="../oauth-features/refresh-token-grant.md">Refresh Token</a></li>
+<li><a href="../../oauth-features/">Refresh Token</a></li>
 <li><a href="../../oauth-features/client-credential-grant/">Client Credentials</a></li>
 <li><a href="../../oauth-features/password-grant/">Password</a></li>
 </ul>
 <p>Client can configure all the possible grant types it can request from token endpoint during client configuration.
 To select the available grant types using
-<a href="../../config-guide/tui.md">Janssen Text-based UI(TUI)</a>,
+<a href="../../../config-guide/jans-tui/">Janssen Text-based UI(TUI)</a>,
 navigate via <code>Auth Server</code>-&gt;<code>Clients</code>-&gt;<code>Add Client</code>/<code>search client</code>-&gt;<code>Basic</code>-&gt; <code>Grant</code>. </p>
 <p><img alt="" src="../../../../assets/image-tui-client-registration-basic.png" /></p>
 <h2 id="interception-scripts">Interception Scripts<a class="headerlink" href="#interception-scripts" title="Permanent link">#</a></h2>
@@ -7421,7 +7421,7 @@ Following interception scripts are relevant to token endpoint:</p>
 <li><a href="../../../developer/scripts/update-token/">Update Token</a></li>
 </ul>
 <p>Client can configure a particular script to be executed using client configuration. To update configuration using
-<a href="../../config-guide/tui.md">Janssen Text-based UI(TUI)</a> navigate via <code>Auth Server</code>-&gt;<code>Clients</code>-&gt;<code>Add Client</code>/<code>search</code>-&gt;
+<a href="../../../config-guide/jans-tui/">Janssen Text-based UI(TUI)</a> navigate via <code>Auth Server</code>-&gt;<code>Clients</code>-&gt;<code>Add Client</code>/<code>search</code>-&gt;
 <code>Client Scripts</code></p>
 <p><img alt="" src="../../../../assets/image-tui-client-registration-scripts.png" /></p>
 
@@ -7430,7 +7430,7 @@ Following interception scripts are relevant to token endpoint:</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-02-10T13:22:40+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-02-10</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-03-30T10:51:22+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-03-30</span>
       
         <br>
         Created:

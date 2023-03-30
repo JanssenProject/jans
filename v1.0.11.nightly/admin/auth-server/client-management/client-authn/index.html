@@ -7475,7 +7475,7 @@ is defined by <a href="https://datatracker.ietf.org/doc/html/rfc6749#section-2.3
 <code>token_endpoint_auth_method</code></p>
 <h2 id="supported-authentication-methods">Supported Authentication Methods<a class="headerlink" href="#supported-authentication-methods" title="Permanent link">#</a></h2>
 <p>List of supported authentication methods are listed in the response of Janssen Server's 
-well-known <a href="./configuration.md">configuration endpoint</a> given below.</p>
+well-known <a href="../../endpoints/configuration/">configuration endpoint</a> given below.</p>
 <div class="highlight"><pre><span></span><code>https://janssen.server.host/jans-auth/.well-known/openid-configuration
 </code></pre></div>
 <p>The <code>token_endpoint_auth_methods_supported</code> claim in the response specifies the list of all the supported methods.</p>
@@ -7576,7 +7576,7 @@ the same token in case it is compromised.</li>
 <p>Algorithms supported by Janssen Server are listed in the response of Janssen Server's well-known
 <a href="../../endpoints/configuration/">configuration endpoint</a>. From the response, the claim 
 <code>token_endpoint_auth_signing_alg_values_supported</code> lists the supported algorithms.</p>
-<p>To specify preferred algorithm for a client, using <a href="../../config-guide/tui.md">Janssen Text-based UI(TUI)</a>,
+<p>To specify preferred algorithm for a client, using <a href="../../../config-guide/jans-tui/">Janssen Text-based UI(TUI)</a>,
 navigate via <code>Auth Server</code> -&gt; Get or add clients -&gt; <code>encryption/signing</code> -&gt; TODO: which exact properties.</p>
 <h2 id="private_key_jwt">private_key_jwt<a class="headerlink" href="#private_key_jwt" title="Permanent link">#</a></h2>
 <p><code>private_key_jwt</code> is private key based method where secret is not shared between client and authorization server. 
@@ -7615,7 +7615,7 @@ can be found at <a href="https://jwt.io/libraries">jwt.io</a>. Psudocode impleme
 <h3 id="client-configuration-for-using-private_key_jwt">Client Configuration For Using private_key_jwt<a class="headerlink" href="#client-configuration-for-using-private_key_jwt" title="Permanent link">#</a></h3>
 <p>Janssen Server clients can specify signing and encryption keys using client configuration. Clients can either specify
 JWKS as value or as reference URI. </p>
-<p>To specify JWKS values or reference URI, using <a href="../../config-guide/tui.md">Janssen Text-based UI(TUI)</a>,
+<p>To specify JWKS values or reference URI, using <a href="../../../config-guide/jans-tui/">Janssen Text-based UI(TUI)</a>,
 navigate via <code>Auth Server</code> -&gt; Get or add clients -&gt; <code>encryption/signing</code> -&gt; set value for <code>Client JWKS URI</code> or 
 <code>Client JWKS</code>.</p>
 <h2 id="tls_client_auth">tls_client_auth<a class="headerlink" href="#tls_client_auth" title="Permanent link">#</a></h2>
@@ -7642,7 +7642,7 @@ mechanism.</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-02-01T17:33:04+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-02-01</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-03-30T10:51:22+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-03-30</span>
       
         <br>
         Created:

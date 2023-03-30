@@ -7285,7 +7285,7 @@ Server, which is defined by the <code>token_endpoint_auth_method</code> in OpenI
 <a href="https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata">Client Metadata</a>.</p>
 <p>Obviously, using asynchronous secrets for authentication is more secure. The
 client configuration also determines what <a href="client-configuration/#cryptography">crypto</a> is used for signing and
-encryption of tokens, what <a href="client-configuration/#scopes">scopes</a> are available to the client (which determines
+encryption of tokens, what scopes are available to the client (which determines
 the extent of access to APIs), what <a href="client-configuration/#grants">grants</a> are available,  what is a valid
 <a href="client-configuration/#redirect-uri">redirect_uri</a>, timeouts, whether to use a value or reference token, whether to
 expire the client, and several other options that impact security.</p>
@@ -7293,8 +7293,8 @@ expire the client, and several other options that impact security.</p>
 <p>There are a few ways clients are created and managed in Jans Auth Server:</p>
 <ul>
 <li><a href="../../config-guide/config-api/">Jans Config API</a></li>
-<li><a href="(../../config-guide/jans-cli/README.md)">Command Line Tool (CLI)</a></li>
-<li><a href="../../config-guide/tui.md">Jans Text UI (TUI)</a></li>
+<li><a href="../../config-guide/jans-cli/">Command Line Tool (CLI)</a></li>
+<li><a href="../../config-guide/jans-tui/">Jans Text UI (TUI)</a></li>
 <li><a href="https://openid.net/specs/openid-connect-registration-1_0.html">OpenID Connect Dynamic Client Registration</a></li>
 </ul>
 <p>Which mechanism to use depends on the deployment requirements. For <em>ad hoc</em>
@@ -7307,7 +7307,7 @@ Connect Dynamic Client Registration.</p>
 configuration JSON response, which you can find at <code>.well-known/openid-configuration</code>
 in your specific deployment. Typically, it is
 <code>https://{hostname}/jans-auth/restv1/register</code></p>
-<p>The OpenApi specification for <a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/v1.0.11.nightly/jans-auth-server/docs/swagger.yaml#/Registration">/registration</a> documents Jans Auth Server's specific implementation,
+<p>The OpenApi specification for <a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/Registration">/registration</a> documents Jans Auth Server's specific implementation,
 which aligns with the requirements of OpenID Connect dynamic client
 registration. Also, check the
 <a href="../endpoints/client-registration/">Registration Endpoint documentation</a> for
@@ -7325,7 +7325,7 @@ the Jans-CLI, see the <a href="../../config-guide/jans-cli/">docs</a></p>
 <code>Auth Server</code>-&gt;<code>Clients</code>-&gt;<code>Add Client</code>.  This brings up a screen as shown below
 with various sections to input client details.</p>
 <p><img alt="" src="../../../assets/Jans_TUI_Auth_Server_Add_new_client.png" /></p>
-<p>Refer to complete documentation <a href="../../config-guide/tui.md">here</a></p>
+<p>Refer to complete documentation <a href="../../config-guide/jans-tui/">here</a></p>
 <h3 id="using-curl">Using curl<a class="headerlink" href="#using-curl" title="Permanent link">#</a></h3>
 <p>To add a client via <code>curl</code>, see the information on the
 <a href="../../config-guide/curl/">curl documentation page</a>.</p>
@@ -7335,7 +7335,7 @@ with various sections to input client details.</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-02-06T08:42:48+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-02-06</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-03-30T10:51:22+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-03-30</span>
       
         <br>
         Created:
