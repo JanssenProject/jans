@@ -479,7 +479,7 @@
     "redirectUrisRegexEnabled": true,
     "useHighestLevelScriptIfAcrScriptNotFound": false,
     "agamaConfiguration": {
-        "enabled": true,
+        "enabled": false,
         "templatesPath": "/ftl",
         "scriptsPath": "/scripts",
         "serializerType": "KRYO",
