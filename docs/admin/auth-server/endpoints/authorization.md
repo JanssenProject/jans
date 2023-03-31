@@ -38,7 +38,7 @@ TODO: It seems this endpoint can't be disabled using featureflags. Confirm this.
 ## Configuration Properties
 
 Authorization endpoint can be further configured using Janssen Server configuration properties listed below. When using
-[Janssen Text-based UI(TUI)](../../config-guide/tui.md) to configure the properties,
+[Janssen Text-based UI(TUI)](../../config-guide/jans-tui/README.md) to configure the properties,
 navigate via `Auth Server`->`Properties`.
 
 - [issuer](../../reference/json/properties/janssenauthserver-properties.md#issuer)
@@ -64,7 +64,7 @@ navigate via `Auth Server`->`Properties`.
 Clients must be registered with Janssen Server as using [code](https://www.rfc-editor.org/rfc/rfc6749#section-4.1) 
 and/or [implicit](https://www.rfc-editor.org/rfc/rfc6749#section-4.2) grant types in order to use authorization endpoint.
 
-Using [Janssen Text-based UI(TUI)](../../config-guide/tui.md), client can be registered for appropriate grant type by
+Using [Janssen Text-based UI(TUI)](../../config-guide/jans-tui/README.md), client can be registered for appropriate grant type by
 navigating to `Auth-Server`->`Clients`->`Add Client`
 
 ## Using PKCE

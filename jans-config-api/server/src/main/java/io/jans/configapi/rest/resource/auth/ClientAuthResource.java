@@ -84,7 +84,7 @@ public class ClientAuthResource extends ConfigBaseResource {
     @DELETE
     @ProtectedApi(scopes = { ApiAccessConstants.CLIENT_AUTHORIZATIONS_DELETE_ACCESS }, groupScopes = {}, superScopes = {
             ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
-    @Path(ApiConstants.USERID_PATH + ApiConstants.USERNAME_PATH + ApiConstants.CLIENTID_PATH)
+    @Path(ApiConstants.USERID_PATH + ApiConstants.CLIENTID_PATH+ ApiConstants.USERNAME_PATH)
     public Response deleteClientAuthorization(
             @Parameter(description = "User identifier") @PathParam(ApiConstants.USERID) @NotNull String userId,
             @Parameter(description = "Client identifier") @PathParam(ApiConstants.CLIENTID) @NotNull String clientId,

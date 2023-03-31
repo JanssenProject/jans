@@ -8068,9 +8068,13 @@ components:
           type: string
         adminCanAccess:
           type: boolean
+<<<<<<< HEAD
         userCanAccess:
           type: boolean
         userCanView:
+=======
+        adminCanAccess:
+>>>>>>> 2bbb95dc4558a3251d52f74ff88b41f1aafe8a5e
           type: boolean
         adminCanView:
           type: boolean
@@ -8078,7 +8082,15 @@ components:
           type: boolean
         adminCanEdit:
           type: boolean
+<<<<<<< HEAD
         whitePagesCanView:
+=======
+        userCanEdit:
+          type: boolean
+        userCanView:
+          type: boolean
+        userCanAccess:
+>>>>>>> 2bbb95dc4558a3251d52f74ff88b41f1aafe8a5e
           type: boolean
         baseDn:
           type: string
@@ -8861,6 +8873,8 @@ components:
           type: object
           additionalProperties:
             type: string
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8870,6 +8884,7 @@ components:
             - code
             - token
             - id_token
+<<<<<<< HEAD
         fapi:
           type: boolean
         newUserSchema:
@@ -8901,6 +8916,8 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapArraySchema
+=======
+>>>>>>> 2bbb95dc4558a3251d52f74ff88b41f1aafe8a5e
     AuthenticationFilter:
       required:
       - baseDn
@@ -9887,6 +9904,11 @@ components:
           type: integer
           format: int32
         displayName:
+<<<<<<< HEAD
+=======
+          type: string
+        authenticationMethod:
+>>>>>>> 2bbb95dc4558a3251d52f74ff88b41f1aafe8a5e
           type: string
         allAuthenticationMethods:
           uniqueItems: true
@@ -9902,6 +9924,7 @@ components:
             - tls_client_auth
             - self_signed_tls_client_auth
             - none
+<<<<<<< HEAD
         authenticationMethod:
           type: string
           enum:
@@ -9913,6 +9936,8 @@ components:
           - tls_client_auth
           - self_signed_tls_client_auth
           - none
+=======
+>>>>>>> 2bbb95dc4558a3251d52f74ff88b41f1aafe8a5e
         baseDn:
           type: string
         inum:
@@ -10432,9 +10457,9 @@ components:
           type: string
         requires_authentication:
           type: boolean
-        user_name:
+        smtp_authentication_account_username:
           type: string
-        password:
+        smtp_authentication_account_password:
           type: string
         key-store:
           type: string

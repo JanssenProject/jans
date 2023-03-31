@@ -107,8 +107,8 @@ public class ClientAuthService {
 
         
         ClientAuthorization clientAuth = new ClientAuthorization();
-        //clientAuth.setDn(getClientAuthorizationDn(null));
-        clientAuth.setDn(getClientAuthorizationDn(AUTHORIZATIONS_DN));
+        clientAuth.setDn(getClientAuthorizationDn(null));
+        //clientAuth.setDn(getClientAuthorizationDn(AUTHORIZATIONS_DN));
         clientAuth.setUserId(userId);
         clientAuth.setClientId(clientId);
         logger.info("clientAuth:{} ", clientAuth);

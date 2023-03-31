@@ -31,7 +31,7 @@ the OpenAPI specification of [jans-auth-server module](https://gluu.org/swagger-
 ## Disabling The Endpoint Using Feature Flag
 
 `/clientinfo` endpoint can be enabled or disable using [clientinfo feature flag](../../reference/json/feature-flags/janssenauthserver-feature-flags.md#clientinfo).
-Use [Janssen Text-based UI(TUI)](../../config-guide/tui.md) or [Janssen command-line interface](../../config-guide/jans-cli/README.md) to perform this task.
+Use [Janssen Text-based UI(TUI)](../../config-guide/jans-tui/README.md) or [Janssen command-line interface](../../config-guide/jans-cli/README.md) to perform this task.
 
 When using TUI, navigate via `Auth Server`->`Properties`->`enabledFeatureFlags` to screen below. From here, enable or
 disable `clientinfo` flag as required.
@@ -41,7 +41,7 @@ disable `clientinfo` flag as required.
 ## Configuration Properties
 
 Clientinfo endpoint can be further configured using Janssen Server configuration properties listed below. When using
-[Janssen Text-based UI(TUI)](../../config-guide/tui.md) to configure the properties,
+[Janssen Text-based UI(TUI)](../../config-guide/jans-tui/README.md) to configure the properties,
 navigate via `Auth Server`->`Properties`.
 
 - [clientInfoEndpoint](../../reference/json/properties/janssenauthserver-properties.md#clientinfoendpoint)
