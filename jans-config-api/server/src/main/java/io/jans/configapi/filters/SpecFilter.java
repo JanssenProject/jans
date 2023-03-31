@@ -6,8 +6,14 @@
 
 package io.jans.configapi.filters;
 
+import io.jans.as.common.model.registration.Client;
+import io.jans.as.persistence.model.Scope;
+
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.media.MapSchema;
 import io.swagger.v3.oas.models.responses.*;
 import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.core.filter.AbstractSpecFilter;
@@ -15,8 +21,10 @@ import io.swagger.v3.core.model.ApiDescription;
 
 import java.io.*;
 import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -31,11 +39,43 @@ public class SpecFilter extends AbstractSpecFilter {
 
                 setRequestExample(operation);
                 setResponseExample(operation);
+            
             }
         } catch (Exception ex) {
             //ex.printStackTrace();
         }
         return Optional.of(operation);
+    }
+    
+    @Override
+    public Optional filterSchema(Schema schema, Map params, Map cookies, Map headers){
+        Schema newUserSchema = new Schema<Map<String, Object>>()
+                .addProperties("name",new Schema().example("John123"))
+                .addProperties("password",new Schema().example("P4SSW0RD"))
+                .addProperties("image",new Schema().example("https://robohash.org/John123.png"));
+
+        
+        Schema clientAuthSchema1 =  new Schema()
+                .description("clientAuthSchema1")
+                .addProperties("children", new MapSchema()
+                        .additionalProperties(new Schema().$ref("#/components/schemas/Scope")));
+        
+        Schema clientAuthMapSchema =  new Schema()
+                .description("clientAuthMapSchema")
+                .addProperties("children", new MapSchema()
+                .additionalProperties(new Schema().$ref("#/components/schemas/Scope")));
+
+        Schema clientAuthMapArraySchema =  new Schema()
+                .description("clientAuthMapArraySchema")
+                .addProperties("children", new MapSchema()
+                .additionalProperties(new ArraySchema().$ref("#/components/schemas/Scope")));
+        
+        schema.addProperty("newUserSchema", newUserSchema);
+        schema.addProperty("clientAuthSchema1", clientAuthSchema1);
+        schema.addProperty("clientAuthMapSchema", clientAuthMapSchema);
+        schema.addProperty("clientAuthMapArraySchema", clientAuthMapArraySchema);
+        
+        return Optional.of(schema);
     }
 
     private void setRequestExample(Operation operation) {
