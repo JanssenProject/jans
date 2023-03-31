@@ -17,7 +17,7 @@ Janssen enables organizations to build a scalable centralized authentication and
 
 **Contribute**: [Contribution Guide](https://docs.jans.io/head/CONTRIBUTING/) | [Community Docs](https://docs.jans.io/head/governance/charter/) | [Developer Guides](https://docs.jans.io/head/CODE_OF_CONDUCT/)
 
-**Social**: [Twitter](https://twitter.com/janssen_project)
+**Social**: [Twitter](https://twitter.com/janssen_project) | [Linkedin](https://www.linkedin.com/company/janssen-project)
 
 
 
