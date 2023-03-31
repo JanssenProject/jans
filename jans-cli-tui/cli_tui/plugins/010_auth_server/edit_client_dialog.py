@@ -992,8 +992,8 @@ class EditClientDialog(JansGDialog, DialogUtils):
         layout = HSplit(children=[
             VSplit(
                 children=[
-                    Label(text=_("Search "), style=cli_style.label,
-                          width=len(_("Search "))),
+                    Label(text=_("Filter "), style=cli_style.label,
+                          width=len(_("Filter "))),
                     ta
                 ]),
             Window(height=2, char=' '),
