@@ -7,27 +7,31 @@
 package io.jans.as.server.introspection.ws.rs;
 
 import com.google.common.collect.Lists;
-import io.jans.as.common.claims.Audience;
 import io.jans.as.common.service.AttributeService;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.common.IntrospectionResponse;
-import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
-import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.uma.UmaScopeType;
 import io.jans.as.model.util.Util;
 import io.jans.as.server.model.common.AbstractToken;
 import io.jans.as.server.model.common.AccessToken;
 import io.jans.as.server.model.common.AuthorizationGrant;
 import io.jans.as.server.model.common.AuthorizationGrantList;
-import io.jans.as.server.model.token.JwtSigner;
 import io.jans.as.server.service.ClientService;
+import io.jans.as.server.service.IntrospectionService;
 import io.jans.as.server.service.external.ExternalIntrospectionService;
 import io.jans.as.server.service.external.context.ExternalIntrospectionContext;
 import io.jans.as.server.service.token.TokenService;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.util.Pair;
+import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.BooleanUtils;
@@ -36,26 +40,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
-import jakarta.inject.Inject;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.ws.rs.FormParam;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.HeaderParam;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.QueryParam;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.Iterator;
 
 import static io.jans.as.model.util.Util.escapeLog;
 import static org.apache.commons.lang.BooleanUtils.isTrue;
@@ -85,30 +74,33 @@ public class IntrospectionWebService {
     private ExternalIntrospectionService externalIntrospectionService;
     @Inject
     private AttributeService attributeService;
+
     @Inject
-    private WebKeysConfiguration webKeysConfiguration;
+    private IntrospectionService introspectionService;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response introspectGet(@HeaderParam("Authorization") String authorization,
+                                  @HeaderParam("Accept") String accept,
                                   @QueryParam("token") String token,
                                   @QueryParam("token_type_hint") String tokenTypeHint,
                                   @QueryParam("response_as_jwt") String responseAsJwt,
                                   @Context HttpServletRequest httpRequest,
                                   @Context HttpServletResponse httpResponse
     ) {
-        return introspect(authorization, token, tokenTypeHint, responseAsJwt, httpRequest, httpResponse);
+        return introspect(authorization, accept, token, tokenTypeHint, responseAsJwt, httpRequest, httpResponse);
     }
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     public Response introspectPost(@HeaderParam("Authorization") String authorization,
+                                   @HeaderParam("Accept") String accept,
                                    @FormParam("token") String token,
                                    @FormParam("token_type_hint") String tokenTypeHint,
                                    @FormParam("response_as_jwt") String responseAsJwt,
                                    @Context HttpServletRequest httpRequest,
                                    @Context HttpServletResponse httpResponse) {
-        return introspect(authorization, token, tokenTypeHint, responseAsJwt, httpRequest, httpResponse);
+        return introspect(authorization, accept, token, tokenTypeHint, responseAsJwt, httpRequest, httpResponse);
     }
 
     private AuthorizationGrant validateAuthorization(String authorization, String token) throws UnsupportedEncodingException {
@@ -146,10 +138,10 @@ public class IntrospectionWebService {
         return authorizationGrant;
     }
 
-    private Response introspect(String authorization, String token, String tokenTypeHint, String responseAsJwt, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
+    private Response introspect(String authorization, String accept,  String token, String tokenTypeHint, String responseAsJwt, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
         try {
             if (log.isTraceEnabled()) {
-                log.trace("Introspect token, authorization: {}, token to introspect: {}, tokenTypeHint: {}", escapeLog(authorization), escapeLog(token), escapeLog(tokenTypeHint));
+                log.trace("Introspect token, authorization: {}, token to introspect: {}, tokenTypeHint: {}, accept: {}", escapeLog(authorization), escapeLog(token), escapeLog(tokenTypeHint), escapeLog(accept));
             }
 
             AuthorizationGrant authorizationGrant = validateAuthorization(authorization, token);
@@ -180,8 +172,8 @@ public class IntrospectionWebService {
                 String scopes = StringUtils.join(response.getScope().toArray(), " ");
                 responseAsJsonObject.put("scope", scopes);
             }
-            if (Boolean.TRUE.toString().equalsIgnoreCase(responseAsJwt)) {
-                return Response.status(Response.Status.OK).entity(createResponseAsJwt(responseAsJsonObject, grantOfIntrospectionToken)).build();
+            if (introspectionService.isJwtResponse(responseAsJwt, accept)) {
+                return Response.status(Response.Status.OK).entity(introspectionService.createResponseAsJwt(responseAsJsonObject, grantOfIntrospectionToken)).build();
             }
 
             return Response.status(Response.Status.OK).entity(responseAsJsonObject.toString()).type(MediaType.APPLICATION_JSON_TYPE).build();
@@ -232,30 +224,6 @@ public class IntrospectionWebService {
                 log.debug("Failed to find grant for access_token: {}. Return 200 with active=false.", escapeLog(token));
         }
         return tokenToIntrospect;
-    }
-
-    private String createResponseAsJwt(JSONObject response, AuthorizationGrant grant) throws Exception {
-        final JwtSigner jwtSigner = JwtSigner.newJwtSigner(appConfiguration, webKeysConfiguration, grant.getClient());
-        final Jwt jwt = jwtSigner.newJwt();
-        Audience.setAudience(jwt.getClaims(), grant.getClient());
-
-        Iterator<String> keysIter = response.keys();
-        while (keysIter.hasNext()) {
-            String key = keysIter.next();
-            Object value = response.opt(key);
-            if (value != null) {
-                try {
-                    jwt.getClaims().setClaimObject(key, value, false);
-                } catch (Exception e) {
-                    log.error("Failed to put claims into jwt. Key: " + key + ", response: " + response.toString(), e);
-                }
-            }
-        }
-        if (log.isTraceEnabled()) {
-            log.trace("Response before signing: {}", jwt.getClaims().toJsonString());
-        }
-
-        return jwtSigner.sign().toString();
     }
 
     private static JSONObject createResponseAsJsonObject(IntrospectionResponse response, AbstractToken tokenToIntrospect) throws JSONException, IOException {

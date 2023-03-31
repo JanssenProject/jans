@@ -178,15 +178,20 @@ public class SessionIdService {
             String sessionAcr = getAcr(session);
 
             if (StringUtils.isBlank(sessionAcr)) {
+                final boolean isDeviceAuthorization = sessionAttributes.containsKey(io.jans.as.model.config.Constants.DEVICE_AUTHORIZATION);
                 log.trace("Failed to fetch acr from session, attributes: {}", sessionAttributes);
-                return session;
+                if (!isDeviceAuthorization) { // force initialization if session acr is not set and session was created by device authorization
+                    return session;
+                }
             }
 
             List<String> acrValuesList = acrValuesList(acrValuesStr);
             boolean isAcrChanged = !acrValuesList.isEmpty() && !acrValuesList.contains(sessionAcr);
             if (isAcrChanged) {
                 Map<String, Integer> acrToLevel = externalAuthenticationService.acrToLevelMapping();
-                Integer sessionAcrLevel = acrToLevel.get(externalAuthenticationService.scriptName(sessionAcr));
+                Integer sessionAcrLevel = Util.asInt(acrToLevel.get(externalAuthenticationService.scriptName(sessionAcr)), -1);
+
+                log.trace("acrChanged, acrToLevel: {}, sessionAcrLevel: {}", acrToLevel, sessionAcrLevel);
 
                 for (String acrValue : acrValuesList) {
                     Integer currentAcrLevel = acrToLevel.get(externalAuthenticationService.scriptName(acrValue));
@@ -196,6 +201,9 @@ public class SessionIdService {
 
                     // Requested acr method not enabled
                     if (currentAcrLevel == null) {
+                        if (Util.isBuiltInPasswordAuthn(acrValue)) {
+                            return session;
+                        }
                         throw new AcrChangedException(false);
                     }
 

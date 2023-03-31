@@ -117,7 +117,7 @@ def _transform_auth_dynamic_config(conf):
         should_update = True
 
     if "useHighestLevelScriptIfAcrScriptNotFound" not in conf:
-        conf["useHighestLevelScriptIfAcrScriptNotFound"] = True
+        conf["useHighestLevelScriptIfAcrScriptNotFound"] = False
         should_update = True
 
     if "httpLoggingExcludePaths" not in conf:
@@ -208,10 +208,6 @@ def _transform_auth_dynamic_config(conf):
         if "private_key_jwt" not in conf["tokenEndpointAuthMethodsSupported"]:
             conf["tokenEndpointAuthMethodsSupported"].append("private_key_jwt")
             should_update = True
-
-        # if conf["redirectUrisRegexEnabled"]:
-        #     conf["redirectUrisRegexEnabled"] = False
-        #     should_update = True
     else:
         if all([
             os.environ.get("CN_PERSISTENCE_TYPE") in ("sql", "spanner"),
@@ -230,7 +226,7 @@ def _transform_auth_dynamic_config(conf):
                 "templatesPath": "/ftl",
                 "scriptsPath": "/scripts",
                 "serializerType": "KRYO",
-                "maxItemsLoggedInCollections": 3,
+                "maxItemsLoggedInCollections": 9,
                 "pageMismatchErrorPage": "mismatch.ftl",
                 "interruptionErrorPage": "timeout.ftl",
                 "crashErrorPage": "crash.ftl",
@@ -515,6 +511,7 @@ class Upgrade:
         self.update_scripts_entries()
         self.update_admin_ui_config()
         self.update_tui_client()
+        self.update_config()
 
     def update_scripts_entries(self):
         # default to ldap persistence
@@ -929,6 +926,52 @@ class Upgrade:
         else:
             if ssa_scope not in entry.attrs["jansScope"]:
                 entry.attrs["jansScope"].append(ssa_scope)
+                should_update = True
+
+        if should_update:
+            self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
+
+    def update_config(self):
+        kwargs = {}
+        id_ = "ou=configuration,o=jans"
+
+        if self.backend.type in ("sql", "spanner"):
+            kwargs = {"table_name": "jansAppConf"}
+            id_ = doc_id_from_dn(id_)
+        elif self.backend.type == "couchbase":
+            kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
+            id_ = id_from_dn(id_)
+
+        entry = self.backend.get_entry(id_, **kwargs)
+
+        if not entry:
+            return
+
+        should_update = False
+
+        # set jansAuthMode if still empty
+        if not entry.attrs.get("jansAuthMode"):
+            entry.attrs["jansAuthMode"] = "simple_password_auth"
+            should_update = True
+
+        # default smtp config
+        default_smtp_conf = {
+            "key-store": "/etc/certs/smtp-keys.pkcs12",
+            "key-store-password": self.manager.secret.get("smtp_jks_pass_enc"),
+            "key-store-alias": self.manager.config.get("smtp_alias"),
+            "signing-algorithm": self.manager.config.get("smtp_signing_alg"),
+        }
+
+        # set jansSmtpConf if still empty
+        smtp_conf = entry.attrs.get("jansSmtpConf")
+
+        if isinstance(smtp_conf, dict):  # likely mysql
+            if not smtp_conf["v"]:
+                entry.attrs["jansSmtpConf"]["v"].append(json.dumps(default_smtp_conf))
+                should_update = True
+        else:
+            if not smtp_conf:
+                entry.attrs["jansSmtpConf"] = [json.dumps(default_smtp_conf)]
                 should_update = True
 
         if should_update:

@@ -44,7 +44,7 @@ import jakarta.ws.rs.core.Application;
                 @Tag(name = "Statistics - User"), @Tag(name = "Health - Check"), @Tag(name = "Server Stats"),
                 @Tag(name = "Auth - Session Management"), @Tag(name = "Organization Configuration"),
                 @Tag(name = "Auth Server Health - Check"), @Tag(name = "Plugins"),
-                @Tag(name = "Configuration – Config API") },
+                @Tag(name = "Configuration – Config API"), @Tag(name = "Client Authorization")},
 
         servers = { @Server(url = "https://jans.io/", description = "The Jans server") })
 

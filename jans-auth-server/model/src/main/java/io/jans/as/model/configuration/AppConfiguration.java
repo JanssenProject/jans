@@ -403,8 +403,8 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Enable/Disable redirect uris validation using regular expression", defaultValue = "false")
     private Boolean redirectUrisRegexEnabled = false;
 
-    @DocProperty(description = "Enable/Disable usage of highest level script in case ACR script does not exist", defaultValue = "true")
-    private Boolean useHighestLevelScriptIfAcrScriptNotFound = true;
+    @DocProperty(description = "Enable/Disable usage of highest level script in case ACR script does not exist", defaultValue = "false")
+    private Boolean useHighestLevelScriptIfAcrScriptNotFound;
 
     @DocProperty(description = "Boolean value specifying whether to enable user authentication filters")
     private Boolean authenticationFiltersEnabled;

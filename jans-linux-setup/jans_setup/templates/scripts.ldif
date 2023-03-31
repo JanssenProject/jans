@@ -303,7 +303,7 @@ jansConfProperty: {"value1":"qr_options","value2":"{ size: 500, mSize: 0.05 }","
 jansConfProperty: {"value1":"label","value2":"Super Gluu","description":""}
 jansConfProperty: {"value1":"registration_uri","value2":"https://%(hostname)s/identity/register","description":""}
 jansConfProperty: {"value1":"authentication_mode","value2":"two_step","description":""}
-jansConfProperty: {"value1":"notification_service_mode","value2":"gluu","description":""}
+jansConfProperty: {"value1":"notification_service_mode","value2":"jans","description":""}
 jansConfProperty: {"value1":"credentials_file","value2":"/etc/certs/super_gluu_creds.json","description":""}
 jansConfProperty: {"value1":"supergluu_android_download_url","value2":"https://play.google.com/store/apps/details?id=gluu.org.super.gluu&hl=en_US","description":""}
 jansConfProperty: {"value1":"supergluu_ios_download_url","value2":"https://itunes.apple.com/us/app/super-gluu/id1093479646","description":""}
@@ -538,7 +538,8 @@ description: Agama Script
 displayName: agama
 inum: BADA-BADA
 jansConfProperty: {"value1":"cust_param_name","value2":"agama_flow","hide":false,"description":""}
-jansEnabled: true
+jansConfProperty: {"value1":"default_flow_name","value2":"","hide":false,"description":""}
+jansEnabled: false
 jansLevel: 10
 jansModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
 jansModuleProperty: {"value1":"location_type","value2":"db","description": ""}

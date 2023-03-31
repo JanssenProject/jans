@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.10](https://github.com/JanssenProject/jans/compare/jans-notify-v1.0.9...jans-notify-v1.0.10) (2023-03-16)
+
+
+### Bug Fixes
+
+* prepare release for 1.0.10 ([e996926](https://github.com/JanssenProject/jans/commit/e99692692ef04d881468d120f7c7d462568dce36))
+
 ## [1.0.9](https://github.com/JanssenProject/jans/compare/jans-notify-v1.0.7...jans-notify-v1.0.9) (2023-03-09)
 
 

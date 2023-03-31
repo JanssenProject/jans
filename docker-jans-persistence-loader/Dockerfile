@@ -1,4 +1,4 @@
-FROM alpine:3.16
+FROM bellsoft/liberica-openjre-alpine:11.0.16
 
 # ===============
 # Alpine packages
@@ -7,7 +7,9 @@ FROM alpine:3.16
 RUN apk update \
     && apk upgrade --available \
     && apk add --no-cache python3 curl tini py3-cryptography py3-psycopg2 py3-grpcio \
-    && apk add --no-cache --virtual .build-deps git wget
+    && apk add --no-cache --virtual .build-deps git wget \
+    && mkdir -p /usr/java/latest \
+    && ln -sf /usr/lib/jvm/jre /usr/java/latest/jre
 
 # ======
 # Python
@@ -24,7 +26,7 @@ RUN python3 -m ensurepip \
 # =====================
 
 # janssenproject/jans SHA commit
-ENV JANS_SOURCE_VERSION=7e432dcde57657d1cfa1cd45bde2206156dc6905
+ENV JANS_SOURCE_VERSION=cd62ff9fe8783f2e87dd5e47c2362d35ba9713ef
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCRIPT_CATALOG_DIR=docs/script-catalog
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
@@ -167,13 +169,12 @@ ENV CN_CACHE_TYPE=NATIVE_PERSISTENCE \
 # misc
 # ====
 
-LABEL name="janssenproject/persistence-loader" \
-    maintainer="Janssen Project <support@jans.io>" \
-    vendor="Janssen Project" \
-    version="1.0.10" \
-    release="dev" \
-    summary="Janssen Authorization Server Persistence loader" \
-    description="Generate initial data for persistence layer"
+LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/persistence-loader" \
+    org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
+    org.opencontainers.image.vendor="Janssen Project" \
+    org.opencontainers.image.version="1.0.11" \
+    org.opencontainers.image.title="Janssen Authorization Server Persistence loader" \
+    org.opencontainers.image.description="Generate initial data for persistence layer"
 
 RUN mkdir -p /app/custom_ldif /etc/certs /etc/jans/conf
 
