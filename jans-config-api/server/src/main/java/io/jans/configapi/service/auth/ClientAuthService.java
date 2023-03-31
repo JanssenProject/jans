@@ -21,9 +21,6 @@ import org.slf4j.Logger;
 @ApplicationScoped
 public class ClientAuthService {
 
-    private static final String TOKENS_DN = "ou=tokens,o=jans";
-    private static final String AUTHORIZATIONS_DN = "ou=authorizations,o=jans";
-
     @Inject
     private Logger logger;
 
