@@ -75,10 +75,7 @@ spec:
         env:
           {{- include "opendj.usr-envs" $ | indent 12 }}
           {{- include "opendj.usr-secret-envs" $ | indent 12 }}
-        lifecycle:
-          preStop:
-            exec:
-              command: ["/bin/sh", "-c", "python3 /app/scripts/deregister_peer.py 1>&/proc/1/fd/1"]
+        lifecycle: {{ toYaml .Values.lifecycle | nindent 10 }}
         envFrom:
         - configMapRef:
             name: {{ $.Release.Name }}-config-cm

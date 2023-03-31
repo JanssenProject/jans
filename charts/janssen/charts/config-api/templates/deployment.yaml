@@ -73,6 +73,7 @@ spec:
 {{- toYaml .Values.livenessProbe | nindent 12 }}
           readinessProbe:
 {{- toYaml .Values.readinessProbe | nindent 12 }}
+          lifecycle: {{ toYaml .Values.lifecycle | nindent 10 }}
           volumeMounts:
           {{- with .Values.volumeMounts }}
 {{- toYaml . | nindent 12 }}

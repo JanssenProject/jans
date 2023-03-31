@@ -75,6 +75,7 @@ spec:
         env:
           {{- include "config.usr-envs" . | indent 12 }}
           {{- include "config.usr-secret-envs" . | indent 12 }}
+        lifecycle: {{ toYaml .Values.lifecycle | nindent 10 }}  
         volumeMounts:
           {{- with .Values.volumeMounts }}
 {{- toYaml . | nindent 10 }}
