@@ -9,6 +9,9 @@ import io.jans.as.common.service.OrganizationService;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.persistence.model.Scope;
 import io.jans.configapi.core.model.Token;
+
+import static io.jans.as.model.util.Util.escapeLog;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -40,8 +43,9 @@ public class ClientAuthService {
     private OrganizationService organizationService;
 
     public Map<Client, Set<Scope>> getUserAuthorizations(String userId) {
-
-        logger.info(" Authorizations details to be fetched for userId:{} ", userId);
+        if (logger.isInfoEnabled()) {
+            logger.info("Authorizations details to be fetched for userId:{}", escapeLog(userId));
+        }
 
         ClientAuthorization clientAuth = new ClientAuthorization();
         clientAuth.setDn(getClientAuthorizationDn(null));
@@ -58,7 +62,6 @@ public class ClientAuthService {
                 .collect(Collectors.toSet());
         logger.debug("clientIds:{}", clientIds);
 
-
         // Create a filter based on client Id
         Filter[] filters = clientIds.stream().map(id -> Filter.createEqualityFilter("inum", id))
                 .collect(Collectors.toList()).toArray(new Filter[] {});
@@ -68,14 +71,17 @@ public class ClientAuthService {
         Set<String> scopeIds = authorizations.stream().map(ClientAuthorization::getScopes).flatMap(Arrays::stream)
                 .collect(Collectors.toSet());
         logger.debug("scopeIds:{}", scopeIds);
-        
+
         // Do the analog for scopes
         filters = scopeIds.stream().map(id -> Filter.createEqualityFilter("jansId", id)).collect(Collectors.toList())
                 .toArray(new Filter[] {});
         List<Scope> scopes = persistenceEntryManager.findEntries(scopeService.getDnForScope(null), Scope.class,
                 Filter.createORFilter(filters));
 
-        logger.info("Found {} client authorizations for user {}", clients.size(), userId);
+        if (logger.isInfoEnabled()) {
+            logger.info("Found {} client authorizations for user:{}", clients.size(), escapeLog(userId));
+        }
+
         Map<Client, Set<Scope>> perms = new HashMap<>();
 
         for (Client client : clients) {
@@ -97,12 +103,11 @@ public class ClientAuthService {
     }
 
     public void removeClientAuthorizations(String userId, String clientId, String userName) {
-        logger.info("Removing client authorizations for userId:{}, clientId:{}, userName:{}", userId, clientId, userName);
+        if (logger.isInfoEnabled()) {
+            logger.info("Removing client authorizations for userId:{}, clientId:{}, userName:{}", escapeLog(userId),
+                    escapeLog(clientId), escapeLog(userName));
+        }
 
-        String id = userId+"_"+clientId;
-        logger.debug("DN - id:{}, getClientAuthorizationDn(id):{}, getClientAuthorizationDn(null):{}", id, getClientAuthorizationDn(id), getClientAuthorizationDn(null));
-
-        
         ClientAuthorization clientAuth = new ClientAuthorization();
         clientAuth.setDn(getClientAuthorizationDn(null));
         clientAuth.setUserId(userId);
@@ -115,9 +120,9 @@ public class ClientAuthService {
         if (authorizations == null || authorizations.isEmpty()) {
             return;
         }
-
-        logger.info("Removing client authorizations for user {}", userName);
-
+        if (logger.isInfoEnabled()) {
+            logger.info("Removing client authorizations for userName:{}", escapeLog(userName));
+        }
         authorizations.forEach(authorization -> {
             logger.debug("Deleting ClientAuthorization for id:{}, clientId:{}", authorization.getId(),
                     authorization.getClientId());
@@ -133,20 +138,18 @@ public class ClientAuthService {
         logger.info("Removing refresh tokens associated to this user/client pair");
         List<Token> tokens = persistenceEntryManager.findEntries(sampleToken);
         logger.debug("Client tokens:{}", tokens);
-        
+
         tokens.forEach(token -> {
             logger.trace("Deleting token {}", token.getTokenCode());
             persistenceEntryManager.remove(token);
         });
-
     }
 
     public String getClientAuthorizationDn(String id) {
-        logger.debug("Get Client Authorization Dn for id:{}", id);
         String baseDn = staticConfiguration.getBaseDn().getAuthorizations();
-        if (id==null || StringUtils.isEmpty(id)) {
+        if (id == null || StringUtils.isEmpty(id)) {
             return baseDn;
-        }        
+        }
         return String.format("jansId=%s,%s", id, baseDn);
     }
 
@@ -162,7 +165,7 @@ public class ClientAuthService {
     public String getDnForClient(String inum) {
         logger.debug("Get Client Dn for inum:{}", inum);
         String orgDn = organizationService.getDnForOrganization();
-        if (inum==null || StringHelper.isEmpty(inum)) {
+        if (inum == null || StringHelper.isEmpty(inum)) {
             return String.format("ou=clients,%s", orgDn);
         }
         return String.format("inum=%s,ou=clients,%s", inum, orgDn);
