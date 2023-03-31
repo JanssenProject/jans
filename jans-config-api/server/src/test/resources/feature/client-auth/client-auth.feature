@@ -5,13 +5,13 @@ Background:
 * def mainUrl = clients_authorizations_url
 
 Scenario: Fetch all clients authorizations without bearer token 
-	Given url mainUrl 
+	Given url mainUrl + '/123'
 	When method GET 
 	Then status 401 
 
 
 Scenario: Fetch all clients authorizations
-	Given url mainUrl 
+	Given url mainUrl + '/123'
 	And print 'accessToken = '+accessToken
 	And print 'issuer = '+issuer
 	And header Authorization = 'Bearer ' + accessToken

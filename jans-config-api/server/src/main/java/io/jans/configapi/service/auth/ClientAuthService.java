@@ -47,7 +47,7 @@ public class ClientAuthService {
         clientAuth.setDn(getClientAuthorizationDn(null));
         clientAuth.setUserId(userId);
         List<ClientAuthorization> authorizations = persistenceEntryManager.findEntries(clientAuth);
-        logger.info("{} client-authorization entries found", authorizations);
+        logger.debug("{} client-authorization entries found", authorizations);
 
         if (authorizations == null || authorizations.isEmpty()) {
             return Collections.emptyMap();
@@ -56,7 +56,7 @@ public class ClientAuthService {
         // Get client id
         Set<String> clientIds = authorizations.stream().map(ClientAuthorization::getClientId)
                 .collect(Collectors.toSet());
-        logger.info("clientIds:{}", clientIds);
+        logger.debug("clientIds:{}", clientIds);
 
 
         // Create a filter based on client Id
@@ -67,7 +67,7 @@ public class ClientAuthService {
 
         Set<String> scopeIds = authorizations.stream().map(ClientAuthorization::getScopes).flatMap(Arrays::stream)
                 .collect(Collectors.toSet());
-        logger.info("scopeIds:{}", scopeIds);
+        logger.debug("scopeIds:{}", scopeIds);
         
         // Do the analog for scopes
         filters = scopeIds.stream().map(id -> Filter.createEqualityFilter("jansId", id)).collect(Collectors.toList())
@@ -82,7 +82,7 @@ public class ClientAuthService {
             Set<Scope> clientScopes = new HashSet<>();
             logger.debug("client:{}", client);
             for (ClientAuthorization auth : authorizations) {
-                logger.debug("auth:{}", auth);
+                logger.trace("auth:{}", auth);
                 if (auth.getClientId().equals(client.getClientId())) {
                     for (String scopeName : auth.getScopes()) {
                         scopes.stream().filter(sc -> sc.getId().equals(scopeName)).findAny()
@@ -107,10 +107,10 @@ public class ClientAuthService {
         clientAuth.setDn(getClientAuthorizationDn(null));
         clientAuth.setUserId(userId);
         clientAuth.setClientId(clientId);
-        logger.info("clientAuth:{} ", clientAuth);
+        logger.debug("clientAuth:{} ", clientAuth);
 
         List<ClientAuthorization> authorizations = persistenceEntryManager.findEntries(clientAuth);
-        logger.info("{} client-authorization entries found", authorizations);
+        logger.debug("{} client-authorization entries found", authorizations);
 
         if (authorizations == null || authorizations.isEmpty()) {
             return;
@@ -119,7 +119,7 @@ public class ClientAuthService {
         logger.info("Removing client authorizations for user {}", userName);
 
         authorizations.forEach(authorization -> {
-            logger.info("Deleting ClientAuthorization for id:{}, clientId:{}", authorization.getId(),
+            logger.debug("Deleting ClientAuthorization for id:{}, clientId:{}", authorization.getId(),
                     authorization.getClientId());
             persistenceEntryManager.remove(authorization);
         });
@@ -131,44 +131,40 @@ public class ClientAuthService {
         sampleToken.setUserId(userName);
 
         logger.info("Removing refresh tokens associated to this user/client pair");
-        // Here we ignore the return value of deletion
         List<Token> tokens = persistenceEntryManager.findEntries(sampleToken);
         logger.debug("Client tokens:{}", tokens);
         
         tokens.forEach(token -> {
-            logger.debug("Deleting token {}", token.getTokenCode());
+            logger.trace("Deleting token {}", token.getTokenCode());
             persistenceEntryManager.remove(token);
         });
 
     }
 
     public String getClientAuthorizationDn(String id) {
-        logger.info("Get Client Authorization Dn for id:{}", id);
+        logger.debug("Get Client Authorization Dn for id:{}", id);
         String baseDn = staticConfiguration.getBaseDn().getAuthorizations();
         if (id==null || StringUtils.isEmpty(id)) {
             return baseDn;
-        }
-        logger.info("Authorization Dn for id:{} is:{}", id, String.format("jansId=%s,%s", id, baseDn));
+        }        
         return String.format("jansId=%s,%s", id, baseDn);
     }
 
     public String geTokenDn(String id) {
-        logger.info("Get Token Dn for id:{}", id);
+        logger.debug("Get Token Dn for id:{}", id);
         String baseDn = staticConfiguration.getBaseDn().getTokens();
         if (id == null || StringUtils.isEmpty(id)) {
             return baseDn;
         }
-        logger.info("Token Dn for id:{} is:{}", id, String.format("tknCde=%s,%s", id, baseDn));
         return String.format("tknCde=%s,%s", id, baseDn);
     }
 
     public String getDnForClient(String inum) {
-        logger.info("Get Client Dn for inum:{}", inum);
+        logger.debug("Get Client Dn for inum:{}", inum);
         String orgDn = organizationService.getDnForOrganization();
         if (inum==null || StringHelper.isEmpty(inum)) {
             return String.format("ou=clients,%s", orgDn);
         }
-        logger.info("Client Dn for inum:{} is:{}", inum, String.format("ou=clients,%s", orgDn));
         return String.format("inum=%s,ou=clients,%s", inum, orgDn);
     }
 
@@ -182,7 +178,7 @@ public class ClientAuthService {
                 Arrays.asList(auth.getScopes()).stream().filter(scopeIds::add);
             }
         }
-        logger.debug("scopeIds:{}", scopeIds);
+        logger.info("scopeIds:{}", scopeIds);
 
         return scopeService.searchScopesById(scopeIds);
 
