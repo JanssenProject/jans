@@ -40,6 +40,7 @@ tags:
 - name: Auth Server Health - Check
 - name: Plugins
 - name: Configuration – Config API
+- name: Client Authorization
 paths:
   /api/v1/health:
     get:
@@ -1969,7 +1970,7 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/cache.write
-  /api/v1/clients/authorizations/{userId}/{username}/{clientId}:
+  /api/v1/clients/authorizations/{userId}/{clientId}/{username}:
     delete:
       tags:
       - Client Authorization
@@ -3656,8 +3657,6 @@ paths:
                     }
         "401":
           description: Unauthorized
-        "404":
-          description: Not Found
         "500":
           description: InternalServerError
       security:
@@ -3791,9 +3790,19 @@ paths:
     post:
       tags:
       - Configuration – SMTP
-      summary: Test SMTP server configuration
-      description: Test SMTP server configuration
+      summary: Signing Test SMTP server configuration
+      description: Signing Test SMTP server configuration
       operationId: test-config-smtp
+      requestBody:
+        description: SmtpTest object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SmtpTest'
+            examples:
+              Request json example:
+                description: Request json example
+                value: ""
       responses:
         "200":
           description: Ok
@@ -3808,7 +3817,7 @@ paths:
           description: InternalServerError
       security:
       - oauth2:
-        - https://jans.io/oauth/config/smtp.readonly
+        - https://jans.io/oauth/config/smtp.write
   /api/v1/config/scripts:
     get:
       tags:
@@ -8066,31 +8075,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        adminCanAccess:
-          type: boolean
-<<<<<<< HEAD
-        userCanAccess:
-          type: boolean
         userCanView:
-=======
-        adminCanAccess:
->>>>>>> 2bbb95dc4558a3251d52f74ff88b41f1aafe8a5e
           type: boolean
         adminCanView:
+          type: boolean
+        adminCanAccess:
+          type: boolean
+        userCanAccess:
           type: boolean
         userCanEdit:
           type: boolean
         adminCanEdit:
           type: boolean
-<<<<<<< HEAD
         whitePagesCanView:
-=======
-        userCanEdit:
-          type: boolean
-        userCanView:
-          type: boolean
-        userCanAccess:
->>>>>>> 2bbb95dc4558a3251d52f74ff88b41f1aafe8a5e
           type: boolean
         baseDn:
           type: string
@@ -8884,9 +8881,6 @@ components:
             - code
             - token
             - id_token
-<<<<<<< HEAD
-        fapi:
-          type: boolean
         newUserSchema:
           properties:
             name:
@@ -8916,8 +8910,6 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapArraySchema
-=======
->>>>>>> 2bbb95dc4558a3251d52f74ff88b41f1aafe8a5e
     AuthenticationFilter:
       required:
       - baseDn
@@ -9904,12 +9896,18 @@ components:
           type: integer
           format: int32
         displayName:
-<<<<<<< HEAD
-=======
           type: string
         authenticationMethod:
->>>>>>> 2bbb95dc4558a3251d52f74ff88b41f1aafe8a5e
           type: string
+          enum:
+          - client_secret_basic
+          - client_secret_post
+          - client_secret_jwt
+          - private_key_jwt
+          - access_token
+          - tls_client_auth
+          - self_signed_tls_client_auth
+          - none
         allAuthenticationMethods:
           uniqueItems: true
           type: array
@@ -9924,20 +9922,6 @@ components:
             - tls_client_auth
             - self_signed_tls_client_auth
             - none
-<<<<<<< HEAD
-        authenticationMethod:
-          type: string
-          enum:
-          - client_secret_basic
-          - client_secret_post
-          - client_secret_jwt
-          - private_key_jwt
-          - access_token
-          - tls_client_auth
-          - self_signed_tls_client_auth
-          - none
-=======
->>>>>>> 2bbb95dc4558a3251d52f74ff88b41f1aafe8a5e
         baseDn:
           type: string
         inum:
@@ -10498,6 +10482,44 @@ components:
               additionalProperties:
                 $ref: '#/components/schemas/Scope'
           description: clientAuthMapArraySchema
+    SmtpTest:
+      type: object
+      properties:
+        sign:
+          type: boolean
+        subject:
+          type: string
+        message:
+          type: string
+        newUserSchema:
+          properties:
+            name:
+              example: John123
+            password:
+              example: P4SSW0RD
+            image:
+              example: https://robohash.org/John123.png
+        clientAuthSchema1:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthSchema1
+        clientAuthMapSchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     CustomScript:
       type: object
       properties:
@@ -10572,14 +10594,14 @@ components:
           type: boolean
         internal:
           type: boolean
-        locationPath:
-          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
+        locationPath:
+          type: string
         baseDn:
           type: string
         newUserSchema:

@@ -103,12 +103,11 @@ public class ClientAuthService {
         logger.info("Removing client authorizations for userId:{}, clientId:{}, userName:{}", userId, clientId, userName);
 
         String id = userId+"_"+clientId;
-        logger.debug("DN - getClientAuthorizationDn(id):{}, getClientAuthorizationDn(null):{}", getClientAuthorizationDn(id), getClientAuthorizationDn(null));
+        logger.debug("DN - id:{}, getClientAuthorizationDn(id):{}, getClientAuthorizationDn(null):{}", id, getClientAuthorizationDn(id), getClientAuthorizationDn(null));
 
         
         ClientAuthorization clientAuth = new ClientAuthorization();
         clientAuth.setDn(getClientAuthorizationDn(null));
-        //clientAuth.setDn(getClientAuthorizationDn(AUTHORIZATIONS_DN));
         clientAuth.setUserId(userId);
         clientAuth.setClientId(clientId);
         logger.info("clientAuth:{} ", clientAuth);
@@ -152,14 +151,14 @@ public class ClientAuthService {
         if (id==null || StringUtils.isEmpty(id)) {
             return baseDn;
         }
-        logger.info("Client Authorization Dn for id:{} is:{}", id, String.format("jansId=%s,%s", id, baseDn));
+        logger.info("Authorization Dn for id:{} is:{}", id, String.format("jansId=%s,%s", id, baseDn));
         return String.format("jansId=%s,%s", id, baseDn);
     }
 
     public String geTokenDn(String id) {
         logger.info("Get Token Dn for id:{}", id);
         String baseDn = staticConfiguration.getBaseDn().getTokens();
-        if (StringUtils.isEmpty(id)) {
+        if (id == null || StringUtils.isEmpty(id)) {
             return baseDn;
         }
         logger.info("Token Dn for id:{} is:{}", id, String.format("tknCde=%s,%s", id, baseDn));
@@ -167,10 +166,12 @@ public class ClientAuthService {
     }
 
     public String getDnForClient(String inum) {
+        logger.info("Get Client Dn for inum:{}", inum);
         String orgDn = organizationService.getDnForOrganization();
-        if (StringHelper.isEmpty(inum)) {
+        if (inum==null || StringHelper.isEmpty(inum)) {
             return String.format("ou=clients,%s", orgDn);
         }
+        logger.info("Client Dn for inum:{} is:{}", inum, String.format("ou=clients,%s", orgDn));
         return String.format("inum=%s,ou=clients,%s", inum, orgDn);
     }
 
