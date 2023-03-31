@@ -8,6 +8,7 @@ package io.jans.as.server.audit.debug.wrapper;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpServletResponseWrapper;
+import org.apache.log4j.Logger;
 import org.json.JSONObject;
 
 import java.io.CharArrayWriter;
@@ -22,7 +23,7 @@ import java.util.Map;
 public class ReadableResponseWrapper extends HttpServletResponseWrapper {
     private CharArrayWriter writer;
     private HttpServletResponse response;
-
+    private static final Logger LOG = Logger.getLogger(ReadableResponseWrapper.class);
     /**
      * Constructs a response adaptor wrapping the given response.
      *
@@ -69,7 +70,7 @@ public class ReadableResponseWrapper extends HttpServletResponseWrapper {
             JSONObject jsonObject = new JSONObject(value);
             return jsonObject.toString();
         } catch (Exception e) {
-
+            LOG.error("Error reading body value from response ; " + e.getMessage());
         }
         return value;
     }

@@ -820,7 +820,7 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "List of key value date formatters, e.g. 'userinfo: 'yyyy-MM-dd', etc.")
     private Map<String, String> dateFormatterPatterns = new HashMap<>();
 
-    @DocProperty(description = "Defines if Response body will be logged", defaultValue = "false")
+    @DocProperty(description = "Defines if Response body will be logged. Default value is false", defaultValue = "false")
     private Boolean httpLoggingResponseBodyContent = false;
 
     public Map<String, String> getDateFormatterPatterns() {
