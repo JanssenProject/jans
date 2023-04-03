@@ -4100,6 +4100,19 @@
     User Experience
   </a>
   
+    <nav class="md-nav" aria-label="User Experience">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#acr-value-during-device-authorization" class="md-nav__link">
+    ACR value during Device Authorization
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -7332,6 +7345,19 @@
     User Experience
   </a>
   
+    <nav class="md-nav" aria-label="User Experience">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#acr-value-during-device-authorization" class="md-nav__link">
+    ACR value during Device Authorization
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -7536,11 +7562,15 @@ Third Party App-&gt;Device App: return Response
 <ol>
 <li>After that, user could need to authenticate, then decide whether permissions will be granted.</li>
 </ol>
+<p><code>acr</code> value can be specified in <code>deviceAuthzAcr</code> AS configuration property. </p>
 <p><img alt="DeviceFlow3" src="https://github.com/JanssenProject/jans/raw/main/docs/assets/device-flow-3.png" /></p>
 <ol>
 <li>Finally, the confirmation screen will be shown.</li>
 </ol>
 <p><img alt="DeviceFlow4" src="https://github.com/JanssenProject/jans/raw/main/docs/assets/device-flow-4.png" /></p>
+<h4 id="acr-value-during-device-authorization">ACR value during Device Authorization<a class="headerlink" href="#acr-value-during-device-authorization" title="Permanent link">#</a></h4>
+<p>User is required to authenticate if not authenticated yet. By default <code>acr_values</code> is not set in authorization request, which means it relies on default AS handling.
+However it's possible explicitly set <code>acr</code> value during Device Authorization by setting <code>deviceAuthzAcr</code> AS configuration property. </p>
 <h2 id="request-user-and-device-codes">Request user and device codes<a class="headerlink" href="#request-user-and-device-codes" title="Permanent link">#</a></h2>
 <p>This first step, device sends an HTTP POST request to Jans authorization server, at <code>/jans-auth/restv1/device_authorization</code> which is also presented in the <code>Discovery url</code> published by Jans Server, this endpoint could process a common authentication method or it could also not do any authentication, depending on the configuration for the client in Jans Server.</p>
 <h4 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">#</a></h4>
@@ -7741,7 +7771,7 @@ This token endpoint can return any error code already defined, for example wheth
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-03-30T10:51:22+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-03-30</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-04-03T10:32:39+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-04-03</span>
       
         <br>
         Created:
