@@ -6,6 +6,8 @@
 
 package io.jans.configapi.rest.resource.auth;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import static io.jans.as.model.util.Util.escapeLog;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.persistence.model.Scope;
@@ -91,5 +93,13 @@ public class ClientAuthResource extends ConfigBaseResource {
     }
     
    
-   
+    @Schema(description = "Response-Object Map<Client, Set<Scope>).")
+    public class AuthMap extends HashMap<Client, Set<Scope>> {
+      @JsonIgnore
+      @Override
+      public boolean isEmpty() {
+        return super.isEmpty();
+      }
+    }
+    
 }
