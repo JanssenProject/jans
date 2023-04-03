@@ -6,7 +6,4 @@ tags:
 
 # Overview
 
-Please use the left navigation menu to browse the content of this section while we are still working on developing content for `Overview` page.
-
-!!! Contribute
-    If you’d like to contribute to this document, get started with the [Contribution Guide](https://docs.jans.io/head/CONTRIBUTING/#contributing-to-the-documentation)
+The Janssen Authentication Server is extremely flexible, extensible, and modular. With the correct configuration, Agama, and interception scripts, a wide variety of authentication flows can be implemented. This section contains samples and tutorials to configure third party integrations, specific authentication flows, benchmarking, customizations, compliance profiles, and more.
