@@ -39,14 +39,14 @@ openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -sha256 -days 3
 
 Replace `OP_HOSTNAME` with the op hostname being used.
 ```bash
-echo | openssl s_client -servername OP_HOSTNAME \
- -connect OP_HOSTNAME:443 | sed -ne \
- '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' \
- > op_web_cert.cer
-export CERT_PATH=$(python3 -m certifi)
-export SSL_CERT_FILE=${CERT_PATH}
-export REQUESTS_CA_BUNDLE=${CERT_PATH}
-mv op_web_cert.cer $(python3 -m certifi)
+echo | openssl s_client -servername OP_HOSTNAME -connect OP_HOSTNAME:443 | sed -ne \
+ '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > op_web_cert.cer
+```
+
+```bash
+export CERT_PATH=$(python3 -m certifi) && export SSL_CERT_FILE=${CERT_PATH} \
+&& export REQUESTS_CA_BUNDLE=${CERT_PATH} && mv op_web_cert.cer $CERT_PATH
+
 ```
 
 ### 4. Register your RP at OP
