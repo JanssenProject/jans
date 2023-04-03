@@ -72,13 +72,13 @@ class TestRegisterEndpoint(TestCase):
 
     @patch('clientapp.client_handler.ClientHandler.__init__', MagicMock(return_value=None))
     def test_endpoint_should_accept_2_params(self):
-        firstValue = 'https://op'
-        secondValue = 'https://client.com.br'
+        first_value = 'https://op'
+        second_value = 'https://client.com.br'
         self.client.post(url_for('register'), json={
-            'op_url': firstValue,
-            'client_url': secondValue
+            'op_url': first_value,
+            'client_url': second_value
         })
-        ClientHandler.__init__.assert_called_once_with(firstValue, secondValue)
+        ClientHandler.__init__.assert_called_once_with(first_value, second_value)
 
     def test_endpoint_should_return_error_code_400_if_no_data_sent(self):
         self.assertEqual(
