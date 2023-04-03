@@ -54,7 +54,7 @@ export CERT_PATH=$(python3 -m certifi) && export SSL_CERT_FILE=${CERT_PATH} \
 ### Start the server
 
 Please notice that your client will be automatically registered once the server starts.
-If your server was already registered, when you start the server again, it won't register.
+If your client was already registered, when you start the server again, it won't register.
 
 (remember to be inside your virtual environment)
 ```bash
