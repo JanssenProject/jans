@@ -1,5 +1,6 @@
 import logging
 from clientapp import config as cfg
+from clientapp.helpers.client_handler import ClientHandler
 
 OP_URL = cfg.ISSUER
 REDIRECT_URIS = cfg.REDIRECT_URIS
@@ -11,4 +12,10 @@ def setup_logging() -> None:
         level=logging.DEBUG,
         handlers=[logging.StreamHandler(), logging.FileHandler('register_new_client.log')],
         format='[%(asctime)s] %(levelname)s %(name)s in %(module)s : %(message)s')
+
+
+def register() -> None:
+    logger = logging.getLogger(__name__)
+    logger.info('Trying to auto-register client from configuration')
+    client_handler = ClientHandler(OP_URL, REDIRECT_URIS)
 
