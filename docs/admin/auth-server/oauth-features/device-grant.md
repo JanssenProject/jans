@@ -56,12 +56,18 @@ Third Party App->Device App: return Response
 
 3. After that, user could need to authenticate, then decide whether permissions will be granted.
 
+`acr` value can be specified in `deviceAuthzAcr` AS configuration property. 
+
 ![DeviceFlow3](https://github.com/JanssenProject/jans/raw/main/docs/assets/device-flow-3.png)
 
 4. Finally, the confirmation screen will be shown.
 
 ![DeviceFlow4](https://github.com/JanssenProject/jans/raw/main/docs/assets/device-flow-4.png)
 
+#### ACR value during Device Authorization
+
+User is required to authenticate if not authenticated yet. By default `acr_values` is not set in authorization request, which means it relies on default AS handling.
+However it's possible explicitly set `acr` value during Device Authorization by setting `deviceAuthzAcr` AS configuration property. 
 
 ## Request user and device codes
 
