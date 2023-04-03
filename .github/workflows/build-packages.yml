@@ -214,6 +214,7 @@ jobs:
       run: |
         echo "version=$(echo ${{ github.event.ref }} | cut -d 'v' -f 2)" >> $GITHUB_OUTPUT
         echo "tag=$(echo ${{ github.event.ref }} | cut -d '/' -f 3)" >> $GITHUB_OUTPUT
+        echo "TUI_PREFIX=jans-cli-tui-linux" >> ${GITHUB_ENV}
         echo "PACKAGE_PREFIX=jans" >> ${GITHUB_ENV}
 
     - name: Print Version and tag
