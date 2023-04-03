@@ -422,13 +422,13 @@ public class UserResource extends BaseResource {
     }
 
     private User ignoreCustomAttributes(User user, Boolean removeNonLDAPAttributes) {
-        logger.info("validate User CustomObjectClasses - User user:{}, removeNonLDAPAttributes:{}", user,
+        logger.error("validate User CustomObjectClasses - User user:{}, removeNonLDAPAttributes:{}", user,
                 removeNonLDAPAttributes);
         if (user == null || (user.getCustomObjectClasses() == null || user.getCustomObjectClasses().length == 0)) {
             return user;
         }
-
-        logger.trace("user.getCustomObjectClasses():{}, userMgmtSrv.getPersistenceType():{}, userMgmtSrv.isLDAP():?{}",
+        removeNonLDAPAttributes = true; //////????
+        logger.error("user.getCustomObjectClasses():{}, userMgmtSrv.getPersistenceType():{}, userMgmtSrv.isLDAP():?{}",
                 user.getCustomObjectClasses(), userMgmtSrv.getPersistenceType(), userMgmtSrv.isLDAP());
 
         if (removeNonLDAPAttributes) {
