@@ -24,46 +24,11 @@ from flask import (Flask, jsonify, redirect, render_template, request, session,
                    url_for)
 from . import config as cfg
 from .client_handler import ClientHandler
-import logging
+from .utils.logger import setup_logger
+
+setup_logger()
 
 oauth = OAuth()
-
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='[%(asctime)s] %(levelname)s %(name)s in %(module)s : %(message)s',
-    filename='test-client.log')
-
-'''
-dictConfig({
-    'version': 1,
-    'formatters': {'default': {
-        'format': '[%(asctime)s] %(levelname)s %(name)s in %(module)s %(threadName)s: %(message)s',
-    }},
-    'handlers':
-        {
-        'wsgi': {
-            'class': 'logging.StreamHandler',
-            'stream': 'ext://flask.logging.wsgi_errors_stream',
-            'formatter': 'default'
-            },
-        'file_handler': {
-            'level': 'DEBUG',
-            'filename': 'mylogfile.log',
-            'class': 'logging.FileHandler',
-            'formatter': 'default'
-
-            }
-        },
-
-    'root': {
-        'level': 'DEBUG',
-        'handlers': ['file_handler'],
-        'filename': 'demo.log'
-    }
-
-})
-'''
-
 
 def add_config_from_json():
     with open('client_info.json', 'r') as openfile:
