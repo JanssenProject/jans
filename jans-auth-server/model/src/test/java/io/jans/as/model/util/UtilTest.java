@@ -20,6 +20,16 @@ import static org.testng.Assert.*;
 public class UtilTest extends BaseTest {
 
     @Test
+    public void asInt_forNull_shouldFallback() {
+        assertEquals(-1, Util.asInt(null, -1));
+    }
+
+    @Test
+    public void asInt_forInteger_shouldReturnInteger() {
+        assertEquals(5, Util.asInt(5, -1));
+    }
+
+    @Test
     public void putArray_whenListIsNull_shouldNotFail() {
         JSONObject json = new JSONObject();
         Util.putArray(json, null, "key");

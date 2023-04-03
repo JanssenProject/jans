@@ -8,12 +8,9 @@ public enum ErrorResponse {
     USER_INFO_JWT_BLANK("User-Info jwt is blank or empty. Generating token with default scopes."),
     CODE_OR_TOKEN_REQUIRED("Bad Request: Either `code` or `access_token` is required."),
     CHECK_LICENSE_ERROR("Error in checking license status."),
-    SAVE_LICENSE_SPRING_CREDENTIALS_ERROR("Error in saving license spring credentials."),
+    LICENSE_SPRING_CREDENTIALS_ERROR("Error in fetching license spring credentials from SCAN Api."),
     ACTIVATE_LICENSE_ERROR("Error in activating License."),
     GET_LICENSE_DETAILS_ERROR("Error in fetching license details."),
-    UPDATE_LICENSE_DETAILS_ERROR("Problem in updating license details"),
-    LICENSE_VALIDITY_PERIOD_NOT_FOUND("Bad Request: License Validity Period not found in request."),
-    INVALID_MAXIMUM_ACTIVATIONS("Bad Request: License Maximum Activations cannot be less than 1."),
     AUDIT_LOGGING_ERROR("Error in audit logging"),
     ERROR_READING_CONFIG("Error in reading auiConfiguration"),
     ERROR_READING_ROLE_PERMISSION_MAP("Error in reading role-permissions mapping from Auth Server."),
@@ -33,7 +30,13 @@ public enum ErrorResponse {
     DELETE_ADMIUI_PERMISSIONS_ERROR("Error in deleting Admin UI permissions."),
     ROLE_MARKED_UNDELETABLE("Role cannot be deleted. Please set ‘deletable’ property of role to true."),
     UNABLE_TO_DELETE_ROLE_MAPPED_TO_PERMISSIONS("Role is mapped to permissions so cannot be deleted. Please remove the permissions mapped before deleting the role."),
-    UNABLE_TO_DELETE_PERMISSION_MAPPED_TO_ROLE("Permission is mapped to role so cannot be deleted. Please remove the permission mapped to the role before deleting it.");
+    UNABLE_TO_DELETE_PERMISSION_MAPPED_TO_ROLE("Permission is mapped to role so cannot be deleted. Please remove the permission mapped to the role before deleting it."),
+    ERROR_IN_READING_CONFIGURATION("Error in reading Admin UI configuration."),
+    TOKEN_GENERATION_ERROR("Error in generating SCAN API access token."),
+    BLANK_JWT("JWT is blank or empty"),
+    ISS_CLAIM_NOT_FOUND("ISS claim not fount in jwt"),
+    ERROR_IN_DCR("Error in DCR using SSA."),
+    ;
 
     private final String description;
 

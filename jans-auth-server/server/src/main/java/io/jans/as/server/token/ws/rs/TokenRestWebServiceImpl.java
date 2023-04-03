@@ -64,7 +64,9 @@ import org.slf4j.Logger;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.function.Function;
 
 import static io.jans.as.model.config.Constants.*;
@@ -195,6 +197,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
             executionContext.setAppConfiguration(appConfiguration);
             executionContext.setAttributeService(attributeService);
             executionContext.setAuditLog(auditLog);
+            executionContext.setScopes(StringUtils.isNotBlank(scope) ? new HashSet<>(Arrays.asList(scope.split(" "))) : new HashSet<>());
 
             if (gt == GrantType.AUTHORIZATION_CODE) {
                 return processAuthorizationCode(code, scope, codeVerifier, sessionIdObj, executionContext);

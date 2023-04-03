@@ -1,13 +1,16 @@
 package io.jans.ca.plugin.adminui.service.license;
 
 import com.google.common.base.Strings;
+import io.jans.as.client.TokenRequest;
+import io.jans.as.model.common.GrantType;
 import io.jans.as.model.config.adminui.AdminConf;
-import io.jans.as.model.config.adminui.LicenseSpringCredentials;
-import io.jans.ca.plugin.adminui.model.auth.LicenseApiResponse;
-import io.jans.ca.plugin.adminui.model.auth.LicenseRequest;
-import io.jans.ca.plugin.adminui.model.auth.LicenseResponse;
+import io.jans.as.model.config.adminui.LicenseConfig;
+import io.jans.as.model.config.adminui.OIDCClientSettings;
+import io.jans.ca.plugin.adminui.model.auth.*;
 import io.jans.ca.plugin.adminui.model.config.AUIConfiguration;
 import io.jans.ca.plugin.adminui.model.config.LicenseConfiguration;
+import io.jans.ca.plugin.adminui.rest.license.LicenseResource;
+import io.jans.ca.plugin.adminui.service.BaseService;
 import io.jans.ca.plugin.adminui.service.config.AUIConfigurationService;
 import io.jans.ca.plugin.adminui.utils.AppConstants;
 import io.jans.ca.plugin.adminui.utils.ClientFactory;
@@ -23,7 +26,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
-import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 import javax.crypto.Mac;
@@ -34,10 +37,9 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 @Singleton
-public class LicenseDetailsService {
+public class LicenseDetailsService extends BaseService {
 
     @Inject
     Logger log;
@@ -48,40 +50,50 @@ public class LicenseDetailsService {
     @Inject
     private PersistenceEntryManager entryManager;
 
-    public LicenseApiResponse saveLicenseSpringCredentials(LicenseSpringCredentials licenseSpringCredentials) {
+    /**
+     * The function checks the license key and the api key and returns a response object
+     *
+     * @return A LicenseApiResponse object is being returned.
+     */
+    public LicenseApiResponse validateLicenseConfiguration() {
+
+        AdminConf appConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
+        LicenseConfig licenseConfig = appConf.getMainSettings().getLicenseConfig();
+
+        io.jans.as.client.TokenResponse tokenResponse = generateToken(licenseConfig);
+
+        if (tokenResponse == null || Strings.isNullOrEmpty(tokenResponse.getAccessToken())) {
+            //try to re-generate clients using old SSA
+            DCRResponse dcrResponse = executeDCR(licenseConfig.getSsa());
+            if (dcrResponse == null) {
+                return createLicenseResponse(false, 500, ErrorResponse.ERROR_IN_DCR.getDescription());
+            }
+            tokenResponse = generateToken(licenseConfig);
+
+            if (tokenResponse == null) {
+                return createLicenseResponse(false, 500, ErrorResponse.TOKEN_GENERATION_ERROR.getDescription());
+            }
+        }
+        return createLicenseResponse(true, 200, "No error in license configuration.");
+    }
+
+    private io.jans.as.client.TokenResponse generateToken(LicenseConfig licenseConfig) {
         try {
-            String hardwareId = UUID.randomUUID().toString();
-            LicenseConfiguration licenseConfiguration = new LicenseConfiguration(licenseSpringCredentials.getApiKey(),
-                    licenseSpringCredentials.getProductCode(),
-                    licenseSpringCredentials.getSharedKey(),
-                    licenseSpringCredentials.getManagementKey());
-            licenseConfiguration.setHardwareId(hardwareId);
+            TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
+            tokenRequest.setAuthUsername(licenseConfig.getOidcClient().getClientId());
+            tokenRequest.setAuthPassword(licenseConfig.getOidcClient().getClientSecret());
+            tokenRequest.setGrantType(GrantType.CLIENT_CREDENTIALS);
+            tokenRequest.setScope(LicenseResource.SCOPE_LICENSE_READ);
 
-            if (!licenseCredentialsValid(licenseConfiguration)) {
-                return createLicenseResponse(false, 400, "The license credentials are not valid.");
-            }
-            //check is license is already active
-            LicenseApiResponse licenseApiResponse = checkLicense();
-            if (licenseApiResponse.isApiResult()) {
-                return createLicenseResponse(false, 500, "The license has been already activated.");
-            }
-
-            licenseSpringCredentials.setHardwareId(hardwareId);
-            //set license-spring configuration
-            AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
-
-            auiConfiguration.setLicenseConfiguration(licenseConfiguration);
-            auiConfigurationService.setAuiConfiguration(auiConfiguration);
-
-            //save license spring credentials
-            AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
-            adminConf.getDynamic().setLicenseSpringCredentials(licenseSpringCredentials);
-            entryManager.merge(adminConf);
-
-            return createLicenseResponse(true, 201, "Success!!");
+            log.info("Trying to get access token from auth server.");
+            String scanLicenseApiHostname = (new StringBuffer()).append(StringUtils.removeEnd(licenseConfig.getOidcClient().getOpHost(), "/"))
+                    .append("/jans-auth/restv1/token").toString();
+            io.jans.as.client.TokenResponse tokenResponse = null;
+            tokenResponse = getToken(tokenRequest, scanLicenseApiHostname);
+            return tokenResponse;
         } catch (Exception e) {
-            log.error(ErrorResponse.SAVE_LICENSE_SPRING_CREDENTIALS_ERROR.getDescription(), e);
-            return createLicenseResponse(false, 500, ErrorResponse.SAVE_LICENSE_SPRING_CREDENTIALS_ERROR.getDescription());
+            log.error(ErrorResponse.TOKEN_GENERATION_ERROR.getDescription());
+            return null;
         }
     }
 
@@ -127,16 +139,26 @@ public class LicenseDetailsService {
         }
     }
 
+    /**
+     * The function checks if the license is already active, if not, it creates a header map, creates a body map, and sends
+     * a POST request to the license server
+     *
+     * @param licenseRequest The license key that you received from the license server.
+     * @return A LicenseApiResponse object.
+     */
     public LicenseApiResponse activateLicense(LicenseRequest licenseRequest) {
         //check is license is already active
         LicenseApiResponse licenseApiResponse = checkLicense();
         if (licenseApiResponse.isApiResult()) {
             return createLicenseResponse(false, 500, "The license has been already activated.");
         }
-        AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
-        LicenseConfiguration licenseConfiguration = auiConfiguration.getLicenseConfiguration();
-
         try {
+            AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
+            LicenseConfiguration licenseConfiguration = auiConfiguration.getLicenseConfiguration();
+            if (licenseConfiguration == null || Strings.isNullOrEmpty(licenseConfiguration.getApiKey()) || Strings.isNullOrEmpty(licenseConfiguration.getSharedKey())) {
+                log.error("Unable to get license credentials from SCAN apis. Please contact your administrator.");
+                return createLicenseResponse(false, 500, "Unable to get license credentials from SCAN apis. Please contact your administrator.");
+            }
             log.debug("Trying to activate License.");
             String activateLicenseUrl = (new StringBuffer()).append(AppConstants.LICENSE_SPRING_API_URL)
                     .append("activate_license").toString();
@@ -158,9 +180,7 @@ public class LicenseDetailsService {
                 if (entity.getString("license_key").equals(licenseRequest.getLicenseKey())) {
                     //save license spring credentials
                     AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
-                    LicenseSpringCredentials licenseSpringCredentials = adminConf.getDynamic().getLicenseSpringCredentials();
-                    licenseSpringCredentials.setLicenseKey(licenseRequest.getLicenseKey());
-                    adminConf.getDynamic().setLicenseSpringCredentials(licenseSpringCredentials);
+                    adminConf.getMainSettings().getLicenseConfig().setLicenseKey(licenseRequest.getLicenseKey());
                     entryManager.merge(adminConf);
                     //save in license configuration
                     licenseConfiguration.setLicenseKey(licenseRequest.getLicenseKey());
@@ -178,6 +198,11 @@ public class LicenseDetailsService {
         }
     }
 
+    /**
+     * This function is used to get the license details of the admin-ui
+     *
+     * @return A LicenseResponse object
+     */
     public LicenseResponse getLicenseDetails() {
         LicenseResponse licenseResponse = new LicenseResponse();
         try {
@@ -254,27 +279,41 @@ public class LicenseDetailsService {
 
     }
 
-    private boolean licenseCredentialsValid(LicenseConfiguration licenseConfiguration) {
-        MultivaluedMap<String, Object> headers = createHeaderMap(licenseConfiguration);
-
-        Invocation.Builder request = ClientFactory.instance().getClientBuilder(AppConstants.LICENSE_SPRING_API_URL + "product_details?product=" + licenseConfiguration.getProductCode());
-        request.headers(headers);
-
-        Response response = request.get();
-        log.info("license Credentials request status code: {}", response.getStatus());
-        if (response.getStatus() == 200) {
-            JsonObject entity = response.readEntity(JsonObject.class);
-            log.info("Product Information: {}", entity.toString());
-            return true;
-        }
-        return false;
-    }
-
     private LicenseApiResponse createLicenseResponse(boolean result, int responseCode, String responseMessage) {
         LicenseApiResponse licenseResponse = new LicenseApiResponse();
         licenseResponse.setResponseCode(responseCode);
         licenseResponse.setResponseMessage(responseMessage);
         licenseResponse.setApiResult(result);
         return licenseResponse;
+    }
+
+    /**
+     * The function takes an SSA string as input, calls the DCR API to get the scan hostname and OIDC client settings, and
+     * saves the SSA string and the scan hostname and OIDC client settings in the Admin UI configuration
+     *
+     * @param ssaRequest The SSA request object.
+     * @return A LicenseApiResponse object.
+     */
+    public LicenseApiResponse postSSA(SSARequest ssaRequest) {
+        try {
+            DCRResponse dcrResponse = executeDCR(ssaRequest.getSsa());
+
+            if (dcrResponse == null) {
+                return createLicenseResponse(false, 500, ErrorResponse.ERROR_IN_DCR.getDescription());
+            }
+            AdminConf appConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
+            LicenseConfig licenseConfig = appConf.getMainSettings().getLicenseConfig();
+            licenseConfig.setSsa(ssaRequest.getSsa());
+            licenseConfig.setScanLicenseApiHostname(dcrResponse.getScanHostname());
+            OIDCClientSettings oidcClient = new OIDCClientSettings(dcrResponse.getOpHost(), dcrResponse.getClientId(), dcrResponse.getClientSecret());
+            licenseConfig.setOidcClient(oidcClient);
+            appConf.getMainSettings().setLicenseConfig(licenseConfig);
+            entryManager.merge(appConf);
+            return createLicenseResponse(true, 201, "SSA saved successfully.");
+
+        } catch (Exception e) {
+            log.error(ErrorResponse.CHECK_LICENSE_ERROR.getDescription(), e);
+            return createLicenseResponse(false, 500, ErrorResponse.ERROR_IN_DCR.getDescription());
+        }
     }
 }

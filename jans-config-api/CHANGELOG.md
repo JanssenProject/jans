@@ -1,5 +1,37 @@
 # Changelog
 
+## [1.0.10](https://github.com/JanssenProject/jans/compare/jans-config-api-v1.0.9...jans-config-api-v1.0.10) (2023-03-16)
+
+
+### Features
+
+* **config-api:** agama deployment path param change and client authorization ([#4147](https://github.com/JanssenProject/jans/issues/4147)) ([22323ce](https://github.com/JanssenProject/jans/commit/22323cebe180c6e224baf28d66cb435982880df7))
+
+
+### Bug Fixes
+
+* **config-api:** smtp password decryption and encryption logic ([#4161](https://github.com/JanssenProject/jans/issues/4161)) ([4aefb0d](https://github.com/JanssenProject/jans/commit/4aefb0d6a4db39d89b87d703a27e0186fa6780f9))
+* **config-api:** user custom attribute changes and agama param changes ([#4123](https://github.com/JanssenProject/jans/issues/4123)) ([291004e](https://github.com/JanssenProject/jans/commit/291004e59248e3205e0113a9f5ce427f259da076))
+* prepare release for 1.0.10 ([e996926](https://github.com/JanssenProject/jans/commit/e99692692ef04d881468d120f7c7d462568dce36))
+* prevent getFlowByName method crash by refactoring [#4128](https://github.com/JanssenProject/jans/issues/4128) ([#4129](https://github.com/JanssenProject/jans/issues/4129)) ([092989b](https://github.com/JanssenProject/jans/commit/092989b35308b6a2d6c3b6da4f36bab2b5518f64))
+
+## [1.0.9](https://github.com/JanssenProject/jans/compare/jans-config-api-v1.0.7...jans-config-api-v1.0.9) (2023-03-09)
+
+
+### Features
+
+* **agama:** update gama deployment endpoint to support configuration properties ([#4049](https://github.com/JanssenProject/jans/issues/4049)) ([392525c](https://github.com/JanssenProject/jans/commit/392525c19152fcd916e0c61e70c436a484bf391c))
+* getting license credentials from SCAN ([#4052](https://github.com/JanssenProject/jans/issues/4052)) ([5c563b7](https://github.com/JanssenProject/jans/commit/5c563b7530847b8ec6b3201fb53676003ef107b0))
+
+
+### Bug Fixes
+
+* **docs:** autogenerate docs ([#4105](https://github.com/JanssenProject/jans/issues/4105)) ([da87cef](https://github.com/JanssenProject/jans/commit/da87cef4efd88796260d123054575c3aceb1ed38))
+* **jans-config-api:** getting license credentials from SCAN ([#4055](https://github.com/JanssenProject/jans/issues/4055)) ([407d618](https://github.com/JanssenProject/jans/commit/407d6187a09689a0d9e8b1ffc9ce9dce3fc6e253))
+* prepare 1.0.9 release ([e6ea522](https://github.com/JanssenProject/jans/commit/e6ea52220824bd6b5d2dca0539d9d515dbeda362))
+* prepare 1.0.9 release ([55f7e0c](https://github.com/JanssenProject/jans/commit/55f7e0c308b869c2c4b5668aca751d022138a678))
+* update next SNAPSHOT and dev ([0df0e7a](https://github.com/JanssenProject/jans/commit/0df0e7ae06af64ac477955119c2522f03e0603c3))
+
 ## [1.0.7](https://github.com/JanssenProject/jans/compare/jans-config-api-v1.0.6...jans-config-api-v1.0.7) (2023-02-22)
 
 

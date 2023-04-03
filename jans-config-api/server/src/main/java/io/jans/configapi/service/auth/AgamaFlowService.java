@@ -104,13 +104,7 @@ public class AgamaFlowService implements Serializable {
     }
 
     public Flow getFlowByName(String flowName) {
-        List<Flow> flows = persistenceEntryManager.findEntries(getAgamaFlowDn(flowName), Flow.class,
-                Filter.createEqualityFilter(Flow.ATTR_NAMES.QNAME, flowName), 1);
-        logger.debug("Agama Flow with flowName:{} flows:{}", flowName, flows);
-        if (!flows.isEmpty()) {
-            return flows.get(0);
-        }
-        return null;
+        return getFlowByDn(getAgamaFlowDn(flowName));
     }
 
     public Flow getFlowByDn(String dn) {

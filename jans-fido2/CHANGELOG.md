@@ -1,5 +1,29 @@
 # Changelog
 
+## [1.0.10](https://github.com/JanssenProject/jans/compare/jans-fido2-v1.0.9...jans-fido2-v1.0.10) (2023-03-16)
+
+
+### Bug Fixes
+
+* **jans-fido2:** handling exception fido2 get endpoints by invalid params ([#4139](https://github.com/JanssenProject/jans/issues/4139)) ([a50d2af](https://github.com/JanssenProject/jans/commit/a50d2af5eea4f88632870546eb9e4505cd5c7e2b))
+* prepare release for 1.0.10 ([e996926](https://github.com/JanssenProject/jans/commit/e99692692ef04d881468d120f7c7d462568dce36))
+
+## [1.0.9](https://github.com/JanssenProject/jans/compare/jans-fido2-v1.0.8...jans-fido2-v1.0.9) (2023-03-09)
+
+
+### Bug Fixes
+
+* prepare 1.0.9 release ([e6ea522](https://github.com/JanssenProject/jans/commit/e6ea52220824bd6b5d2dca0539d9d515dbeda362))
+* prepare 1.0.9 release ([55f7e0c](https://github.com/JanssenProject/jans/commit/55f7e0c308b869c2c4b5668aca751d022138a678))
+* update next SNAPSHOT and dev ([0df0e7a](https://github.com/JanssenProject/jans/commit/0df0e7ae06af64ac477955119c2522f03e0603c3))
+
+## [1.0.8](https://github.com/JanssenProject/jans/compare/jans-fido2-v1.0.7...jans-fido2-v1.0.8) (2023-03-01)
+
+
+### Bug Fixes
+
+* fix user publicKey search ([#3982](https://github.com/JanssenProject/jans/issues/3982)) ([d0584dd](https://github.com/JanssenProject/jans/commit/d0584dd3b67039c3bff76649547401e50012cce5))
+
 ## 1.0.7 (2023-02-22)
 
 

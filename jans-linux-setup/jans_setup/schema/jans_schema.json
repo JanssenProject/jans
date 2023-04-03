@@ -13,17 +13,6 @@
       "x_origin": "Jans created attribute"
     },
     {
-      "desc": "ISO 3166-1 Alpha-2 Country Code",
-      "equality": "caseIgnoreMatch",
-      "names": [
-        "county"
-      ],
-      "oid": "jansAttr",
-      "substr": "caseIgnoreSubstringsMatch",
-      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-      "x_origin": "Jans created attribute"
-    },
-    {
       "desc": "Creation Date used for password reset requests",
       "equality": "generalizedTimeMatch",
       "names": [
@@ -3404,7 +3393,6 @@
       "kind": "STRUCTURAL",
       "may": [
         "c",
-        "county",
         "description",
         "displayName",
         "jansCustomMessage",

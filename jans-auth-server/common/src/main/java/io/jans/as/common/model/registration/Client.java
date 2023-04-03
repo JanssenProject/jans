@@ -21,10 +21,7 @@ import io.jans.orm.model.base.LocalizedString;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 /**
  * @author Javier Rojas Blum
@@ -326,6 +323,22 @@ public class Client extends DeletableEntity implements Serializable {
 
     public AuthenticationMethod getAuthenticationMethod() {
         return AuthenticationMethod.fromString(tokenEndpointAuthMethod);
+    }
+
+    public boolean hasAuthenticationMethod(AuthenticationMethod authenticationMethod) {
+        return getAllAuthenticationMethods().contains(authenticationMethod);
+    }
+
+    public Set<AuthenticationMethod> getAllAuthenticationMethods() {
+        Set<AuthenticationMethod> set = new HashSet<>();
+
+        final AuthenticationMethod authenticationMethod = getAuthenticationMethod();
+        if (authenticationMethod != null) {
+            set.add(authenticationMethod);
+        }
+
+        set.addAll(AuthenticationMethod.fromList(getAttributes().getAdditionalTokenEndpointAuthMethods()));
+        return set;
     }
 
     /**

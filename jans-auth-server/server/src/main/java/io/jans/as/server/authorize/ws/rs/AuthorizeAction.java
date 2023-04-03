@@ -46,8 +46,10 @@ import io.jans.model.AuthenticationScriptUsageType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.service.net.NetworkService;
+import io.jans.util.OxConstants;
 import io.jans.util.StringHelper;
 import io.jans.util.ilocale.LocaleUtil;
+import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.util.Strings;
@@ -282,10 +284,12 @@ public class AuthorizeAction {
             Map<String, String> requestParameterMap = requestParameterService.getAllowedParameters(parameterMap);
 
             String redirectTo = "/login.xhtml";
+            requestParameterMap.put(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, OxConstants.SCRIPT_TYPE_INTERNAL_RESERVED_NAME);
 
+            List<String> acrValuesList = sessionIdService.acrValuesList(this.acrValues);
             boolean useExternalAuthenticator = externalAuthenticationService.isEnabled(AuthenticationScriptUsageType.INTERACTIVE);
-            if (useExternalAuthenticator) {
-                List<String> acrValuesList = sessionIdService.acrValuesList(this.acrValues);
+            boolean skipScript = shouldSkipScript(acrValuesList);
+            if (useExternalAuthenticator && !skipScript) {
                 if (acrValuesList.isEmpty()) {
                     acrValuesList = Arrays.asList(defaultAuthenticationMode.getName());
                 }
@@ -448,6 +452,14 @@ public class AuthorizeAction {
                 return;
             }
         }
+    }
+
+    public boolean shouldSkipScript(List<String> acrValues) {
+        if (acrValues.size() == 1 && acrValues.contains(OxConstants.SCRIPT_TYPE_INTERNAL_RESERVED_NAME)) {
+            return true;
+        }
+        return acrValues.isEmpty() && BooleanUtils.isFalse(appConfiguration.getUseHighestLevelScriptIfAcrScriptNotFound())
+                && OxConstants.SCRIPT_TYPE_INTERNAL_RESERVED_NAME.equalsIgnoreCase(defaultAuthenticationMode.getName());
     }
 
     private SessionId handleAcrChange(SessionId session, List<io.jans.as.model.common.Prompt> prompts) {

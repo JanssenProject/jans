@@ -38,6 +38,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static io.jans.as.model.util.StringUtils.toList;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
@@ -263,9 +264,16 @@ public class RegisterService {
         }
         if (requestObject.getTokenEndpointAuthMethod() != null) {
             client.setTokenEndpointAuthMethod(requestObject.getTokenEndpointAuthMethod().toString());
+        } else if (requestObject.getAdditionalTokenEndpointAuthMethods() != null && !requestObject.getAdditionalTokenEndpointAuthMethods().isEmpty()) {
+            client.setTokenEndpointAuthMethod(requestObject.getAdditionalTokenEndpointAuthMethods().iterator().next().toString());
         } else { // If omitted, the default is client_secret_basic
             client.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_BASIC.toString());
         }
+
+        if (requestObject.getAdditionalTokenEndpointAuthMethods() != null) {
+            client.getAttributes().setAdditionalTokenEndpointAuthMethods(requestObject.getAdditionalTokenEndpointAuthMethods().stream().map(AuthenticationMethod::toString).collect(Collectors.toList()));
+        }
+
         if (requestObject.getTokenEndpointAuthSigningAlg() != null) {
             client.setTokenEndpointAuthSigningAlg(requestObject.getTokenEndpointAuthSigningAlg().toString());
         }

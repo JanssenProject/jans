@@ -2,12 +2,16 @@ from unittest import TestCase
 from unittest.mock import MagicMock
 import sys
 import inspect
+
+import pytest
+
 import clientapp.client_handler as client_handler
 from typing import Optional
 import helper
+from oic.oauth2 import ASConfigurationResponse
+
 
 ClientHandler = client_handler.ClientHandler
-
 
 # helper
 def get_class_instance(op_url='https://t1.techno24x7.com',
@@ -18,29 +22,20 @@ def get_class_instance(op_url='https://t1.techno24x7.com',
 
 class TestDynamicClientRegistration(TestCase):
 
-    def test_if_registration_is_imported_in_sys(self):
-        self.assertIn('flask_oidc.registration', sys.modules,
-                      'flask_oidc.registration not found in sys')
+    def setUp(self) -> None:
+        self.register_client_stash = ClientHandler.register_client
+        self.discover_stash = ClientHandler.discover
 
-    def test_if_registration_exists(self):
+    @staticmethod
+    def mock_methods():
+        ClientHandler.register_client = MagicMock(name='register_client')
+        ClientHandler.register_client.return_value = helper.REGISTER_CLIENT_RESPONSE
+        ClientHandler.discover = MagicMock(name='discover')
+        ClientHandler.discover.return_value = helper.OP_DATA_DICT_RESPONSE
 
-        self.assertTrue(hasattr(client_handler, 'registration'))
-
-    def test_if_registration_is_flask_oidc_package(self):
-        self.assertTrue(
-            client_handler.registration.__package__ == 'flask_oidc',
-            'registration is not from flask_oidc package')
-
-    def test_if_discovery_is_imported(self):
-
-        self.assertIn('flask_oidc.discovery', sys.modules)
-
-    def test_if_discovery_is_flask_oidc_package(self):
-        self.assertTrue(client_handler.discovery.__package__ == 'flask_oidc',
-                        'discovery is not from flask_oidc package')
-
-    def test_if_discovery_exists(self):
-        self.assertTrue(hasattr(client_handler, 'discovery'))
+    def restore_stashed_mocks(self):
+        ClientHandler.discover = self.discover_stash
+        ClientHandler.register_client = self.register_client_stash
 
     def test_if_json_exists(self):
         self.assertTrue(hasattr(client_handler, 'json'),
@@ -70,10 +65,9 @@ class TestDynamicClientRegistration(TestCase):
             'register_client does not receive expected args')
 
     def test_if_register_client_params_are_expected_type(self):
-
         insp = inspect.getfullargspec(ClientHandler.register_client)
         self.assertTrue(
-            insp.annotations['op_data'] == Optional[dict]
+            insp.annotations['op_data'] == ASConfigurationResponse
             and insp.annotations['client_url'] == Optional[str],
             'register_client is not receiving the right params')
 
@@ -93,7 +87,6 @@ class TestDynamicClientRegistration(TestCase):
             'ClientHandler does not have initial attrs')
 
     def test_if_discover_exists(self):
-
         self.assertTrue(hasattr(ClientHandler, 'discover'),
                         'discover does not exists in ClientHandler')
 
@@ -102,7 +95,7 @@ class TestDynamicClientRegistration(TestCase):
                         'discover is not callable')
 
     def test_if_discover_receives_params(self):
-        expected_args = ['self', 'op_url', 'disc']
+        expected_args = ['self', 'op_url']
         self.assertTrue(
             inspect.getfullargspec(
                 ClientHandler.discover).args == expected_args,
@@ -111,18 +104,8 @@ class TestDynamicClientRegistration(TestCase):
     def test_if_discover_params_are_expected_type(self):
         insp = inspect.getfullargspec(ClientHandler.discover)
         self.assertTrue(
-            insp.annotations['op_url'] == Optional[str]
-            and insp.annotations['disc'] == client_handler.discovery,
+            insp.annotations['op_url'] == Optional[str],
             'discover is not receiving the right params')
-
-    def test_discover_should_not_return_none_when_non_existant_config(self):
-        self.assertIsNotNone(
-            ClientHandler.discover(ClientHandler, 'https://google.com'))
-
-    def test_discover_should_return_empty_dict_when_error(self):
-        self.assertEqual(
-            ClientHandler.discover(ClientHandler, 'ggg:asddasd.caccasddas'),
-            {}, 'not returning empty dict on error')
 
     def test_discover_should_return_valid_dict(self):
         """[Checks if returns main keys]
@@ -135,14 +118,14 @@ class TestDynamicClientRegistration(TestCase):
             'revocation_endpoint', 'registration_endpoint'
         }
 
+        self.mock_methods()
         op_data = ClientHandler.discover(ClientHandler,
                                          'https://t1.techno24x7.com')
-
         self.assertTrue(main_keys <= set(op_data),
                         'discovery return data does not have main keys')
+        self.restore_stashed_mocks()
 
     def test_if_get_client_dict_exists(self):
-
         self.assertTrue(hasattr(ClientHandler, 'get_client_dict'),
                         'get_client_dict does not exists in ClientHandler')
 
@@ -167,26 +150,38 @@ class TestDynamicClientRegistration(TestCase):
                               dict, 'get_client_dict is not returning a dict')
 
     def test_class_init_should_set_op_url(self):
+        self.mock_methods()
+
         op_url = 'https://t1.techno24x7.com'
 
         client_handler_obj = get_class_instance(op_url)
+
+        self.restore_stashed_mocks()
 
         self.assertEqual(client_handler_obj.__dict__['_ClientHandler__op_url'],
                          op_url)
 
     def test_class_init_should_set_client_url(self):
+        self.mock_methods()
+
         op_url = 'https://t1.techno24x7.com'
         client_url = 'https://mock.test.com'
         client_handler_obj = ClientHandler(op_url, client_url)
-        # import ipdb; ipdb.set_trace()
+
+        self.restore_stashed_mocks()
+
         self.assertEqual(
             client_handler_obj.__dict__['_ClientHandler__client_url'],
             client_url)
 
     def test_class_init_should_set_metadata_url(self):
+        self.mock_methods()
 
         op_url = 'https://t1.techno24x7.com'
+
         client_handler_obj = get_class_instance(op_url)
+
+        self.restore_stashed_mocks()
 
         expected_metadata_url = op_url + '/.well-known/openid-configuration'
 
@@ -205,8 +200,12 @@ class TestDynamicClientRegistration(TestCase):
             'client_secret',
         ]
 
+        self.mock_methods()
+
         client_handler_obj = get_class_instance()
         client_dict = client_handler_obj.get_client_dict()
+
+        self.restore_stashed_mocks()
 
         self.assertTrue(
             all(key in client_dict.keys() for key in expected_keys),
@@ -214,37 +213,55 @@ class TestDynamicClientRegistration(TestCase):
             % (str(expected_keys), str(client_dict.keys())))
 
     def test_get_client_dict_values_cannot_be_none(self):
+        self.mock_methods()
 
         op_url = 'https://t1.techno24x7.com'
-
         client_handler_obj = get_class_instance(op_url)
-
         client_dict = client_handler_obj.get_client_dict()
+
+        self.restore_stashed_mocks()
 
         for key in client_dict.keys():
             self.assertIsNotNone(client_dict[key],
                                  'get_client_dict[%s] cannot be None!' % key)
 
     def test_get_client_dict_should_return_url_metadata_value(self):
+        self.mock_methods()
+
         client_handler_obj = get_class_instance()
+
+        self.restore_stashed_mocks()
+
         self.assertEqual(
             client_handler_obj.get_client_dict()['op_metadata_url'],
             client_handler_obj._ClientHandler__metadata_url)
 
     def test_get_client_dict_should_return_client_id_value(self):
+        self.mock_methods()
+
         client_handler_obj = get_class_instance()
+
+        self.restore_stashed_mocks()
+
         self.assertEqual(
             client_handler_obj.get_client_dict()['client_id'],
             client_handler_obj._ClientHandler__client_id
         )
 
     def test_init_should_call_discover_once(self):
-        ClientHandler.discover = MagicMock(name='discover')
-        ClientHandler.discover.return_value = helper.OP_DATA_DICT_RESPONSE
-        client_handler_obj = get_class_instance()
+        self.mock_methods()
+
+        get_class_instance()
+
         ClientHandler.discover.assert_called_once()
 
+        self.restore_stashed_mocks()
+
     def test_init_should_call_register_client_once(self):
-        ClientHandler.register_client = MagicMock(name='register_client')
-        client_handler_obj = get_class_instance()
+        self.mock_methods()
+
+        get_class_instance()
         ClientHandler.register_client.assert_called_once()
+
+        self.restore_stashed_mocks()
+

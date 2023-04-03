@@ -1,87 +1,74 @@
 # Jans Tent
 
-This client aims to be a reliable client build with BDD / TDD metologies to be used in auth testing.
-
-Flask based auth/identity app based on test-first, made to encourage and learn BDD and TDD.
-
-## Contributing
-
-### Code of Conduct
-
-[Janssen code of conduct](https://docs.jans.io/head/CODE_OF_CONDUCT/) ensures that Janssen community is a welcoming place for everyone.
-
-### Contribution Guidelines
-
-[Contribution guide](https://docs.jans.io/head/CONTRIBUTING/) will give you all necessary information and `howto` to get started. Janssen community welcomes all types of contributions. Be it an interesting comment on an open issue or implementing a feature.  Welcome aboard! ✈️
-
-## Authorization code flow / Protected Ressources
-
-![auth code flow](docs/images/authorize_code_flow.png)
-
-``` websequencediagrams.com
-actor User
-User->Browser: Clicks login
-Browser->App:
-App->OP: authorization code request
-OP->Browser: Redirect to login prompt
-User->Browser: Authenticate and Conset
-Browser->OP:Post Ahthenticate and consent
-User->OP: Authenticate and consent
-OP->App: Returns authorization code
-App->OP: Request access/id token
-OP->OP: Validates authorization code
-OP->App: Returns ID Token / Access Token
-App->App: Create a new session\n with same state
-App->Browser: Set session cookies, \nRedirects to protected resource
-Browser->App: Request protected ressource
-App->App: Restore previous token from DB
-App->App: Validate session / token
-App->App: Return protected-content\nOr unauthorized error
-```
+A reliable OpenID client to be used in auth testing.
 
 ## Installation
 
-* Install dependencies
+**Note**: *If you are using Mac, **or** want to use different python versions, use **Pyenv**.*
 
+1. Navigate tho the project root folder `jans/demos/jans-tent`
+2. Create virtual environment
+  ```bash
+  python3 -m venv venv
+  ```
+3. Activate the virtual virtual environment
+  ```bash
+   source venv/bin/activate 
+  ```
+4. Install dependencies
+  ```bash
+  pip install -r requirements.txt
+  ```
+
+## Setup
+
+### 1. Edit configuration file `clientapp/config.py` according to your needs:
+  * Set `ISSUER`, replace `op_hostname` (required)
+  * Set any other desired configuration
+
+### 2. Generate test RP server self signed certs
+
+Generate `key.pem` and `cert.pem` at `jans-tent` project root folder (`jans/demos/jans-tent`). i.e: 
 ```bash
-pip3 install -r requirements.txt
+openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -sha256 -days 365 -nodes
 ```
 
-* Create client on Auth server, i.e.:
-  * response_type `code`
-  * redirect_uri `https://localhost:9090/oidc_callback`
-  * Grants `authorization_code`
-  * client authn at token endpoint `client_secret_post`
-  * scopes `openid` `username` `profile` `email`
-  Please notice: You may also use the `register` endpoint, still to be documented.
+### 3. Import your Auth Server certificate and add it to `CERT_PATH`, `SSL_CERT_FILE`, `REQUESTS_CA_BUNDLE`.
 
-* Copy `auth-tdd-client/config_dummy.py` to `config.py` and use data according to your needs, i.e.:
-  * Input client_id and secret from above step
-  * Set configuration endpoint URL
-  * Set `ISSUER`
-  * Set `ACR_VALUES='basic'`
+(remember to be inside your virtual environment)
 
-* Generate test RP server self signed certs
-
-Generate `key.pem` and `cert.pem` at `jans-tent` project root, i.e:
-`openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -sha256 -days 365 -nodes`
-
-* Import your Auth Server certificate
-
+Replace `OP_HOSTNAME` with the op hostname being used.
 ```bash
+echo | openssl s_client -servername OP_HOSTNAME \
+ -connect OP_HOSTNAME:443 | sed -ne \
+ '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' \
+ > op_web_cert.cer
 export CERT_PATH=$(python3 -m certifi)
 export SSL_CERT_FILE=${CERT_PATH}
 export REQUESTS_CA_BUNDLE=${CERT_PATH}
-mv issuer.cer $(python3 -m certifi)
+mv op_web_cert.cer $(python3 -m certifi)
 ```
 
-* Run server
+### 4. Register your RP at OP
 
+(remember to be inside your virtual environment)
 ```bash
-python3 main.py
+python clientapp/register_new_client.py
 ```
 
-* navigate to `https://localhost:9090/protected-content`
+## Using the server
+
+### Start the server
+
+(remember to be inside your virtual environment)
+```bash
+python main.py
+```
+
+### Start the flow
+
+Navigate to `https://localhost:9090` and click the link to start.
+
 
 ## Extra Features
 
@@ -92,7 +79,7 @@ Sending a `POST` request to `/register` endpoint containing a `JSON` with the OP
 ```json
 {
     "op_url": "https://oidc-provider.jans.io",
-    "client_url": "https://my-client.mydomain.com"
+    "client_url": "https://localhost:9090"
 }
 ```
 
@@ -106,6 +93,6 @@ Sending a `POST` request to `/configuration` endpoint, containing client id, cli
 {
     "client_id": "e4f2c3a9-0797-4c6c-9268-35c5546fb3e9",
     "client_secret": "5c9e4775-0f1d-4a56-87c9-a629e1f88b9b",
-    "op_metadata_url": "https://t1.techno24x7.com/.well-known/openid-configuration"
+    "op_metadata_url": "https://oidc-provider.jans.io/.well-known/openid-configuration"
 }
 ```

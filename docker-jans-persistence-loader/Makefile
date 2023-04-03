@@ -1,5 +1,5 @@
-CN_VERSION?=1.0.8-SNAPSHOT
-IMAGE_NAME=janssenproject/persistence-loader
+CN_VERSION?=1.0.11-SNAPSHOT
+IMAGE_NAME=ghcr.io/janssenproject/jans/persistence-loader
 DEV_VERSION?=$(shell echo ${CN_VERSION} | cut -d '-' -f 1)_dev
 
 .PHONY: test clean all build-dev trivy-scan grype-scan

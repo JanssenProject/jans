@@ -119,6 +119,7 @@ class JansCliApp(Application):
         self.progressing_text = ""
         self.mouse_float=True
         self.browse_path = '/'
+        self.app_configuration = {}
 
         self.not_implemented = Frame(
                             body=HSplit([Label(text=_("Not imlemented yet")), Button(text=_("MyButton"))], width=D()),
@@ -304,8 +305,8 @@ class JansCliApp(Application):
                 response = self.cli_object.get_device_verification_code()
                 result = response.json()
 
-                msg = _("Please visit verification url %s and enter user code %s within %d seconds.")
-                body = HSplit([Label(msg % (result['verification_uri'], result['user_code'], result['expires_in']),style='class:jans-main-verificationuri.text')],style='class:jans-main-verificationuri')
+                msg = _("Please visit verification url {} and authorize this device within {} seconds.")
+                body = HSplit([Label(msg.format(result['verification_uri_complete'], result['expires_in']), style='class:jans-main-verificationuri.text')], style='class:jans-main-verificationuri')
                 dialog = JansGDialog(self, title=_("Waiting Response"), body=body)
 
                 async def coroutine():
@@ -353,6 +354,8 @@ class JansCliApp(Application):
                 for pp in self._plugins:
                     if getattr(pp, 'server_side_plugin', False) and pp.pid not in self.available_plugins:
                         self.disable_plugin(pp.pid)
+                    if hasattr(pp, 'on_cli_object_ready'):
+                        pp.on_cli_object_ready()
 
                 self.init_plugins()
 

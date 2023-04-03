@@ -110,6 +110,10 @@ The quick start guide is a must, followed by [A closer look to Hello world flow]
 
 ## Miscellaneous
 
+### How to launch a flow?
+
+A flow is launched by issuing an authentication request in a browser as explained [here](./quick-start.md#craft-an-authentication-request). 
+
 ### Does flow execution timeout?
 
 Yes. The maximum amount of time an end-user can take to fully complete a flow is driven by the configuration of the authentication server and can be constrained even more in the flow itself. Read about timeouts [here](./flows-lifecycle.md#timeouts).
@@ -120,7 +124,7 @@ Disable the flow. It will still be callable from other flows.
 
 ### Updates in a flow's code are not reflected in its execution
 
-Ensure the engine is [enabled](./quick-start.md#enable-the-engine). Use the REST API (PUT method) to [update](./lifecycle.md#flow-updates) the flow's code. Wait one minute and then retrieve (GET) this flow's data. The property `codeError` in the response should have the cause.   
+Ensure the engine is [enabled](./engine-config.md#engine-availability). Use the REST API (PUT method) to [update](./lifecycle.md#flow-updates) the flow's code. Wait one minute and then retrieve (GET) this flow's data. The property `codeError` in the response should have the cause.   
 
 ### Why are the contents of a list or map logged partially?
 

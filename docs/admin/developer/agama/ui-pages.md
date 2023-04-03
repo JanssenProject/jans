@@ -18,7 +18,7 @@ Developers are encouraged to take a peep at the [FreeMarker manual](https://free
 The following resources are useful as introduction as well:
 
 - The Hello World flow presented in the [quick start](./quick-start.md#flow-code) guide. Pay attention to the `RRF` instruction there
-- Agama [sample flows](./sample-flows.md)
+- Agama [sample flows](samples.md)
 
 As you will see, the task boils down to produce the desired markup plus adding some placeholders for information that is dynamic.
 
@@ -42,7 +42,7 @@ Agama already makes use of macros for this purpose. Take a look at the `ftlh` fi
 
 ### Example
 
-Here, two pages will be built to demostrate the concept of composition in FreeMarker templates: a homepage and an "about us" page. These will be made up of a header, a sidebar, and their respective main content. Assume the sidebar should be shown only for the home page. 
+Here, two pages will be built to demonstrate the concept of composition in FreeMarker templates: a homepage and an "about us" page. These will be made up of a header, a sidebar, and their respective main content. Assume the sidebar should be shown only for the home page. 
 
 !!! Note
     FreeMarker comments are of the form `<#-- This won't be printed in the output -->`

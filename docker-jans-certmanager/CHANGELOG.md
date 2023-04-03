@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.0.10-1](https://github.com/JanssenProject/jans/compare/docker-jans-certmanager-v1.0.9-1...docker-jans-certmanager-v1.0.10-1) (2023-03-16)
+
+
+### Bug Fixes
+
+* prepare release for 1.0.10 ([e996926](https://github.com/JanssenProject/jans/commit/e99692692ef04d881468d120f7c7d462568dce36))
+
+## [1.0.9-1](https://github.com/JanssenProject/jans/compare/docker-jans-certmanager-v1.0.8-1...docker-jans-certmanager-v1.0.9-1) (2023-03-09)
+
+
+### Bug Fixes
+
+* prepare 1.0.9 release ([e6ea522](https://github.com/JanssenProject/jans/commit/e6ea52220824bd6b5d2dca0539d9d515dbeda362))
+* prepare 1.0.9 release ([55f7e0c](https://github.com/JanssenProject/jans/commit/55f7e0c308b869c2c4b5668aca751d022138a678))
+* update next SNAPSHOT and dev ([0df0e7a](https://github.com/JanssenProject/jans/commit/0df0e7ae06af64ac477955119c2522f03e0603c3))
+
+## [1.0.8-1](https://github.com/JanssenProject/jans/compare/docker-jans-certmanager-v1.0.7-1...docker-jans-certmanager-v1.0.8-1) (2023-03-01)
+
+
+### Bug Fixes
+
+* **docker-jans:** resolve required keys_ops_type for generating/rotating keys ([#3990](https://github.com/JanssenProject/jans/issues/3990)) ([0ed67fb](https://github.com/JanssenProject/jans/commit/0ed67fbdd5a9fb6a40072d0a8c027b626e3830b8))
+
 ## 1.0.7-1 (2023-02-22)
 
 

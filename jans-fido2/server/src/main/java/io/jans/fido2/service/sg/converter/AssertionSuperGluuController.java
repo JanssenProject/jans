@@ -10,7 +10,15 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
+import io.jans.as.model.config.Constants;
+import io.jans.as.model.error.DefaultErrorResponse;
+import io.jans.fido2.model.u2f.error.Fido2ErrorResponseFactory;
+import io.jans.fido2.model.u2f.error.Fido2ErrorResponseType;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.logging.log4j.ThreadContext;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -31,6 +39,7 @@ import io.jans.fido2.service.persist.UserSessionIdService;
 import io.jans.fido2.service.sg.RawAuthenticationService;
 import io.jans.fido2.service.verifier.CommonVerifiers;
 import io.jans.fido2.sg.SuperGluuMode;
+import io.jans.service.net.NetworkService;
 import io.jans.util.StringHelper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -120,17 +129,22 @@ public class AssertionSuperGluuController {
 
         boolean valid = userSessionIdService.isValidSessionId(sessionId, userName);
         if (!valid) {
-            throw new Fido2RuntimeException(String.format("session_id '%s' is invalid", sessionId));
+            String reasonError = String.format("session_id '%s' is invalid", sessionId);
+            String descriptionError = "The session_id is null, blank or invalid, this param is required.";
+            throw Fido2ErrorResponseFactory.createBadRequestException(Fido2ErrorResponseType.INVALID_ID_SESSION, reasonError, descriptionError, ThreadContext.get(Constants.CORRELATION_ID_HEADER));
         }
 
         if (StringHelper.isEmpty(userName) && StringHelper.isEmpty(keyHandle)) {
-            throw new Fido2RuntimeException("The request should contains either username or keyhandle");
+            String reasonError = "invalid : username or keyhandle";
+            String descriptionError = "The request should contains either username or keyhandle";
+            throw Fido2ErrorResponseFactory.createBadRequestException(Fido2ErrorResponseType.INVALID_USERNAME_OR_KEYHANDLE, reasonError, descriptionError, ThreadContext.get(Constants.CORRELATION_ID_HEADER));
         }
 
         ObjectNode params = dataMapperService.createObjectNode();
         // Add all required parameters from request to allow process U2F request 
         params.put(CommonVerifiers.SUPER_GLUU_REQUEST, true);
         params.put(CommonVerifiers.SUPER_GLUU_APP_ID, appId);
+        params.put("documentDomain", appId);
         params.put(CommonVerifiers.SUPER_GLUU_KEY_HANDLE, keyHandle);
         params.put(CommonVerifiers.SUPER_GLUU_MODE, oneStep ? SuperGluuMode.ONE_STEP.getMode() : SuperGluuMode.TWO_STEP.getMode());
 

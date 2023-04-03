@@ -35,30 +35,6 @@ class TestPreselectedProvider(FlaskBaseTestCase):
             type(clientapp.cfg.PRE_SELECTED_PROVIDER) == bool,
             'cfg.PRE_SELECTED_PROVIDER is not bool')
 
-    def test_if_authlib_authorize_redirect_uri_contains_preselected_ext_prov(
-            self):
-        authorize_redirect_response = clientapp.oauth.op.authorize_redirect(
-            clientapp.cfg.REDIRECT_URIS[0], preselectedExternalProvider='foo')
-
-        self.assertTrue(
-            'preselectedExternalProvider'
-            in authorize_redirect_response.location,
-            'No preselectedExternalPraaovider in authlib redirect uri')
-
-    def test_pre_selected_provider_is_true_on_app(self):
-        ...
-        #import ipdb; ipdb.set_trace()
-
-    def test_redirect_response_url_should_have_preselected_provider_param(
-            self):
-
-        response = self.client.get(url_for('login'))
-        # import ipdb; ipdb.set_trace()
-
-        self.assertTrue(
-            'preselectedExternalProvider' in response.location,
-            'No preselectedExternalProvider in redirect endpoint response')
-
     def test_preselected_provider_id_should_exist_in_cfg(self):
         self.assertTrue(hasattr(clientapp.cfg, 'PRE_SELECTED_PROVIDER_ID'))
 
@@ -78,12 +54,4 @@ class TestPreselectedProvider(FlaskBaseTestCase):
         self.assertEqual(clientapp.get_preselected_provider(),
                          expected_response)
 
-    def test_url_should_contain_selected_provider_base64(self):
-        clientapp.cfg.PRE_SELECTED_PROVIDER_ID = 'saml-emaillink'
-        expected_base_64 = "eyAicHJvdmlkZXIiIDogInNhbWwtZW1haWxsaW5rIiB9"
-        response = self.client.get(url_for('login'))
-        self.assertTrue(
-            'preselectedExternalProvider=%s' % expected_base_64
-            in response.location,
-            'No preselectedExternalProvider=%s in /login response' %
-            expected_base_64)
+

@@ -246,10 +246,13 @@ public class Deployer {
                 
                 Flow fl = aps.getFlow(qname, true);
                 boolean add = fl == null;
+                FlowMetadata prvMeta = null;
+
                 if (add) {
                     fl = new Flow();
                 } else {
                     logger.info("Flow already existing in DB");
+                    prvMeta = fl.getMetadata();
                 }
                 
                 FlowMetadata meta = fl.getMetadata();
@@ -258,7 +261,12 @@ public class Deployer {
                 meta.setTimeout(tresult.getTimeout());
                 meta.setTimestamp(System.currentTimeMillis());
                 meta.setAuthor(dd.getProjectMetadata().getAuthor());
-                //No displayname or description. No handling of properties either
+
+                if (prvMeta != null) {
+                    meta.setDisplayName(prvMeta.getDisplayName());
+                    meta.setDescription(prvMeta.getDescription());
+                    meta.setProperties(prvMeta.getProperties());
+                }
     
                 String compiled = tresult.getCode();
                 fl.setMetadata(meta);
@@ -517,7 +525,6 @@ public class Deployer {
     
     // ========== File-system related utilities follow: ===========
 
-    //Walpurgis
     private void purge(Set<String> dirs, Set<String> filesToRemove) throws IOException {
         
         if (dirs != null) {

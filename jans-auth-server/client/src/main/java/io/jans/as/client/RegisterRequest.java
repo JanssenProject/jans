@@ -30,6 +30,7 @@ import org.json.JSONObject;
 
 import java.util.*;
 import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 
 import static io.jans.as.client.util.ClientUtil.*;
 import static io.jans.as.model.register.RegisterRequestParam.*;
@@ -108,6 +109,7 @@ public class RegisterRequest extends BaseRequest {
     private KeyEncryptionAlgorithm requestObjectEncryptionAlg;
     private BlockEncryptionAlgorithm requestObjectEncryptionEnc;
     private AuthenticationMethod tokenEndpointAuthMethod;
+    private List<AuthenticationMethod> additionalTokenEndpointAuthMethods;
     private SignatureAlgorithm tokenEndpointAuthSigningAlg;
     private Integer defaultMaxAge;
     private List<String> defaultAcrValues;
@@ -1022,6 +1024,14 @@ public class RegisterRequest extends BaseRequest {
         this.tokenEndpointAuthMethod = tokenEndpointAuthMethod;
     }
 
+    public List<AuthenticationMethod> getAdditionalTokenEndpointAuthMethods() {
+        return additionalTokenEndpointAuthMethods;
+    }
+
+    public void setAdditionalTokenEndpointAuthMethods(List<AuthenticationMethod> additionalTokenEndpointAuthMethods) {
+        this.additionalTokenEndpointAuthMethods = additionalTokenEndpointAuthMethods;
+    }
+
     /**
      * Returns the Requested Client Authentication method for the Token Endpoint.
      *
@@ -1618,6 +1628,7 @@ public class RegisterRequest extends BaseRequest {
         result.setRequestObjectEncryptionAlg(KeyEncryptionAlgorithm.fromName(requestObject.optString(REQUEST_OBJECT_ENCRYPTION_ALG.toString())));
         result.setRequestObjectEncryptionEnc(BlockEncryptionAlgorithm.fromName(requestObject.optString(REQUEST_OBJECT_ENCRYPTION_ENC.toString())));
         result.setTokenEndpointAuthMethod(AuthenticationMethod.fromString(requestObject.optString(TOKEN_ENDPOINT_AUTH_METHOD.toString())));
+        result.setAdditionalTokenEndpointAuthMethods(AuthenticationMethod.fromList(extractListByKey(requestObject, ADDITIONAL_TOKEN_ENDPOINT_AUTH_METHODS.toString())));
         result.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.fromString(requestObject.optString(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString())));
         result.setRedirectUris(extractListByKey(requestObject, REDIRECT_URIS.toString()));
         result.setScope(extractListByKey(requestObject, SCOPE.toString()));
@@ -1788,6 +1799,9 @@ public class RegisterRequest extends BaseRequest {
         }
         if (tokenEndpointAuthMethod != null) {
             function.apply(TOKEN_ENDPOINT_AUTH_METHOD.toString(), tokenEndpointAuthMethod.toString());
+        }
+        if (additionalTokenEndpointAuthMethods != null) {
+            function.apply(ADDITIONAL_TOKEN_ENDPOINT_AUTH_METHODS.toString(), toJSONArray(additionalTokenEndpointAuthMethods.stream().map(AuthenticationMethod::toString).collect(Collectors.toList())));
         }
         if (tokenEndpointAuthSigningAlg != null) {
             function.apply(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString(), tokenEndpointAuthSigningAlg.toString());

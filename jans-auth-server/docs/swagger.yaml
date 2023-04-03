@@ -1257,6 +1257,11 @@ paths:
                 token_endpoint_auth_method:
                   type: string
                   description: Requested Client Authentication method for the Token Endpoint.
+                additional_token_endpoint_auth_method:
+                  type: array
+                  description: Array of additional Client Authentication methods for the Token Endpoint
+                  items:
+                    type: string
                 token_endpoint_auth_signing_alg:
                   type: string
                   description: JWS alg algorithm (JWA) that must be used for signing the JWT used to authenticate the Client at the Token Endpoint
@@ -1645,6 +1650,11 @@ paths:
                 token_endpoint_auth_method:
                   type: string
                   description: Requested Client Authentication method for the Token Endpoint.
+                additional_token_endpoint_auth_method:
+                  type: array
+                  description: Array of additional Client Authentication methods for the Token Endpoint
+                  items:
+                    type: string
                 token_endpoint_auth_signing_alg:
                   type: string
                   description: JWS alg algorithm (JWA) that must be used for signing the JWT used to authenticate the Client at the Token Endpoint
@@ -2034,6 +2044,11 @@ paths:
                   token_endpoint_auth_method:
                     type: string
                     description: Requested Client Authentication method for the Token Endpoint.
+                  additional_token_endpoint_auth_method:
+                    type: array
+                    description: Array of additional Client Authentication methods for the Token Endpoint
+                    items:
+                      type: string
                   token_endpoint_auth_signing_alg:
                     type: string
                     description: JWS alg algorithm (JWA) that must be used for signing the JWT used to authenticate the Client at the Token Endpoint

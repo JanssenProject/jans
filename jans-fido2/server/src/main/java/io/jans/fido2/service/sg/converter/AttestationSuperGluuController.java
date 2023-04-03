@@ -11,7 +11,11 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.security.cert.CertificateEncodingException;
 
+import io.jans.as.model.config.Constants;
+import io.jans.fido2.model.u2f.error.Fido2ErrorResponseFactory;
+import io.jans.fido2.model.u2f.error.Fido2ErrorResponseType;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.logging.log4j.ThreadContext;
 import org.slf4j.Logger;
 
 
@@ -124,7 +128,9 @@ public class AttestationSuperGluuController {
 
         boolean valid = userSessionIdService.isValidSessionId(sessionId, userName);
         if (!valid) {
-            throw new Fido2RuntimeException(String.format("session_id '%s' is invalid", sessionId));
+            String reasonError = String.format("session_id '%s' is invalid", sessionId);
+            String descriptionError = "The session_id is null, blank or invalid, this param is required.";
+            throw Fido2ErrorResponseFactory.createBadRequestException(Fido2ErrorResponseType.INVALID_ID_SESSION, reasonError, descriptionError, ThreadContext.get(Constants.CORRELATION_ID_HEADER));
         }
 
         ObjectNode params = dataMapperService.createObjectNode();
@@ -244,7 +250,7 @@ public class AttestationSuperGluuController {
 		response.put("clientDataJSON", base64Service.urlEncodeToString(clientData.toString().getBytes(Charset.forName("UTF-8"))));
 
 		// Store cancel type
-		response.put(CommonVerifiers.SUPER_GLUU_REQUEST_CANCEL, StringHelper.equals(RawRegistrationService.REGISTER_CANCEL_TYPE, registerResponse.getClientData().getTyp()));
+		params.put(CommonVerifiers.SUPER_GLUU_REQUEST_CANCEL, StringHelper.equals(RawRegistrationService.REGISTER_CANCEL_TYPE, registerResponse.getClientData().getTyp()));
 
 		// Prepare attestationObject
         RawRegisterResponse rawRegisterResponse = rawRegistrationService.parseRawRegisterResponse(registerResponse.getRegistrationData());

@@ -63,6 +63,7 @@ func Provider() *schema.Provider {
 			"jans_admin_ui_role":                    resourceAdminUIRole(),
 			"jans_admin_ui_role_permission_mapping": resourceAdminUIRolePermissionMapping(),
 			"jans_agama_flow":                       resourceAgamaFlow(),
+			"jans_api_app_configuration":            resourceApiAppConfiguration(),
 			"jans_app_configuration":                resourceAppConfiguration(),
 			"jans_attribute":                        resourceAttribute(),
 			"jans_cache_configuration":              resourceCacheConfiguration(),
@@ -94,6 +95,7 @@ func Provider() *schema.Provider {
 		DataSourcesMap: map[string]*schema.Resource{
 			"jans_fido2_configuration":     dataSourceFido2Configuration(),
 			"jans_persistence_config":      dataSourcePersistenceConfiguration(),
+			"jans_plugins":                 dataSourcePlugins(),
 			"jans_schema":                  dataSourceSchema(),
 			"jans_service_provider_config": dataSourceServiceProviderConfig(),
 		},

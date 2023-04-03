@@ -50,7 +50,7 @@ public class IntrospectionWsHttpTest extends BaseTest {
         final IntrospectionService introspectionService = ClientFactory.instance().createIntrospectionService(introspectionEndpoint, engine);
         final String jwtAsString = introspectionService.introspectTokenWithResponseAsJwt("Bearer " + authorization.getAccessToken(), tokenToIntrospect.getAccessToken(), true);
         final Jwt jwt = Jwt.parse(jwtAsString);
-        assertTrue(Boolean.parseBoolean(jwt.getClaims().getClaimAsString("active")));
+        assertTrue(jwt.getClaims().getClaimAsJSON("token_introspection").getBoolean("active"));
     }
 
     @Test

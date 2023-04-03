@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.0.10-1](https://github.com/JanssenProject/jans/compare/docker-jans-auth-server-v1.0.9-1...docker-jans-auth-server-v1.0.10-1) (2023-03-16)
+
+
+### Bug Fixes
+
+* add custom permissions ([34336ac](https://github.com/JanssenProject/jans/commit/34336ac3799872303b9e4891b2405267ea9b6fd8))
+* prepare release for 1.0.10 ([e996926](https://github.com/JanssenProject/jans/commit/e99692692ef04d881468d120f7c7d462568dce36))
+
+## [1.0.9-1](https://github.com/JanssenProject/jans/compare/docker-jans-auth-server-v1.0.7-1...docker-jans-auth-server-v1.0.9-1) (2023-03-09)
+
+
+### Bug Fixes
+
+* prepare 1.0.9 release ([e6ea522](https://github.com/JanssenProject/jans/commit/e6ea52220824bd6b5d2dca0539d9d515dbeda362))
+* prepare 1.0.9 release ([55f7e0c](https://github.com/JanssenProject/jans/commit/55f7e0c308b869c2c4b5668aca751d022138a678))
+* update next SNAPSHOT and dev ([0df0e7a](https://github.com/JanssenProject/jans/commit/0df0e7ae06af64ac477955119c2522f03e0603c3))
+
 ## 1.0.7-1 (2023-02-22)
 
 
