@@ -19,7 +19,7 @@
     
     
       
-        <title>Overview - Janssen Documentation</title>
+        <title>OpenID Connect Provider (OP) - Janssen Documentation</title>
       
     
     
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#overview" class="md-skip">
+        <a href="#openid-connect-provider-op" class="md-skip">
           Skip to content
         </a>
       
@@ -128,7 +128,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Overview
+              OpenID Connect Provider (OP)
             
           </span>
         </div>
@@ -7164,6 +7164,21 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#protocol-overview" class="md-nav__link">
+    Protocol Overview
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -7209,19 +7224,37 @@
   </a>
 
 
-<h1 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">#</a></h1>
-<p>Please use the left navigation menu to browse the content of this section while we are still working on developing content for <code>Overview</code> page.</p>
-<div class="admonition contribute">
-<p class="admonition-title">Contribute</p>
-</div>
-<p>If you’d like to contribute to this document, get started with the <a href="https://docs.jans.io/head/CONTRIBUTING/#contributing-to-the-documentation">Contribution Guide</a></p>
+<h1 id="openid-connect-provider-op">OpenID Connect Provider (OP)<a class="headerlink" href="#openid-connect-provider-op" title="Permanent link">#</a></h1>
+<p>The Janssen Authentication Server is a <a href="http://openid.net/certification/">fully certified OpenID Provider (OP)</a> that supports the following OpenID Connect specifications: </p>
+<ul>
+<li>Core <a href="http://openid.net/specs/openid-connect-core-1_0.html">(spec)</a></li>
+<li>Dynamic Client Registration <a href="https://openid.net/specs/openid-connect-registration-1_0.html">(spec)</a></li>
+<li>Discovery <a href="https://openid.net/specs/openid-connect-discovery-1_0.html">(spec)</a></li>
+<li>Form Post Response Mode <a href="https://openid.net/specs/oauth-v2-form-post-response-mode-1_0.html">(spec)</a></li>
+<li>Session Management <a href="http://openid.net/specs/openid-connect-session-1_0.html">(spec)</a></li>
+<li>Front Channel Logout <a href="http://openid.net/specs/openid-connect-frontchannel-1_0.html">(draft)</a></li>
+</ul>
+<h2 id="protocol-overview">Protocol Overview<a class="headerlink" href="#protocol-overview" title="Permanent link">#</a></h2>
+<p>OpenID Connect is an identity layer that profiles OAuth 2.0 to define a sign-in flow for applications (clients) to authenticate a person and obtain authorization to gather information (or "claims") about that person. For more information, see <a href="http://openid.net/connect">OpenID Connect</a></p>
+<p>It's handy to know some OpenID Connect terminology:</p>
+<ul>
+<li>
+<p>The <em>end user</em> or <em>subject</em> is the person being authenticated.</p>
+</li>
+<li>
+<p>The <em>OpenID Provider (OP)</em> is the equivalent of a SAML Identity Provider (IDP). It holds end user credentials (like a username/ password) and personally identifiable information. During a single sign-on (SSO) login flow, end users are redirected to the OP for authentication. </p>
+</li>
+<li>
+<p>The <em>Relying Party</em> or  <em>RP</em>  or <em>client</em> is software, like a mobile application or website, which needs to authenticate the subject. The RP is an OAuth client.</p>
+</li>
+</ul>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-09-27T03:54:33+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-04-03T17:16:45+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-04-03</span>
       
         <br>
         Created:

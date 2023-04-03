@@ -19,7 +19,7 @@
     
     
       
-        <title>Overview - Janssen Documentation</title>
+        <title>Index - Janssen Documentation</title>
       
     
     
@@ -128,7 +128,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Overview
+              Index
             
           </span>
         </div>
@@ -7161,8 +7161,28 @@
   
   
   
-    
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    Overview
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#terminology" class="md-nav__link">
+    Terminology
+  </a>
+  
+</li>
+      
+    </ul>
   
 </nav>
                   </div>
@@ -7204,19 +7224,27 @@
   </a>
 
 
-<h1 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">#</a></h1>
-<p>Please use the left navigation menu to browse the content of this section while we are still working on developing content for <code>Overview</code> page.</p>
-<div class="admonition contribute">
-<p class="admonition-title">Contribute</p>
-</div>
-<p>If you’d like to contribute to this document, get started with the <a href="https://docs.jans.io/head/CONTRIBUTING/#contributing-to-the-documentation">Contribution Guide</a></p>
+  <h1>Index</h1>
+
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">#</a></h2>
+<p>As a profile of OAuth 2.0 that is complementary to OpenID Connect, UMA 2 defines RESTful, JSON-based, standardized flows and constructs for coordinating the protection of APIs and web resources.</p>
+<p>UMA 2 defines interfaces between authorization servers (AS), like Gluu, and resource servers (RS) that enable centralized policy decision-making for improved service delivery, auditing, policy administration, and accountability, even in a very loosely coupled "public API" environment. </p>
+<p>UMA 2 does not standardize a policy expression language, enabling flexibility in policy expression and evaluation through XACML, other declarative policy languages, or procedural code as warranted by conditions. </p>
+<p>UMA 2 inherits authentication agnosticism from OAuth. It concentrates on authorization, not authentication. It has been profiled to work with OpenID Connect to gather identity claims from whoever is attempting access, and enables attribute-based ("claims" in OAuth2) authorization (with group-based or role-based policies a natural subset).</p>
+<h2 id="terminology">Terminology<a class="headerlink" href="#terminology" title="Permanent link">#</a></h2>
+<p>UMA 2 introduces new terms and enhancements of OAuth term definitions. A few important terms include:</p>
+<p>Resource Owner (RO): An entity capable of granting access to a protected resource--the "user" in User-Managed Access. This is typically an end-user, but it can also be non-human entity that is treated as a person for limited legal purposes, such as a corporation.</p>
+<p>Resource Server (RS): A server that hosts resources on a resource owner's behalf, registers resources for protection at an authorization server, and is capable of accepting and responding to requests for protected resources.</p>
+<p>Authorization Server (AS)<em>*</em>: A server that protects, on a resource owner's behalf, resources managed at a resource server.</p>
+<p><em>*</em> <em>The Janssen Authentication Server acts as an UMA AS</em>.</p>
+<p>Learn more in the UMA 2 <a href="https://docs.kantarainitiative.org/uma/wg/uma-core-2.0-20.html">Core</a>, <a href="https://docs.kantarainitiative.org/uma/ed/oauth-uma-federated-authz-2.0-07.html">Federated Authorization</a> and <a href="https://docs.kantarainitiative.org/uma/ed/oauth-uma-grant-2.0-06.html">Grant</a> specifications.</p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-09-27T03:54:33+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-04-03T17:16:45+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-04-03</span>
       
         <br>
         Created:
