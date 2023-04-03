@@ -7337,10 +7337,9 @@
 
 <h1 id="lightweight-directory-active-protocol-ldap-configuration">Lightweight Directory Active Protocol (LDAP) Configuration<a class="headerlink" href="#lightweight-directory-active-protocol-ldap-configuration" title="Permanent link">#</a></h1>
 <blockquote>
-<p>Prerequisite: Know how to use the Janssen CLI in <a href="cli-index.md">command-line mode</a></p>
+<p>Prerequisite: Know how to use the Janssen CLI in <a href="../">command-line mode</a></p>
 </blockquote>
-<p>As like as <a href="im/im-ldap-configuration.md">Interactive Menu</a>, We can do the same operations here.
-Let's run the following command to get operation-id details of LDAP Database COnfiguration.</p>
+<p>Let's run the following command to get operation-id details of LDAP Database COnfiguration.</p>
 <div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --info DatabaseLDAPConfiguration
 </code></pre></div>
 <p>It comes with the following options:</p>
@@ -7529,7 +7528,7 @@ Server Response:
 <p>If required, We can patch single information of a ldap database configuration by using its name id. In that case, we have to make an array of operations in schema file. So, let's get the schema file first.</p>
 <div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --schema /components/schemas/PatchRequest &gt; patch.json
 </code></pre></div>
-<p>We know already that this operation support three types of value <code>op</code>, <code>path</code> and <code>value</code> to be replaced. For more info visit this <a href="cli-index.md#patch-request-schema">link</a></p>
+<p>We know already that this operation support three types of value <code>op</code>, <code>path</code> and <code>value</code> to be replaced. For more info visit this <a href="../#patch-request-schema">link</a></p>
 <p>For example, let's say, we want to change the level of the <code>test_ldap</code> configuration. So, Let's update the patch file as below:</p>
 <div class="highlight"><pre><span></span><code>[
   {
@@ -7550,7 +7549,7 @@ Server Response:
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-09-27T11:17:38+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-04-03T10:21:34+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-04-03</span>
       
         <br>
         Created:
