@@ -1,6 +1,6 @@
 # Jans Tent
 
-A reliable OpenID client to be used in auth testing.
+Reliable OpenID client to be used in auth testing.
 
 ## Installation
 
