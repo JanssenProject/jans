@@ -5,9 +5,8 @@ import clientapp
 import helper
 import os
 from flask import url_for
-from clientapp.client_handler import ClientHandler
+from clientapp.helpers.client_handler import ClientHandler
 from unittest.mock import MagicMock, patch
-import inspect
 
 
 class TestRegisterEndpoint(TestCase):
@@ -62,7 +61,7 @@ class TestRegisterEndpoint(TestCase):
             '/register returned invalid requisition'
         )
 
-    @patch('clientapp.client_handler.ClientHandler.__init__', MagicMock(return_value=None))
+    @patch('clientapp.helpers.client_handler.ClientHandler.__init__', MagicMock(return_value=None))
     def test_endpoint_should_init_client_handler(self):
         self.client.post(url_for('register'), json={
             'op_url': 'https://test.com',
@@ -70,7 +69,7 @@ class TestRegisterEndpoint(TestCase):
         })
         ClientHandler.__init__.assert_called_once()
 
-    @patch('clientapp.client_handler.ClientHandler.__init__', MagicMock(return_value=None))
+    @patch('clientapp.helpers.client_handler.ClientHandler.__init__', MagicMock(return_value=None))
     def test_endpoint_should_accept_2_params(self):
         first_value = 'https://op'
         second_value = 'https://client.com.br'
@@ -107,7 +106,7 @@ class TestRegisterEndpoint(TestCase):
             'not returning status 400 if values are not valid urls'
         )
 
-    @patch('clientapp.client_handler.ClientHandler.get_client_dict', MagicMock(return_value=None))
+    @patch('clientapp.helpers.client_handler.ClientHandler.get_client_dict', MagicMock(return_value=None))
     def test_valid_post_should_should_call_get_client_dict_once(self):
         op_url = 'https://op.com.br'
         client_url = 'https://client.com.br'

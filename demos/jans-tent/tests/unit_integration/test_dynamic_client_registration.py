@@ -1,11 +1,8 @@
 from unittest import TestCase
 from unittest.mock import MagicMock
-import sys
 import inspect
 
-import pytest
-
-import clientapp.client_handler as client_handler
+import clientapp.helpers.client_handler as client_handler
 from typing import Optional
 import helper
 from oic.oauth2 import ASConfigurationResponse
