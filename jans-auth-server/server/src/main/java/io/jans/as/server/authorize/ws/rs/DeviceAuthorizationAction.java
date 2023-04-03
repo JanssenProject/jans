@@ -224,6 +224,7 @@ public class DeviceAuthorizationAction implements Serializable {
      *
      * @param cacheData Data related to the device code request.
      */
+    @SuppressWarnings("java:S1117")
     private void redirectToAuthorization(DeviceAuthorizationCacheControl cacheData) {
         try {
             log.info("Redirecting to authorization code flow to process device authorization, data: {}", cacheData);
@@ -233,6 +234,7 @@ public class DeviceAuthorizationAction implements Serializable {
             String scope = Util.listAsString(cacheData.getScopes());
             String state = UUID.randomUUID().toString();
             String nonce = UUID.randomUUID().toString();
+            String acr = appConfiguration.getDeviceAuthzAcr();
 
             RedirectUri authRequest = new RedirectUri(authorizationEndpoint);
             authRequest.addResponseParameter(CLIENT_ID, clientId);
@@ -240,8 +242,13 @@ public class DeviceAuthorizationAction implements Serializable {
             authRequest.addResponseParameter(SCOPE, scope);
             authRequest.addResponseParameter(STATE, state);
             authRequest.addResponseParameter(NONCE, nonce);
+            if (StringUtils.isNotBlank(acr)) {
+                authRequest.addResponseParameter(ACR_VALUES, acr);
+            }
 
-            FacesContext.getCurrentInstance().getExternalContext().redirect(authRequest.toString());
+            final String redirectTo = authRequest.toString();
+            log.debug("Redirecting to: {}", redirectTo);
+            FacesContext.getCurrentInstance().getExternalContext().redirect(redirectTo);
         } catch (IOException e) {
             log.error("Problems trying to redirect to authorization page from device authorization action", e);
             String message = languageBean.getMessage("error.errorEncountered");
