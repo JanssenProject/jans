@@ -6,7 +6,6 @@
 
 package io.jans.configapi.filters;
 
-
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.media.ArraySchema;
@@ -27,7 +26,6 @@ import org.apache.commons.lang.StringUtils;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.persistence.model.Scope;
 
-
 public class SpecFilter extends AbstractSpecFilter {
 
     @Override
@@ -39,34 +37,21 @@ public class SpecFilter extends AbstractSpecFilter {
 
                 setRequestExample(operation);
                 setResponseExample(operation);
-            
+
             }
         } catch (Exception ex) {
-            //ex.printStackTrace();
+            // ex.printStackTrace();
         }
         return Optional.of(operation);
     }
-    
+
     @Override
-    public Optional filterSchema(Schema schema, Map params, Map cookies, Map headers){
-      
-        Schema clientAuthMapArraySchema =  new Schema()
-                .description("clientAuthMapArraySchema")
-                .addProperties("children", new MapSchema()
-                .additionalProperties(new ArraySchema().$ref("#/components/schemas/Scope")));        
-        schema.addProperty("clientAuthMapArraySchema", clientAuthMapArraySchema);
-        
-        Schema clientAuthSchema =  new Schema<Client>()
-                .description("clientAuthSchema")
+    public Optional filterSchema(Schema schema, Map params, Map cookies, Map headers) {
+
+        Schema clientAuthMapSchema = new MapSchema().description("clientAuthMapSchema")
                 .additionalProperties(new ArraySchema().items(new Schema().$ref("#/components/schemas/Scope")));
-             schema.addProperty("clientAuthSchema", clientAuthSchema);
-             
-             Schema clientAuthMapSchema =  new MapSchema()
-                     .description("clientAuthMapSchema")
-                     .items(new Schema().$ref("#/components/schemas/Client"))
-                     .additionalProperties(new ArraySchema().items(new Schema().$ref("#/components/schemas/Scope")));
-                  schema.addProperty("clientAuthMapSchema", clientAuthMapSchema);
-        
+        schema.addProperty("clientAuthMapSchema", clientAuthMapSchema);
+
         return Optional.of(schema);
     }
 
@@ -84,7 +69,7 @@ public class SpecFilter extends AbstractSpecFilter {
                     }
                 }
             } catch (Exception ex) {
-                //ex.printStackTrace();
+                // ex.printStackTrace();
             }
         }
 
@@ -115,7 +100,7 @@ public class SpecFilter extends AbstractSpecFilter {
                 }
 
             } catch (Exception ex) {
-                //ex.printStackTrace();
+                // ex.printStackTrace();
             }
         }
     }

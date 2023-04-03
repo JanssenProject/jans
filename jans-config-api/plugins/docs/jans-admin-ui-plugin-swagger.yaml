@@ -629,19 +629,6 @@ components:
       properties:
         licenseKey:
           type: string
-        clientAuthMapArraySchema:
-          properties:
-            children:
-              type: object
-              additionalProperties:
-                $ref: '#/components/schemas/Scope'
-          description: clientAuthMapArraySchema
-        clientAuthSchema:
-          additionalProperties:
-            type: array
-            items:
-              $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
         clientAuthMapSchema:
           type: object
           additionalProperties:
@@ -649,8 +636,6 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
-          items:
-            $ref: '#/components/schemas/Client'
     LicenseApiResponse:
       type: object
       properties:
@@ -661,19 +646,6 @@ components:
         responseCode:
           type: integer
           format: int32
-        clientAuthMapArraySchema:
-          properties:
-            children:
-              type: object
-              additionalProperties:
-                $ref: '#/components/schemas/Scope'
-          description: clientAuthMapArraySchema
-        clientAuthSchema:
-          additionalProperties:
-            type: array
-            items:
-              $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
         clientAuthMapSchema:
           type: object
           additionalProperties:
@@ -681,8 +653,6 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
-          items:
-            $ref: '#/components/schemas/Client'
     LicenseResponse:
       type: object
       properties:
@@ -711,19 +681,6 @@ components:
           type: string
         customerLastName:
           type: string
-        clientAuthMapArraySchema:
-          properties:
-            children:
-              type: object
-              additionalProperties:
-                $ref: '#/components/schemas/Scope'
-          description: clientAuthMapArraySchema
-        clientAuthSchema:
-          additionalProperties:
-            type: array
-            items:
-              $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
         clientAuthMapSchema:
           type: object
           additionalProperties:
@@ -731,26 +688,11 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
-          items:
-            $ref: '#/components/schemas/Client'
     SSARequest:
       type: object
       properties:
         ssa:
           type: string
-        clientAuthMapArraySchema:
-          properties:
-            children:
-              type: object
-              additionalProperties:
-                $ref: '#/components/schemas/Scope'
-          description: clientAuthMapArraySchema
-        clientAuthSchema:
-          additionalProperties:
-            type: array
-            items:
-              $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
         clientAuthMapSchema:
           type: object
           additionalProperties:
@@ -758,8 +700,6 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
-          items:
-            $ref: '#/components/schemas/Client'
     AdminPermission:
       type: object
       properties:
@@ -769,19 +709,6 @@ components:
           type: string
         defaultPermissionInToken:
           type: boolean
-        clientAuthMapArraySchema:
-          properties:
-            children:
-              type: object
-              additionalProperties:
-                $ref: '#/components/schemas/Scope'
-          description: clientAuthMapArraySchema
-        clientAuthSchema:
-          additionalProperties:
-            type: array
-            items:
-              $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
         clientAuthMapSchema:
           type: object
           additionalProperties:
@@ -789,8 +716,6 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
-          items:
-            $ref: '#/components/schemas/Client'
     RolePermissionMapping:
       type: object
       properties:
@@ -800,19 +725,6 @@ components:
           type: array
           items:
             type: string
-        clientAuthMapArraySchema:
-          properties:
-            children:
-              type: object
-              additionalProperties:
-                $ref: '#/components/schemas/Scope'
-          description: clientAuthMapArraySchema
-        clientAuthSchema:
-          additionalProperties:
-            type: array
-            items:
-              $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
         clientAuthMapSchema:
           type: object
           additionalProperties:
@@ -820,8 +732,6 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
-          items:
-            $ref: '#/components/schemas/Client'
     AdminRole:
       type: object
       properties:
@@ -831,19 +741,6 @@ components:
           type: string
         deletable:
           type: boolean
-        clientAuthMapArraySchema:
-          properties:
-            children:
-              type: object
-              additionalProperties:
-                $ref: '#/components/schemas/Scope'
-          description: clientAuthMapArraySchema
-        clientAuthSchema:
-          additionalProperties:
-            type: array
-            items:
-              $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema
         clientAuthMapSchema:
           type: object
           additionalProperties:
@@ -851,8 +748,6 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthMapSchema
-          items:
-            $ref: '#/components/schemas/Client'
   securitySchemes:
     oauth2:
       type: oauth2
