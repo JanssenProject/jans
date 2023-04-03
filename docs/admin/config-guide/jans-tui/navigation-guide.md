@@ -169,3 +169,10 @@ can be used to view all the data of the selected label
 can be used to delete a certain label
 
 ![image](https://user-images.githubusercontent.com/63171603/216968417-4cb15f2a-f01c-48bb-a27d-e4e73edb8082.png)
+
+* `p`: 
+can be used to update user's password. 
+
+![Clipboard - April 3, 2023 9_29 PM](https://user-images.githubusercontent.com/7156097/229603328-45232024-26e0-473b-b74a-4b08b5bcaae7.png)
+
+
