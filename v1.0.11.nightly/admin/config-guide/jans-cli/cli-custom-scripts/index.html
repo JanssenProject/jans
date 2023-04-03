@@ -7377,7 +7377,7 @@
 
 <h1 id="custom-scripts">Custom Scripts<a class="headerlink" href="#custom-scripts" title="Permanent link">#</a></h1>
 <blockquote>
-<p>Prerequisite: Know how to use the Janssen CLI in <a href="cli-index.md">command-line mode</a></p>
+<p>Prerequisite: Know how to use the Janssen CLI in <a href="../">command-line mode</a></p>
 </blockquote>
 <p>Interception scripts can be used to implement custom business logic for authentication, authorization, and more in a way that is upgrade-proof and doesn't require forking the Gluu Server code. Using Janssen CLI, we can manage custom scripts as well.</p>
 <p>Let's get the task information using below command:</p>
@@ -7410,7 +7410,7 @@ To get sample schema type /opt/jans/jans-cli/config-cli.py --schema &lt;schma&gt
 <p>The command line is:</p>
 <div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts
 </code></pre></div>
-<p>It returns all the custom scripts of the Janssen Server. You may get nagging here as it display lots of custom scripts together, nearly 40 custom scripts on the terminal. So, I would like to prefer use <a href="im/im-custom-scripts.md#get-list-of-custom-scripts">IM method</a> in this case. </p>
+<p>It returns all the custom scripts of the Janssen Server. </p>
 <h2 id="adds-a-new-custom-script">Adds a New Custom Script<a class="headerlink" href="#adds-a-new-custom-script" title="Permanent link">#</a></h2>
 <p>If we look at the description of this operation we see it supports schema:</p>
 <div class="highlight"><pre><span></span><code>Operation ID: post-config-scripts
@@ -7649,14 +7649,14 @@ Server Response:
 <p>For example, in our case; the command line is:</p>
 <div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id delete-config-scripts-by-inum --url-suffix inum:61aef81b-b22d-42c0-89d5-b098c976a2b7
 </code></pre></div>
-<p>That's all for <code>Custom Script</code> management with <code>CLI</code> feature. You can check <code>IM</code> method from <a href="im/im-custom-scripts.md">here</a>.</p>
+<p>That's all for <code>Custom Script</code> management with <code>CLI</code> feature.</p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-23T17:35:02+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-23</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-04-03T10:21:34+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-04-03</span>
       
         <br>
         Created:
