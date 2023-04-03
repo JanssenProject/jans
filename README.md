@@ -4,6 +4,11 @@
 
 Janssen enables organizations to build a scalable centralized authentication and authorization service using free open source software. The components of the project include client and server implementations of the OAuth, OpenID Connect, SCIM, and FIDO standards.
 
+[![The Linux Foundation](https://img.shields.io/badge/Member-The%20Linux%20Foundation-blue?style=flat-square)](https://www.linuxfoundation.org/press/press-release/the-janssen-project-takes-on-worlds-most-demanding-digital-trust-challenges-at-linux-foundation)
+[![DPGA](https://img.shields.io/badge/DPGA-digital%20public%20good-green?style=flat-square)](https://app.digitalpublicgoods.net/a/10470)
+
+----
+
 **Releases**: [Latest](https://github.com/JanssenProject/jans/releases/latest) | [All](https://github.com/JanssenProject/jans/releases)
 
 **Get Help**: [Discussions](https://github.com/JanssenProject/jans/discussions) | [Chat](https://gitter.im/JanssenProject/Lobby)
@@ -12,14 +17,19 @@ Janssen enables organizations to build a scalable centralized authentication and
 
 **Contribute**: [Contribution Guide](https://docs.jans.io/head/CONTRIBUTING/) | [Community Docs](https://docs.jans.io/head/governance/charter/) | [Developer Guides](https://docs.jans.io/head/CODE_OF_CONDUCT/)
 
+**Social**: [Twitter](https://twitter.com/janssen_project) | [Linkedin](https://www.linkedin.com/company/janssen-project)
+
+
+
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/janssen-auth-server)](https://artifacthub.io/packages/search?repo=janssen-auth-server)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/4353/badge)](https://bestpractices.coreinfrastructure.org/projects/4353)
 [![Hex.pm](https://img.shields.io/hexpm/l/plug)](./LICENSE)
 [![GitHub contributors](https://img.shields.io/github/contributors/janssenproject/jans)](#users-and-community)
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-%23FE5196?logo=conventionalcommits&logoColor=white)](https://conventionalcommits.org)
 
-**Table of Contents**
+----
 
+**Table of Contents**
 
 - [Janssen Modules](#janssen-modules)
 - [Getting Started](#getting-started)
