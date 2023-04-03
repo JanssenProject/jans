@@ -196,9 +196,9 @@ where <library_name> is the name of the library to install.
 
 ### Debugging a Jython script
 
-1. This [article](../interception-scripts-debug-ce) covers the details for debugging a script in a developer environment (CE).
+1. This [article](../developer/interception-scripts-debug-ce.md) covers the details for debugging a script in a developer environment (CE).
 
-2. This [article](../interception-scripts-debug) covers the details for debugging a script in a CN environment.
+2. This [article](../developer/interception-scripts-debug.md) covers the details for debugging a script in a CN environment.
 
 ***
 

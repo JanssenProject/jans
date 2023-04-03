@@ -65,7 +65,7 @@ Relevant methods:
 #### c. Page customizations:
 The Jans-auth server comes with a default set of pages for login, logout, errors, authorizations. You can easily override these pages or write new ones. You can easily apply your own stylesheet, images and resouce-bundles to your pages.
 
-This [article](../../customization/customize-web-pages) covers all the details you need to write your own web page.
+This [article](#c-page-customizations) covers all the details you need to write your own web page.
 
 ### C. Business logic in Custom script:  
 Jans-auth server uses Weld 3.0 (JSR-365 aka CDI 2.0) for managed beans. The most important aspects of business logic are implemented through a set of beans. Details and examples of this can be found in this [article](../managed-beans.md)

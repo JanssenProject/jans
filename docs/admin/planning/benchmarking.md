@@ -98,7 +98,7 @@ cat << EOF > auth_code_client.json
 EOF
 ```
 
-Download or build [config-cli-tui](../config-guide/tui.md) and run:
+Download or build [config-cli-tui](../config-guide/jans-tui/README.md) and run:
 
 ```bash
 # add -noverify if your fqdn is not registered

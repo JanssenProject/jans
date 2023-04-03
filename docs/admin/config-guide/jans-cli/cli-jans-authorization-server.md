@@ -8,7 +8,7 @@ tags:
 
 # Janssen Authorization Server
 
-> Prerequisite: Know how to use the Janssen CLI in [command-line mode](cli-index.md)
+> Prerequisite: Know how to use the Janssen CLI in [command-line mode](../jans-cli/README.md)
 
 To get info about Jans Authorization Server operations:
 
