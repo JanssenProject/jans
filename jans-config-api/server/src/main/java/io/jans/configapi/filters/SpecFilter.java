@@ -53,15 +53,19 @@ public class SpecFilter extends AbstractSpecFilter {
         Schema clientAuthMapArraySchema =  new Schema()
                 .description("clientAuthMapArraySchema")
                 .addProperties("children", new MapSchema()
-                .additionalProperties(new ArraySchema().$ref("#/components/schemas/Scope")));
-        
+                .additionalProperties(new ArraySchema().$ref("#/components/schemas/Scope")));        
         schema.addProperty("clientAuthMapArraySchema", clientAuthMapArraySchema);
         
         Schema clientAuthSchema =  new Schema<Client>()
                 .description("clientAuthSchema")
                 .additionalProperties(new ArraySchema().items(new Schema().$ref("#/components/schemas/Scope")));
-        
-        schema.addProperty("clientAuthSchema", clientAuthSchema);
+             schema.addProperty("clientAuthSchema", clientAuthSchema);
+             
+             Schema clientAuthMapSchema =  new MapSchema()
+                     .description("clientAuthMapSchema")
+                     .items(new Schema().$ref("#/components/schemas/Client"))
+                     .additionalProperties(new ArraySchema().items(new Schema().$ref("#/components/schemas/Scope")));
+                  schema.addProperty("clientAuthMapSchema", clientAuthMapSchema);
         
         return Optional.of(schema);
     }

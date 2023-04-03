@@ -7524,6 +7524,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     Status:
       type: object
       properties:
@@ -7546,6 +7555,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     FacterData:
       type: object
       properties:
@@ -7576,6 +7594,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     StatsData:
       type: object
       properties:
@@ -7599,6 +7626,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     AuthenticationMethod:
       type: object
       properties:
@@ -7617,6 +7653,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     Deployment:
       type: object
       properties:
@@ -7651,6 +7696,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     DeploymentDetails:
       type: object
       properties:
@@ -7683,6 +7737,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     ProjectMetadata:
       type: object
       properties:
@@ -7711,6 +7774,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     PagedResult:
       type: object
       properties:
@@ -7740,6 +7812,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     Flow:
       type: object
       properties:
@@ -7777,6 +7858,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     FlowMetadata:
       type: object
       properties:
@@ -7815,6 +7905,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     JsonPatch:
       type: object
       properties:
@@ -7831,6 +7930,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     AttributeValidation:
       type: object
       properties:
@@ -7855,6 +7963,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     GluuAttribute:
       required:
       - dataType
@@ -7957,19 +8074,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        whitePagesCanView:
-          type: boolean
-        userCanAccess:
-          type: boolean
-        userCanView:
-          type: boolean
-        adminCanView:
+        adminCanAccess:
           type: boolean
         adminCanEdit:
           type: boolean
-        adminCanAccess:
+        adminCanView:
+          type: boolean
+        userCanView:
+          type: boolean
+        userCanAccess:
           type: boolean
         userCanEdit:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -7986,6 +8103,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     PatchRequest:
       type: object
       properties:
@@ -8008,6 +8134,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     AppConfiguration:
       type: object
       properties:
@@ -8744,6 +8879,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     AuthenticationFilter:
       required:
       - baseDn
@@ -8775,6 +8919,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     AuthenticationProtectionConfiguration:
       type: object
       properties:
@@ -8802,6 +8955,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     AuthorizationRequestCustomParameter:
       type: object
       properties:
@@ -8822,6 +8984,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     CIBAEndUserNotificationConfig:
       type: object
       properties:
@@ -8858,6 +9029,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     ClientAuthenticationFilter:
       required:
       - baseDn
@@ -8889,6 +9069,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     CorsConfigurationFilter:
       type: object
       properties:
@@ -8926,6 +9115,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     EngineConfig:
       type: object
       properties:
@@ -8974,6 +9172,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     JsonNode:
       type: object
       properties:
@@ -8990,6 +9197,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     SsaConfiguration:
       type: object
       properties:
@@ -9017,6 +9233,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     SsaValidationConfig:
       type: object
       properties:
@@ -9067,6 +9292,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     PersistenceConfiguration:
       type: object
       properties:
@@ -9085,6 +9319,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     CacheConfiguration:
       type: object
       properties:
@@ -9116,6 +9359,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     InMemoryConfiguration:
       type: object
       properties:
@@ -9135,6 +9387,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     MemcachedConfiguration:
       type: object
       properties:
@@ -9167,6 +9428,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     NativePersistenceConfiguration:
       type: object
       properties:
@@ -9193,6 +9463,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     RedisConfiguration:
       type: object
       properties:
@@ -9250,6 +9529,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     Client:
       type: object
       properties:
@@ -9517,6 +9805,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     ClientAttributes:
       type: object
       properties:
@@ -9622,6 +9919,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     CustomObjectAttribute:
       type: object
       properties:
@@ -9650,6 +9956,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     LocalizedString:
       type: object
       properties:
@@ -9670,6 +9985,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     AgamaConfiguration:
       type: object
       properties:
@@ -9694,6 +10018,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     ApiAppConfiguration:
       type: object
       properties:
@@ -9773,6 +10106,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     AuditLogConf:
       type: object
       properties:
@@ -9799,6 +10141,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     DataFormatConversionConf:
       type: object
       properties:
@@ -9821,6 +10172,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     PluginConf:
       type: object
       properties:
@@ -9843,11 +10203,18 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     SmtpConfiguration:
       type: object
       properties:
-        valid:
-          type: boolean
         connectProtectionList:
           type: array
           items:
@@ -9856,6 +10223,8 @@ components:
             - None
             - StartTls
             - SslTls
+        valid:
+          type: boolean
         host:
           type: string
         port:
@@ -9900,6 +10269,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     SmtpTest:
       type: object
       properties:
@@ -9922,6 +10300,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     CustomScript:
       type: object
       properties:
@@ -10019,6 +10406,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     ScriptError:
       type: object
       properties:
@@ -10040,6 +10436,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     SimpleCustomProperty:
       type: object
       properties:
@@ -10062,6 +10467,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     SimpleExtendedCustomProperty:
       type: object
       properties:
@@ -10086,6 +10500,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     JSONWebKey:
       type: object
       properties:
@@ -10183,6 +10606,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     WebKeysConfiguration:
       type: object
       properties:
@@ -10203,6 +10635,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     GluuLdapConfiguration:
       type: object
       properties:
@@ -10252,6 +10693,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     Logging:
       type: object
       properties:
@@ -10285,6 +10735,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     GluuOrganization:
       required:
       - description
@@ -10345,6 +10804,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     Scope:
       type: object
       properties:
@@ -10424,6 +10892,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     ScopeAttributes:
       type: object
       properties:
@@ -10446,6 +10923,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     CustomScope:
       type: object
       properties:
@@ -10529,6 +11015,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     SessionId:
       type: object
       properties:
@@ -10595,6 +11090,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     SessionIdAccessMap:
       type: object
       properties:
@@ -10617,6 +11121,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     User:
       type: object
       properties:
@@ -10659,6 +11172,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
     UmaResource:
       required:
       - name
@@ -10718,6 +11240,15 @@ components:
             items:
               $ref: '#/components/schemas/Scope'
           description: clientAuthSchema
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+          items:
+            $ref: '#/components/schemas/Client'
   securitySchemes:
     oauth2:
       type: oauth2
