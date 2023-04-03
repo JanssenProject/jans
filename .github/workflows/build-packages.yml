@@ -8,6 +8,7 @@ jobs:
   publish_binary_packages:
     runs-on: ubuntu-20.04
     strategy:
+      fail-fast: false
       matrix:
         name: [ubuntu22, ubuntu20, el8, suse15]
 
