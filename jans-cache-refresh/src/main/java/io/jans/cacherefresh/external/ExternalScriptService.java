@@ -11,8 +11,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
+//import javax.annotation.PostConstruct;
+//import javax.inject.Inject;
 
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
@@ -22,7 +22,9 @@ import io.jans.orm.util.StringHelper;
 import io.jans.service.custom.inject.ReloadScript;
 import io.jans.service.custom.script.CustomScriptManager;
 import io.jans.service.custom.script.StandaloneCustomScriptManager;
+import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.event.Observes;
+import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

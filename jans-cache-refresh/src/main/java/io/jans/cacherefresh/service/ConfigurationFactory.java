@@ -10,8 +10,8 @@ import java.io.File;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.inject.Inject;
-import javax.inject.Named;
+//import javax.inject.Inject;
+//import javax.inject.Named;
 
 import io.jans.cacherefresh.config.ApplicationFactory;
 import io.jans.config.oxtrust.AttributeResolverConfiguration;
@@ -35,6 +35,8 @@ import jakarta.enterprise.event.Event;
 import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.inject.Produces;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 

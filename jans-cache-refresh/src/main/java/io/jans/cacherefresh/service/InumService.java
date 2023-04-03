@@ -12,9 +12,10 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.base.InumEntry;
 import io.jans.util.INumGenerator;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import org.slf4j.Logger;
 
-import javax.inject.Inject;
+//import javax.inject.Inject;
 import java.io.Serializable;
 
 /*

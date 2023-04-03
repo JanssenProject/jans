@@ -11,8 +11,8 @@ import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-import javax.inject.Inject;
-import javax.inject.Named;
+//import javax.inject.Inject;
+//import javax.inject.Named;
 
 import io.jans.cacherefresh.model.GluuConfiguration;
 import io.jans.cacherefresh.model.ProgrammingLanguage;
@@ -25,6 +25,8 @@ import io.jans.service.metric.MetricService;
 import io.jans.util.StringHelper;
 import io.jans.util.security.StringEncrypter;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import org.slf4j.Logger;
 
 /**

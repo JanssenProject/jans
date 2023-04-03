@@ -24,8 +24,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.inject.Inject;
-import javax.inject.Named;
+//import javax.inject.Inject;
+//import javax.inject.Named;
 
 import io.jans.cacherefresh.CacheRefreshEvent;
 import io.jans.cacherefresh.config.ApplicationFactory;
@@ -69,6 +69,8 @@ import io.jans.util.security.PropertiesDecrypter;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import jakarta.enterprise.event.Observes;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import org.apache.commons.beanutils.BeanUtilsBean2;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;

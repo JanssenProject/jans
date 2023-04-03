@@ -8,8 +8,8 @@ package io.jans.cacherefresh.model;
 
 import java.io.Serializable;
 
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+//import javax.validation.constraints.NotNull;
+//import javax.validation.constraints.Size;
 
 import io.jans.model.GluuStatus;
 import io.jans.orm.annotation.AttributeName;
@@ -20,6 +20,8 @@ import io.jans.orm.model.base.Entry;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 /**
  * Group

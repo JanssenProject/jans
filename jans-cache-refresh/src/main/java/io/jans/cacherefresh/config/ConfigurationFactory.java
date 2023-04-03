@@ -6,8 +6,8 @@
 
 package io.jans.cacherefresh.config;
 
-import javax.inject.Inject;
-import javax.inject.Named;
+//import javax.inject.Inject;
+//import javax.inject.Named;
 
 import io.jans.cacherefresh.model.ApiConf;
 import io.jans.config.oxtrust.AppConfiguration;
@@ -19,6 +19,7 @@ import io.jans.orm.exception.BasePersistenceException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.inject.Produces;
+import jakarta.inject.Inject;
 import org.slf4j.Logger;
 
 /**

@@ -7,7 +7,7 @@
 package io.jans.cacherefresh.external;
 
 import java.util.Map;
-import javax.inject.Named;
+//import javax.inject.Named;
 
 import io.jans.cacherefresh.model.GluuCustomPerson;
 import io.jans.model.SimpleCustomProperty;
@@ -16,6 +16,7 @@ import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.custom.script.model.bind.BindCredentials;
 import io.jans.model.custom.script.type.user.CacheRefreshType;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Named;
 
 /**
  * Provides factory methods needed to create external cache refresh extension

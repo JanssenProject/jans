@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.time.Instant;
-import javax.inject.Inject;
+//import javax.inject.Inject;
 
 import io.jans.cacherefresh.constants.OxTrustConstants;
 import io.jans.cacherefresh.exception.DuplicateEmailException;
@@ -33,6 +33,7 @@ import io.jans.util.ArrayHelper;
 import io.jans.util.OxConstants;
 import io.jans.util.StringHelper;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import org.slf4j.Logger;
 
 /**

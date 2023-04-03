@@ -6,7 +6,7 @@
 
 package io.jans.cacherefresh.config;
 
-import javax.inject.Inject;
+//import javax.inject.Inject;
 
 import io.jans.cacherefresh.service.ConfigurationFactory;
 import io.jans.cacherefresh.service.ConfigurationService;
@@ -15,6 +15,7 @@ import io.jans.orm.PersistenceEntryManagerFactory;
 import io.jans.orm.model.PersistenceConfiguration;
 import io.jans.orm.service.PersistanceFactoryService;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import org.slf4j.Logger;
 
 /**

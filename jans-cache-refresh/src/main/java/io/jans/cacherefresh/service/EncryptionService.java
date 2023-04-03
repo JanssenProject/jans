@@ -8,12 +8,13 @@ package io.jans.cacherefresh.service;
 import java.io.Serializable;
 import java.util.Properties;
 
-import javax.inject.Inject;
+//import javax.inject.Inject;
 
 import io.jans.orm.util.StringHelper;
 import io.jans.util.security.PropertiesDecrypter;
 import io.jans.util.security.StringEncrypter;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 /**
  * Allows to decrypted properties with passwords

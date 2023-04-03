@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.inject.Inject;
+//import javax.inject.Inject;
 
 import io.jans.cacherefresh.constants.OxTrustConstants;
 import io.jans.cacherefresh.model.GluuCustomPerson;
@@ -14,6 +14,7 @@ import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.search.filter.Filter;
 import io.jans.util.StringHelper;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 

@@ -13,7 +13,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import javax.inject.Inject;
 
 import io.jans.cacherefresh.constants.OxTrustConstants;
 import io.jans.cacherefresh.model.Events;
@@ -34,6 +33,7 @@ import com.unboundid.ldap.sdk.LDAPException;
 import jakarta.enterprise.event.Event;
 import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.inject.Any;
+import jakarta.inject.Inject;
 
 /**
  * Provides operations with attributes

@@ -12,8 +12,8 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Priority;
-import javax.inject.Inject;
-import javax.inject.Named;
+//import javax.inject.Inject;
+//import javax.inject.Named;
 
 import io.jans.cacherefresh.constants.OxTrustConstants;
 import io.jans.cacherefresh.model.GluuBoolean;
@@ -32,6 +32,8 @@ import io.jans.util.ArrayHelper;
 import io.jans.util.OxConstants;
 import io.jans.util.StringHelper;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import org.slf4j.Logger;
 
 /**
