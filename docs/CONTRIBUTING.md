@@ -51,7 +51,7 @@ We are really glad you are reading this, because we need volunteer developers to
 ## Code of Conduct
 
 Janssen project has a
-[Code of Conduct](./CODE_OF_CONDUCT.md)
+[Code of Conduct](CODE_OF_CONDUCT.md)
 to which all contributors must adhere, please read it before interacting with the repository or the community in any way.
 
 ## About Issues
