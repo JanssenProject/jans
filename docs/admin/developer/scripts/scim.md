@@ -308,7 +308,9 @@ There is an important exception to the above and is related to the `manage*` met
 
 ## Script Type: Python
 
-### [Custom SCIM Event Handler](sample-script/custom_scim_handler.py)
+### Custom SCIM Event Handler
+
+Find the script [here](../../../script-catalog/scim/sample-script/custom_scim_handler.py)
 
 The sample code snippet shows how to -
 1. Modify Search Results
@@ -318,7 +320,9 @@ The sample code snippet shows how to -
 
 ## Script Type: Java
 
-### [Custom SCIM Event Handler](sample-script/custom_scim_handler.java)
+### Custom SCIM Event Handler
+
+Find the code [here](../../../script-catalog/scim/sample-script/custom_scim_handler.java)
 
 The sample code snippet shows how to -
 1. Modify Search Results

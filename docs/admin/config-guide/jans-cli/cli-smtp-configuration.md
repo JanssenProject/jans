@@ -8,7 +8,7 @@ tags:
 
 # SMTP Configuration
 
-> Prerequisite: Know how to use the Janssen CLI in [command-line mode](cli-index.md)
+> Prerequisite: Know how to use the Janssen CLI in [command-line mode](../jans-cli/README.md)
 
 Let's get the information of **SMTP Configuration** using Janssen CLI.
 

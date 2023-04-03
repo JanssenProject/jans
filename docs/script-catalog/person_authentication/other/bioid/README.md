@@ -5,7 +5,7 @@
 In order to use this authentication mechanism your organization will need to register for a BioID account. 
 
 ## Prerequisitesm
-- A Gluu Server ([installation instructions](../installation-guide/index.md));
+- A Gluu Server ([installation instructions](../../../../installation-guide/index.md));
 - [BioID interception script](https://github.com/GluuFederation/oxAuth/blob/master/Server/integrations/bioID/BioIDExternalAuthenticator.py) (included in the default Gluu Server distribution);
 - An account with [BioID](https://bwsportal.bioid.com/register).   
 
