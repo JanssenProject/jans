@@ -23,7 +23,7 @@ from authlib.integrations.flask_client import OAuth
 from flask import (Flask, jsonify, redirect, render_template, request, session,
                    url_for)
 from . import config as cfg
-from .client_handler import ClientHandler
+from .helpers.client_handler import ClientHandler
 import logging
 
 oauth = OAuth()
@@ -140,31 +140,35 @@ def create_app():
         status = 0
         data = ''
         if content is None:
+            print('None')
             status = 400
             # message = 'No json data posted'
-        elif 'op_url' and 'client_url' not in content:
+        elif 'op_url' and 'redirect_uris' not in content:
+            print('needed keys NOT found in json')
             status = 400
             # message = 'Not needed keys found in json'
         else:
+            print('else')
             app.logger.info('Trying to register client %s on %s' %
-                            (content['client_url'], content['op_url']))
+                            (content['redirect_uris'], content['op_url']))
             op_url = content['op_url']
-            client_url = content['client_url']
+            redirect_uris = content['redirect_uris']
 
             op_parsed_url = urlparse(op_url)
-            client_parsed_url = urlparse(client_url)
+            client_parsed_redirect_uri = urlparse(redirect_uris[0])
 
-            if op_parsed_url.scheme != 'https' or client_parsed_url.scheme != 'https':
+            if op_parsed_url.scheme != 'https' or client_parsed_redirect_uri.scheme != 'https':
                 status = 400
 
+
             elif (((
-                           op_parsed_url.path != '' or op_parsed_url.query != '') or client_parsed_url.path != '') or client_parsed_url.query != ''):
+                           op_parsed_url.path != '' or op_parsed_url.query != '') or client_parsed_redirect_uri.path == '') or client_parsed_redirect_uri.query != ''):
                 status = 400
 
             else:
                 client_handler = ClientHandler(
                     content['op_url'],
-                    content['client_url']
+                    content['redirect_uris']
                 )
                 data = client_handler.get_client_dict()
                 status = 200
