@@ -174,7 +174,7 @@ When we need to perform multiple patch operations on any configuration endpoint,
 ]
 ```
 
-This file contains multiple individual patch operation. In [Patch Request (schema)](cli-index.md#patch-request-schema) we explained about each of these keys in the above json file.
+This file contains multiple individual patch operation. In [Patch Request (schema)](README.md#patch-request-schema) we explained about each of these keys in the above json file.
 
 After creating the json file, just run the patch operation command.
 

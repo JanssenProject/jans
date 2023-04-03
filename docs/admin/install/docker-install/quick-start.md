@@ -15,7 +15,7 @@ The quickest way to get a Janssen Server up and running is to install a Docker c
 
 ## System Requirements
 
-System should meet [minimum VM system requirements](vm-requirements.md)
+System should meet [minimum VM system requirements](../vm-install/vm-requirements.md)
 
 ## Install
 

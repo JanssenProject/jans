@@ -267,4 +267,4 @@ In any case, the cause of the error can be inspected by [retrieving](#flow-retri
 
 ## `.gama` files: an alternative for deployment
 
-There is an alternative way to manage flows and is via deployment of `.gama` files. This is a more elaborate technique that allows bundling several flows and their required assets and classes for bulk deployment. Learn more about it [here](#gama-deployment.md).
+There is an alternative way to manage flows and is via deployment of `.gama` files. This is a more elaborate technique that allows bundling several flows and their required assets and classes for bulk deployment. Learn more about it [here](gama-deployment.md).

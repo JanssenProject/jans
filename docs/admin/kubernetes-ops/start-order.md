@@ -8,4 +8,4 @@ tags:
 
 ## Service Start Order
 
-![svg](../../../assets/kubernetes-services-start-order.svg)
+![svg](../../assets/kubernetes-services-start-order.svg)
