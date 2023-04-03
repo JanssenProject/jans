@@ -188,7 +188,7 @@ This usually boils down to create and launch a URL looking like `https://<your-h
 - The qualified name (identifier) of the flow to trigger is passed using the parameter referenced in property `cust_param_name` of the Agama bridge script. `agama_flow` will work in most cases since this is the default value employed by the Jans installer. For the current example `agama_flow=test` should be fine
 
 !!! Note
-    To use a different parameter name ensure to register the given parameter in the [server configuration](../../config-guide/jans-cli/im/im-jans-authorization-server.md) (property `authorizationRequestCustomAllowedParameters`) and update the bridge accordingly
+    To use a different parameter name ensure to register the given parameter in the [server configuration](../../config-guide/jans-cli/cli-jans-authorization-server.md) (property `authorizationRequestCustomAllowedParameters`) and update the bridge accordingly
 
 - If the flow to call receives input parameters, their values can be passed in the custom parameter as well. Use a hyphen to separate the flow name and the parameters expressed in JSON object format. For example, if the flow had inputs  `height` and `color`, you can use `test-{"height": 190, "color": "blue"}` for the value of `agama_flow`. Ensure to apply proper URL-encoding beforehand. In this case, the actual value would be `test-%7B%22height%22%3A+190%2C+%22color%22%3A+%22blue%22%7D`. If certain inputs are not provided, `null` values will be assigned for them
 
