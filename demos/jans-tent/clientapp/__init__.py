@@ -24,6 +24,7 @@ from flask import (Flask, jsonify, redirect, render_template, request, session,
                    url_for)
 from . import config as cfg
 from .helpers.client_handler import ClientHandler
+from .helpers.cgf_checker import register_client_if_no_client_info
 import logging
 
 oauth = OAuth()
@@ -108,6 +109,7 @@ class BaseClientErrors(Exception):
 
 
 def create_app():
+    register_client_if_no_client_info()
     add_config_from_json()
     ssl_verify()
 
