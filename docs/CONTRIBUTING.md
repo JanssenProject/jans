@@ -44,14 +44,14 @@ If you need Janssen installation to test out your fix, here are the [steps](http
 We are really glad you are reading this, because we need volunteer developers to help this project come to fruition.
 
 - [Code of Conduct](#code-of-conduct)
-- [Issues](#issues)
+- [Issues](#about-issues)
 - [Triaging](#triaging)
 - [Coding Conventions](#code-conventions-and-guidelines)
 
 ## Code of Conduct
 
 Janssen project has a
-[Code of Conduct](CODE_OF_CONDUCT.md)
+[Code of Conduct](./CODE_OF_CONDUCT.md)
 to which all contributors must adhere, please read it before interacting with the repository or the community in any way.
 
 ## About Issues
@@ -139,7 +139,7 @@ Branch name should have component name as prefix, eg `jans-core-mybranch`
 - PR should include relevent documentaton changes
 - PR should include unit and integration tests
 
-### Issues 
+### Issues
 - Issue titles should follow [Conventional Commits v1.0.0](https://www.conventionalcommits.org/en/v1.0.0/)
 
 ### Backport changes to a different version

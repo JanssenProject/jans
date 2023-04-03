@@ -18,7 +18,7 @@ Contents:
 ## API and Code Reference
 - API Reference <!-- Link to [OpenAPI](https://swagger.io/specification/) document which can be viewed with [SwaggerUI](https://swagger.io/tools/swagger-ui/) -->
 - Code Reference <!-- Link to auto-generated docs that are extracted from the code, for example, Javadocs -->
-## Deployment 
+## Deployment
 <!-- Instructions on how to properly deploy this component. Included are what persistence, caching, file system, network (e.g. port), compute or other system requirements are needed to make it run.-->
 ## Data Reference
 <!-- If the component needs a database or cache, an overview of the required schema or information tree.-->
