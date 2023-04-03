@@ -1,5 +1,7 @@
-import config as cfg
-from client_handler import ClientHandler
+# executes a new client auto-register from config.py
+
+from clientapp import config as cfg
+from clientapp.helpers.client_handler import ClientHandler
 import logging
 import json
 
