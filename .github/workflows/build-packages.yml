@@ -71,12 +71,13 @@ jobs:
       id: previoustag
       run: |
         echo "version=$(echo ${{ github.event.ref }} | cut -d 'v' -f 2)" >> $GITHUB_OUTPUT
+        echo "tag=$(echo ${{ github.event.ref }} | cut -d '/' -f 3)" >> $GITHUB_OUTPUT
         echo "PACKAGE_PREFIX=jans" >> ${GITHUB_ENV}
 
     - name: Print Version and tag
       run: |
         echo "Version: ${{ steps.previoustag.outputs.version }}"
-        echo "Tag: ${{ github.event.ref }}"
+        echo "Tag: ${{ steps.previoustag.outputs.tag }}"
     - name: Running install and build
       id: run_build
       run: |
@@ -212,6 +213,7 @@ jobs:
       id: previoustag
       run: |
         echo "version=$(echo ${{ github.event.ref }} | cut -d 'v' -f 2)" >> $GITHUB_OUTPUT
+        echo "tag=$(echo ${{ github.event.ref }} | cut -d '/' -f 3)" >> $GITHUB_OUTPUT
         echo "PACKAGE_PREFIX=jans" >> ${GITHUB_ENV}
 
     - name: Print Version and tag
