@@ -75,7 +75,8 @@ spec:
         env:
           {{- include "opendj.usr-envs" $ | indent 12 }}
           {{- include "opendj.usr-secret-envs" $ | indent 12 }}
-        lifecycle: {{ toYaml .Values.lifecycle | nindent 10 }}
+        lifecycle:
+{{- toYaml .Values.lifecycle | nindent 10 }}        
         envFrom:
         - configMapRef:
             name: {{ $.Release.Name }}-config-cm

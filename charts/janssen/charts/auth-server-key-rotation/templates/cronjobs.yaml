@@ -40,7 +40,8 @@ spec:
                 {{- include "auth-server-key-rotation.usr-envs" . | indent 16 }}
                 {{- include "auth-server-key-rotation.usr-secret-envs" . | indent 16 }}
               imagePullPolicy: {{ .Values.image.pullPolicy }}
-              lifecycle: {{ toYaml .Values.lifecycle | nindent 10 }}
+              lifecycle:
+{{- toYaml .Values.lifecycle | nindent 16 }}              
               volumeMounts:
               {{ if or (eq .Values.global.configSecretAdapter "aws") (eq .Values.global.configAdapterName "aws") }}
                 - mountPath: {{ .Values.global.cnAwsSharedCredentialsFile }}
