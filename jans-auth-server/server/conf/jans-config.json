@@ -322,7 +322,7 @@
     ],
     "applianceInum":"${config.oxauth.appliance}",
     "sessionIdUnusedLifetime":86400,
-    "sessionIdUnauthenticatedUnusedLifetime":60,
+    "sessionIdUnauthenticatedUnusedLifetime":7200,
     "sessionIdEnabled":true,
     "sessionIdPersistOnPromptNone":true,
     "sessionIdLifetime":86400,

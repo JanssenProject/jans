@@ -431,7 +431,7 @@ public class AppConfiguration implements Configuration {
     private int sessionIdUnusedLifetime;
 
     @DocProperty(description = "The lifetime for unused unauthenticated session states")
-    private int sessionIdUnauthenticatedUnusedLifetime = 120; // 120 seconds
+    private int sessionIdUnauthenticatedUnusedLifetime = 7200; // 2h
 
     @DocProperty(description = "Boolean value specifying whether to persist session ID on prompt none")
     private Boolean sessionIdPersistOnPromptNone;
