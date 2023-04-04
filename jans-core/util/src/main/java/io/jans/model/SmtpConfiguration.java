@@ -28,8 +28,8 @@ public class SmtpConfiguration implements java.io.Serializable {
     @JsonProperty("port")
     private int port;
     
-    @JsonProperty("connect-protection")
-    private SmtpConnectProtectionType connectProtection;    
+    @JsonProperty("connect_protection")
+    private SmtpConnectProtectionType connectProtection;
 
     @JsonProperty("trust_host")
     private boolean serverTrust;
@@ -52,21 +52,21 @@ public class SmtpConfiguration implements java.io.Serializable {
     @Transient
     @JsonIgnore
     private String smtpAuthenticationAccountPasswordDecrypted;
-    
-    @JsonProperty("key-store")
+
+    @JsonProperty("key_store")
     private String keyStore;
 
-    @JsonProperty("key-store-password")
+    @JsonProperty("key_store_password")
     private String keyStorePassword;
 
     @Transient
     @JsonIgnore
     private String keyStorePasswordDecrypted;
 
-    @JsonProperty("key-store-alias")
+    @JsonProperty("key_store_alias")
     private String keyStoreAlias;
 
-    @JsonProperty("signing-algorithm")
+    @JsonProperty("signing_algorithm")
     private String signingAlgorithm;
 
     public String getHost() {

@@ -52,16 +52,16 @@ public class ConfigSmtpResource extends ConfigBaseResource {
     private static final String SMTP_CONFIGURATION = "smtpConfiguration";
 
     @Inject
-    Logger log;
+    private Logger log;
 
     @Inject
-    ConfigurationService configurationService;
+    private ConfigurationService configurationService;
 
     @Inject
-    EncryptionService encryptionService;
+    private EncryptionService encryptionService;
 
     @Inject
-    MailService mailService;
+    private MailService mailService;
 
     @Operation(summary = "Returns SMTP server configuration", description = "Returns SMTP server configuration", operationId = "get-config-smtp", tags = {
             "Configuration – SMTP" }, security = @SecurityRequirement(name = "oauth2", scopes = {
@@ -145,18 +145,19 @@ public class ConfigSmtpResource extends ConfigBaseResource {
     public Response testSmtpConfiguration(@Valid SmtpTest smtpTest) throws EncryptionException {
         log.debug("smtpTest:{}", smtpTest);
         SmtpConfiguration smtpConfiguration = configurationService.getConfiguration().getSmtpConfiguration();
-        log.debug(SMTP_CONFIGURATION + ":{}", smtpConfiguration);
         smtpConfiguration.setSmtpAuthenticationAccountPasswordDecrypted(encryptionService.decrypt(smtpConfiguration.getSmtpAuthenticationAccountPassword()));
         smtpConfiguration.setKeyStorePasswordDecrypted(encryptionService.decrypt(smtpConfiguration.getKeyStorePassword()));
         boolean status = false;
         if (smtpTest.getSign()) {
-            status = mailService.sendMailSigned(smtpConfiguration, smtpConfiguration.getFromEmailAddress(),
+            log.debug("smtpTest: trying to send signed email");
+            status = mailService.sendMailSigned(smtpConfiguration.getFromEmailAddress(),
                     smtpConfiguration.getFromName(), smtpConfiguration.getFromEmailAddress(), null,
                     smtpTest.getSubject(), smtpTest.getMessage(),
                     smtpTest.getMessage());
         }
         else {
-            status = mailService.sendMail(smtpConfiguration, smtpConfiguration.getFromEmailAddress(),
+            log.debug("smtpTest: trying to send non-signed email");
+            status = mailService.sendMail(smtpConfiguration.getFromEmailAddress(),
                     smtpConfiguration.getFromName(), smtpConfiguration.getFromEmailAddress(), null,
                     smtpTest.getSubject(), smtpTest.getMessage(),
                     smtpTest.getMessage());
