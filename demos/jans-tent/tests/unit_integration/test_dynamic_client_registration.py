@@ -1,11 +1,8 @@
 from unittest import TestCase
 from unittest.mock import MagicMock
-import sys
 import inspect
 
-import pytest
-
-import clientapp.client_handler as client_handler
+import clientapp.helpers.client_handler as client_handler
 from typing import Optional
 import helper
 from oic.oauth2 import ASConfigurationResponse
@@ -58,7 +55,7 @@ class TestDynamicClientRegistration(TestCase):
                         'register_client is not callable')
 
     def test_if_register_client_receives_params(self):
-        expected_args = ['self', 'op_data', 'client_url']
+        expected_args = ['self', 'op_data', 'redirect_uris']
         self.assertTrue(
             inspect.getfullargspec(
                 ClientHandler.register_client).args == expected_args,
@@ -68,14 +65,14 @@ class TestDynamicClientRegistration(TestCase):
         insp = inspect.getfullargspec(ClientHandler.register_client)
         self.assertTrue(
             insp.annotations['op_data'] == ASConfigurationResponse
-            and insp.annotations['client_url'] == Optional[str],
+            and insp.annotations['redirect_uris'] == Optional[list[str]],
             'register_client is not receiving the right params')
 
     def test_if_class_has_initial_expected_attrs(self):
         initial_expected_attrs = [
             '_ClientHandler__client_id',
             '_ClientHandler__client_secret',
-            '_ClientHandler__client_url',
+            '_ClientHandler__redirect_uris',
             '_ClientHandler__metadata_url',
             'discover',  # method
             'register_client'  # method
@@ -161,18 +158,18 @@ class TestDynamicClientRegistration(TestCase):
         self.assertEqual(client_handler_obj.__dict__['_ClientHandler__op_url'],
                          op_url)
 
-    def test_class_init_should_set_client_url(self):
+    def test_class_init_should_set_redirect_uris(self):
         self.mock_methods()
 
         op_url = 'https://t1.techno24x7.com'
-        client_url = 'https://mock.test.com'
-        client_handler_obj = ClientHandler(op_url, client_url)
+        redirect_uris = 'https://mock.test.com/oidc_callback'
+        client_handler_obj = ClientHandler(op_url, redirect_uris)
 
         self.restore_stashed_mocks()
 
         self.assertEqual(
-            client_handler_obj.__dict__['_ClientHandler__client_url'],
-            client_url)
+            client_handler_obj.__dict__['_ClientHandler__redirect_uris'],
+            redirect_uris)
 
     def test_class_init_should_set_metadata_url(self):
         self.mock_methods()
