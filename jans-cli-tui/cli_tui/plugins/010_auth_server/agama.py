@@ -62,7 +62,7 @@ class Agama(DialogUtils):
         project_name = project_data['details']['projectMetadata']['projectName']
 
         async def coroutine():
-            cli_args = {'operation_id': 'get-agama-dev-prj-configs', 'endpoint_args':'name:{}'.format(project_name)}
+            cli_args = {'operation_id': 'get-agama-dev-prj-configs', 'url_suffix':'name:{}'.format(project_name)}
             self.app.start_progressing(_("Retreiving project configuration..."))
             response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
             self.app.stop_progressing()
@@ -70,7 +70,7 @@ class Agama(DialogUtils):
             try:
                 result = response.json()
             except Exception:
-                result = result.text
+                result = response.text
 
             if result:
                 self.app.data_display_dialog(title=_("Configuration for") + " " + project_name, data=response.json())
