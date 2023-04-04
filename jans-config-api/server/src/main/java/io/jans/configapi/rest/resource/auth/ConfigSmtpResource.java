@@ -63,9 +63,6 @@ public class ConfigSmtpResource extends ConfigBaseResource {
     @Inject
     private MailService mailService;
 
-    @Inject
-    private SmtpConfiguration smtpConfiguration;
-
     @Operation(summary = "Returns SMTP server configuration", description = "Returns SMTP server configuration", operationId = "get-config-smtp", tags = {
             "Configuration – SMTP" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.SMTP_READ_ACCESS }))
