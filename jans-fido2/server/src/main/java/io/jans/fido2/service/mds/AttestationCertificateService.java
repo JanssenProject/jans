@@ -85,11 +85,15 @@ public class AttestationCertificateService {
 			List<X509Certificate> attestationCertificates) {
 		JsonNode metaDataStatement = null;
 		// incase of u2f-fido2 attestation
-		if (metadataNode != null) {
-			try {
-				metaDataStatement = dataMapperService.readTree(metadataNode.get("metadataStatement").toPrettyString());
-			} catch (IOException e) {
-				log.error("Error parsing the metadata statement", e);
+		if ((metadataNode != null)) {
+			if (metadataNode.has("attestationRootCertificates")) {
+				metaDataStatement = metadataNode;
+			} else if (metadataNode.has("metadataStatement")) {
+				try {
+					metaDataStatement = dataMapperService.readTree(metadataNode.get("metadataStatement").toPrettyString());
+				} catch (IOException e) {
+					log.error("Error parsing the metadata statement", e);
+				}
 			}
 		}
 

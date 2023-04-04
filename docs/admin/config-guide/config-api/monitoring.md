@@ -5,13 +5,71 @@ tags:
 ---
 
 ## This content is in progress
+There are health endpoints for monitoring its performance, availability, and end-user experience to ensure the application is functioning properly.
 
-The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.
+## Health - Check endpoints
+- /api/v1/health - Returns application consolidated health status - liveness and readiness
+- /api/v1/health/live - Returns application liveness status
+- /api/v1/health/ready -Returns application readiness status
+- /api/v1/health/server-stat - Returns application server status and stats metric like `memoryfree`, `uptime`, `free_disk_space`, etc
 
-## Have questions in the meantime?
+Sample health response
+```json
+HTTP/1.1 200 OK
+Content-Type: application/json
+[
+    {
+        "name": "jans-config-api liveness",
+        "status": "UP"
+    },
+    {
+        "name": "jans-config-api readiness",
+        "status": "UP"
+    }
+]
+```
 
-While this documentation is in progress, you can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussion) or the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). Any questions you have will help determine what information our documentation should cover.
+Sample liveness response
+```json
+HTTP/1.1 200 OK
+Content-Type: application/json
+{
+    "name": "jans-config-api liveness",
+    "status": "UP"
+}
+```
 
-## Want to contribute?
+Sample readiness response
+```json
+HTTP/1.1 200 OK
+Content-Type: application/json
+{
+    "name": "jans-config-api readiness",
+    "status": "UP"
+}
+```
 
-If you have content you'd like to contribute to this page in the meantime, you can get started with our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/).
+Sample server status response
+```json
+HTTP/1.1 200 OK
+Content-Type: application/json
+{
+    "dbType":"ldap",
+	"lastUpdate":"2023-03-16T03:17:44",
+	"facterData":
+	{
+	    "memoryfree":"7.1%",
+		"swapfree":"60.1%",
+		"hostname":"jans.server2",
+		"ipaddress":"192.168.0.102",
+		"uptime":"3:03",
+		"free_disk_space":"65.0%",
+		"load_average":"0.77"
+	}
+}
+```
+
+
+## Application logs
+Application log can be verified if application is started properly.
+[Refer here](./logs.md) for more details.

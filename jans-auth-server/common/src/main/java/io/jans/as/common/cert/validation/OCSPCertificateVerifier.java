@@ -7,7 +7,8 @@
 package io.jans.as.common.cert.validation;
 
 import io.jans.as.common.cert.validation.model.ValidationStatus;
-import io.jans.as.model.util.SecurityProviderUtility;
+import io.jans.util.security.SecurityProviderUtility;
+
 import org.apache.commons.io.IOUtils;
 import org.bouncycastle.asn1.ASN1InputStream;
 import org.bouncycastle.asn1.ASN1OctetString;

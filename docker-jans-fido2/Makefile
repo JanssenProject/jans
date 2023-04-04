@@ -1,5 +1,5 @@
-CN_VERSION?=1.0.10-SNAPSHOT
-IMAGE_NAME=janssenproject/fido2
+CN_VERSION?=1.0.11-SNAPSHOT
+IMAGE_NAME=ghcr.io/janssenproject/jans/fido2
 DEV_VERSION?=$(shell echo ${CN_VERSION} | cut -d '-' -f 1)_dev
 
 .PHONY: test clean all build-dev trivy-scan grype-scan

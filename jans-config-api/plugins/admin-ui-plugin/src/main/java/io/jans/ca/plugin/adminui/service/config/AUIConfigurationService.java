@@ -7,7 +7,9 @@ import io.jans.as.common.service.common.EncryptionService;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.config.adminui.AdminConf;
 import io.jans.as.model.config.adminui.LicenseConfig;
+import io.jans.as.model.config.adminui.OIDCClientSettings;
 import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.ca.plugin.adminui.model.auth.DCRResponse;
 import io.jans.ca.plugin.adminui.model.config.AUIConfiguration;
 import io.jans.ca.plugin.adminui.model.config.LicenseConfiguration;
 import io.jans.ca.plugin.adminui.model.config.LicenseSpringCredentials;
@@ -141,18 +143,23 @@ public class AUIConfigurationService extends BaseService {
 
     private LicenseConfiguration addPropertiesToLicenseConfiguration(AdminConf appConf) throws Exception {
         LicenseConfiguration licenseConfiguration = new LicenseConfiguration();
-        LicenseConfig licenseConfig = appConf.getMainSettings().getLicenseConfig();
+        try {
+            LicenseConfig licenseConfig = appConf.getMainSettings().getLicenseConfig();
 
-        if (licenseConfig != null) {
+            if (licenseConfig != null) {
 
-            LicenseSpringCredentials licenseSpringCredentials = requestLicenseCredentialsFromScan(licenseConfig);
-            licenseConfiguration.setApiKey(licenseSpringCredentials.getApiKey());
-            licenseConfiguration.setProductCode(licenseSpringCredentials.getProductCode());
-            licenseConfiguration.setSharedKey(licenseSpringCredentials.getSharedKey());
-            licenseConfiguration.setHardwareId(licenseConfig.getLicenseHardwareKey());
-            licenseConfiguration.setLicenseKey(licenseConfig.getLicenseKey());
+                LicenseSpringCredentials licenseSpringCredentials = requestLicenseCredentialsFromScan(licenseConfig);
+                licenseConfiguration.setApiKey(licenseSpringCredentials.getApiKey());
+                licenseConfiguration.setProductCode(licenseSpringCredentials.getProductCode());
+                licenseConfiguration.setSharedKey(licenseSpringCredentials.getSharedKey());
+                licenseConfiguration.setHardwareId(licenseConfig.getLicenseHardwareKey());
+                licenseConfiguration.setLicenseKey(licenseConfig.getLicenseKey());
+            }
+            return licenseConfiguration;
+        } catch (Exception e) {
+            logger.error(ErrorResponse.LICENSE_SPRING_CREDENTIALS_ERROR.getDescription());
         }
-        return licenseConfiguration;
+        return null;
     }
 
     /**
@@ -164,17 +171,27 @@ public class AUIConfigurationService extends BaseService {
     private LicenseSpringCredentials requestLicenseCredentialsFromScan(LicenseConfig licenseConfig) throws Exception {
         try {
             logger.info("Inside method to request license credentials from SCAN api.");
-            TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
-            tokenRequest.setAuthUsername(licenseConfig.getOidcClient().getClientId());
-            tokenRequest.setAuthPassword(licenseConfig.getOidcClient().getClientSecret());
-            tokenRequest.setGrantType(GrantType.CLIENT_CREDENTIALS);
-            tokenRequest.setScope(LicenseResource.SCOPE_LICENSE_READ);
+            io.jans.as.client.TokenResponse tokenResponse = generateToken(licenseConfig);
+            if (tokenResponse == null) {
+                //try to re-generate clients using old SSA
+                DCRResponse dcrResponse = executeDCR(licenseConfig.getSsa());
+                if (dcrResponse == null) {
+                    throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), ErrorResponse.ERROR_IN_DCR.getDescription());
+                }
+                tokenResponse = generateToken(licenseConfig);
 
-            logger.info("Truing to get access token from auth server.");
-            String scanLicenseApiHostname = (new StringBuffer()).append(licenseConfig.getScanLicenseAuthServerHostname()).append("/jans-auth/restv1/token").toString();
-            io.jans.as.client.TokenResponse tokenResponse = null;
-            tokenResponse = getToken(tokenRequest, scanLicenseApiHostname);
-
+                if (tokenResponse == null) {
+                    throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), ErrorResponse.TOKEN_GENERATION_ERROR.getDescription());
+                }
+                AdminConf appConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
+                LicenseConfig lc = appConf.getMainSettings().getLicenseConfig();
+                lc.setScanLicenseApiHostname(dcrResponse.getScanHostname());
+                OIDCClientSettings oidcClient = new OIDCClientSettings(dcrResponse.getOpHost(), dcrResponse.getClientId(), dcrResponse.getClientSecret());
+                lc.setOidcClient(oidcClient);
+                appConf.getMainSettings().setLicenseConfig(lc);
+                entryManager.merge(appConf);
+                licenseConfig = lc;
+            }
             // create request header
             MultivaluedMap<String, Object> headers = new MultivaluedHashMap<>();
             headers.putSingle("Content-Type", "application/json");
@@ -218,4 +235,27 @@ public class AUIConfigurationService extends BaseService {
             throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), ErrorResponse.LICENSE_SPRING_CREDENTIALS_ERROR.getDescription());
         }
     }
+
+    private io.jans.as.client.TokenResponse generateToken(LicenseConfig licenseConfig) {
+        try {
+            TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
+            tokenRequest.setAuthUsername(licenseConfig.getOidcClient().getClientId());
+            tokenRequest.setAuthPassword(licenseConfig.getOidcClient().getClientSecret());
+            tokenRequest.setGrantType(GrantType.CLIENT_CREDENTIALS);
+            tokenRequest.setScope(LicenseResource.SCOPE_LICENSE_READ);
+
+            logger.info("licenseConfig.toString(): " + licenseConfig.toString());
+            logger.info("Trying to get access token from auth server.");
+            String scanLicenseApiHostname = (new StringBuffer()).append(StringUtils.removeEnd(licenseConfig.getOidcClient().getOpHost(), "/"))
+                    .append("/jans-auth/restv1/token").toString();
+            io.jans.as.client.TokenResponse tokenResponse = null;
+            tokenResponse = getToken(tokenRequest, scanLicenseApiHostname);
+            return tokenResponse;
+        } catch (Exception e) {
+            logger.error(ErrorResponse.TOKEN_GENERATION_ERROR.getDescription());
+            return null;
+        }
+    }
+
+
 }

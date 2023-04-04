@@ -477,7 +477,7 @@
     "deviceAuthzTokenPollInterval": 5,
     "deviceAuthzResponseTypeToProcessAuthz": "code",
     "redirectUrisRegexEnabled": true,
-    "useHighestLevelScriptIfAcrScriptNotFound": true,
+    "useHighestLevelScriptIfAcrScriptNotFound": false,
     "agamaConfiguration": {
         "enabled": false,
         "templatesPath": "/ftl",

@@ -44,7 +44,6 @@ import io.jans.as.model.config.BaseDnConfiguration;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.fido.u2f.protocol.AuthenticateResponse;
 import io.jans.as.model.fido.u2f.protocol.RegisterResponse;
-import io.jans.as.model.util.SecurityProviderUtility;
 import io.jans.fido2.exception.Fido2CompromisedDevice;
 import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.conf.AppConfiguration;
@@ -65,11 +64,13 @@ import io.jans.fido2.sg.SuperGluuMode;
 import io.jans.junit.extension.FileParameterExtension;
 import io.jans.junit.extension.Name;
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.model.fido2.Fido2AuthenticationData;
 import io.jans.orm.model.fido2.Fido2AuthenticationEntry;
 import io.jans.orm.model.fido2.Fido2AuthenticationStatus;
 import io.jans.orm.model.fido2.Fido2RegistrationEntry;
 import io.jans.orm.model.fido2.Fido2RegistrationStatus;
 import io.jans.u2f.service.persist.DeviceRegistrationService;
+import io.jans.util.security.SecurityProviderUtility;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Inject;
@@ -230,9 +231,9 @@ public class FullFlowAndroidTest {
 		this.attestationChallenge = challenge;
 
 		JsonNode request = attestationSuperGluuController.buildFido2AttestationStartResponse(userName, applicationId, sessionId);
-        assertEquals(request.get(CommonVerifiers.SUPER_GLUU_REQUEST).asBoolean(), true);
-        assertEquals(request.get(CommonVerifiers.SUPER_GLUU_MODE).asText(), SuperGluuMode.TWO_STEP.getMode());
-        assertEquals(request.get(CommonVerifiers.SUPER_GLUU_APP_ID).asText(), applicationId);
+        assertEquals(true, request.get(CommonVerifiers.SUPER_GLUU_REQUEST).asBoolean());
+        assertEquals(SuperGluuMode.TWO_STEP.getMode(), request.get(CommonVerifiers.SUPER_GLUU_MODE).asText());
+        assertEquals(applicationId, request.get(CommonVerifiers.SUPER_GLUU_APP_ID).asText());
 
 		ObjectNode response = attestationService.options(request);
 		
@@ -243,18 +244,18 @@ public class FullFlowAndroidTest {
 
         assertNotNull(registrationEntry);
         assertNotNull(response);
-        assertEquals(response.get("challenge").asText(), challenge);
+        assertEquals(challenge, response.get("challenge").asText());
 
-        assertEquals(registrationEntry.getRegistrationStatus(), Fido2RegistrationStatus.pending);
+        assertEquals(Fido2RegistrationStatus.pending, registrationEntry.getRegistrationStatus());
 	}
 
-	public void testFinishAttestationTwoStepAndroidImpl(String userName, String registerFinishResponse, String registeredPublicKey) {
+	public void testFinishAttestationTwoStepAndroidAuthenticatedImpl(String userName, String registerFinishResponse, String registeredPublicKey) {
 		// Parse register response
 		RegisterResponse registerResponse = attestationSuperGluuController.parseRegisterResponse(registerFinishResponse);
 
 		JsonNode request = attestationSuperGluuController.buildFido2AttestationVerifyResponse(userName, registerResponse);
-        assertEquals(request.get(CommonVerifiers.SUPER_GLUU_REQUEST).asBoolean(), true);
-        assertEquals(request.get(CommonVerifiers.SUPER_GLUU_MODE).asText(), SuperGluuMode.TWO_STEP.getMode());
+        assertEquals(true, request.get(CommonVerifiers.SUPER_GLUU_REQUEST).asBoolean());
+        assertEquals(SuperGluuMode.TWO_STEP.getMode(), request.get(CommonVerifiers.SUPER_GLUU_MODE).asText());
 
 		ObjectNode response = attestationService.verify(request);
 
@@ -264,10 +265,20 @@ public class FullFlowAndroidTest {
         registrationEntry = captor.getValue();
 
 		assertNotNull(response);
-        assertEquals(response.get("status").asText(), "ok");
-        assertEquals(response.get("createdCredentials").get("id").asText(), registeredPublicKey);
+        assertEquals("ok", response.get("status").asText());
+        assertEquals(registeredPublicKey, response.get("createdCredentials").get("id").asText());
+	}
 
-        assertEquals(registrationEntry.getRegistrationStatus(), Fido2RegistrationStatus.registered);
+	public void testFinishAttestationTwoStepAndroidAuthenticatedRegistered(String userName, String registerFinishResponse, String registeredPublicKey) {
+		testFinishAttestationTwoStepAndroidAuthenticatedImpl(userName, registerFinishResponse, registeredPublicKey);
+
+        assertEquals(Fido2RegistrationStatus.registered, registrationEntry.getRegistrationStatus());
+	}
+
+	public void testFinishAssertionTwoStepAndroidAuthenticatedCanceled(String userName, String registerFinishResponse, String registeredPublicKey) {
+		testFinishAttestationTwoStepAndroidAuthenticatedImpl(userName, registerFinishResponse, registeredPublicKey);
+
+        assertEquals(Fido2RegistrationStatus.canceled, registrationEntry.getRegistrationStatus());
 	}
 
 	public void testStartAssertionTwoStepAndroidImpl(String issuer, String challenge, String userName,
@@ -276,10 +287,10 @@ public class FullFlowAndroidTest {
 		this.assertionChallenge = challenge;
 
 		JsonNode request = assertionSuperGluuController.buildFido2AssertionStartResponse(userName, registrationEntry.getPublicKeyId(), applicationId, sessionId);
-        assertEquals(request.get(CommonVerifiers.SUPER_GLUU_REQUEST).asBoolean(), true);
-        assertEquals(request.get(CommonVerifiers.SUPER_GLUU_MODE).asText(), SuperGluuMode.TWO_STEP.getMode());
-        assertEquals(request.get(CommonVerifiers.SUPER_GLUU_KEY_HANDLE).asText(), registrationEntry.getPublicKeyId());
-        assertEquals(request.get(CommonVerifiers.SUPER_GLUU_APP_ID).asText(), applicationId);
+        assertEquals(true, request.get(CommonVerifiers.SUPER_GLUU_REQUEST).asBoolean());
+        assertEquals(SuperGluuMode.TWO_STEP.getMode(), request.get(CommonVerifiers.SUPER_GLUU_MODE).asText());
+        assertEquals(registrationEntry.getPublicKeyId(), request.get(CommonVerifiers.SUPER_GLUU_KEY_HANDLE).asText());
+        assertEquals(applicationId, request.get(CommonVerifiers.SUPER_GLUU_APP_ID).asText());
 
 		ObjectNode response = assertionService.options(request);
 		
@@ -291,9 +302,9 @@ public class FullFlowAndroidTest {
         assertNotNull(authenticationEntry);
         assertNotNull(response);
         assertTrue(response.get("allowCredentials").size() > 0);
-        assertEquals(response.get("allowCredentials").get(0).get("id").asText(), registrationEntry.getPublicKeyId());
+        assertEquals(registrationEntry.getPublicKeyId(), response.get("allowCredentials").get(0).get("id").asText());
 
-        assertEquals(authenticationEntry.getAuthenticationStatus(), Fido2AuthenticationStatus.pending);
+        assertEquals(Fido2AuthenticationStatus.pending, authenticationEntry.getAuthenticationStatus());
 	}
 
 	public void testFinishAssertionTwoStepAndroidImpl(String userName, String authenticateFinishResponse) {
@@ -301,8 +312,8 @@ public class FullFlowAndroidTest {
 		AuthenticateResponse authenticateResponse = assertionSuperGluuController.parseAuthenticateResponse(authenticateFinishResponse);
 
 		JsonNode request = assertionSuperGluuController.buildFido2AuthenticationVerifyResponse(userName, authenticateFinishResponse, authenticateResponse);
-        assertEquals(request.get(CommonVerifiers.SUPER_GLUU_REQUEST).asBoolean(), true);
-        assertEquals(request.get(CommonVerifiers.SUPER_GLUU_MODE).asText(), SuperGluuMode.TWO_STEP.getMode());
+        assertEquals(true, request.get(CommonVerifiers.SUPER_GLUU_REQUEST).asBoolean());
+        assertEquals(SuperGluuMode.TWO_STEP.getMode(), request.get(CommonVerifiers.SUPER_GLUU_MODE).asText());
 
 		ObjectNode response = assertionService.verify(request);
 
@@ -316,10 +327,20 @@ public class FullFlowAndroidTest {
         registrationEntry = captorAttestation.getValue();
 
 		assertNotNull(response);
-        assertEquals(response.get("status").asText(), "ok");
-        assertEquals(response.get("authenticatedCredentials").get("id").asText(), registrationEntry.getPublicKeyId());
+        assertEquals("ok", response.get("status").asText());
+        assertEquals(registrationEntry.getPublicKeyId(), response.get("authenticatedCredentials").get("id").asText());
+	}
 
-        assertEquals(authenticationEntry.getAuthenticationStatus(), Fido2AuthenticationStatus.authenticated);
+	public void testFinishAssertionTwoStepAndroidAuthenticated(String userName, String authenticateFinishResponse) {
+		testFinishAssertionTwoStepAndroidImpl(userName, authenticateFinishResponse);
+
+        assertEquals(Fido2AuthenticationStatus.authenticated, authenticationEntry.getAuthenticationStatus());
+	}
+
+	public void testFinishAssertionTwoStepAndroidCanceled(String userName, String authenticateFinishResponse) {
+		testFinishAssertionTwoStepAndroidImpl(userName, authenticateFinishResponse);
+
+        assertEquals(Fido2AuthenticationStatus.canceled, authenticationEntry.getAuthenticationStatus());
 	}
 
 	@Test
@@ -336,7 +357,7 @@ public class FullFlowAndroidTest {
     @ExtendWith(FileParameterExtension.class)
 	public void testFinishAttestationTwoStepAndroid(@Name("attestation.android.two-step.userName") String userName,
 			@Name("attestation.android.two-step.finish.request") String registerFinishResponse, @Name("attestation.android.two-step.finish.publicKeyId") String publicKeyId) {
-		testFinishAttestationTwoStepAndroidImpl(userName, registerFinishResponse, publicKeyId);
+		testFinishAttestationTwoStepAndroidAuthenticatedRegistered(userName, registerFinishResponse, publicKeyId);
 	}
 
 	@Test
@@ -354,7 +375,7 @@ public class FullFlowAndroidTest {
     @ExtendWith(FileParameterExtension.class)
 	public void testFinishAssertionTwoStepAndroid(@Name("attestation.android.two-step.userName") String userName,
 			@Name("assertion.android.two-step.finish.request") String authenticateFinishResponse) {
-		testFinishAssertionTwoStepAndroidImpl(userName, authenticateFinishResponse);
+		testFinishAssertionTwoStepAndroidAuthenticated(userName, authenticateFinishResponse);
         assertTrue(registrationEntry.getCounter() == 1);
 	}
 
@@ -372,22 +393,75 @@ public class FullFlowAndroidTest {
     @ExtendWith(FileParameterExtension.class)
 	public void testSecondFinishAssertionTwoStepAndroid(@Name("attestation.android.two-step.userName") String userName,
 			@Name("assertion.android.two-step.finish.request2") String authenticateFinishResponse) {
-		testFinishAssertionTwoStepAndroidImpl(userName, authenticateFinishResponse);
+		testFinishAssertionTwoStepAndroidAuthenticated(userName, authenticateFinishResponse);
         assertTrue(registrationEntry.getCounter() == 2);
 	}
 
 	@Test
 	@Order(7)
     @ExtendWith(FileParameterExtension.class)
+	public void testThirdStartAssertionTwoStepCancelAndroid(@Name("attestation.android.two-step.issuer") String issuer, @Name("assertion.android.two-step.cancel.challenge3") String challenge,
+			@Name("attestation.android.two-step.userName") String userName, @Name("attestation.android.two-step.applicationId") String applicationId,
+			@Name("attestation.android.two-step.sessionId") String sessionId) {
+		testStartAssertionTwoStepAndroidImpl(issuer, challenge, userName, applicationId, sessionId);
+	}
+
+	@Test
+	@Order(8)
+    @ExtendWith(FileParameterExtension.class)
+	public void testThirdFinishAssertionTwoStepCancelAndroid(@Name("attestation.android.two-step.userName") String userName,
+			@Name("assertion.android.two-step.cancel.finish.request3") String authenticateFinishResponse) {
+		testFinishAssertionTwoStepAndroidCanceled(userName, authenticateFinishResponse);
+        assertTrue(registrationEntry.getCounter() == 3);
+	}
+
+	@Test
+	@Order(9)
+    @ExtendWith(FileParameterExtension.class)
+	public void testFourthStartAssertionTwoStepAndroid(@Name("attestation.android.two-step.issuer") String issuer, @Name("assertion.android.two-step.challenge4") String challenge,
+			@Name("attestation.android.two-step.userName") String userName, @Name("attestation.android.two-step.applicationId") String applicationId,
+			@Name("attestation.android.two-step.sessionId") String sessionId) {
+		testStartAssertionTwoStepAndroidImpl(issuer, challenge, userName, applicationId, sessionId);
+	}
+
+	@Test
+	@Order(10)
+    @ExtendWith(FileParameterExtension.class)
+	public void tesFourthFinishAssertionTwoStepAndroid(@Name("attestation.android.two-step.userName") String userName,
+			@Name("assertion.android.two-step.finish.request4") String authenticateFinishResponse) {
+		testFinishAssertionTwoStepAndroidAuthenticated(userName, authenticateFinishResponse);
+        assertTrue(registrationEntry.getCounter() == 4);
+	}
+
+	@Test
+	@Order(11)
+    @ExtendWith(FileParameterExtension.class)
 	public void testSecondReplyFinishAssertionTwoStepAndroid(@Name("attestation.android.two-step.userName") String userName,
-			@Name("assertion.android.two-step.finish.request2") String authenticateFinishResponse) {
+			@Name("assertion.android.two-step.finish.request4") String authenticateFinishResponse) {
 		try {
-			testFinishAssertionTwoStepAndroidImpl(userName, authenticateFinishResponse);
+			testFinishAssertionTwoStepAndroidAuthenticated(userName, authenticateFinishResponse);
 		} catch (Fido2RuntimeException ex) {
 			if (!(ex.getCause() instanceof Fido2CompromisedDevice)) {
 				throw ex;
 			}
 		}
+	}
+
+	@Test
+	@Order(12)
+    @ExtendWith(FileParameterExtension.class)
+	public void testStartAttestationTwoStepCancelAndroid(@Name("attestation.android.two-step.cancel.issuer") String issuer, @Name("attestation.android.two-step.cancel.challenge") String challenge,
+			@Name("attestation.android.two-step.cancel.userName") String userName, @Name("attestation.android.two-step.cancel.applicationId") String applicationId,
+			@Name("attestation.android.two-step.cancel.sessionId") String sessionId, @Name("attestation.android.two-step.cancel.enrollmentCode") String enrollmentCode) {
+		testStartAttestationTwoStepAndroidImpl(issuer, challenge, userName, applicationId, sessionId);
+	}
+
+	@Test
+	@Order(13)
+    @ExtendWith(FileParameterExtension.class)
+	public void testFinishAttestationTwoStepCancelAndroid(@Name("attestation.android.two-step.cancel.userName") String userName,
+			@Name("attestation.android.two-step.cancel.finish.request") String registerFinishResponse, @Name("attestation.android.two-step.cancel.finish.publicKeyId") String publicKeyId) {
+		testFinishAssertionTwoStepAndroidAuthenticatedCanceled(userName, registerFinishResponse, publicKeyId);
 	}
 
 }

@@ -56,8 +56,8 @@ OpenID Provider, OAuth Authorization Server, and UMA Authorization Server
 endpoints.
 
 - In below screenshot, we are getting the list of existing clients. ![image](../../../assets/Jans_TUI_Auth_Server_Get_client_list.png)
-- It's possible to get details of any client as well. Just hit enter on any client and  you will see information like this. ![image](../../assets/Jans_TUI_Auth_Server_Client_detail.png)
-- With the button which is located on right upper side named "Add Client", it's possible to create new client. ![image](../../assets/Jans_TUI_Auth_Server_Add_new_client.png)
+- It's possible to get details of any client as well. Just hit enter on any client and  you will see information like this. ![image](../../../assets/Jans_TUI_Auth_Server_Client_detail.png)
+- With the button which is located on right upper side named "Add Client", it's possible to create new client. ![image](../../../assets/Jans_TUI_Auth_Server_Add_new_client.png)
 
 ### FIDO
 

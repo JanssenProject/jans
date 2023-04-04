@@ -13,6 +13,9 @@ In this page a high-level overview of the flow development process is presented.
 
 These are key concepts to keep in mind before starting.
 
+!!! Important
+    Ensure the engine is [enabled](./engine-config.md#engine-availability) in your installation.
+
 ### Flow data
 
 Every flow has some associated information. At minimum this is required:
@@ -172,7 +175,7 @@ Finally the flow assets must be uploaded. You can SFTP/SCP or use other means to
 - Create a directory `hello` under `/opt/jans/jetty/jans-auth/agama/ftl`
 - Upload the [template](https://github.com/JanssenProject/jans/raw/main/docs/admin/developer/agama/index.ftlh) there
 
-There is an alternative way to manage flows and is via deployment of `.gama` files. This is a more elaborate technique that allows bundling several flows and their required assets and classes for bulk deployment. Learn more about it [here](#gama-deployment.md).
+There is an alternative way to manage flows and is via deployment of `.gama` files. This is a more elaborate technique that allows bundling several flows and their required assets and classes for bulk deployment. Learn more about it [here](gama-deployment.md).
 
 ### Craft an authentication request
 
@@ -185,9 +188,11 @@ This usually boils down to create and launch a URL looking like `https://<your-h
 - The qualified name (identifier) of the flow to trigger is passed using the parameter referenced in property `cust_param_name` of the Agama bridge script. `agama_flow` will work in most cases since this is the default value employed by the Jans installer. For the current example `agama_flow=test` should be fine
 
 !!! Note
-    To use a different parameter name ensure to register the given parameter in the [server configuration](../../config-guide/jans-cli/im/im-jans-authorization-server.md) (property `authorizationRequestCustomAllowedParameters`) and update the bridge accordingly
+    To use a different parameter name ensure to register the given parameter in the [server configuration](../../config-guide/jans-cli/cli-jans-authorization-server.md) (property `authorizationRequestCustomAllowedParameters`) and update the bridge accordingly
 
 - If the flow to call receives input parameters, their values can be passed in the custom parameter as well. Use a hyphen to separate the flow name and the parameters expressed in JSON object format. For example, if the flow had inputs  `height` and `color`, you can use `test-{"height": 190, "color": "blue"}` for the value of `agama_flow`. Ensure to apply proper URL-encoding beforehand. In this case, the actual value would be `test-%7B%22height%22%3A+190%2C+%22color%22%3A+%22blue%22%7D`. If certain inputs are not provided, `null` values will be assigned for them
+
+- If for some reason you are not able to set the given custom parameter in the authorization request, you can set its value in the configuration property `default_flow_name` of the bridge script. Note this will launch the same fixed flow at all times
 
 ### Testing
 
@@ -217,7 +222,7 @@ We have barely scratched the surface so far. There is lots more to learn in orde
 
 - [Flows lifecycle](./flows-lifecycle.md)
 
-- [`.gama` files deployment](#gama-deployment.md)
+- [`.gama` files deployment](gama-deployment.md)
 
 - [Engine configuration](./engine-config.md)
 

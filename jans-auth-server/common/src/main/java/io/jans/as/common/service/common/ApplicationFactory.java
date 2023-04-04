@@ -100,7 +100,7 @@ public class ApplicationFactory {
             return new SmtpConfiguration();
         }
 
-        configurationService.decryptSmtpPassword(smtpConfiguration);
+        configurationService.decryptSmtpPasswords(smtpConfiguration);
 
         return smtpConfiguration;
     }

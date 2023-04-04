@@ -7,7 +7,8 @@
 package io.jans.as.common.cert.validation;
 
 import io.jans.as.common.cert.validation.model.ValidationStatus;
-import io.jans.as.model.util.SecurityProviderUtility;
+import io.jans.util.security.SecurityProviderUtility;
+
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

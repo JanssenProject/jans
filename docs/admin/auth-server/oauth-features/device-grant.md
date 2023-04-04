@@ -4,6 +4,8 @@ tags:
   - auth-server
   - oauth
   - feature
+  - device
+  - grant
 ---
 
 # OAuth 2.0 Device Authorization Grant
@@ -54,12 +56,18 @@ Third Party App->Device App: return Response
 
 3. After that, user could need to authenticate, then decide whether permissions will be granted.
 
+`acr` value can be specified in `deviceAuthzAcr` AS configuration property. 
+
 ![DeviceFlow3](https://github.com/JanssenProject/jans/raw/main/docs/assets/device-flow-3.png)
 
 4. Finally, the confirmation screen will be shown.
 
 ![DeviceFlow4](https://github.com/JanssenProject/jans/raw/main/docs/assets/device-flow-4.png)
 
+#### ACR value during Device Authorization
+
+User is required to authenticate if not authenticated yet. By default `acr_values` is not set in authorization request, which means it relies on default AS handling.
+However it's possible explicitly set `acr` value during Device Authorization by setting `deviceAuthzAcr` AS configuration property. 
 
 ## Request user and device codes
 
@@ -67,10 +75,10 @@ This first step, device sends an HTTP POST request to Jans authorization server,
 
 #### Parameters
 
-| Parameter | Description |
-|--|--|
-| client_id | **Required** The client ID for your application. |
-| scope | **Required** A space separated list of scopes that identify the resources that the device could access on the user's behalf. These values inform the consent screen that Jans server displays to the user. |
+| Parameter | Description                                                                                                                                                                                                |
+|-----------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| client_id | **Required** The client ID for your application.                                                                                                                                                           |
+| scope     | **Required** A space separated list of scopes that identify the resources that the device could access on the user's behalf. These values inform the consent screen that Jans server displays to the user. |
 
 #### Example
 
@@ -87,14 +95,14 @@ client_id=123-123-123&scope=openid+profile+address+email+phone
 
 In response, the Jans authorization server generates a unique device verification code and an end-user code that are valid for a limited time and includes them in the HTTP response body using the "application/json" format with a 200 (OK) status code.  The response contains the following parameters:
 
-| Parameter | Description |
-|--|--|
-| user_code | **Required** The end-user verification code |
-| device_code | **Required** The device verification code |
-| verification_uri | **Required** The end-user verification URI on the authorization server. This should be shown to the end-user because he should open this url in the rich user-agent. |
+| Parameter                 | Description                                                                                                                                                                         |
+|---------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| user_code                 | **Required** The end-user verification code                                                                                                                                         |
+| device_code               | **Required** The device verification code                                                                                                                                           |
+| verification_uri          | **Required** The end-user verification URI on the authorization server. This should be shown to the end-user because he should open this url in the rich user-agent.                |
 | verification_uri_complete | **Optional** This is similar than `verification_uri`, however it also includes `user_code` as a query param in the url. It's issued if the device wants to use QR mode for example. |
-| expires_in | **Required** The lifetime in seconds of the `device_code` and `user_code`. |
-| interval | **Required** The minimum amount of time in seconds that the client should wait between polling requests to the token endpoint. |
+| expires_in                | **Required** The lifetime in seconds of the `device_code` and `user_code`.                                                                                                          |
+| interval                  | **Required** The minimum amount of time in seconds that the client should wait between polling requests to the token endpoint.                                                      |
 
 #### Example:
 
@@ -142,10 +150,10 @@ The URL of the endpoint to poll is `/jans-auth/restv1/token`. The polling reques
 
 #### Parameters
 
-| Parameter | Description |
-|--|--|
-| client_id | **Required** The client ID for your application. |
-| grant_type | **Required** Must be `urn:ietf:params:oauth:grant-type:device_code`. |
+| Parameter   | Description                                                                           |
+|-------------|---------------------------------------------------------------------------------------|
+| client_id   | **Required** The client ID for your application.                                      |
+| grant_type  | **Required** Must be `urn:ietf:params:oauth:grant-type:device_code`.                  |
 | device_code | **Required** The device verification code which is returned by Jans server in Step 2. |
 
 Authentication can be done using any of those authentication methods for this token endpoint.

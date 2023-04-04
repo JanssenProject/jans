@@ -403,8 +403,8 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Enable/Disable redirect uris validation using regular expression", defaultValue = "false")
     private Boolean redirectUrisRegexEnabled = false;
 
-    @DocProperty(description = "Enable/Disable usage of highest level script in case ACR script does not exist", defaultValue = "true")
-    private Boolean useHighestLevelScriptIfAcrScriptNotFound = true;
+    @DocProperty(description = "Enable/Disable usage of highest level script in case ACR script does not exist", defaultValue = "false")
+    private Boolean useHighestLevelScriptIfAcrScriptNotFound;
 
     @DocProperty(description = "Boolean value specifying whether to enable user authentication filters")
     private Boolean authenticationFiltersEnabled;
@@ -723,6 +723,10 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "Response type used to process device authz requests")
     private String deviceAuthzResponseTypeToProcessAuthz;
+
+    @DocProperty(description = "Device authz acr")
+    private String deviceAuthzAcr;
+
     // CIBA
     @DocProperty(description = "Backchannel Client Id")
     private String backchannelClientId;
@@ -2959,6 +2963,14 @@ public class AppConfiguration implements Configuration {
 
     public void setDeviceAuthzResponseTypeToProcessAuthz(String deviceAuthzResponseTypeToProcessAuthz) {
         this.deviceAuthzResponseTypeToProcessAuthz = deviceAuthzResponseTypeToProcessAuthz;
+    }
+
+    public String getDeviceAuthzAcr() {
+        return deviceAuthzAcr;
+    }
+
+    public void setDeviceAuthzAcr(String deviceAuthzAcr) {
+        this.deviceAuthzAcr = deviceAuthzAcr;
     }
 
     public Boolean getRequestUriHashVerificationEnabled() {

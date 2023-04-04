@@ -7,7 +7,7 @@ tags:
 
 # Agama engine configuration
 
-The [engine](README.md#agama-engine) is a piece of software in charge of parsing flows written in Agama DSL and put them into action. Some aspects of the engine are configurable and they are part of the general authentication server's JSON configuration - specifically the section labeled `agamaConfiguration`. To learn how to perform changes in the server's configuration click [here](../../config-guide/jans-cli/im/im-jans-authorization-server.md).
+The [engine](README.md#agama-engine) is a piece of software in charge of parsing flows written in Agama DSL and put them into action. Some aspects of the engine are configurable and they are part of the general authentication server's JSON configuration - specifically the section labeled `agamaConfiguration`. To learn how to perform changes in the server's configuration click [here](../../config-guide/jans-cli/cli-jans-authorization-server.md).
 
 The properties of Agama engine configuration are described in the following:
 
@@ -38,7 +38,7 @@ The properties of Agama engine configuration are described in the following:
         
 ## Engine availability
 
-By default the engine is enabled. It might be the case your administrator temporarily disabled Agama. Do the following to restore its availability:
+By default the engine is **disabled**. Do the following to enable it: <!--It might be the case your administrator temporarily disabled Agama. Do the following to restore its availability:-->
 
-- Enable Agama bridge script. You can find details on how to manage custom scripts in [this](../../config-guide/jans-cli/im/im-custom-scripts.md) page. Here, set property `enabled` to `true` and increase `revision` value by one
+- Enable Agama bridge script. You can find details on how to manage custom scripts in [this](../../config-guide/jans-cli/cli-custom-scripts.md) page. There, set property `enabled` to `true` and increase `revision` value by one
 - Set `enabled` property in Agama configuration to `true`. This is the property listed above in this page

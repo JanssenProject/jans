@@ -26,7 +26,7 @@ This section outlines high-level design principles, styles and design choices th
 ### Testing
 ### Deployment
 ### Security
-### Scalability and Cloud Infrastructure 
+### Scalability and Cloud Infrastructure
 
 ## Technical Documentation Guidelines
   

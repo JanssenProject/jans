@@ -129,9 +129,11 @@ public abstract class UserService {
                 new CustomObjectAttribute("displayName", "User " + uid + " added via Jans Auth custom plugin")));
         user.setUserId(uid);
 
-        List<String> personCustomObjectClassList = getPersonCustomObjectClassList();
-        if ((personCustomObjectClassList != null) && !personCustomObjectClassList.isEmpty()) {
-            user.setCustomObjectClasses(personCustomObjectClassList.toArray(new String[personCustomObjectClassList.size()]));
+        if (dataSourceTypeService.isLDAP(user.getDn())) {
+	        List<String> personCustomObjectClassList = getPersonCustomObjectClassList();
+	        if ((personCustomObjectClassList != null) && !personCustomObjectClassList.isEmpty()) {
+	            user.setCustomObjectClasses(personCustomObjectClassList.toArray(new String[personCustomObjectClassList.size()]));
+	        }
         }
 
         user.setCreatedAt(new Date());
@@ -151,17 +153,19 @@ public abstract class UserService {
         GluuStatus status = active ? GluuStatus.ACTIVE : GluuStatus.REGISTER;
         user.setAttribute("jansStatus", status.getValue(), false);
 
-        List<String> personCustomObjectClassList = getPersonCustomObjectClassList();
-        if ((personCustomObjectClassList != null) && !personCustomObjectClassList.isEmpty()) {
-            Set<String> allObjectClasses = new HashSet<>();
-            allObjectClasses.addAll(personCustomObjectClassList);
-
-            String[] currentObjectClasses = user.getCustomObjectClasses();
-            if (ArrayHelper.isNotEmpty(currentObjectClasses)) {
-                allObjectClasses.addAll(Arrays.asList(currentObjectClasses));
-            }
-
-            user.setCustomObjectClasses(allObjectClasses.toArray(new String[allObjectClasses.size()]));
+        if (dataSourceTypeService.isLDAP(user.getDn())) {
+	        List<String> personCustomObjectClassList = getPersonCustomObjectClassList();
+	        if ((personCustomObjectClassList != null) && !personCustomObjectClassList.isEmpty()) {
+	            Set<String> allObjectClasses = new HashSet<>();
+	            allObjectClasses.addAll(personCustomObjectClassList);
+	
+	            String[] currentObjectClasses = user.getCustomObjectClasses();
+	            if (ArrayHelper.isNotEmpty(currentObjectClasses)) {
+	                allObjectClasses.addAll(Arrays.asList(currentObjectClasses));
+	            }
+	
+	            user.setCustomObjectClasses(allObjectClasses.toArray(new String[allObjectClasses.size()]));
+	        }
         }
 
         user.setCreatedAt(new Date());

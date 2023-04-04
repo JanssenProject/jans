@@ -42,7 +42,7 @@ This is a feature that in conjuction with [template overrides](./dsl-full.md#tem
 
 Clearly a page at flow A can be overriden, however, how to abort A and make it jump to B? The answer is cancellation. Through flow cancellation, a running flow can be aborted and the control returned to one of its parents for further processing. This can achieved by overriding a template so that the POST to the current URL includes a form field named `_abort`.
 
-POSTing this way will provoke the associated `Trigger` call to return a value like `{ aborted: true, data: ... }` where `data` is a _map_ consisting of the payload (form fields) sent with the POST. Thus, developers can build custom pages and add for example a button to provoke the cancellation. Then, back in the flow implementation take the user to the desired path.
+POSTing this way will provoke the associated `Trigger` call to return a value like `{ aborted: true, data: ..., url: ... }` where `data` is a _map_ consisting of the payload (form fields) sent with the POST. Thus, developers can build custom pages and add for example a button to provoke the cancellation. Then, back in the flow implementation take the user to the desired path. The `url` property will hold the URL where cancellation took place relative to `https://your-server/jans-auth/fl/`.
 
 As an example, suppose there exists two flows that allow users to enter and validate a one-time passcode (OTP), one flow sends the OTP via e-mail while the other through an SMS. Assume these flows receive a user identifier as input and render a single UI page each to enter the received OTP. If we are interested in building a flow that prompts for username/password credentials and use the SMS-based OTP flow with a customization that consists of showing a link like "Didn't get an SMS?, send the passcode to my e-mail", the following is a sketch of an implementation:
 
@@ -101,7 +101,7 @@ When a page POSTs a cancellation as described earlier, the flow to return contro
 
 ## Timeouts
 
-Authentication flows are normally short-lived. They usually span no more than a few minutes. In Agama, the maximum amount of time an end-user can take to fully complete a flow is driven by the [configuration of the authentication server](../../config-guide/jans-cli/im/im-jans-authorization-server.md), specifically the `sessionIdUnauthenticatedUnusedLifetime` property which is measured in seconds. As an example, if this value is 120, any attempt to authenticate taking more than two minutes will throw an error page.
+Authentication flows are normally short-lived. They usually span no more than a few minutes. In Agama, the maximum amount of time an end-user can take to fully complete a flow is driven by the [configuration of the authentication server](../../config-guide/jans-cli/cli-jans-authorization-server.md), specifically the `sessionIdUnauthenticatedUnusedLifetime` property which is measured in seconds. As an example, if this value is 120, any attempt to authenticate taking more than two minutes will throw an error page.
 
 Moreover, a flow may specify its own timeout in the [header](./dsl-full#header-basics). In practice, the effective timeout is the smallest value between `sessionIdUnauthenticatedUnusedLifetime` and the value supplied in the header, if any.
 
