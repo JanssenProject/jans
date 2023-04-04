@@ -2028,7 +2028,7 @@ paths:
           content:
             application/json:
               schema:
-                type: string
+                $ref: '#/components/schemas/clientAuthMapSchema'
               examples:
                 Response json example:
                   description: Response json example

@@ -319,13 +319,16 @@ public class UserMgmtService {
 
     public User ignoreCustomObjectClassesForNonLDAP(User user) {
         String persistenceType = configurationService.getPersistenceType();
-        logger.debug("persistenceType: {}, isLDAP?:{}", persistenceType, isLDAP());
+        logger.debug("persistenceType: {}, isLDAP?:{}, user.getCustomObjectClasses():{}", persistenceType, isLDAP(),
+                user.getCustomObjectClasses());
+
         if (!isLDAP()) {
             logger.info(
                     "Setting CustomObjectClasses :{} to null as its used only for LDAP and current persistenceType is {} ",
                     user.getCustomObjectClasses(), persistenceType);
             user.setCustomObjectClasses(null);
         }
+        logger.debug("Final user.getCustomObjectClasses():{} ", user.getCustomObjectClasses());
         return user;
     }
 
