@@ -6,6 +6,8 @@
 
 package io.jans.configapi.rest.resource.auth;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import static io.jans.as.model.util.Util.escapeLog;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.persistence.model.Scope;
@@ -41,12 +43,12 @@ public class ClientAuthResource extends ConfigBaseResource {
 
     @Inject
     ClientAuthService clientAuthService;
-    
+
     @Operation(summary = "Gets list of client authorization", description = "Gets list of client authorizations", operationId = "get-client-authorization", tags = {
             "Client Authorization" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.CLIENT_AUTHORIZATIONS_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(schema = @Schema(implementation = java.util.Map.class), examples = @ExampleObject(name = "Response json example", value = "example/client-auth/client-auth-get.json"))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(schema = @Schema(ref = "#/components/schemas/clientAuthMapSchema"), examples = @ExampleObject(name = "Response json example", value = "example/client-auth/client-auth-get.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
@@ -75,7 +77,7 @@ public class ClientAuthResource extends ConfigBaseResource {
     @DELETE
     @ProtectedApi(scopes = { ApiAccessConstants.CLIENT_AUTHORIZATIONS_DELETE_ACCESS }, groupScopes = {}, superScopes = {
             ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
-    @Path(ApiConstants.USERID_PATH + ApiConstants.CLIENTID_PATH+ ApiConstants.USERNAME_PATH)
+    @Path(ApiConstants.USERID_PATH + ApiConstants.CLIENTID_PATH + ApiConstants.USERNAME_PATH)
     public Response deleteClientAuthorization(
             @Parameter(description = "User identifier") @PathParam(ApiConstants.USERID) @NotNull String userId,
             @Parameter(description = "Client identifier") @PathParam(ApiConstants.CLIENTID) @NotNull String clientId,
@@ -89,7 +91,5 @@ public class ClientAuthResource extends ConfigBaseResource {
         logger.info("ClientAuthorizations removed!!!");
         return Response.noContent().build();
     }
-    
-   
-   
+
 }
