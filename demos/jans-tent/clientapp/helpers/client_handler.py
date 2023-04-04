@@ -29,27 +29,27 @@ logger = logging.getLogger(__name__)
 
 
 class ClientHandler:
-    __client_url = None
+    __redirect_uris = None
     __client_id = None
     __client_secret = None
     __metadata_url = None
     __op_url = None
     op_data = None
 
-    def __init__(self, op_url: str, client_url: str):
+    def __init__(self, op_url: str, redirect_uris: list[str]):
         """[initializes]
 
         :param op_url: [url from oidc provider starting with https]
         :type op_url: str
-        :param client_url: [url from client starting with https]
-        :type client_url: str
+        :param redirect_uris: [url from client starting with https]
+        :type redirect_uris: list
         """
         self.clientAdapter = Client(client_authn_method=CLIENT_AUTHN_METHOD)
         self.__op_url = op_url
-        self.__client_url = client_url
+        self.__redirect_uris = redirect_uris
         self.__metadata_url = '%s/.well-known/openid-configuration' % op_url
         self.op_data = self.discover(op_url)
-        self.reg_info = self.register_client(op_data=self.op_data, client_url=client_url)
+        self.reg_info = self.register_client(op_data=self.op_data, redirect_uris=redirect_uris)
         self.__client_id = self.reg_info['client_id']
         self.__client_secret = self.reg_info['client_secret']
 
@@ -62,18 +62,17 @@ class ClientHandler:
 
         return r
 
-    def register_client(self, op_data: ASConfigurationResponse = op_data, client_url: Optional[str] = __client_url) -> dict:
+    def register_client(self, op_data: ASConfigurationResponse = op_data, redirect_uris: Optional[list[str]] = __redirect_uris) -> dict:
         """[register client and returns client information]
 
         :param op_data: [description]
         :type op_data: dict
-        :param client_url: [description]
-        :type client_url: str
+        :param redirect_uris: [description]
+        :type redirect_uris: list[str]
         :return: [client information including client-id and secret]
         :rtype: dict
         """
-        redirect_uri = '%s/oidc_callback' % client_url
-        registration_args = {'redirect_uris': [redirect_uri],
+        registration_args = {'redirect_uris': redirect_uris,
                              'response_types': ['code'],
                              'grant_types': ['authorization_code'],
                              'application_type': 'web',
