@@ -853,10 +853,15 @@ class JCA_CLI:
 
     def post_requests(self, endpoint, data, params=None):
         url = 'https://{}{}'.format(self.host, endpoint.path)
+        url_param_name = self.get_url_param(endpoint.path)
+
         security = self.get_scope_for_endpoint(endpoint)
         self.get_access_token(security)
         mime_type = self.get_mime_for_endpoint(endpoint)
         headers = self.get_request_header({'Accept': 'application/json', 'Content-Type': mime_type})
+
+        if params and url_param_name in params:
+            url = url.format(**{url_param_name: params.pop(url_param_name)})
 
         post_params = {
             'url': url,
