@@ -45,12 +45,15 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v3
+      with:
+        path: temp-jans
+
     - name: Getting build dependencies
       id: get_dependencies
       run: |
          mkdir -p jans/jans-src/opt/
-         cp -rp automation/packaging/${{ matrix.build_files }}/* jans/
-         cp jans-linux-setup/jans_setup/install.py jans/install.py
+         cp -rp temp-jans/automation/packaging/${{ matrix.build_files }}/* jans/
+         cp temp-jans/jans-linux-setup/jans_setup/install.py jans/install.py
          sudo add-apt-repository ppa:deadsnakes/ppa
          sudo apt-get update
          sudo apt-get install -y python${{ matrix.python_version }}
