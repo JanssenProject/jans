@@ -355,6 +355,8 @@ public class FlowService {
             return NativeObject.class.cast(obj);
         } catch (ClassCastException e) {
             if (Undefined.isUndefined(obj)) {
+                //This may only happen for a top-level flow. A subflow that returns undefined
+                //is handled in the generated javascript for a Trigger directive
                 throw new Exception("No Finish instruction was reached");
             } else throw e;
         }
