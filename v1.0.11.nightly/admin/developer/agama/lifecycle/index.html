@@ -7430,8 +7430,8 @@
 <p>Knowledge of the DSL is a requirement as consequence of the above. Fortunately Agama is small and very easy to learn. Check the DSL basics <a href="../dsl/">here</a>. Also the <a href="../quick-start/#hello-world-sample-flow">"Hello World"</a> sample flow will give you a first impresssion on the language.  </p>
 <p>Currently there are no IDE/editor plugins for coding in Agama available. We hope to deliver tools in the future to ease the development experience.</p>
 <h3 id="about-crashes">About crashes<a class="headerlink" href="#about-crashes" title="Permanent link">#</a></h3>
-<p>As a flow executes things can go wrong for reasons that developers cannot foresee. A database may have crashed, a connection to an external system may have failed, the flow engine may have some bug, etc. When an abnormal situation is presented, a flow simply crashes.</p>
-<p>If a flow crashes, its parent flows (or flow) if they exist, crash as well. Trying to handle crashes involves a lot of planning and work which is too costly and will unlikely account for the so many things that might fail in a real setting. Thus, coding defensively is not recommended. While in Agama is possible to deal with Java exceptions, that feature should be used sparingly.</p>
+<p>As a flow executes things can go wrong for reasons that developers cannot foresee. A database may have crashed, a connection to an external system may have failed, the flow itself may have some bug, etc. When an abnormal situation is presented, a flow simply crashes.</p>
+<p>If a flow crashes, its parent flows (or flow) if they exist, crash as well. Trying to handle crashes involves a lot of planning and work which is too costly and will unlikely account for the so many things that might fail in a real setting. Thus, coding defensively is not recommended. While in Agama is possible to deal with Java exceptions (product of <code>Call</code>s) and other abnormalities when <code>Trigger</code>ing flows, these features should be used sparingly.</p>
 <h2 id="creating-a-flow">Creating a flow<a class="headerlink" href="#creating-a-flow" title="Permanent link">#</a></h2>
 <p>In order to manage flows, developers interact with a small REST API. Click <a href="../quick-start/#getting-an-access-token">here</a> to learn about the requisites to access this API and <a href="https://github.com/JanssenProject/jans/blob/main/jans-config-api/docs/jans-config-api-swagger.yaml">here</a> to check the respective open API definition - locate the endpoints starting with <code>/jans-config-api/api/v1/agama</code>.</p>
 <p>There are two ways available to add a flow:</p>
@@ -7709,7 +7709,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-04-03T10:21:34+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-04-03</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-04-04T06:19:51+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-04-04</span>
       
         <br>
         Created:

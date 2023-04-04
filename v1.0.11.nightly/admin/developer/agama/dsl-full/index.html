@@ -8513,7 +8513,7 @@ Finish it.nonsense
 <p><strong>Notes:</strong></p>
 <ul>
 <li>Any statements found after <code>Finish</code> is not reached and thus, not executed</li>
-<li>If no <code>Finish</code> statement is found in a flow's execution, this will degenerate in flow crash </li>
+<li>If no <code>Finish</code> statement is found in a flow's execution, this will degenerate in flow <a href="../lifecycle/#about-crashes">crash</a></li>
 <li>When a flow is finished and was used as <a href="#subflows">subflow</a> (part of the execution of a bigger parent flow), the parent does not terminate. Execution continues at the following instruction that triggered the subflow. More on <code>Trigger</code> later</li>
 <li>Using <code>data</code> in the <code>Finish</code> directive is an effective way to communicate information to callers (parent flows). If a  flow has no parents, <code>data</code> is stored in the authentication server's session of the given user under the key <code>agamaData</code>. Contents are serialized to a JSON string previously </li>
 <li>A flow cannot be aborted by itself. This can only be achieved through a parent flow. Learn more about aborted flows <a href="../flows-lifecycle/#cancellation">here</a></li>
@@ -8749,6 +8749,15 @@ Log &quot;subflow returned with success?&quot; outcome.success
     <tr>
 <td>
 
+<div class="highlight"><pre><span></span><code>outcome | E = Trigger jo.jo.PersonalInfoGathering null false 
+</code></pre></div>
+
+</td>
+        <td>Similar to the previous example. If for some reason <code>PersonalInfoGathering</code> crashes, variable <code>E</code> will hold a reference to the error in the form of a <code>java.lang.Exception</code> for further processing. Otherwise <code>E</code> evaluates to <code>null</code>. The variable on the left of the pipe (<code>|</code>) can be omitted if the outcome of the flow will not be inspected</td>
+    </tr>
+    <tr>
+<td>
+
 <div class="highlight"><pre><span></span><code>userPrefs = { otp: &quot;...&quot;, ... }
 Match userPrefs.otp to
     &quot;e-mail&quot;
@@ -8760,7 +8769,7 @@ Trigger $flow
 
 </td>
         <td>Starts a flow whose qualified name is determined at runtime</td>
-    </tr>
+    </tr>   
 </table>
 
 <h3 id="input-parameters">Input parameters<a class="headerlink" href="#input-parameters" title="Permanent link">#</a></h3>
@@ -9300,7 +9309,7 @@ x[2] = &quot;polo&quot;    //adds the key/value pair &quot;2&quot; / &quot;polo&
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-02-23T14:16:27+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-02-23</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-04-04T06:19:51+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-04-04</span>
       
         <br>
         Created:
