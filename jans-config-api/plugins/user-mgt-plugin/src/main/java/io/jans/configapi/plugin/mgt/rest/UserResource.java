@@ -185,8 +185,8 @@ public class UserResource extends BaseResource {
             @Parameter(description = "Boolean flag to indicate if attributes to be removed for non-LDAP DB. Default value is true, indicating non-LDAP attributes will be removed from request.") @DefaultValue("true") @QueryParam(value = ApiConstants.REMOVE_NON_LDAP_ATTRIBUTES) boolean removeNonLDAPAttributes)
             throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         if (logger.isInfoEnabled()) {
-            logger.info("User details to be updated - customUser:{}, removeNonLDAPAttributes:{}",
-                    escapeLog(customUser), removeNonLDAPAttributes);
+            logger.info("User details to be updated - customUser:{}, removeNonLDAPAttributes:{}", escapeLog(customUser),
+                    removeNonLDAPAttributes);
         }
 
         // get User object
@@ -285,7 +285,7 @@ public class UserResource extends BaseResource {
         return Response.noContent().build();
     }
 
-    private UserPagedResult doSearch(SearchRequest searchReq, Boolean removeNonLDAPAttributes)
+    private UserPagedResult doSearch(SearchRequest searchReq, boolean removeNonLDAPAttributes)
             throws IllegalAccessException, InvocationTargetException {
         if (logger.isInfoEnabled()) {
             logger.info("User search params - searchReq:{}, removeNonLDAPAttributes:{} ", escapeLog(searchReq),
@@ -338,7 +338,7 @@ public class UserResource extends BaseResource {
         throwMissingAttributeError(missingAttributes);
     }
 
-    private List<CustomUser> getCustomUserList(List<User> users, Boolean removeNonLDAPAttributes) {
+    private List<CustomUser> getCustomUserList(List<User> users, boolean removeNonLDAPAttributes) {
         List<CustomUser> customUserList = new ArrayList<>();
         if (users == null || users.isEmpty()) {
             return customUserList;
@@ -364,7 +364,7 @@ public class UserResource extends BaseResource {
         return customUser;
     }
 
-    public CustomUser setParentAttributes(CustomUser customUser, User user, Boolean removeNonLDAPAttributes) {
+    public CustomUser setParentAttributes(CustomUser customUser, User user, boolean removeNonLDAPAttributes) {
         customUser.setBaseDn(user.getBaseDn());
         customUser.setCreatedAt(user.getCreatedAt());
         customUser.setCustomAttributes(user.getCustomAttributes());
@@ -421,21 +421,17 @@ public class UserResource extends BaseResource {
         return user;
     }
 
-    private User ignoreCustomAttributes(User user, Boolean removeNonLDAPAttributes) {
-        logger.info("validate User CustomObjectClasses - User user:{}, removeNonLDAPAttributes:{}", user,
-                removeNonLDAPAttributes);
-        if (user == null || (user.getCustomObjectClasses() == null || user.getCustomObjectClasses().length == 0)) {
-            return user;
-        }
-
-        logger.trace("user.getCustomObjectClasses():{}, userMgmtSrv.getPersistenceType():{}, userMgmtSrv.isLDAP():?{}",
-                user.getCustomObjectClasses(), userMgmtSrv.getPersistenceType(), userMgmtSrv.isLDAP());
+    private User ignoreCustomAttributes(User user, boolean removeNonLDAPAttributes) {
+        logger.debug(
+                "** validate User CustomObjectClasses - User user:{}, removeNonLDAPAttributes:{}, user.getCustomObjectClasses():{}, userMgmtSrv.getPersistenceType():{}, userMgmtSrv.isLDAP():?{}",
+                user, removeNonLDAPAttributes, user.getCustomObjectClasses(), userMgmtSrv.getPersistenceType(),
+                userMgmtSrv.isLDAP());
 
         if (removeNonLDAPAttributes) {
             return userMgmtSrv.ignoreCustomObjectClassesForNonLDAP(user);
         }
-        return user;
 
+        return user;
     }
 
 }

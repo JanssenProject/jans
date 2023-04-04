@@ -1,6 +1,6 @@
 # Jans Tent
 
-A reliable OpenID client to be used in auth testing.
+Reliable OpenID client to be used in auth testing.
 
 ## Installation
 
@@ -39,26 +39,22 @@ openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -sha256 -days 3
 
 Replace `OP_HOSTNAME` with the op hostname being used.
 ```bash
-echo | openssl s_client -servername OP_HOSTNAME \
- -connect OP_HOSTNAME:443 | sed -ne \
- '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' \
- > op_web_cert.cer
-export CERT_PATH=$(python3 -m certifi)
-export SSL_CERT_FILE=${CERT_PATH}
-export REQUESTS_CA_BUNDLE=${CERT_PATH}
-mv op_web_cert.cer $(python3 -m certifi)
+echo | openssl s_client -servername OP_HOSTNAME -connect OP_HOSTNAME:443 | sed -ne \
+ '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > op_web_cert.cer
 ```
 
-### 4. Register your RP at OP
-
-(remember to be inside your virtual environment)
 ```bash
-python clientapp/register_new_client.py
+export CERT_PATH=$(python3 -m certifi) && export SSL_CERT_FILE=${CERT_PATH} \
+&& export REQUESTS_CA_BUNDLE=${CERT_PATH} && mv op_web_cert.cer $CERT_PATH
+
 ```
 
 ## Using the server
 
 ### Start the server
+
+Please notice that your client will be automatically registered once the server starts.
+If your client was already registered, when you start the server again, it won't register.
 
 (remember to be inside your virtual environment)
 ```bash
@@ -71,6 +67,20 @@ Navigate to `https://localhost:9090` and click the link to start.
 
 
 ## Extra Features
+
+### Manual client configuration
+
+In case your OP don't support dynamic registration, manually configure your client.
+
+create a file caled `client_info.json` in `jans-tent`folder as the example:
+```json
+{
+    "op_metadata_url": "https://op_hostname/.well-known/openid-configuration",
+    "client_id": "e4f2c3a9-0797-4c6c-9268-35c5546fb3e9",
+    "client_secret": "a3e71cf1-b9b4-44c5-a9e6-4c7b5c660a5d"
+}
+```
+
 
 ### Auto-register endpoint
 
