@@ -621,12 +621,7 @@ paths:
               schema:
                 title: AssertionSuperGluuStartRegistrationResponse
                 type: object
-                required:
-                  - authenticateRequests
-                  - registerRequests
                 properties:
-                  authenticateRequests:
-                    type: array
                   registerRequests:
                     type: array
                     description: List of registration result
