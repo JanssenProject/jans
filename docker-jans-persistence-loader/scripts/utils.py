@@ -118,7 +118,8 @@ def get_base_ctx(manager):
         "pairwiseCalculationKey": manager.secret.get("pairwiseCalculationKey"),
         "pairwiseCalculationSalt": manager.secret.get("pairwiseCalculationSalt"),
         "default_openid_jks_dn_name": manager.config.get("default_openid_jks_dn_name"),
-        "auth_openid_jks_pass": manager.secret.get("auth_openid_jks_pass"),
+        # maintain compatibility with upstream template
+        "oxauth_openid_jks_pass": manager.secret.get("auth_openid_jks_pass"),
         "auth_legacyIdTokenClaims": manager.config.get("auth_legacyIdTokenClaims"),
         "auth_openidScopeBackwardCompatibility": manager.config.get("auth_openidScopeBackwardCompatibility"),
 
@@ -137,10 +138,11 @@ def get_base_ctx(manager):
         auth_openid_jks_fn = "/etc/certs/ob-ext-signing.jks"
 
     ctx["jwks_uri"] = jwks_uri
-    ctx["auth_openid_jks_fn"] = auth_openid_jks_fn
+    # maintain compatibility with upstream template
+    ctx["oxauth_openid_jks_fn"] = auth_openid_jks_fn
 
-    # static kid
-    ctx["staticKid"] = os.environ.get("CN_OB_STATIC_KID", "")
+    # static kid -- maintain compatibility with upstream template
+    ctx["static_kid"] = os.environ.get("CN_OB_STATIC_KID", "")
 
     # finalize ctx
     return ctx
