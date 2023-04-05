@@ -328,7 +328,7 @@ class Authn(DialogUtils):
                 underline_headings=False,
                 max_width=52,
                 jans_name='configurationProperties',
-                max_height=False
+                max_height=4
                 )
 
         body = HSplit([
