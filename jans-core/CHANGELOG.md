@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.0.11](https://github.com/JanssenProject/jans/compare/jans-core-v1.0.10...jans-core-v1.0.11) (2023-04-05)
+
+
+### Features
+
+* loggerService should update root log level [#4251](https://github.com/JanssenProject/jans/issues/4251) ([#4252](https://github.com/JanssenProject/jans/issues/4252)) ([20264a2](https://github.com/JanssenProject/jans/commit/20264a2f61e7b49015bbf6f7b93e9d241e3176a1))
+* userName -&gt; smtpAuthenticationAccountUsername; ([#4401](https://github.com/JanssenProject/jans/issues/4401)) ([2bbb95d](https://github.com/JanssenProject/jans/commit/2bbb95dc4558a3251d52f74ff88b41f1aafe8a5e))
+
+
+### Bug Fixes
+
+* mailservice should send non signed emails, if keystore isn't defied; ([#4455](https://github.com/JanssenProject/jans/issues/4455)) ([7b41c44](https://github.com/JanssenProject/jans/commit/7b41c44f2933b8fde79d0478cf8df69303b9b3ba))
+* prepare for  release ([60775c0](https://github.com/JanssenProject/jans/commit/60775c09dc5ab9996bf80c03dcb457861d48dfb1))
+* Unable to send emails issue 4121 ([#4333](https://github.com/JanssenProject/jans/issues/4333)) ([70a566b](https://github.com/JanssenProject/jans/commit/70a566b67f660750bf742f19ee127f79b2db8930))
+
 ## [1.0.10](https://github.com/JanssenProject/jans/compare/jans-core-v1.0.9...jans-core-v1.0.10) (2023-03-16)
 
 
