@@ -354,15 +354,13 @@ def main():
             if not Config.installed_instance:
                 jansInstaller.configureSystem()
                 jansInstaller.make_salt()
-                jansAuthInstaller.make_salt()
 
                 if not base.snap:
                     jreInstaller.start_installation()
                     jettyInstaller.start_installation()
                     jythonInstaller.start_installation()
 
-                jansInstaller.generate_configuration()
-
+                jansInstaller.generate_smtp_config()
                 jansInstaller.copy_scripts()
                 jansInstaller.encode_passwords()
 
