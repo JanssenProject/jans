@@ -74,6 +74,12 @@ paths:
                         result_enpoint:
                           type: string
                           description: fido2 assertion result endpoint
+                  super_gluu_registration_endpoint:
+                    type: string
+                    description: Endpoint for SuperGluu registration
+                  super_gluu_authentication_endpoint:
+                    type: string
+                    description: Endpoint for SuperGluu authentication
         403:
           $ref: '#/components/responses/AccessDenied'
         406:
