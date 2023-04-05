@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.0.11](https://github.com/JanssenProject/jans/compare/jans-config-api-v1.0.10...jans-config-api-v1.0.11) (2023-04-05)
+
+
+### Features
+
+* backend changes for admin-ui to call licenseSpring apis via. SCAN [#4461](https://github.com/JanssenProject/jans/issues/4461) ([#4462](https://github.com/JanssenProject/jans/issues/4462)) ([3617a95](https://github.com/JanssenProject/jans/commit/3617a95cc9b651691acb8072790784db70e1b152))
+* backend changes to submit SSA from admin-ui [#4298](https://github.com/JanssenProject/jans/issues/4298) ([#4364](https://github.com/JanssenProject/jans/issues/4364)) ([7e27b6d](https://github.com/JanssenProject/jans/commit/7e27b6da1a3e8212f72185bbbc09fee99e4be616))
+* **config-api:** user consent mgmt code quality fix ([#4412](https://github.com/JanssenProject/jans/issues/4412)) ([acf64e4](https://github.com/JanssenProject/jans/commit/acf64e4bbc6544269daf863ce6110787fe2e64f9))
+* **jans-config-api:** new endpoint for users consent management ([#4409](https://github.com/JanssenProject/jans/issues/4409)) ([c34b592](https://github.com/JanssenProject/jans/commit/c34b592c6bdfaa3b907b37d5e3851a4870e30e7a))
+* loggerService should update root log level [#4251](https://github.com/JanssenProject/jans/issues/4251) ([#4252](https://github.com/JanssenProject/jans/issues/4252)) ([20264a2](https://github.com/JanssenProject/jans/commit/20264a2f61e7b49015bbf6f7b93e9d241e3176a1))
+* userName -&gt; smtpAuthenticationAccountUsername; ([#4401](https://github.com/JanssenProject/jans/issues/4401)) ([2bbb95d](https://github.com/JanssenProject/jans/commit/2bbb95dc4558a3251d52f74ff88b41f1aafe8a5e))
+
+
+### Bug Fixes
+
+* **config-api:** custom script revision increment on update ([#4452](https://github.com/JanssenProject/jans/issues/4452)) ([27988bd](https://github.com/JanssenProject/jans/commit/27988bd207ef20faa677415d921503b8775b398e))
+* **config-api:** user creation in couchbase DB ([#4450](https://github.com/JanssenProject/jans/issues/4450)) ([b8dfddd](https://github.com/JanssenProject/jans/commit/b8dfddd487f317c2531d593dc8527c9579bff965))
+* mailservice should send non signed emails, if keystore isn't defied; ([#4455](https://github.com/JanssenProject/jans/issues/4455)) ([7b41c44](https://github.com/JanssenProject/jans/commit/7b41c44f2933b8fde79d0478cf8df69303b9b3ba))
+* prepare for  release ([60775c0](https://github.com/JanssenProject/jans/commit/60775c09dc5ab9996bf80c03dcb457861d48dfb1))
+* Unable to send emails issue 4121 ([#4333](https://github.com/JanssenProject/jans/issues/4333)) ([70a566b](https://github.com/JanssenProject/jans/commit/70a566b67f660750bf742f19ee127f79b2db8930))
+
 ## [1.0.10](https://github.com/JanssenProject/jans/compare/jans-config-api-v1.0.9...jans-config-api-v1.0.10) (2023-03-16)
 
 
