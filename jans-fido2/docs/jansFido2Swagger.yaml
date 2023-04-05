@@ -179,13 +179,8 @@ paths:
                   type: string
                   description: The base64url encoded userHandle returned by the client. May be null or an empty string.
                 clientDataJSON:
-                  type: array
+                  type: string
                   description: The base64url encoded clientDataJSON returned by the client
-                  items:
-                    type: string
-                  example:
-                    - challenge
-                    - origin
       responses:
         200:
           description: OK
