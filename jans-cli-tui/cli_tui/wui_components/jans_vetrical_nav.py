@@ -271,7 +271,8 @@ class JansVerticalNav():
         """
         if self.field_to_find:
             # ex: ['031C-4A65', '13D3-E7AD','2124-0CF1']
-            error_data = self.get_error()
+            error_data = ['031C-4A65', '13D3-E7AD',
+                          '2124-0CF1']  # self.get_error()
         else:
             error_data = []
 
@@ -282,7 +283,7 @@ class JansVerticalNav():
                 if i == self.selectes:
                     result.append([('[SetCursorPosition]', '')])
                 result.append(
-                    HTML('<i fg="ansired">{}</i>'.format('   '.join(entry))))
+                    HTML('<i fg="#00ff48">{}</i>'.format('   '.join(entry))))
                 result.append('\n')
             else:
                 if i == self.selectes:
