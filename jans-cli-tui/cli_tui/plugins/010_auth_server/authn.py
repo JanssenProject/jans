@@ -243,12 +243,6 @@ class Authn(DialogUtils):
 
             asyncio.ensure_future(coroutine())
 
-
-        def save_default(dialog):
-            data = self.make_data_from_dialog({'acr': dialog.body})
-            if data['default'] and data['default'] != default_acr:
-                self.save_default_acr(BUILTIN_AUTHN)
-
         test_button = Button(_("Test"), test_ldap)
         test_button.keep_dialog = True
         save_button = Button(_("Save"), save_ldap)
@@ -276,10 +270,10 @@ class Authn(DialogUtils):
 
     def edit_script_property(self, **kwargs: Any) -> None:
         key, val, hide = kwargs.get('data', ('','', False))
-        hide_widget = self.app.getTitledCheckBox(_("Hide"), name='property_hide', checked=hide, style='class:script-titledtext', jans_help=_("Hide script property?"))
+        hide_widget = self.app.getTitledCheckBox(_("Hide"), name='property_hide', checked=hide, style=cli_style.check_box, jans_help=_("Hide script property?"))
 
-        key_widget = self.app.getTitledText(_("Key"), name='property_key', value=key, style='class:script-titledtext', jans_help=_("Script propery Key"))
-        val_widget = self.app.getTitledText(_("Value"), name='property_val', value=val, style='class:script-titledtext', jans_help=_("Script property Value"))
+        key_widget = self.app.getTitledText(_("Key"), name='property_key', value=key, style=cli_style.edit_text, jans_help=_("Script propery Key"))
+        val_widget = self.app.getTitledText(_("Value"), name='property_val', value=val, style=cli_style.edit_text, jans_help=_("Script property Value"))
 
         def add_property(dialog: Dialog) -> None:
             key_ = key_widget.me.text
@@ -419,7 +413,7 @@ class Authn(DialogUtils):
             # save default acr
             cli_args = {'operation_id': 'put-acrs', 'data': {'defaultAcr': acr}}
             self.app.start_progressing(_("Saving default ACR..."))
-            response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+            await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
             self.app.stop_progressing()
             await self.get_default_acr()
             self.on_page_enter()
