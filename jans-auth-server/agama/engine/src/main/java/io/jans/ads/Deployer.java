@@ -42,6 +42,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -74,6 +76,8 @@ public class Deployer {
 
     private static final String METADATA_FILE = "project.json";
     private static final boolean ON_CONTAINERS = System.getenv("CN_VERSION") != null;
+    
+    private static final Pattern BP_PATT = Pattern.compile("\n[ \\t]+Basepath[ \\t]+\"");
     
     @Inject
     private ObjectMapper mapper;
@@ -146,21 +150,19 @@ public class Deployer {
 
         if (Files.isDirectory(pcode) && Files.isDirectory(pweb)) {
             
-            try {
-                Set<String> flowIds = createFlows(pcode, dd);
+            try {  
+                String prjBasepath = prjId;
+                //To avoid exposing the id in the url one might do: DigestUtils(DigestUtils.getMd5Digest()).digestAsHex(...)
+                Set<String> flowIds = createFlows(pcode, dd, prjBasepath);
                 if (dd.getError() == null) {
                     projectsFlows.put(prjId, flowIds);
 
                     Set<String> libsPaths = transferJarFiles(plib);
-                    ZipFile zip = compileAssetsArchive(p, pweb, plib);
+                    ZipFile zip = compileAssetsArchive(p, pweb, plib, prjBasepath);
                     byte[] bytes = extractZipFileWithPurge(zip, ASSETS_DIR,
                             projectsBasePaths.get(prjId), projectsLibs.get(prjId));
 
-                    Set<String> basePaths = new HashSet<>();
-                    //Update this project's base paths: use the subdirs of web folder
-                    Files.find​(pweb, 1, (pa, attrs) -> attrs.isDirectory())
-                        .map(pa -> pa.getFileName().toString()).forEach(basePaths::add);
-                    basePaths.remove(pweb.getFileName().toString());
+                    Set<String> basePaths = Set.of(prjBasepath);
                     projectsBasePaths.put(prjId, basePaths);
 
                     //Update this project's libs paths
@@ -206,7 +208,7 @@ public class Deployer {
 
     }
     
-    private Set<String> createFlows(Path dir, DeploymentDetails dd) throws IOException {
+    private Set<String> createFlows(Path dir, DeploymentDetails dd, String prjBasepath) throws IOException {
 
         BiPredicate<Path, BasicFileAttributes> matcher = 
             (path, attrs) -> attrs.isRegularFile() && path.getFileName().toString().endsWith("." + FLOW_EXT);
@@ -235,6 +237,8 @@ public class Deployer {
             String qname = p.getFileName().toString();
             
             try {
+                //this is a workaround to avoid assets mess/loss when different projects use the same folder/file names
+                source = insertProjectBasepath(source, prjBasepath);
                 qname = qname.substring(0, qname.length() - FLOW_EXT.length() - 1);
                 
                 logger.info("Processing flow {}", qname);
@@ -313,7 +317,7 @@ public class Deployer {
         
     }
     
-    private ZipFile compileAssetsArchive(Path root, Path webroot, Path lib) throws IOException {
+    private ZipFile compileAssetsArchive(Path root, Path webroot, Path lib, String prjBasepath) throws IOException {
         
         String rnd = rndName();
 
@@ -321,8 +325,8 @@ public class Deployer {
         String agamStr = agama.toString();
         logger.debug("Created temp directory");
 
-        Path ftl = Files.createDirectory(Paths.get(agamStr, "ftl"));
-        Path fl = Files.createDirectory(Paths.get(agamStr, "fl"));
+        Path ftl = Files.createDirectories(Paths.get(agamStr, "ftl", prjBasepath));
+        Path fl = Files.createDirectories(Paths.get(agamStr, "fl", prjBasepath));
         Path scripts = Files.createDirectory(Paths.get(agamStr, SCRIPTS_SUBDIR));
 
         logger.debug("Copying templates to {}", ftl);
@@ -668,6 +672,18 @@ public class Deployer {
 
     private static String rndName() {
         return ("" + Math.random()).substring(2);
+    }
+    
+    private String insertProjectBasepath(String code, String basepath) {
+        
+        Matcher m = BP_PATT.matcher(code);
+        if (m.find()) {
+            int i = m.end();
+            if (!m.find()) {    //Ensure there is only one occurrence
+                return code.substring(0, i) + basepath + "/" + code.substring(i);
+            }
+        }
+        return code;
     }
 
     @PostConstruct
