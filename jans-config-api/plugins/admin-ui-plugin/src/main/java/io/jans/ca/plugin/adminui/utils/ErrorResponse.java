@@ -7,10 +7,10 @@ public enum ErrorResponse {
     AUTHORIZATION_CODE_BLANK("Bad Request: Authourization `code` blank or empty."),
     USER_INFO_JWT_BLANK("User-Info jwt is blank or empty. Generating token with default scopes."),
     CODE_OR_TOKEN_REQUIRED("Bad Request: Either `code` or `access_token` is required."),
-    CHECK_LICENSE_ERROR("Error in checking license status."),
-    LICENSE_SPRING_CREDENTIALS_ERROR("Error in fetching license spring credentials from SCAN Api."),
-    ACTIVATE_LICENSE_ERROR("Error in activating License."),
-    GET_LICENSE_DETAILS_ERROR("Error in fetching license details."),
+    CHECK_LICENSE_ERROR("Error in checking license status. Check logs for further details."),
+    ERROR_IN_LICENSE_CONFIGURATION_VALIDATION("Error in validating license configuration."),
+    ACTIVATE_LICENSE_ERROR("Error in activating License. Check logs for further details."),
+    GET_LICENSE_DETAILS_ERROR("Error in fetching license details. Check logs for further details."),
     AUDIT_LOGGING_ERROR("Error in audit logging"),
     ERROR_READING_CONFIG("Error in reading auiConfiguration"),
     ERROR_READING_ROLE_PERMISSION_MAP("Error in reading role-permissions mapping from Auth Server."),
@@ -36,6 +36,7 @@ public enum ErrorResponse {
     BLANK_JWT("JWT is blank or empty"),
     ISS_CLAIM_NOT_FOUND("ISS claim not fount in jwt"),
     ERROR_IN_DCR("Error in DCR using SSA."),
+    LICENSE_NOT_PRESENT("Active license not present."),
     ;
 
     private final String description;
