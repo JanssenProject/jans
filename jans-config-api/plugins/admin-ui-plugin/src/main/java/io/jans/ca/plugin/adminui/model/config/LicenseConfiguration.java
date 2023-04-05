@@ -8,44 +8,12 @@ public class LicenseConfiguration {
     @Inject
     Logger log;
 
-    private String apiKey;
-    private String productCode;
-    private String sharedKey;
     private String hardwareId;
     private String licenseKey;
-
-    public LicenseConfiguration() {
-    }
-
-    public LicenseConfiguration(String apiKey, String productCode, String sharedKey) {
-        this.apiKey = apiKey;
-        this.productCode = productCode;
-        this.sharedKey = sharedKey;
-    }
-
-    public String getApiKey() {
-        return apiKey;
-    }
-
-    public void setApiKey(String apiKey) {
-        this.apiKey = apiKey;
-    }
-
-    public String getProductCode() {
-        return productCode;
-    }
-
-    public void setProductCode(String productCode) {
-        this.productCode = productCode;
-    }
-
-    public String getSharedKey() {
-        return sharedKey;
-    }
-
-    public void setSharedKey(String sharedKey) {
-        this.sharedKey = sharedKey;
-    }
+    private String scanApiHostname;
+    private String scanAuthServerHostname;
+    private String scanApiClientId;
+    private String scanApiClientSecret;
 
     public String getHardwareId() {
         return hardwareId;
@@ -63,4 +31,35 @@ public class LicenseConfiguration {
         this.licenseKey = licenseKey;
     }
 
+    public String getScanApiHostname() {
+        return scanApiHostname;
+    }
+
+    public void setScanApiHostname(String scanApiHostname) {
+        this.scanApiHostname = scanApiHostname;
+    }
+
+    public String getScanApiClientId() {
+        return scanApiClientId;
+    }
+
+    public void setScanApiClientId(String scanApiClientId) {
+        this.scanApiClientId = scanApiClientId;
+    }
+
+    public String getScanApiClientSecret() {
+        return scanApiClientSecret;
+    }
+
+    public void setScanApiClientSecret(String scanApiClientSecret) {
+        this.scanApiClientSecret = scanApiClientSecret;
+    }
+
+    public String getScanAuthServerHostname() {
+        return scanAuthServerHostname;
+    }
+
+    public void setScanAuthServerHostname(String scanAuthServerHostname) {
+        this.scanAuthServerHostname = scanAuthServerHostname;
+    }
 }
