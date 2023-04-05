@@ -1,0 +1,1 @@
+typeSearchIndex = [{"p":"io.jans.server.filters","l":"AbstractCorsFilter"},{"l":"All Classes","url":"allclasses-index.html"},{"p":"io.jans.server.filters","l":"AbstractCorsFilter.CORSRequestType"}]
