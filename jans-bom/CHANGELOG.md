@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.11](https://github.com/JanssenProject/jans/compare/jans-bom-v1.0.10...jans-bom-v1.0.11) (2023-04-05)
+
+
+### Bug Fixes
+
+* prepare for  release ([60775c0](https://github.com/JanssenProject/jans/commit/60775c09dc5ab9996bf80c03dcb457861d48dfb1))
+* Unable to send emails issue 4121 ([#4333](https://github.com/JanssenProject/jans/issues/4333)) ([70a566b](https://github.com/JanssenProject/jans/commit/70a566b67f660750bf742f19ee127f79b2db8930))
+
 ## [1.0.10](https://github.com/JanssenProject/jans/compare/jans-bom-v1.0.9...jans-bom-v1.0.10) (2023-03-16)
 
 
