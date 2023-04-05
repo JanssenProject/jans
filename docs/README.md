@@ -35,3 +35,4 @@ If you find a bug in a Janssen project, or you would like to suggest a new featu
 ## License
 
 The Janssen Project is licensed under the [Apache License 2.0](https://github.com/JanssenProject/jans/blob/main/LICENSE). The Janssen Server is highly extensible and can be used with a variety of other products and projects, which may fall under other licenses.
+
