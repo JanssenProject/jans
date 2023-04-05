@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.0.11-1](https://github.com/JanssenProject/jans/compare/docker-jans-config-api-v1.0.10-1...docker-jans-config-api-v1.0.11-1) (2023-04-05)
+
+
+### Features
+
+* **docker-jans:** upstream changes for license credentials ([#4416](https://github.com/JanssenProject/jans/issues/4416)) ([1565095](https://github.com/JanssenProject/jans/commit/15650953e2f6ee449d389682dd624028c9001c47))
+
+
+### Bug Fixes
+
+* prepare for  release ([60775c0](https://github.com/JanssenProject/jans/commit/60775c09dc5ab9996bf80c03dcb457861d48dfb1))
+
 ## [1.0.10-1](https://github.com/JanssenProject/jans/compare/docker-jans-config-api-v1.0.9-1...docker-jans-config-api-v1.0.10-1) (2023-03-16)
 
 
