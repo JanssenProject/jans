@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","url":"allpackages-index.html"},{"l":"io.jans.orm.cloud.spanner.impl"},{"l":"io.jans.orm.cloud.spanner.model"},{"l":"io.jans.orm.cloud.spanner.operation"},{"l":"io.jans.orm.cloud.spanner.operation.impl"},{"l":"io.jans.orm.cloud.spanner.operation.watch"},{"l":"io.jans.orm.cloud.spanner.util"}]
