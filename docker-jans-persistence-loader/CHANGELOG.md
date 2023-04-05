@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.0.11-1](https://github.com/JanssenProject/jans/compare/docker-jans-persistence-loader-v1.0.10-1...docker-jans-persistence-loader-v1.0.11-1) (2023-04-05)
+
+
+### Features
+
+* **jans-auth-server:** increase sessionIdUnauthenticatedUnusedLifetime value in setup [#4445](https://github.com/JanssenProject/jans/issues/4445) ([#4446](https://github.com/JanssenProject/jans/issues/4446)) ([ecf9395](https://github.com/JanssenProject/jans/commit/ecf93955f391bcda17ad6a2f6ead00d79afee165))
+
+
+### Bug Fixes
+
+* **docker-jans-persistence-loader:** disable agama engine by default ([#4400](https://github.com/JanssenProject/jans/issues/4400)) ([9a81459](https://github.com/JanssenProject/jans/commit/9a81459c5c503691b3d0e98c4e3c0cf5a35b5bc3))
+* **docker-jans-persistence-loader:** set highest level script to false by default ([#4250](https://github.com/JanssenProject/jans/issues/4250)) ([c29fc73](https://github.com/JanssenProject/jans/commit/c29fc7368bdb7a98d31077b78c8b1a07ebd98331))
+* **docker-jans:** update smtp config and agama script entry ([#4384](https://github.com/JanssenProject/jans/issues/4384)) ([d24dffb](https://github.com/JanssenProject/jans/commit/d24dffb93ed445b00819d696d87e046bcf5eb269))
+* prepare for  release ([60775c0](https://github.com/JanssenProject/jans/commit/60775c09dc5ab9996bf80c03dcb457861d48dfb1))
+
 ## [1.0.10-1](https://github.com/JanssenProject/jans/compare/docker-jans-persistence-loader-v1.0.9-1...docker-jans-persistence-loader-v1.0.10-1) (2023-03-16)
 
 
