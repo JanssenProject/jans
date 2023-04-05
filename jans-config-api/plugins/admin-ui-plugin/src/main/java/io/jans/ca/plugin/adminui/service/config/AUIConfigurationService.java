@@ -118,7 +118,7 @@ public class AUIConfigurationService extends BaseService {
         return auiConfig;
     }
 
-    private LicenseConfiguration addPropertiesToLicenseConfiguration(AdminConf appConf) throws Exception {
+    private LicenseConfiguration addPropertiesToLicenseConfiguration(AdminConf appConf) {
         LicenseConfiguration licenseConfiguration = new LicenseConfiguration();
         try {
             LicenseConfig licenseConfig = appConf.getMainSettings().getLicenseConfig();
@@ -140,7 +140,7 @@ public class AUIConfigurationService extends BaseService {
         return null;
     }
 
-    private void validateLicenseClientOnAuthServer(LicenseConfig licenseConfig) throws Exception {
+    private void validateLicenseClientOnAuthServer(LicenseConfig licenseConfig) throws ApplicationException {
         try {
             logger.info("Inside method to request license credentials from SCAN api.");
             io.jans.as.client.TokenResponse tokenResponse = generateToken(licenseConfig.getOidcClient().getOpHost(), licenseConfig.getOidcClient().getClientId(), licenseConfig.getOidcClient().getClientSecret());

@@ -14,8 +14,6 @@ public class LicenseConfiguration {
     private String scanAuthServerHostname;
     private String scanApiClientId;
     private String scanApiClientSecret;
-    public LicenseConfiguration() {
-    }
 
     public String getHardwareId() {
         return hardwareId;

@@ -36,6 +36,7 @@ public enum ErrorResponse {
     BLANK_JWT("JWT is blank or empty"),
     ISS_CLAIM_NOT_FOUND("ISS claim not fount in jwt"),
     ERROR_IN_DCR("Error in DCR using SSA."),
+    LICENSE_NOT_PRESENT("Active license not present."),
     ;
 
     private final String description;

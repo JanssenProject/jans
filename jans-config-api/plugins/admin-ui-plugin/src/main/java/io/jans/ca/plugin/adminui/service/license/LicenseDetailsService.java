@@ -43,6 +43,15 @@ public class LicenseDetailsService extends BaseService {
     @Inject
     private PersistenceEntryManager entryManager;
 
+    //constants
+    public static final String AUTHORIZATION = "Authorization";
+    public static final String CONTENT_TYPE = "Content-Type";
+    public static final String APPLICATION_JSON = "application/json";
+    public static final String LICENSE_KEY = "licenseKey";
+    public static final String HARDWARE_ID = "hardwareId";
+    public static final String BEARER = "Bearer ";
+    public static final String MESSAGE = "message";
+
     /**
      * The function checks the license key and the api key and returns a response object
      *
@@ -83,8 +92,8 @@ public class LicenseDetailsService extends BaseService {
                 return createLicenseResponse(false, 500, "SCAN api hostname is missing in configuration.");
             }
             if (Strings.isNullOrEmpty(licenseConfiguration.getLicenseKey())) {
-                log.info("Active license not present.");
-                return createLicenseResponse(false, 500, "Active license not present.");
+                log.info(ErrorResponse.LICENSE_NOT_PRESENT.getDescription());
+                return createLicenseResponse(false, 500, ErrorResponse.LICENSE_NOT_PRESENT.getDescription());
             }
 
             //check license-key
@@ -97,17 +106,14 @@ public class LicenseDetailsService extends BaseService {
                 log.info(ErrorResponse.TOKEN_GENERATION_ERROR.getDescription());
                 return createLicenseResponse(false, 500, ErrorResponse.TOKEN_GENERATION_ERROR.getDescription());
             }
-            Map<String, String> headers = new HashMap<>();
-            headers.put("Authorization", "Bearer " + tokenResponse.getAccessToken());
-            headers.put("Content-Type", "application/json");
 
             Map<String, String> body = new HashMap<>();
-            body.put("licenseKey", licenseConfiguration.getLicenseKey());
-            body.put("hardwareId", licenseConfiguration.getHardwareId());
+            body.put(LICENSE_KEY, licenseConfiguration.getLicenseKey());
+            body.put(HARDWARE_ID, licenseConfiguration.getHardwareId());
 
             Invocation.Builder request = ClientFactory.instance().getClientBuilder(checkLicenseUrl);
-            request.header("Authorization", "Bearer " + tokenResponse.getAccessToken());
-            request.header("Content-Type", "application/json");
+            request.header(AUTHORIZATION, BEARER + tokenResponse.getAccessToken());
+            request.header(CONTENT_TYPE, APPLICATION_JSON);
             Response response = request.post(Entity.entity(body, MediaType.APPLICATION_JSON));
 
             log.info("license request status code: {}", response.getStatus());
@@ -121,12 +127,12 @@ public class LicenseDetailsService extends BaseService {
             String jsonData = response.readEntity(String.class);
             ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
             JsonNode jsonNode = mapper.readValue(jsonData, com.fasterxml.jackson.databind.JsonNode.class);
-            if (!Strings.isNullOrEmpty(jsonNode.get("message").textValue())) {
+            if (!Strings.isNullOrEmpty(jsonNode.get(MESSAGE).textValue())) {
                 log.error("license isActive error response: {}", jsonData);
-                return createLicenseResponse(false, jsonNode.get("status").intValue(), jsonNode.get("message").textValue());
+                return createLicenseResponse(false, jsonNode.get("status").intValue(), jsonNode.get(MESSAGE).textValue());
             }
             log.error("license isActive error response: {}", jsonData);
-            return createLicenseResponse(false, 500, "Active license not present.");
+            return createLicenseResponse(false, 500, ErrorResponse.LICENSE_NOT_PRESENT.getDescription());
 
         } catch (Exception e) {
             log.error(ErrorResponse.CHECK_LICENSE_ERROR.getDescription(), e);
@@ -162,17 +168,13 @@ public class LicenseDetailsService extends BaseService {
                 return createLicenseResponse(false, 500, ErrorResponse.TOKEN_GENERATION_ERROR.getDescription());
             }
 
-            Map<String, String> headers = new HashMap<>();
-            headers.put("Authorization", "Bearer " + tokenResponse.getAccessToken());
-            headers.put("Content-Type", "application/json");
-
             Map<String, String> body = new HashMap<>();
-            body.put("licenseKey", licenseRequest.getLicenseKey());
-            body.put("hardwareId", licenseConfiguration.getHardwareId());
+            body.put(LICENSE_KEY, licenseRequest.getLicenseKey());
+            body.put(HARDWARE_ID, licenseConfiguration.getHardwareId());
 
             Invocation.Builder request = ClientFactory.instance().getClientBuilder(activateLicenseUrl);
-            request.header("Authorization", "Bearer " + tokenResponse.getAccessToken());
-            request.header("Content-Type", "application/json");
+            request.header(AUTHORIZATION, BEARER + tokenResponse.getAccessToken());
+            request.header(CONTENT_TYPE, APPLICATION_JSON);
             Response response = request.post(Entity.entity(body, MediaType.APPLICATION_JSON));
 
             log.info("license Activation request status code: {}", response.getStatus());
@@ -195,9 +197,9 @@ public class LicenseDetailsService extends BaseService {
             String jsonData = response.readEntity(String.class);
             ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
             JsonNode jsonNode = mapper.readValue(jsonData, com.fasterxml.jackson.databind.JsonNode.class);
-            if (!Strings.isNullOrEmpty(jsonNode.get("message").textValue())) {
+            if (!Strings.isNullOrEmpty(jsonNode.get(MESSAGE).textValue())) {
                 log.error("license Activation error response: {}", jsonData);
-                return createLicenseResponse(false, jsonNode.get("status").intValue(), jsonNode.get("message").textValue());
+                return createLicenseResponse(false, jsonNode.get("status").intValue(), jsonNode.get(MESSAGE).textValue());
             }
             log.error("license Activation error response: {}", jsonData);
             return createLicenseResponse(false, response.getStatus(), "License is not activated.");
@@ -228,17 +230,14 @@ public class LicenseDetailsService extends BaseService {
                 log.info(ErrorResponse.TOKEN_GENERATION_ERROR.getDescription());
                 return licenseResponse;
             }
-            Map<String, String> headers = new HashMap<>();
-            headers.put("Authorization", "Bearer " + tokenResponse.getAccessToken());
-            headers.put("Content-Type", "application/json");
 
             Map<String, String> body = new HashMap<>();
-            body.put("licenseKey", licenseConfiguration.getLicenseKey());
-            body.put("hardwareId", licenseConfiguration.getHardwareId());
+            body.put(LICENSE_KEY, licenseConfiguration.getLicenseKey());
+            body.put(HARDWARE_ID, licenseConfiguration.getHardwareId());
 
             Invocation.Builder request = ClientFactory.instance().getClientBuilder(checkLicenseUrl);
-            request.header("Authorization", "Bearer " + tokenResponse.getAccessToken());
-            request.header("Content-Type", "application/json");
+            request.header(AUTHORIZATION, BEARER + tokenResponse.getAccessToken());
+            request.header(CONTENT_TYPE, APPLICATION_JSON);
             Response response = request.post(Entity.entity(body, MediaType.APPLICATION_JSON));
 
             log.info("license details request status code: {}", response.getStatus());
