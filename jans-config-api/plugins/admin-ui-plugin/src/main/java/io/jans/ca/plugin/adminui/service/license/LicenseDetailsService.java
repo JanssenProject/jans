@@ -1,5 +1,7 @@
 package io.jans.ca.plugin.adminui.service.license;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import io.jans.as.client.TokenRequest;
 import io.jans.as.model.common.GrantType;
@@ -60,7 +62,7 @@ public class LicenseDetailsService extends BaseService {
         AdminConf appConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
         LicenseConfig licenseConfig = appConf.getMainSettings().getLicenseConfig();
 
-        io.jans.as.client.TokenResponse tokenResponse = generateToken(licenseConfig);
+        io.jans.as.client.TokenResponse tokenResponse = generateToken(licenseConfig.getOidcClient().getOpHost(), licenseConfig.getOidcClient().getClientId(), licenseConfig.getOidcClient().getClientSecret());
 
         if (tokenResponse == null || Strings.isNullOrEmpty(tokenResponse.getAccessToken())) {
             //try to re-generate clients using old SSA
@@ -68,7 +70,7 @@ public class LicenseDetailsService extends BaseService {
             if (dcrResponse == null) {
                 return createLicenseResponse(false, 500, ErrorResponse.ERROR_IN_DCR.getDescription());
             }
-            tokenResponse = generateToken(licenseConfig);
+            tokenResponse = generateToken(licenseConfig.getOidcClient().getOpHost(), licenseConfig.getOidcClient().getClientId(), licenseConfig.getOidcClient().getClientSecret());
 
             if (tokenResponse == null) {
                 return createLicenseResponse(false, 500, ErrorResponse.TOKEN_GENERATION_ERROR.getDescription());
@@ -77,60 +79,62 @@ public class LicenseDetailsService extends BaseService {
         return createLicenseResponse(true, 200, "No error in license configuration.");
     }
 
-    private io.jans.as.client.TokenResponse generateToken(LicenseConfig licenseConfig) {
-        try {
-            TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
-            tokenRequest.setAuthUsername(licenseConfig.getOidcClient().getClientId());
-            tokenRequest.setAuthPassword(licenseConfig.getOidcClient().getClientSecret());
-            tokenRequest.setGrantType(GrantType.CLIENT_CREDENTIALS);
-            tokenRequest.setScope(LicenseResource.SCOPE_LICENSE_READ);
-
-            log.info("Trying to get access token from auth server.");
-            String scanLicenseApiHostname = (new StringBuffer()).append(StringUtils.removeEnd(licenseConfig.getOidcClient().getOpHost(), "/"))
-                    .append("/jans-auth/restv1/token").toString();
-            io.jans.as.client.TokenResponse tokenResponse = null;
-            tokenResponse = getToken(tokenRequest, scanLicenseApiHostname);
-            return tokenResponse;
-        } catch (Exception e) {
-            log.error(ErrorResponse.TOKEN_GENERATION_ERROR.getDescription());
-            return null;
-        }
-    }
-
     public LicenseApiResponse checkLicense() {
         try {
             AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
             LicenseConfiguration licenseConfiguration = auiConfiguration.getLicenseConfiguration();
-            if (licenseConfiguration == null || Strings.isNullOrEmpty(licenseConfiguration.getApiKey())) {
-                log.info("License api-keys not present ");
-                return createLicenseResponse(false, 500, "License api-keys not present.");
+            if (licenseConfiguration == null || Strings.isNullOrEmpty(licenseConfiguration.getHardwareId())) {
+                log.info("License configuration is not present.");
+                return createLicenseResponse(false, 500, "License configuration is not present.");
+            }
+            if (Strings.isNullOrEmpty(licenseConfiguration.getScanApiHostname())) {
+                log.info("SCAN api hostname is missing in configuration.");
+                return createLicenseResponse(false, 500, "SCAN api hostname is missing in configuration.");
             }
             if (Strings.isNullOrEmpty(licenseConfiguration.getLicenseKey())) {
-                log.info("Active license for admin-ui not present ");
+                log.info("Active license not present.");
                 return createLicenseResponse(false, 500, "Active license not present.");
             }
+
             //check license-key
-            String checkLicenseUrl = (new StringBuffer()).append(AppConstants.LICENSE_SPRING_API_URL)
-                    .append("check_license?license_key=")
-                    .append(licenseConfiguration.getLicenseKey())
-                    .append("&product=")
-                    .append(licenseConfiguration.getProductCode())
-                    .append("&hardware_id=")
-                    .append(licenseConfiguration.getHardwareId()).toString();
+            String checkLicenseUrl = (new StringBuffer()).append(StringUtils.removeEnd(licenseConfiguration.getScanApiHostname(), "/"))
+                    .append("/scan/license/isActive")
+                    .toString();
 
-            MultivaluedMap<String, Object> headers = createHeaderMap(licenseConfiguration);
+            io.jans.as.client.TokenResponse tokenResponse = generateToken(licenseConfiguration.getScanAuthServerHostname(), licenseConfiguration.getScanApiClientId(), licenseConfiguration.getScanApiClientSecret());
+            if (tokenResponse == null) {
+                log.info(ErrorResponse.TOKEN_GENERATION_ERROR.getDescription());
+                return createLicenseResponse(false, 500, ErrorResponse.TOKEN_GENERATION_ERROR.getDescription());
+            }
+            Map<String, String> headers = new HashMap<>();
+            headers.put("Authorization", "Bearer " + tokenResponse.getAccessToken());
+            headers.put("Content-Type", "application/json");
+
+            Map<String, String> body = new HashMap<>();
+            body.put("licenseKey", licenseConfiguration.getLicenseKey());
+            body.put("hardwareId", licenseConfiguration.getHardwareId());
+
             Invocation.Builder request = ClientFactory.instance().getClientBuilder(checkLicenseUrl);
-            request.headers(headers);
-            Response response = request.get();
+            request.header("Authorization", "Bearer " + tokenResponse.getAccessToken());
+            request.header("Content-Type", "application/json");
+            Response response = request.post(Entity.entity(body, MediaType.APPLICATION_JSON));
 
-            log.info("license Credentials request status code: {}", response.getStatus());
+            log.info("license request status code: {}", response.getStatus());
             if (response.getStatus() == 200) {
                 JsonObject entity = response.readEntity(JsonObject.class);
                 if (entity.getBoolean("license_active") && !entity.getBoolean("is_expired")) {
                     return createLicenseResponse(true, 200, "Valid license present.");
                 }
             }
-            log.error("license Credentials error response: {}", response.readEntity(String.class));
+            //getting error
+            String jsonData = response.readEntity(String.class);
+            ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            JsonNode jsonNode= mapper.readValue(jsonData, com.fasterxml.jackson.databind.JsonNode.class);
+            if (!Strings.isNullOrEmpty(jsonNode.get("message").textValue())) {
+                log.error("license isActive error response: {}", jsonData);
+                return createLicenseResponse(false, jsonNode.get("status").intValue(), jsonNode.get("message").textValue());
+            }
+            log.error("license isActive error response: {}", jsonData);
             return createLicenseResponse(false, 500, "Active license not present.");
 
         } catch (Exception e) {
@@ -155,25 +159,31 @@ public class LicenseDetailsService extends BaseService {
         try {
             AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
             LicenseConfiguration licenseConfiguration = auiConfiguration.getLicenseConfiguration();
-            if (licenseConfiguration == null || Strings.isNullOrEmpty(licenseConfiguration.getApiKey()) || Strings.isNullOrEmpty(licenseConfiguration.getSharedKey())) {
-                log.error("Unable to get license credentials from SCAN apis. Please contact your administrator.");
-                return createLicenseResponse(false, 500, "Unable to get license credentials from SCAN apis. Please contact your administrator.");
-            }
-            log.debug("Trying to activate License.");
-            String activateLicenseUrl = (new StringBuffer()).append(AppConstants.LICENSE_SPRING_API_URL)
-                    .append("activate_license").toString();
 
-            MultivaluedMap<String, Object> headers = createHeaderMap(licenseConfiguration);
-            Invocation.Builder request = ClientFactory.instance().getClientBuilder(activateLicenseUrl);
-            request.headers(headers);
+            log.debug("Trying to activate License.");
+            String activateLicenseUrl = (new StringBuffer()).append(StringUtils.removeEnd(licenseConfiguration.getScanApiHostname(), "/"))
+                    .append("/scan/license/activate")
+                    .toString();
+
+            io.jans.as.client.TokenResponse tokenResponse = generateToken(licenseConfiguration.getScanAuthServerHostname(), licenseConfiguration.getScanApiClientId(), licenseConfiguration.getScanApiClientSecret());
+            if (tokenResponse == null) {
+                log.info(ErrorResponse.TOKEN_GENERATION_ERROR.getDescription());
+                return createLicenseResponse(false, 500, ErrorResponse.TOKEN_GENERATION_ERROR.getDescription());
+            }
+
+            Map<String, String> headers = new HashMap<>();
+            headers.put("Authorization", "Bearer " + tokenResponse.getAccessToken());
+            headers.put("Content-Type", "application/json");
 
             Map<String, String> body = new HashMap<>();
-            body.put("license_key", licenseRequest.getLicenseKey());
-            body.put("hardware_id", licenseConfiguration.getHardwareId());
-            body.put("product", licenseConfiguration.getProductCode());
+            body.put("licenseKey", licenseRequest.getLicenseKey());
+            body.put("hardwareId", licenseConfiguration.getHardwareId());
 
-            Response response = request
-                    .post(Entity.entity(body, MediaType.APPLICATION_JSON));
+            Invocation.Builder request = ClientFactory.instance().getClientBuilder(activateLicenseUrl);
+            request.header("Authorization", "Bearer " + tokenResponse.getAccessToken());
+            request.header("Content-Type", "application/json");
+            Response response = request.post(Entity.entity(body, MediaType.APPLICATION_JSON));
+
             log.info("license Activation request status code: {}", response.getStatus());
             if (response.getStatus() == 200) {
                 JsonObject entity = response.readEntity(JsonObject.class);
@@ -190,7 +200,15 @@ public class LicenseDetailsService extends BaseService {
                     return createLicenseResponse(true, 200, "License have been activated.");
                 }
             }
-            log.error("license Activation error response: {}", response.readEntity(String.class));
+            //getting error
+            String jsonData = response.readEntity(String.class);
+            ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            JsonNode jsonNode= mapper.readValue(jsonData, com.fasterxml.jackson.databind.JsonNode.class);
+            if (!Strings.isNullOrEmpty(jsonNode.get("message").textValue())) {
+                log.error("license Activation error response: {}", jsonData);
+                return createLicenseResponse(false, jsonNode.get("status").intValue(), jsonNode.get("message").textValue());
+            }
+            log.error("license Activation error response: {}", jsonData);
             return createLicenseResponse(false, response.getStatus(), "License is not activated.");
         } catch (Exception e) {
             log.error(ErrorResponse.ACTIVATE_LICENSE_ERROR.getDescription(), e);
@@ -210,19 +228,27 @@ public class LicenseDetailsService extends BaseService {
             LicenseConfiguration licenseConfiguration = auiConfiguration.getLicenseConfiguration();
 
             //check license-key
-            String checkLicenseUrl = (new StringBuffer()).append(AppConstants.LICENSE_SPRING_API_URL)
-                    .append("check_license?license_key=")
-                    .append(licenseConfiguration.getLicenseKey())
-                    .append("&product=")
-                    .append(licenseConfiguration.getProductCode())
-                    .append("&hardware_id=")
-                    .append(licenseConfiguration.getHardwareId()).toString();
+            String checkLicenseUrl = (new StringBuffer()).append(StringUtils.removeEnd(licenseConfiguration.getScanApiHostname(), "/"))
+                    .append("/scan/license/isActive")
+                    .toString();
 
-            MultivaluedMap<String, Object> headers = createHeaderMap(licenseConfiguration);
+            io.jans.as.client.TokenResponse tokenResponse = generateToken(licenseConfiguration.getScanAuthServerHostname(), licenseConfiguration.getScanApiClientId(), licenseConfiguration.getScanApiClientSecret());
+            if (tokenResponse == null) {
+                log.info(ErrorResponse.TOKEN_GENERATION_ERROR.getDescription());
+                return licenseResponse;
+            }
+            Map<String, String> headers = new HashMap<>();
+            headers.put("Authorization", "Bearer " + tokenResponse.getAccessToken());
+            headers.put("Content-Type", "application/json");
+
+            Map<String, String> body = new HashMap<>();
+            body.put("licenseKey", licenseConfiguration.getLicenseKey());
+            body.put("hardwareId", licenseConfiguration.getHardwareId());
+
             Invocation.Builder request = ClientFactory.instance().getClientBuilder(checkLicenseUrl);
-            request.headers(headers);
-
-            Response response = request.get();
+            request.header("Authorization", "Bearer " + tokenResponse.getAccessToken());
+            request.header("Content-Type", "application/json");
+            Response response = request.post(Entity.entity(body, MediaType.APPLICATION_JSON));
 
             log.info("license details request status code: {}", response.getStatus());
             if (response.getStatus() == 200) {
@@ -256,37 +282,6 @@ public class LicenseDetailsService extends BaseService {
 
     }
 
-    private MultivaluedMap<String, Object> createHeaderMap(LicenseConfiguration licenseConfiguration) {
-        String formattedDate = CommonUtils.getFormattedDate();
-        String signing_string = "licenseSpring\ndate: " + formattedDate;
-        try {
-            Mac sha256_HMAC = Mac.getInstance("HmacSHA256");
-
-            SecretKeySpec secret_key = new SecretKeySpec(licenseConfiguration.getSharedKey().getBytes(StandardCharsets.UTF_8), "HmacSHA256");
-            sha256_HMAC.init(secret_key);
-            String signature = Base64.getEncoder().encodeToString(sha256_HMAC.doFinal(signing_string.getBytes(StandardCharsets.UTF_8)));
-            log.debug("header signature for license api: {}", signature);
-            log.debug("header signature date for license api: {}", formattedDate);
-            MultivaluedMap<String, Object> headers = new MultivaluedHashMap<>();
-            headers.putSingle("Content-Type", "application/json");
-            headers.putSingle("Date", formattedDate);
-            headers.putSingle("Authorization", "algorithm=\"hmac-sha256\",headers=\"date\",signature=\"" + signature + "\",apiKey=\"" + licenseConfiguration.getApiKey() + "\"");
-            return headers;
-        } catch (NoSuchAlgorithmException | InvalidKeyException e) {
-            log.error("Error in generating authorization header", e);
-            return null;
-        }
-
-    }
-
-    private LicenseApiResponse createLicenseResponse(boolean result, int responseCode, String responseMessage) {
-        LicenseApiResponse licenseResponse = new LicenseApiResponse();
-        licenseResponse.setResponseCode(responseCode);
-        licenseResponse.setResponseMessage(responseMessage);
-        licenseResponse.setApiResult(result);
-        return licenseResponse;
-    }
-
     /**
      * The function takes an SSA string as input, calls the DCR API to get the scan hostname and OIDC client settings, and
      * saves the SSA string and the scan hostname and OIDC client settings in the Admin UI configuration
@@ -315,5 +310,33 @@ public class LicenseDetailsService extends BaseService {
             log.error(ErrorResponse.CHECK_LICENSE_ERROR.getDescription(), e);
             return createLicenseResponse(false, 500, ErrorResponse.ERROR_IN_DCR.getDescription());
         }
+    }
+
+    private io.jans.as.client.TokenResponse generateToken(String opHost, String clientId, String clientSecret) {
+        try {
+            TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
+            tokenRequest.setAuthUsername(clientId);
+            tokenRequest.setAuthPassword(clientSecret);
+            tokenRequest.setGrantType(GrantType.CLIENT_CREDENTIALS);
+            tokenRequest.setScope(LicenseResource.SCOPE_LICENSE_READ);
+
+            log.info("Trying to get access token from auth server.");
+            String scanLicenseApiHostname = (new StringBuffer()).append(StringUtils.removeEnd(opHost, "/"))
+                    .append("/jans-auth/restv1/token").toString();
+            io.jans.as.client.TokenResponse tokenResponse = null;
+            tokenResponse = getToken(tokenRequest, scanLicenseApiHostname);
+            return tokenResponse;
+        } catch (Exception e) {
+            log.error(ErrorResponse.TOKEN_GENERATION_ERROR.getDescription());
+            return null;
+        }
+    }
+
+    private LicenseApiResponse createLicenseResponse(boolean result, int responseCode, String responseMessage) {
+        LicenseApiResponse licenseResponse = new LicenseApiResponse();
+        licenseResponse.setResponseCode(responseCode);
+        licenseResponse.setResponseMessage(responseMessage);
+        licenseResponse.setApiResult(result);
+        return licenseResponse;
     }
 }

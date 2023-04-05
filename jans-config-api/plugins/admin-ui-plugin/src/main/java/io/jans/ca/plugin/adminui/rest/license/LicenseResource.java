@@ -63,6 +63,7 @@ public class LicenseResource {
             licenseResponse = licenseDetailsService.checkLicense();
             log.info("Active license present (true/false): {}", licenseResponse.isApiResult());
             return Response.ok(licenseResponse).build();
+
         } catch (Exception e) {
             log.error(ErrorResponse.CHECK_LICENSE_ERROR.getDescription(), e);
             return Response.serverError().entity(licenseResponse).build();
@@ -89,6 +90,7 @@ public class LicenseResource {
             licenseResponse = licenseDetailsService.activateLicense(licenseRequest);
             log.info("License activated (true/false): {}", licenseResponse.isApiResult());
             return Response.ok(licenseResponse).build();
+
         } catch (Exception e) {
             log.error(ErrorResponse.ACTIVATE_LICENSE_ERROR.getDescription(), e);
             return Response.serverError().entity(licenseResponse).build();
