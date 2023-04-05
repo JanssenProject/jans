@@ -100,18 +100,6 @@ class Authn(DialogUtils):
         elif acr in [ldap_server['configId'] for ldap_server in self.ldap_servers]:
             self.ldap_server_dialog(acr)
 
-    def update_acr_list(self):
-
-        if self.app.cli_object.openid_configuration:
-            acr_values = [(acr, acr) for acr in self.app.cli_object.openid_configuration['acr_values_supported']]
-            if not 'simple_password_auth' in self.app.cli_object.openid_configuration['acr_values_supported']:
-                acr_values.imsert((BUILTIN_AUTHN, BUILTIN_AUTHN))
-            self.acr_values_widget.values = acr_values
-            if hasattr(self, 'default_acr'):
-                self.acr_values_widget.value = self.default_acr
-
-        else:
-            self.app.retreive_openid_configuration(self.populate_acr_values)
 
     async def get_default_acr(self) -> None:
         response = self.app.cli_requests({'operation_id': 'get-acrs'})
@@ -146,12 +134,12 @@ class Authn(DialogUtils):
                 )
 
 
-        def save_default(dialog):
+        def simple_password(dialog):
             data = self.make_data_from_dialog({'acr': dialog.body})
             if data['default'] and data['default'] != default_acr:
                 self.save_default_acr(BUILTIN_AUTHN)
 
-        buttons = [Button(_("Save"), handler=save_default), Button(_("Cancel"))]
+        buttons = [Button(_("Save"), handler=simple_password), Button(_("Cancel"))]
         dialog = JansGDialog(self.app, body=body, title=acr_item[0], buttons=buttons, width=self.app.dialog_width)
         self.app.show_jans_dialog(dialog)
 
@@ -207,7 +195,7 @@ class Authn(DialogUtils):
         def save_ldap(dialog):
 
             ldap_config = self.get_ldap_config(dialog)
-
+            data = self.make_data_from_dialog({'acr': dialog.body})
             operation_id = 'put-config-database-ldap' if config.get('configId') else 'post-config-database-ldap'
 
             async def coroutine():
@@ -221,7 +209,10 @@ class Authn(DialogUtils):
                 else:
                     dialog.future.set_result(True)
 
-                self.on_page_enter()
+                    if data['default'] and data['default'] != data['configId']:
+                        self.save_default_acr(data['configId'])
+                    else:
+                        self.on_page_enter()
 
             asyncio.ensure_future(coroutine())
 
@@ -271,5 +262,7 @@ class Authn(DialogUtils):
             self.app.start_progressing(_("Saving default ACR..."))
             await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
             self.app.stop_progressing()
+            await self.get_default_acr()
+            self.on_page_enter()
 
         asyncio.ensure_future(coroutine())
