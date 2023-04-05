@@ -54,7 +54,7 @@ public class AUIConfigurationService extends BaseService {
      * @param appType The application type. This is either "adminUI" or "ads".
      * @return The AUIConfiguration object
      */
-    public AUIConfiguration getAUIConfiguration(String appType) {
+    public AUIConfiguration getAUIConfiguration(String appType) throws Exception {
         logger.info("Inside method to read the configuration from the LDAP server and stores it in a map.");
         try {
             if (Strings.isNullOrEmpty(appType)) {
