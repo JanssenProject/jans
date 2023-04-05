@@ -271,8 +271,7 @@ class JansVerticalNav():
         """
         if self.field_to_find:
             # ex: ['031C-4A65', '13D3-E7AD','2124-0CF1']
-            error_data = ['031C-4A65', '13D3-E7AD',
-                          '2124-0CF1']  # self.get_error()
+            error_data = self.get_error()
         else:
             error_data = []
 
