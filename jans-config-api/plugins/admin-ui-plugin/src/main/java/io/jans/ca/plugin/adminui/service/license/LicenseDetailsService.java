@@ -16,7 +16,6 @@ import io.jans.ca.plugin.adminui.service.BaseService;
 import io.jans.ca.plugin.adminui.service.config.AUIConfigurationService;
 import io.jans.ca.plugin.adminui.utils.AppConstants;
 import io.jans.ca.plugin.adminui.utils.ClientFactory;
-import io.jans.ca.plugin.adminui.utils.CommonUtils;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
 import io.jans.orm.PersistenceEntryManager;
 import jakarta.inject.Inject;
@@ -25,18 +24,10 @@ import jakarta.json.JsonObject;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.Invocation;
 import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.MultivaluedHashMap;
-import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -129,7 +120,7 @@ public class LicenseDetailsService extends BaseService {
             //getting error
             String jsonData = response.readEntity(String.class);
             ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
-            JsonNode jsonNode= mapper.readValue(jsonData, com.fasterxml.jackson.databind.JsonNode.class);
+            JsonNode jsonNode = mapper.readValue(jsonData, com.fasterxml.jackson.databind.JsonNode.class);
             if (!Strings.isNullOrEmpty(jsonNode.get("message").textValue())) {
                 log.error("license isActive error response: {}", jsonData);
                 return createLicenseResponse(false, jsonNode.get("status").intValue(), jsonNode.get("message").textValue());
@@ -203,7 +194,7 @@ public class LicenseDetailsService extends BaseService {
             //getting error
             String jsonData = response.readEntity(String.class);
             ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
-            JsonNode jsonNode= mapper.readValue(jsonData, com.fasterxml.jackson.databind.JsonNode.class);
+            JsonNode jsonNode = mapper.readValue(jsonData, com.fasterxml.jackson.databind.JsonNode.class);
             if (!Strings.isNullOrEmpty(jsonNode.get("message").textValue())) {
                 log.error("license Activation error response: {}", jsonData);
                 return createLicenseResponse(false, jsonNode.get("status").intValue(), jsonNode.get("message").textValue());

@@ -12,30 +12,19 @@ import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.ca.plugin.adminui.model.auth.DCRResponse;
 import io.jans.ca.plugin.adminui.model.config.AUIConfiguration;
 import io.jans.ca.plugin.adminui.model.config.LicenseConfiguration;
-import io.jans.ca.plugin.adminui.model.config.LicenseSpringCredentials;
 import io.jans.ca.plugin.adminui.model.exception.ApplicationException;
 import io.jans.ca.plugin.adminui.rest.license.LicenseResource;
 import io.jans.ca.plugin.adminui.service.BaseService;
 import io.jans.ca.plugin.adminui.utils.AppConstants;
-import io.jans.ca.plugin.adminui.utils.ClientFactory;
-import io.jans.ca.plugin.adminui.utils.CommonUtils;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
 import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.orm.PersistenceEntryManager;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-import jakarta.json.JsonObject;
-import jakarta.ws.rs.client.Entity;
-import jakarta.ws.rs.client.Invocation;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.MultivaluedHashMap;
-import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
-import java.util.Base64;
-import java.util.HashMap;
 import java.util.Map;
 
 @Singleton
