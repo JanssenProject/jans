@@ -1,0 +1,151 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>io.jans</groupId>
+    <artifactId>jans-cache-refresh</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>war</packaging>
+
+    <name>jans-cache-refresh</name>
+    <url>http://maven.apache.org</url>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <jans.version>1.0.8-SNAPSHOT</jans.version>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <jetty.version>11.0.8</jetty.version>
+    </properties>
+    <repositories>
+        <repository>
+            <id>mavencentral</id>
+            <name>maven central</name>
+            <url>https://repo1.maven.org/maven2</url>
+        </repository>
+        <repository>
+            <id>jans</id>
+            <name>Janssen project repository</name>
+            <url>https://maven.jans.io/maven</url>
+        </repository>
+        <repository>
+            <id>bouncycastle</id>
+            <name>Bouncy Castle</name>
+            <url>https://repo1.maven.org/maven2/org/bouncycastle</url>
+        </repository>
+        <repository>
+            <id>repository.jboss.org</id>
+            <name>JBoss Repository</name>
+            <url>https://repository.jboss.org/nexus/content/groups/public-jboss/</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>3.8.1</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- jans  -->
+
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-orm-ldap</artifactId>
+            <version>${jans.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-core-timer-weld</artifactId>
+            <version>${jans.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-core-util</artifactId>
+            <version>${jans.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-core-model</artifactId>
+            <version>${jans.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-core-cache</artifactId>
+            <version>${jans.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-core-service</artifactId>
+            <version>${jans.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-orm-core</artifactId>
+            <version>${jans.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.inject</groupId>
+            <artifactId>jakarta.inject-api</artifactId>
+            <version>2.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.ejb</groupId>
+            <artifactId>jakarta.ejb-api</artifactId>
+            <version>4.0.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-jaxb-provider</artifactId>
+            <version>6.0.0.Final</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-core</artifactId>
+            <version>6.0.0.Final</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>commons-beanutils</groupId>
+            <artifactId>commons-beanutils</artifactId>
+            <version>1.9.4</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.weld.servlet</groupId>
+            <artifactId>weld-servlet-core</artifactId>
+            <version>4.0.3.Final</version>
+        </dependency>
+
+        <!--  -->
+    </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-maven-plugin</artifactId>
+                <version>${jetty.version}</version>
+                <configuration>
+                    <webAppConfig>
+                        <descriptor>${project.build.directory}/${project.build.finalName}/WEB-INF/web.xml
+                        </descriptor>
+                        <contextPath>/jans</contextPath>
+                    </webAppConfig>
+
+                    <webAppSourceDirectory>${project.build.directory}/${project.build.finalName}
+                    </webAppSourceDirectory>
+                    <scanIntervalSeconds>3</scanIntervalSeconds>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
