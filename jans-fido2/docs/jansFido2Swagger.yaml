@@ -161,9 +161,9 @@ paths:
           application/json:
             schema:
               title: AssertionOptions
+              type: object
               required:
                 - clientDataJSON
-              type: object
               properties:
                 id:
                   type: string
@@ -211,6 +211,12 @@ paths:
                       transports:
                         type: array
                         description: list of transports.
+                        items:
+                          type: string
+                        example:
+                          - net
+                          - qr
+                          - usb
         403:
           $ref: '#/components/responses/AccessDenied'
         500:
@@ -336,6 +342,12 @@ paths:
                       transports:
                         type: array
                         description: list of transports.
+                        items:
+                          type: string
+                        example:
+                          - net
+                          - qr
+                          - usb
         400:
           $ref: '#/components/responses/InvalidRequest'
         401:
