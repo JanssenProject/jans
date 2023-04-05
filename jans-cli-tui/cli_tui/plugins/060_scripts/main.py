@@ -132,7 +132,8 @@ class Plugin():
                 selectes=0,
                 headerColor=cli_style.navbar_headcolor,
                 entriesColor=cli_style.navbar_entriescolor,
-                all_data=self.data['entries']
+                all_data=self.data['entries'],
+                field_to_find='ScriptError'
             )
 
         buttons = []
