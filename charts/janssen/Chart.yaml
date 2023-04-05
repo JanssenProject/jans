@@ -26,7 +26,7 @@ annotations:
   catalog.cattle.io/release-name: janssen
   catalog.cattle.io/display-name: Janssen Cloud Identity and Access Management
 apiVersion: v2
-appVersion: "1.0.10"
+appVersion: "1.0.11"
 icon: >-
   https://raw.githubusercontent.com/JanssenProject/jans/main/docs/assets/logo/janssen_project_favicon_transparent_50px_50px.png
 home: https://jans.io
