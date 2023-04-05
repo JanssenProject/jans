@@ -6,7 +6,7 @@ from prompt_toolkit.application import Application
 from prompt_toolkit.eventloop import get_event_loop
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.layout.containers import HSplit, VSplit, HorizontalAlign, Window
-from prompt_toolkit.widgets import Button, Label
+from prompt_toolkit.widgets import Button, Label, Dialog, Box
 from prompt_toolkit.formatted_text import HTML
 
 from utils.multi_lang import _
@@ -16,7 +16,6 @@ from wui_components.jans_vetrical_nav import JansVerticalNav
 from wui_components.jans_drop_down import DropDownWidget
 from wui_components.jans_cli_dialog import JansGDialog
 from wui_components.jans_spinner import Spinner
-
 
 BUILTIN_AUTHN = 'simple_password_auth'
 BUILTIN_SAML = 'urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport'
@@ -29,6 +28,7 @@ class Authn(DialogUtils):
 
         self.app = app
         self.default_acr = None
+        self.auth_scripts = []
 
         self.acr_container = JansVerticalNav(
                 myparent=app,
@@ -37,6 +37,7 @@ class Authn(DialogUtils):
                 selectes=0,
                 headerColor=cli_style.navbar_headcolor,
                 entriesColor=cli_style.navbar_entriescolor,
+                on_display=self.app.data_display_dialog,
                 on_enter=self.edit_acr,
                 on_delete=self.delete_ldap_server
             )
@@ -73,6 +74,17 @@ class Authn(DialogUtils):
                     'X' if self.default_acr == ldap_server['configId'] else ' '
                     ))
 
+
+            # Custom scripts
+            for scr in self.auth_scripts:
+                self.acr_container.add_item((
+                    scr['name'],
+                    'urn:io:jans:acrs:'+scr['name'],
+                    str(scr['level']).rjust(3),
+                    'X' if self.default_acr == scr['name'] else ' '
+                    ))
+
+
             self.acr_container.all_data = self.acr_container.data[:]
             self.app.layout.focus(self.acr_container)
 
@@ -84,6 +96,22 @@ class Authn(DialogUtils):
             result = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
             self.app.stop_progressing()
             self.ldap_servers = result.json()
+
+            acr_values_supported = self.app.cli_object.openid_configuration.get('acr_values_supported', [])[:]
+            if BUILTIN_AUTHN in acr_values_supported:
+                acr_values_supported.remove('simple_password_auth')
+
+            self.auth_scripts.clear()
+            self.app.start_progressing(_("Retreiving Auth Scripts"))
+            for acr in acr_values_supported:
+                response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, {'operation_id': 'get-config-scripts', 'endpoint_args': 'pattern:{}'.format(acr)})
+                if response.status_code == 200:
+                    result = response.json()
+                    if result.get('entriesCount', 0) > 0:
+                        for scr in result['entries']:
+                            if scr.get('enabled'):
+                                self.auth_scripts.append(scr)
+            self.app.stop_progressing()
             populate_acr_list()
 
         asyncio.ensure_future(coroutine())
@@ -99,7 +127,8 @@ class Authn(DialogUtils):
             self.simple_password_auth_dialog(params['passed'])
         elif acr in [ldap_server['configId'] for ldap_server in self.ldap_servers]:
             self.ldap_server_dialog(acr)
-
+        elif acr in [scr['name'] for scr in self.auth_scripts]:
+            self.auth_script_dialog(acr)
 
     async def get_default_acr(self) -> None:
         response = self.app.cli_requests({'operation_id': 'get-acrs'})
@@ -116,7 +145,6 @@ class Authn(DialogUtils):
 
     def simple_password_auth_dialog(self, acr_item: list) -> None:
 
-
         level = Spinner(value=-1, min_value=-1, max_value=-1)
         hashl_alg = DropDownWidget(values=[('bcrypt','bcrypt')], value='bcrypt', select_one_option=False)
         default_acr = self.default_acr == 'simple_password_auth'
@@ -132,7 +160,6 @@ class Authn(DialogUtils):
                 ],
                 width=D()
                 )
-
 
         def simple_password(dialog):
             data = self.make_data_from_dialog({'acr': dialog.body})
@@ -158,7 +185,7 @@ class Authn(DialogUtils):
         body = HSplit([
                 self.app.getTitledText(title="ACR", value=config.get('configId', ''), name='configId', read_only=bool(config.get('configId', None)), style=cli_style.edit_text_required),
                 self.app.getTitledWidget(title=_("Level"), widget=level, name='level'),
-                self.app.getTitledCheckBox(title=_("Default Authn Method"), checked=default_acr, name='default'),
+                self.app.getTitledCheckBox(title=_("Default Authn Method"), checked=default_acr, name='default', style=cli_style.check_box),
                 self.app.getTitledText(title="Bind DN", value=config.get('bindDN',''), name='bindDN', style=cli_style.edit_text_required),
                 self.app.getTitledText(title=_("Max Connections"), text_type='integer', value=config.get('maxConnections', 1000), name='maxConnections', style=cli_style.edit_text_required),
                 self.app.getTitledText(title=_("Remote Primary Key"), value=config.get('primaryKey', 'uid'), name='primaryKey', style=cli_style.edit_text_required),
@@ -231,6 +258,138 @@ class Authn(DialogUtils):
         self.app.show_jans_dialog(dialog)
 
 
+    def delete_script_property(self, **kwargs: Any) -> None:
+        """This method for deleting the script coniguration property
+        """
+
+        def confirm_handler(dialog) -> None:
+            self.script_config_properties_container.remove_item(kwargs['selected'])
+
+        confirm_dialog = self.app.get_confirm_dialog(
+                    _("Are you sure want to delete property with Key:")+"\n {} ?".format(kwargs['selected'][0]),
+                    confirm_handler=confirm_handler
+                    )
+
+        self.app.show_jans_dialog(confirm_dialog)
+
+
+
+    def edit_script_property(self, **kwargs: Any) -> None:
+        key, val, hide = kwargs.get('data', ('','', False))
+        hide_widget = self.app.getTitledCheckBox(_("Hide"), name='property_hide', checked=hide, style='class:script-titledtext', jans_help=_("Hide script property?"))
+
+        key_widget = self.app.getTitledText(_("Key"), name='property_key', value=key, style='class:script-titledtext', jans_help=_("Script propery Key"))
+        val_widget = self.app.getTitledText(_("Value"), name='property_val', value=val, style='class:script-titledtext', jans_help=_("Script property Value"))
+
+        def add_property(dialog: Dialog) -> None:
+            key_ = key_widget.me.text
+            val_ = val_widget.me.text
+            hide_ = hide_widget.me.checked
+            cur_data = [key_, val_, hide_]
+
+            if not kwargs.get('data'):
+                self.script_config_properties_container.add_item(cur_data)
+            else:
+                self.script_config_properties_container.replace_item(kwargs['selected'], cur_data)
+
+        body = HSplit([key_widget, val_widget, hide_widget])
+        buttons = [Button(_("Cancel")), Button(_("OK"), handler=add_property)]
+        dialog = JansGDialog(self.app, title=_("Configuration Property"), body=body, buttons=buttons, width=self.app.dialog_width-20)
+        self.app.show_jans_dialog(dialog)
+
+
+    def auth_script_dialog(self, acr:str) -> None:
+        for scr in self.auth_scripts:
+            if scr['name'] == acr:
+                auth_script = scr.copy()
+                break
+
+        level = Spinner(value=scr['level'], min_value=0, max_value=99)
+        default_acr = acr == self.default_acr
+
+        config_properties_title = _("Properties: ")
+        add_property_title = _("Add Property")
+        config_properties_data = []
+        for prop in auth_script.get('configurationProperties', []):
+            config_properties_data.append([prop['value1'], prop.get('value2', ''), prop.get('hide', False)])
+
+        self.script_config_properties_container = JansVerticalNav(
+                myparent=self.app,
+                headers=['Key', 'Value', 'Hide'],
+                preferred_size=[15, 15, 5],
+                data=config_properties_data,
+                on_enter=self.edit_script_property,
+                on_delete=self.delete_script_property,
+                on_display=self.app.data_display_dialog,
+                selectes=0,
+                headerColor='class:outh-client-navbar-headcolor',
+                entriesColor='class:outh-client-navbar-entriescolor',
+                all_data=config_properties_data,
+                underline_headings=False,
+                max_width=52,
+                jans_name='configurationProperties',
+                max_height=False
+                )
+
+        body = HSplit([
+                self.app.getTitledText(title="ACR", value=acr, name='acr', read_only=True, style=cli_style.edit_text),
+                self.app.getTitledWidget(title=_("Level"), widget=level, name='level', style=cli_style.edit_text),
+                self.app.getTitledCheckBox(title=_("Default Authn Method"), checked=default_acr, name='default', style=cli_style.check_box),
+                self.app.getTitledText(title="SAML ACR", value='urn:io:jans:acrs:'+acr, name='urn', read_only=True, style=cli_style.edit_text),
+                self.app.getTitledText(title="Description", value=auth_script.get('description', ''), name='description', style=cli_style.edit_text),
+                VSplit([
+                        HSplit([Label(text=config_properties_title, style=cli_style.edit_text, width=len(config_properties_title)+1)]),
+                        self.script_config_properties_container,
+                        Window(width=2),
+                        HSplit([
+                            Window(height=1),
+                            Button(text=add_property_title, width=len(add_property_title)+4, handler=self.edit_script_property),
+                            ]),
+                        ],
+                    height=6,
+                    width=D(),
+                    align=HorizontalAlign.LEFT
+                ),
+                ],
+                width=D()
+                )
+
+
+        def save_auth_script(dialog: Dialog) -> None:
+            data = self.make_data_from_dialog({'script': dialog.body})
+            auth_script['level'] = data['level']
+            auth_script['description'] = data['description']
+            auth_script['configurationProperties'].clear()
+            auth_script['revision'] += 1
+            
+            for prop_data in self.script_config_properties_container.data:
+                auth_script['configurationProperties'].append({
+                    "value1": prop_data[0],
+                    "value2": prop_data[1],
+                    "hide": prop_data[2]
+                    })
+
+            async def coroutine():
+                cli_args = {'operation_id': 'put-config-scripts', 'data': auth_script}
+                self.app.start_progressing("Saving Script ...")
+                response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+                self.app.stop_progressing()
+                if response.status_code == 500:
+                    self.app.show_message(_('Error'), response.text + '\n' + response.reason)
+                else:
+                    dialog.future.set_result(True)
+                    if data['default'] and data['default'] != self.default_acr:
+                        self.save_default_acr(acr)
+
+            asyncio.ensure_future(coroutine())
+
+        save_button = Button(_("Save"), handler=save_auth_script)
+        save_button.keep_dialog = True
+
+        buttons = [save_button, Button(_("Cancel"))]
+        dialog = JansGDialog(self.app, body=body, title=acr, buttons=buttons, width=self.app.dialog_width)
+        self.app.show_jans_dialog(dialog)
+
     def delete_ldap_server(self, **params: Any) -> None:
         async def coroutine(config_id):
             cli_args = {'operation_id': 'delete-config-database-ldap-by-name', 'url_suffix':'name:{}'.format(config_id) }
@@ -260,7 +419,7 @@ class Authn(DialogUtils):
             # save default acr
             cli_args = {'operation_id': 'put-acrs', 'data': {'defaultAcr': acr}}
             self.app.start_progressing(_("Saving default ACR..."))
-            await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+            response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
             self.app.stop_progressing()
             await self.get_default_acr()
             self.on_page_enter()
