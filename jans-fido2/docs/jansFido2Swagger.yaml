@@ -142,6 +142,9 @@ paths:
                     type: string
                   extensions:
                     type: string
+                  rpId:
+                    type: string
+                    description: Document domain.
         403:
           $ref: '#/components/responses/AccessDenied'
         500:
@@ -186,7 +189,28 @@ paths:
       responses:
         200:
           description: OK
-          content: {}
+          content:
+            application/json:
+              schema:
+                title: AssertionVerifyResponse
+                type: object
+                required:
+                  - status
+                properties:
+                  status:
+                    type: string
+                  errorMessage:
+                    type: string
+                  authenticatedCredentials:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                      id:
+                        type: string
+                      transports:
+                        type: array
+                        description: list of transports.
         403:
           $ref: '#/components/responses/AccessDenied'
         500:
@@ -298,8 +322,20 @@ paths:
                 properties:
                   status:
                     type: string
+                  errorMessage:
+                    type: string
                   challenge:
                     type: string
+                  authenticatedCredentials:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                      id:
+                        type: string
+                      transports:
+                        type: array
+                        description: list of transports.
         400:
           $ref: '#/components/responses/InvalidRequest'
         401:
@@ -741,13 +777,87 @@ paths:
               schema:
                 title: AttestationSuperGluuFinishRegistrationResponse
                 type: object
-                required:
-                  - status
-                  - challenge
                 properties:
-                  status:
+                  createdDate:
+                    type: string
+                    format: date-time
+                  updatedDate:
+                    type: string
+                    format: date-time
+                  createdBy:
+                    type: string
+                  updatedBy:
+                    type: string
+                  username:
+                    type: string
+                  domain:
+                    type: string
+                  userId:
                     type: string
                   challenge:
+                    type: string
+                  attestationRequest:
+                    type: string
+                  attestationResponse:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                        enum:
+                          - public-key
+                      id:
+                        type: string
+                      response:
+                        type: object
+                        required:
+                          - attestationObject
+                          - clientDataJSON
+                        properties:
+                          attestationObject:
+                            type: string
+                          clientDataJSON:
+                            type: string
+                          clientExtensionResults:
+                            type: array
+                            items:
+                              type: string
+                  uncompressedECPoint:
+                    type: string
+                  publicKeyId:
+                    type: string
+                  type:
+                    type: string
+                    enum:
+                      - public-key
+                  status:
+                    type: string
+                    enum:
+                      - registered
+                  counter:
+                    type: integer
+                  attestationType:
+                    type: string
+                  signatureAlgorithm:
+                    type: integer
+                  applicationId:
+                    type: string
+                  authenticatorSelection:
+                    type: object
+                    properties:
+                      authenticatorAttachment:
+                        type: string
+                        format: enum
+                          - platform
+                          - cross-platform
+                      userVerification:
+                        type: string
+                        format: enum
+                          - required
+                          - preferred
+                          - discouraged
+                      requireResidentKey:
+                        type: boolean
+                  errorMessage:
                     type: string
         400:
           $ref: '#/components/responses/InvalidRequest'
