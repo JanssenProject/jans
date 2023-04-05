@@ -26,7 +26,7 @@ RUN python3 -m ensurepip \
 # =====================
 
 # janssenproject/jans SHA commit
-ENV JANS_SOURCE_VERSION=cd62ff9fe8783f2e87dd5e47c2362d35ba9713ef
+ENV JANS_SOURCE_VERSION=ecf93955f391bcda17ad6a2f6ead00d79afee165
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCRIPT_CATALOG_DIR=docs/script-catalog
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
@@ -60,6 +60,7 @@ RUN cd /tmp/jans \
     && cp -R ${JANS_SETUP_DIR}/templates/jans-auth /app/templates/jans-auth \
     && cp ${JANS_SETUP_DIR}/openbanking/templates/scopes.ldif /app/templates/scopes.ob.ldif \
     && cp ${JANS_SETUP_DIR}/openbanking/templates/attributes.ldif /app/templates/attributes.ob.ldif \
+    && cp ${JANS_SETUP_DIR}/openbanking/templates/jans-auth/jans-auth-config.json /app/templates/jans-auth/jans-auth-config.ob.json \
     && cp ${JANS_SETUP_DIR}/static/metric/o_metric.ldif /app/templates/o_metric.ldif \
     && cp ${JANS_SETUP_DIR}/static/cache-refresh/o_site.ldif /app/templates/o_site.ldif \
     && cp -R ${JANS_SETUP_DIR}/templates/jans-fido2 /app/templates/jans-fido2 \
@@ -181,6 +182,11 @@ RUN mkdir -p /app/custom_ldif /etc/certs /etc/jans/conf
 COPY scripts /app/scripts
 # this overrides existing templates
 COPY templates /app/templates
+
+# disable keyRegeneration
+RUN sed -i -r 's/("keyRegenerationEnabled":)true/\1false/g' /app/templates/jans-auth/jans-auth-config.json \
+    && sed -i -r 's/("keyRegenerationEnabled":)true/\1false/g' /app/templates/jans-auth/jans-auth-config.ob.json
+
 RUN chmod +x /app/scripts/entrypoint.sh
 
 # create non-root user
