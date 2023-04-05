@@ -826,17 +826,17 @@ components:
           type: array
           items:
             type: object
-        value:
-          type: object
         displayValue:
           type: string
-        clientAuthMapSchema:
+        value:
           type: object
-          additionalProperties:
-            type: array
-            items:
-              $ref: '#/components/schemas/Scope'
-          description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     CustomUser:
       type: object
       properties:
@@ -878,13 +878,13 @@ components:
           type: string
         baseDn:
           type: string
-        clientAuthMapSchema:
-          type: object
-          additionalProperties:
-            type: array
-            items:
-              $ref: '#/components/schemas/Scope'
-          description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     UserPagedResult:
       type: object
       properties:
@@ -901,13 +901,13 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CustomUser'
-        clientAuthMapSchema:
-          type: object
-          additionalProperties:
-            type: array
-            items:
-              $ref: '#/components/schemas/Scope'
-          description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
     UserPatchRequest:
       type: object
       properties:
@@ -917,13 +917,13 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CustomObjectAttribute'
-        clientAuthMapSchema:
-          type: object
-          additionalProperties:
-            type: array
-            items:
-              $ref: '#/components/schemas/Scope'
-          description: clientAuthMapSchema
+        clientAuthMapArraySchema:
+          properties:
+            children:
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/Scope'
+          description: clientAuthMapArraySchema
   securitySchemes:
     oauth2:
       type: oauth2
