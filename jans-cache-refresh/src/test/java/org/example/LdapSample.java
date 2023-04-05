@@ -6,9 +6,9 @@
 
 package org.example;
 
-import io.jans.cacherefresh.config.ConfigurationFactory;
 import io.jans.cacherefresh.model.GluuConfiguration;
-import io.jans.cacherefresh.service.ConfigurationService;
+import io.jans.cacherefresh.service.config.ConfigurationFactory;
+import io.jans.cacherefresh.service.config.ConfigurationService;
 import io.jans.cacherefresh.timer.CacheRefreshTimer;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.ldap.impl.LdapEntryManager;

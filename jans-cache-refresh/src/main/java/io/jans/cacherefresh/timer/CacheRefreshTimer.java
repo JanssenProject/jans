@@ -28,14 +28,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
 //import javax.inject.Named;
 
 import io.jans.cacherefresh.CacheRefreshEvent;
-import io.jans.cacherefresh.config.ApplicationFactory;
-import io.jans.cacherefresh.config.ConfigurationFactory;
 import io.jans.cacherefresh.constants.OxTrustConstants;
 import io.jans.cacherefresh.external.ExternalCacheRefreshService;
 import io.jans.cacherefresh.model.*;
+import io.jans.cacherefresh.model.config.AppConfiguration;
 import io.jans.cacherefresh.service.*;
+import io.jans.cacherefresh.service.config.ApplicationFactory;
+import io.jans.cacherefresh.service.config.ConfigurationFactory;
+import io.jans.cacherefresh.service.config.ConfigurationService;
 import io.jans.cacherefresh.util.PropertyUtil;
-import io.jans.config.oxtrust.AppConfiguration;
 import io.jans.config.oxtrust.CacheRefreshAttributeMapping;
 import io.jans.config.oxtrust.CacheRefreshConfiguration;
 import io.jans.model.GluuStatus;
@@ -57,7 +58,7 @@ import io.jans.orm.search.filter.Filter;
 import io.jans.orm.util.ArrayHelper;
 import io.jans.orm.util.StringHelper;
 import io.jans.service.AttributeService;
-import io.jans.cacherefresh.service.ObjectSerializationService;
+import io.jans.service.ObjectSerializationService;
 import io.jans.service.SchemaService;
 import io.jans.service.cdi.async.Asynchronous;
 import io.jans.service.cdi.event.Scheduled;
@@ -82,7 +83,6 @@ import org.slf4j.Logger;
  * @author Yuriy Movchan Date: 05.05.2011
  */
 @ApplicationScoped
-@Named
 public class CacheRefreshTimer {
 
 	private static final String LETTERS_FOR_SEARCH = "abcdefghijklmnopqrstuvwxyz1234567890.";
@@ -155,7 +155,7 @@ public class CacheRefreshTimer {
 		this.isActive = new AtomicBoolean(false);
 
 		// Clean up previous Inum cache
-		CacheRefreshConfiguration cacheRefreshConfiguration = getConfigurationFactory().getCacheRefreshConfiguration();
+		CacheRefreshConfiguration cacheRefreshConfiguration = getConfigurationFactory().getAppConfiguration();
 		if (cacheRefreshConfiguration != null) {
 			String snapshotFolder = cacheRefreshConfiguration.getSnapshotFolder();
 			if (StringHelper.isNotEmpty(snapshotFolder)) {
@@ -192,7 +192,7 @@ public class CacheRefreshTimer {
 	}
 
 	public void processInt() {
-		CacheRefreshConfiguration cacheRefreshConfiguration = getConfigurationFactory().getCacheRefreshConfiguration();
+		CacheRefreshConfiguration cacheRefreshConfiguration = getConfigurationFactory().getAppConfiguration();
 		try {
 			//GluuConfiguration currentConfiguration = getConfigurationService().getConfiguration();
 			GluuConfiguration currentConfiguration = new GluuConfiguration();

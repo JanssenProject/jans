@@ -8,16 +8,20 @@ package io.jans.cacherefresh.model;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.List;
+
+import org.apache.logging.log4j.core.net.ssl.TrustStoreConfiguration;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import io.jans.model.GluuStatus;
 import io.jans.model.SmtpConfiguration;
-import io.jans.orm.annotation.*;
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import io.jans.orm.annotation.AttributeName;
+import io.jans.orm.annotation.CustomObjectClass;
+import io.jans.orm.annotation.DataEntry;
+import io.jans.orm.annotation.JsonObject;
+import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.model.base.InumEntry;
 import io.jans.service.cache.CacheConfiguration;
-import org.apache.logging.log4j.core.net.ssl.TrustStoreConfiguration;
 
 /**
  * GluuConfiguration

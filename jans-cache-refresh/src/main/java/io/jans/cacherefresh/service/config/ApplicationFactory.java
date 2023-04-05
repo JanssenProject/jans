@@ -4,19 +4,20 @@
  * Copyright (c) 2014, Gluu
  */
 
-package io.jans.cacherefresh.config;
+package io.jans.cacherefresh.service.config;
 
-//import javax.inject.Inject;
+import org.slf4j.Logger;
 
-import io.jans.cacherefresh.service.ConfigurationFactory;
-import io.jans.cacherefresh.service.ConfigurationService;
-import io.jans.config.oxtrust.AppConfiguration;
+import io.jans.cacherefresh.model.config.AppConfiguration;
+import io.jans.model.SmtpConfiguration;
 import io.jans.orm.PersistenceEntryManagerFactory;
 import io.jans.orm.model.PersistenceConfiguration;
 import io.jans.orm.service.PersistanceFactoryService;
+import io.jans.service.cache.CacheConfiguration;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Inject;
-import org.slf4j.Logger;
 
 /**
  * Holds factory methods to create services
@@ -30,7 +31,7 @@ public class ApplicationFactory {
     private Logger log;
 
     @Inject
-    private ConfigurationFactory<?> configurationFactory;
+    private ConfigurationFactory configurationFactory;
 
     @Inject
     private ConfigurationService configurationService;
@@ -40,6 +41,10 @@ public class ApplicationFactory {
 
     @Inject
     private AppConfiguration appConfiguration;
+    
+    private SmtpConfiguration smtpConfiguration = new SmtpConfiguration();
+
+	private CacheConfiguration cacheConfiguration;
 
     public static final String PERSISTENCE_ENTRY_MANAGER_FACTORY_NAME = "persistenceEntryManagerFactory";
 
@@ -50,7 +55,17 @@ public class ApplicationFactory {
     
     public static final String PERSISTENCE_METRIC_CONFIG_GROUP_NAME = "metric";
 
+    @Produces
+    @RequestScoped
+    public SmtpConfiguration getSmtpConfiguration() {
+        return smtpConfiguration;
+    }
 
+    @Produces
+    @ApplicationScoped
+    public CacheConfiguration getCacheConfiguration() {
+        return cacheConfiguration;
+    }
 
     public PersistenceEntryManagerFactory getPersistenceEntryManagerFactory() {
         PersistenceConfiguration persistenceConfiguration = configurationFactory.getPersistenceConfiguration();

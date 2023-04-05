@@ -4,30 +4,29 @@
  * Copyright (c) 2014, Gluu
  */
 
-package io.jans.cacherefresh.service;
+package io.jans.cacherefresh.service.config;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+import org.slf4j.Logger;
+
 //import javax.inject.Inject;
 //import javax.inject.Named;
 
 import io.jans.cacherefresh.model.GluuConfiguration;
 import io.jans.cacherefresh.model.ProgrammingLanguage;
+import io.jans.cacherefresh.service.EncryptionService;
+import io.jans.cacherefresh.service.OrganizationService;
 import io.jans.model.AuthenticationScriptUsageType;
 import io.jans.model.ScriptLocationType;
-import io.jans.model.SmtpConfiguration;
-import io.jans.model.custom.script.CustomScriptType;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.service.metric.MetricService;
-import io.jans.util.StringHelper;
-import io.jans.util.security.StringEncrypter;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
-import org.slf4j.Logger;
 
 /**
  * GluuConfiguration service
@@ -164,55 +163,6 @@ public class ConfigurationService implements Serializable {
 
     public ScriptLocationType[] getLocationTypes() {
         return new ScriptLocationType[] { ScriptLocationType.LDAP, ScriptLocationType.FILE };
-    }
-
-    public CustomScriptType[] getCustomScriptTypes() {
-        return new CustomScriptType[] { CustomScriptType.PERSON_AUTHENTICATION, CustomScriptType.CONSENT_GATHERING, CustomScriptType.CLIENT_REGISTRATION,
-                CustomScriptType.DYNAMIC_SCOPE, CustomScriptType.ID_GENERATOR, CustomScriptType.CACHE_REFRESH,
-                CustomScriptType.UMA_RPT_POLICY, CustomScriptType.UMA_CLAIMS_GATHERING, CustomScriptType.UMA_RPT_CLAIMS,
-                CustomScriptType.INTROSPECTION, CustomScriptType.RESOURCE_OWNER_PASSWORD_CREDENTIALS,
-                CustomScriptType.APPLICATION_SESSION, CustomScriptType.END_SESSION, CustomScriptType.SCIM,
-                CustomScriptType.POST_AUTHN, CustomScriptType.PERSISTENCE_EXTENSION, CustomScriptType.IDP,
-                CustomScriptType.REVOKE_TOKEN };
-    }
-
-    public CustomScriptType[] getOthersCustomScriptTypes() {
-        return new CustomScriptType[] { CustomScriptType.CONSENT_GATHERING, CustomScriptType.CLIENT_REGISTRATION,
-                CustomScriptType.DYNAMIC_SCOPE, CustomScriptType.ID_GENERATOR, CustomScriptType.CACHE_REFRESH,
-                CustomScriptType.UMA_RPT_POLICY, CustomScriptType.UMA_CLAIMS_GATHERING, CustomScriptType.UMA_RPT_CLAIMS,
-                CustomScriptType.INTROSPECTION, CustomScriptType.RESOURCE_OWNER_PASSWORD_CREDENTIALS,
-                CustomScriptType.APPLICATION_SESSION, CustomScriptType.END_SESSION, CustomScriptType.SCIM,
-                CustomScriptType.POST_AUTHN, CustomScriptType.PERSISTENCE_EXTENSION, CustomScriptType.IDP,
-                CustomScriptType.REVOKE_TOKEN, CustomScriptType.UPDATE_TOKEN, CustomScriptType.CIBA_END_USER_NOTIFICATION };
-    }
-
-    public void encryptSmtpPassword(SmtpConfiguration smtpConfiguration) {
-        if (smtpConfiguration == null) {
-            return;
-        }
-        String password = smtpConfiguration.getPasswordDecrypted();
-        if (StringHelper.isNotEmpty(password)) {
-            try {
-                String encryptedPassword = encryptionService.encrypt(password);
-                smtpConfiguration.setPassword(encryptedPassword);
-            } catch (StringEncrypter.EncryptionException ex) {
-                log.error("Failed to encrypt SMTP password", ex);
-            }
-        }
-    }
-
-    public void decryptSmtpPassword(SmtpConfiguration smtpConfiguration) {
-        if (smtpConfiguration == null) {
-            return;
-        }
-        String password = smtpConfiguration.getPassword();
-        if (StringHelper.isNotEmpty(password)) {
-            try {
-                smtpConfiguration.setPasswordDecrypted(encryptionService.decrypt(password));
-            } catch (StringEncrypter.EncryptionException ex) {
-                log.error("Failed to decrypt SMTP password", ex);
-            }
-        }
     }
 
     public PersistenceEntryManager getPersistenceEntryManager() {

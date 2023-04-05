@@ -14,10 +14,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import com.unboundid.ldap.sdk.LDAPException;
+
 import io.jans.cacherefresh.constants.OxTrustConstants;
 import io.jans.cacherefresh.model.Events;
 import io.jans.cacherefresh.model.GluuCustomAttribute;
-import io.jans.config.oxtrust.AppConfiguration;
+import io.jans.cacherefresh.model.config.AppConfiguration;
 import io.jans.model.GluuAttribute;
 import io.jans.model.GluuAttributeUsageType;
 import io.jans.model.GluuUserRole;
@@ -28,10 +30,7 @@ import io.jans.service.BaseCacheService;
 import io.jans.util.OxConstants;
 import io.jans.util.StringHelper;
 import jakarta.enterprise.context.ApplicationScoped;
-
-import com.unboundid.ldap.sdk.LDAPException;
 import jakarta.enterprise.event.Event;
-import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.inject.Any;
 import jakarta.inject.Inject;
 
@@ -45,9 +44,6 @@ public class AttributeService extends io.jans.service.AttributeService {
 
     private GluuUserRole[] attributeEditTypes = new GluuUserRole[] { GluuUserRole.ADMIN, GluuUserRole.USER };
 
-    /**
-     * 
-     */
     private static final long serialVersionUID = 8223624816948822765L;
 
     @Inject

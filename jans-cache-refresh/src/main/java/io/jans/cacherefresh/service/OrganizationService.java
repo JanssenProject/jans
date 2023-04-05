@@ -11,15 +11,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Priority;
-//import javax.inject.Inject;
-//import javax.inject.Named;
-
+import jakarta.annotation.Priority;
 import io.jans.cacherefresh.constants.OxTrustConstants;
 import io.jans.cacherefresh.model.GluuBoolean;
 import io.jans.cacherefresh.model.GluuOrganization;
 import io.jans.cacherefresh.model.ProgrammingLanguage;
-import io.jans.config.oxtrust.AppConfiguration;
+import io.jans.cacherefresh.model.config.AppConfiguration;
 import io.jans.config.oxtrust.LdapOxAuthConfiguration;
 import io.jans.model.ApplicationType;
 import io.jans.model.GluuStatus;
@@ -43,7 +40,6 @@ import org.slf4j.Logger;
  */
 @ApplicationScoped
 @Priority(value = 5)
-@Named("organizationService")
 public class OrganizationService  {
 
 	private static final long serialVersionUID = -1959146007518514678L;
