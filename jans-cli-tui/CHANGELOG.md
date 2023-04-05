@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.0.11](https://github.com/JanssenProject/jans/compare/jans-cli-tui-v1.0.10...jans-cli-tui-v1.0.11) (2023-04-05)
+
+
+### Features
+
+* jans-cli-tui filter scopes (ref: [#4299](https://github.com/JanssenProject/jans/issues/4299)) ([#4414](https://github.com/JanssenProject/jans/issues/4414)) ([6142009](https://github.com/JanssenProject/jans/commit/614200937935e41c5a347278e2b1c6687d2b8cf1))
+* **jans-cli-tui:** device verification url with code ([#4328](https://github.com/JanssenProject/jans/issues/4328)) ([cee9ab4](https://github.com/JanssenProject/jans/commit/cee9ab43adfe3d711f9ae52cf846e6bc19882c06))
+
+
+### Bug Fixes
+
+* **jans-cli-tui:** agama related issues ([#4438](https://github.com/JanssenProject/jans/issues/4438)) ([1180e31](https://github.com/JanssenProject/jans/commit/1180e3126abfdfa31e94ad878deebb8eb979ca6b))
+* **jans-cli-tui:** display jans id in scope list ([#4263](https://github.com/JanssenProject/jans/issues/4263)) ([5d5e1cd](https://github.com/JanssenProject/jans/commit/5d5e1cd81e674a50f64126f458a575d1767bd74a))
+* **jans-cli-tui:** fromisoformat function for py &lt; 3.7 ([#4365](https://github.com/JanssenProject/jans/issues/4365)) ([6756b8f](https://github.com/JanssenProject/jans/commit/6756b8fbd1fc870b86fd4a08e88530c4a1c090c7))
+* **jans-cli-tui:** remove unused code ([#4367](https://github.com/JanssenProject/jans/issues/4367)) ([c944603](https://github.com/JanssenProject/jans/commit/c944603a90afe9b08343e0aa574d576fa38316b6))
+* **jans-cli-tui:** use -dev isntead of -SNAPSHOT in build version ([#4363](https://github.com/JanssenProject/jans/issues/4363)) ([32ea135](https://github.com/JanssenProject/jans/commit/32ea135fd642a82ed93bb45a06256d92db9009d8))
+* prepare for  release ([60775c0](https://github.com/JanssenProject/jans/commit/60775c09dc5ab9996bf80c03dcb457861d48dfb1))
+
 ## [1.0.10](https://github.com/JanssenProject/jans/compare/jans-cli-tui-v1.0.9...jans-cli-tui-v1.0.10) (2023-03-16)
 
 
