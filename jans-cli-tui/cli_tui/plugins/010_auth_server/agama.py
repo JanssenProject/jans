@@ -72,7 +72,7 @@ class Agama(DialogUtils):
 
         async def coroutine():
             cli_args = {'operation_id': 'get-agama-dev-prj-configs', 'url_suffix':'name:{}'.format(project_name)}
-            self.app.start_progressing(_("Retreiving project configuration..."))
+            self.app.start_progressing(_("Retrieving project configuration..."))
             response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
             self.app.stop_progressing()
 
