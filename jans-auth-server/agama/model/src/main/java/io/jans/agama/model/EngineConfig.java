@@ -17,7 +17,7 @@ public class EngineConfig {
 
     private boolean enabled;
 
-    private String rootDir = Path.of(System.getProperty("server.base"), "agama").toString();
+    private String rootDir;
     private String templatesPath = "/ftl";
     private String scriptsPath = "/scripts";
     
