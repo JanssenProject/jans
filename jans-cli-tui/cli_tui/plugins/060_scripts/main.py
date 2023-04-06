@@ -185,7 +185,7 @@ class Plugin():
         title = _("Edit Script") if data else _("Add Script")
 
         dialog = EditScriptDialog(self.app, title=title, data=data, save_handler=self.save_script)
-        result = self.app.show_jans_dialog(dialog)
+        self.app.show_jans_dialog(dialog)
 
     def save_script(self, dialog: Dialog) -> None:
         """This method to save the script data to server
@@ -208,6 +208,9 @@ class Plugin():
             else:
                 dialog.future.set_result(DialogResult.OK)
                 self.get_scripts()
+                # we need to refresh OpenID configuration for acr_values_supported if script enabled or disabled
+                if dialog.new_data['scriptType'] == 'person_authentication' and dialog.script_enabled != dialog.new_data.get('enabled'):
+                    self.app.retreive_openid_configuration()
 
         asyncio.ensure_future(coroutine())
 

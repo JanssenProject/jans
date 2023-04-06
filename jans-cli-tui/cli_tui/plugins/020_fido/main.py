@@ -191,13 +191,13 @@ class Plugin(DialogUtils):
 
                     VSplit([
                             HSplit([Label(text=requested_parties_title, style='class:script-label', width=len(requested_parties_title)+1),]),
-                             
+
                             self.requested_parties_container,
                             Window(width=2),
                             HSplit([
                                 Window(height=1),
                                 HSplit([Button(text=add_party_title, width=len(add_party_title)+4, handler=partial(self.edit_requested_party, jans_name='editRequestedPary'))]),
-                                
+
                                 ]),
                             ],
                             height=5, width=D(),
