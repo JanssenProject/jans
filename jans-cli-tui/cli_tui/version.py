@@ -3,4 +3,4 @@
  https://www.apache.org/licenses/LICENSE-2.0
 """
 
-__version__ = "1.0.11-SNAPSHOT"
+__version__ = "1.0.12-dev"

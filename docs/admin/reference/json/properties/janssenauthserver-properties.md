@@ -79,6 +79,7 @@ tags:
 | dcrSsaValidationConfigs | DCR SSA Validation configurations used to perform validation of SSA or DCR | [Details](#dcrssavalidationconfigs) |
 | defaultSignatureAlgorithm | The default signature algorithm to sign ID Tokens | [Details](#defaultsignaturealgorithm) |
 | defaultSubjectType | The default subject type used for dynamic client registration | [Details](#defaultsubjecttype) |
+| deviceAuthzAcr | Device authz acr | [Details](#deviceauthzacr) |
 | deviceAuthzEndpoint | URL for the Device Authorization | [Details](#deviceauthzendpoint) |
 | deviceAuthzRequestExpiresIn | Expiration time given for device authorization requests | [Details](#deviceauthzrequestexpiresin) |
 | deviceAuthzResponseTypeToProcessAuthz | Response type used to process device authz requests | [Details](#deviceauthzresponsetypetoprocessauthz) |
@@ -886,6 +887,15 @@ tags:
 ### defaultSubjectType
 
 - Description: The default subject type used for dynamic client registration
+
+- Required: No
+
+- Default value: None
+
+
+### deviceAuthzAcr
+
+- Description: Device authz acr
 
 - Required: No
 
@@ -2536,7 +2546,7 @@ tags:
 
 - Required: No
 
-- Default value: true
+- Default value: false
 
 
 ### useLocalCache

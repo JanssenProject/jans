@@ -9,8 +9,7 @@ tags:
 
 # ACR
 
-ACR(Authentication Context Class Reference) is defined by
-[OpenId Connect Specification](https://openid.net/specs/openid-connect-core-1_0.html#Terminology).
+ACR(Authentication Context Class Reference) is defined by   [OpenId Connect Specification](https://openid.net/specs/openid-connect-core-1_0.html#Terminology).
 
 Using ACRs and ACR configuration, the client application can define end-user authentication experience while ensuring
 required level of security for the application.
@@ -28,48 +27,43 @@ https://janssen.server.host/jans-auth/.well-known/openid-configuration
 The `acr_values_supported` claim in the response shows the list of supported and enabled ACRs for particular Janssen Server
 deployment.
 
-## Categorising ACRs
+## ACR categories:
 
 ACRs available in Janssen Server can be broadly put into three categories. These categories are just for ease of
 understanding.
 
-### Internal Janssen Server ACR
+### 1. Internal Janssen Server ACR
 
 Janssen server will use internal ACR only if no other authentication method is set or could be invoked.
 This internal ACR, `default_password_auth`, is set to level -1. This means that it has lower
 priority than any other script. This ACR is always available and enabled on any Janssen Server deployment.
 
-This ACR is a simple user-id and password-based authentication mechanism. It'll try to authenticate the end-user
-against locally deployed backend datastore.
+This ACR is a simple user-id and password-based authentication mechanism. It authenticates the end-user
+against the backend datastore.
 
-### Pre-packaged ACR for authenticating using external LDAP or Active Directory
+### 2. Pre-packaged ACR for authenticating using external LDAP or Active Directory
 
 All Janssen Server deployments have `default_ldap_server` ACR which can be enabled to perform authentication against a
 remote LDAP-based IDP (e.g. ActiveDirectory). By default, this ACR is disabled. This ACR can only authenticate against
 LDAP-based IDP or a local LDAP.
 
-Use the instructions provided in jans-cli
-[LDAP configuration options](../../config-guide/jans-cli/cli-ldap-configuration.md) documentation to learn how to
-enable and configure ACRs that use external LDAP as IDP.
+Use the instructions provided in jans-cli [LDAP configuration options](../../config-guide/jans-cli/cli-ldap-configuration.md) documentation to learn how to enable and configure ACRs that use external LDAP as IDP.
 
-### Script-based ACRs
+### 3. Script-based ACRs
 
-To enable highly flexible and pluggable authentication flows, Janssen Server allows script-based ACRs. These ACRs are
-backed by a corresponding [person authentication script](../../developer/scripts/person-authentication.md). To use these ACRs
-in the authentication flow, the corresponding
-[script should be enabled](../../developer/scripts/person-authentication.md#enabling-an-authentication-mechanism).
+To offer highly flexible and pluggable authentication flows, Janssen Server uses script-based ACRs. These ACRs are
+associated with a corresponding [person authentication script](../../developer/scripts/person-authentication.md). To use these ACRs
+in the authentication flow, the associated [script should be enabled](../../developer/scripts/person-authentication.md#enabling-an-authentication-mechanism).
 
-## Configuring ACRs
+## Configuring ACRs in the JANS AS:
 
-ACRs can be configured at per client level and at the server level.
-
-### Client Configuration
+ACRs can be configured on two levels:
+### 1. Client Level ACR :
 
 The client can configure a specific ACR that should be used if the authentication request is missing `acr_values`
-parameter. This can be configured using `Default ACR`.
+parameter. This can be configured using `Default ACR` attribute of the client configuration.
 
-Also, the client can restrict ACR values that authentication requests can have as part of
-`acr_values` parameter. This can be configured using `Allowed ACRs`.
+Also, the client can restrict ACR values that authentication requests can have as part of `acr_values` parameter. This can be configured using `Allowed ACRs`.
 
 Using the Janssen Text base UI (TUI) configuration tool, these values can be configured by navigating to
 `Auth Server`->`clients`->`get clients`->`choose a client and press enter`->`Advanced Client Prop`. On this screen
@@ -77,7 +71,7 @@ populate ACR values in `Default ACR` and `Allowed ACRs`:
 
 ![](../../../assets/image-tui-client-advance-properties.png)
 
-### Server Configuration
+### 2. Server Level ACR
 
 Janssen Server administrator can configure an ACR that should be invoked if ACR for incoming requests can not be
 determined using client-level configuration. This is the default authentication mechanism exposed to all the clients
@@ -101,15 +95,15 @@ ACR's level, nothing is changed and the usual SSO behavior is observed. If the n
 method is requested), and it's not possible to serve such a request using the existing session's context, then the user
 must re-authenticate to continue. If the user succeeds, a new session with a new ACR gets associated.
 
-## How The Applicable ACR Gets Determined
+## Flowchart - How the Jans AS derives an ACR value for a user session :
 
 ```mermaid
 flowchart TD
-    A[RP send authentication request] --> B{Request contains <br /><code>acr_values</code> parameter}
+    A[RP send authentication request] --> B{Request contains <br /><code>acr_values</code> parameter?}
     B -->|Yes| C[Perform Authentication]
-    B -->|No| D{<code>Default ACR</code> <br />configured for <br />client}
+    B -->|No| D{<code>Default ACR</code> <br />configured for <br />client?}
     D -->|Yes| C
-    D -->|No| E{<code>Default ACR</code> value <br />configured for <br />Janssen Server}
+    D -->|No| E{<code>Default ACR</code> value <br />configured for <br />Janssen Server?}
     E --> |Yes| C
     E --> |No| F[Select <br />internal ACR as<br /> Authentication method] --> C
 ```
