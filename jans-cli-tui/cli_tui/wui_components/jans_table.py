@@ -23,7 +23,7 @@ class JansTableWidget():
             preferred_size: Optional[list] = None,
             height: Optional[int] = 5,
             padding: int = 3,
-            on_enter: Optional[Callable] = None,
+            on_display: Optional[Callable] = None,
             style: Optional[Style] = 'class:table-white'
             ) -> None:
 
@@ -44,7 +44,7 @@ class JansTableWidget():
         self.height = height
         self.padding = padding
         self.style = style
-        self.on_enter = on_enter
+        self.on_display = on_display
 
         self._calculated_column_sizes()
         self.create_window()
@@ -117,8 +117,8 @@ class JansTableWidget():
 
         @kb.add("d")
         def _display(event) -> None:
-            if self.on_enter:
-                self.on_enter(selected_line=self.selected_line, data=self.data[self.selected_line])
+            if self.on_display:
+                self.on_display(selected_line=self.selected_line, data=self.data[self.selected_line])
 
         return kb
 

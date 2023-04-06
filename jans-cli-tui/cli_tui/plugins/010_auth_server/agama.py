@@ -281,7 +281,7 @@ class Agama(DialogUtils):
                         app=self.app,
                         data=list(flow_errors.items()),
                         headers=["Flow", "Error"],
-                        on_enter=display_error
+                        on_display=display_error
                         )
                     body_widgets.append(jans_table)
 
