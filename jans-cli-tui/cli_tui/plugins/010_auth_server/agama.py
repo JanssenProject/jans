@@ -32,8 +32,6 @@ class Agama(DialogUtils):
         self.app = app
         self.data = []
 
-        open("/tmp/ps.txt", "w").write(str(app.get_column_sizes(.2, .2, .2, .15, .15, .1)))
-
         self.working_container = JansVerticalNav(
                 myparent=app,
                 headers=[_("Project Name"), _("Type"), _("Author"), _("Status"), _("Deployed on"), _("Errors")],
