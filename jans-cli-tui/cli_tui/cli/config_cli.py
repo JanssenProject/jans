@@ -404,6 +404,27 @@ class JCA_CLI:
         ret_val.update(headers)
         return ret_val
 
+    def get_openid_configuration(self):
+
+        try:
+            response = requests.get(
+                    url = 'https://{}{}'.format(self.idp_host, self.discovery_endpoint),
+                    headers=self.get_request_header({'Accept': 'application/json'}),
+                    verify=self.verify_ssl,
+                    cert=self.mtls_client_cert
+                )
+        except Exception as e:
+            self.cli_logger.error(str(e))
+            if self.wrapped:
+                return str(e)
+
+            raise ValueError(
+                self.colored_text("Unable to get OpenID configuration:\n {}".format(str(e)), error_color))
+
+        self.openid_configuration = response.json()
+        self.cli_logger.debug("OpenID Config: %s", self.openid_configuration)
+
+        return response
 
     def check_connection(self):
         self.cli_logger.debug("Checking connection")
@@ -448,23 +469,7 @@ class JCA_CLI:
             write_config()
             return response.text
 
-        try:
-            response = requests.get(
-                    url = 'https://{}{}'.format(self.idp_host, self.discovery_endpoint),
-                    headers=self.get_request_header({'Accept': 'application/json'}),
-                    verify=self.verify_ssl,
-                    cert=self.mtls_client_cert
-                )
-        except Exception as e:
-            self.cli_logger.error(str(e))
-            if self.wrapped:
-                return str(e)
-
-            raise ValueError(
-                self.colored_text("Unable to get OpenID configuration:\n {}".format(str(e)), error_color))
-
-        self.openid_configuration = response.json()
-        self.cli_logger.debug("OpenID Config: %s", self.openid_configuration)
+        self.get_openid_configuration()
 
         return True
 

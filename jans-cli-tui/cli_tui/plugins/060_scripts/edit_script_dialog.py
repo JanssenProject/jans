@@ -55,6 +55,7 @@ class EditScriptDialog(JansGDialog, DialogUtils):
         self.cur_lang = self.data.get('programmingLanguage', 'python')
         self.create_window()
         self.script = self.data.get('script','')
+        self.script_enabled = self.data.get('enabled')
 
     def save(self) -> None:
         """method to invoked when saving the dialog (Save button is pressed)
