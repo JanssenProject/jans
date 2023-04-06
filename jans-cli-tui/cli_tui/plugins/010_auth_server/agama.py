@@ -27,12 +27,17 @@ class Agama(DialogUtils):
         app: Application
         ) -> None:
 
-        self.app = self.myparent = app
+        
+
+        self.app = app
         self.data = []
+
+        open("/tmp/ps.txt", "w").write(str(app.get_column_sizes(.2, .2, .2, .15, .15, .1)))
+
         self.working_container = JansVerticalNav(
                 myparent=app,
-                headers=[_("Project Name"), _("Type"), _("Author"), _("Updated"), _("Status"), _("Errors")],
-                preferred_size= self.app.get_column_sizes(.2, .2 , .2, .1, .1, .1, .1),
+                headers=[_("Project Name"), _("Type"), _("Author"), _("Status"), _("Deployed on"), _("Errors")],
+                preferred_size=self.app.get_column_sizes(.2, .2, .2, .15, .15, .1),
                 on_display=self.app.data_display_dialog,
                 on_delete=self.delete_agama_project,
                 selectes=0,
@@ -45,7 +50,7 @@ class Agama(DialogUtils):
 
         self.main_container =  HSplit([
                     VSplit([
-                        self.app.getButton(text=_("Get Projects"), name='oauth:agama:get', jans_help=_("Retreive all Agama Projects"), handler=self.get_agama_projects),
+                        self.app.getButton(text=_("Get Projects"), name='oauth:agama:get', jans_help=_("Retrieve all Agama Projects"), handler=self.get_agama_projects),
                         self.app.getTitledText(_("Search"), name='oauth:agama:search', jans_help=_(common_strings.enter_to_search), accept_handler=self.search_agama_project, style=cli_style.edit_text),
                         self.app.getButton(text=_("Upload Project"), name='oauth:agama:add', jans_help=_("To add a new Agama project press this button"), handler=self.upload_project),
                         ],
@@ -55,6 +60,10 @@ class Agama(DialogUtils):
                     DynamicContainer(lambda: self.working_container)
                     ], style=cli_style.container)
 
+        self.main_container.on_page_enter = self.on_page_enter
+
+    def on_page_enter(self) -> None:
+        self.get_agama_projects()
 
     def display_config(self, event):
 
@@ -102,21 +111,21 @@ class Agama(DialogUtils):
 
             dt_object = fromisoformat(agama['createdAt'])
             if agama.get('finishedAt'):
-                status = _("Pending")
-                error = ''
-            else:
                 status = _("Processed")
-                if not project_details.get('error'):
-                    error = 'No'
-                else:
-                    error = project_details['error'][:5] + '...'
+                deployed_on = '{:02d}/{:02d}/{} {:02d}:{:02d}'.format(dt_object.day, dt_object.month, str(dt_object.year)[2:], dt_object.hour, dt_object.minute)
+                error = 'Yes' if project_details.get('error') else 'No'
+            else:
+                status = _("Pending")
+                deployed_on = '-'
+                error = ''
+                status = '-'
 
             data_display.append((
                         project_metadata.get('projectName'),
-                        project_metadata.get('type', '??'),
-                        project_metadata.get('author', '??'),
-                        '{:02d}/{:02d}/{}'.format(dt_object.day, dt_object.month, str(dt_object.year)[2:]),
+                        project_metadata.get('type', '-'),
+                        project_metadata.get('author', '-'),
                         status,
+                        deployed_on,
                         error
                     ))
 
