@@ -411,7 +411,7 @@ It returns all the information of the Jans Authorization server.
     }
   ],
   "sessionIdUnusedLifetime": 86400,
-  "sessionIdUnauthenticatedUnusedLifetime": 120,
+  "sessionIdUnauthenticatedUnusedLifetime": 7200,
   "sessionIdPersistOnPromptNone": true,
   "sessionIdRequestParameterEnabled": false,
   "changeSessionIdOnAuthentication": true,

@@ -199,7 +199,7 @@ public class CustomScriptResource extends ConfigBaseResource {
 
         // validate Script LocationType value
         validateScriptLocationType(customScript);
-
+        updateRevision(customScript, null);
         customScript.setDn(customScriptService.buildDn(inum));
         customScript.setInum(inum);
         customScriptService.add(customScript);
@@ -224,6 +224,7 @@ public class CustomScriptResource extends ConfigBaseResource {
         CustomScript existingScript = customScriptService.getScriptByInum(customScript.getInum());
         checkResourceNotNull(existingScript, CUSTOM_SCRIPT);
         customScript.setInum(existingScript.getInum());
+        updateRevision(customScript, existingScript);
         logger.debug("Custom Script to be updated {}", customScript);
 
         customScriptService.update(customScript);
@@ -281,6 +282,7 @@ public class CustomScriptResource extends ConfigBaseResource {
         CustomScript existingScript = customScriptService.getScriptByInum(inum);
         checkResourceNotNull(existingScript, CUSTOM_SCRIPT);
         existingScript = Jackson.applyPatch(pathString, existingScript);
+        updateRevision(existingScript, existingScript);
         customScriptService.update(existingScript);
         existingScript = customScriptService.getScriptByInum(inum);
 
@@ -326,6 +328,30 @@ public class CustomScriptResource extends ConfigBaseResource {
 
             throwBadRequestException("Invalid value for '"+customScript.LOCATION_TYPE_MODEL_PROPERTY+"' in request is 'ldap' which is deprecated. Use '"+ScriptLocationType.DB.getValue()+"' instead.");
         }
+    }
+    
+    private CustomScript updateRevision(CustomScript customScript, CustomScript existingScript) {
+        logger.info("Update script revision - customScript:{}, existingScript:{}", customScript, existingScript);
+
+        if (customScript == null) {
+            return customScript;
+        }
+        
+        logger.trace("validate customScript.getRevision():{}", customScript.getRevision());
+        
+        if (existingScript == null) {
+            customScript.setRevision(1);
+            return customScript;
+        }
+        logger.trace("validate customScript.getRevision():{}, existingScript.getRevision():{}", customScript.getRevision(), existingScript.getRevision());     
+        if (customScript.getRevision() <=0  && existingScript.getRevision() <=0 ) {
+           customScript.setRevision(1);
+        } else {
+            customScript.setRevision(existingScript.getRevision() + 1);
+        }
+        
+        logger.debug("script revision after update - customScript.getRevision():{}", customScript.getRevision());
+        return customScript;
     }
 
 }

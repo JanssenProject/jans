@@ -106,7 +106,7 @@ image:
   # -- Image  to use for deploying.
   repository: janssenproject/configurator
   # -- Image  tag to use for deploying.
-  tag: 1.0.10-1
+  tag: 1.0.12_dev
   # -- Image Pull Secrets
   pullSecrets: [ ]
 # -- LDAP admin password if OpennDJ is used for persistence.
@@ -133,6 +133,13 @@ state: TX
 volumes: []
 # -- Configure any additional volumesMounts that need to be attached to the containers
 volumeMounts: []
+# Actions on lifecycle events such as postStart and preStop
+# Example
+# lifecycle:
+#   postStart:
+#     exec:
+#       command: ["sh", "-c", "mkdir /opt/jans/jetty/jans-auth/custom/static/stylesheet/"]
+lifecycle: {}
 # -- Add custom dns policy
 dnsPolicy: ""
 # -- Add custom dns config

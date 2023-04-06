@@ -38,7 +38,7 @@ from edit_client_dialog import EditClientDialog
 from edit_scope_dialog import EditScopeDialog
 from ssa import SSA
 from agama import Agama
-from defaults import Defaults
+from authn import Authn
 from attributes import Attributes
 
 from prompt_toolkit.widgets import (
@@ -66,7 +66,7 @@ class Plugin(DialogUtils):
         self.oauth_update_properties_start_index = 0
         self.ssa = SSA(app)
         self.agama = Agama(app)
-        self.defaults = Defaults(app)
+        self.authn = Authn(app)
         self.attributes = Attributes(app)
         self.oauth_containers = {}
 
@@ -110,7 +110,7 @@ class Plugin(DialogUtils):
         self.app.logger.debug("scopes retreived")
 
     def on_cli_object_ready(self):
-        self.defaults.on_cli_object_ready()
+        self.authn.on_cli_object_ready()
 
     def process(self):
         """No pre-processing for this plugin.
@@ -195,7 +195,7 @@ class Plugin(DialogUtils):
 
         self.oauth_containers['ssa'] = self.ssa.main_container
         self.oauth_containers['agama'] = self.agama.main_container
-        self.oauth_containers['defaults'] = self.defaults.main_container
+        self.oauth_containers['authn'] = self.authn.main_container
         self.oauth_containers['attributes'] = self.attributes.main_container
         self.oauth_containers['logging'] = DynamicContainer(lambda: self.oauth_data_container['logging'])
 
@@ -212,7 +212,7 @@ class Plugin(DialogUtils):
         """
         self.nav_bar = JansNavBar(
                     self.app,
-                    entries=[('clients', 'C[l]ients'), ('scopes', 'Sc[o]pes'), ('keys', '[K]eys'), ('defaults', '[D]efaults'), ('properties', 'Properti[e]s'), ('logging', 'Lo[g]ging'), ('ssa', '[S]SA'), ('agama', 'Aga[m]a'), ('attributes', 'A[t]tributes')],
+                    entries=[('clients', 'C[l]ients'), ('scopes', 'Sc[o]pes'), ('keys', '[K]eys'), ('authn', 'Aut[h]n'), ('properties', 'Properti[e]s'), ('logging', 'Lo[g]ging'), ('ssa', '[S]SA'), ('agama', 'Aga[m]a'), ('attributes', 'A[t]tributes')],
                     selection_changed=self.oauth_nav_selection_changed,
                     select=0,
                     jans_name='oauth:nav_bar'
@@ -227,12 +227,19 @@ class Plugin(DialogUtils):
         Args:
             selection (str): the current selected tab
         """
+
+        set_area = None
+
         if selection in self.oauth_containers:
             if selection == 'properties':
                 self.oauth_update_properties(tofocus=False)
-            self.oauth_main_area = self.oauth_containers[selection]
-        else:
-            self.oauth_main_area = self.app.not_implemented
+            set_area = self.oauth_containers[selection]
+
+        if set_area:
+            if hasattr(set_area, 'on_page_enter'):
+                set_area.on_page_enter()
+
+            self.oauth_main_area = set_area
 
     def oauth_update_clients(
         self,

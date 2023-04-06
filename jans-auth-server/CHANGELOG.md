@@ -1,5 +1,32 @@
 # Changelog
 
+## [1.0.11](https://github.com/JanssenProject/jans/compare/jans-auth-server-v1.0.10...jans-auth-server-v1.0.11) (2023-04-05)
+
+
+### Features
+
+* **agama:** add means to selectively prevent flow crash when a subflow crashes ([#4436](https://github.com/JanssenProject/jans/issues/4436)) ([5d8f0ad](https://github.com/JanssenProject/jans/commit/5d8f0ad2d74f7d39a5eb4b79e807f175393959b5))
+* backend changes to submit SSA from admin-ui [#4298](https://github.com/JanssenProject/jans/issues/4298) ([#4364](https://github.com/JanssenProject/jans/issues/4364)) ([7e27b6d](https://github.com/JanssenProject/jans/commit/7e27b6da1a3e8212f72185bbbc09fee99e4be616))
+* **jans-auth-server:** added configurable acr to Device Flow [#4305](https://github.com/JanssenProject/jans/issues/4305) ([#4424](https://github.com/JanssenProject/jans/issues/4424)) ([fbd4ede](https://github.com/JanssenProject/jans/commit/fbd4edeaf7d5cb32b03653d4f2c944d41389407d))
+* **jans-auth-server:** align JWT Response for OAuth Token Introspection with spec [#3240](https://github.com/JanssenProject/jans/issues/3240) ([#4151](https://github.com/JanssenProject/jans/issues/4151)) ([02e1595](https://github.com/JanssenProject/jans/commit/02e159516d9d41cfe3d81d13983256066f6e647d))
+* **jans-auth-server:** increase sessionIdUnauthenticatedUnusedLifetime value in setup [#4445](https://github.com/JanssenProject/jans/issues/4445) ([#4446](https://github.com/JanssenProject/jans/issues/4446)) ([ecf9395](https://github.com/JanssenProject/jans/commit/ecf93955f391bcda17ad6a2f6ead00d79afee165))
+* **jans-auth-server:** use "nologs" version of WebApplicationException in custom script context to avoid stacktrace during redirects [#4447](https://github.com/JanssenProject/jans/issues/4447) ([#4448](https://github.com/JanssenProject/jans/issues/4448)) ([ccc4e52](https://github.com/JanssenProject/jans/commit/ccc4e522aabb9ee554bcbf1454463e31625cdea6))
+* loggerService should update root log level [#4251](https://github.com/JanssenProject/jans/issues/4251) ([#4252](https://github.com/JanssenProject/jans/issues/4252)) ([20264a2](https://github.com/JanssenProject/jans/commit/20264a2f61e7b49015bbf6f7b93e9d241e3176a1))
+* userName -&gt; smtpAuthenticationAccountUsername; ([#4401](https://github.com/JanssenProject/jans/issues/4401)) ([2bbb95d](https://github.com/JanssenProject/jans/commit/2bbb95dc4558a3251d52f74ff88b41f1aafe8a5e))
+
+
+### Bug Fixes
+
+* **jans-auth-server:** avoid redirect 302 exception every time an authentication request is issued [#2287](https://github.com/JanssenProject/jans/issues/2287) ([#4361](https://github.com/JanssenProject/jans/issues/4361)) ([b5d3901](https://github.com/JanssenProject/jans/commit/b5d390195719e3f9e8ff3ac64ec652f46905c932))
+* **jans-auth-server:** corrected npe in redirect uri validator [#4330](https://github.com/JanssenProject/jans/issues/4330) ([#4331](https://github.com/JanssenProject/jans/issues/4331)) ([6fec544](https://github.com/JanssenProject/jans/commit/6fec5445f04bbb134960cfa084896d9d3796e6b8))
+* **jans-auth-server:** fixed test which prevents build from completion [#4386](https://github.com/JanssenProject/jans/issues/4386) ([#4387](https://github.com/JanssenProject/jans/issues/4387)) ([4c195ca](https://github.com/JanssenProject/jans/commit/4c195ca6ee3f691781142fc7dc505fc568df08b4))
+* **jans-auth-server:** simple_password_auth is missed in acr_values_supported [#4258](https://github.com/JanssenProject/jans/issues/4258) ([#4259](https://github.com/JanssenProject/jans/issues/4259)) ([85bb15c](https://github.com/JanssenProject/jans/commit/85bb15c5f90a7f480158315312ed79da0af45111))
+* **jans-auth-server:** white/blank screen after device flow authn [#4237](https://github.com/JanssenProject/jans/issues/4237) ([#4243](https://github.com/JanssenProject/jans/issues/4243)) ([89f744d](https://github.com/JanssenProject/jans/commit/89f744dcaccb8f0813cee6663b4a8923898b8cc5))
+* **jans-auth:** [#4137](https://github.com/JanssenProject/jans/issues/4137) properties file entries were missing ([#4322](https://github.com/JanssenProject/jans/issues/4322)) ([a069890](https://github.com/JanssenProject/jans/commit/a069890b3f1485289cb16f2c0ae5ba98679f63e5))
+* prepare for  release ([60775c0](https://github.com/JanssenProject/jans/commit/60775c09dc5ab9996bf80c03dcb457861d48dfb1))
+* Unable to send emails issue 4121 ([#4333](https://github.com/JanssenProject/jans/issues/4333)) ([70a566b](https://github.com/JanssenProject/jans/commit/70a566b67f660750bf742f19ee127f79b2db8930))
+* update UserService to correclty add user when DB is not LDAP [#4396](https://github.com/JanssenProject/jans/issues/4396) ([#4397](https://github.com/JanssenProject/jans/issues/4397)) ([77de049](https://github.com/JanssenProject/jans/commit/77de0490519d8edc63f03255d75bef9fed7d96f4))
+
 ## [1.0.10](https://github.com/JanssenProject/jans/compare/jans-auth-server-v1.0.9...jans-auth-server-v1.0.10) (2023-03-16)
 
 

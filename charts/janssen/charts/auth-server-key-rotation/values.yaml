@@ -18,7 +18,7 @@ image:
   # -- Image  to use for deploying.
   repository: janssenproject/certmanager
   # -- Image  tag to use for deploying.
-  tag: 1.0.10-1
+  tag: 1.0.12_dev
   # -- Image Pull Secrets
   pullSecrets: [ ]
 # -- Auth server key rotation keys life in hours
@@ -35,7 +35,13 @@ resources:
 volumes: []
 # -- Configure any additional volumesMounts that need to be attached to the containers
 volumeMounts: []
-
+# Actions on lifecycle events such as postStart and preStop
+# Example
+# lifecycle:
+#   postStart:
+#     exec:
+#       command: ["sh", "-c", "mkdir /opt/jans/jetty/jans-auth/custom/static/stylesheet/"]
+lifecycle: {}
 nodeSelector: {}
 
 tolerations: []

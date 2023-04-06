@@ -31,10 +31,11 @@ class JansPathBrowserWidget:
     """
 
 
-    def __init__(self, 
-            path: str, 
-            browse_type: BrowseType, 
-            height: int = 10
+    def __init__(self,
+            path: str,
+            browse_type: BrowseType,
+            height: int = 10,
+            hide_hidden_files: Optional[bool] = True
             ) -> None:
         """init for JansPathBrowserWidget"""
 
@@ -42,6 +43,7 @@ class JansPathBrowserWidget:
         self.entries = []
         self.browse_type = browse_type
         self.height = height
+        self.hide_hidden_files = hide_hidden_files
 
         self.selected_line = 0
         browsed_dir = Window(FormattedTextControl(lambda: self.path.as_posix()))
@@ -106,6 +108,8 @@ class JansPathBrowserWidget:
         dirs = []
 
         for path_ in self.path.glob('*'):
+            if self.hide_hidden_files and path_.name.startswith('.'):
+                continue
             if path_.is_dir():
                 dirs.append(path_)
             elif self.browse_type != BrowseType.directory:
@@ -166,7 +170,8 @@ def jans_file_browser_dialog(
         app: Application , 
         path: str = '/', 
         browse_type: Optional[BrowseType] = BrowseType.save_as,
-        ok_handler: Optional[Callable] = None
+        ok_handler: Optional[Callable] = None,
+        hide_hidden_files: Optional[bool] = True
     ) -> JansGDialog:
     """Functo to create a Jans File Browser Dialog
     
@@ -176,7 +181,7 @@ def jans_file_browser_dialog(
         ok_handler (collable, optional): Callable when OK button is pressed
     """
 
-    browse_widget = JansPathBrowserWidget(path, browse_type)
+    browse_widget = JansPathBrowserWidget(path, browse_type, hide_hidden_files=hide_hidden_files)
 
 
     def call_ok_handler(dialog):

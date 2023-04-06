@@ -54,7 +54,7 @@ class JansAuthInstaller(JettyInstaller):
 
     def install(self):
         self.logIt("Copying auth.war into jetty webapps folder...")
-
+        self.make_pairwise_calculation_salt()
         self.installJettyService(self.jetty_app_configuration[self.service_name], True)
         self.copyFile(self.source_files[0][0], self.jetty_service_webapps)
         self.external_libs()
@@ -78,7 +78,6 @@ class JansAuthInstaller(JettyInstaller):
 
         if Config.get('use_external_key'):
             self.import_openbanking_key()
-
 
     def get_config_api_scopes(self):
         scopes_def = base.current_app.ConfigApiInstaller.get_scope_defs()
@@ -153,7 +152,7 @@ class JansAuthInstaller(JettyInstaller):
                                                     + string.ascii_uppercase
                                                     + string.digits) for _ in range(N))
 
-    def make_salt(self, enforce=False):
+    def make_pairwise_calculation_salt(self, enforce=False):
         if not Config.get('pairwiseCalculationKey') or enforce:
             Config.pairwiseCalculationKey = self.genRandomString(random.randint(20,30))
         if not Config.get('pairwiseCalculationSalt') or enforce:
