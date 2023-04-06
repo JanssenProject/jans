@@ -57,7 +57,7 @@ public class CustomScriptResource extends ConfigBaseResource {
     @Inject
     CustomScriptService customScriptService;
 
-    @Operation(summary = "Fetch custom script by name", description = "Gets a list of custom scripts", operationId = "get-config-scripts", tags = {
+    @Operation(summary = "Gets a list of custom scripts", description = "Gets a list of custom scripts", operationId = "get-config-scripts", tags = {
             "Custom Scripts" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.SCRIPTS_READ_ACCESS }))
     @ApiResponses(value = {
