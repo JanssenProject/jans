@@ -140,6 +140,12 @@ style = Style.from_dict(
 
         ##scim
         "scim-widget": "bg:black fg:white",
+        
+        ### table
+        "table-white": "fg:ansiblack bg:ansiwhite",
+        "table-white cursor-line": "nounderline bg:Lavender fg:ansiblack",
+        "table-black": "fg:ansiwhite bg:ansiblack",
+        "table-black cursor-line": "nounderline bg:#0a0a0a fg:ansiwhite",
 
     }
 )

@@ -12,7 +12,7 @@ from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.layout.containers import HSplit, VSplit, DynamicContainer
 from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.formatted_text import HTML
-from prompt_toolkit.widgets import Button
+from prompt_toolkit.widgets import Button, Label
 
 from utils.multi_lang import _
 from utils.utils import DialogUtils, fromisoformat
@@ -20,6 +20,7 @@ from utils.static import cli_style, common_strings
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from wui_components.jans_path_browser import jans_file_browser_dialog, BrowseType
 from wui_components.jans_cli_dialog import JansGDialog
+from wui_components.jans_table import JansTableWidget
 
 class Agama(DialogUtils):
     def __init__(
@@ -36,7 +37,7 @@ class Agama(DialogUtils):
                 myparent=app,
                 headers=[_("Project Name"), _("Type"), _("Author"), _("Status"), _("Deployed on"), _("Errors")],
                 preferred_size=self.app.get_column_sizes(.2, .2, .2, .15, .15, .1),
-                on_display=self.app.data_display_dialog,
+                on_display=self.display_details,
                 on_delete=self.delete_agama_project,
                 selectes=0,
                 headerColor=cli_style.navbar_headcolor,
@@ -116,7 +117,6 @@ class Agama(DialogUtils):
                 status = _("Pending")
                 deployed_on = '-'
                 error = ''
-                status = '-'
 
             data_display.append((
                         project_metadata.get('projectName'),
@@ -244,5 +244,43 @@ class Agama(DialogUtils):
             )
 
         self.app.show_jans_dialog(dialog)
+
+
+    def display_details(self,  **params: Any) -> None:
+        project_name = params['data']['details']['projectMetadata'].get('projectName')
+
+        async def coroutine():
+            cli_args = {'operation_id': 'get-agama-dev-studio-prj-by-name', 'url_suffix': 'name:{}'.format(project_name)}
+            self.app.start_progressing(_("Retrieving details for project {}".format(project_name)))
+            response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+            self.app.stop_progressing()
+
+            if response.status_code == 200:
+
+                result = response.json()
+                body_widgets = [
+                        self.app.getTitledText(title=_("Description"), value=result['details']['projectMetadata'].get('description','-'), name='description', read_only=True, height=2),
+                        self.app.getTitledText(title=_("Deployed started on"), value=result['createdAt'], name='createdAt', read_only=True),
+                        self.app.getTitledText(title=_("Deployed finished on"), value=result['finishedAt'], name='finishedAt', read_only=True),
+                        self.app.getTitledText(title=_("Error"), value=result['details'].get('error') or "No", name='error', read_only=True),
+                    ]
+
+                flow_errors = result['details'].get('flowsError')
+
+                if flow_errors:
+                    jans_table = JansTableWidget(myparent=self.app, data=list(flow_errors.items()), headers=["Flow", "Error"])
+                    body_widgets.append(jans_table)
+
+                buttons = [Button(_("Close"))]
+                dialog = JansGDialog(self.app, body=HSplit(body_widgets), title=_("Details of project {}").format(project_name), buttons=buttons)
+                self.app.show_jans_dialog(dialog)
+
+
+            elif response.status_code == 204:
+                self.app.show_message(_(common_strings.error), "Project {} is still being deployed. Try again in 1 minute.".format(project_name), tobefocused=self.working_container)
+
+        if project_name:
+
+            asyncio.ensure_future(coroutine())
 
 
