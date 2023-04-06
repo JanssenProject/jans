@@ -7,7 +7,6 @@ import io.jans.agama.model.serialize.Type;
 import io.jans.util.Pair;
 
 import jakarta.ws.rs.core.HttpHeaders;
-import java.nio.file.Path;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
