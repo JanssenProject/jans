@@ -643,6 +643,7 @@ class JansCliApp(Application):
                 lexer=lexer,
             )
 
+
         if text_type == 'integer':
             ta.buffer.on_text_insert=IntegerValidator(ta)
 

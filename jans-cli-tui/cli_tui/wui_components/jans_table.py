@@ -1,5 +1,5 @@
 
-from typing import Optional
+from typing import Optional, Callable
 
 from prompt_toolkit.application import Application
 from prompt_toolkit.styles import Style
@@ -17,32 +17,34 @@ class JansTableWidget():
     """
     def __init__(
             self,
-            myparent: Application,
+            app: Application,
             data: list,
             headers: Optional[list] = None,
             preferred_size: Optional[list] = None,
             height: Optional[int] = 5,
             padding: int = 3,
+            on_enter: Optional[Callable] = None,
             style: Optional[Style] = 'class:table-white'
             ) -> None:
 
         """initfor JansTab
 
         Args:
-            myparent (application): This is the parent application for the dialog, to caluclate the size
+            app (application): This is the parent application for the dialog, to caluclate the size
             data (list): Data to be displayed
             headers (optional, list): Table headers
             preferred_size (optional, list): Preferred column sizes
             padding (optional, int): space between columns
         """
 
-        self.app = myparent
+        self.app = app
         self.data = data
         self.headers = headers or []
         self.preferred_size = preferred_size
         self.height = height
         self.padding = padding
         self.style = style
+        self.on_enter = on_enter
 
         self._calculated_column_sizes()
         self.create_window()
@@ -66,7 +68,7 @@ class JansTableWidget():
     def create_window(self)-> None:
         """This method creates table widget container
         """
-        self.selected_line = 1
+        self.selected_line = 0
         body = [Window(
                 content=FormattedTextControl(
                     text=self._get_formatted_text,
@@ -112,6 +114,11 @@ class JansTableWidget():
         @kb.add("down")
         def _go_up(event) -> None:
             self.selected_line = (self.selected_line + 1) % len(self.data)
+
+        @kb.add("d")
+        def _display(event) -> None:
+            if self.on_enter:
+                self.on_enter(selected_line=self.selected_line, data=self.data[self.selected_line])
 
         return kb
 

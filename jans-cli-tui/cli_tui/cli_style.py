@@ -67,6 +67,7 @@ style = Style.from_dict(
         "plugin-navbar-entriescolor":"blue",
         "plugin-tabs":"",
         "plugin-text":"green",
+        "plugin-text-nounderline":"nounderline green",
         "plugin-textsearch":"",
         "plugin-label":"bold",
         "plugin-textrequired":"#8b000a",

@@ -249,6 +249,15 @@ class Agama(DialogUtils):
     def display_details(self,  **params: Any) -> None:
         project_name = params['data']['details']['projectMetadata'].get('projectName')
 
+        def display_error(**params):
+            body = HSplit([
+                    self.app.getTitledText(title=_("Flow"), value=params['data'][0], name='flow', read_only=True),
+                    self.app.getTitledText(title=_("Error"), value=params['data'][1], name='flow', read_only=True, focusable=True, scrollbar=True, height=3),
+                    ])
+            dialog = JansGDialog(self.app, body=body, title=_("Error Details"), buttons=[Button(_("Close"))], width=self.app.dialog_width-6)
+            self.app.show_jans_dialog(dialog)
+
+
         async def coroutine():
             cli_args = {'operation_id': 'get-agama-dev-studio-prj-by-name', 'url_suffix': 'name:{}'.format(project_name)}
             self.app.start_progressing(_("Retrieving details for project {}".format(project_name)))
@@ -268,7 +277,12 @@ class Agama(DialogUtils):
                 flow_errors = result['details'].get('flowsError')
 
                 if flow_errors:
-                    jans_table = JansTableWidget(myparent=self.app, data=list(flow_errors.items()), headers=["Flow", "Error"])
+                    jans_table = JansTableWidget(
+                        app=self.app,
+                        data=list(flow_errors.items()),
+                        headers=["Flow", "Error"],
+                        on_enter=display_error
+                        )
                     body_widgets.append(jans_table)
 
                 buttons = [Button(_("Close"))]
