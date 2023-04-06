@@ -198,7 +198,7 @@ class Plugin():
 
         dialog = EditScriptDialog(
             self.app, title=title, data=data, save_handler=self.save_script)
-        result = self.app.show_jans_dialog(dialog)
+        self.app.show_jans_dialog(dialog)
 
     def save_script(self, dialog: Dialog) -> None:
         """This method to save the script data to server

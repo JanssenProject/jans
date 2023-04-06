@@ -119,9 +119,8 @@ class JansVerticalNav():
     def get_error(self):
         error_data = []
         for i in self.all_data:
-            if type(i) == dict:
-                if self.field_to_find in i.keys():
-                    error_data.append(i['inum'])
+            if isinstance(i, dict) and self.field_to_find in i.keys():
+                error_data.append(i['inum'])
         return error_data
 
     def view_data(
