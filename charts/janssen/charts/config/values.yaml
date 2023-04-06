@@ -133,6 +133,13 @@ state: TX
 volumes: []
 # -- Configure any additional volumesMounts that need to be attached to the containers
 volumeMounts: []
+# Actions on lifecycle events such as postStart and preStop
+# Example
+# lifecycle:
+#   postStart:
+#     exec:
+#       command: ["sh", "-c", "mkdir /opt/jans/jetty/jans-auth/custom/static/stylesheet/"]
+lifecycle: {}
 # -- Add custom dns policy
 dnsPolicy: ""
 # -- Add custom dns config
