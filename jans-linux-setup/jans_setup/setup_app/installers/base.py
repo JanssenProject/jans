@@ -1,3 +1,7 @@
+
+import pydevd
+import debugpy
+
 import os
 import uuid
 import inspect
@@ -58,13 +62,14 @@ class BaseInstaller:
         self.service_post_setup()
 
     def update_rendering_dict(self):
+#        debugpy.breakpoint();
         mydict = {}
         for obj_name, obj in inspect.getmembers(self):
             if obj_name in ('dbUtils',):
                 continue
             if not obj_name.startswith('__') and (not callable(obj)):
                 mydict[obj_name] = obj
-
+#        debugpy.breakpoint();
         Config.templateRenderingDict.update(mydict)
 
 

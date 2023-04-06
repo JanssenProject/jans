@@ -1,3 +1,6 @@
+
+import debugpy
+
 import os
 import re
 import sys
@@ -43,6 +46,8 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
         return '`' if Config.rdbm_type in ('mysql', 'spanner') else '"'
 
     def install(self):
+#        debugpy.breakpoint();    
+    
         if Config.rdbm_type == 'spanner':
             self.extract_libs()
         self.local_install()
@@ -58,6 +63,9 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 
         self.create_tables(jans_schema_files)
         self.create_subtables()
+
+        debugpy.breakpoint();
+
         self.import_ldif()
         self.create_indexes()
         self.rdbmProperties()
@@ -194,6 +202,8 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
         column_add = 'COLUMN ' if Config.rdbm_type == 'spanner' else ''
         alter_table_sql_cmd = 'ALTER TABLE %s{}%s ADD %s{};' % (self.qchar, self.qchar, column_add)
 
+        debugpy.breakpoint();
+
         for jans_schema_fn in jans_schema_files:
             jans_schema = base.readJsonFile(jans_schema_fn)
             for obj in jans_schema['objectClasses']:
@@ -201,9 +211,13 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
             for attr in jans_schema['attributeTypes']:
                 all_attribs[attr['names'][0]] = attr
 
+        debugpy.breakpoint();
+
         subtable_attrs = {}
         for stbl in self.dbUtils.sub_tables.get(Config.rdbm_type):
             subtable_attrs[stbl] = [ scol[0] for scol in self.dbUtils.sub_tables[Config.rdbm_type][stbl] ]
+
+        debugpy.breakpoint();
 
         for obj_name in all_schema:
             obj = all_schema[obj_name]
@@ -238,6 +252,8 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                 col_def = self.get_col_def(attrname, sql_tbl_name) 
                 sql_tbl_cols.append(col_def)
 
+            debugpy.breakpoint();
+
             if not self.dbUtils.table_exists(sql_tbl_name):
                 doc_id_type = self.get_sql_col_type('doc_id', sql_tbl_name)
                 if Config.rdbm_type == 'pgsql':
@@ -248,6 +264,8 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                     sql_cmd = 'CREATE TABLE `{}` (`doc_id` {} NOT NULL UNIQUE, `objectClass` VARCHAR(48), dn VARCHAR(128), {}, PRIMARY KEY (`doc_id`));'.format(sql_tbl_name, doc_id_type, ', '.join(sql_tbl_cols))
                 self.dbUtils.exec_rdbm_query(sql_cmd)
                 tables.append(sql_cmd)
+
+        debugpy.breakpoint();
 
         for attrname in all_attribs:
             attr = all_attribs[attrname]

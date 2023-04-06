@@ -1,3 +1,7 @@
+
+import pydevd
+import debugpy
+
 import os
 import sys
 import time
@@ -494,6 +498,9 @@ class SetupUtils(Crypto64):
                 full_output_file.write_text(rendered_text)
 
     def render_template(self, tmp_fn, pystring=False):
+
+#        debugpy.breakpoint();
+
         template_text = self.readFile(tmp_fn)
         format_dict = self.merge_dicts(Config.__dict__, Config.templateRenderingDict)
         for k in format_dict:

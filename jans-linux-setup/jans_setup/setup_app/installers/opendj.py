@@ -1,3 +1,7 @@
+
+import pydevd
+import debugpy
+
 import os
 import glob
 import shutil
@@ -48,6 +52,8 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
         self.ldapDsCreateRcCommand = os.path.join(Config.ldap_bin_dir , 'create-rc-script')
 
     def install(self):
+        debugpy.breakpoint();    
+
         self.logIt("Running OpenDJ Setup")
 
         if Config.profile == SetupProfiles.DISA_STIG:
@@ -80,6 +86,8 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
             self.setup_opendj_service()
             Config.pbar.progress(self.service_name, "Preparing OpenDJ schema", False)
             self.logIt("Preparing OpenDJ schema")
+
+            debugpy.breakpoint();    
             self.prepare_opendj_schema()
 
         # it is time to bind OpenDJ
@@ -156,6 +164,8 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
         self.addUserToGroup('adm', Config.ldap_group)
 
     def install_opendj(self):
+        debugpy.breakpoint();
+
         self.logIt("Running OpenDJ Setup")
 
         Config.templateRenderingDict['opendj_pck11_setup_key_fn'] = self.opendj_pck11_setup_key_fn

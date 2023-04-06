@@ -37,13 +37,13 @@ if base.current_app.profile != 'disa-stig':
     my_path = PurePath(os.path.dirname(os.path.realpath(__file__)))
     sys.path.append(my_path.parent.joinpath('pylib/sqlalchemy'))
 
-    import sqlalchemy
-    import sqlalchemy.orm
-    import sqlalchemy.ext.automap
+#    import sqlalchemy
+#    import sqlalchemy.orm
+#    import sqlalchemy.ext.automap
 
-#import sqlalchemy
-#import sqlalchemy.orm
-#import sqlalchemy.ext.automap
+import sqlalchemy
+import sqlalchemy.orm
+import sqlalchemy.ext.automap
 
 class DBUtils:
 

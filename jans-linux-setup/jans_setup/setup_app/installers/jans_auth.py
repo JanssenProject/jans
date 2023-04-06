@@ -1,3 +1,7 @@
+
+import pydevd
+import debugpy
+
 import os
 import glob
 import uuid
@@ -6,7 +10,8 @@ import json
 import tempfile
 import zipfile
 import re
-
+import random
+import string
 import sys
 
 from urllib.parse import urlparse
@@ -85,10 +90,10 @@ class JansAuthInstaller(JettyInstaller):
             self.logIt("Config.opendj_truststore_format = %s" % Config.opendj_truststore_format)            
 
     def install(self):
-        self.init_key_gen()
-
         self.logIt("Copying auth.war into jetty webapps folder...")
 
+        self.init_key_gen()
+        self.make_pairwise_calculation_salt()
         self.installJettyService(self.jetty_app_configuration[self.service_name], True)
 
         src_file = self.source_files[0][0] if Config.profile != SetupProfiles.DISA_STIG else self.source_fips_files[0][0]
@@ -183,10 +188,10 @@ class JansAuthInstaller(JettyInstaller):
         self.logIt("Config.templateRenderingDict[oxauth_error_base64]       = {}".format(self.generate_base64_ldap_file(self.oxauth_error_json)))
         self.logIt("Config.templateRenderingDict[oxauth_openid_key_base64]  = {}".format(self.generate_base64_ldap_file(self.oxauth_openid_jwks_fn)))
 
+#        debugpy.breakpoint();
+
         self.ldif_scripts = os.path.join(Config.output_dir, 'scripts.ldif')
         self.renderTemplateInOut(self.ldif_scripts, Config.templateFolder, Config.output_dir)
-        
-        sys.exit()        
         
         for temp in (self.ldif_config, self.ldif_role_scope_mappings):
             self.renderTemplateInOut(temp, self.templates_folder, self.output_folder)
@@ -195,6 +200,17 @@ class JansAuthInstaller(JettyInstaller):
 
         if Config.profile == SetupProfiles.OPENBANKING:
             self.import_openbanking_certificate()
+
+    def genRandomString(self, N):
+        return ''.join(random.SystemRandom().choice(string.ascii_lowercase
+                                                    + string.ascii_uppercase
+                                                    + string.digits) for _ in range(N))
+
+    def make_pairwise_calculation_salt(self, enforce=False):
+        if not Config.get('pairwiseCalculationKey') or enforce:
+            Config.pairwiseCalculationKey = self.genRandomString(random.randint(20,30))
+        if not Config.get('pairwiseCalculationSalt') or enforce:
+            Config.pairwiseCalculationSalt = self.genRandomString(random.randint(20,30))
 
     def copy_static(self):
         for conf_fn in ('duo_creds.json', 'gplus_client_secrets.json', 'super_gluu_creds.json',

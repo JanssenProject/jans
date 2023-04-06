@@ -1,3 +1,7 @@
+
+import pydevd
+import debugpy
+
 import os
 import re
 import base64
@@ -180,6 +184,9 @@ class Crypto64:
 
 
     def prepare_base64_extension_scripts(self, extensions=[]):
+
+#        debugpy.breakpoint();
+
         self.logIt("Preparing scripts")
         # Remove extensionFolder when all scripts are moved to script_catalog_dir
         for path_ in (Config.extensionFolder, Config.script_catalog_dir):
@@ -190,12 +197,18 @@ class Crypto64:
                     extension_name = ep.stem.lower()
                     extension_script_name = '{}_{}'.format(extension_type, extension_name)
 
+                    self.logIt('extension_script_name = {}'.format(extension_script_name))
+
                     if extensions and extension_script_name in extensions:
                         continue
 
                     # Prepare key for dictionary
                     base64_script_file = self.generate_base64_file(ep.as_posix(), 1)
+                    self.logIt('base64_script_file = {}'.format(base64_script_file))
+
                     Config.templateRenderingDict[extension_script_name] = base64_script_file
+
+        self.logIt("Config.templateRenderingDict = {}".format(Config.templateRenderingDict))
 
 
     def generate_base64_file(self, fn, num_spaces):

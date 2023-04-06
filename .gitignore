@@ -159,3 +159,8 @@ data-sources.json
 .settings
 .classpath
 .project
+
+#
+_out 
+jans-linux-setup.install.loc
+jans-linux-setup.vs

@@ -1,5 +1,8 @@
 #!/usr/bin/python3
 
+import pydevd
+import debugpy
+
 import readline
 import os
 import sys
@@ -16,6 +19,11 @@ import warnings
 from pathlib import Path
 from queue import Queue
 from setup_app.static import SetupProfiles
+
+from setup_app.utils import base
+
+debugpy.listen(("0.0.0.0",5678));
+debugpy.wait_for_client();
 
 warnings.filterwarnings("ignore")
 
@@ -74,7 +82,6 @@ if paths.IAMPACKAGED:
 from setup_app import static
 
 # second import module base, this makes some initial settings
-from setup_app.utils import base
 base.current_app.profile = profile
 
 # we will access args via base module
@@ -211,6 +218,8 @@ if argsp.import_ldif:
     else:
         base.logIt("The custom LDIF import directory {} does not exist. Exiting...".format(argsp.import_ldif, True, True))
 
+#debugpy.breakpoint();
+
 collectProperties = CollectProperties()
 if os.path.exists(Config.jans_properties_fn):
     collectProperties.collect()
@@ -319,6 +328,8 @@ print(jansInstaller)
 base.current_app.proceed_installation = True
 
 def main():
+    debugpy.breakpoint();
+    base.logIt('jans_setup: main() --------------- >>')
 
     if not Config.noPrompt:
         proceed_prompt = input('Proceed with these values [Y|n] ').lower().strip()
@@ -362,6 +373,8 @@ def main():
                     jettyInstaller.start_installation()
                     jythonInstaller.start_installation()
 
+                jansInstaller.generate_smtp_config()
+
                 jansInstaller.copy_scripts()
                 jansInstaller.encode_passwords()
 
@@ -385,6 +398,7 @@ def main():
                         couchbaseInstaller.start_installation()
 
                 if Config.rdbm_install:
+#                    debugpy.breakpoint();
                     rdbmInstaller.start_installation()
 
             if (Config.installed_instance and 'installHttpd' in Config.addPostSetupService) or (
@@ -461,6 +475,7 @@ def main():
 
 
     if base.current_app.proceed_installation:
+#        debugpy.breakpoint();    
         do_installation()
         print('\n', static.colors.OKGREEN)
         if Config.install_config_api or Config.install_scim_server:
@@ -487,4 +502,6 @@ def main():
         time.sleep(2)
 
 if __name__ == "__main__":
+    debugpy.breakpoint();
+    base.logIt('jans_setup: main()')
     main()

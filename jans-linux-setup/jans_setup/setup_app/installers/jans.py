@@ -98,6 +98,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
 
     def initialize(self):
+        self.logIt("jans.initialize()...")
         self.service_name = 'jans'
         self.app_type = AppType.APPLICATION
         self.install_type = InstallOption.MANDATORY
@@ -113,16 +114,6 @@ class JansInstaller(BaseInstaller, SetupUtils):
         if not Config.installed_instance and Config.profile == static.SetupProfiles.DISA_STIG:
             self.remove_pcks11_keys()
 
-        self.make_salt()
-
-        if not Config.get('smtp_jks_pass'):
-            Config.smtp_jks_pass = self.getPW()
-            try:
-                Config.smtp_jks_pass_enc = self.obscure(Config.smtp_jks_pass)
-            except Exception as e:
-                self.logIt("JansInstaller. __init__ failed. Reason: %s" % str(e), errorLog=True)
-
-        self.profile_templates(Config.templateFolder)
 
     def configureSystem(self):
         self.logIt("Configuring system", 'jans')
@@ -577,10 +568,23 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
     def extract_scripts(self):
         base.extract_from_zip(base.current_app.jans_zip, 'docs/script-catalog', Config.script_catalog_dir)
-
-    def generate_configuration(self):
+        
+    def generate_smtp_config(self):
         self.logIt("Generating smtp keys", pbar=self.service_name)
 
+        if not Config.get('smtp_jks_pass'):
+            Config.smtp_jks_pass = self.getPW()
+            try:
+                Config.smtp_jks_pass_enc = self.obscure(Config.smtp_jks_pass)
+            except Exception as e:
+                self.logIt("JansInstaller. generate_smtp_config failed. Reason: %s" % str(e), errorLog=True)
+
+        try:
+            salt_text = 'encodeSalt = {}'.format(Config.encode_salt)
+            self.writeFile(Config.salt_fn, salt_text)
+        except:
+            self.logIt("Error writing salt", True, True)
+                
         cmd_cert_gen = [Config.cmd_keytool, '-genkeypair',
                         '-alias', Config.smtp_alias,
                         '-keyalg', 'ec',
@@ -602,7 +606,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
                         '-providerpath', fips_provider['-providerpath']
                     ]
 
-        self.run(cmd_cert_gen)
+        self.run(cmd_cert_gen)                
 
     def genRandomString(self, N):
         return ''.join(random.SystemRandom().choice(string.ascii_lowercase
