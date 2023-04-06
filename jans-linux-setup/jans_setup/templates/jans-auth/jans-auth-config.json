@@ -485,6 +485,7 @@
     "useHighestLevelScriptIfAcrScriptNotFound": false,
     "agamaConfiguration": {
         "enabled": false,
+        "rootDir": "/opt/jans/jetty/jans-auth/agama",
         "templatesPath": "/ftl",
         "scriptsPath": "/scripts",
         "serializerType": "KRYO",
