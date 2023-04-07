@@ -1,7 +1,7 @@
 import json
 import asyncio
 from functools import partial
-from typing import Optional, Sequence, Callable
+from typing import Optional, Sequence
 
 from prompt_toolkit.application import Application
 from prompt_toolkit.layout.dimension import D
@@ -26,7 +26,7 @@ class ViewProperty(JansGDialog, DialogUtils):
             parent,
             data:tuple,
             title: AnyFormattedText='',
-            op_type: Optional[str]='replace',
+            op_type: Optional[str]='replace'
             )-> None:
         """init for `ViewProperty`, inherits from two diffrent classes `JansGDialog` and `DialogUtils`
             
