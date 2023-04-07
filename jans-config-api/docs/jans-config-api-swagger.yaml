@@ -834,6 +834,16 @@ paths:
         schema:
           type: string
           default: ascending
+      - name: fieldValuePair
+        in: query
+        description: Field and value pair for seraching
+        schema:
+          type: string
+          default: ""
+        examples:
+          Field value example:
+            description: Field value example
+            value: "adminCanEdit=true,dataType=string"
       responses:
         "200":
           description: Ok
@@ -2169,6 +2179,16 @@ paths:
           "ascending" and "descending"
         schema:
           type: string
+      - name: fieldValuePair
+        in: query
+        description: Field and value pair for seraching
+        schema:
+          type: string
+          default: ""
+        examples:
+          Field value example:
+            description: Field value example
+            value: "applicationType=web,persistClientAuthorizations=true"
       responses:
         "200":
           description: Ok
@@ -3325,6 +3345,8 @@ paths:
                         "baseDn": "inum=1800.768b3d38-a6e8-4be4-93d1-72df33d34fd6,ou=clients,o=jans",
                         "inum": "1800.768b3d38-a6e8-4be4-93d1-72df33d34fd6"
                     }
+        "400":
+          description: Bad Request
         "401":
           description: Unauthorized
         "500":
@@ -3912,7 +3934,7 @@ paths:
     get:
       tags:
       - Custom Scripts
-      summary: Fetch custom script by name
+      summary: Gets a list of custom scripts
       description: Gets a list of custom scripts
       operationId: get-config-scripts
       parameters:
@@ -5510,6 +5532,16 @@ paths:
         schema:
           type: boolean
           default: false
+      - name: fieldValuePair
+        in: query
+        description: Field and value pair for seraching
+        schema:
+          type: string
+          default: ""
+        examples:
+          Field value example:
+            description: Field value example
+            value: "scopeType=spontaneous,defaultScope=true"
       responses:
         "200":
           description: Ok
@@ -7109,6 +7141,16 @@ paths:
           "ascending" and "descending"
         schema:
           type: string
+      - name: fieldValuePair
+        in: query
+        description: Field and value pair for seraching
+        schema:
+          type: string
+          default: ""
+        examples:
+          Field value example:
+            description: Field value example
+            value: deletable=true
       responses:
         "200":
           description: Ok
@@ -7879,19 +7921,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        adminCanAccess:
-          type: boolean
         adminCanView:
           type: boolean
         adminCanEdit:
           type: boolean
-        userCanAccess:
-          type: boolean
         userCanView:
           type: boolean
-        whitePagesCanView:
+        adminCanAccess:
+          type: boolean
+        userCanAccess:
           type: boolean
         userCanEdit:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -9431,10 +9473,10 @@ components:
           type: array
           items:
             type: object
-        displayValue:
-          type: string
         value:
           type: object
+        displayValue:
+          type: string
         clientAuthMapSchema:
           type: object
           additionalProperties:

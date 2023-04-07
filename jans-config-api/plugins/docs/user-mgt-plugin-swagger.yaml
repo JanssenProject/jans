@@ -55,6 +55,16 @@ paths:
           "ascending" and "descending"
         schema:
           type: string
+      - name: fieldValuePair
+        in: query
+        description: Field and value pair for seraching
+        schema:
+          type: string
+          default: ""
+        examples:
+          Field value example:
+            description: Field value example
+            value: "mail=abc@mail.com,jansStatus=true"
       responses:
         "200":
           description: Ok
@@ -826,10 +836,10 @@ components:
           type: array
           items:
             type: object
-        displayValue:
-          type: string
         value:
           type: object
+        displayValue:
+          type: string
         clientAuthMapSchema:
           type: object
           additionalProperties:

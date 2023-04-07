@@ -31,8 +31,8 @@ public class Util {
         return param.toString().replaceAll("[\n\r\t]", "_");
     }
 
-    public List<String> getTokens(String str, String format) {
-        log.debug(" String to get tokens - str:{}, format:{}", str, format);
+    public List<String> getTokens(String str, String tokenizer) {
+        log.debug(" String to get tokens - str:{}, tokenizer:{}", str, tokenizer);
 
         ArrayList<String> list = new ArrayList<>();
         if (StringUtils.isBlank(str)) {
@@ -40,38 +40,48 @@ public class Util {
             return list;
         }
 
-        log.debug("str.contains(format):{}", str.contains(format));
-        if (!str.contains(format)) {
+        log.debug("str.contains(tokenizer):{}", str.contains(tokenizer));
+        if (!str.contains(tokenizer)) {
 
             list.add(str);
             log.debug(" Not tokenized - list:{}", list);
             return list;
         }
 
-        log.debug("final tokenized list:{}", Collections.list(new StringTokenizer(str, format)).stream()
+        log.debug("final tokenized list:{}", Collections.list(new StringTokenizer(str, tokenizer)).stream()
                 .map(token -> (String) token).collect(Collectors.toList()));
-        return Collections.list(new StringTokenizer(str, format)).stream().map(token -> (String) token)
+        return Collections.list(new StringTokenizer(str, tokenizer)).stream().map(token -> (String) token)
                 .collect(Collectors.toList());
     }
-    
-    public Map<String,String> getFieldValueMap(String str, String tokenizer, String format) {
-        log.debug(" Field Value to get map - str:{}, tokenizer:{} format:{}", str, tokenizer, format);
 
-        Map<String,String> fieldValueMap = new HashMap<>();
-        if (StringUtils.isBlank(str)) {
-              return fieldValueMap;
-        }
+    public Map<String, String> getFieldValueMap(String str, String tokenizer, String fieldValueSeparator) {
+        log.debug(" Field Value to get map - str:{}, tokenizer:{} fieldValueSeparator:{}", str, tokenizer,
+                fieldValueSeparator);
 
-        log.debug("str.contains(format):{}", str.contains(format));
-        if (!str.contains(format)) {
-
-            fieldValueMap.put(str, str);
-            log.debug(" Not tokenized - fieldValueMap:{}", fieldValueMap);
+        Map<String, String> fieldValueMap = new HashMap<>();
+        if (StringUtils.isBlank(str) || !str.contains(tokenizer) || !str.contains(fieldValueSeparator)) {
             return fieldValueMap;
         }
 
-        log.debug("final tokenized list:{}", Collections.list(new StringTokenizer(str, format)).stream()
-                .map(token -> (String) token).collect(Collectors.toList()));
+        log.debug("getTokens(str, tokenizer):{}", getTokens(str, tokenizer));
+
+        List<String> fieldValueList = getTokens(str, tokenizer);
+        log.debug("fieldValueList:{}", fieldValueList);
+        if (fieldValueList == null || fieldValueList.isEmpty()) {
+            return fieldValueMap;
+        }
+
+        for (String data : fieldValueList) {
+            StringTokenizer st = new StringTokenizer(fieldValueSeparator, fieldValueSeparator);
+
+            if (StringUtils.isNotBlank(data) && st.hasMoreTokens()) {
+                String[] keyValue = data.split("=");
+                fieldValueMap.put(keyValue[0], keyValue[1]);
+
+            }
+        }
+
+        log.debug("fieldValueMap:{}", fieldValueMap);
         return fieldValueMap;
     }
 }

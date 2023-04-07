@@ -8,6 +8,8 @@ package io.jans.configapi.rest.resource.auth;
 
 import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
+
+import static io.jans.as.model.util.Util.escapeLog;
 import io.jans.as.model.uma.persistence.UmaResource;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.service.auth.ClientService;
@@ -74,12 +76,20 @@ public class UmaResourcesResource extends ConfigBaseResource {
             @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @Parameter(description = "Search pattern") @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
             @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
-            @Parameter(description = "Attribute whose value will be used to order the returned response") @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
-            @Parameter(description = "Order in which the sortBy param is applied. Allowed values are \"ascending\" and \"descending\"") @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder) {
-        logger.debug("UMA_RESOURCE to be fetched - limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}", limit,
-                pattern, startIndex, sortBy, sortOrder);
+            @Parameter(description = "Attribute whose value will be used to order the returned response") @DefaultValue(ApiConstants.INUM) @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
+            @Parameter(description = "Order in which the sortBy param is applied. Allowed values are \"ascending\" and \"descending\"") @DefaultValue(ApiConstants.ASCENDING) @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder,
+            @Parameter(description = "Field and value pair for seraching", examples = @ExampleObject(name = "Field value example", value = "deletable=true")) @DefaultValue("") @QueryParam(value = ApiConstants.FIELD_VALUE_PAIR) String fieldValuePair) {
+        
+        logger.debug("UMA_RESOURCE to be fetched - limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}, fieldValuePair:{}", escapeLog(limit),
+                escapeLog(pattern), escapeLog(startIndex), escapeLog(sortBy), escapeLog(sortOrder), escapeLog(fieldValuePair));
+        
+        
+        logger.error("UMA_RESOURCE to be fetched - limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}, fieldValuePair:{}", limit,
+                pattern, startIndex, sortBy, sortOrder, fieldValuePair);
+        
+        
         SearchRequest searchReq = createSearchRequest(umaResourceService.getBaseDnForResource(), pattern, sortBy,
-                sortOrder, startIndex, limit, null, null, this.getMaxCount());
+                sortOrder, startIndex, limit, null, null, this.getMaxCount(), fieldValuePair);
 
         return Response.ok(doSearch(searchReq)).build();
     }
