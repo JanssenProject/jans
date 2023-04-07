@@ -137,11 +137,12 @@ public class Authenticator {
         }
 
         lastResult = authenticateImpl(servletRequest, true, false, false);
+        logger.debug("authenticate resultCode: {}", lastResult);
 
         if (Constants.RESULT_SUCCESS.equals(lastResult)) {
             return true;
         } else if (Constants.RESULT_FAILURE.equals(lastResult)) {
-            authenticationFailed();
+            authenticationFailed(sessionId);
         } else if (Constants.RESULT_NO_PERMISSIONS.equals(lastResult)) {
             handlePermissionsError();
         } else if (Constants.RESULT_EXPIRED.equals(lastResult)) {
@@ -167,7 +168,7 @@ public class Authenticator {
         if (Constants.RESULT_SUCCESS.equals(lastResult)) {
             return lastResult;
         } else if (Constants.RESULT_FAILURE.equals(lastResult)) {
-            authenticationFailed();
+            authenticationFailed(sessionIdService.getSessionId());
         } else if (Constants.RESULT_NO_PERMISSIONS.equals(lastResult)) {
             handlePermissionsError();
         } else if (Constants.RESULT_EXPIRED.equals(lastResult)) {
@@ -483,12 +484,16 @@ public class Authenticator {
                 "Create authorization request to start new authentication session.");
     }
 
-    protected void handleScriptError() {
-        handleScriptError(AUTHENTICATION_ERROR_MESSAGE);
+    protected void handleScriptError(SessionId sessionId) {
+        handleScriptError(sessionId, AUTHENTICATION_ERROR_MESSAGE);
     }
 
-    protected void handleScriptError(String facesMessageId) {
-        errorHandlerService.handleError(facesMessageId, AuthorizeErrorResponseType.INVALID_AUTHENTICATION_METHOD,
+    protected void handleScriptError(SessionId sessionId, String facesMessageId) {
+        final AuthorizeErrorResponseType errorType = sessionId == null ?
+                AuthorizeErrorResponseType.AUTHENTICATION_SESSION_INVALID :
+                AuthorizeErrorResponseType.INVALID_AUTHENTICATION_METHOD;
+
+        errorHandlerService.handleError(facesMessageId, errorType,
                 "Contact administrator to fix specific ACR method issue.");
     }
 
@@ -580,7 +585,7 @@ public class Authenticator {
         if (Constants.RESULT_SUCCESS.equals(lastResult)) {
             return lastResult;
         } else if (Constants.RESULT_FAILURE.equals(lastResult)) {
-            handleScriptError();
+            handleScriptError(sessionId);
         } else if (Constants.RESULT_NO_PERMISSIONS.equals(lastResult)) {
             handlePermissionsError();
         } else if (Constants.RESULT_EXPIRED.equals(lastResult)) {
@@ -759,9 +764,9 @@ public class Authenticator {
         this.authAcr = sessionIdAttributes.get(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE);
     }
 
-    private boolean authenticationFailed() {
+    private boolean authenticationFailed(SessionId sessionId) {
         addMessage(FacesMessage.SEVERITY_ERROR, "login.errorMessage");
-        handleScriptError(null);
+        handleScriptError(sessionId);
         return false;
     }
 
