@@ -151,8 +151,7 @@ public class Deployer {
         if (Files.isDirectory(pcode) && Files.isDirectory(pweb)) {
             
             try {  
-                String prjBasepath = prjId;
-                //To avoid exposing the id in the url one might do: DigestUtils(DigestUtils.getMd5Digest()).digestAsHex(...)
+                String prjBasepath = makeShortSafePath(prjId);
                 Set<String> flowIds = createFlows(pcode, dd, prjBasepath);
                 if (dd.getError() == null) {
                     projectsFlows.put(prjId, flowIds);
@@ -227,6 +226,8 @@ public class Deployer {
         
         if (flowsPaths.isEmpty()) {
             dd.setError("There are no flows in this archive");
+        } else {
+            logger.debug("Flows' basepaths will all be prefixed with '{}'", prjBasepath);  
         }
         
         Map<String, String> flowsOutcome = new HashMap<>();
@@ -347,8 +348,8 @@ public class Deployer {
         logger.info("Compressing to {}", newZipPath);
 
         ZipFile newZip = new ZipFile(newZipPath.toFile());
-        newZip.addFolder(ftl.toFile(), params);
-        newZip.addFolder(fl.toFile(), params);
+        newZip.addFolder(ftl.toFile().getParentFile(), params);
+        newZip.addFolder(fl.toFile().getParentFile(), params);
         newZip.addFolder(scripts.toFile(), params);
 
         return newZip;
@@ -684,6 +685,12 @@ public class Deployer {
             }
         }
         return code;
+    }
+    
+    private String makeShortSafePath(String id) {
+        //radix 36 entails safe filename/url characters: 0-9 plus a-z
+        String path = Integer.toString(id.hashCode(), Math.min(36, Character.MAX_RADIX));
+        return path.substring(path.charAt(0) == '-' ? 1 : 0);
     }
 
     @PostConstruct
