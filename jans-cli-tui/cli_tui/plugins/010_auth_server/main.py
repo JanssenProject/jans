@@ -153,7 +153,6 @@ class Plugin(DialogUtils):
 
         self.oauth_containers['scopes'] = HSplit([
                     VSplit([
-                        self.app.getButton(text=_("Get Scopes"), name='oauth:scopes:get', jans_help=_("Retreive first {} Scopes").format(self.app.entries_per_page), handler=self.oauth_get_scopes),
                         self.app.getTitledText(_("Search"), name='oauth:scopes:search', jans_help=_(common_strings.enter_to_search), accept_handler=self.search_scope,style='class:outh_containers_scopes.text'),
                         self.app.getButton(text=_("Add Scope"), name='oauth:scopes:add', jans_help=_("To add a new scope press this button"), handler=self.add_scope),
                         ],
@@ -165,7 +164,6 @@ class Plugin(DialogUtils):
 
         self.oauth_containers['clients'] = HSplit([
                     VSplit([
-                        self.app.getButton(text=_("Get Clients"), name='oauth:clients:get', jans_help=_("Retreive first {} OpenID Connect clients").format(self.app.entries_per_page), handler=self.oauth_update_clients),
                         self.app.getTitledText(_("Search"), name='oauth:clients:search', jans_help=_(common_strings.enter_to_search), accept_handler=self.search_clients,style='class:outh_containers_clients.text'),
                         self.app.getButton(text=_("Add Client"), name='oauth:clients:add', jans_help=_("To add a new client press this button"), handler=self.add_client),
 
