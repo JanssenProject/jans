@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -21,6 +22,7 @@ public class SearchRequest {
     private int maxCount;
     private List<String> filterAttributeName;
     private List<String> filterAssertionValue;
+    private Map<String,String> fieldValueMap;
 
     @JsonIgnore
     private String attributesStr;
@@ -139,6 +141,14 @@ public class SearchRequest {
     public void setFilterAssertionValue(List<String> filterAssertionValue) {
         this.filterAssertionValue = filterAssertionValue;
     }
+    
+    public Map<String, String> getFieldValueMap() {
+        return fieldValueMap;
+    }
+
+    public void setFieldValueMap(Map<String, String> fieldValueMap) {
+        this.fieldValueMap = fieldValueMap;
+    }
 
     @Override
     public String toString() {
@@ -146,6 +156,8 @@ public class SearchRequest {
                 + excludedAttributes + ", filter=" + filter + ", sortBy=" + sortBy + ", sortOrder=" + sortOrder
                 + ", startIndex=" + startIndex + ", count=" + count + ", maxCount=" + maxCount
                 + ", filterAttributeName=" + filterAttributeName + ", filterAssertionValue=" + filterAssertionValue
-                + ", attributesStr=" + attributesStr + ", excludedAttributesStr=" + excludedAttributesStr + "]";
+                + ", fieldValueMap=" + fieldValueMap + ", attributesStr=" + attributesStr + ", excludedAttributesStr="
+                + excludedAttributesStr + "]";
     }
+
 }

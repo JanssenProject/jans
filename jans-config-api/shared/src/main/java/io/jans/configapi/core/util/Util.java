@@ -8,7 +8,9 @@ package io.jans.configapi.core.util;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.stream.Collectors;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -50,5 +52,26 @@ public class Util {
                 .map(token -> (String) token).collect(Collectors.toList()));
         return Collections.list(new StringTokenizer(str, format)).stream().map(token -> (String) token)
                 .collect(Collectors.toList());
+    }
+    
+    public Map<String,String> getFieldValueMap(String str, String tokenizer, String format) {
+        log.debug(" Field Value to get map - str:{}, tokenizer:{} format:{}", str, tokenizer, format);
+
+        Map<String,String> fieldValueMap = new HashMap<>();
+        if (StringUtils.isBlank(str)) {
+              return fieldValueMap;
+        }
+
+        log.debug("str.contains(format):{}", str.contains(format));
+        if (!str.contains(format)) {
+
+            fieldValueMap.put(str, str);
+            log.debug(" Not tokenized - fieldValueMap:{}", fieldValueMap);
+            return fieldValueMap;
+        }
+
+        log.debug("final tokenized list:{}", Collections.list(new StringTokenizer(str, format)).stream()
+                .map(token -> (String) token).collect(Collectors.toList()));
+        return fieldValueMap;
     }
 }

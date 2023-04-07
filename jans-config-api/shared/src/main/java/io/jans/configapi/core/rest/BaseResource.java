@@ -179,13 +179,13 @@ public class BaseResource {
     }
 
     protected SearchRequest createSearchRequest(String schemas, String filter, String sortBy, String sortOrder,
-            Integer startIndex, Integer count, String attrsList, String excludedAttrsList, int maximumRecCount) {
+            Integer startIndex, Integer count, String attrsList, String excludedAttrsList, int maximumRecCount, String fieldValuePair) {
         if (log.isDebugEnabled()) {
             log.debug(
-                    "Search Request params:: - schemas:{}, filter:{}, sortBy:{}, sortOrder:{}, startIndex:{}, count:{}, attrsList:{}, excludedAttrsList:{}, maximumRecCount:{}",
+                    "Search Request params:: - schemas:{}, filter:{}, sortBy:{}, sortOrder:{}, startIndex:{}, count:{}, attrsList:{}, excludedAttrsList:{}, maximumRecCount:{}, fieldValuePair:{}",
                     escapeLog(schemas), escapeLog(filter), escapeLog(sortBy), escapeLog(sortOrder),
                     escapeLog(startIndex), escapeLog(count), escapeLog(attrsList), escapeLog(excludedAttrsList),
-                    escapeLog(maximumRecCount));
+                    escapeLog(maximumRecCount), escapeLog(fieldValuePair));
         }
         SearchRequest searchRequest = new SearchRequest();
 
