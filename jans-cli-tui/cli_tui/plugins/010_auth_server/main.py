@@ -100,14 +100,30 @@ class Plugin(DialogUtils):
         self.oauth_logging()
 
 
+
     async def retrieve_sopes(self) -> None:
         """asyncio corotune for retreiving scopes
         """
+        limit =60
+        start_index = 0
+        
         self.app.logger.debug("retreiving scopes")
-        cli_args = {'operation_id': 'get-oauth-scopes', 'endpoint_args': 'limit:200,startIndex:0'}
+        cli_args = {'operation_id': 'get-oauth-scopes', 'endpoint_args': f'limit:{limit},startIndex:{start_index}'}
         response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-        common_data.scopes = response.json()['entries']
+        result = response.json()
+        max_limit = result['totalEntriesCount']
+
+        while(start_index < max_limit) :
+            if start_index < max_limit:
+                start_index +=limit
+                cli_args = {'operation_id': 'get-oauth-scopes', 'endpoint_args': f'limit:{limit},startIndex:{start_index}'}
+                response_new = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+                result_new = response_new.json()
+                result['entries'].append(result_new.get('entries',[]))
+
+        common_data.scopes = result['entries']
         self.app.logger.debug("scopes retreived")
+
 
     def on_cli_object_ready(self):
         self.authn.on_cli_object_ready()
