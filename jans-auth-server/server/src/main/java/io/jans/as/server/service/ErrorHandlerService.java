@@ -14,14 +14,12 @@ import io.jans.as.model.error.IErrorType;
 import io.jans.jsf2.message.FacesMessages;
 import io.jans.jsf2.service.FacesService;
 import io.jans.util.StringHelper;
-import org.python.jline.internal.Log;
-import org.slf4j.Logger;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.application.FacesMessage.Severity;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import org.slf4j.Logger;
 
 /**
  * Helper service to generate either error response or local error based on application settings
@@ -76,7 +74,7 @@ public class ErrorHandlerService {
         String redirectUri = cookieService.getRpOriginIdCookie();
 
         if (StringHelper.isEmpty(redirectUri)) {
-            Log.error("Failed to get redirect_uri from cookie");
+            log.error("Failed to get redirect_uri from cookie");
             handleLocalError(facesMessageId);
             return;
         }
