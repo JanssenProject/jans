@@ -1,7 +1,7 @@
 import json
 import asyncio
 from functools import partial
-from typing import Optional, Sequence
+from typing import Optional, Sequence, Callable
 
 from prompt_toolkit.application import Application
 from prompt_toolkit.layout.dimension import D
@@ -26,7 +26,7 @@ class ViewProperty(JansGDialog, DialogUtils):
             parent,
             data:tuple,
             title: AnyFormattedText='',
-            op_type: Optional[str]='replace'
+            op_type: Optional[str]='replace',
             )-> None:
         """init for `ViewProperty`, inherits from two diffrent classes `JansGDialog` and `DialogUtils`
             
@@ -90,8 +90,14 @@ class ViewProperty(JansGDialog, DialogUtils):
             self.app.stop_progressing()
             self.myparent.app_configuration = response
             self.future.set_result(DialogResult.ACCEPT)
+            await self.myparent.get_appconfiguration()
             self.myparent.oauth_update_properties(start_index=self.myparent.oauth_update_properties_start_index)
+
         asyncio.ensure_future(coroutine())
+
+
+           
+
 
 
     def get_widgets(
