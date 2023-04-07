@@ -706,8 +706,8 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Authentication Brute Force Protection Configuration")
     private AuthenticationProtectionConfiguration authenticationProtectionConfiguration;
 
-    @DocProperty(description = "A list of possible error handling methods")
-    private ErrorHandlingMethod errorHandlingMethod = ErrorHandlingMethod.INTERNAL;
+    @DocProperty(description = "A list of possible error handling methods. Possible values: remote (send error back to RP), internal (show error page)", defaultValue = "remote")
+    private ErrorHandlingMethod errorHandlingMethod = ErrorHandlingMethod.REMOTE;
 
     @DocProperty(description = "Boolean value specifying whether to disable authentication when max_age=0", defaultValue = "false")
     private Boolean disableAuthnForMaxAgeZero;
