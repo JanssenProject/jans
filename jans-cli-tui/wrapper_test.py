@@ -4,14 +4,14 @@ from cli_tui.cli import config_cli
 test_client = config_cli.client_id if config_cli.test_client else None
 config_cli.debug = True
 cli_object = config_cli.JCA_CLI(
-                host=config_cli.host, 
-                client_id=config_cli.client_id,
-                client_secret=config_cli.client_secret, 
-                access_token=config_cli.access_token, 
-                test_client=test_client
-            )
+    host=config_cli.host,
+    client_id=config_cli.client_id,
+    client_secret=config_cli.client_secret,
+    access_token=config_cli.access_token,
+    test_client=test_client
+)
 
-#print(config_cli.host, config_cli.client_id, config_cli.client_secret, config_cli.access_token, cli_object.use_test_client)
+# print(config_cli.host, config_cli.client_id, config_cli.client_secret, config_cli.access_token, cli_object.use_test_client)
 status = cli_object.check_connection()
 
 print(status)
@@ -66,23 +66,22 @@ result = cli_object.process_command_by_id(
 
 # endpoint_args ='pattern:2B29' ### limit the responce and wrong pattern
 data = {}
-inum = '40a48740-4892-4fce-b30f-81c5c45670f4'  ## this user has 3 UMA
+inum = '40a48740-4892-4fce-b30f-81c5c45670f4'  # this user has 3 UMA
 result = cli_object.process_command_by_id(
-                        operation_id='get-all-attribute',
-                        url_suffix='',
-                        endpoint_args="pattern:3B47\,3692\,E7BC\,11AA",
-                        data_fn=None,
-                        data={}
-                        )
+    operation_id='get-oauth-scopes',
+    url_suffix='',
+    endpoint_args="limit:200,startIndex:0",
+    data_fn=None,
+    data={}
+)
 
-x = result.json()  
-print(x)
+x = result.json()
+print(x['totalEntriesCount'])
 # print(len(x["entries"]))
 # print(x["entries"])
 # for i in x["entries"]:
 #         if i['inum'] == '08E2':
 #                 print(i['claimName'])
-
 
 
 # endpoint_args ='limit:1,pattern:hasdaeat'
@@ -96,13 +95,6 @@ print(x)
 #                         data={}
 #                         )
 # print(result.text)
-
-
-
-
-
-
-
 
 
 '''
@@ -182,4 +174,3 @@ print(x)
 {"dn":"inum=C4F6,ou=scopes,o=jans","inum":"C4F6","displayName":"refresh_token","id":"offline_access","description":"This scope value requests that an OAuth 2.0 Refresh Token be issued.","scopeType":"openid","defaultScope":true,"attributes":{"showInConfigurationEndpoint":true},"creationDate":"2022-09-24T07:07:19","umaType":false,"baseDn":"inum=C4F6,ou=scopes,o=jans"}]
 
 '''
-

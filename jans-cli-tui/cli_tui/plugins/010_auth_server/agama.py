@@ -45,7 +45,6 @@ class Agama(DialogUtils):
 
         self.main_container =  HSplit([
                     VSplit([
-                        self.app.getButton(text=_("Get Projects"), name='oauth:agama:get', jans_help=_("Retreive all Agama Projects"), handler=self.get_agama_projects),
                         self.app.getTitledText(_("Search"), name='oauth:agama:search', jans_help=_(common_strings.enter_to_search), accept_handler=self.search_agama_project, style=cli_style.edit_text),
                         self.app.getButton(text=_("Upload Project"), name='oauth:agama:add', jans_help=_("To add a new Agama project press this button"), handler=self.upload_project),
                         ],
