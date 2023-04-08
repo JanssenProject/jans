@@ -5,14 +5,16 @@ import zipfile
 
 from datetime import datetime
 from typing import Any
-
+from types import SimpleNamespace
 from prompt_toolkit.application import Application
 from prompt_toolkit.eventloop import get_event_loop
 from prompt_toolkit.layout.dimension import D
+from prompt_toolkit.lexers import PygmentsLexer, DynamicLexer
+
 from prompt_toolkit.layout.containers import HSplit, VSplit, DynamicContainer
 from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.formatted_text import HTML
-from prompt_toolkit.widgets import Button, Label
+from prompt_toolkit.widgets import Button, Label, TextArea, Box
 
 from utils.multi_lang import _
 from utils.utils import DialogUtils, fromisoformat
@@ -21,6 +23,7 @@ from wui_components.jans_vetrical_nav import JansVerticalNav
 from wui_components.jans_path_browser import jans_file_browser_dialog, BrowseType
 from wui_components.jans_cli_dialog import JansGDialog
 from wui_components.jans_table import JansTableWidget
+from wui_components.jans_path_browser import JansPathBrowserWidget
 
 class Agama(DialogUtils):
     def __init__(
@@ -28,7 +31,6 @@ class Agama(DialogUtils):
         app: Application
         ) -> None:
 
-        
 
         self.app = app
         self.data = []
@@ -68,22 +70,121 @@ class Agama(DialogUtils):
 
         project_data = self.working_container.all_data[self.working_container.selectes]
         project_name = project_data['details']['projectMetadata']['projectName']
+        fdata = SimpleNamespace()
+
+        export_current_config_button_title = _("Export Current Config")
+        export_sample_config_button_title = _("Export Sample Config")
+        import_configuration_button_title = _("Import Configuration")
+
 
         async def coroutine():
-            cli_args = {'operation_id': 'get-agama-dev-prj-configs', 'url_suffix':'name:{}'.format(project_name)}
-            self.app.start_progressing(_("Retrieving project configuration..."))
-            response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+
+            cli_args = {'operation_id': 'get-agama-dev-studio-prj-by-name', 'url_suffix': 'name:{}'.format(project_name)}
+            self.app.start_progressing(_("Retrieving details for project {}".format(project_name)))
+            details_response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
             self.app.stop_progressing()
 
-            try:
-                result = response.json()
-            except Exception:
-                result = response.text
+            if details_response.status_code == 204:
+                self.app.show_message(_(common_strings.info), _("Project {} is still being deployed. Try again in 1 minute.").format(project_name), tobefocused=self.working_container)
+                return
+            elif details_response.status_code == 200:
+                project_details = details_response.json()
 
-            if result:
-                self.app.data_display_dialog(title=_("Configuration for") + " " + project_name, data=response.json())
             else:
-                self.app.show_message(_(common_strings.error), "Server did not return configuration for {}".format(project_name), tobefocused=self.working_container)
+                self.app.show_message(_(common_strings.error), _("Can't get details for project {}").format(project_name), tobefocused=self.working_container)
+                return
+
+
+            async def do_import_config_coroutine(config):
+                cli_args = {'operation_id': 'put-agama-dev-studio-prj', 'url_suffix':'name:{}'.format(project_name), 'data':config}
+                self.app.start_progressing(_("Saving project configuration..."))
+                response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+                self.app.stop_progressing()
+
+            def read_config_file(path):
+                try:
+                    with open(path) as f:
+                        config_s = f.read()
+                except Exception as e:
+                    self.app.show_message(_(common_strings.error), _("An error ocurred reading file") + ":\n{}".format(str(e)), tobefocused=fdata.main_dialog)
+                    return
+
+                try:
+                    config = json.loads(config_s)
+                except Exception as e:
+                    self.app.show_message(_(common_strings.error), _("An error ocurred while parsing json") + ":\n{}".format(str(e)), tobefocused=fdata.main_dialog)
+                    return
+
+                asyncio.ensure_future(do_import_config_coroutine(config))
+
+
+
+            def import_config():
+                file_browser_dialog = jans_file_browser_dialog(self.app, path=self.app.browse_path, browse_type=BrowseType.file, ok_handler=read_config_file)
+                self.app.show_jans_dialog(file_browser_dialog)
+
+
+            def save_data(path):
+
+                try:
+                    with open(path, 'w') as w:
+                        w.write(fdata.save_data)
+                    self.pbar_text = _("File {} was saved".format(path))
+                    self.app.show_message(_(common_strings.info), _("File {} was successfully saved").format(path), tobefocused=fdata.main_dialog)
+                except Exception as e:
+                    self.app.show_message(_(common_strings.error), _("An error ocurred while saving") + ":\n{}".format(str(e)), tobefocused=fdata.main_dialog)
+
+
+
+            async def get_current_config_coroutine():
+
+                cli_args = {'operation_id': 'get-agama-dev-prj-configs', 'url_suffix':'name:{}'.format(project_name)}
+                self.app.start_progressing(_("Retrieving project configuration..."))
+                response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+                self.app.stop_progressing()
+
+                result = None
+                try:
+                    result = response.json()
+                    fdata.save_status = export_current_config_button_title
+                except Exception:
+                    result = response.text
+
+                if not result:
+                    self.app.show_message(_(common_strings.info), _("No configurations defined for {}").format(project_name), tobefocused=fdata.main_dialog)
+                    return
+
+                fdata.save_data = json.dumps(result, indent=2)
+                file_browser_dialog = jans_file_browser_dialog(self.app, path=self.app.browse_path, browse_type=BrowseType.save_as, ok_handler=save_data)
+                self.app.show_jans_dialog(file_browser_dialog)
+
+            def export_current_config():
+                asyncio.ensure_future(get_current_config_coroutine())
+
+
+            def export_sample_config():
+                if not project_details['details']['projectMetadata'].get('configs'):
+                    self.app.show_message(_(common_strings.info), _("No sample configurations defined for project {}").format(project_name), tobefocused=fdata.main_dialog)
+                    return
+
+                fdata.save_data = json.dumps(project_details['details']['projectMetadata']['configs'], indent=2)
+                file_browser_dialog = jans_file_browser_dialog(self.app, path=self.app.browse_path, browse_type=BrowseType.save_as, ok_handler=save_data)
+                self.app.show_jans_dialog(file_browser_dialog)
+
+            export_sample_config_button = Box(Button(export_sample_config_button_title, width=len(export_sample_config_button_title)+4, handler=export_sample_config))
+            export_current_config_button = Box(Button(export_current_config_button_title, width=len(export_current_config_button_title)+4, handler=export_current_config))
+            import_configuration_button = Box(Button(import_configuration_button_title, width=len(import_configuration_button_title)+4, handler=import_config))
+
+            dialog_title = _("Managae Configuration for Project {}").format(project_name)
+            dialog = JansGDialog(
+                        self.app,
+                        title=dialog_title,
+                        body=HSplit([export_sample_config_button, export_current_config_button, import_configuration_button], width=D(), padding=1),
+                        buttons=[Button('Close')],
+                        width=len(dialog_title)+8
+                        )
+            fdata.main_dialog = dialog
+            self.app.show_jans_dialog(dialog)
 
 
         asyncio.ensure_future(coroutine())
@@ -291,10 +392,9 @@ class Agama(DialogUtils):
 
 
             elif response.status_code == 204:
-                self.app.show_message(_(common_strings.error), "Project {} is still being deployed. Try again in 1 minute.".format(project_name), tobefocused=self.working_container)
+                self.app.show_message(_(common_strings.info), _("Project {} is still being deployed. Try again in 1 minute.").format(project_name), tobefocused=self.working_container)
 
         if project_name:
-
             asyncio.ensure_future(coroutine())
 
 

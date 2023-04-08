@@ -148,6 +148,12 @@ style = Style.from_dict(
         "table-black": "fg:ansiwhite bg:ansiblack",
         "table-black cursor-line": "nounderline bg:#0a0a0a fg:ansiwhite",
 
+        # dialog
+        'dialog':             'bg:#4444ff',
+        'dialog frame.label': '#ff0000 bold',
+        'dialog.body':        'bg:#ffffff #000000',
+        'dialog shadow':      'bg:#262626',
+
     }
 )
 
