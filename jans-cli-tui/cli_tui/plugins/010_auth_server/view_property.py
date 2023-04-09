@@ -6,7 +6,7 @@ from typing import Optional, Sequence
 from prompt_toolkit.application import Application
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.formatted_text import AnyFormattedText
-from prompt_toolkit.layout.containers import HSplit
+from prompt_toolkit.layout.containers import HSplit, VSplit
 from prompt_toolkit.widgets import Button, Dialog
 
 from cli import config_cli
@@ -14,6 +14,8 @@ from utils.static import DialogResult, cli_style
 from utils.utils import DialogUtils
 from wui_components.jans_cli_dialog import JansGDialog
 from wui_components.jans_tab import JansTab
+from typing import Any
+from wui_components.jans_vetrical_nav import JansVerticalNav
 
 from utils.multi_lang import _
 
@@ -80,7 +82,8 @@ class ViewProperty(JansGDialog, DialogUtils):
             data = {}
             for widget in self.widgets:
                 item_data = self.get_item_data(widget)
-                data[item_data['key']] = item_data['value']
+                if item_data:
+                    data[item_data['key']] = item_data['value']
 
         cli_args = {'operation_id': 'patch-properties', 'data': [ {'op':self.op_type, 'path': self.property_name, 'value': data } ]}
 
@@ -94,11 +97,6 @@ class ViewProperty(JansGDialog, DialogUtils):
             self.myparent.oauth_update_properties(start_index=self.myparent.oauth_update_properties_start_index)
 
         asyncio.ensure_future(coroutine())
-
-
-           
-
-
 
     def get_widgets(
             self, 
@@ -170,7 +168,81 @@ class ViewProperty(JansGDialog, DialogUtils):
                 titled_text.jans_list_type = True
                 widgets.append(titled_text)
 
+
+            elif item['type'] == 'object' :
+
+                self.item_name = item_name
+                this_value = self.value[self.item_name] #values.get(item_name, [])
+
+                self.propert_widget = JansVerticalNav(
+                                myparent=self.app,
+                                headers=[_("Property"), _("Value")],
+                                preferred_size= [0,0],
+                                on_display=self.app.data_display_dialog,
+                                data=[[key, value] for key, value in this_value.items()],
+                                all_data=[{key: val} for key, val in this_value.items()],
+                                on_delete=self.delete_property,
+                                selectes=0,
+                                headerColor=cli_style.navbar_headcolor,
+                                entriesColor=cli_style.navbar_entriescolor,
+                                hide_headers = False,
+                                max_height=20
+                            )
+                widgets.append(self.app.getTitledWidget(widget=self.propert_widget,title=str(self.item_name),name=self.item_name,style='green'))
+                widgets.append(self.app.getButton(text=f"Add {self.item_name}",name=self.item_name, handler=self.add_property,jans_help='add Property'))
+    
         return widgets
+
+
+    def add_property(self):
+
+        body = HSplit([
+                self.app.getTitledText(
+                    title=_("Property"),
+                    name='Property',
+                    style=cli_style.edit_text_required
+                ),
+                self.app.getTitledText(
+                    title=_("Value"),
+                    name='Value',
+                    style=cli_style.edit_text_required
+                ),
+        ])
+
+        save_button = Button(_("Save"), handler=self.save_property)
+        save_button.keep_dialog = True
+        canncel_button = Button(_("Cancel"))
+        buttons = [save_button, canncel_button]
+        dialog = JansGDialog(self.app, title=f'{self.item_name}', body=body, buttons=buttons)
+        self.app.show_jans_dialog(dialog)
+
+    def delete_property(self, **kwargs: Any) -> None:
+        selects = kwargs['selected']
+
+        def do_delete_property(result):
+            self.value[self.item_name].pop(selects[0])
+            self.prepare_properties()
+            self.dialog.body=HSplit([self.value_content], padding=1,width=100)
+            self.app.layout.focus(self.dialog.body)
+
+        dialog = self.app.get_confirm_dialog(
+            message = _(f"Are you sure want to delete {selects}:"),
+            confirm_handler=do_delete_property
+            )
+
+        self.app.show_jans_dialog(dialog)
+
+
+    def save_property(self, dialog):
+        new_data = self.make_data_from_dialog(tabs={dialog.title: dialog.body}) 
+        self.value[self.item_name][new_data['Property']]= new_data['Value'] 
+        
+        self.prepare_properties()
+        self.dialog.body=HSplit([self.value_content], padding=1,width=100)
+        dialog.future.set_result(True)
+
+        self.app.layout.focus(self.propert_widget)
+
 
 
     def add_tab_element(

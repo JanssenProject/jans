@@ -182,7 +182,7 @@ class JansVerticalNav():
             self.list_box,
         ]
 
-        self.container = FloatContainer(
+        self.window = FloatContainer(
             content=HSplit(self.container_content +
                            [Window(height=1)], width=D(max=self.max_width)),
             floats=[],
@@ -392,4 +392,4 @@ class JansVerticalNav():
         return kb
 
     def __pt_container__(self) -> FloatContainer:
-        return self.container
+        return self.window

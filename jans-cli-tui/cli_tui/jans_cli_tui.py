@@ -769,7 +769,7 @@ class JansCliApp(Application):
         widget.window.jans_help = jans_help
         #li, w2, width = self.handle_long_string(title, widget.values, widget)
 
-        v = VSplit([Label(text=title, width=len(title), style=style), widget])
+        v = VSplit([Window(FormattedTextControl(title), width=len(title)+1, style=style,), widget])
         v.me = widget
 
         return v
