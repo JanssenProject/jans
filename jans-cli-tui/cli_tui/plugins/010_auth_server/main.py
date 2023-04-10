@@ -104,25 +104,30 @@ class Plugin(DialogUtils):
     async def retrieve_sopes(self) -> None:
         """asyncio corotune for retreiving scopes
         """
-        limit =60
+
+        common_data.scopes = []
         start_index = 0
-        
-        self.app.logger.debug("retreiving scopes")
-        cli_args = {'operation_id': 'get-oauth-scopes', 'endpoint_args': f'limit:{limit},startIndex:{start_index}'}
-        response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-        result = response.json()
-        max_limit = result['totalEntriesCount']
+        limit = 100
 
-        while(start_index < max_limit) :
-            if start_index < max_limit:
-                start_index +=limit
-                cli_args = {'operation_id': 'get-oauth-scopes', 'endpoint_args': f'limit:{limit},startIndex:{start_index}'}
-                response_new = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-                result_new = response_new.json()
-                result['entries'].append(result_new.get('entries',[]))
+        while True:
 
-        common_data.scopes = result['entries']
-        self.app.logger.debug("scopes retreived")
+            cli_args = {'operation_id': 'get-oauth-scopes', 'endpoint_args': f'limit:{limit},startIndex:{start_index}'}
+            response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+
+            if response.status_code == 200:
+                try:
+                    data = response.json()
+                    if data.get('entriesCount', 0) == 0:
+                        break
+                    common_data.scopes += data['entries']
+                    self.app.logger.info("%d scopes retreived", data['entriesCount'])
+                except Exception as e:
+                    self.app.logger.error("Failed tor retreive scopes %s", e)
+                    break
+            else:
+                break
+
+            start_index += limit
 
 
     def on_cli_object_ready(self):
