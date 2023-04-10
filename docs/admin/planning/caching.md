@@ -1,6 +1,8 @@
 ---
 tags:
+  - administration
   - planning
+  - caching
   - Redis
   - Couchbase
   - Memcached
