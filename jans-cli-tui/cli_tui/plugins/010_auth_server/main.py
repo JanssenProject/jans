@@ -104,11 +104,8 @@ class Plugin(DialogUtils):
     async def retrieve_sopes(self) -> None:
         """asyncio corotune for retreiving scopes
         """
-        max_limit =60
-        start_index = 0
 
         common_data.scopes = []
-
         start_index = 0
         limit = 100
 
