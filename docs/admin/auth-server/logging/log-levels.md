@@ -2,7 +2,7 @@
 tags:
   - administration
   - auth-server
-  - logging
+  - logging-levels
 ---
 
 ## This content is in progress

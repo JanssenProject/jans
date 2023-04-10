@@ -5,6 +5,7 @@ tags:
 - vm
 - SUSE
 - SLES
+- Leap
 ---
 
 # SUSE Janssen Installation
