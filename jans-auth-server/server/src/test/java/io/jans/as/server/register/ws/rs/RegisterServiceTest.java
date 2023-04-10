@@ -4,7 +4,9 @@ import com.beust.jcommander.internal.Lists;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Sets;
 import io.jans.as.common.service.AttributeService;
+import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.server.ciba.CIBARegisterClientMetadataService;
@@ -17,6 +19,9 @@ import org.mockito.testng.MockitoTestNGListener;
 import org.slf4j.Logger;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
+
+import java.util.ArrayList;
+import java.util.Set;
 
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertTrue;
@@ -48,6 +53,14 @@ public class RegisterServiceTest {
 
     @Mock
     private CIBARegisterClientMetadataService cibaRegisterClientMetadataService;
+
+    @Test
+    public void identifyResponseType_whenResponseTypeIsBlank_shouldFallbackToCodeValue() {
+        when(appConfiguration.getAllResponseTypesSupported()).thenReturn(Sets.newHashSet(ResponseType.values()));
+
+        final Set<ResponseType> result = registerService.identifyResponseTypes(new ArrayList<>(), new ArrayList<>());
+        assertTrue(result.contains(ResponseType.CODE));
+    }
 
     @Test
     public void addDefaultCustomAttributes_whenCalledWithExistingConfigurationData_shouldPopulateRequestObject() throws JsonProcessingException {
