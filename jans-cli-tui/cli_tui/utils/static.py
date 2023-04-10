@@ -28,3 +28,4 @@ class common_strings:
     no_matching_result = "No matching result"
     error = "Error!"
     info = "Info"
+    oops = "Oops"

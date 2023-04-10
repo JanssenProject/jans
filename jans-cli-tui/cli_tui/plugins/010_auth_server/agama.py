@@ -46,12 +46,11 @@ class Agama(DialogUtils):
                 entriesColor=cli_style.navbar_entriescolor,
                 hide_headers = True,
                 custom_key_bindings=([('c', self.display_config)]),
-                jans_help=_("Press c to display configuration for project")
+                jans_help=HTML(_("Press <b>d</b> to see deployment details. Press <b>c</b> to view/set projects configurations."))
             )
 
         self.main_container =  HSplit([
                     VSplit([
-                        self.app.getButton(text=_("Get Projects"), name='oauth:agama:get', jans_help=_("Retrieve all Agama Projects"), handler=self.get_agama_projects),
                         self.app.getTitledText(_("Search"), name='oauth:agama:search', jans_help=_(common_strings.enter_to_search), accept_handler=self.search_agama_project, style=cli_style.edit_text),
                         self.app.getButton(text=_("Upload Project"), name='oauth:agama:add', jans_help=_("To add a new Agama project press this button"), handler=self.upload_project),
                         ],
@@ -229,7 +228,10 @@ class Agama(DialogUtils):
                     ))
 
         if not data_display:
-            self.app.show_message(_("Oops"), _(common_strings.no_matching_result), tobefocused = self.main_container)
+            if search_str:
+                self.app.show_message(_("Oops"), _(common_strings.no_matching_result), tobefocused = self.main_container)
+            else:
+                self.app.show_message(_(common_strings.info), _("No projects have been deployed for the time being."), tobefocused = self.main_container)
             return
 
         self.working_container.hide_headers = False
