@@ -1,6 +1,9 @@
 ---
 tags:
-  - security recommendations
+  - administration
+  - planning
+  - security
+  - recommendations
 ---
 
 Janssen Project distributions are designed to be easy to deploy. Its default
