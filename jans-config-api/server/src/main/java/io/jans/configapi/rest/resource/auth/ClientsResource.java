@@ -14,7 +14,7 @@ import io.jans.as.common.service.common.EncryptionService;
 import io.jans.as.common.service.common.InumService;
 import io.jans.as.persistence.model.Scope;
 import io.jans.configapi.core.rest.ProtectedApi;
-import io.jans.configapi.core.model.SearchRequest;
+import io.jans.model.SearchRequest;
 import io.jans.configapi.service.auth.ClientService;
 import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.service.auth.AttributeService;

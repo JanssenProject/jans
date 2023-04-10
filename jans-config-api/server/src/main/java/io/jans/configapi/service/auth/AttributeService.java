@@ -4,13 +4,14 @@ package io.jans.configapi.service.auth;
 import io.jans.model.GluuAttribute;
 import io.jans.as.common.util.AttributeConstants;
 import io.jans.configapi.util.ApiConstants;
-import io.jans.configapi.core.model.SearchRequest;
+import io.jans.model.SearchRequest;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;
 import io.jans.orm.search.filter.Filter;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -48,14 +49,27 @@ public class AttributeService extends io.jans.as.common.service.AttributeService
                 Filter inumFilter = Filter.createSubstringFilter(AttributeConstants.INUM, null, targetArray, null);
                 filters.add(Filter.createORFilter(displayNameFilter, descriptionFilter, nameFilter, inumFilter));
             }
-            searchFilter = Filter.createORFilter(filters);
+            
         }
+        log.debug("Attributes pattern searchFilter:{}", searchFilter);
+        if(searchRequest.getFieldValueMap()!=null && !searchRequest.getFieldValueMap().isEmpty())
+        {
+            for (Map.Entry<String, String> entry : searchRequest.getFieldValueMap().entrySet()) {
+                Filter dataFilter = Filter.createEqualityFilter(entry.getKey(), entry.getValue());
+                filters.add(Filter.createORFilter(dataFilter));
+            }
+            searchFilter = Filter.createORFilter(filters);       
+        }
+        
+        log.debug("Attributes pattern and field searchFilter:{}", searchFilter);
+       
+        
 
         if (activeFilter != null) {
             searchFilter = Filter.createANDFilter(Filter.createORFilter(filters), activeFilter);
         }
 
-        log.debug("GluuAttributes to be fetched with searchFilter:{}", searchFilter);
+        log.debug("GluuAttributes final searchFilter:{}", searchFilter);
 
         return persistenceEntryManager.findPagedEntries(getDnForAttribute(null), GluuAttribute.class, searchFilter,
                 null, searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),

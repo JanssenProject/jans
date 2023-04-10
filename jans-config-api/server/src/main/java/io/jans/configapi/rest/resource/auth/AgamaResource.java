@@ -21,7 +21,7 @@ import io.jans.configapi.core.util.Jackson;
 import io.jans.configapi.service.auth.AgamaFlowService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
-import io.jans.configapi.core.model.SearchRequest;
+import io.jans.model.SearchRequest;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.model.PagedResult;
 
@@ -160,7 +160,7 @@ public class AgamaResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
     @Consumes(MediaType.TEXT_PLAIN)
-    @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_VALIDATE_FLOW_ACCESS }, groupScopes = {
+    @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_READ_ACCESS }, groupScopes = {
             ApiAccessConstants.AGAMA_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Path("/syntax-check/" + ApiConstants.QNAME_PATH)
     public Response doSyntaxCheck(@Parameter(description = "Agama Flow name") @PathParam(ApiConstants.QNAME) String qname, String source) {

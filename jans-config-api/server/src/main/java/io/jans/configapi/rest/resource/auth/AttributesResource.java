@@ -9,7 +9,7 @@ package io.jans.configapi.rest.resource.auth;
 import com.github.fge.jsonpatch.JsonPatchException;
 
 import io.jans.configapi.core.model.PatchRequest;
-import io.jans.configapi.core.model.SearchRequest;
+import io.jans.model.SearchRequest;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.service.auth.AttributeService;
 import io.jans.configapi.util.ApiAccessConstants;

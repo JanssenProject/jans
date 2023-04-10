@@ -49,12 +49,14 @@ paths:
         description: Attribute whose value will be used to order the returned response
         schema:
           type: string
+          default: inum
       - name: sortOrder
         in: query
         description: Order in which the sortBy param is applied. Allowed values are
           "ascending" and "descending"
         schema:
           type: string
+          default: ascending
       - name: fieldValuePair
         in: query
         description: Field and value pair for seraching

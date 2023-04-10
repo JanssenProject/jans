@@ -2173,12 +2173,14 @@ paths:
         description: Attribute whose value will be used to order the returned response
         schema:
           type: string
+          default: inum
       - name: sortOrder
         in: query
         description: Order in which the sortBy param is applied. Allowed values are
           "ascending" and "descending"
         schema:
           type: string
+          default: ascending
       - name: fieldValuePair
         in: query
         description: Field and value pair for seraching
@@ -3934,7 +3936,7 @@ paths:
     get:
       tags:
       - Custom Scripts
-      summary: Gets a list of custom scripts
+      summary: Fetch custom script by name
       description: Gets a list of custom scripts
       operationId: get-config-scripts
       parameters:
@@ -5519,12 +5521,14 @@ paths:
         description: Attribute whose value will be used to order the returned response
         schema:
           type: string
+          default: inum
       - name: sortOrder
         in: query
         description: Order in which the sortBy param is applied. Allowed values are
           "ascending" and "descending"
         schema:
           type: string
+          default: ascending
       - name: withAssociatedClients
         in: query
         description: Boolean fag to indicate if clients associated with the scope
@@ -7135,12 +7139,14 @@ paths:
         description: Attribute whose value will be used to order the returned response
         schema:
           type: string
+          default: inum
       - name: sortOrder
         in: query
         description: Order in which the sortBy param is applied. Allowed values are
           "ascending" and "descending"
         schema:
           type: string
+          default: ascending
       - name: fieldValuePair
         in: query
         description: Field and value pair for seraching
@@ -7694,6 +7700,8 @@ components:
           type: string
         description:
           type: string
+        version:
+          type: string
         configs:
           type: object
           additionalProperties:
@@ -7923,15 +7931,15 @@ components:
           type: string
         adminCanView:
           type: boolean
-        adminCanEdit:
-          type: boolean
-        userCanView:
+        userCanAccess:
           type: boolean
         adminCanAccess:
           type: boolean
-        userCanAccess:
+        userCanView:
           type: boolean
         userCanEdit:
+          type: boolean
+        adminCanEdit:
           type: boolean
         whitePagesCanView:
           type: boolean

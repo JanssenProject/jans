@@ -11,7 +11,7 @@ import static io.jans.as.model.util.Util.escapeLog;
 import io.jans.configapi.core.interceptor.RequestAuditInterceptor;
 import io.jans.configapi.core.interceptor.RequestInterceptor;
 import io.jans.configapi.core.model.ApiError;
-import io.jans.configapi.core.model.SearchRequest;
+import io.jans.model.SearchRequest;
 import io.jans.configapi.core.util.Util;
 import io.jans.orm.model.SortOrder;
 

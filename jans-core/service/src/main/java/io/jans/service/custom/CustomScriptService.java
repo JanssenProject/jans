@@ -9,10 +9,6 @@ package io.jans.service.custom;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.model.CustomScript;
 import io.jans.orm.model.PagedResult;
@@ -40,15 +36,14 @@ public class CustomScriptService extends AbstractCustomScriptService {
     }
 
     public PagedResult<CustomScript> searchScripts(String pattern, String sortBy, String sortOrder, Integer startIndex,
-            int limit, int maximumRecCount, CustomScriptType type, Map<String, String> fieldValuePair) {
+            int limit, int maximumRecCount, CustomScriptType type) {
         log.debug(
-                "Search CustomScript with searchRequest - pattern:{}, sortBy:{}, sortOrder:{}, startIndex:{}, limit:{}, maximumRecCount:{}, type:{}, fieldValuePair:{}",
-                pattern, sortBy, sortOrder, startIndex, limit, maximumRecCount, type, fieldValuePair);
+                "Search CustomScript with searchRequest - pattern:{}, sortBy:{}, sortOrder:{}, startIndex:{}, limit:{}, maximumRecCount:{}, type:{}",
+                pattern, sortBy, sortOrder, startIndex, limit, maximumRecCount, type);
 
         Filter searchFilter = null;
-        List<Filter> filters = new ArrayList<>();
         String[] targetArray = new String[] { pattern };
-              
+
         boolean useLowercaseFilter = isLowercaseFilter(baseDn());
         if (useLowercaseFilter) {
             searchFilter = Filter.createORFilter(
@@ -61,16 +56,6 @@ public class CustomScriptService extends AbstractCustomScriptService {
                     Filter.createSubstringFilter(OxConstants.DESCRIPTION, null, targetArray, null),
                     Filter.createSubstringFilter(OxConstants.DISPLAY_NAME, null, targetArray, null));
         }
-
-        if(fieldValuePair!=null && !fieldValuePair.isEmpty())
-        {
-            for (Map.Entry<String, String> entry : fieldValuePair.entrySet()) {
-                Filter dataFilter = Filter.createEqualityFilter(entry.getKey(), entry.getValue());
-                filters.add(Filter.createORFilter(dataFilter));
-            }
-                   
-        }
-
 
         Filter filter = searchFilter;
         log.debug("filter:{}", filter);

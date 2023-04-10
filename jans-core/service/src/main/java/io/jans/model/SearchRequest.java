@@ -1,4 +1,4 @@
-package io.jans.configapi.core.model;
+package io.jans.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
