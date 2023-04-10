@@ -2,6 +2,7 @@
 tags:
   - administration
   - planning
+  - integration
 ---
 
 Older monolithic web access management platforms from the 2000's had
