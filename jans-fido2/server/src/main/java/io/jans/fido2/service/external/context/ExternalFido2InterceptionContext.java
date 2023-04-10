@@ -8,7 +8,7 @@ import io.jans.service.external.context.ExternalScriptContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-public class ExternalFido2InterceptionContext extends ExternalScriptContext {
+public class ExternalFido2InterceptionContext extends io.jans.fido2.service.external.context.ExternalScriptContext {
 
     private final JsonNode jsonNode;
     private CustomScriptConfiguration script;

@@ -98,23 +98,22 @@ paths:
           application/json:
             schema:
               title: AssertionOptions
+              description: An object that contains the extensions to enable, and the options to use for each of them.
               type: object
+              required:
+                - username
               properties:
-                content:
-                  type: object
-                  description: An object that contains the extensions to enable, and the options to use for each of them.
-                  properties:
-                    username:
-                      type: string
-                    authenticatorSelection:
-                      type: array
-                      items:
-                        type: string
-                        description: Set of parameters required for FIDO2 assertion option.
-                    documentDomain:
-                      type: string
-                    extensions:
-                      type: string
+                properties:
+                  username:
+                    type: string
+                  userVerification:
+                    type: string
+                  documentDomain:
+                    type: string
+                  extensions:
+                    type: string
+                  session_id:
+                    type: string
       responses:
         200:
           description: OK
@@ -151,6 +150,10 @@ paths:
                   rpId:
                     type: string
                     description: Document domain.
+                  status:
+                    type: string
+                  errorMessage:
+                    type: string
         403:
           $ref: '#/components/responses/AccessDenied'
         500:
@@ -169,11 +172,14 @@ paths:
               title: AssertionOptions
               type: object
               required:
-                - clientDataJSON
+                - id
+                - type
+                - response
+                - rawId
               properties:
                 id:
                   type: string
-                  description: The base64url encoded id returned by the client
+                  description: The base64url encoded id
                 type:
                   type: string
                   example:
@@ -181,12 +187,21 @@ paths:
                 rawId:
                   type: string
                   description: The base64url encoded rawId returned by the client. If res.rawId is missing, res.id will be used instead. If both are missing an error will be thrown.
-                userHandle:
-                  type: string
-                  description: The base64url encoded userHandle returned by the client. May be null or an empty string.
-                clientDataJSON:
-                  type: string
-                  description: The base64url encoded clientDataJSON returned by the client
+                response:
+                  type: object
+                  properties:
+                    userHandle:
+                      type: string
+                      description: The base64url encoded userHandle returned by the client. May be null or an empty string.
+                    clientDataJSON:
+                      type: string
+                      description: The base64url encoded clientDataJSON returned by the client.
+                    authenticatorData:
+                      type: string
+                      description: The base64url encoded authenticator Data. May be null or an empty string.
+                    signature:
+                      type: string
+                      description: To verify signature.
       responses:
         200:
           description: OK
@@ -362,8 +377,8 @@ paths:
     post:
       tags:
         - FIDO2 Attestation
-      summary: Created new registration.
-      description: Created new registration.
+      summary: Create new registration.
+      description: Create new registration.
       operationId: attestation-options
       requestBody:
         content:
@@ -372,6 +387,10 @@ paths:
               title: AttestationOptions
               description: An object containing various options for the option creation
               type: object
+              required:
+                - username
+                - displayName
+                - attestation
               properties:
                 username:
                   type: string
@@ -383,6 +402,10 @@ paths:
                    - direct
                    - indirect
                    - none
+                documentDomain:
+                  type: string
+                timeout:
+                  type: integer
                 authenticatorSelection:
                   type: object
                   properties:
@@ -498,9 +521,13 @@ paths:
               description: An object containing various options for the option creation
               type: object
               required:
+                - id
                 - type
                 - response
               properties:
+                id:
+                  type: string
+                  description: base64url encoded
                 type:
                   type: string
                   enum: 
@@ -509,7 +536,11 @@ paths:
                   type: object
                   required:
                     - clientDataJSON
+                    - attestationObject
                   properties:
+                    attestationObject:
+                      type: string
+                      description: base64url encoded
                     clientDataJSON:
                       type: object
                       description: The base64url encoded clientDataJSON returned by the client
@@ -535,6 +566,10 @@ paths:
                               type: string
                             id:
                               type: string
+                    clientExtensionResults:
+                      type: array
+                      items:
+                        type: string
       responses:        
         200:
           description: OK
@@ -544,86 +579,91 @@ paths:
                 title: Fido2RegistrationData
                 type: object
                 properties:
-                  createdDate:
-                    type: string
-                    format: date-time
-                  updatedDate:
-                    type: string
-                    format: date-time
-                  createdBy:
-                    type: string
-                  updatedBy:
-                    type: string
-                  username:
-                    type: string
-                  domain:
-                    type: string
-                  userId:
-                    type: string
-                  challenge:
-                    type: string
-                  attestationRequest:
-                    type: string
-                  attestationResponse:
+                  createdCredentials:
                     type: object
                     properties:
+                      createdDate:
+                        type: string
+                        format: date-time
+                      updatedDate:
+                        type: string
+                        format: date-time
+                      createdBy:
+                        type: string
+                      updatedBy:
+                        type: string
+                      username:
+                        type: string
+                      domain:
+                        type: string
+                      userId:
+                        type: string
+                      challenge:
+                        type: string
+                      attestationRequest:
+                        type: string
+                      attestationResponse:
+                        type: object
+                        properties:
+                          type:
+                            type: string
+                            enum:
+                              - public-key
+                          id:
+                            type: string
+                          response:
+                            type: object
+                            required:
+                              - attestationObject
+                              - clientDataJSON
+                            properties:
+                              attestationObject:
+                                type: string
+                              clientDataJSON:
+                                type: string
+                              clientExtensionResults:
+                                type: array
+                                items:
+                                  type: string
+                      uncompressedECPoint:
+                        type: string
+                      publicKeyId:
+                        type: string
                       type:
                         type: string
                         enum:
                           - public-key
-                      id:
+                      status:
                         type: string
-                      response:
+                        enum:
+                          - registered
+                      counter:
+                        type: integer
+                      attestationType:
+                        type: string
+                      signatureAlgorithm:
+                        type: integer
+                      applicationId:
+                        type: string
+                      authenticatorSelection:
                         type: object
-                        required:
-                          - attestationObject
-                          - clientDataJSON
                         properties:
-                          attestationObject:
+                          authenticatorAttachment:
                             type: string
-                          clientDataJSON:
+                            format: enum
+                             - platform
+                             - cross-platform
+                          userVerification:
                             type: string
-                          clientExtensionResults:
-                            type: array
-                            items:
-                              type: string
-                  uncompressedECPoint:
-                    type: string
-                  publicKeyId:
-                    type: string
-                  type:
-                    type: string
-                    enum:
-                      - public-key
-                  status:
-                    type: string
-                    enum:
-                      - registered
-                  counter:
-                    type: integer
-                  attestationType:
-                    type: string
-                  signatureAlgorithm:
-                    type: integer
-                  applicationId:
-                    type: string					
-                  authenticatorSelection:
-                    type: object
-                    properties:
-                      authenticatorAttachment:
-                        type: string
-                        format: enum
-                         - platform
-                         - cross-platform
-                      userVerification:
-                        type: string
-                        format: enum
-                         - required
-                         - preferred
-                         - discouraged
-                      requireResidentKey:
-                        type: boolean
+                            format: enum
+                             - required
+                             - preferred
+                             - discouraged
+                          requireResidentKey:
+                            type: boolean
                   errorMessage:
+                    type: string
+                  status:
                     type: string
         403:
           $ref: '#/components/responses/AccessDenied'

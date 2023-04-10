@@ -1,6 +1,7 @@
 package io.jans.fido2.service.external;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.fido2.service.external.context.ExternalFido2InterceptionContext;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
@@ -9,6 +10,8 @@ import io.jans.service.custom.script.ExternalScriptService;
 import jakarta.ejb.DependsOn;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Named;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -88,7 +91,10 @@ public class ExternalFido2InterceptionService extends ExternalScriptService {
             final boolean result = script.interceptRegisterAttestation(params, context);
 
             log.trace("Finished external 'interceptRegisterAttestation' method, script name: {}, context: {}, result: {}", scriptConfiguration.getName(), context, result);
+            context.throwWebApplicationExceptionIfSet();
             return result;
+        } catch (WebApplicationException e) {
+            throw e;
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
             saveScriptError(scriptConfiguration.getCustomScript(), ex);
@@ -103,9 +109,11 @@ public class ExternalFido2InterceptionService extends ExternalScriptService {
             Fido2InterceptionType script = (Fido2InterceptionType) scriptConfiguration.getExternalType();
             context.setScript(scriptConfiguration);
             final boolean result = script.interceptVerifyAttestation(params, context);
-
             log.trace("Finished external 'interceptVerifyAttestation' method, script name: {}, context: {}, result: {}", scriptConfiguration.getName(), context, result);
+            context.throwWebApplicationExceptionIfSet();
             return result;
+        } catch (WebApplicationException e) {
+            throw e;
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
             saveScriptError(scriptConfiguration.getCustomScript(), ex);
@@ -122,7 +130,10 @@ public class ExternalFido2InterceptionService extends ExternalScriptService {
             final boolean result = script.interceptVerifyAssertion(params, context);
 
             log.trace("Finished external 'interceptVerifyAssertion' method, script name: {}, context: {}, result: {}", scriptConfiguration.getName(), context, result);
+            context.throwWebApplicationExceptionIfSet();
             return result;
+        } catch (WebApplicationException e) {
+            throw e;
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
             saveScriptError(scriptConfiguration.getCustomScript(), ex);
@@ -138,7 +149,11 @@ public class ExternalFido2InterceptionService extends ExternalScriptService {
             final boolean result = script.interceptAuthenticateAssertion(params, context);
 
             log.trace("Finished external 'interceptAuthenticateAssertion' method, script name: {}, context: {}, result: {}", scriptConfiguration.getName(), context, result);
+
+            context.throwWebApplicationExceptionIfSet();
             return result;
+        } catch (WebApplicationException e) {
+            throw e;
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
             saveScriptError(scriptConfiguration.getCustomScript(), ex);

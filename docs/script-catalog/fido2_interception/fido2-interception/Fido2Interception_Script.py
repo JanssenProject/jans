@@ -7,7 +7,13 @@
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.model.custom.script.type.auth import Fido2InterceptionType
 from io.jans.fido2.service.operation import AttestationService
+from io.jans.fido2.service.operation import AssertionService
 from io.jans.util import StringHelper
+from io.jans.as.model.error import ErrorResponseFactory
+from jakarta.ws.rs.core import Response
+from io.jans.as.model.authorize import AuthorizeErrorResponseType
+from org.json import JSONObject
+from com.fasterxml.jackson.databind import JsonNode
 
 import java
 
@@ -28,10 +34,20 @@ class Fido2Interception(Fido2InterceptionType):
     def getApiVersion(self):
         return 11
 
+#To generate a bad request WebApplicationException giving a message. This method is to be called inside (interceptRegisterAttestation, interceptVerifyAttestation, interceptAuthenticateAssertion, interceptVerifyAssertion)
+    def throwBadRequestException(self, context, message):
+	errorResponseFactory = CdiUtil.bean(ErrorResponseFactory)
+	errorClaimException = errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, AuthorizeErrorResponseType.INVALID_REQUEST, message)
+	context.setWebApplicationException(errorClaimException); 
+
 #This method is called during Attestation register endpoint, just before to start the registration process
     def interceptRegisterAttestation(self, paramAsJsonNode, context):
 	print "Fido2Interception. interceptRegisterAttestation"
 	attestationService = CdiUtil.bean(AttestationService)
+	
+	# Read paramAsJsonNode as JSONObject
+        json_param = JSONObject(request_string)
+        
         return True
 	
 #This method is called during Attestation verify enpoint, just before to start the verification process	
