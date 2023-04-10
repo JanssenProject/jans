@@ -40,29 +40,26 @@ class Fido2Interception(Fido2InterceptionType):
 	errorClaimException = errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, AuthorizeErrorResponseType.INVALID_REQUEST, message)
 	context.setWebApplicationException(errorClaimException); 
 
-#This method is called during Attestation register endpoint, just before to start the registration process
+#This method is called in Attestation register endpoint, just before to start the registration process
     def interceptRegisterAttestation(self, paramAsJsonNode, context):
 	print "Fido2Interception. interceptRegisterAttestation"
 	attestationService = CdiUtil.bean(AttestationService)
-	
-	# Read paramAsJsonNode as JSONObject
-        json_param = JSONObject(request_string)
-        
+       
         return True
 	
-#This method is called during Attestation verify enpoint, just before to start the verification process	
+#This method is called in Attestation verify enpoint, just before to start the verification process	
     def interceptVerifyAttestation(self, paramAsJsonNode, context):
 	print "Fido2Interception. interceptVerifyAttestation"
 	attestationService = CdiUtil.bean(AttestationService)
         return True
 	
-#This method is called during Assertion authenticate enpoint, just before to start the authentication process		
+#This method is called in Assertion authenticate enpoint, just before to start the authentication process		
     def interceptAuthenticateAssertion(self, paramAsJsonNode, context):
 	print "Fido2Interception. interceptAuthenticateAssertion"
 	assertionService = CdiUtil.bean(AssertionService)
         return True
 	
-#This method is called during Assertion verify enpoint, just before to start the verification process		
+#This method is called in Assertion verify enpoint, just before to start the verification process		
     def interceptVerifyAssertion(self, paramAsJsonNode, context):
 	print "Fido2Interception. interceptVerifyAssertion"
 	assertionService = CdiUtil.bean(AssertionService)
