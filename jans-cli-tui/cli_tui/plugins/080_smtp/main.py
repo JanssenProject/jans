@@ -5,7 +5,8 @@ from typing import Any
 
 import prompt_toolkit
 from prompt_toolkit.eventloop import get_event_loop
-from prompt_toolkit.layout.containers import HSplit, DynamicContainer, VSplit, Window, HorizontalAlign
+from prompt_toolkit.layout.containers import HSplit, DynamicContainer,\
+    VSplit, Window, HorizontalAlign, Window
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.widgets import Frame, Button, Label, Box, Dialog
 from prompt_toolkit.application import Application
@@ -39,8 +40,6 @@ class Plugin(DialogUtils):
         self.edit_container = HSplit([])
         self.prepare_container()
 
-    def process(self) -> None:
-        pass
 
     def init_plugin(self) -> None:
         """The initialization for this plugin
@@ -49,17 +48,42 @@ class Plugin(DialogUtils):
 
     def prepare_container(self):
 
-        self.main_container = HSplit([
+        self.host_widget = self.app.getTitledText(_("SMTP Host"), name='host', style=cli_style.edit_text)
+        self.port_widget = self.app.getTitledText(_("SMTP Port"), name='port', text_type='integer', style=cli_style.edit_text)
+        self.connect_protection_widget = self.app.getTitledRadioButton(
+                    _("Connect Protection"),
+                    name='connect-protection',
+                    values=[(v,v) for v in ('None', 'StartTls', 'SslTls')],
+                    style=cli_style.edit_text
+                    )
+        self.from_name_widget = self.app.getTitledText(_("From Name"), name='from_name', style=cli_style.edit_text)
+        self.from_email_address_widget = self.app.getTitledText(_("From Email Address"), name='from_email_address', style=cli_style.edit_text)
+        self.requires_authentication_widget = self.app.getTitledCheckBox(_("Requires Authentication"), name='requires_authentication', style=cli_style.check_box)
+        self.smtp_authentication_account_username_widget = self.app.getTitledText(_("SMTP User Name"), name='smtp_authentication_account_username', style=cli_style.edit_text)
+        self.smtp_authentication_account_password_widget = self.app.getTitledText(_("SMTP Password"), name='smtp_authentication_account_password', style=cli_style.edit_text)
+        self.trust_host_widget = self.app.getTitledCheckBox(_("Trust Server"), name='trust_host', style=cli_style.edit_text)
 
-                        self.app.getTitledText(_("SMTP Host"), name='host', style=cli_style.edit_text),
-                        self.app.getTitledText(_("SMTP Port"), name='port', text_type='integer', style=cli_style.edit_text),
-                        self.app.getTitledCheckBox(_("Reqire SSL"), name='requires_ssl', style=cli_style.edit_text),
-                        self.app.getTitledText(_("From Name"), name='from_name', style=cli_style.edit_text),
-                        self.app.getTitledText(_("From Email Address"), name='from_email_address', style=cli_style.edit_text),
-                        self.app.getTitledCheckBox(_("Requires Authentication"), name='requires_authentication', style=cli_style.check_box),
-                        self.app.getTitledText(_("SMTP User Name"), name='user_name', style=cli_style.edit_text),
-                        self.app.getTitledText(_("SMTP Password"), name='password', style=cli_style.edit_text),
-                        self.app.getTitledCheckBox(_("Trust Server"), name='trust_host', style=cli_style.edit_text),
+        self.key_store_widget = self.app.getTitledText(_("Keystore"), name='key-store', style=cli_style.edit_text)
+        self.key_store_password_widget = self.app.getTitledText(_("Keystore Password"), name='key-store-password', style=cli_style.edit_text)
+        self.key_store_alias_widget = self.app.getTitledText(_("Keystore Alias"), name='key-store-alias', style=cli_style.edit_text)
+        self.signing_algorithm_widget = self.app.getTitledText(_("Keystore Signing Alg"), name='signing-algorithm', style=cli_style.edit_text)
+
+
+        self.main_container = HSplit([
+                        self.host_widget,
+                        self.port_widget,
+                        self.connect_protection_widget,
+                        self.from_name_widget,
+                        self.from_email_address_widget,
+                        self.requires_authentication_widget,
+                        self.smtp_authentication_account_username_widget,
+                        self.smtp_authentication_account_password_widget,
+                        self.trust_host_widget,
+                        Window(height=1),
+                        self.key_store_widget,
+                        self.key_store_password_widget,
+                        self.key_store_alias_widget,
+                        self.signing_algorithm_widget,
                         VSplit([
                                 Button(_("Save"), handler=self.save_config),
                                 Button(_("Test"), handler=self.test_config),
@@ -77,19 +101,25 @@ class Plugin(DialogUtils):
         self.app.stop_progressing()
         self.data = response.json()
 
-        for item in self.main_container.children:
-            if hasattr(item, 'me'):
-                if isinstance(item.me, prompt_toolkit.widgets.base.TextArea):
-                    item.me.text = str(self.data.get(item.me.window.jans_name, ''))
-                elif isinstance(item.me, prompt_toolkit.widgets.base.Checkbox):
-                    item.me.checked = self.data.get(item.me.window.jans_name, '')
+        self.host_widget.me.text = self.data.get('host', '')
+        self.port_widget.me.text = str(self.data.get('port', ''))
+        self.connect_protection_widget.me.value = self.data.get('connect-protection', '')
+        self.from_name_widget.me.text = self.data.get('from_name', '')
+        self.from_email_address_widget.me.text = self.data.get('from_email_address', '')
+        self.requires_authentication_widget.me.checked = self.data.get('requires_authentication', False)
+        self.smtp_authentication_account_username_widget.me.text = self.data.get('smtp_authentication_account_username', '')
+        self.smtp_authentication_account_password_widget.me.text = self.data.get('smtp_authentication_account_password', '')
+        self.trust_host_widget.me.checked = self.data.get('trust_host', False)
 
+        self.key_store_widget.me.text = self.data.get('key-store', '')
+        self.key_store_password_widget.me.text = self.data.get('key-store-password', '')
+        self.key_store_alias_widget.me.text = self.data.get('key-store-alias', '')
+        self.signing_algorithm_widget.me.text = self.data.get('signing-algorithm', '')
 
     def save_config(self) -> None:
         """This method saves STMP configuration
         """
-        new_data = self.make_data_from_dialog(tabs={'smtp': self.main_container})
-        self.data.update(new_data)
+        self.data = self.make_data_from_dialog(tabs={'smtp': self.main_container})
 
         operation_id = 'put-config-smtp'
 
@@ -98,6 +128,7 @@ class Plugin(DialogUtils):
             self.app.start_progressing(_("Saving SMTP Configuration..."))
             await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
             self.app.stop_progressing(_("SMTP Configuration was saved."))
+            await self.get_smtp_config()
 
         asyncio.ensure_future(coroutine())
 
@@ -107,16 +138,11 @@ class Plugin(DialogUtils):
         """
         new_data = self.make_data_from_dialog(tabs={'smtp': self.main_container})
 
-        open("/tmp/a.txt", "w").write(str(new_data)+'\n')
-
         async def coroutine():
             cli_args = {'operation_id': 'test-config-smtp', 'data': new_data}
             self.app.start_progressing(_("Testing SMTP Configuration..."))
             response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
             self.app.stop_progressing(_("SMTP Configuration test was completed."))
-            open("/tmp/a.txt", "a").write(str(response.status_code)+'\n')
-            open("/tmp/a.txt", "a").write(str(response.text)+'\n')
-
 
         asyncio.ensure_future(coroutine())
 
