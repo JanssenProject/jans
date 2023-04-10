@@ -350,7 +350,7 @@
     },
     "loggingLevel": "TRACE",
     "loggingLayout": "text",
-    "errorHandlingMethod":"internal",
+    "errorHandlingMethod":"remote",
     "useLocalCache":true,
     "backchannelTokenDeliveryModesSupported": [
         "poll",

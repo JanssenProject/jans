@@ -519,7 +519,7 @@ It returns all the information of the Jans Authorization server.
     "delayTime": 2,
     "bruteForceProtectionEnabled": false
   },
-  "errorHandlingMethod": "internal",
+  "errorHandlingMethod": "remote",
   "keepAuthenticatorAttributesOnAcrChange": false,
   "deviceAuthzRequestExpiresIn": 1800,
   "deviceAuthzTokenPollInterval": 5,

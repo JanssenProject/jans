@@ -3,6 +3,7 @@ tags:
   - administration
   - installation
   - helm
+  - rancher
 ---
 
 # Install Janssen Server Using Rancher Marketplace
