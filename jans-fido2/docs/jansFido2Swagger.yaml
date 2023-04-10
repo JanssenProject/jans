@@ -103,17 +103,16 @@ paths:
               required:
                 - username
               properties:
-                properties:
-                  username:
-                    type: string
-                  userVerification:
-                    type: string
-                  documentDomain:
-                    type: string
-                  extensions:
-                    type: string
-                  session_id:
-                    type: string
+                username:
+                  type: string
+                userVerification:
+                  type: string
+                documentDomain:
+                  type: string
+                extensions:
+                  type: string
+                session_id:
+                  type: string
       responses:
         200:
           description: OK
@@ -146,7 +145,7 @@ paths:
                   userVerification:
                     type: string
                   extensions:
-                    type: string
+                    type: object
                   rpId:
                     type: string
                     description: Document domain.
@@ -406,6 +405,8 @@ paths:
                   type: string
                 timeout:
                   type: integer
+                extensions:
+                  type: object
                 authenticatorSelection:
                   type: object
                   properties:
@@ -696,7 +697,7 @@ paths:
           description: Session to be validated.
           schema:
             type: string
-        - name: enrrollment_code
+        - name: enrollment_code
           in: query
           required: true
           description: .
