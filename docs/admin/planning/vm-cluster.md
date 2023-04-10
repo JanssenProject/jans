@@ -2,6 +2,8 @@
 tags:
   - administration
   - planning
+  - vm
+  - cluster
 ---
 
 What if you need four or five nines availability, but cloud native is not
