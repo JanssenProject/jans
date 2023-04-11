@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#overview" class="md-skip">
+        <a href="#inbound-openid-connect-authentication" class="md-skip">
           Skip to content
         </a>
       
@@ -6560,6 +6560,8 @@
       <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
       
       
+        
+      
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
           Inbound OIDC
@@ -6576,19 +6578,14 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
       Table of contents
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
-    Overview
-  </a>
-  
-</li>
       
         <li class="md-nav__item">
   <a href="#authentication-flow" class="md-nav__link">
@@ -7244,19 +7241,14 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
       Table of contents
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
-    Overview
-  </a>
-  
-</li>
       
         <li class="md-nav__item">
   <a href="#authentication-flow" class="md-nav__link">
@@ -7321,6 +7313,35 @@
                   
   
 
+  <nav class="md-tags" >
+    
+      
+      
+        <span class="md-tag">administration</span>
+      
+    
+      
+      
+        <span class="md-tag">recipe</span>
+      
+    
+      
+      
+        <span class="md-tag">openid-connect</span>
+      
+    
+      
+      
+        <span class="md-tag">inbound</span>
+      
+    
+      
+      
+        <span class="md-tag">authentication</span>
+      
+    
+  </nav>
+
 
 
   <a href="https://github.com/JanssenProject/jans/edit/main/docs/admin/recipes/inbound-oidc.md" title="Edit this page" class="md-content__button md-icon">
@@ -7329,9 +7350,7 @@
   </a>
 
 
-  <h1>Inbound OIDC</h1>
-
-<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">#</a></h2>
+<h1 id="inbound-openid-connect-authentication">Inbound OpenId-Connect Authentication<a class="headerlink" href="#inbound-openid-connect-authentication" title="Permanent link">#</a></h1>
 <p>In this tutorial, we will see how you can integrate any inbound external oauth2 provider authentication in the Janssen server. If you are looking for social login support then check out <a href="../passportjs/">passport</a> module for that.</p>
 <p>We will use <a href="../../../script-catalog/person_authentication/oidc/oidc-jans-script.py">interception authentication script</a> which is a <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/auth/PersonAuthenticationType.java">PersonAuthenticationType</a> script for whole flow. Currently, It supports <code>Authorization Code Flow</code> and <code>client_secret_post</code> token endpoint auth method.</p>
 <h2 id="authentication-flow">Authentication Flow<a class="headerlink" href="#authentication-flow" title="Permanent link">#</a></h2>
@@ -7517,7 +7536,7 @@ rp-&gt;&gt;browser: Page is accessed</code></pre>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-10-04T15:58:15+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-10-04</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-04-11T07:54:01+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-04-11</span>
       
         <br>
         Created:
