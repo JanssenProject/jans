@@ -3936,7 +3936,7 @@ paths:
     get:
       tags:
       - Custom Scripts
-      summary: Fetch custom script by name
+      summary: Gets a list of custom scripts
       description: Gets a list of custom scripts
       operationId: get-config-scripts
       parameters:
@@ -7929,19 +7929,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
+        whitePagesCanView:
+          type: boolean
+        userCanEdit:
+          type: boolean
         adminCanView:
           type: boolean
         userCanAccess:
           type: boolean
-        adminCanAccess:
-          type: boolean
         userCanView:
           type: boolean
-        userCanEdit:
+        adminCanAccess:
           type: boolean
         adminCanEdit:
-          type: boolean
-        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -8682,8 +8682,6 @@ components:
           type: object
           additionalProperties:
             type: string
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8693,6 +8691,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
         clientAuthMapSchema:
           type: object
           additionalProperties:
@@ -9335,17 +9335,6 @@ components:
           format: int32
         displayName:
           type: string
-        authenticationMethod:
-          type: string
-          enum:
-          - client_secret_basic
-          - client_secret_post
-          - client_secret_jwt
-          - private_key_jwt
-          - access_token
-          - tls_client_auth
-          - self_signed_tls_client_auth
-          - none
         allAuthenticationMethods:
           uniqueItems: true
           type: array
@@ -9360,6 +9349,17 @@ components:
             - tls_client_auth
             - self_signed_tls_client_auth
             - none
+        authenticationMethod:
+          type: string
+          enum:
+          - client_secret_basic
+          - client_secret_post
+          - client_secret_jwt
+          - private_key_jwt
+          - access_token
+          - tls_client_auth
+          - self_signed_tls_client_auth
+          - none
         baseDn:
           type: string
         inum:
@@ -9481,10 +9481,10 @@ components:
           type: array
           items:
             type: object
-        value:
-          type: object
         displayValue:
           type: string
+        value:
+          type: object
         clientAuthMapSchema:
           type: object
           additionalProperties:
@@ -9652,8 +9652,6 @@ components:
     SmtpConfiguration:
       type: object
       properties:
-        valid:
-          type: boolean
         connectProtectionList:
           type: array
           items:
@@ -9662,6 +9660,8 @@ components:
             - None
             - StartTls
             - SslTls
+        valid:
+          type: boolean
         host:
           type: string
         port:
