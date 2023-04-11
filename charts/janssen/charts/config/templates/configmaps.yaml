@@ -36,6 +36,19 @@ data:
   CN_GOOGLE_SECRET_NAME_PREFIX: {{ .Values.configmap.cnGoogleSecretNamePrefix | quote }}
   # [google_secret_manager_envs] END
   {{- end }}
+  # [aws_envs] Envs related to using AWS
+  {{ if eq .Values.global.configSecretAdapter "aws" }}
+  {{- if .Values.configmap.cnAwsSecretsEndpointUrl }}  
+  CN_AWS_SECRETS_ENDPOINT_URL: {{ .Values.configmap.cnAwsSecretsEndpointUrl }}
+  {{- end }}
+  CN_AWS_SECRETS_PREFIX: {{ .Values.configmap.cnAwsSecretsNamePrefix }}
+  CN_AWS_SECRETS_REPLICA_FILE: {{ .Values.global.cnAwsSecretsReplicaRegionsFile }}
+  AWS_DEFAULT_REGION: {{ .Values.configmap.cnAwsDefaultRegion }}
+  AWS_SHARED_CREDENTIALS_FILE: {{ .Values.global.cnAwsSharedCredentialsFile }}
+  AWS_CONFIG_FILE: {{ .Values.global.cnAwsConfigFile }}
+  #AWS_PROFILE
+  # [aws_envs] END
+  {{- end }}
   CN_SQL_DB_SCHEMA: {{ .Values.configmap.cnSqlDbSchema | quote }}
   CN_SQL_DB_DIALECT: {{ .Values.configmap.cnSqlDbDialect }}
   CN_SQL_DB_HOST: {{ .Values.configmap.cnSqlDbHost }}

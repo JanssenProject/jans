@@ -173,6 +173,7 @@ nav:
         - 'Customization': 'admin/kubernetes-ops/customization.md'
         - 'Start Order': 'admin/kubernetes-ops/start-order.md'
         - 'Logs': 'admin/kubernetes-ops/logs.md'
+        - 'External Secrets and Configmaps': 'admin/kubernetes-ops/external-secrets-configmaps.md'
         - 'Health Check': 'admin/kubernetes-ops/health-check.md'
 #        - 'FAQ': 'admin/kubernetes-ops/faq.md'
     - 'VM Operation Guide':
