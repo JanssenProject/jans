@@ -30,32 +30,28 @@ def getIndexes(cursorObject, database, table):
     return indexes  # returns a list of tuples   [('index1',), ('index2',), ('index3',)]
 
 
-def printTables(cursorObject, database, tables):
-    for table in tables:
-        print("\n**" + table[0] + "**")
-        print("|Field|Type|Null|Key|Default|Extra|")
-        print("|-|-|-|-|-|-|")  # Markdown table header row separator
-        fields = getTableFields(cursorObject, database, table[0])  # get the fields for the table
-        for field in fields:
-            print("|" + "|".join(map(str, field)))
-
-
-def printIndexes(cursorObject, database, tables):
-    for table in tables:
-        print("\n**" + table[0] + "**")
-        indexes = getIndexes(cursorObject, database, table[0])
-        print(
-            "|Table|Non_unique|Key_name|Seq_in_index|Column_name|Collation|Cardinality|Sub_part|Packed|Null|Index_type"
-            "|Comment| Index_comment | Visible | Expression|")
-        print("|-|-|-|-|-|-|-|-|-|-|-|-| - | - | -|")
-        for index in indexes:
-            print("|" + "|".join(map(str, index)))
-
-
-def writeToFile(fileName, data):
+def printTables(fileName, cursorObject, database, tables):
     with open(fileName, 'w') as f:
-        f.write(data)
+        for table in tables:
+            f.write("\n**" + table[0] + "**")
+            f.write("|Field|Type|Null|Key|Default|Extra|")
+            f.write("|-|-|-|-|-|-|")  # Markdown table header row separator
+            fields = getTableFields(cursorObject, database, table[0])  # get the fields for the table
+            for field in fields:
+                f.write("|" + "|".join(map(str, field)))
 
+
+def printIndexes(fileName, cursorObject, database, tables):
+    with open(fileName, 'w') as f:
+        for table in tables:
+            f.write("\n**" + table[0] + "**")
+            indexes = getIndexes(cursorObject, database, table[0])
+            f.write(
+                "|Table|Non_unique|Key_name|Seq_in_index|Column_name|Collation|Cardinality|Sub_part|Packed|Null|Index_type"
+                "|Comment| Index_comment | Visible | Expression|")
+            f.write("|-|-|-|-|-|-|-|-|-|-|-|-| - | - | -|")
+            for index in indexes:
+                f.write("|" + "|".join(map(str, index)))
 
 def main():
     serverIP = sys.argv[1] or "localhost"
@@ -68,8 +64,8 @@ def main():
 
     cursorObject = connectToMySQL(serverIP, serverUser, serverUserPwd, database, characterSet)
     tables = getTables(cursorObject, database)
-    writeToFile(schemaFileName, printTables(cursorObject, database, tables))
-    writeToFile(schemaIndexesFileName, printIndexes(cursorObject, database, tables))
+    printTables(schemaFileName, cursorObject, database, tables)
+    printIndexes(schemaIndexesFileName, cursorObject, database, tables)
 
 
 if __name__ == '__main__':
