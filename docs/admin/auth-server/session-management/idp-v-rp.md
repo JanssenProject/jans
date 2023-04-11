@@ -5,7 +5,7 @@ tags:
   - session
 ---
 
-## IDP versus RP session
+# IDP versus RP session
 
 Applications generally have their own session cookie (the "RP Session").
 This makes sense, because the RP only redirects to the IDP for authentication

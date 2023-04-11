@@ -3,7 +3,12 @@ tags:
   - administration
   - reference
   - database
+  - ldap
+  - schema
 ---
+
+# LDAP Schema
+
 |DN |
 |-|
 |o=jans|

@@ -4,6 +4,7 @@ tags:
   - configuration
   - cli
   - commandline
+  - couchbase
 ---
 
 # Couchbase Database Configuration

@@ -4,6 +4,7 @@ tags:
   - configuration
   - cli
   - commandline
+  - uma
 ---
 
 # UMA Resources
