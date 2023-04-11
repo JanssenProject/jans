@@ -7354,8 +7354,9 @@
 </ul>
 <h2 id="install-the-package">Install the Package<a class="headerlink" href="#install-the-package" title="Permanent link">#</a></h2>
 <ul>
-<li>The firewall in SUSE is on by default. Make sure to disable it during installation. </li>
+<li>If the server firewall is running, make sure to disable it during installation. </li>
 </ul>
+<p>For example:</p>
 <div class="highlight"><pre><span></span><code>firewall-cmd --permanent --zone=public --add-service=https
 firewall-cmd --reload
 </code></pre></div>
@@ -7450,7 +7451,7 @@ Removing /etc/apache2/sites-available/https_jans.conf
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-04-11T07:54:01+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-04-11</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-04-11T18:49:35+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-04-11</span>
       
         <br>
         Created:
