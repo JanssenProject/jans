@@ -3,6 +3,7 @@ tags:
   - administration
   - auth-server
   - token
+  - id-token
 ---
 
 ## OpenID Connect ID Token
