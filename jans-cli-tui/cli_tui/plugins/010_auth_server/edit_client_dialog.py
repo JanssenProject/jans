@@ -204,8 +204,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
         for scope_dn in self.data.get('scopes', []):
             scope = self.get_scope_by_inum(scope_dn)
             if scope:
-                label = scope.get('displayName') or scope.get(
-                    'inum') or scope_dn
+                label = scope['id']
                 if [scope_dn, label] not in self.client_scopes_entries:
                     self.client_scopes_entries.append([scope_dn, label])
                     if hasattr(self, 'client_scopes'):
