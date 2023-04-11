@@ -143,10 +143,9 @@ style = Style.from_dict(
         "scim-widget": "bg:black fg:white",
         
         ### table
-        "table-white": "fg:ansiblack bg:ansiwhite",
-        "table-white cursor-line": "nounderline bg:Lavender fg:ansiblack",
-        "table-black": "fg:ansiwhite bg:ansiblack",
-        "table-black cursor-line": "nounderline bg:#0a0a0a fg:ansiwhite",
+        "table-white-header": "nounderline bold fg:ansiblack bg:White",
+        "table-white-data": "nounderline fg:ansiblack bg:LightGray",
+        "table-white-bg": "nounderline bg:ansiwhite",
 
         # dialog
         'dialog':             'bg:#4444ff',

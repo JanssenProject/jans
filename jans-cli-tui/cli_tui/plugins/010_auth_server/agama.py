@@ -11,7 +11,7 @@ from prompt_toolkit.eventloop import get_event_loop
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.lexers import PygmentsLexer, DynamicLexer
 
-from prompt_toolkit.layout.containers import HSplit, VSplit, DynamicContainer
+from prompt_toolkit.layout.containers import HSplit, VSplit, DynamicContainer, Window
 from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.formatted_text import HTML
 from prompt_toolkit.widgets import Button, Label, TextArea, Box
@@ -186,6 +186,9 @@ class Agama(DialogUtils):
             self.app.show_jans_dialog(dialog)
 
 
+        if not project_data.get('finishedAt'):
+            asyncio.ensure_future(self.get_projects_coroutine())
+
         asyncio.ensure_future(coroutine())
 
 
@@ -240,26 +243,28 @@ class Agama(DialogUtils):
 
         self.app.layout.focus(self.working_container)
 
+
+    async def get_projects_coroutine(self, search_str=''):
+        cli_args = {'operation_id': 'get-agama-dev-prj'}
+        self.app.start_progressing(_("Retreiving agama projects..."))
+        response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+        self.app.stop_progressing()
+        try:
+            self.data = response.json()
+        except Exception:
+            self.app.show_message(_(common_strings.error), HTML(_("Server reterned non json data <i>{}</i>").format(response.text)), tobefocused=self.app.center_container)
+            return
+
+        if not 'entriesCount' in self.data:
+            self.app.show_message(_(common_strings.error), HTML(_("Server reterned unexpected data <i>{}</i>").format(self.data)), tobefocused=self.app.center_container)
+            return
+
+        self.working_container.all_data = self.data.get('entries', [])
+        self.update_agama_container(search_str=search_str)
+
+
     def get_agama_projects(self, search_str=''):
-        async def coroutine():
-            cli_args = {'operation_id': 'get-agama-dev-prj'}
-            self.app.start_progressing(_("Retreiving agama projects..."))
-            response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-            self.app.stop_progressing()
-            try:
-                self.data = response.json()
-            except Exception:
-                self.app.show_message(_(common_strings.error), HTML(_("Server reterned non json data <i>{}</i>").format(response.text)), tobefocused=self.app.center_container)
-                return
-
-            if not 'entriesCount' in self.data:
-                self.app.show_message(_(common_strings.error), HTML(_("Server reterned unexpected data <i>{}</i>").format(self.data)), tobefocused=self.app.center_container)
-                return
-
-            self.working_container.all_data = self.data.get('entries', [])
-            self.update_agama_container(search_str=search_str)
-
-        asyncio.ensure_future(coroutine())
+        asyncio.ensure_future(self.get_projects_coroutine(search_str))
 
     def upload_project(self):
 
@@ -352,15 +357,6 @@ class Agama(DialogUtils):
     def display_details(self,  **params: Any) -> None:
         project_name = params['data']['details']['projectMetadata'].get('projectName')
 
-        def display_error(**params):
-            body = HSplit([
-                    self.app.getTitledText(title=_("Flow"), value=params['data'][0], name='flow', read_only=True),
-                    self.app.getTitledText(title=_("Error"), value=params['data'][1], name='flow', read_only=True, focusable=True, scrollbar=True, height=3),
-                    ])
-            dialog = JansGDialog(self.app, body=body, title=_("Error Details"), buttons=[Button(_("Close"))], width=self.app.dialog_width-6)
-            self.app.show_jans_dialog(dialog)
-
-
         async def coroutine():
             cli_args = {'operation_id': 'get-agama-dev-studio-prj-by-name', 'url_suffix': 'name:{}'.format(project_name)}
             self.app.start_progressing(_("Retrieving details for project {}".format(project_name)))
@@ -370,23 +366,24 @@ class Agama(DialogUtils):
             if response.status_code == 200:
 
                 result = response.json()
+                project_metadata = result['details']['projectMetadata']
                 body_widgets = [
-                        self.app.getTitledText(title=_("Description"), value=result['details']['projectMetadata'].get('description','-'), name='description', read_only=True, height=2),
+                        self.app.getTitledText(title=_("Version"), value=project_metadata.get('version','-'), name='version', read_only=True),
+                        self.app.getTitledText(title=_("Description"), value=project_metadata.get('description','-'), name='description', read_only=True, height=2),
                         self.app.getTitledText(title=_("Deployed started on"), value=result['createdAt'], name='createdAt', read_only=True),
                         self.app.getTitledText(title=_("Deployed finished on"), value=result['finishedAt'], name='finishedAt', read_only=True),
-                        self.app.getTitledText(title=_("Error"), value=result['details'].get('error') or "No", name='error', read_only=True),
+                        self.app.getTitledText(title=_("Errors"), value=result['details'].get('error') or "No", name='error', read_only=True),
+                        Window(height=1)
                     ]
 
-                flow_errors = result['details'].get('flowsError')
+                flow_errors = result['details'].get('flowsError', {})
 
-                if flow_errors:
-                    jans_table = JansTableWidget(
-                        app=self.app,
-                        data=list(flow_errors.items()),
-                        headers=["Flow", "Error"],
-                        on_display=display_error
-                        )
-                    body_widgets.append(jans_table)
+                jans_table = JansTableWidget(
+                    app=self.app,
+                    data=list(flow_errors.items()),
+                    headers=["Flow", "Error"],
+                    )
+                body_widgets.append(jans_table)
 
                 buttons = [Button(_("Close"))]
                 dialog = JansGDialog(self.app, body=HSplit(body_widgets), title=_("Details of project {}").format(project_name), buttons=buttons)
@@ -397,6 +394,8 @@ class Agama(DialogUtils):
                 self.app.show_message(_(common_strings.info), _("Project {} is still being deployed. Try again in 1 minute.").format(project_name), tobefocused=self.working_container)
 
         if project_name:
+            if params['selected'][3] == _("Pending"):
+                asyncio.ensure_future(self.get_projects_coroutine())
             asyncio.ensure_future(coroutine())
-
+            
 
