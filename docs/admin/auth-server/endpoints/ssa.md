@@ -1,12 +1,10 @@
 ---
-"org_id": "test-org-id",
 tags:
 
 - administration
 - auth-server
 - SSA
 - endpoint
-
 ---
 
 # Software Statement Assertion (SSA)
