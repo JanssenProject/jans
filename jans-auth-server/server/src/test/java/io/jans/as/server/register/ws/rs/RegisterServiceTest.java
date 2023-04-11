@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Sets;
 import io.jans.as.common.service.AttributeService;
+import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
@@ -60,6 +61,80 @@ public class RegisterServiceTest {
 
         final Set<ResponseType> result = registerService.identifyResponseTypes(new ArrayList<>(), new ArrayList<>());
         assertTrue(result.contains(ResponseType.CODE));
+    }
+
+    @Test
+    public void identifyResponseType_whenResponseTypeIsNotSupported_shouldRemoveIt() {
+        when(appConfiguration.getAllResponseTypesSupported()).thenReturn(Sets.newHashSet());
+
+        final Set<ResponseType> result = registerService.identifyResponseTypes(new ArrayList<>(), new ArrayList<>());
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void identifyResponseType_whenResponseTypeIsAbsentButAutofixEnabledForAuthorizationCode_shouldFix() {
+        when(appConfiguration.getAllResponseTypesSupported()).thenReturn(Sets.newHashSet(ResponseType.values()));
+        when(appConfiguration.getGrantTypesAndResponseTypesAutofixEnabled()).thenReturn(true);
+
+        final Set<ResponseType> result = registerService.identifyResponseTypes(new ArrayList<>(), Lists.newArrayList(GrantType.AUTHORIZATION_CODE));
+        assertTrue(result.contains(ResponseType.CODE));
+    }
+
+    @Test
+    public void identifyResponseType_whenResponseTypeIsAbsentButAutofixEnabledForToken_shouldFix() {
+        when(appConfiguration.getAllResponseTypesSupported()).thenReturn(Sets.newHashSet(ResponseType.values()));
+        when(appConfiguration.getGrantTypesAndResponseTypesAutofixEnabled()).thenReturn(true);
+
+        final Set<ResponseType> result = registerService.identifyResponseTypes(new ArrayList<>(), Lists.newArrayList(GrantType.IMPLICIT));
+        assertTrue(result.contains(ResponseType.TOKEN));
+    }
+
+    @Test
+    public void identifyGrantType_whenGrantTypeIsBlank_shouldFallbackToCodeValue() {
+        when(appConfiguration.getGrantTypesSupported()).thenReturn(Sets.newHashSet(GrantType.values()));
+        when(appConfiguration.getDynamicGrantTypeDefault()).thenReturn(Sets.newHashSet(GrantType.values()));
+
+        final Set<GrantType> result = registerService.identifyGrantTypes(new ArrayList<>(), new ArrayList<>());
+        assertTrue(result.contains(GrantType.AUTHORIZATION_CODE));
+    }
+
+    @Test
+    public void identifyGrantType_whenGrantTypeIsNotSupported_shouldRemoveIt() {
+        when(appConfiguration.getGrantTypesSupported()).thenReturn(Sets.newHashSet());
+        when(appConfiguration.getDynamicGrantTypeDefault()).thenReturn(Sets.newHashSet(GrantType.values()));
+
+        final Set<GrantType> result = registerService.identifyGrantTypes(new ArrayList<>(), new ArrayList<>());
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void identifyGrantType_whenGrantTypeIsAbsentButAutofixEnabledForAuthorizationCode_shouldFix() {
+        when(appConfiguration.getGrantTypesSupported()).thenReturn(Sets.newHashSet(GrantType.values()));
+        when(appConfiguration.getDynamicGrantTypeDefault()).thenReturn(Sets.newHashSet(GrantType.values()));
+        when(appConfiguration.getGrantTypesAndResponseTypesAutofixEnabled()).thenReturn(true);
+
+        final Set<GrantType> result = registerService.identifyGrantTypes(Lists.newArrayList(ResponseType.CODE), new ArrayList<>());
+        assertTrue(result.contains(GrantType.AUTHORIZATION_CODE));
+    }
+
+    @Test
+    public void identifyGrantType_whenGrantTypeIsAbsentButAutofixEnabledForToken_shouldFix() {
+        when(appConfiguration.getGrantTypesSupported()).thenReturn(Sets.newHashSet(GrantType.values()));
+        when(appConfiguration.getDynamicGrantTypeDefault()).thenReturn(Sets.newHashSet(GrantType.values()));
+        when(appConfiguration.getGrantTypesAndResponseTypesAutofixEnabled()).thenReturn(true);
+
+        final Set<GrantType> result = registerService.identifyGrantTypes(Lists.newArrayList(ResponseType.TOKEN), new ArrayList<>());
+        assertTrue(result.contains(GrantType.IMPLICIT));
+    }
+
+    @Test
+    public void identifyGrantType_whenGrantTypeIsAbsentButAutofixEnabledForIdToken_shouldFix() {
+        when(appConfiguration.getGrantTypesSupported()).thenReturn(Sets.newHashSet(GrantType.values()));
+        when(appConfiguration.getDynamicGrantTypeDefault()).thenReturn(Sets.newHashSet(GrantType.values()));
+        when(appConfiguration.getGrantTypesAndResponseTypesAutofixEnabled()).thenReturn(true);
+
+        final Set<GrantType> result = registerService.identifyGrantTypes(Lists.newArrayList(ResponseType.ID_TOKEN), new ArrayList<>());
+        assertTrue(result.contains(GrantType.IMPLICIT));
     }
 
     @Test
