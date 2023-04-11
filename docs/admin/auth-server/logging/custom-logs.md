@@ -3,6 +3,7 @@ tags:
   - administration
   - auth-server
   - logging
+  - custom-logs
 ---
 
 ## This content is in progress

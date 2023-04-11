@@ -2,7 +2,8 @@
 tags:
   - administration
   - auth-server
-  - token
+  - oauth
+  - refresh-token
 ---
 
 ## Background

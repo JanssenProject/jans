@@ -1,3 +1,11 @@
+---
+tags:
+  - governance
+  - copyrights
+---
+
+# Copyrights
+
 ## Ownership of Copyrights in Janssen Project Contributions
 
 When source code, documentation and other content is contributed to the Janssen Project, the copyrights in those contributions remain owned by the original
