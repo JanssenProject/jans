@@ -94,10 +94,16 @@ public class MailService {
         mc.addMailcap("multipart/*;; x-java-content-handler=com.sun.mail.handlers.multipart_mixed");
         mc.addMailcap("message/rfc822;; x-java-content- handler=com.sun.mail.handlers.message_rfc822");
 
-        String keystoreFile = smtpConfiguration.getKeyStore();
-        String keystoreSecret = smtpConfiguration.getKeyStorePasswordDecrypted();
-
         try {
+            String keystoreFile = smtpConfiguration.getKeyStore();
+            String keystoreSecret = smtpConfiguration.getKeyStorePasswordDecrypted();
+            String keystoreAlias = smtpConfiguration.getKeyStoreAlias();
+            String keystoreSigningAlgorithm = smtpConfiguration.getSigningAlgorithm();
+
+            if(keystoreFile == null || keystoreSecret == null || keystoreAlias == null || keystoreSigningAlgorithm == null) {
+                return;
+            }
+
             SecurityProviderUtility.KeyStorageType keystoreType = SecurityProviderUtility.solveKeyStorageType(keystoreFile);
 
             InputStream is = new FileInputStream(keystoreFile);
@@ -118,15 +124,15 @@ public class MailService {
             }
             keyStore.load(is, keystoreSecret.toCharArray());
             Certificate[] certificates = null;
-            privateKey = (PrivateKey)keyStore.getKey(smtpConfiguration.getKeyStoreAlias(), smtpConfiguration.getKeyStorePasswordDecrypted().toCharArray());
-            certificates = keyStore.getCertificateChain(smtpConfiguration.getKeyStoreAlias());
+            privateKey = (PrivateKey)keyStore.getKey(keystoreAlias, keystoreSecret.toCharArray());
+            certificates = keyStore.getCertificateChain(keystoreAlias);
             if (certificates != null) {
                 x509Certificates = new X509Certificate[certificates.length];
                 for (int i = 0; i < certificates.length; i++) {
                     x509Certificates[i] = (X509Certificate)certificates[i];
                 }
             }
-            isReadyForSign = (privateKey != null && x509Certificates != null && smtpConfiguration.getSigningAlgorithm() != null);             
+            isReadyForSign = (privateKey != null && x509Certificates != null && keystoreSigningAlgorithm != null);
         }
         catch (Exception ex) {
             isReadyForSign = false;
