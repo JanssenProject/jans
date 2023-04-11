@@ -7310,46 +7310,11 @@ Casa can be installed using the command below.  </p>
 </li>
 <li>
 <p><a href="https://github.com/maduvena/jans-docs/wiki/Enabling-an-authentication-mechanism-(or-custom-script)">Enable authentication mechanisms</a> in Jan-auth server like <code>otp</code>, <code>fido2</code>, <code>email_otp</code>.</p>
-<div class="highlight"><pre><span></span><code>python3 /opt/jans/jans-setup/setup.py -enable-script<span class="o">=</span><span class="s2">&quot;&lt;inum_of_script&gt;&quot;</span>
-</code></pre></div>
-<table>
-<thead>
-<tr>
-<th>Inum</th>
-<th>displayName</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>09A0-93D7</td>
-<td>smpp</td>
-</tr>
-<tr>
-<td>5018-D4BF</td>
-<td>otp</td>
-</tr>
-<tr>
-<td>5018-F9CF</td>
-<td>duo</td>
-</tr>
-<tr>
-<td>8BAF-80D7</td>
-<td>fido2</td>
-</tr>
-<tr>
-<td>92F0-BF9E</td>
-<td>super_gluu</td>
-</tr>
-<tr>
-<td>09A0-93D6</td>
-<td>twilio_sms</td>
-</tr>
-</tbody>
-</table>
-<p>When successfully enabled, you should see a confirmation message similar to the one below on console:</p>
-<div class="highlight"><pre><span></span><code>Please wait while collecting properties...
-Enabling scripts 5018-D4BF
-</code></pre></div>
+</li>
+<li>launch jans-cli-tui to enable scripts in Jans-auth server</li>
+<li>
+<p>search for script, open script and navigate to enable section and press enter at enable then press save.
+<img alt="image" src="https://user-images.githubusercontent.com/5729240/219859903-97e863d6-3e49-40ff-92e4-3f95d1d56018.png" /></p>
 </li>
 <li>
 <p>Login to the Casa portal as an administrator</p>
@@ -7370,7 +7335,7 @@ Enabling scripts 5018-D4BF
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-04-11T07:54:01+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-04-11</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-04-11T19:56:24+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-04-11</span>
       
         <br>
         Created:
