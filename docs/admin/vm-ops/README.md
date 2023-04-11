@@ -5,7 +5,7 @@ tags:
   - operations
 ---
 
-# Overview
+# Janssen VM Operations Guide
 
 While fancy container orchestrated deployments are all the rage, there are still
 lots of reasons to deploy Janssen on a good, old-fashioned, virtual machine,

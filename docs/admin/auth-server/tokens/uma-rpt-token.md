@@ -3,6 +3,7 @@ tags:
   - administration
   - auth-server
   - token
+  - rpt-token
 ---
 
 ## Background

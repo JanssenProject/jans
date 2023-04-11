@@ -2,6 +2,7 @@
 tags:
   - administration
   - scim
+  - configuration
 ---
 
 ## This content is in progress
