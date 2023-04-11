@@ -44,7 +44,7 @@ public class ApplicationFactory {
     
     private SmtpConfiguration smtpConfiguration = new SmtpConfiguration();
 
-	private CacheConfiguration cacheConfiguration;
+	private CacheConfiguration cacheConfiguration = new CacheConfiguration();
 
     public static final String PERSISTENCE_ENTRY_MANAGER_FACTORY_NAME = "persistenceEntryManagerFactory";
 
