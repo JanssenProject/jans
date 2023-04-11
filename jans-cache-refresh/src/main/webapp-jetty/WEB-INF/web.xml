@@ -23,15 +23,6 @@
 		<param-value>${weld.debug}</param-value>
 	</context-param>
 
-	<listener>
-		<listener-class>org.jboss.weld.environment.servlet.Listener
-		</listener-class>
-	</listener>
-    
-   <listener>
-    <listener-class>org.jboss.resteasy.plugins.server.servlet.ResteasyBootstrap</listener-class>
-  </listener>
-
 	<!-- Weld -->
 	<resource-env-ref>
 		<description>Object factory for the CDI Bean Manager</description>
