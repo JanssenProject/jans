@@ -7652,6 +7652,8 @@ components:
           type: string
         description:
           type: string
+        version:
+          type: string
         configs:
           type: object
           additionalProperties:
@@ -7879,19 +7881,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        adminCanAccess:
-          type: boolean
         adminCanView:
-          type: boolean
-        adminCanEdit:
           type: boolean
         userCanAccess:
           type: boolean
+        adminCanAccess:
+          type: boolean
+        adminCanEdit:
+          type: boolean
         userCanView:
           type: boolean
-        whitePagesCanView:
-          type: boolean
         userCanEdit:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -9431,10 +9433,10 @@ components:
           type: array
           items:
             type: object
-        displayValue:
-          type: string
         value:
           type: object
+        displayValue:
+          type: string
         clientAuthMapSchema:
           type: object
           additionalProperties:

@@ -23,51 +23,51 @@ public class SmtpConfiguration implements java.io.Serializable {
     private static final long serialVersionUID = -5675038049444038755L;
 
     @JsonProperty("host")
-    private String host;
+    private String host = null;
 
     @JsonProperty("port")
-    private int port;
+    private int port = 0;
     
     @JsonProperty("connect_protection")
-    private SmtpConnectProtectionType connectProtection;
+    private SmtpConnectProtectionType connectProtection = null;
 
     @JsonProperty("trust_host")
-    private boolean serverTrust;
+    private boolean serverTrust = false;
 
     @JsonProperty("from_name")
-    private String fromName;
+    private String fromName = null;
 
     @JsonProperty("from_email_address")
-    private String fromEmailAddress;
+    private String fromEmailAddress = null;
 
     @JsonProperty("requires_authentication")
-    private boolean requiresAuthentication;
+    private boolean requiresAuthentication = false;
 
     @JsonProperty("smtp_authentication_account_username")
-    private String smtpAuthenticationAccountUsername;
+    private String smtpAuthenticationAccountUsername = null;
 
     @JsonProperty("smtp_authentication_account_password")
-    private String smtpAuthenticationAccountPassword;
+    private String smtpAuthenticationAccountPassword = null;
 
     @Transient
     @JsonIgnore
-    private String smtpAuthenticationAccountPasswordDecrypted;
+    private String smtpAuthenticationAccountPasswordDecrypted = null;
 
     @JsonProperty("key_store")
-    private String keyStore;
+    private String keyStore = null;
 
     @JsonProperty("key_store_password")
-    private String keyStorePassword;
+    private String keyStorePassword = null;
 
     @Transient
     @JsonIgnore
-    private String keyStorePasswordDecrypted;
+    private String keyStorePasswordDecrypted = null;
 
     @JsonProperty("key_store_alias")
-    private String keyStoreAlias;
+    private String keyStoreAlias = null;
 
     @JsonProperty("signing_algorithm")
-    private String signingAlgorithm;
+    private String signingAlgorithm = null;
 
     public String getHost() {
         return host;
