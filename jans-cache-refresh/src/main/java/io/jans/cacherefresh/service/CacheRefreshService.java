@@ -15,6 +15,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.slf4j.Logger;
+
 import io.jans.cacherefresh.constants.OxTrustConstants;
 import io.jans.cacherefresh.model.GluuCustomAttribute;
 import io.jans.cacherefresh.model.GluuCustomPerson;
@@ -27,18 +29,15 @@ import io.jans.orm.search.filter.Filter;
 import io.jans.orm.util.ArrayHelper;
 import io.jans.util.OxConstants;
 import io.jans.util.StringHelper;
-import jakarta.ejb.Stateless;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.inject.Named;
-import org.slf4j.Logger;
 
 /**
  * Provides cache refresh related operations
  *
  * @author Yuriy Movchan Date: 07.04.2011
  */
-@Stateless
-@Named("cacheRefreshService")
+@ApplicationScoped
 public class CacheRefreshService implements Serializable {
 
     private static final long serialVersionUID = -2225880517520443390L;

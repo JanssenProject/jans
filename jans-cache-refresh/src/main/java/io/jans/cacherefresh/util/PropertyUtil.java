@@ -8,6 +8,9 @@ package io.jans.cacherefresh.util;
 
 import java.util.List;
 
+import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.log4j.Logger;
+
 //import javax.inject.Inject;
 //import javax.inject.Named;
 
@@ -15,19 +18,14 @@ import io.jans.cacherefresh.service.EncryptionService;
 import io.jans.model.SimpleProperty;
 import io.jans.util.StringHelper;
 import io.jans.util.security.StringEncrypter;
-import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
-import jakarta.inject.Named;
-import org.apache.commons.lang.StringEscapeUtils;
-import org.apache.log4j.Logger;
 
 /**
  * Utility class with helpers methods to generate configuration files
  * 
  * @author Yuriy Movchan Date: 08.02.2011
  */
-@Stateless
-@Named
+
 public class PropertyUtil {
 
 	private static final Logger log = Logger.getLogger(PropertyUtil.class);

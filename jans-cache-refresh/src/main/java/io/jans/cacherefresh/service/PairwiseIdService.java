@@ -4,17 +4,18 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+
 //import javax.inject.Inject;
 
 import io.jans.cacherefresh.model.GluuCustomPerson;
 import io.jans.cacherefresh.model.GluuUserPairwiseIdentifier;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.util.StringHelper;
-import jakarta.ejb.Stateless;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import org.slf4j.Logger;
 
-@Stateless
+@ApplicationScoped
 public class PairwiseIdService implements IPairwiseIdService, Serializable {
 
 	/**
