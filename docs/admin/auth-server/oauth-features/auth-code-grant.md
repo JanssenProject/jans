@@ -4,6 +4,8 @@ tags:
   - auth-server
   - oauth
   - feature
+  - grant
+  - code
 ---
 
 # OAuth 2.0 Authorization Code Grant 

@@ -27,3 +27,5 @@ class common_strings:
     enter_to_search = "Press enter to perform search"
     no_matching_result = "No matching result"
     error = "Error!"
+    info = "Info"
+    oops = "Oops"

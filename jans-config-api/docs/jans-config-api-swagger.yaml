@@ -834,16 +834,6 @@ paths:
         schema:
           type: string
           default: ascending
-      - name: fieldValuePair
-        in: query
-        description: Field and value pair for seraching
-        schema:
-          type: string
-          default: ""
-        examples:
-          Field value example:
-            description: Field value example
-            value: "adminCanEdit=true,dataType=string"
       responses:
         "200":
           description: Ok
@@ -2173,24 +2163,12 @@ paths:
         description: Attribute whose value will be used to order the returned response
         schema:
           type: string
-          default: inum
       - name: sortOrder
         in: query
         description: Order in which the sortBy param is applied. Allowed values are
           "ascending" and "descending"
         schema:
           type: string
-          default: ascending
-      - name: fieldValuePair
-        in: query
-        description: Field and value pair for seraching
-        schema:
-          type: string
-          default: ""
-        examples:
-          Field value example:
-            description: Field value example
-            value: "applicationType=web,persistClientAuthorizations=true"
       responses:
         "200":
           description: Ok
@@ -3347,8 +3325,6 @@ paths:
                         "baseDn": "inum=1800.768b3d38-a6e8-4be4-93d1-72df33d34fd6,ou=clients,o=jans",
                         "inum": "1800.768b3d38-a6e8-4be4-93d1-72df33d34fd6"
                     }
-        "400":
-          description: Bad Request
         "401":
           description: Unauthorized
         "500":
@@ -3936,7 +3912,7 @@ paths:
     get:
       tags:
       - Custom Scripts
-      summary: Gets a list of custom scripts
+      summary: Fetch custom script by name
       description: Gets a list of custom scripts
       operationId: get-config-scripts
       parameters:
@@ -5521,14 +5497,12 @@ paths:
         description: Attribute whose value will be used to order the returned response
         schema:
           type: string
-          default: inum
       - name: sortOrder
         in: query
         description: Order in which the sortBy param is applied. Allowed values are
           "ascending" and "descending"
         schema:
           type: string
-          default: ascending
       - name: withAssociatedClients
         in: query
         description: Boolean fag to indicate if clients associated with the scope
@@ -5536,16 +5510,6 @@ paths:
         schema:
           type: boolean
           default: false
-      - name: fieldValuePair
-        in: query
-        description: Field and value pair for seraching
-        schema:
-          type: string
-          default: ""
-        examples:
-          Field value example:
-            description: Field value example
-            value: "scopeType=spontaneous,defaultScope=true"
       responses:
         "200":
           description: Ok
@@ -7139,24 +7103,12 @@ paths:
         description: Attribute whose value will be used to order the returned response
         schema:
           type: string
-          default: inum
       - name: sortOrder
         in: query
         description: Order in which the sortBy param is applied. Allowed values are
           "ascending" and "descending"
         schema:
           type: string
-          default: ascending
-      - name: fieldValuePair
-        in: query
-        description: Field and value pair for seraching
-        schema:
-          type: string
-          default: ""
-        examples:
-          Field value example:
-            description: Field value example
-            value: deletable=true
       responses:
         "200":
           description: Ok
@@ -7929,19 +7881,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        whitePagesCanView:
-          type: boolean
-        userCanEdit:
-          type: boolean
         adminCanView:
           type: boolean
         userCanAccess:
           type: boolean
-        userCanView:
-          type: boolean
         adminCanAccess:
           type: boolean
         adminCanEdit:
+          type: boolean
+        userCanView:
+          type: boolean
+        userCanEdit:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -8682,6 +8634,8 @@ components:
           type: object
           additionalProperties:
             type: string
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8691,8 +8645,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
         clientAuthMapSchema:
           type: object
           additionalProperties:
@@ -9335,6 +9287,17 @@ components:
           format: int32
         displayName:
           type: string
+        authenticationMethod:
+          type: string
+          enum:
+          - client_secret_basic
+          - client_secret_post
+          - client_secret_jwt
+          - private_key_jwt
+          - access_token
+          - tls_client_auth
+          - self_signed_tls_client_auth
+          - none
         allAuthenticationMethods:
           uniqueItems: true
           type: array
@@ -9349,17 +9312,6 @@ components:
             - tls_client_auth
             - self_signed_tls_client_auth
             - none
-        authenticationMethod:
-          type: string
-          enum:
-          - client_secret_basic
-          - client_secret_post
-          - client_secret_jwt
-          - private_key_jwt
-          - access_token
-          - tls_client_auth
-          - self_signed_tls_client_auth
-          - none
         baseDn:
           type: string
         inum:
@@ -9481,10 +9433,10 @@ components:
           type: array
           items:
             type: object
-        displayValue:
-          type: string
         value:
           type: object
+        displayValue:
+          type: string
         clientAuthMapSchema:
           type: object
           additionalProperties:
@@ -9652,6 +9604,8 @@ components:
     SmtpConfiguration:
       type: object
       properties:
+        valid:
+          type: boolean
         connectProtectionList:
           type: array
           items:
@@ -9660,8 +9614,6 @@ components:
             - None
             - StartTls
             - SslTls
-        valid:
-          type: boolean
         host:
           type: string
         port:

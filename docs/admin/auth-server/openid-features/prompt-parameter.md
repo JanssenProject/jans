@@ -4,6 +4,7 @@ tags:
   - auth-server
   - openidc
   - feature
+  - prompt
 ---
 
 # Prompt NONE

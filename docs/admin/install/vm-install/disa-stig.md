@@ -3,6 +3,8 @@ tags:
   - administration
   - installation
   - vm
+  - disa
+  - stig
 ---
 
 ## This content is in progress

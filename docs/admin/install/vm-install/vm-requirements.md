@@ -3,6 +3,7 @@ tags:
 - requirements
 - installation
 - vm
+- hardware
 ---
 
 # VM System Requirements
