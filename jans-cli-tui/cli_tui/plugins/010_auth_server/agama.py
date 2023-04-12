@@ -98,7 +98,13 @@ class Agama(DialogUtils):
                 cli_args = {'operation_id': 'put-agama-dev-studio-prj', 'url_suffix':'name:{}'.format(project_name), 'data':config}
                 self.app.start_progressing(_("Saving project configuration..."))
                 response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+
                 self.app.stop_progressing()
+
+                if response.status_code in (200, 202):
+                    self.app.show_message(_(common_strings.info), HTML(_("Configuration for project <b>{}</b> was imported successfully.").format(project_name)), tobefocused=fdata.main_dialog)
+                else:
+                    self.app.show_message(_(common_strings.error), HTML(_("Failed to import configuration for project <b>{}</b>: {} {}").format(project_name, response.status_code, response.reason)), tobefocused=fdata.main_dialog)
 
             def read_config_file(path):
                 try:
