@@ -78,7 +78,7 @@ from prompt_toolkit.keys import Keys
 
 from cli_style import style
 from utils.multi_lang import _
-from utils.static import cli_style
+from utils.static import cli_style, common_strings
 from utils.validators import IntegerValidator
 from wui_components.jans_cli_dialog import JansGDialog
 from wui_components.jans_nav_bar import JansNavBar
@@ -316,15 +316,36 @@ class JansCliApp(Application):
 
         self.invalidate()
 
+
         if status not in (True, 'ID Token is expired'):
             buttons = [Button(_("OK"), handler=self.jans_creds_dialog)]
-            self.show_message(_("Error getting Connection Config Api"), status, buttons=buttons)
+            self.show_message(_("Error connectiong to Auth Server"), status, buttons=buttons)
 
         else:
             if not test_client and not self.cli_object.access_token:
 
-                response = self.cli_object.get_device_verification_code()
-                result = response.json()
+                result = {}
+                try:
+                    response = self.cli_object.get_device_verification_code()
+                    result = response.json()
+                except Exception as e:
+                    self.cli_object_ok = False
+                    self.show_message(
+                            _(common_strings.error), 
+                            _("Can't get device verification code: \n{}").format(str(e)), 
+                            buttons=[Button(_("OK"), handler=self.jans_creds_dialog)],
+                            tobefocused=self.center_container)
+                    return
+
+
+                if not 'verification_uri_complete' in result:
+                    self.cli_object_ok = False
+                    self.show_message(
+                            _(common_strings.error),
+                            _("Can't find verification code in server response: \n{}").format(response.text),
+                            buttons=[Button(_("OK"), handler=self.jans_creds_dialog)],
+                            tobefocused=self.center_container)
+                    return
 
                 msg = _("Please visit verification url {} and authorize this device within {} seconds.")
                 body = HSplit([Label(msg.format(result['verification_uri_complete'], result['expires_in']), style='class:jans-main-verificationuri.text')], style='class:jans-main-verificationuri')
