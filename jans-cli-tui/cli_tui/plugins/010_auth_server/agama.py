@@ -174,7 +174,7 @@ class Agama(DialogUtils):
             export_current_config_button = Box(Button(export_current_config_button_title, width=len(export_current_config_button_title)+4, handler=export_current_config))
             import_configuration_button = Box(Button(import_configuration_button_title, width=len(import_configuration_button_title)+4, handler=import_config))
 
-            dialog_title = _("Managae Configuration for Project {}").format(project_name)
+            dialog_title = _("Manage Configuration for Project {}").format(project_name)
             dialog = JansGDialog(
                         self.app,
                         title=dialog_title,
