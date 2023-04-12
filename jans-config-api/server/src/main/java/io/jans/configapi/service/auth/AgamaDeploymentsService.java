@@ -41,7 +41,7 @@ public class AgamaDeploymentsService {
 
     public Deployment getDeployment(String name) {
         
-        String[] attrs = new String[]{ "jansStartDate", "jansEndDate", "adsPrjDeplDetails" };
+        String[] attrs = new String[]{ "jansId", "jansStartDate", "jansEndDate", "adsPrjDeplDetails" };
         logger.info("Looking up project named {}", name);
 
         Deployment d = null;
