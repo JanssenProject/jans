@@ -90,7 +90,7 @@ class Agama(DialogUtils):
                 project_details = details_response.json()
 
             else:
-                self.app.show_message(_(common_strings.error), _("Can't get details for project {}").format(project_name), tobefocused=self.working_container)
+                self.app.show_message(_(common_strings.error), HTML(_("Can't get details for project <b>{}</b>").format(project_name)), tobefocused=self.working_container)
                 return
 
 
@@ -340,8 +340,12 @@ class Agama(DialogUtils):
             async def coroutine():
                 cli_args = {'operation_id': 'delete-agama-dev-studio-prj', 'url_suffix': 'name:{}'.format(agama['details']['projectMetadata']['projectName'])}
                 self.app.start_progressing(_("Deleting agama project {}".format(project_name)))
-                await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+                response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
                 self.app.stop_progressing()
+
+                if response.status_code != 200:
+                    self.app.show_message(_(common_strings.error), HTML(_("Deleting project <b>{}</b> was failed: {} {}").format(project_name, response.status_code, response.reason)), tobefocused=self.working_container)
+
                 self.get_agama_projects()
 
             asyncio.ensure_future(coroutine())
@@ -391,7 +395,10 @@ class Agama(DialogUtils):
 
 
             elif response.status_code == 204:
-                self.app.show_message(_(common_strings.info), _("Project {} is still being deployed. Try again in 1 minute.").format(project_name), tobefocused=self.working_container)
+                self.app.show_message(_(common_strings.info), HTML(_("Project <b>{}</b> is still being deployed. Try again in 1 minute.").format(project_name)), tobefocused=self.working_container)
+
+            else:
+                self.app.show_message(_(common_strings.error), HTML(_("Retrieving details for <b>{}</b> was failed: {} {}").format(project_name, response.status_code, response.reason)), tobefocused=self.working_container)
 
         if project_name:
             if params['selected'][3] == _("Pending"):
