@@ -2187,10 +2187,6 @@ paths:
         schema:
           type: string
           default: ""
-        examples:
-          Field value example:
-            description: Field value example
-            value: "applicationType=web,persistClientAuthorizations=true"
       responses:
         "200":
           description: Ok
@@ -3973,6 +3969,16 @@ paths:
         schema:
           type: string
           default: ascending
+      - name: fieldValuePair
+        in: query
+        description: Field and value pair for seraching
+        schema:
+          type: string
+          default: ""
+        examples:
+          Field value example:
+            description: Field value example
+            value: "adminCanEdit=true,dataType=string"
       responses:
         "200":
           description: Ok
@@ -7839,17 +7845,17 @@ components:
           type: string
         whitePagesCanView:
           type: boolean
-        userCanEdit:
+        adminCanAccess:
+          type: boolean
+        userCanView:
           type: boolean
         adminCanView:
-          type: boolean
-        adminCanAccess:
           type: boolean
         adminCanEdit:
           type: boolean
         userCanAccess:
           type: boolean
-        userCanView:
+        userCanEdit:
           type: boolean
         baseDn:
           type: string
@@ -8576,8 +8582,6 @@ components:
           type: object
           additionalProperties:
             type: string
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8587,6 +8591,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -9109,6 +9115,17 @@ components:
           format: int32
         displayName:
           type: string
+        authenticationMethod:
+          type: string
+          enum:
+          - client_secret_basic
+          - client_secret_post
+          - client_secret_jwt
+          - private_key_jwt
+          - access_token
+          - tls_client_auth
+          - self_signed_tls_client_auth
+          - none
         allAuthenticationMethods:
           uniqueItems: true
           type: array
@@ -9123,17 +9140,6 @@ components:
             - tls_client_auth
             - self_signed_tls_client_auth
             - none
-        authenticationMethod:
-          type: string
-          enum:
-          - client_secret_basic
-          - client_secret_post
-          - client_secret_jwt
-          - private_key_jwt
-          - access_token
-          - tls_client_auth
-          - self_signed_tls_client_auth
-          - none
         baseDn:
           type: string
         inum:
@@ -9363,8 +9369,6 @@ components:
     SmtpConfiguration:
       type: object
       properties:
-        valid:
-          type: boolean
         connectProtectionList:
           type: array
           items:
@@ -9373,6 +9377,8 @@ components:
             - None
             - StartTls
             - SslTls
+        valid:
+          type: boolean
         host:
           type: string
         port:

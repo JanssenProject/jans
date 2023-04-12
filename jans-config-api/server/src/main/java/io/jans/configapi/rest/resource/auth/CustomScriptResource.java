@@ -17,6 +17,7 @@ import io.jans.service.custom.CustomScriptService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.model.ScriptLocationType;
+import io.jans.model.SearchRequest;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.model.CustomScript;
 import io.jans.orm.model.PagedResult;
@@ -72,16 +73,24 @@ public class CustomScriptResource extends ConfigBaseResource {
             @Parameter(description = "Search pattern") @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
             @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
             @Parameter(description = "Attribute whose value will be used to order the returned response") @DefaultValue(ApiConstants.INUM) @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
-            @Parameter(description = "Order in which the sortBy param is applied. Allowed values are \"ascending\" and \"descending\"") @DefaultValue(ApiConstants.ASCENDING) @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder) {
+            @Parameter(description = "Order in which the sortBy param is applied. Allowed values are \"ascending\" and \"descending\"") @DefaultValue(ApiConstants.ASCENDING) @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder,
+            @Parameter(description = "Field and value pair for seraching", examples = @ExampleObject(name = "Field value example", value = "adminCanEdit=true,dataType=string")) @DefaultValue("") @QueryParam(value = ApiConstants.FIELD_VALUE_PAIR) String fieldValuePair) {
 
         if (logger.isDebugEnabled()) {
             logger.debug(
-                    "Search Custom Script filters with limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}",
+                    "Search Custom Script filters with limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}, fieldValuePair:{}",
                     escapeLog(limit), escapeLog(pattern), escapeLog(startIndex), escapeLog(sortBy),
-                    escapeLog(sortOrder));
+                    escapeLog(sortOrder), escapeLog(fieldValuePair));
         }
+        logger.error(
+                "Search Custom Script filters with limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}, fieldValuePair:{}",
+                limit, pattern, startIndex, sortBy, sortOrder, fieldValuePair);
+        
+        SearchRequest searchReq = createSearchRequest(customScriptService.baseDn(), pattern, sortBy,
+                sortOrder, startIndex, limit, null, null, this.getMaxCount(),fieldValuePair);
 
-        return Response.ok(doSearch(pattern, sortBy, sortOrder, startIndex, limit, this.getMaxCount(), null)).build();
+        
+        return Response.ok(doSearch(searchReq, null)).build();
     }
 
     @Operation(summary = "Fetch custom script by name", description = "Fetch custom script by name", operationId = "get-custom-script-by-name", tags = {
@@ -290,6 +299,24 @@ public class CustomScriptResource extends ConfigBaseResource {
         return Response.ok(existingScript).build();
     }
 
+    private PagedResult<CustomScript> doSearch(SearchRequest searchReq, CustomScriptType type) {
+
+        logger.debug(
+                "CustomScript search request params -  searchReq:{}, type:{}", searchReq, type);
+
+        PagedResult<CustomScript> pagedResult = customScriptService.searchScripts(searchReq,type);
+
+        logger.debug("PagedResult  - pagedResult:{}", pagedResult);
+        if (pagedResult != null) {
+            logger.debug(
+                    "CustomScripts fetched  - pagedResult.getTotalEntriesCount():{}, pagedResult.getEntriesCount():{}, pagedResult.getEntries():{}",
+                    pagedResult.getTotalEntriesCount(), pagedResult.getEntriesCount(), pagedResult.getEntries());
+        }
+
+        logger.debug("CustomScript pagedResult:{} ", pagedResult);
+        return pagedResult;
+    }
+    
     private PagedResult<CustomScript> doSearch(String pattern, String sortBy, String sortOrder, Integer startIndex,
             int limit, int maximumRecCount, CustomScriptType type) {
 
