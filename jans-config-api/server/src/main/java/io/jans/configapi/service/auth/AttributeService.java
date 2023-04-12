@@ -49,7 +49,7 @@ public class AttributeService extends io.jans.as.common.service.AttributeService
                 Filter inumFilter = Filter.createSubstringFilter(AttributeConstants.INUM, null, targetArray, null);
                 filters.add(Filter.createORFilter(displayNameFilter, descriptionFilter, nameFilter, inumFilter));
             }
-            
+            searchFilter = Filter.createORFilter(filters);
         }
         log.debug("Attributes pattern searchFilter:{}", searchFilter);
         if(searchRequest.getFieldValueMap()!=null && !searchRequest.getFieldValueMap().isEmpty())

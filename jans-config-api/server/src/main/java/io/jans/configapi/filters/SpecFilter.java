@@ -50,8 +50,7 @@ public class SpecFilter extends AbstractSpecFilter {
 
         Schema clientAuthMapSchema = new MapSchema().description("clientAuthMapSchema")
                 .additionalProperties(new ArraySchema().items(new Schema().$ref("#/components/schemas/Scope")));
-        schema.addProperty("clientAuthMapSchema", clientAuthMapSchema);
-
+        
         return Optional.of(schema);
     }
 
