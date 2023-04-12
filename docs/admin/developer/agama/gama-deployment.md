@@ -126,11 +126,11 @@ The following tables summarize the available endpoints. All URLs are relative to
 |Status|200 (OK)|
 
 
-|Endpoint -> |`/agama-deployment`|
+|Endpoint -> |`/agama-deployment/{name}`|
 |-|-|
 |Purpose|Retrieve details of a single deployment by name|
 |Method|GET|
-|Query params|`name` - mandatory|
+|Path params|`name`|
 |Sample output|The structure of a deployment is explained below|
 |Status|200 (deployment task is finished), 204 (task still in course), 404 (project unknown), 400 (a param is missing)|
 
@@ -152,39 +152,39 @@ The following tables summarize the available endpoints. All URLs are relative to
 |flowsError|A mapping of the errors obtained per flow found in the archive. The keys correspond to qualified names. A `null` value indicates the flow was successfully added|`{ "co.acme.example": "Syntax error on line 4", "io.jans.test": null }`|
 
 
-|Endpoint -> |`/agama-deployment`|
+|Endpoint -> |`/agama-deployment/{name}`|
 |-|-|
 |Purpose|Add or replace an ADS project to the server|
 |Method|POST|
-|Query params|`name` (the project's name) - mandatory|
+|Path params|`name` (the project's name)|
 |Body|The binary contents of a `.gama` file; example [here](#sample-file). Ensure to use header `Content-Type: application/zip`|
 |Output|Textual explanation, e.g. `A deployment task for project XXX  has been queued. Use the GET endpoint to poll status`|
 |Status|202 (the task was created and scheduled for deployment), 409 (there is a task already for this project and it hasn't finished yet), 400 (a param is missing)|
 
 
-|Endpoint -> |`/agama-deployment/configs`|
+|Endpoint -> |`/agama-deployment/configs/{name}`|
 |-|-|
 |Purpose|Retrieve the configurations associated to flows that belong to the project of interest. The project must have been already processed fully|
 |Method|GET|
-|Query params|`name` (the project's name) - mandatory|
+|Path params|`name` (the project's name)|
 |Output|A JSON object whose properties are flow names and values correspond to configuration properties defined (JSON objects too)|
 |Status|200 (successful response), 204 (this project is still in course of deployment), 404 (unknown project), 400 (a param is missing)|
 
 
-|Endpoint -> |`/agama-deployment/configs`|
+|Endpoint -> |`/agama-deployment/configs/{name}`|
 |-|-|
 |Purpose|Set or replace the configurations associated to flows that belong to the project of interest. The project must have been already processed fully|
 |Method|PUT|
-|Query params|`name` (the project's name) - mandatory|
+|Path params|`name` (the project's name)|
 |Output|A JSON object whose properties are flow names and values correspond to a boolean indicating the success of the update for the given flow|
 |Status|200 (successful response), 204 (this project is still in course of deployment), 404 (unknown project), 400 (a param is missing)|
 
 
-|Endpoint -> |`/agama-deployment`|
+|Endpoint -> |`/agama-deployment/{name}`|
 |-|-|
 |Purpose|Undeploy an ADS project from the server. Entails removing flows and assets initally supplied|
 |Method|DELETE|
-|Query params|`name` (the project's name) - mandatory|
+|Path params|`name` (the project's name)|
 |Status|204 (scheduled for removal), 409 (the project is being deployed currently), 404 (unknown project), 400 (a param is missing)|
 
 ### Endpoints access
