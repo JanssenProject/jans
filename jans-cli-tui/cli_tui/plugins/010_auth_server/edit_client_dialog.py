@@ -310,14 +310,11 @@ class EditClientDialog(JansGDialog, DialogUtils):
                     schema, 'responseTypes'),
                 style='class:outh-client-checkboxlist'),
 
-            self.myparent.getTitledCheckBox(_("Supress Authorization"),
-                                            name='dynamicRegistrationPersistClientAuthorizations',
-                                            checked=self.data.get(
-                                                'dynamicRegistrationPersistClientAuthorizations'),
-                                            jans_help=self.myparent.get_help_from_schema(
-                self.myparent.cli_object.get_schema_from_reference(
-                    '', '#/components/schemas/AppConfiguration'),
-                'tokenEndpointAuthMethodsSupported'),
+            self.myparent.getTitledCheckBox(
+                _("Suppress Authorization"),
+                name='trustedClient',
+                checked=self.data.get('trustedClient'),
+                jans_help=self.myparent.get_help_from_schema(schema, 'trustedClient'),
                 style=cli_style.check_box),
 
             self.myparent.getTitledRadioButton(
