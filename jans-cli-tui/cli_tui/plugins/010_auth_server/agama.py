@@ -383,8 +383,8 @@ class Agama(DialogUtils):
                 result = response.json()
                 project_metadata = result['details']['projectMetadata']
                 body_widgets = [
-                        self.app.getTitledText(title=_("Version"), value=project_metadata.get('version','-'), name='version', read_only=True),
-                        self.app.getTitledText(title=_("Description"), value=project_metadata.get('description','-'), name='description', read_only=True, height=2),
+                        self.app.getTitledText(title=_("Version"), value=project_metadata.get('version') or '-', name='version', read_only=True),
+                        self.app.getTitledText(title=_("Description"), value=project_metadata.get('description') or '-', name='description', read_only=True, height=2),
                         self.app.getTitledText(title=_("Deployed started on"), value=result['createdAt'], name='createdAt', read_only=True),
                         self.app.getTitledText(title=_("Deployed finished on"), value=result['finishedAt'], name='finishedAt', read_only=True),
                         self.app.getTitledText(title=_("Errors"), value=result['details'].get('error') or "No", name='error', read_only=True),
