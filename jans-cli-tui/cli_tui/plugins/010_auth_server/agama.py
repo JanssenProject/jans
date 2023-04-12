@@ -34,6 +34,7 @@ class Agama(DialogUtils):
 
         self.app = app
         self.data = []
+        self.first_enter = False
 
         self.working_container = JansVerticalNav(
                 myparent=app,
@@ -63,6 +64,7 @@ class Agama(DialogUtils):
         self.main_container.on_page_enter = self.on_page_enter
 
     def on_page_enter(self) -> None:
+        self.first_enter = True
         self.get_agama_projects()
 
     def display_config(self, event):
@@ -247,7 +249,10 @@ class Agama(DialogUtils):
         for datum in data_display[start_index:start_index+self.app.entries_per_page]:
             self.working_container.add_item(datum)
 
-        self.app.layout.focus(self.working_container)
+        if not self.first_enter:
+            self.app.layout.focus(self.working_container)
+
+        self.first_enter = False
 
 
     async def get_projects_coroutine(self, search_str=''):
