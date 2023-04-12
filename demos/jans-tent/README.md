@@ -77,7 +77,7 @@ starts. If your client was already registered, when you start the server again,
 it won't register. Remember to be inside your virtual environment!
 
 ```bash
-python main.py
+python3 main.py
 ```
 
 ### Login!
