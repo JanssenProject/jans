@@ -388,12 +388,13 @@ class Agama(DialogUtils):
 
                 flow_errors = result['details'].get('flowsError', {})
 
-                jans_table = JansTableWidget(
-                    app=self.app,
-                    data=list(flow_errors.items()),
-                    headers=["Flow", "Error"],
-                    )
-                body_widgets.append(jans_table)
+                if flow_errors:
+                    jans_table = JansTableWidget(
+                        app=self.app,
+                        data=list(flow_errors.items()),
+                        headers=["Flow", "Error"],
+                        )
+                    body_widgets.append(jans_table)
 
                 buttons = [Button(_("Close"))]
                 dialog = JansGDialog(self.app, body=HSplit(body_widgets), title=_("Details of project {}").format(project_name), buttons=buttons)
