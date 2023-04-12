@@ -95,7 +95,13 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
             return Response.noContent().build();
         
         d.getDetails().setFolders(null);
-        return Response.ok(d).build();
+        try {
+            //Use own mapper so flows with no errors are effectively serialized
+            return Response.ok(mapper.writeValueAsString(d)).build();
+        } catch (JsonProcessingException e) {
+            logger.error(e.getMessage(), e);
+            return Response.serverError().build();
+        }
 
     }
 
@@ -171,7 +177,8 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_READ_ACCESS }, groupScopes = {ApiAccessConstants.AGAMA_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Path(ApiConstants.CONFIGS + ApiConstants.NAME_PARAM_PATH)
-    public Response getConfigs(@Parameter(description = "Agama project name") @PathParam(ApiConstants.NAME) @NotNull String projectName) throws JsonProcessingException {
+    public Response getConfigs(@Parameter(description = "Agama project name") @PathParam(ApiConstants.NAME) @NotNull String projectName)
+            throws JsonProcessingException {
         
         Pair<Response, Set<String>> pair = projectFlows(projectName);
         Response resp = pair.getFirst();
