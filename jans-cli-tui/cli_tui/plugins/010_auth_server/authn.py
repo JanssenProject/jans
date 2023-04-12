@@ -57,7 +57,7 @@ class Authn(DialogUtils):
         self.app.create_background_task(self.get_default_acr())
 
 
-    def on_page_enter(self) -> None:
+    def on_page_enter(self, focus_container=False) -> None:
 
 
         def populate_acr_list():
@@ -86,7 +86,8 @@ class Authn(DialogUtils):
 
 
             self.acr_container.all_data = self.acr_container.data[:]
-            self.app.layout.focus(self.acr_container)
+            if focus_container:
+                self.app.layout.focus(self.acr_container)
 
 
         async def coroutine():
@@ -109,7 +110,7 @@ class Authn(DialogUtils):
                     result = response.json()
                     if result.get('entriesCount', 0) > 0:
                         for scr in result['entries']:
-                            if scr.get('enabled'):
+                            if scr.get('enabled') and scr not in self.auth_scripts:
                                 self.auth_scripts.append(scr)
             self.app.stop_progressing()
             populate_acr_list()
@@ -239,7 +240,7 @@ class Authn(DialogUtils):
                     if data['default'] and data['default'] != data['configId']:
                         self.save_default_acr(data['configId'])
                     else:
-                        self.on_page_enter()
+                        self.on_page_enter(focus_container=True)
 
             asyncio.ensure_future(coroutine())
 
@@ -390,7 +391,7 @@ class Authn(DialogUtils):
             self.app.start_progressing(_("Deleting Source LDAP..."))
             await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
             self.app.stop_progressing()
-            self.on_page_enter()
+            self.on_page_enter(focus_container=True)
 
         def do_delete_ldap_server(config_id, dialog):
             asyncio.ensure_future(coroutine(config_id))
@@ -416,6 +417,6 @@ class Authn(DialogUtils):
             await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
             self.app.stop_progressing()
             await self.get_default_acr()
-            self.on_page_enter()
+            self.on_page_enter(focus_container=True)
 
         asyncio.ensure_future(coroutine())
