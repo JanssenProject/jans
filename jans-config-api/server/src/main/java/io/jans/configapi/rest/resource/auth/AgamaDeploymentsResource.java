@@ -263,9 +263,14 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
         Response res = getDeployment(projectName);
         if (res.getStatus() != Response.Status.OK.getStatusCode()) return new Pair<>(res, null);
 
-        Deployment d = (Deployment) res.getEntity();
-        //Retrieve the flows this project contains
-        return new Pair<>(null, d.getDetails().getFlowsError().keySet());
+        try {
+            Deployment d = mapper.readValue(res.getEntity().toString(), Deployment.class);
+            //Retrieve the flows this project contains
+            return new Pair<>(null, d.getDetails().getFlowsError().keySet());
+        } catch (JsonProcessingException e) {
+            logger.error(e.getMessage(), e);
+            return new Pair<>(Response.serverError().build(), null);
+        }
 
     }
 
