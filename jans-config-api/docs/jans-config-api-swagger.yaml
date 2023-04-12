@@ -7652,8 +7652,6 @@ components:
           type: string
         description:
           type: string
-        version:
-          type: string
         configs:
           type: object
           additionalProperties:
@@ -7881,19 +7879,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        adminCanView:
-          type: boolean
-        userCanAccess:
-          type: boolean
         adminCanAccess:
+          type: boolean
+        adminCanView:
           type: boolean
         adminCanEdit:
           type: boolean
+        userCanAccess:
+          type: boolean
         userCanView:
           type: boolean
-        userCanEdit:
-          type: boolean
         whitePagesCanView:
+          type: boolean
+        userCanEdit:
           type: boolean
         baseDn:
           type: string

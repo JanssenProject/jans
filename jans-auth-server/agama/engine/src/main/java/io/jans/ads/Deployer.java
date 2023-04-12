@@ -156,7 +156,6 @@ public class Deployer {
                 if (dd.getError() == null) {
                     projectsFlows.put(prjId, flowIds);
 
-                    Set<String> libsPaths = transferJarFiles(plib);
                     ZipFile zip = compileAssetsArchive(p, pweb, plib, prjBasepath);
                     byte[] bytes = extractZipFileWithPurge(zip, ASSETS_DIR,
                             projectsBasePaths.get(prjId), projectsLibs.get(prjId));
@@ -164,6 +163,7 @@ public class Deployer {
                     Set<String> basePaths = Set.of(prjBasepath);
                     projectsBasePaths.put(prjId, basePaths);
 
+                    Set<String> libsPaths = transferJarFiles(plib);
                     //Update this project's libs paths
                     libsPaths.addAll(computeSourcePaths(plib));
                     projectsLibs.put(prjId, libsPaths);
