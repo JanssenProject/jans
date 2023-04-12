@@ -188,18 +188,24 @@ public class BaseResource {
                     escapeLog(startIndex), escapeLog(count), escapeLog(attrsList), escapeLog(excludedAttrsList),
                     escapeLog(maximumRecCount), escapeLog(fieldValuePair));
         }
+        log.error(
+                "Search Request params:: - schemas:{}, filter:{}, sortBy:{}, sortOrder:{}, startIndex:{}, count:{}, attrsList:{}, excludedAttrsList:{}, maximumRecCount:{}, fieldValuePair:{}",
+                escapeLog(schemas), escapeLog(filter), escapeLog(sortBy), escapeLog(sortOrder),
+                escapeLog(startIndex), escapeLog(count), escapeLog(attrsList), escapeLog(excludedAttrsList),
+                escapeLog(maximumRecCount), escapeLog(fieldValuePair));
+        
         SearchRequest searchRequest = new SearchRequest();
 
         // Validation
         checkNotEmpty(schemas, "Schema");
         int maxCount = maximumRecCount;
-        log.debug(" count:{}, maxCount:{}", count, maxCount);
+        log.error(" count:{}, maxCount:{}", count, maxCount);
         if (count > maxCount) {
             throwBadRequestException("Maximum number of results per page is " + maxCount);
         }
 
         count = count == null ? maxCount : count;
-        log.debug(" count:{} ", count);
+        log.error(" count:{} ", count);
         // Per spec, a negative value SHALL be interpreted as "0" for count
         if (count < 0) {
             count = 0;
@@ -208,7 +214,7 @@ public class BaseResource {
         if (StringUtils.isEmpty(sortOrder) || !sortOrder.equals(SortOrder.DESCENDING.getValue())) {
             sortOrder = SortOrder.ASCENDING.getValue();
         }
-        log.debug(" util.getTokens(filter,TOKEN_DELIMITER):{} , util.getFieldValueMap(fieldValuePair, TOKEN_DELIMITER, FIELD_VALUE_SEPARATOR)):{}", util.getTokens(filter, TOKEN_DELIMITER), util.getFieldValueMap(fieldValuePair, TOKEN_DELIMITER, FIELD_VALUE_SEPARATOR));
+        log.error(" util.getTokens(filter,TOKEN_DELIMITER):{} , util.getFieldValueMap(fieldValuePair, TOKEN_DELIMITER, FIELD_VALUE_SEPARATOR)):{}", util.getTokens(filter, TOKEN_DELIMITER), util.getFieldValueMap(fieldValuePair, TOKEN_DELIMITER, FIELD_VALUE_SEPARATOR));
         searchRequest.setSchemas(schemas);
         searchRequest.setAttributes(attrsList);
         searchRequest.setExcludedAttributes(excludedAttrsList);

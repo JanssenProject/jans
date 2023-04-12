@@ -32,7 +32,7 @@ public class Util {
     }
 
     public List<String> getTokens(String str, String tokenizer) {
-        log.debug(" String to get tokens - str:{}, tokenizer:{}", str, tokenizer);
+        log.error(" String to get tokens - str:{}, tokenizer:{}", str, tokenizer);
 
         ArrayList<String> list = new ArrayList<>();
         if (StringUtils.isBlank(str)) {
@@ -40,48 +40,50 @@ public class Util {
             return list;
         }
 
-        log.debug("str.contains(tokenizer):{}", str.contains(tokenizer));
+        log.error("str.contains(tokenizer):{}", str.contains(tokenizer));
         if (!str.contains(tokenizer)) {
 
             list.add(str);
-            log.debug(" Not tokenized - list:{}", list);
+            log.error(" Not tokenized - list:{}", list);
             return list;
         }
 
-        log.debug("final tokenized list:{}", Collections.list(new StringTokenizer(str, tokenizer)).stream()
+        log.error("final tokenized list:{}", Collections.list(new StringTokenizer(str, tokenizer)).stream()
                 .map(token -> (String) token).collect(Collectors.toList()));
         return Collections.list(new StringTokenizer(str, tokenizer)).stream().map(token -> (String) token)
                 .collect(Collectors.toList());
     }
 
     public Map<String, String> getFieldValueMap(String str, String tokenizer, String fieldValueSeparator) {
-        log.debug(" Field Value to get map - str:{}, tokenizer:{} fieldValueSeparator:{}", str, tokenizer,
+        log.error(" Field Value to get map - str:{}, tokenizer:{} fieldValueSeparator:{}", str, tokenizer,
                 fieldValueSeparator);
 
         Map<String, String> fieldValueMap = new HashMap<>();
-        if (StringUtils.isBlank(str) || !str.contains(tokenizer) || !str.contains(fieldValueSeparator)) {
+        log.error(" StringUtils.isBlank(str):{}, str.contains(tokenizer):{} , str.contains(fieldValueSeparator):{}", StringUtils.isBlank(str), str.contains(tokenizer),
+                str.contains(fieldValueSeparator));
+        if (StringUtils.isBlank(str) || !str.contains(fieldValueSeparator)) {
             return fieldValueMap;
         }
 
-        log.debug("getTokens(str, tokenizer):{}", getTokens(str, tokenizer));
+        log.error("getTokens(str, tokenizer):{}", getTokens(str, tokenizer));
 
         List<String> fieldValueList = getTokens(str, tokenizer);
-        log.debug("fieldValueList:{}", fieldValueList);
+        log.error("fieldValueList:{}", fieldValueList);
         if (fieldValueList == null || fieldValueList.isEmpty()) {
             return fieldValueMap;
         }
 
         for (String data : fieldValueList) {
-            StringTokenizer st = new StringTokenizer(fieldValueSeparator, fieldValueSeparator);
+            StringTokenizer st = new StringTokenizer(str, fieldValueSeparator);
 
             if (StringUtils.isNotBlank(data) && st.hasMoreTokens()) {
                 String[] keyValue = data.split("=");
+                log.error("fieldValueMap:{},keyValue:{}, keyValue[0]:{}, keyValue[1]):{}", fieldValueMap, keyValue, keyValue[0], keyValue[1]);
                 fieldValueMap.put(keyValue[0], keyValue[1]);
-
             }
         }
 
-        log.debug("fieldValueMap:{}", fieldValueMap);
+        log.error("fieldValueMap:{}", fieldValueMap);
         return fieldValueMap;
     }
 }
