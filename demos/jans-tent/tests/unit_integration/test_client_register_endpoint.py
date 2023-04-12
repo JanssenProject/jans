@@ -1,38 +1,12 @@
-from unittest import TestCase
-
-
+from helper import FlaskBaseTestCase
 import clientapp
 import helper
-import os
 from flask import url_for
 from clientapp.helpers.client_handler import ClientHandler
 from unittest.mock import MagicMock, patch
 
 
-class TestRegisterEndpoint(TestCase):
-
-    def setUp(self):
-        self.app = clientapp.create_app()
-        self.app.testing = True
-        self.app_context = self.app.test_request_context()
-        self.app_context.push()
-        self.client = self.app.test_client()
-        # self.oauth = OAuth(self.app)
-        os.environ['AUTHLIB_INSECURE_TRANSPORT'] = "1"
-        # stashing to restore on teardown
-        self.CHd = ClientHandler.discover
-        self.register = ClientHandler.register_client
-
-        ClientHandler.discover = MagicMock(name='discover')
-        # discover will always return a valid data
-        ClientHandler.discover.return_value = helper.OP_DATA_DICT_RESPONSE
-        ClientHandler.register_client = MagicMock(name='register_client')
-        ClientHandler.register_client.return_value = helper.REGISTER_CLIENT_RESPONSE
-
-    def tearDown(self):
-        # restoring original method from stash
-        ClientHandler.discover = self.CHd
-        ClientHandler.register_client = self.register
+class TestRegisterEndpoint(FlaskBaseTestCase):
 
     def test_if_app_has_register_endpoint(self):
         self.assertIn(

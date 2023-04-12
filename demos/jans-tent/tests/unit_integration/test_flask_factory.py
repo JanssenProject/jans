@@ -36,7 +36,7 @@ class TestFlaskApp(TestCase):
         self.assertEqual(hasattr(clientapp, 'create_app'), True,
                          'app factory does not exists')
 
-    def test_create_app_should_be_inokable(self):
+    def test_create_app_should_be_invokable(self):
         self.assertEqual(callable(clientapp.create_app), True,
                          'cannot invoke create_app from clientapp')
 
