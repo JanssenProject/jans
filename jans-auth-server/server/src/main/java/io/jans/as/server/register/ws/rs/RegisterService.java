@@ -41,6 +41,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static io.jans.as.model.util.StringUtils.toList;
+import static org.apache.commons.lang3.BooleanUtils.isFalse;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 /**
@@ -375,29 +376,7 @@ public class RegisterService {
             client.setAuthorizedOrigins(listAsArrayWithoutDuplicates(authorizedOrigins));
         }
 
-        List<String> scopes = requestObject.getScope();
-        if (Arrays.asList(client.getGrantTypes()).contains(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS) && !appConfiguration.getDynamicRegistrationAllowedPasswordGrantScopes().isEmpty()) {
-            scopes = Lists.newArrayList(scopes);
-            scopes.retainAll(appConfiguration.getDynamicRegistrationAllowedPasswordGrantScopes());
-        }
-        List<String> scopesDn;
-        if (scopes != null && !scopes.isEmpty() && isTrue(appConfiguration.getDynamicRegistrationScopesParamEnabled())) {
-            List<String> defaultScopes = scopeService.getDefaultScopesDn();
-            List<String> requestedScopes = scopeService.getScopesDn(scopes);
-            Set<String> allowedScopes = new HashSet<>();
-
-            for (String requestedScope : requestedScopes) {
-                if (defaultScopes.contains(requestedScope)) {
-                    allowedScopes.add(requestedScope);
-                }
-            }
-
-            scopesDn = new ArrayList<>(allowedScopes);
-            client.setScopes(scopesDn.toArray(new String[scopesDn.size()]));
-        } else {
-            scopesDn = scopeService.getDefaultScopesDn();
-            client.setScopes(scopesDn.toArray(new String[scopesDn.size()]));
-        }
+        assignScopes(client, requestObject);
 
         List<String> claims = requestObject.getClaims();
         if (claims != null && !claims.isEmpty()) {
@@ -452,6 +431,38 @@ public class RegisterService {
         cibaRegisterClientMetadataService.updateClient(client, requestObject.getBackchannelTokenDeliveryMode(),
                 requestObject.getBackchannelClientNotificationEndpoint(), requestObject.getBackchannelAuthenticationRequestSigningAlg(),
                 requestObject.getBackchannelUserCodeParameter());
+    }
+
+    public void assignScopes(Client client, RegisterRequest requestObject) {
+        if (isFalse(appConfiguration.getDynamicRegistrationScopesParamEnabled())) {
+            log.debug("Skip scopes update. Reason - configuration dynamicRegistrationScopesParamEnabled=false");
+            return;
+        }
+
+        List<String> requestScopes = requestObject.getScope();
+        if (requestScopes == null || requestScopes.isEmpty()) {
+            log.trace("No scopes in request");
+            return;
+        }
+
+        // apply ROPC restriction
+        if (Arrays.asList(client.getGrantTypes()).contains(GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS) && !appConfiguration.getDynamicRegistrationAllowedPasswordGrantScopes().isEmpty()) {
+            requestScopes = Lists.newArrayList(requestScopes);
+            requestScopes.retainAll(appConfiguration.getDynamicRegistrationAllowedPasswordGrantScopes());
+        }
+
+        List<String> defaultScopes = scopeService.getDefaultScopesDn();
+        List<String> requestedScopes = scopeService.getScopesDn(requestScopes);
+        Set<String> allowedScopes = new HashSet<>();
+
+        for (String requestedScope : requestedScopes) {
+            if (defaultScopes.contains(requestedScope)) {
+                allowedScopes.add(requestedScope);
+            }
+        }
+
+        log.trace("Allowed scopes: {}, requested scopes: {}, default scopes: {}", allowedScopes, requestedScopes, defaultScopes);
+        client.setScopes(allowedScopes.toArray(new String[0]));
     }
 
     /**
