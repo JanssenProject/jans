@@ -52,7 +52,7 @@ class Plugin(DialogUtils):
         self.port_widget = self.app.getTitledText(_("SMTP Port"), name='port', text_type='integer', style=cli_style.edit_text)
         self.connect_protection_widget = self.app.getTitledRadioButton(
                     _("Connect Protection"),
-                    name='connect-protection',
+                    name='connect_protection',
                     values=[(v,v) for v in ('None', 'StartTls', 'SslTls')],
                     style=cli_style.edit_text
                     )
