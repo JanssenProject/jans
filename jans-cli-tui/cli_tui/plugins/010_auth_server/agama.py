@@ -362,7 +362,7 @@ class Agama(DialogUtils):
             asyncio.ensure_future(coroutine())
 
         dialog = self.app.get_confirm_dialog(
-            message = HTML(_("Are you sure want to delete Agama Project <b>{}</b>?").format(project_name)),
+            message = HTML(_("This will remove flows, assets, code and libraries belonging to project <b>{}</b>. Are you sure want to delete?").format(project_name)),
             confirm_handler=do_delete_agama_project
             )
 
