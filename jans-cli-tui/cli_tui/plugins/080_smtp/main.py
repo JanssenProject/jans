@@ -63,10 +63,10 @@ class Plugin(DialogUtils):
         self.smtp_authentication_account_password_widget = self.app.getTitledText(_("SMTP Password"), name='smtp_authentication_account_password', style=cli_style.edit_text)
         self.trust_host_widget = self.app.getTitledCheckBox(_("Trust Server"), name='trust_host', style=cli_style.edit_text)
 
-        self.key_store_widget = self.app.getTitledText(_("Keystore"), name='key-store', style=cli_style.edit_text)
-        self.key_store_password_widget = self.app.getTitledText(_("Keystore Password"), name='key-store-password', style=cli_style.edit_text)
-        self.key_store_alias_widget = self.app.getTitledText(_("Keystore Alias"), name='key-store-alias', style=cli_style.edit_text)
-        self.signing_algorithm_widget = self.app.getTitledText(_("Keystore Signing Alg"), name='signing-algorithm', style=cli_style.edit_text)
+        self.key_store_widget = self.app.getTitledText(_("Keystore"), name='key_store', style=cli_style.edit_text)
+        self.key_store_password_widget = self.app.getTitledText(_("Keystore Password"), name='key_store_password', style=cli_style.edit_text)
+        self.key_store_alias_widget = self.app.getTitledText(_("Keystore Alias"), name='key_store_alias', style=cli_style.edit_text)
+        self.signing_algorithm_widget = self.app.getTitledText(_("Keystore Signing Alg"), name='signing_algorithm', style=cli_style.edit_text)
 
 
         self.main_container = HSplit([
