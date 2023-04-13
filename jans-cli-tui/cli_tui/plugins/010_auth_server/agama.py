@@ -354,7 +354,7 @@ class Agama(DialogUtils):
                 response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
                 self.app.stop_progressing()
 
-                if response.status_code != 200:
+                if response:
                     self.app.show_message(_(common_strings.error), HTML(_("Deleting project <b>{}</b> was failed: {} {}").format(project_name, response.status_code, response.reason)), tobefocused=self.working_container)
 
                 self.get_agama_projects()
