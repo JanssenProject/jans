@@ -77,8 +77,17 @@ public class CustomScriptService extends AbstractCustomScriptService {
     }
 
     public PagedResult<CustomScript> searchScripts(SearchRequest searchRequest, CustomScriptType type) {
-        log.debug("Search CustomScript with searchRequest - searchRequest:{}, type:{}", searchRequest, type);
+        log.error("Search CustomScript with searchRequest - searchRequest:{}, type:{}", searchRequest, type);
+        PagedResult<CustomScript> pagedResult =  searchScripts(searchRequest.getFilter(), searchRequest.getSortBy(), searchRequest.getSortOrder(), searchRequest.getStartIndex(), searchRequest.getCount(), searchRequest.getMaxCount(), null);
 
+        log.error("PagedResult  - pagedResult:{}", pagedResult);
+        if (pagedResult != null) {
+            log.error(
+                    "CustomScripts fetched  - pagedResult.getTotalEntriesCount():{}, pagedResult.getEntriesCount():{}, pagedResult.getEntries():{}",
+                    pagedResult.getTotalEntriesCount(), pagedResult.getEntriesCount(), pagedResult.getEntries());
+        }
+
+       
         Filter searchFilter = null;
 
         List<Filter> filters = new ArrayList<>();

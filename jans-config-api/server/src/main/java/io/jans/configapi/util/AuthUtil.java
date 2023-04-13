@@ -17,10 +17,12 @@ import io.jans.configapi.security.api.ApiProtectionCache;
 import io.jans.configapi.security.client.AuthClientFactory;
 import io.jans.configapi.configuration.ConfigurationFactory;
 import io.jans.configapi.core.rest.ProtectedApi;
+import io.jans.configapi.core.service.ConfService;
 import io.jans.configapi.core.util.ProtectionScopeType;
 import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.service.auth.ClientService;
 import io.jans.configapi.service.auth.ScopeService;
+import io.jans.orm.model.AttributeData;
 import io.jans.util.security.StringEncrypter.EncryptionException;
 
 import java.lang.reflect.Method;
@@ -65,6 +67,9 @@ public class AuthUtil {
 
     @Inject
     EncryptionService encryptionService;
+    
+    @Inject
+    ConfService confService;
 
     public String getOpenIdConfigurationEndpoint() {
         return this.configurationService.find().getOpenIdConfigurationEndpoint();
@@ -441,6 +446,11 @@ public class AuthUtil {
             log.error("Error in parsing string to date. Allowed Date Format : {},  Date-String : {} ", DATE_PATTERN_YYYY_MM_DD, dateString);
         }
         return date;
+    }
+    
+    public <T> List<AttributeData> getAttributeData(String dn, String objectClass) {
+        log.debug("AttributeData to be fetched for dn:{}, objectClass:{} ", dn, objectClass);
+        return confService.getEntityAttributeData(dn, objectClass);
     }
 
 }

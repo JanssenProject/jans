@@ -40,6 +40,7 @@ import jakarta.ws.rs.core.Response;
 import static io.jans.as.model.util.Util.escapeLog;
 
 import java.io.IOException;
+import java.util.Map;
 
 import org.slf4j.Logger;
 
@@ -210,7 +211,6 @@ public class AttributesResource extends ConfigBaseResource {
     }
 
     private PagedResult<GluuAttribute> doSearch(SearchRequest searchReq, String status) {
-
         logger.debug("GluuAttribute search params - searchReq:{} , status:{} ", searchReq, status);
 
         PagedResult<GluuAttribute> pagedResult = attributeService.searchGluuAttributes(searchReq, status);
@@ -224,6 +224,11 @@ public class AttributesResource extends ConfigBaseResource {
 
         logger.debug("GluuAttributes pagedResult:{} ", pagedResult);
         return pagedResult;
+    }
+    
+    private Map<String,String> getFieldValueMap(SearchRequest searchReq){
+        logger.error("Attribute search params - attributeService.getDnForAttribute(null):{}, GluuAttribute.class.getSimpleName(), searchReq:{} ", attributeService.getDnForAttribute(null), GluuAttribute.class.getSimpleName(), searchReq);
+        return this.getAttributeData(attributeService.getDnForAttribute(null), GluuAttribute.class.getSimpleName(), searchReq.getFieldValueMap());
     }
 
 }

@@ -10,9 +10,11 @@ import io.jans.as.common.service.common.ConfigurationService;
 import io.jans.as.model.config.Conf;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.orm.PersistenceEntryManager;
-
+import io.jans.orm.model.AttributeData;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+
+import java.util.List;
 
 import org.slf4j.Logger;
 
@@ -40,6 +42,10 @@ public class ConfService {
     public AppConfiguration find() {
         final Conf conf = findConf();
         return conf.getDynamic();
+    }
+    
+    public <T> List<AttributeData> getEntityAttributeData(String dn, String objectClass) {
+        return persistenceEntryManager.exportEntry(dn, objectClass);
     }
 
 }

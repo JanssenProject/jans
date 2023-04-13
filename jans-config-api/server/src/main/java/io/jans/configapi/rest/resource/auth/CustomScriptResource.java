@@ -42,6 +42,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -89,7 +90,7 @@ public class CustomScriptResource extends ConfigBaseResource {
         SearchRequest searchReq = createSearchRequest(customScriptService.baseDn(), pattern, sortBy,
                 sortOrder, startIndex, limit, null, null, this.getMaxCount(),fieldValuePair);
 
-        
+        getFieldValueMap(searchReq);
         return Response.ok(doSearch(searchReq, null)).build();
     }
 
@@ -146,6 +147,11 @@ public class CustomScriptResource extends ConfigBaseResource {
                     escapeLog(sortOrder));
         }
 
+        SearchRequest searchReq = createSearchRequest(customScriptService.baseDn(), pattern, sortBy,
+                sortOrder, startIndex, limit, null, null, this.getMaxCount(),null);
+
+        getFieldValueMap(searchReq);
+        
         return Response.ok(doSearch(pattern, sortBy, sortOrder, startIndex, limit, this.getMaxCount(),
                 CustomScriptType.getByValue(type.toLowerCase()))).build();
     }
@@ -379,6 +385,11 @@ public class CustomScriptResource extends ConfigBaseResource {
         
         logger.debug("script revision after update - customScript.getRevision():{}", customScript.getRevision());
         return customScript;
+    }
+    
+    private Map<String,String> getFieldValueMap(SearchRequest searchReq){
+        logger.error("CustomScript search params - customScriptService.baseDn():{}, CustomScript.class.getSimpleName():{}, searchReq:{} ", customScriptService.baseDn(), CustomScript.class.getSimpleName(), searchReq);
+        return this.getAttributeData(customScriptService.baseDn(), CustomScript.class.getSimpleName(), searchReq.getFieldValueMap());
     }
 
 }
