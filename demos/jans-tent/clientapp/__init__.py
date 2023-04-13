@@ -31,6 +31,7 @@ setup_logger()
 
 oauth = OAuth()
 
+
 def add_config_from_json():
     with open('client_info.json', 'r') as openfile:
         client_info = json.load(openfile)
