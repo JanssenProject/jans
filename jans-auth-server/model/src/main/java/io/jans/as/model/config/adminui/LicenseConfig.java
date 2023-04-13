@@ -9,16 +9,7 @@ public class LicenseConfig {
     private String scanLicenseApiHostname;
     private String licenseKey;
     private String licenseHardwareKey;
-    private CredentialsEncryptionKeyDetails credentialsEncryptionKey;
     private OIDCClientSettings oidcClient;
-
-    public CredentialsEncryptionKeyDetails getCredentialsEncryptionKey() {
-        return credentialsEncryptionKey;
-    }
-
-    public void setCredentialsEncryptionKey(CredentialsEncryptionKeyDetails credentialsEncryptionKey) {
-        this.credentialsEncryptionKey = credentialsEncryptionKey;
-    }
 
     public OIDCClientSettings getOidcClient() {
         return oidcClient;
@@ -67,7 +58,6 @@ public class LicenseConfig {
                 ", licenseKey='" + licenseKey + '\'' +
                 ", ssa='" + ssa + '\'' +
                 ", licenseHardwareKey='" + licenseHardwareKey + '\'' +
-                ", credentialsEncryptionKey=" + credentialsEncryptionKey.toString() +
                 ", oidcClient=" + oidcClient.toString() +
                 '}';
     }
