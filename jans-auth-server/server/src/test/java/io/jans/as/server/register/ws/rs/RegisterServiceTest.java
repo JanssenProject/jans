@@ -5,6 +5,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Sets;
+import io.jans.as.client.RegisterRequest;
+import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.AttributeService;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
@@ -22,10 +24,11 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 /**
  * @author Yuriy Z
@@ -54,6 +57,73 @@ public class RegisterServiceTest {
 
     @Mock
     private CIBARegisterClientMetadataService cibaRegisterClientMetadataService;
+
+    @Test
+    public void assignScopes_whenCalled_shouldAssignOnlyAllowedScopes() {
+        final List<String> requestScopes = Lists.newArrayList("s1", "s2", "s3");
+
+        when(appConfiguration.getDynamicRegistrationScopesParamEnabled()).thenReturn(true);
+        when(scopeService.getDefaultScopesDn()).thenReturn(Lists.newArrayList("s1_dn", "s2_dn"));
+        when(scopeService.getScopesDn(requestScopes)).thenReturn(Lists.newArrayList("s1_dn", "s2_dn", "s3_dn"));
+
+        Client client = new Client();
+
+        RegisterRequest registerRequest = new RegisterRequest();
+        registerRequest.setScope(requestScopes);
+
+        registerService.assignScopes(client, registerRequest);
+        assertEqualsNoOrder(client.getScopes(), new String[]{"s1_dn", "s2_dn"});
+    }
+
+    @Test
+    public void assignScopes_whenDynamicRegistrationScopesAreNotAllowed_shouldAssignNothing() {
+        final List<String> requestScopes = Lists.newArrayList("s1", "s2", "s3");
+
+        when(appConfiguration.getDynamicRegistrationScopesParamEnabled()).thenReturn(false);
+
+        Client client = new Client();
+
+        RegisterRequest registerRequest = new RegisterRequest();
+        registerRequest.setScope(requestScopes);
+
+        registerService.assignScopes(client, registerRequest);
+        assertNull(client.getScopes());
+    }
+
+    @Test
+    public void assignScopes_whenScopesAreNotRequested_shouldAssignNothing() {
+        final List<String> requestScopes = Lists.newArrayList();
+
+        when(appConfiguration.getDynamicRegistrationScopesParamEnabled()).thenReturn(true);
+
+        Client client = new Client();
+
+        RegisterRequest registerRequest = new RegisterRequest();
+        registerRequest.setScope(requestScopes);
+
+        registerService.assignScopes(client, registerRequest);
+        assertNull(client.getScopes());
+    }
+
+    @Test
+    public void assignScopes_forROPC_shouldAssignOnlyAllowedScopes() {
+        final List<String> requestScopes = Lists.newArrayList("s1", "s2", "s3");
+        final List<String> allowedForRopc = Lists.newArrayList("s2");
+
+        when(appConfiguration.getDynamicRegistrationScopesParamEnabled()).thenReturn(true);
+        when(appConfiguration.getDynamicRegistrationAllowedPasswordGrantScopes()).thenReturn(allowedForRopc);
+        when(scopeService.getDefaultScopesDn()).thenReturn(Lists.newArrayList("s1_dn", "s2_dn"));
+        when(scopeService.getScopesDn(allowedForRopc)).thenReturn(Lists.newArrayList("s2_dn"));
+
+        Client client = new Client();
+        client.setGrantTypes(new GrantType[]{GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS});
+
+        RegisterRequest registerRequest = new RegisterRequest();
+        registerRequest.setScope(requestScopes);
+
+        registerService.assignScopes(client, registerRequest);
+        assertEqualsNoOrder(client.getScopes(), new String[]{"s2_dn"});
+    }
 
     @Test
     public void identifyResponseType_whenResponseTypeIsBlank_shouldFallbackToCodeValue() {
