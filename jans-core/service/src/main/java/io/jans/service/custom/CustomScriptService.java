@@ -22,6 +22,7 @@ import io.jans.orm.search.filter.Filter;
 import io.jans.service.OrganizationService;
 import io.jans.service.custom.script.AbstractCustomScriptService;
 import io.jans.util.OxConstants;
+import io.jans.orm.reflect.property.PropertyAnnotation;
 
 /**
  * Operations with custom scripts
@@ -78,16 +79,7 @@ public class CustomScriptService extends AbstractCustomScriptService {
 
     public PagedResult<CustomScript> searchScripts(SearchRequest searchRequest, CustomScriptType type) {
         log.error("Search CustomScript with searchRequest - searchRequest:{}, type:{}", searchRequest, type);
-        PagedResult<CustomScript> pagedResult =  searchScripts(searchRequest.getFilter(), searchRequest.getSortBy(), searchRequest.getSortOrder(), searchRequest.getStartIndex(), searchRequest.getCount(), searchRequest.getMaxCount(), null);
-
-        log.error("PagedResult  - pagedResult:{}", pagedResult);
-        if (pagedResult != null) {
-            log.error(
-                    "CustomScripts fetched  - pagedResult.getTotalEntriesCount():{}, pagedResult.getEntriesCount():{}, pagedResult.getEntries():{}",
-                    pagedResult.getTotalEntriesCount(), pagedResult.getEntriesCount(), pagedResult.getEntries());
-        }
-
-       
+      
         Filter searchFilter = null;
 
         List<Filter> filters = new ArrayList<>();
@@ -133,11 +125,22 @@ public class CustomScriptService extends AbstractCustomScriptService {
             filter = Filter.createANDFilter(searchFilter, typeFilter);
         }
 
-        log.debug("Searching CustomScript Flow with filter:{}", filter);
+        log.error("Searching CustomScript Flow with filter:{}", filter);
+       
+        ////????
+                getData();
+        ////????
 
         return persistenceEntryManager.findPagedEntries(baseDn(), CustomScript.class, filter, null,
                 searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
                 searchRequest.getStartIndex(), searchRequest.getCount(), searchRequest.getMaxCount());
 
+    }
+    
+    
+    private void getData() {
+        log.error("Search CustomScript Get Data");
+        List<PropertyAnnotation> propertyAnnotations = persistenceEntryManager.getEntryPropertyAnnotations(CustomScript.class.getClass());
+        log.error("Searching CustomScript Flow with propertyAnnotations:{}", propertyAnnotations);
     }
 }
