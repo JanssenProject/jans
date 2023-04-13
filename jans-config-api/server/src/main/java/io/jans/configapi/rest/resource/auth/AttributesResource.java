@@ -40,7 +40,6 @@ import jakarta.ws.rs.core.Response;
 import static io.jans.as.model.util.Util.escapeLog;
 
 import java.io.IOException;
-import java.util.Map;
 
 import org.slf4j.Logger;
 
@@ -87,14 +86,14 @@ public class AttributesResource extends ConfigBaseResource {
                     escapeLog(limit), escapeLog(pattern), escapeLog(status), escapeLog(startIndex), escapeLog(sortBy),
                     escapeLog(sortOrder), escapeLog(fieldValuePair));
         }
-        
-        logger.error(
-                "Search Attribute filters with limit:{}, pattern:{}, status:{}, startIndex:{}, sortBy:{}, sortOrder:{}, fieldValuePair:{}",
-                limit, pattern, status, startIndex, sortBy, sortOrder, fieldValuePair);
-        
+              
         SearchRequest searchReq = createSearchRequest(attributeService.getDnForAttribute(null), pattern, sortBy,
                 sortOrder, startIndex, limit, null, null, this.getMaxCount(),fieldValuePair);
 
+        // ??
+        getAttributeData(new GluuAttribute());
+        // ??
+        
         return Response.ok(doSearch(searchReq, status)).build();
     }
 
@@ -224,11 +223,6 @@ public class AttributesResource extends ConfigBaseResource {
 
         logger.debug("GluuAttributes pagedResult:{} ", pagedResult);
         return pagedResult;
-    }
-    
-    private Map<String,String> getFieldValueMap(SearchRequest searchReq){
-        logger.error("Attribute search params - attributeService.getDnForAttribute(null):{}, GluuAttribute.class.getSimpleName(), searchReq:{} ", attributeService.getDnForAttribute(null), GluuAttribute.class.getSimpleName(), searchReq);
-        return this.getAttributeData(attributeService.getDnForAttribute(null), GluuAttribute.class.getSimpleName(), searchReq.getFieldValueMap());
     }
 
 }

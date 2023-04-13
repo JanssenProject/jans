@@ -42,7 +42,6 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 import java.io.IOException;
-import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -83,14 +82,11 @@ public class CustomScriptResource extends ConfigBaseResource {
                     escapeLog(limit), escapeLog(pattern), escapeLog(startIndex), escapeLog(sortBy),
                     escapeLog(sortOrder), escapeLog(fieldValuePair));
         }
-        logger.error(
-                "Search Custom Script filters with limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}, fieldValuePair:{}",
-                limit, pattern, startIndex, sortBy, sortOrder, fieldValuePair);
-        
+
         SearchRequest searchReq = createSearchRequest(customScriptService.baseDn(), pattern, sortBy,
                 sortOrder, startIndex, limit, null, null, this.getMaxCount(),fieldValuePair);
 
-        getFieldValueMap(searchReq);
+        getAttributeData(new CustomScript());
         return Response.ok(doSearch(searchReq, null)).build();
     }
 
@@ -150,7 +146,7 @@ public class CustomScriptResource extends ConfigBaseResource {
         SearchRequest searchReq = createSearchRequest(customScriptService.baseDn(), pattern, sortBy,
                 sortOrder, startIndex, limit, null, null, this.getMaxCount(),null);
 
-        getFieldValueMap(searchReq);
+        getAttributeData(new CustomScript());
         
         return Response.ok(doSearch(pattern, sortBy, sortOrder, startIndex, limit, this.getMaxCount(),
                 CustomScriptType.getByValue(type.toLowerCase()))).build();
@@ -387,9 +383,4 @@ public class CustomScriptResource extends ConfigBaseResource {
         return customScript;
     }
     
-    private Map<String,String> getFieldValueMap(SearchRequest searchReq){
-        logger.error("CustomScript search params - customScriptService.baseDn():{}, CustomScript.class.getSimpleName():{}, searchReq:{} ", customScriptService.baseDn(), CustomScript.class.getSimpleName(), searchReq);
-        return this.getAttributeData(customScriptService.baseDn(), CustomScript.class.getSimpleName(), searchReq.getFieldValueMap());
-    }
-
 }

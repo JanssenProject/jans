@@ -7847,19 +7847,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        whitePagesCanView:
+        userCanAccess:
           type: boolean
-        userCanView:
+        adminCanAccess:
           type: boolean
         userCanEdit:
           type: boolean
         adminCanView:
           type: boolean
-        adminCanAccess:
-          type: boolean
         adminCanEdit:
           type: boolean
-        userCanAccess:
+        userCanView:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -9497,14 +9497,14 @@ components:
           type: boolean
         internal:
           type: boolean
-        locationPath:
-          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
+        locationPath:
+          type: string
         baseDn:
           type: string
     ScriptError:

@@ -25,7 +25,7 @@ public class AttributeService extends io.jans.as.common.service.AttributeService
     }
 
     public PagedResult<GluuAttribute> searchGluuAttributes(SearchRequest searchRequest, String status) {
-        log.debug("Search GluuAttributes with searchRequest:{}, status:{}", searchRequest, status);
+        log.info("Search GluuAttributes with searchRequest:{}, status:{}", searchRequest, status);
 
         Filter activeFilter = null;
         if (ApiConstants.ACTIVE.equalsIgnoreCase(status)) {
@@ -51,27 +51,26 @@ public class AttributeService extends io.jans.as.common.service.AttributeService
             }
             searchFilter = Filter.createORFilter(filters);
         }
-        log.error("Attributes pattern searchFilter:{}", searchFilter);
+        
+        log.trace("Attributes pattern searchFilter:{}", searchFilter);
         List<Filter> fieldValueFilters = new ArrayList<>();
         if(searchRequest.getFieldValueMap()!=null && !searchRequest.getFieldValueMap().isEmpty())
         {
             for (Map.Entry<String, String> entry : searchRequest.getFieldValueMap().entrySet()) {
                 Filter dataFilter = Filter.createEqualityFilter(entry.getKey(), entry.getValue());
-                log.error("dataFilter:{}", dataFilter);
+                log.trace("dataFilter:{}", dataFilter);
                 fieldValueFilters.add(Filter.createANDFilter(dataFilter));
             }  
             searchFilter = Filter.createANDFilter(Filter.createORFilter(filters), Filter.createANDFilter(fieldValueFilters));
         }        
 
-        log.error("Attributes pattern and field searchFilter:{}", searchFilter);
+        log.trace("Attributes pattern and field searchFilter:{}", searchFilter);
        
-        
-
         if (activeFilter != null) {
             searchFilter = Filter.createANDFilter(searchFilter, activeFilter);
         }
 
-        log.error("GluuAttributes final searchFilter:{}", searchFilter);
+        log.info("GluuAttributes final searchFilter:{}", searchFilter);
 
         return persistenceEntryManager.findPagedEntries(getDnForAttribute(null), GluuAttribute.class, searchFilter,
                 null, searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),

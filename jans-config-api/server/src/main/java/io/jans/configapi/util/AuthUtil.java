@@ -22,7 +22,9 @@ import io.jans.configapi.core.util.ProtectionScopeType;
 import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.service.auth.ClientService;
 import io.jans.configapi.service.auth.ScopeService;
+import io.jans.model.custom.script.model.CustomScript;
 import io.jans.orm.model.AttributeData;
+import io.jans.orm.reflect.property.PropertyAnnotation;
 import io.jans.util.security.StringEncrypter.EncryptionException;
 
 import java.lang.reflect.Method;
@@ -67,7 +69,7 @@ public class AuthUtil {
 
     @Inject
     EncryptionService encryptionService;
-    
+
     @Inject
     ConfService confService;
 
@@ -78,15 +80,15 @@ public class AuthUtil {
     public String getAuthOpenidConfigurationUrl() {
         return this.configurationFactory.getApiAppConfiguration().getAuthOpenidConfigurationUrl();
     }
-    
+
     public AuditLogConf getAuditLogConf() {
         return this.configurationFactory.getApiAppConfiguration().getAuditLogConf();
     }
-    
+
     public DataFormatConversionConf getDataFormatConversionConf() {
         return this.configurationFactory.getApiAppConfiguration().getDataFormatConversionConf();
     }
-    
+
     public List<PluginConf> getPluginConf() {
         return this.configurationFactory.getApiAppConfiguration().getPlugins();
     }
@@ -434,7 +436,7 @@ public class AuthUtil {
         return scopeList;
 
     }
-    
+
     public Date parseStringToDateObj(String dateString) {
         String DATE_PATTERN_YYYY_MM_DD = "yyyy-MM-dd";
         SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_PATTERN_YYYY_MM_DD);
@@ -443,14 +445,14 @@ public class AuthUtil {
         try {
             date = dateFormat.parse(dateString);
         } catch (ParseException e) {
-            log.error("Error in parsing string to date. Allowed Date Format : {},  Date-String : {} ", DATE_PATTERN_YYYY_MM_DD, dateString);
+            log.error("Error in parsing string to date. Allowed Date Format : {},  Date-String : {} ",
+                    DATE_PATTERN_YYYY_MM_DD, dateString);
         }
         return date;
     }
-    
-    public <T> List<AttributeData> getAttributeData(String dn, String objectClass) {
-        log.debug("AttributeData to be fetched for dn:{}, objectClass:{} ", dn, objectClass);
-        return confService.getEntityAttributeData(dn, objectClass);
-    }
 
+    public <T> List<AttributeData> getAttributeData(Object entity) {
+        log.error("AttributeData to be fetched for  entity:{} ", entity);
+        return confService.getEntityAttributeData(entity);
+    }
 }

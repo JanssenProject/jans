@@ -1555,7 +1555,7 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 		}
 	}
 
-	protected List<AttributeData> getAttributesListForPersist(Object entry,
+	public List<AttributeData> getAttributesListForPersist(Object entry,
 			List<PropertyAnnotation> propertiesAnnotations) {
 		// Prepare list of properties to persist
 		List<AttributeData> attributes = new ArrayList<AttributeData>();

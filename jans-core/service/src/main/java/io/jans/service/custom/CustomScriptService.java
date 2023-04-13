@@ -22,7 +22,7 @@ import io.jans.orm.search.filter.Filter;
 import io.jans.service.OrganizationService;
 import io.jans.service.custom.script.AbstractCustomScriptService;
 import io.jans.util.OxConstants;
-import io.jans.orm.reflect.property.PropertyAnnotation;
+
 
 /**
  * Operations with custom scripts
@@ -78,11 +78,11 @@ public class CustomScriptService extends AbstractCustomScriptService {
     }
 
     public PagedResult<CustomScript> searchScripts(SearchRequest searchRequest, CustomScriptType type) {
-        log.error("Search CustomScript with searchRequest - searchRequest:{}, type:{}", searchRequest, type);
-      
-        Filter searchFilter = null;
+        log.info("Search CustomScript with searchRequest - searchRequest:{}, type:{}", searchRequest, type);
 
+        Filter searchFilter = null;
         List<Filter> filters = new ArrayList<>();
+
         if (searchRequest.getFilterAssertionValue() != null && !searchRequest.getFilterAssertionValue().isEmpty()) {
 
             for (String assertionValue : searchRequest.getFilterAssertionValue()) {
@@ -104,19 +104,19 @@ public class CustomScriptService extends AbstractCustomScriptService {
             searchFilter = Filter.createORFilter(filters);
         }
 
-        log.error("CustomScript pattern searchFilter:{}", searchFilter);
+        log.trace("CustomScript pattern searchFilter:{}", searchFilter);
         List<Filter> fieldValueFilters = new ArrayList<>();
         if (searchRequest.getFieldValueMap() != null && !searchRequest.getFieldValueMap().isEmpty()) {
             for (Map.Entry<String, String> entry : searchRequest.getFieldValueMap().entrySet()) {
                 Filter dataFilter = Filter.createEqualityFilter(entry.getKey(), entry.getValue());
-                log.error("CustomScript dataFilter:{}", dataFilter);
+                log.trace("CustomScript dataFilter:{}", dataFilter);
                 fieldValueFilters.add(Filter.createANDFilter(dataFilter));
             }
             searchFilter = Filter.createANDFilter(Filter.createORFilter(filters),
                     Filter.createANDFilter(fieldValueFilters));
         }
 
-        log.error("CustomScript pattern and field searchFilter:{}", searchFilter);
+        log.trace("CustomScript pattern and field searchFilter:{}", searchFilter);
 
         Filter filter = searchFilter;
         log.debug("filter:{}", filter);
@@ -125,22 +125,11 @@ public class CustomScriptService extends AbstractCustomScriptService {
             filter = Filter.createANDFilter(searchFilter, typeFilter);
         }
 
-        log.error("Searching CustomScript Flow with filter:{}", filter);
-       
-        ////????
-                getData();
-        ////????
-
+        log.info("Searching CustomScript Flow with filter:{}", filter);
         return persistenceEntryManager.findPagedEntries(baseDn(), CustomScript.class, filter, null,
                 searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
                 searchRequest.getStartIndex(), searchRequest.getCount(), searchRequest.getMaxCount());
 
     }
-    
-    
-    private void getData() {
-        log.error("Search CustomScript Get Data");
-        List<PropertyAnnotation> propertyAnnotations = persistenceEntryManager.getEntryPropertyAnnotations(CustomScript.class.getClass());
-        log.error("Searching CustomScript Flow with propertyAnnotations:{}", propertyAnnotations);
-    }
+
 }

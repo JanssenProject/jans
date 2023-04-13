@@ -29,7 +29,7 @@ public class ConfigBaseResource extends BaseResource {
 
     @Inject
     ConfigurationFactory configurationFactory;
-    
+
     @Inject
     AuthUtil authUtil;
 
@@ -40,19 +40,12 @@ public class ConfigBaseResource extends BaseResource {
                 ? configurationFactory.getApiAppConfiguration().getMaxCount()
                 : ApiConstants.DEFAULT_MAX_COUNT);
     }
-    
-    public <T> List<AttributeData> getAttributeData(String dn, String objectClass) {
-        logger.error("AttributeData details to be fetched for dn:{}, objectClass:{} ", dn, objectClass);
-        List<AttributeData> attributeDataList = authUtil.getAttributeData(dn, objectClass);
-        logger.error("AttributeData details fetched for dn:{}, objectClass:{} is attributeDataList:{}", dn, objectClass, attributeDataList);
-        return attributeDataList;
-    }
 
-    public <T> Map<String,String> getAttributeData(String dn, String objectClass, Map<String,String> fieldValueMap) {
-        logger.error("AttributeData details to be fetched for dn:{}, objectClass:{}, fieldValueMap:{} ", dn, objectClass, fieldValueMap);
-        List<AttributeData> attributeDataList = getAttributeData(dn, objectClass);
-        logger.error("AttributeData details to be fetched for attributeDataList:{} ", attributeDataList);
-        return fieldValueMap;
+    public <T> List<AttributeData> getAttributeData(Object entity) {
+        logger.error("AttributeData details to be fetched for entity:{} ", entity);
+        List<AttributeData> attributeDataList = authUtil.getAttributeData(entity);
+        logger.error("AttributeData details fetched for entity:{} is attributeDataList:{}", entity, attributeDataList);
+        return attributeDataList;
     }
 
 }
