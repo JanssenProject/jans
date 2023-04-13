@@ -111,10 +111,10 @@ class Plugin(DialogUtils):
         self.smtp_authentication_account_password_widget.me.text = self.data.get('smtp_authentication_account_password', '')
         self.trust_host_widget.me.checked = self.data.get('trust_host', False)
 
-        self.key_store_widget.me.text = self.data.get('key-store', '')
-        self.key_store_password_widget.me.text = self.data.get('key-store-password', '')
-        self.key_store_alias_widget.me.text = self.data.get('key-store-alias', '')
-        self.signing_algorithm_widget.me.text = self.data.get('signing-algorithm', '')
+        self.key_store_widget.me.text = self.data.get('key_store', '')
+        self.key_store_password_widget.me.text = self.data.get('key_store_password', '')
+        self.key_store_alias_widget.me.text = self.data.get('key_store_alias', '')
+        self.signing_algorithm_widget.me.text = self.data.get('signing_algorithm', '')
 
     def save_config(self) -> None:
         """This method saves STMP configuration
