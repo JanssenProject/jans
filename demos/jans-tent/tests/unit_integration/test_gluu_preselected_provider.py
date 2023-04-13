@@ -1,23 +1,9 @@
-from unittest import TestCase
 import clientapp
-import os
-from flask import url_for
-from typing import List
-
-
-class FlaskBaseTestCase(TestCase):
-    def setUp(self):
-        clientapp.cfg.PRE_SELECTED_PROVIDER = True
-        self.app = clientapp.create_app()
-        self.app.testing = True
-        self.app_context = self.app.test_request_context()
-        self.app_context.push()
-        self.client = self.app.test_client()
-        #self.oauth = OAuth(self.app)
-        os.environ['AUTHLIB_INSECURE_TRANSPORT'] = "1"
+from helper import FlaskBaseTestCase
 
 
 class TestPreselectedProvider(FlaskBaseTestCase):
+
     # """
     # We should be able to send Preselected passport provider to gluu OIDC as a authorization param
     # like this: preselectedExternalProvider=<base64-url-encoded-provider-object>
@@ -25,6 +11,9 @@ class TestPreselectedProvider(FlaskBaseTestCase):
     # content that looking like this:
     # { "provider" : <provider-ID> }
     # """
+    def setUp(self):
+        clientapp.cfg.PRE_SELECTED_PROVIDER = True
+        FlaskBaseTestCase.setUp(FlaskBaseTestCase)
 
     def test_config_should_have_preselected_provider_option(self):
         self.assertTrue(hasattr(clientapp.cfg, 'PRE_SELECTED_PROVIDER'),
