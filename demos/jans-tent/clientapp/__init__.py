@@ -66,7 +66,6 @@ def get_provider_host():
 
 def ssl_verify(ssl_verify=cfg.SSL_VERIFY):
     if ssl_verify is False:
-        print("Here!")
         os.environ['CURL_CA_BUNDLE'] = ""
 
 
@@ -111,11 +110,9 @@ def create_app():
             status = 400
             # message = 'No json data posted'
         elif 'op_url' and 'redirect_uris' not in content:
-            print('needed keys NOT found in json')
             status = 400
             # message = 'Not needed keys found in json'
         else:
-            print('else')
             app.logger.info('Trying to register client %s on %s' %
                             (content['redirect_uris'], content['op_url']))
             op_url = content['op_url']
@@ -202,8 +199,6 @@ def create_app():
             return redirect('/')
 
         except Exception as error:
-            print('exception!')
-            print(error)
             app.logger.error(str(error))
             return {'error': str(error)}, 400
 
