@@ -34,6 +34,7 @@ class Agama(DialogUtils):
 
         self.app = app
         self.data = []
+        self.first_enter = False
 
         self.working_container = JansVerticalNav(
                 myparent=app,
@@ -63,6 +64,7 @@ class Agama(DialogUtils):
         self.main_container.on_page_enter = self.on_page_enter
 
     def on_page_enter(self) -> None:
+        self.first_enter = True
         self.get_agama_projects()
 
     def display_config(self, event):
@@ -90,7 +92,7 @@ class Agama(DialogUtils):
                 project_details = details_response.json()
 
             else:
-                self.app.show_message(_(common_strings.error), _("Can't get details for project {}").format(project_name), tobefocused=self.working_container)
+                self.app.show_message(_(common_strings.error), HTML(_("Can't get details for project <b>{}</b>").format(project_name)), tobefocused=self.working_container)
                 return
 
 
@@ -98,7 +100,13 @@ class Agama(DialogUtils):
                 cli_args = {'operation_id': 'put-agama-dev-studio-prj', 'url_suffix':'name:{}'.format(project_name), 'data':config}
                 self.app.start_progressing(_("Saving project configuration..."))
                 response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+
                 self.app.stop_progressing()
+
+                if response.status_code in (200, 202):
+                    self.app.show_message(_(common_strings.info), HTML(_("Configuration for project <b>{}</b> was imported successfully.").format(project_name)), tobefocused=fdata.main_dialog)
+                else:
+                    self.app.show_message(_(common_strings.error), HTML(_("Failed to import configuration for project <b>{}</b>: {} {}").format(project_name, response.status_code, response.reason)), tobefocused=fdata.main_dialog)
 
             def read_config_file(path):
                 try:
@@ -174,7 +182,7 @@ class Agama(DialogUtils):
             export_current_config_button = Box(Button(export_current_config_button_title, width=len(export_current_config_button_title)+4, handler=export_current_config))
             import_configuration_button = Box(Button(import_configuration_button_title, width=len(import_configuration_button_title)+4, handler=import_config))
 
-            dialog_title = _("Managae Configuration for Project {}").format(project_name)
+            dialog_title = _("Manage Configuration for Project {}").format(project_name)
             dialog = JansGDialog(
                         self.app,
                         title=dialog_title,
@@ -241,7 +249,10 @@ class Agama(DialogUtils):
         for datum in data_display[start_index:start_index+self.app.entries_per_page]:
             self.working_container.add_item(datum)
 
-        self.app.layout.focus(self.working_container)
+        if not self.first_enter:
+            self.app.layout.focus(self.working_container)
+
+        self.first_enter = False
 
 
     async def get_projects_coroutine(self, search_str=''):
@@ -340,14 +351,18 @@ class Agama(DialogUtils):
             async def coroutine():
                 cli_args = {'operation_id': 'delete-agama-dev-studio-prj', 'url_suffix': 'name:{}'.format(agama['details']['projectMetadata']['projectName'])}
                 self.app.start_progressing(_("Deleting agama project {}".format(project_name)))
-                await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+                response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
                 self.app.stop_progressing()
+
+                if response.status_code != 200:
+                    self.app.show_message(_(common_strings.error), HTML(_("Deleting project <b>{}</b> was failed: {} {}").format(project_name, response.status_code, response.reason)), tobefocused=self.working_container)
+
                 self.get_agama_projects()
 
             asyncio.ensure_future(coroutine())
 
         dialog = self.app.get_confirm_dialog(
-            message = HTML(_("Are you sure want to delete Agama Project <b>{}</b>?").format(project_name)),
+            message = HTML(_("This will remove flows, assets, code and libraries belonging to project <b>{}</b>. Are you sure want to delete?").format(project_name)),
             confirm_handler=do_delete_agama_project
             )
 
@@ -368,8 +383,8 @@ class Agama(DialogUtils):
                 result = response.json()
                 project_metadata = result['details']['projectMetadata']
                 body_widgets = [
-                        self.app.getTitledText(title=_("Version"), value=project_metadata.get('version','-'), name='version', read_only=True),
-                        self.app.getTitledText(title=_("Description"), value=project_metadata.get('description','-'), name='description', read_only=True, height=2),
+                        self.app.getTitledText(title=_("Version"), value=project_metadata.get('version') or '-', name='version', read_only=True),
+                        self.app.getTitledText(title=_("Description"), value=project_metadata.get('description') or '-', name='description', read_only=True, height=2),
                         self.app.getTitledText(title=_("Deployed started on"), value=result['createdAt'], name='createdAt', read_only=True),
                         self.app.getTitledText(title=_("Deployed finished on"), value=result['finishedAt'], name='finishedAt', read_only=True),
                         self.app.getTitledText(title=_("Errors"), value=result['details'].get('error') or "No", name='error', read_only=True),
@@ -378,12 +393,13 @@ class Agama(DialogUtils):
 
                 flow_errors = result['details'].get('flowsError', {})
 
-                jans_table = JansTableWidget(
-                    app=self.app,
-                    data=list(flow_errors.items()),
-                    headers=["Flow", "Error"],
-                    )
-                body_widgets.append(jans_table)
+                if flow_errors:
+                    jans_table = JansTableWidget(
+                        app=self.app,
+                        data=list(flow_errors.items()),
+                        headers=["Flow", "Error"],
+                        )
+                    body_widgets.append(jans_table)
 
                 buttons = [Button(_("Close"))]
                 dialog = JansGDialog(self.app, body=HSplit(body_widgets), title=_("Details of project {}").format(project_name), buttons=buttons)
@@ -391,7 +407,10 @@ class Agama(DialogUtils):
 
 
             elif response.status_code == 204:
-                self.app.show_message(_(common_strings.info), _("Project {} is still being deployed. Try again in 1 minute.").format(project_name), tobefocused=self.working_container)
+                self.app.show_message(_(common_strings.info), HTML(_("Project <b>{}</b> is still being deployed. Try again in 1 minute.").format(project_name)), tobefocused=self.working_container)
+
+            else:
+                self.app.show_message(_(common_strings.error), HTML(_("Retrieving details for <b>{}</b> was failed: {} {}").format(project_name, response.status_code, response.reason)), tobefocused=self.working_container)
 
         if project_name:
             if params['selected'][3] == _("Pending"):

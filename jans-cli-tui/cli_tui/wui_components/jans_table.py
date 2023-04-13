@@ -63,9 +63,10 @@ class JansTableWidget():
 
             for row in self.data:
                 for i, c in enumerate(row):
-                    for cl in c.splitlines():
-                        if len(cl) > max_col_sizes[i]:
-                            max_col_sizes[i] = len(cl)+1
+                    if c:
+                        for cl in c.splitlines():
+                            if len(cl) > max_col_sizes[i]:
+                                max_col_sizes[i] = len(cl)+1
 
             total_col_size = sum(max_col_sizes)
 
@@ -91,6 +92,8 @@ class JansTableWidget():
         for row in self.data:
             row_widgets = []
             for i, c in enumerate(row):
+                if not c:
+                    c = '-'
                 m = c.splitlines()
                 row_widgets.append(TextArea(c, width=self.preferred_size[i], read_only=True, height=len(m), style=self.data_style))
                 table_height += len(m) +1
