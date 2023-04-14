@@ -1,6 +1,7 @@
 
 package io.jans.configapi.service.auth;
 
+import static io.jans.as.model.util.Util.escapeLog;
 import io.jans.as.common.util.AttributeConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.model.GluuAttribute;
@@ -28,7 +29,7 @@ public class AttributeService extends io.jans.as.common.service.AttributeService
     }
 
     public PagedResult<GluuAttribute> searchGluuAttributes(SearchRequest searchRequest, String status) {
-        log.info("Search GluuAttributes with searchRequest:{}, status:{}", searchRequest, status);
+        log.info("Search GluuAttributes with searchRequest:{}, status:{}", escapeLog(searchRequest), status);
 
         Filter activeFilter = null;
         if (ApiConstants.ACTIVE.equalsIgnoreCase(status)) {

@@ -81,11 +81,7 @@ public class UmaResourcesResource extends ConfigBaseResource {
         logger.debug("UMA_RESOURCE to be fetched - limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}, fieldValuePair:{}", escapeLog(limit),
                 escapeLog(pattern), escapeLog(startIndex), escapeLog(sortBy), escapeLog(sortOrder), escapeLog(fieldValuePair));
         
-        
-        logger.error("UMA_RESOURCE to be fetched - limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}, fieldValuePair:{}", limit,
-                pattern, startIndex, sortBy, sortOrder, fieldValuePair);
-        
-        
+             
         SearchRequest searchReq = createSearchRequest(umaResourceService.getBaseDnForResource(), pattern, sortBy,
                 sortOrder, startIndex, limit, null, null, this.getMaxCount(), fieldValuePair, UmaResource.class);
 

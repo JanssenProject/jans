@@ -6,6 +6,7 @@
 
 package io.jans.configapi.core.util;
 
+import static io.jans.as.model.util.Util.escapeLog;
 import io.jans.configapi.core.service.ConfService;
 import io.jans.model.SearchRequest;
 import io.jans.orm.annotation.AttributeName;
@@ -69,7 +70,7 @@ public class Util {
     public Map<String, String> getFieldValueMap(SearchRequest searchRequest, String str, String tokenizer,
             String fieldValueSeparator) {
         log.info(" Field Value to get map - searchRequest:{}, str:{], tokenizer:{} fieldValueSeparator:{}",
-                searchRequest, str, tokenizer, fieldValueSeparator);
+                escapeLog(searchRequest), escapeLog(str), tokenizer, fieldValueSeparator);
 
         Map<String, String> fieldValueMap = new HashMap<>();
         log.debug(" StringUtils.isBlank(str):{}, str.contains(tokenizer):{} , str.contains(fieldValueSeparator):{}",
@@ -107,7 +108,7 @@ public class Util {
     }
 
     public SearchRequest getAttributeData(SearchRequest searchRequest) {
-        log.info("AttributeData details to be fetched with searchRequest:{} ", searchRequest);
+        log.info("AttributeData details to be fetched with searchRequest:{} ", escapeLog(searchRequest));
 
         if (searchRequest == null
                 || (searchRequest.getFieldValueMap() == null || searchRequest.getFieldValueMap().isEmpty())) {
