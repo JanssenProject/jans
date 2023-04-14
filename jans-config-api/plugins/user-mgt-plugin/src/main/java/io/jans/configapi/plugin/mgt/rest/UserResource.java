@@ -89,8 +89,9 @@ public class UserResource extends BaseResource {
                     escapeLog(limit), escapeLog(pattern), escapeLog(startIndex), escapeLog(sortBy),
                     escapeLog(sortOrder),escapeLog(fieldValuePair));
         }
+        
         SearchRequest searchReq = createSearchRequest(userMgmtSrv.getPeopleBaseDn(), pattern, sortBy, sortOrder,
-                startIndex, limit, null, userMgmtSrv.getUserExclusionAttributesAsString(), mgtUtil.getRecordMaxCount(), fieldValuePair);
+                startIndex, limit, null, userMgmtSrv.getUserExclusionAttributesAsString(), mgtUtil.getRecordMaxCount(), fieldValuePair, CustomUser.class);
 
         return Response.ok(this.doSearch(searchReq, true)).build();
     }

@@ -87,7 +87,7 @@ public class AgamaResource extends ConfigBaseResource {
         }
 
         SearchRequest searchReq = createSearchRequest(agamaFlowService.getAgamaFlowDn(null), pattern, sortBy, sortOrder,
-                startIndex, limit, null, null, this.getMaxCount(), null);
+                startIndex, limit, null, null, this.getMaxCount(), null, Flow.class);
 
         return Response.ok(doSearch(searchReq, includeSource)).build();
     }

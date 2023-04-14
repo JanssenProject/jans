@@ -113,11 +113,8 @@ public class ClientsResource extends ConfigBaseResource {
         }
 
         SearchRequest searchReq = createSearchRequest(clientService.getDnForClient(null), pattern, sortBy, sortOrder,
-                startIndex, limit, null, null, this.getMaxCount(),fieldValuePair);
-        // ??
-        getAttributeData(new Client());
-        // ??
-        
+                startIndex, limit, null, null, this.getMaxCount(),fieldValuePair, Client.class);
+
         return Response.ok(this.doSearch(searchReq)).build();
     }
 

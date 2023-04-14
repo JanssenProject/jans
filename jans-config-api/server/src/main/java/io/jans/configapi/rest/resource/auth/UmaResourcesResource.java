@@ -39,8 +39,6 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-import static io.jans.as.model.util.Util.escapeLog;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
@@ -89,7 +87,7 @@ public class UmaResourcesResource extends ConfigBaseResource {
         
         
         SearchRequest searchReq = createSearchRequest(umaResourceService.getBaseDnForResource(), pattern, sortBy,
-                sortOrder, startIndex, limit, null, null, this.getMaxCount(), fieldValuePair);
+                sortOrder, startIndex, limit, null, null, this.getMaxCount(), fieldValuePair, UmaResource.class);
 
         return Response.ok(doSearch(searchReq)).build();
     }

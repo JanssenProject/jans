@@ -1,13 +1,14 @@
 
 package io.jans.configapi.service.auth;
 
-import io.jans.model.GluuAttribute;
 import io.jans.as.common.util.AttributeConstants;
 import io.jans.configapi.util.ApiConstants;
+import io.jans.model.GluuAttribute;
 import io.jans.model.SearchRequest;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;
 import io.jans.orm.search.filter.Filter;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +20,8 @@ import java.util.Map;
 @ApplicationScoped
 public class AttributeService extends io.jans.as.common.service.AttributeService {
 
+    private static final long serialVersionUID = -820393743995746612L;
+    
     @Override
     protected boolean isUseLocalCache() {
         return false;

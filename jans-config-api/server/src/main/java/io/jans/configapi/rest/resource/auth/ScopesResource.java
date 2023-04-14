@@ -37,7 +37,6 @@ import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
@@ -91,12 +90,9 @@ public class ScopesResource extends ConfigBaseResource {
                     "SCOPES to be fetched based on type:{}, limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}, withAssociatedClients:{}, fieldValuePair:{}",
                     escapeLog(type), escapeLog(limit), escapeLog(pattern), escapeLog(startIndex), escapeLog(sortBy), escapeLog(sortOrder), escapeLog(withAssociatedClients), escapeLog(fieldValuePair));
         }
-        log.error(
-                "SCOPES tooo fetched based on type:{}, limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}, withAssociatedClients:{}, fieldValuePair:{}",
-                type, limit, pattern, startIndex, sortBy, sortOrder, withAssociatedClients, fieldValuePair);
-    
+
         SearchRequest searchReq = createSearchRequest(scopeService.getDnForScope(null), pattern, sortBy, sortOrder,
-                startIndex, limit, null, null, this.getMaxCount(), fieldValuePair);
+                startIndex, limit, null, null, this.getMaxCount(), fieldValuePair, CustomScope.class);
 
         return Response.ok(doSearch(searchReq, type, withAssociatedClients)).build();
     }

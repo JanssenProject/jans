@@ -11,10 +11,11 @@ import io.jans.as.common.model.registration.Client;
 import io.jans.as.persistence.model.Scope;
 import io.jans.configapi.core.rest.ProtectedApi;
 
+import io.jans.configapi.core.model.ClientAuth;
 import io.jans.configapi.service.auth.ClientAuthService;
-
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -45,7 +46,7 @@ public class ClientAuthResource extends ConfigBaseResource {
             "Client Authorization" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.CLIENT_AUTHORIZATIONS_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(schema = @Schema(implementation = java.util.HashMap.class), examples = @ExampleObject(name = "Response json example", value = "example/client-auth/client-auth-get.json"))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(schema = @Schema(implementation = ClientAuth.class), examples = @ExampleObject(name = "Response json example", value = "example/client-auth/client-auth-get.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
@@ -61,6 +62,10 @@ public class ClientAuthResource extends ConfigBaseResource {
 
         Map<Client, Set<Scope>> clientAuths = clientAuthService.getUserAuthorizations(userId);
         logger.info("Client serach param - clientAuths:{}", clientAuths);
+        
+        ClientAuth clientAuth = new ClientAuth();
+        clientAuth.setClientAuths(clientAuths);
+        
         return Response.ok(clientAuths).build();
     }
 

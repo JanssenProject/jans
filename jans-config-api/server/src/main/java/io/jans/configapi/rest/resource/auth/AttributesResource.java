@@ -88,12 +88,8 @@ public class AttributesResource extends ConfigBaseResource {
         }
               
         SearchRequest searchReq = createSearchRequest(attributeService.getDnForAttribute(null), pattern, sortBy,
-                sortOrder, startIndex, limit, null, null, this.getMaxCount(),fieldValuePair);
+                sortOrder, startIndex, limit, null, null, this.getMaxCount(),fieldValuePair, GluuAttribute.class);
 
-        // ??
-        getAttributeData(new GluuAttribute());
-        // ??
-        
         return Response.ok(doSearch(searchReq, status)).build();
     }
 
@@ -210,6 +206,7 @@ public class AttributesResource extends ConfigBaseResource {
     }
 
     private PagedResult<GluuAttribute> doSearch(SearchRequest searchReq, String status) {
+
         logger.debug("GluuAttribute search params - searchReq:{} , status:{} ", searchReq, status);
 
         PagedResult<GluuAttribute> pagedResult = attributeService.searchGluuAttributes(searchReq, status);

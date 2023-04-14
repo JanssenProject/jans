@@ -10,13 +10,14 @@ import io.jans.as.common.service.common.ConfigurationService;
 import io.jans.as.model.config.Conf;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.orm.PersistenceEntryManager;
-import io.jans.orm.exception.MappingException;
-import io.jans.orm.model.AttributeData;
 import io.jans.orm.reflect.property.PropertyAnnotation;
+import io.jans.orm.reflect.util.ReflectHelper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
+import java.lang.annotation.Annotation;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 
@@ -43,24 +44,25 @@ public class ConfService {
         return conf.getDynamic();
     }
 
-    public <T> List<AttributeData> getEntityAttributeData(Object entry) {
-        logger.info("Param to get Entity Attribute Data is entry:{}", entry);
-        List<AttributeData> attributes = null;
-        if (entry == null) {
-            return attributes;
-        }
-
-        // Check entry class
-        Class<?> entryClass = entry.getClass();
-        List<PropertyAnnotation> propertiesAnnotations = getEntryPropertyAnnotations(entryClass);
-        attributes = persistenceEntryManager.getAttributesListForPersist(entry, propertiesAnnotations);
-
-        logger.info("Attributes for objectClass:{} are attributes:{}", entry, attributes);
-        return attributes;
-    }
-
     public <T> List<PropertyAnnotation> getEntryPropertyAnnotations(Class<T> entryClass) {
         return persistenceEntryManager.getEntryPropertyAnnotations(entryClass);
+    }
+
+    public Map<String, List<Annotation>> getPropertiesAnnotations(Class<?> theClass, Class<?>... allowedAnnotations) {
+
+        logger.info("Getting Properties Annotations for theClass:{}, allowedAnnotations:{}", theClass,
+                allowedAnnotations);
+        Map<String, List<Annotation>> propertiesAnnotations = null;
+        if (theClass == null || allowedAnnotations == null || allowedAnnotations.length == 0) {
+            return propertiesAnnotations;
+        }
+
+        propertiesAnnotations = ReflectHelper.getPropertiesAnnotations(theClass, allowedAnnotations);
+
+        logger.info("Properties Annotations for theClass:{}, allowedAnnotations:{} are propertiesAnnotations:{}",
+                theClass, allowedAnnotations, propertiesAnnotations);
+
+        return propertiesAnnotations;
     }
 
 }

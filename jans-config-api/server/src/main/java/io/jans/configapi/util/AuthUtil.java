@@ -22,9 +22,6 @@ import io.jans.configapi.core.util.ProtectionScopeType;
 import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.service.auth.ClientService;
 import io.jans.configapi.service.auth.ScopeService;
-import io.jans.model.custom.script.model.CustomScript;
-import io.jans.orm.model.AttributeData;
-import io.jans.orm.reflect.property.PropertyAnnotation;
 import io.jans.util.security.StringEncrypter.EncryptionException;
 
 import java.lang.reflect.Method;
@@ -451,8 +448,4 @@ public class AuthUtil {
         return date;
     }
 
-    public <T> List<AttributeData> getAttributeData(Object entity) {
-        log.error("AttributeData to be fetched for  entity:{} ", entity);
-        return confService.getEntityAttributeData(entity);
-    }
 }

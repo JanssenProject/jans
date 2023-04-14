@@ -150,8 +150,6 @@ public interface PersistenceEntryManager extends EntityManager {
 	List<Object> getCustomAttributesListFromAttributeDataList(Object entry, AttributesList attributesList,
 			String propertyName, Collection<AttributeData> attributes);
 	<T> List<PropertyAnnotation> getEntryPropertyAnnotations(Class<T> entryClass); 
-	List<AttributeData> getAttributesListForPersist(Object entry,
-            List<PropertyAnnotation> propertiesAnnotations);
 
     boolean destroy();
 

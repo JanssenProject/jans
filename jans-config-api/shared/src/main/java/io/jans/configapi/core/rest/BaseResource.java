@@ -180,32 +180,28 @@ public class BaseResource {
     }
 
     protected SearchRequest createSearchRequest(String schemas, String filter, String sortBy, String sortOrder,
-            Integer startIndex, Integer count, String attrsList, String excludedAttrsList, int maximumRecCount, String fieldValuePair) {
+            Integer startIndex, Integer count, String attrsList, String excludedAttrsList, int maximumRecCount, String fieldValuePair, Class<?> entityClass) {
         if (log.isDebugEnabled()) {
             log.debug(
-                    "Search Request params:: - schemas:{}, filter:{}, sortBy:{}, sortOrder:{}, startIndex:{}, count:{}, attrsList:{}, excludedAttrsList:{}, maximumRecCount:{}, fieldValuePair:{}",
+                    "Search Request params:: - schemas:{}, filter:{}, sortBy:{}, sortOrder:{}, startIndex:{}, count:{}, attrsList:{}, excludedAttrsList:{}, maximumRecCount:{}, fieldValuePair:{}, entityClass:{}",
                     escapeLog(schemas), escapeLog(filter), escapeLog(sortBy), escapeLog(sortOrder),
                     escapeLog(startIndex), escapeLog(count), escapeLog(attrsList), escapeLog(excludedAttrsList),
-                    escapeLog(maximumRecCount), escapeLog(fieldValuePair));
+                    escapeLog(maximumRecCount), escapeLog(fieldValuePair), escapeLog(entityClass));
         }
-        log.error(
-                "Search Request params:: - schemas:{}, filter:{}, sortBy:{}, sortOrder:{}, startIndex:{}, count:{}, attrsList:{}, excludedAttrsList:{}, maximumRecCount:{}, fieldValuePair:{}",
-                escapeLog(schemas), escapeLog(filter), escapeLog(sortBy), escapeLog(sortOrder),
-                escapeLog(startIndex), escapeLog(count), escapeLog(attrsList), escapeLog(excludedAttrsList),
-                escapeLog(maximumRecCount), escapeLog(fieldValuePair));
         
         SearchRequest searchRequest = new SearchRequest();
+        searchRequest.setEntityClass(entityClass);
 
         // Validation
         checkNotEmpty(schemas, "Schema");
         int maxCount = maximumRecCount;
-        log.error(" count:{}, maxCount:{}", count, maxCount);
+        log.trace(" count:{}, maxCount:{}", count, maxCount);
         if (count > maxCount) {
             throwBadRequestException("Maximum number of results per page is " + maxCount);
         }
 
         count = count == null ? maxCount : count;
-        log.error(" count:{} ", count);
+        log.trace(" count:{} ", count);
         // Per spec, a negative value SHALL be interpreted as "0" for count
         if (count < 0) {
             count = 0;
@@ -214,7 +210,7 @@ public class BaseResource {
         if (StringUtils.isEmpty(sortOrder) || !sortOrder.equals(SortOrder.DESCENDING.getValue())) {
             sortOrder = SortOrder.ASCENDING.getValue();
         }
-        log.error(" util.getTokens(filter,TOKEN_DELIMITER):{} , util.getFieldValueMap(fieldValuePair, TOKEN_DELIMITER, FIELD_VALUE_SEPARATOR)):{}", util.getTokens(filter, TOKEN_DELIMITER), util.getFieldValueMap(fieldValuePair, TOKEN_DELIMITER, FIELD_VALUE_SEPARATOR));
+        log.debug(" util.getTokens(filter,TOKEN_DELIMITER):{} , util.getFieldValueMap(searchRequest, fieldValuePair, TOKEN_DELIMITER, FIELD_VALUE_SEPARATOR)):{}", util.getTokens(filter, TOKEN_DELIMITER), util.getFieldValueMap(searchRequest, fieldValuePair, TOKEN_DELIMITER, FIELD_VALUE_SEPARATOR));
         searchRequest.setSchemas(schemas);
         searchRequest.setAttributes(attrsList);
         searchRequest.setExcludedAttributes(excludedAttrsList);
@@ -225,7 +221,7 @@ public class BaseResource {
         searchRequest.setCount(count);
         searchRequest.setMaxCount(maximumRecCount);
         searchRequest.setFilterAssertionValue(util.getTokens(filter, TOKEN_DELIMITER));
-        searchRequest.setFieldValueMap((util.getFieldValueMap(fieldValuePair, TOKEN_DELIMITER, FIELD_VALUE_SEPARATOR)));
+        searchRequest.setFieldValueMap((util.getFieldValueMap(searchRequest, fieldValuePair, TOKEN_DELIMITER, FIELD_VALUE_SEPARATOR)));
         return searchRequest;
 
     }

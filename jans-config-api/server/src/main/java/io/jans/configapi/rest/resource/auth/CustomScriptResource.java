@@ -84,9 +84,8 @@ public class CustomScriptResource extends ConfigBaseResource {
         }
 
         SearchRequest searchReq = createSearchRequest(customScriptService.baseDn(), pattern, sortBy,
-                sortOrder, startIndex, limit, null, null, this.getMaxCount(),fieldValuePair);
-
-        getAttributeData(new CustomScript());
+                sortOrder, startIndex, limit, null, null, this.getMaxCount(),fieldValuePair, CustomScript.class);
+        
         return Response.ok(doSearch(searchReq, null)).build();
     }
 
@@ -134,22 +133,20 @@ public class CustomScriptResource extends ConfigBaseResource {
             @Parameter(description = "Search pattern") @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
             @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
             @Parameter(description = "Attribute whose value will be used to order the returned response") @DefaultValue(ApiConstants.INUM) @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
-            @Parameter(description = "Order in which the sortBy param is applied. Allowed values are \"ascending\" and \"descending\"") @DefaultValue(ApiConstants.ASCENDING) @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder) {
+            @Parameter(description = "Order in which the sortBy param is applied. Allowed values are \"ascending\" and \"descending\"") @DefaultValue(ApiConstants.ASCENDING) @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder,
+            @Parameter(description = "Field and value pair for seraching", examples = @ExampleObject(name = "Field value example", value = "adminCanEdit=true,dataType=string")) @DefaultValue("") @QueryParam(value = ApiConstants.FIELD_VALUE_PAIR) String fieldValuePair) {
 
         if (logger.isDebugEnabled()) {
             logger.debug(
-                    "Custom Script to be fetched based on type - type:{}, limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}",
+                    "Custom Script to be fetched based on type - type:{}, limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}, fieldValuePair:{}",
                     escapeLog(type), escapeLog(limit), escapeLog(pattern), escapeLog(startIndex), escapeLog(sortBy),
-                    escapeLog(sortOrder));
+                    escapeLog(sortOrder), escapeLog(fieldValuePair));
         }
 
         SearchRequest searchReq = createSearchRequest(customScriptService.baseDn(), pattern, sortBy,
-                sortOrder, startIndex, limit, null, null, this.getMaxCount(),null);
+                sortOrder, startIndex, limit, null, null, this.getMaxCount(),fieldValuePair, CustomScript.class);
 
-        getAttributeData(new CustomScript());
-        
-        return Response.ok(doSearch(pattern, sortBy, sortOrder, startIndex, limit, this.getMaxCount(),
-                CustomScriptType.getByValue(type.toLowerCase()))).build();
+        return Response.ok(doSearch(searchReq, CustomScriptType.getByValue(type.toLowerCase()))).build();
     }
 
     @Operation(summary = "Gets a script by Inum", description = "Gets a script by Inum", operationId = "get-config-scripts-by-inum", tags = {
@@ -318,27 +315,6 @@ public class CustomScriptResource extends ConfigBaseResource {
         logger.debug("CustomScript pagedResult:{} ", pagedResult);
         return pagedResult;
     }
-    
-    private PagedResult<CustomScript> doSearch(String pattern, String sortBy, String sortOrder, Integer startIndex,
-            int limit, int maximumRecCount, CustomScriptType type) {
-
-        logger.debug(
-                "CustomScript search params -  - pattern:{}, sortBy:{}, sortOrder:{}, startIndex:{}, limit:{}, maximumRecCount:{}, type:{}",
-                pattern, sortBy, sortOrder, startIndex, limit, maximumRecCount, type);
-
-        PagedResult<CustomScript> pagedResult = customScriptService.searchScripts(pattern, sortBy, sortOrder,
-                startIndex, limit, maximumRecCount, type);
-
-        logger.debug("PagedResult  - pagedResult:{}", pagedResult);
-        if (pagedResult != null) {
-            logger.debug(
-                    "CustomScripts fetched  - pagedResult.getTotalEntriesCount():{}, pagedResult.getEntriesCount():{}, pagedResult.getEntries():{}",
-                    pagedResult.getTotalEntriesCount(), pagedResult.getEntriesCount(), pagedResult.getEntries());
-        }
-
-        logger.debug("CustomScript pagedResult:{} ", pagedResult);
-        return pagedResult;
-    }
 
     /**
      * ScriptLocationType.LDAP has been deprecated and hence for any new script
@@ -382,5 +358,5 @@ public class CustomScriptResource extends ConfigBaseResource {
         logger.debug("script revision after update - customScript.getRevision():{}", customScript.getRevision());
         return customScript;
     }
-    
+
 }

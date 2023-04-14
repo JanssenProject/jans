@@ -2038,7 +2038,7 @@ paths:
           content:
             application/json:
               schema:
-                type: string
+                $ref: '#/components/schemas/ClientAuth'
               examples:
                 Response json example:
                   description: Response json example
@@ -4443,6 +4443,16 @@ paths:
         schema:
           type: string
           default: ascending
+      - name: fieldValuePair
+        in: query
+        description: Field and value pair for seraching
+        schema:
+          type: string
+          default: ""
+        examples:
+          Field value example:
+            description: Field value example
+            value: "adminCanEdit=true,dataType=string"
       responses:
         "200":
           description: Ok
@@ -7847,19 +7857,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        userCanAccess:
-          type: boolean
-        adminCanAccess:
-          type: boolean
-        userCanEdit:
+        whitePagesCanView:
           type: boolean
         adminCanView:
           type: boolean
         adminCanEdit:
           type: boolean
+        userCanAccess:
+          type: boolean
+        userCanEdit:
+          type: boolean
         userCanView:
           type: boolean
-        whitePagesCanView:
+        adminCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -8586,6 +8596,8 @@ components:
           type: object
           additionalProperties:
             type: string
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8595,8 +8607,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -8894,6 +8904,91 @@ components:
         maxRetryAttempts:
           type: integer
           format: int32
+    ClientAuth:
+      type: object
+      properties:
+        clientAuths:
+          type: object
+          additionalProperties:
+            uniqueItems: true
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+    Scope:
+      type: object
+      properties:
+        dn:
+          type: string
+        expirationDate:
+          type: string
+          format: date-time
+        deletable:
+          type: boolean
+        inum:
+          type: string
+        displayName:
+          type: string
+        id:
+          type: string
+        iconUrl:
+          type: string
+        description:
+          type: string
+        scopeType:
+          type: string
+          enum:
+          - openid
+          - dynamic
+          - uma
+          - spontaneous
+          - oauth
+        claims:
+          type: array
+          items:
+            type: string
+        defaultScope:
+          type: boolean
+        groupClaims:
+          type: boolean
+        dynamicScopeScripts:
+          type: array
+          items:
+            type: string
+        umaAuthorizationPolicies:
+          type: array
+          items:
+            type: string
+        attributes:
+          $ref: '#/components/schemas/ScopeAttributes'
+        creatorId:
+          type: string
+        creatorType:
+          type: string
+          enum:
+          - none
+          - client
+          - user
+          - auto
+        creationDate:
+          type: string
+          format: date-time
+        creatorAttributes:
+          type: object
+          additionalProperties:
+            type: string
+        umaType:
+          type: boolean
+        baseDn:
+          type: string
+    ScopeAttributes:
+      type: object
+      properties:
+        spontaneousClientScopes:
+          type: array
+          items:
+            type: string
+        showInConfigurationEndpoint:
+          type: boolean
     Client:
       type: object
       properties:
@@ -9119,17 +9214,6 @@ components:
           format: int32
         displayName:
           type: string
-        authenticationMethod:
-          type: string
-          enum:
-          - client_secret_basic
-          - client_secret_post
-          - client_secret_jwt
-          - private_key_jwt
-          - access_token
-          - tls_client_auth
-          - self_signed_tls_client_auth
-          - none
         allAuthenticationMethods:
           uniqueItems: true
           type: array
@@ -9144,6 +9228,17 @@ components:
             - tls_client_auth
             - self_signed_tls_client_auth
             - none
+        authenticationMethod:
+          type: string
+          enum:
+          - client_secret_basic
+          - client_secret_post
+          - client_secret_jwt
+          - private_key_jwt
+          - access_token
+          - tls_client_auth
+          - self_signed_tls_client_auth
+          - none
         baseDn:
           type: string
         inum:
@@ -9729,81 +9824,6 @@ components:
           type: string
         baseDn:
           type: string
-    Scope:
-      type: object
-      properties:
-        dn:
-          type: string
-        expirationDate:
-          type: string
-          format: date-time
-        deletable:
-          type: boolean
-        inum:
-          type: string
-        displayName:
-          type: string
-        id:
-          type: string
-        iconUrl:
-          type: string
-        description:
-          type: string
-        scopeType:
-          type: string
-          enum:
-          - openid
-          - dynamic
-          - uma
-          - spontaneous
-          - oauth
-        claims:
-          type: array
-          items:
-            type: string
-        defaultScope:
-          type: boolean
-        groupClaims:
-          type: boolean
-        dynamicScopeScripts:
-          type: array
-          items:
-            type: string
-        umaAuthorizationPolicies:
-          type: array
-          items:
-            type: string
-        attributes:
-          $ref: '#/components/schemas/ScopeAttributes'
-        creatorId:
-          type: string
-        creatorType:
-          type: string
-          enum:
-          - none
-          - client
-          - user
-          - auto
-        creationDate:
-          type: string
-          format: date-time
-        creatorAttributes:
-          type: object
-          additionalProperties:
-            type: string
-        umaType:
-          type: boolean
-        baseDn:
-          type: string
-    ScopeAttributes:
-      type: object
-      properties:
-        spontaneousClientScopes:
-          type: array
-          items:
-            type: string
-        showInConfigurationEndpoint:
-          type: boolean
     CustomScope:
       type: object
       properties:

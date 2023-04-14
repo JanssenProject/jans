@@ -45,15 +45,6 @@ public class SpecFilter extends AbstractSpecFilter {
         return Optional.of(operation);
     }
 
-    @Override
-    public Optional filterSchema(Schema schema, Map params, Map cookies, Map headers) {
-
-        Schema clientAuthMapSchema = new MapSchema().description("clientAuthMapSchema")
-                .additionalProperties(new ArraySchema().items(new Schema().$ref("#/components/schemas/Scope")));
-        
-        return Optional.of(schema);
-    }
-
     private void setRequestExample(Operation operation) {
         // request example
         if (operation != null && operation.getRequestBody() != null
