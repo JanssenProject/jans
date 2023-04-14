@@ -34,9 +34,6 @@ public class ErrorHandlerService {
     private Logger log;
 
     @Inject
-    private SessionIdService sessionIdService;
-
-    @Inject
     private CookieService cookieService;
 
     @Inject
@@ -61,11 +58,12 @@ public class ErrorHandlerService {
 
     private void addMessage(Severity severity, String facesMessageId) {
         if (StringHelper.isNotEmpty(facesMessageId)) {
-            facesMessages.add(FacesMessage.SEVERITY_ERROR, String.format("#{msgs['%s']}", facesMessageId));
+            facesMessages.add(severity, String.format("#{msgs['%s']}", facesMessageId));
         }
     }
 
     private void handleLocalError(String facesMessageId) {
+        log.debug("Show /error.xhtml with message {}", facesMessageId);
         addMessage(FacesMessage.SEVERITY_ERROR, facesMessageId);
         facesService.redirect("/error.xhtml");
     }
@@ -85,8 +83,9 @@ public class ErrorHandlerService {
         if (StringHelper.isNotEmpty(hint)) {
             redirectUriResponse.addResponseParameter("hint", "Create authorization request to start new authentication session.");
         }
-        facesService.redirectToExternalURL(redirectUriResponse.toString());
 
+        final String redirectTo = redirectUriResponse.toString();
+        log.debug("Redirect to {}", redirectTo);
+        facesService.redirectToExternalURL(redirectTo);
     }
-
 }
