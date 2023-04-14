@@ -69,7 +69,7 @@ public class Util {
 
     public Map<String, String> getFieldValueMap(SearchRequest searchRequest, String str, String tokenizer,
             String fieldValueSeparator) {
-        log.info(" Field Value to get map - searchRequest:{}, str:{], tokenizer:{} fieldValueSeparator:{}",
+        log.info(" Field Value to get map - searchRequest:{}, str:{}, tokenizer:{} fieldValueSeparator:{}",
                 escapeLog(searchRequest), escapeLog(str), tokenizer, fieldValueSeparator);
 
         Map<String, String> fieldValueMap = new HashMap<>();

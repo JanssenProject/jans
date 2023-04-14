@@ -7859,13 +7859,13 @@ components:
           type: string
         userCanEdit:
           type: boolean
-        userCanView:
+        adminCanAccess:
           type: boolean
         userCanAccess:
           type: boolean
-        adminCanEdit:
+        userCanView:
           type: boolean
-        adminCanAccess:
+        adminCanEdit:
           type: boolean
         adminCanView:
           type: boolean

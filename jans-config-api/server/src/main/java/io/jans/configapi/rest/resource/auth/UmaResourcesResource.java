@@ -77,9 +77,12 @@ public class UmaResourcesResource extends ConfigBaseResource {
             @Parameter(description = "Attribute whose value will be used to order the returned response") @DefaultValue(ApiConstants.INUM) @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
             @Parameter(description = "Order in which the sortBy param is applied. Allowed values are \"ascending\" and \"descending\"") @DefaultValue(ApiConstants.ASCENDING) @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder,
             @Parameter(description = "Field and value pair for seraching", examples = @ExampleObject(name = "Field value example", value = "deletable=true")) @DefaultValue("") @QueryParam(value = ApiConstants.FIELD_VALUE_PAIR) String fieldValuePair) {
-        
-        logger.debug("UMA_RESOURCE to be fetched - limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}, fieldValuePair:{}", escapeLog(limit),
-                escapeLog(pattern), escapeLog(startIndex), escapeLog(sortBy), escapeLog(sortOrder), escapeLog(fieldValuePair));
+        if (logger.isDebugEnabled()) {
+            logger.debug(
+                    "UMA_RESOURCE to be fetched - limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}, fieldValuePair:{}",
+                    escapeLog(limit), escapeLog(pattern), escapeLog(startIndex), escapeLog(sortBy),
+                    escapeLog(sortOrder), escapeLog(fieldValuePair));
+        }
         
              
         SearchRequest searchReq = createSearchRequest(umaResourceService.getBaseDnForResource(), pattern, sortBy,
