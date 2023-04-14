@@ -73,8 +73,7 @@ public class Util {
                 escapeLog(searchRequest), escapeLog(str), tokenizer, fieldValueSeparator);
 
         Map<String, String> fieldValueMap = new HashMap<>();
-        log.debug(" StringUtils.isBlank(str):{}, str.contains(tokenizer):{} , str.contains(fieldValueSeparator):{}",
-                StringUtils.isBlank(str), str.contains(tokenizer), str.contains(fieldValueSeparator));
+        
         if (StringUtils.isBlank(str) || !str.contains(fieldValueSeparator)) {
             return fieldValueMap;
         }
@@ -100,7 +99,10 @@ public class Util {
         }
 
         log.info("fieldValueMap:{}", fieldValueMap);
-        searchRequest.setFieldValueMap(fieldValueMap);
+       
+        if(searchRequest!=null) {
+            searchRequest.setFieldValueMap(fieldValueMap);
+        }
         
         // Replace filedValue with the DB field name
         getAttributeData(searchRequest);
