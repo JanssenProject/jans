@@ -29,7 +29,9 @@ public class AttributeService extends io.jans.as.common.service.AttributeService
     }
 
     public PagedResult<GluuAttribute> searchGluuAttributes(SearchRequest searchRequest, String status) {
-        log.info("Search GluuAttributes with searchRequest:{}, status:{}", escapeLog(searchRequest), status);
+        if (log.isInfoEnabled()) {
+            log.info("Search GluuAttributes with searchRequest:{}, status:{}", escapeLog(searchRequest), escapeLog(status));
+        }
 
         Filter activeFilter = null;
         if (ApiConstants.ACTIVE.equalsIgnoreCase(status)) {

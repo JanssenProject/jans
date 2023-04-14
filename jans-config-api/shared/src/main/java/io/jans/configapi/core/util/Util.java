@@ -44,7 +44,9 @@ public class Util {
     }
 
     public List<String> getTokens(String str, String tokenizer) {
-        log.info(" String to get tokens - str:{}, tokenizer:{}", str, tokenizer);
+        if (log.isInfoEnabled()) {
+            log.info(" String to get tokens - str:{}, tokenizer:{}", escapeLog(str), escapeLog(tokenizer));
+        }
 
         ArrayList<String> list = new ArrayList<>();
         if (StringUtils.isBlank(str)) {
@@ -69,8 +71,10 @@ public class Util {
 
     public Map<String, String> getFieldValueMap(SearchRequest searchRequest, String str, String tokenizer,
             String fieldValueSeparator) {
-        log.info(" Field Value to get map - searchRequest:{}, str:{}, tokenizer:{} fieldValueSeparator:{}",
-                escapeLog(searchRequest), escapeLog(str), tokenizer, fieldValueSeparator);
+        if (log.isInfoEnabled()) {
+            log.info(" Field Value to get map - searchRequest:{}, str:{}, tokenizer:{} fieldValueSeparator:{}",
+                    escapeLog(searchRequest), escapeLog(str), escapeLog(tokenizer), escapeLog(fieldValueSeparator));
+        }
 
         Map<String, String> fieldValueMap = new HashMap<>();
         
@@ -110,7 +114,9 @@ public class Util {
     }
 
     public SearchRequest getAttributeData(SearchRequest searchRequest) {
-        log.info("AttributeData details to be fetched with searchRequest:{} ", escapeLog(searchRequest));
+        if (log.isInfoEnabled()) {
+            log.info("AttributeData details to be fetched with searchRequest:{} ", escapeLog(searchRequest));
+        }
 
         if (searchRequest == null
                 || (searchRequest.getFieldValueMap() == null || searchRequest.getFieldValueMap().isEmpty())) {
