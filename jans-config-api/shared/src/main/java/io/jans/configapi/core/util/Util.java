@@ -6,7 +6,6 @@
 
 package io.jans.configapi.core.util;
 
-import static io.jans.as.model.util.Util.escapeLog;
 import io.jans.configapi.core.service.ConfService;
 import io.jans.model.SearchRequest;
 import io.jans.orm.annotation.AttributeName;
@@ -156,26 +155,15 @@ public class Util {
 
         for (Annotation annotation : annotations) {
             try {
-                AttributeName attributeName = (AttributeName) annotations;
+                AttributeName attributeName = (AttributeName) annotation;
                 if (attributeName != null && StringUtils.isNotBlank(attributeName.name())) {
                     fieldName = attributeName.name();
-                }
-            } catch (ClassCastException cex) {
-                log.error("ClassCastException while fetching DB fieldName for fieldName:{} is :{}", fieldName, cex);
-                try {
-                    AttributesList attributesList = (AttributesList) annotation;
-                    if (attributesList != null && StringUtils.isNotBlank(attributesList.name())) {
-                        fieldName = attributesList.name();
-                    }
-                } catch (Exception ex) {
-                    log.error("Error while fetching AttributesList DB fieldName for fieldName:{} is :{}", fieldName,
-                            ex);
                 }
             } catch (Exception ex) {
                 log.error("Error while fetching DB fieldName for fieldName:{} is :{}", fieldName, ex);
             }
         }
-        
+
         log.info("Final DB field fieldName:{} ", fieldName);
         return fieldName;
     }
