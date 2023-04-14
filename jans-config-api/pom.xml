@@ -394,7 +394,7 @@
 			<dependency>
 				<groupId>org.json</groupId>
 				<artifactId>json</artifactId>
-				<version>20210307</version>
+				<version>20230227</version>
 			</dependency>
 
 			<!-- Swagger -->
