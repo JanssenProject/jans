@@ -956,10 +956,10 @@ class Upgrade:
 
         # default smtp config
         default_smtp_conf = {
-            "key-store": "/etc/certs/smtp-keys.pkcs12",
-            "key-store-password": self.manager.secret.get("smtp_jks_pass_enc"),
-            "key-store-alias": self.manager.config.get("smtp_alias"),
-            "signing-algorithm": self.manager.config.get("smtp_signing_alg"),
+            "key_store": "/etc/certs/smtp-keys.pkcs12",
+            "key_store_password": self.manager.secret.get("smtp_jks_pass_enc"),
+            "key_store_alias": self.manager.config.get("smtp_alias"),
+            "signing_algorithm": self.manager.config.get("smtp_signing_alg"),
         }
 
         # set jansSmtpConf if still empty
@@ -969,10 +969,20 @@ class Upgrade:
             if not smtp_conf["v"]:
                 entry.attrs["jansSmtpConf"]["v"].append(json.dumps(default_smtp_conf))
                 should_update = True
+            else:
+                if new_smtp_conf := _transform_smtp_config(default_smtp_conf, smtp_conf["v"]):
+                    entry.attrs["jansSmtpConf"]["v"][0] = json.dumps(new_smtp_conf)
+                    should_update = True
+
+        # other persistence backends
         else:
             if not smtp_conf:
-                entry.attrs["jansSmtpConf"] = [json.dumps(default_smtp_conf)]
+                entry.attrs["jansSmtpConf"].append(json.dumps(default_smtp_conf))
                 should_update = True
+            else:
+                if new_smtp_conf := _transform_smtp_config(default_smtp_conf, smtp_conf):
+                    entry.attrs["jansSmtpConf"][0] = json.dumps(new_smtp_conf)
+                    should_update = True
 
         if should_update:
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
@@ -1026,3 +1036,19 @@ def _transform_auth_static_config(conf):
         conf["baseDn"]["ssa"] = "ou=ssa,o=jans"
         should_update = True
     return conf, should_update
+
+
+def _transform_smtp_config(default_smtp_conf, smtp_conf):
+    old_smtp_conf = json.loads(smtp_conf[0])
+    new_smtp_conf = {}
+
+    for k, v in default_smtp_conf.items():
+        if k in old_smtp_conf:
+            continue
+
+        # rename key and migrate the value (fallback to default value)
+        new_smtp_conf[k] = old_smtp_conf.pop(
+            # old key uses `-` instead of `_` char
+            k.replace("_", "-"), ""
+        ) or v
+    return new_smtp_conf
