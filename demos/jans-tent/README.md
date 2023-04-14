@@ -12,8 +12,9 @@ an existing client_id if you like.
 
 ## Installation
 
-**Note**: If you are using Mac or want to use different Python versions, use
-**Pyenv**.
+**Important**: Ensure you have `Python >= 3.11`
+
+**Mac Users**: We recommend using [pyenv - simple python version management](https://github.com/pyenv/pyenv) instead of Os x native python.
 
 1. Navigate to the project root folder `jans/demos/jans-tent`
 2. Create virtual environment

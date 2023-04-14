@@ -13,14 +13,17 @@ class TestDrcFromConfig(TestCase):
         # stashing to restore on teardown
         self.stashed_discover = ClientHandler.discover
         self.stashed_register_client = ClientHandler.register_client
+        self.stashed_open = builtins.open
         ClientHandler.discover = MagicMock(name='discover')
         ClientHandler.discover.return_value = helper.OP_DATA_DICT_RESPONSE
         ClientHandler.register_client = MagicMock(name='register_client')
         ClientHandler.register_client.return_value = helper.REGISTER_CLIENT_RESPONSE
+        builtins.open = MagicMock(name='open')
 
     def tearDown(self) -> None:
         ClientHandler.discover = self.stashed_discover
         ClientHandler.register_client = self.stashed_register_client
+        builtins.open = self.stashed_open
 
     def test_if_setup_logging_exists(self):
         assert hasattr(dcr_from_config, 'setup_logging')

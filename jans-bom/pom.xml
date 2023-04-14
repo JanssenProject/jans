@@ -50,7 +50,7 @@
 
 		<guava.version>31.1-jre</guava.version>
 	
-		<aws.sns.version>1.12.327</aws.sns.version>
+		<aws.sns.version>1.12.448</aws.sns.version>
 		<jackrabbit.version>2.21.13</jackrabbit.version>
 
 		<bc.version>1.70</bc.version>
@@ -718,14 +718,14 @@
 			<dependency>
 				<groupId>com.unboundid</groupId>
 				<artifactId>unboundid-ldapsdk</artifactId>
-				<version>6.0.6</version>
+				<version>6.0.8</version>
 			</dependency>
 
 			<!-- Couchbase -->
 			<dependency>
 				<groupId>com.couchbase.client</groupId>
 				<artifactId>java-client</artifactId>
-				<version>3.3.4</version>
+				<version>3.4.4</version>
 			</dependency>
 
 			<!-- SQL JDBC Drivers -->
@@ -742,12 +742,12 @@
 			<dependency>
 				<groupId>com.mysql</groupId>
 				<artifactId>mysql-connector-j</artifactId>
-				<version>8.0.31</version>
+				<version>8.0.32</version>
 			</dependency>
 			<dependency>
 			    <groupId>org.postgresql</groupId>
 			    <artifactId>postgresql</artifactId>
-			    <version>42.5.1</version>
+			    <version>42.6.0</version>
 			</dependency>
 
 			<!-- SQL Query -->
@@ -766,7 +766,7 @@
 			<dependency>
 			    <groupId>com.google.cloud</groupId>
 			    <artifactId>google-cloud-spanner</artifactId>
-			    <version>6.31.2</version>
+			    <version>6.39.0</version>
 			</dependency>
 
 			<!-- Metrics -->
