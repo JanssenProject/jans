@@ -266,6 +266,11 @@ def _transform_auth_dynamic_config(conf):
             })
             should_update = True
 
+        # avoid setting agama configuration root dir based on java system variable
+        if "rootDir" not in conf["agamaConfiguration"]:
+            conf["agamaConfiguration"]["rootDir"] = "/opt/jans/jetty/jans-auth/agama"
+            should_update = True
+
     # return the conf and flag to determine whether it needs update or not
     return conf, should_update
 
