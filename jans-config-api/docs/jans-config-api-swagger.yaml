@@ -7652,6 +7652,8 @@ components:
           type: string
         description:
           type: string
+        version:
+          type: string
         configs:
           type: object
           additionalProperties:
@@ -7879,19 +7881,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        adminCanAccess:
+        whitePagesCanView:
           type: boolean
         adminCanView:
           type: boolean
+        adminCanAccess:
+          type: boolean
         adminCanEdit:
+          type: boolean
+        userCanEdit:
           type: boolean
         userCanAccess:
           type: boolean
         userCanView:
-          type: boolean
-        whitePagesCanView:
-          type: boolean
-        userCanEdit:
           type: boolean
         baseDn:
           type: string
@@ -8632,8 +8634,6 @@ components:
           type: object
           additionalProperties:
             type: string
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8643,6 +8643,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
         clientAuthMapSchema:
           type: object
           additionalProperties:
@@ -9431,10 +9433,10 @@ components:
           type: array
           items:
             type: object
-        value:
-          type: object
         displayValue:
           type: string
+        value:
+          type: object
         clientAuthMapSchema:
           type: object
           additionalProperties:
@@ -9602,8 +9604,6 @@ components:
     SmtpConfiguration:
       type: object
       properties:
-        valid:
-          type: boolean
         connectProtectionList:
           type: array
           items:
@@ -9612,6 +9612,8 @@ components:
             - None
             - StartTls
             - SslTls
+        valid:
+          type: boolean
         host:
           type: string
         port:
