@@ -35,7 +35,7 @@ data:
   CN_GOOGLE_SECRET_NAME_PREFIX: {{ .Values.configmap.cnGoogleSecretNamePrefix | quote }}
   # [google_secret_manager_envs] END
   {{- end }}
-  {{ if or (eq .Values.global.configSecretAdapter "aws") (eq .Values.global.configAdapterName "aws"}}
+  {{ if or (eq .Values.global.configSecretAdapter "aws") (eq .Values.global.configAdapterName "aws") }}
   # [aws_envs] Envs related to using AWS
   {{- if .Values.configmap.cnAwsSecretsEndpointUrl }}  
   CN_AWS_SECRETS_ENDPOINT_URL: {{ .Values.configmap.cnAwsSecretsEndpointUrl }}
