@@ -44,10 +44,10 @@ jansScrTyp: client_registration
 objectClass: top
 objectClass: jansCustomScr
 
-dn: inum=CACD-5902,ou=scripts,o=jans
+dn: inum=D3C1-2E4C,ou=scripts,o=jans
 description: Openbanking Token Update Script
 displayName: update_token
-inum: CACD-5902
+inum: D3C1-2E4C
 jansEnabled: 1
 jansLevel: 100
 jansModuleProperty: {"value1":"v1","value2":"v2","description":""}
