@@ -104,7 +104,7 @@ public class Util {
         log.info("fieldValueMap:{}", fieldValueMap);
 
         // Replace filedValue with the DB field name
-        getAttributeData(entityClass, fieldValueMap);
+        fieldValueMap = getAttributeData(entityClass, fieldValueMap);
         return fieldValueMap;
     }
 
@@ -126,17 +126,22 @@ public class Util {
         if (propertiesAnnotations == null || propertiesAnnotations.isEmpty()) {
             return fieldValueMap;
         }
+
+        Map<String, String> updatedFieldValueMap = new HashMap<>();
         if (fieldValueMap != null && !fieldValueMap.isEmpty()) {
 
             for (Map.Entry<String, String> entry : fieldValueMap.entrySet()) {
                 log.debug("entry.getKey():{}, entry.getValue():{}", entry.getKey(), entry.getValue());
                 String dbFieldName = getFieldDBName(entry.getKey(), propertiesAnnotations.get(entry.getKey()));
-                fieldValueMap.remove(entry.getKey());
-                fieldValueMap.put(dbFieldName, entry.getValue());
+                if (StringUtils.isNotBlank(dbFieldName)) {
+                    updatedFieldValueMap.put(dbFieldName, entry.getValue());
+                } else {
+                    updatedFieldValueMap.put(entry.getKey(), entry.getValue());
+                }
             }
         }
-        log.info("Returning fieldValueMap:{} ", fieldValueMap);
-        return fieldValueMap;
+        log.info("Returning updatedFieldValueMap:{} ", updatedFieldValueMap);
+        return updatedFieldValueMap;
     }
 
     private String getFieldDBName(String fieldName, List<Annotation> annotations) {
