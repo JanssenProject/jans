@@ -55,6 +55,15 @@ func TestResourceFido2Config_Mapping(t *testing.T) {
 
 	newCfg := jans.JansFido2DynConfiguration{}
 
+	patches, err := patchFromResourceData(data, &newCfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(patches) != 20 {
+		t.Errorf("Got %d patches, expected 20", len(patches))
+	}
+
 	if err := fromSchemaResource(data, &newCfg); err != nil {
 		t.Fatal(err)
 	}
