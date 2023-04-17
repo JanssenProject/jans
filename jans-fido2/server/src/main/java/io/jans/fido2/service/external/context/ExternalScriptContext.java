@@ -14,18 +14,48 @@ import org.jboss.resteasy.spi.NoLogWebApplicationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ExternalScriptContext extends io.jans.service.external.context.ExternalScriptContext {
+import java.util.HashMap;
+import java.util.Map;
+
+public class ExternalScriptContext {
 
     private static final Logger log = LoggerFactory.getLogger(ExternalScriptContext.class);
 
     private NoLogWebApplicationException webApplicationException;
+
+    private final Map<String, Object> contextVariables;
+
+    protected HttpServletRequest httpRequest;
+    protected final HttpServletResponse httpResponse;
 
     public ExternalScriptContext(HttpServletRequest httpRequest) {
         this(httpRequest, null);
     }
 
     public ExternalScriptContext(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
-        super(httpRequest, httpResponse);
+        this.contextVariables = new HashMap();
+        this.httpRequest = httpRequest;
+        this.httpResponse = httpResponse;
+    }
+
+    public Logger getLog() {
+        return log;
+    }
+
+    public HttpServletRequest getHttpRequest() {
+        return httpRequest;
+    }
+
+    public HttpServletResponse getHttpResponse() {
+        return httpResponse;
+    }
+
+    public String getIpAddress() {
+        return httpRequest != null ? httpRequest.getRemoteAddr() : "";
+    }
+
+    public Map<String, Object> getContextVariables() {
+        return contextVariables;
     }
 
     public NoLogWebApplicationException getWebApplicationException() {

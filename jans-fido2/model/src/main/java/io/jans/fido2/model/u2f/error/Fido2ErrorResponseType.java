@@ -23,7 +23,12 @@ public enum Fido2ErrorResponseType implements IErrorType {
     /**
      *  The request is missing a required parameter, username or keyhandle
      */
-    INVALID_USERNAME_OR_KEYHANDLE("invalid_username_or_keyhandle");
+    INVALID_USERNAME_OR_KEYHANDLE("invalid_username_or_keyhandle"),
+
+    /**
+     *  The request is missing a required parameter, username or keyhandle
+     */
+    BAD_REQUEST_INTERCEPTION("bad_request_interception");
 
 
     private final String paramName;

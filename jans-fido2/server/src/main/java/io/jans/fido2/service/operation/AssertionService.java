@@ -35,6 +35,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.core.Context;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -98,11 +99,16 @@ public class AssertionService {
     @Inject
     private Base64Service base64Service;
 
+	@Context
+	private HttpServletRequest httpRequest;
+	@Context
+	private HttpServletResponse httpResponse;
+
     /*
      * Requires mandatory parameters: username Support non mandatory parameters:
      * userVerification, documentDomain, extensions, timeout
      */
-    public ObjectNode options(JsonNode params, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
+    public ObjectNode options(JsonNode params) {
         log.debug("Assertion options {}", params);
 
         // Apply external custom scripts
@@ -214,8 +220,8 @@ public class AssertionService {
 		return optionsResponseNode;
 	}
 
-    public ObjectNode verify(JsonNode params, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
-        log.debug("authenticateResponse {}", params);
+	public ObjectNode verify(JsonNode params) {
+		log.debug("authenticateResponse {}", params);
 
         // Apply external custom scripts
         ExternalFido2InterceptionContext externalFido2InterceptionContext = new ExternalFido2InterceptionContext(params, httpRequest, httpResponse);

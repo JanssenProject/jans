@@ -11,15 +11,8 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
 import io.jans.as.model.config.Constants;
-import io.jans.as.model.error.DefaultErrorResponse;
 import io.jans.fido2.model.u2f.error.Fido2ErrorResponseFactory;
 import io.jans.fido2.model.u2f.error.Fido2ErrorResponseType;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.ThreadContext;
 import org.slf4j.Logger;
@@ -42,7 +35,6 @@ import io.jans.fido2.service.persist.UserSessionIdService;
 import io.jans.fido2.service.sg.RawAuthenticationService;
 import io.jans.fido2.service.verifier.CommonVerifiers;
 import io.jans.fido2.sg.SuperGluuMode;
-import io.jans.service.net.NetworkService;
 import io.jans.util.StringHelper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -99,10 +91,10 @@ public class AssertionSuperGluuController {
      *             "appId":"https://yurem-emerging-pig.gluu.info/identity/authcode.htm",
      *             "keyHandle":"YJvWD9n40eIurInJvPKUoxpKzrleUMWgu9w3v_NUBu7BiGAclgkH_Zg88_T5y6Rh78imTxTh0djWFYG4jxOixw","version":"U2F_V2"}]}
      */
-    public JsonNode startAuthentication(String userName, String keyHandle, String appId, String sessionId, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
+    public JsonNode startAuthentication(String userName, String keyHandle, String appId, String sessionId) {
         ObjectNode params = buildFido2AssertionStartResponse(userName, keyHandle, appId, sessionId);
 
-        ObjectNode result = assertionService.options(params, httpRequest, httpResponse);
+        ObjectNode result = assertionService.options(params);
 
         // Build start authentication response  
         ObjectNode superGluuResult = dataMapperService.createObjectNode();
@@ -182,12 +174,12 @@ public class AssertionSuperGluuController {
      *             {"status":"success","challenge":"5QoRtudmej5trcrMRgFBoI5rZ6pzIZiYP3u3bXCvvAE"}
      *
      */
-    public JsonNode finishAuthentication(String userName, String authenticateResponseString, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
+    public JsonNode finishAuthentication(String userName, String authenticateResponseString) {
         AuthenticateResponse authenticateResponse = parseAuthenticateResponse(authenticateResponseString);
 
         ObjectNode params = buildFido2AuthenticationVerifyResponse(userName, authenticateResponseString, authenticateResponse);
 
-        ObjectNode result = assertionService.verify(params, httpRequest, httpResponse);
+        ObjectNode result = assertionService.verify(params);
 
         result.put("status", "success");
         result.put("challenge", authenticateResponse.getClientData().getChallenge());

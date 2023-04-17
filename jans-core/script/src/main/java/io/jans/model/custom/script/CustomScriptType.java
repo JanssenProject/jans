@@ -105,7 +105,7 @@ public enum CustomScriptType implements AttributeEnum {
     UPDATE_TOKEN("update_token", "Update Token", UpdateTokenType.class, CustomScript.class, "UpdateToken", new DummyUpdateTokenType()),
     CONFIG_API("config_api_auth", "Config Api Auth", ConfigApiType.class, CustomScript.class,"ConfigApiAuthorization", new DummyConfigApiType()),
     MODIFY_SSA_RESPONSE("modify_ssa_response", "Modify SSA Response", ModifySsaResponseType.class, CustomScript.class, "ModifySsaResponse", new DummyModifySsaResponseType()),
-    FIDO2_INTERCEPTION("fido2_interception", "Intercept Fido2", Fido2InterceptionType.class, CustomScript.class, "ModifySsaResponse", new DummyFido2InterceptionType()),
+    FIDO2_INTERCEPTION("fido2_interception", "Intercept Fido2", Fido2InterceptionType.class, CustomScript.class, "Fido2Interception", new DummyFido2InterceptionType()),
     ;
 
     private String value;

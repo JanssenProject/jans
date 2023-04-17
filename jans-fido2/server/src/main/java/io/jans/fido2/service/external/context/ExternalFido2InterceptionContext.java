@@ -1,10 +1,7 @@
 package io.jans.fido2.service.external.context;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import io.jans.as.common.model.registration.Client;
-import io.jans.as.common.model.session.SessionId;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
-import io.jans.service.external.context.ExternalScriptContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
