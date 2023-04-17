@@ -210,7 +210,7 @@ public class BaseResource {
         if (StringUtils.isEmpty(sortOrder) || !sortOrder.equals(SortOrder.DESCENDING.getValue())) {
             sortOrder = SortOrder.ASCENDING.getValue();
         }
-        log.debug(" util.getTokens(filter,TOKEN_DELIMITER):{} , util.getFieldValueMap(searchRequest, fieldValuePair, TOKEN_DELIMITER, FIELD_VALUE_SEPARATOR)):{}", util.getTokens(filter, TOKEN_DELIMITER), util.getFieldValueMap(searchRequest, fieldValuePair, TOKEN_DELIMITER, FIELD_VALUE_SEPARATOR));
+        log.debug(" util.getTokens(filter,TOKEN_DELIMITER):{} , util.getFieldValueMap(searchRequest, fieldValuePair, TOKEN_DELIMITER, FIELD_VALUE_SEPARATOR)):{}", util.getTokens(filter, TOKEN_DELIMITER), util.getFieldValueMap(entityClass, fieldValuePair, TOKEN_DELIMITER, FIELD_VALUE_SEPARATOR));
         searchRequest.setSchemas(schemas);
         searchRequest.setAttributes(attrsList);
         searchRequest.setExcludedAttributes(excludedAttrsList);
@@ -221,7 +221,7 @@ public class BaseResource {
         searchRequest.setCount(count);
         searchRequest.setMaxCount(maximumRecCount);
         searchRequest.setFilterAssertionValue(util.getTokens(filter, TOKEN_DELIMITER));
-        searchRequest.setFieldValueMap((util.getFieldValueMap(searchRequest, fieldValuePair, TOKEN_DELIMITER, FIELD_VALUE_SEPARATOR)));
+        searchRequest.setFieldValueMap((util.getFieldValueMap(entityClass, fieldValuePair, TOKEN_DELIMITER, FIELD_VALUE_SEPARATOR)));
         return searchRequest;
 
     }

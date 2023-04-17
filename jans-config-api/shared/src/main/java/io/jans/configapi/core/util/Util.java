@@ -63,20 +63,20 @@ public class Util {
 
         log.info("final tokenized list:{}", Collections.list(new StringTokenizer(str, tokenizer)).stream()
                 .map(token -> (String) token).collect(Collectors.toList()));
-        
+
         return Collections.list(new StringTokenizer(str, tokenizer)).stream().map(token -> (String) token)
                 .collect(Collectors.toList());
     }
 
-    public Map<String, String> getFieldValueMap(SearchRequest searchRequest, String str, String tokenizer,
+    public Map<String, String> getFieldValueMap(Class<?> entityClass, String str, String tokenizer,
             String fieldValueSeparator) {
         if (log.isInfoEnabled()) {
-            log.info(" Field Value to get map - searchRequest:{}, str:{}, tokenizer:{} fieldValueSeparator:{}",
-                    escapeLog(searchRequest), escapeLog(str), escapeLog(tokenizer), escapeLog(fieldValueSeparator));
+            log.info(" Field Value to get map - entityClass:{}, str:{}, tokenizer:{} fieldValueSeparator:{}",
+                    escapeLog(entityClass), escapeLog(str), escapeLog(tokenizer), escapeLog(fieldValueSeparator));
         }
 
         Map<String, String> fieldValueMap = new HashMap<>();
-        
+
         if (StringUtils.isBlank(str) || !str.contains(fieldValueSeparator)) {
             return fieldValueMap;
         }
@@ -85,7 +85,7 @@ public class Util {
 
         List<String> fieldValueList = getTokens(str, tokenizer);
         log.debug("fieldValueList:{}", fieldValueList);
-        
+
         if (fieldValueList == null || fieldValueList.isEmpty()) {
             return fieldValueMap;
         }
@@ -102,49 +102,41 @@ public class Util {
         }
 
         log.info("fieldValueMap:{}", fieldValueMap);
-       
-        if(searchRequest!=null) {
-            searchRequest.setFieldValueMap(fieldValueMap);
-        }
-        
+
         // Replace filedValue with the DB field name
-        getAttributeData(searchRequest);
+        getAttributeData(entityClass, fieldValueMap);
         return fieldValueMap;
     }
 
-    public SearchRequest getAttributeData(SearchRequest searchRequest) {
+    public Map<String, String> getAttributeData(Class<?> entityClass, Map<String, String> fieldValueMap) {
         if (log.isInfoEnabled()) {
-            log.info("AttributeData details to be fetched with searchRequest:{} ", escapeLog(searchRequest));
+            log.info("AttributeData details to be fetched for entityClass:{} with fieldValueMap:{} ",
+                    escapeLog(entityClass), escapeLog(fieldValueMap));
         }
 
-        if (searchRequest == null
-                || (searchRequest.getFieldValueMap() == null || searchRequest.getFieldValueMap().isEmpty())) {
-            return searchRequest;
+        if (entityClass == null || fieldValueMap == null || fieldValueMap.isEmpty()) {
+            return fieldValueMap;
         }
 
-        Class<?> theClass = searchRequest.getEntityClass();
-
-        Map<String, List<Annotation>> propertiesAnnotations = confService.getPropertiesAnnotations(theClass,
+        Map<String, List<Annotation>> propertiesAnnotations = confService.getPropertiesAnnotations(entityClass,
                 LDAP_ENTRY_PROPERTY_ANNOTATIONS);
-        log.debug("Properties annotations fetched for theClass:{} are propertiesAnnotations:{}", theClass,
+        log.debug("Properties annotations fetched for theClass:{} are propertiesAnnotations:{}", entityClass,
                 propertiesAnnotations);
 
         if (propertiesAnnotations == null || propertiesAnnotations.isEmpty()) {
-            return searchRequest;
+            return fieldValueMap;
         }
+        if (fieldValueMap != null && !fieldValueMap.isEmpty()) {
 
-        Map<String, String> updatedFieldValueMap = new HashMap<>();
-        if (searchRequest.getFieldValueMap() != null && !searchRequest.getFieldValueMap().isEmpty()) {
-
-            for (Map.Entry<String, String> entry : searchRequest.getFieldValueMap().entrySet()) {
+            for (Map.Entry<String, String> entry : fieldValueMap.entrySet()) {
                 log.debug("entry.getKey():{}, entry.getValue():{}", entry.getKey(), entry.getValue());
                 String dbFieldName = getFieldDBName(entry.getKey(), propertiesAnnotations.get(entry.getKey()));
-                updatedFieldValueMap.put(dbFieldName, entry.getValue());
+                fieldValueMap.remove(entry.getKey());
+                fieldValueMap.put(dbFieldName, entry.getValue());
             }
-            searchRequest.setFieldValueMap(updatedFieldValueMap);
         }
-
-        return searchRequest;
+        log.info("Returning fieldValueMap:{} ", fieldValueMap);
+        return fieldValueMap;
     }
 
     private String getFieldDBName(String fieldName, List<Annotation> annotations) {
