@@ -44,11 +44,19 @@ func TestPatchAuthConfig(t *testing.T) {
 
 	rand.Seed(time.Now().UnixNano())
 
-	newEntry := fmt.Sprintf("*.attacker-%v.com/*", rand.Intn(100))
+	newEntry := []string{fmt.Sprintf("*.attacker-%v.com/*", rand.Intn(100))}
 
-	cfg.ClientBlackList = []string{newEntry}
+	patches := []PatchRequest{
+		{
+			Op:    "replace",
+			Path:  "/clientBlackList",
+			Value: newEntry,
+		},
+	}
 
-	if _, err := client.UpdateAppConfiguration(ctx, cfg); err != nil {
+	cfg.ClientBlackList = newEntry
+
+	if _, err := client.PatchAppConfiguration(ctx, patches); err != nil {
 		t.Fatal(err)
 	}
 
@@ -61,7 +69,7 @@ func TestPatchAuthConfig(t *testing.T) {
 		t.Fatal("expected 1 client in blacklist")
 	}
 
-	if (cfg.ClientBlackList[0]) != newEntry {
+	if (cfg.ClientBlackList[0]) != newEntry[0] {
 		t.Fatalf("expected '%s' in blacklist, got '%s'", newEntry, cfg.ClientBlackList[0])
 	}
 
