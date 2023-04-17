@@ -4,19 +4,11 @@ on:
   push:
     tags:
     - 'v**'
-
-  workflow_dispatch:
-    inputs:
-      nightly:
-        description: 'Enable nightly build'
-        default: "false"
-        required: false
-  schedule:
-    - cron: "0 0 * * *"
 jobs:
   publish_binary_packages:
     runs-on: ubuntu-20.04
     strategy:
+      fail-fast: false
       matrix:
         name: [ubuntu22, ubuntu20, el8, suse15]
 
@@ -51,19 +43,23 @@ jobs:
             python_version: 3.6
 
     steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        path: temp-jans
+
     - name: Getting build dependencies
       id: get_dependencies
-      run: |      
-         git clone -b jans https://github.com/GluuFederation/packaging
+      run: |
          mkdir -p jans/jans-src/opt/
-         cp -rp packaging/${{ matrix.build_files }}/* jans/
-         wget https://raw.githubusercontent.com/JanssenProject/jans/main/jans-linux-setup/jans_setup/install.py -O jans/install.py
+         cp -rp temp-jans/automation/packaging/${{ matrix.build_files }}/* jans/
+         cp temp-jans/jans-linux-setup/jans_setup/install.py jans/install.py
          sudo add-apt-repository ppa:deadsnakes/ppa
          sudo apt-get update
          sudo apt-get install -y python${{ matrix.python_version }}
-         sudo apt install -y build-essential devscripts debhelper rpm dpkg-sig python3-ldap3 python3-requests python3-ruamel.yaml python3-pymysql python3-crypto python3-distutils python3-prompt-toolkit python${{ matrix.python_version }}-distutils
+         sudo apt install -y build-essential devscripts debhelper rpm dpkg-sig python3-dev python3-ldap3 python3-requests python3-ruamel.yaml python3-pymysql python3-crypto python3-distutils python3-prompt-toolkit python${{ matrix.python_version }}-distutils libpq-dev python${{ matrix.python_version }}-dev
          sudo cp -r /usr/lib/python3/dist-packages /usr/lib/python${{ matrix.python_version }}/
-         sudo python${{ matrix.python_version }} -m pip install psycopg2-binary
+         sudo python${{ matrix.python_version }} -m pip install psycopg2-binary psycopg2
     - name: Import GPG key
       id: import_gpg
       continue-on-error: true
@@ -79,24 +75,14 @@ jobs:
     - name: Get latest tag
       id: previoustag
       run: |
-        echo "version=$(curl https://api.github.com/repos/${{ github.repository }}/releases -s | grep "tag_name" | cut -d '"' -f 4 | grep -o '^\v.*' | head -n 1 | cut -d 'v' -f 2)" >> $GITHUB_OUTPUT
-        TAG=$(curl https://api.github.com/repos/${{ github.repository }}/releases -s | grep "tag_name" | cut -d '"' -f 4 | grep -o '^\v.*' | head -n 1)
-        echo "tag=$TAG" >> $GITHUB_OUTPUT
+        echo "version=$(echo ${{ github.event.ref }} | cut -d 'v' -f 2)" >> $GITHUB_OUTPUT
+        echo "tag=$(echo ${{ github.event.ref }} | cut -d '/' -f 3)" >> $GITHUB_OUTPUT
         echo "PACKAGE_PREFIX=jans" >> ${GITHUB_ENV}
-        #If on schedule build nightly packages
-        if [ ${{ github.event_name }} = "schedule" ] || [ ${{ github.event.inputs.nightly }} = true ]; then
-          echo "Activating nightly build"
-          mkdir test && cd test
-          git clone https://github.com/JanssenProject/jans
-          VERSION=$(cat jans/docker-jans-auth-server/Dockerfile | grep "ENV CN_VERSION" | awk -F "[=-]" '{print $2}')
-          cd ../../
-          echo "PACKAGE_PREFIX=jans-nightly-build" >> ${GITHUB_ENV}
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-        fi
 
-    - name: Print Version
+    - name: Print Version and tag
       run: |
-        echo "${{ steps.previoustag.outputs.version }}"
+        echo "Version: ${{ steps.previoustag.outputs.version }}"
+        echo "Tag: ${{ steps.previoustag.outputs.tag }}"
     - name: Running install and build
       id: run_build
       run: |
@@ -231,20 +217,16 @@ jobs:
     - name: Get latest tag
       id: previoustag
       run: |
-        TAG=$(curl https://api.github.com/repos/${{ github.repository }}/releases -s | grep "tag_name" | cut -d '"' -f 4 | grep -o '^\v.*' | head -n 1)
-        echo "tag=$TAG" >> $GITHUB_OUTPUT
+        echo "version=$(echo ${{ github.event.ref }} | cut -d 'v' -f 2)" >> $GITHUB_OUTPUT
+        echo "tag=$(echo ${{ github.event.ref }} | cut -d '/' -f 3)" >> $GITHUB_OUTPUT
         echo "SETUP_PREFIX=jans-linux" >> ${GITHUB_ENV}
         echo "TUI_PREFIX=jans-cli-tui-linux" >> ${GITHUB_ENV}
-        #If on schedule build nightly packages
-        if [ ${{ github.event_name }} = "schedule" ] || [ ${{ github.event.inputs.nightly }} = true ]; then
-          echo "Activating nightly build"
-          VERSION=$(cat docker-jans-auth-server/Dockerfile | grep "ENV CN_VERSION" | awk -F "[=-]" '{print $2}')
-          echo "SETUP_PREFIX=jans-linux-$VERSION-nightly-build" >> ${GITHUB_ENV}
-          echo "TUI_PREFIX=jans-cli-tui-linux-$VERSION-nightly-build" >> ${GITHUB_ENV}
-        fi
-    - name: Print Version
+        echo "PACKAGE_PREFIX=jans" >> ${GITHUB_ENV}
+
+    - name: Print Version and tag
       run: |
-        echo "${{ steps.previoustag.outputs.tag }}"
+        echo "Version: ${{ steps.previoustag.outputs.version }}"
+        echo "Tag: ${{ github.event.ref }}"
     - name: Upload binaries to release
       id: upload_binaries_setup
       continue-on-error: true

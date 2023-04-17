@@ -36,13 +36,14 @@ wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-v
     Check the hash if it is matching.
 
     ```shell
+    cd /tmp
     sha256sum -c /tmp/jans_replace-janssen-version.ubuntu22.04_amd64.deb.sha256sum
     ```
 
     Output similar to below should confirm the integrity of the downloaded package.
 
     ```text
-    <package-name>: OK
+    jans_replace-janssen-version.ubuntu22.04_amd64.deb.sha256sum: OK
     ```
 
 - Install the package
@@ -71,13 +72,14 @@ wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-v
     Check the hash if it is matching.
 
     ```shell
+    cd /tmp
     sha256sum -c /tmp/jans_replace-janssen-version.ubuntu20.04_amd64.deb.sha256sum
     ```
 
     Output similar to below should confirm the integrity of the downloaded package.
 
     ```text
-    <package-name>: OK
+    jans_replace-janssen-version.ubuntu20.04_amd64.deb.sha256sum: OK
     ```
 
 - Install the package

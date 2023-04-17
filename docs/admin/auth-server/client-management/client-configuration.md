@@ -55,7 +55,7 @@ client configuration on Janssen Server.
 
 The client can select algorithms for cryptographic and encryption during client configuration. Janssen 
 Server supports a list of algorithms as listed in response of Janssen Server's well-known
-[configuration endpoint](./configuration.md) given below.
+[configuration endpoint](../endpoints/configuration.md) given below.
 
 ```text
 https://janssen.server.host/jans-auth/.well-known/openid-configuration
@@ -86,7 +86,7 @@ Claims that list supported algorithms:
 Grant defines how a client interacts with the token endpoint to get the tokens. Janssen Server supports grant types
 defined by OAuth 2.0, OAuth 2.1, and extension grants defined by other RFCs. A complete
 list of supported grant types can be found in the response of the Janssen Server's well-known
-[configuration endpoint](./configuration.md) given below.
+[configuration endpoint](../endpoints/configuration.md) given below.
 
 ```text
 https://janssen.server.host/jans-auth/.well-known/openid-configuration
@@ -97,7 +97,8 @@ Claim `grant_types_supported` lists all the supported grant types in the respons
 ### Configuring Grant Type For Client
 
 Janssen Server will allow requests from a client with grant types that the client is configured to use. Client can be
-configured to use or not use certain grant types using [CLI](../../config-guide/jans-cli/README.md) or [TUI](../../config-guide/tui.md) tools.
+configured to use or not use certain grant types using [CLI](../../config-guide/jans-cli/README.md) or 
+[TUI](../../config-guide/jans-tui/README.md) tools.
 
 ### Recommendations For Using Grant Types and Flows
 
@@ -139,7 +140,7 @@ client informs the authorization server of the desired grant. Response type para
 
 Janssen Server supports response types
 defined by OAuth 2.0, OAuth 2.1.The complete list of supported response types can be found in the response of the 
-Janssen Server's well-known [configuration endpoint](./configuration.md) given below.
+Janssen Server's well-known [configuration endpoint](../endpoints/configuration.md) given below.
 
 ```text
 https://janssen.server.host/jans-auth/.well-known/openid-configuration

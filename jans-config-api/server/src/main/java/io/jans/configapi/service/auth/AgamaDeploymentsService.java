@@ -11,6 +11,7 @@ import jakarta.inject.Inject;
 
 import java.util.Base64;
 import java.util.Date;
+import java.util.UUID;
 
 import org.slf4j.Logger;
 
@@ -40,7 +41,7 @@ public class AgamaDeploymentsService {
 
     public Deployment getDeployment(String name) {
         
-        String[] attrs = new String[]{ "jansStartDate", "jansEndDate", "adsPrjDeplDetails" };
+        String[] attrs = new String[]{ "jansId", "jansStartDate", "jansEndDate", "adsPrjDeplDetails" };
         logger.info("Looking up project named {}", name);
 
         Deployment d = null;
@@ -131,9 +132,7 @@ public class AgamaDeploymentsService {
     }
 
     private static String idFromName(String name) {
-        String hash = Integer.toString(name.hashCode());
-        if (hash.startsWith("-")) hash = hash.substring(1);
-        return hash;
+        return UUID.nameUUIDFromBytes(name.getBytes(UTF_8)).toString();
     }
 
 }

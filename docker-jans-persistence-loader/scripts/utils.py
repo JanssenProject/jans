@@ -10,6 +10,7 @@ from jans.pycloudlib.utils import encode_text
 from jans.pycloudlib.utils import safe_render
 from jans.pycloudlib.utils import generate_base64_contents
 from jans.pycloudlib.utils import get_random_chars
+from jans.pycloudlib.utils import exec_cmd
 
 
 def render_ldif(src, dst, ctx):
@@ -117,7 +118,8 @@ def get_base_ctx(manager):
         "pairwiseCalculationKey": manager.secret.get("pairwiseCalculationKey"),
         "pairwiseCalculationSalt": manager.secret.get("pairwiseCalculationSalt"),
         "default_openid_jks_dn_name": manager.config.get("default_openid_jks_dn_name"),
-        "auth_openid_jks_pass": manager.secret.get("auth_openid_jks_pass"),
+        # maintain compatibility with upstream template
+        "oxauth_openid_jks_pass": manager.secret.get("auth_openid_jks_pass"),
         "auth_legacyIdTokenClaims": manager.config.get("auth_legacyIdTokenClaims"),
         "auth_openidScopeBackwardCompatibility": manager.config.get("auth_openidScopeBackwardCompatibility"),
 
@@ -136,10 +138,11 @@ def get_base_ctx(manager):
         auth_openid_jks_fn = "/etc/certs/ob-ext-signing.jks"
 
     ctx["jwks_uri"] = jwks_uri
-    ctx["auth_openid_jks_fn"] = auth_openid_jks_fn
+    # maintain compatibility with upstream template
+    ctx["oxauth_openid_jks_fn"] = auth_openid_jks_fn
 
-    # static kid
-    ctx["staticKid"] = os.environ.get("CN_OB_STATIC_KID", "")
+    # static kid -- maintain compatibility with upstream template
+    ctx["static_kid"] = os.environ.get("CN_OB_STATIC_KID", "")
 
     # finalize ctx
     return ctx
@@ -225,6 +228,7 @@ def prepare_template_ctx(manager):
     ctx = merge_extension_ctx(ctx)
     ctx = merge_auth_ctx(ctx)
     ctx = merge_jans_cli_ctx(manager, ctx)
+    ctx = merge_smtp_ctx(manager, ctx)
     return ctx
 
 
@@ -332,3 +336,59 @@ def get_role_scope_mappings(path="/app/templates/jans-auth/role-scope-mappings.j
             ))
             break
     return role_mapping
+
+
+def merge_smtp_ctx(manager, ctx):
+    encoded_salt = manager.secret.get("encoded_salt")
+    jks_fn = "/etc/certs/smtp-keys.pkcs12"
+
+    smtp_jks_pass = manager.secret.get("smtp_jks_pass")
+    if not smtp_jks_pass:
+        smtp_jks_pass = get_random_chars()
+        manager.secret.set("smtp_jks_pass", smtp_jks_pass)
+
+    smtp_jks_pass_enc = manager.secret.get("smtp_jks_pass_enc")
+    if not smtp_jks_pass_enc:
+        smtp_jks_pass_enc = encode_text(smtp_jks_pass, encoded_salt).decode()
+        manager.secret.set("smtp_jks_pass_enc", smtp_jks_pass_enc)
+
+    smtp_signing_alg = manager.config.get("smtp_signing_alg")
+    if not smtp_signing_alg:
+        smtp_signing_alg = "SHA256withECDSA"
+        manager.config.set("smtp_signing_alg", smtp_signing_alg)
+
+    smtp_alias = manager.config.get("smtp_alias")
+    if not smtp_alias:
+        smtp_alias = "smtp_sig_ec256"
+        manager.config.set("smtp_alias", smtp_alias)
+
+    smtp_jks_base64 = manager.secret.get("smtp_jks_base64")
+    if not smtp_jks_base64:
+        cmds = " ".join([
+            "keytool",
+            "-genkeypair",
+            "-alias", smtp_alias,
+            "-keyalg", "ec",
+            "-groupname", "secp256r1",
+            "-sigalg", smtp_signing_alg,
+            "-storetype", "pkcs12",
+            "-keystore", jks_fn,
+            "-storepass", smtp_jks_pass,
+            "-dname", "'CN=SMTP CA Certificate'",
+            "-validity", "365",
+        ])
+        _, err, retcode = exec_cmd(cmds)
+        assert retcode == 0, "Failed to generate JKS keystore; reason={}".format(err.decode())
+
+        with open(jks_fn, "rb") as fr:
+            manager.secret.set("smtp_jks_base64", encode_text(fr.read(), encoded_salt))
+
+    smtp_ctx = {
+        "smtp_jks_fn": jks_fn,
+        "smtp_jks_pass": smtp_jks_pass,
+        "smtp_alias": smtp_alias,
+        "smtp_signing_alg": smtp_signing_alg,
+        "smtp_jks_pass_enc": smtp_jks_pass_enc,
+    }
+    ctx.update(smtp_ctx)
+    return ctx

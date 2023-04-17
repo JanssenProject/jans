@@ -9,7 +9,7 @@
 	<parent>
 		<groupId>io.jans</groupId>
 		<artifactId>jans-config-api-parent</artifactId>
-		<version>1.0.11-SNAPSHOT</version>
+		<version>1.0.12-SNAPSHOT</version>
 	</parent>
 
 	<prerequisites>
@@ -264,7 +264,11 @@
 			<groupId>io.swagger.core.v3</groupId>
 			<artifactId>swagger-core-jakarta</artifactId>
 		</dependency>
-
+		<dependency>
+			<groupId>io.swagger.core.v3</groupId>
+			<artifactId>swagger-models-jakarta</artifactId>
+			<version>${swagger-models-jakarta}</version>
+		</dependency>
 	</dependencies>
 
 	<build>

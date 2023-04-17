@@ -4,11 +4,12 @@ tags:
   - configuration
   - cli
   - commandline
+  - group
 ---
 
 # Group Resources
 
-> Prerequisite: Know how to use the Janssen CLI in [command-line mode](cli-index.md)
+> Prerequisite: Know how to use the Janssen CLI in [command-line mode](../jans-cli/README.md)
 
 Group resources are used to manage user resources easily with some operations. 
 If you run the below command, then you will get a list of operations as below:

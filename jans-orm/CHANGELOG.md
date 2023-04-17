@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.11](https://github.com/JanssenProject/jans/compare/jans-orm-v1.0.10...jans-orm-v1.0.11) (2023-04-05)
+
+
+### Bug Fixes
+
+* prepare for  release ([60775c0](https://github.com/JanssenProject/jans/commit/60775c09dc5ab9996bf80c03dcb457861d48dfb1))
+
 ## [1.0.10](https://github.com/JanssenProject/jans/compare/jans-orm-v1.0.9...jans-orm-v1.0.10) (2023-03-16)
 
 

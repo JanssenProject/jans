@@ -5,7 +5,7 @@ site_author: Janssen, Inc.
 site_url: https://jans.io/docs
 
 # Copyright
-copyright: Copyright &copy; 2022, The Janssen Project
+copyright: Copyright &copy; 2023, The Janssen Project
 
 # Repository
 docs_dir: ./docs
@@ -174,7 +174,7 @@ nav:
         - 'Start Order': 'admin/kubernetes-ops/start-order.md'
         - 'Logs': 'admin/kubernetes-ops/logs.md'
         - 'Health Check': 'admin/kubernetes-ops/health-check.md'
-        - 'FAQ': 'admin/kubernetes-ops/faq.md'
+#        - 'FAQ': 'admin/kubernetes-ops/faq.md'
     - 'VM Operation Guide':
         - 'admin/vm-ops/README.md'
         - 'Backup': 'admin/vm-ops/backup.md'
@@ -183,8 +183,8 @@ nav:
         - 'Restarting Services': 'admin/vm-ops/restarting-services.md'
         - 'Managing Key Rotation': 'admin/vm-ops/managing-key-rotation.md'
         - 'Certificates': 'admin/vm-ops/certificates.md'
-        - 'Web Services': 'admin/vm-ops/web-services.md'
-        - 'FAQ': 'admin/vm-ops/faq.md'
+#        - 'Web Services': 'admin/vm-ops/web-services.md'
+#        - 'FAQ': 'admin/vm-ops/faq.md'
     - 'Configuration Guide':
         - 'Config API':
             - 'admin/config-guide/config-api/README.md'
@@ -241,10 +241,10 @@ nav:
             - 'Spanner Schema': 'admin/reference/database/spanner-schema.md'
             - 'Spanner Configuration': 'admin/reference/database/spanner-config.md'
             - 'Spanner Operation': 'admin/reference/database/spanner-ops.md'
- #       - 'PostgreSQL':    
- #           - 'PostgreSQL Schema': 'admin/reference/database/postgres-schema.md'
- #           - 'PostgreSQL Configuration': 'admin/reference/database/postgres-config.md'
- #           - 'PostgreSQL Operation': 'admin/reference/database/postgres-ops.md'
+        - 'PostgreSQL':    
+            - 'PostgreSQL Schema': 'admin/reference/database/postgres-schema.md'
+            - 'PostgreSQL Configuration': 'admin/reference/database/postgres-config.md'
+            - 'PostgreSQL Operation': 'admin/reference/database/postgres-ops.md'
         - 'Converting Data': 'admin/reference/database/converting-data.md'
     - 'Auth Server Admin Guide':
         - 'admin/auth-server/README.md'
@@ -253,7 +253,6 @@ nav:
             - 'admin/auth-server/session-management/README.md'
             - 'IDP v RP Sessions': 'admin/auth-server/session-management/idp-v-rp.md'
             - 'Multiple Sessions in One Browser': 'admin/auth-server/session-management/multiple-sessions-one-browser.md'
-            - 'Multiple Browser Sessions': 'admin/auth-server/session-management/multiple-browser-sessions.md'
         - 'Tokens':
             - 'admin/auth-server/tokens/README.md'
             - 'OAuth Access Tokens': 'admin/auth-server/tokens/oauth-access-tokens.md'
@@ -376,8 +375,6 @@ nav:
         - 'Script Debugging': 'admin/developer/interception-scripts-debug.md'
         - 'External Libraries': 'admin/developer/external-libraries.md'
         - 'CORS': 'admin/developer/cors.md'
-        - 'Front Channel Scripts': 'admin/developer/front-channel-scripts.md'
-        - 'Back Channel Scripts': 'admin/developer/back-channel-scripts.md'
         - 'Managed Beans': 'admin/developer/managed-beans.md'
         - 'Customization':
             - 'admin/developer/customization/README.md'
@@ -420,7 +417,6 @@ nav:
             - 'Feature Flags':
                   - 'admin/reference/json/feature-flags/README.md'
                   - 'Auth Server': 'admin/reference/json/feature-flags/janssenauthserver-feature-flags.md'
-
         - 'Kubernetes':
             - 'admin/reference/kubernetes/README.md'
             - 'Helm Chart': 'admin/reference/kubernetes/helm-chart.md'
@@ -458,96 +454,96 @@ nav:
     - 'Janssen Recipes':
         - 'admin/recipes/README.md'
         - 'Benchmark': 'admin/recipes/benchmark.md'
-        - 'Returning Group/Role User Information': 'admin/recipes/returning-group.md'
-        - 'Passwordless': 'admin/recipes/passwordless.md'
-        - 'Forcing Re-Authentication': 'admin/recipes/forcing-reauthn.md'
-        - 'Web Applications': 'admin/recipes/web-apps.md'
-        - 'Mobile Applications': 'admin/recipes/mobile-apps.md'
-        - 'Single Page Applications': 'admin/recipes/single-page-apps.md'
-        - 'Impersonation': 'admin/recipes/impersonation.md'
+#        - 'Returning Group/Role User Information': 'admin/recipes/returning-group.md'
+#        - 'Passwordless': 'admin/recipes/passwordless.md'
+#        - 'Forcing Re-Authentication': 'admin/recipes/forcing-reauthn.md'
+#        - 'Web Applications': 'admin/recipes/web-apps.md'
+#        - 'Mobile Applications': 'admin/recipes/mobile-apps.md'
+#        - 'Single Page Applications': 'admin/recipes/single-page-apps.md'
+#        - 'Impersonation': 'admin/recipes/impersonation.md'
         - 'Social Login': 'admin/recipes/social-login.md'
-        - 'Inbound SAML': 'admin/recipes/inbound-saml.md'
+#        - 'Inbound SAML': 'admin/recipes/inbound-saml.md'
         - 'Inbound OIDC': 'admin/recipes/inbound-oidc.md'
         - 'Registration': 'admin/recipes/registration.md'
         - 'Password Expirations': 'admin/recipes/password-expirations.md'
         - 'Locking or Disabling Accounts': 'admin/recipes/locking-accounts.md'
-        - 'Forgot Password':
-            - 'admin/recipes/forgot-password/README.md'
-            - 'Email': 'admin/recipes/forgot-password/email.md'
-            - 'SMS': 'admin/recipes/forgot-password/sms.md'
-        - 'Adaptive Authentication': 'admin/recipes/adaptive-authn.md'
-        - 'API Access Control':
-            - 'admin/recipes/api-access-control/README.md'
-            - 'Access Tokens': 'admin/recipes/api-access-control/access-tokens.md'
-            - 'Client Credential Grant Flow': 'admin/recipes/api-access-control/client-credential-grant-flow.md'
-            - 'Using Scopes to Manage Access': 'admin/recipes/api-access-control/scope-access.md'
-            - 'Adding User Claims to Access Tokens': 'admin/recipes/api-access-control/user-claims-tokens.md'
-            - 'Software Statements': 'admin/recipes/api-access-control/software-statements.md'
-            - 'Using OAuth with API Gateways': 'admin/recipes/api-access-control/oauth-api-gateway.md'
-            - 'Using OPA and Access Tokens': 'admin/recipes/api-access-control/opa-access-tokens.md'
-            - 'OpenAPI Best Security Practices': 'admin/recipes/api-access-control/openapi-best-practice.md'
-        - 'Open Banking':
-            - 'admin/recipes/open-banking/README.md'
-            - 'Open Banking Requirements': 'admin/recipes/open-banking/requirements.md'
-            - 'Client Registration': 'admin/recipes/open-banking/client-registration.md'
-            - 'FAPI Authentication Request': 'admin/recipes/open-banking/fapi-authn-request.md'
-        - 'Custom Web Development':
-            - 'admin/recipes/custom-web-development/README.md'
-            - 'Protecting a Website with mod_auth_openidc': 'admin/recipes/custom-web-development/mod-auth-openidc.md'
-            - 'AppAuth iOS': 'admin/recipes/custom-web-development/appauth-ios.md'
-            - 'AppAuth Android': 'admin/recipes/custom-web-development/appauth-android.md'
-            - 'AppAuth JS': 'admin/recipes/custom-web-development/appauth-js.md'
-            - 'Apache Reverse Proxy': 'admin/recipes/custom-web-development/authn-with-apache-reverse-proxy.md'
-            - 'Node': 'admin/recipes/custom-web-development/node.md'
-            - 'React': 'admin/recipes/custom-web-development/react.md'
-            - 'React Native': 'admin/recipes/custom-web-development/react-native.md'
-            - 'Angular': 'admin/recipes/custom-web-development/angular.md'
-            - 'Spring Boot': 'admin/recipes/custom-web-development/spring-boot.md'
-            - 'Django': 'admin/recipes/custom-web-development/django.md'
-            - 'Flask': 'admin/recipes/custom-web-development/flask.md'
-            - 'ASP Net': 'admin/recipes/custom-web-development/asp-net.md'
-        - 'SAML':
-            - 'admin/recipes/saml/README.md'
-            - 'SSO with SAML SPs': 'admin/recipes/saml/sso-sp.md'
-            - 'Federation with SAML IDPs': 'admin/recipes/saml/federation.md'
-            - 'SAML IDP Initiated Authentication': 'admin/recipes/saml/idp-init-authn.md'
-        - 'Applications':
-            - 'admin/recipes/apps/README.md'
-            - 'Rancher': 'admin/recipes/apps/rancher.md'
-            - 'Rocket': 'admin/recipes/apps/rocket.md'
-            - 'NextCloud': 'admin/recipes/apps/nextcloud.md'
-            - 'Wordpress': 'admin/recipes/apps/wordpress.md'
-            - 'Magento': 'admin/recipes/apps/magento.md'
-            - 'Teleport': 'admin/recipes/apps/teleport.md'
-            - 'Moodle': 'admin/recipes/apps/moodle.md'
-            - 'Drupal': 'admin/recipes/apps/drupal.md'
-            - 'Kafka': 'admin/recipes/apps/kafka.md'
-        - 'SaaS Provider':
-            - 'admin/recipes/saas/README.md'
-            - 'Office365': 'admin/recipes/saas/office365.md'
-            - 'Google': 'admin/recipes/saas/google.md'
-            - 'Amazon AWS': 'admin/recipes/saas/aws.md'
-            - 'Salesforce': 'admin/recipes/saas/salesforce.md'
-            - 'Zoom': 'admin/recipes/saas/zoom.md'
-            - 'Webex': 'admin/recipes/saas/webex.md'
-            - 'Jira': 'admin/recipes/saas/jira.md'
-            - 'Docusign': 'admin/recipes/saas/docusign.md'
-        - 'Passport-JS': 'admin/recipes/passportjs.md'
-        - 'Gluu Casa': 'admin/recipes/casa.md'
-        - 'FAQ': 'admin/recipes/faq.md'
+#        - 'Forgot Password':
+#            - 'admin/recipes/forgot-password/README.md'
+#            - 'Email': 'admin/recipes/forgot-password/email.md'
+#            - 'SMS': 'admin/recipes/forgot-password/sms.md'
+#        - 'Adaptive Authentication': 'admin/recipes/adaptive-authn.md'
+#        - 'API Access Control':
+#            - 'admin/recipes/api-access-control/README.md'
+#            - 'Access Tokens': 'admin/recipes/api-access-control/access-tokens.md'
+#            - 'Client Credential Grant Flow': 'admin/recipes/api-access-control/client-credential-grant-flow.md'
+#            - 'Using Scopes to Manage Access': 'admin/recipes/api-access-control/scope-access.md'
+#            - 'Adding User Claims to Access Tokens': 'admin/recipes/api-access-control/user-claims-tokens.md'
+#            - 'Software Statements': 'admin/recipes/api-access-control/software-statements.md'
+#            - 'Using OAuth with API Gateways': 'admin/recipes/api-access-control/oauth-api-gateway.md'
+#            - 'Using OPA and Access Tokens': 'admin/recipes/api-access-control/opa-access-tokens.md'
+#            - 'OpenAPI Best Security Practices': 'admin/recipes/api-access-control/openapi-best-practice.md'
+#        - 'Open Banking':
+#            - 'admin/recipes/open-banking/README.md'
+#            - 'Open Banking Requirements': 'admin/recipes/open-banking/requirements.md'
+#            - 'Client Registration': 'admin/recipes/open-banking/client-registration.md'
+#            - 'FAPI Authentication Request': 'admin/recipes/open-banking/fapi-authn-request.md'
+#        - 'Custom Web Development':
+#            - 'admin/recipes/custom-web-development/README.md'
+#            - 'Protecting a Website with mod_auth_openidc': 'admin/recipes/custom-web-development/mod-auth-openidc.md'
+#            - 'AppAuth iOS': 'admin/recipes/custom-web-development/appauth-ios.md'
+#            - 'AppAuth Android': 'admin/recipes/custom-web-development/appauth-android.md'
+#            - 'AppAuth JS': 'admin/recipes/custom-web-development/appauth-js.md'
+#            - 'Apache Reverse Proxy': 'admin/recipes/custom-web-development/authn-with-apache-reverse-proxy.md'
+#            - 'Node': 'admin/recipes/custom-web-development/node.md'
+#            - 'React': 'admin/recipes/custom-web-development/react.md'
+#            - 'React Native': 'admin/recipes/custom-web-development/react-native.md'
+#            - 'Angular': 'admin/recipes/custom-web-development/angular.md'
+#            - 'Spring Boot': 'admin/recipes/custom-web-development/spring-boot.md'
+#            - 'Django': 'admin/recipes/custom-web-development/django.md'
+#            - 'Flask': 'admin/recipes/custom-web-development/flask.md'
+#            - 'ASP Net': 'admin/recipes/custom-web-development/asp-net.md'
+#        - 'SAML':
+#            - 'admin/recipes/saml/README.md'
+#            - 'SSO with SAML SPs': 'admin/recipes/saml/sso-sp.md'
+#            - 'Federation with SAML IDPs': 'admin/recipes/saml/federation.md'
+#            - 'SAML IDP Initiated Authentication': 'admin/recipes/saml/idp-init-authn.md'
+#        - 'Applications':
+#            - 'admin/recipes/apps/README.md'
+#            - 'Rancher': 'admin/recipes/apps/rancher.md'
+#            - 'Rocket': 'admin/recipes/apps/rocket.md'
+#            - 'NextCloud': 'admin/recipes/apps/nextcloud.md'
+#            - 'Wordpress': 'admin/recipes/apps/wordpress.md'
+#            - 'Magento': 'admin/recipes/apps/magento.md'
+#            - 'Teleport': 'admin/recipes/apps/teleport.md'
+#            - 'Moodle': 'admin/recipes/apps/moodle.md'
+#            - 'Drupal': 'admin/recipes/apps/drupal.md'
+#            - 'Kafka': 'admin/recipes/apps/kafka.md'
+#        - 'SaaS Provider':
+#            - 'admin/recipes/saas/README.md'
+#            - 'Office365': 'admin/recipes/saas/office365.md'
+#            - 'Google': 'admin/recipes/saas/google.md'
+#            - 'Amazon AWS': 'admin/recipes/saas/aws.md'
+#            - 'Salesforce': 'admin/recipes/saas/salesforce.md'
+#            - 'Zoom': 'admin/recipes/saas/zoom.md'
+#            - 'Webex': 'admin/recipes/saas/webex.md'
+#            - 'Jira': 'admin/recipes/saas/jira.md'
+#            - 'Docusign': 'admin/recipes/saas/docusign.md'
+#        - 'Passport-JS': 'admin/recipes/passportjs.md'
+#        - 'Gluu Casa': 'admin/recipes/casa.md'
+#        - 'FAQ': 'admin/recipes/faq.md'
     - 'Upgrade Guide':
         - 'admin/upgrade/README.md'
-        - 'VM':
-            - 'admin/upgrade/vm/README.md'
-            - 'Version Upgrade Paths': 'admin/upgrade/vm/paths.md'
-            - 'Backup': 'admin/upgrade/vm/backup.md'
-            - 'Rollback': 'admin/upgrade/vm/rollback.md'
-        - 'Kubernetes':
-            - 'admin/upgrade/kubernetes/README.md'
-            - 'Version Upgrade Paths': 'admin/upgrade/kubernetes/paths.md'
-            - 'Backup': 'admin/upgrade/kubernetes/backup.md'
-            - 'Rollback': 'admin/upgrade/kubernetes/rollback.md'
-        - 'FAQ': 'admin/upgrade/upgrade-faq.md'
+#        - 'VM':
+#            - 'admin/upgrade/vm/README.md'
+#            - 'Version Upgrade Paths': 'admin/upgrade/vm/paths.md'
+#            - 'Backup': 'admin/upgrade/vm/backup.md'
+#            - 'Rollback': 'admin/upgrade/vm/rollback.md'
+#        - 'Kubernetes':
+#            - 'admin/upgrade/kubernetes/README.md'
+#            - 'Version Upgrade Paths': 'admin/upgrade/kubernetes/paths.md'
+#            - 'Backup': 'admin/upgrade/kubernetes/backup.md'
+#            - 'Rollback': 'admin/upgrade/kubernetes/rollback.md'
+#        - 'FAQ': 'admin/upgrade/upgrade-faq.md'
 - 'Developer':
       - 'Contribution Guidelines': 'CONTRIBUTING.md'
       - 'Code of Conduct': 'CODE_OF_CONDUCT.md'
@@ -573,4 +569,3 @@ nav:
       - 'Charter': 'governance/charter.md'
       - 'Copyright-notice': 'governance/copyright-notices.md'
       - 'Triage': 'governance/triage.md'
-

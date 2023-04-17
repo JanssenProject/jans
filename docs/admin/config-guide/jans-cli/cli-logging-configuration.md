@@ -4,11 +4,12 @@ tags:
   - configuration
   - cli
   - commandline
+  - logs
 ---
 
 # Log Management
 
-> Prerequisite: Know how to use the Janssen CLI in [command-line mode](cli-index.md)
+> Prerequisite: Know how to use the Janssen CLI in [command-line mode](../jans-cli/README.md)
 
 To `view/update` logging configuration, let's get the information of logging Configuration.
 

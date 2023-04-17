@@ -6,7 +6,7 @@ Janssen enables organizations to build a scalable centralized authentication and
 
 ## Administration Guide
 
-The Janssen Server is highly extensible and customizable. Resources for deployment, operation, and maintenance of the Janssen environment are available in the [Administration guide](admin/README.md). We recommend a holistic approach to identity, planning the environment thoroughly using the [Deployment Guide](admin/planning/platform-goal.md). For a quick start for testing, you can jump right into [Installation](admin/install/vm-install/).
+The Janssen Server is highly extensible and customizable. Resources for deployment, operation, and maintenance of the Janssen environment are available in the [Administration guide](admin/README.md). We recommend a holistic approach to identity, planning the environment thoroughly using the [Deployment Guide](admin/planning/platform-goal.md). For a quick start for testing, you can jump right into [Installation](admin/install/vm-install/README.md).
 
 ## Developer Guide
 
@@ -24,7 +24,7 @@ The definitive location for scripts and their documentation is the [Script Catal
 
 ## Agama
 
-[Agama](./admin/developer/agama/README.md) is a component of the Janssen authentication server that offers an alternative way to build web-based authentication flows. Typically, person authentication flows are defined in the server by means of jython scripts that adhere to a predefined API. With Agama, flows are coded using a DSL (domain specific language) designed for the sole purpose of writing web flows.
+[Agama](admin/developer/agama/README.md) is a component of the Janssen authentication server that offers an alternative way to build web-based authentication flows. Typically, person authentication flows are defined in the server by means of jython scripts that adhere to a predefined API. With Agama, flows are coded using a DSL (domain specific language) designed for the sole purpose of writing web flows.
 
 ## Support
 
@@ -35,3 +35,4 @@ If you find a bug in a Janssen project, or you would like to suggest a new featu
 ## License
 
 The Janssen Project is licensed under the [Apache License 2.0](https://github.com/JanssenProject/jans/blob/main/LICENSE). The Janssen Server is highly extensible and can be used with a variety of other products and projects, which may fall under other licenses.
+

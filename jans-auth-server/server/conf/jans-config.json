@@ -322,7 +322,7 @@
     ],
     "applianceInum":"${config.oxauth.appliance}",
     "sessionIdUnusedLifetime":86400,
-    "sessionIdUnauthenticatedUnusedLifetime":60,
+    "sessionIdUnauthenticatedUnusedLifetime":7200,
     "sessionIdEnabled":true,
     "sessionIdPersistOnPromptNone":true,
     "sessionIdLifetime":86400,
@@ -437,7 +437,8 @@
     "deviceAuthzTokenPollInterval": 5,
     "deviceAuthzResponseTypeToProcessAuthz": "code",
     "agamaConfiguration": {
-        "enabled": true,
+        "enabled": false,
+        "rootDir": "/opt/jans/jetty/jans-auth/agama",
         "templatesPath": "/ftl",
         "scriptsPath": "/scripts",
         "serializerType": "KRYO",

@@ -2,6 +2,7 @@
 tags:
   - administration
   - planning
+  - platform-goals
 ---
 
 # Project Goals

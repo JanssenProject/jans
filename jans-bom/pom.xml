@@ -5,7 +5,7 @@
 	<artifactId>jans-bom</artifactId>
 	<packaging>pom</packaging>
 	<name>jans-bom</name>
-	<version>1.0.11-SNAPSHOT</version>
+	<version>1.0.12-SNAPSHOT</version>
 
     <distributionManagement>
 	  <repository>
@@ -33,6 +33,8 @@
 		
 		<jakarta.ejb.api.version>4.0.1</jakarta.ejb.api.version>
 		<jakarta.mail.api.version>2.1.0</jakarta.mail.api.version>
+		<jakarta.mail.version>1.6.7</jakarta.mail.version>
+
 		<jakarta.websocket.api.version>2.1.0</jakarta.websocket.api.version>
 		<jakarta.xml.bind.api.version>3.0.1</jakarta.xml.bind.api.version>
 		<org.glassfish.jakarta.el.api.version>5.0.0-M1</org.glassfish.jakarta.el.api.version>
@@ -48,7 +50,7 @@
 
 		<guava.version>31.1-jre</guava.version>
 	
-		<aws.sns.version>1.12.327</aws.sns.version>
+		<aws.sns.version>1.12.448</aws.sns.version>
 		<jackrabbit.version>2.21.13</jackrabbit.version>
 
 		<bc.version>1.70</bc.version>
@@ -271,6 +273,11 @@
 				<version>${bc.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bcmail-jdk15on</artifactId>
+				<version>${bc.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>com.nimbusds</groupId>
 				<artifactId>nimbus-jose-jwt</artifactId>
 				<version>9.28</version>
@@ -286,29 +293,32 @@
 			</dependency>
 			
 			<!-- Jakarta lib required but not part of Weld dependency -->
-		  	<dependency>
-               <groupId>jakarta.ejb</groupId>
-               <artifactId>jakarta.ejb-api</artifactId>
-               <version>${jakarta.ejb.api.version}</version>
-            </dependency>
 			<dependency>
-        		<groupId>jakarta.mail</groupId>
-        		<artifactId>jakarta.mail-api</artifactId>
-        		<version>${jakarta.mail.api.version}</version>
-      		</dependency>
-      		  <dependency>
-                <groupId>jakarta.websocket</groupId>
-                <artifactId>jakarta.websocket-api</artifactId>
-                <version>${jakarta.websocket.api.version}</version>
-            </dependency>
-            <dependency>
+				<groupId>jakarta.ejb</groupId>
+				<artifactId>jakarta.ejb-api</artifactId>
+				<version>${jakarta.ejb.api.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>jakarta.mail</groupId>
+				<artifactId>jakarta.mail-api</artifactId>
+				<version>${jakarta.mail.api.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.sun.mail</groupId>
+				<artifactId>jakarta.mail</artifactId>
+				<version>${jakarta.mail.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>jakarta.websocket</groupId>
+				<artifactId>jakarta.websocket-api</artifactId>
+				<version>${jakarta.websocket.api.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>jakarta.xml.bind</groupId>
 				<artifactId>jakarta.xml.bind-api</artifactId>
 				<version>${jakarta.xml.bind.api.version}</version>
 			</dependency>
-            
-			
-				
+
 		<!-- 	<dependency>
 				<groupId>javax.enterprise</groupId>
 				<artifactId>cdi-api</artifactId>
@@ -377,7 +387,7 @@
 			<!-- <dependency>
 				<groupId>javax.persistence</groupId>
 				<artifactId>persistence-api</artifactId>
-				<version>1.0.11-SNAPSHOT</version>
+				<version>1.0.12-SNAPSHOT</version>
 			</dependency> -->
 
 			<!-- hibernate -->
@@ -652,13 +662,6 @@
 				<version>1.3.0</version>
 			</dependency>
 
-			<!-- Net -->
-			<dependency>
-				<groupId>com.sun.mail</groupId>
-				<artifactId>jakarta.mail</artifactId>
-				<version>1.6.7</version>
-			</dependency>
-
 			<!-- Cache -->
 			<dependency>
 				<groupId>net.sf.ehcache</groupId>
@@ -715,14 +718,14 @@
 			<dependency>
 				<groupId>com.unboundid</groupId>
 				<artifactId>unboundid-ldapsdk</artifactId>
-				<version>6.0.6</version>
+				<version>6.0.8</version>
 			</dependency>
 
 			<!-- Couchbase -->
 			<dependency>
 				<groupId>com.couchbase.client</groupId>
 				<artifactId>java-client</artifactId>
-				<version>3.3.4</version>
+				<version>3.4.4</version>
 			</dependency>
 
 			<!-- SQL JDBC Drivers -->
@@ -739,12 +742,12 @@
 			<dependency>
 				<groupId>com.mysql</groupId>
 				<artifactId>mysql-connector-j</artifactId>
-				<version>8.0.31</version>
+				<version>8.0.32</version>
 			</dependency>
 			<dependency>
 			    <groupId>org.postgresql</groupId>
 			    <artifactId>postgresql</artifactId>
-			    <version>42.5.1</version>
+			    <version>42.6.0</version>
 			</dependency>
 
 			<!-- SQL Query -->
@@ -763,7 +766,7 @@
 			<dependency>
 			    <groupId>com.google.cloud</groupId>
 			    <artifactId>google-cloud-spanner</artifactId>
-			    <version>6.31.2</version>
+			    <version>6.39.0</version>
 			</dependency>
 
 			<!-- Metrics -->
@@ -803,6 +806,11 @@
 				<groupId>org.dom4j</groupId>
 				<artifactId>dom4j</artifactId>
 				<version>2.3.1</version>
+			</dependency>
+			<dependency>
+				<groupId>javax.activation</groupId>
+				<artifactId>activation</artifactId>
+				<version>1.1.1</version>
 			</dependency>
 
 			<!-- Velocity -->

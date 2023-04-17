@@ -1,4 +1,4 @@
-FROM alpine:3.16
+FROM bellsoft/liberica-openjre-alpine:11.0.16
 
 # ===============
 # Alpine packages
@@ -7,7 +7,9 @@ FROM alpine:3.16
 RUN apk update \
     && apk upgrade --available \
     && apk add --no-cache python3 curl tini py3-cryptography py3-psycopg2 py3-grpcio \
-    && apk add --no-cache --virtual .build-deps git wget
+    && apk add --no-cache --virtual .build-deps git wget \
+    && mkdir -p /usr/java/latest \
+    && ln -sf /usr/lib/jvm/jre /usr/java/latest/jre
 
 # ======
 # Python
@@ -24,7 +26,7 @@ RUN python3 -m ensurepip \
 # =====================
 
 # janssenproject/jans SHA commit
-ENV JANS_SOURCE_VERSION=12c4dfffcbdd3ccb6814885d4190159d5628fde3
+ENV JANS_SOURCE_VERSION=b20f115e7bf4fa75c7df9c120596e67273f1b10e
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCRIPT_CATALOG_DIR=docs/script-catalog
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
@@ -58,6 +60,7 @@ RUN cd /tmp/jans \
     && cp -R ${JANS_SETUP_DIR}/templates/jans-auth /app/templates/jans-auth \
     && cp ${JANS_SETUP_DIR}/openbanking/templates/scopes.ldif /app/templates/scopes.ob.ldif \
     && cp ${JANS_SETUP_DIR}/openbanking/templates/attributes.ldif /app/templates/attributes.ob.ldif \
+    && cp ${JANS_SETUP_DIR}/openbanking/templates/jans-auth/jans-auth-config.json /app/templates/jans-auth/jans-auth-config.ob.json \
     && cp ${JANS_SETUP_DIR}/static/metric/o_metric.ldif /app/templates/o_metric.ldif \
     && cp ${JANS_SETUP_DIR}/static/cache-refresh/o_site.ldif /app/templates/o_site.ldif \
     && cp -R ${JANS_SETUP_DIR}/templates/jans-fido2 /app/templates/jans-fido2 \
@@ -170,7 +173,7 @@ ENV CN_CACHE_TYPE=NATIVE_PERSISTENCE \
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/persistence-loader" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.0.11" \
+    org.opencontainers.image.version="1.0.12" \
     org.opencontainers.image.title="Janssen Authorization Server Persistence loader" \
     org.opencontainers.image.description="Generate initial data for persistence layer"
 
@@ -179,6 +182,11 @@ RUN mkdir -p /app/custom_ldif /etc/certs /etc/jans/conf
 COPY scripts /app/scripts
 # this overrides existing templates
 COPY templates /app/templates
+
+# disable keyRegeneration
+RUN sed -i -r 's/("keyRegenerationEnabled":)true/\1false/g' /app/templates/jans-auth/jans-auth-config.json \
+    && sed -i -r 's/("keyRegenerationEnabled":)true/\1false/g' /app/templates/jans-auth/jans-auth-config.ob.json
+
 RUN chmod +x /app/scripts/entrypoint.sh
 
 # create non-root user

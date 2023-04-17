@@ -567,3 +567,30 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
     def extract_scripts(self):
         base.extract_from_zip(base.current_app.jans_zip, 'docs/script-catalog', Config.script_catalog_dir)
+
+
+    def generate_smtp_config(self):
+        self.logIt("Generating smtp keys", pbar=self.service_name)
+
+        if not Config.get('smtp_jks_pass'):
+            Config.smtp_jks_pass = self.getPW()
+            try:
+                Config.smtp_jks_pass_enc = self.obscure(Config.smtp_jks_pass)
+            except Exception as e:
+                self.logIt("JansInstaller. __init__ failed. Reason: %s" % str(e), errorLog=True)
+
+
+        cmd_cert_gen = [Config.cmd_keytool, '-genkeypair',
+                        '-alias', Config.smtp_alias,
+                        '-keyalg', 'ec',
+                        '-groupname', 'secp256r1',
+                        '-sigalg', Config.smtp_signing_alg,
+                        '-validity', '3650',
+                        '-storetype', 'PKCS12',
+                        '-keystore', Config.smtp_jks_fn,
+                        '-keypass', Config.smtp_jks_pass,
+                        '-storepass', Config.smtp_jks_pass,
+                        '-dname', 'CN=SMTP CA Certificate'
+                    ]
+
+        self.run(cmd_cert_gen)

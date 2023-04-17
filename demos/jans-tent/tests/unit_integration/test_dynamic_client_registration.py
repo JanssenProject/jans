@@ -1,10 +1,12 @@
 from unittest import TestCase
 from unittest.mock import MagicMock
-import sys
 import inspect
-import clientapp.client_handler as client_handler
+
+import clientapp.helpers.client_handler as client_handler
 from typing import Optional
 import helper
+from oic.oauth2 import ASConfigurationResponse
+
 
 ClientHandler = client_handler.ClientHandler
 
@@ -32,28 +34,6 @@ class TestDynamicClientRegistration(TestCase):
         ClientHandler.discover = self.discover_stash
         ClientHandler.register_client = self.register_client_stash
 
-    def test_if_registration_is_imported_in_sys(self):
-        self.assertIn('flask_oidc.registration', sys.modules,
-                      'flask_oidc.registration not found in sys')
-
-    def test_if_registration_exists(self):
-        self.assertTrue(hasattr(client_handler, 'registration'))
-
-    def test_if_registration_is_flask_oidc_package(self):
-        self.assertTrue(
-            client_handler.registration.__package__ == 'flask_oidc',
-            'registration is not from flask_oidc package')
-
-    def test_if_discovery_is_imported(self):
-        self.assertIn('flask_oidc.discovery', sys.modules)
-
-    def test_if_discovery_is_flask_oidc_package(self):
-        self.assertTrue(client_handler.discovery.__package__ == 'flask_oidc',
-                        'discovery is not from flask_oidc package')
-
-    def test_if_discovery_exists(self):
-        self.assertTrue(hasattr(client_handler, 'discovery'))
-
     def test_if_json_exists(self):
         self.assertTrue(hasattr(client_handler, 'json'),
                         'json does not exists in client_handler')
@@ -75,7 +55,7 @@ class TestDynamicClientRegistration(TestCase):
                         'register_client is not callable')
 
     def test_if_register_client_receives_params(self):
-        expected_args = ['self', 'op_data', 'client_url']
+        expected_args = ['self', 'op_data', 'redirect_uris']
         self.assertTrue(
             inspect.getfullargspec(
                 ClientHandler.register_client).args == expected_args,
@@ -84,15 +64,15 @@ class TestDynamicClientRegistration(TestCase):
     def test_if_register_client_params_are_expected_type(self):
         insp = inspect.getfullargspec(ClientHandler.register_client)
         self.assertTrue(
-            insp.annotations['op_data'] == Optional[dict]
-            and insp.annotations['client_url'] == Optional[str],
+            insp.annotations['op_data'] == ASConfigurationResponse
+            and insp.annotations['redirect_uris'] == Optional[list[str]],
             'register_client is not receiving the right params')
 
     def test_if_class_has_initial_expected_attrs(self):
         initial_expected_attrs = [
             '_ClientHandler__client_id',
             '_ClientHandler__client_secret',
-            '_ClientHandler__client_url',
+            '_ClientHandler__redirect_uris',
             '_ClientHandler__metadata_url',
             'discover',  # method
             'register_client'  # method
@@ -112,7 +92,7 @@ class TestDynamicClientRegistration(TestCase):
                         'discover is not callable')
 
     def test_if_discover_receives_params(self):
-        expected_args = ['self', 'op_url', 'disc']
+        expected_args = ['self', 'op_url']
         self.assertTrue(
             inspect.getfullargspec(
                 ClientHandler.discover).args == expected_args,
@@ -121,18 +101,8 @@ class TestDynamicClientRegistration(TestCase):
     def test_if_discover_params_are_expected_type(self):
         insp = inspect.getfullargspec(ClientHandler.discover)
         self.assertTrue(
-            insp.annotations['op_url'] == Optional[str]
-            and insp.annotations['disc'] == client_handler.discovery,
+            insp.annotations['op_url'] == Optional[str],
             'discover is not receiving the right params')
-
-    def test_discover_should_not_return_none_when_non_existant_config(self):
-        self.assertIsNotNone(
-            ClientHandler.discover(ClientHandler, 'https://google.com'))
-
-    def test_discover_should_return_empty_dict_when_error(self):
-        self.assertEqual(
-            ClientHandler.discover(ClientHandler, 'ggg:asddasd.caccasddas'),
-            {}, 'not returning empty dict on error')
 
     def test_discover_should_return_valid_dict(self):
         """[Checks if returns main keys]
@@ -188,18 +158,18 @@ class TestDynamicClientRegistration(TestCase):
         self.assertEqual(client_handler_obj.__dict__['_ClientHandler__op_url'],
                          op_url)
 
-    def test_class_init_should_set_client_url(self):
+    def test_class_init_should_set_redirect_uris(self):
         self.mock_methods()
 
         op_url = 'https://t1.techno24x7.com'
-        client_url = 'https://mock.test.com'
-        client_handler_obj = ClientHandler(op_url, client_url)
+        redirect_uris = 'https://mock.test.com/oidc_callback'
+        client_handler_obj = ClientHandler(op_url, redirect_uris)
 
         self.restore_stashed_mocks()
 
         self.assertEqual(
-            client_handler_obj.__dict__['_ClientHandler__client_url'],
-            client_url)
+            client_handler_obj.__dict__['_ClientHandler__redirect_uris'],
+            redirect_uris)
 
     def test_class_init_should_set_metadata_url(self):
         self.mock_methods()

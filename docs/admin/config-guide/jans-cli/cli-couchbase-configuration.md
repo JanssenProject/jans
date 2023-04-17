@@ -4,11 +4,12 @@ tags:
   - configuration
   - cli
   - commandline
+  - couchbase
 ---
 
 # Couchbase Database Configuration
 
-> Prerequisite: Know how to use the Janssen CLI in [command-line mode](cli-index.md)
+> Prerequisite: Know how to use the Janssen CLI in [command-line mode](../jans-cli/README.md)
 
 If your janssen server backend is connected with couchbase database then you can go with these operations instead of [LDAP configuration](cli-ldap-configuration.md).
 

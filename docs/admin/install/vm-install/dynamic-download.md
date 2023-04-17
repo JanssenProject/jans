@@ -3,7 +3,7 @@ tags:
 - administration
 - installation
 - vm
-- Dynamic
+- dynamic
 ---
 
 # Install Janssen Server using Dynamic Download

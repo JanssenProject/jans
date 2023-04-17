@@ -5,20 +5,11 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class LicenseConfig {
 
+    private String ssa;
     private String scanLicenseApiHostname;
-    private String scanLicenseAuthServerHostname;
     private String licenseKey;
     private String licenseHardwareKey;
-    private CredentialsEncryptionKeyDetails credentialsEncryptionKey;
     private OIDCClientSettings oidcClient;
-
-    public CredentialsEncryptionKeyDetails getCredentialsEncryptionKey() {
-        return credentialsEncryptionKey;
-    }
-
-    public void setCredentialsEncryptionKey(CredentialsEncryptionKeyDetails credentialsEncryptionKey) {
-        this.credentialsEncryptionKey = credentialsEncryptionKey;
-    }
 
     public OIDCClientSettings getOidcClient() {
         return oidcClient;
@@ -52,22 +43,21 @@ public class LicenseConfig {
         this.licenseKey = licenseKey;
     }
 
-    public String getScanLicenseAuthServerHostname() {
-        return scanLicenseAuthServerHostname;
+    public String getSsa() {
+        return ssa;
     }
 
-    public void setScanLicenseAuthServerHostname(String scanLicenseAuthServerHostname) {
-        this.scanLicenseAuthServerHostname = scanLicenseAuthServerHostname;
+    public void setSsa(String ssa) {
+        this.ssa = ssa;
     }
 
     @Override
     public String toString() {
         return "LicenseConfig{" +
                 "scanLicenseApiHostname='" + scanLicenseApiHostname + '\'' +
-                "scanLicenseAuthServerHostname='" + scanLicenseAuthServerHostname + '\'' +
                 ", licenseKey='" + licenseKey + '\'' +
+                ", ssa='" + ssa + '\'' +
                 ", licenseHardwareKey='" + licenseHardwareKey + '\'' +
-                ", credentialsEncryptionKey=" + credentialsEncryptionKey.toString() +
                 ", oidcClient=" + oidcClient.toString() +
                 '}';
     }

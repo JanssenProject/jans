@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>io.jans</groupId>
 		<artifactId>jans-core-parent</artifactId>
-		<version>1.0.11-SNAPSHOT</version>
+		<version>1.0.12-SNAPSHOT</version>
 	</parent>
 
 	<build>
@@ -80,28 +80,28 @@
 		</dependency>
 
 		<!-- CDI -->
-        <dependency>
-		    <groupId>jakarta.enterprise</groupId>
-		    <artifactId>jakarta.enterprise.cdi-api</artifactId>
-		    <scope>provided</scope>
-   		</dependency>
 		<dependency>
-		    <groupId>jakarta.inject</groupId>
-        	<artifactId>jakarta.inject-api</artifactId>
-   		</dependency>
-        <dependency>
-            <groupId>jakarta.mail</groupId>
-        	<artifactId>jakarta.mail-api</artifactId>
-      	</dependency>
+			<groupId>jakarta.enterprise</groupId>
+			<artifactId>jakarta.enterprise.cdi-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.inject</groupId>
+			<artifactId>jakarta.inject-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>jakarta.mail</groupId>
+			<artifactId>jakarta.mail-api</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>jakarta.servlet</groupId>
 			<artifactId>jakarta.servlet-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-            <groupId>jakarta.validation</groupId>
-            <artifactId>jakarta.validation-api</artifactId>
-        </dependency>
+			<groupId>jakarta.validation</groupId>
+			<artifactId>jakarta.validation-api</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.jboss.spec.javax.annotation</groupId>
 			<artifactId>jboss-annotations-api_1.3_spec</artifactId>
@@ -156,16 +156,34 @@
 		<dependency>
 			<groupId>com.sun.mail</groupId>
 			<artifactId>jakarta.mail</artifactId>
-		<!-- 	<exclusions>
+		 	<exclusions>
 				<exclusion>
 					<groupId>com.sun.activation</groupId>
 					<artifactId>jakarta.activation</artifactId>
 				</exclusion>
-			</exclusions> -->
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>javax.activation</groupId>
+			<artifactId>activation</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml</groupId>
 			<artifactId>aalto-xml</artifactId>
+		</dependency>
+
+		<!-- Bouncycastle -->
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcprov-jdk15on</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcpkix-jdk15on</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcmail-jdk15on</artifactId>
 		</dependency>
 	</dependencies>
 

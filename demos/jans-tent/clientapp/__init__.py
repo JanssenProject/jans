@@ -1,7 +1,7 @@
 '''
 Project: Test Auth Client
 Author: Christian Hawk
-Copyright 2023 Christian Hawk
+
 
 Licensed under the Apache License, Version 2.0 (the 'License');
 you may not use this file except in compliance with the License.
@@ -16,53 +16,28 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 import base64
-import logging
+import json
 import os
 from urllib.parse import urlparse
-
 from authlib.integrations.flask_client import OAuth
 from flask import (Flask, jsonify, redirect, render_template, request, session,
                    url_for)
-
 from . import config as cfg
-from .client_handler import ClientHandler
+from .helpers.client_handler import ClientHandler
+from .helpers.cgf_checker import register_client_if_no_client_info
+from .utils.logger import setup_logger
+
+setup_logger()
 
 oauth = OAuth()
 
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='[%(asctime)s] %(levelname)s %(name)s in %(module)s : %(message)s',
-    filename='test-client.log')
-'''
-dictConfig({
-    'version': 1,
-    'formatters': {'default': {
-        'format': '[%(asctime)s] %(levelname)s %(name)s in %(module)s %(threadName)s: %(message)s',
-    }},
-    'handlers':
-        {
-        'wsgi': {
-            'class': 'logging.StreamHandler',
-            'stream': 'ext://flask.logging.wsgi_errors_stream',
-            'formatter': 'default'
-            },
-        'file_handler': {
-            'level': 'DEBUG',
-            'filename': 'mylogfile.log',
-            'class': 'logging.FileHandler',
-            'formatter': 'default'
 
-            }
-        },
-
-    'root': {
-        'level': 'DEBUG',
-        'handlers': ['file_handler'],
-        'filename': 'demo.log'
-    }
-
-})
-'''
+def add_config_from_json():
+    with open('client_info.json', 'r') as openfile:
+        client_info = json.load(openfile)
+        cfg.SERVER_META_URL = client_info['op_metadata_url']
+        cfg.CLIENT_ID = client_info['client_id']
+        cfg.CLIENT_SECRET = client_info['client_secret']
 
 
 def get_preselected_provider():
@@ -76,8 +51,9 @@ def get_preselected_provider():
     #     return base64url_value_unpad
     return base64url_value
 
+
 def get_provider_host():
-    provider_host_string  = cfg.PROVIDER_HOST_STRING
+    provider_host_string = cfg.PROVIDER_HOST_STRING
     provider_object = '{ "providerHost" : "%s" }' % provider_host_string
     provider_object_bytes = provider_object.encode()
     base64url_bytes = base64.urlsafe_b64encode(provider_object_bytes)
@@ -90,7 +66,6 @@ def get_provider_host():
 
 def ssl_verify(ssl_verify=cfg.SSL_VERIFY):
     if ssl_verify is False:
-        print("Here!")
         os.environ['CURL_CA_BUNDLE'] = ""
 
 
@@ -99,6 +74,8 @@ class BaseClientErrors(Exception):
 
 
 def create_app():
+    register_client_if_no_client_info()
+    add_config_from_json()
     ssl_verify()
 
     app = Flask(__name__)
@@ -108,20 +85,19 @@ def create_app():
     app.config['OP_CLIENT_SECRET'] = cfg.CLIENT_SECRET
     oauth.init_app(app)
     oauth.register(
-                    'op',
-                   server_metadata_url=cfg.SERVER_META_URL,
-                   client_kwargs={
-                       'scope': 'openid profile email',
-                       'acr_value': cfg.ACR_VALUES
-                   },
-                   token_endpoint_auth_method=cfg.SERVER_TOKEN_AUTH_METHOD)
+            'op',
+            server_metadata_url=cfg.SERVER_META_URL,
+            client_kwargs={
+                'scope': cfg.SCOPE
+            },
+            token_endpoint_auth_method=cfg.SERVER_TOKEN_AUTH_METHOD
+            )
 
     @app.route('/')
     def index():
         user = session.get('user')
         id_token = session.get('id_token')
         return render_template("home.html", user=user, id_token=id_token)
-        
 
     @app.route('/register', methods=['POST'])
     def register():
@@ -133,28 +109,29 @@ def create_app():
         if content is None:
             status = 400
             # message = 'No json data posted'
-        elif 'op_url' and 'client_url' not in content:
+        elif 'op_url' and 'redirect_uris' not in content:
             status = 400
             # message = 'Not needed keys found in json'
         else:
             app.logger.info('Trying to register client %s on %s' %
-                            (content['client_url'], content['op_url']))
+                            (content['redirect_uris'], content['op_url']))
             op_url = content['op_url']
-            client_url = content['client_url']
+            redirect_uris = content['redirect_uris']
 
             op_parsed_url = urlparse(op_url)
-            client_parsed_url = urlparse(client_url)
+            client_parsed_redirect_uri = urlparse(redirect_uris[0])
 
-            if op_parsed_url.scheme != 'https' or client_parsed_url.scheme != 'https':
+            if op_parsed_url.scheme != 'https' or client_parsed_redirect_uri.scheme != 'https':
                 status = 400
 
-            elif (((op_parsed_url.path != '' or op_parsed_url.query != '') or client_parsed_url.path != '') or client_parsed_url.query != ''):
+            elif (((
+                           op_parsed_url.path != '' or op_parsed_url.query != '') or client_parsed_redirect_uri.path == '') or client_parsed_redirect_uri.query != ''):
                 status = 400
 
             else:
                 client_handler = ClientHandler(
                     content['op_url'],
-                    content['client_url']
+                    content['redirect_uris']
                 )
                 data = client_handler.get_client_dict()
                 status = 200
@@ -178,20 +155,21 @@ def create_app():
         query_args = {
             'redirect_uri': redirect_uri,
         }
-        if cfg.PRE_SELECTED_PROVIDER is True:
-            query_args[
-                'preselectedExternalProvider'] = get_preselected_provider()
 
         if cfg.ACR_VALUES is not None:
             query_args['acr_values'] = cfg.ACR_VALUES
-        
-        if cfg.PROVIDER_HOST_STRING is not None:
-            query_args["providerHost"] = get_provider_host()
 
+        # used for inbound-saml, uncomment and set config.py to use it
+        # if cfg.PRE_SELECTED_PROVIDER is True:
+        #     query_args[
+        #         'preselectedExternalProvider'] = get_preselected_provider()
+
+        # used for gluu-passport, , uncomment and set config.py to use it
+        # if cfg.PROVIDER_HOST_STRING is not None:
+        #     query_args["providerHost"] = get_provider_host()
 
         if cfg.ADDITIONAL_PARAMS is not None:
             query_args |= cfg.ADDITIONAL_PARAMS
-
 
         response = oauth.op.authorize_redirect(**query_args)
 
@@ -221,8 +199,6 @@ def create_app():
             return redirect('/')
 
         except Exception as error:
-            print('exception!')
-            print(error)
             app.logger.error(str(error))
             return {'error': str(error)}, 400
 

@@ -7,7 +7,6 @@ import io.jans.agama.model.serialize.Type;
 import io.jans.util.Pair;
 
 import jakarta.ws.rs.core.HttpHeaders;
-import java.nio.file.Path;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -17,7 +16,7 @@ public class EngineConfig {
 
     private boolean enabled;
 
-    private String rootDir = Path.of(System.getProperty("server.base"), "agama").toString();
+    private String rootDir;
     private String templatesPath = "/ftl";
     private String scriptsPath = "/scripts";
     

@@ -3,7 +3,10 @@ tags:
   - administration
   - vm
   - operations
+  - backup
 ---
+
+# Janssen VM Backup
 
 Best method of Janssen Backup is "VM Snapshot" backup. That means, backup / take snapshot of whole virtual machine / droplet / instance which is hosting your Gluu Janssen software. In the event of a production outage, a proper snapshot of the last working condition will help rapidly restore service.
 

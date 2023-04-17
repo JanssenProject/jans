@@ -345,12 +345,12 @@ func (c *Client) GetAppConfiguration(ctx context.Context) (*AppConfiguration, er
 	return ret, nil
 }
 
-// UpdateAuthServiceConfig uses the provided list of patch requests to update
-// the Janssen authorization servcer application configuration properties.
-func (c *Client) UpdateAppConfiguration(ctx context.Context, config *AppConfiguration) (*AppConfiguration, error) {
+// PatchAppConfiguration uses the provided list of patch requests to update
+// the Janssen authorization server application configuration properties.
+func (c *Client) PatchAppConfiguration(ctx context.Context, patches []PatchRequest) (*AppConfiguration, error) {
 
-	if config == nil {
-		return nil, fmt.Errorf("config is nil")
+	if len(patches) == 0 {
+		return c.GetAppConfiguration(ctx)
 	}
 
 	orig, err := c.GetAppConfiguration(ctx)
@@ -358,13 +358,13 @@ func (c *Client) UpdateAppConfiguration(ctx context.Context, config *AppConfigur
 		return nil, fmt.Errorf("failed to get app configuration: %w", err)
 	}
 
-	patches, err := createPatches(config, orig)
+	updates, err := createPatchesDiff(orig, patches)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create patches: %w", err)
 	}
 
-	if len(patches) == 0 {
-		return nil, fmt.Errorf("no patches provided")
+	if len(updates) == 0 {
+		return c.GetAppConfiguration(ctx)
 	}
 
 	token, err := c.getToken(ctx, "https://jans.io/oauth/jans-auth-server/config/properties.write")
@@ -372,7 +372,7 @@ func (c *Client) UpdateAppConfiguration(ctx context.Context, config *AppConfigur
 		return nil, fmt.Errorf("failed to get token: %w", err)
 	}
 
-	if err := c.patch(ctx, "/jans-config-api/api/v1/jans-auth-server/config", token, patches); err != nil {
+	if err := c.patch(ctx, "/jans-config-api/api/v1/jans-auth-server/config", token, updates); err != nil {
 		return nil, fmt.Errorf("patch request failed: %w", err)
 	}
 

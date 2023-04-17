@@ -25,6 +25,7 @@ sudo apt-get install \
   ca-certificates \
   curl \
   gnupg \
+  python3-pip \
   lsb-release -y
 sudo mkdir -p /etc/apt/keyrings
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg

@@ -12,6 +12,7 @@ public class ProjectMetadata {
     private String author;
     private String type;
     private String description;
+    private String version;
 
     @JsonProperty("configs")
     private Map<String, Object> configHints;
@@ -46,6 +47,14 @@ public class ProjectMetadata {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
     }
 
     public Map<String, Object> getConfigHints() {

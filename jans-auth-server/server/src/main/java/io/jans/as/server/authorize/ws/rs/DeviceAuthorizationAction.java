@@ -6,26 +6,27 @@
 
 package io.jans.as.server.authorize.ws.rs;
 
+import io.jans.as.common.model.session.SessionId;
+import io.jans.as.common.model.session.SessionIdState;
 import io.jans.as.common.util.RedirectUri;
+import io.jans.as.model.config.Constants;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.util.Util;
 import io.jans.as.server.i18n.LanguageBean;
 import io.jans.as.server.model.common.DeviceAuthorizationCacheControl;
 import io.jans.as.server.model.common.DeviceAuthorizationStatus;
-import io.jans.as.common.model.session.SessionId;
-import io.jans.as.common.model.session.SessionIdState;
 import io.jans.as.server.service.CookieService;
 import io.jans.as.server.service.DeviceAuthorizationService;
 import io.jans.as.server.service.SessionIdService;
 import io.jans.jsf2.message.FacesMessages;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date;
@@ -33,15 +34,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import static io.jans.as.model.authorize.AuthorizeRequestParam.CLIENT_ID;
-import static io.jans.as.model.authorize.AuthorizeRequestParam.NONCE;
-import static io.jans.as.model.authorize.AuthorizeRequestParam.RESPONSE_TYPE;
-import static io.jans.as.model.authorize.AuthorizeRequestParam.SCOPE;
-import static io.jans.as.model.authorize.AuthorizeRequestParam.STATE;
+import static io.jans.as.model.authorize.AuthorizeRequestParam.*;
 import static io.jans.as.model.util.StringUtils.EASY_TO_READ_CHARACTERS;
-import static io.jans.as.server.service.DeviceAuthorizationService.SESSION_ATTEMPTS;
-import static io.jans.as.server.service.DeviceAuthorizationService.SESSION_LAST_ATTEMPT;
-import static io.jans.as.server.service.DeviceAuthorizationService.SESSION_USER_CODE;
+import static io.jans.as.server.service.DeviceAuthorizationService.*;
 
 /**
  * Action used to process all requests related to device authorization.
@@ -112,7 +107,10 @@ public class DeviceAuthorizationAction implements Serializable {
      */
     public void initializeSession() {
         SessionId sessionId = sessionIdService.getSessionId();
-        Map<String, String> sessionAttributes = new HashMap<>();
+        Map<String, String> sessionAttributes = sessionId != null ? sessionId.getSessionAttributes() : new HashMap<>();
+        sessionAttributes.put(Constants.DEVICE_AUTHORIZATION, Boolean.TRUE.toString());
+        sessionAttributes.remove(SESSION_USER_CODE);
+
         if (StringUtils.isNotBlank(userCode)) {
             sessionAttributes.put(SESSION_USER_CODE, userCode);
         }
@@ -226,6 +224,7 @@ public class DeviceAuthorizationAction implements Serializable {
      *
      * @param cacheData Data related to the device code request.
      */
+    @SuppressWarnings("java:S1117")
     private void redirectToAuthorization(DeviceAuthorizationCacheControl cacheData) {
         try {
             log.info("Redirecting to authorization code flow to process device authorization, data: {}", cacheData);
@@ -235,6 +234,7 @@ public class DeviceAuthorizationAction implements Serializable {
             String scope = Util.listAsString(cacheData.getScopes());
             String state = UUID.randomUUID().toString();
             String nonce = UUID.randomUUID().toString();
+            String acr = appConfiguration.getDeviceAuthzAcr();
 
             RedirectUri authRequest = new RedirectUri(authorizationEndpoint);
             authRequest.addResponseParameter(CLIENT_ID, clientId);
@@ -242,8 +242,13 @@ public class DeviceAuthorizationAction implements Serializable {
             authRequest.addResponseParameter(SCOPE, scope);
             authRequest.addResponseParameter(STATE, state);
             authRequest.addResponseParameter(NONCE, nonce);
+            if (StringUtils.isNotBlank(acr)) {
+                authRequest.addResponseParameter(ACR_VALUES, acr);
+            }
 
-            FacesContext.getCurrentInstance().getExternalContext().redirect(authRequest.toString());
+            final String redirectTo = authRequest.toString();
+            log.debug("Redirecting to: {}", redirectTo);
+            FacesContext.getCurrentInstance().getExternalContext().redirect(redirectTo);
         } catch (IOException e) {
             log.error("Problems trying to redirect to authorization page from device authorization action", e);
             String message = languageBean.getMessage("error.errorEncountered");

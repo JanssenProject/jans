@@ -110,6 +110,74 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly
+  /admin-ui/license/isConfigValid:
+    get:
+      tags:
+      - Admin UI - License
+      summary: Is license configuration valid
+      description: Is license configuration valid
+      operationId: check-adminui-license-config
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LicenseApiResponse'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LicenseApiResponse'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LicenseApiResponse'
+      security:
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly
+  /admin-ui/license/ssa:
+    post:
+      tags:
+      - Admin UI - License
+      summary: Save SSA in configuration
+      description: Save SSA in configuration
+      operationId: adminui-post-ssa
+      requestBody:
+        description: SSARequest object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SSARequest'
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LicenseApiResponse'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LicenseApiResponse'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LicenseApiResponse'
+      security:
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/license.write
   /admin-ui/adminUIPermissions:
     get:
       tags:
@@ -561,6 +629,13 @@ components:
       properties:
         licenseKey:
           type: string
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
     LicenseApiResponse:
       type: object
       properties:
@@ -571,6 +646,13 @@ components:
         responseCode:
           type: integer
           format: int32
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
     LicenseResponse:
       type: object
       properties:
@@ -599,6 +681,25 @@ components:
           type: string
         customerLastName:
           type: string
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
+    SSARequest:
+      type: object
+      properties:
+        ssa:
+          type: string
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
     AdminPermission:
       type: object
       properties:
@@ -608,6 +709,13 @@ components:
           type: string
         defaultPermissionInToken:
           type: boolean
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
     RolePermissionMapping:
       type: object
       properties:
@@ -617,6 +725,13 @@ components:
           type: array
           items:
             type: string
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
     AdminRole:
       type: object
       properties:
@@ -626,6 +741,13 @@ components:
           type: string
         deletable:
           type: boolean
+        clientAuthMapSchema:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/Scope'
+          description: clientAuthMapSchema
   securitySchemes:
     oauth2:
       type: oauth2

@@ -36,6 +36,7 @@ if no_tui:
     sys.exit()
 
 import prompt_toolkit
+from prompt_toolkit.eventloop import get_event_loop
 from prompt_toolkit.application import Application, get_app_session
 from prompt_toolkit.application.current import get_app
 from prompt_toolkit.key_binding import KeyBindings
@@ -77,7 +78,7 @@ from prompt_toolkit.keys import Keys
 
 from cli_style import style
 from utils.multi_lang import _
-from utils.static import cli_style
+from utils.static import cli_style, common_strings
 from utils.validators import IntegerValidator
 from wui_components.jans_cli_dialog import JansGDialog
 from wui_components.jans_nav_bar import JansNavBar
@@ -197,6 +198,26 @@ class JansCliApp(Application):
                         )
         return response
 
+
+    def retreive_openid_configuration(
+        self,
+        call_after: Optional[Callable] = None
+        ) -> None:
+        """Retreives OpenID configuration via CLI Object"""
+
+        self.logger.debug('Retreiving OpenID configuration')
+
+        async def coroutine():
+            self.start_progressing(_("Retireiving OpenID configuration..."))
+            await get_event_loop().run_in_executor(self.executor, self.cli_object.get_openid_configuration)
+            self.stop_progressing()
+            self.logger.debug('OpenID Configuration: {}'.format(self.cli_object.openid_configuration))
+            if call_after:
+                call_after()
+
+        asyncio.ensure_future(coroutine())
+
+
     def start_progressing(self, message: Optional[str]="Progressing") -> None:
         self.progressing_text = message
         self.create_background_task(self.progress_coroutine())
@@ -295,18 +316,39 @@ class JansCliApp(Application):
 
         self.invalidate()
 
+
         if status not in (True, 'ID Token is expired'):
             buttons = [Button(_("OK"), handler=self.jans_creds_dialog)]
-            self.show_message(_("Error getting Connection Config Api"), status, buttons=buttons)
+            self.show_message(_("Error connectiong to Auth Server"), status, buttons=buttons)
 
         else:
             if not test_client and not self.cli_object.access_token:
 
-                response = self.cli_object.get_device_verification_code()
-                result = response.json()
+                result = {}
+                try:
+                    response = self.cli_object.get_device_verification_code()
+                    result = response.json()
+                except Exception as e:
+                    self.cli_object_ok = False
+                    self.show_message(
+                            _(common_strings.error), 
+                            _("Can't get device verification code: \n{}").format(str(e)), 
+                            buttons=[Button(_("OK"), handler=self.jans_creds_dialog)],
+                            tobefocused=self.center_container)
+                    return
 
-                msg = _("Please visit verification url %s and enter user code %s within %d seconds.")
-                body = HSplit([Label(msg % (result['verification_uri'], result['user_code'], result['expires_in']),style='class:jans-main-verificationuri.text')],style='class:jans-main-verificationuri')
+
+                if not 'verification_uri_complete' in result:
+                    self.cli_object_ok = False
+                    self.show_message(
+                            _(common_strings.error),
+                            _("Can't find verification code in server response: \n{}").format(response.text),
+                            buttons=[Button(_("OK"), handler=self.jans_creds_dialog)],
+                            tobefocused=self.center_container)
+                    return
+
+                msg = _("Please visit verification url {} and authorize this device within {} seconds.")
+                body = HSplit([Label(msg.format(result['verification_uri_complete'], result['expires_in']), style='class:jans-main-verificationuri.text')], style='class:jans-main-verificationuri')
                 dialog = JansGDialog(self, title=_("Waiting Response"), body=body)
 
                 async def coroutine():
@@ -602,7 +644,8 @@ class JansCliApp(Application):
             scrollbar: Optional[bool] = False,
             line_numbers: Optional[bool] = False,
             lexer: PygmentsLexer = None,
-            text_type: Optional[str] = 'string'
+            text_type: Optional[str] = 'string',
+            jans_list_type: Optional[bool] = False,
             ) -> AnyContainer:
 
         title += ': '
@@ -621,6 +664,7 @@ class JansCliApp(Application):
                 lexer=lexer,
             )
 
+
         if text_type == 'integer':
             ta.buffer.on_text_insert=IntegerValidator(ta)
 
@@ -628,8 +672,13 @@ class JansCliApp(Application):
         ta.window.jans_name = name
         ta.window.jans_help = jans_help
 
+
+
         v = VSplit([Window(FormattedTextControl(title), width=len(title)+1, style=style, height=height), ta])
         v.me = ta
+
+        if jans_list_type:
+            v.jans_list_type = True
 
         return v
  

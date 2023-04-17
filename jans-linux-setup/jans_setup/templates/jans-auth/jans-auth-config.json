@@ -355,7 +355,7 @@
         }
     ],
     "sessionIdUnusedLifetime":86400,
-    "sessionIdUnauthenticatedUnusedLifetime":120,
+    "sessionIdUnauthenticatedUnusedLifetime":7200,
     "changeSessionIdOnAuthentication":true,
     "returnClientSecretOnRead": true,
     "sessionIdPersistOnPromptNone":true,
@@ -440,7 +440,7 @@
     },
     "loggingLevel": "INFO",
     "loggingLayout": "text",
-    "errorHandlingMethod":"internal",
+    "errorHandlingMethod":"remote",
     "useLocalCache":true,
     "backchannelTokenDeliveryModesSupported": [
         "poll",
@@ -484,7 +484,8 @@
     "redirectUrisRegexEnabled": true,
     "useHighestLevelScriptIfAcrScriptNotFound": false,
     "agamaConfiguration": {
-        "enabled": true,
+        "enabled": false,
+        "rootDir": "/opt/jans/jetty/jans-auth/agama",
         "templatesPath": "/ftl",
         "scriptsPath": "/scripts",
         "serializerType": "KRYO",
