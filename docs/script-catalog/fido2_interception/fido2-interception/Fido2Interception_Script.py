@@ -3,19 +3,19 @@
 #
 # Author: Jorge Munoz
 #
-
 from io.jans.service.cdi.util import CdiUtil
-from io.jans.model.custom.script.type.auth import Fido2InterceptionType
+from io.jans.model.custom.script.type.fido2 import Fido2InterceptionType
 from io.jans.fido2.service.operation import AttestationService
 from io.jans.fido2.service.operation import AssertionService
 from io.jans.util import StringHelper
-from io.jans.as.model.error import ErrorResponseFactory
-from jakarta.ws.rs.core import Response
-from io.jans.as.model.authorize import AuthorizeErrorResponseType
 from org.json import JSONObject
 from com.fasterxml.jackson.databind import JsonNode
+from org.apache.logging.log4j import ThreadContext
+from io.jans.fido2.model.u2f.error import Fido2ErrorResponseFactory
+from io.jans.fido2.model.u2f.error import Fido2ErrorResponseType
+from io.jans.as.model.config import Constants
 
-import java
+from java.lang import String
 
 class Fido2Interception(Fido2InterceptionType):
     def __init__(self, currentTimeMillis):
@@ -35,10 +35,10 @@ class Fido2Interception(Fido2InterceptionType):
         return 11
 
 #To generate a bad request WebApplicationException giving a message. This method is to be called inside (interceptRegisterAttestation, interceptVerifyAttestation, interceptAuthenticateAssertion, interceptVerifyAssertion)
-    def throwBadRequestException(self, context, message):
-	errorResponseFactory = CdiUtil.bean(ErrorResponseFactory)
-	errorClaimException = errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, AuthorizeErrorResponseType.INVALID_REQUEST, message)
-	context.setWebApplicationException(errorClaimException); 
+    def throwBadRequestException(self, title, message, context):
+    	print "Fido2Interception. setting Bad request exception"
+	errorClaimException = Fido2ErrorResponseFactory.createBadRequestException(Fido2ErrorResponseType.BAD_REQUEST_INTERCEPTION, title, message, ThreadContext.get(Constants.CORRELATION_ID_HEADER))
+	context.setWebApplicationException(errorClaimException)
 
 #This method is called in Attestation register endpoint, just before to start the registration process
     def interceptRegisterAttestation(self, paramAsJsonNode, context):
@@ -57,6 +57,11 @@ class Fido2Interception(Fido2InterceptionType):
     def interceptAuthenticateAssertion(self, paramAsJsonNode, context):
 	print "Fido2Interception. interceptAuthenticateAssertion"
 	assertionService = CdiUtil.bean(AssertionService)
+	print "Fido2Interception. printing username:"
+	print paramAsJsonNode.get("username").asText()
+	if paramAsJsonNode.get("username").asText() == 'test_user':
+	    self.throwBadRequestException("Fido2Interception interceptAuthenticateAssertion : test_user", "Description Error from script : test_user", context)
+	    
         return True
 	
 #This method is called in Assertion verify enpoint, just before to start the verification process		
@@ -64,3 +69,4 @@ class Fido2Interception(Fido2InterceptionType):
 	print "Fido2Interception. interceptVerifyAssertion"
 	assertionService = CdiUtil.bean(AssertionService)
         return True
+
