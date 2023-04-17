@@ -1,10 +1,10 @@
-
-[Super Gluu](supergluu.md) is Janssen's own push-notification two-factor authentication (2FA) mobile app built to work with the Janssen Server.
+[Super Gluu](https://github.com/GluuFederation/super-gluu) is an open source, push-notification two-factor authentication (2FA) mobile app which can be integrated to work with the Janssen Server.
 Super Gluu uses public-key encryption as specified in the [FIDO U2F authentication standard](https://fidoalliance.org/specifications/overview/). Upon device enrollment, Super Gluu registers its public key against the Janssen's FIDO Server's `super_gluu_registration_endpoint` endpoint. Authentication takes place at `super_gluu_authentication_endpoint` where a challenge response ensures that the device has the corresponding private key.
 
 ### Janssen's Super Gluu endpoint
 
 The fido2 server serves the registration and authentication of Super Gluu credentials, the URI of which can be found at `https://<my.jans.server>/.well-known/fido2-configuration`. However, **this feature has to be enabled** first, else the endpoints `super_gluu_registration_endpoint` and `super_gluu_authentication_endpoint` will not show up by default.
+
 
 ### Prerequisites:
 
@@ -37,9 +37,31 @@ python3 /opt/jans/jans-setup/setup.py
 !!! Note
     The Janssen Server and Super Gluu can work in the same network, without a DNS server hostname and with a self-signed certificate. There is only one limitation: both components should belong to the same network. Instead of assigning a hostname during Janssen Server installation, an IP address can be specified. In the Super Gluu mobile app, enable `Trust all (SSL)`.
 
-#### E. Configuring Push notification server (push-api-server):
+#### E. Push Notification Server **hosted by Gluu**:
+The Notification server should be configured to recieve push notifications on registered mobile devices. 
 
-Configure `/etc/certs/super_gluu_creds.json`. For each Mobile app (Android, iOS); place the Access key / Secret key of `push-api-server`.  
+Configure `/etc/certs/super_gluu_creds.json`. For each Mobile app (Android, iOS); place the Access key / Secret key of Push Notification server.  
+```
+{
+       "android":{
+           "gluu":{
+               "enabled":true,
+               "access_key":"36W......BP",
+               "secret_access_key":"ueq.....fek"
+           }
+       },
+       "ios":{
+           "gluu":{
+               "enabled":true,
+               "access_key":"auO......6V",
+               "secret_access_key":"f0......oei"
+           }
+       },
+       "gluu":{
+           "server_uri":"https://api.gluu.org"
+       }
+   }
+```
 
 
 ### User and Developer Guides
