@@ -26,26 +26,34 @@ func TestOrganization(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// orga.Dn = "o=janssen"
-	// orga.BaseDn = "o=janssen"
-	orga.DisplayName = "TestDisplayName"
-	orga.Description = "TestDescription"
-	orga.Member = "yes"
-	orga.Organization = "TestOrga"
-	orga.ManagerGroup = "TestManagerGroup"
-	orga.ShortName = "TestShortName"
+	patches := []PatchRequest{
+		{
+			Op:    "replace",
+			Path:  "/displayName",
+			Value: "TestDisplayName",
+		},
+		{
+			Op:    "replace",
+			Path:  "/description",
+			Value: "TestDescription",
+		},
+	}
 
-	updatedOrga, err := client.UpdateOrganization(ctx, orga)
+	updatedOrga, err := client.PatchOrganization(ctx, patches)
 	if err != nil {
 		t.Fatal(err)
 	}
 
+	t.Cleanup(func() {
+		patches[0].Value = origOrga.DisplayName
+		patches[1].Value = origOrga.Description
+		_, _ = client.PatchOrganization(ctx, patches)
+	})
+
+	orga.DisplayName = "TestDisplayName"
+	orga.Description = "TestDescription"
 	if diff := cmp.Diff(orga, updatedOrga); diff != "" {
 		t.Errorf("Got different organization after update: %s", diff)
-	}
-
-	if _, err = client.UpdateOrganization(ctx, origOrga); err != nil {
-		t.Fatal(err)
 	}
 
 }

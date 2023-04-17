@@ -69,36 +69,36 @@ func (c *Client) GetCacheConfiguration(ctx context.Context) (*CacheConfiguration
 	return ret, nil
 }
 
-// UpdateCacheConfiguration peforms partial modifications of the cache
-// configuration.
-func (c *Client) UpdateCacheConfiguration(ctx context.Context, config *CacheConfiguration) error {
+// PatchCacheConfiguration uses the provided list of patch requests to update
+// the cache configuration.
+func (c *Client) PatchCacheConfiguration(ctx context.Context, patches []PatchRequest) (*CacheConfiguration, error) {
 
-	if config == nil {
-		return fmt.Errorf("config is nil")
+	if len(patches) == 0 {
+		return c.GetCacheConfiguration(ctx)
 	}
 
 	orig, err := c.GetCacheConfiguration(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to get cache configuration: %w", err)
+		return nil, fmt.Errorf("failed to get cache configuration: %w", err)
 	}
 
 	token, err := c.getToken(ctx, "https://jans.io/oauth/config/cache.write")
 	if err != nil {
-		return fmt.Errorf("failed to get token: %w", err)
+		return nil, fmt.Errorf("failed to get token: %w", err)
 	}
 
-	patches, err := createPatches(config, orig)
+	updates, err := createPatchesDiff(orig, patches)
 	if err != nil {
-		return fmt.Errorf("failed to create patches: %w", err)
+		return nil, fmt.Errorf("failed to create patches: %w", err)
 	}
 
-	if len(patches) == 0 {
-		return fmt.Errorf("no patches created")
+	if len(updates) == 0 {
+		return c.GetCacheConfiguration(ctx)
 	}
 
-	if err := c.patch(ctx, "/jans-config-api/api/v1/config/cache", token, patches); err != nil {
-		return fmt.Errorf("patch request failed: %w", err)
+	if err := c.patch(ctx, "/jans-config-api/api/v1/config/cache", token, updates); err != nil {
+		return nil, fmt.Errorf("patch request failed: %w", err)
 	}
 
-	return nil
+	return c.GetCacheConfiguration(ctx)
 }

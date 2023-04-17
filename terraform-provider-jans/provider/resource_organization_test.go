@@ -34,6 +34,15 @@ func TestResourceOrganization_Mapping(t *testing.T) {
 
 	newOrg := jans.Organization{}
 
+	patches, err := patchFromResourceData(data, &newOrg)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(patches) != 8 {
+		t.Errorf("Got %d patches, expected 8", len(patches))
+	}
+
 	if err := fromSchemaResource(data, &newOrg); err != nil {
 		t.Fatal(err)
 	}
@@ -79,7 +88,7 @@ func testAccResourceCheckOrganizationImport(states []*terraform.InstanceState) e
 
 		found = true
 
-		if err := checkAttribute(is, "display_name", "Gluu"); err != nil {
+		if err := checkAttribute(is, "display_name", "Janssen"); err != nil {
 			return err
 		}
 

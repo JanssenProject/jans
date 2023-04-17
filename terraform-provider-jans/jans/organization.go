@@ -44,23 +44,26 @@ func (c *Client) GetOrganization(ctx context.Context) (*Organization, error) {
 	return ret, nil
 }
 
-// // UpdateOrganization updates the organization configuration.
-func (c *Client) UpdateOrganization(ctx context.Context, orga *Organization) (*Organization, error) {
+// PatchOrganization updates the organization configuration with the
+// provided set of patches.
+func (c *Client) PatchOrganization(ctx context.Context, patches []PatchRequest) (*Organization, error) {
 
-	if orga == nil {
-		return nil, fmt.Errorf("organization is nil")
+	if len(patches) == 0 {
+		return c.GetOrganization(ctx)
 	}
 
-	// get the original so we don't have to send all fields
-	// as patch requests
 	orig, err := c.GetOrganization(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get organization: %w", err)
+		return nil, fmt.Errorf("failed to get fido2 configuration: %w", err)
 	}
 
-	patches, err := createPatches(orga, orig)
+	updates, err := createPatchesDiff(orig, patches)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create patches: %w", err)
+	}
+
+	if len(updates) == 0 {
+		return c.GetOrganization(ctx)
 	}
 
 	token, err := c.getToken(ctx, "https://jans.io/oauth/config/organization.write")
@@ -68,8 +71,8 @@ func (c *Client) UpdateOrganization(ctx context.Context, orga *Organization) (*O
 		return nil, fmt.Errorf("failed to get token: %w", err)
 	}
 
-	if err := c.patch(ctx, "/jans-config-api/api/v1/org", token, patches); err != nil {
-		return nil, fmt.Errorf("put request failed: %w", err)
+	if err := c.patch(ctx, "/jans-config-api/api/v1/org", token, updates); err != nil {
+		return nil, fmt.Errorf("patch request failed: %w", err)
 	}
 
 	return c.GetOrganization(ctx)

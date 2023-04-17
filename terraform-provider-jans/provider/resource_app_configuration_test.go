@@ -58,6 +58,15 @@ func TestResourceAuthServiceConfig_Mapping(t *testing.T) {
 
 	newConfig := jans.AppConfiguration{}
 
+	patches, err := patchFromResourceData(data, &newConfig)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(patches) != 6 {
+		t.Errorf("Got %d patches, expected 6", len(patches))
+	}
+
 	if err := fromSchemaResource(data, &newConfig); err != nil {
 		t.Fatal(err)
 	}
