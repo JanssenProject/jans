@@ -16,7 +16,7 @@ from wui_components.jans_vetrical_nav import JansVerticalNav
 from wui_components.jans_cli_dialog import JansGDialog
 from utils.multi_lang import _
 from utils.utils import DialogUtils
-from utils.static import cli_style
+from utils.static import cli_style, common_strings
 
 
 class Plugin(DialogUtils):
@@ -103,7 +103,7 @@ class Plugin(DialogUtils):
 
         self.host_widget.me.text = self.data.get('host', '')
         self.port_widget.me.text = str(self.data.get('port', ''))
-        self.connect_protection_widget.me.value = self.data.get('connect-protection', '')
+        self.connect_protection_widget.me.current_value = self.data.get('connect_protection', '')
         self.from_name_widget.me.text = self.data.get('from_name', '')
         self.from_email_address_widget.me.text = self.data.get('from_email_address', '')
         self.requires_authentication_widget.me.checked = self.data.get('requires_authentication', False)
@@ -136,13 +136,17 @@ class Plugin(DialogUtils):
     def test_config(self) -> None:
         """This method tests SMTP configuration
         """
-        new_data = self.make_data_from_dialog(tabs={'smtp': self.main_container})
 
         async def coroutine():
-            cli_args = {'operation_id': 'test-config-smtp', 'data': new_data}
+            cli_args = {'operation_id': 'test-config-smtp', 'data': {'sign': True, 'subject': "SMTP Configuration verification", 'message': "Mail to test SMTP configuration"}}
             self.app.start_progressing(_("Testing SMTP Configuration..."))
             response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
             self.app.stop_progressing(_("SMTP Configuration test was completed."))
+
+            if response.status_code == 200 and response.json() == True:
+                self.app.show_message(_(common_strings.info), _("SMTP configuration test was successfull."), tobefocused=self.main_container)
+            else:
+                self.app.show_message(_(common_strings.info), _("SMTP configuration test was failed:\nStatus code: {}\nServer response: {}").format(response.status_code, response.json()), tobefocused=self.main_container)
 
         asyncio.ensure_future(coroutine())
 
