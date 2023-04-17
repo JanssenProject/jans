@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 import io.jans.orm.annotation.AttributeEnum;
 
@@ -63,9 +64,9 @@ public enum SmtpConnectProtectionType implements AttributeEnum {
         return getByValue(value);
     }
 
+    @JsonValue
     @Override
     public String toString() {
         return value;
     }
-	
 }
