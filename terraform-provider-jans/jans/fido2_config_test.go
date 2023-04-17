@@ -28,38 +28,29 @@ func TestFido2Config(t *testing.T) {
 	origBasepoint := cfg.BaseEndpoint
 	cfg.BaseEndpoint = "newbasepoint"
 
-	if err := client.UpdateFido2Configuration(ctx, cfg); err != nil {
-		t.Fatal(err)
+	patches := []PatchRequest{
+		{
+			Op:    "replace",
+			Path:  "/baseEndpoint",
+			Value: "newbasepoint",
+		},
 	}
 
-	updatedConfig, err := client.GetFido2Configuration(ctx)
+	updatedConfig, err := client.PatchFido2Configuration(ctx, patches)
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	t.Cleanup(func() {
+		patches[0].Value = origBasepoint
+		_, _ = client.PatchFido2Configuration(ctx, patches)
+	})
 
 	if diff := cmp.Diff(cfg, updatedConfig); diff != "" {
 		t.Errorf("Got different configuration after update: %s", diff)
 	}
 
 	if updatedConfig.BaseEndpoint != "newbasepoint" {
-		t.Fatal("updatedConfig.BaseEndpoint was not updated")
-	}
-
-	cfg.BaseEndpoint = origBasepoint
-	if err := client.UpdateFido2Configuration(ctx, cfg); err != nil {
-		t.Fatal(err)
-	}
-
-	updatedConfig, err = client.GetFido2Configuration(ctx)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if diff := cmp.Diff(cfg, updatedConfig); diff != "" {
-		t.Errorf("Got different configuration after update: %s", diff)
-	}
-
-	if updatedConfig.BaseEndpoint != origBasepoint {
 		t.Fatal("updatedConfig.BaseEndpoint was not updated")
 	}
 

@@ -37,16 +37,22 @@ func TestPatchApiAppConfig(t *testing.T) {
 
 	oldCount := cfg.MaxCount
 
-	cfg.MaxCount = 5
+	patches := []PatchRequest{
+		{
+			Op:    "replace",
+			Path:  "/maxCount",
+			Value: 5,
+		},
+	}
 
-	_, err = client.UpdateApiAppConfiguration(ctx, cfg)
+	_, err = client.PatchApiAppConfiguration(ctx, patches)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	t.Cleanup(func() {
-		cfg.MaxCount = oldCount
-		_, _ = client.UpdateApiAppConfiguration(ctx, cfg)
+		patches[0].Value = oldCount
+		_, _ = client.PatchApiAppConfiguration(ctx, patches)
 	})
 
 	cfg, err = client.GetApiAppConfiguration(ctx)

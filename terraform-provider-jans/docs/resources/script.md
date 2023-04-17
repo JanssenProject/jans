@@ -26,12 +26,12 @@ resource "jans_script" "test" {
 	enabled 									= true
 	modified 									= false
 	internal 									= false
-	location_type 						= "LDAP"
+	location_type 						= "db"
 	base_dn 									= "inum=4A4E-4F3D,ou=scripts,o=jans"
 
 	module_properties {
 			value1 = "location_type"
-			value2 = "ldap"
+			value2 = "db"
 	}
 
 	module_properties {

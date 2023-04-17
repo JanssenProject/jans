@@ -260,11 +260,12 @@ func resourceCacheConfigurationUpdate(ctx context.Context, d *schema.ResourceDat
 	c := meta.(*jans.Client)
 
 	var cacheConfig jans.CacheConfiguration
-	if err := fromSchemaResource(d, &cacheConfig); err != nil {
+	patches, err := patchFromResourceData(d, &cacheConfig)
+	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	if err := c.UpdateCacheConfiguration(ctx, &cacheConfig); err != nil {
+	if _, err := c.PatchCacheConfiguration(ctx, patches); err != nil {
 		return diag.FromErr(err)
 	}
 

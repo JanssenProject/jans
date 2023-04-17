@@ -30,13 +30,13 @@ func TestResourceScripts_Mapping(t *testing.T) {
 		ModuleProperties: []jans.SimpleCustomProperty{
 			{
 				Value1: "location_type",
-				Value2: "ldap",
+				Value2: "db",
 			},
 		},
 		ConfigurationProperties: []jans.SimpleExtendedCustomProperty{
 			{
 				Value1: "location_type",
-				Value2: "ldap",
+				Value2: "db",
 			},
 		},
 		Level:        1,
@@ -45,7 +45,7 @@ func TestResourceScripts_Mapping(t *testing.T) {
 		ScriptError:  jans.ScriptError{},
 		Modified:     true,
 		Internal:     true,
-		LocationType: "ldap",
+		LocationType: "db",
 		BaseDN:       "inum=A44E-4F3D,ou=scripts,o=jans",
 	}
 
@@ -79,7 +79,7 @@ func TestAccResourceScript_basic(t *testing.T) {
 					testAccResourceCheckScriptExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "script_type", "introspection"),
 					resource.TestCheckResourceAttr(resourceName, "revision", "1"),
-					resource.TestCheckResourceAttr(resourceName, "location_type", "ldap"),
+					resource.TestCheckResourceAttr(resourceName, "location_type", "db"),
 					resource.TestCheckResourceAttr(resourceName, "module_properties.0.value1", "location_type"),
 				),
 			},
@@ -103,12 +103,12 @@ resource "jans_script" "test" {
 	enabled 									= true
 	modified 									= false
 	internal 									= false
-	location_type 						= "ldap"
+	location_type 						= "db"
 	base_dn 									= "inum=4A4E-4F3D,ou=scripts,o=jans"
 
 	module_properties {
 			value1 = "location_type"
-			value2 = "ldap"
+			value2 = "db"
 	}
 
 	module_properties {
