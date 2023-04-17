@@ -18,7 +18,7 @@ tags:
   - name: FIDO2 Assertion
   - name: FIDO2 Attestation
 paths:
-  /fido2/configuration:
+  /jans-fido2/restv1/configuration:
     get:
       tags:
         - FIDO2 configuration
@@ -86,7 +86,7 @@ paths:
           $ref: '#/components/responses/NotAcceptable'
         500:
           $ref: '#/components/responses/InternalServerError'
-  /fido2/assertion/options:
+  /jans-fido2/restv1/assertion/options:
     post:
       tags:
         - FIDO2 Assertion
@@ -157,7 +157,7 @@ paths:
           $ref: '#/components/responses/AccessDenied'
         500:
           $ref: '#/components/responses/InternalServerError'
-  /fido2/assertion/result:
+  /jans-fido2/restv1/assertion/result:
     post:
       tags:
         - FIDO2 Assertion
@@ -237,7 +237,7 @@ paths:
         500:
           $ref: '#/components/responses/InternalServerError'
 
-  /fido2/assertion/authentication:
+  /jans-fido2/restv1/assertion/authentication:
     get:
       tags:
         - FIDO2 Assertion
@@ -372,7 +372,7 @@ paths:
         500:
           $ref: '#/components/responses/InternalServerError'
 
-  /fido2/attestation/options:
+  /jans-fido2/restv1/attestation/options:
     post:
       tags:
         - FIDO2 Attestation
@@ -507,7 +507,7 @@ paths:
           $ref: '#/components/responses/AccessDenied'
         500:
           $ref: '#/components/responses/InternalServerError'
-  /fido2/attestation/result:
+  /jans-fido2/restv1/attestation/result:
     post:
       tags:
         - FIDO2 Attestation
@@ -671,7 +671,7 @@ paths:
         500:
           $ref: '#/components/responses/InternalServerError'
 
-  /fido2/attestation/registration:
+  /jans-fido2/restv1/attestation/registration:
     get:
       tags:
         - FIDO2 Attestation
