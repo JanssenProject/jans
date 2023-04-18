@@ -18,7 +18,7 @@ class cli_style:
     navbar_headcolor = 'class:plugin-navbar-headcolor'
     navbar_entriescolor = 'class:plugin-navbar-entriescolor'
     tab_selected = 'class:tab-selected'
-    scim_widget = 'class:scim-widget'
+    black_bg_widget = 'class:black-bg-widget'
     black_bg = 'class:plugin-black-bg'
     textarea = 'class:textarea'
     drop_down = 'class:plugin-dropdown'
