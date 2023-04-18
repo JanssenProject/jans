@@ -43,7 +43,7 @@
 
 		<rest-assured.version>5.0.1</rest-assured.version>
 		<karate.version>0.9.5</karate.version>
-		<snake.version>1.33</snake.version>
+		<snake.version>2.0</snake.version>
 		<jupiter.version>5.7.0</jupiter.version>
 		<cucumber.version>3.8.0</cucumber.version>
 		<jacoco.version>0.8.5</jacoco.version>

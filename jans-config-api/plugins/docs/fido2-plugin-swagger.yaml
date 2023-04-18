@@ -136,13 +136,6 @@ components:
           type: boolean
         fido2Configuration:
           $ref: '#/components/schemas/Fido2Configuration'
-        clientAuthMapSchema:
-          type: object
-          additionalProperties:
-            type: array
-            items:
-              $ref: '#/components/schemas/Scope'
-          description: clientAuthMapSchema
     Fido2Configuration:
       type: object
       properties:
@@ -174,13 +167,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/RequestedParty'
-        clientAuthMapSchema:
-          type: object
-          additionalProperties:
-            type: array
-            items:
-              $ref: '#/components/schemas/Scope'
-          description: clientAuthMapSchema
     RequestedParty:
       type: object
       properties:
@@ -190,13 +176,6 @@ components:
           type: array
           items:
             type: string
-        clientAuthMapSchema:
-          type: object
-          additionalProperties:
-            type: array
-            items:
-              $ref: '#/components/schemas/Scope'
-          description: clientAuthMapSchema
     Fido2DeviceData:
       type: object
       properties:
@@ -221,13 +200,6 @@ components:
             type: string
         push_token:
           type: string
-        clientAuthMapSchema:
-          type: object
-          additionalProperties:
-            type: array
-            items:
-              $ref: '#/components/schemas/Scope'
-          description: clientAuthMapSchema
     Fido2RegistrationData:
       type: object
       properties:
@@ -276,13 +248,6 @@ components:
           format: int32
         applicationId:
           type: string
-        clientAuthMapSchema:
-          type: object
-          additionalProperties:
-            type: array
-            items:
-              $ref: '#/components/schemas/Scope'
-          description: clientAuthMapSchema
     Fido2RegistrationEntry:
       type: object
       properties:
@@ -340,13 +305,6 @@ components:
           writeOnly: true
         baseDn:
           type: string
-        clientAuthMapSchema:
-          type: object
-          additionalProperties:
-            type: array
-            items:
-              $ref: '#/components/schemas/Scope'
-          description: clientAuthMapSchema
   securitySchemes:
     oauth2:
       type: oauth2

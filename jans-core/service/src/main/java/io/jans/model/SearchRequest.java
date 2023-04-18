@@ -1,15 +1,17 @@
-package io.jans.configapi.core.model;
+package io.jans.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SearchRequest {
 
+    private Class<?> entityClass;
     private String schemas;
     private List<String> attributes;
     private List<String> excludedAttributes;
@@ -21,12 +23,21 @@ public class SearchRequest {
     private int maxCount;
     private List<String> filterAttributeName;
     private List<String> filterAssertionValue;
+    private Map<String, String> fieldValueMap;
 
     @JsonIgnore
     private String attributesStr;
 
     @JsonIgnore
     private String excludedAttributesStr;
+
+    public Class<?> getEntityClass() {
+        return entityClass;
+    }
+
+    public void setEntityClass(Class<?> entityClass) {
+        this.entityClass = entityClass;
+    }
 
     public String getSchemas() {
         return schemas;
@@ -140,12 +151,22 @@ public class SearchRequest {
         this.filterAssertionValue = filterAssertionValue;
     }
 
+    public Map<String, String> getFieldValueMap() {
+        return fieldValueMap;
+    }
+
+    public void setFieldValueMap(Map<String, String> fieldValueMap) {
+        this.fieldValueMap = fieldValueMap;
+    }
+
     @Override
     public String toString() {
-        return "SearchRequest [schemas=" + schemas + ", attributes=" + attributes + ", excludedAttributes="
-                + excludedAttributes + ", filter=" + filter + ", sortBy=" + sortBy + ", sortOrder=" + sortOrder
-                + ", startIndex=" + startIndex + ", count=" + count + ", maxCount=" + maxCount
-                + ", filterAttributeName=" + filterAttributeName + ", filterAssertionValue=" + filterAssertionValue
-                + ", attributesStr=" + attributesStr + ", excludedAttributesStr=" + excludedAttributesStr + "]";
+        return "SearchRequest [entityClass=" + entityClass + ", schemas=" + schemas + ", attributes=" + attributes
+                + ", excludedAttributes=" + excludedAttributes + ", filter=" + filter + ", sortBy=" + sortBy
+                + ", sortOrder=" + sortOrder + ", startIndex=" + startIndex + ", count=" + count + ", maxCount="
+                + maxCount + ", filterAttributeName=" + filterAttributeName + ", filterAssertionValue="
+                + filterAssertionValue + ", fieldValueMap=" + fieldValueMap + ", attributesStr=" + attributesStr
+                + ", excludedAttributesStr=" + excludedAttributesStr + "]";
     }
+
 }
