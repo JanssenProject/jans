@@ -1,6 +1,6 @@
 {
-  "dn": "inum=CACD-5902,ou=scripts,o=jans",
-  "inum": "CACD-5902",
+  "dn": "inum=D3C1-2E4C,ou=scripts,o=jans",
+  "inum": "D3C1-2E4C",
   "name": "update_token",
   "aliases": null,
   "description": "Openbanking Token Update Script",
