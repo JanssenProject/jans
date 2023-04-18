@@ -1146,7 +1146,7 @@ class JCA_CLI:
 
 
     def print_response(self, response):
-        if response:
+        if response is not None:
             sys.stderr.write("Server Response:\n")
             self.pretty_print(response)
 
