@@ -18,6 +18,13 @@ from queue import Queue
 
 warnings.filterwarnings("ignore")
 
+uname_cmd = shutil.which('uname')
+cpu_arch = os.popen(uname_cmd + ' -m').read().strip()
+
+if cpu_arch != 'x86_64':
+    print("Janssen Linux setup supports only x86_64 architecture. Detected architecture was {}.".format(cpu_arch))
+    sys.exit()
+
 __STATIC_SETUP_DIR__ = '/opt/jans/jans-setup/'
 queue = Queue()
 
