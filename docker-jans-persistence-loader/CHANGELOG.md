@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.0.12-1](https://github.com/JanssenProject/jans/compare/docker-jans-persistence-loader-v1.0.11-1...docker-jans-persistence-loader-v1.0.12-1) (2023-04-18)
+
+
+### Bug Fixes
+
+* **docker-jans-persistence-loader:** rename smtp config keys ([#4528](https://github.com/JanssenProject/jans/issues/4528)) ([f0c3045](https://github.com/JanssenProject/jans/commit/f0c3045a8821318238a58b2a61901359c3e71991))
+* opencontainer labels ([f8b0b36](https://github.com/JanssenProject/jans/commit/f8b0b365600bd700128bb9d92df6de7ba14830b6))
+* prepare for 1.0.12 release ([6f83197](https://github.com/JanssenProject/jans/commit/6f83197705511c39413456acdc64e9136a97ff39))
+
 ## [1.0.11-1](https://github.com/JanssenProject/jans/compare/docker-jans-persistence-loader-v1.0.10-1...docker-jans-persistence-loader-v1.0.11-1) (2023-04-05)
 
 
