@@ -789,6 +789,21 @@ class JansCliApp(Application):
             b.handler = handler
         return b
 
+    def getButtonWithHandler(
+                self, 
+                text: AnyFormattedText,
+                name: AnyFormattedText,
+                jans_help: AnyFormattedText,
+                handler: Callable= None, 
+                ) -> Button:
+
+        b = Button(text=text, width=len(text)+2)
+        b.window.jans_name = name
+        b.window.jans_help = jans_help
+        if handler:
+            b.handler = lambda:handler(name)
+        return b
+
     def update_status_bar(self) -> None:
         cur_text = self.pbar_text
         if self.progressing_text:
