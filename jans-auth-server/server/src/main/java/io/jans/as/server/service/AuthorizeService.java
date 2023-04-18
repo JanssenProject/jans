@@ -9,6 +9,7 @@ package io.jans.as.server.service;
 import com.google.common.collect.Sets;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.common.model.session.SessionId;
 import io.jans.as.common.util.RedirectUri;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.authorize.AuthorizeRequestParam;
@@ -33,27 +34,27 @@ import io.jans.as.server.model.common.CibaRequestCacheControl;
 import io.jans.as.server.model.common.CibaRequestStatus;
 import io.jans.as.server.model.common.DeviceAuthorizationCacheControl;
 import io.jans.as.server.model.common.DeviceAuthorizationStatus;
-import io.jans.as.common.model.session.SessionId;
 import io.jans.as.server.security.Identity;
 import io.jans.as.server.service.ciba.CibaRequestService;
 import io.jans.jsf2.message.FacesMessages;
 import io.jans.jsf2.service.FacesService;
 import io.jans.util.security.StringEncrypter;
-
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.ExternalContext;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.UnsupportedEncodingException;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import static org.apache.commons.lang.BooleanUtils.isFalse;
+import static org.apache.commons.lang.BooleanUtils.isTrue;
 
 /**
  * @author Yuriy Movchan
@@ -139,12 +140,12 @@ public class AuthorizeService {
             authenticator.authenticateBySessionId(sessionId);
         }
 
-        SessionId ldapSessionId = sessionIdService.getSessionId(sessionId);
-        if (ldapSessionId == null) {
+        SessionId dbSessionId = sessionIdService.getSessionId(sessionId);
+        if (dbSessionId == null) {
             identity.logout();
         }
 
-        return ldapSessionId;
+        return dbSessionId;
     }
 
     public void permissionGranted(HttpServletRequest httpRequest, final SessionId session) {
@@ -178,13 +179,14 @@ public class AuthorizeService {
             identity.setSessionId(session);
 
             // OXAUTH-297 - set session_id cookie
-            if (!appConfiguration.getInvalidateSessionCookiesAfterAuthorizationFlow()) {
+            if (isFalse(appConfiguration.getInvalidateSessionCookiesAfterAuthorizationFlow())) {
                 cookieService.createSessionIdCookie(session, false);
             }
             Map<String, String> sessionAttribute = requestParameterService.getAllowedParameters(session.getSessionAttributes());
 
             if (sessionAttribute.containsKey(AuthorizeRequestParam.PROMPT)) {
                 List<Prompt> prompts = Prompt.fromString(sessionAttribute.get(AuthorizeRequestParam.PROMPT), " ");
+                prompts.remove(Prompt.LOGIN);
                 prompts.remove(Prompt.CONSENT);
                 sessionAttribute.put(AuthorizeRequestParam.PROMPT, io.jans.as.model.util.StringUtils.implodeEnum(prompts, " "));
             }
@@ -193,87 +195,91 @@ public class AuthorizeService {
             String uri = httpRequest.getContextPath() + "/restv1/authorize?" + parametersAsString;
             log.trace("permissionGranted, redirectTo: {}", uri);
 
-            if (invalidateSessionCookiesIfNeeded()) {
-                if (!uri.contains(AuthorizeRequestParam.SESSION_ID) && appConfiguration.getSessionIdRequestParameterEnabled()) {
-                    uri += "&session_id=" + session.getId();
-                }
+            final boolean sessionInvalidated = invalidateSessionCookiesIfNeeded();
+            if (sessionInvalidated && !uri.contains(AuthorizeRequestParam.SESSION_ID) && isTrue(appConfiguration.getSessionIdRequestParameterEnabled())) {
+                uri += "&session_id=" + session.getId();
             }
             facesService.redirectToExternalURL(uri);
-        } catch (UnsupportedEncodingException e) {
-            log.trace(e.getMessage(), e);
+        } catch (Exception e) {
+            log.error("Failed to grant permission", e);
+            showErrorPage("login.failedToGrantPermission");
         }
     }
 
     public void permissionDenied(final SessionId session) {
-        log.trace("permissionDenied");
-        invalidateSessionCookiesIfNeeded();
+        try {
+            log.trace("permissionDenied");
+            invalidateSessionCookiesIfNeeded();
 
-        if (session == null) {
-            authenticationFailedSessionInvalid();
-            return;
-        }
-        
-        String baseRedirectUri = session.getSessionAttributes().get(AuthorizeRequestParam.REDIRECT_URI);
-        String state = session.getSessionAttributes().get(AuthorizeRequestParam.STATE);
-        ResponseMode responseMode = ResponseMode.fromString(session.getSessionAttributes().get(AuthorizeRequestParam.RESPONSE_MODE));
-        List<ResponseType> responseType = ResponseType.fromString(session.getSessionAttributes().get(AuthorizeRequestParam.RESPONSE_TYPE), " ");
+            if (session == null) {
+                authenticationFailedSessionInvalid();
+                return;
+            }
 
-        RedirectUri redirectUri = new RedirectUri(baseRedirectUri, responseType, responseMode);
-        redirectUri.parseQueryString(errorResponseFactory.getErrorAsQueryString(AuthorizeErrorResponseType.ACCESS_DENIED, state));
+            String baseRedirectUri = session.getSessionAttributes().get(AuthorizeRequestParam.REDIRECT_URI);
+            String state = session.getSessionAttributes().get(AuthorizeRequestParam.STATE);
+            ResponseMode responseMode = ResponseMode.fromString(session.getSessionAttributes().get(AuthorizeRequestParam.RESPONSE_MODE));
+            List<ResponseType> responseType = ResponseType.fromString(session.getSessionAttributes().get(AuthorizeRequestParam.RESPONSE_TYPE), " ");
 
-        // CIBA
-        Map<String, String> sessionAttribute = requestParameterService.getAllowedParameters(session.getSessionAttributes());
-        if (sessionAttribute.containsKey(AuthorizeRequestParam.AUTH_REQ_ID)) {
-            String authReqId = sessionAttribute.get(AuthorizeRequestParam.AUTH_REQ_ID);
-            CibaRequestCacheControl request = cibaRequestService.getCibaRequest(authReqId);
+            RedirectUri redirectUri = new RedirectUri(baseRedirectUri, responseType, responseMode);
+            redirectUri.parseQueryString(errorResponseFactory.getErrorAsQueryString(AuthorizeErrorResponseType.ACCESS_DENIED, state));
 
-            if (request != null && request.getClient() != null) {
-                if (request.getStatus() == CibaRequestStatus.PENDING) {
-                    cibaRequestService.removeCibaRequest(authReqId);
-                }
-                switch (request.getClient().getBackchannelTokenDeliveryMode()) {
-                    case POLL:
-                        request.setStatus(CibaRequestStatus.DENIED);
-                        request.setTokensDelivered(false);
-                        cibaRequestService.update(request);
-                        break;
-                    case PING:
-                        request.setStatus(CibaRequestStatus.DENIED);
-                        request.setTokensDelivered(false);
-                        cibaRequestService.update(request);
+            // CIBA
+            Map<String, String> sessionAttribute = requestParameterService.getAllowedParameters(session.getSessionAttributes());
+            if (sessionAttribute.containsKey(AuthorizeRequestParam.AUTH_REQ_ID)) {
+                String authReqId = sessionAttribute.get(AuthorizeRequestParam.AUTH_REQ_ID);
+                CibaRequestCacheControl request = cibaRequestService.getCibaRequest(authReqId);
 
-                        cibaPingCallbackService.pingCallback(
-                                request.getAuthReqId(),
-                                request.getClient().getBackchannelClientNotificationEndpoint(),
-                                request.getClientNotificationToken()
-                        );
-                        break;
-                    case PUSH:
-                        cibaPushErrorService.pushError(
-                                request.getAuthReqId(),
-                                request.getClient().getBackchannelClientNotificationEndpoint(),
-                                request.getClientNotificationToken(),
-                                PushErrorResponseType.ACCESS_DENIED,
-                                "The end-user denied the authorization request.");
-                        break;
+                if (request != null && request.getClient() != null) {
+                    if (request.getStatus() == CibaRequestStatus.PENDING) {
+                        cibaRequestService.removeCibaRequest(authReqId);
+                    }
+                    switch (request.getClient().getBackchannelTokenDeliveryMode()) {
+                        case POLL:
+                            request.setStatus(CibaRequestStatus.DENIED);
+                            request.setTokensDelivered(false);
+                            cibaRequestService.update(request);
+                            break;
+                        case PING:
+                            request.setStatus(CibaRequestStatus.DENIED);
+                            request.setTokensDelivered(false);
+                            cibaRequestService.update(request);
+
+                            cibaPingCallbackService.pingCallback(
+                                    request.getAuthReqId(),
+                                    request.getClient().getBackchannelClientNotificationEndpoint(),
+                                    request.getClientNotificationToken()
+                            );
+                            break;
+                        case PUSH:
+                            cibaPushErrorService.pushError(
+                                    request.getAuthReqId(),
+                                    request.getClient().getBackchannelClientNotificationEndpoint(),
+                                    request.getClientNotificationToken(),
+                                    PushErrorResponseType.ACCESS_DENIED,
+                                    "The end-user denied the authorization request.");
+                            break;
+                    }
                 }
             }
-        }
-        if (sessionAttribute.containsKey(DeviceAuthorizationService.SESSION_USER_CODE)) {
-            processDeviceAuthDeniedResponse(sessionAttribute);
-        }
+            if (sessionAttribute.containsKey(DeviceAuthorizationService.SESSION_USER_CODE)) {
+                processDeviceAuthDeniedResponse(sessionAttribute);
+            }
 
-		if (responseMode == ResponseMode.JWT) {
-			String clientId = session.getSessionAttributes().get(AuthorizeRequestParam.CLIENT_ID);
-			Client client = clientService.getClient(clientId);
-			facesService.redirectToExternalURL(createJarmRedirectUri(redirectUri, client, session));
-        }   
-        else 
-        	facesService.redirectToExternalURL(redirectUri.toString());
+            if (responseMode == ResponseMode.JWT) {
+                String clientId = session.getSessionAttributes().get(AuthorizeRequestParam.CLIENT_ID);
+                Client client = clientService.getClient(clientId);
+                facesService.redirectToExternalURL(createJarmRedirectUri(redirectUri, client));
+            } else
+                facesService.redirectToExternalURL(redirectUri.toString());
+
+        } catch (Exception e) {
+            log.error("Unable to perform permission deny", e);
+            showErrorPage("login.failedToDeny");
+        }
     }
     
-    private String createJarmRedirectUri(RedirectUri redirectUri, Client client, final SessionId session)
-    {
+    private String createJarmRedirectUri(RedirectUri redirectUri, Client client) {
 		String jarmRedirectUri = redirectUri.toString();
 		SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm
 				.fromString(client.getAttributes().getAuthorizationSignedResponseAlg());
@@ -297,14 +303,19 @@ public class AuthorizeService {
 		redirectUri.setKeyId(keyId);
 
 		String jarmQueryString = redirectUri.getQueryString();
-		log.info("The JARM Query Response:" + jarmQueryString);
+		log.info("The JARM Query Response: {}", jarmQueryString);
 		jarmRedirectUri = jarmRedirectUri + jarmQueryString;
 
 		return jarmRedirectUri;
     }
     
     private void authenticationFailedSessionInvalid() {
-        facesMessages.add(FacesMessage.SEVERITY_ERROR, "login.errorSessionInvalidMessage");
+        showErrorPage("login.errorSessionInvalidMessage");
+    }
+
+    private void showErrorPage(String errorCode) {
+        log.debug("Redirect to /error.xhtml page with {} error code.", errorCode);
+        facesMessages.add(FacesMessage.SEVERITY_ERROR, errorCode);
         facesService.redirect("/error.xhtml");
     }
 
@@ -316,7 +327,7 @@ public class AuthorizeService {
     }
 
     public List<Scope> getScopes(String scopes) {
-        List<Scope> result = new ArrayList<Scope>();
+        List<Scope> result = new ArrayList<>();
 
         if (scopes != null && !scopes.isEmpty()) {
             String[] scopesName = scopes.split(" ");
@@ -332,7 +343,7 @@ public class AuthorizeService {
     }
 
     private boolean invalidateSessionCookiesIfNeeded() {
-        if (appConfiguration.getInvalidateSessionCookiesAfterAuthorizationFlow()) {
+        if (isTrue(appConfiguration.getInvalidateSessionCookiesAfterAuthorizationFlow())) {
             return invalidateSessionCookies();
         }
         return false;

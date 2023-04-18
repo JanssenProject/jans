@@ -3,6 +3,7 @@ tags:
   - administration
   - vm
   - operations
+  - certificates
 ---
 
 # Web server certificate

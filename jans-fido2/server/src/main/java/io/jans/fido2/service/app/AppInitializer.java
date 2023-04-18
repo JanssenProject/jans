@@ -12,7 +12,6 @@ import io.jans.exception.ConfigurationException;
 import io.jans.fido2.service.shared.LoggerService;
 import io.jans.fido2.service.shared.MetricService;
 import io.jans.model.custom.script.CustomScriptType;
-import io.jans.as.model.util.SecurityProviderUtility;
 import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.as.common.service.common.EncryptionService;
 import io.jans.orm.PersistenceEntryManager;
@@ -26,6 +25,7 @@ import io.jans.service.custom.script.CustomScriptManager;
 import io.jans.service.metric.inject.ReportMetric;
 import io.jans.util.StringHelper;
 import io.jans.orm.util.properties.FileConfiguration;
+import io.jans.util.security.SecurityProviderUtility;
 import io.jans.util.security.StringEncrypter;
 import io.jans.util.security.StringEncrypter.EncryptionException;
 import org.slf4j.Logger;
@@ -137,7 +137,7 @@ public class AppInitializer {
 		// Schedule timer tasks
 		metricService.initTimer();
 		configurationFactory.initTimer();
-		loggerService.initTimer();
+		loggerService.initTimer(true);
 		cleanerTimer.initTimer();
 		mds3UpdateTimer.initTimer();
 		customScriptManager.initTimer(supportedCustomScriptTypes);

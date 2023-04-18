@@ -643,6 +643,9 @@ class PropertiesUtils(SetupUtils):
 
 
     def prompt_for_backend(self):
+        if Config.installed_instance:
+            return
+
         print('Chose Backend Type:')
 
         backend_types = [
@@ -691,10 +694,10 @@ class PropertiesUtils(SetupUtils):
             while True:
                 ldapPass = self.getPrompt("Enter Password for LDAP Admin ({})".format(Config.ldap_binddn), ldapPass)
 
-                if self.checkPassword(ldapPass):
+                if len(ldapPass) >= 0:
                     break
                 else:
-                    print("Password must be at least 6 characters and include one uppercase letter, one lowercase letter, one digit, and one special character.")
+                    print("Password must be at least 1 character.")
 
             Config.ldapPass = ldapPass
 
@@ -918,16 +921,16 @@ class PropertiesUtils(SetupUtils):
             Config.jans_max_mem = self.getPrompt("Enter maximum RAM for applications in MB", str(Config.jans_max_mem))
 
 
-        admin_password =  Config.ldapPass or Config.cb_password or Config.rdbm_password or self.getPW(special='.*=!%&+/-')
+            admin_password =  Config.ldapPass or Config.cb_password or Config.rdbm_password or self.getPW(special='.*=!%&+/-')
 
-        while True:
-            adminPass = self.getPrompt("Enter Password for Admin User", admin_password)
-            if len(adminPass) > 3:
-                break
-            else:
-                print("Admin password should be at least four characters in length.")
+            while True:
+                adminPass = self.getPrompt("Enter Password for Admin User", admin_password)
+                if len(adminPass) > 3:
+                    break
+                else:
+                    print("Admin password should be at least four characters in length.")
 
-        Config.admin_password = adminPass
+            Config.admin_password = adminPass
 
         if Config.profile == 'openbanking':
             self.openbanking_properties()

@@ -6,6 +6,8 @@
 
 package io.jans.configapi.rest.resource.auth;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import static io.jans.as.model.util.Util.escapeLog;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.persistence.model.Scope;
@@ -46,12 +48,13 @@ public class ClientAuthResource extends ConfigBaseResource {
             "Client Authorization" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.CLIENT_AUTHORIZATIONS_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = HashMap.class), examples = @ExampleObject(name = "Response json example", value = "example/client-auth/clients-auth-get.json"))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(schema = @Schema(ref = "#/components/schemas/clientAuthMapSchema"), examples = @ExampleObject(name = "Response json example", value = "example/client-auth/client-auth-get.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.CLIENT_AUTHORIZATIONS_READ_ACCESS }, groupScopes = {
             ApiAccessConstants.OPENID_READ_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    @Path(ApiConstants.USERID_PATH)
     public Response getClientAuthorization(
             @Parameter(description = "User identifier") @PathParam(ApiConstants.USERID) @NotNull String userId) {
 
@@ -64,7 +67,7 @@ public class ClientAuthResource extends ConfigBaseResource {
         return Response.ok(clientAuths).build();
     }
 
-    @Operation(summary = "Revoke client authorization", description = "Revoke client authorizations", operationId = "get-client-authorization", tags = {
+    @Operation(summary = "Revoke client authorization", description = "Revoke client authorizations", operationId = "delete-client-authorization", tags = {
             "Client Authorization" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.CLIENT_AUTHORIZATIONS_DELETE_ACCESS }))
     @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "No Content"),
@@ -74,15 +77,17 @@ public class ClientAuthResource extends ConfigBaseResource {
     @DELETE
     @ProtectedApi(scopes = { ApiAccessConstants.CLIENT_AUTHORIZATIONS_DELETE_ACCESS }, groupScopes = {}, superScopes = {
             ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
+    @Path(ApiConstants.USERID_PATH + ApiConstants.CLIENTID_PATH + ApiConstants.USERNAME_PATH)
     public Response deleteClientAuthorization(
             @Parameter(description = "User identifier") @PathParam(ApiConstants.USERID) @NotNull String userId,
-            @Parameter(description = "User name") @PathParam(ApiConstants.USERNAME) @NotNull String userName,
-            @Parameter(description = "Client identifier") @PathParam(ApiConstants.CLIENTID) @NotNull String clientId) {
+            @Parameter(description = "Client identifier") @PathParam(ApiConstants.CLIENTID) @NotNull String clientId,
+            @Parameter(description = "User name") @PathParam(ApiConstants.USERNAME) @NotNull String userName) {
+
         if (logger.isInfoEnabled()) {
-            logger.info("Param for ClientAuthorization to be deleted - userId:{}, userName:{}, clientId:{}",
-                    escapeLog(userId), escapeLog(userName), escapeLog(clientId));
+            logger.info("ClientAuthorization to be deleted for - userId:{}, clientId:{}, userName:{}",
+                    escapeLog(userId), escapeLog(clientId), escapeLog(userName));
         }
-        clientAuthService.removeClientAuthorizations(userId, userName, clientId);
+        clientAuthService.removeClientAuthorizations(userId, clientId, userName);
         logger.info("ClientAuthorizations removed!!!");
         return Response.noContent().build();
     }

@@ -18,7 +18,7 @@ Developers are encouraged to take a peep at the [FreeMarker manual](https://free
 The following resources are useful as introduction as well:
 
 - The Hello World flow presented in the [quick start](./quick-start.md#flow-code) guide. Pay attention to the `RRF` instruction there
-- Agama [sample flows](./sample-flows.md)
+- Agama [sample flows](samples.md)
 
 As you will see, the task boils down to produce the desired markup plus adding some placeholders for information that is dynamic.
 

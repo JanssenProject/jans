@@ -1865,11 +1865,12 @@ func resourceAppConfigurationUpdate(ctx context.Context, d *schema.ResourceData,
 	c := meta.(*jans.Client)
 
 	var appConfig jans.AppConfiguration
-	if err := fromSchemaResource(d, &appConfig); err != nil {
+	patches, err := patchFromResourceData(d, &appConfig)
+	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	if _, err := c.UpdateAppConfiguration(ctx, &appConfig); err != nil {
+	if _, err := c.PatchAppConfiguration(ctx, patches); err != nil {
 		return diag.FromErr(err)
 	}
 

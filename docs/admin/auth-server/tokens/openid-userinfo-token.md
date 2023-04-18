@@ -3,6 +3,7 @@ tags:
   - administration
   - auth-server
   - token
+  - userinfo-token
 ---
 
 ## `Userinfo` JWT
@@ -54,7 +55,7 @@ the privacy protection of the OpenID scopes construct.
 ## Dynamic Scopes / Interception Script
 
 If you need to call an API to render scopes or scope values on the fly,
-you should see the [Dynamic Scopes](../developer/scripts/dynamic-scope.md) interception script.
+you should see the [Dynamic Scopes](../../developer/scripts/dynamic-scope.md) interception script.
 
 ## Userinfo formatter
 

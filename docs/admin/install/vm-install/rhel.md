@@ -4,7 +4,6 @@ tags:
 - installation
 - vm
 - RHEL
-- CentOS
 ---
 
 # Red Hat EL Janssen Installation
@@ -13,12 +12,20 @@ Before you install, check the [VM system requirements](vm-requirements.md).
 
 ## Supported versions
 - Red Hat Enterprise Linus 8 (RHEL 8)
-- CentOS 8
+
 ## Disable SELinux
-You can disbale SELinux temporarly by executing `setenforce 0`. To disable permanently edit file `/etc/selinux/config`.
+You can disable SELinux temporarily by executing `setenforce 0`. To disable permanently edit file `/etc/selinux/config`.
 
 ## Install the Package
 
+- Install EPEL and mod-auth-openidc as dependencies
+
+```
+yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+yum -y module enable mod_auth_openidc 
+```
+
+- Disable SELinux temporarily by executing `setenforce 0`. If required, to disable permanently edit the `/etc/selinux/config` file.
 
 - Download the release package from the Github Janssen Project
   [Releases](https://github.com/JanssenProject/jans/releases)
@@ -44,7 +51,7 @@ wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-v
     Output similar to below should confirm the integrity of the downloaded package.
 
     ```text
-    <package-name>: OK
+    jans-replace-janssen-version-el8.x86_64.rpm: OK
     ```
   
 - Install the package

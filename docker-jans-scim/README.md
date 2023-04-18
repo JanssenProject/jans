@@ -13,7 +13,7 @@ Docker image packaging for SCIM.
 ## Versions
 
 See [Releases](https://github.com/JanssenProject/docker-jans-scim/releases) for stable versions.
-For bleeding-edge/unstable version, use `janssenproject/scim:1.0.11_dev`.
+For bleeding-edge/unstable version, use `janssenproject/scim:1.0.12_dev`.
 
 ## Environment Variables
 
@@ -168,3 +168,4 @@ i.e. `http://container:9093/metrics`.
 
 Note that Prometheus JMX exporter uses pre-defined config file (see `conf/prometheus-config.yaml`).
 To customize the config, mount custom config file to `/opt/prometheus/prometheus-config.yaml` inside the container.
+

@@ -1,39 +1,12 @@
-from unittest import TestCase
-
-
+from helper import FlaskBaseTestCase
 import clientapp
 import helper
-import os
 from flask import url_for
-from clientapp.client_handler import ClientHandler
+from clientapp.helpers.client_handler import ClientHandler
 from unittest.mock import MagicMock, patch
-import inspect
 
 
-class TestRegisterEndpoint(TestCase):
-
-    def setUp(self):
-        self.app = clientapp.create_app()
-        self.app.testing = True
-        self.app_context = self.app.test_request_context()
-        self.app_context.push()
-        self.client = self.app.test_client()
-        # self.oauth = OAuth(self.app)
-        os.environ['AUTHLIB_INSECURE_TRANSPORT'] = "1"
-        # stashing to restore on teardown
-        self.CHd = ClientHandler.discover
-        self.register = ClientHandler.register_client
-
-        ClientHandler.discover = MagicMock(name='discover')
-        # discover will always return a valid data
-        ClientHandler.discover.return_value = helper.OP_DATA_DICT_RESPONSE
-        ClientHandler.register_client = MagicMock(name='register_client')
-        ClientHandler.register_client.return_value = helper.REGISTER_CLIENT_RESPONSE
-
-    def tearDown(self):
-        # restoring original method from stash
-        ClientHandler.discover = self.CHd
-        ClientHandler.register_client = self.register
+class TestRegisterEndpoint(FlaskBaseTestCase):
 
     def test_if_app_has_register_endpoint(self):
         self.assertIn(
@@ -62,23 +35,23 @@ class TestRegisterEndpoint(TestCase):
             '/register returned invalid requisition'
         )
 
-    @patch('clientapp.client_handler.ClientHandler.__init__', MagicMock(return_value=None))
+    @patch('clientapp.helpers.client_handler.ClientHandler.__init__', MagicMock(return_value=None))
     def test_endpoint_should_init_client_handler(self):
         self.client.post(url_for('register'), json={
             'op_url': 'https://test.com',
-            'client_url': 'https://clienttoberegistered.com'
+            'redirect_uris': ['https://clienttoberegistered.com/oidc_callback']
         })
         ClientHandler.__init__.assert_called_once()
 
-    @patch('clientapp.client_handler.ClientHandler.__init__', MagicMock(return_value=None))
+    @patch('clientapp.helpers.client_handler.ClientHandler.__init__', MagicMock(return_value=None))
     def test_endpoint_should_accept_2_params(self):
-        firstValue = 'https://op'
-        secondValue = 'https://client.com.br'
+        first_value = 'https://op'
+        second_value = ['https://client.com.br/oidc_callback']
         self.client.post(url_for('register'), json={
-            'op_url': firstValue,
-            'client_url': secondValue
+            'op_url': first_value,
+            'redirect_uris': second_value
         })
-        ClientHandler.__init__.assert_called_once_with(firstValue, secondValue)
+        ClientHandler.__init__.assert_called_once_with(first_value, second_value)
 
     def test_endpoint_should_return_error_code_400_if_no_data_sent(self):
         self.assertEqual(
@@ -101,25 +74,23 @@ class TestRegisterEndpoint(TestCase):
         self.assertEqual(
             self.client.post(url_for('register'), json={
                 'op_url': 'not_valid_url',
-                'client_url': 'also_not_valid_url'
+                'redirect_uris': ['https://clienttoberegistered.com/oidc_callback']
             }).status_code,
             400,
             'not returning status 400 if values are not valid urls'
         )
 
-    @patch('clientapp.client_handler.ClientHandler.get_client_dict', MagicMock(return_value=None))
+    @patch('clientapp.helpers.client_handler.ClientHandler.get_client_dict', MagicMock(return_value=None))
     def test_valid_post_should_should_call_get_client_dict_once(self):
         op_url = 'https://op.com.br'
-        client_url = 'https://client.com.br'
         self.client.post(url_for('register'), json={
             'op_url': op_url,
-            'client_url': client_url
+            'redirect_uris': ['https://clienttoberegistered.com/oidc_callback']
         })
         ClientHandler.get_client_dict.assert_called_once()
 
     def test_should_should_return_200_if_registered(self):
         op_url = 'https://op.com.br'
-        client_url = 'https://client.com.br'
         test_client_id = '1234-5678-9ten11'
         test_client_secret = 'mysuperprotectedsecret'
         with patch.object(ClientHandler, 'get_client_dict', return_value={
@@ -129,14 +100,14 @@ class TestRegisterEndpoint(TestCase):
         }) as get_client_dict:
             response = self.client.post(url_for('register'), json={
                 'op_url': op_url,
-                'client_url': client_url
+                'redirect_uris': ['https://clienttoberegistered.com/oidc_callback']
             })
             self.assertEqual(response.status_code, 200)
             get_client_dict.reset()
 
     def test_should_return_expected_keys(self):
         op_url = 'https://op.com.br'
-        client_url = 'https://client.com.br'
+        redirect_uris = ['https://client.com.br/oidc_calback']
         test_client_id = '1234-5678-9ten11'
         test_client_secret = 'mysuperprotectedsecret'
 
@@ -149,10 +120,9 @@ class TestRegisterEndpoint(TestCase):
         }) as get_client_dict:
             response = self.client.post(url_for('register'), json={
                 'op_url': op_url,
-                'client_url': client_url
+                'redirect_uris': redirect_uris
             })
-            self.assertTrue(
-                expected_keys <= response.json.keys(),
-                'endpoint not returning expected keys'
-            )
+            print(response)
+            assert expected_keys <= response.json.keys(), response.json
+
             get_client_dict.reset()

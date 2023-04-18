@@ -18,23 +18,35 @@ data:
   CN_JETTY_REQUEST_HEADER_SIZE: {{ .Values.configmap.cnJettyRequestHeaderSize | quote }}
   # Port used by Prometheus JMX agent
   CN_PROMETHEUS_PORT: {{ .Values.global.cnPrometheusPort | quote }}
-  {{ if or (eq .Values.global.configSecretAdapter "google") (eq .Values.global.cnPersistenceType "spanner") }}
+  {{ if or (eq .Values.global.configAdapterName "google") (eq .Values.global.configSecretAdapter "google") (eq .Values.global.cnPersistenceType "spanner") }}
   # [google_envs] Envs related to using Google
   GOOGLE_APPLICATION_CREDENTIALS: {{ .Values.global.cnGoogleApplicationCredentials | quote }}
   GOOGLE_PROJECT_ID: {{ .Values.configmap.cnGoogleProjectId | quote }}
   {{- end }}
   {{ if eq .Values.global.cnPersistenceType "spanner" }}
-  # [google_spanner_envs] Envs related to using Google Secret Manager to store config and secret layer
+  # [google_spanner_envs] Envs related to using Google Cloud Spanner
   CN_GOOGLE_SPANNER_INSTANCE_ID: {{ .Values.configmap.cnGoogleSpannerInstanceId | quote }}
   CN_GOOGLE_SPANNER_DATABASE_ID: {{ .Values.configmap.cnGoogleSpannerDatabaseId | quote }}
   # [google_spanner_envs] END
   {{- end }}
-  {{ if eq .Values.global.configSecretAdapter "google" }}
+  {{ if or (eq .Values.global.configSecretAdapter "google") (eq .Values.global.configAdapterName "google") }}
   # [google_secret_manager_envs] Envs related to using Google Secret Manager to store config and secret layer
   CN_GOOGLE_SECRET_VERSION_ID: {{ .Values.configmap.cnGoogleSecretVersionId | quote }}
-  CN_GOOGLE_SECRET_MANAGER_PASSPHRASE: {{ .Values.configmap.cnGoogleSecretManagerPassPhrase | quote }}
   CN_GOOGLE_SECRET_NAME_PREFIX: {{ .Values.configmap.cnGoogleSecretNamePrefix | quote }}
   # [google_secret_manager_envs] END
+  {{- end }}
+  {{ if or (eq .Values.global.configSecretAdapter "aws") (eq .Values.global.configAdapterName "aws") }}
+  # [aws_envs] Envs related to using AWS
+  {{- if .Values.configmap.cnAwsSecretsEndpointUrl }}  
+  CN_AWS_SECRETS_ENDPOINT_URL: {{ .Values.configmap.cnAwsSecretsEndpointUrl }}
+  {{- end }}
+  CN_AWS_SECRETS_PREFIX: {{ .Values.configmap.cnAwsSecretsNamePrefix }}
+  CN_AWS_SECRETS_REPLICA_FILE: {{ .Values.global.cnAwsSecretsReplicaRegionsFile }}
+  AWS_DEFAULT_REGION: {{ .Values.configmap.cnAwsDefaultRegion }}
+  AWS_SHARED_CREDENTIALS_FILE: {{ .Values.global.cnAwsSharedCredentialsFile }}
+  AWS_CONFIG_FILE: {{ .Values.global.cnAwsConfigFile }}
+  #AWS_PROFILE
+  # [aws_envs] END
   {{- end }}
   CN_SQL_DB_SCHEMA: {{ .Values.configmap.cnSqlDbSchema | quote }}
   CN_SQL_DB_DIALECT: {{ .Values.configmap.cnSqlDbDialect }}

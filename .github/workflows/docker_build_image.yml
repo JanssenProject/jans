@@ -89,7 +89,7 @@ jobs:
           if [[ "loadtesting-jmeter" =~ "${{ matrix.docker-images }}" ]]; then
             DOCKER_FILE_LOCATION=./demos/benchmarking/docker-jans-loadtesting-jmeter
           fi
-          MAIN_VERSION=$(python3 -c "from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('$DOCKER_FILE_LOCATION') ; print(dfparser.labels['version'])")
+          MAIN_VERSION=$(python3 -c "from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('$DOCKER_FILE_LOCATION') ; print(dfparser.labels['org.opencontainers.image.version'])")
           DOCKER_IMAGE=ghcr.io/$REPOSITORY/${{ matrix.docker-images }}
           VERSION=${MAIN_VERSION}_dev
           BUILD=true
@@ -166,7 +166,7 @@ jobs:
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
-          username: mo-auto
+          username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push

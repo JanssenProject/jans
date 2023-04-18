@@ -45,8 +45,8 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # SCIM
 # ====
 
-ENV CN_VERSION=1.0.11-SNAPSHOT
-ENV CN_BUILD_DATE='2023-03-16 11:43'
+ENV CN_VERSION=1.0.12-SNAPSHOT
+ENV CN_BUILD_DATE='2023-04-16 08:16'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-scim-server/${CN_VERSION}/jans-scim-server-${CN_VERSION}.war
 
 # Install SCIM
@@ -80,7 +80,7 @@ COPY conf/prometheus-config.yaml /opt/prometheus/
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_SOURCE_VERSION=60f66f17cb1b00136a0c7ec4ae30ef3e867ab558
+ENV JANS_SOURCE_VERSION=3a62f0588b996df97f9f21f26edd2d980b4fadec
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCIM_RESOURCE_DIR=jans-scim/server/src/main/resources
 
@@ -207,13 +207,12 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
 # misc stuff
 # ==========
 
-LABEL name="janssenproject/scim" \
-    maintainer="Janssen Project <support@jans.io>" \
-    vendor="Janssen Project" \
-    version="1.0.11" \
-    release="dev" \
-    summary="Janssen SCIM" \
-    description="SCIM server"
+LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/scim" \
+    org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
+    org.opencontainers.image.vendor="Janssen Project" \
+    org.opencontainers.image.version="1.0.12" \
+    org.opencontainers.image.title="Janssen SCIM" \
+    org.opencontainers.image.description="SCIM server"
 
 RUN mkdir -p /etc/certs \
     /etc/jans/conf \

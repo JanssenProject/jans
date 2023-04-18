@@ -11,3 +11,4 @@ io.jans.agama.engine.serialize
 io.jans.agama.engine.service
 io.jans.agama.engine.servlet
 io.jans.agama.timer
+org.mozilla.javascript

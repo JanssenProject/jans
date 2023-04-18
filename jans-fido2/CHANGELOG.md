@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.0.11](https://github.com/JanssenProject/jans/compare/jans-fido2-v1.0.10...jans-fido2-v1.0.11) (2023-04-05)
+
+
+### Features
+
+* loggerService should update root log level [#4251](https://github.com/JanssenProject/jans/issues/4251) ([#4252](https://github.com/JanssenProject/jans/issues/4252)) ([20264a2](https://github.com/JanssenProject/jans/commit/20264a2f61e7b49015bbf6f7b93e9d241e3176a1))
+* restore status/errorMessage and timeout attributes ([#4240](https://github.com/JanssenProject/jans/issues/4240)) ([1d49d68](https://github.com/JanssenProject/jans/commit/1d49d683c2b2c9da5961ef2aa312c47b59864a0f))
+* rests for cancel ([#4212](https://github.com/JanssenProject/jans/issues/4212)) ([12c4dff](https://github.com/JanssenProject/jans/commit/12c4dfffcbdd3ccb6814885d4190159d5628fde3))
+* update fido2-server to conform latest FIDO2 conformance ([#4346](https://github.com/JanssenProject/jans/issues/4346)) ([29147cb](https://github.com/JanssenProject/jans/commit/29147cb0c3f5dd8dbda039f8613e58fa46f23579)), closes [#4239](https://github.com/JanssenProject/jans/issues/4239)
+
+
+### Bug Fixes
+
+* add documentDomain to assertion response ([#4392](https://github.com/JanssenProject/jans/issues/4392)) ([b567726](https://github.com/JanssenProject/jans/commit/b56772605044e8eb7531ff9ec742db3b9855879a))
+* authenticatorAttachment should be not mandatory ([#4232](https://github.com/JanssenProject/jans/issues/4232)) ([aec8482](https://github.com/JanssenProject/jans/commit/aec848215d9869eb684e2af5d8eed7ea022c748c))
+* prepare for  release ([60775c0](https://github.com/JanssenProject/jans/commit/60775c09dc5ab9996bf80c03dcb457861d48dfb1))
+* Unable to send emails issue 4121 ([#4333](https://github.com/JanssenProject/jans/issues/4333)) ([70a566b](https://github.com/JanssenProject/jans/commit/70a566b67f660750bf742f19ee127f79b2db8930))
+* user real URL  in documentDomain ([#4394](https://github.com/JanssenProject/jans/issues/4394)) ([6f66cb8](https://github.com/JanssenProject/jans/commit/6f66cb860003ba6fccf942fb8f4969ac6dd54295))
+
 ## [1.0.10](https://github.com/JanssenProject/jans/compare/jans-fido2-v1.0.9...jans-fido2-v1.0.10) (2023-03-16)
 
 

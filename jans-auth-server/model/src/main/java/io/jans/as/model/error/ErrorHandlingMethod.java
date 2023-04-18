@@ -72,7 +72,7 @@ public enum ErrorHandlingMethod implements HasParamName, AttributeEnum {
     public static ErrorHandlingMethod fromString(String param) {
         if (param != null) {
             for (ErrorHandlingMethod hm : ErrorHandlingMethod.values()) {
-                if (param.equals(hm.value)) {
+                if (hm.value.equalsIgnoreCase(param)) {
                     return hm;
                 }
             }

@@ -91,7 +91,7 @@ A Kubernetes cluster can be created with three nodes or more in one region and t
    config:
       image:
         repository: janssenproject/configurator
-        tag: 1.0.11_dev 
+        tag: 1.0.12_dev 
       countryCode: US
       email: support@gluu.org
       orgName: Gluu
@@ -135,17 +135,17 @@ A Kubernetes cluster can be created with three nodes or more in one region and t
      image:
        pullPolicy: IfNotPresent
        repository: janssenproject/auth-server
-       tag: 1.0.11_dev
+       tag: 1.0.12_dev
    config-api:
      image:
        pullPolicy: IfNotPresent
        repository: janssenproject/config-api
-       tag: 1.0.11_dev
+       tag: 1.0.12_dev
    persistence:
      image:
        pullPolicy: IfNotPresent
        repository: janssenproject/persistence-loader
-       tag: 1.0.11_dev 
+       tag: 1.0.12_dev 
    nginx-ingress:
      ingress:
        path: /
@@ -259,7 +259,7 @@ Create the client needed to run the test by executing the following. Make sure t
     ```
 3. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/load_test_auth_code.yaml) into the folder.
 
-4. Download or build [config-cli-tui](../config-guide/tui.md) and run:
+4. Download or build [config-cli-tui](../config-guide/jans-tui/README.md) and run:
 
     ```bash
     # Notice the namespace is jans here . Change it if it was changed during installation of janssen previously

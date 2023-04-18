@@ -4,6 +4,11 @@
 
 Janssen enables organizations to build a scalable centralized authentication and authorization service using free open source software. The components of the project include client and server implementations of the OAuth, OpenID Connect, SCIM, and FIDO standards.
 
+[![The Linux Foundation](https://img.shields.io/badge/Member-The%20Linux%20Foundation-blue?style=flat-square)](https://www.linuxfoundation.org/press/press-release/the-janssen-project-takes-on-worlds-most-demanding-digital-trust-challenges-at-linux-foundation)
+[![DPGA](https://img.shields.io/badge/DPGA-digital%20public%20good-green?style=flat-square)](https://app.digitalpublicgoods.net/a/10470)
+
+----
+
 **Releases**: [Latest](https://github.com/JanssenProject/jans/releases/latest) | [All](https://github.com/JanssenProject/jans/releases)
 
 **Get Help**: [Discussions](https://github.com/JanssenProject/jans/discussions) | [Chat](https://gitter.im/JanssenProject/Lobby)
@@ -12,14 +17,19 @@ Janssen enables organizations to build a scalable centralized authentication and
 
 **Contribute**: [Contribution Guide](https://docs.jans.io/head/CONTRIBUTING/) | [Community Docs](https://docs.jans.io/head/governance/charter/) | [Developer Guides](https://docs.jans.io/head/CODE_OF_CONDUCT/)
 
+**Social**: [Twitter](https://twitter.com/janssen_project) | [Linkedin](https://www.linkedin.com/company/janssen-project)
+
+
+
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/janssen-auth-server)](https://artifacthub.io/packages/search?repo=janssen-auth-server)
 [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/4353/badge)](https://bestpractices.coreinfrastructure.org/projects/4353)
 [![Hex.pm](https://img.shields.io/hexpm/l/plug)](./LICENSE)
 [![GitHub contributors](https://img.shields.io/github/contributors/janssenproject/jans)](#users-and-community)
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-%23FE5196?logo=conventionalcommits&logoColor=white)](https://conventionalcommits.org)
 
-**Table of Contents**
+----
 
+**Table of Contents**
 
 - [Janssen Modules](#janssen-modules)
 - [Getting Started](#getting-started)
@@ -85,6 +95,12 @@ A BIG thanks to all the amazing contributors!! 👏 👏
 
 There are many ways you can contribute. Of course, you can contribute code. But we also need people to write documentation and guides, to help us with testing, to answer questions on the forums and chat, to review PRs, to help us with devops and CI/CD, to provide feedback on usability, and to promote the project through outreach. Also, by sharing metrics with us, we can gain valuable insights into how the software performs in the wild.
 
+<a href="https://digitalpublicgoods.net/">
+  <img src="https://github.com/JanssenProject/jans/blob/docs-add-dpg-info-to-README/docs/assets/DPGA_color_logo.png" alt="DPGA" width="113"/>
+</a>
+
+The Janssen Project community takes immense pride in the fact that Janssen Project is [recognized as a digital public good (DPG)](https://app.digitalpublicgoods.net/a/10470) by [Digital Public Good Alliance](https://digitalpublicgoods.net/). This is a validation of our social and global impact on millions of people. Today, countries and communities globally use Janssen Project to create affordable and accessible digital identity infrastructure. Please read the [announcement](https://www.linkedin.com/pulse/linux-foundation-janssen-project-recognized-digital-public/) to know more. 
+
 Building a large community is our number one goal. Please let us know what we can do to make you feel more welcome, no matter what you want to contribute.
 
 <a href="https://github.com/JanssenProject/jans/graphs/contributors">
@@ -139,6 +155,7 @@ If you find a bug in a Janssen project, or you would like to suggest a new featu
 ## Releases
 
 Below is the list of current mega releases that hold information about every single release of our services and modules:
+- [v1.0.11](https://github.com/JanssenProject/jans/releases/tag/v1.0.11)
 - [v1.0.10](https://github.com/JanssenProject/jans/releases/tag/v1.0.10)
 - [v1.0.9](https://github.com/JanssenProject/jans/releases/tag/v1.0.9)
 - [v1.0.8](https://github.com/JanssenProject/jans/releases/tag/v1.0.8)
