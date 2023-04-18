@@ -97,6 +97,9 @@ public class ExternalCacheRefreshService extends ExternalScriptService {
 
     public BindCredentials executeExternalGetBindCredentialsMethods(String configId) {
         BindCredentials result = null;
+        if(this.customScriptConfigurations == null){
+            reload(CustomScriptType.CACHE_REFRESH.toString());
+        }
         for (CustomScriptConfiguration customScriptConfiguration : this.customScriptConfigurations) {
             result = executeExternalGetBindCredentialsMethod(customScriptConfiguration, configId);
             if (result != null) {

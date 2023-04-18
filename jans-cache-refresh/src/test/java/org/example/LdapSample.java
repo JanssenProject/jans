@@ -39,7 +39,7 @@ public final class LdapSample {
         CacheRefreshTimer cacheRefreshTimer = new CacheRefreshTimer();
         cacheRefreshTimer.setLdapEntryManager(entryManager);
         ConfigurationFactory configurationFactory = new ConfigurationFactory();
-        configurationFactory.setPersistenceEntryManagerInstance(entryManager);
+        //configurationFactory.setPersistenceEntryManagerInstance(entryManager);
         configurationFactory.create();
         cacheRefreshTimer.setConfigurationFactory(configurationFactory);
         ConfigurationService configurationService = new ConfigurationService();

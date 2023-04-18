@@ -20,6 +20,7 @@ import com.google.common.collect.Lists;
 
 import io.jans.cacherefresh.service.config.ApplicationFactory;
 import io.jans.cacherefresh.service.config.ConfigurationFactory;
+import io.jans.cacherefresh.timer.CacheRefreshTimer;
 import io.jans.exception.ConfigurationException;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.orm.PersistenceEntryManager;
@@ -105,6 +106,9 @@ public class AppInitializer {
 	@Inject
 	private LoggerService loggerService;
 
+	@Inject
+	private CacheRefreshTimer cacheRefreshTimer;
+
 	@PostConstruct
 	public void createApplicationComponents() {
 		try {
@@ -132,24 +136,24 @@ public class AppInitializer {
 		// Initialize python interpreter
 		pythonService
 				.initPythonInterpreter(configurationFactory.getBaseConfiguration().getString("pythonModulesDir", null));
-
+		
 		// Initialize script manager
 		List<CustomScriptType> supportedCustomScriptTypes = Lists.newArrayList(CustomScriptType.values());
 
 		// There is no Fido2 scripts yet
-		supportedCustomScriptTypes.clear();
-
+		//supportedCustomScriptTypes.clear();
+		
 		// Start timer
 		initSchedulerService();
 
 		// Schedule timer tasks
-		metricService.initTimer();
+		//metricService.initTimer();
 		configurationFactory.initTimer();
 		loggerService.initTimer();
 // This one conform latest code
 //		loggerService.initTimer(true);
 		customScriptManager.initTimer(supportedCustomScriptTypes);
-
+		cacheRefreshTimer.initTimer();
 		// Notify plugins about finish application initialization
 		eventApplicationInitialized.select(ApplicationInitialized.Literal.APPLICATION)
 				.fire(new ApplicationInitializedEvent());
