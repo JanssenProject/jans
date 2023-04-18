@@ -1,0 +1,9 @@
+io.jans.model
+io.jans.model.attribute
+io.jans.model.metric
+io.jans.model.metric.counter
+io.jans.model.metric.ldap
+io.jans.model.metric.timer
+io.jans.model.types
+io.jans.model.uma
+io.jans.model.user
