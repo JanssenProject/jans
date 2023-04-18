@@ -1,1 +1,0 @@
-packageSearchIndex = [{"l":"All Packages","url":"allpackages-index.html"},{"l":"io.jans.notify.exception"},{"l":"io.jans.notify.model.conf"},{"l":"io.jans.notify.model.sns"},{"l":"io.jans.notify.resource"},{"l":"io.jans.notify.rest"},{"l":"io.jans.notify.service"}]

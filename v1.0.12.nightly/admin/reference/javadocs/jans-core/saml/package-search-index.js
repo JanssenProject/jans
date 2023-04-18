@@ -1,1 +1,0 @@
-packageSearchIndex = [{"l":"All Packages","url":"allpackages-index.html"},{"l":"io.jans.saml"},{"l":"io.jans.saml.exception"},{"l":"io.jans.saml.metadata"}]
