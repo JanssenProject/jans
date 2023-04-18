@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.0.12](https://github.com/JanssenProject/jans/compare/jans-core-v1.0.11...jans-core-v1.0.12) (2023-04-18)
+
+
+### Features
+
+* **config-api:** search pattern, client auth response and security fix ([#4595](https://github.com/JanssenProject/jans/issues/4595)) ([4dbfcc2](https://github.com/JanssenProject/jans/commit/4dbfcc241353c4e03672d4103d10768cbc0c5bdd))
+
+
+### Bug Fixes
+
+* jsonvalue has been added; ([#4604](https://github.com/JanssenProject/jans/issues/4604)) ([f3b46f4](https://github.com/JanssenProject/jans/commit/f3b46f4a2b8da47063efe8e3e90d98db58eeec81))
+* mailservice should send non signed emails, if keystore isn't defined (update); ([#4544](https://github.com/JanssenProject/jans/issues/4544)) ([57f4b75](https://github.com/JanssenProject/jans/commit/57f4b75ce68f0f12a775d397f97cf56df5299900))
+* mismatch in notation used for SmtpConfiguration [#4581](https://github.com/JanssenProject/jans/issues/4581) ([#4600](https://github.com/JanssenProject/jans/issues/4600)) ([3a62f05](https://github.com/JanssenProject/jans/commit/3a62f0588b996df97f9f21f26edd2d980b4fadec))
+* prepare for 1.0.12 release ([6f83197](https://github.com/JanssenProject/jans/commit/6f83197705511c39413456acdc64e9136a97ff39))
+* yaml has been updated; ([f3b46f4](https://github.com/JanssenProject/jans/commit/f3b46f4a2b8da47063efe8e3e90d98db58eeec81))
+
 ## [1.0.11](https://github.com/JanssenProject/jans/compare/jans-core-v1.0.10...jans-core-v1.0.11) (2023-04-05)
 
 
