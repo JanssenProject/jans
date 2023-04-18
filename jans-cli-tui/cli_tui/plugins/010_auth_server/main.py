@@ -253,6 +253,7 @@ class Plugin(DialogUtils):
             if selection == 'properties':
                 self.oauth_update_properties(tofocus=False)
             set_area = self.oauth_containers[selection]
+            self.app.current_page = selection
 
         if set_area:
             if hasattr(set_area, 'on_page_enter'):

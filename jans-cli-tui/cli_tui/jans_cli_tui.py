@@ -121,6 +121,7 @@ class JansCliApp(Application):
         self.mouse_float=True
         self.browse_path = '/'
         self.app_configuration = {}
+        self.current_page = None
 
         self.not_implemented = Frame(
                             body=HSplit([Label(text=_("Not imlemented yet")), Button(text=_("MyButton"))], width=D()),
