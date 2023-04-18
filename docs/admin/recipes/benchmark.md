@@ -91,7 +91,7 @@ A Kubernetes cluster can be created with three nodes or more in one region and t
    config:
       image:
         repository: janssenproject/configurator
-        tag: 1.0.12_dev 
+        tag: 1.0.13_dev 
       countryCode: US
       email: support@gluu.org
       orgName: Gluu
@@ -135,17 +135,17 @@ A Kubernetes cluster can be created with three nodes or more in one region and t
      image:
        pullPolicy: IfNotPresent
        repository: janssenproject/auth-server
-       tag: 1.0.12_dev
+       tag: 1.0.13_dev
    config-api:
      image:
        pullPolicy: IfNotPresent
        repository: janssenproject/config-api
-       tag: 1.0.12_dev
+       tag: 1.0.13_dev
    persistence:
      image:
        pullPolicy: IfNotPresent
        repository: janssenproject/persistence-loader
-       tag: 1.0.12_dev 
+       tag: 1.0.13_dev 
    nginx-ingress:
      ingress:
        path: /
