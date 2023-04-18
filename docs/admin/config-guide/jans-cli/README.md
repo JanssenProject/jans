@@ -78,6 +78,7 @@ optional arguments:
                         Key for remove patch operation. For example
                         imgLocation
   --data DATA           Path to json data file
+  --output-access-token Prints jwt access token and exits
 root@testjans:~# 
 ```
 We start with getting information about tasks, tasks are options of argument `--info`:
@@ -207,6 +208,10 @@ In this command line:
 - `patch-replace` type of operation; used to replace values in
 - `memcachedConfiguration/bufferSize:32788` is a `key:value` pair
 
+Multi valued arguments can be privede as `key:value1,key:vlaue2`, for example 
+```
+/opt/jans/jans-cli/config-cli.py --operation-id=get-config-scripts  --endpoint-args="fieldValuePair:scriptType=dynamic_scope,fieldValuePair:level=100"
+```
 ## CLI Authorization
 To run operations on Janssen Server, CLI client will need to be authenticated and authorized by the server. Since CLI has limited input capabilities, it uses [Device Authorization Grant](https://datatracker.ietf.org/doc/html/rfc8628) flow to get required permissions in form of an access token. After successfully receiving the token, CLI can run operations on the Janssen server while the token is valid. The steps below will summarize this process.
 
