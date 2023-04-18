@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.0.12](https://github.com/JanssenProject/jans/compare/docs-v1.0.11...docs-v1.0.12) (2023-04-18)
+
+
+### Features
+
+* **jans-auth-server:** redirect back to RP when session is expired or if not possible show error page [#4449](https://github.com/JanssenProject/jans/issues/4449) ([#4505](https://github.com/JanssenProject/jans/issues/4505)) ([0983e73](https://github.com/JanssenProject/jans/commit/0983e7397ea2aa99423e5e928690666cd67ca8b2))
+
+
+### Bug Fixes
+
+* adjust bleeding edge images ([4bb0b09](https://github.com/JanssenProject/jans/commit/4bb0b0983984314a51e7b43e547027d5226c84bb))
+* **docs:** [#2487](https://github.com/JanssenProject/jans/issues/2487) ([#4624](https://github.com/JanssenProject/jans/issues/4624)) ([ba7c347](https://github.com/JanssenProject/jans/commit/ba7c3478a52d6d8e8dbd542fedbf3a2e44fc8da9))
+* **docs:** [#3340](https://github.com/JanssenProject/jans/issues/3340) mention push notification server ([#4622](https://github.com/JanssenProject/jans/issues/4622)) ([7539857](https://github.com/JanssenProject/jans/commit/75398578b4a53c4bfa63e36fa8539fa5fc930b1b))
+* **docs:** autogenerate docs ([#4652](https://github.com/JanssenProject/jans/issues/4652)) ([e353874](https://github.com/JanssenProject/jans/commit/e35387414ba9a4610a4f5a5e690fb0e26efdacdb))
+* **docs:** Paraphrasing [#4369](https://github.com/JanssenProject/jans/issues/4369) ([#4512](https://github.com/JanssenProject/jans/issues/4512)) ([57e027e](https://github.com/JanssenProject/jans/commit/57e027ec73212c89e71779f4e0f1236b751de5fd))
+* **docs:** session persistence [#3235](https://github.com/JanssenProject/jans/issues/3235) ([#4616](https://github.com/JanssenProject/jans/issues/4616)) ([0575c9f](https://github.com/JanssenProject/jans/commit/0575c9f6b6e2be3dcca1eb5bce6fa972dd3cf104))
+* **jans-auth:** [#3340](https://github.com/JanssenProject/jans/issues/3340) incorrect folder location ([#4623](https://github.com/JanssenProject/jans/issues/4623)) ([ef0dbb4](https://github.com/JanssenProject/jans/commit/ef0dbb40b34c531d9ae5f33fb41e5bdecfda9524))
+* **jans-config-api:** agama deployment detail endpoint not including all flows IDs ([#4565](https://github.com/JanssenProject/jans/issues/4565)) ([358c494](https://github.com/JanssenProject/jans/commit/358c49409a172d6419382dd800a21b845a8cc708))
+* prepare for 1.0.12 release ([6f83197](https://github.com/JanssenProject/jans/commit/6f83197705511c39413456acdc64e9136a97ff39))
+
 ## [1.0.11](https://github.com/JanssenProject/jans/compare/docs-v1.0.10...docs-v1.0.11) (2023-04-05)
 
 
