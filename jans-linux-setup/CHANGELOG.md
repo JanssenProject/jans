@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.0.12](https://github.com/JanssenProject/jans/compare/jans-linux-setup-v1.0.11...jans-linux-setup-v1.0.12) (2023-04-18)
+
+
+### Features
+
+* **jans-auth-server:** redirect back to RP when session is expired or if not possible show error page [#4449](https://github.com/JanssenProject/jans/issues/4449) ([#4505](https://github.com/JanssenProject/jans/issues/4505)) ([0983e73](https://github.com/JanssenProject/jans/commit/0983e7397ea2aa99423e5e928690666cd67ca8b2))
+
+
+### Bug Fixes
+
+* avoid setting agama configuration root dir based on java system variable ([#4524](https://github.com/JanssenProject/jans/issues/4524)) ([1d93fd7](https://github.com/JanssenProject/jans/commit/1d93fd7cc3dfd0592781602c5b5bb00f6d5adf4c))
+* **jans-linux-setup:** remove scan_update_token ([#4621](https://github.com/JanssenProject/jans/issues/4621)) ([b20f115](https://github.com/JanssenProject/jans/commit/b20f115e7bf4fa75c7df9c120596e67273f1b10e))
+* **jans-linux-setup:** version 1.0.12 ([#4509](https://github.com/JanssenProject/jans/issues/4509)) ([5d80442](https://github.com/JanssenProject/jans/commit/5d8044229af9f5e44e05cef76b179e7359cff2a8))
+* prepare for 1.0.12 release ([6f83197](https://github.com/JanssenProject/jans/commit/6f83197705511c39413456acdc64e9136a97ff39))
+
 ## [1.0.11](https://github.com/JanssenProject/jans/compare/jans-linux-setup-v1.0.10...jans-linux-setup-v1.0.11) (2023-04-05)
 
 
