@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.0.12](https://github.com/JanssenProject/jans/compare/jans-auth-server-v1.0.11...jans-auth-server-v1.0.12) (2023-04-18)
+
+
+### Features
+
+* add support for version field to project metadata [#4533](https://github.com/JanssenProject/jans/issues/4533) ([#4534](https://github.com/JanssenProject/jans/issues/4534)) ([0eefb90](https://github.com/JanssenProject/jans/commit/0eefb905548ec562d918cb5816add399a1177bca))
+* **jans-auth-server:** redirect back to RP when session is expired or if not possible show error page [#4449](https://github.com/JanssenProject/jans/issues/4449) ([#4505](https://github.com/JanssenProject/jans/issues/4505)) ([0983e73](https://github.com/JanssenProject/jans/commit/0983e7397ea2aa99423e5e928690666cd67ca8b2))
+* remove credentialsEncryptionKey field from admin-ui configuration [#4539](https://github.com/JanssenProject/jans/issues/4539) ([#4576](https://github.com/JanssenProject/jans/issues/4576)) ([35b475f](https://github.com/JanssenProject/jans/commit/35b475fd237eadb02f930af35996368218c72772))
+
+
+### Bug Fixes
+
+* **agama:** avoid assets mess/loss when different projects use the same folder/file names ([#4503](https://github.com/JanssenProject/jans/issues/4503)) ([def096b](https://github.com/JanssenProject/jans/commit/def096bddb8e81ab676d47d6f637dce75bb6991f))
+* avoid setting agama configuration root dir based on java system variable ([#4524](https://github.com/JanssenProject/jans/issues/4524)) ([1d93fd7](https://github.com/JanssenProject/jans/commit/1d93fd7cc3dfd0592781602c5b5bb00f6d5adf4c))
+* **jans-auth-server:** dynamic registration - assign to client only scopes which are explicitly in request [#4426](https://github.com/JanssenProject/jans/issues/4426) ([#4577](https://github.com/JanssenProject/jans/issues/4577)) ([0b0e624](https://github.com/JanssenProject/jans/commit/0b0e6248eede64a93431ec36cc6adcce377f8eee))
+* **jans-auth-server:** upgraded jettison, 1.5.2 -&gt; 1.5.4 [#4591](https://github.com/JanssenProject/jans/issues/4591) ([#4592](https://github.com/JanssenProject/jans/issues/4592)) ([e90269f](https://github.com/JanssenProject/jans/commit/e90269fb58f021377d098a45b38a6ba0fc9220d1))
+* **jans-config-api:** agama deployment detail endpoint not including all flows IDs ([#4565](https://github.com/JanssenProject/jans/issues/4565)) ([358c494](https://github.com/JanssenProject/jans/commit/358c49409a172d6419382dd800a21b845a8cc708))
+* prepare for 1.0.12 release ([6f83197](https://github.com/JanssenProject/jans/commit/6f83197705511c39413456acdc64e9136a97ff39))
+
 ## [1.0.11](https://github.com/JanssenProject/jans/compare/jans-auth-server-v1.0.10...jans-auth-server-v1.0.11) (2023-04-05)
 
 
