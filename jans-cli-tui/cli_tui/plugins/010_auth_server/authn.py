@@ -103,16 +103,17 @@ class Authn(DialogUtils):
                 acr_values_supported.remove('simple_password_auth')
 
             self.auth_scripts.clear()
-            self.app.start_progressing(_("Retreiving Auth Scripts"))
             for acr in acr_values_supported:
+                self.app.start_progressing(_("Retreiving Auth Scripts"))
                 response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, {'operation_id': 'get-config-scripts', 'endpoint_args': 'pattern:{}'.format(acr)})
+                self.app.stop_progressing()
                 if response.status_code == 200:
                     result = response.json()
                     if result.get('entriesCount', 0) > 0:
                         for scr in result['entries']:
                             if scr.get('enabled') and scr not in self.auth_scripts:
                                 self.auth_scripts.append(scr)
-            self.app.stop_progressing()
+            
             populate_acr_list()
 
         asyncio.ensure_future(coroutine())
