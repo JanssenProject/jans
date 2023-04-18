@@ -8,9 +8,6 @@ package io.jans.configapi.filters;
 
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.Operation;
-import io.swagger.v3.oas.models.media.ArraySchema;
-import io.swagger.v3.oas.models.media.Schema;
-import io.swagger.v3.oas.models.media.MapSchema;
 import io.swagger.v3.oas.models.responses.*;
 import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.core.filter.AbstractSpecFilter;
@@ -22,9 +19,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.apache.commons.lang.StringUtils;
-
-import io.jans.as.common.model.registration.Client;
-import io.jans.as.persistence.model.Scope;
 
 public class SpecFilter extends AbstractSpecFilter {
 
@@ -43,16 +37,6 @@ public class SpecFilter extends AbstractSpecFilter {
             // ex.printStackTrace();
         }
         return Optional.of(operation);
-    }
-
-    @Override
-    public Optional filterSchema(Schema schema, Map params, Map cookies, Map headers) {
-
-        Schema clientAuthMapSchema = new MapSchema().description("clientAuthMapSchema")
-                .additionalProperties(new ArraySchema().items(new Schema().$ref("#/components/schemas/Scope")));
-        schema.addProperty("clientAuthMapSchema", clientAuthMapSchema);
-
-        return Optional.of(schema);
     }
 
     private void setRequestExample(Operation operation) {
