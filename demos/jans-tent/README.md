@@ -83,7 +83,10 @@ python main.py
 
 ### Login!
 
-Navigate your browser to `https://localhost:9090` and click the link to start.
+Navigate the browser to `https://<hostname-used-in-redirect-uri>:9090` URL to access Jans Tent home page. The hostname 
+component of the URL should match the hostname componant of redirect URI as configured by `REDIRECT_URIS` entry in the 
+`clientapp/config.py` file. By default, Jans Tent uses the string `localhost` as hostname in the redirect URI. 
+So, `https://localhost:9090` should be used.  
 
 ## Manual client configuration
 
