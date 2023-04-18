@@ -1020,7 +1020,9 @@ class JCA_CLI:
                 if neq > 1:
                     arg_name = arg[:neq].strip()
                     arg_val = arg[neq + 1:].strip()
-                    if arg_name and arg_val:
+                    if arg_name and args_dict:
+                        args_dict[arg_name] += ','+arg_val
+                    else:
                         args_dict[arg_name] = arg_val
 
         return args_dict
