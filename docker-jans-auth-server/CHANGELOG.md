@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.12-1](https://github.com/JanssenProject/jans/compare/docker-jans-auth-server-v1.0.11-1...docker-jans-auth-server-v1.0.12-1) (2023-04-18)
+
+
+### Bug Fixes
+
+* opencontainer labels ([f8b0b36](https://github.com/JanssenProject/jans/commit/f8b0b365600bd700128bb9d92df6de7ba14830b6))
+* prepare for 1.0.12 release ([6f83197](https://github.com/JanssenProject/jans/commit/6f83197705511c39413456acdc64e9136a97ff39))
+
 ## [1.0.11-1](https://github.com/JanssenProject/jans/compare/docker-jans-auth-server-v1.0.10-1...docker-jans-auth-server-v1.0.11-1) (2023-04-05)
 
 
