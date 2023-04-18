@@ -48,25 +48,26 @@ class Plugin(DialogUtils):
 
     def prepare_container(self):
 
-        self.host_widget = self.app.getTitledText(_("SMTP Host"), name='host', style=cli_style.edit_text)
-        self.port_widget = self.app.getTitledText(_("SMTP Port"), name='port', text_type='integer', style=cli_style.edit_text)
+        self.host_widget = self.app.getTitledText(_("SMTP Host"), name='host', style=cli_style.edit_text, widget_style=cli_style.black_bg_widget)
+        self.port_widget = self.app.getTitledText(_("SMTP Port"), name='port', text_type='integer', style=cli_style.edit_text, widget_style=cli_style.black_bg_widget)
         self.connect_protection_widget = self.app.getTitledRadioButton(
                     _("Connect Protection"),
                     name='connect_protection',
                     values=[(v,v) for v in ('None', 'StartTls', 'SslTls')],
-                    style=cli_style.edit_text
+                    style=cli_style.edit_text,
+                    widget_style=cli_style.black_bg_widget
                     )
-        self.from_name_widget = self.app.getTitledText(_("From Name"), name='from_name', style=cli_style.edit_text)
-        self.from_email_address_widget = self.app.getTitledText(_("From Email Address"), name='from_email_address', style=cli_style.edit_text)
-        self.requires_authentication_widget = self.app.getTitledCheckBox(_("Requires Authentication"), name='requires_authentication', style=cli_style.check_box)
-        self.smtp_authentication_account_username_widget = self.app.getTitledText(_("SMTP User Name"), name='smtp_authentication_account_username', style=cli_style.edit_text)
-        self.smtp_authentication_account_password_widget = self.app.getTitledText(_("SMTP Password"), name='smtp_authentication_account_password', style=cli_style.edit_text)
-        self.trust_host_widget = self.app.getTitledCheckBox(_("Trust Server"), name='trust_host', style=cli_style.edit_text)
+        self.from_name_widget = self.app.getTitledText(_("From Name"), name='from_name', style=cli_style.edit_text, widget_style=cli_style.black_bg_widget)
+        self.from_email_address_widget = self.app.getTitledText(_("From Email Address"), name='from_email_address', style=cli_style.edit_text, widget_style=cli_style.black_bg_widget)
+        self.requires_authentication_widget = self.app.getTitledCheckBox(_("Requires Authentication"), name='requires_authentication', style=cli_style.check_box, widget_style=cli_style.black_bg_widget)
+        self.smtp_authentication_account_username_widget = self.app.getTitledText(_("SMTP User Name"), name='smtp_authentication_account_username', style=cli_style.edit_text, widget_style=cli_style.black_bg_widget)
+        self.smtp_authentication_account_password_widget = self.app.getTitledText(_("SMTP Password"), name='smtp_authentication_account_password', style=cli_style.edit_text, widget_style=cli_style.black_bg_widget)
+        self.trust_host_widget = self.app.getTitledCheckBox(_("Trust Server"), name='trust_host', style=cli_style.edit_text, widget_style=cli_style.black_bg_widget)
 
-        self.key_store_widget = self.app.getTitledText(_("Keystore"), name='key_store', style=cli_style.edit_text)
-        self.key_store_password_widget = self.app.getTitledText(_("Keystore Password"), name='key_store_password', style=cli_style.edit_text)
-        self.key_store_alias_widget = self.app.getTitledText(_("Keystore Alias"), name='key_store_alias', style=cli_style.edit_text)
-        self.signing_algorithm_widget = self.app.getTitledText(_("Keystore Signing Alg"), name='signing_algorithm', style=cli_style.edit_text)
+        self.key_store_widget = self.app.getTitledText(_("Keystore"), name='key_store', style=cli_style.edit_text, widget_style=cli_style.black_bg_widget)
+        self.key_store_password_widget = self.app.getTitledText(_("Keystore Password"), name='key_store_password', style=cli_style.edit_text, widget_style=cli_style.black_bg_widget)
+        self.key_store_alias_widget = self.app.getTitledText(_("Keystore Alias"), name='key_store_alias', style=cli_style.edit_text, widget_style=cli_style.black_bg_widget)
+        self.signing_algorithm_widget = self.app.getTitledText(_("Keystore Signing Alg"), name='signing_algorithm', style=cli_style.edit_text, widget_style=cli_style.black_bg_widget)
 
 
         self.main_container = HSplit([
