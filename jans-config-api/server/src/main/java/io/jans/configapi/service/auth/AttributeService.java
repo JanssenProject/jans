@@ -1,16 +1,19 @@
 
 package io.jans.configapi.service.auth;
 
-import io.jans.model.GluuAttribute;
+import static io.jans.as.model.util.Util.escapeLog;
 import io.jans.as.common.util.AttributeConstants;
 import io.jans.configapi.util.ApiConstants;
-import io.jans.configapi.core.model.SearchRequest;
+import io.jans.model.GluuAttribute;
+import io.jans.model.SearchRequest;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;
 import io.jans.orm.search.filter.Filter;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -18,13 +21,17 @@ import java.util.List;
 @ApplicationScoped
 public class AttributeService extends io.jans.as.common.service.AttributeService {
 
+    private static final long serialVersionUID = -820393743995746612L;
+    
     @Override
     protected boolean isUseLocalCache() {
         return false;
     }
 
     public PagedResult<GluuAttribute> searchGluuAttributes(SearchRequest searchRequest, String status) {
-        log.debug("Search GluuAttributes with searchRequest:{}, status:{}", searchRequest, status);
+        if (log.isInfoEnabled()) {
+            log.info("Search GluuAttributes with searchRequest:{}, status:{}", escapeLog(searchRequest), escapeLog(status));
+        }
 
         Filter activeFilter = null;
         if (ApiConstants.ACTIVE.equalsIgnoreCase(status)) {
@@ -50,12 +57,26 @@ public class AttributeService extends io.jans.as.common.service.AttributeService
             }
             searchFilter = Filter.createORFilter(filters);
         }
+        
+        log.trace("Attributes pattern searchFilter:{}", searchFilter);
+        List<Filter> fieldValueFilters = new ArrayList<>();
+        if(searchRequest.getFieldValueMap()!=null && !searchRequest.getFieldValueMap().isEmpty())
+        {
+            for (Map.Entry<String, String> entry : searchRequest.getFieldValueMap().entrySet()) {
+                Filter dataFilter = Filter.createEqualityFilter(entry.getKey(), entry.getValue());
+                log.trace("dataFilter:{}", dataFilter);
+                fieldValueFilters.add(Filter.createANDFilter(dataFilter));
+            }  
+            searchFilter = Filter.createANDFilter(Filter.createORFilter(filters), Filter.createANDFilter(fieldValueFilters));
+        }        
 
+        log.trace("Attributes pattern and field searchFilter:{}", searchFilter);
+       
         if (activeFilter != null) {
-            searchFilter = Filter.createANDFilter(Filter.createORFilter(filters), activeFilter);
+            searchFilter = Filter.createANDFilter(searchFilter, activeFilter);
         }
 
-        log.debug("GluuAttributes to be fetched with searchFilter:{}", searchFilter);
+        log.info("GluuAttributes final searchFilter:{}", searchFilter);
 
         return persistenceEntryManager.findPagedEntries(getDnForAttribute(null), GluuAttribute.class, searchFilter,
                 null, searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
