@@ -7333,6 +7333,7 @@ optional arguments:
                         Key for remove patch operation. For example
                         imgLocation
   --data DATA           Path to json data file
+  --output-access-token Prints jwt access token and exits
 root@testjans:~# 
 </code></pre></div>
 We start with getting information about tasks, tasks are options of argument <code>--info</code>:</p>
@@ -7428,6 +7429,9 @@ It returns:</p>
 - <code>patch-config-cache</code> is a operation-id from <em>Cache Configurations</em> task.
 - <code>patch-replace</code> type of operation; used to replace values in
 - <code>memcachedConfiguration/bufferSize:32788</code> is a <code>key:value</code> pair</p>
+<p>Multi valued arguments can be privede as <code>key:value1,key:vlaue2</code>, for example 
+<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id=get-config-scripts  --endpoint-args=&quot;fieldValuePair:scriptType=dynamic_scope,fieldValuePair:level=100&quot;
+</code></pre></div></p>
 <h2 id="cli-authorization">CLI Authorization<a class="headerlink" href="#cli-authorization" title="Permanent link">#</a></h2>
 <p>To run operations on Janssen Server, CLI client will need to be authenticated and authorized by the server. Since CLI has limited input capabilities, it uses <a href="https://datatracker.ietf.org/doc/html/rfc8628">Device Authorization Grant</a> flow to get required permissions in form of an access token. After successfully receiving the token, CLI can run operations on the Janssen server while the token is valid. The steps below will summarize this process.</p>
 <ol>
@@ -7448,7 +7452,7 @@ Please press &lt;&lt;Enter&gt;&gt; when ready
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-04-03T10:21:34+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-04-03</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-04-18T20:57:56+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-04-18</span>
       
         <br>
         Created:
