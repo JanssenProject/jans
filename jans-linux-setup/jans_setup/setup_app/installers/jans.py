@@ -433,8 +433,8 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
     def create_test_client(self):
         ldif_fn = self.clients_ldif_fn = os.path.join(Config.output_dir, 'test-client.ldif')
-        client_id = Config.get('test_client_id') or base.argsp.test_client_id
-        client_pw = Config.get('test_client_pw') or base.argsp.test_client_pw or self.getPW()
+        client_id = Config.get('test_client_id') or getattr(base.argsp, 'test_client_id', None)
+        client_pw = Config.get('test_client_pw') or getattr(base.argsp, 'test_client_pw', None) or self.getPW()
         encoded_pw = self.obscure(client_pw)
         trusted_client = 'true' if (Config.get('test_client_trusted') or base.argsp.test_client_trusted) else 'false'
 
@@ -468,7 +468,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
     def post_install_before_saving_properties(self):
 
-        if base.argsp.test_client_id or Config.get('test_client_id'):
+        if getattr(base.argsp, 'test_client_id', None) or Config.get('test_client_id'):
             self.create_test_client()
 
 
