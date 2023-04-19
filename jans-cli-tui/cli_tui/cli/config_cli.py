@@ -383,12 +383,6 @@ class JCA_CLI:
         if args.config_api_mtls_client_cert and args.config_api_mtls_client_key:
             self.mtls_client_cert = (args.config_api_mtls_client_cert, args.config_api_mtls_client_key)
 
-    def drop_to_shell(self, mylocals):
-        locals_ = locals()
-        locals_.update(mylocals)
-        code.interact(local=locals_)
-        sys.exit()
-
 
     def get_request_header(self, headers=None, access_token=None):
         if headers is None:
@@ -525,14 +519,6 @@ class JCA_CLI:
             if not self.wrapped:
                 print(self.colored_text("Unable to validate access token: {}".format(e), error_color))
                 self.access_token = None
-
-    def validate_date_time(self, date_str):
-        try:
-            datetime.datetime.fromisoformat(date_str)
-            return True
-        except Exception as e:
-            self.log_response('invalid date-time format: %s'.format(str(e)))
-            return False
 
 
     def get_scoped_access_token(self, scope, set_access_token=True):
