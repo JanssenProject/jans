@@ -534,7 +534,6 @@ class Plugin(DialogUtils):
             self.view_property(passed=passed, op_type='add')
 
         properties = VSplit([
-                Label(text=" ",width=1),
                 JansVerticalNav(
                         myparent=self.app,
                         headers=['Property Name'],
