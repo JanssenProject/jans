@@ -16,10 +16,12 @@ import shutil
 import multiprocessing
 import ssl
 import tempfile
+import urllib.request
+
 
 from pathlib import Path
 from collections import OrderedDict
-from urllib.request import urlretrieve
+
 
 # disable ssl certificate check
 ssl._create_default_https_context = ssl._create_unverified_context
@@ -312,7 +314,7 @@ def find_script_names(ldif_file):
                 
     return name_list
 
-def download(url, dst, verbose=False):
+def download(url, dst, verbose=False, headers=None):
     pardir, fn = os.path.split(dst)
     if not os.path.exists(pardir):
         logIt("Creating driectory", pardir)
@@ -323,11 +325,17 @@ def download(url, dst, verbose=False):
         if verbose:
             print(logs)
 
+
+    if headers:
+        opener = urllib.request.build_opener()
+        opener.addheaders = headers
+        urllib.request.install_opener(opener)
+
     mylog("Downloading {} to {}".format(url, dst))
     download_tries = 1
     while download_tries < 4:
         try:
-            urlretrieve(url, dst)
+            urllib.request.urlretrieve(url, dst)
             mylog("Download size: {} bytes".format(os.path.getsize(dst)))
             time.sleep(0.1)
         except:
@@ -336,6 +344,8 @@ def download(url, dst, verbose=False):
              time.sleep(1)
         else:
             break
+
+    urllib.request.install_opener(None)
 
 def extract_file(zip_file, source, target, ren=False):
     zip_obj = zipfile.ZipFile(zip_file, "r")
