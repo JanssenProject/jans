@@ -12,7 +12,7 @@ from jans.pycloudlib.persistence.sql import SqlClient
 
 from settings import LOGGING_CONFIG
 from utils import prepare_template_ctx
-from utils import get_ldif_mappings
+from ldif_mappings import get_ldif_mappings
 
 FIELD_RE = re.compile(r"[^0-9a-zA-Z\s]+")
 

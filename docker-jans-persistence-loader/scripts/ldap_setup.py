@@ -7,11 +7,10 @@ from ldap3.core.exceptions import LDAPSessionTerminatedByServerError
 from ldap3.core.exceptions import LDAPSocketOpenError
 
 from jans.pycloudlib.persistence.ldap import LdapClient
-# from jans.pycloudlib.persistence.utils import PersistenceMapper
 
 from settings import LOGGING_CONFIG
 from utils import prepare_template_ctx
-from utils import get_ldif_mappings
+from ldif_mappings import get_ldif_mappings
 
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("ldap_setup")

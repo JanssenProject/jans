@@ -8,7 +8,7 @@ from jans.pycloudlib.persistence.couchbase import CouchbaseClient
 
 from settings import LOGGING_CONFIG
 from utils import prepare_template_ctx
-from utils import get_ldif_mappings
+from ldif_mappings import get_ldif_mappings
 
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("couchbase_setup")
