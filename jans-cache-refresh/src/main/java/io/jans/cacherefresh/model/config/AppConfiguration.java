@@ -10,8 +10,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-import io.jans.config.oxtrust.CacheRefreshConfiguration;
 import jakarta.enterprise.inject.Vetoed;
 
 /**

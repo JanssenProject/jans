@@ -8,7 +8,6 @@ package io.jans.cacherefresh.model.config;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import io.jans.config.oxtrust.Configuration;
 import jakarta.enterprise.inject.Vetoed;
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;

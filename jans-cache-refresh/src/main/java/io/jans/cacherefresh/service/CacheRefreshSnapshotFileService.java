@@ -23,10 +23,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-//import javax.inject.Inject;
-//import javax.inject.Named;
-
-import io.jans.config.oxtrust.CacheRefreshConfiguration;
+import io.jans.cacherefresh.model.config.CacheRefreshConfiguration;
 import io.jans.util.ArrayHelper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
