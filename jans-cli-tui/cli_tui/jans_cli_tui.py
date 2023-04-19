@@ -763,13 +763,18 @@ class JansCliApp(Application):
         widget:AnyContainer, 
         jans_help: AnyFormattedText= "",
         style: AnyFormattedText= "",
+        other_widgets: Optional[Sequence[AnyContainer]]=None
         )-> AnyContainer:
         title += ': '
         widget.window.jans_name = name
         widget.window.jans_help = jans_help
         #li, w2, width = self.handle_long_string(title, widget.values, widget)
 
-        v = VSplit([Window(FormattedTextControl(title), width=len(title)+1, style=style,), widget])
+        my_widgets = [Window(FormattedTextControl(title), width=len(title)+1, style=style,), widget]
+        if other_widgets:
+            my_widgets.append(other_widgets)
+
+        v = VSplit(my_widgets)
         v.me = widget
 
         return v
