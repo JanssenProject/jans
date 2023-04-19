@@ -29,6 +29,7 @@
             <class name="io.jans.as.server.authorize.ws.rs.AuthorizeActionTest" />
             <class name="io.jans.as.server.register.ws.rs.SsaValidationConfigServiceTest" />
             <class name="io.jans.as.server.session.ws.rs.EndSessionRestWebServiceImplTest" />
+            <class name="io.jans.as.server.session.ws.rs.EndSessionServiceTest" />
         </classes>
     </test>
 
