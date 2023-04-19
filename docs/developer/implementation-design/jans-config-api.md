@@ -1,11 +1,23 @@
-## This content is in progress
+---
+tags:
+  - developer
+  - config-api
+---
 
-The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.
+# Overview
 
-## Have questions in the meantime?
+## Janssen Config API
+Jans Config API is an application programming interface (API) gateway managing client access to various Janssen backend services.
 
-While this documentation is in progress, you can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussion) or the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). Any questions you have will help determine what information our documentation should cover.
+[Diagram reference](../../assets/jans-config-api-components.xml)
 
-## Want to contribute?
 
-If you have content you'd like to contribute to this page in the meantime, you can get started with our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/).
+### Jans Config API features:
+l  Jans Config API uses REST endpoints to communicate.
+2. Jans Config API endpoint are OAuth 2.0 protected. More details [here](./authorization.md).
+3. Jans Config API flexible plugin architecture in which the new features can be added using extensions. More details [here](./plugins.md).
+4. Config API endpoint can be used to create new user, clients, scopes, etc. This data is stores into the same persistence store as the Jans-Auth server.
+
+
+### Jans Config API Flow
+
