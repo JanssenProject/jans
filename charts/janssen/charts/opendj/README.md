@@ -1,6 +1,6 @@
 # opendj
 
-![Version: 1.0.12-dev](https://img.shields.io/badge/Version-1.0.12--dev-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.0.12-dev](https://img.shields.io/badge/AppVersion-1.0.12--dev-informational?style=flat-square)
+![Version: 1.0.13-dev](https://img.shields.io/badge/Version-1.0.13--dev-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.0.13-dev](https://img.shields.io/badge/AppVersion-1.0.13--dev-informational?style=flat-square)
 
 OpenDJ is a directory server which implements a wide range of Lightweight Directory Access Protocol and related standards, including full compliance with LDAPv3 but also support for Directory Service Markup Language (DSMLv2).Written in Java, OpenDJ offers multi-master replication, access control, and many extensions.
 
@@ -36,6 +36,9 @@ Kubernetes: `>=v1.21.0-0`
 | image.pullSecrets | list | `[]` | Image Pull Secrets |
 | image.repository | string | `"gluufederation/opendj"` | Image  to use for deploying. |
 | image.tag | string | `"5.0.0_dev"` | Image  tag to use for deploying. |
+| lifecycle.preStop.exec.command[0] | string | `"/bin/sh"` |  |
+| lifecycle.preStop.exec.command[1] | string | `"-c"` |  |
+| lifecycle.preStop.exec.command[2] | string | `"python3 /app/scripts/deregister_peer.py 1>&/proc/1/fd/1"` |  |
 | livenessProbe | object | `{"exec":{"command":["python3","/app/scripts/healthcheck.py"]},"failureThreshold":20,"initialDelaySeconds":30,"periodSeconds":30,"timeoutSeconds":5}` | Configure the liveness healthcheck for OpenDJ if needed. |
 | livenessProbe.exec | object | `{"command":["python3","/app/scripts/healthcheck.py"]}` | Executes the python3 healthcheck. |
 | nameOverride | string | `""` |  |

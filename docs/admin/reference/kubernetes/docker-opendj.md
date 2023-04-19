@@ -3,7 +3,7 @@ tags:
   - administration
   - reference
   - kubernetes
-  - docker image
+ - docker image
 ---
 ## Overview
 

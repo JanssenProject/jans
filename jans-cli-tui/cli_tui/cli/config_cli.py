@@ -154,20 +154,20 @@ parser.add_argument("--debug-log-file", default='swagger.log', help="Log file na
 parser.add_argument("--operation-id", help="Operation ID to be done")
 parser.add_argument("--url-suffix", help="Argument to be added api endpoint url. For example inum:2B29")
 parser.add_argument("--info", choices=op_list, help="Help for operation")
+
 parser.add_argument("--op-mode", choices=['get', 'post', 'put', 'patch', 'delete'], default='get',
                     help="Operation mode to be done")
+
 parser.add_argument("--endpoint-args",
                     help="Arguments to pass endpoint separated by comma. For example limit:5,status:INACTIVE")
+
 parser.add_argument("--schema", help="Get sample json schema")
 
 parser.add_argument("-CC", "--config-api-mtls-client-cert", help="Path to SSL Certificate file")
 parser.add_argument("-CK", "--config-api-mtls-client-key", help="Path to SSL Key file")
 parser.add_argument("--key-password", help="Password for SSL Key file")
 parser.add_argument("-noverify", help="Ignore verifying the SSL certificate", action='store_true', default=True)
-
 parser.add_argument("-use-test-client", help="Use test client without device authorization", action='store_true')
-
-
 parser.add_argument("--patch-add", help="Colon delimited key:value pair for add patch operation. For example loggingLevel:DEBUG")
 parser.add_argument("--patch-replace", help="Colon delimited key:value pair for replace patch operation. For example loggingLevel:DEBUG")
 parser.add_argument("--patch-remove", help="Key for remove patch operation. For example imgLocation")
@@ -176,8 +176,9 @@ parser.add_argument("--log-dir", help="Log directory", default=log_dir)
 parser.add_argument("-revoke-session", help="Revokes session", action='store_true')
 parser.add_argument("-scim", help="SCIM Mode", action='store_true', default=False)
 parser.add_argument("-auth", help="Jans OAuth Server Mode", action='store_true', default=False)
-
 parser.add_argument("--data", help="Path to json data file")
+parser.add_argument("--output-access-token", help="Prints jwt access token and exits", action='store_true')
+
 args = parser.parse_args()
 
 
@@ -729,6 +730,11 @@ class JCA_CLI:
             elif not self.access_token and not self.wrapped:
                 self.check_access_token()
                 self.get_jwt_access_token()
+
+        if args.output_access_token and self.access_token:
+            print(self.access_token)
+            sys.exit()
+
         return True, ''
 
     def print_exception(self, e):
@@ -1014,7 +1020,9 @@ class JCA_CLI:
                 if neq > 1:
                     arg_name = arg[:neq].strip()
                     arg_val = arg[neq + 1:].strip()
-                    if arg_name and arg_val:
+                    if arg_name in args_dict:
+                        args_dict[arg_name] += ','+arg_val
+                    else:
                         args_dict[arg_name] = arg_val
 
         return args_dict
@@ -1146,7 +1154,7 @@ class JCA_CLI:
 
 
     def print_response(self, response):
-        if response:
+        if response is not None:
             sys.stderr.write("Server Response:\n")
             self.pretty_print(response)
 
@@ -1422,7 +1430,8 @@ def main():
             cli_object.get_sample_schema(args.schema)
         elif args.operation_id:
             cli_object.process_command_by_id(args.operation_id, args.url_suffix, args.endpoint_args, args.data)
-
+        elif args.output_access_token:
+            cli_object.get_access_token(None)
     #except Exception as e:
     #    print(u"\u001b[38;5;{}mAn Unhandled error raised: {}\u001b[0m".format(error_color, e))
     #    with open(error_log_file, 'a') as w:

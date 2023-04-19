@@ -11,7 +11,7 @@ import io.jans.configapi.plugin.mgt.model.user.UserPatchRequest;
 import io.jans.configapi.plugin.mgt.util.MgtUtil;
 import io.jans.configapi.util.AuthUtil;
 import io.jans.configapi.service.auth.ConfigurationService;
-import io.jans.configapi.core.model.SearchRequest;
+import io.jans.model.SearchRequest;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;

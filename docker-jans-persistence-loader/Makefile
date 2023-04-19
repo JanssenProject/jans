@@ -1,4 +1,4 @@
-CN_VERSION?=1.0.12-SNAPSHOT
+CN_VERSION?=1.0.13-SNAPSHOT
 IMAGE_NAME=ghcr.io/janssenproject/jans/persistence-loader
 DEV_VERSION?=$(shell echo ${CN_VERSION} | cut -d '-' -f 1)_dev
 

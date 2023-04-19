@@ -139,9 +139,9 @@ style = Style.from_dict(
         "tab-unselected": "fg:#b0e0e6 bg:#a9a9a9 underline",
         "tab-selected": "fg:#000080 bg:#d3d3d3",
 
-        ##scim
-        "scim-widget": "bg:black fg:white",
-        
+        # black background widget
+        "black-bg-widget": "bg:black fg:white",
+
         ### table
         "table-white-header": "nounderline bold fg:ansiblack bg:White",
         "table-white-data": "nounderline fg:ansiblack bg:LightGray",

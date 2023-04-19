@@ -13,7 +13,7 @@ Configuration manager is a special container used to load (generate/restore) and
 ## Versions
 
 See [Releases](https://github.com/JanssenProject/docker-jans-configurator/releases) for stable versions.
-For bleeding-edge/unstable version, use `janssenproject/configurator:1.0.12_dev`.
+For bleeding-edge/unstable version, use `janssenproject/configurator:1.0.13_dev`.
 
 ## Environment Variables
 
@@ -124,7 +124,7 @@ python -c 'import random, string; print("".join(random.choices(string.ascii_lett
         -v /path/to/host/volume:/app/db \
         -v /path/to/vault_role_id.txt:/etc/certs/vault_role_id \
         -v /path/to/vault_secret_id.txt:/etc/certs/vault_secret_id \
-        janssenproject/configurator:1.0.12_dev load
+        janssenproject/configurator:1.0.13_dev load
     ```
 
 #### Kubernetes
@@ -152,7 +152,7 @@ python -c 'import random, string; print("".join(random.choices(string.ascii_lett
                 name: config-generate-params
           containers:
             - name: configurator-load
-              image: janssenproject/configurator:1.0.12_dev
+              image: janssenproject/configurator:1.0.13_dev
               volumeMounts:
                 - mountPath: /app/db/generate.json
                   name: config-generate-params
@@ -192,7 +192,7 @@ python -c 'import random, string; print("".join(random.choices(string.ascii_lett
                 name: secret-params
           containers:
             - name: configurator-load
-              image: janssenproject/configurator:1.0.12_dev
+              image: janssenproject/configurator:1.0.13_dev
               volumeMounts:
                 - mountPath: /app/db/config.json
                   name: config-params
@@ -226,7 +226,7 @@ docker run \
     -v /path/to/host/volume:/app/db \
     -v /path/to/vault_role_id.txt:/etc/certs/vault_role_id \
     -v /path/to/vault_secret_id.txt:/etc/certs/vault_secret_id \
-    janssenproject/configurator:1.0.12_dev dump
+    janssenproject/configurator:1.0.13_dev dump
 ```
 
 #### Kubernetes
@@ -242,7 +242,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: configurator-dump-job
-          image: janssenproject/configurator:1.0.12_dev
+          image: janssenproject/configurator:1.0.13_dev
           command:
             - /bin/sh
             - -c
@@ -257,3 +257,4 @@ spec:
 Copy over the files to host
 
 `kubectl cp config-init-load-job:/app/db .`
+

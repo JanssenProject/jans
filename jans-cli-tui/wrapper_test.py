@@ -1,4 +1,5 @@
 import os
+import sys
 import json
 from cli_tui.cli import config_cli
 test_client = config_cli.client_id if config_cli.test_client else None
@@ -64,6 +65,19 @@ result = cli_object.process_command_by_id(
 """
 
 
+result = cli_object.process_command_by_id(
+        operation_id='test-config-smtp',
+        url_suffix='',
+        endpoint_args='',
+        data_fn='',
+        data={"sign": True, "subject": "SMTP Configuration verification", "message": "Mail to test SMTP configuration"}
+        )
+
+print(result.status_code)
+x = result.json()
+print(x, type(x))
+
+sys.exit()
 # endpoint_args ='pattern:2B29' ### limit the responce and wrong pattern
 data = {}
 inum = '40a48740-4892-4fce-b30f-81c5c45670f4'  # this user has 3 UMA

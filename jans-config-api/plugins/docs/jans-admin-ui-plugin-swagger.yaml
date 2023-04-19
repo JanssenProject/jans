@@ -629,13 +629,6 @@ components:
       properties:
         licenseKey:
           type: string
-        clientAuthMapSchema:
-          type: object
-          additionalProperties:
-            type: array
-            items:
-              $ref: '#/components/schemas/Scope'
-          description: clientAuthMapSchema
     LicenseApiResponse:
       type: object
       properties:
@@ -646,13 +639,6 @@ components:
         responseCode:
           type: integer
           format: int32
-        clientAuthMapSchema:
-          type: object
-          additionalProperties:
-            type: array
-            items:
-              $ref: '#/components/schemas/Scope'
-          description: clientAuthMapSchema
     LicenseResponse:
       type: object
       properties:
@@ -681,25 +667,11 @@ components:
           type: string
         customerLastName:
           type: string
-        clientAuthMapSchema:
-          type: object
-          additionalProperties:
-            type: array
-            items:
-              $ref: '#/components/schemas/Scope'
-          description: clientAuthMapSchema
     SSARequest:
       type: object
       properties:
         ssa:
           type: string
-        clientAuthMapSchema:
-          type: object
-          additionalProperties:
-            type: array
-            items:
-              $ref: '#/components/schemas/Scope'
-          description: clientAuthMapSchema
     AdminPermission:
       type: object
       properties:
@@ -709,13 +681,6 @@ components:
           type: string
         defaultPermissionInToken:
           type: boolean
-        clientAuthMapSchema:
-          type: object
-          additionalProperties:
-            type: array
-            items:
-              $ref: '#/components/schemas/Scope'
-          description: clientAuthMapSchema
     RolePermissionMapping:
       type: object
       properties:
@@ -725,13 +690,6 @@ components:
           type: array
           items:
             type: string
-        clientAuthMapSchema:
-          type: object
-          additionalProperties:
-            type: array
-            items:
-              $ref: '#/components/schemas/Scope'
-          description: clientAuthMapSchema
     AdminRole:
       type: object
       properties:
@@ -741,13 +699,6 @@ components:
           type: string
         deletable:
           type: boolean
-        clientAuthMapSchema:
-          type: object
-          additionalProperties:
-            type: array
-            items:
-              $ref: '#/components/schemas/Scope'
-          description: clientAuthMapSchema
   securitySchemes:
     oauth2:
       type: oauth2

@@ -9,7 +9,7 @@
     <parent>
         <groupId>io.jans</groupId>
         <artifactId>jans-auth-server-parent</artifactId>
-        <version>1.0.12-SNAPSHOT</version>
+        <version>1.0.13-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     
@@ -232,7 +232,7 @@
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20220924</version>
+            <version>20230227</version>
             <scope>test</scope>
         </dependency>
         <!-- Needed for htmlunit <-> log4j2 intergration -->

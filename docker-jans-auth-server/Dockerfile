@@ -55,8 +55,8 @@ RUN /opt/jython/bin/pip uninstall -y pip setuptools
 # Auth server
 # ===========
 
-ENV CN_VERSION=1.0.12-SNAPSHOT
-ENV CN_BUILD_DATE='2023-04-16 08:14'
+ENV CN_VERSION=1.0.13-SNAPSHOT
+ENV CN_BUILD_DATE='2023-04-18 10:35'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-server/${CN_VERSION}/jans-auth-server-${CN_VERSION}.war
 
 # Install Jans Auth
@@ -88,7 +88,7 @@ ARG CASA_CONFIG_BUILD_DATE="2023-02-13 11:44"
 RUN wget -q https://jenkins.gluu.org/maven/org/gluu/casa-config/${CASA_CONFIG_VERSION}/casa-config-${CASA_CONFIG_VERSION}.jar -P /usr/share/java/
 
 # A workaround for Fido2 integration
-ARG FIDO2_CLIENT_VERSION=1.0.12-SNAPSHOT
+ARG FIDO2_CLIENT_VERSION=1.0.13-SNAPSHOT
 ARG FIDO2_CLIENT_BUILD_DATE="2023-01-31 15:04"
 RUN wget -q https://jenkins.jans.io/maven/io/jans/jans-fido2-client/${FIDO2_CLIENT_VERSION}/jans-fido2-client-${FIDO2_CLIENT_VERSION}.jar -P /usr/share/java/
 
@@ -118,7 +118,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/agama/fl \
     ${JETTY_BASE}/jans-auth/agama/scripts
 
 # janssenproject/jans SHA commit
-ENV JANS_SOURCE_VERSION=3a62f0588b996df97f9f21f26edd2d980b4fadec
+ENV JANS_SOURCE_VERSION=2e29a9d932f84871466fd4b6d64f1a75bf37ca18
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the agama code
@@ -254,7 +254,7 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/auth-server" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.0.12" \
+    org.opencontainers.image.version="1.0.13" \
     org.opencontainers.image.title="Janssen Authorization Server" \
     org.opencontainers.image.description="OAuth 2.0 server and client; OpenID Connect Provider (OP) & UMA Authorization Server (AS)"
 

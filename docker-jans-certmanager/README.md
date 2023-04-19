@@ -14,7 +14,7 @@ The container designed to run as one-time command (or Job in kubernetes world).
 ## Versions
 
 See [Releases](https://github.com/JanssenProject/docker-jans-certmanager/releases) for stable versions.
-For bleeding-edge/unstable version, use `janssenproject/certmanager:1.0.12_dev`.
+For bleeding-edge/unstable version, use `janssenproject/certmanager:1.0.13_dev`.
 
 ## Environment Variables
 
@@ -214,7 +214,7 @@ docker run \
     -v $PWD/ssl.crt:/etc/certs/jans_https.crt \
     -v $PWD/ssl.key:/etc/certs/jans_https.key \
     -v /var/run/docker.sock:/var/run/docker.sock \
-    janssenproject/certmanager:1.0.12_dev patch web --opts source:from-files
+    janssenproject/certmanager:1.0.13_dev patch web --opts source:from-files
 ```
 
 Kubernetes CronJob example:
@@ -279,3 +279,4 @@ As per v1.0.1, hybrid persistence supports all available persistence types. To c
         "session": "spanner",
     }
     ```
+
