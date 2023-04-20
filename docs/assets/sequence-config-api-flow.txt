@@ -1,4 +1,4 @@
-title Jans Config API request flow
+title Jans Config API - Sample request flow
 
 participant Admin
 participant Admin-ui
