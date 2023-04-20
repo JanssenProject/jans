@@ -21,7 +21,8 @@ Jans Config API is an application programming interface (API) gateway managing c
 </ol>
 
 ### Jans Config API Flow
-[Diagram reference](../../assets/config-api-flow.xml)
+[Diagram reference](../../assets/sequence-config-api-flow.txt)
+
 ```mermaid
 sequenceDiagram
 autonumber 1
@@ -42,7 +43,5 @@ Config-api<--Config-api: Successful validation of token claim with Introspection
 Config-api<--Config-api: Validate token claim with Introspection Response
 Config-api->Jans Persistence: Validate and persist client data
 Admin-ui<--Config-api: Returns persistence status
-
-
 ```
 
