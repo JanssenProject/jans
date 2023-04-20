@@ -383,12 +383,6 @@ class JCA_CLI:
         if args.config_api_mtls_client_cert and args.config_api_mtls_client_key:
             self.mtls_client_cert = (args.config_api_mtls_client_cert, args.config_api_mtls_client_key)
 
-    def drop_to_shell(self, mylocals):
-        locals_ = locals()
-        locals_.update(mylocals)
-        code.interact(local=locals_)
-        sys.exit()
-
 
     def get_request_header(self, headers=None, access_token=None):
         if headers is None:
@@ -525,14 +519,6 @@ class JCA_CLI:
             if not self.wrapped:
                 print(self.colored_text("Unable to validate access token: {}".format(e), error_color))
                 self.access_token = None
-
-    def validate_date_time(self, date_str):
-        try:
-            datetime.datetime.fromisoformat(date_str)
-            return True
-        except Exception as e:
-            self.log_response('invalid date-time format: %s'.format(str(e)))
-            return False
 
 
     def get_scoped_access_token(self, scope, set_access_token=True):
@@ -1295,6 +1281,46 @@ class JCA_CLI:
                     if schema == schema_name:
                         return '#/components/schemas/' + schema
 
+
+    def get_nasted_schema(self,data):
+        result = self.find_key('$ref', data)
+        if result:
+            return result
+        return None
+
+    def find_key(self,key, dictionary):
+        if key in dictionary:
+            return dictionary[key]
+        for k, v in dictionary.items():
+            if isinstance(v, dict):
+                result = self.find_key(key, v)
+                if result:
+                    return result
+        return None
+
+    def change_certain_value_from_list(self,keys_to_lookup,my_dict_nested,data_to_change):
+
+        value = OrderedDict()
+        value.update(my_dict_nested)
+        for key in keys_to_lookup[:-2]:
+            value = value[key]
+        # assign a new value to the final key > -2 to discared `$ref`
+        value[keys_to_lookup[-2]] = data_to_change
+
+        return my_dict_nested
+
+
+    def list_leading_to_value(self,my_dict, value, keys=[]):
+        for k, v in my_dict.items():
+            if isinstance(v, dict):
+                result = self.list_leading_to_value(v, value, keys + [k])
+                if result is not None:
+                    return result
+            elif v == value:
+                return keys + [k]
+        
+
+
     def get_schema_from_reference(self, plugin_name, ref):
         schema_path_list = ref.strip('/#').split('/')
         schema = cfg_yaml[self.my_op_mode][plugin_name][schema_path_list[0]]
@@ -1320,15 +1346,51 @@ class JCA_CLI:
             schema_ = all_schema
 
         for key_ in schema_.get('properties', []):
+
             if '$ref' in schema_['properties'][key_]:
-                schema_['properties'][key_] = self.get_schema_from_reference(plugin_name, schema_['properties'][key_]['$ref'])
+                current_schema = self.get_schema_from_reference(plugin_name, schema_['properties'][key_]['$ref'])
+                ref = self.get_nasted_schema(current_schema) ## cehck for nasted `$ref` schema
+                
+
+                if False: #ref :
+                    print(ref)
+                    ### Get schema from refrence for the new `ref`
+                    new_schema = self.get_schema_from_reference(plugin_name, ref) 
+
+                    ### Get List of keys to the `ref` value ex: ['properties', 'agamaConfiguration', 'properties', 'clientAuthMapSchema', 'additionalProperties', 'items', '$ref']
+                    keys_to_lookup = self.list_leading_to_value(my_dict=current_schema, value=ref) 
+
+                    ### Change the value that List of keys looks at.
+                    schema_['properties'][key_] =OrderedDict(self.change_certain_value_from_list(keys_to_lookup,current_schema,new_schema['properties'])) 
+
+                else:
+                    schema_['properties'][key_] = current_schema
+                
             elif schema_['properties'][key_].get('type') == 'array' and '$ref' in schema_['properties'][key_]['items']:
+                
                 ref_path = schema_['properties'][key_]['items'].pop('$ref')
                 ref_schema = self.get_schema_from_reference(plugin_name, ref_path)
                 schema_['properties'][key_]['properties'] = ref_schema['properties']
                 schema_['properties'][key_]['title'] = ref_schema['title']
                 schema_['properties'][key_]['description'] = ref_schema.get('description', '')
                 schema_['properties'][key_]['__schema_name__'] = ref_schema['__schema_name__']
+
+            # else:
+            #     ref = self.get_nasted_schema(schema_)
+            #     print('ref else: '+str(ref)+'\n')
+            #     if ref :
+            #         ### Get schema from refrence for the new `ref`
+            #         new_schema = self.get_schema_from_reference(plugin_name, ref) 
+
+            #         ### Get List of keys to the `ref` value ex: ['properties', 'agamaConfiguration', 'properties', 'clientAuthMapSchema', 'additionalProperties', 'items', '$ref']
+            #         keys_to_lookup = self.list_leading_to_value(my_dict=current_schema, value=ref) 
+
+            #         ### Change the value that List of keys looks at.
+            #         schema_['properties'][key_] =OrderedDict(self.change_certain_value_from_list(keys_to_lookup,current_schema,new_schema['properties'])) 
+
+               
+
+
 
         if not 'title' in schema_:
             schema_['title'] = p
