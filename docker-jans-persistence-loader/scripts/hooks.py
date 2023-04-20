@@ -1,12 +1,23 @@
+"""Hooks are special callables that can be used to change the behavior
+of default callables, i.e. change keystore in specific Janssen image.
+
+Currently, hooks are meant to be overriden manually. In the future,
+we can use specialized hooks/plugins system.
+"""
 import itertools
 import os
+import typing as _t
 
-from jans.pycloudlib import get_manager
-
-manager = get_manager()
+from jans.pycloudlib.persistence.utils import PersistenceMapper
 
 
-def _transform_auth_dynamic_config(conf):
+def merge_auth_keystore_ctx_hook(manager, ctx: dict[str, _t.Any]) -> dict[str, _t.Any]:
+    # maintain compatibility with upstream template
+    ctx["oxauth_openid_jks_fn"] = manager.config.get("auth_openid_jks_fn")
+    return ctx
+
+
+def transform_auth_dynamic_config_hook(conf, manager):
     should_update = False
 
     if "redirectUrisRegexEnabled" not in conf:
@@ -195,3 +206,46 @@ def _transform_auth_dynamic_config(conf):
 
     # return the conf and flag to determine whether it needs update or not
     return conf, should_update
+
+
+def get_ldif_mappings_hook(group, optional_scopes=None):
+    optional_scopes = optional_scopes or []
+
+    def default_files():
+        return [
+            "base.ldif",
+            "attributes.ldif",
+            "scopes.ldif",
+            "scripts.ldif",
+            "configuration.ldif",
+            "o_metric.ldif",
+            "agama.ldif",
+            "jans-auth/role-scope-mappings.ldif",
+            "jans-cli/client.ldif",
+            "jans-auth/configuration.ldif",
+        ]
+
+    def user_files():
+        return [
+            "jans-auth/people.ldif",
+            "jans-auth/groups.ldif",
+        ]
+
+    def site_files():
+        return ["o_site.ldif"]
+
+    ldif_mappings = {
+        "default": default_files(),
+        "user": user_files(),
+        "site": site_files(),
+        "cache": [],
+        "token": [],
+        "session": [],
+    }
+
+    mapper = PersistenceMapper()
+    ldif_mappings = {
+        mapping: files for mapping, files in ldif_mappings.items()
+        if mapping in mapper.groups()[group]
+    }
+    return ldif_mappings

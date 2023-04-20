@@ -18,7 +18,7 @@ from jans.pycloudlib.utils import as_boolean
 
 from settings import LOGGING_CONFIG
 from utils import get_role_scope_mappings
-from auth_dynamic_config import _transform_auth_dynamic_config
+from hooks import transform_auth_dynamic_config_hook
 
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("entrypoint")
@@ -104,6 +104,8 @@ def collect_claim_names(ldif_file="/app/templates/attributes.ldif"):
         parser = LDIFParser(fd)
 
         for dn, entry in parser.parse():
+            if "jansClaimName" not in entry:
+                continue
             rows[dn] = entry["jansClaimName"][0]
     return rows
 
@@ -350,7 +352,7 @@ class Upgrade:
         if self.backend.type != "couchbase":
             entry.attrs["jansConfDyn"] = json.loads(entry.attrs["jansConfDyn"])
 
-        conf, should_update = _transform_auth_dynamic_config(entry.attrs["jansConfDyn"])
+        conf, should_update = transform_auth_dynamic_config_hook(entry.attrs["jansConfDyn"], self.manager)
 
         if should_update:
             if self.backend.type != "couchbase":

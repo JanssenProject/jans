@@ -12,7 +12,7 @@ from jans.pycloudlib.utils import generate_base64_contents
 from jans.pycloudlib.utils import get_random_chars
 from jans.pycloudlib.utils import exec_cmd
 
-from auth_keystore import merge_auth_keystore_ctx
+from hooks import merge_auth_keystore_ctx_hook
 
 
 def render_ldif(src, dst, ctx):
@@ -203,7 +203,7 @@ def merge_jans_cli_ctx(manager, ctx):
 def prepare_template_ctx(manager):
     ctx = get_base_ctx(manager)
     ctx = merge_extension_ctx(ctx)
-    ctx = merge_auth_keystore_ctx(manager, ctx)
+    ctx = merge_auth_keystore_ctx_hook(manager, ctx)
     ctx = merge_auth_ctx(ctx)
     ctx = merge_jans_cli_ctx(manager, ctx)
     ctx = merge_smtp_ctx(manager, ctx)

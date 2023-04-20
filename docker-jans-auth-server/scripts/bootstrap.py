@@ -1,4 +1,3 @@
-import base64
 import json
 import os
 import re
@@ -20,6 +19,7 @@ from jans.pycloudlib.utils import as_boolean
 
 import logging.config
 from settings import LOGGING_CONFIG
+from hooks import get_auth_keys_hook
 
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("entrypoint")
@@ -121,14 +121,7 @@ def main():
     modify_jetty_xml()
     modify_webdefault_xml()
     configure_logging()
-    manager.secret.to_file(
-        "auth_jks_base64",
-        "/etc/certs/auth-keys.jks",
-        decode=True,
-        binary_mode=True,
-    )
-    with open("/etc/certs/auth-keys.json", "w") as f:
-        f.write(base64.b64decode(manager.secret.get("auth_openid_key_base64")).decode())
+    get_auth_keys_hook(manager)
 
     try:
         manager.secret.to_file(
