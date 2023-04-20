@@ -15,14 +15,14 @@
 
 install_jans() {
 
-sudo ssh -i ~/private_rhel.pem ${USERNAME}@${IPADDRESS} << EOF
+sudo ssh -i private.pem ${USERNAME}@${IPADDRESS} << EOF
 sudo python3 install.py -uninstall -y
 exit
 EOF
 
 rm setup.properties
 # IP_ADDRESS=$HOST
-# HOSTNAME=`sudo ssh -i ~/private_rhel.pem ${USERNAME}@${IPADDRESS} hostname`
+# HOSTNAME=`sudo ssh -i private.pem ${USERNAME}@${IPADDRESS} hostname`
  
 # echo "$USERNAME"
 # echo "$HOST"
@@ -72,12 +72,12 @@ fi
 			
 		curl https://raw.githubusercontent.com/JanssenProject/jans/v${VERSION}.nightly/jans-linux-setup/jans_setup/install.py > install.py
 		echo "install downloaded"
-		sudo scp  -i ~/private_rhel.pem  setup.properties install.py ${USERNAME}@${IPADDRESS}:~/
+		sudo scp  -i private.pem  setup.properties install.py ${USERNAME}@${IPADDRESS}:~/
 		rm setup.properties install.py
 		
 if [[ $OS == ubuntu22 ]] || [[ $OS == ubuntu20 ]];
     then
-		sudo ssh -i ~/private_rhel.pem ${USERNAME}@${IPADDRESS} << EOF
+		sudo ssh -i private.pem ${USERNAME}@${IPADDRESS} << EOF
  		sudo apt install  python3-pip -y
 		echo "package download started"
 		wget https://github.com/JanssenProject/jans/releases/download/v${VERSION}.nightly/jans_${VERSION}.nightly.${OS}.04_amd64.deb
@@ -85,7 +85,7 @@ if [[ $OS == ubuntu22 ]] || [[ $OS == ubuntu20 ]];
 EOF
 	elif [[ $OS == rhel ]] || [[ $OS == centos ]];
     then
-			sudo ssh -i ~/private_rhel.pem ${USERNAME}@${IPADDRESS} << EOF
+			sudo ssh -i private.pem ${USERNAME}@${IPADDRESS} << EOF
 			sudo sed -i 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config
 			sudo yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
 			sudo yum -y module enable mod_auth_openidc 
@@ -99,12 +99,12 @@ EOF
 EOF
 	elif [[ $OS == suse ]];
 	then
-			sudo ssh -i ~/private_rhel.pem ${USERNAME}@${IPADDRESS} << EOF			
+			sudo ssh -i private.pem ${USERNAME}@${IPADDRESS} << EOF			
 			#sudo zypper update -y
 			#sudo reboot		
 			#EOF
 			#sleep 360
-			#sudo ssh -i ~/private_rhel.pem ${USERNAME}@${IPADDRESS} << EOF
+			#sudo ssh -i private.pem ${USERNAME}@${IPADDRESS} << EOF
 			echo "downloading package"
 			wget https://github.com/JanssenProject/jans/releases/download/v${VERSION}.nightly/jans-${VERSION}.nightly-suse15.x86_64.rpm
 			
@@ -151,7 +151,7 @@ sleep 300
 	echo " installation started"
 	if [[ ${PACKAGE_OR_ONLINE} == "online" ]];
 	then 
-	sudo ssh -i ~/private_rhel.pem ${USERNAME}@${IPADDRESS} << EOF 
+	sudo ssh -i private.pem ${USERNAME}@${IPADDRESS} << EOF 
 	sudo python3 install.py -y --args="-f setup.properties -c -n --cli-test-client" 
 EOF
 	echo " installation ended"
@@ -161,7 +161,7 @@ EOF
 		if [[ ${OS} == "suse"  ]]
 		then
 		echo "package installation started"
-		sudo ssh -i ~/private_rhel.pem ${USERNAME}@${IPADDRESS} << EOF
+		sudo ssh -i private.pem ${USERNAME}@${IPADDRESS} << EOF
 			sudo zypper --no-gpg-checks install -y ./jans-${VERSION}.nightly-suse15.x86_64.rpm
 			sudo python3 /opt/jans/jans-setup/setup.py -f setup.properties -n
 EOF
@@ -169,15 +169,15 @@ EOF
 		if [[ ${OS} == "rhel"  ]]
 		then
 		echo "package installation started"
-		sudo ssh -i ~/private_rhel.pem ${USERNAME}@${IPADDRESS} << EOF
-			sudo yum install ./jans-${VERSION}.nightly-el8.x86_64.rpm
+		sudo ssh -i private.pem ${USERNAME}@${IPADDRESS} << EOF
+			sudo yum install -y ./jans-${VERSION}.nightly-el8.x86_64.rpm
 			sudo python3 /opt/jans/jans-setup/setup.py -f setup.properties -n
 EOF
 		fi
 		if [[ ${OS} == "ubuntu20"  ]] || [[ ${OS} == "ubuntu22"  ]]
 		then
 			echo "package installation started"
-			sudo ssh -i ~/private_rhel.pem ${USERNAME}@${IPADDRESS} << EOF
+			sudo ssh -i private.pem ${USERNAME}@${IPADDRESS} << EOF
 			sudo apt install -y ./jans_${VERSION}.nightly.${OS}.04_amd64.deb
 			sudo python3 /opt/jans/jans-setup/setup.py -f setup.properties -n
 EOF
@@ -194,7 +194,7 @@ EOF
 helpFunction()
 {
    echo ""
-   echo "Usage: ./install.sh -i ipaddress -h hostname -u username -d db -o os  -b VERSION -p PACKAGE_OR_ONLINE"
+   echo "Usage: ./install.sh -i IPADDRESS -h HOSTNAME -u USERNAME -d DB -o OS  -b VERSION -p PACKAGE_OR_ONLINE"
    echo -e "\t ./install.sh  3.10.10.22  manojs1978-pleasing-goldfish.gluu.info  ec2-user  ldap  ubuntu22 or suse or rhel or ubuntu20  1.0.12  package"
    exit 1 # Exit script after printing help
 }
@@ -215,7 +215,7 @@ esac
 done
 #VERSION=main
 # Print helpFunction in case parameters are empty
-# sudo ssh -i ~/private_rhel.pem $USERNAME@$HOST
+# sudo ssh -i private.pem $USERNAME@$HOST
 
  IPADDRESS=$1
  HOSTNAME=$2
@@ -241,3 +241,4 @@ if [ -z ${IPADDRESS} ] && [ -z ${HOSTNAME} ] && [ -z ${USERNAME} ] && [ -z ${DB}
 	else
 	install_jans
 fi
+
