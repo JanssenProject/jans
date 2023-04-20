@@ -15,7 +15,7 @@ Janssen(Jans) Config API is an application programming interface (API) gateway m
 ### Jans Config API features:
 <ol>
 <li>Jans Config API uses REST endpoints to communicate.</li> 
-<li>Jans Config API endpoint are OAuth 2.0 protected. More details [here](../../admin/config-guide/config-api/authorization.md).</li> 
+<li>Jans Config API endpoint are OAuth 2.0 protected. More details [Diagram reference](../../assets/config-api-components.png)</li> 
 <li>Jans Config API plugin architecture can be used to add new features. More details [here](../../admin/config-guide/config-api/plugins.md).</li> 
 <li>Config API endpoint can be used to create new user, clients, scopes, etc. This data is stores into the same persistence store as the Jans-Auth server.</li> 
 </ol>
