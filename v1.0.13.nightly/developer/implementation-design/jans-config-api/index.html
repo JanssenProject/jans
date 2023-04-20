@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#this-content-is-in-progress" class="md-skip">
+        <a href="#overview" class="md-skip">
           Skip to content
         </a>
       
@@ -6850,6 +6850,8 @@
       <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
       
       
+        
+      
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
           jans-config-api
@@ -6866,6 +6868,8 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -6874,23 +6878,29 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#this-content-is-in-progress" class="md-nav__link">
-    This content is in progress
+  <a href="#janssen-config-api" class="md-nav__link">
+    Janssen Config API
+  </a>
+  
+    <nav class="md-nav" aria-label="Janssen Config API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#jans-config-api-features" class="md-nav__link">
+    Jans Config API features:
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#have-questions-in-the-meantime" class="md-nav__link">
-    Have questions in the meantime?
+        
+          <li class="md-nav__item">
+  <a href="#jans-config-api-flow" class="md-nav__link">
+    Jans Config API Flow
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#want-to-contribute" class="md-nav__link">
-    Want to contribute?
-  </a>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -7226,6 +7236,8 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -7234,23 +7246,29 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#this-content-is-in-progress" class="md-nav__link">
-    This content is in progress
+  <a href="#janssen-config-api" class="md-nav__link">
+    Janssen Config API
+  </a>
+  
+    <nav class="md-nav" aria-label="Janssen Config API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#jans-config-api-features" class="md-nav__link">
+    Jans Config API features:
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#have-questions-in-the-meantime" class="md-nav__link">
-    Have questions in the meantime?
+        
+          <li class="md-nav__item">
+  <a href="#jans-config-api-flow" class="md-nav__link">
+    Jans Config API Flow
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#want-to-contribute" class="md-nav__link">
-    Want to contribute?
-  </a>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -7269,6 +7287,20 @@
                   
   
 
+  <nav class="md-tags" >
+    
+      
+      
+        <span class="md-tag">developer</span>
+      
+    
+      
+      
+        <span class="md-tag">config-api</span>
+      
+    
+  </nav>
+
 
 
   <a href="https://github.com/JanssenProject/jans/edit/main/docs/developer/implementation-design/jans-config-api.md" title="Edit this page" class="md-content__button md-icon">
@@ -7277,21 +7309,51 @@
   </a>
 
 
-  <h1>jans-config-api</h1>
+<h1 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">#</a></h1>
+<h2 id="janssen-config-api">Janssen Config API<a class="headerlink" href="#janssen-config-api" title="Permanent link">#</a></h2>
+<p>Janssen(Jans) Config API is an application programming interface (API) gateway managing configuring of various Janssen modules.</p>
+<p><a href="../../../assets/config-api-components.png">Diagram reference</a></p>
+<h3 id="jans-config-api-features">Jans Config API features:<a class="headerlink" href="#jans-config-api-features" title="Permanent link">#</a></h3>
+<ol>
+<li>Jans Config API uses REST endpoints to communicate. </li>
+<li>Jans Config API endpoint are OAuth 2.0 protected. More details <a href="../../../admin/config-guide/config-api/authorization/">here</a></li>
+<li>Jans Config API plugin architecture can be used to add new features. More details <a href="../../../admin/config-guide/config-api/plugins/">here</a>.</li>
+<li>Config API endpoint can be used to create new user, clients, scopes, etc. This data is stores into the same persistence store as the Jans-Auth server.</li>
+</ol>
+<h3 id="jans-config-api-flow">Jans Config API Flow<a class="headerlink" href="#jans-config-api-flow" title="Permanent link">#</a></h3>
+<p><a href="../../../assets/sequence-config-api-flow.png">Diagram reference</a></p>
+<pre class="mermaid"><code>
+sequenceDiagram
+title Jans Config API request flow
+autonumber 1
 
-<h2 id="this-content-is-in-progress">This content is in progress<a class="headerlink" href="#this-content-is-in-progress" title="Permanent link">#</a></h2>
-<p>The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.</p>
-<h2 id="have-questions-in-the-meantime">Have questions in the meantime?<a class="headerlink" href="#have-questions-in-the-meantime" title="Permanent link">#</a></h2>
-<p>While this documentation is in progress, you can ask questions through <a href="https://github.com/JanssenProject/jans/discussion">GitHub Discussions</a> or the <a href="https://gitter.im/JanssenProject/Lobby">community chat on Gitter</a>. Any questions you have will help determine what information our documentation should cover.</p>
-<h2 id="want-to-contribute">Want to contribute?<a class="headerlink" href="#want-to-contribute" title="Permanent link">#</a></h2>
-<p>If you have content you'd like to contribute to this page in the meantime, you can get started with our <a href="https://docs.jans.io/head/CONTRIBUTING/">Contribution guide</a>.</p>
+participant Admin
+participant Admin-ui
+participant Config-api
+participant Auth-Server
+participant Jans Persistence
+
+Admin-&gt;&gt;Admin-ui: Create Client
+note over Admin-ui: Click on (+) Create Client and Save button to create new client
+Config-api-&gt;&gt;Auth-Server: Introspect Token
+Auth-Server-&gt;&gt;Config-api: Returns Introspection Response
+Config-api-&gt;&gt;Config-api: Successful validation of token claim with Introspection Response
+Config-api-&gt;&gt;Jans Persistence: Validate and persist client data
+Config-api-&gt;&gt;Admin-ui: Returns persistence status</code></pre>
+<ol>
+<li><strong>Admin</strong>: Administrator of the application. Will use Admin-ui to configure application. </li></li>
+<li><strong>Admin-ui</strong>: Gluu graphical user interface for the administrators to manage configuration and other properties of Jans Auth Server via Jans Config API.</li></li>
+<li><strong>Config-api</strong>: Jans API gateway for configuring Janssen modules like Jans Auth Server, fido2, SCIM, etc. </li></li>
+<li><strong>Auth-Server</strong>: Janssen federated identity with comprehensive implementation of OpenID Connect. Used for introspection of access token in this flow.</li></li>
+<li><strong>Jans Persistence</strong>: Jans Persistence layer to persist data in backend.</li></li>
+</ol>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-12-08T20:20:00+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-12-08</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-04-20T16:58:46+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-04-20</span>
       
         <br>
         Created:
