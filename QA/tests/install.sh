@@ -1,4 +1,4 @@
-#!/usr/bin/bash -x
+#!/usr/bin/bash 
 
 # LOG_LOCATION=./logs
 # exec > >(tee -i $LOG_LOCATION/install.log)
@@ -15,14 +15,14 @@
 
 install_jans() {
 
-sudo ssh -i ~/private_ubuntu22.pem ${USERNAME}@${IPADDRESS} << EOF
+sudo ssh -i ~/private_rhel.pem ${USERNAME}@${IPADDRESS} << EOF
 sudo python3 install.py -uninstall -y
 exit
 EOF
 
 rm setup.properties
 # IP_ADDRESS=$HOST
-# HOSTNAME=`sudo ssh -i ~/private_ubuntu22.pem ${USERNAME}@${IPADDRESS} hostname`
+# HOSTNAME=`sudo ssh -i ~/private_rhel.pem ${USERNAME}@${IPADDRESS} hostname`
  
 # echo "$USERNAME"
 # echo "$HOST"
@@ -69,15 +69,15 @@ if [[ $DB == opendj ]]
 	else
 		echo "please select any DB"
 fi
-		
-		curl https://raw.githubusercontent.com/JanssenProject/jans/v${VERSION}/jans-linux-setup/jans_setup/install.py > install.py
+			
+		curl https://raw.githubusercontent.com/JanssenProject/jans/v${VERSION}.nightly/jans-linux-setup/jans_setup/install.py > install.py
 		echo "install downloaded"
-		sudo scp  -i ~/private_ubuntu22.pem  setup.properties install.py ${USERNAME}@${IPADDRESS}:~/
+		sudo scp  -i ~/private_rhel.pem  setup.properties install.py ${USERNAME}@${IPADDRESS}:~/
 		rm setup.properties install.py
 		
 if [[ $OS == ubuntu22 ]] || [[ $OS == ubuntu20 ]];
     then
-		sudo ssh -i ~/private_ubuntu22.pem ${USERNAME}@${IPADDRESS} << EOF
+		sudo ssh -i ~/private_rhel.pem ${USERNAME}@${IPADDRESS} << EOF
  		sudo apt install  python3-pip -y
 		echo "package download started"
 		wget https://github.com/JanssenProject/jans/releases/download/v${VERSION}.nightly/jans_${VERSION}.nightly.${OS}.04_amd64.deb
@@ -85,31 +85,30 @@ if [[ $OS == ubuntu22 ]] || [[ $OS == ubuntu20 ]];
 EOF
 	elif [[ $OS == rhel ]] || [[ $OS == centos ]];
     then
-			sudo ssh -i ~/private_ubuntu22.pem ${USERNAME}@${IPADDRESS} << EOF
+			sudo ssh -i ~/private_rhel.pem ${USERNAME}@${IPADDRESS} << EOF
 			sudo sed -i 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config
 			sudo yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
 			sudo yum -y module enable mod_auth_openidc 
 			sudo yum update -y
 			sudo yum install  python3-pip -y
-			sudo yum  install python3-certifi python3-ldap3 python3-prompt-toolkit python3-ruamel-yaml
+			sudo yum  install -y wget python3-certifi python3-ldap3 python3-prompt-toolkit python3-ruamel-yaml
 			wget https://github.com/JanssenProject/jans/releases/download/v${VERSION}.nightly/jans-${VERSION}.nightly-el8.x86_64.rpm
 			
 			sudo reboot
-			wait 300	
+			
 EOF
 	elif [[ $OS == suse ]];
 	then
-			sudo ssh -i ~/private_ubuntu22.pem ${USERNAME}@${IPADDRESS} << EOF			
+			sudo ssh -i ~/private_rhel.pem ${USERNAME}@${IPADDRESS} << EOF			
 			#sudo zypper update -y
 			#sudo reboot		
-#EOF
-#sleep 360
-			#sudo ssh -i ~/private_ubuntu22.pem ${USERNAME}@${IPADDRESS} << EOF
+			#EOF
+			#sleep 360
+			#sudo ssh -i ~/private_rhel.pem ${USERNAME}@${IPADDRESS} << EOF
 			echo "downloading package"
-#			wget https://github.com/JanssenProject/jans/releases/download/v${VERSION}.nightly/jans-${VERSION}.nightly-suse15.x86_64.rpm
+			wget https://github.com/JanssenProject/jans/releases/download/v${VERSION}.nightly/jans-${VERSION}.nightly-suse15.x86_64.rpm
 			
-#			sudo zypper addrepo https://download.opensuse.org/repositories/home:frispete:python/15.4/home:frispete:python.repo"
-	echo "in shell"
+			sudo zypper addrepo https://download.opensuse.org/repositories/home:frispete:python/15.4/home:frispete:python.repo"
 			sudo zypper --non-interactive --gpg-auto-import-keys refresh
 			sudo zypper --non-interactive --gpg-auto-import-keys install python3-PyMySQL
 			#/usr/bin/expect -c 'spawn sudo zypper install python3-PyMySQL;expect -re "(.*)";send -- "y\r";expect eof'
@@ -122,6 +121,7 @@ EOF
 	else
 		echo "db not selected"
 fi
+sleep 300
 
 # 	if [[ $OS == rhel ]] || [[ $OS == centos ]] || [[ $OS == ubuntu ]] || [[ $OS == suse ]] && [[ $DB == couchbase ]] ;
 # 	then
@@ -151,7 +151,7 @@ fi
 	echo " installation started"
 	if [[ ${PACKAGE_OR_ONLINE} == "online" ]];
 	then 
-	sudo ssh -i ~/private_ubuntu22.pem ${USERNAME}@${IPADDRESS} << EOF 
+	sudo ssh -i ~/private_rhel.pem ${USERNAME}@${IPADDRESS} << EOF 
 	sudo python3 install.py -y --args="-f setup.properties -c -n --cli-test-client" 
 EOF
 	echo " installation ended"
@@ -161,7 +161,7 @@ EOF
 		if [[ ${OS} == "suse"  ]]
 		then
 		echo "package installation started"
-		sudo ssh -i ~/private_ubuntu22.pem ${USERNAME}@${IPADDRESS} << EOF
+		sudo ssh -i ~/private_rhel.pem ${USERNAME}@${IPADDRESS} << EOF
 			sudo zypper --no-gpg-checks install -y ./jans-${VERSION}.nightly-suse15.x86_64.rpm
 			sudo python3 /opt/jans/jans-setup/setup.py -f setup.properties -n
 EOF
@@ -169,15 +169,15 @@ EOF
 		if [[ ${OS} == "rhel"  ]]
 		then
 		echo "package installation started"
-		sudo ssh -i ~/private_ubuntu22.pem ${USERNAME}@${IPADDRESS} << EOF
-			sudo yum install ./jans-${VERSION}.nightly-suse15.x86_64.rpm
+		sudo ssh -i ~/private_rhel.pem ${USERNAME}@${IPADDRESS} << EOF
+			sudo yum install ./jans-${VERSION}.nightly-el8.x86_64.rpm
 			sudo python3 /opt/jans/jans-setup/setup.py -f setup.properties -n
 EOF
 		fi
 		if [[ ${OS} == "ubuntu20"  ]] || [[ ${OS} == "ubuntu22"  ]]
 		then
 			echo "package installation started"
-			sudo ssh -i ~/private_ubuntu22.pem ${USERNAME}@${IPADDRESS} << EOF
+			sudo ssh -i ~/private_rhel.pem ${USERNAME}@${IPADDRESS} << EOF
 			sudo apt install -y ./jans_${VERSION}.nightly.${OS}.04_amd64.deb
 			sudo python3 /opt/jans/jans-setup/setup.py -f setup.properties -n
 EOF
@@ -215,7 +215,7 @@ esac
 done
 #VERSION=main
 # Print helpFunction in case parameters are empty
-# sudo ssh -i ~/private_ubuntu22.pem $USERNAME@$HOST
+# sudo ssh -i ~/private_rhel.pem $USERNAME@$HOST
 
  IPADDRESS=$1
  HOSTNAME=$2
@@ -241,4 +241,3 @@ if [ -z ${IPADDRESS} ] && [ -z ${HOSTNAME} ] && [ -z ${USERNAME} ] && [ -z ${DB}
 	else
 	install_jans
 fi
-
