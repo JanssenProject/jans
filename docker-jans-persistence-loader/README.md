@@ -49,7 +49,6 @@ The following environment variables are supported by the container:
 - `CN_WAIT_SLEEP_DURATION`: Delay between startup "health checks" (default to `10` seconds).
 - `CN_OXTRUST_CONFIG_GENERATION`: Whether to generate oxShibboleth configuration or not (default to `true`).
 - `CN_CACHE_TYPE`: Supported values are `IN_MEMORY`, `REDIS`, `MEMCACHED`, and `NATIVE_PERSISTENCE` (default to `NATIVE_PERSISTENCE`).
-- `CN_DISTRIBUTION`: Supported distributions are `default`, and `openbanking` (default to `default`).
 - `CN_EXT_SIGNING_JWKS_URI`: URI of external signing JWKS (default is "").
 - `CN_REDIS_URL`: URL of Redis server, format is host:port (optional; default to `localhost:6379`).
 - `CN_REDIS_TYPE`: Redis service type, either `STANDALONE` or `CLUSTER` (optional; default to `STANDALONE`).

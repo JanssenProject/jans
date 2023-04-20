@@ -26,7 +26,7 @@ RUN python3 -m ensurepip \
 # =====================
 
 # janssenproject/jans SHA commit
-ENV JANS_SOURCE_VERSION=2e29a9d932f84871466fd4b6d64f1a75bf37ca18
+ENV JANS_SOURCE_VERSION=05fc275948b4eceb6c9264c7107e0c2ae7ec6ebc
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCRIPT_CATALOG_DIR=docs/script-catalog
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
@@ -41,12 +41,11 @@ RUN git clone --filter blob:none --no-checkout https://github.com/janssenproject
     && git sparse-checkout add ${JANS_SCRIPT_CATALOG_DIR} \
     && git sparse-checkout add ${JANS_CONFIG_API_RESOURCES}
 
-RUN mkdir -p /app/static /app/static/couchbase /app/schema /app/openbanking/static /app/static/opendj /app/templates
+RUN mkdir -p /app/static /app/static/couchbase /app/schema /app/static/opendj /app/templates
 
 # sync static files from linux-setup
 RUN cd /tmp/jans \
     && cp -R ${JANS_SETUP_DIR}/static/extension /app/static/extension \
-    && cp -R ${JANS_SETUP_DIR}/openbanking/static/extension /app/openbanking/static/extension \
     && cp ${JANS_SETUP_DIR}/static/couchbase/index.json /app/static/couchbase/index.json \
     && cp ${JANS_SETUP_DIR}/schema/opendj_types.json /app/schema/opendj_types.json \
     && cp -R ${JANS_SETUP_DIR}/static/rdbm /app/static/rdbm \
@@ -54,17 +53,11 @@ RUN cd /tmp/jans \
     && cp ${JANS_SETUP_DIR}/schema/custom_schema.json /app/schema/custom_schema.json \
     && cp ${JANS_SETUP_DIR}/static/opendj/index.json /app/static/opendj/index.json \
     && cp -R ${JANS_SCRIPT_CATALOG_DIR} /app/script-catalog \
-    && cp ${JANS_SETUP_DIR}/static/extension/introspection/introspection_role_based_scope.py /app/openbanking/static/extension/introspection/ \
     && cp ${JANS_CONFIG_API_RESOURCES}/config-api-rs-protect.json -P /app/static/ \
     && cp ${JANS_SETUP_DIR}/templates/*.ldif /app/templates \
     && cp -R ${JANS_SETUP_DIR}/templates/jans-auth /app/templates/jans-auth \
-    && cp ${JANS_SETUP_DIR}/openbanking/templates/scopes.ldif /app/templates/scopes.ob.ldif \
-    && cp ${JANS_SETUP_DIR}/openbanking/templates/attributes.ldif /app/templates/attributes.ob.ldif \
-    && cp ${JANS_SETUP_DIR}/openbanking/templates/jans-auth/jans-auth-config.json /app/templates/jans-auth/jans-auth-config.ob.json \
     && cp ${JANS_SETUP_DIR}/static/metric/o_metric.ldif /app/templates/o_metric.ldif \
     && cp ${JANS_SETUP_DIR}/static/cache-refresh/o_site.ldif /app/templates/o_site.ldif \
-    && cp -R ${JANS_SETUP_DIR}/templates/jans-fido2 /app/templates/jans-fido2 \
-    && cp -R ${JANS_SETUP_DIR}/templates/jans-scim /app/templates/jans-scim \
     && cp -R ${JANS_SETUP_DIR}/templates/jans-cli /app/templates/jans-cli
 
 # cleanup
@@ -184,8 +177,7 @@ COPY scripts /app/scripts
 COPY templates /app/templates
 
 # disable keyRegeneration
-RUN sed -i -r 's/("keyRegenerationEnabled":)true/\1false/g' /app/templates/jans-auth/jans-auth-config.json \
-    && sed -i -r 's/("keyRegenerationEnabled":)true/\1false/g' /app/templates/jans-auth/jans-auth-config.ob.json
+RUN sed -i -r 's/("keyRegenerationEnabled":)true/\1false/g' /app/templates/jans-auth/jans-auth-config.json
 
 RUN chmod +x /app/scripts/entrypoint.sh
 
