@@ -12,6 +12,8 @@ from jans.pycloudlib.utils import generate_base64_contents
 from jans.pycloudlib.utils import get_random_chars
 from jans.pycloudlib.utils import exec_cmd
 
+from hooks import merge_auth_keystore_ctx_hook
+
 
 def render_ldif(src, dst, ctx):
     with open(src) as f:
@@ -74,7 +76,8 @@ def get_base_ctx(manager):
     memcached_url = os.environ.get('CN_MEMCACHED_URL', 'localhost:11211')
     scim_enabled = os.environ.get("CN_SCIM_ENABLED", False)
 
-    ctx = {
+    # finalize ctx
+    return {
         'cache_provider_type': cache_type,
         'redis_url': redis_url,
         'redis_type': redis_type,
@@ -101,8 +104,7 @@ def get_base_ctx(manager):
         'hostname': manager.config.get('hostname'),
         'idp_client_id': manager.config.get('idp_client_id'),
         'idpClient_encoded_pw': manager.secret.get('idpClient_encoded_pw'),
-        'auth_openid_key_base64': manager.secret.get('auth_openid_key_base64'),
-        # "encoded_ldap_pw": manager.secret.get('encoded_ldap_pw'),
+        'oxauth_openid_key_base64': manager.secret.get('auth_openid_key_base64'),
         "encoded_admin_password": manager.secret.get('encoded_admin_password'),
 
         'admin_email': manager.config.get('admin_email'),
@@ -128,25 +130,6 @@ def get_base_ctx(manager):
         "jca_client_encoded_pw": manager.secret.get("jca_client_encoded_pw"),
     }
 
-    # JWKS URI
-    jwks_uri = f"https://{ctx['hostname']}/jans-auth/restv1/jwks"
-    auth_openid_jks_fn = manager.config.get("auth_openid_jks_fn")
-
-    ext_jwks_uri = os.environ.get("CN_OB_EXT_SIGNING_JWKS_URI", "")
-    if ext_jwks_uri:
-        jwks_uri = ext_jwks_uri
-        auth_openid_jks_fn = "/etc/certs/ob-ext-signing.jks"
-
-    ctx["jwks_uri"] = jwks_uri
-    # maintain compatibility with upstream template
-    ctx["oxauth_openid_jks_fn"] = auth_openid_jks_fn
-
-    # static kid -- maintain compatibility with upstream template
-    ctx["static_kid"] = os.environ.get("CN_OB_STATIC_KID", "")
-
-    # finalize ctx
-    return ctx
-
 
 def merge_extension_ctx(ctx: dict[str, _t.Any]) -> dict[str, _t.Any]:
     """Merge extension script contexts into given contexts.
@@ -154,10 +137,7 @@ def merge_extension_ctx(ctx: dict[str, _t.Any]) -> dict[str, _t.Any]:
     :param ctx: A key-value pairs of existing contexts.
     :returns: Merged contexts.
     """
-    if os.environ.get("CN_DISTRIBUTION", "default") == "openbanking":
-        basedirs = ["/app/openbanking/static/extension"]
-    else:
-        basedirs = ["/app/static/extension", "/app/script-catalog"]
+    basedirs = ["/app/static/extension", "/app/script-catalog"]
 
     for basedir in basedirs:
         filepath = Path(basedir)
@@ -180,13 +160,10 @@ def merge_auth_ctx(ctx):
 
     basedir = '/app/templates/jans-auth'
     file_mappings = {
-        'auth_static_conf_base64': 'jans-auth-static-conf.json',
-        'auth_error_base64': 'jans-auth-errors.json',
-        "auth_config_base64": "jans-auth-config.json",
+        'oxauth_static_conf_base64': 'jans-auth-static-conf.json',
+        'oxauth_error_base64': 'jans-auth-errors.json',
+        "oxauth_config_base64": "jans-auth-config.json",
     }
-
-    if os.environ.get("CN_DISTRIBUTION", "default") == "openbanking":
-        file_mappings["auth_config_base64"] = "jans-auth-config.ob.json"
 
     for key, file_ in file_mappings.items():
         file_path = os.path.join(basedir, file_)
@@ -226,82 +203,11 @@ def merge_jans_cli_ctx(manager, ctx):
 def prepare_template_ctx(manager):
     ctx = get_base_ctx(manager)
     ctx = merge_extension_ctx(ctx)
+    ctx = merge_auth_keystore_ctx_hook(manager, ctx)
     ctx = merge_auth_ctx(ctx)
     ctx = merge_jans_cli_ctx(manager, ctx)
     ctx = merge_smtp_ctx(manager, ctx)
-    return ctx
-
-
-def get_ldif_mappings(group, optional_scopes=None):
-    from jans.pycloudlib.persistence.utils import PersistenceMapper
-
-    optional_scopes = optional_scopes or []
-    dist = os.environ.get("CN_DISTRIBUTION", "default")
-
-    def default_files():
-        files = [
-            "base.ldif",
-        ]
-
-        if dist == "openbanking":
-            files += [
-                "attributes.ob.ldif",
-                "scopes.ob.ldif",
-                "scripts.ob.ldif",
-                "configuration.ob.ldif",
-            ]
-        else:
-            files += [
-                "attributes.ldif",
-                "scopes.ldif",
-                "scripts.ldif",
-                "configuration.ldif",
-                "o_metric.ldif",
-                "agama.ldif",
-            ]
-
-        files += [
-            "jans-auth/role-scope-mappings.ldif",
-            "jans-cli/client.ldif",
-            "jans-auth/configuration.ldif",
-        ]
-
-        return files
-
-    def user_files():
-        files = []
-
-        if dist != "openbanking":
-            files += [
-                "jans-auth/people.ldif",
-                "jans-auth/groups.ldif",
-            ]
-        return files
-
-    def site_files():
-        files = []
-
-        if dist != "openbanking":
-            files += [
-                "o_site.ldif",
-            ]
-        return files
-
-    ldif_mappings = {
-        "default": default_files(),
-        "user": user_files(),
-        "site": site_files(),
-        "cache": [],
-        "token": [],
-        "session": [],
-    }
-
-    mapper = PersistenceMapper()
-    ldif_mappings = {
-        mapping: files for mapping, files in ldif_mappings.items()
-        if mapping in mapper.groups()[group]
-    }
-    return ldif_mappings
+    return ctx  # noqa: R504
 
 
 def get_config_api_scopes(path="/app/static/config-api-rs-protect.json"):

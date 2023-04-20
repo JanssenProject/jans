@@ -292,14 +292,6 @@ class AuthHandler(BaseHandler):
         return jwks_fn, jks_fn
 
     def patch(self):
-        # avoid conflict with external JWKS URI
-        ext_jwks_uri = os.environ.get("CN_OB_EXT_SIGNING_JWKS_URI", "")
-        if ext_jwks_uri:
-            logger.warning(f"Found external JWKS URI at {ext_jwks_uri}; "
-                           "skipping proccess to avoid conflict with "
-                           "builtin key rotation feature in jans-auth")
-            return
-
         strategies = ", ".join(KEY_STRATEGIES)
 
         if self.key_strategy not in KEY_STRATEGIES:
@@ -337,6 +329,10 @@ class AuthHandler(BaseHandler):
             logger.warning("keyRegenerationEnabled config was set to true; "
                            "skipping proccess to avoid conflict with "
                            "builtin key rotation feature in jans-auth")
+            return
+
+        # avoid conflict with external JWKS URI
+        if has_ext_jwks_uri(conf_dynamic, self.manager):
             return
 
         jks_pass = self.manager.secret.get("auth_openid_jks_pass")
@@ -470,14 +466,6 @@ class AuthHandler(BaseHandler):
             logger.warning(f"Unable to get public keys; reason={exc}")
 
     def prune(self):
-        # avoid conflict with external JWKS URI
-        ext_jwks_uri = os.environ.get("CN_OB_EXT_SIGNING_JWKS_URI", "")
-        if ext_jwks_uri:
-            logger.warning(f"Found external JWKS URI at {ext_jwks_uri}; "
-                           "skipping proccess to avoid conflict with "
-                           "builtin key rotation feature in jans-auth")
-            return
-
         config = self.backend.get_auth_config()
 
         if not config:
@@ -494,6 +482,10 @@ class AuthHandler(BaseHandler):
             logger.warning("keyRegenerationEnabled config was set to true; "
                            "skipping proccess to avoid conflict with "
                            "builtin key rotation feature in jans-auth")
+            return
+
+        # avoid conflict with external JWKS URI
+        if has_ext_jwks_uri(conf_dynamic, self.manager):
             return
 
         jks_pass = self.manager.secret.get("auth_openid_jks_pass")
@@ -674,3 +666,21 @@ def resolve_enc_keys(keys: str) -> str:
 def key_ops_from_jwk(jwk):
     """Resolve key_ops_type first value."""
     return (jwk.get("key_ops_type") or ["connect"])[0]
+
+
+def has_ext_jwks_uri(conf_dynamic, manager) -> bool:
+    # avoid conflict with external JWKS URI
+    jwks_uri = conf_dynamic["jwksUri"]
+    default_jwks_uri = f"https://{manager.config.get('hostname')}/jans-auth/restv1/jwks"
+
+    # compare JWKS URI in persistence and the default one
+    # previously, the external JWKS URI is read from CN_OB_EXT_SIGNING_JWKS_URI env
+    # if they're different, we assume it's an external JWKS URI
+    if jwks_uri != default_jwks_uri:
+        logger.warning(
+            f"Found external JWKS URI at {jwks_uri}; "
+            "skipping proccess to avoid conflict with "
+            "builtin key rotation feature in jans-auth"
+        )
+        return True
+    return False
