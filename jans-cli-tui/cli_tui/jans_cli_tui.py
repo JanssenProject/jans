@@ -320,7 +320,7 @@ class JansCliApp(Application):
 
         if status not in (True, 'ID Token is expired'):
             buttons = [Button(_("OK"), handler=self.jans_creds_dialog)]
-            self.show_message(_("Error connectiong to Auth Server"), status, buttons=buttons)
+            self.show_message(_("Error connecting to Auth Server"), status, buttons=buttons)
 
         else:
             if not test_client and not self.cli_object.access_token:
@@ -427,7 +427,7 @@ class JansCliApp(Application):
             ],style='class:jans-main-usercredintial')
 
         buttons = [Button(_("Save"), handler=self.save_creds)]
-        dialog = JansGDialog(self, title=_("Janssen Config Api Client Credidentials"), body=body, buttons=buttons)
+        dialog = JansGDialog(self, title=_("Janssen Config Api Client Credentials"), body=body, buttons=buttons)
         async def coroutine():
             app = get_app()
             focused_before = app.layout.current_window
