@@ -1,4 +1,4 @@
-#!/usr/bin/bash 
+#!/usr/bin/bash
 
 # LOG_LOCATION=./logs
 # exec > >(tee -i $LOG_LOCATION/install.log)
@@ -106,16 +106,14 @@ install_jans() {
 	sudo scp -i private.pem setup.properties install.py ${USERNAME}@${IPADDRESS}:~/
 	rm setup.properties install.py
 
-	if [[ $OS == ubuntu22 ]] || [[ $OS == ubuntu20 ]];
-	 then
+	if [[ $OS == ubuntu22 ]] || [[ $OS == ubuntu20 ]]; then
 		sudo ssh -i private.pem ${USERNAME}@${IPADDRESS} <<EOF
  		sudo apt install  python3-pip -y
 		echo "package download started"
 		wget https://github.com/JanssenProject/jans/releases/download/v${VERSION}.nightly/jans_${VERSION}.nightly.${OS}.04_amd64.deb
 		echo "package downloaded"
 EOF
-	elif [[ $OS == rhel ]] || [[ $OS == centos ]];
-	 then
+	elif [[ $OS == rhel ]] || [[ $OS == centos ]]; then
 		sudo ssh -i private.pem ${USERNAME}@${IPADDRESS} <<EOF
 			sudo sed -i 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config
 			sudo yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
@@ -241,9 +239,8 @@ PACKAGE_OR_ONLINE=$7
 # echo "your VERSION is ${VERSION}"
 # echo "installation type is ${PACKAGE_OR_ONLINE}"
 
-if [ -z ${IPADDRESS} ] && [ -z ${HOSTNAME} ] && [ -z ${USERNAME} ] && [ -z ${DB} ] && [ -z ${OS} ] && [ -z ${VERSION} ] && [ -z ${PACKAGE_OR_ONLINE} ]; 
-then
-	echo " some parameter are empty please check help"
+if [ -z ${IPADDRESS} ] && [ -z ${HOSTNAME} ] && [ -z ${USERNAME} ] && [ -z ${DB} ] && [ -z ${OS} ] && [ -z ${VERSION} ] && [ -z ${PACKAGE_OR_ONLINE} ]; then
+	echo " some parameter are empty please check below instructions"
 	helpFunction
 else
 	uninstall_jans
