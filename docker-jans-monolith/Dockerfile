@@ -1,4 +1,4 @@
-FROM ubuntu:22.04
+FROM ubuntu:kinetic
 
 # Don't start any optional services except for the few we need.
 RUN find /etc/systemd/system \
