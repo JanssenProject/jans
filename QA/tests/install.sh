@@ -27,21 +27,24 @@ then
 	sudo python3 install.py -uninstall -y
 	sudo apt-get remove --purge -y mysql*;sudo apt-get purge -y  mysql*;sudo apt-get -y autoremove;
 	sudo apt-get -y autoclean;sudo apt-get remove -y dbconfig-mysql;sudo rm -r -f /var/lib/mysql
-	sudo apt-get --purge remove postgresql postgresql-doc postgresql-common
+	sudo apt-get --purge remove -y postgresql postgresql-doc postgresql-common
+	sudo rm -rf /var/lib/pgsql
 elif [[ $OS == "suse" ]]
 then
 	sudo zypper remove -y jans
-	sudo python3 install.py -y -uninstall
+	sudo python3 install.py  -uninstall -y
 	sudo zypper remove -y mysql mysql-server 
 	sudo mv -f /var/lib/mysql /var/lib/mysql_old_backup
-	sudo zypper remove postgresql postgresql-doc postgresql-common
+	sudo zypper remove -y postgresql postgresql-contrib postgresql-server
+	sudo rm -rf /var/lib/pgsql
 elif [[ $OS == "rhel" ]]
 then
 	sudo yum remove -y jans
 	sudo python3 install.py -uninstall -y
 	sudo yum remove -y mysql mysql-server 
 	sudo mv -f /var/lib/mysql /var/lib/mysql_old_backup
-	sudo yum  remove postgresql postgresql-doc postgresql-common
+	sudo yum  remove -y  postgresql postgresql-doc postgresql-common  postgresql-contrib postgresql-server
+	sudo rm -rf /var/lib/pgsql
 fi
 else
 echo "jans server is not installed"
@@ -199,9 +202,9 @@ EOF
 }
 
 helpFunction() {
-	echo "KEEP private.pem and install.sh in same folder"
+	echo "KEEP PRIVATE.PEM and INSTALL.SH IN SAME FOLDER"
 	echo "Usage: ./install.sh -i IPADDRESS -h HOSTNAME -u USERNAME -d DB -o OS  -b VERSION -p PACKAGE_OR_ONLINE"
-	echo -e "\t ./install.sh  3.10.10.22  manojs1978-pleasing-goldfish.gluu.info  ec2-user  ldap  ubuntu22 or suse or rhel or ubuntu20  1.0.12  package"
+	echo -e "EX: ./install.sh  3.10.10.22  manojs1978-pleasing-goldfish.gluu.info  ec2-user  ldap  ubuntu22 or suse or rhel or ubuntu20  1.0.12  package"
 	exit 1 # Exit script after printing help
 }
 
@@ -230,13 +233,13 @@ VERSION=$6
 PACKAGE_OR_ONLINE=$7
 
 # Begin script in case all parameters are correct
-echo "your ip address is ${IPADDRESS}"
-echo "your hostname is ${HOSTNAME}"
-echo "your username is ${USERNAME}"
-echo "your DB is ${DB}"
-echo "your  OS is  ${OS}"
-echo "your VERSION is ${VERSION}"
-echo "installation type is ${PACKAGE_OR_ONLINE}"
+# echo "your ip address is ${IPADDRESS}"
+# echo "your hostname is ${HOSTNAME}"
+# echo "your username is ${USERNAME}"
+# echo "your DB is ${DB}"
+# echo "your  OS is  ${OS}"
+# echo "your VERSION is ${VERSION}"
+# echo "installation type is ${PACKAGE_OR_ONLINE}"
 
 if [ -z ${IPADDRESS} ] && [ -z ${HOSTNAME} ] && [ -z ${USERNAME} ] && [ -z ${DB} ] && [ -z ${OS} ] && [ -z ${VERSION} ] && [ -z ${PACKAGE_OR_ONLINE} ]; 
 then
