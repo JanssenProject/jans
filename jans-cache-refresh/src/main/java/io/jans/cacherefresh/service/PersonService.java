@@ -64,7 +64,7 @@ public class PersonService implements Serializable, IPersonService {
 	@Inject
 	private ExternalIdGeneratorService idGeneratorService;
 
-	private List<GluuCustomAttribute> mandatoryAttributes;
+	private List<JansCustomAttribute> mandatoryAttributes;
 
 	/*
 	 * (non-Javadoc)
@@ -480,7 +480,7 @@ public class PersonService implements Serializable, IPersonService {
 	public String getDnForPerson(String inum) {
 		String orgDn = organizationService.getDnForOrganization();
 		if (StringHelper.isEmpty(inum)) {
-			return String.format("ou=people,%s", orgDn);
+			return String.format("ou=person,%s", orgDn);
 		}
 
 		return String.format("inum=%s,ou=people,%s", inum, orgDn);
@@ -504,16 +504,16 @@ public class PersonService implements Serializable, IPersonService {
 	 * @see org.gluu.oxtrust.ldap.service.IPersonService#getMandatoryAtributes()
 	 */
 	@Override
-	public List<GluuCustomAttribute> getMandatoryAtributes() {
+	public List<JansCustomAttribute> getMandatoryAtributes() {
 		if (this.mandatoryAttributes == null) {
-			mandatoryAttributes = new ArrayList<GluuCustomAttribute>();
-			mandatoryAttributes.add(new GluuCustomAttribute(OxConstants.UID, "", true, true));
-			mandatoryAttributes.add(new GluuCustomAttribute("displayName", "", true, true));
-			mandatoryAttributes.add(new GluuCustomAttribute("givenName", "", true, true));
-			mandatoryAttributes.add(new GluuCustomAttribute("sn", "", true, true));
-			mandatoryAttributes.add(new GluuCustomAttribute("mail", "", true, true));
-			mandatoryAttributes.add(new GluuCustomAttribute("userPassword", "", true, true));
-			mandatoryAttributes.add(new GluuCustomAttribute("gluuStatus", "", true, true));
+			mandatoryAttributes = new ArrayList<JansCustomAttribute>();
+			mandatoryAttributes.add(new JansCustomAttribute(OxConstants.UID, "", true, true));
+			mandatoryAttributes.add(new JansCustomAttribute("displayName", "", true, true));
+			mandatoryAttributes.add(new JansCustomAttribute("givenName", "", true, true));
+			mandatoryAttributes.add(new JansCustomAttribute("sn", "", true, true));
+			mandatoryAttributes.add(new JansCustomAttribute("mail", "", true, true));
+			mandatoryAttributes.add(new JansCustomAttribute("userPassword", "", true, true));
+			mandatoryAttributes.add(new JansCustomAttribute("gluuStatus", "", true, true));
 		}
 		return mandatoryAttributes;
 	}

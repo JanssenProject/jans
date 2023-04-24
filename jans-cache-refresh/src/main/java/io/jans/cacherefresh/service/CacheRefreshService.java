@@ -18,9 +18,9 @@ import java.util.Set;
 import org.slf4j.Logger;
 
 import io.jans.cacherefresh.constants.OxTrustConstants;
-import io.jans.cacherefresh.model.GluuCustomAttribute;
+import io.jans.cacherefresh.model.JansCustomAttribute;
 import io.jans.cacherefresh.model.GluuCustomPerson;
-import io.jans.cacherefresh.model.GluuInumMap;
+import io.jans.cacherefresh.model.JansInumMap;
 import io.jans.cacherefresh.model.GluuSimplePerson;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.operation.SearchException;
@@ -38,11 +38,12 @@ import jakarta.inject.Inject;
  * @author Yuriy Movchan Date: 07.04.2011
  */
 @ApplicationScoped
-public class CacheRefreshService implements Serializable {
+public class CacheRefreshService{
 
-    private static final long serialVersionUID = -2225880517520443390L;
+    public CacheRefreshService() {
+	}
 
-    @Inject
+	@Inject
     private Logger log;
 
     @Inject
@@ -101,12 +102,12 @@ public class CacheRefreshService implements Serializable {
         return Filter.createPresenceFilter(OxConstants.OBJECT_CLASS);
     }
 
-    public void addInumMap(PersistenceEntryManager ldapEntryManager, GluuInumMap inumMap) {
+    public void addInumMap(PersistenceEntryManager ldapEntryManager, JansInumMap inumMap) {
         ldapEntryManager.persist(inumMap);
     }
 
     public boolean containsInumMap(PersistenceEntryManager ldapEntryManager, String dn) {
-        return ldapEntryManager.contains(dn, GluuInumMap.class);
+        return ldapEntryManager.contains(dn, JansInumMap.class);
     }
 
     public String generateInumForNewInumMap(String inumbBaseDn, PersistenceEntryManager ldapEntryManager) {
@@ -132,12 +133,12 @@ public class CacheRefreshService implements Serializable {
     public void setTargetEntryAttributes(GluuSimplePerson sourcePerson, Map<String, String> targetServerAttributesMapping,
                                          GluuCustomPerson targetPerson) {
         // Collect all attributes to single map
-        Map<String, GluuCustomAttribute> customAttributesMap = new HashMap<String, GluuCustomAttribute>();
-        for (GluuCustomAttribute sourceCustomAttribute : sourcePerson.getCustomAttributes()) {
+        Map<String, JansCustomAttribute> customAttributesMap = new HashMap<String, JansCustomAttribute>();
+        for (JansCustomAttribute sourceCustomAttribute : sourcePerson.getCustomAttributes()) {
             customAttributesMap.put(StringHelper.toLowerCase(sourceCustomAttribute.getName()), sourceCustomAttribute);
         }
 
-        List<GluuCustomAttribute> resultAttributes = new ArrayList<GluuCustomAttribute>();
+        List<JansCustomAttribute> resultAttributes = new ArrayList<JansCustomAttribute>();
 
         // Add attributes configured via mapping
         Set<String> processedAttributeNames = new HashSet<String>();
@@ -147,25 +148,25 @@ public class CacheRefreshService implements Serializable {
 
             processedAttributeNames.add(sourceKeyAttributeName);
 
-            GluuCustomAttribute gluuCustomAttribute = customAttributesMap.get(sourceKeyAttributeName);
+            JansCustomAttribute gluuCustomAttribute = customAttributesMap.get(sourceKeyAttributeName);
             if (gluuCustomAttribute != null) {
                 String[] values = gluuCustomAttribute.getStringValues();
                 String[] clonedValue = ArrayHelper.arrayClone(values);
 
-                GluuCustomAttribute gluuCustomAttributeCopy = new GluuCustomAttribute(targetKeyAttributeName, clonedValue);
+                JansCustomAttribute gluuCustomAttributeCopy = new JansCustomAttribute(targetKeyAttributeName, clonedValue);
                 gluuCustomAttributeCopy.setName(targetKeyAttributeName);
                 resultAttributes.add(gluuCustomAttributeCopy);
             }
         }
 
         // Set destination entry attributes
-        for (Entry<String, GluuCustomAttribute> sourceCustomAttributeEntry : customAttributesMap.entrySet()) {
+        for (Entry<String, JansCustomAttribute> sourceCustomAttributeEntry : customAttributesMap.entrySet()) {
             if (!processedAttributeNames.contains(sourceCustomAttributeEntry.getKey())) {
                 targetPerson.setAttribute(sourceCustomAttributeEntry.getValue());
             }
         }
 
-        for (GluuCustomAttribute resultAttribute : resultAttributes) {
+        for (JansCustomAttribute resultAttribute : resultAttributes) {
             targetPerson.setAttribute(resultAttribute);
         }
     }

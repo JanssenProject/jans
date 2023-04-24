@@ -26,7 +26,7 @@ import io.jans.orm.annotation.ObjectClass;
  * @author Yuriy Movchan Date: 10.21.2010
  */
 @DataEntry(sortBy = { "displayName" })
-@ObjectClass(value = "gluuPerson")
+@ObjectClass(value = "jansPerson")
 @JsonInclude(Include.NON_NULL)
 public class GluuCustomPerson extends User
                                     implements Serializable {
@@ -44,10 +44,10 @@ public class GluuCustomPerson extends User
     @AttributeName(name = "oxGuid")
     private String guid;
 
-    @AttributeName(name = "gluuOptOuts")
+    @AttributeName(name = "jansOptOuts")
     private List<String> gluuOptOuts;
 
-    @AttributeName(name = "associatedClient")
+    @AttributeName(name = "jansAssociatedClnt")
     private List<String> associatedClient;
     
     @AttributeName(name = "oxPPID")
@@ -80,7 +80,7 @@ public class GluuCustomPerson extends User
 		this.oxOTPDevices = oxOTPDevices;
 	}
 
-	@AttributeName(name = "oxCreationTimestamp")
+	@AttributeName(name = "jansCreationTimestamp")
     private Date creationDate;
 
     @AttributeName
@@ -124,7 +124,7 @@ public class GluuCustomPerson extends User
     }
 
     public void setStatus(String value) {
-        setAttribute("gluuStatus", value);
+        setAttribute("jansStatus", value);
     }
 
     public String getUserPassword() {
@@ -153,7 +153,7 @@ public class GluuCustomPerson extends User
 
     public List<String> getMemberOf() {
     	String[] value = {};
-        for (GluuCustomAttribute attribute : customAttributes) {
+        for (JansCustomAttribute attribute : customAttributes) {
             if (attribute.getName().equalsIgnoreCase("memberOf")) {
                 value = attribute.getStringValues();
                 break;
@@ -192,7 +192,7 @@ public class GluuCustomPerson extends User
 
     public int getAttributeIndex(String attributeName) {
         int idx = 0;
-        for (GluuCustomAttribute attribute : customAttributes) {
+        for (JansCustomAttribute attribute : customAttributes) {
             if (attribute.getName().equalsIgnoreCase(attributeName)) {
                 return idx;
             }
@@ -204,7 +204,7 @@ public class GluuCustomPerson extends User
 
     public String getAttribute(String attributeName) {
         String value = null;
-        for (GluuCustomAttribute attribute : customAttributes) {
+        for (JansCustomAttribute attribute : customAttributes) {
             if (attribute.getName().equalsIgnoreCase(attributeName)) {
                 value = String.valueOf(attribute.getValue());
                 break;
@@ -215,7 +215,7 @@ public class GluuCustomPerson extends User
 
     public Boolean geBooleanAttribute(String attributeName) {
         Boolean value = null;
-        for (GluuCustomAttribute attribute : customAttributes) {
+        for (JansCustomAttribute attribute : customAttributes) {
             if (attribute.getName().equalsIgnoreCase(attributeName)) {
                 value = Boolean.parseBoolean(String.valueOf(attribute.getValue()));
                 break;
@@ -226,7 +226,7 @@ public class GluuCustomPerson extends User
     
     public Object[] getAttributeValues(String attributeName) {
     	Object[] value = null;
-        for (GluuCustomAttribute attribute : customAttributes) {
+        for (JansCustomAttribute attribute : customAttributes) {
             if (attribute.getName().equalsIgnoreCase(attributeName)) {
                 value = attribute.getValues();
                 break;
@@ -236,7 +236,7 @@ public class GluuCustomPerson extends User
     }
 
     public Object[] getAttributeArray(String attributeName) {
-        GluuCustomAttribute gluuCustomAttribute = 
+        JansCustomAttribute gluuCustomAttribute = 
                                 getGluuCustomAttribute(attributeName);
         if (gluuCustomAttribute == null) {
             return null;
@@ -245,8 +245,8 @@ public class GluuCustomPerson extends User
         }
     }
 
-    public GluuCustomAttribute getGluuCustomAttribute(String attributeName) {
-        for (GluuCustomAttribute gluuCustomAttribute : customAttributes) {
+    public JansCustomAttribute getGluuCustomAttribute(String attributeName) {
+        for (JansCustomAttribute gluuCustomAttribute : customAttributes) {
             if (gluuCustomAttribute.getName().equalsIgnoreCase(attributeName)) {
                 return gluuCustomAttribute;
             }
@@ -256,30 +256,30 @@ public class GluuCustomPerson extends User
     }
 
     public void setAttribute(String attributeName, String attributeValue) {
-        GluuCustomAttribute attribute = new GluuCustomAttribute(attributeName, 
+        JansCustomAttribute attribute = new JansCustomAttribute(attributeName, 
                                                                 attributeValue);
         customAttributes.remove(attribute);
         customAttributes.add(attribute);
     }
 
     public void setBooleanAttribute(String attributeName, Boolean attributeValue) {
-        GluuCustomAttribute attribute = new GluuCustomAttribute(attributeName, 
+        JansCustomAttribute attribute = new JansCustomAttribute(attributeName, 
                                                                 attributeValue);
         customAttributes.remove(attribute);
         customAttributes.add(attribute);
     }
 
     public void setAttribute(String attributeName, String[] attributeValue) {
-        GluuCustomAttribute attribute = new GluuCustomAttribute(attributeName, 
+        JansCustomAttribute attribute = new JansCustomAttribute(attributeName, 
                                                                 attributeValue);
         customAttributes.remove(attribute);
         customAttributes.add(attribute);
     }
 
     public void removeAttribute(String attributeName) {
-        for (Iterator<GluuCustomAttribute> it = customAttributes.iterator(); 
+        for (Iterator<JansCustomAttribute> it = customAttributes.iterator(); 
                                                                 it.hasNext();) {
-            GluuCustomAttribute attribute = (GluuCustomAttribute) it.next();
+            JansCustomAttribute attribute = (JansCustomAttribute) it.next();
             if (attribute.getName().equalsIgnoreCase(attributeName)) {
                 it.remove();
                 break;

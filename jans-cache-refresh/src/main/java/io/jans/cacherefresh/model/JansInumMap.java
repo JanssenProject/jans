@@ -21,33 +21,33 @@ import io.jans.orm.model.base.Entry;
  * @author Yuriy Movchan Date: 07.13.2011
  */
 @DataEntry(sortBy = { "inum" })
-@ObjectClass(value = "gluuInumMap")
-public class GluuInumMap extends Entry implements Serializable {
+@ObjectClass(value = "jansInumMap")
+public class JansInumMap extends Entry implements Serializable {
 
 	private static final long serialVersionUID = -2190480357430436503L;
 
 	@AttributeName(ignoreDuringUpdate = true)
 	private String inum;
 
-	@AttributeName
+	@AttributeName(name = "jansPrimaryKeyAttrName")
 	private String primaryKeyAttrName;
 
-	@AttributeName(name = "primaryKeyValue")
+	@AttributeName(name = "jansPrimaryKeyValue")
 	private String[] primaryKeyValues;
 
-	@AttributeName
+	@AttributeName(name = "jansSecondaryKeyAttrName")
 	private String secondaryKeyAttrName;
 
-	@AttributeName(name = "secondaryKeyValue")
+	@AttributeName(name = "jansSecondaryKeyValue")
 	private String[] secondaryKeyValues;
 
-	@AttributeName
+	@AttributeName(name = "jansTertiaryKeyAttrName")
 	private String tertiaryKeyAttrName;
 
 	@AttributeName(name = "tertiaryKeyValue")
 	private String[] tertiaryKeyValues;
 
-	@AttributeName(name = "gluuStatus")
+	@AttributeName(name = "jansStatus")
 	private GluuStatus status;
 
 	public String getInum() {

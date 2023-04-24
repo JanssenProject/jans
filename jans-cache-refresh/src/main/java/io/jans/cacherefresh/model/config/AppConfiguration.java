@@ -7,6 +7,7 @@
 package io.jans.cacherefresh.model.config;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -151,6 +152,13 @@ public class AppConfiguration extends CacheRefreshConfiguration {
     private int passwordResetRequestExpirationTime; // in seconds
     private int cleanServiceInterval;
     private Boolean enforceEmailUniqueness = true;
+    
+	private boolean vdsCacheRefreshEnabled;
+	private String cacheRefreshServerIpAddress;
+	private String vdsCacheRefreshPollingInterval;
+	private Date vdsCacheRefreshLastUpdate;
+	private String vdsCacheRefreshLastUpdateCount;
+	private String vdsCacheRefreshProblemCount;
 
     private Boolean useLocalCache = false;
 
@@ -902,5 +910,53 @@ public class AppConfiguration extends CacheRefreshConfiguration {
     public void setEnableUpdateNotification(boolean enableUpdateNotification) {
         this.enableUpdateNotification = enableUpdateNotification;
     }
+
+	public boolean isVdsCacheRefreshEnabled() {
+		return vdsCacheRefreshEnabled;
+	}
+
+	public void setVdsCacheRefreshEnabled(boolean vdsCacheRefreshEnabled) {
+		this.vdsCacheRefreshEnabled = vdsCacheRefreshEnabled;
+	}
+
+	public String getCacheRefreshServerIpAddress() {
+		return cacheRefreshServerIpAddress;
+	}
+
+	public void setCacheRefreshServerIpAddress(String cacheRefreshServerIpAddress) {
+		this.cacheRefreshServerIpAddress = cacheRefreshServerIpAddress;
+	}
+
+	public String getVdsCacheRefreshPollingInterval() {
+		return vdsCacheRefreshPollingInterval;
+	}
+
+	public void setVdsCacheRefreshPollingInterval(String vdsCacheRefreshPollingInterval) {
+		this.vdsCacheRefreshPollingInterval = vdsCacheRefreshPollingInterval;
+	}
+
+	public Date getVdsCacheRefreshLastUpdate() {
+		return vdsCacheRefreshLastUpdate;
+	}
+
+	public void setVdsCacheRefreshLastUpdate(Date vdsCacheRefreshLastUpdate) {
+		this.vdsCacheRefreshLastUpdate = vdsCacheRefreshLastUpdate;
+	}
+
+	public String getVdsCacheRefreshLastUpdateCount() {
+		return vdsCacheRefreshLastUpdateCount;
+	}
+
+	public void setVdsCacheRefreshLastUpdateCount(String vdsCacheRefreshLastUpdateCount) {
+		this.vdsCacheRefreshLastUpdateCount = vdsCacheRefreshLastUpdateCount;
+	}
+
+	public String getVdsCacheRefreshProblemCount() {
+		return vdsCacheRefreshProblemCount;
+	}
+
+	public void setVdsCacheRefreshProblemCount(String vdsCacheRefreshProblemCount) {
+		this.vdsCacheRefreshProblemCount = vdsCacheRefreshProblemCount;
+	}
 
 }

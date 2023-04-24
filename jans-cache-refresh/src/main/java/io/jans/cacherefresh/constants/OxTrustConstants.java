@@ -19,15 +19,15 @@ public final class OxTrustConstants extends OxConstants {
 	public static final String CURRENT_PERSON = "currentPerson";
 
 	public static final String top = "top";
-	public static final String objectClassPerson = "gluuPerson";
-	public static final String objectClassInumMap = "gluuInumMap";
+	public static final String objectClassPerson = "jansPerson";
+	public static final String objectClassInumMap = "jansInumMap";
 
 	public static final String inumDelimiter = "!";
 	public static final String inameDelimiter = "*";
 
 	public static final String PERSON_INUM = "personInum";
 
-	public static final String ouPeople = "ou=people";
+	public static final String ouPeople = "ou=person";
 
 	public static final String inum = "inum";
 	public static final String displayName = "displayName";

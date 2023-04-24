@@ -28,7 +28,7 @@ import jakarta.xml.bind.annotation.*;
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlSeeAlso({GluuAttribute.class})
-public class GluuCustomAttribute implements Serializable, Comparable<GluuCustomAttribute> {
+public class JansCustomAttribute implements Serializable, Comparable<JansCustomAttribute> {
 
 	private static final long serialVersionUID = 1468440094325406153L;
 
@@ -46,33 +46,33 @@ public class GluuCustomAttribute implements Serializable, Comparable<GluuCustomA
 	private transient GluuBoolean[] booleanValues;
 	private transient boolean usedBooleanValues = false;
 
-	public GluuCustomAttribute() {
+	public JansCustomAttribute() {
 	}
 
-	public GluuCustomAttribute(String name, Object value) {
+	public JansCustomAttribute(String name, Object value) {
 		this.name = name;
 		setValue(value);
 	}
 
-	public GluuCustomAttribute(String name, Object[] values) {
+	public JansCustomAttribute(String name, Object[] values) {
 		this.name = name;
 		this.values = values;
 	}
 
-	public GluuCustomAttribute(String name, Object value, boolean newAttribute) {
+	public JansCustomAttribute(String name, Object value, boolean newAttribute) {
 		this.name = name;
 		setValue(value);
 		this.newAttribute = newAttribute;
 	}
 
-	public GluuCustomAttribute(String name, Object value, boolean newAttribute, boolean mandatory) {
+	public JansCustomAttribute(String name, Object value, boolean newAttribute, boolean mandatory) {
 		this.name = name;
 		setValue(value);
 		this.newAttribute = newAttribute;
 		this.mandatory = mandatory;
 	}
 
-	public GluuCustomAttribute(String name, Object[] values, boolean newAttribute, boolean mandatory) {
+	public JansCustomAttribute(String name, Object[] values, boolean newAttribute, boolean mandatory) {
 		this.name = name;
 		this.values = values;
 		this.newAttribute = newAttribute;
@@ -80,7 +80,7 @@ public class GluuCustomAttribute implements Serializable, Comparable<GluuCustomA
 	}
 
 	// To avoid extra code in CR interceptor script
-	public GluuCustomAttribute(String name, Set<String> values) {
+	public JansCustomAttribute(String name, Set<String> values) {
 		this.name = name;
 		this.values = values.toArray(new String[0]);
 	}
@@ -312,7 +312,7 @@ public class GluuCustomAttribute implements Serializable, Comparable<GluuCustomA
 		if (o == null || getClass() != o.getClass())
 			return false;
 
-		GluuCustomAttribute that = (GluuCustomAttribute) o;
+		JansCustomAttribute that = (JansCustomAttribute) o;
 
 		return !(name != null ? !name.equalsIgnoreCase(that.name) : that.name != null);
 
@@ -328,7 +328,7 @@ public class GluuCustomAttribute implements Serializable, Comparable<GluuCustomA
 		return String.format("Attribute [name=%s, values=%s, metadata=%s]", name, Arrays.toString(values), metadata);
 	}
 	
-	public int compareTo(GluuCustomAttribute o) {
+	public int compareTo(JansCustomAttribute o) {
 		return name.compareTo(o.name);
 	}
 	/*

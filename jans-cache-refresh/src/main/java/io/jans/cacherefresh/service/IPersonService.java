@@ -8,7 +8,7 @@ package io.jans.cacherefresh.service;
 import java.util.List;
 import java.util.Map;
 
-import io.jans.cacherefresh.model.GluuCustomAttribute;
+import io.jans.cacherefresh.model.JansCustomAttribute;
 import io.jans.cacherefresh.model.GluuCustomPerson;
 import io.jans.cacherefresh.model.User;
 import io.jans.orm.model.AttributeData;
@@ -158,7 +158,7 @@ public interface IPersonService {
 	 */
 	public abstract boolean authenticate(String userName, String password);
 
-	public abstract List<GluuCustomAttribute> getMandatoryAtributes();
+	public abstract List<JansCustomAttribute> getMandatoryAtributes();
 
 	public abstract List<GluuCustomPerson> createEntities(Map<String, List<AttributeData>> entriesAttributes)
 			throws Exception;

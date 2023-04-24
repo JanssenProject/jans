@@ -26,13 +26,13 @@ public class GluuSimplePerson extends CustomEntry implements Serializable {
 	private String sourceServerName;
 
 	@AttributesList(name = "name", value = "values", sortByName = true)
-	private List<GluuCustomAttribute> customAttributes = new ArrayList<GluuCustomAttribute>();
+	private List<JansCustomAttribute> customAttributes = new ArrayList<JansCustomAttribute>();
 
-	public List<GluuCustomAttribute> getCustomAttributes() {
+	public List<JansCustomAttribute> getCustomAttributes() {
 		return customAttributes;
 	}
 
-	public void setCustomAttributes(List<GluuCustomAttribute> customAttributes) {
+	public void setCustomAttributes(List<JansCustomAttribute> customAttributes) {
 		this.customAttributes = customAttributes;
 	}
 

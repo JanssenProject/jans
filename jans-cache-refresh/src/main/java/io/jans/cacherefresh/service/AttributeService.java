@@ -18,7 +18,7 @@ import com.unboundid.ldap.sdk.LDAPException;
 
 import io.jans.cacherefresh.constants.OxTrustConstants;
 import io.jans.cacherefresh.model.Events;
-import io.jans.cacherefresh.model.GluuCustomAttribute;
+import io.jans.cacherefresh.model.JansCustomAttribute;
 import io.jans.cacherefresh.model.config.AppConfiguration;
 import io.jans.model.GluuAttribute;
 import io.jans.model.GluuAttributeUsageType;
@@ -380,12 +380,12 @@ public class AttributeService extends io.jans.service.AttributeService {
      * @param attributes
      *            List of attributes
      */
-    public void setAttributeMetadata(List<GluuCustomAttribute> customAttributes, List<GluuAttribute> attributes) {
+    public void setAttributeMetadata(List<JansCustomAttribute> customAttributes, List<GluuAttribute> attributes) {
         if ((customAttributes == null) || (attributes == null)) {
             return;
         }
 
-        for (GluuCustomAttribute personAttribute : customAttributes) {
+        for (JansCustomAttribute personAttribute : customAttributes) {
             GluuAttribute tmpAttribute = getAttributeByName(personAttribute.getName(), attributes);
             if (tmpAttribute == null) {
                 log.warn("Failed to find attribute '{}' metadata", personAttribute.getName());
@@ -398,16 +398,16 @@ public class AttributeService extends io.jans.service.AttributeService {
      * Get custom attributes by attribute DNs
      *
      */
-    public List<GluuCustomAttribute> getCustomAttributesByAttributeDNs(List<String> attributeDNs,
+    public List<JansCustomAttribute> getCustomAttributesByAttributeDNs(List<String> attributeDNs,
             HashMap<String, GluuAttribute> attributesByDNs) {
-        List<GluuCustomAttribute> customAttributes = new ArrayList<GluuCustomAttribute>();
+        List<JansCustomAttribute> customAttributes = new ArrayList<JansCustomAttribute>();
         if (attributeDNs == null) {
             return customAttributes;
         }
         for (String releasedAttributeDn : attributeDNs) {
             GluuAttribute attribute = attributesByDNs.get(releasedAttributeDn);
             if (attribute != null) {
-                GluuCustomAttribute customAttribute = new GluuCustomAttribute(attribute.getName(), releasedAttributeDn);
+                JansCustomAttribute customAttribute = new JansCustomAttribute(attribute.getName(), releasedAttributeDn);
                 customAttribute.setMetadata(attribute);
                 customAttributes.add(customAttribute);
             }
@@ -423,8 +423,8 @@ public class AttributeService extends io.jans.service.AttributeService {
         return attributeDns;
     }
 
-    public void sortCustomAttributes(List<GluuCustomAttribute> customAttributes, String sortByProperties) {
-        persistenceEntryManager.sortListByProperties(GluuCustomAttribute.class, customAttributes, false,
+    public void sortCustomAttributes(List<JansCustomAttribute> customAttributes, String sortByProperties) {
+        persistenceEntryManager.sortListByProperties(JansCustomAttribute.class, customAttributes, false,
                 sortByProperties);
     }
 

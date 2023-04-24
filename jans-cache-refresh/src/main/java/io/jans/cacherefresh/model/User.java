@@ -22,7 +22,7 @@ import io.jans.orm.util.StringHelper;
  * @author Yuriy Movchan Date: 06/10/2013
  */
 @DataEntry(sortBy = { "displayName" })
-@ObjectClass(value = "gluuPerson")
+@ObjectClass(value = "jansPerson")
 public class User extends CustomEntry implements Serializable, Cloneable {
 
 	private static final long serialVersionUID = -7779582184398161112L;
@@ -30,13 +30,13 @@ public class User extends CustomEntry implements Serializable, Cloneable {
 	@AttributesList(name = "name", value = "values", sortByName = true, attributesConfiguration = {
 			 @AttributeName(name = "inum", ignoreDuringUpdate = true),
 			@AttributeName(name = "uid", ignoreDuringUpdate = false), @AttributeName(name = "userPassword", ignoreDuringRead = true) })
-	protected List<GluuCustomAttribute> customAttributes = new ArrayList<GluuCustomAttribute>();
+	protected List<JansCustomAttribute> customAttributes = new ArrayList<JansCustomAttribute>();
 
-	public List<GluuCustomAttribute> getCustomAttributes() {
+	public List<JansCustomAttribute> getCustomAttributes() {
 		return customAttributes;
 	}
 
-	public void setCustomAttributes(List<GluuCustomAttribute> customAttributes) {
+	public void setCustomAttributes(List<JansCustomAttribute> customAttributes) {
 		this.customAttributes = customAttributes;
 	}
 

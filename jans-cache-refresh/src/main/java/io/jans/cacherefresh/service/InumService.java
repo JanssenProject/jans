@@ -13,6 +13,8 @@ import io.jans.orm.model.base.InumEntry;
 import io.jans.util.INumGenerator;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.inject.Named;
+
 import org.slf4j.Logger;
 
 //import javax.inject.Inject;
@@ -41,7 +43,13 @@ https://github.com/GluuFederation/docs/blob/master/sources/reference/api/id-gene
  */
 
 @ApplicationScoped
+@Named
 public class InumService implements Serializable {
+
+	public InumService() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
 
 	private static final long serialVersionUID = 6685720517520443399L;
 
@@ -103,7 +111,7 @@ public class InumService implements Serializable {
 
 	public boolean containsPerson(String inum) {
 		boolean contains = true;
-		String dn = String.format("inum=%s,ou=people,o=gluu", inum);
+		String dn = String.format("inum=%s,ou=people,o=jans", inum);
 		contains = ldapEntryManager.contains(dn, GluuCustomPerson.class);
 		if (contains)
 			return true;
