@@ -152,9 +152,6 @@ public class CacheRefreshTimer {
 
 	private AtomicBoolean isActive;
 	private long lastFinishedTime;
-	
-	@Inject
-	private LdapFilterConverter ldapFilterConverter;
 
 	public void initTimer() {
 		log.info("Initializing Cache Refresh Timer");
@@ -906,7 +903,6 @@ public class CacheRefreshTimer {
 
 			PersistenceEntryManager sourcePersistenceEntryManager = sourceServerConnection.getPersistenceEntryManager();
 			String[] baseDns = sourceServerConnection.getBaseDns();
-			Filter checkfilter = ldapFilterConverter.convertRawLdapFilterToFilter("uid=test");
 			Filter filter = cacheRefreshService.createFilter(keyAttributes, keyObjectClasses, "", customFilter);
 			if (log.isTraceEnabled()) {
 				log.trace("Using next filter to load entris from source server: {}"+ filter);
@@ -1375,6 +1371,14 @@ public class CacheRefreshTimer {
 		public TypedGluuSimplePerson() {
 			super();
 		}
+	}
+
+	public AtomicBoolean getIsActive() {
+		return isActive;
+	}
+
+	public void setIsActive(AtomicBoolean isActive) {
+		this.isActive = isActive;
 	}
 
 }
