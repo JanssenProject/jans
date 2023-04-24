@@ -7213,7 +7213,36 @@
 
 
 <h1 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">#</a></h1>
+<p>If jans server is already installed and if we need to upgrade jans 
+use below to upgrade jans.</p>
 <p>Please use the left navigation menu to browse the content of this section while we are still working on developing content for <code>Overview</code> page.</p>
+<p><strong>jans upgrade on  Ubuntu  </strong></p>
+<p>1) if you want to upgrade to latest, download latest package file
+<div class="highlight"><pre><span></span><code>wget http:$(curl -s -L https://api.github.com/repos/JanssenProject/jans/releases/latest | egrep -o &#39;/.*ubuntu20.04_amd64.deb&#39; | head -n -O /tmp/jans.ubuntu20.04_amd64.deb
+</code></pre></div>
+2) run below upgrade command
+<div class="highlight"><pre><span></span><code>sudo apt upgrade -y /tmp/jans.ubuntu20.04_amd64.deb
+</code></pre></div>
+3) verify upgraded version
+<div class="highlight"><pre><span></span><code>apt-cache policy jans
+</code></pre></div></p>
+<p><strong>jans upgrade on RHEL/CentOS8</strong></p>
+<p>1) if you want to upgrade to latest,download and upgrade latest package file
+<div class="highlight"><pre><span></span><code>yum upgrade -y https:$(curl -s -L https://api.github.com/repos/JanssenProject/jans/releases/latest | egrep -o &#39;/.*el8.x86_64.rpm&#39; | head -n 
+</code></pre></div>
+2) verify upgraded version
+<div class="highlight"><pre><span></span><code>rpm -qa |grep jans
+</code></pre></div></p>
+<p><strong>jans upgrade on Suse</strong>
+1) if you want to upgrade to latest,download and upgrade latest package file
+<div class="highlight"><pre><span></span><code>wget http:$(curl -s -L https://api.github.com/repos/JanssenProject/jans/releases/latest | egrep -o &#39;/.*suse15.x86_64.rpm&#39; | head -n -O ./jans-1.0.13.nightly-suse15.x86_64.rpm
+</code></pre></div>
+2) upgrade package
+<div class="highlight"><pre><span></span><code>sudo rpm -U jans-1.0.13.nightly-suse15.x86_64.rpm
+</code></pre></div>
+3) verify upgraded version
+<div class="highlight"><pre><span></span><code>rpm -qa |grep jans
+</code></pre></div></p>
 <div class="admonition contribute">
 <p class="admonition-title">Contribute</p>
 <p>If you’d like to contribute to this document, get started with the <a href="https://docs.jans.io/head/CONTRIBUTING/#contributing-to-the-documentation">Contribution Guide</a></p>
@@ -7224,7 +7253,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-09-27T11:17:38+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-04-24T05:59:49+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-04-24</span>
       
         <br>
         Created:
