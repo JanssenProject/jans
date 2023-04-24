@@ -10,6 +10,7 @@
 # fi
 
 #rm  -rf  $LOG_LOCATION/* ./report/result.txt
+
 uninstall_jans() {
 
 	echo "uninstall jans server is started"
@@ -34,7 +35,7 @@ then
 	sudo zypper remove -y jans
 	sudo python3 install.py  -uninstall -y
 	sudo zypper remove -y mysql mysql-server 
-	sudo mv -f /var/lib/mysql /var/lib/mysql_old_backup
+	sudo mv -f /var/lib/mysql /var/lib/mysql_old_$$
 	sudo zypper remove -y postgresql postgresql-contrib postgresql-server
 	sudo rm -rf /var/lib/pgsql
 elif [[ $OS == "rhel" ]]
@@ -42,7 +43,7 @@ then
 	sudo yum remove -y jans
 	sudo python3 install.py -uninstall -y
 	sudo yum remove -y mysql mysql-server 
-	sudo mv -f /var/lib/mysql /var/lib/mysql_old_backup
+	sudo mv -f /var/lib/mysql /var/lib/mysql_old_$$
 	sudo yum  remove -y  postgresql postgresql-doc postgresql-common  postgresql-contrib postgresql-server
 	sudo rm -rf /var/lib/pgsql
 fi
@@ -101,7 +102,7 @@ install_jans() {
 		echo "please select any DB"
 	fi
 
-	curl https://raw.githubusercontent.com/JanssenProject/jans/v${VERSION}.nightly/jans-linux-setup/jans_setup/install.py >install.py
+	curl https://raw.githubusercontent.com/JanssenProject/jans/v${VERSION}/jans-linux-setup/jans_setup/install.py >install.py
 	echo "install downloaded"
 	sudo scp -i private.pem setup.properties install.py ${USERNAME}@${IPADDRESS}:~/
 	rm setup.properties install.py
@@ -110,7 +111,7 @@ install_jans() {
 		sudo ssh -i private.pem ${USERNAME}@${IPADDRESS} <<EOF
  		sudo apt install  python3-pip -y
 		echo "package download started"
-		wget https://github.com/JanssenProject/jans/releases/download/v${VERSION}.nightly/jans_${VERSION}.nightly.${OS}.04_amd64.deb
+		wget https://github.com/JanssenProject/jans/releases/download/v${VERSION}/jans_${VERSION}.${OS}.04_amd64.deb
 		echo "package downloaded"
 EOF
 	elif [[ $OS == rhel ]] || [[ $OS == centos ]]; then
@@ -121,7 +122,7 @@ EOF
 			sudo yum update -y
 			sudo yum install  python3-pip -y
 			sudo yum  install -y wget python3-certifi python3-ldap3 python3-prompt-toolkit python3-ruamel-yaml
-			wget https://github.com/JanssenProject/jans/releases/download/v${VERSION}.nightly/jans-${VERSION}.nightly-el8.x86_64.rpm
+			wget https://github.com/JanssenProject/jans/releases/download/v${VERSION}/jans-${VERSION}-el8.x86_64.rpm
 			
 			sudo reboot
 			sleep 300
@@ -130,7 +131,7 @@ EOF
 	elif [[ $OS == suse ]]; then
 		sudo ssh -i private.pem ${USERNAME}@${IPADDRESS} <<EOF
 			echo "downloading package"
-			wget https://github.com/JanssenProject/jans/releases/download/v${VERSION}.nightly/jans-${VERSION}.nightly-suse15.x86_64.rpm &>/dev/null
+			wget https://github.com/JanssenProject/jans/releases/download/v${VERSION}/jans-${VERSION}-suse15.x86_64.rpm &>/dev/null
 			sudo zypper addrepo https://download.opensuse.org/repositories/home:frispete:python/15.4/home:frispete:python.repo
 			sudo zypper --non-interactive --gpg-auto-import-keys refresh
 			sudo zypper --non-interactive --gpg-auto-import-keys install python3-PyMySQL
@@ -174,21 +175,21 @@ EOF
 		if [[ ${OS} == "suse" ]]; then
 			echo "${OS} package installation started"
 			sudo ssh -i private.pem ${USERNAME}@${IPADDRESS} <<EOF
-			sudo zypper --no-gpg-checks install -y ./jans-${VERSION}.nightly-suse15.x86_64.rpm
+			sudo zypper --no-gpg-checks install -y ./jans-${VERSION}-suse15.x86_64.rpm
 			sudo python3 /opt/jans/jans-setup/setup.py -f setup.properties -n
 EOF
 		fi
 		if [[ ${OS} == "rhel" ]]; then
 			echo "${OS} package installation started"
 			sudo ssh -i private.pem ${USERNAME}@${IPADDRESS} <<EOF
-			sudo yum install -y ./jans-${VERSION}.nightly-el8.x86_64.rpm
+			sudo yum install -y ./jans-${VERSION}-el8.x86_64.rpm
 			sudo python3 /opt/jans/jans-setup/setup.py -f setup.properties -n
 EOF
 		fi
 		if [[ ${OS} == "ubuntu20" ]] || [[ ${OS} == "ubuntu22" ]]; then
 			echo "${OS} package installation started"
 			sudo ssh -i private.pem ${USERNAME}@${IPADDRESS} <<EOF
-			sudo apt install -y ./jans_${VERSION}.nightly.${OS}.04_amd64.deb
+			sudo apt install -y ./jans_${VERSION}.${OS}.04_amd64.deb
 			sudo python3 /opt/jans/jans-setup/setup.py -f setup.properties -n
 EOF
 		fi
@@ -202,7 +203,7 @@ EOF
 helpFunction() {
 	echo "KEEP PRIVATE.PEM and INSTALL.SH IN SAME FOLDER"
 	echo "Usage: ./install.sh -i IPADDRESS -h HOSTNAME -u USERNAME -d DB -o OS  -b VERSION -p PACKAGE_OR_ONLINE"
-	echo -e "EX: ./install.sh  3.10.10.22  manojs1978-pleasing-goldfish.gluu.info  ec2-user  ldap  ubuntu22 or suse or rhel or ubuntu20  1.0.12  package"
+	echo -e "EX: ./install.sh  3.10.10.22  manojs1978-pleasing-goldfish.gluu.info  ec2-user  ldap  ubuntu22 OR suse OR rhel OR ubuntu20  1.0.12 OR 1.0.13.nightly  package"
 	exit 1 # Exit script after printing help
 }
 
