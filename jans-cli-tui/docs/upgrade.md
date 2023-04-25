@@ -2,7 +2,7 @@
 
 Step to upgrade TUI from github main branch
 
-1 . `wget https://github.com/JanssenProject/jans/archive/refs/heads/main.zip -O main.zip`
+1. `wget https://github.com/JanssenProject/jans/archive/refs/heads/main.zip -O main.zip`
 
 2. `unzip main.zip`
 
