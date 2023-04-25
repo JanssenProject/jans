@@ -238,11 +238,8 @@ class Agama(DialogUtils):
                         error
                     ))
 
-        if not data_display and self.app.current_page == 'agama':
-            if search_str:
-                self.app.show_message(_("Oops"), _(common_strings.no_matching_result), tobefocused = self.main_container)
-            else:
-                self.app.show_message(_(common_strings.info), _("No projects have been deployed for the time being."), tobefocused = self.main_container)
+        if not data_display and self.app.current_page == 'agama' and search_str:
+            self.app.show_message(_("Oops"), _(common_strings.no_matching_result), tobefocused = self.main_container)
             return
 
         self.working_container.hide_headers = False
