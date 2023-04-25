@@ -102,7 +102,7 @@ public class SignatureVerifier {
                 return signatureChecker;
             }
             case -65535: {
-                Signature signatureChecker = Signature.getInstance("SHA1withRSA", provider);
+                Signature signatureChecker = Signature.getInstance("SHA1withRSA");
                 return signatureChecker;
             }
 
