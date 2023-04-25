@@ -68,6 +68,10 @@
 	</listener>
 	<!-- FILTERS MAPPING -->
 	<filter-mapping>
+		<filter-name>ServletLoggingFilter</filter-name>
+		<url-pattern />
+	</filter-mapping>
+	<filter-mapping>
 		<filter-name>AuthenticationFilter</filter-name>
 		<url-pattern />
 	</filter-mapping>
@@ -77,10 +81,6 @@
 	</filter-mapping>
 	<filter-mapping>
 		<filter-name>CorsFilter</filter-name>
-		<url-pattern />
-	</filter-mapping>
-	<filter-mapping>
-		<filter-name>ServletLoggingFilter</filter-name>
 		<url-pattern />
 	</filter-mapping>
 

@@ -12,7 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.server.audit.debug.entity.HttpRequest;
 import io.jans.as.server.audit.debug.entity.HttpResponse;
-import io.jans.as.server.audit.debug.wrapper.ReadableResponseWrapper;
+import io.jans.as.server.audit.debug.wrapper.LogResponseWrapper;
 import io.jans.as.server.audit.debug.wrapper.RequestWrapper;
 import io.jans.as.server.audit.debug.wrapper.ResponseWrapper;
 import jakarta.inject.Inject;
@@ -82,14 +82,14 @@ public class ServletLoggingFilter implements Filter {
 
         RequestWrapper requestWrapper = new RequestWrapper(httpRequest);
         HttpServletResponseWrapper responseWrapper = null;
+        /** If httpLoggingResponseBodyContent  is enabled then LogResponseWrapper is used, otherwise normal ResponseWrapper is used **/
         if (appConfiguration.getHttpLoggingResponseBodyContent()) {
-            responseWrapper = new ReadableResponseWrapper(httpResponse);
-            chain.doFilter(httpRequest, responseWrapper);
+            responseWrapper = new LogResponseWrapper((HttpServletResponse) response);
         } else {
             responseWrapper = new ResponseWrapper(httpResponse);
-            chain.doFilter(httpRequest, httpResponse);
         }
 
+        chain.doFilter(httpRequest, responseWrapper);
         Duration duration = duration(start);
 
         // yuriyz: log request and response only after filter handling.
@@ -97,6 +97,10 @@ public class ServletLoggingFilter implements Filter {
         if (log.isDebugEnabled()) {
             log.debug("REQUEST  : " + getRequestDescription(requestWrapper, duration));
             log.debug("RESPONSE : " + getResponseDescription(responseWrapper));
+            /** A copy of body content is logged **/
+            if (appConfiguration.getHttpLoggingResponseBodyContent()) {
+                log.debug("RESPONSE BODY : " + ((LogResponseWrapper) responseWrapper).getBodyCopy());
+            }
         }
     }
 
@@ -125,14 +129,8 @@ public class ServletLoggingFilter implements Filter {
 
     protected String getResponseDescription(HttpServletResponseWrapper responseWrapper) {
         HttpResponse httpResponse = new HttpResponse();
-        if (appConfiguration.getHttpLoggingResponseBodyContent()) {
-            httpResponse.setStatus(((ReadableResponseWrapper) responseWrapper).getStatus());
-            httpResponse.setHeaders(((ReadableResponseWrapper) responseWrapper).getHeaders());
-            httpResponse.setBody(((ReadableResponseWrapper) responseWrapper).readBodyValue());
-        } else {
-            httpResponse.setStatus(((ResponseWrapper) responseWrapper).getStatus());
-            httpResponse.setHeaders(((ResponseWrapper) responseWrapper).getHeaders());
-        }
+        httpResponse.setStatus(responseWrapper.getStatus());
+        httpResponse.setHeaders(((ResponseWrapper) responseWrapper).getHeaders());
         try {
             return OBJECT_MAPPER.writeValueAsString(httpResponse);
         } catch (JsonProcessingException e) {
