@@ -7594,8 +7594,10 @@ navigate via <code>Auth Server</code>-&gt;<code>Properties</code>.</p>
 <li><a href="../../../reference/json/properties/janssenauthserver-properties/#introspectionskipauthorization">introspectionSkipAuthorization</a></li>
 <li><a href="../../../reference/json/properties/janssenauthserver-properties/#introspectionscriptbackwardcompatibility">introspectionScriptBackwardCompatibility</a></li>
 <li><a href="../../../reference/json/properties/janssenauthserver-properties/#introspectionaccesstokenmusthaveumaprotectionscope">introspectionAccessTokenMustHaveUmaProtectionScope</a></li>
+<li><a href="../../../reference/json/properties/janssenauthserver-properties/#introspectionaccesstokenmusthaveintrospectionscope">introspectionAccessTokenMustHaveIntrospectionScope</a></li>
 <li><a href="../../../reference/json/properties/janssenauthserver-properties/#introspectionresponsescopesbackwardcompatibility">introspectionResponseScopesBackwardCompatibility</a></li>
 </ul>
+<p>There difference between <code>introspectionAccessTokenMustHaveUmaProtectionScope</code> and <code>introspectionAccessTokenMustHaveIntrospectionScope</code> is that <code>uma_protection</code> scope is enabled for Dynamic Client Registration while <code>introspection</code> scope is not. Thus if set <code>introspectionAccessTokenMustHaveIntrospectionScope</code> to <code>true</code> value allows disable access to Introspection Endpoint to all clients which does not have explicitly granted <code>introspection</code> scope. </p>
 <h2 id="customising-introspection-endpoint-behaviour-using-custom-script">Customising Introspection Endpoint Behaviour using Custom script:<a class="headerlink" href="#customising-introspection-endpoint-behaviour-using-custom-script" title="Permanent link">#</a></h2>
 <p>Customizing certain aspects of endpoint behaviour, for example, one can modify claims of an access token as JWT, using
 <a href="../../../../script-catalog/introspection/">introspection scripts</a>. Use
@@ -7625,7 +7627,7 @@ navigate to</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-03-30T10:51:22+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-03-30</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-04-26T08:25:38+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-04-26</span>
       
         <br>
         Created:
