@@ -449,6 +449,7 @@ class JansCliApp(Application):
         self.bindings.add('c-c')(do_exit)
         self.bindings.add('c-q')(do_exit)
         self.bindings.add('f1')(self.help)
+        self.bindings.add('f4')(self.escape)
         self.bindings.add('escape')(self.escape)
         self.bindings.add('s-up')(self.up)
         self.bindings.add(Keys.Vt100MouseEvent)(self.mouse)

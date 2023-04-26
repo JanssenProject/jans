@@ -34,8 +34,8 @@ Open help dialog (currently, help dialog is static, in the near future it will d
 
 ![f1](https://user-images.githubusercontent.com/63171603/210387872-099413f4-5e33-43e9-86c7-440e55c9f85c.png)
 
-*  `ESC` :  
-Close any dialog or even nested dialog
+*  `ESC`, `f4` :  
+Closes any dialog, even nested dialogs
 
 ![esc](https://user-images.githubusercontent.com/63171603/210389011-97da92b1-57b8-4628-9810-3a571255ea20.gif)
 
