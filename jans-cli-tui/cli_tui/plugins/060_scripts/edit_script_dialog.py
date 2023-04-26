@@ -151,6 +151,7 @@ class EditScriptDialog(JansGDialog, DialogUtils):
                         ['revoke_token', 'Revoke Token'],
                         ['persistence_extension', 'Persistence Extension'],
                         ['discovery', 'Discovery'],
+                        ['fido2_interception', 'Intercept Fido2'],
                         ]
 
         self.location_widget = self.myparent.getTitledText(
