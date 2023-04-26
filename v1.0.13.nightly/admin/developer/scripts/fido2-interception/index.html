@@ -12,14 +12,14 @@
         <meta name="author" content="Janssen, Inc.">
       
       
-        <link rel="canonical" href="https://jans.io/docs/v1.0.13.nightly/admin/config-guide/jans-tui/navigation-guide/">
+        <link rel="canonical" href="https://jans.io/docs/v1.0.13.nightly/admin/developer/scripts/fido2-interception/">
       
       <link rel="icon" href="../../../../assets/janssen_project_favicon_transparent_50px_50px.ico">
       <meta name="generator" content="mkdocs-1.4.1, mkdocs-material-8.5.7">
     
     
       
-        <title>Navigation Guide - Janssen Documentation</title>
+        <title>Fido2 interception - Janssen Documentation</title>
       
     
     
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#general-structure" class="md-skip">
+        <a href="#overview" class="md-skip">
           Skip to content
         </a>
       
@@ -128,7 +128,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Navigation Guide
+              Fido2 interception
             
           </span>
         </div>
@@ -225,15 +225,13 @@
         
   
   
-    
-  
 
 
   
   
   
     <li class="md-tabs__item">
-      <a href="../../../" class="md-tabs__link md-tabs__link--active">
+      <a href="../../../" class="md-tabs__link">
         Administration
       </a>
     </li>
@@ -327,14 +325,12 @@
 
   
   
-    
-  
   
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1" type="checkbox" id="__nav_1" checked>
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1" type="checkbox" id="__nav_1" >
       
       
       
@@ -1586,14 +1582,12 @@
               
   
   
-    
-  
   
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_6" type="checkbox" id="__nav_1_6" checked>
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_6" type="checkbox" id="__nav_1_6" >
       
       
       
@@ -1657,7 +1651,7 @@
         
         
         <div class="md-nav__link md-nav__link--index ">
-          <a href="../../config-api/">Config API</a>
+          <a href="../../../config-guide/config-api/">Config API</a>
           
             <label for="__nav_1_6_1">
               <span class="md-nav__icon md-icon"></span>
@@ -1680,7 +1674,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../config-api/config/" class="md-nav__link">
+      <a href="../../../config-guide/config-api/config/" class="md-nav__link">
         Settings
       </a>
     </li>
@@ -1694,7 +1688,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../config-api/attribute/" class="md-nav__link">
+      <a href="../../../config-guide/config-api/attribute/" class="md-nav__link">
         Attributes
       </a>
     </li>
@@ -1708,7 +1702,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../config-api/security/" class="md-nav__link">
+      <a href="../../../config-guide/config-api/security/" class="md-nav__link">
         Security
       </a>
     </li>
@@ -1722,7 +1716,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../config-api/logs/" class="md-nav__link">
+      <a href="../../../config-guide/config-api/logs/" class="md-nav__link">
         Logs
       </a>
     </li>
@@ -1736,7 +1730,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../config-api/monitoring/" class="md-nav__link">
+      <a href="../../../config-guide/config-api/monitoring/" class="md-nav__link">
         Monitoring
       </a>
     </li>
@@ -1750,7 +1744,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../config-api/plugins/" class="md-nav__link">
+      <a href="../../../config-guide/config-api/plugins/" class="md-nav__link">
         Plugins
       </a>
     </li>
@@ -1771,7 +1765,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../curl/" class="md-nav__link">
+      <a href="../../../config-guide/curl/" class="md-nav__link">
         CURL Guide
       </a>
     </li>
@@ -1783,14 +1777,12 @@
               
   
   
-    
-  
   
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_6_3" type="checkbox" id="__nav_1_6_3" checked>
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_6_3" type="checkbox" id="__nav_1_6_3" >
       
       
       
@@ -1806,7 +1798,7 @@
         
         
         <div class="md-nav__link md-nav__link--index ">
-          <a href="../">Text-Based User Interface (TUI)</a>
+          <a href="../../../config-guide/jans-tui/">Text-Based User Interface (TUI)</a>
           
             <label for="__nav_1_6_3">
               <span class="md-nav__icon md-icon"></span>
@@ -1827,116 +1819,11 @@
               
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-      
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          Navigation Guide
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../../config-guide/jans-tui/navigation-guide/" class="md-nav__link">
         Navigation Guide
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#general-structure" class="md-nav__link">
-    General Structure:
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#general-purpose-shortcuts" class="md-nav__link">
-    General Purpose shortcuts
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#navigation-shortcuts" class="md-nav__link">
-    Navigation Shortcuts
-  </a>
-  
-    <nav class="md-nav" aria-label="Navigation Shortcuts">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#general-navigation-shortcuts" class="md-nav__link">
-    General Navigation shortcuts
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#main-tabs-navigation-shortcuts" class="md-nav__link">
-    Main tabs Navigation shortcuts
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#custom-widget-shortcuts" class="md-nav__link">
-    Custom widget shortcuts
-  </a>
-  
-    <nav class="md-nav" aria-label="Custom widget shortcuts">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#lists-vertical-nav-bar" class="md-nav__link">
-    Lists (Vertical Nav bar)
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#date-widgets" class="md-nav__link">
-    Date Widgets
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#label-widgets" class="md-nav__link">
-    Label Widgets
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -2008,7 +1895,7 @@
         
         
         <div class="md-nav__link md-nav__link--index ">
-          <a href="../../jans-cli/">Command Line Interface (CLI)</a>
+          <a href="../../../config-guide/jans-cli/">Command Line Interface (CLI)</a>
           
             <label for="__nav_1_6_4">
               <span class="md-nav__icon md-icon"></span>
@@ -2031,7 +1918,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../jans-cli/install/" class="md-nav__link">
+      <a href="../../../config-guide/jans-cli/install/" class="md-nav__link">
         Standalone Installation
       </a>
     </li>
@@ -2045,7 +1932,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../jans-cli/cli-attribute/" class="md-nav__link">
+      <a href="../../../config-guide/jans-cli/cli-attribute/" class="md-nav__link">
         Attribute
       </a>
     </li>
@@ -2059,7 +1946,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../jans-cli/cli-default-authentication-method/" class="md-nav__link">
+      <a href="../../../config-guide/jans-cli/cli-default-authentication-method/" class="md-nav__link">
         Default Authentication
       </a>
     </li>
@@ -2073,7 +1960,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../jans-cli/cli-cache-configuration/" class="md-nav__link">
+      <a href="../../../config-guide/jans-cli/cli-cache-configuration/" class="md-nav__link">
         Cache Configuration
       </a>
     </li>
@@ -2087,7 +1974,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../jans-cli/cli-jans-authorization-server/" class="md-nav__link">
+      <a href="../../../config-guide/jans-cli/cli-jans-authorization-server/" class="md-nav__link">
         Auth Server Configuration
       </a>
     </li>
@@ -2101,7 +1988,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../jans-cli/cli-janssen-fido2-configuration/" class="md-nav__link">
+      <a href="../../../config-guide/jans-cli/cli-janssen-fido2-configuration/" class="md-nav__link">
         FIDO2 Configuration
       </a>
     </li>
@@ -2115,7 +2002,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../jans-cli/cli-logging-configuration/" class="md-nav__link">
+      <a href="../../../config-guide/jans-cli/cli-logging-configuration/" class="md-nav__link">
         Logging
       </a>
     </li>
@@ -2129,7 +2016,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../jans-cli/cli-jwk-json-web-key-jwk/" class="md-nav__link">
+      <a href="../../../config-guide/jans-cli/cli-jwk-json-web-key-jwk/" class="md-nav__link">
         JSON Web Key
       </a>
     </li>
@@ -2143,7 +2030,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../jans-cli/cli-ldap-configuration/" class="md-nav__link">
+      <a href="../../../config-guide/jans-cli/cli-ldap-configuration/" class="md-nav__link">
         LDAP Configuration
       </a>
     </li>
@@ -2157,7 +2044,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../jans-cli/cli-couchbase-configuration/" class="md-nav__link">
+      <a href="../../../config-guide/jans-cli/cli-couchbase-configuration/" class="md-nav__link">
         Couchbase Configuration
       </a>
     </li>
@@ -2171,7 +2058,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../jans-cli/cli-oauthscopes/" class="md-nav__link">
+      <a href="../../../config-guide/jans-cli/cli-oauthscopes/" class="md-nav__link">
         OAuth Scope Management
       </a>
     </li>
@@ -2185,7 +2072,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../jans-cli/cli-oauthumaresources/" class="md-nav__link">
+      <a href="../../../config-guide/jans-cli/cli-oauthumaresources/" class="md-nav__link">
         UMA Management
       </a>
     </li>
@@ -2199,7 +2086,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../jans-cli/cli-openid-connect-client-configuration/" class="md-nav__link">
+      <a href="../../../config-guide/jans-cli/cli-openid-connect-client-configuration/" class="md-nav__link">
         OpenID Connect Client Configuration
       </a>
     </li>
@@ -2213,7 +2100,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../jans-cli/cli-smtp-configuration/" class="md-nav__link">
+      <a href="../../../config-guide/jans-cli/cli-smtp-configuration/" class="md-nav__link">
         SMTP Configuration
       </a>
     </li>
@@ -2227,7 +2114,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../jans-cli/cli-custom-scripts/" class="md-nav__link">
+      <a href="../../../config-guide/jans-cli/cli-custom-scripts/" class="md-nav__link">
         Custom Scripts
       </a>
     </li>
@@ -2241,7 +2128,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../jans-cli/cli-user/" class="md-nav__link">
+      <a href="../../../config-guide/jans-cli/cli-user/" class="md-nav__link">
         SCIM User Resources
       </a>
     </li>
@@ -2255,7 +2142,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../jans-cli/cli-group/" class="md-nav__link">
+      <a href="../../../config-guide/jans-cli/cli-group/" class="md-nav__link">
         SCIM Group Management
       </a>
     </li>
@@ -2269,7 +2156,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../jans-cli/device-flow/" class="md-nav__link">
+      <a href="../../../config-guide/jans-cli/device-flow/" class="md-nav__link">
         Authentication via Device Flow
       </a>
     </li>
@@ -2290,7 +2177,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../scim-cli/" class="md-nav__link">
+      <a href="../../../config-guide/scim-cli/" class="md-nav__link">
         SCIM CLI
       </a>
     </li>
@@ -4878,7 +4765,7 @@
         
         
         <div class="md-nav__link md-nav__link--index ">
-          <a href="../../../developer/">Developer Guide</a>
+          <a href="../../">Developer Guide</a>
           
             <label for="__nav_1_9">
               <span class="md-nav__icon md-icon"></span>
@@ -4944,7 +4831,7 @@
         
         
         <div class="md-nav__link md-nav__link--index ">
-          <a href="../../../developer/agama/">Agama</a>
+          <a href="../../agama/">Agama</a>
           
             <label for="__nav_1_9_2">
               <span class="md-nav__icon md-icon"></span>
@@ -4967,7 +4854,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../developer/agama/quick-start/" class="md-nav__link">
+      <a href="../../agama/quick-start/" class="md-nav__link">
         Quick Start Guide
       </a>
     </li>
@@ -4981,7 +4868,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../developer/agama/lifecycle/" class="md-nav__link">
+      <a href="../../agama/lifecycle/" class="md-nav__link">
         Development Lifecycle
       </a>
     </li>
@@ -4995,7 +4882,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../developer/agama/dsl/" class="md-nav__link">
+      <a href="../../agama/dsl/" class="md-nav__link">
         DSL Guide
       </a>
     </li>
@@ -5009,7 +4896,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../developer/agama/logging/" class="md-nav__link">
+      <a href="../../agama/logging/" class="md-nav__link">
         Logging
       </a>
     </li>
@@ -5023,7 +4910,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../developer/agama/ui-pages/" class="md-nav__link">
+      <a href="../../agama/ui-pages/" class="md-nav__link">
         Writing UI Pages
       </a>
     </li>
@@ -5037,7 +4924,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../developer/agama/flows-lifecycle/" class="md-nav__link">
+      <a href="../../agama/flows-lifecycle/" class="md-nav__link">
         Flows Lifecycle
       </a>
     </li>
@@ -5051,7 +4938,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../developer/agama/engine-config/" class="md-nav__link">
+      <a href="../../agama/engine-config/" class="md-nav__link">
         Engine Configuration
       </a>
     </li>
@@ -5065,7 +4952,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../developer/agama/samples/" class="md-nav__link">
+      <a href="../../agama/samples/" class="md-nav__link">
         Sample Flows
       </a>
     </li>
@@ -5079,7 +4966,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../developer/agama/dsl-full/" class="md-nav__link">
+      <a href="../../agama/dsl-full/" class="md-nav__link">
         DSL Reference
       </a>
     </li>
@@ -5093,7 +4980,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../developer/agama/java-classpath/" class="md-nav__link">
+      <a href="../../agama/java-classpath/" class="md-nav__link">
         Java Classpath
       </a>
     </li>
@@ -5107,7 +4994,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../developer/agama/hello-world-closer/" class="md-nav__link">
+      <a href="../../agama/hello-world-closer/" class="md-nav__link">
         A closer look to the engine
       </a>
     </li>
@@ -5121,7 +5008,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../developer/agama/gama-deployment/" class="md-nav__link">
+      <a href="../../agama/gama-deployment/" class="md-nav__link">
         .gama files deployment
       </a>
     </li>
@@ -5135,7 +5022,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../developer/agama/faq/" class="md-nav__link">
+      <a href="../../agama/faq/" class="md-nav__link">
         FAQ
       </a>
     </li>
@@ -5156,7 +5043,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../developer/interception-scripts/" class="md-nav__link">
+      <a href="../../interception-scripts/" class="md-nav__link">
         Interception Script Overview
       </a>
     </li>
@@ -5170,7 +5057,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../developer/interception-scripts-debug/" class="md-nav__link">
+      <a href="../../interception-scripts-debug/" class="md-nav__link">
         Script Debugging
       </a>
     </li>
@@ -5184,7 +5071,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../developer/external-libraries/" class="md-nav__link">
+      <a href="../../external-libraries/" class="md-nav__link">
         External Libraries
       </a>
     </li>
@@ -5198,7 +5085,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../developer/cors/" class="md-nav__link">
+      <a href="../../cors/" class="md-nav__link">
         CORS
       </a>
     </li>
@@ -5212,7 +5099,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../developer/managed-beans/" class="md-nav__link">
+      <a href="../../managed-beans/" class="md-nav__link">
         Managed Beans
       </a>
     </li>
@@ -5247,7 +5134,7 @@
         
         
         <div class="md-nav__link md-nav__link--index ">
-          <a href="../../../developer/customization/">Customization</a>
+          <a href="../../customization/">Customization</a>
           
             <label for="__nav_1_9_8">
               <span class="md-nav__icon md-icon"></span>
@@ -5270,7 +5157,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../developer/customization/customize-web-pages/" class="md-nav__link">
+      <a href="../../customization/customize-web-pages/" class="md-nav__link">
         Customize Web pages
       </a>
     </li>
@@ -5284,7 +5171,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../developer/customization/custom-client-logs/" class="md-nav__link">
+      <a href="../../customization/custom-client-logs/" class="md-nav__link">
         Custom client logs
       </a>
     </li>
@@ -5364,7 +5251,7 @@
         
         
         <div class="md-nav__link md-nav__link--index ">
-          <a href="../../../developer/scripts/">Scripts</a>
+          <a href="../">Scripts</a>
           
             <label for="__nav_1_9_9">
               <span class="md-nav__icon md-icon"></span>
@@ -5387,7 +5274,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../developer/scripts/person-authentication/" class="md-nav__link">
+      <a href="../person-authentication/" class="md-nav__link">
         Person Authentication
       </a>
     </li>
@@ -5401,7 +5288,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../developer/scripts/consent-gathering/" class="md-nav__link">
+      <a href="../consent-gathering/" class="md-nav__link">
         Consent Gathering
       </a>
     </li>
@@ -5415,7 +5302,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../developer/scripts/post-authentication/" class="md-nav__link">
+      <a href="../post-authentication/" class="md-nav__link">
         Post Authentication
       </a>
     </li>
@@ -5429,7 +5316,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../developer/scripts/ropc/" class="md-nav__link">
+      <a href="../ropc/" class="md-nav__link">
         Resource Owner Password Credentials
       </a>
     </li>
@@ -5443,7 +5330,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../developer/scripts/ciba/" class="md-nav__link">
+      <a href="../ciba/" class="md-nav__link">
         CIBA End User Notification
       </a>
     </li>
@@ -5457,7 +5344,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../developer/scripts/openid-config/" class="md-nav__link">
+      <a href="../openid-config/" class="md-nav__link">
         OpenID Configuration
       </a>
     </li>
@@ -5471,7 +5358,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../developer/scripts/dynamic-scope/" class="md-nav__link">
+      <a href="../dynamic-scope/" class="md-nav__link">
         Dynamic Scope
       </a>
     </li>
@@ -5485,7 +5372,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../developer/scripts/spontaneous-scope/" class="md-nav__link">
+      <a href="../spontaneous-scope/" class="md-nav__link">
         Spontaneous Scope
       </a>
     </li>
@@ -5499,7 +5386,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../developer/scripts/application-session/" class="md-nav__link">
+      <a href="../application-session/" class="md-nav__link">
         Application Session
       </a>
     </li>
@@ -5513,7 +5400,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../developer/scripts/end-session/" class="md-nav__link">
+      <a href="../end-session/" class="md-nav__link">
         End Session
       </a>
     </li>
@@ -5527,7 +5414,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../developer/scripts/client-registration/" class="md-nav__link">
+      <a href="../client-registration/" class="md-nav__link">
         Client Registration
       </a>
     </li>
@@ -5541,7 +5428,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../developer/scripts/introspection/" class="md-nav__link">
+      <a href="../introspection/" class="md-nav__link">
         Introspection
       </a>
     </li>
@@ -5555,7 +5442,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../developer/scripts/update-token/" class="md-nav__link">
+      <a href="../update-token/" class="md-nav__link">
         Update Token
       </a>
     </li>
@@ -5569,7 +5456,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../developer/scripts/revoke-token/" class="md-nav__link">
+      <a href="../revoke-token/" class="md-nav__link">
         Revoke Token
       </a>
     </li>
@@ -5583,7 +5470,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../developer/scripts/id-generator/" class="md-nav__link">
+      <a href="../id-generator/" class="md-nav__link">
         ID Generator
       </a>
     </li>
@@ -5597,7 +5484,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../developer/scripts/uma-rpt/" class="md-nav__link">
+      <a href="../uma-rpt/" class="md-nav__link">
         UMA RPT Policies
       </a>
     </li>
@@ -5611,7 +5498,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../developer/scripts/uma-claims-web/" class="md-nav__link">
+      <a href="../uma-claims-web/" class="md-nav__link">
         UMA Claims Gathering (Web Flow)
       </a>
     </li>
@@ -5625,7 +5512,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../developer/scripts/uma-claims-jwt/" class="md-nav__link">
+      <a href="../uma-claims-jwt/" class="md-nav__link">
         UMA Claims (JWT Transformation)
       </a>
     </li>
@@ -5639,7 +5526,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../developer/scripts/scim/" class="md-nav__link">
+      <a href="../scim/" class="md-nav__link">
         SCIM
       </a>
     </li>
@@ -5653,7 +5540,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../developer/scripts/persistence/" class="md-nav__link">
+      <a href="../persistence/" class="md-nav__link">
         Persistence
       </a>
     </li>
@@ -5667,7 +5554,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../developer/scripts/config-api/" class="md-nav__link">
+      <a href="../config-api/" class="md-nav__link">
         Config API
       </a>
     </li>
@@ -7290,37 +7177,37 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#general-structure" class="md-nav__link">
-    General Structure:
+  <a href="#overview" class="md-nav__link">
+    Overview
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#general-purpose-shortcuts" class="md-nav__link">
-    General Purpose shortcuts
+  <a href="#interface" class="md-nav__link">
+    Interface
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#navigation-shortcuts" class="md-nav__link">
-    Navigation Shortcuts
-  </a>
-  
-    <nav class="md-nav" aria-label="Navigation Shortcuts">
+    <nav class="md-nav" aria-label="Interface">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#general-navigation-shortcuts" class="md-nav__link">
-    General Navigation shortcuts
+  <a href="#inherited-methods" class="md-nav__link">
+    Inherited Methods
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#main-tabs-navigation-shortcuts" class="md-nav__link">
-    Main tabs Navigation shortcuts
+  <a href="#new-methods" class="md-nav__link">
+    New Methods
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#objects" class="md-nav__link">
+    Objects
   </a>
   
 </li>
@@ -7331,30 +7218,23 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#custom-widget-shortcuts" class="md-nav__link">
-    Custom widget shortcuts
+  <a href="#use-case-dummy-fido2-interception-form" class="md-nav__link">
+    Use case: Dummy Fido2 Interception Form
   </a>
   
-    <nav class="md-nav" aria-label="Custom widget shortcuts">
+    <nav class="md-nav" aria-label="Use case: Dummy Fido2 Interception Form">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#lists-vertical-nav-bar" class="md-nav__link">
-    Lists (Vertical Nav bar)
+  <a href="#script-type-python" class="md-nav__link">
+    Script Type: Python
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#date-widgets" class="md-nav__link">
-    Date Widgets
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#label-widgets" class="md-nav__link">
-    Label Widgets
+  <a href="#script-type-java" class="md-nav__link">
+    Script Type: Java
   </a>
   
 </li>
@@ -7383,210 +7263,299 @@
     
       
       
-        <span class="md-tag">installation</span>
-      
-    
-      
-      
         <span class="md-tag">administration</span>
       
     
       
       
-        <span class="md-tag">configuration</span>
+        <span class="md-tag">developer</span>
       
     
       
       
-        <span class="md-tag">config</span>
+        <span class="md-tag">scripts</span>
       
     
       
       
-        <span class="md-tag">tui</span>
+        <span class="md-tag">fido2</span>
+      
+    
+      
+      
+        <span class="md-tag">Fido2Interception</span>
       
     
   </nav>
 
 
 
-  <a href="https://github.com/JanssenProject/jans/edit/main/docs/admin/config-guide/jans-tui/navigation-guide.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/JanssenProject/jans/edit/main/docs/admin/developer/scripts/fido2-interception.md" title="Edit this page" class="md-content__button md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
-  <h1>Navigation Guide</h1>
+  <h1>Fido2 interception</h1>
 
-<h2 id="general-structure">General Structure:<a class="headerlink" href="#general-structure" title="Permanent link">#</a></h2>
-<ol>
-<li>The TUI consists of many tabs, each tab may or may not contain nested tabs.</li>
-<li>The TUI consists of one main navigation bar which contains (Auth Server, FIDO, SCIM, Scripts, Users, and Jans CLI)</li>
-</ol>
-<p><img alt="image" src="https://user-images.githubusercontent.com/63171603/216954725-46c556bd-11ae-46f0-bb1c-e9c5f1e89d60.png" /></p>
-<ol>
-<li>The tab currently in focus is highlighted at the top.
-ex:</li>
-</ol>
-<p><img alt="image" src="https://user-images.githubusercontent.com/63171603/216954883-749f5493-9313-4326-8429-7898e0cd55f3.png" /></p>
-<p>Note:</p>
-<ul>
-<li>in the image provided below <code>SCIM</code> is focused </li>
-<li>We can notice that there is a cursor mark on the first of the Navigation bar line, which indicates that the focus currently in this widget
-<img alt="cursor_line" src="https://user-images.githubusercontent.com/63171603/216955914-01f28440-81f3-437d-a018-c0f117dcd24e.gif" /></li>
-</ul>
-<hr />
-<h2 id="general-purpose-shortcuts">General Purpose shortcuts<a class="headerlink" href="#general-purpose-shortcuts" title="Permanent link">#</a></h2>
-<ul>
-<li><code>f1</code> :<br />
-Open help dialog (currently, help dialog is static, in the near future it will dynamically change according to the current position inside the TUI )</li>
-</ul>
-<p><img alt="f1" src="https://user-images.githubusercontent.com/63171603/210387872-099413f4-5e33-43e9-86c7-440e55c9f85c.png" /></p>
-<ul>
-<li><code>ESC</code>, <code>f4</code> :<br />
-Closes any dialog, even nested dialogs</li>
-</ul>
-<p><img alt="esc" src="https://user-images.githubusercontent.com/63171603/210389011-97da92b1-57b8-4628-9810-3a571255ea20.gif" /></p>
-<ul>
-<li><code>Ctrl+c</code>(Terminate) :<br />
-Terminate the program (SigKILL)</li>
-</ul>
-<hr />
-<h2 id="navigation-shortcuts">Navigation Shortcuts<a class="headerlink" href="#navigation-shortcuts" title="Permanent link">#</a></h2>
-<h3 id="general-navigation-shortcuts">General Navigation shortcuts<a class="headerlink" href="#general-navigation-shortcuts" title="Permanent link">#</a></h3>
-<ul>
-<li><code>tab</code>(Next):<br />
-focus on the next field or widget.  </li>
-</ul>
-<p><img alt="tab" src="https://user-images.githubusercontent.com/63171603/216956961-f88010e9-6f81-4401-b920-e7522c774115.gif" /></p>
-<ul>
-<li><code>shift + tab</code>(Previous):<br />
-focus on the previous field or widget  </li>
-</ul>
-<p><img alt="shift_tab" src="https://user-images.githubusercontent.com/63171603/216957299-595b5ca1-9d9a-4d8b-8b19-ae939390f9ea.gif" /></p>
-<ul>
-<li><code>PageUp</code>(Next tab):<br />
-Jump to the next tab in dialogs (ex: Client dialog)</li>
-</ul>
-<p>Note:<br />
-<em> the focus must be inside the current tab<br />
-</em> In the Gif provided, the focus was inside the tab itself before we can press the <code>PageUp</code> key<br />
-* If the focus is on the tab name itself, we can navigate to other tabs by the <code>Up</code> key and <code>Down</code> key  </p>
-<p><img alt="page_down" src="https://user-images.githubusercontent.com/63171603/216957110-8a0629fa-dab8-4254-9900-dcc4fed5225f.gif" /></p>
-<ul>
-<li><code>PageDown</code>(Previous tab) :<br />
-Jump to the previous tab in dialogs (ex: Client dialog)<br />
-Note:  </li>
-<li>the focus must be inside the current tab  </li>
-<li>In the Gif provided, the focus was inside the tab itself before we can press the <code>PageDown</code> key  </li>
-<li>If the focus is on the tab name itself, we can navigate to other tabs by the <code>Up</code> key and <code>Down</code> key  </li>
-</ul>
-<p><img alt="page_up" src="https://user-images.githubusercontent.com/63171603/216956999-5c813da5-f3a8-4755-9324-a4694b06ab68.gif" /></p>
-<h3 id="main-tabs-navigation-shortcuts">Main tabs Navigation shortcuts<a class="headerlink" href="#main-tabs-navigation-shortcuts" title="Permanent link">#</a></h3>
-<ul>
-<li><code>Alt + key</code><br />
-You can navigate to any tab inside the TUI by using the <code>Alt</code> key followed by a certain letter from the tab you want to navigate too  </li>
-</ul>
-<p>Note:<br />
-<em> the colored character inside each Tab name is the specified letter for the navigation.<br />
-</em> you can't navigate from a tab in the main top navigation bar to a nested navigation bar inside another tab, you must navigate to it first.  </p>
-<p>examples on the navigation letters for the main navigation bar:</p>
-<ul>
-<li><code>Auth Server</code> -&gt; <code>A</code>  </li>
-<li><code>FIDO</code> -&gt; <code>F</code>  </li>
-<li><code>SCIM</code> -&gt; <code>C</code>  </li>
-<li><code>Scripts</code> -&gt; <code>r</code>  </li>
-<li><code>Users</code> -&gt; <code>U</code>  </li>
-<li><code>Jans CLI</code> -&gt; <code>J</code>  </li>
-</ul>
-<p><img alt="navigation" src="https://user-images.githubusercontent.com/63171603/210389648-d4f7692d-d2c1-48bd-a05d-61dd887c0063.gif" /></p>
-<hr />
-<h2 id="custom-widget-shortcuts">Custom widget shortcuts<a class="headerlink" href="#custom-widget-shortcuts" title="Permanent link">#</a></h2>
-<p>Note:<br />
-* This section contains any widgets with special shortcuts and behavior  </p>
-<h3 id="lists-vertical-nav-bar">Lists (Vertical Nav bar)<a class="headerlink" href="#lists-vertical-nav-bar" title="Permanent link">#</a></h3>
-<p>currently, we have about 6 List widgets</p>
-<p>Note:<br />
-<em> Any list widget can be navigated between its items by the <code>Up</code> key and <code>Down</code> key<br />
-</em> There are some shortcuts here that can be used in most but not all List widgets  </p>
-<ul>
-<li>
-<p><code>delete</code>:<br />
-can be used to delete a certain item</p>
-</li>
-<li>
-<p><code>d</code>:<br />
-can be used to view all the selected item data in the <code>JSON</code> format</p>
-</li>
-<li>
-<p><code>Enter</code>:<br />
-can be used to edit the current item</p>
-</li>
-</ul>
-<p>ex:</p>
-<p><img alt="image" src="https://user-images.githubusercontent.com/63171603/216964422-1dcd692d-b9d0-4386-b12c-8a66b2dc3b4a.png" /></p>
-<hr />
-<h3 id="date-widgets">Date Widgets<a class="headerlink" href="#date-widgets" title="Permanent link">#</a></h3>
-<p>The date widget can be used to select a date and time. ex (Client Expiration Date)</p>
-<p><img alt="image" src="https://user-images.githubusercontent.com/63171603/216964886-12eefe6a-5617-4ce5-9db9-646c844ce18b.png" /></p>
-<ul>
-<li><code>tab</code>, <code>shift + tab</code>:<br />
-can be used to navigate between date and time</li>
-</ul>
-<p><img alt="image" src="https://user-images.githubusercontent.com/63171603/216969015-26263039-abef-404a-bcf7-4f4a080ded1f.png" /></p>
-<ul>
-<li><code>Up</code>, <code>Down</code>, <code>Right</code>, and <code>Left</code> arrows:<br />
-can be used to change the date and time</li>
-</ul>
-<p>Note:
-* in the <code>date</code> section, if you navigate to the right border and then pressed <code>Right</code>, the year will be increased.<br />
-<em> in the <code>date</code> section, if you navigate to the left border and then pressed <code>Left</code>, the year will be decreased.<br />
-</em> in the <code>date</code> section, if you navigate to the up border and then pressed <code>Up</code>, the month will be decreased.<br />
-* in the <code>date</code> section, if you navigate to the down border and then pressed <code>Down</code>, the month will be increased.  </p>
-<p><img alt="date_wid_year" src="https://user-images.githubusercontent.com/63171603/216966941-90cfed2e-5e56-4f92-b10c-7bebbb3c3229.gif" /></p>
-<ul>
-<li>in the <code>time</code> section, you can navigate between hour, minute, and second by the <code>Right</code> key and the <code>Left</code> key.  </li>
-<li>in the <code>time</code> section, you can increase the time (hour, minute, or second) by the <code>Up</code> key and the <code>Down</code> key.</li>
-</ul>
-<p><img alt="date_wid_time" src="https://user-images.githubusercontent.com/63171603/216968005-74f5a56c-fa9d-495d-95ad-ca71576198ab.gif" /></p>
-<hr />
-<h3 id="label-widgets">Label Widgets<a class="headerlink" href="#label-widgets" title="Permanent link">#</a></h3>
-<p>The label widget is used with scopes to show certain items instead of a long one, it is similar to the list widget</p>
-<ul>
-<li>
-<p><code>tab</code>, <code>shift + tab</code>:<br />
-can be used to navigate between the button and the labels</p>
-</li>
-<li>
-<p><code>Right</code> key and <code>Left</code> key<br />
-can be used to navigate between the labels</p>
-</li>
-<li>
-<p><code>d</code>:<br />
-can be used to view all the data of the selected label</p>
-</li>
-<li>
-<p><code>delete</code>:<br />
-can be used to delete a certain label</p>
-</li>
-</ul>
-<p><img alt="image" src="https://user-images.githubusercontent.com/63171603/216968417-4cb15f2a-f01c-48bb-a27d-e4e73edb8082.png" /></p>
-<ul>
-<li><code>p</code>: 
-can be used to update user's password. </li>
-</ul>
-<p><img alt="Clipboard - April 3, 2023 9_29 PM" src="https://user-images.githubusercontent.com/7156097/229603328-45232024-26e0-473b-b74a-4b08b5bcaae7.png" /></p>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">#</a></h2>
+<p>FIDO2 implements attestation and assertion with next endpoints:  </p>
+<p><div class="highlight"><pre><span></span><code>https://&lt;myjans-server&gt;/jans-fido2/restv1/attestation/options   (register) 
+https://&lt;myjans-server&gt;/jans-fido2/restv1/attestation/result   (verify registration)
+https://&lt;myjans-server&gt;/jans-fido2/restv1/assertion/options   (authenticate)
+https://&lt;myjans-server&gt;/jans-fido2/restv1/assertion/result   (verify authentication)
+</code></pre></div>
+each one can be customized just in the moment the endpoint is called, just before to execute the method as usual. You could execute validations, verifications, and modify the params received.</p>
+<h2 id="interface">Interface<a class="headerlink" href="#interface" title="Permanent link">#</a></h2>
+<p>The Fido2 interception script implements the <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/authz/Fido2InterceptionType.java">Fido2Interception</a> interface. This extends methods from the base script type in addition to adding new methods:</p>
+<h3 id="inherited-methods">Inherited Methods<a class="headerlink" href="#inherited-methods" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th align="left">Method header</th>
+<th align="left">Method description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><code>def init(self, customScript, configurationAttributes)</code></td>
+<td align="left">This method is only called once during the script initialization. It can be used for global script initialization, initiate objects etc</td>
+</tr>
+<tr>
+<td align="left"><code>def destroy(self, configurationAttributes)</code></td>
+<td align="left">This method is called once to destroy events. It can be used to free resource and objects created in the <code>init()</code> method</td>
+</tr>
+<tr>
+<td align="left"><code>def getApiVersion(self, configurationAttributes, customScript)</code></td>
+<td align="left">The getApiVersion method allows API changes in order to do transparent migration from an old script to a new API. Only include the customScript variable if the value for getApiVersion is greater than 10</td>
+</tr>
+</tbody>
+</table>
+<h3 id="new-methods">New Methods<a class="headerlink" href="#new-methods" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th align="left">Method header</th>
+<th align="left">Method description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><code>def interceptRegisterAttestation(self, step, consentContext)</code></td>
+<td align="left">Main consent-gather method. Must return True (if consent gathered successfully) or False (if failed).</td>
+</tr>
+<tr>
+<td align="left"><code>def interceptVerifyAttestation(self, step, context)</code></td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><code>def interceptAuthenticateAssertion(self, context)</code></td>
+<td align="left">Return total number of consent gathering steps</td>
+</tr>
+<tr>
+<td align="left"><code>def interceptVerifyAssertion(self, step, context)</code></td>
+<td align="left">Returns the consent page corresponding to the current step of consent gathering</td>
+</tr>
+</tbody>
+</table>
+<h3 id="objects">Objects<a class="headerlink" href="#objects" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th align="left">Object name</th>
+<th align="left">Object description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><code>customScript</code></td>
+<td align="left">The custom script object. <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/model/CustomScript.java">Reference</a></td>
+</tr>
+<tr>
+<td align="left"><code>configurationAttributes</code></td>
+<td align="left"><code>configurationProperties</code> passed in when adding custom script. <code>Map&lt;String, SimpleCustomProperty&gt; configurationAttributes</code></td>
+</tr>
+<tr>
+<td align="left"><code>SimpleCustomProperty</code></td>
+<td align="left">Map of configuration properties. <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/util/src/main/java/io/jans/model/SimpleCustomProperty.java">Reference</a></td>
+</tr>
+<tr>
+<td align="left"><code>context</code></td>
+<td align="left"><a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/fido2/service/external/context/ExternalFido2InterceptionContext.java">Reference</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="use-case-dummy-fido2-interception-form">Use case: Dummy Fido2 Interception Form<a class="headerlink" href="#use-case-dummy-fido2-interception-form" title="Permanent link">#</a></h2>
+<p>This script has been adapted from the Jans Server <a href="https://github.com/JanssenProject/jans/blob/main/docs/script-catalog/fido2_interception/fido2-interception/Fido2Interception_Script.py">sample fido2 interception script</a>.</p>
+<h3 id="script-type-python">Script Type: Python<a class="headerlink" href="#script-type-python" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Janssen Project software is available under the Apache 2.0 License (2004). See http://www.apache.org/licenses/ for full text.</span>
+<span class="c1"># Copyright (c) 2023, Janssen Project</span>
+<span class="c1">#</span>
+<span class="kn">from</span> <span class="nn">io.jans.service.cdi.util</span> <span class="kn">import</span> <span class="n">CdiUtil</span>
+<span class="kn">from</span> <span class="nn">io.jans.model.custom.script.type.fido2</span> <span class="kn">import</span> <span class="n">Fido2InterceptionType</span>
+<span class="kn">from</span> <span class="nn">io.jans.fido2.service.operation</span> <span class="kn">import</span> <span class="n">AttestationService</span>
+<span class="kn">from</span> <span class="nn">io.jans.fido2.service.operation</span> <span class="kn">import</span> <span class="n">AssertionService</span>
+<span class="kn">from</span> <span class="nn">io.jans.util</span> <span class="kn">import</span> <span class="n">StringHelper</span>
+<span class="kn">from</span> <span class="nn">org.json</span> <span class="kn">import</span> <span class="n">JSONObject</span>
+<span class="kn">from</span> <span class="nn">com.fasterxml.jackson.databind</span> <span class="kn">import</span> <span class="n">JsonNode</span>
+<span class="kn">from</span> <span class="nn">org.apache.logging.log4j</span> <span class="kn">import</span> <span class="n">ThreadContext</span>
+<span class="kn">from</span> <span class="nn">io.jans.fido2.model.u2f.error</span> <span class="kn">import</span> <span class="n">Fido2ErrorResponseFactory</span>
+<span class="kn">from</span> <span class="nn">io.jans.fido2.model.u2f.error</span> <span class="kn">import</span> <span class="n">Fido2ErrorResponseType</span>
+<span class="kn">from</span> <span class="nn">io.jans.as.model.config</span> <span class="kn">import</span> <span class="n">Constants</span>
+
+<span class="kn">from</span> <span class="nn">java.lang</span> <span class="kn">import</span> <span class="n">String</span>
+
+<span class="k">class</span> <span class="nc">Fido2Interception</span><span class="p">(</span><span class="n">Fido2InterceptionType</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">currentTimeMillis</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentTimeMillis</span> <span class="o">=</span> <span class="n">currentTimeMillis</span>
+
+    <span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">customScript</span><span class="p">,</span>  <span class="n">configurationAttributes</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;Fido2Interception. Initialization&quot;</span>
+        <span class="nb">print</span> <span class="s2">&quot;Fido2Interception. Initialized successfully&quot;</span>
+        <span class="k">return</span> <span class="kc">True</span>   
+
+    <span class="k">def</span> <span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">configurationAttributes</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;Fido2Interception. Destroy&quot;</span>
+        <span class="nb">print</span> <span class="s2">&quot;Fido2Interception. Destroyed successfully&quot;</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span> <span class="nf">getApiVersion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">11</span>
+
+<span class="c1">#To generate a bad request WebApplicationException giving a message. This method is to be called inside (interceptRegisterAttestation, interceptVerifyAttestation, interceptAuthenticateAssertion, interceptVerifyAssertion)</span>
+    <span class="k">def</span> <span class="nf">throwBadRequestException</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s2">&quot;Fido2Interception. setting Bad request exception&quot;</span>
+    <span class="n">errorClaimException</span> <span class="o">=</span> <span class="n">Fido2ErrorResponseFactory</span><span class="o">.</span><span class="n">createBadRequestException</span><span class="p">(</span><span class="n">Fido2ErrorResponseType</span><span class="o">.</span><span class="n">BAD_REQUEST_INTERCEPTION</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">ThreadContext</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">Constants</span><span class="o">.</span><span class="n">CORRELATION_ID_HEADER</span><span class="p">))</span>
+    <span class="n">context</span><span class="o">.</span><span class="n">setWebApplicationException</span><span class="p">(</span><span class="n">errorClaimException</span><span class="p">)</span>
+
+<span class="c1">#This method is called in Attestation register endpoint, just before to start the registration process</span>
+    <span class="k">def</span> <span class="nf">interceptRegisterAttestation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">paramAsJsonNode</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+    <span class="nb">print</span> <span class="s2">&quot;Fido2Interception. interceptRegisterAttestation&quot;</span>
+    <span class="n">attestationService</span> <span class="o">=</span> <span class="n">CdiUtil</span><span class="o">.</span><span class="n">bean</span><span class="p">(</span><span class="n">AttestationService</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="kc">True</span>
+
+<span class="c1">#This method is called in Attestation verify enpoint, just before to start the verification process </span>
+    <span class="k">def</span> <span class="nf">interceptVerifyAttestation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">paramAsJsonNode</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+    <span class="nb">print</span> <span class="s2">&quot;Fido2Interception. interceptVerifyAttestation&quot;</span>
+    <span class="n">attestationService</span> <span class="o">=</span> <span class="n">CdiUtil</span><span class="o">.</span><span class="n">bean</span><span class="p">(</span><span class="n">AttestationService</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+<span class="c1">#This method is called in Assertion authenticate enpoint, just before to start the authentication process       </span>
+    <span class="k">def</span> <span class="nf">interceptAuthenticateAssertion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">paramAsJsonNode</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+    <span class="nb">print</span> <span class="s2">&quot;Fido2Interception. interceptAuthenticateAssertion&quot;</span>
+    <span class="n">assertionService</span> <span class="o">=</span> <span class="n">CdiUtil</span><span class="o">.</span><span class="n">bean</span><span class="p">(</span><span class="n">AssertionService</span><span class="p">)</span>
+    <span class="nb">print</span> <span class="s2">&quot;Fido2Interception. printing username:&quot;</span>
+    <span class="nb">print</span> <span class="n">paramAsJsonNode</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;username&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">asText</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">paramAsJsonNode</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;username&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">asText</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;test_user&#39;</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">throwBadRequestException</span><span class="p">(</span><span class="s2">&quot;Fido2Interception interceptAuthenticateAssertion : test_user&quot;</span><span class="p">,</span> <span class="s2">&quot;Description Error from script : test_user&quot;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="kc">True</span>
+
+<span class="c1">#This method is called in Assertion verify enpoint, just before to start the verification process       </span>
+    <span class="k">def</span> <span class="nf">interceptVerifyAssertion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">paramAsJsonNode</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+    <span class="nb">print</span> <span class="s2">&quot;Fido2Interception. interceptVerifyAssertion&quot;</span>
+    <span class="n">assertionService</span> <span class="o">=</span> <span class="n">CdiUtil</span><span class="o">.</span><span class="n">bean</span><span class="p">(</span><span class="n">AssertionService</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span>
+</code></pre></div>
+<h3 id="script-type-java">Script Type: Java<a class="headerlink" href="#script-type-java" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.SimpleCustomProperty</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.custom.script.model.CustomScript</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.model.custom.script.type.auth.Fido2InterceptionType</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.service.custom.script.CustomScriptManager</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">io.jans.fido2.service.external.context.ExternalFido2InterceptionContext</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">com.fasterxml.jackson.databind.JsonNode</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.apache.logging.log4j.ThreadContext</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.jboss.resteasy.spi.NoLogWebApplicationException</span><span class="p">;</span><span class="w"></span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.util.Map</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.slf4j.Logger</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">org.slf4j.LoggerFactory</span><span class="p">;</span><span class="w"></span>
+
+<span class="kd">public</span><span class="w"> </span><span class="kd">class</span> <span class="nc">Fido2Interception</span><span class="w"> </span><span class="kd">implements</span><span class="w"> </span><span class="n">Fido2InterceptionType</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kd">static</span><span class="w"> </span><span class="kd">final</span><span class="w"> </span><span class="n">Logger</span><span class="w"> </span><span class="n">log</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">LoggerFactory</span><span class="p">.</span><span class="na">getLogger</span><span class="p">(</span><span class="n">CustomScriptManager</span><span class="p">.</span><span class="na">class</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">SimpleCustomProperty</span><span class="o">&gt;</span><span class="w"> </span><span class="n">configurationAttributes</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Fido2Interception Script. Initializing...&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Fido2Interception Script. Initialized&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="n">CustomScript</span><span class="w"> </span><span class="n">customScript</span><span class="p">,</span><span class="w"> </span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">SimpleCustomProperty</span><span class="o">&gt;</span><span class="w"> </span><span class="n">configurationAttributes</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Fido2Interception Script. Initializing...&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Fido2Interception Script. Initialized&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">destroy</span><span class="p">(</span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">SimpleCustomProperty</span><span class="o">&gt;</span><span class="w"> </span><span class="n">configurationAttributes</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Fido2Interception Script. Destroying...&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Fido2Interception Script. Destroyed.&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">getApiVersion</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">11</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">interceptRegisterAttestation</span><span class="p">(</span><span class="n">JsonNode</span><span class="w"> </span><span class="n">paramsAsJsonNode</span><span class="p">,</span><span class="w"> </span><span class="n">ExternalFido2InterceptionContext</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Fido2Interception Script. Attestation Register...&quot;</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">interceptVerifyAttestation</span><span class="p">(</span><span class="n">JsonNode</span><span class="w"> </span><span class="n">paramsAsJsonNode</span><span class="p">,</span><span class="w"> </span><span class="n">ExternalFido2InterceptionContext</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Fido2Interception Script. Attestation Register...&quot;</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">interceptAuthenticateAssertion</span><span class="p">(</span><span class="n">JsonNode</span><span class="w"> </span><span class="n">paramsAsJsonNode</span><span class="p">,</span><span class="w"> </span><span class="n">ExternalFido2InterceptionContext</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Fido2Interception Script. Assertion Authenticate...&quot;</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">        </span><span class="n">JsonNode</span><span class="w"> </span><span class="n">jsonNodeUser</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">paramsAsJsonNode</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="s">&quot;username&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">jsonNodeUser</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Fido2Interception. printing username: {}&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">jsonNodeUser</span><span class="p">.</span><span class="na">asText</span><span class="p">());</span><span class="w"></span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">jsonNodeUser</span><span class="p">.</span><span class="na">asText</span><span class="p">().</span><span class="na">equals</span><span class="p">(</span><span class="s">&quot;test_user&quot;</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                </span><span class="n">throwBadRequestException</span><span class="p">(</span><span class="s">&quot;Fido2Interception interceptAuthenticateAssertion : test_user&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Description Error from script : test_user&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">context</span><span class="p">);</span><span class="w"></span>
+<span class="w">            </span><span class="p">}</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">boolean</span><span class="w"> </span><span class="nf">interceptVerifyAssertion</span><span class="p">(</span><span class="n">JsonNode</span><span class="w"> </span><span class="n">paramsAsJsonNode</span><span class="p">,</span><span class="w"> </span><span class="n">ExternalFido2InterceptionContext</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Fido2Interception Script. Assertion Verify...&quot;</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">throwBadRequestException</span><span class="p">(</span><span class="n">String</span><span class="w"> </span><span class="n">title</span><span class="p">,</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">message</span><span class="p">,</span><span class="w"> </span><span class="n">ExternalFido2InterceptionContext</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">log</span><span class="p">.</span><span class="na">info</span><span class="p">(</span><span class="s">&quot;Fido2Interception. setting Bad request exception&quot;</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="n">WebApplicationException</span><span class="w"> </span><span class="n">errorClaimException</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Fido2ErrorResponseFactory</span><span class="p">.</span><span class="na">createBadRequestException</span><span class="p">(</span><span class="n">Fido2ErrorResponseType</span><span class="p">.</span><span class="na">BAD_REQUEST_INTERCEPTION</span><span class="p">,</span><span class="w"> </span><span class="n">title</span><span class="p">,</span><span class="w"> </span><span class="n">message</span><span class="p">,</span><span class="w"> </span><span class="n">ThreadContext</span><span class="p">.</span><span class="na">get</span><span class="p">(</span><span class="n">Constants</span><span class="p">.</span><span class="na">CORRELATION_ID_HEADER</span><span class="p">));</span><span class="w"></span>
+<span class="w">        </span><span class="n">context</span><span class="p">.</span><span class="na">setWebApplicationException</span><span class="p">((</span><span class="n">NoLogWebApplicationException</span><span class="p">)</span><span class="w"> </span><span class="n">errorClaimException</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-04-26T20:15:34+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-04-26</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-04-26T08:57:47+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-04-26</span>
       
         <br>
         Created:
-        <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-02-28T15:37:22+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-02-28</span>
+        <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-04-26T08:57:47+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-04-26</span>
       
     
   </small>
@@ -7606,42 +7575,6 @@ can be used to update user's password. </li>
       </main>
       
         <footer class="md-footer">
-  
-    
-    <nav class="md-footer__inner md-grid" aria-label="Footer" >
-      
-        
-        <a href="../" class="md-footer__link md-footer__link--prev" aria-label="Previous: Index" rel="prev">
-          <div class="md-footer__button md-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
-          </div>
-          <div class="md-footer__title">
-            <div class="md-ellipsis">
-              <span class="md-footer__direction">
-                Previous
-              </span>
-              Index
-            </div>
-          </div>
-        </a>
-      
-      
-        
-        <a href="../../jans-cli/" class="md-footer__link md-footer__link--next" aria-label="Next: Janssen CLI" rel="next">
-          <div class="md-footer__title">
-            <div class="md-ellipsis">
-              <span class="md-footer__direction">
-                Next
-              </span>
-              Janssen CLI
-            </div>
-          </div>
-          <div class="md-footer__button md-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
-          </div>
-        </a>
-      
-    </nav>
   
   <div class="md-footer-meta md-typeset">
     <div class="md-footer-meta__inner md-grid">
