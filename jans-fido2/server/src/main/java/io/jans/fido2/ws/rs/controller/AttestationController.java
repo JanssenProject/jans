@@ -6,12 +6,7 @@
 
 package io.jans.fido2.ws.rs.controller;
 
-import java.io.IOException;
-
-import org.slf4j.Logger;
-
 import com.fasterxml.jackson.databind.JsonNode;
-
 import io.jans.fido2.exception.Fido2RpRuntimeException;
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.service.DataMapperService;
@@ -20,19 +15,17 @@ import io.jans.fido2.service.sg.converter.AttestationSuperGluuController;
 import io.jans.fido2.service.verifier.CommonVerifiers;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.FormParam;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
 import jakarta.ws.rs.core.Response.Status;
+import org.slf4j.Logger;
+
+import java.io.IOException;
 
 /**
  * serves request for /attestation endpoint exposed by FIDO2 sever
+ *
  * @author Yuriy Movchan
  * @version May 08, 2020
  */
@@ -59,8 +52,8 @@ public class AttestationController {
     private AppConfiguration appConfiguration;
 
     @POST
-    @Consumes({ "application/json" })
-    @Produces({ "application/json" })
+    @Consumes({"application/json"})
+    @Produces({"application/json"})
     @Path("/options")
     public Response register(String content) {
         if (appConfiguration.getFido2Configuration() == null) {
@@ -69,7 +62,7 @@ public class AttestationController {
 
         JsonNode params;
         try {
-        	params = dataMapperService.readTree(content);
+            params = dataMapperService.readTree(content);
         } catch (IOException ex) {
             throw new Fido2RpRuntimeException("Failed to parse options attestation request", ex);
         }
@@ -82,8 +75,8 @@ public class AttestationController {
     }
 
     @POST
-    @Consumes({ "application/json" })
-    @Produces({ "application/json" })
+    @Consumes({"application/json"})
+    @Produces({"application/json"})
     @Path("/result")
     public Response verify(String content) {
         if (appConfiguration.getFido2Configuration() == null) {
@@ -92,7 +85,7 @@ public class AttestationController {
 
         JsonNode params;
         try {
-        	params = dataMapperService.readTree(content);
+            params = dataMapperService.readTree(content);
         } catch (IOException ex) {
             throw new Fido2RpRuntimeException("Failed to parse finish attestation request", ex) ;
         }
@@ -105,7 +98,7 @@ public class AttestationController {
     }
 
     @GET
-    @Produces({ "application/json" })
+    @Produces({"application/json"})
     @Path("/registration")
     public Response startRegistration(@QueryParam("username") String userName, @QueryParam("application") String appId, @QueryParam("session_id") String sessionId, @QueryParam("enrollment_code") String enrollmentCode) {
         if ((appConfiguration.getFido2Configuration() == null) && !appConfiguration.isSuperGluuEnabled()) {
@@ -123,7 +116,7 @@ public class AttestationController {
     }
 
     @POST
-    @Produces({ "application/json" })
+    @Produces({"application/json"})
     @Path("/registration")
     public Response finishRegistration(@FormParam("username") String userName, @FormParam("tokenResponse") String registerResponseString) {
         if ((appConfiguration.getFido2Configuration() == null) && !appConfiguration.isSuperGluuEnabled()) {
