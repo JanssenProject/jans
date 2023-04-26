@@ -2,17 +2,25 @@ package io.jans.as.server.service;
 
 import io.jans.as.common.claims.Audience;
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.model.authorize.AuthorizeErrorResponseType;
+import io.jans.as.model.common.ScopeConstants;
 import io.jans.as.model.config.Constants;
 import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.server.model.common.AuthorizationGrant;
 import io.jans.as.server.model.token.JwtSigner;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import org.json.JSONObject;
 import org.slf4j.Logger;
+
+import static org.apache.commons.lang.BooleanUtils.isTrue;
 
 /**
  * @author Yuriy Z
@@ -32,6 +40,18 @@ public class IntrospectionService {
 
     @Inject
     private ClientService clientService;
+
+    @Inject
+    private ErrorResponseFactory errorResponseFactory;
+
+    public void validateIntrospectionScopePresence(AuthorizationGrant authorizationGrant) {
+        if (isTrue(appConfiguration.getIntrospectionAccessTokenMustHaveIntrospectionScope()) &&
+                !authorizationGrant.getScopesAsString().contains(ScopeConstants.INTROSPECTION)) {
+            final String reason = "access_token used to access introspection endpoint does not have 'introspection' scope, however in AS configuration 'introspectionAccessTokenMustHaveIntrospectionScope' is true";
+            log.trace(reason);
+            throw new WebApplicationException(Response.status(Response.Status.UNAUTHORIZED).entity(errorResponseFactory.errorAsJson(AuthorizeErrorResponseType.ACCESS_DENIED, reason)).type(MediaType.APPLICATION_JSON_TYPE).build());
+        }
+    }
 
     public boolean isJwtResponse(String responseAsJwt, String acceptHeader) {
         return Boolean.TRUE.toString().equalsIgnoreCase(responseAsJwt) ||
