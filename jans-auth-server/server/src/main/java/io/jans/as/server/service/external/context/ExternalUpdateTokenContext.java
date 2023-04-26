@@ -33,7 +33,7 @@ public class ExternalUpdateTokenContext extends ExternalScriptContext {
     private static final Logger log = LoggerFactory.getLogger(ExternalUpdateTokenContext.class);
 
     private final Client client;
-    private final AuthorizationGrant grant;
+    private AuthorizationGrant grant;
 
     private final AppConfiguration appConfiguration;
     private final AttributeService attributeService;
@@ -60,6 +60,7 @@ public class ExternalUpdateTokenContext extends ExternalScriptContext {
         ExternalUpdateTokenContext context = new ExternalUpdateTokenContext(executionContext.getHttpRequest(), executionContext.getGrant(), executionContext.getClient(), executionContext.getAppConfiguration(), executionContext.getAttributeService());
         context.setExecutionContext(executionContext);
         context.setJwtSigner(jwtSigner);
+        context.setGrant(executionContext.getGrant());
         return context;
     }
 
@@ -111,6 +112,10 @@ public class ExternalUpdateTokenContext extends ExternalScriptContext {
 
     public AuthorizationGrant getGrant() {
         return grant;
+    }
+
+    public void setGrant(AuthorizationGrant grant) {
+        this.grant = grant;
     }
 
     public AppConfiguration getAppConfiguration() {

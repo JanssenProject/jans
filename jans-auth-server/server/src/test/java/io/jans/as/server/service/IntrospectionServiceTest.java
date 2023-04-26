@@ -1,12 +1,17 @@
 package io.jans.as.server.service;
 
+import com.google.common.collect.Lists;
+import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.config.Constants;
 import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.server.model.common.AuthorizationGrant;
+import io.jans.as.server.model.common.AuthorizationGrantType;
+import jakarta.ws.rs.WebApplicationException;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
 import org.mockito.InjectMocks;
@@ -17,6 +22,9 @@ import org.slf4j.Logger;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import java.util.Date;
+
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.*;
 import static org.testng.AssertJUnit.assertNotNull;
 
@@ -41,6 +49,40 @@ public class IntrospectionServiceTest {
 
     @Mock
     private ClientService clientService;
+
+    @Mock
+    private ErrorResponseFactory errorResponseFactory;
+
+    @Test
+    public void validateIntrospectionScopePresence_whenIntrospectionScopeCheckIsDisabled_shouldNotRaiseException() {
+        when(appConfiguration.getIntrospectionAccessTokenMustHaveIntrospectionScope()).thenReturn(false);
+
+        introspectionService.validateIntrospectionScopePresence(getTestGrant());
+    }
+
+    @Test
+    public void validateIntrospectionScopePresence_whenIntrospectionScopeCheckIsEnabledAndIntrospectionScopePresent_shouldNotRaiseException() {
+        when(appConfiguration.getIntrospectionAccessTokenMustHaveIntrospectionScope()).thenReturn(true);
+        final AuthorizationGrant grant = getTestGrant();
+        grant.setScopes(Lists.newArrayList("introspection"));
+
+        introspectionService.validateIntrospectionScopePresence(grant);
+    }
+
+    @Test
+    public void validateIntrospectionScopePresence_whenIntrospectionScopeCheckIsEnabledAndIntrospectionScopeIsNotPresent_shouldRaiseException() {
+        when(appConfiguration.getIntrospectionAccessTokenMustHaveIntrospectionScope()).thenReturn(true);
+        final AuthorizationGrant grant = getTestGrant();
+        grant.setScopes(Lists.newArrayList("openid"));
+
+        try {
+            introspectionService.validateIntrospectionScopePresence(grant);
+        } catch (WebApplicationException e) {
+            return;
+        }
+
+        fail("Exception was not thrown however grant didn't have 'introspection' scope");
+    }
 
     @Test
     public void isJwtResponse_whenNoParameterAndNoAcceptHeader_shouldReturnFalse() {
@@ -79,17 +121,18 @@ public class IntrospectionServiceTest {
         assertEquals(jwt.getClaims().getClaimAsJSON("token_introspection").getString("newClaim"), "newValue");
     }
 
+    private static AuthorizationGrant getTestGrant() {
+        return getTestGrant(null);
+    }
+
     private static AuthorizationGrant getTestGrant(final Client client) {
-        return new AuthorizationGrant() {
+        final AuthorizationGrant grant = new AuthorizationGrant() {
             @Override
             public GrantType getGrantType() {
                 return GrantType.AUTHORIZATION_CODE;
             }
-
-            @Override
-            public Client getClient() {
-                return client;
-            }
         };
+        grant.init(new User(), AuthorizationGrantType.AUTHORIZATION_CODE, client, new Date());
+        return grant;
     }
 }

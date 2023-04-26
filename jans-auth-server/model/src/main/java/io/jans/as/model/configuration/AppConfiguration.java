@@ -551,6 +551,9 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "If True, rejects introspection requests if access_token does not have the uma_protection scope in its authorization header", defaultValue = "false")
     private Boolean introspectionAccessTokenMustHaveUmaProtectionScope = false;
 
+    @DocProperty(description = "If True, rejects introspection requests if access_token does not have the 'introspection' scope in its authorization header. Comparing to 'uma_protection', 'introspection' scope is not allowed for dynamic registration'", defaultValue = "false")
+    private Boolean introspectionAccessTokenMustHaveIntrospectionScope = false;
+
     @DocProperty(description = "Specifies if authorization to be skipped for introspection")
     private Boolean introspectionSkipAuthorization;
 
@@ -1323,6 +1326,15 @@ public class AppConfiguration implements Configuration {
     public void setFrontChannelLogoutSessionSupported(
             Boolean frontChannelLogoutSessionSupported) {
         this.frontChannelLogoutSessionSupported = frontChannelLogoutSessionSupported;
+    }
+
+    public Boolean getIntrospectionAccessTokenMustHaveIntrospectionScope() {
+        if (introspectionAccessTokenMustHaveIntrospectionScope == null) introspectionAccessTokenMustHaveIntrospectionScope = false;
+        return introspectionAccessTokenMustHaveIntrospectionScope;
+    }
+
+    public void setIntrospectionAccessTokenMustHaveIntrospectionScope(Boolean introspectionAccessTokenMustHaveIntrospectionScope) {
+        this.introspectionAccessTokenMustHaveIntrospectionScope = introspectionAccessTokenMustHaveIntrospectionScope;
     }
 
     public Boolean getIntrospectionAccessTokenMustHaveUmaProtectionScope() {
