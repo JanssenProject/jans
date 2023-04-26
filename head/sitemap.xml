@@ -811,6 +811,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://jans.io/docs/head/admin/developer/scripts/fido2-interception/</loc>
+         <lastmod>2023-04-26</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://jans.io/docs/head/admin/developer/scripts/id-generator/</loc>
          <lastmod>2023-04-26</lastmod>
          <changefreq>daily</changefreq>
@@ -2187,6 +2192,11 @@
     </url>
     <url>
          <loc>https://jans.io/docs/head/script-catalog/end_session/end-session/</loc>
+         <lastmod>2023-04-26</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/head/script-catalog/fido2_interception/fido2-interception/</loc>
          <lastmod>2023-04-26</lastmod>
          <changefreq>daily</changefreq>
     </url>
