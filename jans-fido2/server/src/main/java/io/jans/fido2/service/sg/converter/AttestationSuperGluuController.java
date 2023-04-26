@@ -46,7 +46,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 /**
- * Converters Super Gluu registration request to U2F V2 request 
+ * Converters Super Gluu registration request to U2F V2 request
  * @author Yuriy Movchan
  * @version Jan 26, 2023
  */
@@ -67,7 +67,7 @@ public class AttestationSuperGluuController {
 
     @Inject
     private Base64Service base64Service;
-    
+
     @Inject
     private RawRegistrationService rawRegistrationService;
 
@@ -95,7 +95,7 @@ public class AttestationSuperGluuController {
      *  - response:
      *             {"authenticateRequests":[],"registerRequests":[{"challenge":"GU4usvpYfvQ_RCMSqm819gTZMa0qCeLr1Xg2KbvW2To"
      *             "appId":"https://yurem-emerging-pig.gluu.info/identity/authcode.htm","version":"U2F_V2"}]}
-     *            
+     *
      * Example for two_step:
      *  - request:
      *             username: test1
@@ -148,7 +148,7 @@ public class AttestationSuperGluuController {
         params.put("displayName", useUserName);
 
         params.put("session_id", sessionId);
-        
+
         // Required parameters
         params.put("attestation", "direct");
 
@@ -176,7 +176,7 @@ public class AttestationSuperGluuController {
      *             aF90b2tlbiIsInR5cGUiOiJub3JtYWwiLCJ1dWlkIjoidXVpZCJ9"}
      *  - response:
      *             {"status":"success","challenge":"GU4usvpYfvQ_RCMSqm819gTZMa0qCeLr1Xg2KbvW2To"}
-     *            
+     *
     * Example for two_step:
      *  - request:
      *             username: test1
@@ -197,7 +197,7 @@ public class AttestationSuperGluuController {
      *             aF90b2tlbiIsInR5cGUiOiJub3JtYWwiLCJ1dWlkIjoidXVpZCJ9"}
      *  - response:
      *             {"status":"success","challenge":"raPfmqZOHlHF4gXbprd29uwX-bs3Ff5v03quxBD4FkM"}
-     *            
+     *
      */
     public JsonNode finishRegistration(String userName, String registerResponseString) {
         RegisterResponse registerResponse = parseRegisterResponse(registerResponseString);
@@ -205,7 +205,7 @@ public class AttestationSuperGluuController {
         ObjectNode params = buildFido2AttestationVerifyResponse(userName, registerResponse);
 
         ObjectNode result = attestationService.verify(params);
-        
+
         result.put("status", "success");
         result.put("challenge", registerResponse.getClientData().getChallenge());
 
@@ -241,7 +241,7 @@ public class AttestationSuperGluuController {
         ObjectNode response = dataMapperService.createObjectNode();
         params.set("response", response);
         response.put("deviceData", registerResponse.getDeviceData());
-        
+
         // Convert clientData node to new format
         ObjectNode clientData = dataMapperService.createObjectNode();
         clientData.put("challenge", registerResponse.getClientData().getChallenge());
@@ -259,7 +259,7 @@ public class AttestationSuperGluuController {
 
         ObjectNode attestationObject = dataMapperService.createObjectNode();
         ObjectNode attStmt = dataMapperService.createObjectNode();
-        
+
         try {
 			ArrayNode x5certs = attStmt.putArray("x5c");
 			x5certs.add(base64Service.encodeToString(rawRegisterResponse.getAttestationCertificate().getEncoded()));
@@ -287,7 +287,7 @@ public class AttestationSuperGluuController {
     	byte[] counter = ByteBuffer.allocate(4).putInt(0).array();
 
         byte[] aaguid = ByteBuffer.allocate(16).array();
-        
+
         byte[] credIDBuffer = rawRegisterResponse.getKeyHandle();
 
         byte[] credIDLenBuffer = ByteBuffer.allocate(2).putShort((short) credIDBuffer.length).array();
@@ -297,13 +297,13 @@ public class AttestationSuperGluuController {
 				rawRegisterResponse.getUserPublicKey());
 
 		byte[] cosePublicKeyBuffer = dataMapperService.cborWriteAsBytes(uncompressedECPoint);
-        
+
 		byte[] authData = ByteBuffer
 				.allocate(rpIdHash.length + flags.length + counter.length + aaguid.length + credIDLenBuffer.length
 						+ credIDBuffer.length + cosePublicKeyBuffer.length)
 				.put(rpIdHash).put(flags).put(counter).put(aaguid).put(credIDLenBuffer).put(credIDBuffer)
 				.put(cosePublicKeyBuffer).array();
-		
+
 		return authData;
     }
 

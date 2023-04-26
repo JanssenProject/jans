@@ -18,7 +18,7 @@ tags:
   - name: FIDO2 Assertion
   - name: FIDO2 Attestation
 paths:
-  /fido2/configuration:
+  /jans-fido2/restv1/configuration:
     get:
       tags:
         - FIDO2 configuration
@@ -74,13 +74,19 @@ paths:
                         result_enpoint:
                           type: string
                           description: fido2 assertion result endpoint
+                  super_gluu_registration_endpoint:
+                    type: string
+                    description: Endpoint for SuperGluu registration
+                  super_gluu_authentication_endpoint:
+                    type: string
+                    description: Endpoint for SuperGluu authentication
         403:
           $ref: '#/components/responses/AccessDenied'
         406:
           $ref: '#/components/responses/NotAcceptable'
         500:
           $ref: '#/components/responses/InternalServerError'
-  /fido2/assertion/options:
+  /jans-fido2/restv1/assertion/options:
     post:
       tags:
         - FIDO2 Assertion
@@ -92,23 +98,21 @@ paths:
           application/json:
             schema:
               title: AssertionOptions
+              description: An object that contains the extensions to enable, and the options to use for each of them.
               type: object
+              required:
+                - username
               properties:
-                content:
-                  type: object
-                  description: An object that contains the extensions to enable, and the options to use for each of them.
-                  properties:
-                    username:
-                      type: string
-                    authenticatorSelection:
-                      type: array
-                      items:
-                        type: string
-                        description: Set of parameters required for FIDO2 assertion option.
-                    documentDomain:
-                      type: string
-                    extensions:
-                      type: string
+                username:
+                  type: string
+                userVerification:
+                  type: string
+                documentDomain:
+                  type: string
+                extensions:
+                  type: string
+                session_id:
+                  type: string
       responses:
         200:
           description: OK
@@ -141,12 +145,19 @@ paths:
                   userVerification:
                     type: string
                   extensions:
+                    type: object
+                  rpId:
+                    type: string
+                    description: Document domain.
+                  status:
+                    type: string
+                  errorMessage:
                     type: string
         403:
           $ref: '#/components/responses/AccessDenied'
         500:
           $ref: '#/components/responses/InternalServerError'
-  /fido2/assertion/result:
+  /jans-fido2/restv1/assertion/result:
     post:
       tags:
         - FIDO2 Assertion
@@ -158,13 +169,16 @@ paths:
           application/json:
             schema:
               title: AssertionOptions
-              required:
-                - clientDataJSON
               type: object
+              required:
+                - id
+                - type
+                - response
+                - rawId
               properties:
                 id:
                   type: string
-                  description: The base64url encoded id returned by the client
+                  description: The base64url encoded id
                 type:
                   type: string
                   example:
@@ -172,31 +186,198 @@ paths:
                 rawId:
                   type: string
                   description: The base64url encoded rawId returned by the client. If res.rawId is missing, res.id will be used instead. If both are missing an error will be thrown.
-                userHandle:
-                  type: string
-                  description: The base64url encoded userHandle returned by the client. May be null or an empty string.
-                clientDataJSON:
-                  type: array
-                  description: The base64url encoded clientDataJSON returned by the client
-                  items:
-                    type: string
-                  example:
-                    - challenge
-                    - origin
+                response:
+                  type: object
+                  properties:
+                    userHandle:
+                      type: string
+                      description: The base64url encoded userHandle returned by the client. May be null or an empty string.
+                    clientDataJSON:
+                      type: string
+                      description: The base64url encoded clientDataJSON returned by the client.
+                    authenticatorData:
+                      type: string
+                      description: The base64url encoded authenticator Data. May be null or an empty string.
+                    signature:
+                      type: string
+                      description: To verify signature.
       responses:
         200:
           description: OK
-          content: {}
+          content:
+            application/json:
+              schema:
+                title: AssertionVerifyResponse
+                type: object
+                required:
+                  - status
+                properties:
+                  status:
+                    type: string
+                  errorMessage:
+                    type: string
+                  authenticatedCredentials:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                      id:
+                        type: string
+                      transports:
+                        type: array
+                        description: list of transports.
+                        items:
+                          type: string
+                        example:
+                          - net
+                          - qr
+                          - usb
         403:
           $ref: '#/components/responses/AccessDenied'
         500:
           $ref: '#/components/responses/InternalServerError'
-  /fido2/attestation/options:
+
+  /jans-fido2/restv1/assertion/authentication:
+    get:
+      tags:
+        - FIDO2 Assertion
+      summary: Start authentication endpoint for SuperGluu
+      description: Start authentication endpoint for SuperGluu.
+      operationId: get_authentication
+      parameters:
+        - name: username
+          in: query
+          required: true
+          description: Username for authentication.
+          schema:
+            type: string
+        - name: keyhandle
+          in: query
+          required: true
+          description: Key for authentication.
+          schema:
+            type: string
+        - name: application
+          in: query
+          required: true
+          description: .
+          schema:
+            type: string
+        - name: session_id
+          in: query
+          required: true
+          description: Session to be validated.
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: AssertionSuperGluuStartAuthenticationResponse
+                type: object
+                required:
+                  - authenticateRequests
+                properties:
+                  authenticateRequests:
+                    type: array
+                    description: List of authentication result
+                    items:
+                      type: object
+                      required:
+                        - challenge
+                        - appId
+                        - keyHandle
+                        - version
+                      properties:
+                        challenge:
+                          type: string
+                        appId:
+                          type: string
+                        keyHandle:
+                          type: string
+                        version:
+                          type: string
+        400:
+          $ref: '#/components/responses/InvalidRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/AccessDenied'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      tags:
+        - FIDO2 Assertion
+      summary: Finish authentication endpoint for SuperGluu
+      description: Finish authentication endpoint for SuperGluu.
+      operationId: post_authentication
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - username
+                - tokenResponse
+              properties:
+                username:
+                  type: string
+                  description: username for authentication.
+                tokenResponse:
+                  type: string
+                  description: tokenRespose used for finish authentication.
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: AssertionSuperGluuFinishAuthenticationResponse
+                type: object
+                required:
+                  - status
+                  - challenge
+                properties:
+                  status:
+                    type: string
+                  errorMessage:
+                    type: string
+                  challenge:
+                    type: string
+                  authenticatedCredentials:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                      id:
+                        type: string
+                      transports:
+                        type: array
+                        description: list of transports.
+                        items:
+                          type: string
+                        example:
+                          - net
+                          - qr
+                          - usb
+        400:
+          $ref: '#/components/responses/InvalidRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/AccessDenied'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+
+  /jans-fido2/restv1/attestation/options:
     post:
       tags:
         - FIDO2 Attestation
-      summary: Created new registration.
-      description: Created new registration.
+      summary: Create new registration.
+      description: Create new registration.
       operationId: attestation-options
       requestBody:
         content:
@@ -205,6 +386,10 @@ paths:
               title: AttestationOptions
               description: An object containing various options for the option creation
               type: object
+              required:
+                - username
+                - displayName
+                - attestation
               properties:
                 username:
                   type: string
@@ -216,6 +401,12 @@ paths:
                    - direct
                    - indirect
                    - none
+                documentDomain:
+                  type: string
+                timeout:
+                  type: integer
+                extensions:
+                  type: object
                 authenticatorSelection:
                   type: object
                   properties:
@@ -316,7 +507,7 @@ paths:
           $ref: '#/components/responses/AccessDenied'
         500:
           $ref: '#/components/responses/InternalServerError'
-  /fido2/attestation/result:
+  /jans-fido2/restv1/attestation/result:
     post:
       tags:
         - FIDO2 Attestation
@@ -331,9 +522,13 @@ paths:
               description: An object containing various options for the option creation
               type: object
               required:
+                - id
                 - type
                 - response
               properties:
+                id:
+                  type: string
+                  description: base64url encoded
                 type:
                   type: string
                   enum: 
@@ -342,7 +537,11 @@ paths:
                   type: object
                   required:
                     - clientDataJSON
+                    - attestationObject
                   properties:
+                    attestationObject:
+                      type: string
+                      description: base64url encoded
                     clientDataJSON:
                       type: object
                       description: The base64url encoded clientDataJSON returned by the client
@@ -368,6 +567,10 @@ paths:
                               type: string
                             id:
                               type: string
+                    clientExtensionResults:
+                      type: array
+                      items:
+                        type: string
       responses:        
         200:
           description: OK
@@ -375,6 +578,258 @@ paths:
             application/json:
               schema:
                 title: Fido2RegistrationData
+                type: object
+                properties:
+                  createdCredentials:
+                    type: object
+                    properties:
+                      createdDate:
+                        type: string
+                        format: date-time
+                      updatedDate:
+                        type: string
+                        format: date-time
+                      createdBy:
+                        type: string
+                      updatedBy:
+                        type: string
+                      username:
+                        type: string
+                      domain:
+                        type: string
+                      userId:
+                        type: string
+                      challenge:
+                        type: string
+                      attestationRequest:
+                        type: string
+                      attestationResponse:
+                        type: object
+                        properties:
+                          type:
+                            type: string
+                            enum:
+                              - public-key
+                          id:
+                            type: string
+                          response:
+                            type: object
+                            required:
+                              - attestationObject
+                              - clientDataJSON
+                            properties:
+                              attestationObject:
+                                type: string
+                              clientDataJSON:
+                                type: string
+                              clientExtensionResults:
+                                type: array
+                                items:
+                                  type: string
+                      uncompressedECPoint:
+                        type: string
+                      publicKeyId:
+                        type: string
+                      type:
+                        type: string
+                        enum:
+                          - public-key
+                      status:
+                        type: string
+                        enum:
+                          - registered
+                      counter:
+                        type: integer
+                      attestationType:
+                        type: string
+                      signatureAlgorithm:
+                        type: integer
+                      applicationId:
+                        type: string
+                      authenticatorSelection:
+                        type: object
+                        properties:
+                          authenticatorAttachment:
+                            type: string
+                            format: enum
+                             - platform
+                             - cross-platform
+                          userVerification:
+                            type: string
+                            format: enum
+                             - required
+                             - preferred
+                             - discouraged
+                          requireResidentKey:
+                            type: boolean
+                  errorMessage:
+                    type: string
+                  status:
+                    type: string
+        403:
+          $ref: '#/components/responses/AccessDenied'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+
+  /jans-fido2/restv1/attestation/registration:
+    get:
+      tags:
+        - FIDO2 Attestation
+      summary: Start registration endpoint for SuperGluu
+      description: Start registration endpoint for SuperGluu.
+      operationId: get_registration
+      parameters:
+        - name: username
+          in: query
+          required: true
+          description: Username for registration.
+          schema:
+            type: string
+        - name: application
+          in: query
+          required: true
+          description: .
+          schema:
+            type: string
+        - name: session_id
+          in: query
+          required: true
+          description: Session to be validated.
+          schema:
+            type: string
+        - name: enrollment_code
+          in: query
+          required: true
+          description: .
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: AssertionSuperGluuStartRegistrationResponse
+                type: object
+                properties:
+                  registerRequests:
+                    type: array
+                    description: List of registration result
+                    items:
+                      type: object
+                      properties:
+                        appId:
+                          type: string
+                        version:
+                          type: string
+                        attestation:
+                          type: string
+                          format: enum
+                            - direct
+                            - indirect
+                            - none
+                        authenticatorSelection:
+                          type: object
+                          properties:
+                            authenticatorAttachment:
+                              type: string
+                              format: enum
+                                - platform
+                                - cross-platform
+                            userVerification:
+                              type: string
+                              format: enum
+                                - required
+                                - preferred
+                                - discouraged
+                            requireResidentKey:
+                              type: boolean
+                        challenge:
+                          type: string
+                          description: The base64url encoded challenge that was sent to the client, as generated by assertionOptions.
+                        pubKeyCredParams:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                            alg:
+                              type: string
+                        rp:
+                          type: object
+                          description: RP credentials
+                          properties:
+                            name:
+                              type: string
+                            id:
+                              type: string
+                        username:
+                          type: string
+                        displayName:
+                          type: string
+                        user:
+                          type: object
+                          description: User object
+                          properties:
+                            id:
+                              type: string
+                            name:
+                              type: string
+                            displayName:
+                              type: string
+                        excludeCredentials:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                            id:
+                              type: string
+                        timeout:
+                          type: integer
+                        extensions:
+                          type: array
+                          items:
+                            type: string
+                        status:
+                          type: string
+                        errorMessage:
+                          type: string
+        400:
+          $ref: '#/components/responses/InvalidRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/AccessDenied'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      tags:
+        - FIDO2 Attestation
+      summary: Finish registration endpoint for SuperGluu
+      description: Finish registration endpoint for SuperGluu.
+      operationId: post_registration
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - username
+                - tokenResponse
+              properties:
+                username:
+                  type: string
+                  description: username for finish registration.
+                tokenResponse:
+                  type: string
+                  description: tokenResponse used for finish registration.
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: AttestationSuperGluuFinishRegistrationResponse
                 type: object
                 properties:
                   createdDate:
@@ -395,9 +850,9 @@ paths:
                     type: string
                   challenge:
                     type: string
-                  attenstationRequest:
+                  attestationRequest:
                     type: string
-                  attenstationResponse:
+                  attestationResponse:
                     type: object
                     properties:
                       type:
@@ -439,26 +894,30 @@ paths:
                   signatureAlgorithm:
                     type: integer
                   applicationId:
-                    type: string					
+                    type: string
                   authenticatorSelection:
                     type: object
                     properties:
                       authenticatorAttachment:
                         type: string
                         format: enum
-                         - platform
-                         - cross-platform
+                          - platform
+                          - cross-platform
                       userVerification:
                         type: string
                         format: enum
-                         - required
-                         - preferred
-                         - discouraged
+                          - required
+                          - preferred
+                          - discouraged
                       requireResidentKey:
                         type: boolean
                   errorMessage:
                     type: string
-
+        400:
+          $ref: '#/components/responses/InvalidRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
           $ref: '#/components/responses/AccessDenied'
         500:
           $ref: '#/components/responses/InternalServerError'
