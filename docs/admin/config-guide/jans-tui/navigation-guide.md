@@ -40,7 +40,7 @@ Close any dialog or even nested dialog
 ![esc](https://user-images.githubusercontent.com/63171603/210389011-97da92b1-57b8-4628-9810-3a571255ea20.gif)
 
 * `Ctrl+c`(Terminate) :  
-Terminate the program (SigKILL)
+Terminate the program (SIGINT)
 
 ------------------------------------
 
