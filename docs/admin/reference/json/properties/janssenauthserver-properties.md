@@ -126,7 +126,7 @@ tags:
 | grantTypesSupported | This list details which OAuth 2.0 grant types are supported by this OP | [Details](#granttypessupported) |
 | httpLoggingEnabled | Enable/disable request/response logging filter | [Details](#httploggingenabled) |
 | httpLoggingExcludePaths | This list details the base URIs for which the request/response logging filter will not record activity | [Details](#httploggingexcludepaths) |
-| httpLoggingResponseBodyContent | Defines if Response body will be logged. Default value is false | [Details](#httploggingresponsebodycontent) |
+| httpLoggingResponseBodyContent | Defines if Response body will be logged, applied just if 'httpLoggingEnabled' is true and 'loggingLevel' is 'DEBUG', use 'httpLoggingExcludePaths' to avoid logging of unnecessary responses like ('/jans-auth/js/platform.js','/jans-auth/stylesheet/style.css'). Default value is false | [Details](#httploggingresponsebodycontent) |
 | idGenerationEndpoint | ID Generation endpoint URL | [Details](#idgenerationendpoint) |
 | idTokenEncryptionAlgValuesSupported | A list of the JWE encryption algorithms (alg values) supported by the OP for the ID Token to encode the Claims in a JWT | [Details](#idtokenencryptionalgvaluessupported) |
 | idTokenEncryptionEncValuesSupported | A list of the JWE encryption algorithms (enc values) supported by the OP for the ID Token to encode the Claims in a JWT | [Details](#idtokenencryptionencvaluessupported) |
@@ -1318,7 +1318,7 @@ tags:
 
 ### httpLoggingResponseBodyContent
 
-- Description: Defines if Response body will be logged. Default value is false
+- Description: Defines if Response body will be logged, applied just if 'httpLoggingEnabled' is true and 'loggingLevel' is 'DEBUG', use 'httpLoggingExcludePaths' to avoid logging of unnecessary responses like ('/jans-auth/js/platform.js','/jans-auth/stylesheet/style.css') this kind of responses will fill the log with non relevant information. Default value is false
 
 - Required: No
 

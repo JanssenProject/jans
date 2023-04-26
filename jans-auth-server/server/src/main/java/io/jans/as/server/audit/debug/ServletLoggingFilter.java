@@ -83,7 +83,7 @@ public class ServletLoggingFilter implements Filter {
         RequestWrapper requestWrapper = new RequestWrapper(httpRequest);
         HttpServletResponseWrapper responseWrapper = null;
         /** If httpLoggingResponseBodyContent  is enabled then LogResponseWrapper is used, otherwise normal ResponseWrapper is used **/
-        if (appConfiguration.getHttpLoggingResponseBodyContent()) {
+        if (log.isDebugEnabled() && appConfiguration.getHttpLoggingResponseBodyContent()) {
             responseWrapper = new LogResponseWrapper((HttpServletResponse) response);
         } else {
             responseWrapper = new ResponseWrapper(httpResponse);
