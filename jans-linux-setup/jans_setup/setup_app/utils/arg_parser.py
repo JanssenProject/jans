@@ -91,6 +91,8 @@ if PROFILE != OPENBANKING_PROFILE:
     parser.add_argument('--no-scim', help="Do not install Scim Server", action='store_true')
     parser.add_argument('--no-fido2', help="Do not install Fido2 Server", action='store_true')
     parser.add_argument('--install-eleven', help="Install Eleven Server", action='store_true')
+    parser.add_argument('--install-cache-refresh', help="Install Cache Refresh Server", action='store_true')
+
     #parser.add_argument('--oxd-use-jans-storage', help="Use Jans Storage for Oxd Server", action='store_true')
     parser.add_argument('--load-config-api-test', help="Load Config Api Test Data", action='store_true')
 

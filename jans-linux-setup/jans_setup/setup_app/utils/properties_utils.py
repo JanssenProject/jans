@@ -594,6 +594,20 @@ class PropertiesUtils(SetupUtils):
             Config.addPostSetupService.append('installEleven')
 
 
+    def prompt_for_cache_refresh(self):
+        if Config.installed_instance and Config.install_cache_refresh:
+            return
+
+        promp_cache_refresh = self.getPrompt("Install Cache Refresh Server?",
+                                            self.getDefaultOption(Config.install_cache_refresh)
+                                            )[0].lower()
+
+        Config.install_cache_refresh = promp_cache_refresh == 'y'
+
+        if Config.installed_instance and Config.install_cache_refresh:
+            Config.addPostSetupService.append('install_cache_refresh')
+
+
     def promptForConfigApi(self):
         if Config.installed_instance and Config.install_config_api:
             return
@@ -939,6 +953,7 @@ class PropertiesUtils(SetupUtils):
             self.promptForConfigApi()
             self.promptForScimServer()
             self.promptForFido2Server()
+            self.prompt_for_cache_refresh()
             #self.promptForEleven()
             #if (not Config.installOxd) and Config.oxd_package:
             #    self.promptForOxd()

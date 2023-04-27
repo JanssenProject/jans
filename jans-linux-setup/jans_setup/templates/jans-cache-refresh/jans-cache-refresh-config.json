@@ -1,0 +1,117 @@
+{
+  "sourceConfigs": [
+    {
+      "configId": "UBUNTULDAP1",
+      "bindDN": "cn=directory manager",
+      "bindPassword": "gluu2022",
+      "servers": [
+        "127.0.0.1:16361"
+      ],
+      "maxConnections": 2,
+      "useSSL": true,
+      "baseDNs": [
+        "ou=people,o=gluu"
+      ],
+      "primaryKey": null,
+      "localPrimaryKey": null,
+      "useAnonymousBind": false,
+      "enabled": false,
+      "version": 0,
+      "level": 0
+    }
+  ],
+  "inumConfig": {
+    "configId": "local_inum",
+    "bindDN": "cn=directory manager",
+    "bindPassword": "Qu7m/IlTzlYQ0e8HYKdl8g==",
+    "servers": [
+      "localhost:1636"
+    ],
+    "maxConnections": 10,
+    "useSSL": true,
+    "baseDNs": [
+      "ou=cache-refresh,o=site"
+    ],
+    "primaryKey": null,
+    "localPrimaryKey": null,
+    "useAnonymousBind": false,
+    "enabled": true,
+    "version": 0,
+    "level": 0
+  },
+  "targetConfig": {
+    "configId": null,
+    "bindDN": null,
+    "bindPassword": null,
+    "servers": [],
+    "maxConnections": 2,
+    "useSSL": false,
+    "baseDNs": [],
+    "primaryKey": null,
+    "localPrimaryKey": null,
+    "useAnonymousBind": false,
+    "enabled": false,
+    "version": 0,
+    "level": 0
+  },
+  "ldapSearchSizeLimit": 1000,
+  "keyAttributes": [
+    "uid"
+  ],
+  "keyObjectClasses": [
+    "gluuPerson"
+  ],
+  "sourceAttributes": [
+    "mail",
+    "cn",
+    "sn"
+  ],
+  "customLdapFilter": "",
+  "updateMethod": "copy",
+  "defaultInumServer": true,
+  "keepExternalPerson": true,
+  "useSearchLimit": false,
+  "attributeMapping": [
+    {
+      "source": "uid",
+      "destination": "uid"
+    },
+    {
+      "source": "cn",
+      "destination": "cn"
+    },
+    {
+      "source": "sn",
+      "destination": "sn"
+    }
+  ],
+  "snapshotFolder": "/var/gluu/identity/cr-snapshots",
+  "snapshotMaxCount": 10,
+  "baseDN": "o=jans",
+  "personObjectClassTypes": [
+    "jansCustomPerson",
+    "jansPerson",
+    "eduPerson"
+  ],
+  "personCustomObjectClass": "jansCustomPerson",
+  "contactObjectClassTypes": [],
+  "allowPersonModification": false,
+  "supportedUserStatus": [
+    "active",
+    "inactive"
+  ],
+  "loggingLevel": null,
+  "loggingLayout": null,
+  "externalLoggerConfiguration": null,
+  "metricReporterInterval": 0,
+  "metricReporterKeepDataDays": 0,
+  "metricReporterEnabled": null,
+  "disableJdkLogger": true,
+  "cleanServiceInterval": 0,
+  "vdsCacheRefreshEnabled": true,
+  "cacheRefreshServerIpAddress": "255.255.255.255",
+  "vdsCacheRefreshPollingInterval": null,
+  "vdsCacheRefreshLastUpdateCount": "0",
+  "vdsCacheRefreshProblemCount": "3",
+  "useLocalCache": false
+}

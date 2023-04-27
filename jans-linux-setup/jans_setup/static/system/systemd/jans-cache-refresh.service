@@ -1,0 +1,13 @@
+[Unit]
+Description=Janssen Cache Refresh Server
+After=jans-auth.service
+
+[Service]
+Type=forking
+ExecStart=/opt/dist/scripts/jans-cache-refresh start
+ExecStop=/opt/dist/scripts/jans-cache-refresh stop
+User=jetty
+Group=jetty
+
+[Install]
+WantedBy=multi-user.target
