@@ -498,7 +498,7 @@ jansLevel: 1
 jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansProgLng: python
 jansRevision: 1
-jansScr::%(introspection_introspection_role_based_scope)s
+jansScr::%(introspection_introspection_role_based_scope_introspection_role_based_scope)s
 jansScrTyp: introspection
 
 dn: inum=A110-88AB,ou=scripts,o=jans
