@@ -19,7 +19,7 @@
     
     
       
-        <title>Technical Documentation - Janssen Documentation</title>
+        <title>Design And Implementation - Janssen Documentation</title>
       
     
     
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#technical-documentation" class="md-skip">
+        <a href="#design-and-implementation" class="md-skip">
           Skip to content
         </a>
       
@@ -128,7 +128,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Technical Documentation
+              Design And Implementation
             
           </span>
         </div>
@@ -241,13 +241,15 @@
         
   
   
+    
+  
 
 
   
   
   
     <li class="md-tabs__item">
-      <a href="../../CONTRIBUTING/" class="md-tabs__link">
+      <a href="../../CONTRIBUTING/" class="md-tabs__link md-tabs__link--active">
         Developer
       </a>
     </li>
@@ -6676,12 +6678,14 @@
 
   
   
+    
+  
   
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" checked>
       
       
       
@@ -6746,17 +6750,23 @@
               
   
   
+    
+  
   
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_3" type="checkbox" id="__nav_2_3" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_3" type="checkbox" id="__nav_2_3" checked>
       
       
       
         
           
+            
+          
+        
+          
         
           
         
@@ -6778,10 +6788,16 @@
         
       
       
-        <label class="md-nav__link" for="__nav_2_3">
-          Design and Implementation
-          <span class="md-nav__icon md-icon"></span>
-        </label>
+        
+        
+        <div class="md-nav__link md-nav__link--index md-nav__link--active">
+          <a href="./">Design and Implementation</a>
+          
+            <label for="__nav_2_3">
+              <span class="md-nav__icon md-icon"></span>
+            </label>
+          
+        </div>
       
       <nav class="md-nav" aria-label="Design and Implementation" data-md-level="2">
         <label class="md-nav__title" for="__nav_2_3">
@@ -6789,6 +6805,8 @@
           Design and Implementation
         </label>
         <ul class="md-nav__list" data-md-scrollfix>
+          
+            
           
             
               
@@ -7179,20 +7197,6 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#contents" class="md-nav__link">
-    Contents:
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#api-reference" class="md-nav__link">
-    API Reference
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#design-consideration-and-guidelines" class="md-nav__link">
     Design Consideration and Guidelines
   </a>
@@ -7277,24 +7281,10 @@
   </a>
 
 
-<h1 id="technical-documentation">Technical Documentation<a class="headerlink" href="#technical-documentation" title="Permanent link">#</a></h1>
-<p>This documentation explains technical design, architecture and interactions of various Janssen modules.</p>
-<h2 id="contents">Contents:<a class="headerlink" href="#contents" title="Permanent link">#</a></h2>
-<ul>
-<li><a href="#api-reference">API Reference</a></li>
-<li><a href="#design-consideration-and-guidelines">Design Consideration and Guidelines</a></li>
-<li><a href="#rest-api-design">REST API Design</a></li>
-<li><a href="#caching">Caching</a></li>
-<li><a href="#testing">Testing</a></li>
-<li><a href="#deployment">Deployment</a></li>
-<li><a href="#security">Security</a></li>
-<li><a href="#scalability-and-cloud-infrastructure">Scalability and Cloud Infrastructure</a></li>
-<li><a href="#technical-documentation-guidelines">Technical Documentation Guidelines</a></li>
-</ul>
-<h2 id="api-reference">API Reference<a class="headerlink" href="#api-reference" title="Permanent link">#</a></h2>
-<p>REST and Java APIs are list <a href="../../admin/reference/openapi/#api-reference">here</a></p>
+<h1 id="design-and-implementation">Design And Implementation<a class="headerlink" href="#design-and-implementation" title="Permanent link">#</a></h1>
+<p>This section documents technical design, architecture and interactions of various Janssen modules.</p>
 <h2 id="design-consideration-and-guidelines">Design Consideration and Guidelines<a class="headerlink" href="#design-consideration-and-guidelines" title="Permanent link">#</a></h2>
-<p>This section outlines high-level design principles, styles and design choices that Janssen project follow. </p>
+<p>This section outlines high-level design principles, styles and design choices that Janssen project follow.</p>
 <h3 id="rest-api-design">REST API Design<a class="headerlink" href="#rest-api-design" title="Permanent link">#</a></h3>
 <h3 id="caching">Caching<a class="headerlink" href="#caching" title="Permanent link">#</a></h3>
 <h3 id="testing">Testing<a class="headerlink" href="#testing" title="Permanent link">#</a></h3>
@@ -7302,11 +7292,12 @@
 <h3 id="security">Security<a class="headerlink" href="#security" title="Permanent link">#</a></h3>
 <h3 id="scalability-and-cloud-infrastructure">Scalability and Cloud Infrastructure<a class="headerlink" href="#scalability-and-cloud-infrastructure" title="Permanent link">#</a></h3>
 <h2 id="technical-documentation-guidelines">Technical Documentation Guidelines<a class="headerlink" href="#technical-documentation-guidelines" title="Permanent link">#</a></h2>
+<p>These are high-level guidelines to follow when adding or updating technical documentation for a module</p>
 <ul>
 <li>Detailed technical documentation for each module should be placed under directory with module's name. For example, technical documentation for <code>jans-mod</code> should be placed under directory <code>docs/technical/jans-mod</code></li>
 <li>Each module directory should have a README file that follows <a href="technical-overview-template/">Technical Overview Template</a>.</li>
 <li>Create directories if required under module directory to further arrange documentation</li>
-<li>Place all the digital assets to support your documentation under <a href="../../assets">assets</a> following these <a href="../../assets/">guidelines</a></li>
+<li>Place all the digital assets to support your documentation under <a href="../assets">assets</a> following these <a href="../assets/README.md">guidelines</a></li>
 </ul>
 
   <hr>
@@ -7314,7 +7305,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-04-03T10:21:34+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-04-03</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-04-28T05:28:12+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-04-28</span>
       
         <br>
         Created:
@@ -7338,6 +7329,42 @@
       </main>
       
         <footer class="md-footer">
+  
+    
+    <nav class="md-footer__inner md-grid" aria-label="Footer" >
+      
+        
+        <a href="../../CODE_OF_CONDUCT/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Code of Conduct" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              Code of Conduct
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="agama/" class="md-footer__link md-footer__link--next" aria-label="Next: Agama" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              Agama
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
   
   <div class="md-footer-meta md-typeset">
     <div class="md-footer-meta__inner md-grid">
