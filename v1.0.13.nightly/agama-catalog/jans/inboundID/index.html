@@ -6757,6 +6757,10 @@
       
         
           
+            
+          
+        
+          
         
           
         
@@ -6778,10 +6782,16 @@
         
       
       
-        <label class="md-nav__link" for="__nav_2_3">
-          Design and Implementation
-          <span class="md-nav__icon md-icon"></span>
-        </label>
+        
+        
+        <div class="md-nav__link md-nav__link--index ">
+          <a href="../../../developer/implementation-design/">Design and Implementation</a>
+          
+            <label for="__nav_2_3">
+              <span class="md-nav__icon md-icon"></span>
+            </label>
+          
+        </div>
       
       <nav class="md-nav" aria-label="Design and Implementation" data-md-level="2">
         <label class="md-nav__title" for="__nav_2_3">
@@ -6789,6 +6799,8 @@
           Design and Implementation
         </label>
         <ul class="md-nav__list" data-md-scrollfix>
+          
+            
           
             
               
@@ -7543,7 +7555,7 @@
 <p>Launch the main flow (learn about this topic <a href="https://docs.jans.io/head/admin/developer/agama/quick-start/#craft-an-authentication-request">here</a>). If everything was setup correctly, a screen with a "Sign in using" heading will be shown and next to it a link titled "Facebook". When clicking on the link, the browser will be taken to the Facebook website for authentication. A prompt for consent of release of personal information may appear as well. Finally, the browser is taken back to your server and then to the target application as described <a href="#main-flow">here</a>. </p>
 <h2 id="configuration-parameters-of-flows">Configuration parameters of flows<a class="headerlink" href="#configuration-parameters-of-flows" title="Permanent link">#</a></h2>
 <h3 id="main-flow-configurations">Main flow configurations<a class="headerlink" href="#main-flow-configurations" title="Permanent link">#</a></h3>
-<p>Configuration is supplied in a JSON object whose keys are the identifiers of the existing identity providers. The associated value for a key is a JSON object itself and follows the structure represented by <a href="https://github.com/JanssenProject/jans/blob/v1.0.13.nightly/jans-auth-server/agama/inboundID/src/main/java/io/jans/inbound/Provider.java">this</a> Java class.</p>
+<p>Configuration is supplied in a JSON object whose keys are the identifiers of the existing identity providers. The associated value for a key is a JSON object itself and follows the structure represented by <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-auth-server/agama/inboundID/src/main/java/io/jans/inbound/Provider.java">this</a> Java class.</p>
 <p>This is an example of a configuration for a couple of identity providers:</p>
 <div class="highlight"><pre><span></span><code>{
 
