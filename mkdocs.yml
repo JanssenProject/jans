@@ -549,6 +549,7 @@ nav:
       - 'Contribution Guidelines': 'CONTRIBUTING.md'
       - 'Code of Conduct': 'CODE_OF_CONDUCT.md'
       - 'Design and Implementation':
+            - 'developer/implementation-design/README.md'
             - 'Agama': 'developer/implementation-design/agama.md'
             - 'jans-auth-server': 'developer/implementation-design/jans-auth-server.md'
             - 'jans-cli': 'developer/implementation-design/jans-cli.md'
