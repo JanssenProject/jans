@@ -35,6 +35,7 @@ The Fido2 interception script implements the [Fido2Interception](https://github.
 | `def interceptVerifyAttestation(self, paramAsJsonNode, context)` | This method is called in Attestation verify enpoint, just before to start the verification process. Method 'throwBadRequestException' could be used to create a BadRequest Exception Response. |
 | `def interceptAuthenticateAssertion(self, paramAsJsonNode, context)` | This method is called in Assertion authenticate enpoint, just before to start the authentication process. Method 'throwBadRequestException' could be used to create a BadRequest Exception Response. |
 | `def interceptVerifyAssertion(self, paramAsJsonNode, context)` | This method is called in Assertion verify enpoint, just before to start the verification process. Method 'throwBadRequestException' could be used to create a BadRequest Exception Response. |
+| `def throwBadRequestException(self, title, message, context)` | This method could be used to create a BadRequest Exception Response with a title and description message. |
 
 ### Objects
 | Object name | Object description |
@@ -45,7 +46,7 @@ The Fido2 interception script implements the [Fido2Interception](https://github.
 |`context`| [Reference](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/fido2/service/external/context/ExternalFido2InterceptionContext.java) |
 
 ## Use case: Dummy Fido2 Interception Form
-This script has been adapted from the Jans Server [sample fido2 interception script](https://github.com/JanssenProject/jans/blob/main/docs/script-catalog/fido2_interception/fido2-interception/Fido2Interception_Script.py).
+This script has been adapted from the Jans Fido2 sample [sample fido2 interception script](https://github.com/JanssenProject/jans/blob/main/docs/script-catalog/fido2_interception/Fido2Interception_Script.py).
 ### Script Type: Python
 ```python
 # Janssen Project software is available under the Apache 2.0 License (2004). See http://www.apache.org/licenses/ for full text.
