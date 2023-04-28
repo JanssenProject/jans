@@ -106,13 +106,13 @@ public class BaseService {
             if (claims.get("iss") == null) {
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.ISS_CLAIM_NOT_FOUND.getDescription());
             }
+            String issuer = StringUtils.removeEnd(claims.get("iss").toString(), "/");
             //claims.get("iss").toString();
             Map<String, String> body = new HashMap<>();
             body.put("software_statement", ssaJwt);
             body.put("response_types", "token");
-            body.put("redirect_uris", "http://localhost");//dummy redirect_uri
+            body.put("redirect_uris", issuer);
             body.put("client_name", "admin-ui-license-client-" + UUID.randomUUID().toString());
-            String issuer = StringUtils.removeEnd(claims.get("iss").toString(), "/");
 
             Invocation.Builder request = ClientFactory.instance().getClientBuilder(issuer + "/jans-auth/restv1/register");
             Response response = request
