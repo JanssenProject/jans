@@ -7353,20 +7353,20 @@ each one can be customized just in the moment the endpoint is called, just befor
 </thead>
 <tbody>
 <tr>
-<td align="left"><code>def interceptRegisterAttestation(self, step, consentContext)</code></td>
-<td align="left">Main consent-gather method. Must return True (if consent gathered successfully) or False (if failed).</td>
+<td align="left"><code>def interceptRegisterAttestation(self, paramAsJsonNode, context)</code></td>
+<td align="left">This method is called in Attestation register endpoint, just before to start the registration process. Method 'throwBadRequestException' could be used to create a BadRequest Exception Response.</td>
 </tr>
 <tr>
-<td align="left"><code>def interceptVerifyAttestation(self, step, context)</code></td>
-<td align="left"></td>
+<td align="left"><code>def interceptVerifyAttestation(self, paramAsJsonNode, context)</code></td>
+<td align="left">This method is called in Attestation verify enpoint, just before to start the verification process. Method 'throwBadRequestException' could be used to create a BadRequest Exception Response.</td>
 </tr>
 <tr>
-<td align="left"><code>def interceptAuthenticateAssertion(self, context)</code></td>
-<td align="left">Return total number of consent gathering steps</td>
+<td align="left"><code>def interceptAuthenticateAssertion(self, paramAsJsonNode, context)</code></td>
+<td align="left">This method is called in Assertion authenticate enpoint, just before to start the authentication process. Method 'throwBadRequestException' could be used to create a BadRequest Exception Response.</td>
 </tr>
 <tr>
-<td align="left"><code>def interceptVerifyAssertion(self, step, context)</code></td>
-<td align="left">Returns the consent page corresponding to the current step of consent gathering</td>
+<td align="left"><code>def interceptVerifyAssertion(self, paramAsJsonNode, context)</code></td>
+<td align="left">This method is called in Assertion verify enpoint, just before to start the verification process. Method 'throwBadRequestException' could be used to create a BadRequest Exception Response.</td>
 </tr>
 </tbody>
 </table>
@@ -7563,7 +7563,7 @@ each one can be customized just in the moment the endpoint is called, just befor
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-04-26T08:57:47+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-04-26</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-04-28T15:53:06+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-04-28</span>
       
         <br>
         Created:
