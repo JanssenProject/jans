@@ -23,6 +23,7 @@ from typing import Optional, Dict, Any
 from oic.oauth2 import ASConfigurationResponse
 from oic.oic import Client
 from oic.utils.authn.client import CLIENT_AUTHN_METHOD
+from .custom_msg_factory import CustomMessageFactory
 
 
 logger = logging.getLogger(__name__)
@@ -44,7 +45,7 @@ class ClientHandler:
         :param redirect_uris: [url from client starting with https]
         :type redirect_uris: list
         """
-        self.clientAdapter = Client(client_authn_method=CLIENT_AUTHN_METHOD)
+        self.clientAdapter = Client(client_authn_method=CLIENT_AUTHN_METHOD, message_factory=CustomMessageFactory)
         self.__op_url = op_url
         self.__redirect_uris = redirect_uris
         self.__metadata_url = '%s/.well-known/openid-configuration' % op_url
@@ -77,7 +78,8 @@ class ClientHandler:
                              'grant_types': ['authorization_code'],
                              'application_type': 'web',
                              'client_name': 'Jans Tent',
-                             'token_endpoint_auth_method': 'client_secret_post'
+                             'token_endpoint_auth_method': 'client_secret_post',
+                             'scope': ['openid']
                              }
         reg_info = self.clientAdapter.register(op_data['registration_endpoint'], **registration_args)
 
