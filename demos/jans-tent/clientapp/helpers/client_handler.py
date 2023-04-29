@@ -38,13 +38,15 @@ class ClientHandler:
     __additional_metadata = None
     op_data = None
 
-    def __init__(self, op_url: str, redirect_uris: list[str], additional_metadata: Optional[dict] = None):
+    def __init__(self, op_url: str, redirect_uris: list[str], additional_metadata: dict):
         """[initializes]
 
         :param op_url: [url from oidc provider starting with https]
         :type op_url: str
         :param redirect_uris: [url from client starting with https]
         :type redirect_uris: list
+        :param additional_metadata: additional client metadata
+        :type additional_metadata: dict
         """
         self.__additional_metadata = additional_metadata
         self.clientAdapter = Client(client_authn_method=CLIENT_AUTHN_METHOD, message_factory=CustomMessageFactory)
