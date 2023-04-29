@@ -35,9 +35,10 @@ class ClientHandler:
     __client_secret = None
     __metadata_url = None
     __op_url = None
+    __additional_metadata = None
     op_data = None
 
-    def __init__(self, op_url: str, redirect_uris: list[str]):
+    def __init__(self, op_url: str, redirect_uris: list[str], additional_metadata: Optional[dict] = None):
         """[initializes]
 
         :param op_url: [url from oidc provider starting with https]
@@ -45,6 +46,7 @@ class ClientHandler:
         :param redirect_uris: [url from client starting with https]
         :type redirect_uris: list
         """
+        self.__additional_metadata = additional_metadata
         self.clientAdapter = Client(client_authn_method=CLIENT_AUTHN_METHOD, message_factory=CustomMessageFactory)
         self.__op_url = op_url
         self.__redirect_uris = redirect_uris
@@ -79,7 +81,7 @@ class ClientHandler:
                              'application_type': 'web',
                              'client_name': 'Jans Tent',
                              'token_endpoint_auth_method': 'client_secret_post',
-                             'scope': ['openid']
+                             **self.__additional_metadata
                              }
         reg_info = self.clientAdapter.register(op_data['registration_endpoint'], **registration_args)
 

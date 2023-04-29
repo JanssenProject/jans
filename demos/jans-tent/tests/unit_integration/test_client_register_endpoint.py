@@ -110,6 +110,7 @@ class TestRegisterEndpoint(FlaskBaseTestCase):
         redirect_uris = ['https://client.com.br/oidc_calback']
         test_client_id = '1234-5678-9ten11'
         test_client_secret = 'mysuperprotectedsecret'
+        additional_params = {'param1': 'value1'}
 
         expected_keys = {'op_metadata_url', 'client_id', 'client_secret'}
 
@@ -120,7 +121,8 @@ class TestRegisterEndpoint(FlaskBaseTestCase):
         }) as get_client_dict:
             response = self.client.post(url_for('register'), json={
                 'op_url': op_url,
-                'redirect_uris': redirect_uris
+                'redirect_uris': redirect_uris,
+                'additional_params': additional_params
             })
             print(response)
             assert expected_keys <= response.json.keys(), response.json
