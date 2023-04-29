@@ -34,7 +34,8 @@ class CacheRefreshInstaller(JettyInstaller):
         self.ldif_config_fn = os.path.join(self.output_folder, 'configuration.ldif')
         self.config_json_fn = os.path.join(self.templates_folder, 'jans-cache-refresh-config.json')
         self.static_config_json_fn = os.path.join(self.templates_folder, 'jans-cache-refresh-static-config.json')
-
+        self.vendor_dir = '/var/gluu/'
+        self.snapshots_dir = os.path.join(self.vendor_dir, 'identity/cr-snapshots')
 
     def install(self):
         self.installJettyService(self.jetty_app_configuration[self.service_name], True)
@@ -49,3 +50,7 @@ class CacheRefreshInstaller(JettyInstaller):
         self.renderTemplateInOut(self.ldif_config_fn, self.templates_folder, self.output_folder)
 
         self.dbUtils.import_ldif([self.ldif_config_fn])
+
+    def create_folders(self):
+        self.createDirs(self.snapshots_dir)
+        self.chown(self.vendor_dir, Config.jetty_user, Config.jetty_group, recursive=True)

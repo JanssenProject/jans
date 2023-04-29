@@ -18,7 +18,7 @@ def get_setup_options():
         'installOxd': False,
         'installFido2': True,
         'installEleven': False,
-        'install_cache_refresh': False,
+        'install_cache_refresh': True,
         'loadTestData': False,
         'allowPreReleasedFeatures': False,
         'listenAllInterfaces': False,
