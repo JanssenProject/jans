@@ -18,10 +18,51 @@ Major Steps involved in this process are:
 - Janssen Server instance
 - A public GitHub repository with at least one prior commit
 
-## Design Agama flow
+## Create Agama Project
 
-Below Agama flow is for simple username-password based user authentication. This flow can be [created using Agama Labs
-as well]().
+To design a simple username-password based user authentication [Agama Labs](https://cloud.gluu.org/agama-lab/) follow 
+the steps below.
+
+### Design The Flow
+
+#### Log Into Agama Lab
+
+#### Create A Project
+
+#### Configure The Authentication Flow
+
+Create/import
+
+1. Crate Flow File
+
+2. Create AuthenticationService [call]() block
+
+3. Create CdiUtil call block
+
+4. Create [assignment]() block
+
+5. Create [repeat]() block
+
+6. Create [RRF]() block
+
+7. Create CdiUtil call block
+
+8. Create [assignment]() block
+
+9. Create conditional [When]() block
+
+10. Create [finish]() blocks
+
+
+### Design User Interface
+
+1. Create a template file
+
+2. Use the visual editor
+
+3. Customise using CSS and resources
+
+### Release Project To GitHub
 
 ## Enable Agama using TUI
 
