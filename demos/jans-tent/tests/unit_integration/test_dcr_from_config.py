@@ -47,7 +47,7 @@ class TestDrcFromConfig(TestCase):
     @patch('clientapp.helpers.client_handler.ClientHandler.__init__', MagicMock(return_value=None))
     def test_register_should_call_ClientHandler_with_params(self):
         dcr_from_config.register()
-        ClientHandler.__init__.assert_called_once_with(cfg.ISSUER, cfg.REDIRECT_URIS)
+        ClientHandler.__init__.assert_called_once_with(cfg.ISSUER, cfg.REDIRECT_URIS, {'scope': cfg.SCOPE.split(" ")})
 
     def test_register_should_call_open(self):
         with patch('builtins.open', mock_open()) as open_mock:
@@ -61,7 +61,7 @@ class TestDrcFromConfig(TestCase):
         open_mock.assert_called_once_with('client_info.json', 'w')
 
     def test_register_should_call_write_with_client_info(self):
-        client = ClientHandler(cfg.ISSUER, cfg.REDIRECT_URIS)
+        client = ClientHandler(cfg.ISSUER, cfg.REDIRECT_URIS, {})
         expected_json_client_info = json.dumps(client.get_client_dict(), indent=4)
         with patch('builtins.open', mock_open()) as open_mock:
             dcr_from_config.register()
