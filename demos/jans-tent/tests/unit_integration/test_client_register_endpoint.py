@@ -47,11 +47,26 @@ class TestRegisterEndpoint(FlaskBaseTestCase):
     def test_endpoint_should_accept_2_params(self):
         first_value = 'https://op'
         second_value = ['https://client.com.br/oidc_callback']
+
         self.client.post(url_for('register'), json={
             'op_url': first_value,
             'redirect_uris': second_value
         })
-        ClientHandler.__init__.assert_called_once_with(first_value, second_value)
+        ClientHandler.__init__.assert_called_once_with(first_value, second_value, {})
+
+    @patch('clientapp.helpers.client_handler.ClientHandler.__init__', MagicMock(return_value=None))
+    def test_endpoint_should_accept_3_params(self):
+        first_value = 'https://op'
+        second_value = ['https://client.com.br/oidc_callback']
+        third_value = {'scope': 'openid email profile'}
+
+        self.client.post(url_for('register'), json={
+            'op_url': first_value,
+            'redirect_uris': second_value,
+            'additional_params': third_value
+        })
+
+        ClientHandler.__init__.assert_called_once_with(first_value, second_value, third_value)
 
     def test_endpoint_should_return_error_code_400_if_no_data_sent(self):
         self.assertEqual(
@@ -110,6 +125,7 @@ class TestRegisterEndpoint(FlaskBaseTestCase):
         redirect_uris = ['https://client.com.br/oidc_calback']
         test_client_id = '1234-5678-9ten11'
         test_client_secret = 'mysuperprotectedsecret'
+        additional_params = {'param1': 'value1'}
 
         expected_keys = {'op_metadata_url', 'client_id', 'client_secret'}
 
@@ -120,7 +136,8 @@ class TestRegisterEndpoint(FlaskBaseTestCase):
         }) as get_client_dict:
             response = self.client.post(url_for('register'), json={
                 'op_url': op_url,
-                'redirect_uris': redirect_uris
+                'redirect_uris': redirect_uris,
+                'additional_params': additional_params
             })
             print(response)
             assert expected_keys <= response.json.keys(), response.json

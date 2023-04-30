@@ -23,6 +23,7 @@ from typing import Optional, Dict, Any
 from oic.oauth2 import ASConfigurationResponse
 from oic.oic import Client
 from oic.utils.authn.client import CLIENT_AUTHN_METHOD
+from .custom_msg_factory import CustomMessageFactory
 
 
 logger = logging.getLogger(__name__)
@@ -34,17 +35,21 @@ class ClientHandler:
     __client_secret = None
     __metadata_url = None
     __op_url = None
+    __additional_metadata = None
     op_data = None
 
-    def __init__(self, op_url: str, redirect_uris: list[str]):
+    def __init__(self, op_url: str, redirect_uris: list[str], additional_metadata: dict):
         """[initializes]
 
         :param op_url: [url from oidc provider starting with https]
         :type op_url: str
         :param redirect_uris: [url from client starting with https]
         :type redirect_uris: list
+        :param additional_metadata: additional client metadata
+        :type additional_metadata: dict
         """
-        self.clientAdapter = Client(client_authn_method=CLIENT_AUTHN_METHOD)
+        self.__additional_metadata = additional_metadata
+        self.clientAdapter = Client(client_authn_method=CLIENT_AUTHN_METHOD, message_factory=CustomMessageFactory)
         self.__op_url = op_url
         self.__redirect_uris = redirect_uris
         self.__metadata_url = '%s/.well-known/openid-configuration' % op_url
@@ -77,7 +82,8 @@ class ClientHandler:
                              'grant_types': ['authorization_code'],
                              'application_type': 'web',
                              'client_name': 'Jans Tent',
-                             'token_endpoint_auth_method': 'client_secret_post'
+                             'token_endpoint_auth_method': 'client_secret_post',
+                             **self.__additional_metadata
                              }
         reg_info = self.clientAdapter.register(op_data['registration_endpoint'], **registration_args)
 

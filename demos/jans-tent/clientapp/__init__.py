@@ -129,9 +129,11 @@ def create_app():
                 status = 400
 
             else:
+                additional_metadata = {}
+                if 'additional_params' in content.keys():
+                    additional_metadata = content['additional_params']
                 client_handler = ClientHandler(
-                    content['op_url'],
-                    content['redirect_uris']
+                   content['op_url'], content['redirect_uris'], additional_metadata
                 )
                 data = client_handler.get_client_dict()
                 status = 200
