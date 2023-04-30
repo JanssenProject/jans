@@ -111,21 +111,25 @@ to download and install a new OP TLS certificate
 
 ## Other Tent endpoints
 
-**Auto-register endpoint**
+### Auto-register endpoint
 
 Sending a `POST` request to Jans Tent `/register` endpoint containing a `JSON`
 with the OP/AS url and client url, like this:
 
 ```json
 {
-    "op_url": "https://OP_HOSTNAME",
-    "client_url": "https://localhost:9090"
+  "op_url": "https://OP_HOSTNAME",
+  "client_url": "https://localhost:9090",
+  "additional_params": {
+    "scope": "openid mail profile"
+  }
 }
 ```
+Please notice that `additional_params` is not required by endpoint.
 
-This endpoint response will return the registered client id and client secret
+The response will return the registered client id and client secret 
 
-**Auto-config endpoint**
+### Auto-config endpoint
 
 Sending a `POST` request to the Tent `/configuration` endpoint, containing the
 client id, client secret, and metadata endpoint will fetch data from OP metadata
