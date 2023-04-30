@@ -1,3 +1,9 @@
+"""
+Custom message factory required by pyoic to add scope param
+Overrides RegistrationRequest, RegistrationResponse
+and use them to create CustomMessageFactory
+"""
+
 from oic.oic.message import OIDCMessageFactory, RegistrationRequest, RegistrationResponse, MessageTuple, OPTIONAL_LOGICAL
 from oic.oauth2.message import OPTIONAL_LIST_OF_STRINGS, REQUIRED_LIST_OF_STRINGS, SINGLE_OPTIONAL_STRING, SINGLE_OPTIONAL_INT
 
@@ -39,7 +45,7 @@ class MyRegistrationRequest(RegistrationRequest):
         "frontchannel_logout_session_required": OPTIONAL_LOGICAL,
         "backchannel_logout_uri": SINGLE_OPTIONAL_STRING,
         "backchannel_logout_session_required": OPTIONAL_LOGICAL,
-        "scope": OPTIONAL_LIST_OF_STRINGS,
+        "scope": OPTIONAL_LIST_OF_STRINGS,  # added
     }
     c_default = {"application_type": "web", "response_types": ["code"]}
     c_allowed_values = {
@@ -47,9 +53,6 @@ class MyRegistrationRequest(RegistrationRequest):
         "subject_type": ["public", "pairwise"],
     }
 
-
-# class MyRegistrationResponse(RegistrationResponse):
-#     # add the extra fields you expect the OP to send back
 
 class CustomMessageFactory(OIDCMessageFactory):
     registration_endpoint = MessageTuple(MyRegistrationRequest, RegistrationResponse)
