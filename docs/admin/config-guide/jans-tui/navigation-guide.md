@@ -34,13 +34,13 @@ Open help dialog (currently, help dialog is static, in the near future it will d
 
 ![f1](https://user-images.githubusercontent.com/63171603/210387872-099413f4-5e33-43e9-86c7-440e55c9f85c.png)
 
-*  `ESC`, `f4` :  
-Closes any dialog, even nested dialogs
+*  `ESC` :  
+Close any dialog or even nested dialog
 
 ![esc](https://user-images.githubusercontent.com/63171603/210389011-97da92b1-57b8-4628-9810-3a571255ea20.gif)
 
 * `Ctrl+c`(Terminate) :  
-Terminate the program (SigKILL)
+Terminate the program (SIGINT)
 
 ------------------------------------
 
@@ -124,6 +124,14 @@ ex:
 
 ![image](https://user-images.githubusercontent.com/63171603/216964422-1dcd692d-b9d0-4386-b12c-8a66b2dc3b4a.png)
 
+
+* `p`: 
+can be used to update user's password. 
+
+![Clipboard - April 3, 2023 9_29 PM](https://user-images.githubusercontent.com/7156097/229603328-45232024-26e0-473b-b74a-4b08b5bcaae7.png)
+
+
+
 --------------------------------------------------
 ### Date Widgets
 The date widget can be used to select a date and time. ex (Client Expiration Date)
@@ -169,10 +177,4 @@ can be used to view all the data of the selected label
 can be used to delete a certain label
 
 ![image](https://user-images.githubusercontent.com/63171603/216968417-4cb15f2a-f01c-48bb-a27d-e4e73edb8082.png)
-
-* `p`: 
-can be used to update user's password. 
-
-![Clipboard - April 3, 2023 9_29 PM](https://user-images.githubusercontent.com/7156097/229603328-45232024-26e0-473b-b74a-4b08b5bcaae7.png)
-
 
