@@ -12,8 +12,9 @@ ClientHandler = client_handler.ClientHandler
 
 # helper
 def get_class_instance(op_url='https://t1.techno24x7.com',
-                       client_url='https://mock.test.com'):
-    client_handler_obj = ClientHandler(op_url, client_url)
+                       client_url='https://mock.test.com',
+                       additional_metadata={}):
+    client_handler_obj = ClientHandler(op_url, client_url, additional_metadata)
     return client_handler_obj
 
 
@@ -74,6 +75,7 @@ class TestDynamicClientRegistration(TestCase):
             '_ClientHandler__client_secret',
             '_ClientHandler__redirect_uris',
             '_ClientHandler__metadata_url',
+            '_ClientHandler__additional_metadata',
             'discover',  # method
             'register_client'  # method
         ]
@@ -163,7 +165,7 @@ class TestDynamicClientRegistration(TestCase):
 
         op_url = 'https://t1.techno24x7.com'
         redirect_uris = 'https://mock.test.com/oidc_callback'
-        client_handler_obj = ClientHandler(op_url, redirect_uris)
+        client_handler_obj = ClientHandler(op_url, redirect_uris, {})
 
         self.restore_stashed_mocks()
 
@@ -185,6 +187,17 @@ class TestDynamicClientRegistration(TestCase):
         self.assertEqual(
             client_handler_obj.__dict__['_ClientHandler__metadata_url'],
             expected_metadata_url)
+
+    def test_class_init_should_set_additional_params(self):
+        self.mock_methods()
+        expected_metadata = {'metakey1': 'meta value 1'}
+        client_handler_obj = get_class_instance(additional_metadata=expected_metadata)
+        self.restore_stashed_mocks()
+
+        self.assertEqual(
+            client_handler_obj.__dict__['_ClientHandler__additional_metadata'],
+            expected_metadata
+        )
 
     def test_class_init_should_have_docstring(self):
         self.assertTrue(ClientHandler.__init__.__doc__,

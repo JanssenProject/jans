@@ -9565,6 +9565,7 @@ components:
           - update_token
           - config_api_auth
           - modify_ssa_response
+          - fido2_interception
         programmingLanguage:
           type: string
           enum:

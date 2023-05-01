@@ -6,17 +6,9 @@
 
 package io.jans.fido2.service.operation;
 
-import java.nio.charset.StandardCharsets;
-import java.security.SecureRandom;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import io.jans.fido2.ctap.AttestationConveyancePreference;
 import io.jans.fido2.ctap.AuthenticatorAttachment;
 import io.jans.fido2.ctap.CoseEC2Algorithm;
@@ -29,23 +21,31 @@ import io.jans.fido2.model.conf.RequestedParty;
 import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.ChallengeGenerator;
 import io.jans.fido2.service.DataMapperService;
+import io.jans.fido2.service.external.ExternalFido2InterceptionService;
+import io.jans.fido2.service.external.context.ExternalFido2InterceptionContext;
 import io.jans.fido2.service.persist.RegistrationPersistenceService;
 import io.jans.fido2.service.persist.UserSessionIdService;
 import io.jans.fido2.service.verifier.AttestationVerifier;
 import io.jans.fido2.service.verifier.CommonVerifiers;
 import io.jans.fido2.service.verifier.DomainVerifier;
-import io.jans.fido2.ws.rs.controller.AttestationController;
-import io.jans.orm.model.fido2.Fido2DeviceData;
-import io.jans.orm.model.fido2.Fido2RegistrationData;
-import io.jans.orm.model.fido2.Fido2RegistrationEntry;
-import io.jans.orm.model.fido2.Fido2RegistrationStatus;
-import io.jans.orm.model.fido2.UserVerification;
+import io.jans.orm.model.fido2.*;
 import io.jans.util.StringHelper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.core.Context;
+import org.slf4j.Logger;
+
+import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
+import java.util.List;
+import java.util.stream.Collectors;
+
 
 /**
  * Core offering by the FIDO2 server, attestation is invoked upon enrollment
+ *
  * @author Yuriy Movchan
  * @version May 08, 2020
  */
@@ -82,16 +82,29 @@ public class AttestationService {
 	@Inject
 	private Base64Service base64Service;
 
-	/*
-	 * Requires mandatory parameters: username, displayName, attestation Support non
-	 * mandatory parameters: authenticatorSelection, documentDomain, extensions,
-	 * timeout
-	 */
-	public ObjectNode options(JsonNode params) {
-		log.debug("Attestation options {}", params);
+    @Inject
+    private ExternalFido2InterceptionService externalFido2InterceptionService;
 
-		// Verify request parameters
-		commonVerifiers.verifyAttestationOptions(params);
+	@Context
+	private HttpServletRequest httpRequest;
+	@Context
+	private HttpServletResponse httpResponse;
+
+    /*
+     * Requires mandatory parameters: username, displayName, attestation Support non
+     * mandatory parameters: authenticatorSelection, documentDomain, extensions,
+     * timeout
+     */
+    public ObjectNode options(JsonNode params) {
+
+        log.debug("Attestation options {}", params);
+
+        // Apply external custom scripts
+        ExternalFido2InterceptionContext externalFido2InterceptionContext = new ExternalFido2InterceptionContext(params, httpRequest, httpResponse);
+        boolean externalInterceptContext = externalFido2InterceptionService.interceptRegisterAttestation(params, externalFido2InterceptionContext);
+
+        // Verify request parameters
+        commonVerifiers.verifyAttestationOptions(params);
 
 		boolean oneStep = commonVerifiers.isSuperGluuOneStepMode(params);
 
@@ -197,9 +210,13 @@ public class AttestationService {
 	public ObjectNode verify(JsonNode params) {
 		log.debug("Attestation verify {}", params);
 
-		boolean superGluu = commonVerifiers.hasSuperGluu(params);
-		boolean oneStep = commonVerifiers.isSuperGluuOneStepMode(params);
-		boolean cancelRequest = commonVerifiers.isSuperGluuCancelRequest(params);
+        // Apply external custom scripts
+        ExternalFido2InterceptionContext externalFido2InterceptionContext = new ExternalFido2InterceptionContext(params, httpRequest, httpResponse);
+        boolean externalInterceptContext = externalFido2InterceptionService.interceptVerifyAttestation(params, externalFido2InterceptionContext);
+
+        boolean superGluu = commonVerifiers.hasSuperGluu(params);
+        boolean oneStep = commonVerifiers.isSuperGluuOneStepMode(params);
+        boolean cancelRequest = commonVerifiers.isSuperGluuCancelRequest(params);
 
 		// Verify if there are mandatory request parameters
 		commonVerifiers.verifyBasicPayload(params);
@@ -264,7 +281,7 @@ public class AttestationService {
                 throw new Fido2RuntimeException(String.format("Device data is invalid: %s", responseDeviceData), ex);
             }
         }
-        
+
         registrationEntry.setPublicKeyId(registrationData.getPublicKeyId());
 
         int publicKeyIdHash = registrationPersistenceService.getPublicKeyIdHash(registrationData.getPublicKeyId());
@@ -281,7 +298,7 @@ public class AttestationService {
         } else {
         	registrationEntry.clearExpiration();
         }
-        
+
 		registrationPersistenceService.update(registrationEntry);
 
 		// If sessionStateId is not empty update session

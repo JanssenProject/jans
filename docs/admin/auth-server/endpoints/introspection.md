@@ -169,7 +169,10 @@ navigate via `Auth Server`->`Properties`.
 - [introspectionSkipAuthorization](../../reference/json/properties/janssenauthserver-properties.md#introspectionskipauthorization)
 - [introspectionScriptBackwardCompatibility](../../reference/json/properties/janssenauthserver-properties.md#introspectionscriptbackwardcompatibility)
 - [introspectionAccessTokenMustHaveUmaProtectionScope](../../reference/json/properties/janssenauthserver-properties.md#introspectionaccesstokenmusthaveumaprotectionscope)
+- [introspectionAccessTokenMustHaveIntrospectionScope](../../reference/json/properties/janssenauthserver-properties.md#introspectionaccesstokenmusthaveintrospectionscope)
 - [introspectionResponseScopesBackwardCompatibility](../../reference/json/properties/janssenauthserver-properties.md#introspectionresponsescopesbackwardcompatibility)
+
+There difference between `introspectionAccessTokenMustHaveUmaProtectionScope` and `introspectionAccessTokenMustHaveIntrospectionScope` is that `uma_protection` scope is enabled for Dynamic Client Registration while `introspection` scope is not. Thus if set `introspectionAccessTokenMustHaveIntrospectionScope` to `true` value allows disable access to Introspection Endpoint to all clients which does not have explicitly granted `introspection` scope. 
 
 ## Customising Introspection Endpoint Behaviour using Custom script:
 
