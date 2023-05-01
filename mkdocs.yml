@@ -9035,9 +9035,6 @@ plugins:
 - git-revision-date-localized:
     enable_creation_date: true
     type: timeago
-- git-committers:
-    branch: main
-    repository: JanssenProject/jans
 repo_name: GitHub
 repo_url: https://github.com/JanssenProject/jans/
 site_author: Janssen, Inc.
