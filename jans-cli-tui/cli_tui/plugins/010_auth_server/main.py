@@ -100,6 +100,27 @@ class Plugin(DialogUtils):
         self.oauth_logging()
 
 
+    def help(self):
+
+        currentTap = self.nav_bar.navbar_entries[self.nav_bar.cur_navbar_selection][0]
+        if currentTap == 'agama':
+                self.app.show_message(_("Help "),
+                ("<d>              {}\n"
+                "<c>              {}\n"
+                "<Esc>            {}\n"
+                "<Alt + letter>   {}\n"
+                "<Delete>         {}\n"
+                "For More Visit  {}")
+                .format(
+                    _("display agama project config"),
+                    _("Manage agama project Configuration"),
+                    _("Close the current dialog"),
+                    _("Navigate to an other tab"),
+                    _("Delete current agama project if possible"),
+                    "https://docs.jans.io/v1.0.6/admin/config-guide/tui/"),tobefocused=self.app.center_container)
+        else:
+            self.app.show_message(_("Help"),
+                self.app.defult_help,tobefocused=self.app.center_container)
 
     async def retrieve_sopes(self) -> None:
         """asyncio corotune for retreiving scopes
