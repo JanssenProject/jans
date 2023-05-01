@@ -33,7 +33,25 @@ the steps below.
 
 Create/import
 
-1. Crate Flow File
+1. Create Flow File
+
+![](../../../assets/agama-lab-login.png)
+
+![](../../../assets/agama-lab-GH-login.png)
+
+![](../../../assets/agama-lab-add-gh-repo.png)
+
+![](../../../assets/agama-lab-project-page.png)
+
+![](../../../assets/agama-lab-new-proj.png)
+
+![](../../../assets/agama-lab-project-listing.png)
+
+![](../../../assets/agama-lab-new-flow.png)
+
+![](../../../assets/agama-lab-new-flow-name.png)
+
+![](../../../assets/agama-lab-flow-passwd-1.png)
 
 2. Create AuthenticationService [call]() block
 
