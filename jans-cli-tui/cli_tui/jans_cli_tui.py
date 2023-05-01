@@ -594,20 +594,57 @@ class JansCliApp(Application):
         focus_previous(ev)
 
     def help(self,ev: KeyPressEvent) -> None:
-        self.show_message(_("Help"),
-        ("<Enter>          {} \n"
-        "<Esc>            {}\n"
-        "<Alt + letter>   {}\n"
-        "<d>              {}\n"
-        "<Delete>         {}\n"
-        "For More Visite  {}")
-        .format(
-            _("Confirm or Edit current selection"),
-            _("Close the current dialog"),
-            _("Navigate to an other tab"),
-            _("Display current item in JSON format if possible"),
-            _("Delete current selection if possible"),
-            "https://docs.jans.io/v1.0.6/admin/config-guide/tui/"))
+        current_tab = self._plugins[self.nav_bar.cur_navbar_selection].pid
+        if current_tab in ['oauth','fido2']:
+            nasted_navbar = self._plugins[self.nav_bar.cur_navbar_selection].nav_bar
+            nasted_tab = nasted_navbar.navbar_entries[nasted_navbar.cur_navbar_selection][0]
+
+            if nasted_tab =='agama':
+                        
+                self.show_message(_("Help"),
+                ("<d>              {}\n"
+                "<c>              {}\n"
+                "<Esc>            {}\n"
+                "<Alt + letter>   {}\n"
+                "<Delete>         {}\n"
+                "For More Visite  {}")
+                .format(
+                    _("display agama project config"),
+                    _("Manage agama project Configuration"),
+                    _("Close the current dialog"),
+                    _("Navigate to an other tab"),
+                    _("Delete current agama project if possible"),
+                    "https://docs.jans.io/v1.0.6/admin/config-guide/tui/"))
+            else:
+                self.show_message(_("Help"),
+                    ("<Enter>          {} \n"
+                    "<Esc>            {}\n"
+                    "<Alt + letter>   {}\n"
+                    "<d>              {}\n"
+                    "<Delete>         {}\n"
+                    "For More Visite  {}")
+                    .format(
+                        _("Confirm or Edit current selection"),
+                        _("Close the current dialog"),
+                        _("Navigate to an other tab"),
+                        _("Display current item in JSON format if possible"),
+                        _("Delete current selection if possible"),
+                        "https://docs.jans.io/v1.0.6/admin/config-guide/tui/")) 
+        else:
+            self.show_message(_("Help"),
+                ("<Enter>          {} \n"
+                "<Esc>            {}\n"
+                "<Alt + letter>   {}\n"
+                "<d>              {}\n"
+                "<Delete>         {}\n"
+                "For More Visite  {}")
+                .format(
+                    _("Confirm or Edit current selection"),
+                    _("Close the current dialog"),
+                    _("Navigate to an other tab"),
+                    _("Display current item in JSON format if possible"),
+                    _("Delete current selection if possible"),
+                    "https://docs.jans.io/v1.0.6/admin/config-guide/tui/"))
 
     def escape(self,ev: KeyPressEvent) -> None:
         try:
