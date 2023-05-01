@@ -25,12 +25,12 @@ markdown_extensions:
 - pymdownx.superfences:
     custom_fences:
     - class: mermaid
-      format: '!!python/name:pymdownx.superfences.fence_code_format'
+      format: !!python/name:pymdownx.superfences.fence_code_format
       name: mermaid
 - pymdownx.tabbed
 - pymdownx.emoji:
-    emoji_generator: '!!python/name:materialx.emoji.to_svg'
-    emoji_index: '!!python/name:materialx.emoji.twemoji'
+    emoji_generator: !!python/name:materialx.emoji.to_svg
+    emoji_index: !!python/name:materialx.emoji.twemoji
 nav:
 - Administration:
   - Introduction: admin/README.md
