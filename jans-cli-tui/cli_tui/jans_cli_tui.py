@@ -607,7 +607,7 @@ class JansCliApp(Application):
                 "<Esc>            {}\n"
                 "<Alt + letter>   {}\n"
                 "<Delete>         {}\n"
-                "For More Visite  {}")
+                "For More Visit  {}")
                 .format(
                     _("display agama project config"),
                     _("Manage agama project Configuration"),
@@ -622,7 +622,7 @@ class JansCliApp(Application):
                     "<Alt + letter>   {}\n"
                     "<d>              {}\n"
                     "<Delete>         {}\n"
-                    "For More Visite  {}")
+                    "For More Visit  {}")
                     .format(
                         _("Confirm or Edit current selection"),
                         _("Close the current dialog"),
@@ -637,7 +637,7 @@ class JansCliApp(Application):
                 "<Alt + letter>   {}\n"
                 "<d>              {}\n"
                 "<Delete>         {}\n"
-                "For More Visite  {}")
+                "For More Visit  {}")
                 .format(
                     _("Confirm or Edit current selection"),
                     _("Close the current dialog"),
