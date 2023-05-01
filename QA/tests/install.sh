@@ -67,6 +67,33 @@ EOF
 
 install_jans() {
 
+}
+
+install_jans() {
+
+	rm setup.properties
+	# IP_ADDRESS=$HOST
+	# HOSTNAME=`sudo ssh -i private.pem ${USERNAME}@${IPADDRESS} hostname`
+
+	# echo "$USERNAME"
+	# echo "$HOST"
+	# echo "$HOSTNAME"
+	ORG_NAME=test
+	EMAIL=test@test.org
+	CITY=pune
+	STATE=MH
+	COUNTRY=IN
+	ADMIN_PASS="Admin@123"
+	LDAP=True
+	echo "*****   Writing properties!!   *****"
+	echo "ip=${IPADDRESS}" | tee -a setup.properties >/dev/null
+	echo "hostname=${HOSTNAME}" | tee -a setup.properties >/dev/null
+	echo "orgName=${ORG_NAME}" | tee -a setup.properties >/dev/null
+	echo "admin_email=${EMAIL}" | tee -a setup.properties >/dev/null
+	echo "city=${CITY}" | tee -a setup.properties >/dev/null
+	echo "state=${STATE}" | tee -a setup.properties >/dev/null
+	echo "countryCode=${COUNTRY}" | tee -a setup.properties >/dev/null
+	echo "ldapPass=${ADMIN_PASS}" | tee -a setup.properties >/dev/null
 	rm setup.properties
 	# IP_ADDRESS=$HOST
 	# HOSTNAME=`sudo ssh -i private.pem ${USERNAME}@${IPADDRESS} hostname`
@@ -100,7 +127,23 @@ install_jans() {
 		echo "rdbm_install=${LDAP}" | tee -a setup.properties >/dev/null
 		echo "rdbm_install_type=1" | tee -a setup.properties >/dev/null
 		echo "rdbm_type=pgsql" | tee -a setup.properties >/dev/null
+	if [[ $DB == opendj ]]; then
+		echo "installLdap=${LDAP}" | tee -a setup.properties >/dev/null
+	elif [[ $DB == mysql ]]; then
+		echo "rdbm_install=${LDAP}" | tee -a setup.properties >/dev/null
+		echo "rdbm_install_type=1" | tee -a setup.properties >/dev/null
+	elif [[ $DB == pgsql ]]; then
+		echo "rdbm_install=${LDAP}" | tee -a setup.properties >/dev/null
+		echo "rdbm_install_type=1" | tee -a setup.properties >/dev/null
+		echo "rdbm_type=pgsql" | tee -a setup.properties >/dev/null
 
+	elif [[ $DB == couchbase ]]; then
+		echo "rdbm_install=False" | tee -a setup.properties >/dev/null
+		echo "rdbm_install_type=0" | tee -a setup.properties >/dev/null
+		echo "rdbm_type=mysql" | tee -a setup.properties >/dev/null
+		echo "cb_install=1" | tee -a setup.properties >/dev/null
+		echo "cb_password=Admin@123" | tee -a setup.properties >/dev/null
+		echo "persistence_type=couchbase" | tee -a setup.properties >/dev/null
 	elif [[ $DB == couchbase ]]; then
 		echo "rdbm_install=False" | tee -a setup.properties >/dev/null
 		echo "rdbm_install_type=0" | tee -a setup.properties >/dev/null
@@ -119,11 +162,22 @@ install_jans() {
 
 	if [[ $OS == ubuntu22 ]] || [[ $OS == ubuntu20 ]]; then
 		sudo ssh -i private.pem ${USERNAME}@${IPADDRESS} <<EOF
+	fi
+
+	curl https://raw.githubusercontent.com/JanssenProject/jans/v${VERSION}/jans-linux-setup/jans_setup/install.py >install.py
+	echo "install downloaded"
+	sudo scp -i private.pem setup.properties install.py ${USERNAME}@${IPADDRESS}:~/
+	rm setup.properties install.py
+
+	if [[ $OS == ubuntu22 ]] || [[ $OS == ubuntu20 ]]; then
+		sudo ssh -i private.pem ${USERNAME}@${IPADDRESS} <<EOF
  		sudo apt install  python3-pip -y
 		echo "package download started"
 		wget https://github.com/JanssenProject/jans/releases/download/v${VERSION}/jans_${VERSION}.${OS}.04_amd64.deb &>/dev/null
 		echo "package downloaded"
 EOF
+	elif [[ $OS == rhel ]] || [[ $OS == centos ]]; then
+		sudo ssh -i private.pem ${USERNAME}@${IPADDRESS} <<EOF
 	elif [[ $OS == rhel ]] || [[ $OS == centos ]]; then
 		sudo ssh -i private.pem ${USERNAME}@${IPADDRESS} <<EOF
 			sudo sed -i 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config
@@ -140,6 +194,8 @@ EOF
 EOF
 	elif [[ $OS == suse ]]; then
 		sudo ssh -i private.pem ${USERNAME}@${IPADDRESS} <<EOF
+	elif [[ $OS == suse ]]; then
+		sudo ssh -i private.pem ${USERNAME}@${IPADDRESS} <<EOF
 			echo "downloading package"
 			wget https://github.com/JanssenProject/jans/releases/download/v${VERSION}/jans-${VERSION}-suse15.x86_64.rpm &>/dev/null
 			sudo zypper addrepo https://download.opensuse.org/repositories/home:frispete:python/15.4/home:frispete:python.repo
@@ -148,6 +204,7 @@ EOF
 EOF
 	else
 		echo "db not selected"
+	fi
 	fi
 
 	# 	if [[ $OS == rhel ]] || [[ $OS == centos ]] || [[ $OS == ubuntu ]] || [[ $OS == suse ]] && [[ $DB == couchbase ]] ;
@@ -181,7 +238,13 @@ sleep 300
 EOF
 		echo " installation ended"
 	elif [[ ${PACKAGE_OR_ONLINE} == "package" ]]; then
+		echo " installation ended"
+	elif [[ ${PACKAGE_OR_ONLINE} == "package" ]]; then
 		echo "package installation started"
+		if [[ ${OS} == "suse" ]]; then
+			echo "${OS} package installation started"
+			sudo ssh -i private.pem ${USERNAME}@${IPADDRESS} <<EOF
+			sudo zypper --no-gpg-checks install -y ./jans-${VERSION}-suse15.x86_64.rpm
 		if [[ ${OS} == "suse" ]]; then
 			echo "${OS} package installation started"
 			sudo ssh -i private.pem ${USERNAME}@${IPADDRESS} <<EOF
@@ -193,9 +256,17 @@ EOF
 			echo "${OS} package installation started"
 			sudo ssh -i private.pem ${USERNAME}@${IPADDRESS} <<EOF
 			sudo yum install -y ./jans-${VERSION}-el8.x86_64.rpm
+		if [[ ${OS} == "rhel" ]]; then
+			echo "${OS} package installation started"
+			sudo ssh -i private.pem ${USERNAME}@${IPADDRESS} <<EOF
+			sudo yum install -y ./jans-${VERSION}-el8.x86_64.rpm
 			sudo python3 /opt/jans/jans-setup/setup.py -f setup.properties -n
 EOF
 		fi
+		if [[ ${OS} == "ubuntu20" ]] || [[ ${OS} == "ubuntu22" ]]; then
+			echo "${OS} package installation started"
+			sudo ssh -i private.pem ${USERNAME}@${IPADDRESS} <<EOF
+			sudo apt install -y ./jans_${VERSION}.${OS}.04_amd64.deb
 		if [[ ${OS} == "ubuntu20" ]] || [[ ${OS} == "ubuntu22" ]]; then
 			echo "${OS} package installation started"
 			sudo ssh -i private.pem ${USERNAME}@${IPADDRESS} <<EOF
@@ -206,10 +277,17 @@ EOF
 	else
 		echo " please enter which product you want to install"
 
+
 	fi
 
 }
+}
 
+helpFunction() {
+	echo "KEEP PRIVATE.PEM and INSTALL.SH IN SAME FOLDER"
+	echo "Usage: ./install.sh -i IPADDRESS -h HOSTNAME -u USERNAME -d DB -o OS  -b VERSION -p PACKAGE_OR_ONLINE"
+	echo -e "EX: ./install.sh  3.10.10.22  manojs1978-pleasing-goldfish.gluu.info  ec2-user  ldap  ubuntu22 OR suse OR rhel OR ubuntu20  1.0.12 OR 1.0.13.nightly  package"
+	exit 1 # Exit script after printing help
 helpFunction() {
 	echo "KEEP PRIVATE.PEM and INSTALL.SH IN SAME FOLDER"
 	echo "Usage: ./install.sh -i IPADDRESS -h HOSTNAME -u USERNAME -d DB -o OS  -b VERSION -p PACKAGE_OR_ONLINE"
@@ -228,9 +306,21 @@ while getopts i:h:u:d:o:f:b:p: option; do
 	b) VERSION=${VERSION} ;;
 	p) PACKAGE_OR_ONLINE=${PACKAGE_OR_ONLINE} ;;
 	esac
+unset IPADDRESS HOSTNAME USERNAME DB OS PACKAGE_OR_ONLINE
+while getopts i:h:u:d:o:f:b:p: option; do
+	case "${option}" in
+	i) IPADDRESS=${OPTARG} ;;
+	h) HOSTNAME=${OPTARG} ;;
+	u) USERNAME=${OPTARG} ;;
+	d) DB=${OPTARG} ;;
+	o) OS=${OPTARG} ;;
+	b) VERSION=${VERSION} ;;
+	p) PACKAGE_OR_ONLINE=${PACKAGE_OR_ONLINE} ;;
+	esac
 done
 #VERSION=main
 # Print helpFunction in case parameters are empty
+# sudo ssh -i private.pem $USERNAME@$HOST
 # sudo ssh -i private.pem $USERNAME@$HOST
 
 IPADDRESS=$1
@@ -240,8 +330,22 @@ DB=$4
 OS=$5
 VERSION=$6
 PACKAGE_OR_ONLINE=$7
+IPADDRESS=$1
+HOSTNAME=$2
+USERNAME=$3
+DB=$4
+OS=$5
+VERSION=$6
+PACKAGE_OR_ONLINE=$7
 
 # Begin script in case all parameters are correct
+# echo "your ip address is ${IPADDRESS}"
+# echo "your hostname is ${HOSTNAME}"
+# echo "your username is ${USERNAME}"
+# echo "your DB is ${DB}"
+# echo "your  OS is  ${OS}"
+# echo "your VERSION is ${VERSION}"
+# echo "installation type is ${PACKAGE_OR_ONLINE}"
 # echo "your ip address is ${IPADDRESS}"
 # echo "your hostname is ${HOSTNAME}"
 # echo "your username is ${USERNAME}"
