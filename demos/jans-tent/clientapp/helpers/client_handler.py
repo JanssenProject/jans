@@ -77,6 +77,7 @@ class ClientHandler:
         :return: [client information including client-id and secret]
         :rtype: dict
         """
+        logger.debug('called ClientHandler´s register_client method')
         registration_args = {'redirect_uris': redirect_uris,
                              'response_types': ['code'],
                              'grant_types': ['authorization_code'],
@@ -86,7 +87,7 @@ class ClientHandler:
                              **self.__additional_metadata
                              }
         reg_info = self.clientAdapter.register(op_data['registration_endpoint'], **registration_args)
-
+        logger.info('register_client - reg_info = %s', json.dumps(reg_info.to_dict(), indent=2))
         return reg_info
 
     def discover(self, op_url: Optional[str] = __op_url) -> ASConfigurationResponse:
