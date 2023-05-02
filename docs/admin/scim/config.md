@@ -15,13 +15,13 @@ tags:
 >{
 >    "baseDN":"o=jans",
 >
->    "applicationUrl":"https://pujavs-kind-oryx.gluu.info",
->    "baseEndpoint":"https://pujavs-kind-oryx.gluu.info/jans-scim/restv1",
+>    "applicationUrl":"https://<your-jans-host>.info",
+>    "baseEndpoint":"https://<your-jans-host>.info/jans-scim/restv1",
 >
 >    "personCustomObjectClass":"jansCustomPerson",
 >
->    "oxAuthIssuer":"https://pujavs-kind-oryx.gluu.info",
->    "umaIssuer":"https://pujavs-kind-oryx.gluu.info",
+>    "oxAuthIssuer":"https://<your-jans-host>.info",
+>    "umaIssuer":"https://<your-jans-host>.info",
 >
 >    "maxCount": 200,
 >    "bulkMaxOperations": 30,
