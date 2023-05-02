@@ -29,34 +29,34 @@ the steps below.
 
 #### Create A Project
 
-1. Use https://cloud.gluu.org/agama-lab online tool to make an agama flow.
+1. Use [Agama Lab](https://cloud.gluu.org/agama-lab) online tool to make an agama flow.
 
-Hit the above URL and you will see a page with Login with GitHub button. Click on it to go to GitHub authentication page.
+    Hit the above URL and you will see a page with Login with GitHub button. Click on it to go to GitHub authentication page.
 
-  ![](../../../assets/agama-lab-login.png)
+    ![](../../../assets/agama-lab-login.png)
 
-Authenticate on GitHub authentication page.
+2. Authenticate on GitHub authentication page.
 
-![](../../../assets/agama-lab-GH-login.png)
+    ![](../../../assets/agama-lab-GH-login.png)
 
-Input the name of the repository where Agama Lab should commit the project artifacts. Hit `Next`
+3. Input the name of the repository where Agama Lab should commit the project artifacts. Hit `Next`
 
-![](../../../assets/agama-lab-add-gh-repo.png)
+    ![](../../../assets/agama-lab-add-gh-repo.png)
 
-Project listing page is shown. All the existing projects for your GitHub user are listed here. Projects can be editted, deleted
+4. Project listing page is shown. All the existing projects for your GitHub user are listed here. Projects can be editted, deleted
 from project listing page.
 
-![](../../../assets/agama-lab-project-page.png)
+    ![](../../../assets/agama-lab-project-page.png)
 
-To create new project, click on the `New Project` button.
+5. To create new project, click on the `New Project` button.
 
-![](../../../assets/agama-lab-new-proj.png)
+    ![](../../../assets/agama-lab-new-proj.png)
 
-Enter the name and the description for the new project and click `Create` button
+6. Enter the name and the description for the new project and click `Create` button.
+    This will create a new project and it'll be visible on the project listing page.
 
-![](../../../assets/agama-lab-project-listing.png)
+    ![](../../../assets/agama-lab-project-listing.png)
 
-This will create a new project and it'll be visible on the project listing page.
 
 #### Configure The Authentication Flow
 
@@ -64,28 +64,42 @@ Create/import
 
 1. Create Flow File
 
-Click on :material-arrow-top-right:. 
-This will open flow authering view with a blank canvas. To start creating the flow, we need to create a `Flow File`. To
-do that, 
+    Click on :material-arrow-top-right:. 
+    This will open flow authering view with a blank canvas. To start creating the flow, we need to create a `Flow File`. To
+    do that, 
+    
+    _Right click on `code` and then `New`. Select `Flow File`_
+    
+    ![](../../../assets/agama-lab-new-flow.png)
 
-_Right click on `code` and then `New`. Select `Flow File`_
+2. Give name and description for flow file and then click `Create`
 
-![](../../../assets/agama-lab-new-flow.png)
+    ![](../../../assets/agama-lab-new-flow-name.png)
 
-Give name and description for flow file
+3. Newly created flow file has one stage in it by default. Right-clicking on any will allow you to edit the existing 
+stage using :material-pencil: and add further stages by clicking :material-plus-circle:
 
-![](../../../assets/agama-lab-new-flow-name.png)
+    ![](../../../assets/agama-lab-flow-passwd-1.png)
 
-Newly created flow file has one stage in it by default. Right-clicking on any will allow you to edit the existing stage
-using :material-pencil: and add further stages by clicking :material-plus-circle:
+4. Create AuthenticationService [call]() block
 
-![](../../../assets/agama-lab-flow-passwd-1.png)
+   ![](../../../assets/agama-lab-flow-passwd-create-call.png)
 
-2. Create AuthenticationService [call]() block
+   ![](../../../assets/agama-lab-flow-passwd-new-call.png)
+
+   ![](../../../assets/agama-lab-flow-passwd-edit-call.png)
 
 3. Create CdiUtil call block
 
+   ![](../../../assets/agama-lab-flow-passwd-create-cdiutil.png)
+   
+   ![](../../../assets/agama-lab-flow-passwd-edit-cdiutil.png)
+
 4. Create [assignment]() block
+
+   ![](../../../assets/agama-lab-flow-passwd-create-assignment.png)
+
+   ![](../../../assets/agama-lab-flow-passwd-edit-assignment.png)
 
 5. Create [repeat]() block
 
