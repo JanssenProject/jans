@@ -30,7 +30,7 @@ Operation ID: delete-config-smtp
 Operation ID: test-config-smtp
   Description: Test SMTP server configuration.
 
-To get sample shema type /opt/jans/jans-cli/config-cli.py --schema <schma>, for example /opt/jans/jans-cli/config-cli.py --schema /components/schemas/SmtpConfiguration
+To get sample schema type /opt/jans/jans-cli/config-cli.py --schema <schema>, for example /opt/jans/jans-cli/config-cli.py --schema /components/schemas/SmtpConfiguration
 ```
 As we see, we can perform many operations such as `update`, `delete`, `test`, `post`, etc. Let's do some operations.
 
@@ -108,4 +108,15 @@ To update smtp server, simply change any information on `/tmp/smtp.json` file an
 /opt/jans/jans-cli/config-cli.py --operation-id put-config-smtp --data /tmp/smtp.json
 ```
 It will update the information.
+
+
+## Test SMTP Server Configuration
+Testing SMTP configuration token with `https://jans.io/oauth/config/smtp.write` scope is required.
+To test SMTP configuration update, change any information on `/tmp/smtp.json` file with test data and run the following command:
+
+```commandline
+/opt/jans/jans-cli/config-cli.py --operation-id test-config-smtp --data /tmp/smtp.json
+```
+This will be return status code 200 with response as true or false based on the SMTP test result.
+Note:  `SMTP Password` should be App password and not web login password.
 
