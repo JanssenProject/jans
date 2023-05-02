@@ -5,14 +5,136 @@ tags:
   - bulk-users
 ---
 
-## This content is in progress
+## Bulk Users
 
-The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.
+This functionality enables clients to send a potentially large collection of resource operations in a single request.
 
-## Have questions in the meantime?
+!!! Note
+Operation of multiple resources can be clubbed in one BulkRequest, like for user and group.
+Individual BulkOperation can be of any of HTTP method - POST, PUT, PATCH, etc
 
-While this documentation is in progress, you can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussion) or the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). Any questions you have will help determine what information our documentation should cover.
+## Bulk operation JSON example 
+> ```javascript
+>{
+>  "schemas": [
+>    "urn:ietf:params:scim:api:messages:2.0:BulkRequest"
+>  ],
+>  "Operations": [
+>    {
+>      "method": "POST",
+>      "path": "/Users",
+>      "bulkId": "qwerty",
+>      "data": {
+>        "schemas": ["urn:ietf:params:scim:schemas:core:2.0:User"],
+>        "userName": "scim_test_bjensen_1"
+>      }
+>    },
+>   {
+>     "method": "POST",
+>     "path": "/Groups",
+>     "bulkId": "ytrewq",
+>     "data": {
+>       "schemas": ["urn:ietf:params:scim:schemas:core:2.0:Group"],
+>       "displayName": "Tour Guides",
+>       "members": [
+>         {
+>           "type": "User",
+>           "value": "bulkId:qwerty"
+>         }
+>       ]
+>     }
+>   },
+>    {
+>      "method": "PUT",
+>      "path": "/Users/bulkId:qwerty",
+>      "data": {
+>        "active": true,
+>        "password": "top-secret",
+>        "roles": [{ "value" : "Master of puppets" }]
+>      }
+>    },
+>    {
+>      "method": "PATCH",
+>      "path": "/Users/bulkId:qwerty",
+>      "data": {
+>        "schemas": [
+>          "urn:ietf:params:scim:api:messages:2.0:PatchOp"
+>        ],
+>        "Operations": [
+>          {
+>            "op": "add",
+>            "value": {
+>              "nickName": "Babas",
+>              "userType": "CEO"
+>            }
+>          },
+>          {
+>            "op": "replace",
+>            "value": {
+>              "displayName": "patched Brava"
+>            }
+>          }
+>        ]
+>      }
+>    },
+>    {
+>      "method": "PATCH",
+>      "path": "/Users/bulkId:qwerty",
+>      "data": {
+>        "schemas": [
+>          "urn:ietf:params:scim:api:messages:2.0:PatchOp"
+>        ],
+>        "Operations": [
+>          {
+>            "op": "replace",
+>            "path": "name",
+>            "value": {
+>              "familyName": "re-patched Jensen",
+>              "givenName": "re-patched Barbara",
+>              "middleName": "re-patched Jane"
+>            }
+>          },
+>          {
+>            "op": "replace",
+>            "path": "phoneNumbers",
+>            "value": [
+>              {
+>                "value": "re-patch 555 123 4567",
+>                "type": "other"
+>              },
+>              {
+>                "value": "re-patch 666 000 1234",
+>                "type": "work"
+>              }
+>            ]
+>          },
+>          {
+>            "op": "remove",
+>            "path": "name.middleName"
+>          }
+>        ]
+>      }
+>    }
+>  ]
+>}
+>}
+> ```
 
-## Want to contribute?
 
-If you have content you'd like to contribute to this page in the meantime, you can get started with our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/).
+## Required scope
+
+```text
+https://jans.io/scim/bulk
+```
+
+## Bulk operation configuration
+SCIM configuration has various attributes related to bulk operation. Following are related attributes and their default values.
+
+> ```javascript
+>    ...
+>    "maxCount": 200,
+>    "bulkMaxOperations": 30,
+>    "bulkMaxPayloadSize": 3072000,
+>    "userExtensionSchemaURI": "urn:ietf:params:scim:schemas:extension:gluu:2.0:User",
+>    ...
+> ```
