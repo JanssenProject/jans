@@ -99,7 +99,14 @@ class Plugin(DialogUtils):
         self.app.app_configuration = response.json()
         self.oauth_logging()
 
-
+    def help(self):
+        current_tab = self.nav_bar.navbar_entries[self.nav_bar.cur_navbar_selection][0]
+        tap_help = getattr(getattr(self, current_tab, None), 'jans_help', None)
+        if tap_help:
+            help_message = tap_help
+        else:
+            help_message = self.app.jans_help
+        self.app.show_message(_("Help "),help_message,tobefocused=self.app.center_container)
 
     async def retrieve_sopes(self) -> None:
         """asyncio corotune for retreiving scopes

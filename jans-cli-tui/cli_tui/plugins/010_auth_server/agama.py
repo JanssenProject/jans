@@ -35,6 +35,18 @@ class Agama(DialogUtils):
         self.app = app
         self.data = []
         self.first_enter = False
+        self.jans_help = ("<d>              {}\n"
+                "<c>              {}\n"
+                "<Esc>            {}\n"
+                "<Alt + letter>   {}\n"
+                "<Delete>         {}\n"
+                "For More Visit  {}").format(
+                    _("display agama project config"),
+                    _("Manage agama project Configuration"),
+                    _("Close the current dialog"),
+                    _("Navigate to an other tab"),
+                    _("Delete current agama project if possible"),
+                    "https://docs.jans.io/v1.0.6/admin/config-guide/tui/")
 
         self.working_container = JansVerticalNav(
                 myparent=app,
