@@ -278,6 +278,7 @@ class Agama(DialogUtils):
         asyncio.ensure_future(self.get_projects_coroutine(search_str))
 
     def upload_project(self):
+        agama_status = self.app.app_configuration.get('agamaConfiguration',{}).get('enabled')
 
         def project_uploader(path, project_name):
             async def coroutine():
@@ -288,7 +289,6 @@ class Agama(DialogUtils):
                 self.get_agama_projects()
 
             asyncio.ensure_future(coroutine())
-
 
         def aks_project_name(path):
             body = self.app.getTitledText(_("Project Name"), name='oauth:agama:projectname', style=cli_style.edit_text)
@@ -317,7 +317,6 @@ class Agama(DialogUtils):
 
             return asyncio.ensure_future(coroutine())
 
-
         def do_upload_project(path):
             project_name = None
 
@@ -334,8 +333,16 @@ class Agama(DialogUtils):
             except Exception:
                 aks_project_name(path)
 
-        file_browser_dialog = jans_file_browser_dialog(self.app, path=self.app.browse_path, browse_type=BrowseType.file, ok_handler=do_upload_project)
-        self.app.show_jans_dialog(file_browser_dialog)
+        def continue_upload():
+            file_browser_dialog = jans_file_browser_dialog(self.app, path=self.app.browse_path, browse_type=BrowseType.file, ok_handler=do_upload_project)
+            self.app.show_jans_dialog(file_browser_dialog)
+
+        if agama_status:
+            continue_upload()
+        else:
+            continue_button = Button(_("Continue!"), handler=continue_upload)
+            buttons = [Button('Back'), continue_button]
+            self.app.show_message(_("Action must be taken"),_("Agama is not enabled"), buttons=buttons)
 
     def search_agama_project(self, tbuffer:Buffer) -> None:
         if 'entries' in self.data:
