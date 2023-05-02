@@ -495,12 +495,14 @@ public class SqlFilterConverter {
 				}
 			}
 			try {
-				String columnType = attributeType.getType();
-				java.sql.JDBCType jdbcType = java.sql.JDBCType.valueOf(StringHelper.toUpperCase(columnType));
-
-				if (jdbcType == java.sql.JDBCType.SMALLINT) {
-					if (StringHelper.equalsIgnoreCase((String) assertionValue, "true") || StringHelper.equalsIgnoreCase((String) assertionValue, "1")) {
-						assertionValue = 1;
+				if (attributeType != null) {
+					String columnType = attributeType.getType();
+					java.sql.JDBCType jdbcType = java.sql.JDBCType.valueOf(StringHelper.toUpperCase(columnType));
+	
+					if (jdbcType == java.sql.JDBCType.SMALLINT) {
+						if (StringHelper.equalsIgnoreCase((String) assertionValue, "true") || StringHelper.equalsIgnoreCase((String) assertionValue, "1")) {
+							assertionValue = 1;
+						}
 					}
 				}
 			} catch (java.lang.IllegalArgumentException ex) {
