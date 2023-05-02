@@ -321,6 +321,7 @@ nav:
   - Reference Guide:
     - admin/reference/README.md
     - Javadocs / OpenAPI:
+      - admin/reference/openapi.md
       - jans-fido2:
         - client:
           - member-search-index.zip: admin/reference/javadocs/jans-fido2/client/member-search-index.zip
