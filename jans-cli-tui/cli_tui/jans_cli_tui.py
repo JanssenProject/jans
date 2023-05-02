@@ -122,7 +122,7 @@ class JansCliApp(Application):
         self.browse_path = '/'
         self.app_configuration = {}
         self.current_page = None
-        self.defult_help = ("<Enter>          {} \n"
+        self.jans_help = ("<Enter>          {} \n"
                 "<Esc>            {}\n"
                 "<Alt + letter>   {}\n"
                 "<d>              {}\n"
@@ -606,13 +606,13 @@ class JansCliApp(Application):
         focus_previous(ev)
 
     def help(self,ev: KeyPressEvent) -> None:
+        
         plugin = self._plugins[self.nav_bar.cur_navbar_selection]
-
         if callable(getattr(plugin, "help", None)):
             plugin.help()
         else:
             self.show_message(_("Help"),
-                self.defult_help,tobefocused=self.center_container)
+                self.jans_help,tobefocused=self.center_container)
 
     def escape(self,ev: KeyPressEvent) -> None:
         try:
