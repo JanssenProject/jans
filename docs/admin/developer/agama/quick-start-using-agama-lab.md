@@ -81,38 +81,88 @@ stage using :material-pencil: and add further stages by clicking :material-plus-
 
     ![](../../../assets/agama-lab-flow-passwd-1.png)
 
-4. Create AuthenticationService [call]() block
+   4. Create AuthenticationService [call]() block
 
-   ![](../../../assets/agama-lab-flow-passwd-create-call.png)
+      ![](../../../assets/agama-lab-flow-passwd-create-call.png)
 
-   ![](../../../assets/agama-lab-flow-passwd-new-call.png)
+      ![](../../../assets/agama-lab-flow-passwd-new-call.png)
 
-   ![](../../../assets/agama-lab-flow-passwd-edit-call.png)
+      ![](../../../assets/agama-lab-flow-passwd-edit-call.png)
 
-3. Create CdiUtil call block
+   3. Create CdiUtil call block
 
-   ![](../../../assets/agama-lab-flow-passwd-create-cdiutil.png)
+      ![](../../../assets/agama-lab-flow-passwd-create-cdiutil.png)
    
-   ![](../../../assets/agama-lab-flow-passwd-edit-cdiutil.png)
+      ![](../../../assets/agama-lab-flow-passwd-edit-cdiutil.png)
 
-4. Create [assignment]() block
+   4. Create [assignment]() block
 
-   ![](../../../assets/agama-lab-flow-passwd-create-assignment.png)
+      ![](../../../assets/agama-lab-flow-passwd-create-assignment.png)
 
-   ![](../../../assets/agama-lab-flow-passwd-edit-assignment.png)
+      ![](../../../assets/agama-lab-flow-passwd-edit-assignment.png)
 
-5. Create [repeat]() block
+   5. Create [repeat]() block
 
-6. Create [RRF]() block
+      ![](../../../assets/agama-lab-flow-passwd-create-repeat.png)
 
-7. Create CdiUtil call block
+      ![](../../../assets/agama-lab-flow-passwd-edit-repeat.png)
 
-8. Create [assignment]() block
+   6. Create [RRF]() block
 
-9. Create conditional [When]() block
+      ![](../../../assets/agama-lab-flow-passwd-check-repeat.png)
+
+      ![](../../../assets/agama-lab-flow-passwd-edit-rrf.png)
+
+      Save the flow. 
+
+   7. Create CdiUtil call block
+
+      ![](../../../assets/agama-lab-flow-passwd-create-cdiutil-instance.png)
+
+      ![](../../../assets/agama-lab-flow-passwd-edit-cdiutil-instance.png)
+
+   8. Create [assignment]() block
+
+      ![](../../../assets/agama-lab-flow-passwd-create-assignment-uid.png)
+
+      ![](../../../assets/agama-lab-flow-passwd-edit-assignment-uid.png)
+
+   9. Create conditional [When]() block
+
+      ![](../../../assets/agama-lab-flow-passwd-create-when.png)
+
+      ![](../../../assets/agama-lab-flow-passwd-edit-when.png)
 
 10. Create [finish]() blocks
 
+      ![](../../../assets/agama-lab-flow-passwd-create-finish.png)
+   
+      ![](../../../assets/agama-lab-flow-passwd-edit-finish.png)
+   
+      ![](../../../assets/agama-lab-flow-passwd-create-fail-finish.png)
+   
+      ![](../../../assets/agama-lab-flow-passwd-edit-fail-finish.png)
+
+   Complete flow looks like below:
+
+      ![](../../../assets/agama-lab-flow-passwd-complete-flow.png)
+
+11. Generated code
+
+      ```
+    Flow co.acme.password
+     Basepath ""
+    authService = Call io.jans.as.server.service.AuthenticationService#class
+    cdiUtil = Call io.jans.service.cdi.util.CdiUtil#bean authService
+    authResult = {}
+    Repeat 3 times max
+      creds = RRF "login.ftlh" authResult
+      authResult.success = Call cdiUtil authenticate creds.username creds.password
+      authResult.uid = creds.username
+      When authResult.success is true
+        Finish authResult.uid
+    Finish false
+    ```
 
 ### Design User Interface
 
