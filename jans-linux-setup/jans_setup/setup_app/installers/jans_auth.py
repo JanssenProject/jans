@@ -42,7 +42,7 @@ class JansAuthInstaller(JettyInstaller):
         self.oxauth_static_conf_json = os.path.join(self.templates_folder, 'jans-auth-static-conf.json')
         self.oxauth_error_json = os.path.join(self.templates_folder, 'jans-auth-errors.json')
         self.oxauth_openid_jwks_fn = os.path.join(self.output_folder, 'jans-auth-keys.json')
-        self.oxauth_openid_jks_fn = os.path.join(Config.certFolder, 'jans-auth-keys.p12')
+        self.oxauth_openid_jks_fn = os.path.join(Config.certFolder, 'jans-auth-keys.' + Config.default_store_type.lower())
         self.ldif_people = os.path.join(self.output_folder, 'people.ldif')
         self.ldif_groups = os.path.join(self.output_folder, 'groups.ldif')
         self.agama_root = os.path.join(self.jetty_base, self.service_name, 'agama')
@@ -71,9 +71,14 @@ class JansAuthInstaller(JettyInstaller):
         Config.encoded_admin_password = self.ldap_encode(Config.admin_password)
 
         self.logIt("Generating OAuth openid keys", pbar=self.service_name)
-        sig_keys = 'RS256 RS384 RS512 ES256 ES256K ES384 ES512 PS256 PS384 PS512'
-        enc_keys = 'RSA1_5 RSA-OAEP ECDH-ES'
-        jwks = self.gen_openid_jwks_jks_keys(self.oxauth_openid_jks_fn, Config.oxauth_openid_jks_pass, key_expiration=2, key_algs=sig_keys, enc_keys=enc_keys)
+
+        jwks = self.gen_openid_jwks_jks_keys(
+                    jks_path=self.oxauth_openid_jks_fn,
+                    jks_pwd=Config.oxauth_openid_jks_pass,
+                    key_expiration=2,
+                    key_algs=Config.default_sig_key_algs,
+                    enc_keys=Config.default_enc_key_algs
+                    )
         self.write_openid_keys(self.oxauth_openid_jwks_fn, jwks)
 
         if Config.get('use_external_key'):
