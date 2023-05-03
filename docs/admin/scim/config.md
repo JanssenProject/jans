@@ -5,8 +5,8 @@ tags:
   - configuration
 ---
 
-# SCMI configuration
-[SCMI](https://github.com/JanssenProject/jans/tree/main/jans-scim) configuration enables to manage application-level configuration.
+# SCIM configuration
+[SCIM](https://github.com/JanssenProject/jans/tree/main/jans-scim) configuration enables to manage application-level configuration.
 
 
 ### Existing SCIM dynamic configuration
