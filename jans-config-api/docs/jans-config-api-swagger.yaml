@@ -7857,19 +7857,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        adminCanAccess:
-          type: boolean
-        adminCanView:
-          type: boolean
-        adminCanEdit:
-          type: boolean
-        userCanAccess:
+        whitePagesCanView:
           type: boolean
         userCanView:
           type: boolean
-        whitePagesCanView:
+        adminCanAccess:
+          type: boolean
+        adminCanEdit:
           type: boolean
         userCanEdit:
+          type: boolean
+        userCanAccess:
+          type: boolean
+        adminCanView:
           type: boolean
         baseDn:
           type: string
@@ -8367,6 +8367,8 @@ components:
           type: string
         introspectionAccessTokenMustHaveUmaProtectionScope:
           type: boolean
+        introspectionAccessTokenMustHaveIntrospectionScope:
+          type: boolean
         introspectionSkipAuthorization:
           type: boolean
         endSessionWithAccessToken:
@@ -8596,8 +8598,6 @@ components:
           type: object
           additionalProperties:
             type: string
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8607,6 +8607,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -9346,10 +9348,10 @@ components:
           type: array
           items:
             type: object
-        displayValue:
-          type: string
         value:
           type: object
+        displayValue:
+          type: string
     LocalizedString:
       type: object
       properties:
