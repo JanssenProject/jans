@@ -91,15 +91,29 @@ from project listing page.
 
     ![](../../../assets/agama-lab-flow-passwd-create-call.png)
 
+    New `Call` stage should appear with a link to `Start` stage
+
     ![](../../../assets/agama-lab-flow-passwd-new-call.png)
+
+    _Click `Call` stage and then click :material-pencil: to open configuration screen._
+
+    Add configuration values as shown below. This will create a new instance of `AuthenticationService` class. This
+    instance will be used to authenticate user. New instance will be stored in variable called `authService`.
 
     ![](../../../assets/agama-lab-flow-passwd-edit-call.png)
 
-   3. Create CdiUtil call block
-
-      ![](../../../assets/agama-lab-flow-passwd-create-cdiutil.png)
+5. Create CdiUtil call block
    
-      ![](../../../assets/agama-lab-flow-passwd-edit-cdiutil.png)
+    To perform authentication we will also need an instance of `CdiUtil` class. This instance in form of a bean which 
+    takes `AuthenticationService` instance as an argument. 
+
+    _Click `New Authentication Service` stage and then click on :material-plus-circle:. Then click `Call`_
+
+    ![](../../../assets/agama-lab-flow-passwd-create-cdiutil.png)
+   
+    _Input values as below in the configuration screen_
+
+    ![](../../../assets/agama-lab-flow-passwd-edit-cdiutil.png)
 
    4. Create [assignment]() block
 
