@@ -320,7 +320,7 @@ class JansVerticalNav():
 
     def clear(self) -> None:
         self.data = []
-        self.container_content[-1].height = self.max_height
+        self.list_box.height = 0
         self.selectes = 0
 
     def _get_key_bindings(self) -> KeyBindingsBase:
