@@ -204,6 +204,8 @@ class Attributes(DialogUtils):
                 await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
                 self.app.stop_progressing()
                 self.get_attributes()
+                common_data.claims_retreived = False
+
             asyncio.ensure_future(coroutine())
 
 
@@ -310,6 +312,7 @@ class Attributes(DialogUtils):
                 await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
                 self.app.stop_progressing()
                 self.get_attributes()
+                common_data.claims_retreived = False
 
             asyncio.ensure_future(coroutine())
 

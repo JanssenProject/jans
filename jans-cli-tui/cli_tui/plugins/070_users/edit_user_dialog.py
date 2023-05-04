@@ -171,9 +171,8 @@ class EditUserDialog(JansGDialog, DialogUtils):
                 )
 
             elif claim_prop.get('dataType') == 'boolean':
-                checked = get_custom_attribute(ca['value']).lower() == 'true'
                 self.edit_user_content.insert(-1, 
-                    self.app.getTitledCheckBox(_(claim_prop['displayName']), name=ca['name'], checked=checked, style='class:script-checkbox', jans_help=self.app.get_help_from_schema(self.schema, ca['name']))
+                    self.app.getTitledCheckBox(_(claim_prop['displayName']), name=ca['name'], checked=ca['value'], style='class:script-checkbox', jans_help=self.app.get_help_from_schema(self.schema, ca['name']))
                 )
 
         self.edit_user_container = ScrollablePane(content=HSplit(self.edit_user_content, width=D()),show_scrollbar=False)
