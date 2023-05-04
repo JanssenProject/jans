@@ -111,15 +111,24 @@ from project listing page.
 
     ![](../../../assets/agama-lab-flow-passwd-create-cdiutil.png)
    
-    _Input values as below in the configuration screen_
+    _Click on newly created `Call` stage and using :material-pencil: open the configuration page.
+    Input values as shown below in the configuration screen_
 
     ![](../../../assets/agama-lab-flow-passwd-edit-cdiutil.png)
 
-   4. Create [assignment]() block
+4. Create [assignment]() block
 
-      ![](../../../assets/agama-lab-flow-passwd-create-assignment.png)
+    Next, we need to create an empty variable which we will use in future to store value that represents success or 
+    failed authentication.
 
-      ![](../../../assets/agama-lab-flow-passwd-edit-assignment.png)
+    _Click on `New CdiUtil Object` and then click :material-plus-circle:. Select `Assignment(s)`_
+
+    ![](../../../assets/agama-lab-flow-passwd-create-assignment.png)
+
+    _Click on newly created `Assign` stage and using :material-pencil: open the configuration page.
+    Input values as shown below in the configuration screen_
+
+    ![](../../../assets/agama-lab-flow-passwd-edit-assignment.png)
 
    5. Create [repeat]() block
 
