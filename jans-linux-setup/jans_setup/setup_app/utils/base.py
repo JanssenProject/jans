@@ -111,6 +111,13 @@ def get_os_description():
 if snap:
     snapctl = shutil.which('snapctl')
 
+systemctl = False
+systemctl_cmd = shutil.which('systemctl')
+service_cmd = shutil.which('service')
+if systemctl_cmd:
+    systemctl = os.popen(systemctl_cmd + ' is-system-running').read().strip() == 'offline'
+
+
 # resources
 current_file_max = int(open("/proc/sys/fs/file-max").read().strip())
 current_mem_bytes = os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES')
