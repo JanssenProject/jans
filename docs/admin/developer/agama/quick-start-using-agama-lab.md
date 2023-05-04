@@ -150,29 +150,93 @@ stage using :material-pencil: and add further stages by clicking :material-plus-
 11. Generated code
 
       ```
-    Flow co.acme.password
-     Basepath ""
-    authService = Call io.jans.as.server.service.AuthenticationService#class
-    cdiUtil = Call io.jans.service.cdi.util.CdiUtil#bean authService
-    authResult = {}
-    Repeat 3 times max
-      creds = RRF "login.ftlh" authResult
-      authResult.success = Call cdiUtil authenticate creds.username creds.password
-      authResult.uid = creds.username
-      When authResult.success is true
-        Finish authResult.uid
-    Finish false
-    ```
+       Flow co.acme.password
+        Basepath ""
+       authService = Call io.jans.as.server.service.AuthenticationService#class
+       cdiUtil = Call io.jans.service.cdi.util.CdiUtil#bean authService
+       authResult = {}
+       Repeat 3 times max
+         creds = RRF "login.ftlh" authResult
+         authResult.success = Call cdiUtil authenticate creds.username creds.password
+         authResult.uid = creds.username
+         When authResult.success is true
+           Finish authResult.uid
+       Finish false
+      ```
 
 ### Design User Interface
 
+In the RRF configuration step in the flow above, we used `login.ftlh` to render the login page elements.
+We need to provide `login.ftlh` to the Agama project so that the flow can use it during the flow execution.
+Use the steps below to create the page.
+
 1. Create a template file
 
+      ![](../../../assets/agama-lab-flow-passwd-create-login-page.png)
+
+      ![](../../../assets/agama-lab-flow-passwd-select-template.png)      
+
 2. Use the visual editor
+
+      ![](../../../assets/agama-lab-flow-passwd-edit-template.png)
+
+      ![](../../../assets/agama-lab-flow-passwd-edit-template-2.png)
+
+   ```html
+   <!doctype html>
+   <html xmlns="http://www.w3.org/1999/xhtml">
+       <head>
+         <title> Jans Agama Basic Auth flow </title>
+       </head>
+       <body>
+   
+         <h2>Welcome</h2>
+         <hr />
+         
+         [#if !(success!true)]
+           <p class="fs-6 text-danger mb-3">${msgs["login.errorMessage"]}</p>
+         [/#if]
+           
+         <hr />
+         <form method="post" enctype="application/x-www-form-urlencoded">
+           
+           <div>
+               Username: <input type="text" class="form-control" name="username" id="username" value="${uid!}" required>
+           </div>
+           
+           <div>
+               Password: <input type="password" class="form-control" id="password" name="password">
+           </div>
+           
+           <div>
+               <input type="submit" class="btn btn-success px-4" value="Login">
+           </div>
+         </form>
+       </body>
+       <style>
+           input {
+               border: 1px solid #000000;
+           }
+       </style>
+   </html>
+   ```
+
+     ![](../../../assets/agama-lab-flow-passwd-save-template.png)
+
+     ![](../../../assets/agama-lab-flow-passwd-render-template.png)
 
 3. Customise using CSS and resources
 
 ### Release Project To GitHub
+  
+  This will attemp to create a tag in your repository.
+  ![](../../../assets/agama-lab-flow-passwd-release-project.png)
+
+  ![](../../../assets/agama-lab-flow-passwd-release-project-gh.png)
+
+  ![](../../../assets/agama-lab-flow-passwd-release-list.png)
+
+  ![](../../../assets/agama-lab-flow-passwd-release-list-gh.png)
 
 ## Enable Agama using TUI
 
@@ -183,7 +247,7 @@ stage using :material-pencil: and add further stages by clicking :material-plus-
 
 ## Test
 
-
+## Importing And Exporting the Flow From Agama Lab
 ## Notes:
 
 - more details about inputs given on this screen: https://github.com/GluuFederation/private/wiki/Agama-Lab-Quick-Start-Guide#2
