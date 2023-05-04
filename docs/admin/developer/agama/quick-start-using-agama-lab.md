@@ -245,7 +245,33 @@ Use the steps below to create the page.
 
 ## Deploy Agama Project
 
+!!! Note
+    Please ensure that Agama engine and scripts are [enabled](../agama/engine-config.md#engine-availability) in Janssen
+    Server deployment
+
+1. Download `.gama` file from GitHub repository
+2. Open [TUI](../../config-guide/jans-tui/README.md) using following commands on Janssen Server
+     
+     ```
+     cd /opt/jans/jans-cli
+     python3 jans_cli_tui.py
+     ```
+   
+3. Navigate to `Auth Server` > `Agama` > `Upload Project`. Select the `.gama` file to upload.
+
 ## Test
+
+1. [Setup](https://github.com/JanssenProject/jans/tree/main/demos/jans-tent) Janssen Tent
+2. Change configuration as given below in `config.py`
+
+     ```
+     ACR_VALUES = "agama"
+     ```
+
+     ```
+     ADDITIONAL_PARAMS = {'agama_flow': 'co.acme.password.flow'}
+     ```
+3. Run Tent test by accessing it via browser
 
 ## Importing And Exporting the Flow From Agama Lab
 ## Notes:
