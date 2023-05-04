@@ -3,15 +3,18 @@
 In this quick start guide, we will see how to build, deploy and test a simple password based authentication flow using
 Agama and [Agama Lab](https://cloud.gluu.org/agama-lab). 
 
-[Agama Lab](https://cloud.gluu.org/agama-lab) is an online visual editor to build these authentication flows. The flow
+[Agama Lab](https://cloud.gluu.org/agama-lab) is an online visual editor to build authentication flows. A flow
 built on Agama Lab is packaged as a `.gama` project file. `.gama` package needs to be manually deployed on 
 Janssen Server where Agama engine will execute the flow when authentication request is received.
 
 Major Steps involved in this process are:
-- Designing a flow using Agama labs
+
+- Create Agama project using Agama Lab
 - Enable Agama engine on Janssen Server
-- Deploying `.gama` on Janssen Server
+- Deploying `.gama` package on Janssen Server
 - Testing the flow
+
+This guide covers each step in following sections.
 
 ## Prerequisites
 
@@ -20,14 +23,12 @@ Major Steps involved in this process are:
 
 ## Create Agama Project
 
-To design a simple username-password based user authentication [Agama Labs](https://cloud.gluu.org/agama-lab/) follow 
-the steps below.
+We will use [Agama Lab](https://cloud.gluu.org/agama-lab/) to create a simple username-password based user 
+authentication flow using steps below:
 
 ### Design The Flow
 
 #### Log Into Agama Lab
-
-#### Create A Project
 
 1. Use [Agama Lab](https://cloud.gluu.org/agama-lab) online tool to make an agama flow.
 
@@ -48,46 +49,51 @@ from project listing page.
 
     ![](../../../assets/agama-lab-project-page.png)
 
-5. To create new project, click on the `New Project` button.
+#### Create A New Project
+
+1. To create new project, click on the `New Project` button.
 
     ![](../../../assets/agama-lab-new-proj.png)
 
-6. Enter the name and the description for the new project and click `Create` button.
+2. Enter the name and the description for the new project and click `Create` button.
     This will create a new project and it'll be visible on the project listing page.
 
     ![](../../../assets/agama-lab-project-listing.png)
 
 
-#### Configure The Authentication Flow
+#### Create The Authentication Flow
 
-Create/import
-
-1. Create Flow File
-
-    Click on :material-arrow-top-right:. 
-    This will open flow authering view with a blank canvas. To start creating the flow, we need to create a `Flow File`. To
+1. Create A Flow File
+      
+    _Click on :material-arrow-top-right:_ 
+    
+    The flow authering view will open with a blank canvas. To start creating the flow, we need to create a `Flow File`. To
     do that, 
     
-    _Right click on `code` and then `New`. Select `Flow File`_
+    _Right click on `code` and then select `New` > `Flow File`_
     
     ![](../../../assets/agama-lab-new-flow.png)
 
-2. Give name and description for flow file and then click `Create`
+2. Give name and description for the flow file and then click `Create`
 
     ![](../../../assets/agama-lab-new-flow-name.png)
 
-3. Newly created flow file has one stage in it by default. Right-clicking on any will allow you to edit the existing 
-stage using :material-pencil: and add further stages by clicking :material-plus-circle:
+3. Newly created flow file has one stage in it by default. 
 
     ![](../../../assets/agama-lab-flow-passwd-1.png)
 
-   4. Create AuthenticationService [call]() block
+    Clicking on the stage will allow you to add further stages using :material-plus-circle: or to edit the existing 
+    stage using :material-pencil:. We will create a new stage.  
 
-      ![](../../../assets/agama-lab-flow-passwd-create-call.png)
+4. Create AuthenticationService [call]() block
 
-      ![](../../../assets/agama-lab-flow-passwd-new-call.png)
+    _Click on stage and then :material-plus-circle:. Then select `call`_
 
-      ![](../../../assets/agama-lab-flow-passwd-edit-call.png)
+    ![](../../../assets/agama-lab-flow-passwd-create-call.png)
+
+    ![](../../../assets/agama-lab-flow-passwd-new-call.png)
+
+    ![](../../../assets/agama-lab-flow-passwd-edit-call.png)
 
    3. Create CdiUtil call block
 
