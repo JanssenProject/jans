@@ -15,7 +15,7 @@ RUN apk update \
 # Jetty
 # =====
 
-ARG JETTY_VERSION=11.0.13
+ARG JETTY_VERSION=11.0.15
 ARG JETTY_HOME=/opt/jetty
 ARG JETTY_BASE=/opt/jans/jetty
 ARG JETTY_USER_HOME_LIB=/home/jetty/lib
@@ -236,7 +236,6 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_SYNC_JKS_ENABLED=false \
     CN_SYNC_JKS_INTERVAL=30 \
     GOOGLE_PROJECT_ID="" \
-    GOOGLE_APPLICATION_CREDENTIALS=/etc/jans/conf/google-credentials.json \
     CN_GOOGLE_SECRET_VERSION_ID=latest \
     CN_GOOGLE_SECRET_NAME_PREFIX=jans \
     CN_GOOGLE_SECRET_MANAGER_PASSPHRASE=secret \
@@ -277,7 +276,7 @@ COPY scripts /app/scripts
 RUN chmod +x /app/scripts/entrypoint.sh
 
 # create non-root user
-RUN adduser -s /bin/sh -D -G root -u 1000 jetty
+RUN adduser -s /bin/sh -h /home/1000 -D -G root -u 1000 jetty
 
 COPY --chown=1000:0 jetty/jans-auth.xml ${JETTY_BASE}/jans-auth/webapps/
 
@@ -298,6 +297,8 @@ RUN chmod -R g=u ${JETTY_BASE}/jans-auth/custom \
     && chown -R 1000:0 /opt/prometheus
 
 USER 1000
+
+RUN mkdir -p $HOME/.config/gcloud
 
 ENTRYPOINT ["tini", "-e", "143", "-g", "--"]
 CMD ["sh", "/app/scripts/entrypoint.sh"]
