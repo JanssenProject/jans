@@ -251,7 +251,7 @@ class Agama(DialogUtils):
                     ))
 
         if not data_display and self.app.current_page == 'agama' and search_str:
-            self.app.show_message(_("Oops"), _(common_strings.no_matching_result), tobefocused = self.main_container)
+            self.app.show_message(_("Oops"), _(common_strings.no_matching_result), tobefocused=self.main_container)
             return
 
         self.working_container.hide_headers = False
@@ -353,8 +353,8 @@ class Agama(DialogUtils):
             continue_upload()
         else:
             continue_button = Button(_("Continue!"), handler=continue_upload)
-            buttons = [Button('Back'), continue_button]
-            self.app.show_message(_("Action must be taken"),_("Agama is not enabled"), buttons=buttons)
+            buttons = [Button('Back'), continue_button] 
+            self.app.show_message(_("Action must be taken"), _("Agama is not enabled"), buttons=buttons, tobefocused=self.main_container)
 
     def search_agama_project(self, tbuffer:Buffer) -> None:
         if 'entries' in self.data:
