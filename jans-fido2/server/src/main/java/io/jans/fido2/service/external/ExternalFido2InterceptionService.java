@@ -1,7 +1,7 @@
 package io.jans.fido2.service.external;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import io.jans.as.model.authorize.AuthorizeErrorResponseType;
+
 import io.jans.fido2.service.external.context.ExternalFido2InterceptionContext;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
@@ -11,7 +11,6 @@ import jakarta.ejb.DependsOn;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Named;
 import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Response;
 
 /**
  * @author Yuriy Zabrovarnyy
