@@ -130,8 +130,6 @@
 										<exclude>keystore.p12</exclude>
 									</excludes>
 								</resource>
-							</resources>
-							<resources>
 								<resource>
 									<directory>${basedir}/conf</directory>
 									<filtering>false</filtering>
