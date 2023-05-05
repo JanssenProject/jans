@@ -1,6 +1,6 @@
 # Quick Start Using Agama Lab
 
-In this quick start guide, we will see how to build, deploy and test a simple password based authentication flow using
+In this quick start guide, we will build, deploy and test a simple password based authentication flow using
 Agama and [Agama Lab](https://cloud.gluu.org/agama-lab). 
 
 [Agama Lab](https://cloud.gluu.org/agama-lab) is an online visual editor to build authentication flows. A flow
@@ -10,9 +10,8 @@ Janssen Server where Agama engine will execute the flow when authentication requ
 Major Steps involved in this process are:
 
 - Create Agama project using Agama Lab
-- Enable Agama engine on Janssen Server
 - Deploying `.gama` package on Janssen Server
-- Testing the flow
+- Testing the authentication flow
 
 This guide covers each step in following sections.
 
@@ -24,15 +23,14 @@ This guide covers each step in following sections.
 ## Create Agama Project
 
 We will use [Agama Lab](https://cloud.gluu.org/agama-lab/) to create a simple username-password based user 
-authentication flow using steps below:
+authentication flow. This involves defining the authentication steps, designing the user interface to capture user 
+inputs and lastly, releasing the flow as Agama project.
 
-### Design The Flow
+### Defining The Authentication Flow
 
 #### Log Into Agama Lab
 
-1. Use [Agama Lab](https://cloud.gluu.org/agama-lab) online tool to make an agama flow.
-
-    Hit the above URL and you will see a page with Login with GitHub button. Click on it to go to GitHub authentication page.
+1. Go to [Agama Lab](https://cloud.gluu.org/agama-lab) login page. 
 
     ![](../../../assets/agama-lab-login.png)
 
@@ -40,23 +38,23 @@ authentication flow using steps below:
 
     ![](../../../assets/agama-lab-GH-login.png)
 
-3. Input the name of the repository where Agama Lab should commit the project artifacts. Hit `Next`
+3. Input the name of the repository where Agama Lab should release the project artifacts. Click `Next`
 
     ![](../../../assets/agama-lab-add-gh-repo.png)
 
-4. Project listing page is shown. All the existing projects for your GitHub user are listed here. Projects can be editted, deleted
-from project listing page.
+4. Project listing page will be shown. All the existing projects for your GitHub user are listed here. Projects can be 
+   created, edited and deleted from the project listing page.
 
     ![](../../../assets/agama-lab-project-page.png)
 
 #### Create A New Project
 
-1. To create new project, click on the `New Project` button.
+1. To create new project, click on the `New Project` button on project listing page above. 
+   Enter the name and the description for the new project and click the `Create` button.
 
     ![](../../../assets/agama-lab-new-proj.png)
 
-2. Enter the name and the description for the new project and click `Create` button.
-    This will create a new project and it'll be visible on the project listing page.
+2. This will create a new project and it'll be listed on the project listing page.
 
     ![](../../../assets/agama-lab-project-listing.png)
 
@@ -74,169 +72,178 @@ from project listing page.
     
     ![](../../../assets/agama-lab-new-flow.png)
 
-2. Give name and description for the flow file and then click `Create`
+    _Give name and description for the flow file and then click `Create`_
 
     ![](../../../assets/agama-lab-new-flow-name.png)
 
-3. Newly created flow file has one stage in it by default. 
+    Newly created flow file has one block in it by default. 
 
     ![](../../../assets/agama-lab-flow-passwd-1.png)
 
-    Clicking on the stage will allow you to add further stages using :material-plus-circle: or to edit the existing 
-    stage using :material-pencil:. We will create a new stage.  
+    Clicking on the block will allow you to add further blocks using :material-plus-circle: or to edit the existing 
+    block using :material-pencil:. 
 
-4. Create AuthenticationService [call]() block
+2. Create _AuthenticationService_ Call block
 
-    _Click on stage and then :material-plus-circle:. Then select `call`_
+    _Click on block and then :material-plus-circle:. Then select `call`_
 
     ![](../../../assets/agama-lab-flow-passwd-create-call.png)
 
-    New `Call` stage should appear with a link to `Start` stage
+    New `Call` block should appear with a link to `Start` block
 
     ![](../../../assets/agama-lab-flow-passwd-new-call.png)
 
-    _Click `Call` stage and then click :material-pencil: to open configuration screen._
+    _Click `Call` block and then click :material-pencil: to open configuration screen._
 
-    Add configuration values as shown below. This will create a new instance of `AuthenticationService` class. This
+    _Add configuration values as shown below._ 
+
+    This will create a new instance of `AuthenticationService` class. This
     instance will be used to authenticate user. New instance will be stored in variable called `authService`.
 
     ![](../../../assets/agama-lab-flow-passwd-edit-call.png)
 
-5. Create CdiUtil call block
+5. Create _CdiUtil_ Call block
    
-    To perform authentication we will also need an instance of `CdiUtil` class. This instance in form of a bean which 
-    takes `AuthenticationService` instance as an argument. 
+    To perform authentication we will also need an bean instance of `CdiUtil` class. This bean instance  
+    takes `AuthenticationService` instance that we created in previous step as an argument . 
 
-    _Click `New Authentication Service` stage and then click on :material-plus-circle:. Then click `Call`_
+    _Click `New Authentication Service` block and then click on :material-plus-circle:. Then click `Call`_
 
     ![](../../../assets/agama-lab-flow-passwd-create-cdiutil.png)
    
-    _Click on newly created `Call` stage and using :material-pencil: open the configuration page.
+    _Click on newly created `Call` block and by clicking :material-pencil: open the configuration page.
     Input values as shown below in the configuration screen_
 
     ![](../../../assets/agama-lab-flow-passwd-edit-cdiutil.png)
 
-4. Create [assignment]() block
+4. Create Assignment(s) block
 
-    Next, we need to create an empty variable which we will use in future to store value that represents success or 
-    failed authentication.
+    Next, we need to create an empty variable which the flow will use in future to store authentication result.
 
     _Click on `New CdiUtil Object` and then click :material-plus-circle:. Select `Assignment(s)`_
 
     ![](../../../assets/agama-lab-flow-passwd-create-assignment.png)
 
-    _Click on newly created `Assign` stage. Click :material-pencil:.
+    _Click on newly created `Assign` block. Click :material-pencil:.
     Input values as shown below in the configuration screen_
 
     ![](../../../assets/agama-lab-flow-passwd-edit-assignment.png)
 
 5. Create [repeat]() block
-   
-    Repeat block creates a loop in which stages can be added. We will create a repeat loop that allows 3 retries if the
-    authentication fails. 
 
-    _Click on `Result Object` stage and then click :material-plus-circle:. Select `Repeat`._
+   `Repeat` block represents the [Repeat](../../developer/agama/dsl-full.md#repeat) instruction of Agama DSL.
+   
+    Repeat block creates a loop to iterate over certain steps(blocks). We will create a repeat loop that allows 
+    3 retries if the authentication fails.
+
+    _Click on `Result Object` block and then click :material-plus-circle:. Select `Repeat`._
 
     ![](../../../assets/agama-lab-flow-passwd-create-repeat.png)
 
-   _Click on newly created `Repeat` stage. Click :material-pencil:.
-   Input values as shown below in the configuration screen_
+    _Click on newly created `Repeat` block. Click :material-pencil:.
+    Input values as shown below in the configuration screen_
 
     ![](../../../assets/agama-lab-flow-passwd-edit-repeat.png)
 
-6. Create [RRF]() block
+6. Create An RRF block
 
-    `RRF` block represents the [RRF](../../developer/agama/dsl-full.md#rrf) instruction of Agama DSL.
+    `RRF` block represents the [RRF](../../developer/agama/dsl-full.md#rrf) instruction of Agama DSL. 
     
-     _Click on `Repeat` stage. Click :material-plus-circle:. Check the `In Repeat Block` and then click on `RRF`._
+     _Click on `Repeat` block. Click :material-plus-circle:. Check the `In Repeat Block` and then click on `RRF`._
          
     ![](../../../assets/agama-lab-flow-passwd-check-repeat.png)
 
-    _Click on newly created `Repeat` stage. Click :material-pencil:.
-    Input values as shown below in the configuration screen_
+    _Click on newly created `Repeat` block. Click :material-pencil:. Input values as shown below in the configuration 
+    screen_
 
     ![](../../../assets/agama-lab-flow-passwd-edit-rrf.png)
 
     Since we have checked the `In Repeat Block` at the time of adding `RRF` block, the `RRF` block
-    as well as all the blocks that we add to `RRF` block are part of a block which is looped as
-    defined in `Repeat` stage.
+    as well as all the blocks that we add to the `RRF` block iterated blocks.
 
-    At this stage, let's save the flow. Click `Save` on the flow canvas.
+    _At this stage, let's save the flow. Click `Save` on the flow canvas._
 
-7. Create CdiUtil call block
+7. Create a _CdiUtil_ Call block
 
-    Create a `Call` stage to process the username and password received from user (in RRF) and
+    Create a `Call` block to process the username and password received from user (in RRF) and
     validate them. Result of validation should be stored in a variable.
 
-    _Click on `RRF` stage. Click :material-plus-circle:. Click on `Call`._
+    _Click on `RRF` block. Click :material-plus-circle:. Click on `Call`._
 
     ![](../../../assets/agama-lab-flow-passwd-create-cdiutil-instance.png)
 
-   _Click on newly created `Call` stage. Click :material-pencil:.
-   Input values as shown below in the configuration screen_
+    _Click on newly created `Call` block. Click :material-pencil:. Input values as shown below in the configuration 
+    screen_
 
     ![](../../../assets/agama-lab-flow-passwd-edit-cdiutil-instance.png)
 
-   8. Create [assignment]() block
+8. Create An Assignment block
 
     In case of authentication failure, we want to show the username to the user while reentering the
-    password. For this, we will save he username in a variable using `Assignment(s)` block.
+    password on the web page. For this, we will save the username in a variable using `Assignment(s)` block.
 
-   _Click on `Call` stage. Click :material-plus-circle:. Click on `Assignment(s)`._
+   _Click on `Call` block. Click :material-plus-circle:. Click on `Assignment(s)`._
 
    ![](../../../assets/agama-lab-flow-passwd-create-assignment-uid.png)
 
-   _Click on newly created `Call` stage. Click :material-pencil:.
+   _Click on newly created `Call` block. Click :material-pencil:.
    Input values as shown below in the configuration screen_ 
 
    ![](../../../assets/agama-lab-flow-passwd-edit-assignment-uid.png)
 
-   9. Create conditional [When]() block
+9. Create A Conditional When block
 
-    Now, create a condition check using `When` stage to check if the authentication (validated in 
-    `validate credentials` stage) has been successful.
+    `When` block represents the [When](../../developer/agama/dsl-full.md#conditionals-and-branching) instruction of Agama DSL.
 
-    _Click on `Assignment(s)` stage. Click :material-plus-circle:. Click on `When`._
+    Create a conditional check using `When` block to check if the authentication (validated in 
+    `validate credentials` block) has been successful.
 
-      ![](../../../assets/agama-lab-flow-passwd-create-when.png)
+    _Click on `Assignment(s)` block. Click :material-plus-circle:. Click on `When`._
 
-   _Click on newly created `When` stage. Click :material-pencil:.
-   Input values as shown below in the configuration screen_
+    ![](../../../assets/agama-lab-flow-passwd-create-when.png)
 
-      ![](../../../assets/agama-lab-flow-passwd-edit-when.png)
+    _Click on newly created `When` block. Click :material-pencil:.
+    Input values as shown below in the configuration screen_
+
+    ![](../../../assets/agama-lab-flow-passwd-edit-when.png)
 
 10. Create [finish]() blocks
 
-    If the authentication was successful then we have to finish the flow using the `Finish` stage and return the 
-    username. And to handle the case where authentication fails after 3 attempts, we need another `Finish`
-    block following `Repeat` loop block.
+    `Finish` block represents the [Flow finish](../../developer/agama/dsl-full.md#flow-finish) instruction of Agama DSL.
 
-    _Click on `When` stage. Click :material-plus-circle:. Click on `Condition met` and then click
+    If the authentication was successful then the flow should finish and return the 
+    username. This will be achieved by adding a Finish block to the `When` block. And if authentication fails after 3 
+    attempts, we need another `Finish` block following the `Repeat` block.
+
+    _Click on `When` block. Click :material-plus-circle:. Click on `Condition met` and then click
     `Finish`_
 
     ![](../../../assets/agama-lab-flow-passwd-create-finish.png)
 
-    _Click on newly created `Finish` stage. Click :material-pencil:.
+    _Click on newly created `Finish` block. Click :material-pencil:.
     Input values as shown below in the configuration screen_
    
-      ![](../../../assets/agama-lab-flow-passwd-edit-finish.png)
+    ![](../../../assets/agama-lab-flow-passwd-edit-finish.png)
 
-    _Click on `Repeat` stage. Click :material-plus-circle:. Click `Finish`_   
+    _Click on `Repeat` block. Click :material-plus-circle:. Click `Finish`_   
 
-      ![](../../../assets/agama-lab-flow-passwd-create-fail-finish.png)
+    ![](../../../assets/agama-lab-flow-passwd-create-fail-finish.png)
 
-    _Click on newly created `Finish` stage. Click :material-pencil:.
-    Input values as shown below in the configuration screen_
+    _Click on newly created `Finish` block. Click :material-pencil:.
+    Input values as shown below in the configuration screen and click `Save`._
    
-      ![](../../../assets/agama-lab-flow-passwd-edit-fail-finish.png)
+    ![](../../../assets/agama-lab-flow-passwd-edit-fail-finish.png)
 
     Save the flow using `Save` button on flow canvas. 
    
-    The complete flow looks like below:
+    The completed flow looks like below:
 
       ![](../../../assets/agama-lab-flow-passwd-complete-flow.png)
 
-11. Generated code
+11. Check Generated code
+
+    Agama Lab flow gets translated in [Agama DSL](../../developer/agama/dsl.md) . Click `Code` button to see the code 
+    generated by the flow.
 
       ```
        Flow co.acme.password
@@ -255,21 +262,32 @@ from project listing page.
 
 ### Design User Interface
 
-In the RRF configuration step in the flow above, we used `login.ftlh` to render the login page elements.
-We need to provide `login.ftlh` to the Agama project so that the flow can use it during the flow execution.
+In the RRF configuration step, we mentioned `login.ftlh` to render the login page elements.
+We need to add `login.ftlh` to the Agama project so that the flow can use it during the flow execution.
 Use the steps below to create the page.
 
 1. Create a template file
 
+    _On the left project explorer menu, click on `web` > `New` > `Freemarker Template`_
+
       ![](../../../assets/agama-lab-flow-passwd-create-login-page.png)
 
-      ![](../../../assets/agama-lab-flow-passwd-select-template.png)      
+    _Select `+ Create` under the `New Blank Template`_
+
+      ![](../../../assets/agama-lab-flow-passwd-select-template.png)
+
+   _Give `Name` and `Description` as shown below and click `Create`_
+
+   ![](../../../assets/agama-lab-flow-passwd-edit-template.png)
 
 2. Use the visual editor
 
-      ![](../../../assets/agama-lab-flow-passwd-edit-template.png)
+    This opens a visual editor to create a freemarker template. Use this visual editor to create template
+    as per the need. For the purpose of this article, we will use the code below.
 
       ![](../../../assets/agama-lab-flow-passwd-edit-template-2.png)
+
+    _Click `Edit HTML`. This opens a text editor. Remove existing code in the editor and paste the code shown below._
 
    ```html
    <!doctype html>
@@ -310,27 +328,39 @@ Use the steps below to create the page.
    </html>
    ```
 
-     ![](../../../assets/agama-lab-flow-passwd-save-template.png)
 
-     ![](../../../assets/agama-lab-flow-passwd-render-template.png)
+   
+   _Click `Save changes`_
+
+   ![](../../../assets/agama-lab-flow-passwd-save-template.png)
+
+   _This will render the page in the visual editor_.
+
+   ![](../../../assets/agama-lab-flow-passwd-render-template.png)
 
 3. Customise using CSS and resources
 
 ### Release Project To GitHub
   
-  This will attemp to create a tag in your repository.
+  In order to use the flow for authentication in the Janssen Server, the flow needs to be released. Agama Lab
+  releases the flow and the related artifacts (like template) in form of `.gama` file in the GitHub repository.
+
+  _To release the project, click on any of the files in the left project explorer, click `Release Project`._
+
   ![](../../../assets/agama-lab-flow-passwd-release-project.png)
+
+  _Enter a desired version number and click `Save`_
 
   ![](../../../assets/agama-lab-flow-passwd-release-project-gh.png)
 
+  _Upon successful release, Agama Lab `Releases` dashboard is shown. It lists all projects that are released. Click on
+  project name to go to GitHub repository release page where `.gama` file has been released
+
   ![](../../../assets/agama-lab-flow-passwd-release-list.png)
 
+  Download `.gama` file from here to deploy on to the Janssen Server.
+
   ![](../../../assets/agama-lab-flow-passwd-release-list-gh.png)
-
-## Enable Agama using TUI
-
-- Access TUI
-- Make sure Agama engine is enabled ( )
 
 ## Deploy Agama Project
 
