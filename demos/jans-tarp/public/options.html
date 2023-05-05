@@ -1,0 +1,83 @@
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gluu RP</title>
+  <!-- <link rel="stylesheet" href="https://codepen.io/gymratpacks/pen/VKzBEp#0"> -->
+  <link href='https://fonts.googleapis.com/css?family=Nunito:400,300' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="popup.css">
+  <link rel="stylesheet" href="loader.css">
+</head>
+
+<body>
+  <div>
+    <div id="registerForm">
+      <div id="box">
+        <h1> Gluu's RP </h1>
+
+        <fieldset>
+          <legend><span class="error" id="errorSpanTop"></span></legend>
+
+          <legend><span class="number">=></span> Register OIDC Client</legend>
+
+          <label for="issuer"><b>Issuer:</b><span class="required">*</span></label>
+          <input type="text" id="issuer" name="issuer" placeholder="e.g. https://<op-host>" autocomplete="off" required>
+
+          <label for="redirectUri"><b>Redirect Url:</b></label>
+          <input type="text" id="redirectUri" name="redirectUri" placeholder="Not Required." autocomplete="off"
+            disabled>
+
+          <label for="acrValues"><b>Acr Values:</b><span class="required">*</span></label>
+          <input type="text" id="acrValues" name="acrValues" placeholder="e.g. basic" autocomplete="off" required>
+
+          <label for="additionalParam"><b>Additional Params:</b></label>
+          <input type="text" id="additionalParam" name="additionalParam"
+            placeholder='e.g. {"paramOne": "valueOne", "paramTwo": "valueTwo"}' autocomplete="off">
+
+          <label for="scope"><b>Scope:</b><span class="required">*</span></label>
+          <input type="text" id="scope" name="scope" placeholder="e.g. openid" autocomplete="off" required>
+
+          <legend><span class="error" id="errorSpanBot"></span></legend>
+          <button id="sbmtButton">Register</button>
+        </fieldset>
+
+      </div>
+    </div>
+    <div id="oidcClientDetails" style="display:none">
+      <div id="box">
+        <fieldset>
+
+          <legend><span class="number">=></span> Registered Client</legend>
+
+          <label for="issuer"><b>OP Host:</b></label>
+          <input type="text" id="opHost" name="opHost" disabled>
+
+          <label for="clientId"><b>Client Id:</b></label>
+          <input type="text" id="clientId" name="clientId" disabled>
+
+          <label for="clientId"><b>Client Secret:</b></label>
+          <input type="text" id="clientSecret" name="clientSecret" disabled>
+          <button id="trigCodeFlowButton">Trigger Auth Code Flow</button>
+          <button id="resetButton">Reset</button>
+        </fieldset>
+      </div>
+    </div>
+    <div id="userDetailsDiv" style="display:none">
+      <div id="box">
+        <fieldset>
+          <legend><span class="number">=></span> User Details:</legend>
+          <hr />
+          <span id="userDetailsSpan"></span>
+          <hr />
+          <button id="logoutButton">Logout</button>
+        </fieldset>
+      </div>
+    </div>
+  </div>
+  <div class="loading" id="loadingDiv" style="display:none">Loading&#8230;</div>
+  <script type="text/javascript" src="popup.js">
+  </script>
+</body>
+
+</html>
