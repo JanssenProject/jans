@@ -546,13 +546,13 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>8.2.1</version>
 			</plugin>
 
 			<!-- OWASP plugin -->
 			<plugin>
 				<groupId>org.owasp</groupId>
 				<artifactId>dependency-check-maven</artifactId>
+				<version>8.2.1</version>
 				<reportSets>
 					<reportSet>
 						<reports>
