@@ -126,6 +126,18 @@
 								<resource>
 									<directory>${basedir}/conf</directory>
 									<filtering>true</filtering>
+									<excludes>
+										<exclude>keystore.p12</exclude>
+									</excludes>
+								</resource>
+							</resources>
+							<resources>
+								<resource>
+									<directory>${basedir}/conf</directory>
+									<filtering>false</filtering>
+									<includes>
+										<exclude>keystore.p12</exclude>
+									</includes>
 								</resource>
 							</resources>
 							<filters>
@@ -198,7 +210,6 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>buildnumber-maven-plugin</artifactId>
-				<version>1.1</version>
 				<executions>
 					<execution>
 						<phase>validate</phase>
