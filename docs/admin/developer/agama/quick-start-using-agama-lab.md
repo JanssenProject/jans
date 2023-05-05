@@ -125,54 +125,114 @@ from project listing page.
 
     ![](../../../assets/agama-lab-flow-passwd-create-assignment.png)
 
-    _Click on newly created `Assign` stage and using :material-pencil: open the configuration page.
+    _Click on newly created `Assign` stage. Click :material-pencil:.
     Input values as shown below in the configuration screen_
 
     ![](../../../assets/agama-lab-flow-passwd-edit-assignment.png)
 
-   5. Create [repeat]() block
+5. Create [repeat]() block
+   
+    Repeat block creates a loop in which stages can be added. We will create a repeat loop that allows 3 retries if the
+    authentication fails. 
 
-      ![](../../../assets/agama-lab-flow-passwd-create-repeat.png)
+    _Click on `Result Object` stage and then click :material-plus-circle:. Select `Repeat`._
 
-      ![](../../../assets/agama-lab-flow-passwd-edit-repeat.png)
+    ![](../../../assets/agama-lab-flow-passwd-create-repeat.png)
 
-   6. Create [RRF]() block
+   _Click on newly created `Repeat` stage. Click :material-pencil:.
+   Input values as shown below in the configuration screen_
 
-      ![](../../../assets/agama-lab-flow-passwd-check-repeat.png)
+    ![](../../../assets/agama-lab-flow-passwd-edit-repeat.png)
 
-      ![](../../../assets/agama-lab-flow-passwd-edit-rrf.png)
+6. Create [RRF]() block
 
-      Save the flow. 
+    `RRF` block represents the [RRF](../../developer/agama/dsl-full.md#rrf) instruction of Agama DSL.
+    
+     _Click on `Repeat` stage. Click :material-plus-circle:. Check the `In Repeat Block` and then click on `RRF`._
+         
+    ![](../../../assets/agama-lab-flow-passwd-check-repeat.png)
 
-   7. Create CdiUtil call block
+    _Click on newly created `Repeat` stage. Click :material-pencil:.
+    Input values as shown below in the configuration screen_
 
-      ![](../../../assets/agama-lab-flow-passwd-create-cdiutil-instance.png)
+    ![](../../../assets/agama-lab-flow-passwd-edit-rrf.png)
 
-      ![](../../../assets/agama-lab-flow-passwd-edit-cdiutil-instance.png)
+    Since we have checked the `In Repeat Block` at the time of adding `RRF` block, the `RRF` block
+    as well as all the blocks that we add to `RRF` block are part of a block which is looped as
+    defined in `Repeat` stage.
+
+    At this stage, let's save the flow. Click `Save` on the flow canvas.
+
+7. Create CdiUtil call block
+
+    Create a `Call` stage to process the username and password received from user (in RRF) and
+    validate them. Result of validation should be stored in a variable.
+
+    _Click on `RRF` stage. Click :material-plus-circle:. Click on `Call`._
+
+    ![](../../../assets/agama-lab-flow-passwd-create-cdiutil-instance.png)
+
+   _Click on newly created `Call` stage. Click :material-pencil:.
+   Input values as shown below in the configuration screen_
+
+    ![](../../../assets/agama-lab-flow-passwd-edit-cdiutil-instance.png)
 
    8. Create [assignment]() block
 
-      ![](../../../assets/agama-lab-flow-passwd-create-assignment-uid.png)
+    In case of authentication failure, we want to show the username to the user while reentering the
+    password. For this, we will save he username in a variable using `Assignment(s)` block.
 
-      ![](../../../assets/agama-lab-flow-passwd-edit-assignment-uid.png)
+   _Click on `Call` stage. Click :material-plus-circle:. Click on `Assignment(s)`._
+
+   ![](../../../assets/agama-lab-flow-passwd-create-assignment-uid.png)
+
+   _Click on newly created `Call` stage. Click :material-pencil:.
+   Input values as shown below in the configuration screen_ 
+
+   ![](../../../assets/agama-lab-flow-passwd-edit-assignment-uid.png)
 
    9. Create conditional [When]() block
 
+    Now, create a condition check using `When` stage to check if the authentication (validated in 
+    `validate credentials` stage) has been successful.
+
+    _Click on `Assignment(s)` stage. Click :material-plus-circle:. Click on `When`._
+
       ![](../../../assets/agama-lab-flow-passwd-create-when.png)
+
+   _Click on newly created `When` stage. Click :material-pencil:.
+   Input values as shown below in the configuration screen_
 
       ![](../../../assets/agama-lab-flow-passwd-edit-when.png)
 
 10. Create [finish]() blocks
 
-      ![](../../../assets/agama-lab-flow-passwd-create-finish.png)
+    If the authentication was successful then we have to finish the flow using the `Finish` stage and return the 
+    username. And to handle the case where authentication fails after 3 attempts, we need another `Finish`
+    block following `Repeat` loop block.
+
+    _Click on `When` stage. Click :material-plus-circle:. Click on `Condition met` and then click
+    `Finish`_
+
+    ![](../../../assets/agama-lab-flow-passwd-create-finish.png)
+
+    _Click on newly created `Finish` stage. Click :material-pencil:.
+    Input values as shown below in the configuration screen_
    
       ![](../../../assets/agama-lab-flow-passwd-edit-finish.png)
-   
+
+    _Click on `Repeat` stage. Click :material-plus-circle:. Click `Finish`_   
+
       ![](../../../assets/agama-lab-flow-passwd-create-fail-finish.png)
+
+    _Click on newly created `Finish` stage. Click :material-pencil:.
+    Input values as shown below in the configuration screen_
    
       ![](../../../assets/agama-lab-flow-passwd-edit-fail-finish.png)
 
-   Complete flow looks like below:
+    Save the flow using `Save` button on flow canvas. 
+   
+    The complete flow looks like below:
 
       ![](../../../assets/agama-lab-flow-passwd-complete-flow.png)
 
