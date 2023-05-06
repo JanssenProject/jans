@@ -1318,7 +1318,7 @@ tags:
 
 ### httpLoggingResponseBodyContent
 
-- Description: Defines if Response body will be logged, applied just if 'httpLoggingEnabled' is true and 'loggingLevel' is 'DEBUG', use 'httpLoggingExcludePaths' to avoid logging of unnecessary responses like ('/jans-auth/js/platform.js','/jans-auth/stylesheet/style.css') this kind of responses will fill the log with non relevant information. Default value is false
+- Description: Defines if Response body will be logged, applied just if 'httpLoggingEnabled' is true and 'loggingLevel' is 'DEBUG', use 'httpLoggingExcludePaths' to avoid logging of unnecessary responses, suggested excludes: ('/jans-auth/stylesheet/fontawesome.min.css','/jans-auth/js/jquery-3.6.0.min.js','/jans-auth/js/bootstrap.min.js','/jans-auth/js/platform.js','/jans-auth/jakarta.faces.resource/jsf.js.htm','/jans-auth/stylesheet/font-awesome.css','/jans-auth/stylesheet/authorize.css','/jans-auth/stylesheet/site.css','/jans-auth/stylesheet/bootstrap.min.css','/jans-auth/stylesheet/style.css','/jans-auth/authorize.htm') this kind of responses will fill the log with non relevant information. Default value is false
 
 - Required: No
 

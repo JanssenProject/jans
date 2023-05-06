@@ -1,7 +1,9 @@
 package io.jans.as.server.audit.debug.wrapper;
 
+import io.jans.as.client.AuthorizationRequest;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -13,6 +15,8 @@ public class LogResponseWrapper extends ResponseWrapper {
     private PrintWriter writer;
     private ServletOutputStreamCopier copier;
     private HttpServletResponse res;
+
+    private static final Logger LOG = Logger.getLogger(LogResponseWrapper.class);
 
     public LogResponseWrapper(HttpServletResponse response) {
         super(response);
@@ -72,7 +76,7 @@ public class LogResponseWrapper extends ResponseWrapper {
             byte[] copy = this.getCopy();
             responseBody = new String(copy, res.getCharacterEncoding());
         } catch (IOException ie) {
-            ie.printStackTrace();
+            LOG.error("Error reading response body content IOException LogResponseWrapper, configuration (httpLoggingResponseBodyContent) is enabled " , ie);
         } finally {
             return responseBody;
         }

@@ -95,12 +95,13 @@ public class ServletLoggingFilter implements Filter {
         // yuriyz: log request and response only after filter handling.
         // #914 - we don't want to effect server functionality due to logging. Currently content can be messed if it is InputStream.
         if (log.isDebugEnabled()) {
-            log.debug("REQUEST  : " + getRequestDescription(requestWrapper, duration));
-            log.debug("RESPONSE : " + getResponseDescription(responseWrapper));
+            String strDebugLog = "\nREQUEST: " + getRequestDescription(requestWrapper, duration);
+            strDebugLog += "\nRESPONSE: " + getResponseDescription(responseWrapper);
             /** A copy of body content is logged **/
             if (appConfiguration.getHttpLoggingResponseBodyContent()) {
-                log.debug("RESPONSE BODY : " + ((LogResponseWrapper) responseWrapper).getBodyCopy());
+                strDebugLog += "\nRESPONSE BODY: " + ((LogResponseWrapper) responseWrapper).getBodyCopy();
             }
+            log.debug(strDebugLog);
         }
     }
 
