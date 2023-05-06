@@ -30,7 +30,7 @@ As mentioned in the overview we recommend using the same Kubernetes cluster as p
 
 We recommend your persistence in production to be HA, backup supported and point in time recovery supported. Below is a table of the persistence used and resources set for this test.
 
-| Persistence      | # of nodes | RAM(GiB) | CPU | Total RAM (GiB) | Total CPU |
+| Persistence      | # of nodes | RAM(GiB) | vCPU | Total RAM (GiB) | Total vCPU |
 |------------------|------------|----------|-----|-----------------|-----------|
 | MySQL            | 1          | 52       | 8   | 52              | 8         |
 
@@ -43,7 +43,7 @@ We recommend your persistence in production to be HA, backup supported and point
 
 Resourcing is  critical as timeouts in connections can occur, resulting in failed authentications or cutoffs.
 
-| Regions     | # of nodes | RAM(GiB) | CPU | Total RAM (GiB) | Total CPU |
+| Regions     | # of nodes | RAM(GiB) | vCPU | Total RAM (GiB) | Total vCPU |
 |-------------|------------|----------|-----|-----------------|-----------|
 | US-West     | 1          | 96       | 48  | 96              | 48        |
 | US-East     | 1          | 96       | 48  | 96              | 48        |
@@ -171,7 +171,7 @@ Our tests used 10 million users that were loaded. We have created a docker image
 
 ### Loading users
 
-Loading users requires a hefty but temporary amount of resources. By default, the resources ask for `10` vCPU and `5` Gis. However, to speed up the process increase the number of CPUs as the job in step two below uses parallel tasks. If left as is 10 million users would load in around 17 hours or so.
+Loading users requires a hefty but temporary amount of resources. By default, the resources ask for `10` vCPU and `5` Gis. However, to speed up the process increase the number of vCPUs as the job in step two below uses parallel tasks. If left as is 10 million users would load in around 17 hours or so.
 
 1. Create a folder called `add_users`.
 
@@ -180,7 +180,7 @@ Loading users requires a hefty but temporary amount of resources. By default, th
     ```
 2. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-users/load_users_rdbms_job.yaml) into the folder under the name `load_users.yaml`.
 
-3. Open the file and modify the sql connection parameters. To speed the loading process increase the CPU requests and limits.
+3. Open the file and modify the sql connection parameters. To speed the loading process increase the vCPU requests and limits.
 
 4. Create a namespace for load-testing.
 
@@ -205,7 +205,7 @@ Wait until all the users are up before moving forward. Tail the logs by running 
 
  The below resources were [calculated](#kubernetes-cluster-load-test-resources) when creating the nodes above.
 
-| NAME                                | # of pods | RAM(GiB) | CPU | Total RAM(GiB) | Total CPU |
+| NAME                                | # of pods | RAM(GiB) | vCPU | Total RAM(GiB) | Total vCPU |
 |-------------------------------------|-----------|----------|-----|----------------|-----------|
 | Authorization code flow jmeter test | 20        | 8        | 1.3 | 190            | 24        |
 | Grand Total                         |           |          |     | 190 GiB        | 24        |
