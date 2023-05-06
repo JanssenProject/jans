@@ -57,7 +57,7 @@ const qs = require('qs');
   }
 
   async function trigCodeFlowButton() {
-    
+
     const redirectUrl = chrome.identity.getRedirectURL()/*chrome.runtime.getURL('redirect.html')*/
     await chrome.storage.local.get(["oidcClient"]).then(async (result) => {
       if (result.oidcClient != undefined) {
@@ -65,7 +65,7 @@ const qs = require('qs');
           '?scope=' + `${result.oidcClient.scope[0]}+profile` +
           '&acr_values=' + result.oidcClient.acr_values[0] +
           '&response_type=' + result.oidcClient.response_type[0] +
-          '&redirect_uri=' + redirectUrl +//result.oidcClient.redirect_uri[0] + 
+          '&redirect_uri=' + redirectUrl +//result.oidcClient.redirect_uri[0] +
           '&client_id=' + result.oidcClient.client_id +
           '&state=' + uuidv4() +
           '&nonce=' + uuidv4();
@@ -76,7 +76,6 @@ const qs = require('qs');
           let additionalParamJSON = JSON.parse(additionalParams)
           console.log('Processing additional parameters');
           Object.keys(additionalParamJSON).forEach(key => {
-
             console.log(key + "~~~" + additionalParamJSON[key]);
             authzUrl += `&${key}=${additionalParamJSON[key]}`
           });

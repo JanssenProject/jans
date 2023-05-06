@@ -11,17 +11,21 @@ This extension is for convenient testing of authentication flows on browser.
 - Chrome
 - Opera
 
-## Quick Install
+## Build
 
-1. Unpack the zip file in /release folder of this project to an empty folder
-2. Go to `Settings --> Extensions` of Chrome browser
-3. Switch on the `Developer mode`
-4. Click on `Load unpacked` button to load the extension
-5. the extension is now ready to use
+1. Change directory to the project directory (`/jans-tarp`).
+2. Run `npm install`.
+3. Run `npm run build`. It will create build in `/jans-tarp/build` directory.
+4. To pack the build into a zip file run `npm run pack`. This command will create zip in `/jans-tarp/release`.
 
-## Build & Package
+# Install in browser
 
-Follow the steps provided [**here**](https://github.com/dutiyesh/chrome-extension-cli).
+1. Go to `Settings --> Extensions` of Chrome browser.
+2. Switch on the `Developer mode`.
+3. Click on `Load unpacked` button to load the extension and select the build created in `/jans-tarp/build` directory.
+
+
+For more details follow the steps provided [**here**](https://github.com/dutiyesh/chrome-extension-cli).
 
 ## Contribution
 
