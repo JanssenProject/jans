@@ -1,6 +1,5 @@
 package io.jans.as.server.audit.debug.wrapper;
 
-import io.jans.as.client.AuthorizationRequest;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.log4j.Logger;
