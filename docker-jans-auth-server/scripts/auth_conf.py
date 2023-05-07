@@ -1,4 +1,4 @@
-from hashlib import md5
+from hashlib import sha256
 from pathlib import Path
 
 from jans.pycloudlib import get_manager
@@ -28,8 +28,8 @@ def push_auth_conf() -> None:
 
 
 def digest_equals(val1: str, val2: str) -> bool:
-    val1_digest = md5(val1.encode()).hexdigest()  # nosec: B234
-    val2_digest = md5(val2.encode()).hexdigest()  # nosec: B234
+    val1_digest = sha256(val1.encode()).hexdigest()
+    val2_digest = sha256(val2.encode()).hexdigest()
     return val1_digest == val2_digest
 
 
