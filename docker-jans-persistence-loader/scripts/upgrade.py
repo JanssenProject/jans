@@ -765,6 +765,10 @@ class Upgrade:
 
         # other persistence backends
         else:
+            # ensure smtp_conf is a list
+            if not isinstance(smtp_conf, list):
+                smtp_conf = [smtp_conf]
+
             if not smtp_conf:
                 entry.attrs["jansSmtpConf"].append(json.dumps(default_smtp_conf))
                 should_update = True
