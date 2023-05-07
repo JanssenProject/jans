@@ -27,6 +27,7 @@ jans_app_dir = '/opt/dist/jans'
 maven_base_url = 'https://maven.jans.io/maven/io/jans/'
 jetty_home = '/opt/jans/jetty'
 jans_zip_file = os.path.join(jans_app_dir, 'jans.zip')
+openbanking_zip_file = os.path.join(jans_app_dir, 'openbanking.zip')
 
 package_installer = shutil.which('apt') or shutil.which('dnf') or shutil.which('yum') or shutil.which('zypper')
 
@@ -46,7 +47,8 @@ parser.add_argument('-download-exit', help="Downloads files and exits", action='
 parser.add_argument('--setup-branch', help="Jannsen setup github branch", default="main")
 parser.add_argument('--setup-dir', help="Setup directory", default=os.path.join(jans_dir, 'jans-setup'))
 parser.add_argument('-force-download', help="Force downloading files", action='store_true')
-
+parser.add_argument('--github-access-token', help="Github access token to retrieve openbanking setup profile")
+parser.add_argument('--openbanking-setup-branch', help="Openbanking setup github branch", default="main")
 argsp = parser.parse_args()
 
 
@@ -84,7 +86,29 @@ def download_jans_acrhieve():
     print("Downloading {} as {}".format(jans_acrhieve_url, jans_zip_file))
     request.urlretrieve(jans_acrhieve_url, jans_zip_file)
 
+    if argsp.profile == 'openbanking':
+        access_token = argsp.github_access_token
+        if not access_token:
+            access_token = input("Please enter github access token: ")
+        if not access_token:
+            print("Can't continue without github access token for openbanking profile")
+            sys.exit()
 
+        openbanking_acrhieve_url = 'https://github.com/GluuFederation/openbanking/archive/refs/heads/{}.zip'.format(argsp.openbanking_setup_branch)
+
+        opener = request.build_opener()
+        opener.addheaders = [('Authorization', 'token '+access_token)]
+        request.install_opener(opener)
+
+        print("Downloading {} as {}".format(openbanking_acrhieve_url, openbanking_zip_file))
+
+        try:
+            request.urlretrieve(openbanking_acrhieve_url, openbanking_zip_file)
+        except Exception as e:
+            print("Can't download openbanking profile", e)
+            sys.exit()
+
+        request.install_opener(None)
 
 def check_installation():
     if not (os.path.exists(jetty_home) and os.path.exists('/etc/jans/conf/jans.properties')):
@@ -131,20 +155,24 @@ def profile_setup():
                 shutil.copy(source_file, target_dir)
 
 
+def extract_from_zip(zip_fn, source_dir, target_dir):
+    zip_object = zipfile.ZipFile(zip_fn)
+    parent_dir = zip_object.filelist[0].orig_filename
+    zip_object.close()
+
+    unpack_dir = os.path.join(jans_app_dir, os.urandom(8).hex())
+    shutil.unpack_archive(zip_fn, unpack_dir)
+    shutil.copytree(os.path.join(unpack_dir, parent_dir, source_dir), target_dir)
+
+    shutil.rmtree(unpack_dir)
 
 def extract_setup():
     if os.path.exists(argsp.setup_dir):
         shutil.move(argsp.setup_dir, argsp.setup_dir + bacup_ext)
 
     print("Extracting jans-setup package")
-    jans_zip = zipfile.ZipFile(jans_zip_file)
-    parent_dir = jans_zip.filelist[0].orig_filename
 
-    unpack_dir = os.path.join(jans_app_dir, os.urandom(4).hex())
-    shutil.unpack_archive(jans_zip_file, unpack_dir)
-    shutil.copytree(os.path.join(unpack_dir, parent_dir, 'jans-linux-setup/jans_setup'), argsp.setup_dir)
-    jans_zip.close()
-    shutil.rmtree(unpack_dir)
+    extract_from_zip(jans_zip_file, 'jans-linux-setup/jans_setup', argsp.setup_dir)
 
     target_setup = os.path.join(argsp.setup_dir, 'setup.py')
     if not os.path.exists(target_setup):
@@ -162,6 +190,13 @@ def extract_setup():
 
     with open(os.path.join(argsp.setup_dir, 'profile'), 'w') as w:
         w.write(argsp.profile)
+
+    if argsp.profile == 'openbanking' and os.path.exists(openbanking_zip_file):
+        print("Extracting Openbanking profile")
+        target_dir = os.path.join(argsp.setup_dir, 'openbanking')
+        if os.path.exists(target_dir):
+            shutil.move(target_dir, target_dir + bacup_ext)
+        extract_from_zip(openbanking_zip_file, 'jans-linux-setup/openbanking', target_dir)
 
 def uninstall_jans():
     check_installation()

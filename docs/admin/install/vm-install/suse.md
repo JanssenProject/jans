@@ -5,6 +5,7 @@ tags:
 - vm
 - SUSE
 - SLES
+- Leap
 ---
 
 # SUSE Janssen Installation
@@ -17,7 +18,9 @@ Before you install, check the [VM system requirements](vm-requirements.md).
 
 ## Install the Package
 
-- The firewall in SUSE is on by default. Make sure to disable it during installation. 
+- If the server firewall is running, make sure to disable it during installation. 
+
+For example:
 
 ```
 firewall-cmd --permanent --zone=public --add-service=https

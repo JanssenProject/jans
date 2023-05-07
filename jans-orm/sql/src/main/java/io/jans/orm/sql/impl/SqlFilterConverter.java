@@ -6,6 +6,7 @@
 
 package io.jans.orm.sql.impl;
 
+import java.sql.JDBCType;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -492,6 +493,20 @@ public class SqlFilterConverter {
 				if (dateValue != null) {
 					assertionValue = dateValue;
 				}
+			}
+			try {
+				if (attributeType != null) {
+					String columnType = attributeType.getType();
+					java.sql.JDBCType jdbcType = java.sql.JDBCType.valueOf(StringHelper.toUpperCase(columnType));
+	
+					if (jdbcType == java.sql.JDBCType.SMALLINT) {
+						if (StringHelper.equalsIgnoreCase((String) assertionValue, "true") || StringHelper.equalsIgnoreCase((String) assertionValue, "1")) {
+							assertionValue = 1;
+						}
+					}
+				}
+			} catch (java.lang.IllegalArgumentException ex) {
+				// Do nothing. Type is not defined in enum
 			}
 		}
 

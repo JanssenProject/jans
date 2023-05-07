@@ -18,7 +18,7 @@ class cli_style:
     navbar_headcolor = 'class:plugin-navbar-headcolor'
     navbar_entriescolor = 'class:plugin-navbar-entriescolor'
     tab_selected = 'class:tab-selected'
-    scim_widget = 'class:scim-widget'
+    black_bg_widget = 'class:black-bg-widget'
     black_bg = 'class:plugin-black-bg'
     textarea = 'class:textarea'
     drop_down = 'class:plugin-dropdown'
@@ -27,3 +27,5 @@ class common_strings:
     enter_to_search = "Press enter to perform search"
     no_matching_result = "No matching result"
     error = "Error!"
+    info = "Info"
+    oops = "Oops"

@@ -10,6 +10,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.server.service.LocalResponseCache;
 import io.jans.as.server.service.cdi.event.ReloadAuthScript;
 import io.jans.as.server.service.external.internal.InternalDefaultPersonAuthenticationType;
 import io.jans.model.AuthenticationScriptUsageType;
@@ -24,12 +25,12 @@ import io.jans.model.ldap.GluuLdapConfiguration;
 import io.jans.service.custom.script.ExternalScriptService;
 import io.jans.util.OxConstants;
 import io.jans.util.StringHelper;
-import org.apache.commons.lang.StringUtils;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import org.apache.commons.lang.StringUtils;
+
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -52,6 +53,9 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 
     @Inject
     private AppConfiguration appConfiguration;
+
+    @Inject
+    private LocalResponseCache localResponseCache;
 
     private static final long serialVersionUID = 7339887464253044927L;
 
@@ -89,6 +93,9 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 
         // Determine default authenticator for every usage type
         this.defaultExternalAuthenticators = determineDefaultCustomScriptConfigurationsMap(this.customScriptConfigurationsNameMap);
+
+        // invalidate discovery cache
+        localResponseCache.invalidateDiscoveryCache();
     }
 
     private HashMap<String, String> buildScriptAliases() {
@@ -114,9 +121,9 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 
     @Override
     protected void addExternalConfigurations(List<CustomScriptConfiguration> newCustomScriptConfigurations) {
-        if ((ldapAuthConfigs == null) || (ldapAuthConfigs.size() == 0)) {
+        if ((ldapAuthConfigs == null) || (ldapAuthConfigs.isEmpty())) {
             // Add internal type only if there is no enabled scripts and external authentication configurations
-            if (newCustomScriptConfigurations.size() == 0) {
+            if (newCustomScriptConfigurations.isEmpty()) {
                 newCustomScriptConfigurations.add(getInternalCustomScriptConfiguration());
             }
         } else {
@@ -127,7 +134,7 @@ public class ExternalAuthenticationService extends ExternalScriptService {
     }
 
     private Map<AuthenticationScriptUsageType, List<CustomScriptConfiguration>> groupCustomScriptConfigurationsMapByUsageType(Map<String, CustomScriptConfiguration> customScriptConfigurationsMap) {
-        Map<AuthenticationScriptUsageType, List<CustomScriptConfiguration>> newCustomScriptConfigurationsMapByUsageType = new HashMap<AuthenticationScriptUsageType, List<CustomScriptConfiguration>>();
+        Map<AuthenticationScriptUsageType, List<CustomScriptConfiguration>> newCustomScriptConfigurationsMapByUsageType = new HashMap<>();
 
         for (AuthenticationScriptUsageType usageType : AuthenticationScriptUsageType.values()) {
             List<CustomScriptConfiguration> currCustomScriptConfigurationsMapByUsageType = new ArrayList<CustomScriptConfiguration>();
@@ -146,7 +153,7 @@ public class ExternalAuthenticationService extends ExternalScriptService {
     }
 
     private Map<AuthenticationScriptUsageType, CustomScriptConfiguration> determineDefaultCustomScriptConfigurationsMap(Map<String, CustomScriptConfiguration> customScriptConfigurationsMap) {
-        Map<AuthenticationScriptUsageType, CustomScriptConfiguration> newDefaultCustomScriptConfigurationsMap = new HashMap<AuthenticationScriptUsageType, CustomScriptConfiguration>();
+        Map<AuthenticationScriptUsageType, CustomScriptConfiguration> newDefaultCustomScriptConfigurationsMap = new HashMap<>();
 
         for (AuthenticationScriptUsageType usageType : AuthenticationScriptUsageType.values()) {
             CustomScriptConfiguration defaultExternalAuthenticator = null;
@@ -169,7 +176,9 @@ public class ExternalAuthenticationService extends ExternalScriptService {
             log.debug("Executing python 'isValidAuthenticationMethod' authenticator method");
             PersonAuthenticationType externalAuthenticator = (PersonAuthenticationType) customScriptConfiguration.getExternalType();
             Map<String, SimpleCustomProperty> configurationAttributes = customScriptConfiguration.getConfigurationAttributes();
-            return externalAuthenticator.isValidAuthenticationMethod(usageType, configurationAttributes);
+            final boolean result = externalAuthenticator.isValidAuthenticationMethod(usageType, configurationAttributes);
+            log.debug("Executed python 'isValidAuthenticationMethod' authenticator method, result: {}", result);
+            return result;
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
             saveScriptError(customScriptConfiguration.getCustomScript(), ex);
@@ -183,7 +192,9 @@ public class ExternalAuthenticationService extends ExternalScriptService {
             log.trace("Executing python 'getAlternativeAuthenticationMethod' authenticator method");
             PersonAuthenticationType externalAuthenticator = (PersonAuthenticationType) customScriptConfiguration.getExternalType();
             Map<String, SimpleCustomProperty> configurationAttributes = customScriptConfiguration.getConfigurationAttributes();
-            return externalAuthenticator.getAlternativeAuthenticationMethod(usageType, configurationAttributes);
+            final String result = externalAuthenticator.getAlternativeAuthenticationMethod(usageType, configurationAttributes);
+            log.trace("Executed python 'getAlternativeAuthenticationMethod' authenticator method, result: {}", result);
+            return result;
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
             saveScriptError(customScriptConfiguration.getCustomScript(), ex);
@@ -197,7 +208,9 @@ public class ExternalAuthenticationService extends ExternalScriptService {
             log.trace("Executing python 'getCountAuthenticationSteps' authenticator method");
             PersonAuthenticationType externalAuthenticator = (PersonAuthenticationType) customScriptConfiguration.getExternalType();
             Map<String, SimpleCustomProperty> configurationAttributes = customScriptConfiguration.getConfigurationAttributes();
-            return externalAuthenticator.getCountAuthenticationSteps(configurationAttributes);
+            final int result = externalAuthenticator.getCountAuthenticationSteps(configurationAttributes);
+            log.trace("Executed python 'getCountAuthenticationSteps' authenticator method, result: {}", result);
+            return result;
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
             saveScriptError(customScriptConfiguration.getCustomScript(), ex);
@@ -211,7 +224,9 @@ public class ExternalAuthenticationService extends ExternalScriptService {
             log.trace("Executing python 'authenticate' authenticator method");
             PersonAuthenticationType externalAuthenticator = (PersonAuthenticationType) customScriptConfiguration.getExternalType();
             Map<String, SimpleCustomProperty> configurationAttributes = customScriptConfiguration.getConfigurationAttributes();
-            return externalAuthenticator.authenticate(configurationAttributes, requestParameters, step);
+            final boolean result = externalAuthenticator.authenticate(configurationAttributes, requestParameters, step);
+            log.trace("Executed python 'authenticate' authenticator method, result: {}", result);
+            return result;
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
             saveScriptError(customScriptConfiguration.getCustomScript(), ex);
@@ -225,7 +240,9 @@ public class ExternalAuthenticationService extends ExternalScriptService {
             log.trace("Executing python 'getNextStep' authenticator method");
             PersonAuthenticationType externalAuthenticator = (PersonAuthenticationType) customScriptConfiguration.getExternalType();
             Map<String, SimpleCustomProperty> configurationAttributes = customScriptConfiguration.getConfigurationAttributes();
-            return externalAuthenticator.getNextStep(configurationAttributes, requestParameters, step);
+            final int result = externalAuthenticator.getNextStep(configurationAttributes, requestParameters, step);
+            log.trace("Executed python 'getNextStep' authenticator method, result: {}", result);
+            return result;
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
             saveScriptError(customScriptConfiguration.getCustomScript(), ex);
@@ -239,7 +256,9 @@ public class ExternalAuthenticationService extends ExternalScriptService {
             log.trace("Executing python 'logout' authenticator method");
             PersonAuthenticationType externalAuthenticator = (PersonAuthenticationType) customScriptConfiguration.getExternalType();
             Map<String, SimpleCustomProperty> configurationAttributes = customScriptConfiguration.getConfigurationAttributes();
-            return externalAuthenticator.logout(configurationAttributes, requestParameters);
+            final boolean result = externalAuthenticator.logout(configurationAttributes, requestParameters);
+            log.trace("Executed python 'logout' authenticator method, result: {}", result);
+            return result;
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
             saveScriptError(customScriptConfiguration.getCustomScript(), ex);
@@ -253,7 +272,9 @@ public class ExternalAuthenticationService extends ExternalScriptService {
             log.trace("Executing python 'getLogouExternalUrl' authenticator method");
             PersonAuthenticationType externalAuthenticator = (PersonAuthenticationType) customScriptConfiguration.getExternalType();
             Map<String, SimpleCustomProperty> configurationAttributes = customScriptConfiguration.getConfigurationAttributes();
-            return externalAuthenticator.getLogoutExternalUrl(configurationAttributes, requestParameters);
+            final String result = externalAuthenticator.getLogoutExternalUrl(configurationAttributes, requestParameters);
+            log.trace("Executed python 'getLogouExternalUrl' authenticator method, result: {}", result);
+            return result;
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
             saveScriptError(customScriptConfiguration.getCustomScript(), ex);
@@ -264,10 +285,12 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 
     public boolean executeExternalPrepareForStep(CustomScriptConfiguration customScriptConfiguration, Map<String, String[]> requestParameters, int step) {
         try {
-            log.trace("Executing python 'prepareForStep' authenticator method");
+            log.trace("Executing python 'prepareForStep' authn");
             PersonAuthenticationType externalAuthenticator = (PersonAuthenticationType) customScriptConfiguration.getExternalType();
             Map<String, SimpleCustomProperty> configurationAttributes = customScriptConfiguration.getConfigurationAttributes();
-            return externalAuthenticator.prepareForStep(configurationAttributes, requestParameters, step);
+            final boolean result = externalAuthenticator.prepareForStep(configurationAttributes, requestParameters, step);
+            log.trace("Executed python 'prepareForStep' authn, result: {}", result);
+            return result;
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
             saveScriptError(customScriptConfiguration.getCustomScript(), ex);
@@ -278,10 +301,12 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 
     public List<String> executeExternalGetExtraParametersForStep(CustomScriptConfiguration customScriptConfiguration, int step) {
         try {
-            log.trace("Executing python 'getExtraParametersForStep' authenticator method");
+            log.trace("Executing python 'getExtraParametersForStep' authn");
             PersonAuthenticationType externalAuthenticator = (PersonAuthenticationType) customScriptConfiguration.getExternalType();
             Map<String, SimpleCustomProperty> configurationAttributes = customScriptConfiguration.getConfigurationAttributes();
-            return externalAuthenticator.getExtraParametersForStep(configurationAttributes, step);
+            final List<String> result = externalAuthenticator.getExtraParametersForStep(configurationAttributes, step);
+            log.trace("Executed python 'getExtraParametersForStep' authn, result: {}", result);
+            return result;
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
             saveScriptError(customScriptConfiguration.getCustomScript(), ex);
@@ -295,7 +320,9 @@ public class ExternalAuthenticationService extends ExternalScriptService {
             log.trace("Executing python 'getPageForStep' authenticator method");
             PersonAuthenticationType externalAuthenticator = (PersonAuthenticationType) customScriptConfiguration.getExternalType();
             Map<String, SimpleCustomProperty> configurationAttributes = customScriptConfiguration.getConfigurationAttributes();
-            return externalAuthenticator.getPageForStep(configurationAttributes, step);
+            final String result = externalAuthenticator.getPageForStep(configurationAttributes, step);
+            log.trace("Executed python 'getPageForStep' authenticator method, result: {}", result);
+            return result;
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
             saveScriptError(customScriptConfiguration.getCustomScript(), ex);
@@ -308,7 +335,9 @@ public class ExternalAuthenticationService extends ExternalScriptService {
         try {
             log.trace("Executing python 'getApiVersion' authenticator method");
             PersonAuthenticationType externalAuthenticator = (PersonAuthenticationType) customScriptConfiguration.getExternalType();
-            return externalAuthenticator.getApiVersion();
+            final int result = externalAuthenticator.getApiVersion();
+            log.trace("Executed python 'getApiVersion' authenticator method, result: {}", result);
+            return result;
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
             saveScriptError(customScriptConfiguration.getCustomScript(), ex);

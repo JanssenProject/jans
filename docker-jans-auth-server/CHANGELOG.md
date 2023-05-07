@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.0.12-1](https://github.com/JanssenProject/jans/compare/docker-jans-auth-server-v1.0.11-1...docker-jans-auth-server-v1.0.12-1) (2023-04-18)
+
+
+### Bug Fixes
+
+* opencontainer labels ([f8b0b36](https://github.com/JanssenProject/jans/commit/f8b0b365600bd700128bb9d92df6de7ba14830b6))
+* prepare for 1.0.12 release ([6f83197](https://github.com/JanssenProject/jans/commit/6f83197705511c39413456acdc64e9136a97ff39))
+
+## [1.0.11-1](https://github.com/JanssenProject/jans/compare/docker-jans-auth-server-v1.0.10-1...docker-jans-auth-server-v1.0.11-1) (2023-04-05)
+
+
+### Features
+
+* **docker-jans:** upstream changes for license credentials ([#4416](https://github.com/JanssenProject/jans/issues/4416)) ([1565095](https://github.com/JanssenProject/jans/commit/15650953e2f6ee449d389682dd624028c9001c47))
+
+
+### Bug Fixes
+
+* **docker-jans:** update smtp config and agama script entry ([#4384](https://github.com/JanssenProject/jans/issues/4384)) ([d24dffb](https://github.com/JanssenProject/jans/commit/d24dffb93ed445b00819d696d87e046bcf5eb269))
+* prepare for  release ([60775c0](https://github.com/JanssenProject/jans/commit/60775c09dc5ab9996bf80c03dcb457861d48dfb1))
+
 ## [1.0.10-1](https://github.com/JanssenProject/jans/compare/docker-jans-auth-server-v1.0.9-1...docker-jans-auth-server-v1.0.10-1) (2023-03-16)
 
 

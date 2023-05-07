@@ -6,10 +6,14 @@ package io.jans.model;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 import io.jans.orm.annotation.AttributeEnum;
 
 /**
  * @author Sergey Manoylo
+ * @author Yuriy Movchan
  * @version 03/15/2023
  */
 public enum SmtpConnectProtectionType implements AttributeEnum {
@@ -25,6 +29,11 @@ public enum SmtpConnectProtectionType implements AttributeEnum {
         for (SmtpConnectProtectionType enumType : values()) {
             mapByValues.put(enumType.getValue(), enumType);
         }
+    }
+
+    @JsonCreator
+    public static SmtpConnectProtectionType forValues(String value) {
+        return getByValue(value);
     }
 
     /**
@@ -55,9 +64,9 @@ public enum SmtpConnectProtectionType implements AttributeEnum {
         return getByValue(value);
     }
 
+    @JsonValue
     @Override
     public String toString() {
         return value;
-    }    		
-	
+    }
 }

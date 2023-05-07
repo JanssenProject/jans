@@ -2,30 +2,29 @@
 tags:
   - administration
   - config-api
+  - configuration
 ---
 
 # Config-api-configuration
 
 ## Overview
-[Jans Config Api](https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-config-api) configuration enables to manage application-level configuration.
-
-![](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/docs/assets/config-api-configuration.png)
+[Jans Config Api](https://github.com/JanssenProject/jans/tree/main/jans-config-api) configuration enables to manage application-level configuration.
 
 ### Existing Config-api dynamic configuration
 
 > ```javascript
 >{
 >  "configOauthEnabled": true,
->  "apiApprovedIssuer": ["https://jans.server2"],
+>  "apiApprovedIssuer": ["https://<your-jans-host>"],
 >  "apiProtectionType": "oauth2",
 >  "apiClientId": "1800.0a6a17a0-0d3b-4ce5-881c-f98b2f2b75a7",
 >  "apiClientPassword": "BlRk0TlvJp8QJg1vs5e1vw==",
 >  "endpointInjectionEnabled": false,
->  "authIssuerUrl": "https://jans.server2",
->  "authOpenidConfigurationUrl": "https://jans.server2/.well-known/openid-configuration",
->  "authOpenidIntrospectionUrl": "https://jans.server2/jans-auth/restv1/introspection",
->  "authOpenidTokenUrl": "https://jans.server2/jans-auth/restv1/token",
->  "authOpenidRevokeUrl": "https://jans.server2/jans-auth/restv1/revoke",
+>  "authIssuerUrl": "https://<your-jans-host>",
+>  "authOpenidConfigurationUrl": "https://<your-jans-host>/.well-known/openid-configuration",
+>  "authOpenidIntrospectionUrl": "https://<your-jans-host>/jans-auth/restv1/introspection",
+>  "authOpenidTokenUrl": "https://<your-jans-host>/jans-auth/restv1/token",
+>  "authOpenidRevokeUrl": "https://<your-jans-host>/jans-auth/restv1/revoke",
 >  "smallryeHealthRootPath": "/health-check",
 >  "disableJdkLogger":true,
 >  "loggingLevel":"INFO",
@@ -76,7 +75,7 @@ tags:
 ## Revision update
 
 `jansRevision` property of the configuration is used to manage any change
-![](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/docs/assets/config-api-configuration-revision)
+
 
 ### Two options to make effect of the changes done to the configuration
 
@@ -111,7 +110,7 @@ tags:
 
 > ```javascript
 >  ...
-> apiApprovedIssuer": ["https://jans.server1,https://jans.server2"]
+> apiApprovedIssuer": ["https://<jans.auth.server>,https://<gluu.server>,https://<anyAuth.server>"]
 >  ...
 > ```
 

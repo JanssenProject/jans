@@ -13,7 +13,7 @@ Persistence is a special container to load initial data for LDAP or Couchbase.
 ## Versions
 
 See [Releases](https://github.com/JanssenProject/docker-jans-persistence/releases) for stable versions.
-For bleeding-edge/unstable version, use `janssenproject/persistence:1.0.11_dev`.
+For bleeding-edge/unstable version, use `janssenproject/persistence:1.0.12_dev`.
 
 ## Environment Variables
 

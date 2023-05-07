@@ -130,15 +130,6 @@ class JansInstaller(BaseInstaller, SetupUtils):
             self.logIt("Key generator path was determined as {}".format(Config.non_setup_properties['key_export_path']))
 
         self.extract_scripts()
-        
-        self.make_salt()
-
-        if not Config.get('smtp_jks_pass'):
-            Config.smtp_jks_pass = self.getPW()
-            try:
-                Config.smtp_jks_pass_enc = self.obscure(Config.smtp_jks_pass)
-            except Exception as e:
-                self.logIt("JansInstaller. __init__ failed. Reason: %s" % str(e), errorLog=True)
 
     def configureSystem(self):
         self.logIt("Configuring system", 'jans')
@@ -442,8 +433,8 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
     def create_test_client(self):
         ldif_fn = self.clients_ldif_fn = os.path.join(Config.output_dir, 'test-client.ldif')
-        client_id = Config.get('test_client_id') or base.argsp.test_client_id
-        client_pw = Config.get('test_client_pw') or base.argsp.test_client_pw or self.getPW()
+        client_id = Config.get('test_client_id') or getattr(base.argsp, 'test_client_id', None)
+        client_pw = Config.get('test_client_pw') or getattr(base.argsp, 'test_client_pw', None) or self.getPW()
         encoded_pw = self.obscure(client_pw)
         trusted_client = 'true' if (Config.get('test_client_trusted') or base.argsp.test_client_trusted) else 'false'
 
@@ -477,7 +468,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
     def post_install_before_saving_properties(self):
 
-        if base.argsp.test_client_id or Config.get('test_client_id'):
+        if getattr(base.argsp, 'test_client_id', None) or Config.get('test_client_id'):
             self.create_test_client()
 
 
@@ -577,8 +568,17 @@ class JansInstaller(BaseInstaller, SetupUtils):
     def extract_scripts(self):
         base.extract_from_zip(base.current_app.jans_zip, 'docs/script-catalog', Config.script_catalog_dir)
 
-    def generate_configuration(self):
+
+    def generate_smtp_config(self):
         self.logIt("Generating smtp keys", pbar=self.service_name)
+
+        if not Config.get('smtp_jks_pass'):
+            Config.smtp_jks_pass = self.getPW()
+            try:
+                Config.smtp_jks_pass_enc = self.obscure(Config.smtp_jks_pass)
+            except Exception as e:
+                self.logIt("JansInstaller. __init__ failed. Reason: %s" % str(e), errorLog=True)
+
 
         cmd_cert_gen = [Config.cmd_keytool, '-genkeypair',
                         '-alias', Config.smtp_alias,
@@ -586,7 +586,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
                         '-groupname', 'secp256r1',
                         '-sigalg', Config.smtp_signing_alg,
                         '-validity', '3650',
-                        '-storetype', 'PKCS12',
+                        '-storetype', Config.default_store_type,
                         '-keystore', Config.smtp_jks_fn,
                         '-keypass', Config.smtp_jks_pass,
                         '-storepass', Config.smtp_jks_pass,

@@ -431,7 +431,7 @@ public class AppConfiguration implements Configuration {
     private int sessionIdUnusedLifetime;
 
     @DocProperty(description = "The lifetime for unused unauthenticated session states")
-    private int sessionIdUnauthenticatedUnusedLifetime = 120; // 120 seconds
+    private int sessionIdUnauthenticatedUnusedLifetime = 7200; // 2h
 
     @DocProperty(description = "Boolean value specifying whether to persist session ID on prompt none")
     private Boolean sessionIdPersistOnPromptNone;
@@ -549,6 +549,9 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "If True, rejects introspection requests if access_token does not have the uma_protection scope in its authorization header", defaultValue = "false")
     private Boolean introspectionAccessTokenMustHaveUmaProtectionScope = false;
+
+    @DocProperty(description = "If True, rejects introspection requests if access_token does not have the 'introspection' scope in its authorization header. Comparing to 'uma_protection', 'introspection' scope is not allowed for dynamic registration'", defaultValue = "false")
+    private Boolean introspectionAccessTokenMustHaveIntrospectionScope = false;
 
     @DocProperty(description = "Specifies if authorization to be skipped for introspection")
     private Boolean introspectionSkipAuthorization;
@@ -705,8 +708,8 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Authentication Brute Force Protection Configuration")
     private AuthenticationProtectionConfiguration authenticationProtectionConfiguration;
 
-    @DocProperty(description = "A list of possible error handling methods")
-    private ErrorHandlingMethod errorHandlingMethod = ErrorHandlingMethod.INTERNAL;
+    @DocProperty(description = "A list of possible error handling methods. Possible values: remote (send error back to RP), internal (show error page)", defaultValue = "remote")
+    private ErrorHandlingMethod errorHandlingMethod = ErrorHandlingMethod.REMOTE;
 
     @DocProperty(description = "Boolean value specifying whether to disable authentication when max_age=0", defaultValue = "false")
     private Boolean disableAuthnForMaxAgeZero;
@@ -722,6 +725,10 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "Response type used to process device authz requests")
     private String deviceAuthzResponseTypeToProcessAuthz;
+
+    @DocProperty(description = "Device authz acr")
+    private String deviceAuthzAcr;
+
     // CIBA
     @DocProperty(description = "Backchannel Client Id")
     private String backchannelClientId;
@@ -1321,6 +1328,15 @@ public class AppConfiguration implements Configuration {
     public void setFrontChannelLogoutSessionSupported(
             Boolean frontChannelLogoutSessionSupported) {
         this.frontChannelLogoutSessionSupported = frontChannelLogoutSessionSupported;
+    }
+
+    public Boolean getIntrospectionAccessTokenMustHaveIntrospectionScope() {
+        if (introspectionAccessTokenMustHaveIntrospectionScope == null) introspectionAccessTokenMustHaveIntrospectionScope = false;
+        return introspectionAccessTokenMustHaveIntrospectionScope;
+    }
+
+    public void setIntrospectionAccessTokenMustHaveIntrospectionScope(Boolean introspectionAccessTokenMustHaveIntrospectionScope) {
+        this.introspectionAccessTokenMustHaveIntrospectionScope = introspectionAccessTokenMustHaveIntrospectionScope;
     }
 
     public Boolean getIntrospectionAccessTokenMustHaveUmaProtectionScope() {
@@ -2961,6 +2977,14 @@ public class AppConfiguration implements Configuration {
 
     public void setDeviceAuthzResponseTypeToProcessAuthz(String deviceAuthzResponseTypeToProcessAuthz) {
         this.deviceAuthzResponseTypeToProcessAuthz = deviceAuthzResponseTypeToProcessAuthz;
+    }
+
+    public String getDeviceAuthzAcr() {
+        return deviceAuthzAcr;
+    }
+
+    public void setDeviceAuthzAcr(String deviceAuthzAcr) {
+        this.deviceAuthzAcr = deviceAuthzAcr;
     }
 
     public Boolean getRequestUriHashVerificationEnabled() {

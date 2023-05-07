@@ -2,6 +2,7 @@
 tags:
   - administration
   - planning
+  - integration
 ---
 
 Older monolithic web access management platforms from the 2000's had
@@ -10,7 +11,7 @@ resources. But modern federated digital identity platforms generally do not.
 That's true for two reasons. First implementing all the OAuth and OpenID
 features is already a wide swath of requirements. Second, policy management,
 or authorization, has itself become a nice market. Note the policy management
-platforms list in the [RBAC](docs/admin/planning/role-based-access-management.md)
+platforms list in the [RBAC](../../../docs/admin/planning/role-based-access-management.md)
 planning guide page.
 
 With that said, if the number of policies is low, there are some ways to

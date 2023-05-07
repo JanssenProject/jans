@@ -13,7 +13,7 @@ Configuration manager is a special container used to load (generate/restore) and
 ## Versions
 
 See [Releases](https://github.com/JanssenProject/docker-jans-configurator/releases) for stable versions.
-For bleeding-edge/unstable version, use `janssenproject/configurator:1.0.11_dev`.
+For bleeding-edge/unstable version, use `janssenproject/configurator:1.0.13_dev`.
 
 ## Environment Variables
 
@@ -47,7 +47,7 @@ The following environment variables are supported by the container:
 - `CN_SECRET_KUBERNETES_USE_KUBE_CONFIG`: Load credentials from `$HOME/.kube/config`, only useful for non-container environment (default to `false`).
 - `CN_WAIT_MAX_TIME`: How long the startup "health checks" should run (default to `300` seconds).
 - `CN_WAIT_SLEEP_DURATION`: Delay between startup "health checks" (default to `10` seconds).
-- `GOOGLE_APPLICATION_CREDENTIALS`: JSON file (contains Google credentials) that should be injected into container.
+- `GOOGLE_APPLICATION_CREDENTIALS`: Optional JSON file (contains Google credentials) that can be injected into container for authentication. Refer to https://cloud.google.com/docs/authentication/provide-credentials-adc#how-to for supported credentials.
 - `GOOGLE_PROJECT_ID`: ID of Google project.
 - `CN_GOOGLE_SECRET_VERSION_ID`: Janssen secret version ID in Google Secret Manager. Defaults to `latest`, which is recommended.
 - `CN_GOOGLE_SECRET_NAME_PREFIX`: Prefix for Janssen secret in Google Secret Manager. Defaults to `jans`. If left `jans-secret` secret will be created.
@@ -124,7 +124,7 @@ python -c 'import random, string; print("".join(random.choices(string.ascii_lett
         -v /path/to/host/volume:/app/db \
         -v /path/to/vault_role_id.txt:/etc/certs/vault_role_id \
         -v /path/to/vault_secret_id.txt:/etc/certs/vault_secret_id \
-        janssenproject/configurator:1.0.11_dev load
+        janssenproject/configurator:1.0.13_dev load
     ```
 
 #### Kubernetes
@@ -152,7 +152,7 @@ python -c 'import random, string; print("".join(random.choices(string.ascii_lett
                 name: config-generate-params
           containers:
             - name: configurator-load
-              image: janssenproject/configurator:1.0.11_dev
+              image: janssenproject/configurator:1.0.13_dev
               volumeMounts:
                 - mountPath: /app/db/generate.json
                   name: config-generate-params
@@ -192,7 +192,7 @@ python -c 'import random, string; print("".join(random.choices(string.ascii_lett
                 name: secret-params
           containers:
             - name: configurator-load
-              image: janssenproject/configurator:1.0.11_dev
+              image: janssenproject/configurator:1.0.13_dev
               volumeMounts:
                 - mountPath: /app/db/config.json
                   name: config-params
@@ -226,7 +226,7 @@ docker run \
     -v /path/to/host/volume:/app/db \
     -v /path/to/vault_role_id.txt:/etc/certs/vault_role_id \
     -v /path/to/vault_secret_id.txt:/etc/certs/vault_secret_id \
-    janssenproject/configurator:1.0.11_dev dump
+    janssenproject/configurator:1.0.13_dev dump
 ```
 
 #### Kubernetes
@@ -242,7 +242,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: configurator-dump-job
-          image: janssenproject/configurator:1.0.11_dev
+          image: janssenproject/configurator:1.0.13_dev
           command:
             - /bin/sh
             - -c

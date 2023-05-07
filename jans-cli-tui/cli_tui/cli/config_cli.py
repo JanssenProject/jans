@@ -154,20 +154,20 @@ parser.add_argument("--debug-log-file", default='swagger.log', help="Log file na
 parser.add_argument("--operation-id", help="Operation ID to be done")
 parser.add_argument("--url-suffix", help="Argument to be added api endpoint url. For example inum:2B29")
 parser.add_argument("--info", choices=op_list, help="Help for operation")
+
 parser.add_argument("--op-mode", choices=['get', 'post', 'put', 'patch', 'delete'], default='get',
                     help="Operation mode to be done")
+
 parser.add_argument("--endpoint-args",
                     help="Arguments to pass endpoint separated by comma. For example limit:5,status:INACTIVE")
+
 parser.add_argument("--schema", help="Get sample json schema")
 
 parser.add_argument("-CC", "--config-api-mtls-client-cert", help="Path to SSL Certificate file")
 parser.add_argument("-CK", "--config-api-mtls-client-key", help="Path to SSL Key file")
 parser.add_argument("--key-password", help="Password for SSL Key file")
 parser.add_argument("-noverify", help="Ignore verifying the SSL certificate", action='store_true', default=True)
-
 parser.add_argument("-use-test-client", help="Use test client without device authorization", action='store_true')
-
-
 parser.add_argument("--patch-add", help="Colon delimited key:value pair for add patch operation. For example loggingLevel:DEBUG")
 parser.add_argument("--patch-replace", help="Colon delimited key:value pair for replace patch operation. For example loggingLevel:DEBUG")
 parser.add_argument("--patch-remove", help="Key for remove patch operation. For example imgLocation")
@@ -176,8 +176,9 @@ parser.add_argument("--log-dir", help="Log directory", default=log_dir)
 parser.add_argument("-revoke-session", help="Revokes session", action='store_true')
 parser.add_argument("-scim", help="SCIM Mode", action='store_true', default=False)
 parser.add_argument("-auth", help="Jans OAuth Server Mode", action='store_true', default=False)
-
 parser.add_argument("--data", help="Path to json data file")
+parser.add_argument("--output-access-token", help="Prints jwt access token and exits", action='store_true')
+
 args = parser.parse_args()
 
 
@@ -382,12 +383,6 @@ class JCA_CLI:
         if args.config_api_mtls_client_cert and args.config_api_mtls_client_key:
             self.mtls_client_cert = (args.config_api_mtls_client_cert, args.config_api_mtls_client_key)
 
-    def drop_to_shell(self, mylocals):
-        locals_ = locals()
-        locals_.update(mylocals)
-        code.interact(local=locals_)
-        sys.exit()
-
 
     def get_request_header(self, headers=None, access_token=None):
         if headers is None:
@@ -404,6 +399,27 @@ class JCA_CLI:
         ret_val.update(headers)
         return ret_val
 
+    def get_openid_configuration(self):
+
+        try:
+            response = requests.get(
+                    url = 'https://{}{}'.format(self.idp_host, self.discovery_endpoint),
+                    headers=self.get_request_header({'Accept': 'application/json'}),
+                    verify=self.verify_ssl,
+                    cert=self.mtls_client_cert
+                )
+        except Exception as e:
+            self.cli_logger.error(str(e))
+            if self.wrapped:
+                return str(e)
+
+            raise ValueError(
+                self.colored_text("Unable to get OpenID configuration:\n {}".format(str(e)), error_color))
+
+        self.openid_configuration = response.json()
+        self.cli_logger.debug("OpenID Config: %s", self.openid_configuration)
+
+        return response
 
     def check_connection(self):
         self.cli_logger.debug("Checking connection")
@@ -448,23 +464,7 @@ class JCA_CLI:
             write_config()
             return response.text
 
-        try:
-            response = requests.get(
-                    url = 'https://{}{}'.format(self.idp_host, self.discovery_endpoint),
-                    headers=self.get_request_header({'Accept': 'application/json'}),
-                    verify=self.verify_ssl,
-                    cert=self.mtls_client_cert
-                )
-        except Exception as e:
-            self.cli_logger.error(str(e))
-            if self.wrapped:
-                return str(e)
-
-            raise ValueError(
-                self.colored_text("Unable to get OpenID configuration:\n {}".format(str(e)), error_color))
-
-        self.openid_configuration = response.json()
-        self.cli_logger.debug("OpenID Config: %s", self.openid_configuration)
+        self.get_openid_configuration()
 
         return True
 
@@ -519,14 +519,6 @@ class JCA_CLI:
             if not self.wrapped:
                 print(self.colored_text("Unable to validate access token: {}".format(e), error_color))
                 self.access_token = None
-
-    def validate_date_time(self, date_str):
-        try:
-            datetime.datetime.fromisoformat(date_str)
-            return True
-        except Exception as e:
-            self.log_response('invalid date-time format: %s'.format(str(e)))
-            return False
 
 
     def get_scoped_access_token(self, scope, set_access_token=True):
@@ -724,6 +716,11 @@ class JCA_CLI:
             elif not self.access_token and not self.wrapped:
                 self.check_access_token()
                 self.get_jwt_access_token()
+
+        if args.output_access_token and self.access_token:
+            print(self.access_token)
+            sys.exit()
+
         return True, ''
 
     def print_exception(self, e):
@@ -853,10 +850,15 @@ class JCA_CLI:
 
     def post_requests(self, endpoint, data, params=None):
         url = 'https://{}{}'.format(self.host, endpoint.path)
+        url_param_name = self.get_url_param(endpoint.path)
+
         security = self.get_scope_for_endpoint(endpoint)
         self.get_access_token(security)
         mime_type = self.get_mime_for_endpoint(endpoint)
         headers = self.get_request_header({'Accept': 'application/json', 'Content-Type': mime_type})
+
+        if params and url_param_name in params:
+            url = url.format(**{url_param_name: params.pop(url_param_name)})
 
         post_params = {
             'url': url,
@@ -1004,7 +1006,9 @@ class JCA_CLI:
                 if neq > 1:
                     arg_name = arg[:neq].strip()
                     arg_val = arg[neq + 1:].strip()
-                    if arg_name and arg_val:
+                    if arg_name in args_dict:
+                        args_dict[arg_name] += ','+arg_val
+                    else:
                         args_dict[arg_name] = arg_val
 
         return args_dict
@@ -1136,7 +1140,7 @@ class JCA_CLI:
 
 
     def print_response(self, response):
-        if response:
+        if response is not None:
             sys.stderr.write("Server Response:\n")
             self.pretty_print(response)
 
@@ -1277,6 +1281,46 @@ class JCA_CLI:
                     if schema == schema_name:
                         return '#/components/schemas/' + schema
 
+
+    def get_nasted_schema(self,data):
+        result = self.find_key('$ref', data)
+        if result:
+            return result
+        return None
+
+    def find_key(self,key, dictionary):
+        if key in dictionary:
+            return dictionary[key]
+        for k, v in dictionary.items():
+            if isinstance(v, dict):
+                result = self.find_key(key, v)
+                if result:
+                    return result
+        return None
+
+    def change_certain_value_from_list(self,keys_to_lookup,my_dict_nested,data_to_change):
+
+        value = OrderedDict()
+        value.update(my_dict_nested)
+        for key in keys_to_lookup[:-2]:
+            value = value[key]
+        # assign a new value to the final key > -2 to discared `$ref`
+        value[keys_to_lookup[-2]] = data_to_change
+
+        return my_dict_nested
+
+
+    def list_leading_to_value(self,my_dict, value, keys=[]):
+        for k, v in my_dict.items():
+            if isinstance(v, dict):
+                result = self.list_leading_to_value(v, value, keys + [k])
+                if result is not None:
+                    return result
+            elif v == value:
+                return keys + [k]
+        
+
+
     def get_schema_from_reference(self, plugin_name, ref):
         schema_path_list = ref.strip('/#').split('/')
         schema = cfg_yaml[self.my_op_mode][plugin_name][schema_path_list[0]]
@@ -1302,15 +1346,51 @@ class JCA_CLI:
             schema_ = all_schema
 
         for key_ in schema_.get('properties', []):
+
             if '$ref' in schema_['properties'][key_]:
-                schema_['properties'][key_] = self.get_schema_from_reference(plugin_name, schema_['properties'][key_]['$ref'])
+                current_schema = self.get_schema_from_reference(plugin_name, schema_['properties'][key_]['$ref'])
+                ref = self.get_nasted_schema(current_schema) ## cehck for nasted `$ref` schema
+                
+
+                if False: #ref :
+                    print(ref)
+                    ### Get schema from refrence for the new `ref`
+                    new_schema = self.get_schema_from_reference(plugin_name, ref) 
+
+                    ### Get List of keys to the `ref` value ex: ['properties', 'agamaConfiguration', 'properties', 'clientAuthMapSchema', 'additionalProperties', 'items', '$ref']
+                    keys_to_lookup = self.list_leading_to_value(my_dict=current_schema, value=ref) 
+
+                    ### Change the value that List of keys looks at.
+                    schema_['properties'][key_] =OrderedDict(self.change_certain_value_from_list(keys_to_lookup,current_schema,new_schema['properties'])) 
+
+                else:
+                    schema_['properties'][key_] = current_schema
+                
             elif schema_['properties'][key_].get('type') == 'array' and '$ref' in schema_['properties'][key_]['items']:
+                
                 ref_path = schema_['properties'][key_]['items'].pop('$ref')
                 ref_schema = self.get_schema_from_reference(plugin_name, ref_path)
                 schema_['properties'][key_]['properties'] = ref_schema['properties']
                 schema_['properties'][key_]['title'] = ref_schema['title']
                 schema_['properties'][key_]['description'] = ref_schema.get('description', '')
                 schema_['properties'][key_]['__schema_name__'] = ref_schema['__schema_name__']
+
+            # else:
+            #     ref = self.get_nasted_schema(schema_)
+            #     print('ref else: '+str(ref)+'\n')
+            #     if ref :
+            #         ### Get schema from refrence for the new `ref`
+            #         new_schema = self.get_schema_from_reference(plugin_name, ref) 
+
+            #         ### Get List of keys to the `ref` value ex: ['properties', 'agamaConfiguration', 'properties', 'clientAuthMapSchema', 'additionalProperties', 'items', '$ref']
+            #         keys_to_lookup = self.list_leading_to_value(my_dict=current_schema, value=ref) 
+
+            #         ### Change the value that List of keys looks at.
+            #         schema_['properties'][key_] =OrderedDict(self.change_certain_value_from_list(keys_to_lookup,current_schema,new_schema['properties'])) 
+
+               
+
+
 
         if not 'title' in schema_:
             schema_['title'] = p
@@ -1412,7 +1492,8 @@ def main():
             cli_object.get_sample_schema(args.schema)
         elif args.operation_id:
             cli_object.process_command_by_id(args.operation_id, args.url_suffix, args.endpoint_args, args.data)
-
+        elif args.output_access_token:
+            cli_object.get_access_token(None)
     #except Exception as e:
     #    print(u"\u001b[38;5;{}mAn Unhandled error raised: {}\u001b[0m".format(error_color, e))
     #    with open(error_log_file, 'a') as w:

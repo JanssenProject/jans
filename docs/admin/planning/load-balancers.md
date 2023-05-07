@@ -1,6 +1,7 @@
 ---
 tags:
   - administration
+  - planning
   - load balancer
   - nginx
   - apache HTTPD

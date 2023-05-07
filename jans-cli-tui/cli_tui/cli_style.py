@@ -67,6 +67,7 @@ style = Style.from_dict(
         "plugin-navbar-entriescolor":"blue",
         "plugin-tabs":"",
         "plugin-text":"green",
+        "plugin-text-nounderline":"nounderline green",
         "plugin-textsearch":"",
         "plugin-label":"bold",
         "plugin-textrequired":"#8b000a",
@@ -138,8 +139,19 @@ style = Style.from_dict(
         "tab-unselected": "fg:#b0e0e6 bg:#a9a9a9 underline",
         "tab-selected": "fg:#000080 bg:#d3d3d3",
 
-        ##scim
-        "scim-widget": "bg:black fg:white",
+        # black background widget
+        "black-bg-widget": "bg:black fg:white",
+
+        ### table
+        "table-white-header": "nounderline bold fg:ansiblack bg:White",
+        "table-white-data": "nounderline fg:ansiblack bg:LightGray",
+        "table-white-bg": "nounderline bg:ansiwhite",
+
+        # dialog
+        'dialog':             'bg:#4444ff',
+        'dialog frame.label': '#ff0000 bold',
+        'dialog.body':        'bg:#ffffff #000000',
+        'dialog shadow':      'bg:#262626',
 
     }
 )

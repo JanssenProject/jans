@@ -132,14 +132,15 @@ func resourceOrganizationUpdate(ctx context.Context, d *schema.ResourceData, met
 
 	c := meta.(*jans.Client)
 
-	var loggingConfig jans.LoggingConfiguration
-	if err := fromSchemaResource(d, &loggingConfig); err != nil {
+	var orga jans.Organization
+	patches, err := patchFromResourceData(d, &orga)
+	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	if _, err := c.UpdateLoggingConfiguration(ctx, &loggingConfig); err != nil {
+	if _, err := c.PatchOrganization(ctx, patches); err != nil {
 		return diag.FromErr(err)
 	}
 
-	return resourceLoggingConfigurationRead(ctx, d, meta)
+	return resourceOrganizationRead(ctx, d, meta)
 }

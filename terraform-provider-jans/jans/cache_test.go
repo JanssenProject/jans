@@ -23,23 +23,26 @@ func TestCacheConfig(t *testing.T) {
 		t.Fatal("expected cache provider type")
 	}
 
-	cacheCfg.CacheProviderType = "REDIS"
-	if err := client.UpdateCacheConfiguration(ctx, cacheCfg); err != nil {
-		t.Fatal(err)
+	patches := []PatchRequest{
+		{
+			Op:    "replace",
+			Path:  "/cacheProviderType",
+			Value: "REDIS",
+		},
 	}
 
-	cacheCfg, err = client.GetCacheConfiguration(ctx)
+	cacheCfg, err = client.PatchCacheConfiguration(ctx, patches)
 	if err != nil {
 		t.Fatal(err)
 	}
 
+	t.Cleanup(func() {
+		patches[0].Value = "NATIVE_PERSISTENCE"
+		client.PatchCacheConfiguration(ctx, patches)
+	})
+
 	if cacheCfg.CacheProviderType != "REDIS" {
 		t.Error("expected cache provider type")
-	}
-
-	cacheCfg.CacheProviderType = "NATIVE_PERSISTENCE"
-	if err := client.UpdateCacheConfiguration(ctx, cacheCfg); err != nil {
-		t.Fatal(err)
 	}
 
 }
@@ -62,23 +65,26 @@ func TestMemcachedConfig(t *testing.T) {
 		t.Fatal("expected memcached servers")
 	}
 
-	cacheCfg.MemcachedConfiguration.Servers = "localhost:11222"
-	if err := client.UpdateCacheConfiguration(ctx, cacheCfg); err != nil {
+	patches := []PatchRequest{
+		{
+			Op:    "replace",
+			Path:  "/memcachedConfiguration/servers",
+			Value: "localhost:11222",
+		},
+	}
+
+	cacheCfg, err = client.PatchCacheConfiguration(ctx, patches)
+	if err != nil {
 		t.Fatal(err)
 	}
 
-	cacheCfg, err = client.GetCacheConfiguration(ctx)
-	if err != nil {
-		t.Error(err)
-	}
+	t.Cleanup(func() {
+		patches[0].Value = "localhost:11211"
+		client.PatchCacheConfiguration(ctx, patches)
+	})
 
 	if cacheCfg.MemcachedConfiguration.Servers != "localhost:11222" {
 		t.Fatal("expected updated memcached servers")
-	}
-
-	cacheCfg.MemcachedConfiguration.Servers = "localhost:11211"
-	if err := client.UpdateCacheConfiguration(ctx, cacheCfg); err != nil {
-		t.Fatal(err)
 	}
 
 }
@@ -101,23 +107,26 @@ func TestRedisConfig(t *testing.T) {
 		t.Fatal("expected redis servers")
 	}
 
-	cacheCfg.RedisConfiguration.Servers = "localhost:6389"
-	if err := client.UpdateCacheConfiguration(ctx, cacheCfg); err != nil {
+	patches := []PatchRequest{
+		{
+			Op:    "replace",
+			Path:  "/redisConfiguration/servers",
+			Value: "localhost:11222",
+		},
+	}
+
+	cacheCfg, err = client.PatchCacheConfiguration(ctx, patches)
+	if err != nil {
 		t.Fatal(err)
 	}
 
-	cacheCfg, err = client.GetCacheConfiguration(ctx)
-	if err != nil {
-		t.Error(err)
-	}
+	t.Cleanup(func() {
+		patches[0].Value = "localhost:6379"
+		client.PatchCacheConfiguration(ctx, patches)
+	})
 
 	if cacheCfg.RedisConfiguration.Servers != "localhost:6389" {
 		t.Fatal("expected updated redis servers")
-	}
-
-	cacheCfg.RedisConfiguration.Servers = "localhost:6379"
-	if err := client.UpdateCacheConfiguration(ctx, cacheCfg); err != nil {
-		t.Fatal(err)
 	}
 
 }
@@ -140,23 +149,26 @@ func TestInMemoryCacheConfig(t *testing.T) {
 		t.Fatal("expected different value for put expiration")
 	}
 
-	cacheCfg.InMemoryConfiguration.DefaultPutExpiration = 120
-	if err := client.UpdateCacheConfiguration(ctx, cacheCfg); err != nil {
+	patches := []PatchRequest{
+		{
+			Op:    "replace",
+			Path:  "/inMemoryConfiguration/defaultPutExpiration",
+			Value: 120,
+		},
+	}
+
+	cacheCfg, err = client.PatchCacheConfiguration(ctx, patches)
+	if err != nil {
 		t.Fatal(err)
 	}
 
-	cacheCfg, err = client.GetCacheConfiguration(ctx)
-	if err != nil {
-		t.Error(err)
-	}
+	t.Cleanup(func() {
+		patches[0].Value = 60
+		client.PatchCacheConfiguration(ctx, patches)
+	})
 
 	if cacheCfg.InMemoryConfiguration.DefaultPutExpiration != 120 {
 		t.Fatal("expected updated in-memory cache config servers")
-	}
-
-	cacheCfg.InMemoryConfiguration.DefaultPutExpiration = 60
-	if err := client.UpdateCacheConfiguration(ctx, cacheCfg); err != nil {
-		t.Fatal(err)
 	}
 
 }
@@ -179,23 +191,26 @@ func TestNativePersistenceCacheConfig(t *testing.T) {
 		t.Fatal("expected different value for put expiration")
 	}
 
-	cacheCfg.NativePersistenceConfiguration.DefaultPutExpiration = 120
-	if err := client.UpdateCacheConfiguration(ctx, cacheCfg); err != nil {
+	patches := []PatchRequest{
+		{
+			Op:    "replace",
+			Path:  "/nativePersistenceConfiguration/defaultPutExpiration",
+			Value: 120,
+		},
+	}
+
+	cacheCfg, err = client.PatchCacheConfiguration(ctx, patches)
+	if err != nil {
 		t.Fatal(err)
 	}
 
-	cacheCfg, err = client.GetCacheConfiguration(ctx)
-	if err != nil {
-		t.Error(err)
-	}
+	t.Cleanup(func() {
+		patches[0].Value = 60
+		client.PatchCacheConfiguration(ctx, patches)
+	})
 
 	if cacheCfg.NativePersistenceConfiguration.DefaultPutExpiration != 120 {
 		t.Fatal("expected updated in-memory cache config servers")
-	}
-
-	cacheCfg.NativePersistenceConfiguration.DefaultPutExpiration = 60
-	if err := client.UpdateCacheConfiguration(ctx, cacheCfg); err != nil {
-		t.Fatal(err)
 	}
 
 }

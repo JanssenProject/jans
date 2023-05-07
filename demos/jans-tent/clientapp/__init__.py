@@ -23,46 +23,13 @@ from authlib.integrations.flask_client import OAuth
 from flask import (Flask, jsonify, redirect, render_template, request, session,
                    url_for)
 from . import config as cfg
-from .client_handler import ClientHandler
-import logging
+from .helpers.client_handler import ClientHandler
+from .helpers.cgf_checker import register_client_if_no_client_info
+from .utils.logger import setup_logger
+
+setup_logger()
 
 oauth = OAuth()
-
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='[%(asctime)s] %(levelname)s %(name)s in %(module)s : %(message)s',
-    filename='test-client.log')
-
-'''
-dictConfig({
-    'version': 1,
-    'formatters': {'default': {
-        'format': '[%(asctime)s] %(levelname)s %(name)s in %(module)s %(threadName)s: %(message)s',
-    }},
-    'handlers':
-        {
-        'wsgi': {
-            'class': 'logging.StreamHandler',
-            'stream': 'ext://flask.logging.wsgi_errors_stream',
-            'formatter': 'default'
-            },
-        'file_handler': {
-            'level': 'DEBUG',
-            'filename': 'mylogfile.log',
-            'class': 'logging.FileHandler',
-            'formatter': 'default'
-
-            }
-        },
-
-    'root': {
-        'level': 'DEBUG',
-        'handlers': ['file_handler'],
-        'filename': 'demo.log'
-    }
-
-})
-'''
 
 
 def add_config_from_json():
@@ -99,7 +66,6 @@ def get_provider_host():
 
 def ssl_verify(ssl_verify=cfg.SSL_VERIFY):
     if ssl_verify is False:
-        print("Here!")
         os.environ['CURL_CA_BUNDLE'] = ""
 
 
@@ -108,6 +74,7 @@ class BaseClientErrors(Exception):
 
 
 def create_app():
+    register_client_if_no_client_info()
     add_config_from_json()
     ssl_verify()
 
@@ -121,7 +88,7 @@ def create_app():
             'op',
             server_metadata_url=cfg.SERVER_META_URL,
             client_kwargs={
-                'scope': 'openid profile email'
+                'scope': cfg.SCOPE
             },
             token_endpoint_auth_method=cfg.SERVER_TOKEN_AUTH_METHOD
             )
@@ -142,29 +109,31 @@ def create_app():
         if content is None:
             status = 400
             # message = 'No json data posted'
-        elif 'op_url' and 'client_url' not in content:
+        elif 'op_url' and 'redirect_uris' not in content:
             status = 400
             # message = 'Not needed keys found in json'
         else:
             app.logger.info('Trying to register client %s on %s' %
-                            (content['client_url'], content['op_url']))
+                            (content['redirect_uris'], content['op_url']))
             op_url = content['op_url']
-            client_url = content['client_url']
+            redirect_uris = content['redirect_uris']
 
             op_parsed_url = urlparse(op_url)
-            client_parsed_url = urlparse(client_url)
+            client_parsed_redirect_uri = urlparse(redirect_uris[0])
 
-            if op_parsed_url.scheme != 'https' or client_parsed_url.scheme != 'https':
+            if op_parsed_url.scheme != 'https' or client_parsed_redirect_uri.scheme != 'https':
                 status = 400
 
             elif (((
-                           op_parsed_url.path != '' or op_parsed_url.query != '') or client_parsed_url.path != '') or client_parsed_url.query != ''):
+                           op_parsed_url.path != '' or op_parsed_url.query != '') or client_parsed_redirect_uri.path == '') or client_parsed_redirect_uri.query != ''):
                 status = 400
 
             else:
+                additional_metadata = {}
+                if 'additional_params' in content.keys():
+                    additional_metadata = content['additional_params']
                 client_handler = ClientHandler(
-                    content['op_url'],
-                    content['client_url']
+                   content['op_url'], content['redirect_uris'], additional_metadata
                 )
                 data = client_handler.get_client_dict()
                 status = 200
@@ -232,8 +201,6 @@ def create_app():
             return redirect('/')
 
         except Exception as error:
-            print('exception!')
-            print(error)
             app.logger.error(str(error))
             return {'error': str(error)}, 400
 

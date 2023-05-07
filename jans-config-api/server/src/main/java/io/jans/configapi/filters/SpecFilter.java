@@ -6,12 +6,8 @@
 
 package io.jans.configapi.filters;
 
-
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.Operation;
-import io.swagger.v3.oas.models.media.ArraySchema;
-import io.swagger.v3.oas.models.media.Schema;
-import io.swagger.v3.oas.models.media.MapSchema;
 import io.swagger.v3.oas.models.responses.*;
 import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.core.filter.AbstractSpecFilter;
@@ -35,24 +31,12 @@ public class SpecFilter extends AbstractSpecFilter {
 
                 setRequestExample(operation);
                 setResponseExample(operation);
-            
+
             }
         } catch (Exception ex) {
-            //ex.printStackTrace();
+            // ex.printStackTrace();
         }
         return Optional.of(operation);
-    }
-    
-    @Override
-    public Optional filterSchema(Schema schema, Map params, Map cookies, Map headers){
-      
-        Schema clientAuthMapArraySchema =  new Schema()
-                .description("clientAuthMapArraySchema")
-                .addProperties("children", new MapSchema()
-                .additionalProperties(new ArraySchema().$ref("#/components/schemas/Scope")));
-        schema.addProperty("clientAuthMapArraySchema", clientAuthMapArraySchema);
-        
-        return Optional.of(schema);
     }
 
     private void setRequestExample(Operation operation) {
@@ -69,7 +53,7 @@ public class SpecFilter extends AbstractSpecFilter {
                     }
                 }
             } catch (Exception ex) {
-                //ex.printStackTrace();
+                // ex.printStackTrace();
             }
         }
 
@@ -100,7 +84,7 @@ public class SpecFilter extends AbstractSpecFilter {
                 }
 
             } catch (Exception ex) {
-                //ex.printStackTrace();
+                // ex.printStackTrace();
             }
         }
     }

@@ -498,7 +498,7 @@ jansLevel: 1
 jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansProgLng: python
 jansRevision: 1
-jansScr::%(introspection_introspection_role_based_scope)s
+jansScr::%(introspection_introspection_role_based_scope_introspection_role_based_scope)s
 jansScrTyp: introspection
 
 dn: inum=A110-88AB,ou=scripts,o=jans
@@ -562,21 +562,6 @@ jansProgLng: python
 jansRevision: 1
 jansScr::%(person_authentication_forgot_password_forgot_password)s
 jansScrTyp: person_authentication
-
-dn: inum=CACD-5902,ou=scripts,o=jans
-objectClass: top
-objectClass: jansCustomScr
-description: Scan Token Update Script
-displayName: scan_update_token
-inum: CACD-5902
-jansEnabled: false
-jansLevel: 100
-jansModuleProperty: {"value1":"v1","value2":"v2","description":""}
-jansConfProperty: {"value1":"BILLING_API_URL", "value2":"https://my.billing.api.com/", "hide":false, "description":"URL to billing API"}
-jansRevision: 1
-jansScr::%(update_token_updatetoken)s
-jansScrTyp: update_token
-jansProgLng: python
 
 dn: inum=E706-F8A8,ou=scripts,o=jans
 objectClass: top

@@ -337,7 +337,7 @@ public class ManualSqlEntryManagerTest {
                 String value = (String) props.getProperty(key);
                 
                 if (!key.startsWith("sql")) {
-                	key = "sql." + key;
+                	key = "sql#" + key;
                 }
                 properties.put(key,  value);
             }
