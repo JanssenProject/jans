@@ -279,4 +279,4 @@ jobs:
         cd demos
         for i in $(ls -d */); do zip -r ${i%/}.zip $i && sha256sum ${i%/}.zip > ${i%/}.zip.sha256sum; done
         echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
-        gh release upload ${{ github.event.ref }} demos/*.zip demos/*.sha256sum --clobber
+        gh release upload ${{ github.event.ref }} *.zip *.sha256sum --clobber
