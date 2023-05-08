@@ -274,6 +274,7 @@ nav:
     - Agama:
       - admin/developer/agama/README.md
       - Quick Start Guide: admin/developer/agama/quick-start.md
+      - Quick Start Using Agama Lab: admin/developer/agama/quick-start-using-agama-lab.md
       - Development Lifecycle: admin/developer/agama/lifecycle.md
       - DSL Guide: admin/developer/agama/dsl.md
       - Logging: admin/developer/agama/logging.md
