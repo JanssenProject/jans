@@ -26,6 +26,16 @@
 			<testResource>
 				<directory>src/test/resources</directory>
 				<filtering>true</filtering>
+				<excludes>
+					<exclude>jans_test_client_keys.zip</exclude>
+				</excludes>
+			</testResource>
+			<testResource>
+				<directory>src/test/resources</directory>
+				<filtering>false</filtering>
+				<includes>
+					<include>jans_test_client_keys.zip</include>
+				</includes>
 			</testResource>
 		</testResources>
 

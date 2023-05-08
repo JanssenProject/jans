@@ -20,6 +20,9 @@
 
 		<filters>
 			<filter>profiles/${cfg}/config-build.properties</filter>
+			<filter>${basedir}/profiles/${cfg}/config-oxauth.properties</filter>
+
+			<filter>${basedir}/profiles/${cfg}/config-oxauth-test.properties</filter>
 			<filter>profiles/${cfg}/config-oxauth-test-data.properties</filter>
 		</filters>
 
@@ -47,6 +50,22 @@
 			<testResource>
 				<directory>src/test/resources</directory>
 				<filtering>true</filtering>
+			</testResource>
+			<testResource>
+				<directory>${basedir}/conf</directory>
+				<targetPath>${project.build.directory}/conf</targetPath>
+				<filtering>true</filtering>
+				<excludes>
+					<exclude>keystore.p12</exclude>
+				</excludes>
+			</testResource>
+			<testResource>
+				<directory>${basedir}/conf</directory>
+				<targetPath>${project.build.directory}/conf</targetPath>
+				<filtering>false</filtering>
+				<includes>
+					<include>keystore.p12</include>
+				</includes>
 			</testResource>
 		</testResources>
 
@@ -113,38 +132,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-resources-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>prepare-configuration-files</id>
-						<phase>process-test-resources</phase>
-						<goals>
-							<goal>copy-resources</goal>
-						</goals>
-						<configuration>
-							<outputDirectory>${project.build.directory}/conf</outputDirectory>
-							<resources>
-								<resource>
-									<directory>${basedir}/conf</directory>
-									<filtering>true</filtering>
-									<excludes>
-										<exclude>keystore.p12</exclude>
-									</excludes>
-								</resource>
-								<resource>
-									<directory>${basedir}/conf</directory>
-									<filtering>false</filtering>
-									<includes>
-										<exclude>keystore.p12</exclude>
-									</includes>
-								</resource>
-							</resources>
-							<filters>
-								<filter>${basedir}/profiles/${cfg}/config-oxauth.properties</filter>
-								<filter>${basedir}/profiles/${cfg}/config-oxauth-test.properties</filter>
-							</filters>
-						</configuration>
-					</execution>
-				</executions>
 			</plugin>
 
 			<plugin>
