@@ -29,7 +29,8 @@
 
 		<jackson.version>2.13.2</jackson.version>
 		<jetty.version>11.0.10</jetty.version>
-		<weld.version>4.0.3.Final</weld.version>	
+		<weld.version>4.0.3.Final</weld.version>
+        <jakarta.mail.version>1.6.7</jakarta.mail.version>
 
 		<microprofile.config.version>3.0.1</microprofile.config.version>
 		<microprofile.health.version>4.0</microprofile.health.version>
@@ -229,6 +230,7 @@
 			<dependency>
 				<groupId>com.sun.mail</groupId>
 				<artifactId>jakarta.mail</artifactId>
+				<version>${jakarta.mail.version}</version>
 				<exclusions>
 					<exclusion>
 						<groupId>jakarta.activation</groupId>
