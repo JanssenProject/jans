@@ -531,7 +531,6 @@ public class AppConfiguration implements Configuration {
     private String staticDecryptionKid;
 
 
-
     //oxEleven
     @DocProperty(description = "oxEleven Test Mode Token")
     private String jansElevenTestModeToken;
@@ -827,6 +826,9 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "List of key value date formatters, e.g. 'userinfo: 'yyyy-MM-dd', etc.")
     private Map<String, String> dateFormatterPatterns = new HashMap<>();
+
+    @DocProperty(description = "Defines if Response body will be logged. Default value is false", defaultValue = "false")
+    private Boolean httpLoggingResponseBodyContent = false;
 
     public Map<String, String> getDateFormatterPatterns() {
         return dateFormatterPatterns;
@@ -3168,5 +3170,15 @@ public class AppConfiguration implements Configuration {
 
     public void setBlockWebviewAuthorizationEnabled(Boolean blockWebviewAuthorizationEnabled) {
         this.blockWebviewAuthorizationEnabled = blockWebviewAuthorizationEnabled;
+    }
+
+    public Boolean getHttpLoggingResponseBodyContent() {
+        if (httpLoggingResponseBodyContent == null)
+            httpLoggingResponseBodyContent = false;
+        return httpLoggingResponseBodyContent;
+    }
+
+    public void setHttpLoggingResponseBodyContent(Boolean httpLoggingResponseBodyContent) {
+        this.httpLoggingResponseBodyContent = httpLoggingResponseBodyContent;
     }
 }
