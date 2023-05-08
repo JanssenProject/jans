@@ -7857,19 +7857,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        adminCanAccess:
+        adminCanEdit:
           type: boolean
         adminCanView:
           type: boolean
-        adminCanEdit:
+        adminCanAccess:
           type: boolean
         userCanAccess:
+          type: boolean
+        userCanEdit:
           type: boolean
         userCanView:
           type: boolean
         whitePagesCanView:
-          type: boolean
-        userCanEdit:
           type: boolean
         baseDn:
           type: string
@@ -8366,6 +8366,8 @@ components:
         jansElevenDeleteKeyEndpoint:
           type: string
         introspectionAccessTokenMustHaveUmaProtectionScope:
+          type: boolean
+        introspectionAccessTokenMustHaveIntrospectionScope:
           type: boolean
         introspectionSkipAuthorization:
           type: boolean
@@ -9214,17 +9216,6 @@ components:
           format: int32
         displayName:
           type: string
-        authenticationMethod:
-          type: string
-          enum:
-          - client_secret_basic
-          - client_secret_post
-          - client_secret_jwt
-          - private_key_jwt
-          - access_token
-          - tls_client_auth
-          - self_signed_tls_client_auth
-          - none
         allAuthenticationMethods:
           uniqueItems: true
           type: array
@@ -9239,6 +9230,17 @@ components:
             - tls_client_auth
             - self_signed_tls_client_auth
             - none
+        authenticationMethod:
+          type: string
+          enum:
+          - client_secret_basic
+          - client_secret_post
+          - client_secret_jwt
+          - private_key_jwt
+          - access_token
+          - tls_client_auth
+          - self_signed_tls_client_auth
+          - none
         baseDn:
           type: string
         inum:
@@ -9346,10 +9348,10 @@ components:
           type: array
           items:
             type: object
-        displayValue:
-          type: string
         value:
           type: object
+        displayValue:
+          type: string
     LocalizedString:
       type: object
       properties:
@@ -9593,14 +9595,14 @@ components:
           type: boolean
         internal:
           type: boolean
+        locationPath:
+          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
-        locationPath:
-          type: string
         baseDn:
           type: string
     ScriptError:
