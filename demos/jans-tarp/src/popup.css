@@ -130,6 +130,12 @@ label.light {
   color: red;
 }
 
+.warningAlert {
+  padding: 20px;
+  background-color: #f44336;
+  color: white;
+}
+
 @media screen and (min-width: 480px) {
 
   form {

@@ -19,10 +19,11 @@ const qs = require('qs');
     });
 
     if (!isEmpty(loginDetails) && Object.keys(JSON.parse(loginDetails)).length !== 0) {
-      trigCodeFlowButton()
-    } else {
-      checkDB();
+      logout()
+      //trigCodeFlowButton()
     }
+    checkDB();
+
   }
 
   async function checkDB() {
@@ -56,6 +57,52 @@ const qs = require('qs');
     });
   }
 
+  function customLaunchWebAuthFlow(options, callback) {
+    var requestId = Math.random().toString(36).substring(2);
+    var authUrl = options.url + "&state=" + requestId;
+    chrome.tabs.create({ url: authUrl }, function (tab) {
+      var intervalId = setInterval(function () {
+        chrome.tabs.get(tab.id, function (currentTab) {
+          if (!currentTab) {
+            clearInterval(intervalId);
+            chrome.tabs.remove(tab.id);
+            callback(undefined, new Error('Authorization tab was closed.'));
+          }
+        });
+      }, 1000);
+
+      chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+        if (!!chrome.runtime.lastError) {
+          chrome.tabs.remove(tabId);
+          callback(undefined, chrome.runtime.lastError);
+        }
+        if (tabId === tab.id && changeInfo.status === "complete") {
+          chrome.tabs.sendMessage(tab.id, { requestId: requestId }, function (response) {
+            /*if (!!chrome.runtime.lastError) {
+              chrome.tabs.remove(tab.id);
+              callback(undefined, chrome.runtime.lastError);
+            }*/
+            clearInterval(intervalId);
+            chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
+              let url = tabs[0].url;
+              /*if (!!chrome.runtime.lastError) {
+                chrome.tabs.remove(tab.id);
+                callback(undefined, chrome.runtime.lastError);
+              }*/
+              const urlParams = new URLSearchParams(new URL(url).search)
+              const code = urlParams.get('code')
+              if (code != null) {
+                callback(url, undefined);
+                chrome.tabs.remove(tab.id);
+              }
+            });
+          });
+        }
+        //chrome.tabs.onUpdated.removeListener(tabUpdatedListener);
+      })
+    });
+  }
+
   async function trigCodeFlowButton() {
 
     const redirectUrl = chrome.identity.getRedirectURL()/*chrome.runtime.getURL('redirect.html')*/
@@ -80,8 +127,25 @@ const qs = require('qs');
             authzUrl += `&${key}=${additionalParamJSON[key]}`
           });
         }
-        console.log('Obtained autorization URL: '+authzUrl)
+        console.log('Obtained autorization URL: ' + authzUrl)
+
         const resultUrl = await new Promise((resolve, reject) => {
+          customLaunchWebAuthFlow({
+            url: authzUrl
+          }, (callbackUrl, error) => {
+            if (!!error) {
+              console.error('Error in executing auth url: ', error)
+              hideDiv(['loadingDiv'])
+              logout()
+              reject(error)
+            } else {
+              console.log('Callback Url: ', callbackUrl)
+              resolve(callbackUrl);
+            }
+          });
+        });
+
+        /*const resultUrl = await new Promise((resolve, reject) => {
           chrome.identity.launchWebAuthFlow({
             url: authzUrl,
             interactive: true
@@ -89,7 +153,7 @@ const qs = require('qs');
             console.log('Callback Url: ', callbackUrl)
             resolve(callbackUrl);
           });
-        });
+        });*/
 
         //chrome.windows.create({url: redirectUrl,focused: true, incognito: true});
 
@@ -169,7 +233,7 @@ const qs = require('qs');
         });
       });
 
-      const openidConfiguration = await new Promise((resolve, reject) => { chrome.storage.local.get(["opConfiguration"], (result) => { resolve(JSON.stringify(result)); })});
+      const openidConfiguration = await new Promise((resolve, reject) => { chrome.storage.local.get(["opConfiguration"], (result) => { resolve(JSON.stringify(result)); }) });
 
       chrome.storage.local.remove(["loginDetails"], function () {
         var error = chrome.runtime.lastError;
