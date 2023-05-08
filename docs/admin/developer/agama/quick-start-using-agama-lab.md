@@ -1,3 +1,11 @@
+---
+tags:
+  - administration
+  - developer
+  - agama
+  - agama lab
+---
+
 # Quick Start Using Agama Lab
 
 In this quick start guide, we will build, deploy and test a simple password-based authentication flow using
