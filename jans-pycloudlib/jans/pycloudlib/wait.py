@@ -96,20 +96,20 @@ def get_wait_interval() -> int:
 def on_backoff(details: Details) -> None:
     """Emit logs automatically when error is thrown while running a backoff-decorated function."""
     error = sys.exc_info()[1]
-    label = details["kwargs"].pop("label", "Service")
+    label = details["kwargs"].get("label") or "Service"
     logger.warning(f"{label} is not ready; reason={error}; retrying in {details['wait']:0.1f} seconds")
 
 
 def on_success(details: Details) -> None:
     """Emit logs automatically when there's no error while running a backoff-decorated function."""
-    label = details["kwargs"].pop("label", "Service")
+    label = details["kwargs"].get("label") or "Service"
     logger.info(f"{label} is ready")
 
 
 def on_giveup(details: Details) -> None:
     """Emit logs automatically when a backoff-decorated function exceeds allowed retries."""
-    label = details["kwargs"].pop("label", "Service")
-    logger.error(f"{label} is not ready after {details['elapsed']:0.1f}")
+    label = details["kwargs"].get("label") or "Service"
+    logger.error(f"{label} is not ready after {details['elapsed']:0.1f} seconds")
 
 
 retry_on_exception = backoff.on_exception(
