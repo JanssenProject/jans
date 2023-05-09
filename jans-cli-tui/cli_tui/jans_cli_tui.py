@@ -325,7 +325,27 @@ class JansCliApp(Application):
                 test_client=test_client
             )
 
+        print(_("Checking health of Jans Config Api Server"))
+        response = self.cli_requests({'operation_id': 'get-config-health'})
+
+        if response.status_code != 200:
+            print(_("Jans Config Api Server is not running propery"))
+            print(response.text)
+            sys.exit()
+        else:
+            result = response.json()
+            for healt_status in result:
+                if healt_status['status'] != 'UP':
+                    print(_("Jans Config Api Server is not running propery"))
+                    print(healt_status)
+                    sys.exit()
+
+        print(_("Health of Jans Config Api Server seems good"))
+
         status = self.cli_object.check_connection()
+
+
+
 
         self.invalidate()
 
