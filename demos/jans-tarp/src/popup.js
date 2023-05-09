@@ -19,10 +19,10 @@ const qs = require('qs');
     });
 
     if (!isEmpty(loginDetails) && Object.keys(JSON.parse(loginDetails)).length !== 0) {
-      trigCodeFlowButton()
-    } else {
-      checkDB();
+      logout()
     }
+    checkDB();
+
   }
 
   async function checkDB() {
@@ -56,6 +56,44 @@ const qs = require('qs');
     });
   }
 
+  function customLaunchWebAuthFlow(options, callback) {
+    var requestId = Math.random().toString(36).substring(2);
+    var authUrl = options.url + "&state=" + requestId;
+    chrome.tabs.create({ url: authUrl }, function (tab) {
+      var intervalId = setInterval(function () {
+        chrome.tabs.get(tab.id, function (currentTab) {
+          if (!currentTab) {
+            clearInterval(intervalId);
+            chrome.tabs.remove(tab.id);
+            callback(undefined, new Error('Authorization tab was closed.'));
+          }
+        });
+      }, 1000);
+
+      chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+        if (!!chrome.runtime.lastError) {
+          chrome.tabs.remove(tabId);
+          callback(undefined, chrome.runtime.lastError);
+        }
+        if (tabId === tab?.id && changeInfo?.status === "complete") {
+          chrome.tabs.sendMessage(tab.id, { requestId: requestId }, function (response) {
+            clearInterval(intervalId);
+            chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
+              let url = tabs[0].url;
+              const urlParams = new URLSearchParams(new URL(url).search)
+              const code = urlParams.get('code')
+              if (code != null) {
+                callback(url, undefined);
+                chrome.tabs.remove(tab.id);
+              }
+            });
+          });
+        }
+        //chrome.tabs.onUpdated.removeListener(tabUpdatedListener);
+      })
+    });
+  }
+
   async function trigCodeFlowButton() {
 
     const redirectUrl = chrome.identity.getRedirectURL()/*chrome.runtime.getURL('redirect.html')*/
@@ -65,7 +103,7 @@ const qs = require('qs');
           '?scope=' + `${result.oidcClient.scope[0]}+profile` +
           '&acr_values=' + result.oidcClient.acr_values[0] +
           '&response_type=' + result.oidcClient.response_type[0] +
-          '&redirect_uri=' + redirectUrl +//result.oidcClient.redirect_uri[0] +
+          '&redirect_uri=' + redirectUrl +
           '&client_id=' + result.oidcClient.client_id +
           '&state=' + uuidv4() +
           '&nonce=' + uuidv4();
@@ -80,18 +118,23 @@ const qs = require('qs');
             authzUrl += `&${key}=${additionalParamJSON[key]}`
           });
         }
-        console.log('Obtained autorization URL: '+authzUrl)
+        console.log('Obtained autorization URL: ' + authzUrl)
+
         const resultUrl = await new Promise((resolve, reject) => {
-          chrome.identity.launchWebAuthFlow({
-            url: authzUrl,
-            interactive: true
-          }, callbackUrl => {
-            console.log('Callback Url: ', callbackUrl)
-            resolve(callbackUrl);
+          customLaunchWebAuthFlow({
+            url: authzUrl
+          }, (callbackUrl, error) => {
+            if (!!error) {
+              console.error('Error in executing auth url: ', error)
+              hideDiv(['loadingDiv'])
+              logout()
+              reject(error)
+            } else {
+              console.log('Callback Url: ', callbackUrl)
+              resolve(callbackUrl);
+            }
           });
         });
-
-        //chrome.windows.create({url: redirectUrl,focused: true, incognito: true});
 
         if (resultUrl) {
           showDiv(['loadingDiv'])
@@ -169,7 +212,7 @@ const qs = require('qs');
         });
       });
 
-      const openidConfiguration = await new Promise((resolve, reject) => { chrome.storage.local.get(["opConfiguration"], (result) => { resolve(JSON.stringify(result)); })});
+      const openidConfiguration = await new Promise((resolve, reject) => { chrome.storage.local.get(["opConfiguration"], (result) => { resolve(JSON.stringify(result)); }) });
 
       chrome.storage.local.remove(["loginDetails"], function () {
         var error = chrome.runtime.lastError;
@@ -199,7 +242,7 @@ const qs = require('qs');
       var registerObj = {}
       registerObj.issuer = issuer
 
-      registerObj.redirect_uris =  /*[chrome.runtime.getURL('redirect.html')]*/[chrome.identity.getRedirectURL()]//[redirectUri]
+      registerObj.redirect_uris = [chrome.identity.getRedirectURL()]
       registerObj.default_acr_values = [acrValues]
       registerObj.additionalParam = additionalParam
       registerObj.scope = [scope, 'profile']
@@ -269,7 +312,6 @@ const qs = require('qs');
       console.error(err)
       return { result: "error", message: "Error in registration!" };
     }
-    //chrome.windows.create({url: "https://admin-ui-test.gluu.org/jans-auth/authorize.htm?scope=openid+profile+user_name+email&acr_values=basic&response_type=code&redirect_uri=https%3A%2F%2Fadmin-ui-test.gluu.org%2Fadmin&state=07adc860-5ce8-4516-a15f-65f8c5b9a882&nonce=bf92bede-c1c4-43da-9cb0-83b14ecdb467&client_id=2001.bfd15f73-96cf-4ac7-a066-32c78d516c16",focused: true, incognito: true});
   }
 
   async function registerOIDCClient(registration_endpoint, registerObj) {
