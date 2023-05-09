@@ -191,7 +191,6 @@ jobs:
           ${{github.workspace}}/jans-cli-tui/jans-cli-tui-linux-ubuntu-X86-64.pyz
           ${{github.workspace}}/jans-cli-tui/jans-cli-tui-linux-ubuntu-X86-64.pyz.sha256sum
         key: ${{ github.sha }}
-
   upload_python_packages:
     needs: build_python_packages
     runs-on: ubuntu-20.04
@@ -267,3 +266,18 @@ jobs:
         asset_name: ${{ env.TUI_PREFIX }}-${{ matrix.name }}-X86-64.pyz.sha256sum
         tag: ${{ steps.previoustag.outputs.tag }}
         overwrite: true
+  build_demo_packages:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Build with Ubuntu
+      continue-on-error: true
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y zip       
+        cd demos
+        for i in $(ls -d */); do zip -r ${i%/}.zip $i && sha256sum ${i%/}.zip > ${i%/}.zip.sha256sum; done
+        echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
+        VER=$(echo ${{ github.event.ref }} | cut -d '/' -f 3)
+        gh release upload $VER *.zip *.sha256sum --clobber
