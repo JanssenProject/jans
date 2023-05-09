@@ -20,7 +20,6 @@ const qs = require('qs');
 
     if (!isEmpty(loginDetails) && Object.keys(JSON.parse(loginDetails)).length !== 0) {
       logout()
-      //trigCodeFlowButton()
     }
     checkDB();
 
@@ -76,19 +75,11 @@ const qs = require('qs');
           chrome.tabs.remove(tabId);
           callback(undefined, chrome.runtime.lastError);
         }
-        if (tabId === tab.id && changeInfo.status === "complete") {
+        if (tabId === tab?.id && changeInfo?.status === "complete") {
           chrome.tabs.sendMessage(tab.id, { requestId: requestId }, function (response) {
-            /*if (!!chrome.runtime.lastError) {
-              chrome.tabs.remove(tab.id);
-              callback(undefined, chrome.runtime.lastError);
-            }*/
             clearInterval(intervalId);
             chrome.tabs.query({ active: true, lastFocusedWindow: true }, tabs => {
               let url = tabs[0].url;
-              /*if (!!chrome.runtime.lastError) {
-                chrome.tabs.remove(tab.id);
-                callback(undefined, chrome.runtime.lastError);
-              }*/
               const urlParams = new URLSearchParams(new URL(url).search)
               const code = urlParams.get('code')
               if (code != null) {
@@ -112,7 +103,7 @@ const qs = require('qs');
           '?scope=' + `${result.oidcClient.scope[0]}+profile` +
           '&acr_values=' + result.oidcClient.acr_values[0] +
           '&response_type=' + result.oidcClient.response_type[0] +
-          '&redirect_uri=' + redirectUrl +//result.oidcClient.redirect_uri[0] +
+          '&redirect_uri=' + redirectUrl +
           '&client_id=' + result.oidcClient.client_id +
           '&state=' + uuidv4() +
           '&nonce=' + uuidv4();
@@ -144,18 +135,6 @@ const qs = require('qs');
             }
           });
         });
-
-        /*const resultUrl = await new Promise((resolve, reject) => {
-          chrome.identity.launchWebAuthFlow({
-            url: authzUrl,
-            interactive: true
-          }, callbackUrl => {
-            console.log('Callback Url: ', callbackUrl)
-            resolve(callbackUrl);
-          });
-        });*/
-
-        //chrome.windows.create({url: redirectUrl,focused: true, incognito: true});
 
         if (resultUrl) {
           showDiv(['loadingDiv'])
@@ -263,7 +242,7 @@ const qs = require('qs');
       var registerObj = {}
       registerObj.issuer = issuer
 
-      registerObj.redirect_uris =  /*[chrome.runtime.getURL('redirect.html')]*/[chrome.identity.getRedirectURL()]//[redirectUri]
+      registerObj.redirect_uris = [chrome.identity.getRedirectURL()]
       registerObj.default_acr_values = [acrValues]
       registerObj.additionalParam = additionalParam
       registerObj.scope = [scope, 'profile']
@@ -333,7 +312,6 @@ const qs = require('qs');
       console.error(err)
       return { result: "error", message: "Error in registration!" };
     }
-    //chrome.windows.create({url: "https://admin-ui-test.gluu.org/jans-auth/authorize.htm?scope=openid+profile+user_name+email&acr_values=basic&response_type=code&redirect_uri=https%3A%2F%2Fadmin-ui-test.gluu.org%2Fadmin&state=07adc860-5ce8-4516-a15f-65f8c5b9a882&nonce=bf92bede-c1c4-43da-9cb0-83b14ecdb467&client_id=2001.bfd15f73-96cf-4ac7-a066-32c78d516c16",focused: true, incognito: true});
   }
 
   async function registerOIDCClient(registration_endpoint, registerObj) {

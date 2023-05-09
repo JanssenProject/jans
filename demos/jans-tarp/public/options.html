@@ -14,12 +14,11 @@
   <div>
     <div id="registerForm">
       <div id="box">
-        <h1> Gluu's RP </h1>
+        <div><img src="./icons/JansTarp.png" /></div>
 
-        <fieldset>
+        <fieldset id="box">
+          <legend><span class="number">O</span> Register OIDC Client</legend>
           <legend><span class="error" id="errorSpanTop"></span></legend>
-
-          <legend><span class="number">=></span> Register OIDC Client</legend>
 
           <label for="issuer"><b>Issuer:</b><span class="required">*</span></label>
           <input type="text" id="issuer" name="issuer" placeholder="e.g. https://<op-host>" autocomplete="off" required>
@@ -45,10 +44,12 @@
       </div>
     </div>
     <div id="oidcClientDetails" style="display:none">
-      <div id="box">
-        <fieldset>
 
-          <legend><span class="number">=></span> Registered Client</legend>
+      <div id="box">
+        <div><img src="./icons/JansTarp.png" /></div>
+        <fieldset id="box">
+
+          <legend><span class="number">O</span> Registered Client</legend>
 
           <label for="issuer"><b>OP Host:</b></label>
           <input type="text" id="opHost" name="opHost" disabled>
@@ -65,14 +66,13 @@
     </div>
     <div id="userDetailsDiv" style="display:none">
       <div id="box">
-        <fieldset>
+        <div><img src="./icons/JansTarp.png" /></div>
+        <fieldset id="box">
           <div class="w3-panel w3-pale-yellow w3-border">
             <strong>Note!</strong> The extension will clear session on closing the tab or on opening the extension
             again.
             <br />
           </div>
-        </fieldset>
-        <fieldset>
           <legend><span class="number">=></span> User Details:</legend>
           <hr />
           <span id="userDetailsSpan"></span>
