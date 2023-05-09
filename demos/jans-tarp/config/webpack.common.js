@@ -2,7 +2,6 @@
 
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-
 const PATHS = require('./paths');
 
 // used in the module rules and in the stats exlude list
@@ -49,17 +48,17 @@ const common = {
     ],
   },
   resolve: {
-    fallback: { 
-    "fs": false,
-    "tls": false,
-    "net": false,
-    "path": false,
-    "zlib": false,
-    "http": false,
-    "https": require.resolve('https-browserify'),
-    "stream": false,
-    "crypto": require.resolve('crypto-browserify'),
-     },
+    fallback: {
+      "fs": false,
+      "tls": false,
+      "net": false,
+      "path": false,
+      "zlib": false,
+      "http": false,
+      "https": require.resolve('https-browserify'),
+      "stream": require.resolve("stream-browserify"),
+      "crypto": require.resolve('crypto-browserify')
+    },
   },
   plugins: [
     // Copy static assets from `public` folder to `build` folder
@@ -74,7 +73,7 @@ const common = {
     // Extract CSS into separate files
     new MiniCssExtractPlugin({
       filename: '[name].css',
-    }),
+    })
   ],
 };
 
