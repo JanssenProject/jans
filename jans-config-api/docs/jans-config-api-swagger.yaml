@@ -8471,6 +8471,8 @@ components:
           type: boolean
         refreshTokenExtendLifetimeOnRotation:
           type: boolean
+        allowBlankValuesInDiscoveryResponse:
+          type: boolean
         checkUserPresenceOnRefreshToken:
           type: boolean
         consentGatheringScriptBackwardCompatibility:

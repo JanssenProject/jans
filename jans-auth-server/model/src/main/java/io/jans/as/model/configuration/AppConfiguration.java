@@ -687,6 +687,9 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Boolean value specifying whether to extend refresh tokens on rotation", defaultValue = "false")
     private Boolean refreshTokenExtendLifetimeOnRotation = false;
 
+    @DocProperty(description = "Boolean value specifying whether to allow blank values in discovery response", defaultValue = "false")
+    private Boolean allowBlankValuesInDiscoveryResponse;
+
     @DocProperty(description = "Check whether user exists and is active before creating RefreshToken. Set it to true if check is needed(Default value is false - don't check.", defaultValue = "false")
     private Boolean checkUserPresenceOnRefreshToken = false;
 
@@ -1036,6 +1039,15 @@ public class AppConfiguration implements Configuration {
 
     public void setRefreshTokenExtendLifetimeOnRotation(Boolean refreshTokenExtendLifetimeOnRotation) {
         this.refreshTokenExtendLifetimeOnRotation = refreshTokenExtendLifetimeOnRotation;
+    }
+
+    public Boolean getAllowBlankValuesInDiscoveryResponse() {
+        if (allowBlankValuesInDiscoveryResponse == null) allowBlankValuesInDiscoveryResponse = false;
+        return allowBlankValuesInDiscoveryResponse;
+    }
+
+    public void setAllowBlankValuesInDiscoveryResponse(Boolean allowBlankValuesInDiscoveryResponse) {
+        this.allowBlankValuesInDiscoveryResponse = allowBlankValuesInDiscoveryResponse;
     }
 
     public int getSectorIdentifierCacheLifetimeInMinutes() {
