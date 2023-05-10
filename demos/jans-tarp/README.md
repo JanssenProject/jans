@@ -1,4 +1,4 @@
-# <img src="public/icons/icon_48.png" width="45" align="left"> Gluu.oidc.rp
+# <img src="public/icons/icon_48.png" width="45" align="left"> jans-tarp
 
 ## Relying Party tool in form of a Chrome Extension. 
 
