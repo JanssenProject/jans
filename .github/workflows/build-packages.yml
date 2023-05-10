@@ -278,8 +278,8 @@ jobs:
         sudo apt-get install -y zip       
         cd demos
         VER=$(echo ${{ github.event.ref }} | cut -d '/' -f 3)
-        for i in $(ls -d */); do zip -r ${i%/}.zip $i && sha256sum ${i%/}-$VER-source.zip > ${i%/}-$VER-source.zip.sha256sum; done
-        sudo rm jans-tarp-$VER-source.zip jans-tarp-$VER-source.zip.sha256sum
+        for i in $(ls -d */); do zip -r demo-${i%/}-$VER-source.zip $i && sha256sum demo-${i%/}-$VER-source.zip > demo-${i%/}-$VER-source.zip.sha256sum; done
+        sudo rm demo-jans-tarp-$VER-source.zip demo-jans-tarp-$VER-source.zip.sha256sum
         cd jans-tarp
         npm install
         npm run build
