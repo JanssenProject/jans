@@ -29,7 +29,7 @@ For this quick start we will use a [single node Kubernetes install in docker wit
     ```
 5. Head to `https://<VM-IP-ADDRESS-FROM-FIRST-STEP>` and log in with the username `admin` and the password from the previous step. If you are logging into Rancher for the first time, you'll need to enter just the password, and on the next step, Rancher will ask you to reset your current password.
 6. Next you'll see the Rancher home page with a list of existing clusters. By default, the name of the newly created cluster would be `local`. Click on the cluster name to go to the dashboard.
-7. From the top-left menu expand `Apps & Marketplace` and click `charts`.
+7. From the top-left menu expand `Apps` and click `Charts`.
 8. Search for `Gluu` and begin your installation.
 9. During Step 1 of installation, be sure to select the `Customize Helm options before install` options.
 10. In Step 2, customize the settings for the Janssen installation. Specifically `Optional Services` from where you can enable Janssen modules.
