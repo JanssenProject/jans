@@ -12,8 +12,7 @@ Docker image packaging for config-api.
 
 ## Versions
 
-See [Releases](https://github.com/JanssenProject/docker-jans-config-api/releases) for stable versions.
-For bleeding-edge/unstable version, use `janssenproject/config-api:1.0.13_dev`.
+See [Packages](https://github.com/orgs/JanssenProject/packages/container/package/jans%2Fconfig-api) for available versions.
 
 ## Environment Variables
 
