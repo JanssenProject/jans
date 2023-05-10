@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.0.13](https://github.com/JanssenProject/jans/compare/jans-config-api-v1.0.12...jans-config-api-v1.0.13) (2023-05-10)
+
+
+### Features
+
+* **jans-fido2:** interception scripts issue 1485, swagger updates ([#4543](https://github.com/JanssenProject/jans/issues/4543)) ([80274ff](https://github.com/JanssenProject/jans/commit/80274ffd1a20318988d9cc99ee015c5c7d5984b7))
+
+
+### Bug Fixes
+
+* **config-api:** starup issue realted to mail service ([#4853](https://github.com/JanssenProject/jans/issues/4853)) ([6aad8c9](https://github.com/JanssenProject/jans/commit/6aad8c9adf1c00feac6a94e8f5c06e5b22f61c14))
+* jans-config-api/plugins/sample/demo/pom.xml to reduce vulnerabilities ([#4037](https://github.com/JanssenProject/jans/issues/4037)) ([e079b28](https://github.com/JanssenProject/jans/commit/e079b283c0ccbcf768349d3ed80668109e9b7ab2))
+* jans-config-api/plugins/sample/helloworld/pom.xml to reduce vulnerabilities ([#4039](https://github.com/JanssenProject/jans/issues/4039)) ([e0687f2](https://github.com/JanssenProject/jans/commit/e0687f22df61782c326a149930d94e93d5aaf676))
+* prepare for 1.0.13 release ([493478e](https://github.com/JanssenProject/jans/commit/493478e71f6231553c998b48c0f163c7f5869da4))
+* set appropriate redirect_uris for registration in DCR using ssa (admin-ui)[#4748](https://github.com/JanssenProject/jans/issues/4748) ([#4749](https://github.com/JanssenProject/jans/issues/4749)) ([749f66b](https://github.com/JanssenProject/jans/commit/749f66b2290d57d49c43481498f1515243a78495))
+
 ## [1.0.12](https://github.com/JanssenProject/jans/compare/jans-config-api-v1.0.11...jans-config-api-v1.0.12) (2023-04-18)
 
 
