@@ -15,6 +15,7 @@ tags:
 | activeSessionAuthorizationScope | Authorization Scope for active session | [Details](#activesessionauthorizationscope) |
 | agamaConfiguration | Engine Config which offers an alternative way to build authentication flows in Janssen server | [Details](#agamaconfiguration) |
 | allowAllValueForRevokeEndpoint | Boolean value true allow all value for revoke endpoint | [Details](#allowallvalueforrevokeendpoint) |
+| allowBlankValuesInDiscoveryResponse | Boolean value specifying whether to allow blank values in discovery response | [Details](#allowblankvaluesindiscoveryresponse) |
 | allowEndSessionWithUnmatchedSid | default value false. If true, sid check will be skipped | [Details](#allowendsessionwithunmatchedsid) |
 | allowIdTokenWithoutImplicitGrantType | Specifies if a token without implicit grant types is allowed | [Details](#allowidtokenwithoutimplicitgranttype) |
 | allowPostLogoutRedirectWithoutValidation | Allows post-logout redirect without validation for the End Session endpoint (still AS validates it against clientWhiteList url pattern property) | [Details](#allowpostlogoutredirectwithoutvalidation) |
@@ -313,6 +314,15 @@ tags:
 ### allowAllValueForRevokeEndpoint
 
 - Description: Boolean value true allow all value for revoke endpoint
+
+- Required: No
+
+- Default value: false
+
+
+### allowBlankValuesInDiscoveryResponse
+
+- Description: Boolean value specifying whether to allow blank values in discovery response
 
 - Required: No
 
