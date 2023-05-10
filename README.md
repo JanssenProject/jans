@@ -96,7 +96,7 @@ A BIG thanks to all the amazing contributors!! 👏 👏
 There are many ways you can contribute. Of course, you can contribute code. But we also need people to write documentation and guides, to help us with testing, to answer questions on the forums and chat, to review PRs, to help us with devops and CI/CD, to provide feedback on usability, and to promote the project through outreach. Also, by sharing metrics with us, we can gain valuable insights into how the software performs in the wild.
 
 <a href="https://digitalpublicgoods.net/">
-  <img src="https://github.com/JanssenProject/jans/blob/docs-add-dpg-info-to-README/docs/assets/DPGA_color_logo.png" alt="DPGA" width="113"/>
+  <img src="https://github.com/JanssenProject/jans/blob/main/docs/assets/DPGA_color_logo.png" alt="DPGA" width="113"/>
 </a>
 
 The Janssen Project community takes immense pride in the fact that Janssen Project is [recognized as a digital public good (DPG)](https://app.digitalpublicgoods.net/a/10470) by [Digital Public Good Alliance](https://digitalpublicgoods.net/). This is a validation of our social and global impact on millions of people. Today, countries and communities globally use Janssen Project to create affordable and accessible digital identity infrastructure. Please read the [announcement](https://www.linkedin.com/pulse/linux-foundation-janssen-project-recognized-digital-public/) to know more. 
