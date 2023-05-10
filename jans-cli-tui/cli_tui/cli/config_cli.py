@@ -710,7 +710,8 @@ class JCA_CLI:
         return True, ''
 
     def get_access_token(self, scope):
-        if self.my_op_mode != 'auth':
+
+        if self.my_op_mode != 'auth' and scope:
             if self.use_test_client:
                 self.get_scoped_access_token(scope)
             elif not self.access_token and not self.wrapped:
@@ -801,6 +802,7 @@ class JCA_CLI:
             sys.stderr.write("Please wait while retrieving data ...\n")
 
         security = self.get_scope_for_endpoint(endpoint)
+
         self.get_access_token(security)
 
         headers=self.get_request_header({'Accept': 'application/json'})
