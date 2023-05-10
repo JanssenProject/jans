@@ -275,7 +275,7 @@ jobs:
       continue-on-error: true
       run: |
         sudo apt-get update
-        sudo apt-get install -y zip       
+        sudo apt-get install -y zip
         cd demos
         VER=$(echo ${{ github.event.ref }} | cut -d '/' -f 3)
         for i in $(ls -d */); do zip -r demo-${i%/}-$VER-source.zip $i && sha256sum demo-${i%/}-$VER-source.zip > demo-${i%/}-$VER-source.zip.sha256sum; done
@@ -284,7 +284,7 @@ jobs:
         npm install
         npm run build
         npm run pack
-        mv ./release/* ../../
+        mv ./release/jans-tarp-*.zip ../demo-jans-tarp-$VER.zip
         cd ..
         
         echo "${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" | gh auth login --with-token
