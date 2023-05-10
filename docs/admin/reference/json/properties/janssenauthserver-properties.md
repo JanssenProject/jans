@@ -127,7 +127,7 @@ tags:
 | grantTypesSupported | This list details which OAuth 2.0 grant types are supported by this OP | [Details](#granttypessupported) |
 | httpLoggingEnabled | Enable/disable request/response logging filter | [Details](#httploggingenabled) |
 | httpLoggingExcludePaths | This list details the base URIs for which the request/response logging filter will not record activity | [Details](#httploggingexcludepaths) |
-| httpLoggingResponseBodyContent | Defines if Response body will be logged, applied just if 'httpLoggingEnabled' is true and 'loggingLevel' is 'DEBUG', use 'httpLoggingExcludePaths' to avoid logging of unnecessary responses like ('/jans-auth/js/platform.js','/jans-auth/stylesheet/style.css'). Default value is false | [Details](#httploggingresponsebodycontent) |
+| httpLoggingResponseBodyContent | Defines if Response body will be logged. Default value is false | [Details](#httploggingresponsebodycontent) |
 | idGenerationEndpoint | ID Generation endpoint URL | [Details](#idgenerationendpoint) |
 | idTokenEncryptionAlgValuesSupported | A list of the JWE encryption algorithms (alg values) supported by the OP for the ID Token to encode the Claims in a JWT | [Details](#idtokenencryptionalgvaluessupported) |
 | idTokenEncryptionEncValuesSupported | A list of the JWE encryption algorithms (enc values) supported by the OP for the ID Token to encode the Claims in a JWT | [Details](#idtokenencryptionencvaluessupported) |
@@ -137,6 +137,7 @@ tags:
 | idTokenTokenBindingCnfValuesSupported | Array containing a list of the JWT Confirmation Method member names supported by the OP for Token Binding of ID Tokens. The presence of this parameter indicates that the OpenID Provider supports Token Binding of ID Tokens. If omitted, the default is that the OpenID Provider does not support Token Binding of ID Tokens | [Details](#idtokentokenbindingcnfvaluessupported) |
 | imgLocation | The location for image files | [Details](#imglocation) |
 | includeSidInResponse | Boolean value specifying whether to include sessionId in response | [Details](#includesidinresponse) |
+| introspectionAccessTokenMustHaveIntrospectionScope | If True, rejects introspection requests if access_token does not have the 'introspection' scope in its authorization header. Comparing to 'uma_protection', 'introspection' scope is not allowed for dynamic registration' | [Details](#introspectionaccesstokenmusthaveintrospectionscope) |
 | introspectionAccessTokenMustHaveUmaProtectionScope | If True, rejects introspection requests if access_token does not have the uma_protection scope in its authorization header | [Details](#introspectionaccesstokenmusthaveumaprotectionscope) |
 | introspectionEndpoint | Introspection endpoint URL | [Details](#introspectionendpoint) |
 | introspectionResponseScopesBackwardCompatibility | Boolean value specifying introspection response backward compatibility mode | [Details](#introspectionresponsescopesbackwardcompatibility) |
@@ -1328,7 +1329,7 @@ tags:
 
 ### httpLoggingResponseBodyContent
 
-- Description: Defines if Response body will be logged, applied just if 'httpLoggingEnabled' is true and 'loggingLevel' is 'DEBUG', use 'httpLoggingExcludePaths' to avoid logging of unnecessary responses, suggested excludes: ('/jans-auth/stylesheet/fontawesome.min.css','/jans-auth/js/jquery-3.6.0.min.js','/jans-auth/js/bootstrap.min.js','/jans-auth/js/platform.js','/jans-auth/jakarta.faces.resource/jsf.js.htm','/jans-auth/stylesheet/font-awesome.css','/jans-auth/stylesheet/authorize.css','/jans-auth/stylesheet/site.css','/jans-auth/stylesheet/bootstrap.min.css','/jans-auth/stylesheet/style.css','/jans-auth/authorize.htm') this kind of responses will fill the log with non relevant information. Default value is false
+- Description: Defines if Response body will be logged. Default value is false
 
 - Required: No
 
@@ -1410,6 +1411,15 @@ tags:
 ### includeSidInResponse
 
 - Description: Boolean value specifying whether to include sessionId in response
+
+- Required: No
+
+- Default value: false
+
+
+### introspectionAccessTokenMustHaveIntrospectionScope
+
+- Description: If True, rejects introspection requests if access_token does not have the 'introspection' scope in its authorization header. Comparing to 'uma_protection', 'introspection' scope is not allowed for dynamic registration'
 
 - Required: No
 
