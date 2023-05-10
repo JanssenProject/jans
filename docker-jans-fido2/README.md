@@ -12,8 +12,7 @@ Docker image packaging for Fido2.
 
 ## Versions
 
-See [Releases](https://github.com/JanssenProject/docker-jans-fido2/releases) for stable versions.
-For bleeding-edge/unstable version, use `janssenproject/fido2:1.0.14_dev`.
+See [Packages](https://github.com/orgs/JanssenProject/packages/container/package/jans%2Ffido2) for available versions.
 
 ## Environment Variables
 
