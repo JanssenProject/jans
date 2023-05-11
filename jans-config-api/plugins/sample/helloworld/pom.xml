@@ -3,13 +3,13 @@
 
 	<groupId>com.spl</groupId>
 	<artifactId>${plugin.id}</artifactId>
-	<version>1.0.13-SNAPSHOT</version>
+	<version>1.0.14-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<name>helloworld</name>
 
 	<properties>
-		<maven.compiler.source>1.8</maven.compiler.source>
-		<maven.compiler.target>1.8</maven.compiler.target>
+		<maven.compiler.source>11</maven.compiler.source>
+		<maven.compiler.target>11</maven.compiler.target>
 		<plugin.id>hello-world-plugin</plugin.id>
 		<plugin.version>0.1</plugin.version>
 

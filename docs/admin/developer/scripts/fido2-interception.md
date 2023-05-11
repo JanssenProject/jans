@@ -31,10 +31,10 @@ The Fido2 interception script implements the [Fido2Interception](https://github.
 ### New Methods
 | Method header | Method description |
 |:-----|:------|
-| `def interceptRegisterAttestation(self, step, consentContext)` | Main consent-gather method. Must return True (if consent gathered successfully) or False (if failed). |
-| `def interceptVerifyAttestation(self, step, context)` |  |
-| `def interceptAuthenticateAssertion(self, context)` | Return total number of consent gathering steps |
-| `def interceptVerifyAssertion(self, step, context)` | Returns the consent page corresponding to the current step of consent gathering |
+| `def interceptRegisterAttestation(self, paramAsJsonNode, context)` | This method is called in Attestation register endpoint, just before to start the registration process. Method 'throwBadRequestException' could be used to create a BadRequest Exception Response. |
+| `def interceptVerifyAttestation(self, paramAsJsonNode, context)` | This method is called in Attestation verify enpoint, just before to start the verification process. Method 'throwBadRequestException' could be used to create a BadRequest Exception Response. |
+| `def interceptAuthenticateAssertion(self, paramAsJsonNode, context)` | This method is called in Assertion authenticate enpoint, just before to start the authentication process. Method 'throwBadRequestException' could be used to create a BadRequest Exception Response. |
+| `def interceptVerifyAssertion(self, paramAsJsonNode, context)` | This method is called in Assertion verify enpoint, just before to start the verification process. Method 'throwBadRequestException' could be used to create a BadRequest Exception Response. |
 
 ### Objects
 | Object name | Object description |

@@ -5,9 +5,10 @@
 	<groupId>io.jans</groupId>
 	<artifactId>jans-scim</artifactId>
 	<packaging>pom</packaging>
-	<version>1.0.13-SNAPSHOT</version>
+	<version>1.0.14-SNAPSHOT</version>
 	<name>SCIM API</name>
 	<url>http://www.gluu.org</url>
+
     <distributionManagement>
 	  <repository>
           <id>github</id>
@@ -17,14 +18,16 @@
     </distributionManagement>
 
 	<properties>
-		<maven.min-version>3.3.9</maven.min-version>
-		<maven.compiler.source>1.8</maven.compiler.source>
-		<maven.compiler.target>1.8</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		
-		<janssen.version>${project.version}</janssen.version>
+
+		<maven.min-version>3.0.3</maven.min-version>
+
+		<maven.compiler.source>11</maven.compiler.source>
+		<maven.compiler.target>11</maven.compiler.target>
+
+		<jans.bom.version>${project.version}</jans.bom.version>
         
-		<jacoco.version>0.8.7</jacoco.version>
+		<jacoco.version>0.8.10</jacoco.version>
 
 		<sonar.projectKey>JanssenProject_jans-scim</sonar.projectKey>
 		<sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
@@ -55,9 +58,9 @@
 	</repositories>
 
 	<scm>
-		<url>https://github.com/JanssenProject/jans-scim</url>
-		<connection>scm:git:git://github.com/JanssenProject/jans-scim.git</connection>
-		<developerConnection>scm:git:git@github.com:JanssenProject/jans-scim.git</developerConnection>
+		<url>https://github.com/JanssenProject/jans</url>
+		<connection>scm:git:git://github.com/JanssenProject/jans.git</connection>
+		<developerConnection>scm:git:git@github.com:JanssenProject/jans.git</developerConnection>
 	</scm>
 
 	<modules>
@@ -69,11 +72,11 @@
 	
 	<dependencyManagement>
 		<dependencies>
-			<!-- janssen -->
+			<!-- Janssen -->
 			<dependency>
 				<groupId>io.jans</groupId>
 				<artifactId>jans-bom</artifactId>
-				<version>${janssen.version}</version>
+				<version>${jans.bom.version}</version>
 				<scope>import</scope>
 				<type>pom</type>
 			</dependency>
@@ -86,7 +89,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.1</version>
+					<version>3.11.0</version>
 					<configuration>
 						<annotationProcessors>
 							<annotationProcessor>
@@ -104,32 +107,44 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-clean-plugin</artifactId>
-					<version>2.5</version>
+					<version>3.2.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-deploy-plugin</artifactId>
-					<version>2.7</version>
+					<version>3.1.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-dependency-plugin</artifactId>
-					<version>2.8</version>
+					<version>3.5.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-install-plugin</artifactId>
-					<version>2.3.1</version>
+					<version>3.1.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-jar-plugin</artifactId>
-					<version>2.4</version>
+					<version>3.3.0</version>
+					<executions>
+						<execution>
+							<goals>
+								<goal>test-jar</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-war-plugin</artifactId>
+					<version>3.3.2</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-resources-plugin</artifactId>
-					<version>2.6</version>
+					<version>3.3.1</version>
 					<configuration>
 						<encoding>UTF-8</encoding>
 					</configuration>
@@ -137,12 +152,20 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-site-plugin</artifactId>
-					<version>2.1.1</version>
+					<version>4.0.0-M7</version>
 				</plugin>
 				<plugin>
-					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>findbugs-maven-plugin</artifactId>
-					<version>3.0.4</version>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-source-plugin</artifactId>
+					<version>3.2.1</version>
+					<executions>
+						<execution>
+							<id>attach-sources</id>
+							<goals>
+								<goal>jar</goal>
+							</goals>
+						</execution>
+					</executions>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -152,9 +175,19 @@
 					</configuration>
 				</plugin>
 				<plugin>
+					<groupId>com.github.spotbugs</groupId>
+					<artifactId>spotbugs-maven-plugin</artifactId>
+					<version>4.7.3.4</version>
+				</plugin>
+				<plugin>
 					<groupId>org.jacoco</groupId>
 					<artifactId>jacoco-maven-plugin</artifactId>
 					<version>${jacoco.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>buildnumber-maven-plugin</artifactId>
+					<version>3.0.0</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>

@@ -5,7 +5,7 @@
 	<groupId>io.jans</groupId>
 	<artifactId>jans-config-api-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>1.0.13-SNAPSHOT</version>
+	<version>1.0.14-SNAPSHOT</version>
 	<name>jans-config-api-parent</name>
 
 	<distributionManagement>
@@ -17,13 +17,12 @@
 	</distributionManagement>
 	<properties>
 		<maven.min-version>3.3.9</maven.min-version>
-		<compiler-plugin.version>3.8.1</compiler-plugin.version>
+		<compiler-plugin.version>3.11.0</compiler-plugin.version>
 		<maven.compiler.parameters>true</maven.compiler.parameters>
 		<maven.compiler.source>11</maven.compiler.source>
 		<maven.compiler.target>11</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.reporting.outputEncoding>UTF-8
-		</project.reporting.outputEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
 
 		<jans.version>${project.version}</jans.version>
@@ -46,7 +45,7 @@
 		<snake.version>2.0</snake.version>
 		<jupiter.version>5.7.0</jupiter.version>
 		<cucumber.version>3.8.0</cucumber.version>
-		<jacoco.version>0.8.5</jacoco.version>
+		<jacoco.version>0.8.10</jacoco.version>
 		<swagger.version>2.2.7</swagger.version>
 
 		<sonar.projectKey>JanssenProject_jans-config-api</sonar.projectKey>
@@ -230,6 +229,7 @@
 			<dependency>
 				<groupId>com.sun.mail</groupId>
 				<artifactId>jakarta.mail</artifactId>
+				<version>1.6.7</version>
 				<exclusions>
 					<exclusion>
 						<groupId>jakarta.activation</groupId>
@@ -252,12 +252,12 @@
 			<dependency>
 				<groupId>com.nimbusds</groupId>
 				<artifactId>nimbus-jose-jwt</artifactId>
-				<version>9.11.1</version>
+				<version>9.28</version>
 			</dependency>
 			<dependency>
 				<groupId>org.bitbucket.b_c</groupId>
 				<artifactId>jose4j</artifactId>
-				<version>0.6.4</version>
+				<version>0.9.3</version>
 				<scope>test</scope>
 			</dependency>
 
@@ -413,7 +413,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-clean-plugin</artifactId>
-					<version>2.5</version>
+					<version>3.2.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -426,27 +426,27 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-deploy-plugin</artifactId>
-					<version>2.7</version>
+					<version>3.1.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-dependency-plugin</artifactId>
-					<version>2.8</version>
+					<version>3.5.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-install-plugin</artifactId>
-					<version>2.3.1</version>
+					<version>3.1.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-jar-plugin</artifactId>
-					<version>3.2.0</version>
+					<version>3.3.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-resources-plugin</artifactId>
-					<version>3.2.0</version>
+					<version>3.3.1</version>
 					<configuration>
 						<encoding>UTF-8</encoding>
 					</configuration>
@@ -454,7 +454,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-site-plugin</artifactId>
-					<version>2.1.1</version>
+					<version>4.0.0-M7</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -462,14 +462,14 @@
 					<version>${surefire-plugin.version}</version>
 				</plugin>
 				<plugin>
-					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>findbugs-maven-plugin</artifactId>
-					<version>3.0.4</version>
+					<groupId>com.github.spotbugs</groupId>
+					<artifactId>spotbugs-maven-plugin</artifactId>
+					<version>4.7.3.4</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-war-plugin</artifactId>
-					<version>2.3</version>
+					<version>3.3.2</version>
 				</plugin>
 				<plugin>
 					<groupId>org.eclipse.jetty</groupId>
@@ -479,7 +479,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-source-plugin</artifactId>
-					<version>2.1.2</version>
+					<version>3.2.1</version>
 					<executions>
 						<execution>
 							<id>attach-sources</id>
@@ -594,7 +594,11 @@
 						</dependency>
 					</dependencies>
 				</plugin>
-
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>buildnumber-maven-plugin</artifactId>
+					<version>3.0.0</version>
+				</plugin>
 			</plugins>
 
 		</pluginManagement>

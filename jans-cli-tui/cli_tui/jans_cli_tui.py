@@ -122,6 +122,18 @@ class JansCliApp(Application):
         self.browse_path = '/'
         self.app_configuration = {}
         self.current_page = None
+        self.jans_help = ("<Enter>          {} \n"
+                "<Esc>            {}\n"
+                "<Alt + letter>   {}\n"
+                "<d>              {}\n"
+                "<Delete>         {}\n"
+                "For More Visit  {}").format(
+                    _("Confirm or Edit current selection"),
+                    _("Close the current dialog"),
+                    _("Navigate to an other tab"),
+                    _("Display current item in JSON format if possible"),
+                    _("Delete current selection if possible"),
+                    "https://docs.jans.io/v1.0.6/admin/config-guide/tui/")
 
         self.not_implemented = Frame(
                             body=HSplit([Label(text=_("Not imlemented yet")), Button(text=_("MyButton"))], width=D()),
@@ -313,7 +325,27 @@ class JansCliApp(Application):
                 test_client=test_client
             )
 
+        print(_("Checking health of Jans Config Api Server"))
+        response = self.cli_requests({'operation_id': 'get-config-health'})
+
+        if response.status_code != 200:
+            print(_("Jans Config Api Server is not running propery"))
+            print(response.text)
+            sys.exit()
+        else:
+            result = response.json()
+            for healt_status in result:
+                if healt_status['status'] != 'UP':
+                    print(_("Jans Config Api Server is not running propery"))
+                    print(healt_status)
+                    sys.exit()
+
+        print(_("Health of Jans Config Api Server seems good"))
+
         status = self.cli_object.check_connection()
+
+
+
 
         self.invalidate()
 
@@ -594,20 +626,13 @@ class JansCliApp(Application):
         focus_previous(ev)
 
     def help(self,ev: KeyPressEvent) -> None:
-        self.show_message(_("Help"),
-        ("<Enter>          {} \n"
-        "<Esc>            {}\n"
-        "<Alt + letter>   {}\n"
-        "<d>              {}\n"
-        "<Delete>         {}\n"
-        "For More Visite  {}")
-        .format(
-            _("Confirm or Edit current selection"),
-            _("Close the current dialog"),
-            _("Navigate to an other tab"),
-            _("Display current item in JSON format if possible"),
-            _("Delete current selection if possible"),
-            "https://docs.jans.io/v1.0.6/admin/config-guide/tui/"))
+        
+        plugin = self._plugins[self.nav_bar.cur_navbar_selection]
+        if callable(getattr(plugin, "help", None)):
+            plugin.help()
+        else:
+            self.show_message(_("Help"),
+                self.jans_help,tobefocused=self.center_container)
 
     def escape(self,ev: KeyPressEvent) -> None:
         try:

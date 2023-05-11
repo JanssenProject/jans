@@ -5,7 +5,7 @@
 	<groupId>io.jans</groupId>
 	<artifactId>jans-eleven-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>1.0.13-SNAPSHOT</version>
+	<version>1.0.14-SNAPSHOT</version>
 	<name>eleven</name>
 
     <distributionManagement>
@@ -15,27 +15,30 @@
           <url>https://maven.pkg.github.com/JanssenProject/jans</url>
       </repository>
     </distributionManagement>
+
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
+		<maven.min-version>3.0.3</maven.min-version>
+
+		<maven.compiler.source>11</maven.compiler.source>
+		<maven.compiler.target>11</maven.compiler.target>
+
 		<jans.bom.version>${project.version}</jans.bom.version>
 
-		<jettison.version>1.5.2</jettison.version>
-		<bouncycastle.version>1.54</bouncycastle.version>
-
-		<httpcore.version>4.4.15</httpcore.version>
-		<httpclient.version>4.5.13</httpclient.version>
-
-		<jetty.version>11.0.8</jetty.version>
-
-		<arquillian.version>1.1.11.Final</arquillian.version>
-		<arquillian.rest.version>1.0.0.Alpha4</arquillian.rest.version>
-		<arquillian.drone.version>2.0.0.Final</arquillian.drone.version>
-		<arquillian.graphene.version>2.1.0.CR1</arquillian.graphene.version>
-		<shrinkwrap.version>2.1.0</shrinkwrap.version>
-		
+		<jetty.version>11.0.15</jetty.version>
 	</properties>
-	
+
+	<scm>
+		<url>https://github.com/JanssenProject/jans</url>
+		<connection>scm:git:git://github.com/JanssenProject/jans.git</connection>
+		<developerConnection>scm:git:git@github.com:JanssenProject/jans.git</developerConnection>
+	</scm>
+
+	<prerequisites>
+		<maven>${maven.min-version}</maven>
+	</prerequisites>
+
 	<repositories>
 		<repository>
 			<id>repository.jboss.org</id>
@@ -46,6 +49,11 @@
 			<id>mavencentral</id>
 			<name>maven central</name>
 			<url>https://repo1.maven.org/maven2</url>
+		</repository>
+		<repository>
+			<id>bouncycastle</id>
+			<name>Bouncy Castle</name>
+			<url>https://repo1.maven.org/maven2/org/bouncycastle</url>
 		</repository>
 		<repository>
 			<id>jans</id>
@@ -75,86 +83,41 @@
 				<artifactId>jans-eleven-model</artifactId>
 				<version>${project.version}</version>
 			</dependency>			
-
-			<!-- Security -->
-			<dependency>
-				<groupId>org.bouncycastle</groupId>
-				<artifactId>bcprov-jdk15on</artifactId>
-				<version>1.69</version>
-			</dependency>
-			<dependency>
-				<groupId>org.bouncycastle</groupId>
-				<artifactId>bcpkix-jdk15on</artifactId>
-				<version>1.67</version>
-			</dependency>
-
-			<!-- Net -->
-			<dependency>
-				<groupId>org.apache.httpcomponents</groupId>
-				<artifactId>httpclient</artifactId>
-				<version>${httpclient.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.httpcomponents</groupId>
-				<artifactId>httpcore</artifactId>
-				<version>${httpcore.version}</version>
-			</dependency>
-			
-			<!-- Jettison -->
-	        <dependency>
-	            <groupId>org.codehaus.jettison</groupId>
-	            <artifactId>jettison</artifactId>
-	            <version>${jettison.version}</version>
-	        </dependency>
-
-			<!-- Test -->
-			<dependency>
-				<groupId>org.testng</groupId>
-				<artifactId>testng</artifactId>
-				<version>6.11</version>
-				<scope>test</scope>
-			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
 	<build>
 		<pluginManagement>
 			<plugins>
-				<!-- Ensures we are compiling at 1.6 level -->
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
-					<version>2.3.2</version>
-					<configuration>
-						<source>1.6</source>
-						<target>1.6</target>
-						<encoding>UTF-8</encoding>
-					</configuration>
+					<version>3.11.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-clean-plugin</artifactId>
-					<version>2.5</version>
+					<version>3.2.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-deploy-plugin</artifactId>
-					<version>2.7</version>
+					<version>3.1.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-dependency-plugin</artifactId>
-					<version>2.8</version>
+					<version>3.5.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-install-plugin</artifactId>
-					<version>2.3.1</version>
+					<version>3.1.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-jar-plugin</artifactId>
-					<version>2.4</version>
+					<version>3.3.0</version>
 					<executions>
 						<execution>
 							<goals>
@@ -165,8 +128,13 @@
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-war-plugin</artifactId>
+					<version>3.3.2</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-resources-plugin</artifactId>
-					<version>2.6</version>
+					<version>3.3.1</version>
 					<configuration>
 						<encoding>UTF-8</encoding>
 					</configuration>
@@ -174,27 +142,12 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-site-plugin</artifactId>
-					<version>2.1.1</version>
-				</plugin>
-				<plugin>
-					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>findbugs-maven-plugin</artifactId>
-					<version>3.0.4</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-war-plugin</artifactId>
-					<version>2.3</version>
-				</plugin>
-				<plugin>
-					<groupId>org.eclipse.jetty</groupId>
-					<artifactId>jetty-maven-plugin</artifactId>
-					<version>${jetty.version}</version>
+					<version>4.0.0-M7</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-source-plugin</artifactId>
-					<version>2.1.2</version>
+					<version>3.2.1</version>
 					<executions>
 						<execution>
 							<id>attach-sources</id>
@@ -203,6 +156,16 @@
 							</goals>
 						</execution>
 					</executions>
+				</plugin>
+				<plugin>
+					<groupId>com.github.spotbugs</groupId>
+					<artifactId>spotbugs-maven-plugin</artifactId>
+					<version>4.7.3.4</version>
+				</plugin>
+				<plugin>
+					<groupId>org.eclipse.jetty</groupId>
+					<artifactId>jetty-maven-plugin</artifactId>
+					<version>${jetty.version}</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>

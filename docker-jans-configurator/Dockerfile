@@ -16,8 +16,8 @@ RUN apk update \
 # ===========
 
 # JAR files required to generate OpenID Connect keys
-ENV CN_VERSION=1.0.13-SNAPSHOT
-ENV CN_BUILD_DATE='2023-04-18 10:34'
+ENV CN_VERSION=1.0.14-SNAPSHOT
+ENV CN_BUILD_DATE='2023-05-10 08:19'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-client/${CN_VERSION}/jans-auth-client-${CN_VERSION}-jar-with-dependencies.jar
 
 RUN wget -q ${CN_SOURCE_URL} -P /app/javalibs/
@@ -100,7 +100,6 @@ ENV CN_SECRET_ADAPTER=vault \
 ENV CN_WAIT_MAX_TIME=300 \
     CN_WAIT_SLEEP_DURATION=10 \
     GOOGLE_PROJECT_ID="" \
-    GOOGLE_APPLICATION_CREDENTIALS=/etc/jans/conf/google-credentials.json \
     CN_GOOGLE_SECRET_MANAGER_PASSPHRASE=secret \
     CN_GOOGLE_SECRET_VERSION_ID=latest \
     CN_GOOGLE_SECRET_NAME_PREFIX=jans \
@@ -116,7 +115,7 @@ ENV CN_WAIT_MAX_TIME=300 \
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/configurator" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.0.13" \
+    org.opencontainers.image.version="1.0.14" \
     org.opencontainers.image.title="Janssen Configuration Manager" \
     org.opencontainers.image.description="Manage config and secret"
 
@@ -128,7 +127,7 @@ COPY scripts /app/scripts
 RUN chmod +x /app/scripts/entrypoint.sh
 
 # create non-root user
-RUN adduser -s /bin/sh -D -G root -u 1000 1000
+RUN adduser -s /bin/sh -h /home/1000 -D -G root -u 1000 1000
 
 # adjust ownership and permission
 RUN chmod -R g=u /app/db \
@@ -137,6 +136,8 @@ RUN chmod -R g=u /app/db \
     && chmod 664 /usr/java/latest/jre/lib/security/cacerts
 
 USER 1000
+
+RUN mkdir -p $HOME/.config/gcloud
 
 ENTRYPOINT ["tini", "-g", "--", "sh", "/app/scripts/entrypoint.sh"]
 CMD ["--help"]

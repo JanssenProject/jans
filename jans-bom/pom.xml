@@ -5,7 +5,7 @@
 	<artifactId>jans-bom</artifactId>
 	<packaging>pom</packaging>
 	<name>jans-bom</name>
-	<version>1.0.13-SNAPSHOT</version>
+	<version>1.0.14-SNAPSHOT</version>
 
     <distributionManagement>
 	  <repository>
@@ -17,7 +17,10 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.min-version>3.0.3</maven.min-version>
-		
+
+		<maven.compiler.source>11</maven.compiler.source>
+		<maven.compiler.target>11</maven.compiler.target>
+
 		<httpcore.version>4.4.15</httpcore.version>
 		<httpclient.version>4.5.13</httpclient.version>
 
@@ -56,6 +59,8 @@
 		<bc.version>1.70</bc.version>
 		<junit.jupiter.version>5.9.2</junit.jupiter.version>
 		<mockito.version>5.1.1</mockito.version>
+
+		<jetty.version>11.0.15</jetty.version>
 	</properties>
 
 	<repositories>
@@ -389,7 +394,7 @@
 			<!-- <dependency>
 				<groupId>javax.persistence</groupId>
 				<artifactId>persistence-api</artifactId>
-				<version>1.0.13-SNAPSHOT</version>
+				<version>1.0.14-SNAPSHOT</version>
 			</dependency> -->
 
 			<!-- hibernate -->
@@ -929,4 +934,5 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
+
 </project>

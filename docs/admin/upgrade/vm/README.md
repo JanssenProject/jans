@@ -40,12 +40,12 @@ rpm -qa |grep jans
 **jans upgrade on Suse**
 1) if you want to upgrade to latest,download and upgrade latest package file
 ```
-wget http:$(curl -s -L https://api.github.com/repos/JanssenProject/jans/releases/latest | egrep -o '/.*suse15.x86_64.rpm' | head -n -O ./jans-1.0.13.nightly-suse15.x86_64.rpm
+wget http:$(curl -s -L https://api.github.com/repos/JanssenProject/jans/releases/latest | egrep -o '/.*suse15.x86_64.rpm' | head -n -O ./jans-replace-janssen-version.nightly-suse15.x86_64.rpm
 
 ```
 2) upgrade package
 ```
-sudo rpm -U jans-1.0.13.nightly-suse15.x86_64.rpm
+sudo rpm -U jans-replace-janssen-version.nightly-suse15.x86_64.rpm
 ```
 3) verify upgraded version
 ```

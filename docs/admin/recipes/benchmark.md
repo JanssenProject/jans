@@ -90,8 +90,8 @@ A Kubernetes cluster can be created with three nodes or more in one region and t
    ```yaml
    config:
       image:
-        repository: janssenproject/configurator
-        tag: 1.0.13_dev 
+        repository: ghcr.io/janssenproject/jans/configurator
+        tag: replace-janssen-version_dev 
       countryCode: US
       email: support@gluu.org
       orgName: Gluu
@@ -134,18 +134,18 @@ A Kubernetes cluster can be created with three nodes or more in one region and t
    auth-server:
      image:
        pullPolicy: IfNotPresent
-       repository: janssenproject/auth-server
-       tag: 1.0.13_dev
+       repository: ghcr.io/janssenproject/jans/auth-server
+       tag: replace-janssen-version_dev
    config-api:
      image:
        pullPolicy: IfNotPresent
-       repository: janssenproject/config-api
-       tag: 1.0.13_dev
+       repository: ghcr.io/janssenproject/jans/config-api
+       tag: replace-janssen-version_dev
    persistence:
      image:
        pullPolicy: IfNotPresent
-       repository: janssenproject/persistence-loader
-       tag: 1.0.13_dev 
+       repository: ghcr.io/janssenproject/jans/persistence-loader
+       tag: replace-janssen-version_dev 
    nginx-ingress:
      ingress:
        path: /
@@ -178,6 +178,7 @@ Loading users requires a hefty but temporary amount of resources. By default, th
     ```bash
     mkdir add_users && cd add_users
     ```
+
 2. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-users/load_users_rdbms_job.yaml) into the folder under the name `load_users.yaml`.
 
 3. Open the file and modify the sql connection parameters. To speed the loading process increase the CPU requests and limits.

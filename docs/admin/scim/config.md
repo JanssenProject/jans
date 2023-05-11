@@ -5,14 +5,49 @@ tags:
   - configuration
 ---
 
-## This content is in progress
+# SCIM configuration
+[SCIM](https://github.com/JanssenProject/jans/tree/main/jans-scim) configuration enables to manage application-level configuration.
 
-The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.
 
-## Have questions in the meantime?
+### Existing SCIM dynamic configuration
 
-While this documentation is in progress, you can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussion) or the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). Any questions you have will help determine what information our documentation should cover.
+> ```javascript
+>{
+>    "baseDN":"o=jans",
+>
+>    "applicationUrl":"https://<your-jans-host>.info",
+>    "baseEndpoint":"https://<your-jans-host>.info/jans-scim/restv1",
+>
+>    "personCustomObjectClass":"jansCustomPerson",
+>
+>    "oxAuthIssuer":"https://<your-jans-host>.info",
+>    "umaIssuer":"https://<your-jans-host>.info",
+>
+>    "maxCount": 200,
+>    "bulkMaxOperations": 30,
+>    "bulkMaxPayloadSize": 3072000,
+>    "userExtensionSchemaURI": "urn:ietf:params:scim:schemas:extension:gluu:2.0:User",
+>
+>    "useLocalCache":true,
+>
+>    "disableJdkLogger":true,
+>    "loggingLevel":"INFO",
+>    "loggingLayout":"text",
+>    "externalLoggerConfiguration":"",
+>
+>    "metricReporterInterval":300,
+>    "metricReporterKeepDataDays":15,
+>    "metricReporterEnabled":true
+>}
+> ```
 
-## Want to contribute?
 
-If you have content you'd like to contribute to this page in the meantime, you can get started with our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/).
+## Reflect update
+
+`jansRevision` property of the configuration is used to manage any change
+
+### Two options to make effect of the changes done to the configuration
+
+1. Restart jans-scim
+2. Increment the `jansRevision` property of the configuration without restarting the application. The timer job will detect the change and fetch the latest configuration from the DB.
+

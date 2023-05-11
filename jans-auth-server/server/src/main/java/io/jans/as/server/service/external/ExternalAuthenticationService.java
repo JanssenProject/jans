@@ -10,6 +10,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.server.service.LocalResponseCache;
 import io.jans.as.server.service.cdi.event.ReloadAuthScript;
 import io.jans.as.server.service.external.internal.InternalDefaultPersonAuthenticationType;
 import io.jans.model.AuthenticationScriptUsageType;
@@ -24,12 +25,12 @@ import io.jans.model.ldap.GluuLdapConfiguration;
 import io.jans.service.custom.script.ExternalScriptService;
 import io.jans.util.OxConstants;
 import io.jans.util.StringHelper;
-import org.apache.commons.lang.StringUtils;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import org.apache.commons.lang.StringUtils;
+
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -52,6 +53,9 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 
     @Inject
     private AppConfiguration appConfiguration;
+
+    @Inject
+    private LocalResponseCache localResponseCache;
 
     private static final long serialVersionUID = 7339887464253044927L;
 
@@ -89,6 +93,9 @@ public class ExternalAuthenticationService extends ExternalScriptService {
 
         // Determine default authenticator for every usage type
         this.defaultExternalAuthenticators = determineDefaultCustomScriptConfigurationsMap(this.customScriptConfigurationsNameMap);
+
+        // invalidate discovery cache
+        localResponseCache.invalidateDiscoveryCache();
     }
 
     private HashMap<String, String> buildScriptAliases() {

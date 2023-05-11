@@ -67,10 +67,10 @@ RUN mkdir -p /root/.bzt/jmeter-taurus \
     && tar zxvf /scripts/apache-jmeter-5.5.tgz -C /root/.bzt/jmeter-taurus \
     && mv /root/.bzt/jmeter-taurus/apache-jmeter-5.5 /root/.bzt/jmeter-taurus/5.5
 
-LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/demo_loadtesting" \
+LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/loadtesting-jmeter" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.0.13" \
+    org.opencontainers.image.version="1.0.14" \
     org.opencontainers.image.title="Janssen Jmeter tests" \
     org.opencontainers.image.description="Janssen Jmeter and user loader image"
 

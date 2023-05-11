@@ -12,8 +12,7 @@ Configuration manager is a special container used to load (generate/restore) and
 
 ## Versions
 
-See [Releases](https://github.com/JanssenProject/docker-jans-configurator/releases) for stable versions.
-For bleeding-edge/unstable version, use `janssenproject/configurator:1.0.13_dev`.
+See [Packages](https://github.com/orgs/JanssenProject/packages/container/package/jans%2Fconfigurator) for available versions.
 
 ## Environment Variables
 
@@ -47,7 +46,7 @@ The following environment variables are supported by the container:
 - `CN_SECRET_KUBERNETES_USE_KUBE_CONFIG`: Load credentials from `$HOME/.kube/config`, only useful for non-container environment (default to `false`).
 - `CN_WAIT_MAX_TIME`: How long the startup "health checks" should run (default to `300` seconds).
 - `CN_WAIT_SLEEP_DURATION`: Delay between startup "health checks" (default to `10` seconds).
-- `GOOGLE_APPLICATION_CREDENTIALS`: JSON file (contains Google credentials) that should be injected into container.
+- `GOOGLE_APPLICATION_CREDENTIALS`: Optional JSON file (contains Google credentials) that can be injected into container for authentication. Refer to https://cloud.google.com/docs/authentication/provide-credentials-adc#how-to for supported credentials.
 - `GOOGLE_PROJECT_ID`: ID of Google project.
 - `CN_GOOGLE_SECRET_VERSION_ID`: Janssen secret version ID in Google Secret Manager. Defaults to `latest`, which is recommended.
 - `CN_GOOGLE_SECRET_NAME_PREFIX`: Prefix for Janssen secret in Google Secret Manager. Defaults to `jans`. If left `jans-secret` secret will be created.
@@ -109,33 +108,15 @@ python -c 'import random, string; print("".join(random.choices(string.ascii_lett
 # ouput: HsPzqiPkRzNySWlOVui8Ilmw
 ```
 
-#### Docker
+To generate initial config and secrets:
 
-1. Mount the `generate.json` into container:
+1.  Create config map `config-generate-params` to store the contents of `generate.json`
 
     ```sh
-    docker run \
-        --rm \
-        --network container:consul \
-        -e CN_CONFIG_ADAPTER=consul \
-        -e CN_CONFIG_CONSUL_HOST=consul \
-        -e CN_SECRET_ADAPTER=vault \
-        -e CN_SECRET_VAULT_HOST=vault \
-        -v /path/to/host/volume:/app/db \
-        -v /path/to/vault_role_id.txt:/etc/certs/vault_role_id \
-        -v /path/to/vault_secret_id.txt:/etc/certs/vault_secret_id \
-        janssenproject/configurator:1.0.13_dev load
+    kubectl create cm config-generate-params --from-file=generate.json
     ```
 
-#### Kubernetes
-
-1. Create config map `config-generate-params` to store the contents of `generate.json`
-
-   ```sh
-   kubectl create cm config-generate-params --from-file=generate.json
-   ```
-
-1. Mount the configmap into container and apply the yaml:
+1.  Mount the configmap into container and apply the yaml:
 
     ```yaml
     apiVersion: batch/v1
@@ -152,7 +133,7 @@ python -c 'import random, string; print("".join(random.choices(string.ascii_lett
                 name: config-generate-params
           containers:
             - name: configurator-load
-              image: janssenproject/configurator:1.0.13_dev
+              image: ghcr.io/janssenproject/jans/configurator:1.0.14_dev
               volumeMounts:
                 - mountPath: /app/db/generate.json
                   name: config-generate-params
@@ -163,16 +144,16 @@ python -c 'import random, string; print("".join(random.choices(string.ascii_lett
               args: ["load"]
     ```
 
--   To restore configuration and secrets from a backup of `/path/to/host/volume/config.json` and `/path/to/host/volume/secret.json`: mount the directory as `/app/db` inside the container:
+To restore configuration and secrets from a backup of `/path/to/host/volume/config.json` and `/path/to/host/volume/secret.json`: mount the directory as `/app/db` inside the container:
 
-1. Create config map `config-params` and `secret-params`:
+1.  Create config map `config-params` and `secret-params`:
 
-   ```sh
-   kubectl create cm config-params --from-file=config.json
-   kubectl create cm secret-params --from-file=secret.json
-   ```
+    ```sh
+    kubectl create cm config-params --from-file=config.json
+    kubectl create cm secret-params --from-file=secret.json
+    ```
 
-2. Mount the configmap into container and apply the yaml:
+2.  Mount the configmap into container and apply the yaml:
 
     ```yaml
     apiVersion: batch/v1
@@ -192,7 +173,7 @@ python -c 'import random, string; print("".join(random.choices(string.ascii_lett
                 name: secret-params
           containers:
             - name: configurator-load
-              image: janssenproject/configurator:1.0.13_dev
+              image: ghcr.io/janssenproject/jans/configurator:1.0.14_dev
               volumeMounts:
                 - mountPath: /app/db/config.json
                   name: config-params
@@ -204,32 +185,12 @@ python -c 'import random, string; print("".join(random.choices(string.ascii_lett
               - configMapRef:
                   name: config-cm
               args: ["load"]
-       ```
+    ```
 
 
 ### dump
 
 The dump command will dump all configuration and secrets from the backends saved into the `/app/db/config.json` and `/app/db/secret.json` files.
-
-#### Docker
-
-Please note that to dump this file into the host, mount a volume to the `/app/db` directory as seen in the following example:
-
-```sh
-docker run \
-    --rm \
-    --network container:consul \
-    -e CN_CONFIG_ADAPTER=consul \
-    -e CN_CONFIG_CONSUL_HOST=consul \
-    -e CN_SECRET_ADAPTER=vault \
-    -e CN_SECRET_VAULT_HOST=vault \
-    -v /path/to/host/volume:/app/db \
-    -v /path/to/vault_role_id.txt:/etc/certs/vault_role_id \
-    -v /path/to/vault_secret_id.txt:/etc/certs/vault_secret_id \
-    janssenproject/configurator:1.0.13_dev dump
-```
-
-#### Kubernetes
 
 ```yaml
 apiVersion: batch/v1
@@ -242,7 +203,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: configurator-dump-job
-          image: janssenproject/configurator:1.0.13_dev
+          image: ghcr.io/janssenproject/jans/configurator:1.0.14_dev
           command:
             - /bin/sh
             - -c
@@ -257,4 +218,3 @@ spec:
 Copy over the files to host
 
 `kubectl cp config-init-load-job:/app/db .`
-

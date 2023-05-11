@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.13-1](https://github.com/JanssenProject/jans/compare/docker-jans-auth-server-v1.0.12-1...docker-jans-auth-server-v1.0.13-1) (2023-05-10)
+
+
+### Bug Fixes
+
+* ensure google libs support all possible credentials ([#4777](https://github.com/JanssenProject/jans/issues/4777)) ([d0759e5](https://github.com/JanssenProject/jans/commit/d0759e595517ca16b97a1ce4f7cd168b29ff17dd))
+* prepare for 1.0.13 release ([493478e](https://github.com/JanssenProject/jans/commit/493478e71f6231553c998b48c0f163c7f5869da4))
+
 ## [1.0.12-1](https://github.com/JanssenProject/jans/compare/docker-jans-auth-server-v1.0.11-1...docker-jans-auth-server-v1.0.12-1) (2023-04-18)
 
 

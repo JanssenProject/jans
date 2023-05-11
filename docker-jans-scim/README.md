@@ -12,8 +12,7 @@ Docker image packaging for SCIM.
 
 ## Versions
 
-See [Releases](https://github.com/JanssenProject/docker-jans-scim/releases) for stable versions.
-For bleeding-edge/unstable version, use `janssenproject/scim:1.0.13_dev`.
+See [Packages](https://github.com/orgs/JanssenProject/packages/container/package/jans%2Fscim) for available versions.
 
 ## Environment Variables
 
@@ -64,7 +63,7 @@ The following environment variables are supported by the container:
 - `CN_COUCHBASE_KEEPALIVE_INTERVAL`: Keep-alive interval for Couchbase connection (default to `30000` milliseconds).
 - `CN_COUCHBASE_KEEPALIVE_TIMEOUT`: Keep-alive timeout for Couchbase connection (default to `2500` milliseconds).
 - `CN_JAVA_OPTIONS`: Java options passed to entrypoint, i.e. `-Xmx1024m` (default to empty-string).
-- `GOOGLE_APPLICATION_CREDENTIALS`: JSON file (contains Google credentials) that should be injected into container.
+- `GOOGLE_APPLICATION_CREDENTIALS`: Optional JSON file (contains Google credentials) that can be injected into container for authentication. Refer to https://cloud.google.com/docs/authentication/provide-credentials-adc#how-to for supported credentials.
 - `GOOGLE_PROJECT_ID`: ID of Google project.
 - `CN_GOOGLE_SECRET_VERSION_ID`: Janssen secret version ID in Google Secret Manager. Defaults to `latest`, which is recommended.
 - `CN_GOOGLE_SECRET_NAME_PREFIX`: Prefix for Janssen secret in Google Secret Manager. Defaults to `jans`. If left `jans-secret` secret will be created.
@@ -168,3 +167,4 @@ i.e. `http://container:9093/metrics`.
 
 Note that Prometheus JMX exporter uses pre-defined config file (see `conf/prometheus-config.yaml`).
 To customize the config, mount custom config file to `/opt/prometheus/prometheus-config.yaml` inside the container.
+
