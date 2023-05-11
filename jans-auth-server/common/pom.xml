@@ -209,6 +209,13 @@
 			<groupId>com.wordnik</groupId>
 			<artifactId>swagger-annotations</artifactId>
 		</dependency>
+		
+       	<!-- Swagger -->
+		<dependency>
+			<groupId>io.swagger.core.v3</groupId>
+			<artifactId>swagger-core-jakarta</artifactId>
+			<version>2.2.7</version>
+		</dependency>
 
 		<!-- Test -->
 		<dependency>
