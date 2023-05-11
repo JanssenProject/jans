@@ -21,10 +21,10 @@ from pathlib import Path
 
 ssl._create_default_https_context = ssl._create_unverified_context
 
-debugpy.listen(("0.0.0.0",5678));
-debugpy.wait_for_client();
+#debugpy.listen(("0.0.0.0",5678));
+#debugpy.wait_for_client();
 
-pydevd.settrace("192.168.64.2", port=5678)
+#pydevd.settrace("192.168.64.2", port=5678)
 
 SETUP_BRANCH = 'main'
 
@@ -255,7 +255,7 @@ def upgrade():
         os.system('systemctl restart jans-config-api')
 
 def do_install():
-    debugpy.breakpoint();
+    #debugpy.breakpoint();
     extract_setup()
 
     if argsp.profile != 'jans' and argsp.profile != 'disa-stig':
@@ -283,7 +283,7 @@ def do_install():
     os.system(setup_cmd)
 
 def main():
-    debugpy.breakpoint();
+    #debugpy.breakpoint();
     if not argsp.uninstall or argsp.download_exit:
         check_install_dependencies()
 
@@ -299,5 +299,5 @@ def main():
 
 
 if __name__ == "__main__":
-    debugpy.breakpoint();
+    #debugpy.breakpoint();
     main()

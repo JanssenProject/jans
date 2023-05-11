@@ -23,8 +23,8 @@ from setup_app.utils.properties_utils import PropertiesUtils
 from setup_app.utils.ldif_utils import myLdifParser
 from setup_app.utils.db_utils import dbUtils
 
-debugpy.listen(("0.0.0.0",5678));
-debugpy.wait_for_client();
+#debugpy.listen(("0.0.0.0",5678));
+#debugpy.wait_for_client();
 
 parser = argparse.ArgumentParser(description="Jans LDAP to RDBM migrator script")
 parser.add_argument('-remote-rdbm', choices=['pgsql'], help="Enables using remote RDBM server", default='pgsql')
@@ -44,7 +44,7 @@ argsp_dict['rdbm_type'] = getattr(argsp, 'remote_rdbm')
 
 def main():
 
-#    debugpy.breakpoint();
+    #debugpy.breakpoint();
 
     base.argsp = argsp
 
@@ -87,7 +87,7 @@ def main():
 
     print('Config.rdbm_type = {}'.format(Config.rdbm_type))
 
-    debugpy.breakpoint();
+    #debugpy.breakpoint();
 
     print('dbUtils.sqlconnection() ------------------------ >>')
     result, conn = dbUtils.sqlconnection(log=False)
@@ -95,7 +95,7 @@ def main():
     print('conn = {}'.format(conn))
     print('dbUtils.sqlconnection() ------------------------ <<')
 
-    debugpy.breakpoint();
+    #debugpy.breakpoint();
 
     print('dbUtils.bind() ------------------------ >>')
     dbUtils.bind()
@@ -103,7 +103,7 @@ def main():
 
     print('argsp_dict[in_ldif_fpath] = {}'.format(argsp_dict['in_ldif_fpath']))
 
-    debugpy.breakpoint();
+    #debugpy.breakpoint();
 
     dbUtils.import_ldif([argsp_dict['in_ldif_fpath']])
     
@@ -111,6 +111,6 @@ def main():
     return
 
 if __name__ == "__main__":
-    debugpy.breakpoint();
+    #debugpy.breakpoint();
     base.logIt('jans_setup: main()')
     main()

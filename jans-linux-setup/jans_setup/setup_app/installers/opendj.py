@@ -52,7 +52,7 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
         self.ldapDsCreateRcCommand = os.path.join(Config.ldap_bin_dir , 'create-rc-script')
 
     def install(self):
-        debugpy.breakpoint();    
+        #debugpy.breakpoint();    
 
         self.logIt("Running OpenDJ Setup")
 
@@ -87,7 +87,7 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
             Config.pbar.progress(self.service_name, "Preparing OpenDJ schema", False)
             self.logIt("Preparing OpenDJ schema")
 
-            debugpy.breakpoint();    
+            #debugpy.breakpoint();    
             self.prepare_opendj_schema()
 
         # it is time to bind OpenDJ
@@ -164,7 +164,7 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
         self.addUserToGroup('adm', Config.ldap_group)
 
     def install_opendj(self):
-        debugpy.breakpoint();
+        #debugpy.breakpoint();
 
         self.logIt("Running OpenDJ Setup")
 

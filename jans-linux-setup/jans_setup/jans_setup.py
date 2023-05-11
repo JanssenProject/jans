@@ -22,8 +22,8 @@ from setup_app.static import SetupProfiles
 
 from setup_app.utils import base
 
-debugpy.listen(("0.0.0.0",5678));
-debugpy.wait_for_client();
+#debugpy.listen(("0.0.0.0",5678));
+#debugpy.wait_for_client();
 
 warnings.filterwarnings("ignore")
 
@@ -328,7 +328,7 @@ print(jansInstaller)
 base.current_app.proceed_installation = True
 
 def main():
-    debugpy.breakpoint();
+    #debugpy.breakpoint();
     base.logIt('jans_setup: main() --------------- >>')
 
     if not Config.noPrompt:
@@ -502,6 +502,6 @@ def main():
         time.sleep(2)
 
 if __name__ == "__main__":
-    debugpy.breakpoint();
+    #debugpy.breakpoint();
     base.logIt('jans_setup: main()')
     main()
