@@ -23,6 +23,8 @@ import org.apache.commons.lang.StringUtils;
 import java.io.Serializable;
 import java.util.*;
 
+import io.swagger.v3.oas.annotations.Hidden;
+
 /**
  * @author Javier Rojas Blum
  * @version October 17, 2022
@@ -329,6 +331,7 @@ public class Client extends DeletableEntity implements Serializable {
         return getAllAuthenticationMethods().contains(authenticationMethod);
     }
 
+    @Hidden
     public Set<AuthenticationMethod> getAllAuthenticationMethods() {
         Set<AuthenticationMethod> set = new HashSet<>();
 
