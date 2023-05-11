@@ -16,22 +16,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import jakarta.inject.Inject;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.core.CacheControl;
-import jakarta.ws.rs.core.Response;
-
-import io.jans.notify.service.NetworkService;
-import io.jans.notify.service.NotifyService;
 import org.apache.http.HttpStatus;
-import io.jans.notify.model.NotificationResponse;
-import io.jans.notify.model.PushPlatform;
-import io.jans.notify.model.RegisterDeviceResponse;
-import io.jans.notify.model.conf.ClientConfiguration;
-import io.jans.notify.model.sns.ClientData;
-import io.jans.notify.model.sns.CustomUserData;
-import io.jans.notify.service.ApplicationService;
 import org.slf4j.Logger;
 
 import com.amazonaws.services.sns.AmazonSNS;
@@ -45,6 +30,21 @@ import com.amazonaws.services.sns.model.PublishRequest;
 import com.amazonaws.services.sns.model.PublishResult;
 import com.amazonaws.services.sns.model.SetEndpointAttributesRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.jans.notify.model.NotificationResponse;
+import io.jans.notify.model.PushPlatform;
+import io.jans.notify.model.RegisterDeviceResponse;
+import io.jans.notify.model.conf.ClientConfiguration;
+import io.jans.notify.model.sns.ClientData;
+import io.jans.notify.model.sns.CustomUserData;
+import io.jans.notify.service.ApplicationService;
+import io.jans.notify.service.NetworkService;
+import io.jans.notify.service.NotifyService;
+import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.core.CacheControl;
+import jakarta.ws.rs.core.Response;
 
 /**
  * @author Yuriy Movchan
@@ -66,22 +66,36 @@ public class NotifyRestServiceImpl implements NotifyRestService {
 	private NetworkService networkService;
 
 	@Override
-	public Response registerDevice(String authorization, String token, String userData, HttpServletRequest httpRequest) {
+	public Response registerDevice(String authorization, String token, String userData, String platformId,
+			HttpServletRequest httpRequest) {
 		log.debug("Registering new user '{}' device with token '{}'", userData, token);
 
-		ClientConfiguration clientConfiguration = notifyService.processAuthorization(authorization);
-		if (clientConfiguration == null) {
-			Response response = buildErrorResponse(Response.Status.UNAUTHORIZED, "Failed to authorize client");
+		ClientConfiguration clientConfiguration = null;
+		ClientData clientData;
+		if (applicationService.isProtectionMechanismInternal()) {
+			clientConfiguration = notifyService.processAuthorization(authorization);
+			if (clientConfiguration == null) {
+				Response response = buildErrorResponse(Response.Status.UNAUTHORIZED, "Failed to authorize client");
+				return response;
+			}
+	
+			clientData = notifyService.getClientData(clientConfiguration);
+			if (clientData == null) {
+				Response response = buildErrorResponse(Response.Status.BAD_REQUEST, "Failed to find client");
+				return response;
+			}
+		} else if (applicationService.isProtectionMechanismExternal()) {
+			clientData = applicationService.getClientDataByPlatformId(platformId);
+			if (clientData == null) {
+				Response response = buildErrorResponse(Response.Status.BAD_REQUEST, "Failed to find client");
+				return response;
+			}
+		} else {
+			Response response = buildErrorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Failed to register device. Authorization method is not specified!");
 			return response;
 		}
 
-		ClientData clientData = notifyService.getClientData(clientConfiguration);
-		if (clientData == null) {
-			Response response = buildErrorResponse(Response.Status.BAD_REQUEST, "Failed to find client");
-			return response;
-		}
-
-		RegisterDeviceResponse registerDeviceResponse = registerDeviceImpl(clientConfiguration, clientData, token, userData, httpRequest);
+		RegisterDeviceResponse registerDeviceResponse = registerDeviceImpl(clientConfiguration, clientData, token, userData, platformId, httpRequest);
 		if (registerDeviceResponse == null) {
 			Response response = buildErrorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Failed to register device");
 			return response;
@@ -92,13 +106,15 @@ public class NotifyRestServiceImpl implements NotifyRestService {
 		return builder.entity(registerDeviceResponse).build();
 	}
 
-	private RegisterDeviceResponse registerDeviceImpl(ClientConfiguration clientConfiguration, ClientData clientData, String token, String userData, HttpServletRequest httpRequest) {
+	private RegisterDeviceResponse registerDeviceImpl(ClientConfiguration clientConfiguration, ClientData clientData, String token, String userData, String platformId,
+			HttpServletRequest httpRequest) {
 		try {
 			log.debug("Preparing for new user '{}' device with token '{}' registration", userData, token);
 			AmazonSNS snsClient = clientData.getSnsClient();
 			
 			// Build custom user data
-			CustomUserData customUserData = new CustomUserData(clientConfiguration.getClientId(),
+			String clientId = clientConfiguration == null ? null : clientConfiguration.getClientId();
+			CustomUserData customUserData = new CustomUserData(clientId,
 					networkService.getIpAddress(httpRequest), new Date(), Arrays.asList(userData)); 
 			log.info("Prepared custom user data for device registration: '{}' ", customUserData);
 
@@ -224,18 +240,31 @@ public class NotifyRestServiceImpl implements NotifyRestService {
     }
 
 	@Override
-	public Response sendNotification(String authorization, String endpoint, String message, HttpServletRequest httpRequest) {
+	public Response sendNotification(String authorization, String endpoint, String message, String platformId, HttpServletRequest httpRequest) {
 		log.debug("Sending notification '{}' to endpoint '{}'", message, endpoint);
 
-		ClientConfiguration clientConfiguration = notifyService.processAuthorization(authorization);
-		if (clientConfiguration == null) {
-			Response response = buildErrorResponse(Response.Status.UNAUTHORIZED, "Failed to authorize client");
-			return response;
-		}
-
-		ClientData clientData = notifyService.getClientData(clientConfiguration);
-		if (clientData == null) {
-			Response response = buildErrorResponse(Response.Status.BAD_REQUEST, "Failed to find client");
+		ClientConfiguration clientConfiguration = null;
+		ClientData clientData;
+		if (applicationService.isProtectionMechanismInternal()) {
+			clientConfiguration = notifyService.processAuthorization(authorization);
+			if (clientConfiguration == null) {
+				Response response = buildErrorResponse(Response.Status.UNAUTHORIZED, "Failed to authorize client");
+				return response;
+			}
+	
+			clientData = notifyService.getClientData(clientConfiguration);
+			if (clientData == null) {
+				Response response = buildErrorResponse(Response.Status.BAD_REQUEST, "Failed to find client");
+				return response;
+			}
+		} else if (applicationService.isProtectionMechanismExternal()) {
+			clientData = applicationService.getClientDataByPlatformId(platformId);
+			if (clientData == null) {
+				Response response = buildErrorResponse(Response.Status.BAD_REQUEST, "Failed to find client");
+				return response;
+			}
+		} else {
+			Response response = buildErrorResponse(Response.Status.INTERNAL_SERVER_ERROR, "Failed to send notification. Authorization method is not specified!");
 			return response;
 		}
 
@@ -256,7 +285,8 @@ public class NotifyRestServiceImpl implements NotifyRestService {
 			log.debug("Preparing to send to device endpoint '{}'", endpoint);
 			AmazonSNS snsClient = clientData.getSnsClient();
 
-			log.info("Prepared message to send from clienId '{}' with clientIp '{}'", clientConfiguration.getClientId(),
+			String clientId = clientConfiguration == null ? null : clientConfiguration.getClientId();
+			log.info("Prepared message to send from clienId '{}' with clientIp '{}'", clientId,
 					networkService.getIpAddress(httpRequest));
 
 			PushPlatform platform = clientData.getPlatform();

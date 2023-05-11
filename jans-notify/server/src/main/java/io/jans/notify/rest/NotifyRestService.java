@@ -28,13 +28,15 @@ public interface NotifyRestService {
 	@Produces({ MediaType.APPLICATION_JSON })
 	@Path("/register")
 	Response registerDevice(@HeaderParam("Authorization") String authorization, @FormParam("token") String token,
-			@FormParam("user_data") String userData, @Context HttpServletRequest httpRequest);
+			@FormParam("user_data") String userData, @FormParam("platform_id") String platformId,
+			@Context HttpServletRequest httpRequest);
 
 	@POST
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Produces({ MediaType.APPLICATION_JSON })
 	@Path("/notify")
 	Response sendNotification(@HeaderParam("Authorization") String authorization, @FormParam("enpoint") String endpoint,
-			@FormParam("message") String message, @Context HttpServletRequest httpRequest);
+			@FormParam("message") String message, @FormParam("platform_id") String platformId,
+			@Context HttpServletRequest httpRequest);
 
 }

@@ -11,16 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import jakarta.inject.Named;
-
-import io.jans.notify.model.conf.AccessConfiguration;
-import io.jans.notify.model.conf.ClientConfiguration;
-import io.jans.notify.model.conf.Configuration;
-import io.jans.notify.model.conf.PlatformConfiguration;
-import io.jans.notify.model.sns.ClientData;
 import org.slf4j.Logger;
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
@@ -34,6 +24,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
+
+import io.jans.notify.model.conf.AccessConfiguration;
+import io.jans.notify.model.conf.ClientConfiguration;
+import io.jans.notify.model.conf.Configuration;
+import io.jans.notify.model.conf.PlatformConfiguration;
+import io.jans.notify.model.conf.ProtectionMechanismType;
+import io.jans.notify.model.sns.ClientData;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 /**
  * @author Yuriy Movchan
@@ -56,6 +57,8 @@ public class ApplicationService {
 
 	private Map<String, ClientConfiguration> accessClients;
 
+	private ProtectionMechanismType protectionMechanism;
+
 	@PostConstruct
 	public void create() {
 		this.platormClients = new HashMap<String, ClientData>();
@@ -68,6 +71,10 @@ public class ApplicationService {
 	}
 
 	public ClientConfiguration getAccessClient(String accessKeyId, String secretAccessKey) {
+		if (ProtectionMechanismType.EXTERNAL == protectionMechanism) {
+			return null;
+		}
+
 		if ((accessKeyId == null) || (secretAccessKey == null)) {
 			log.error("Access key or secret is empty");
 			return null;
@@ -122,6 +129,12 @@ public class ApplicationService {
 	}
 
 	private void initAccessClients() {
+		if (ProtectionMechanismType.EXTERNAL == accessConfiguration.getProtectionMechanism()) {
+			this.protectionMechanism = accessConfiguration.getProtectionMechanism();
+			log.info("Loaded access configurations. Authorization is not enabled.");
+			return;
+		}
+
 		List<ClientConfiguration> clientConfiguratios = accessConfiguration.getClientConfigurations();
 		if ((clientConfiguratios == null) || clientConfiguratios.isEmpty()) {
 			log.error("List of clients is empty!");
@@ -193,5 +206,13 @@ public class ApplicationService {
         mapper.getSerializationConfig().with(pair);
         return mapper;
     }
+
+    public boolean isProtectionMechanismExternal() {
+    	return ProtectionMechanismType.EXTERNAL == protectionMechanism;
+	}
+
+    public boolean isProtectionMechanismInternal() {
+    	return (protectionMechanism == null) || (ProtectionMechanismType.DEFAULT == protectionMechanism);
+	}
 
 }
