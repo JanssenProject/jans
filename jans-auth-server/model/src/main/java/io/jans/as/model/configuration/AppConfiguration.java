@@ -469,6 +469,9 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "The interval for configuration update in seconds")
     private int configurationUpdateInterval;
 
+    @DocProperty(description = "Boolean value specifying whether to log not_found entity exception as error or as trace. Default value is false (trace).")
+    private Boolean logNotFoundEntityAsError;
+
     @DocProperty(description = "Choose if client can update Grant Type values")
     private Boolean enableClientGrantTypeUpdate;
 
@@ -879,6 +882,15 @@ public class AppConfiguration implements Configuration {
 
     public void setRotateDeviceSecret(Boolean rotateDeviceSecret) {
         this.rotateDeviceSecret = rotateDeviceSecret;
+    }
+
+    public Boolean getLogNotFoundEntityAsError() {
+        if (logNotFoundEntityAsError == null) logNotFoundEntityAsError = false;
+        return logNotFoundEntityAsError;
+    }
+
+    public void setLogNotFoundEntityAsError(Boolean logNotFoundEntityAsError) {
+        this.logNotFoundEntityAsError = logNotFoundEntityAsError;
     }
 
     public Boolean getRequirePkce() {
