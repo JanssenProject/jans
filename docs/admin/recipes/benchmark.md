@@ -181,7 +181,34 @@ Loading users requires a hefty but temporary amount of resources. By default, th
 
 2. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-users/load_users_rdbms_job.yaml) into the folder under the name `load_users.yaml`.
 
-3. Open the file and modify the sql connection parameters. To speed the loading process increase the CPU requests and limits.
+3.  Open the file and modify the required parameters. Note that the following environments can be used as configmaps data to configure the pod.
+
+    | ENV                              | Description                                                                                                   | Default                |
+    |----------------------------------|---------------------------------------------------------------------------------------------------------------|------------------------|
+    | `TEST_USERS_PREFIX_STRING`       | The user prefix string attached to the test users loaded                                                      | `test_user`            |
+    | `COUCHBASE_URL`                  | Couchbase URL if Couchbase is the persistence to load users in.                                               | ``                     |
+    | `COUCHBASE_PW`                   | Couchbase PW if Couchbase is the persistence to load users in.                                                | ``                     |
+    | `USER_NUMBER_STARTING_POINT`     | The user number to start from . This is appended to the username i.e test_user0                               | `0`                    |
+    | `USER_NUMBER_ENDING_POINT`       | The user number to end at.                                                                                    | `50000000`             |
+    | `LOAD_USERS_TO_COUCHBASE`        | Enable loading users to Couchbase persistence. `true` or `false` == ``                                        | `false`                |
+    | `LOAD_USERS_TO_LDAP`             | Enable loading users to LDAP persistence. `true` or `false` == ``                                             | `false`                |
+    | `LOAD_USERS_TO_SPANNER`          | Enable loading users to Spanner persistence. `true` or `false` == ``                                          | `false`                |
+    | `LOAD_USERS_TO_RDBMS`            | Enable loading users to RDBMS persistence. `true` or `false` == ``                                            | `false`                |
+    | `USER_SPLIT_PARALLEL_THREADS`    | The number of parallel threads to break the total number users across. This number heavily effects CPU usage. | `20`                   |
+    | `GOOGLE_APPLICATION_CREDENTIALS` | Google Credentials JSON SA file. **Used with Spanner**                                                        | ``                     |
+    | `GOOGLE_PROJECT_ID`              | Google Project ID. **Used with Spanner**                                                                      | ``                     |
+    | `GOOGLE_SPANNER_INSTANCE_ID`     | Google Spanner Instance ID. **Used with Spanner**                                                             | ``                     |
+    | `GOOGLE_SPANNER_DATABASE_ID`     | Google Spanner Database ID. **Used with Spanner**                                                             | ``                     |
+    | `LDAP_URL`                       | LDAP URL if LDAP is the persistence to load users in.                                                         | `opendj:1636`          |
+    | `LDAP_PW`                        | LDAP PW  if LDAP is the persistence to load users in.                                                         | ``                     |
+    | `LDAP_DN`                        | LDAP DN if LDAP is the persistence to load users in.                                                          | `cn=directory manager` |
+    | `RDBMS_TYPE`                     | RDBMS type if `mysql` or `pgsql` is the persistence to load users in.                                         | `mysql`                |
+    | `RDBMS_DB`                       | RDBMS Database name if `mysql` or `pgsql` is the persistence to load users in.                                | `jans`                 |
+    | `RDBMS_USER`                     | RDBMS user if `mysql` or `pgsql` is the persistence to load users in.                                         | `jans`                 |
+    | `RDBMS_PASSWORD`                 | RDBMS user password if `mysql` or `pgsql` is the persistence to load users in. .                              | ``                     |
+    | `RDBMS_HOST`                     | RDBMS host if `mysql` or `pgsql` is the persistence to load users in.                                         | `localhost`            |
+
+    __Tips:__ To speed the loading process, increase the CPU requests and limits of the pod.
 
 4. Create a namespace for load-testing.
 
@@ -200,7 +227,7 @@ Wait until all the users are up before moving forward. Tail the logs by running 
 
 ### Load testing
 
-#### Authorization code client
+#### Authorization code flow
 
 ##### Resources needed for Authorization code client jmeter test
 
@@ -286,7 +313,7 @@ Create the client needed to run the test by executing the following. Make sure t
     kubectl scale deploy load-testing-authz -n load --replicas=20
    ```
 
-#### Resource Owner Password Credentials (ROPC) client
+#### Resource Owner Password Credentials (ROPC) flow
 
 ##### Resources needed for ROPC client jmeter test
 
