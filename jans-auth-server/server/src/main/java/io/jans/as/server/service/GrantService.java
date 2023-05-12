@@ -21,7 +21,6 @@ import io.jans.service.cache.CacheConfiguration;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
-import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
@@ -29,6 +28,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+
+import static org.apache.commons.lang.BooleanUtils.isTrue;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -140,7 +141,7 @@ public class GrantService {
             final String baseDn = clientService.buildClientDn(clientId);
             return persistenceEntryManager.findEntries(baseDn, TokenEntity.class, Filter.createPresenceFilter("tknCde"));
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+            logException(e);
         }
         return Collections.emptyList();
     }
@@ -154,11 +155,19 @@ public class GrantService {
         }
     }
 
+    private void logException(Exception e) {
+        if (isTrue(appConfiguration.getLogNotFoundEntityAsError())) {
+            log.error(e.getMessage(), e);
+        } else {
+            log.trace(e.getMessage(), e);
+        }
+    }
+
     private TokenEntity load(String tokenDn) {
         try {
             return persistenceEntryManager.find(TokenEntity.class, tokenDn);
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+            logException(e);
         }
         return null;
     }
@@ -167,7 +176,7 @@ public class GrantService {
         try {
             return persistenceEntryManager.findEntries(tokenBaseDn(), TokenEntity.class, Filter.createEqualityFilter("grtId", grantId));
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+            logException(e);
         }
         return Collections.emptyList();
     }
@@ -176,7 +185,7 @@ public class GrantService {
         try {
             return persistenceEntryManager.findEntries(tokenBaseDn(), TokenEntity.class, Filter.createEqualityFilter("authzCode", TokenHashUtil.hash(authorizationCode)));
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+            logException(e);
         }
         return Collections.emptyList();
     }
@@ -189,7 +198,7 @@ public class GrantService {
                 grants.addAll(ldapGrants);
             }
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
+            logException(e);
         }
         return grants;
     }
@@ -201,7 +210,7 @@ public class GrantService {
     }
 
     public void filterOutRefreshTokenFromDeletion(List<TokenEntity> tokens) {
-        if (BooleanUtils.isTrue(appConfiguration.getRemoveRefreshTokensForClientOnLogout())) {
+        if (isTrue(appConfiguration.getRemoveRefreshTokensForClientOnLogout())) {
             return;
         }
 
