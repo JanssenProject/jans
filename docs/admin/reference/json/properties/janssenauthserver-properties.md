@@ -172,6 +172,7 @@ tags:
 | logClientNameOnClientAuthentication | Choose if application should log the Client Name on client authentication | [Details](#logclientnameonclientauthentication) |
 | loggingLayout | Logging layout used for Jans Authorization Server loggers | [Details](#logginglayout) |
 | loggingLevel | Specify the logging level for oxAuth loggers | [Details](#logginglevel) |
+| logNotFoundEntityAsError | Boolean value specifying whether to log not_found entity exception as error or as trace. Default value is false (trace). | [Details](#lognotfoundentityaserror) |
 | metricReporterInterval | The interval for metric reporter in seconds | [Details](#metricreporterinterval) |
 | metricReporterKeepDataDays | The days to keep metric reported data | [Details](#metricreporterkeepdatadays) |
 | mtlsAuthorizationEndpoint | URL for Mutual TLS (mTLS) Client Authentication and Certificate-Bound Access Tokens (MTLS) Endpoint | [Details](#mtlsauthorizationendpoint) |
