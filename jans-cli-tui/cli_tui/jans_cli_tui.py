@@ -763,7 +763,7 @@ class JansCliApp(Application):
         if on_selection_changed:
             cb._handle_enter = custom_handler
 
-        v = VSplit([Window(FormattedTextControl(title), width=len(title)+1, style=style,), cb], style=widget_style)
+        v = VSplit([Window(FormattedTextControl(title), width=len(title)+1, style=style), cb], height=1, style=widget_style)
 
         v.me = cb
 
