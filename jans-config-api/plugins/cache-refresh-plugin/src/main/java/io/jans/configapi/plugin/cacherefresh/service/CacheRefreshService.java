@@ -7,8 +7,8 @@
 package io.jans.configapi.plugin.cacherefresh.service;
 
 import io.jans.configapi.configuration.ConfigurationFactory;
-import io.jans.cacherefresh.model.conf.Conf;
-import io.jans.cacherefresh.model.conf.AppConfiguration;
+import io.jans.configapi.plugin.cacherefresh.model.config.Conf;
+import io.jans.configapi.plugin.cacherefresh.model.config.CacheRefreshConfigSource;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.BasePersistenceException;
 import org.slf4j.Logger;
@@ -31,7 +31,7 @@ public class CacheRefreshService {
     public Conf findConf() {
         try {
             String configurationDn = configurationFactory.getBaseConfiguration()
-                    .getString("cacherefresh_ConfigurationEntryDN");
+                    .getString("cacheRefresh_ConfigurationEntryDN");
             return persistenceManager.find(Conf.class, configurationDn);
         } catch (BasePersistenceException var3) {
             logger.error("Failed to load cache-refresh configuration from LDAP");
@@ -39,7 +39,7 @@ public class CacheRefreshService {
         }
     }
 
-    public AppConfiguration find() {
+    public CacheRefreshConfigSource find() {
         final Conf conf = findConf();
         return conf.getDynamicConf();
     }
@@ -49,7 +49,7 @@ public class CacheRefreshService {
         persistenceManager.merge(conf);
     }
 
-    public void merge(AppConfiguration cacheRefreshConfigJson) {
+    public void merge(CacheRefreshConfigSource cacheRefreshConfigJson) {
         Conf conf = this.findConf();
         conf.setDynamicConf(cacheRefreshConfigJson);
         mergeConf(conf);

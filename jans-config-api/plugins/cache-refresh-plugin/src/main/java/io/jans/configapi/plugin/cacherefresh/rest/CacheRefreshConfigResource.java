@@ -9,7 +9,8 @@ package io.jans.configapi.plugin.cacherefresh.rest;
 import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.util.ApiAccessConstants;
-import io.jans.configapi.cacherefresh.model.conf.AppConfiguration;
+import io.jans.configapi.plugin.cacherefresh.model.config.Conf;
+import io.jans.configapi.plugin.cacherefresh.model.config.CacheRefreshConfigSource;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -44,13 +45,13 @@ public class CacheRefreshConfigResource extends BaseResource {
             "Cache Refresh - Configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.CACHEREFRESH_CONFIG_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AppConfiguration.class))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CacheRefreshConfigSource.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.CACHEREFRESH_CONFIG_READ_ACCESS })
     public Response getCacheRefreshConfiguration() {
-        AppConfiguration appConfiguration = this.cacheRefreshService.find();
+        CacheRefreshConfigSource appConfiguration = this.cacheRefreshService.find();
         logger.debug("Cache Refresh details appConfiguration():{}", appConfiguration);
         return Response.ok(appConfiguration).build();
     }
@@ -65,7 +66,7 @@ public class CacheRefreshConfigResource extends BaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PUT
     @ProtectedApi(scopes = { ApiAccessConstants.CACHEREFRESH_CONFIG_WRITE_ACCESS })
-    public Response updateCacheRefreshConfiguration(@NotNull AppConfiguration appConfiguration) {
+    public Response updateCacheRefreshConfiguration(@NotNull CacheRefreshConfigSource appConfiguration) {
         logger.debug("Cache Refresh details to be updated - appConfiguration:{} ", appConfiguration);
         checkResourceNotNull(appConfiguration, CACHEREFRESH_CONFIGURATION);
         this.cacheRefreshService.merge(appConfiguration);
