@@ -8,7 +8,7 @@ package io.jans.configapi.plugin.cacherefresh.service;
 
 import io.jans.configapi.configuration.ConfigurationFactory;
 import io.jans.configapi.plugin.cacherefresh.model.config.Conf;
-import io.jans.configapi.plugin.cacherefresh.model.config.CacheRefreshConfigSource;
+import io.jans.configapi.plugin.cacherefresh.model.config.CacheRefreshConfiguration;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.BasePersistenceException;
 import org.slf4j.Logger;
@@ -39,7 +39,7 @@ public class CacheRefreshService {
         }
     }
 
-    public CacheRefreshConfigSource find() {
+    public CacheRefreshConfiguration find() {
         final Conf conf = findConf();
         return conf.getDynamicConf();
     }
@@ -49,7 +49,7 @@ public class CacheRefreshService {
         persistenceManager.merge(conf);
     }
 
-    public void merge(CacheRefreshConfigSource cacheRefreshConfigJson) {
+    public void merge(CacheRefreshConfiguration cacheRefreshConfigJson) {
         Conf conf = this.findConf();
         conf.setDynamicConf(cacheRefreshConfigJson);
         mergeConf(conf);
