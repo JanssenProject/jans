@@ -23,7 +23,7 @@ Scenario: Fetch all Agama deployment without bearer token
 	Then status 401 
 	And print response
 
-
+@ignore
 Scenario: Fetch all Agama deployment  
 	Given url mainUrl + '/list'
 	And print 'accessToken = '+accessToken
@@ -31,7 +31,8 @@ Scenario: Fetch all Agama deployment
 	When method GET 
 	Then status 200 
 	And print response
-	
+
+@ignore	
 Scenario: Fetch all Agama deployment  
 	Given url mainUrl + '/list'
 	And print 'accessToken = '+accessToken

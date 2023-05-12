@@ -7648,12 +7648,12 @@ components:
           type: array
           items:
             type: string
+        error:
+          type: string
         flowsError:
           type: object
           additionalProperties:
             type: string
-        error:
-          type: string
         projectMetadata:
           $ref: '#/components/schemas/ProjectMetadata'
     ProjectMetadata:
@@ -7853,19 +7853,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        adminCanAccess:
+        userCanAccess:
           type: boolean
         adminCanView:
           type: boolean
-        adminCanEdit:
-          type: boolean
-        userCanAccess:
-          type: boolean
         userCanView:
           type: boolean
-        whitePagesCanView:
-          type: boolean
         userCanEdit:
+          type: boolean
+        adminCanEdit:
+          type: boolean
+        adminCanAccess:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -8286,6 +8286,8 @@ components:
         configurationUpdateInterval:
           type: integer
           format: int32
+        logNotFoundEntityAsError:
+          type: boolean
         enableClientGrantTypeUpdate:
           type: boolean
         dynamicGrantTypeDefault:
@@ -8468,8 +8470,6 @@ components:
         refreshTokenExtendLifetimeOnRotation:
           type: boolean
         allowBlankValuesInDiscoveryResponse:
-          type: boolean
-        logNotFoundEntityAsError:
           type: boolean
         checkUserPresenceOnRefreshToken:
           type: boolean
@@ -9229,20 +9229,6 @@ components:
           - tls_client_auth
           - self_signed_tls_client_auth
           - none
-        allAuthenticationMethods:
-          uniqueItems: true
-          type: array
-          items:
-            type: string
-            enum:
-            - client_secret_basic
-            - client_secret_post
-            - client_secret_jwt
-            - private_key_jwt
-            - access_token
-            - tls_client_auth
-            - self_signed_tls_client_auth
-            - none
         baseDn:
           type: string
         inum:
@@ -9474,14 +9460,6 @@ components:
       properties:
         valid:
           type: boolean
-        connectProtectionList:
-          type: array
-          items:
-            type: string
-            enum:
-            - None
-            - StartTls
-            - SslTls
         host:
           type: string
         port:
