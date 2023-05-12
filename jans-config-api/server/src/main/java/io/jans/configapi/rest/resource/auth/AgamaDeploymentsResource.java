@@ -23,11 +23,11 @@ import io.jans.configapi.service.auth.AgamaFlowService;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
-import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -54,23 +54,21 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_READ_ACCESS }, groupScopes = {ApiAccessConstants.AGAMA_WRITE_ACCESS}, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("list")
     public Response getDeployments(@QueryParam("start") int start, @QueryParam("count") int count) {
         
         // this is NOT a search but a paged listing
         int maxcount = getMaxCount();
         PagedResult<Deployment> res = ads.list(start < 0 ? 0 : start, count > 0 ? count : maxcount, maxcount);
-        res.getEntries().forEach(d -> d.getDetails().setFolders(null));
+        res.getEntries().forEach(this::minimize);
         return Response.ok(res).build();
 
     }
-
+    
     @Operation(summary = "Fetches deployed Agama project based on name.", description = "Fetches deployed Agama project based on name.", operationId = "get-agama-dev-studio-prj-by-name", tags = {
     "Agama - Developer Studio" }, security = @SecurityRequirement(name = "oauth2", scopes = {ApiAccessConstants.AGAMA_READ_ACCESS} ))
     @ApiResponses(value = {
     @ApiResponse(responseCode = "200", description = "Agama project", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Deployment.class), examples = @ExampleObject(name = "Response json example", value = "example/agama/agama-dev-prj-get.json"))),
     @ApiResponse(responseCode = "204", description = "No Content"),
-    @ApiResponse(responseCode = "400", description = "Bad Request"),
     @ApiResponse(responseCode = "401", description = "Unauthorized"),
     @ApiResponse(responseCode = "404", description = "Not Found"),
     @ApiResponse(responseCode = "500", description = "InternalServerError") })
@@ -78,30 +76,14 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_READ_ACCESS }, groupScopes = {ApiAccessConstants.AGAMA_WRITE_ACCESS}, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Produces(MediaType.APPLICATION_JSON)
     @Path(ApiConstants.NAME_PARAM_PATH)
-    public Response getDeployment(@Parameter(description = "Agama project name") @PathParam(ApiConstants.NAME) @NotNull String projectName) {
-        
-        if (projectName == null) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("Project name missing in query string").build();
-        }
-        
-        Deployment d = ads.getDeployment(projectName);
-        
-        if (d == null)
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity("Unknown project " + projectName).build();
+    public Response getDeployment(@Parameter(description = "Agama project name") @PathParam(ApiConstants.NAME) String projectName) {
 
-        if (d.getFinishedAt() == null)
-            return Response.noContent().build();
+        Pair<Boolean, Deployment> p = getDeploymentP(projectName);
+        Deployment d = p.getSecond();
         
-        d.getDetails().setFolders(null);
-        try {
-            //Use own mapper so flows with no errors are effectively serialized
-            return Response.ok(mapper.writeValueAsString(d)).build();
-        } catch (JsonProcessingException e) {
-            logger.error(e.getMessage(), e);
-            return Response.serverError().build();
-        }
+        if (d == null) return errorResponse(p.getFirst(), projectName);
+
+        return Response.ok(d).build();
 
     }
 
@@ -118,9 +100,10 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_WRITE_ACCESS }, groupScopes = {},
             superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @Path(ApiConstants.NAME_PARAM_PATH)
-    public Response deploy(@Parameter(description = "Agama project name") @PathParam(ApiConstants.NAME) @NotNull String projectName, byte[] gamaBinary) {
+    public Response deploy(@Parameter(description = "Agama project name") @PathParam(ApiConstants.NAME)
+                String projectName, byte[] gamaBinary) {
         
-        if (projectName == null || gamaBinary == null)
+        if (gamaBinary == null)
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity("Project name or binary data missing").build();
         
@@ -139,7 +122,6 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
             ApiAccessConstants.AGAMA_DELETE_ACCESS }))
     @ApiResponses(value = {
     @ApiResponse(responseCode = "204", description = "No Content"),
-    @ApiResponse(responseCode = "400", description = "Bad Request"),
     @ApiResponse(responseCode = "401", description = "Unauthorized"),
     @ApiResponse(responseCode = "404", description = "Not Found"),
     @ApiResponse(responseCode = "409", description = "Conflict"),
@@ -148,11 +130,7 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_DELETE_ACCESS }, groupScopes = {},
             superScopes = { ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
     @Path(ApiConstants.NAME_PARAM_PATH)
-    public Response undeploy(@Parameter(description = "Agama project name") @PathParam(ApiConstants.NAME) @NotNull String projectName) {
-        
-        if (projectName == null)
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("Project name missing in query string").build();
+    public Response undeploy(@Parameter(description = "Agama project name") @PathParam(ApiConstants.NAME) String projectName) {
         
         Boolean result = ads.createUndeploymentTask(projectName);
         
@@ -177,16 +155,18 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_READ_ACCESS }, groupScopes = {ApiAccessConstants.AGAMA_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Path(ApiConstants.CONFIGS + ApiConstants.NAME_PARAM_PATH)
-    public Response getConfigs(@Parameter(description = "Agama project name") @PathParam(ApiConstants.NAME) @NotNull String projectName)
-            throws JsonProcessingException {
+    public Response getConfigs(@Parameter(description = "Agama project name") @PathParam(ApiConstants.NAME) String projectName) {
+
+        Pair<Boolean, Deployment> p = getDeploymentP(projectName);
+        Deployment d = p.getSecond();
         
-        Pair<Response, Set<String>> pair = projectFlows(projectName);
-        Response resp = pair.getFirst();
-        if (resp != null) return resp;
-
+        if (d == null) return errorResponse(p.getFirst(), projectName);
+        
         Map<String, Map<String, Object>> configs = new HashMap<>();
+        Set<String> flowIds = Optional.ofNullable(d.getDetails().getFlowsError())
+                .map(Map::keySet).orElse(Collections.emptySet());
 
-        for (String qname : pair.getSecond()) {
+        for (String qname : flowIds) {
             Map<String, Object> config = Optional.ofNullable(flowService.getFlowByName(qname))
                     .map(f -> f.getMetadata().getProperties()).orElse(null);
 
@@ -197,8 +177,14 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
                 configs.put(qname, config);
             }
         }
-        //Use own mapper so any empty maps that may be found inside flows configurations are not ignored 
-        return Response.ok(mapper.writeValueAsString(configs)).build();
+        //Use own mapper so any empty maps/nulls that may be found inside flows configurations are not
+        //ignored. Using @JsonInclude(Include.ALWAYS) in FlowMetadata#properties did not help
+        try {
+            return Response.ok(mapper.writeValueAsString(configs)).build();
+        } catch (JsonProcessingException e) {
+            logger.error(e.getMessage(), e);
+            return Response.serverError().build();
+        }
 
     }
 
@@ -215,20 +201,22 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.AGAMA_WRITE_ACCESS }, groupScopes = {},
             superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @Path(ApiConstants.CONFIGS + ApiConstants.NAME_PARAM_PATH)
-    public Response setConfigs(@Parameter(description = "Agama project name") @PathParam(ApiConstants.NAME) @NotNull String projectName,
+    public Response setConfigs(@Parameter(description = "Agama project name") @PathParam(ApiConstants.NAME) String projectName,
             Map<String, Map<String, Object>> flowsConfigs) {
 
         if (flowsConfigs == null) {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity("Mapping of flows vs. configs not provided").build();
         }
-                    
-        Pair<Response, Set<String>> pair = projectFlows(projectName);
-        Response resp = pair.getFirst(); 
-        if (resp != null) return resp;
+
+        Pair<Boolean, Deployment> p = getDeploymentP(projectName);
+        Deployment d = p.getSecond();
         
-        Set<String> flowIds = pair.getSecond();
+        if (d == null) return errorResponse(p.getFirst(), projectName);
+
         Map<String, Boolean> results = new HashMap<>();
+        Set<String> flowIds = Optional.ofNullable(d.getDetails().getFlowsError())
+                .map(Map::keySet).orElse(Collections.emptySet());
 
         for (String qname : flowsConfigs.keySet()) {
             if (qname != null && flowIds.contains(qname)) {
@@ -256,22 +244,33 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
         } 
         return Response.ok(results).build();
 
-    }    
- 
-    private Pair<Response, Set<String>> projectFlows(String projectName) {        
+    }
 
-        Response res = getDeployment(projectName);
-        if (res.getStatus() != Response.Status.OK.getStatusCode()) return new Pair<>(res, null);
+    private Pair<Boolean, Deployment> getDeploymentP(String projectName) {
 
-        try {
-            Deployment d = mapper.readValue(res.getEntity().toString(), Deployment.class);
-            //Retrieve the flows this project contains
-            return new Pair<>(null, d.getDetails().getFlowsError().keySet());
-        } catch (JsonProcessingException e) {
-            logger.error(e.getMessage(), e);
-            return new Pair<>(Response.serverError().build(), null);
-        }
+        Deployment d = ads.getDeployment(projectName);
 
+        if (d == null) return new Pair<>(false, null);
+
+        if (d.getFinishedAt() == null) return new Pair<>(true, null);   
+        
+        return new Pair<>(true, minimize(d));
+        
+    }
+
+    private Response errorResponse(boolean flag, String projectName) {
+        
+        if (flag) return Response.noContent().build();
+        
+        return Response.status(Response.Status.NOT_FOUND)
+                .entity("Unknown project " + projectName).build();
+
+    }
+
+    private Deployment minimize(Deployment d) {
+        //hides some deployment details 
+        d.getDetails().setFolders(null);
+        return d;
     }
 
     @PostConstruct
