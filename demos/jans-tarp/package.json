@@ -1,7 +1,7 @@
 {
-  "name": "gluu.oidc.rp",
-  "version": "0.1.0",
-  "description": "My Chrome Extension",
+  "name": "jans-tarp",
+  "version": "1.0.0",
+  "description": "Relying Party tool in form of a Chrome Extension.",
   "private": true,
   "scripts": {
     "watch": "webpack --mode=development --watch --config config/webpack.config.js",
