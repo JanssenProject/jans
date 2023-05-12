@@ -28,6 +28,7 @@
 
 		<jetty.version>11.0.15</jetty.version>
 		<bouncycastle.version>1.70</bouncycastle.version>
+	</properties>
 
 	<scm>
 		<url>https://github.com/JanssenProject/jans</url>
@@ -61,12 +62,6 @@
 			<url>https://maven.jans.io/maven</url>
 		</repository>
 	</repositories>	
-
-	<scm>
-		<url>https://github.com/JanssenProject/jans-eleven</url>
-		<connection>scm:git:git://github.com/JanssenProject/jans-eleven.git</connection>
-		<developerConnection>scm:git:git@github.com:v/jans-eleven.git</developerConnection>
-	</scm>
 
 	<modules>
 		<module>model</module>
