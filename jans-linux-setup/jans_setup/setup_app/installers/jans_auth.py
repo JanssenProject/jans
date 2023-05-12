@@ -116,7 +116,7 @@ class JansAuthInstaller(JettyInstaller):
         sig_keys = 'RS256 RS384 RS512 ES256 ES256K ES384 ES512 PS256 PS384 PS512'
         enc_keys = 'RSA1_5 RSA-OAEP ECDH-ES'
     
-        jwks = self.gen_openid_data_store_keys(jks_path=self.oxauth_openid_jks_fn, jks_pwd=Config.oxauth_openid_jks_pass, key_expiration=2, key_algs=sig_keys, enc_keys=enc_keys)
+        jwks = self.gen_openid_data_store_keys(self.oxauth_openid_jks_fn, Config.oxauth_openid_jks_pass, key_expiration=2, key_algs=sig_keys, enc_keys=enc_keys)
         self.write_openid_keys(self.oxauth_openid_jwks_fn, jwks)
 
         if Config.get('use_external_key'):

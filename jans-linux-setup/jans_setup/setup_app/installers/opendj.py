@@ -173,9 +173,9 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
         Config.start_auth_after = 'opendj.service'
 
         # Copy opendj-setup.properties so user ldap can find it in /opt/opendj
-        setup_props_fn = os.path.join(Config.ldap_base_dir, 'opendj-setup.properties')
-        shutil.copy("%s/opendj-setup.properties" % Config.output_dir, setup_props_fn)
-        self.chown(setup_props_fn, Config.ldap_user, Config.ldap_group)
+#        setup_props_fn = os.path.join(Config.ldap_base_dir, 'opendj-setup.properties')
+#        shutil.copy("%s/opendj-setup.properties" % Config.output_dir, setup_props_fn)
+#        self.chown(setup_props_fn, Config.ldap_user, Config.ldap_group)
         self.renderTemplateInOut(Config.ldap_setup_properties, Config.templateFolder, Config.output_dir)
         
         ldap_setup_properties_dir, ldap_setup_properties_fn = os.path.split(Config.ldap_setup_properties)
