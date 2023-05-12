@@ -1,4 +1,4 @@
-# <img src="public/icons/icon_48.png" width="45" align="left"> Gluu.oidc.rp
+# <img src="public/icons/icon_48.png" width="45" align="left"> jans-tarp
 
 ## Relying Party tool in form of a Chrome Extension. 
 
@@ -18,7 +18,7 @@ This extension is for convenient testing of authentication flows on browser.
 3. Run `npm run build`. It will create build in `/jans-tarp/build` directory.
 4. To pack the build into a zip file run `npm run pack`. This command will create zip in `/jans-tarp/release`.
 
-# Install in browser
+## Install in browser
 
 1. Go to `Settings --> Extensions` of Chrome browser.
 2. Switch on the `Developer mode`.
