@@ -3,16 +3,65 @@ tags:
   - administration
   - reference
   - database
+  - remote database
 ---
 
-## This content is in progress
+### MySQL as choice for Persistence
+While installing the Jans Server, the administrator will be presented a menu of the possible choices for the persistence layer (LDAP, MySQL, Couchbase, Postgres etc). 
+MySQL database can be installed in 2 possible ways and the administrator will be prompted to make this choice during installation:
+1. **Locally** : 
+<br>The administrator can configure:
+*  RDBM username
+*  RDBM password
+*  RDBM database name
+2. **Remotely** :
+<br>The administrator will be prompted to configure:
+*  RDBM username
+*  RDBM password
+*  RDBM port
+*  RDBM database
+*  RDBM host
 
-The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.
+### Database configuration file name 
+The database configurations are stored in `/etc/gluu/conf/jans-sql.properties` and contain the following information: 
+ ```
+ db.schema.name=jansdb
 
-## Have questions in the meantime?
+ connection.uri=jdbc:mysql://localhost:3306/jansdb?enabledTLSProtocols=TLSv1.2
 
-While this documentation is in progress, you can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussion) or the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). Any questions you have will help determine what information our documentation should cover.
+ connection.driver-property.serverTimezone=UTC+0000
+ # Prefix connection.driver-property.key=value will be coverterd to key=value JDBC driver properties
+ #connection.driver-property.driverProperty=driverPropertyValue
 
-## Want to contribute?
+ #connection.driver-property.useServerPrepStmts=false
+ connection.driver-property.cachePrepStmts=false
+ connection.driver-property.cacheResultSetMetadata=true
+ connection.driver-property.metadataCacheSize=500
+ #connection.driver-property.prepStmtCacheSize=500
+ #connection.driver-property.prepStmtCacheSqlLimit=1024
 
-If you have content you'd like to contribute to this page in the meantime, you can get started with our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/).
+ auth.userName=vi....bo
+ auth.userPassword=qphWF1h....XmUAvn9g==
+
+ # Password hash method
+ password.encryption.method=SSHA-256
+
+ # Connection pool size
+ connection.pool.max-total=40
+ connection.pool.max-idle=15
+ connection.pool.min-idle=5
+
+ # Max time needed to create connection pool in milliseconds
+ connection.pool.create-max-wait-time-millis=20000
+
+ # Max wait 20 seconds
+ connection.pool.max-wait-time-millis=20000
+
+ # Allow to evict connection in pool after 30 minutes
+ connection.pool.min-evictable-idle-time-millis=1800000
+
+ binaryAttributes=objectGUID
+ certificateAttributes=userCertificate
+
+ ```
+
