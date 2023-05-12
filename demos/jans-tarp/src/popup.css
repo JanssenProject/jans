@@ -122,8 +122,8 @@ label.light {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  max-height: 100vh;
-  min-width: 600px
+  min-width: 600px;
+  font-size: 15px;
 }
 
 .required {
