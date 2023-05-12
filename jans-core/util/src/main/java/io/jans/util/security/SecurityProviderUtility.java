@@ -7,12 +7,14 @@
 package io.jans.util.security;
 
 import java.lang.reflect.InvocationTargetException;
+import java.security.InvalidParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
 import java.security.Security;
 
 import javax.crypto.Cipher;
 
+import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -336,5 +338,42 @@ public class SecurityProviderUtility {
 
     public static void setSecurityMode(SecurityModeType securityModeIn) {
         securityMode = securityModeIn;
+    }
+
+    /**
+     * 
+     * @param keyStoreFile
+     * @return
+     */
+    static public SecurityProviderUtility.KeyStorageType solveKeyStorageType(final String keyStoreFile) {
+        if (keyStoreFile == null) {
+            throw new InvalidParameterException("KeyStore File isn't defined. Check configuration.");
+        }
+        SecurityProviderUtility.SecurityModeType securityMode = SecurityProviderUtility.getSecurityMode();
+        if (securityMode == null) {
+            throw new InvalidParameterException("Security Mode wasn't initialized. Call installBCProvider() before");
+        }
+        String keyStoreExt = FilenameUtils.getExtension(keyStoreFile);
+        SecurityProviderUtility.KeyStorageType keyStorageType = SecurityProviderUtility.KeyStorageType.fromExtension(keyStoreExt);
+        boolean ksTypeFound = false;
+        for (SecurityProviderUtility.KeyStorageType ksType : securityMode.getKeystorageTypes()) {
+            if (keyStorageType == ksType) {
+                ksTypeFound = true;
+                break;
+            }
+        }
+        if (!ksTypeFound) {
+            switch (securityMode) {
+            case BCFIPS_SECURITY_MODE: {
+                keyStorageType =  SecurityProviderUtility.KeyStorageType.BCFKS_KS;
+                break;
+            }
+            case BCPROV_SECURITY_MODE: {
+                keyStorageType = SecurityProviderUtility.KeyStorageType.PKCS12_KS;
+                break;
+            }
+            }
+        }
+        return keyStorageType;
     }
 }

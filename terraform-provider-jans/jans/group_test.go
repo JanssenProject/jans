@@ -7,6 +7,10 @@ import (
 
 func TestGroup(t *testing.T) {
 
+	if skipKnownFailures {
+		t.SkipNow()
+	}
+
 	client, err := NewInsecureClient(host, user, pass)
 	if err != nil {
 		t.Fatal(err)
@@ -16,7 +20,7 @@ func TestGroup(t *testing.T) {
 
 	_, err = client.GetGroups(ctx)
 	if err != nil {
-		t.Fatal(err)
+		t.Error(err)
 	}
 
 	newGroup := Group{

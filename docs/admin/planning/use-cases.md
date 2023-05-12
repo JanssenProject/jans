@@ -1,8 +1,9 @@
 ---
 tags:
-  - architecture
-  - use-cases
+  - administration
   - planning
+  - use-cases
+  - architecture
 ---
 
 ## Browser Single Sign-On (B-SS0)
@@ -127,7 +128,7 @@ is still an important security paradigm. So it makes sense to people that the
 place where you store information about a person's roles, is where you define
 policies about what resources a role can access (i.e. policies). Recently,
 centralized authorization has had an active resurgence. Companies like
-[Styra][https://www.styra.com/], [Oso](https://www.osohq.com/), and
+[Styra](https://www.styra.com/), [Oso](https://www.osohq.com/), and
 [HashiCorp](https://www.boundaryproject.io/) have introduced innovative
 centralized authorization software. These systems, acting as a "policy decision
 point", enable you to define policies, and can evaluate these policies at

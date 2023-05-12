@@ -14,6 +14,7 @@ public class SecurityProviderUtilityTest extends BaseTest {
         showTitle("installBCProvider_silent_validInstance");
         SecurityProviderUtility.installBCProvider(true);
         assertNotNull(SecurityProviderUtility.getBCProvider());
+        assertNotNull(SecurityProviderUtility.getSecurityMode());
     }
 
     @Test
@@ -21,5 +22,6 @@ public class SecurityProviderUtilityTest extends BaseTest {
         showTitle("installBCProvider_Nosilent_validInstance");
         SecurityProviderUtility.installBCProvider();
         assertNotNull(SecurityProviderUtility.getBCProvider());
+        assertNotNull(SecurityProviderUtility.getSecurityMode());
     }
 }

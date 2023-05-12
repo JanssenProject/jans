@@ -23,51 +23,51 @@ public class SmtpConfiguration implements java.io.Serializable {
     private static final long serialVersionUID = -5675038049444038755L;
 
     @JsonProperty("host")
-    private String host;
+    private String host = null;
 
     @JsonProperty("port")
-    private int port;
+    private int port = 0;
     
-    @JsonProperty("connect-protection")
-    private SmtpConnectProtectionType connectProtection;    
+    @JsonProperty("connect_protection")
+    private SmtpConnectProtectionType connectProtection = null;
 
     @JsonProperty("trust_host")
-    private boolean serverTrust;
+    private boolean serverTrust = false;
 
     @JsonProperty("from_name")
-    private String fromName;
+    private String fromName = null;
 
     @JsonProperty("from_email_address")
-    private String fromEmailAddress;
+    private String fromEmailAddress = null;
 
     @JsonProperty("requires_authentication")
-    private boolean requiresAuthentication;
+    private boolean requiresAuthentication = false;
 
-    @JsonProperty("user_name")
-    private String userName;
+    @JsonProperty("smtp_authentication_account_username")
+    private String smtpAuthenticationAccountUsername = null;
 
-    @JsonProperty("password")
-    private String password;
-
-    @Transient
-    @JsonIgnore
-    private String passwordDecrypted;
-    
-    @JsonProperty("key-store")
-    private String keyStore;
-
-    @JsonProperty("key-store-password")
-    private String keyStorePassword;
+    @JsonProperty("smtp_authentication_account_password")
+    private String smtpAuthenticationAccountPassword = null;
 
     @Transient
     @JsonIgnore
-    private String keyStorePasswordDecrypted;
+    private String smtpAuthenticationAccountPasswordDecrypted = null;
 
-    @JsonProperty("key-store-alias")
-    private String keyStoreAlias;
+    @JsonProperty("key_store")
+    private String keyStore = null;
 
-    @JsonProperty("signing-algorithm")
-    private String signingAlgorithm;
+    @JsonProperty("key_store_password")
+    private String keyStorePassword = null;
+
+    @Transient
+    @JsonIgnore
+    private String keyStorePasswordDecrypted = null;
+
+    @JsonProperty("key_store_alias")
+    private String keyStoreAlias = null;
+
+    @JsonProperty("signing_algorithm")
+    private String signingAlgorithm = null;
 
     public String getHost() {
         return host;
@@ -128,31 +128,31 @@ public class SmtpConfiguration implements java.io.Serializable {
     public boolean isValid() {
         return getHost() != null && getPort() != 0
                 && ((!isRequiresAuthentication())
-                || (getUserName() != null && getPassword() != null));
+                || (getSmtpAuthenticationAccountUsername() != null && getSmtpAuthenticationAccountPassword() != null));
     }
 
-    public String getUserName() {
-        return userName;
+    public String getSmtpAuthenticationAccountUsername() {
+        return smtpAuthenticationAccountUsername;
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
+    public void setSmtpAuthenticationAccountUsername(String smtpAuthenticationAccountUsername) {
+        this.smtpAuthenticationAccountUsername = smtpAuthenticationAccountUsername;
     }
 
-    public String getPassword() {
-        return password;
+    public String getSmtpAuthenticationAccountPassword() {
+        return smtpAuthenticationAccountPassword;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setSmtpAuthenticationAccountPassword(String smtpAuthenticationAccountPassword) {
+        this.smtpAuthenticationAccountPassword = smtpAuthenticationAccountPassword;
     }
 
-    public String getPasswordDecrypted() {
-        return passwordDecrypted;
+    public String getSmtpAuthenticationAccountPasswordDecrypted() {
+        return smtpAuthenticationAccountPasswordDecrypted;
     }
 
-    public void setPasswordDecrypted(String passwordDecrypted) {
-        this.passwordDecrypted = passwordDecrypted;
+    public void setSmtpAuthenticationAccountPasswordDecrypted(String smtpAuthenticationAccountPasswordDecrypted) {
+        this.smtpAuthenticationAccountPasswordDecrypted = smtpAuthenticationAccountPasswordDecrypted;
     }
     
     public SmtpConnectProtectionType[] getConnectProtectionList() {
@@ -198,5 +198,5 @@ public class SmtpConfiguration implements java.io.Serializable {
     public void setSigningAlgorithm(String signingAlgorithm) {
         this.signingAlgorithm = signingAlgorithm;
     }
-    
+
 }

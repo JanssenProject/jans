@@ -58,7 +58,11 @@ class ScimInstaller(JettyInstaller):
         jettyServiceWebapps = os.path.join(self.jetty_base, self.service_name,  'webapps')
 
         src_file = self.source_files[0][0] if Config.profile != SetupProfiles.DISA_STIG else self.source_fips_files[0][0]
-        self.copyFile(src_file, os.path.join(jettyServiceWebapps, '%s%s' % (self.service_name, Path(self.source_files[0][0]).suffix)))            
+        self.copyFile(src_file, os.path.join(jettyServiceWebapps, '%s%s' % (self.service_name, Path(self.source_files[0][0]).suffix)))
+
+
+        if Config.installed_instance and Config.install_config_api:
+            base.current_app.ConfigApiInstaller.install_plugin('scim-plugin')
 
         self.enable()
 

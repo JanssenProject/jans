@@ -39,6 +39,7 @@ calling external APIs
 1. Resource Owner Password Credentials
 1. UMA 2 RPT Authorization Policies
 1. UMA 2 Claims-Gathering
+1. [Fido2 Interception](./scripts/fido2-interception.md) : Interception of attestation and assertion endpoints.
 
 ## Implementation languages - Jython or pure Java
 
@@ -196,9 +197,9 @@ where <library_name> is the name of the library to install.
 
 ### Debugging a Jython script
 
-1. This [article](../interception-scripts-debug-ce) covers the details for debugging a script in a developer environment (CE).
+1. This [article](../developer/interception-scripts-debug-ce.md) covers the details for debugging a script in a developer environment (CE).
 
-2. This [article](../interception-scripts-debug) covers the details for debugging a script in a CN environment.
+2. This [article](../developer/interception-scripts-debug.md) covers the details for debugging a script in a CN environment.
 
 ***
 

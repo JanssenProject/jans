@@ -1,3 +1,5 @@
+import datetime
+
 from types import SimpleNamespace
 from typing import Optional
 
@@ -6,6 +8,7 @@ import prompt_toolkit
 from cli_style import style
 from wui_components.jans_drop_down import DropDownWidget
 from wui_components.jans_spinner import Spinner
+from wui_components.jans_vetrical_nav import JansVerticalNav
 import sys
 
 from wui_components.jans_date_picker import DateSelectWidget
@@ -35,6 +38,12 @@ class DialogUtils:
                 value_ = me.value
             elif isinstance(me, Spinner):
                 value_ = me.value
+            elif isinstance(me, JansVerticalNav):
+                value_ = {lst[0]: lst[1] for lst in me.data}
+                
+            elif isinstance(me, prompt_toolkit.layout.containers.VSplit):
+                for wid in item.children:
+                    self.get_item_data(wid)
             else:
                 return
 
@@ -83,3 +92,12 @@ class DialogUtils:
             return False
 
         return True
+
+
+def fromisoformat(dt_str):
+    dt, _, us = dt_str.partition(".")
+    dt = datetime.datetime.strptime(dt, "%Y-%m-%dT%H:%M:%S")
+    if us:
+        us = int(us.rstrip("Z"), 10)
+        dt = dt + datetime.timedelta(microseconds=us)
+    return dt

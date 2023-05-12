@@ -64,6 +64,9 @@ public class SsaGetAssertBuilder extends BaseAssertBuilder {
                     assertTrue(ssaJson.has(SOFTWARE_ROLES.getName()));
                     assertTrue(ssaJson.has(GRANT_TYPES.getName()));
                     assertTrue(ssaJson.has(EXP.getName()));
+                    assertTrue(ssaJson.has(DESCRIPTION.getName()));
+                    assertTrue(ssaJson.has(ONE_TIME_USE.getName()));
+                    assertTrue(ssaJson.has(ROTATE_SSA.getName()));
                 });
             }
         }

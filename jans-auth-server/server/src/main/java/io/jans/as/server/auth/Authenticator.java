@@ -28,6 +28,7 @@ import io.jans.jsf2.service.FacesService;
 import io.jans.model.AuthenticationScriptUsageType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.security.Credentials;
+import io.jans.util.OxConstants;
 import io.jans.util.StringHelper;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -136,11 +137,12 @@ public class Authenticator {
         }
 
         lastResult = authenticateImpl(servletRequest, true, false, false);
+        logger.debug("authenticate resultCode: {}", lastResult);
 
         if (Constants.RESULT_SUCCESS.equals(lastResult)) {
             return true;
         } else if (Constants.RESULT_FAILURE.equals(lastResult)) {
-            authenticationFailed();
+            authenticationFailed(sessionId);
         } else if (Constants.RESULT_NO_PERMISSIONS.equals(lastResult)) {
             handlePermissionsError();
         } else if (Constants.RESULT_EXPIRED.equals(lastResult)) {
@@ -166,7 +168,7 @@ public class Authenticator {
         if (Constants.RESULT_SUCCESS.equals(lastResult)) {
             return lastResult;
         } else if (Constants.RESULT_FAILURE.equals(lastResult)) {
-            authenticationFailed();
+            authenticationFailed(sessionIdService.getSessionId());
         } else if (Constants.RESULT_NO_PERMISSIONS.equals(lastResult)) {
             handlePermissionsError();
         } else if (Constants.RESULT_EXPIRED.equals(lastResult)) {
@@ -314,7 +316,8 @@ public class Authenticator {
         initCustomAuthenticatorVariables(sessionIdAttributes);
         boolean useExternalAuthenticator = externalAuthenticationService
                 .isEnabled(AuthenticationScriptUsageType.INTERACTIVE);
-        if (useExternalAuthenticator && !StringHelper.isEmpty(this.authAcr)) {
+        if (useExternalAuthenticator && !StringHelper.isEmpty(this.authAcr) &&
+                !OxConstants.SCRIPT_TYPE_INTERNAL_RESERVED_NAME.equalsIgnoreCase(authAcr)) {
             initCustomAuthenticatorVariables(sessionIdAttributes);
             if ((this.authStep == null) || StringHelper.isEmpty(this.authAcr)) {
                 logger.error("Failed to determine authentication mode");
@@ -481,12 +484,16 @@ public class Authenticator {
                 "Create authorization request to start new authentication session.");
     }
 
-    protected void handleScriptError() {
-        handleScriptError(AUTHENTICATION_ERROR_MESSAGE);
+    protected void handleScriptError(SessionId sessionId) {
+        handleScriptError(sessionId, AUTHENTICATION_ERROR_MESSAGE);
     }
 
-    protected void handleScriptError(String facesMessageId) {
-        errorHandlerService.handleError(facesMessageId, AuthorizeErrorResponseType.INVALID_AUTHENTICATION_METHOD,
+    protected void handleScriptError(SessionId sessionId, String facesMessageId) {
+        final AuthorizeErrorResponseType errorType = sessionId == null ?
+                AuthorizeErrorResponseType.AUTHENTICATION_SESSION_INVALID :
+                AuthorizeErrorResponseType.INVALID_AUTHENTICATION_METHOD;
+
+        errorHandlerService.handleError(facesMessageId, errorType,
                 "Contact administrator to fix specific ACR method issue.");
     }
 
@@ -578,7 +585,7 @@ public class Authenticator {
         if (Constants.RESULT_SUCCESS.equals(lastResult)) {
             return lastResult;
         } else if (Constants.RESULT_FAILURE.equals(lastResult)) {
-            handleScriptError();
+            handleScriptError(sessionId);
         } else if (Constants.RESULT_NO_PERMISSIONS.equals(lastResult)) {
             handlePermissionsError();
         } else if (Constants.RESULT_EXPIRED.equals(lastResult)) {
@@ -604,7 +611,7 @@ public class Authenticator {
         }
 
         initCustomAuthenticatorVariables(sessionIdAttributes);
-        if (StringHelper.isEmpty(this.authAcr)) {
+        if (StringHelper.isEmpty(this.authAcr) || OxConstants.SCRIPT_TYPE_INTERNAL_RESERVED_NAME.equalsIgnoreCase(this.authAcr)) {
             return Constants.RESULT_SUCCESS;
         }
 
@@ -757,9 +764,9 @@ public class Authenticator {
         this.authAcr = sessionIdAttributes.get(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE);
     }
 
-    private boolean authenticationFailed() {
+    private boolean authenticationFailed(SessionId sessionId) {
         addMessage(FacesMessage.SEVERITY_ERROR, "login.errorMessage");
-        handleScriptError(null);
+        handleScriptError(sessionId);
         return false;
     }
 

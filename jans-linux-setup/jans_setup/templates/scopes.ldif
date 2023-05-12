@@ -119,6 +119,17 @@ jansScopeTyp: openid
 objectClass: top
 objectClass: jansScope
 
+dn: inum=6D91,ou=scopes,o=jans
+description: Introspection
+displayName: introspection
+inum: 6D91
+jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
+jansDefScope: false
+jansId: introspection
+jansScopeTyp: openid
+objectClass: top
+objectClass: jansScope
+
 dn: inum=7D90,ou=scopes,o=jans
 description: revoke_session scope which is required to be able call /revoke_session endpoint
 displayName: revoke_session
@@ -138,6 +149,17 @@ jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigu
 jansClaim: inum=6DA6,ou=attributes,o=jans
 jansDefScope: false
 jansId: mobile_phone
+jansScopeTyp: openid
+objectClass: top
+objectClass: jansScope
+
+dn: inum=C4F4,ou=scopes,o=jans
+description: Expire OAuth 2.0 Refresh Token when session ends.
+displayName: online_access
+inum: C4F4
+jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
+jansDefScope: true
+jansId: online_access
 jansScopeTyp: openid
 objectClass: top
 objectClass: jansScope

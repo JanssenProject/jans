@@ -37,7 +37,7 @@ criteria to select the user. If there are multiple users matching the given crit
 ## Disabling The Endpoint Using Feature Flag
 
 `Session revocation` endpoint can be enabled or disable using [REVOKE_SESSION feature flag](../../reference/json/feature-flags/janssenauthserver-feature-flags.md#revokesession).
-Use [Janssen Text-based UI(TUI)](../../config-guide/tui.md) or [Janssen command-line interface](../../config-guide/jans-cli/README.md) to perform this task.
+Use [Janssen Text-based UI(TUI)](../../config-guide/jans-tui/README.md) or [Janssen command-line interface](../../config-guide/jans-cli/README.md) to perform this task.
 
 When using TUI, navigate via `Auth Server`->`Properties`->`enabledFeatureFlags` to screen below. From here, enable or
 disable `REVOKE_SESSION` flag as required.

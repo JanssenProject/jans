@@ -15,7 +15,7 @@ import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.uma.persistence.UmaResource;
 import io.jans.as.persistence.model.Scope;
 import io.jans.configapi.rest.model.CustomScope;
-import io.jans.configapi.core.model.SearchRequest;
+import io.jans.model.SearchRequest;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;
@@ -26,10 +26,7 @@ import jakarta.inject.Inject;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -135,6 +132,22 @@ public class ScopeService {
             return new ArrayList<>();
         }
     }
+    
+    public List<Scope> searchScopesById(Set<String> scopeIds) {
+        logger.debug("Scope to search based on scopeIds:{}",scopeIds);
+        try {
+            if(scopeIds==null || scopeIds.isEmpty()) {
+                return Collections.emptyList();
+            }
+        Filter[] filters = scopeIds.stream().map(id -> Filter.createEqualityFilter("jansId", id))
+                .collect(Collectors.toList()).toArray(new Filter[]{});
+        
+            return persistenceEntryManager.findEntries(getDnForScope(null), Scope.class, Filter.createORFilter(filters));
+        } catch (Exception e) {
+            logger.error("No scopes found by Ids: " + scopeIds, e);
+            return new ArrayList<>();
+        }
+    }
 
     public Scope getScopeByDn(String dn) {
         return persistenceEntryManager.find(Scope.class, dn);
@@ -165,7 +178,7 @@ public class ScopeService {
 
             return scopes;
         } catch (Exception e) {
-            logger.error("No scopes found by pattern: " + pattern, e);
+            logger.error("No scopes found by patterns: " + pattern, e);
             return new ArrayList<>();
         }
     }

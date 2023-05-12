@@ -86,18 +86,18 @@ class JansAuthInstaller(JettyInstaller):
         if Config.profile == SetupProfiles.DISA_STIG:
             self.extract_bcfips_jars()
             Config.init_ext()
-            
-            self.logIt("Config.opendj_truststore_format = %s" % Config.opendj_truststore_format)            
+
+            self.logIt("Config.opendj_truststore_format = %s" % Config.opendj_truststore_format)
 
     def install(self):
         self.logIt("Copying auth.war into jetty webapps folder...")
-
+        self.make_pairwise_calculation_salt()
         self.init_key_gen()
         self.make_pairwise_calculation_salt()
         self.installJettyService(self.jetty_app_configuration[self.service_name], True)
 
         src_file = self.source_files[0][0] if Config.profile != SetupProfiles.DISA_STIG else self.source_fips_files[0][0]
-        self.copyFile(src_file, os.path.join(self.jetty_service_webapps, '%s%s' % (self.service_name, Path(self.source_files[0][0]).suffix)))        
+        self.copyFile(src_file, os.path.join(self.jetty_service_webapps, '%s%s' % (self.service_name, Path(self.source_files[0][0]).suffix)))
 
         self.external_libs()
         self.setup_agama()
@@ -116,12 +116,11 @@ class JansAuthInstaller(JettyInstaller):
         sig_keys = 'RS256 RS384 RS512 ES256 ES256K ES384 ES512 PS256 PS384 PS512'
         enc_keys = 'RSA1_5 RSA-OAEP ECDH-ES'
     
-        jwks = self.gen_openid_data_store_keys(self.oxauth_openid_jks_fn, Config.oxauth_openid_jks_pass, key_expiration=2, key_algs=sig_keys, enc_keys=enc_keys)
+        jwks = self.gen_openid_data_store_keys(jks_path=self.oxauth_openid_jks_fn, jks_pwd=Config.oxauth_openid_jks_pass, key_expiration=2, key_algs=sig_keys, enc_keys=enc_keys)
         self.write_openid_keys(self.oxauth_openid_jwks_fn, jwks)
 
         if Config.get('use_external_key'):
             self.import_openbanking_key()
-
 
     def get_config_api_scopes(self):
         scopes_def = base.current_app.ConfigApiInstaller.get_scope_defs()
@@ -299,3 +298,4 @@ class JansAuthInstaller(JettyInstaller):
             self.logIt("Can't determine key generator and/or key exporter path form {}".format(client_file), True, True)
         else:
             self.logIt("Key generator path was determined as {}".format(Config.non_setup_properties['key_export_path']))
+

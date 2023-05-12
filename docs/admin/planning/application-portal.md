@@ -2,6 +2,7 @@
 tags:
   - administration
   - planning
+  - portal
 ---
 
 An application portal ("portal") is a website which displays all the

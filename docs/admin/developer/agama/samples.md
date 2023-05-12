@@ -52,7 +52,7 @@ Source code [here](https://github.com/JanssenProject/jans/raw/main/docs/admin/de
 
 ## Email OTP authentication
 
-This is a two-stepped flow where the end-user initially is prompted to enter a username and corresponding password. Upon successful validation and assuming the user has an e-mail designated in his profile, a message with a one-time passcode (OTP) is sent to his inbox. The user is expected to enter the code in the browser to complete the authentication.
+This is a two-stepped flow where the end-user initially is prompted to enter a username and corresponding password. Upon successful validation and assuming the user has an e-mail designated in his profile, a message with a one-time passcode (OTP) is sent to his inbox. The user is expected to enter the code in the browser to complete the authentication. Note your server is required to have [SMTP settings](#smtp-configurations) set. 
 
 ### Implementation
 
@@ -77,7 +77,7 @@ Source code [here](https://github.com/JanssenProject/jans/raw/main/docs/admin/de
 
 - Lines 16-18. Initializes utility variables and declares that the block of indented statements (lines 20-35) will be executed repeatedly three times at most
 
-- Lines 20-22. Sends a message with a passcode to the e-mail of the user (stored in variable `email`) by calling method `send` of class `EmailOTPUtil`. If delivery was successful this method returns the passcode sent, otherwise `null`. The value is store in `otpCode` variable
+- Lines 20-22. Sends a message with a passcode to the e-mail of the user (stored in variable `email`) by calling method `send` of class `EmailOTPUtil`. If delivery was successful this method returns the passcode sent, otherwise `null`. The value is stored in `otpCode` variable. For this code to work properly you have to configure the **SMTP settings** in your server as explaind [below](#smtp-configurations)
 
 - Lines 24-26. If delivery failed, the flow is finished
 
@@ -100,6 +100,34 @@ Source code [here](https://github.com/JanssenProject/jans/raw/main/docs/admin/de
 - A button with `type=submit` and `id=resend` rendered as a hypertext link (around line 47). Only when the link is clicked, `resend` parameter will be part of the request sent to the server
 
 If the user presses the enter key when the focus is on the text field, the form is submitted by means of the standard submission button.
+
+### SMTP configurations
+
+To supply details of the mail server to employ for message delivery, create a json file like the below with your specific details:
+
+```
+{
+  "valid": true,
+  "host": "outgoing-smtp-server.acme.co",
+  "port": 587,
+  "requires_ssl": true,
+  "trust_host": true,
+  "from_name": "Acme nofications",
+  "from_email_address": "no-reply@acme.co",
+  "requires_authentication": true,
+  "user_name": "admin@acme.co",
+  "password": "secret"
+}
+```
+
+Then log into your server, transfer the file to some location, `cd` to it, and run:
+
+```
+python3 /opt/jans/jans-cli/config-cli.py --operation-id=post-config-smtp --data path/to/your/file.json
+```
+
+If you had previously set a configuration, you may have to pass `put-config-smtp` instead for `operation-id`.
+
 
 ## Combined registration and authentication flow
 

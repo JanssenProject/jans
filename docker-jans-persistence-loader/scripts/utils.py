@@ -10,6 +10,9 @@ from jans.pycloudlib.utils import encode_text
 from jans.pycloudlib.utils import safe_render
 from jans.pycloudlib.utils import generate_base64_contents
 from jans.pycloudlib.utils import get_random_chars
+from jans.pycloudlib.utils import exec_cmd
+
+from hooks import merge_auth_keystore_ctx_hook
 
 
 def render_ldif(src, dst, ctx):
@@ -73,7 +76,8 @@ def get_base_ctx(manager):
     memcached_url = os.environ.get('CN_MEMCACHED_URL', 'localhost:11211')
     scim_enabled = os.environ.get("CN_SCIM_ENABLED", False)
 
-    ctx = {
+    # finalize ctx
+    return {
         'cache_provider_type': cache_type,
         'redis_url': redis_url,
         'redis_type': redis_type,
@@ -100,8 +104,7 @@ def get_base_ctx(manager):
         'hostname': manager.config.get('hostname'),
         'idp_client_id': manager.config.get('idp_client_id'),
         'idpClient_encoded_pw': manager.secret.get('idpClient_encoded_pw'),
-        'auth_openid_key_base64': manager.secret.get('auth_openid_key_base64'),
-        # "encoded_ldap_pw": manager.secret.get('encoded_ldap_pw'),
+        'oxauth_openid_key_base64': manager.secret.get('auth_openid_key_base64'),
         "encoded_admin_password": manager.secret.get('encoded_admin_password'),
 
         'admin_email': manager.config.get('admin_email'),
@@ -117,7 +120,8 @@ def get_base_ctx(manager):
         "pairwiseCalculationKey": manager.secret.get("pairwiseCalculationKey"),
         "pairwiseCalculationSalt": manager.secret.get("pairwiseCalculationSalt"),
         "default_openid_jks_dn_name": manager.config.get("default_openid_jks_dn_name"),
-        "auth_openid_jks_pass": manager.secret.get("auth_openid_jks_pass"),
+        # maintain compatibility with upstream template
+        "oxauth_openid_jks_pass": manager.secret.get("auth_openid_jks_pass"),
         "auth_legacyIdTokenClaims": manager.config.get("auth_legacyIdTokenClaims"),
         "auth_openidScopeBackwardCompatibility": manager.config.get("auth_openidScopeBackwardCompatibility"),
 
@@ -126,24 +130,6 @@ def get_base_ctx(manager):
         "jca_client_encoded_pw": manager.secret.get("jca_client_encoded_pw"),
     }
 
-    # JWKS URI
-    jwks_uri = f"https://{ctx['hostname']}/jans-auth/restv1/jwks"
-    auth_openid_jks_fn = manager.config.get("auth_openid_jks_fn")
-
-    ext_jwks_uri = os.environ.get("CN_OB_EXT_SIGNING_JWKS_URI", "")
-    if ext_jwks_uri:
-        jwks_uri = ext_jwks_uri
-        auth_openid_jks_fn = "/etc/certs/ob-ext-signing.jks"
-
-    ctx["jwks_uri"] = jwks_uri
-    ctx["auth_openid_jks_fn"] = auth_openid_jks_fn
-
-    # static kid
-    ctx["staticKid"] = os.environ.get("CN_OB_STATIC_KID", "")
-
-    # finalize ctx
-    return ctx
-
 
 def merge_extension_ctx(ctx: dict[str, _t.Any]) -> dict[str, _t.Any]:
     """Merge extension script contexts into given contexts.
@@ -151,10 +137,7 @@ def merge_extension_ctx(ctx: dict[str, _t.Any]) -> dict[str, _t.Any]:
     :param ctx: A key-value pairs of existing contexts.
     :returns: Merged contexts.
     """
-    if os.environ.get("CN_DISTRIBUTION", "default") == "openbanking":
-        basedirs = ["/app/openbanking/static/extension"]
-    else:
-        basedirs = ["/app/static/extension", "/app/script-catalog"]
+    basedirs = ["/app/static/extension", "/app/script-catalog"]
 
     for basedir in basedirs:
         filepath = Path(basedir)
@@ -177,13 +160,10 @@ def merge_auth_ctx(ctx):
 
     basedir = '/app/templates/jans-auth'
     file_mappings = {
-        'auth_static_conf_base64': 'jans-auth-static-conf.json',
-        'auth_error_base64': 'jans-auth-errors.json',
-        "auth_config_base64": "jans-auth-config.json",
+        'oxauth_static_conf_base64': 'jans-auth-static-conf.json',
+        'oxauth_error_base64': 'jans-auth-errors.json',
+        "oxauth_config_base64": "jans-auth-config.json",
     }
-
-    if os.environ.get("CN_DISTRIBUTION", "default") == "openbanking":
-        file_mappings["auth_config_base64"] = "jans-auth-config.ob.json"
 
     for key, file_ in file_mappings.items():
         file_path = os.path.join(basedir, file_)
@@ -223,81 +203,11 @@ def merge_jans_cli_ctx(manager, ctx):
 def prepare_template_ctx(manager):
     ctx = get_base_ctx(manager)
     ctx = merge_extension_ctx(ctx)
+    ctx = merge_auth_keystore_ctx_hook(manager, ctx)
     ctx = merge_auth_ctx(ctx)
     ctx = merge_jans_cli_ctx(manager, ctx)
-    return ctx
-
-
-def get_ldif_mappings(group, optional_scopes=None):
-    from jans.pycloudlib.persistence.utils import PersistenceMapper
-
-    optional_scopes = optional_scopes or []
-    dist = os.environ.get("CN_DISTRIBUTION", "default")
-
-    def default_files():
-        files = [
-            "base.ldif",
-        ]
-
-        if dist == "openbanking":
-            files += [
-                "attributes.ob.ldif",
-                "scopes.ob.ldif",
-                "scripts.ob.ldif",
-                "configuration.ob.ldif",
-            ]
-        else:
-            files += [
-                "attributes.ldif",
-                "scopes.ldif",
-                "scripts.ldif",
-                "configuration.ldif",
-                "o_metric.ldif",
-                "agama.ldif",
-            ]
-
-        files += [
-            "jans-auth/role-scope-mappings.ldif",
-            "jans-cli/client.ldif",
-            "jans-auth/configuration.ldif",
-        ]
-
-        return files
-
-    def user_files():
-        files = []
-
-        if dist != "openbanking":
-            files += [
-                "jans-auth/people.ldif",
-                "jans-auth/groups.ldif",
-            ]
-        return files
-
-    def site_files():
-        files = []
-
-        if dist != "openbanking":
-            files += [
-                "o_site.ldif",
-            ]
-        return files
-
-    ldif_mappings = {
-        "default": default_files(),
-        "user": user_files(),
-        "site": site_files(),
-        "cache": [],
-        "token": [],
-        "session": [],
-    }
-
-    mapper = PersistenceMapper()
-    ldif_mappings = {
-        mapping: files for mapping, files in ldif_mappings.items()
-        if mapping in mapper.groups()[group]
-    }
-    return ldif_mappings
+    ctx = merge_smtp_ctx(manager, ctx)
+    return ctx  # noqa: R504
 
 
 def get_config_api_scopes(path="/app/static/config-api-rs-protect.json"):
@@ -332,3 +242,59 @@ def get_role_scope_mappings(path="/app/templates/jans-auth/role-scope-mappings.j
             ))
             break
     return role_mapping
+
+
+def merge_smtp_ctx(manager, ctx):
+    encoded_salt = manager.secret.get("encoded_salt")
+    jks_fn = "/etc/certs/smtp-keys.pkcs12"
+
+    smtp_jks_pass = manager.secret.get("smtp_jks_pass")
+    if not smtp_jks_pass:
+        smtp_jks_pass = get_random_chars()
+        manager.secret.set("smtp_jks_pass", smtp_jks_pass)
+
+    smtp_jks_pass_enc = manager.secret.get("smtp_jks_pass_enc")
+    if not smtp_jks_pass_enc:
+        smtp_jks_pass_enc = encode_text(smtp_jks_pass, encoded_salt).decode()
+        manager.secret.set("smtp_jks_pass_enc", smtp_jks_pass_enc)
+
+    smtp_signing_alg = manager.config.get("smtp_signing_alg")
+    if not smtp_signing_alg:
+        smtp_signing_alg = "SHA256withECDSA"
+        manager.config.set("smtp_signing_alg", smtp_signing_alg)
+
+    smtp_alias = manager.config.get("smtp_alias")
+    if not smtp_alias:
+        smtp_alias = "smtp_sig_ec256"
+        manager.config.set("smtp_alias", smtp_alias)
+
+    smtp_jks_base64 = manager.secret.get("smtp_jks_base64")
+    if not smtp_jks_base64:
+        cmds = " ".join([
+            "keytool",
+            "-genkeypair",
+            "-alias", smtp_alias,
+            "-keyalg", "ec",
+            "-groupname", "secp256r1",
+            "-sigalg", smtp_signing_alg,
+            "-storetype", "pkcs12",
+            "-keystore", jks_fn,
+            "-storepass", smtp_jks_pass,
+            "-dname", "'CN=SMTP CA Certificate'",
+            "-validity", "365",
+        ])
+        _, err, retcode = exec_cmd(cmds)
+        assert retcode == 0, "Failed to generate JKS keystore; reason={}".format(err.decode())
+
+        with open(jks_fn, "rb") as fr:
+            manager.secret.set("smtp_jks_base64", encode_text(fr.read(), encoded_salt))
+
+    smtp_ctx = {
+        "smtp_jks_fn": jks_fn,
+        "smtp_jks_pass": smtp_jks_pass,
+        "smtp_alias": smtp_alias,
+        "smtp_signing_alg": smtp_signing_alg,
+        "smtp_jks_pass_enc": smtp_jks_pass_enc,
+    }
+    ctx.update(smtp_ctx)
+    return ctx

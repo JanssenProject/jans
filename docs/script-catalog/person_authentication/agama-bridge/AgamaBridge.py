@@ -1,6 +1,9 @@
 # Janssen Project software is available under the Apache 2.0 License (2004). See http://www.apache.org/licenses/ for full text.
 # Copyright (c) 2020, Janssen Project
 #
+
+from com.fasterxml.jackson.databind import ObjectMapper
+
 from io.jans.agama import NativeJansFlowBridge
 from io.jans.agama.engine.misc import FlowUtils
 from io.jans.as.server.security import Identity
@@ -13,6 +16,7 @@ from io.jans.service.cdi.util import CdiUtil
 from io.jans.util import StringHelper
 
 from jakarta.faces.application import FacesMessage
+from java.util import Arrays
 
 import java
 import sys
@@ -22,15 +26,22 @@ class PersonAuthentication(PersonAuthenticationType):
         self.currentTimeMillis = currentTimeMillis
 
     def init(self, customScript, configurationAttributes):
-        print "Agama. Initialization"        
+        print "Agama. Initialization"
+        self.resultParam = "agamaData"
+
         prop = "cust_param_name"
         self.cust_param_name = self.configProperty(configurationAttributes, prop)
         
         if self.cust_param_name == None:
             print "Agama. Custom parameter name not referenced via property '%s'" % prop
             return False
+
+        prop = "default_flow_name"
+        self.default_flow_name = self.configProperty(configurationAttributes, prop)
             
-        print "Agama. Request param '%s' will be used to pass flow inputs" % self.cust_param_name
+        print "Agama. Request param '%s' will be used to pass flow name and inputs" % self.cust_param_name
+        print "Agama. When '%s' is missing, the flow to launch will be '%s'" % (self.cust_param_name, self.default_flow_name)
+
         print "Agama. Initialized successfully"
         return True
 
@@ -78,6 +89,9 @@ class PersonAuthentication(PersonAuthenticationType):
                     if not authenticated:
                         print "Agama. Unable to authenticate %s" % userId
                         return False
+                    
+                    jsonData = CdiUtil.bean(ObjectMapper).writeValueAsString(data) 
+                    CdiUtil.bean(Identity).setWorkingParameter(self.resultParam, jsonData)
             except:
                 print "Agama. Exception: ", sys.exc_info()[1]
                 return False
@@ -100,9 +114,15 @@ class PersonAuthentication(PersonAuthenticationType):
                 return False
                 
             param = session.getSessionAttributes().get(self.cust_param_name) 
-            if param == None:
+            if StringHelper.isEmpty(param):
                 print "Agama. Request param '%s' is missing or has no value" % self.cust_param_name
-                return False
+                
+                param = self.default_flow_name
+                if StringHelper.isEmpty(param):
+                    print "Agama. Default flow name is not set either..." 
+
+                    print "Agama. Unable to determine the Agama flow to launch. Check the docs"
+                    return False
             
             (qn, ins) = self.extractParams(param)
             if qn == None:
@@ -132,7 +152,7 @@ class PersonAuthentication(PersonAuthenticationType):
             return True
         
     def getExtraParametersForStep(self, configurationAttributes, step):
-        return None
+        return Arrays.asList(self.resultParam)
 
     def getCountAuthenticationSteps(self, configurationAttributes):
         return 1

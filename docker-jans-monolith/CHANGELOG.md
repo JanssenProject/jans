@@ -1,5 +1,67 @@
 # Changelog
 
+## [1.0.13-1](https://github.com/JanssenProject/jans/compare/docker-jans-monolith-v1.0.12-1...docker-jans-monolith-v1.0.13-1) (2023-05-10)
+
+
+### Bug Fixes
+
+* **docker-jans-monolith:** add support for using /opt/dist/scripts ([#4810](https://github.com/JanssenProject/jans/issues/4810)) ([a2894ff](https://github.com/JanssenProject/jans/commit/a2894ff72b548e47a3db9aff41f01932d7600c00))
+* **docker-jans-monolith:** incorrect image tag for compose-based deployment ([#4818](https://github.com/JanssenProject/jans/issues/4818)) ([fa0a13d](https://github.com/JanssenProject/jans/commit/fa0a13df16b5071746342188203844744a4435e0))
+* **docker-jans:** sync role-based introspection script ([#4753](https://github.com/JanssenProject/jans/issues/4753)) ([f744330](https://github.com/JanssenProject/jans/commit/f74433098011bb9546d27ca2b55d7e83dc4e0531))
+* prepare for 1.0.13 release ([493478e](https://github.com/JanssenProject/jans/commit/493478e71f6231553c998b48c0f163c7f5869da4))
+
+## [1.0.12-1](https://github.com/JanssenProject/jans/compare/docker-jans-monolith-v1.0.11-1...docker-jans-monolith-v1.0.12-1) (2023-04-18)
+
+
+### Bug Fixes
+
+* adjust bleeding edge images ([4bb0b09](https://github.com/JanssenProject/jans/commit/4bb0b0983984314a51e7b43e547027d5226c84bb))
+* opencontainer labels ([f8b0b36](https://github.com/JanssenProject/jans/commit/f8b0b365600bd700128bb9d92df6de7ba14830b6))
+* prepare for 1.0.12 release ([6f83197](https://github.com/JanssenProject/jans/commit/6f83197705511c39413456acdc64e9136a97ff39))
+
+## [1.0.11-1](https://github.com/JanssenProject/jans/compare/docker-jans-monolith-v1.0.10-1...docker-jans-monolith-v1.0.11-1) (2023-04-05)
+
+
+### Bug Fixes
+
+* prepare for  release ([60775c0](https://github.com/JanssenProject/jans/commit/60775c09dc5ab9996bf80c03dcb457861d48dfb1))
+
+## [1.0.10-1](https://github.com/JanssenProject/jans/compare/docker-jans-monolith-v1.0.9-1...docker-jans-monolith-v1.0.10-1) (2023-03-16)
+
+
+### Features
+
+* **docker-jans:** add client auth scopes ([#4156](https://github.com/JanssenProject/jans/issues/4156)) ([1ae907b](https://github.com/JanssenProject/jans/commit/1ae907b3abda9f2df03cfcab805931fdbd1bfc11))
+
+
+### Bug Fixes
+
+* prepare release for 1.0.10 ([e996926](https://github.com/JanssenProject/jans/commit/e99692692ef04d881468d120f7c7d462568dce36))
+
+## [1.0.9-1](https://github.com/JanssenProject/jans/compare/docker-jans-monolith-v1.0.7-1...docker-jans-monolith-v1.0.9-1) (2023-03-09)
+
+
+### Bug Fixes
+
+* prepare 1.0.9 release ([e6ea522](https://github.com/JanssenProject/jans/commit/e6ea52220824bd6b5d2dca0539d9d515dbeda362))
+* prepare 1.0.9 release ([55f7e0c](https://github.com/JanssenProject/jans/commit/55f7e0c308b869c2c4b5668aca751d022138a678))
+* update next SNAPSHOT and dev ([0df0e7a](https://github.com/JanssenProject/jans/commit/0df0e7ae06af64ac477955119c2522f03e0603c3))
+
+## 1.0.7-1 (2023-02-22)
+
+
+### Features
+
+* add support for postgres testing ([3494925](https://github.com/JanssenProject/jans/commit/34949250f6c06ecf73be30628ee17fecedf70a9d))
+
+
+### Bug Fixes
+
+* **docker-jans-monolith:** use test client and secret ([42c9556](https://github.com/JanssenProject/jans/commit/42c95562cdfe250be893c4f363dc74aadbf05bb7))
+* modify clnId column type ([#3459](https://github.com/JanssenProject/jans/issues/3459)) ([701394c](https://github.com/JanssenProject/jans/commit/701394c3d7463ffb2bd223daf9662921244ad34d))
+* prepare 1.0.7 release ([ce02fd9](https://github.com/JanssenProject/jans/commit/ce02fd9322ab49d5bea4f6e88f316f931e9d2169))
+* prepare for 1.0.6 release ([9e4c8fb](https://github.com/JanssenProject/jans/commit/9e4c8fb4c0a1ef4779934558e8d8d40d8fedbabf))
+
 ## [1.0.6-1](https://github.com/JanssenProject/jans/compare/docker-jans-monolith-v1.0.5-1...docker-jans-monolith-v1.0.6-1) (2023-01-09)
 
 

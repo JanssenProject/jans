@@ -58,8 +58,8 @@ justified.
 **Prerequisite**
 
 1. Create OpenID Connect client with 
-   1. Response Types: ['code', 'id_token]
-   1. Grant Types: ['authorization_code', `implicit`, 'refresh_token']
+   1. Response Types: `['code', 'id_token']`
+   1. Grant Types: `['authorization_code', 'implicit', 'refresh_token']`
    1. Redirect Uri: valid redirect uri which is resolvable by machine which runs this load test
 Change the `FQDN` below and execute:
 ```bash
@@ -98,7 +98,7 @@ cat << EOF > auth_code_client.json
 EOF
 ```
 
-Download or build [config-cli-tui](../config-guide/tui.md) and run:
+Download or build [config-cli-tui](../config-guide/jans-tui/README.md) and run:
 
 ```bash
 # add -noverify if your fqdn is not registered
@@ -106,7 +106,7 @@ Download or build [config-cli-tui](../config-guide/tui.md) and run:
 ```
 
 1. Create users by pattern:
-Set the following [env vars](../../../demos/benchmarking/docker-jans-loadtesting-jmeter/README.md#loading-users) 
+Set the following [env vars](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/README.md#loading-users) 
 
 | ENV                          | Example            |
 |------------------------------|--------------------|
@@ -120,7 +120,7 @@ Set the following [env vars](../../../demos/benchmarking/docker-jans-loadtesting
 | `USER_NUMBER_ENDING_POINT`   | 10000              |
 
 
-Run the following script [add_sequenced_jans_user_rdbm.py](../../../demos/benchmarking/docker-jans-loadtesting-jmeter/scripts/add_users_rdbm.py)
+Run the following script [load_users_rdbms_job.py](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-users/load_users_rdbms_job.yaml)
 
 
 **Threads&RampUp**
@@ -140,7 +140,7 @@ jmeter -n -t Authorization_Code_Flow_jans.jmx
 
 ### Authorization Code Flow jmeter test
 
-For load testing with Authorization Code Flow jmeter test is used located [here](https://github.com/JanssenProject/jans/blob/main/demos/load-testing/jmeter/test/Authorization%20Code%20Flow_jans.jmx)
+For load testing with Authorization Code Flow jmeter test is used located [here](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/scripts/tests/authorization_code_flow.jmx)
 
 1. Configure Script
    1. Open jmeter script by GUI
@@ -163,7 +163,7 @@ If everything was done correctly you should see:
 
 ### Resource Owner Password Grant (ROPC) Flow jmeter test
 
-For load testing with Resource Owner Password Grant (ROPC) Flow jmeter test is used located [here](https://github.com/JanssenProject/jans/blob/main/demos/load-testing/jmeter/test/ResourceOwnerPasswordCredentials_jans.jmx)
+For load testing with Resource Owner Password Grant (ROPC) Flow jmeter test is used located [here](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/scripts/tests/resource_owner_password_credentials.jmx)
 
 1. Configure Script
    1. Open jmeter script by GUI

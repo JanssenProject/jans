@@ -21,12 +21,14 @@ import io.jans.as.server.service.external.ExternalDiscoveryService;
 import io.jans.as.server.service.external.ExternalDynamicScopeService;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.model.GluuAttribute;
+import io.jans.util.OxConstants;
 import jakarta.inject.Inject;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -159,7 +161,7 @@ public class OpenIdConfiguration extends HttpServlet {
 
             jsonObj.put(AUTH_LEVEL_MAPPING, createAuthLevelMapping());
 
-            Util.putArray(jsonObj, externalAuthenticationService.getAcrValuesList(), ACR_VALUES_SUPPORTED);
+            Util.putArray(jsonObj, getAcrValuesList(), ACR_VALUES_SUPPORTED);
 
             Util.putArray(jsonObj, appConfiguration.getSubjectTypesSupported(), SUBJECT_TYPES_SUPPORTED);
 
@@ -249,6 +251,17 @@ public class OpenIdConfiguration extends HttpServlet {
         }
     }
 
+    public List<String> getAcrValuesList() {
+        return getAcrValuesList(externalAuthenticationService.getAcrValuesList());
+    }
+
+    public static List<String> getAcrValuesList(final List<String> scriptAliases) {
+        if (!scriptAliases.contains(OxConstants.SCRIPT_TYPE_INTERNAL_RESERVED_NAME)) {
+            scriptAliases.add(OxConstants.SCRIPT_TYPE_INTERNAL_RESERVED_NAME);
+        }
+        return scriptAliases;
+    }
+
     @SuppressWarnings("java:S3776")
     private void addMtlsAliases(JSONObject jsonObj) {
         JSONObject aliases = new JSONObject();
@@ -292,6 +305,16 @@ public class OpenIdConfiguration extends HttpServlet {
     }
 
     public static void filterOutKeys(JSONObject jsonObj, AppConfiguration appConfiguration) {
+
+        // filter out keys with blank values
+        if (BooleanUtils.isFalse(appConfiguration.getAllowBlankValuesInDiscoveryResponse())) {
+            for (String key : new HashSet<>(jsonObj.keySet())) {
+                if (jsonObj.get(key) == null || StringUtils.isBlank(jsonObj.optString(key))) {
+                    jsonObj.remove(key);
+                }
+            }
+        }
+
         final List<String> denyKeys = appConfiguration.getDiscoveryDenyKeys();
         if (!denyKeys.isEmpty()) {
             for (String key : new HashSet<>(jsonObj.keySet())) {

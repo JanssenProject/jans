@@ -1,5 +1,94 @@
 # Changelog
 
+## [1.0.13](https://github.com/JanssenProject/jans/compare/jans-fido2-v1.0.12...jans-fido2-v1.0.13) (2023-05-10)
+
+
+### Features
+
+* **jans-fido2:** enhancements to getHashedBuffer and tpm process method ([#4603](https://github.com/JanssenProject/jans/issues/4603)) ([a367d6e](https://github.com/JanssenProject/jans/commit/a367d6efce450ad15b812497235b570b307e9509))
+* **jans-fido2:** interception scripts issue 1485, swagger updates ([#4543](https://github.com/JanssenProject/jans/issues/4543)) ([80274ff](https://github.com/JanssenProject/jans/commit/80274ffd1a20318988d9cc99ee015c5c7d5984b7))
+
+
+### Bug Fixes
+
+* prepare for 1.0.13 release ([493478e](https://github.com/JanssenProject/jans/commit/493478e71f6231553c998b48c0f163c7f5869da4))
+
+## [1.0.12](https://github.com/JanssenProject/jans/compare/jans-fido2-v1.0.11...jans-fido2-v1.0.12) (2023-04-18)
+
+
+### Bug Fixes
+
+* prepare for 1.0.12 release ([6f83197](https://github.com/JanssenProject/jans/commit/6f83197705511c39413456acdc64e9136a97ff39))
+
+## [1.0.11](https://github.com/JanssenProject/jans/compare/jans-fido2-v1.0.10...jans-fido2-v1.0.11) (2023-04-05)
+
+
+### Features
+
+* loggerService should update root log level [#4251](https://github.com/JanssenProject/jans/issues/4251) ([#4252](https://github.com/JanssenProject/jans/issues/4252)) ([20264a2](https://github.com/JanssenProject/jans/commit/20264a2f61e7b49015bbf6f7b93e9d241e3176a1))
+* restore status/errorMessage and timeout attributes ([#4240](https://github.com/JanssenProject/jans/issues/4240)) ([1d49d68](https://github.com/JanssenProject/jans/commit/1d49d683c2b2c9da5961ef2aa312c47b59864a0f))
+* rests for cancel ([#4212](https://github.com/JanssenProject/jans/issues/4212)) ([12c4dff](https://github.com/JanssenProject/jans/commit/12c4dfffcbdd3ccb6814885d4190159d5628fde3))
+* update fido2-server to conform latest FIDO2 conformance ([#4346](https://github.com/JanssenProject/jans/issues/4346)) ([29147cb](https://github.com/JanssenProject/jans/commit/29147cb0c3f5dd8dbda039f8613e58fa46f23579)), closes [#4239](https://github.com/JanssenProject/jans/issues/4239)
+
+
+### Bug Fixes
+
+* add documentDomain to assertion response ([#4392](https://github.com/JanssenProject/jans/issues/4392)) ([b567726](https://github.com/JanssenProject/jans/commit/b56772605044e8eb7531ff9ec742db3b9855879a))
+* authenticatorAttachment should be not mandatory ([#4232](https://github.com/JanssenProject/jans/issues/4232)) ([aec8482](https://github.com/JanssenProject/jans/commit/aec848215d9869eb684e2af5d8eed7ea022c748c))
+* prepare for  release ([60775c0](https://github.com/JanssenProject/jans/commit/60775c09dc5ab9996bf80c03dcb457861d48dfb1))
+* Unable to send emails issue 4121 ([#4333](https://github.com/JanssenProject/jans/issues/4333)) ([70a566b](https://github.com/JanssenProject/jans/commit/70a566b67f660750bf742f19ee127f79b2db8930))
+* user real URL  in documentDomain ([#4394](https://github.com/JanssenProject/jans/issues/4394)) ([6f66cb8](https://github.com/JanssenProject/jans/commit/6f66cb860003ba6fccf942fb8f4969ac6dd54295))
+
+## [1.0.10](https://github.com/JanssenProject/jans/compare/jans-fido2-v1.0.9...jans-fido2-v1.0.10) (2023-03-16)
+
+
+### Bug Fixes
+
+* **jans-fido2:** handling exception fido2 get endpoints by invalid params ([#4139](https://github.com/JanssenProject/jans/issues/4139)) ([a50d2af](https://github.com/JanssenProject/jans/commit/a50d2af5eea4f88632870546eb9e4505cd5c7e2b))
+* prepare release for 1.0.10 ([e996926](https://github.com/JanssenProject/jans/commit/e99692692ef04d881468d120f7c7d462568dce36))
+
+## [1.0.9](https://github.com/JanssenProject/jans/compare/jans-fido2-v1.0.8...jans-fido2-v1.0.9) (2023-03-09)
+
+
+### Bug Fixes
+
+* prepare 1.0.9 release ([e6ea522](https://github.com/JanssenProject/jans/commit/e6ea52220824bd6b5d2dca0539d9d515dbeda362))
+* prepare 1.0.9 release ([55f7e0c](https://github.com/JanssenProject/jans/commit/55f7e0c308b869c2c4b5668aca751d022138a678))
+* update next SNAPSHOT and dev ([0df0e7a](https://github.com/JanssenProject/jans/commit/0df0e7ae06af64ac477955119c2522f03e0603c3))
+
+## [1.0.8](https://github.com/JanssenProject/jans/compare/jans-fido2-v1.0.7...jans-fido2-v1.0.8) (2023-03-01)
+
+
+### Bug Fixes
+
+* fix user publicKey search ([#3982](https://github.com/JanssenProject/jans/issues/3982)) ([d0584dd](https://github.com/JanssenProject/jans/commit/d0584dd3b67039c3bff76649547401e50012cce5))
+
+## 1.0.7 (2023-02-22)
+
+
+### Features
+
+* add authentication SG flow tests ([#3877](https://github.com/JanssenProject/jans/issues/3877)) ([d5c3fac](https://github.com/JanssenProject/jans/commit/d5c3fac2ee16d0d8276da880b78cc5e676a2f302))
+* add debug SG logging ([#3730](https://github.com/JanssenProject/jans/issues/3730)) ([a0c9ca2](https://github.com/JanssenProject/jans/commit/a0c9ca28e3558a8c85502d134a81d9f5bdd78b12))
+* add Jupiter+Weld+Mockito+Extension to Fido2 ([#3875](https://github.com/JanssenProject/jans/issues/3875)) ([0152435](https://github.com/JanssenProject/jans/commit/01524358cbd720ad547c6b0d622c2cc32e76a125))
+* add more loggers ([#3742](https://github.com/JanssenProject/jans/issues/3742)) ([919bc86](https://github.com/JanssenProject/jans/commit/919bc869fd3f2e0be143c5bfddc7ba3629178e86))
+* optmize cleander job ([#3737](https://github.com/JanssenProject/jans/issues/3737)) ([2a864d9](https://github.com/JanssenProject/jans/commit/2a864d98b0d3e1983aead62ef9f95e6191248de5))
+* support cancel request ([#3733](https://github.com/JanssenProject/jans/issues/3733)) ([2741e51](https://github.com/JanssenProject/jans/commit/2741e511bc7244a764a43d4dd8d4bb13da87aabb))
+* Support Super Gluu one step authentication to Fido2 server [#3593](https://github.com/JanssenProject/jans/issues/3593) ([#3599](https://github.com/JanssenProject/jans/issues/3599)) ([c013b16](https://github.com/JanssenProject/jans/commit/c013b161f2eb47f5952cbb80c8740f8d62d302c3))
+
+
+### Bug Fixes
+
+* cbor data stream lenght calculatro return wrong lengh [#3614](https://github.com/JanssenProject/jans/issues/3614) ([#3615](https://github.com/JanssenProject/jans/issues/3615)) ([22065ea](https://github.com/JanssenProject/jans/commit/22065ea14fcaa523531a738f53d6659a790155c5))
+* **fido2-client:** conflict of log4j config ([#3636](https://github.com/JanssenProject/jans/issues/3636)) ([77412d5](https://github.com/JanssenProject/jans/commit/77412d5ca1be8dd99797489db22a4e22c7a5cc13))
+* fix authenticatorData encoding ([#3815](https://github.com/JanssenProject/jans/issues/3815)) ([687cb2a](https://github.com/JanssenProject/jans/commit/687cb2a3b12980f360a113c88e7cc295c1a4a752))
+* fix fmt name ([#3900](https://github.com/JanssenProject/jans/issues/3900)) ([4a6a0c1](https://github.com/JanssenProject/jans/commit/4a6a0c19126220ae783a343d4fe1a54c99ed4475))
+* fixes for cancel support ([#3735](https://github.com/JanssenProject/jans/issues/3735)) ([3e64530](https://github.com/JanssenProject/jans/commit/3e64530f3196e4f396c7e8a95d6fd722efa9a816))
+* **jans-auth-server:** jansApp attribute only relevant for SG ([#3782](https://github.com/JanssenProject/jans/issues/3782)) ([6153a13](https://github.com/JanssenProject/jans/commit/6153a139d584e69088f8d9202ce072ae10a2dc73))
+* **jans-fido2:** RegistrationPersistenceService implemntation ([#3728](https://github.com/JanssenProject/jans/issues/3728)) ([d5b8b67](https://github.com/JanssenProject/jans/commit/d5b8b67e10bd6d9bc93d831bef8198f406873b0e))
+* prepare 1.0.7 release ([ce02fd9](https://github.com/JanssenProject/jans/commit/ce02fd9322ab49d5bea4f6e88f316f931e9d2169))
+* prepare for 1.0.6 release ([9e4c8fb](https://github.com/JanssenProject/jans/commit/9e4c8fb4c0a1ef4779934558e8d8d40d8fedbabf))
+
 ## 1.0.6 (2023-01-09)
 
 

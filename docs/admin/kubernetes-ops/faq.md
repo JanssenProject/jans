@@ -3,6 +3,7 @@ tags:
   - administration
   - kubernetes
   - operations
+  - faq
 ---
 
 ## This content is in progress

@@ -9,15 +9,15 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OIDCClientSettings {
 
-    private String opHost;
-    private String clientId;
-    private String clientSecret;
     private String tokenEndpoint;
     private String redirectUri;
     private String postLogoutUri;
     private String frontchannelLogoutUri;
     private List<String> scopes;
     private List<String> acrValues;
+    private String opHost;
+    private String clientId;
+    private String clientSecret;
 
     public OIDCClientSettings() {
         //Do not remove
@@ -95,5 +95,20 @@ public class OIDCClientSettings {
 
     public void setFrontchannelLogoutUri(String frontchannelLogoutUri) {
         this.frontchannelLogoutUri = frontchannelLogoutUri;
+    }
+
+    @Override
+    public String toString() {
+        return "OIDCClientSettings{" +
+                "opHost='" + opHost + '\'' +
+                ", clientId='" + clientId + '\'' +
+                ", clientSecret='" + clientSecret + '\'' +
+                ", tokenEndpoint='" + tokenEndpoint + '\'' +
+                ", redirectUri='" + redirectUri + '\'' +
+                ", postLogoutUri='" + postLogoutUri + '\'' +
+                ", frontchannelLogoutUri='" + frontchannelLogoutUri + '\'' +
+                ", scopes=" + scopes +
+                ", acrValues=" + acrValues +
+                '}';
     }
 }

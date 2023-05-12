@@ -382,6 +382,9 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Boolean value specifying whether a client_secret is returned on client GET or PUT. Set to true by default which means to return secret", defaultValue = "false")
     private Boolean returnClientSecretOnRead = false;
 
+    @DocProperty(description = "Boolean value specifying whether to rotate client registration access token after each usage", defaultValue = "false")
+    private Boolean rotateClientRegistrationAccessTokenOnUsage = false;
+
     @DocProperty(description = "Boolean value specifying whether reject JWT requested or validated with algorithm None. Default value is true", defaultValue = "true")
     private Boolean rejectJwtWithNoneAlg = true;
 
@@ -400,8 +403,8 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Enable/Disable redirect uris validation using regular expression", defaultValue = "false")
     private Boolean redirectUrisRegexEnabled = false;
 
-    @DocProperty(description = "Enable/Disable usage of highest level script in case ACR script does not exist", defaultValue = "true")
-    private Boolean useHighestLevelScriptIfAcrScriptNotFound = true;
+    @DocProperty(description = "Enable/Disable usage of highest level script in case ACR script does not exist", defaultValue = "false")
+    private Boolean useHighestLevelScriptIfAcrScriptNotFound;
 
     @DocProperty(description = "Boolean value specifying whether to enable user authentication filters")
     private Boolean authenticationFiltersEnabled;
@@ -428,7 +431,7 @@ public class AppConfiguration implements Configuration {
     private int sessionIdUnusedLifetime;
 
     @DocProperty(description = "The lifetime for unused unauthenticated session states")
-    private int sessionIdUnauthenticatedUnusedLifetime = 120; // 120 seconds
+    private int sessionIdUnauthenticatedUnusedLifetime = 7200; // 2h
 
     @DocProperty(description = "Boolean value specifying whether to persist session ID on prompt none")
     private Boolean sessionIdPersistOnPromptNone;
@@ -528,7 +531,6 @@ public class AppConfiguration implements Configuration {
     private String staticDecryptionKid;
 
 
-
     //oxEleven
     @DocProperty(description = "oxEleven Test Mode Token")
     private String jansElevenTestModeToken;
@@ -547,6 +549,9 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "If True, rejects introspection requests if access_token does not have the uma_protection scope in its authorization header", defaultValue = "false")
     private Boolean introspectionAccessTokenMustHaveUmaProtectionScope = false;
+
+    @DocProperty(description = "If True, rejects introspection requests if access_token does not have the 'introspection' scope in its authorization header. Comparing to 'uma_protection', 'introspection' scope is not allowed for dynamic registration'", defaultValue = "false")
+    private Boolean introspectionAccessTokenMustHaveIntrospectionScope = false;
 
     @DocProperty(description = "Specifies if authorization to be skipped for introspection")
     private Boolean introspectionSkipAuthorization;
@@ -682,6 +687,9 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Boolean value specifying whether to extend refresh tokens on rotation", defaultValue = "false")
     private Boolean refreshTokenExtendLifetimeOnRotation = false;
 
+    @DocProperty(description = "Boolean value specifying whether to allow blank values in discovery response", defaultValue = "false")
+    private Boolean allowBlankValuesInDiscoveryResponse;
+
     @DocProperty(description = "Check whether user exists and is active before creating RefreshToken. Set it to true if check is needed(Default value is false - don't check.", defaultValue = "false")
     private Boolean checkUserPresenceOnRefreshToken = false;
 
@@ -703,8 +711,8 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Authentication Brute Force Protection Configuration")
     private AuthenticationProtectionConfiguration authenticationProtectionConfiguration;
 
-    @DocProperty(description = "A list of possible error handling methods")
-    private ErrorHandlingMethod errorHandlingMethod = ErrorHandlingMethod.INTERNAL;
+    @DocProperty(description = "A list of possible error handling methods. Possible values: remote (send error back to RP), internal (show error page)", defaultValue = "remote")
+    private ErrorHandlingMethod errorHandlingMethod = ErrorHandlingMethod.REMOTE;
 
     @DocProperty(description = "Boolean value specifying whether to disable authentication when max_age=0", defaultValue = "false")
     private Boolean disableAuthnForMaxAgeZero;
@@ -720,6 +728,10 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "Response type used to process device authz requests")
     private String deviceAuthzResponseTypeToProcessAuthz;
+
+    @DocProperty(description = "Device authz acr")
+    private String deviceAuthzAcr;
+
     // CIBA
     @DocProperty(description = "Backchannel Client Id")
     private String backchannelClientId;
@@ -817,6 +829,9 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "List of key value date formatters, e.g. 'userinfo: 'yyyy-MM-dd', etc.")
     private Map<String, String> dateFormatterPatterns = new HashMap<>();
+
+    @DocProperty(description = "Defines if Response body will be logged. Default value is false", defaultValue = "false")
+    private Boolean httpLoggingResponseBodyContent = false;
 
     public Map<String, String> getDateFormatterPatterns() {
         return dateFormatterPatterns;
@@ -1026,6 +1041,15 @@ public class AppConfiguration implements Configuration {
         this.refreshTokenExtendLifetimeOnRotation = refreshTokenExtendLifetimeOnRotation;
     }
 
+    public Boolean getAllowBlankValuesInDiscoveryResponse() {
+        if (allowBlankValuesInDiscoveryResponse == null) allowBlankValuesInDiscoveryResponse = false;
+        return allowBlankValuesInDiscoveryResponse;
+    }
+
+    public void setAllowBlankValuesInDiscoveryResponse(Boolean allowBlankValuesInDiscoveryResponse) {
+        this.allowBlankValuesInDiscoveryResponse = allowBlankValuesInDiscoveryResponse;
+    }
+
     public int getSectorIdentifierCacheLifetimeInMinutes() {
         return sectorIdentifierCacheLifetimeInMinutes;
     }
@@ -1158,6 +1182,15 @@ public class AppConfiguration implements Configuration {
 
     public void setChangeSessionIdOnAuthentication(Boolean changeSessionIdOnAuthentication) {
         this.changeSessionIdOnAuthentication = changeSessionIdOnAuthentication;
+    }
+
+    public Boolean getRotateClientRegistrationAccessTokenOnUsage() {
+        if (rotateClientRegistrationAccessTokenOnUsage == null) rotateClientRegistrationAccessTokenOnUsage = false;
+        return rotateClientRegistrationAccessTokenOnUsage;
+    }
+
+    public void setRotateClientRegistrationAccessTokenOnUsage(Boolean rotateClientRegistrationAccessTokenOnUsage) {
+        this.rotateClientRegistrationAccessTokenOnUsage = rotateClientRegistrationAccessTokenOnUsage;
     }
 
     public Boolean getReturnClientSecretOnRead() {
@@ -1307,6 +1340,15 @@ public class AppConfiguration implements Configuration {
     public void setFrontChannelLogoutSessionSupported(
             Boolean frontChannelLogoutSessionSupported) {
         this.frontChannelLogoutSessionSupported = frontChannelLogoutSessionSupported;
+    }
+
+    public Boolean getIntrospectionAccessTokenMustHaveIntrospectionScope() {
+        if (introspectionAccessTokenMustHaveIntrospectionScope == null) introspectionAccessTokenMustHaveIntrospectionScope = false;
+        return introspectionAccessTokenMustHaveIntrospectionScope;
+    }
+
+    public void setIntrospectionAccessTokenMustHaveIntrospectionScope(Boolean introspectionAccessTokenMustHaveIntrospectionScope) {
+        this.introspectionAccessTokenMustHaveIntrospectionScope = introspectionAccessTokenMustHaveIntrospectionScope;
     }
 
     public Boolean getIntrospectionAccessTokenMustHaveUmaProtectionScope() {
@@ -2949,6 +2991,14 @@ public class AppConfiguration implements Configuration {
         this.deviceAuthzResponseTypeToProcessAuthz = deviceAuthzResponseTypeToProcessAuthz;
     }
 
+    public String getDeviceAuthzAcr() {
+        return deviceAuthzAcr;
+    }
+
+    public void setDeviceAuthzAcr(String deviceAuthzAcr) {
+        this.deviceAuthzAcr = deviceAuthzAcr;
+    }
+
     public Boolean getRequestUriHashVerificationEnabled() {
         return requestUriHashVerificationEnabled != null && requestUriHashVerificationEnabled;
     }
@@ -3132,5 +3182,15 @@ public class AppConfiguration implements Configuration {
 
     public void setBlockWebviewAuthorizationEnabled(Boolean blockWebviewAuthorizationEnabled) {
         this.blockWebviewAuthorizationEnabled = blockWebviewAuthorizationEnabled;
+    }
+
+    public Boolean getHttpLoggingResponseBodyContent() {
+        if (httpLoggingResponseBodyContent == null)
+            httpLoggingResponseBodyContent = false;
+        return httpLoggingResponseBodyContent;
+    }
+
+    public void setHttpLoggingResponseBodyContent(Boolean httpLoggingResponseBodyContent) {
+        this.httpLoggingResponseBodyContent = httpLoggingResponseBodyContent;
     }
 }

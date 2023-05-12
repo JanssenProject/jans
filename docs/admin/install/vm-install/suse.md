@@ -5,7 +5,7 @@ tags:
 - vm
 - SUSE
 - SLES
-- Tumbleweed
+- Leap
 ---
 
 # SUSE Janssen Installation
@@ -15,9 +15,17 @@ Before you install, check the [VM system requirements](vm-requirements.md).
 ## Supported versions
 - SUSE Linux Enterprise Server (SLES) 15
 - openSUSE Leap 15.4
-- openSUSE Tumbleweed (non-production)
 
 ## Install the Package
+
+- If the server firewall is running, make sure to disable it during installation. 
+
+For example:
+
+```
+firewall-cmd --permanent --zone=public --add-service=https
+firewall-cmd --reload
+```
 
 - Download the release package from the GitHub Janssen Project
   [Releases](https://github.com/JanssenProject/jans/releases)
@@ -70,7 +78,17 @@ interactive mode.
 
 After the successful completion of setup process, [verify the system health](../install-faq.md#after-installation-how-do-i-verify-that-the-janssen-server-is-up-and-running).
 
-## Un-installation
+## Log in to Text User Interface (TUI)
+
+Begin configuration by accessing the TUI with the following command:
+
+```
+/opt/jans/jans-cli/jans_cli_tui.py
+```
+
+Full TUI documentation can be found [here](../../config-guide/jans-tui/README.md)
+
+## Uninstall
 
 Uninstall process involves two steps
 

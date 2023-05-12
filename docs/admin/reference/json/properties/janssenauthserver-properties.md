@@ -15,6 +15,7 @@ tags:
 | activeSessionAuthorizationScope | Authorization Scope for active session | [Details](#activesessionauthorizationscope) |
 | agamaConfiguration | Engine Config which offers an alternative way to build authentication flows in Janssen server | [Details](#agamaconfiguration) |
 | allowAllValueForRevokeEndpoint | Boolean value true allow all value for revoke endpoint | [Details](#allowallvalueforrevokeendpoint) |
+| allowBlankValuesInDiscoveryResponse | Boolean value specifying whether to allow blank values in discovery response | [Details](#allowblankvaluesindiscoveryresponse) |
 | allowEndSessionWithUnmatchedSid | default value false. If true, sid check will be skipped | [Details](#allowendsessionwithunmatchedsid) |
 | allowIdTokenWithoutImplicitGrantType | Specifies if a token without implicit grant types is allowed | [Details](#allowidtokenwithoutimplicitgranttype) |
 | allowPostLogoutRedirectWithoutValidation | Allows post-logout redirect without validation for the End Session endpoint (still AS validates it against clientWhiteList url pattern property) | [Details](#allowpostlogoutredirectwithoutvalidation) |
@@ -66,7 +67,7 @@ tags:
 | corsConfigurationFilters | This list specifies the CORS configuration filters | [Details](#corsconfigurationfilters) |
 | cssLocation | The location for CSS files | [Details](#csslocation) |
 | customHeadersWithAuthorizationResponse | Choose whether to enable the custom response header parameter to return custom headers with the authorization response | [Details](#customheaderswithauthorizationresponse) |
-| dateFormatterPatterns | List of key value, e.g. 'birthdate: 'yyyy-MM-dd', etc. | [Details](#dateformatterpattern) |
+| dateFormatterPatterns | List of key value date formatters, e.g. 'userinfo: 'yyyy-MM-dd', etc. | [Details](#dateformatterpatterns) |
 | dcrAuthorizationWithClientCredentials | Boolean value indicating if DCR authorization to be performed using client credentials | [Details](#dcrauthorizationwithclientcredentials) |
 | dcrAuthorizationWithMTLS | Boolean value indicating if DCR authorization allowed with MTLS | [Details](#dcrauthorizationwithmtls) |
 | dcrIssuers | List of DCR issuers | [Details](#dcrissuers) |
@@ -79,12 +80,15 @@ tags:
 | dcrSsaValidationConfigs | DCR SSA Validation configurations used to perform validation of SSA or DCR | [Details](#dcrssavalidationconfigs) |
 | defaultSignatureAlgorithm | The default signature algorithm to sign ID Tokens | [Details](#defaultsignaturealgorithm) |
 | defaultSubjectType | The default subject type used for dynamic client registration | [Details](#defaultsubjecttype) |
+| deviceAuthzAcr | Device authz acr | [Details](#deviceauthzacr) |
 | deviceAuthzEndpoint | URL for the Device Authorization | [Details](#deviceauthzendpoint) |
 | deviceAuthzRequestExpiresIn | Expiration time given for device authorization requests | [Details](#deviceauthzrequestexpiresin) |
 | deviceAuthzResponseTypeToProcessAuthz | Response type used to process device authz requests | [Details](#deviceauthzresponsetypetoprocessauthz) |
 | deviceAuthzTokenPollInterval | Default interval returned to the client to process device token requests | [Details](#deviceauthztokenpollinterval) |
 | disableAuthnForMaxAgeZero | Boolean value specifying whether to disable authentication when max_age=0 | [Details](#disableauthnformaxagezero) |
 | disableJdkLogger | Choose whether to disable JDK loggers | [Details](#disablejdklogger) |
+| disablePromptConsent | Boolean value specifying whether to disable prompt=consent | [Details](#disablepromptconsent) |
+| disablePromptLogin | Boolean value specifying whether to disable prompt=login | [Details](#disablepromptlogin) |
 | disableU2fEndpoint | Choose whether to disable U2F endpoints | [Details](#disableu2fendpoint) |
 | discoveryAllowedKeys | List of configuration response claim allowed to be displayed in discovery endpoint | [Details](#discoveryallowedkeys) |
 | discoveryCacheLifetimeInMinutes | Lifetime of discovery cache | [Details](#discoverycachelifetimeinminutes) |
@@ -96,8 +100,9 @@ tags:
 | dpopTimeframe | Demonstration of Proof-of-Possession (DPoP) timeout | [Details](#dpoptimeframe) |
 | dynamicGrantTypeDefault | This list details which OAuth 2.0 grant types can be set up with the client registration API | [Details](#dynamicgranttypedefault) |
 | dynamicRegistrationAllowedPasswordGrantScopes | List of grant scopes for dynamic registration | [Details](#dynamicregistrationallowedpasswordgrantscopes) |
-| dynamicRegistrationCustomAttributes | This list details the custom attributes for dynamic registration | [Details](#dynamicregistrationcustomattributes) |
+| dynamicRegistrationCustomAttributes | This list details the custom attributes allowed for dynamic registration | [Details](#dynamicregistrationcustomattributes) |
 | dynamicRegistrationCustomObjectClass | LDAP custom object class for dynamic registration | [Details](#dynamicregistrationcustomobjectclass) |
+| dynamicRegistrationDefaultCustomAttributes | This map provides default custom attributes with values for dynamic registration | [Details](#dynamicregistrationdefaultcustomattributes) |
 | dynamicRegistrationExpirationTime | Expiration time in seconds for clients created with dynamic registration, 0 or -1 means never expire | [Details](#dynamicregistrationexpirationtime) |
 | dynamicRegistrationPasswordGrantTypeEnabled | Boolean value specifying whether to enable Password Grant Type during Dynamic Registration | [Details](#dynamicregistrationpasswordgranttypeenabled) |
 | dynamicRegistrationPersistClientAuthorizations | Boolean value specifying whether to persist client authorizations | [Details](#dynamicregistrationpersistclientauthorizations) |
@@ -106,7 +111,7 @@ tags:
 | enabledOAuthAuditLogging | enable OAuth Audit Logging | [Details](#enabledoauthauditlogging) |
 | endSessionEndpoint | URL at the OP to which an RP can perform a redirect to request that the end user be logged out at the OP | [Details](#endsessionendpoint) |
 | endSessionWithAccessToken | Choose whether to accept access tokens to call end_session endpoint | [Details](#endsessionwithaccesstoken) |
-| errorHandlingMethod | A list of possible error handling methods | [Details](#errorhandlingmethod) |
+| errorHandlingMethod | A list of possible error handling methods. Possible values: remote (send error back to RP), internal (show error page) | [Details](#errorhandlingmethod) |
 | errorReasonEnabled | Boolean value specifying whether to return detailed reason of the error from AS. Default value is false | [Details](#errorreasonenabled) |
 | expirationNotificatorEnabled | Boolean value specifying whether expiration notificator is enabled (used to identify expiration for persistence that support TTL, like Couchbase) | [Details](#expirationnotificatorenabled) |
 | expirationNotificatorIntervalInSeconds | The expiration notificator interval in second | [Details](#expirationnotificatorintervalinseconds) |
@@ -123,6 +128,7 @@ tags:
 | grantTypesSupported | This list details which OAuth 2.0 grant types are supported by this OP | [Details](#granttypessupported) |
 | httpLoggingEnabled | Enable/disable request/response logging filter | [Details](#httploggingenabled) |
 | httpLoggingExcludePaths | This list details the base URIs for which the request/response logging filter will not record activity | [Details](#httploggingexcludepaths) |
+| httpLoggingResponseBodyContent | Defines if Response body will be logged. Default value is false | [Details](#httploggingresponsebodycontent) |
 | idGenerationEndpoint | ID Generation endpoint URL | [Details](#idgenerationendpoint) |
 | idTokenEncryptionAlgValuesSupported | A list of the JWE encryption algorithms (alg values) supported by the OP for the ID Token to encode the Claims in a JWT | [Details](#idtokenencryptionalgvaluessupported) |
 | idTokenEncryptionEncValuesSupported | A list of the JWE encryption algorithms (enc values) supported by the OP for the ID Token to encode the Claims in a JWT | [Details](#idtokenencryptionencvaluessupported) |
@@ -132,6 +138,7 @@ tags:
 | idTokenTokenBindingCnfValuesSupported | Array containing a list of the JWT Confirmation Method member names supported by the OP for Token Binding of ID Tokens. The presence of this parameter indicates that the OpenID Provider supports Token Binding of ID Tokens. If omitted, the default is that the OpenID Provider does not support Token Binding of ID Tokens | [Details](#idtokentokenbindingcnfvaluessupported) |
 | imgLocation | The location for image files | [Details](#imglocation) |
 | includeSidInResponse | Boolean value specifying whether to include sessionId in response | [Details](#includesidinresponse) |
+| introspectionAccessTokenMustHaveIntrospectionScope | If True, rejects introspection requests if access_token does not have the 'introspection' scope in its authorization header. Comparing to 'uma_protection', 'introspection' scope is not allowed for dynamic registration' | [Details](#introspectionaccesstokenmusthaveintrospectionscope) |
 | introspectionAccessTokenMustHaveUmaProtectionScope | If True, rejects introspection requests if access_token does not have the uma_protection scope in its authorization header | [Details](#introspectionaccesstokenmusthaveumaprotectionscope) |
 | introspectionEndpoint | Introspection endpoint URL | [Details](#introspectionendpoint) |
 | introspectionResponseScopesBackwardCompatibility | Boolean value specifying introspection response backward compatibility mode | [Details](#introspectionresponsescopesbackwardcompatibility) |
@@ -190,8 +197,8 @@ tags:
 | pairwiseCalculationSalt | Salt to calculate algorithmic pairwise IDs | [Details](#pairwisecalculationsalt) |
 | pairwiseIdType | the pairwise ID type | [Details](#pairwiseidtype) |
 | parEndpoint | URL for Pushed Authorisation Request (PAR) Endpoint | [Details](#parendpoint) |
-| persistIdToken | Specifies whether to persist id_token (otherwise saves into cache) | [Details](#persistIdToken) |
-| persistRefreshToken | Specifies whether to persist refresh_token (otherwise saves into cache) | [Details](#persistRefreshToken) |
+| persistIdToken | Specifies whether to persist id_token (otherwise saves into cache) | [Details](#persistidtoken) |
+| persistRefreshToken | Specifies whether to persist refresh_token (otherwise saves into cache) | [Details](#persistrefreshtoken) |
 | personCustomObjectClassList | This list details LDAP custom object classes for dynamic person enrollment | [Details](#personcustomobjectclasslist) |
 | publicSubjectIdentifierPerClientEnabled | Specifies whether public subject identifier is allowed per client | [Details](#publicsubjectidentifierperclientenabled) |
 | redirectUrisRegexEnabled | Enable/Disable redirect uris validation using regular expression | [Details](#redirecturisregexenabled) |
@@ -200,7 +207,7 @@ tags:
 | registrationEndpoint | Registration endpoint URL | [Details](#registrationendpoint) |
 | rejectEndSessionIfIdTokenExpired | default value false. If true and id_token is not found in db, request is rejected | [Details](#rejectendsessionifidtokenexpired) |
 | rejectJwtWithNoneAlg | Boolean value specifying whether reject JWT requested or validated with algorithm None. Default value is true | [Details](#rejectjwtwithnonealg) |
-| removeRefreshTokensForClientOnLogout | Boolean value specifying whether to remove Refresh Tokens on logout. Default value is false | [Details](#removerefreshtokensforclientonlogout) |
+| removeRefreshTokensForClientOnLogout | Boolean value specifying whether to remove Refresh Tokens on logout. Default value is true | [Details](#removerefreshtokensforclientonlogout) |
 | requestObjectEncryptionAlgValuesSupported | A list of the JWE encryption algorithms (alg values) supported by the OP for Request Objects | [Details](#requestobjectencryptionalgvaluessupported) |
 | requestObjectEncryptionEncValuesSupported | A list of the JWE encryption algorithms (enc values) supported by the OP for Request Objects | [Details](#requestobjectencryptionencvaluessupported) |
 | requestObjectSigningAlgValuesSupported | A list of the JWS signing algorithms (alg values) supported by the OP for Request Objects | [Details](#requestobjectsigningalgvaluessupported) |
@@ -216,6 +223,7 @@ tags:
 | responseTypesSupported | This list details which OAuth 2.0 response_type values are supported by this OP. | [Details](#responsetypessupported) |
 | returnClientSecretOnRead | Boolean value specifying whether a client_secret is returned on client GET or PUT. Set to true by default which means to return secret | [Details](#returnclientsecretonread) |
 | returnDeviceSecretFromAuthzEndpoint |  | [Details](#returndevicesecretfromauthzendpoint) |
+| rotateClientRegistrationAccessTokenOnUsage | Boolean value specifying whether to rotate client registration access token after each usage | [Details](#rotateclientregistrationaccesstokenonusage) |
 | rotateDeviceSecret |  | [Details](#rotatedevicesecret) |
 | sectorIdentifierCacheLifetimeInMinutes | Sector Identifier cache lifetime in minutes | [Details](#sectoridentifiercachelifetimeinminutes) |
 | serverSessionIdLifetime | Dedicated property to control lifetime of the server side OP session object in seconds. Overrides sessionIdLifetime. By default value is 0, so object lifetime equals sessionIdLifetime (which sets both cookie and object expiration). It can be useful if goal is to keep different values for client cookie and server object | [Details](#serversessionidlifetime) |
@@ -260,7 +268,6 @@ tags:
 | useHighestLevelScriptIfAcrScriptNotFound | Enable/Disable usage of highest level script in case ACR script does not exist | [Details](#usehighestlevelscriptifacrscriptnotfound) |
 | useLocalCache | Cache in local memory cache attributes, scopes, clients and organization entry with expiration 60 seconds | [Details](#uselocalcache) |
 | useNestedJwtDuringEncryption | Boolean value specifying whether to use nested Jwt during encryption | [Details](#usenestedjwtduringencryption) |
-| userInfoConfiguration | UserInfo Configuration | [Details](#userinfoconfiguration) |
 | userInfoEncryptionAlgValuesSupported | This JSON Array lists which JWS encryption algorithms (alg values) [JWA] can be used by for the UserInfo endpoint to encode the claims in a JWT | [Details](#userinfoencryptionalgvaluessupported) |
 | userInfoEncryptionEncValuesSupported | This JSON Array lists which JWS encryption algorithms (enc values) [JWA] can be used by for the UserInfo endpoint to encode the claims in a JWT | [Details](#userinfoencryptionencvaluessupported) |
 | userInfoEndpoint | The User Info endpoint URL | [Details](#userinfoendpoint) |
@@ -307,6 +314,15 @@ tags:
 ### allowAllValueForRevokeEndpoint
 
 - Description: Boolean value true allow all value for revoke endpoint
+
+- Required: No
+
+- Default value: false
+
+
+### allowBlankValuesInDiscoveryResponse
+
+- Description: Boolean value specifying whether to allow blank values in discovery response
 
 - Required: No
 
@@ -774,7 +790,7 @@ tags:
 
 ### dateFormatterPatterns
 
-- Description: List of key value, e.g. 'birthdate: 'yyyy-MM-dd', etc.
+- Description: List of key value date formatters, e.g. 'userinfo: 'yyyy-MM-dd', etc.
 
 - Required: No
 
@@ -889,6 +905,15 @@ tags:
 - Default value: None
 
 
+### deviceAuthzAcr
+
+- Description: Device authz acr
+
+- Required: No
+
+- Default value: None
+
+
 ### deviceAuthzEndpoint
 
 - Description: URL for the Device Authorization
@@ -941,6 +966,24 @@ tags:
 - Required: No
 
 - Default value: true
+
+
+### disablePromptConsent
+
+- Description: Boolean value specifying whether to disable prompt=consent
+
+- Required: No
+
+- Default value: false
+
+
+### disablePromptLogin
+
+- Description: Boolean value specifying whether to disable prompt=login
+
+- Required: No
+
+- Default value: false
 
 
 ### disableU2fEndpoint
@@ -1044,7 +1087,7 @@ tags:
 
 ### dynamicRegistrationCustomAttributes
 
-- Description: This list details the custom attributes for dynamic registration
+- Description: This list details the custom attributes allowed for dynamic registration
 
 - Required: No
 
@@ -1054,6 +1097,15 @@ tags:
 ### dynamicRegistrationCustomObjectClass
 
 - Description: LDAP custom object class for dynamic registration
+
+- Required: No
+
+- Default value: None
+
+
+### dynamicRegistrationDefaultCustomAttributes
+
+- Description: This map provides default custom attributes with values for dynamic registration
 
 - Required: No
 
@@ -1134,11 +1186,11 @@ tags:
 
 ### errorHandlingMethod
 
-- Description: A list of possible error handling methods
+- Description: A list of possible error handling methods. Possible values: remote (send error back to RP), internal (show error page)
 
 - Required: No
 
-- Default value: None
+- Default value: remote
 
 
 ### errorReasonEnabled
@@ -1285,6 +1337,15 @@ tags:
 - Default value: None
 
 
+### httpLoggingResponseBodyContent
+
+- Description: Defines if Response body will be logged. Default value is false
+
+- Required: No
+
+- Default value: false
+
+
 ### idGenerationEndpoint
 
 - Description: ID Generation endpoint URL
@@ -1360,6 +1421,15 @@ tags:
 ### includeSidInResponse
 
 - Description: Boolean value specifying whether to include sessionId in response
+
+- Required: No
+
+- Default value: false
+
+
+### introspectionAccessTokenMustHaveIntrospectionScope
+
+- Description: If True, rejects introspection requests if access_token does not have the 'introspection' scope in its authorization header. Comparing to 'uma_protection', 'introspection' scope is not allowed for dynamic registration'
 
 - Required: No
 
@@ -1980,7 +2050,7 @@ tags:
 
 ### removeRefreshTokensForClientOnLogout
 
-- Description: Boolean value specifying whether to remove Refresh Tokens on logout. Default value is false
+- Description: Boolean value specifying whether to remove Refresh Tokens on logout. Default value is true
 
 - Required: No
 
@@ -2116,6 +2186,15 @@ tags:
 ### returnDeviceSecretFromAuthzEndpoint
 
 - Description: 
+
+- Required: No
+
+- Default value: false
+
+
+### rotateClientRegistrationAccessTokenOnUsage
+
+- Description: Boolean value specifying whether to rotate client registration access token after each usage
 
 - Required: No
 
@@ -2497,7 +2576,7 @@ tags:
 
 - Required: No
 
-- Default value: true
+- Default value: false
 
 
 ### useLocalCache
@@ -2516,15 +2595,6 @@ tags:
 - Required: No
 
 - Default value: true
-
-
-### userInfoConfiguration
-
-- Description: UserInfo Configuration
-
-- Required: No
-
-- Default value: None
 
 
 ### userInfoEncryptionAlgValuesSupported

@@ -1,5 +1,67 @@
 # Changelog
 
+## [1.0.13-1](https://github.com/JanssenProject/jans/compare/docker-jans-auth-server-v1.0.12-1...docker-jans-auth-server-v1.0.13-1) (2023-05-10)
+
+
+### Bug Fixes
+
+* ensure google libs support all possible credentials ([#4777](https://github.com/JanssenProject/jans/issues/4777)) ([d0759e5](https://github.com/JanssenProject/jans/commit/d0759e595517ca16b97a1ce4f7cd168b29ff17dd))
+* prepare for 1.0.13 release ([493478e](https://github.com/JanssenProject/jans/commit/493478e71f6231553c998b48c0f163c7f5869da4))
+
+## [1.0.12-1](https://github.com/JanssenProject/jans/compare/docker-jans-auth-server-v1.0.11-1...docker-jans-auth-server-v1.0.12-1) (2023-04-18)
+
+
+### Bug Fixes
+
+* opencontainer labels ([f8b0b36](https://github.com/JanssenProject/jans/commit/f8b0b365600bd700128bb9d92df6de7ba14830b6))
+* prepare for 1.0.12 release ([6f83197](https://github.com/JanssenProject/jans/commit/6f83197705511c39413456acdc64e9136a97ff39))
+
+## [1.0.11-1](https://github.com/JanssenProject/jans/compare/docker-jans-auth-server-v1.0.10-1...docker-jans-auth-server-v1.0.11-1) (2023-04-05)
+
+
+### Features
+
+* **docker-jans:** upstream changes for license credentials ([#4416](https://github.com/JanssenProject/jans/issues/4416)) ([1565095](https://github.com/JanssenProject/jans/commit/15650953e2f6ee449d389682dd624028c9001c47))
+
+
+### Bug Fixes
+
+* **docker-jans:** update smtp config and agama script entry ([#4384](https://github.com/JanssenProject/jans/issues/4384)) ([d24dffb](https://github.com/JanssenProject/jans/commit/d24dffb93ed445b00819d696d87e046bcf5eb269))
+* prepare for  release ([60775c0](https://github.com/JanssenProject/jans/commit/60775c09dc5ab9996bf80c03dcb457861d48dfb1))
+
+## [1.0.10-1](https://github.com/JanssenProject/jans/compare/docker-jans-auth-server-v1.0.9-1...docker-jans-auth-server-v1.0.10-1) (2023-03-16)
+
+
+### Bug Fixes
+
+* add custom permissions ([34336ac](https://github.com/JanssenProject/jans/commit/34336ac3799872303b9e4891b2405267ea9b6fd8))
+* prepare release for 1.0.10 ([e996926](https://github.com/JanssenProject/jans/commit/e99692692ef04d881468d120f7c7d462568dce36))
+
+## [1.0.9-1](https://github.com/JanssenProject/jans/compare/docker-jans-auth-server-v1.0.7-1...docker-jans-auth-server-v1.0.9-1) (2023-03-09)
+
+
+### Bug Fixes
+
+* prepare 1.0.9 release ([e6ea522](https://github.com/JanssenProject/jans/commit/e6ea52220824bd6b5d2dca0539d9d515dbeda362))
+* prepare 1.0.9 release ([55f7e0c](https://github.com/JanssenProject/jans/commit/55f7e0c308b869c2c4b5668aca751d022138a678))
+* update next SNAPSHOT and dev ([0df0e7a](https://github.com/JanssenProject/jans/commit/0df0e7ae06af64ac477955119c2522f03e0603c3))
+
+## 1.0.7-1 (2023-02-22)
+
+
+### Features
+
+* **docker-jans:** add support for mounted hybrid properties file ([#3623](https://github.com/JanssenProject/jans/issues/3623)) ([8c58a5a](https://github.com/JanssenProject/jans/commit/8c58a5a9530cc9c44e7009ce3952064f8610cc69))
+* **docker-jans:** enable prefix and group for stdout logs ([#3481](https://github.com/JanssenProject/jans/issues/3481)) ([e7684e7](https://github.com/JanssenProject/jans/commit/e7684e7f6da7c789d03311fe2df855c687aa7fa6))
+* **docker-jans:** introduce key_ops when generating keys ([#3770](https://github.com/JanssenProject/jans/issues/3770)) ([2495842](https://github.com/JanssenProject/jans/commit/249584257c3e892f5106d0e3559d1c0caa4a8d77))
+
+
+### Bug Fixes
+
+* modify clnId column type ([#3459](https://github.com/JanssenProject/jans/issues/3459)) ([701394c](https://github.com/JanssenProject/jans/commit/701394c3d7463ffb2bd223daf9662921244ad34d))
+* prepare 1.0.7 release ([ce02fd9](https://github.com/JanssenProject/jans/commit/ce02fd9322ab49d5bea4f6e88f316f931e9d2169))
+* prepare for 1.0.6 release ([9e4c8fb](https://github.com/JanssenProject/jans/commit/9e4c8fb4c0a1ef4779934558e8d8d40d8fedbabf))
+
 ## 1.0.6-1 (2023-01-09)
 
 

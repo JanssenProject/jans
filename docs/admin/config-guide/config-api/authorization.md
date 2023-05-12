@@ -2,6 +2,7 @@
 tags:
   - administration
   - config-api
+  - endpoint
 ---
 
 ## Endpoints protection
@@ -10,12 +11,12 @@ Config API endpoints are OAuth 2.0 protected. It supports simple bearer and JWT 
 ## 
 
 
-1) If a user has write permission then should be able to read data as well. That is no need for explicit read permission
+1) If a user has `write` permission then should be able to read data as well. That is no need for explicit read permission
 2) Need super permission to execute endpoints
  - `https://jans.io/oauth/config/read-all` should be able to able to execute read for all endpoints
 - `https://jans.io/oauth/config/write-all` should be able to execute add/update/delete for all endpoints
-3) Functionality wise group permission to enable excecution of all endpoints
- - example all openid endpoints (client, scope), all admin-ui endpoints(role, mapping, permission, license)
+3) Functionality wise group permission to enable execution of all endpoints
+ - example all OpenID endpoints (client, scope), all admin-ui endpoints(role, mapping, permission, license)
  https://jans.io/oauth/config/oauth-write
 https://jans.io/oauth/config/oauth-read
 
@@ -28,7 +29,7 @@ An endpoint can be annotated with endpoint specific scope, feature level scope(G
 
 **Logic:**
 - superScopes: If the access token has **any** of super scopes then no need to check group or granular scopes
-- groupScopes: If the access token does not have any of the applicable super scopes then check if the access token has group level scopes. If **any** of the group level scope present then no need to check group or granular scopes.
+- groupScopes: If the access token does not have any of the applicable super scopes, then check if the access token has group level scopes. If **any** of the group level scope present then no need to check group or granular scopes.
 - scope: If access token does not have any of the super or group level scopes then check if **all** the applicable endpoint specific granular scopes are present.
 
 

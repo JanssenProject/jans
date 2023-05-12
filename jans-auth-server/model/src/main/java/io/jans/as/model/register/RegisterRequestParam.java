@@ -202,6 +202,11 @@ public enum RegisterRequestParam {
     TOKEN_ENDPOINT_AUTH_METHOD("token_endpoint_auth_method"),
 
     /**
+     * Requested authentication methods for the Token Endpoint.
+     */
+    ADDITIONAL_TOKEN_ENDPOINT_AUTH_METHODS("additional_token_endpoint_auth_methods"),
+
+    /**
      * JWS alg algorithm (JWA) that MUST be used for signing the JWT used to authenticate the Client at the
      * Token Endpoint for the private_key_jwt and client_secret_jwt authentication methods.
      */

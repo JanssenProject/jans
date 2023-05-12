@@ -1,12 +1,10 @@
 ---
-"org_id": "test-org-id",
 tags:
 
 - administration
 - auth-server
 - SSA
 - endpoint
-
 ---
 
 # Software Statement Assertion (SSA)
@@ -37,7 +35,7 @@ of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.github
 
 `/ssa` endpoint can be enabled or disable
 using [SSA feature flag](../../reference/json/feature-flags/janssenauthserver-feature-flags.md#ssa).
-Use [Janssen Text-based UI(TUI)](../../config-guide/tui.md)
+Use [Janssen Text-based UI(TUI)](../../config-guide/jans-tui/README.md)
 or [Janssen command-line interface](../../config-guide/jans-cli/README.md) to perform this task.
 
 When using TUI, navigate via `Auth Server`->`Properties`->`enabledFeatureFlags` to screen below. From here, enable or
@@ -48,7 +46,7 @@ disable `SSA` flag as required.
 ## Configuration Properties
 
 SSA endpoint can be further configured using Janssen Server configuration property `ssaConfiguration`. When using
-[Janssen Text-based UI(TUI)](../../config-guide/tui.md) to configure the properties,
+[Janssen Text-based UI(TUI)](../../config-guide/jans-tui/README.md) to configure the properties,
 navigate via `Auth Server`->`Properties` to update value for this property. This property take JSON configuration with
 parameters as described below:
 
@@ -141,6 +139,7 @@ Returned SSA is a JWT, containing the following structure:
 - `software_roles` — List of string values, fixed value `["password", "notify"]`.
 - `grant_types` — Fixed value `["client_credentials"]`.
 - `exp` — Expiration Time.
+- `myCustom1, myCustom2, ...`: if you have custom attributes, they will be displayed here.
 
 ### Example:
 
@@ -214,6 +213,9 @@ Get existing active SSA based on `jti` or `org_id`.
             "iss": "https://jans.localhost",
             "exp": 1668608852,
             "iat": 1668608851,
+            "description: "test description",
+            "one_time_use": true,
+            "rotate_ssa": false
         },
         "iss": "ed4d5f74-ce41-4180-aed4-54cffa974630",
         "created_at": 1668608851,
@@ -232,6 +234,10 @@ Get existing active SSA based on `jti` or `org_id`.
     - `iss` — The "iss" (issuer) claim identifies the principal that issued the JWT.
     - `exp` — Expiration time.
     - `iat` — Creation time.
+    - `description` — Describe SSA.
+    - `one_time_use` — Defined whether the SSA will be used only once or can be used multiple times.
+    - `rotate_ssa` — TODO - Will be used to rotate expiration of the SSA, currently is only saved as part of the SSA.
+    - `myCustom1, myCustom2, ...` — if you have custom attributes, they will be displayed here.
 - `iss` — The "iss" is related to the client that created this SSA.
 - `created_at` — Creation time.
 - `expiration` — Expiration time.
@@ -287,7 +293,10 @@ Connection: Keep-Alive
       ],
       "exp": 1668608852,
       "iat": 1668608851,
-      "jti": "c3eb1c16-be9b-4e96-974e-aea5e3cf95b0"
+      "jti": "c3eb1c16-be9b-4e96-974e-aea5e3cf95b0",
+      "description: "test description",
+      "one_time_use": true,
+      "rotate_ssa": false
     },
     "iss": "ed4d5f74-ce41-4180-aed4-54cffa974630",
     "created_at": 1668608851,
@@ -295,6 +304,73 @@ Connection: Keep-Alive
     "status": "ACTIVE"
   }
 ]
+```
+
+## Get JWT SSA
+
+Get existing active SSA based on `jti`.
+
+### Query Parameters
+
+- `jti` — Unique identifier
+
+### Response description
+
+Returned SSA is a JWT, containing the following structure:
+
+```
+{
+    "ssa": "eyJraWQiOiI1NTk3MGFkZS00M2MwLTQ4YWMtODEyZi0yZTY1MzhjMTEyN2Zfc2lnX3JzNTEyIiwidHlwIjoiand0IiwiYWxnIjoiUlM1MTIifQ.eyJzb2Z0d2FyZV9pZCI6ImdsdXUtc2Nhbi1hcGkiLCJncmFudF90eXBlcyI6WyJjbGllbnRfY3JlZGVudGlhbHMiXSwib3JnX2lkIjoxLCJpc3MiOiJodHRwczovL2phbnMubG9jYWxob3N0Iiwic29mdHdhcmVfcm9sZXMiOlsicGFzc3d1cmQiXSwiZXhwIjoxNjY4NjA5MDA1LCJpYXQiOjE2Njg2NDE5NjcsImp0aSI6ImU4OWVjYTQxLTM0ODUtNDUxNi1hMTYyLWZiODYyNjJhYmFjMyJ9.jRgh8_aiwMTJxeT9cwfup9QP9LBc6gQstvabCzUOJvELnzosxiNJHeU2mrvavaNK6BGvs_lbNjODVDeetGCD48_F2ay9r8qmo-f3GPzdzcJozKgfzonSkAE5Ran9LKcQQJpVc1rDYcV2xYiJLJ6FSuvnoClkDEE1tXysxshLPs-GXOZE7rD8XUXzezuxZWUE1jXwA-EFajoat8CP6QulHGxlcn_sKIhawhGODxJPz4Pf3jgeZVLG_7HfRJgxNiKcdzQIxnkbdpuS-0Q4-oc5yntsXhFhn31Pa3vGsiPPH9f3ndL2ZZKk3xCgyImLDJuGaxXg-qEVoIG4zNWNHMUNUQ"
+}
+```
+
+**Header**
+
+- `alg` — The signature algorithm which used `RS256`.
+- `typ` — The type which used.
+- `kid` — The key identification `gluu-scan-api-rs256-ssa-signature-key`.
+
+**Payload**
+
+- `iat` — The time the JWT was created.
+- `iss` — The "iss" (issuer) claim identifies the principal that issued the JWT.
+- `jti` — The "jti" (JWT ID) claim provides a unique identifier for the JWT.
+- `software_id` — The "software_id" is used for software identification.
+- `org_id` — The "org_id" is used for organization identification.
+- `software_roles` — List of string values, fixed value `["password", "notify"]`.
+- `grant_types` — Fixed value `["client_credentials"]`.
+- `exp` — Expiration Time.
+- `myCustom1, myCustom2, ...`: if you have custom attributes, they will be displayed here.
+
+### Example:
+
+**Request:**
+
+```
+GET {{your-url}}/ssa/jwt?jti={{your-jti}}
+Content-Type: application/json
+Authorization: Bearer {{your-token}}
+```
+
+**Response:**
+
+```
+HTTP/1.1 201 Created
+Date: Wed, 16 Nov 2022 23:39:27 GMT
+Server: Apache/2.4.52 (Ubuntu)
+X-Xss-Protection: 1; mode=block
+X-Content-Type-Options: nosniff
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+Cache-Control: no-store
+Content-Type: application/json
+Pragma: no-cache
+Content-Length: 757
+Keep-Alive: timeout=5, max=100
+Connection: Keep-Alive
+
+{
+    "ssa": "eyJraWQiOiI1NTk3MGFkZS00M2MwLTQ4YWMtODEyZi0yZTY1MzhjMTEyN2Zfc2lnX3JzNTEyIiwidHlwIjoiand0IiwiYWxnIjoiUlM1MTIifQ.eyJzb2Z0d2FyZV9pZCI6ImdsdXUtc2Nhbi1hcGkiLCJncmFudF90eXBlcyI6WyJjbGllbnRfY3JlZGVudGlhbHMiXSwib3JnX2lkIjoxLCJpc3MiOiJodHRwczovL2phbnMubG9jYWxob3N0Iiwic29mdHdhcmVfcm9sZXMiOlsicGFzc3d1cmQiXSwiZXhwIjoxNjY4NjA5MDA1LCJpYXQiOjE2Njg2NDE5NjcsImp0aSI6ImU4OWVjYTQxLTM0ODUtNDUxNi1hMTYyLWZiODYyNjJhYmFjMyJ9.jRgh8_aiwMTJxeT9cwfup9QP9LBc6gQstvabCzUOJvELnzosxiNJHeU2mrvavaNK6BGvs_lbNjODVDeetGCD48_F2ay9r8qmo-f3GPzdzcJozKgfzonSkAE5Ran9LKcQQJpVc1rDYcV2xYiJLJ6FSuvnoClkDEE1tXysxshLPs-GXOZE7rD8XUXzezuxZWUE1jXwA-EFajoat8CP6QulHGxlcn_sKIhawhGODxJPz4Pf3jgeZVLG_7HfRJgxNiKcdzQIxnkbdpuS-0Q4-oc5yntsXhFhn31Pa3vGsiPPH9f3ndL2ZZKk3xCgyImLDJuGaxXg-qEVoIG4zNWNHMUNUQ"
+}
 ```
 
 ## Validate SSA

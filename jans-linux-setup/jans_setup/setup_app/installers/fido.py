@@ -55,6 +55,10 @@ class FidoInstaller(JettyInstaller):
         src_file = self.source_files[0][0] if Config.profile != SetupProfiles.DISA_STIG else self.source_fips_files[0][0]
         self.copyFile(src_file, os.path.join(jettyServiceWebapps, '%s%s' % (self.service_name, Path(self.source_files[0][0]).suffix)))        
 
+
+        if Config.installed_instance and Config.install_config_api:
+            base.current_app.ConfigApiInstaller.install_plugin('fido2-plugin')
+
         self.enable()
 
     def render_import_templates(self):

@@ -176,7 +176,7 @@ public class SsaCreateRequest extends BaseRequest {
     @Override
     public String toString() {
         return "SsaRequest{" +
-                "orgId=" + orgId +
+                "orgId='" + orgId + '\'' +
                 ", expiration=" + expiration +
                 ", description='" + description + '\'' +
                 ", softwareId='" + softwareId + '\'' +

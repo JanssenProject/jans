@@ -303,7 +303,7 @@ jansConfProperty: {"value1":"qr_options","value2":"{ size: 500, mSize: 0.05 }","
 jansConfProperty: {"value1":"label","value2":"Super Gluu","description":""}
 jansConfProperty: {"value1":"registration_uri","value2":"https://%(hostname)s/identity/register","description":""}
 jansConfProperty: {"value1":"authentication_mode","value2":"two_step","description":""}
-jansConfProperty: {"value1":"notification_service_mode","value2":"gluu","description":""}
+jansConfProperty: {"value1":"notification_service_mode","value2":"jans","description":""}
 jansConfProperty: {"value1":"credentials_file","value2":"/etc/certs/super_gluu_creds.json","description":""}
 jansConfProperty: {"value1":"supergluu_android_download_url","value2":"https://play.google.com/store/apps/details?id=gluu.org.super.gluu&hl=en_US","description":""}
 jansConfProperty: {"value1":"supergluu_ios_download_url","value2":"https://itunes.apple.com/us/app/super-gluu/id1093479646","description":""}
@@ -498,7 +498,7 @@ jansLevel: 1
 jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansProgLng: python
 jansRevision: 1
-jansScr::%(introspection_introspection_role_based_scope)s
+jansScr::%(introspection_introspection_role_based_scope_introspection_role_based_scope)s
 jansScrTyp: introspection
 
 dn: inum=A110-88AB,ou=scripts,o=jans
@@ -538,6 +538,7 @@ description: Agama Script
 displayName: agama
 inum: BADA-BADA
 jansConfProperty: {"value1":"cust_param_name","value2":"agama_flow","hide":false,"description":""}
+jansConfProperty: {"value1":"default_flow_name","value2":"","hide":false,"description":""}
 jansEnabled: false
 jansLevel: 10
 jansModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
@@ -562,21 +563,6 @@ jansRevision: 1
 jansScr::%(person_authentication_forgot_password_forgot_password)s
 jansScrTyp: person_authentication
 
-dn: inum=CACD-5902,ou=scripts,o=jans
-objectClass: top
-objectClass: jansCustomScr
-description: Scan Token Update Script
-displayName: scan_update_token
-inum: CACD-5902
-jansEnabled: false
-jansLevel: 100
-jansModuleProperty: {"value1":"v1","value2":"v2","description":""}
-jansConfProperty: {"value1":"BILLING_API_URL", "value2":"https://my.billing.api.com/", "hide":false, "description":"URL to billing API"}
-jansRevision: 1
-jansScr::%(update_token_updatetoken)s
-jansScrTyp: update_token
-jansProgLng: python
-
 dn: inum=E706-F8A8,ou=scripts,o=jans
 objectClass: top
 objectClass: jansCustomScr
@@ -593,24 +579,6 @@ jansModuleProperty: {"value1":"usage_type","value2":"interactive","description":
 jansProgLng: python
 jansRevision: 0
 jansScr::%(person_authentication_github_external_authenticator_githubexternalauthenticator)s
-jansScrTyp: person_authentication
-
-dn: inum=E706-F8A9,ou=scripts,o=jans
-objectClass: top
-objectClass: jansCustomScr
-description: GitHub Inbound Custom Authentication script For ADS
-displayName: github_ads
-inum: E706-F8A9
-jansConfProperty: {"value1":"hide","value2":"true","hide":false,"description":""}
-jansConfProperty: {"value1":"github_creds_file","value2":"/etc/jans/conf/github.json","hide":false,"description":""}
-jansConfProperty: {"value1":"description","value2":"GitHub Login","hide":false,"description":""}
-jansEnabled: false
-jansLevel: 10
-jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
-jansModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
-jansProgLng: python
-jansRevision: 0
-jansScr::%(person_authentication_github_external_authenticator_githubauthenticatorforads)s
 jansScrTyp: person_authentication
 
 dn: inum=8333-DFBC,ou=scripts,o=jans

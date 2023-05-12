@@ -4,6 +4,7 @@ tags:
   - configuration
   - cli
   - commandline
+  - attributes
 ---
 
 # Attribute
@@ -59,7 +60,7 @@ Table of Contents
 
 ## Get Attributes
 
-> Prerequisite: Know how to use the Janssen CLI in [command-line mode](cli-index.md)
+> Prerequisite: Know how to use the Janssen CLI in [command-line mode](../jans-cli/README.md)
 
 As we know, Attributes are individual pieces of user data, like `uid` or `email`, that are required by applications in order to identify a user and grant access to protect resources. The user attributes that are available in your Janssen Server can be found by using this operation-ID. If we look at the description below:
 
@@ -625,7 +626,7 @@ Let's modify this schema file to change the status of an attribute as below:
 
 ![](../../../assets/image-cl-attribute-patch-03042021.png)
 
-In the above image, added two tasks. To know more about how we can modify this schema file to perform a specific task, follow this link: [patch-request-schema](cli-index.md#patch-request-schema)
+In the above image, added two tasks. To know more about how we can modify this schema file to perform a specific task, follow this link: [patch-request-schema](../jans-cli/README.md#patch-request-schema)
 
 Let's update an attribute by its `inum` value. In our case, `inum`: 6EEB. Before patching the selected attribute, you can check its properties using [get-attributes-by-inum](#get-attribute-by-inum) operation.
 

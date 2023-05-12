@@ -193,11 +193,12 @@ func resourceFido2ConfigurationUpdate(ctx context.Context, d *schema.ResourceDat
 	c := meta.(*jans.Client)
 
 	var fido2Config jans.JansFido2DynConfiguration
-	if err := fromSchemaResource(d, &fido2Config); err != nil {
+	patches, err := patchFromResourceData(d, &fido2Config)
+	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	if err := c.UpdateFido2Configuration(ctx, &fido2Config); err != nil {
+	if _, err := c.PatchFido2Configuration(ctx, patches); err != nil {
 		return diag.FromErr(err)
 	}
 

@@ -5,9 +5,9 @@ import (
 	"fmt"
 )
 
-// AgamaConfiguration enables an alternative way to build authentication
+// EngineConfiguration enables an alternative way to build authentication
 // flows in the Janssen server.
-type AgamaConfiguration struct {
+type EngineConfiguration struct {
 	Enabled                     bool              `schema:"enabled" json:"enabled"`
 	RootDir                     string            `schema:"root_dir" json:"rootDir"`
 	TemplatesPath               string            `schema:"templates_path" json:"templatesPath"`
@@ -186,8 +186,8 @@ type AppConfiguration struct {
 	DynamicRegistrationCustomObjectClass                      string                                `schema:"dynamic_registration_custom_object_class" json:"dynamicRegistrationCustomObjectClass"`
 	DynamicRegistrationScopesParamEnabled                     bool                                  `schema:"dynamic_registration_scopes_param_enabled" json:"dynamicRegistrationScopesParamEnabled"`
 	DynamicRegistrationPasswordGrantTypeEnabled               bool                                  `schema:"dynamic_registration_password_grant_type_enabled" json:"dynamicRegistrationPasswordGrantTypeEnabled"`
-	PersistIdToken                                            bool                                  `schema:"persist_id_token_in_ldap" json:"persistIdToken"`
-	PersistRefreshToken                                       bool                                  `schema:"persist_refresh_token_in_ldap" json:"persistRefreshToken"`
+	PersistIdTokenInLdap                                      bool                                  `schema:"persist_id_token_in_ldap" json:"persistIdTokenInLdap"`
+	PersistRefreshTokenInLdap                                 bool                                  `schema:"persist_refresh_token_in_ldap" json:"persistRefreshTokenInLdap"`
 	AllowPostLogoutRedirectWithoutValidation                  bool                                  `schema:"allow_post_logout_redirect_without_validation" json:"allowPostLogoutRedirectWithoutValidation"`
 	InvalidateSessionCookiesAfterAuthorizationFlow            bool                                  `schema:"invalidate_session_cookies_after_authorization_flow" json:"invalidateSessionCookiesAfterAuthorizationFlow"`
 	ReturnClientSecretOnRead                                  bool                                  `schema:"return_client_secret_on_read" json:"returnClientSecretOnRead"`
@@ -308,7 +308,7 @@ type AppConfiguration struct {
 	HttpLoggingEnabled                                        bool                                  `schema:"http_logging_enabled" json:"httpLoggingEnabled"`
 	HttpLoggingExcludePaths                                   []string                              `schema:"http_logging_exclude_paths" json:"httpLoggingExcludePaths"`
 	ExternalLoggerConfiguration                               string                                `schema:"external_logger_configuration" json:"externalLoggerConfiguration"`
-	AgamaConfiguration                                        AgamaConfiguration                    `schema:"agama_configuration" json:"agamaConfiguration"`
+	AgamaConfiguration                                        EngineConfiguration                   `schema:"agama_configuration" json:"agamaConfiguration"`
 	EnabledComponents                                         []string                              `schema:"enabled_components" json:"enabledComponents"`
 	PersonCustomObjectClassList                               []string                              `schema:"person_custom_object_class_list" json:"personCustomObjectClassList"`
 	StatWebServiceIntervalLimitInSeconds                      int                                   `schema:"stat_web_service_interval_limit_in_seconds" json:"statWebServiceIntervalLimitInSeconds"`
@@ -340,15 +340,17 @@ func (c *Client) GetAppConfiguration(ctx context.Context) (*AppConfiguration, er
 		return nil, fmt.Errorf("get request failed: %w", err)
 	}
 
+	sortArrays(&ret.AuthorizationRequestCustomAllowedParameters)
+
 	return ret, nil
 }
 
-// UpdateAuthServiceConfig uses the provided list of patch requests to update
-// the Janssen authorization servcer application configuration properties.
-func (c *Client) UpdateAppConfiguration(ctx context.Context, config *AppConfiguration) (*AppConfiguration, error) {
+// PatchAppConfiguration uses the provided list of patch requests to update
+// the Janssen authorization server application configuration properties.
+func (c *Client) PatchAppConfiguration(ctx context.Context, patches []PatchRequest) (*AppConfiguration, error) {
 
-	if config == nil {
-		return nil, fmt.Errorf("config is nil")
+	if len(patches) == 0 {
+		return c.GetAppConfiguration(ctx)
 	}
 
 	orig, err := c.GetAppConfiguration(ctx)
@@ -356,13 +358,13 @@ func (c *Client) UpdateAppConfiguration(ctx context.Context, config *AppConfigur
 		return nil, fmt.Errorf("failed to get app configuration: %w", err)
 	}
 
-	patches, err := createPatches(config, orig)
+	updates, err := createPatchesDiff(orig, patches)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create patches: %w", err)
 	}
 
-	if len(patches) == 0 {
-		return nil, fmt.Errorf("no patches provided")
+	if len(updates) == 0 {
+		return c.GetAppConfiguration(ctx)
 	}
 
 	token, err := c.getToken(ctx, "https://jans.io/oauth/jans-auth-server/config/properties.write")
@@ -370,7 +372,7 @@ func (c *Client) UpdateAppConfiguration(ctx context.Context, config *AppConfigur
 		return nil, fmt.Errorf("failed to get token: %w", err)
 	}
 
-	if err := c.patch(ctx, "/jans-config-api/api/v1/jans-auth-server/config", token, patches); err != nil {
+	if err := c.patch(ctx, "/jans-config-api/api/v1/jans-auth-server/config", token, updates); err != nil {
 		return nil, fmt.Errorf("patch request failed: %w", err)
 	}
 

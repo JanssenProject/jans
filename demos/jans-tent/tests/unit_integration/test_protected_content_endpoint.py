@@ -1,9 +1,8 @@
-from unittest import TestCase
 from clientapp import create_app, session
 from flask import Flask, url_for
 from typing import List
 from werkzeug import local
-import os
+from helper import FlaskBaseTestCase
 
 
 def app_endpoint(app: Flask) -> List[str]:
@@ -16,24 +15,6 @@ def app_endpoint(app: Flask) -> List[str]:
     return endpoints
 
 
-class FlaskBaseTestCase(TestCase):
-    def setUp(self):
-        self.app = create_app()
-        self.app.testing = True
-        self.app_context = self.app.test_request_context(
-            base_url="https://chris.testingenv.org")
-        self.app_context.push()
-        self.client = self.app.test_client()
-
-        #self.oauth = OAuth(self.app)
-        os.environ['AUTHLIB_INSECURE_TRANSPORT'] = "1"
-        '''
-        self.oauth.register('op',
-            server_metadata_url = 'https://chris.gluuthree.org/.well-known/openid-configuration',
-            client_kwargs = {'scope' : 'openid'})
-        '''
-
-
 class TestProtectedContentEndpoint(FlaskBaseTestCase):
     def test_app_should_contain_protected_content_route(self):
 
@@ -43,7 +24,7 @@ class TestProtectedContentEndpoint(FlaskBaseTestCase):
 
     def test_app_protected_content_route_should_return_valid_requisition(self):
 
-        response = self.client.get(url_for('protected_content'))
+        self.client.get(url_for('protected_content'))
 
         self.assertIn(
             self.client.get(url_for('protected_content')).status_code,

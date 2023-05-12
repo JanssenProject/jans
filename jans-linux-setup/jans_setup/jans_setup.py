@@ -27,6 +27,13 @@ from setup_app.utils import base
 
 warnings.filterwarnings("ignore")
 
+uname_cmd = shutil.which('uname')
+cpu_arch = os.popen(uname_cmd + ' -m').read().strip()
+
+if cpu_arch != 'x86_64':
+    print("Janssen Linux setup supports only x86_64 architecture. Detected architecture was {}.".format(cpu_arch))
+    sys.exit()
+
 __STATIC_SETUP_DIR__ = '/opt/jans/jans-setup/'
 queue = Queue()
 
@@ -339,6 +346,10 @@ def main():
         if Config.rdbm_install_type == static.InstallTypes.LOCAL:
             packageUtils.check_and_install_packages()
 
+        if Config.cb_install == static.InstallTypes.LOCAL:
+            print("Please wait while setup is installing couchbase package ...")
+            couchbaseInstaller.couchbaseInstall()
+
     # register post setup progress
     class PostSetup:
         service_name = 'post-setup'
@@ -362,6 +373,7 @@ def main():
 
             if not Config.installed_instance:
                 jansInstaller.configureSystem()
+                jansInstaller.make_salt()
 
                 if Config.profile == SetupProfiles.JANS or Config.profile == SetupProfiles.DISA_STIG:
                     jansAuthInstaller.pre_installation()
@@ -479,7 +491,7 @@ def main():
         do_installation()
         print('\n', static.colors.OKGREEN)
         if Config.install_config_api or Config.install_scim_server:
-            msg.installation_completed += "Experimental CLI TUI is available to manage Jannsen Server:\n"
+            msg.installation_completed += "To manage your Janssen Identity Provider:\n"
             if Config.install_config_api:
                 msg.installation_completed += '/opt/jans/jans-cli/config-cli-tui.py'
                 if base.current_app.profile == static.SetupProfiles.OPENBANKING:

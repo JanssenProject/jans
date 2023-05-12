@@ -432,8 +432,8 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
     def create_test_client(self):
         ldif_fn = self.clients_ldif_fn = os.path.join(Config.output_dir, 'test-client.ldif')
-        client_id = Config.get('test_client_id') or base.argsp.test_client_id
-        client_pw = Config.get('test_client_pw') or base.argsp.test_client_pw or self.getPW()
+        client_id = Config.get('test_client_id') or getattr(base.argsp, 'test_client_id', None)
+        client_pw = Config.get('test_client_pw') or getattr(base.argsp, 'test_client_pw', None) or self.getPW()
         encoded_pw = self.obscure(client_pw)
         trusted_client = 'true' if (Config.get('test_client_trusted') or base.argsp.test_client_trusted) else 'false'
 
@@ -467,7 +467,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
     def post_install_before_saving_properties(self):
 
-        if base.argsp.test_client_id or Config.get('test_client_id'):
+        if getattr(base.argsp, 'test_client_id', None) or Config.get('test_client_id'):
             self.create_test_client()
 
 
@@ -568,7 +568,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
     def extract_scripts(self):
         base.extract_from_zip(base.current_app.jans_zip, 'docs/script-catalog', Config.script_catalog_dir)
-        
+
     def generate_smtp_config(self):
         self.logIt("Generating smtp keys", pbar=self.service_name)
 
@@ -606,9 +606,10 @@ class JansInstaller(BaseInstaller, SetupUtils):
                         '-providerpath', fips_provider['-providerpath']
                     ]
 
-        self.run(cmd_cert_gen)                
+        self.run(cmd_cert_gen)
 
     def genRandomString(self, N):
         return ''.join(random.SystemRandom().choice(string.ascii_lowercase
                                                     + string.ascii_uppercase
                                                     + string.digits) for _ in range(N))
+

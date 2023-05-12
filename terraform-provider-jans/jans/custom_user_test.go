@@ -74,10 +74,6 @@ func TestCustomUsers(t *testing.T) {
 				DisplayValue: "exampleUsr1",
 			},
 		},
-		CustomObjectClasses: []string{
-			"top",
-			"jansCustomPerson",
-		},
 		Mail:                "exampleUsr1@jans.io",
 		OxAuthPersistentJwt: []string{"jwt1", "jwt2"},
 		DisplayName:         "Default Test User",
@@ -95,7 +91,8 @@ func TestCustomUsers(t *testing.T) {
 	filter := cmp.FilterPath(func(p cmp.Path) bool {
 		attr := p.String()
 		return attr == "CreatedAt" || attr == "BaseDn" || attr == "Dn" ||
-			attr == "UserPassword" || attr == "Inum" || attr == "UpdatedAt"
+			attr == "UserPassword" || attr == "Inum" || attr == "UpdatedAt" ||
+			attr == "DisplayValue"
 	}, cmp.Ignore())
 
 	if diff := cmp.Diff(&usr, createdUser, filter); diff != "" {

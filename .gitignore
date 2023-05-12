@@ -159,8 +159,11 @@ data-sources.json
 .settings
 .classpath
 .project
+# scanner reports
+trivy.json
+grype.json
 
 #
-_out 
+_out
 jans-linux-setup.install.loc
 jans-linux-setup.vs

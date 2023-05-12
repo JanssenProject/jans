@@ -2,6 +2,7 @@
 tags:
   - administration
   - planning
+  - stepped-up authentication
 ---
 
 The holy grail of security policies since the introduction of RSA OTP tokens,

@@ -7,11 +7,11 @@ tags:
 
 # Agama engine configuration
 
-The [engine](README.md#agama-engine) is a piece of software in charge of parsing flows written in Agama DSL and put them into action. Some aspects of the engine are configurable and this is integral part of the general authentication server's JSON configuration. To learn how to perform changes in the server's configuration click [here](../../config-guide/jans-cli/im/im-jans-authorization-server.md).
+The [engine](README.md#agama-engine) is a piece of software in charge of parsing flows written in Agama DSL and put them into action. Some aspects of the engine are configurable and they are part of the general authentication server's JSON configuration - specifically the section labeled `agamaConfiguration`. To learn how to perform changes in the server's configuration click [here](../../config-guide/jans-cli/cli-jans-authorization-server.md).
 
 The properties of Agama engine configuration are described in the following:
 
-- `enabled`: A boolean value that specifies if the engine is enabled. Default value is `false` 
+- `enabled`: A boolean value that specifies if the engine is enabled. Read more about [engine availability](#engine-availability) below 
 
 - `templatesPath`: A path relative to `/opt/jans/jetty/jans-auth/server/agama` that servers as the root of Agama flow pages. Default value is `/ftl`
 
@@ -36,3 +36,17 @@ The properties of Agama engine configuration are described in the following:
             "Expires": "0"
         }-->
         
+## Engine availability
+
+By default the engine is **disabled**. Do the following to enable it: <!--It might be the case your administrator temporarily disabled Agama. Do the following to restore its availability:-->
+
+### Using TUI
+
+- Open [TUI](../../config-guide/jans-tui/README.md)
+- Enable engine by navigating to `Auth Server` > `properties` > `agamaConfiguration` > check `enabled` > `save`
+- Enable script by navigating to `Scripts` > Search 'agama' > Select script and hit enter > check `enabled` > `save` 
+
+### Using CLI
+
+- Enable Agama bridge script. You can find details on how to manage custom scripts in [this](../../config-guide/jans-cli/cli-custom-scripts.md) page. There, set property `enabled` to `true` and increase `revision` value by one
+- Set `enabled` property in Agama configuration to `true`. This is the property listed above in this page
