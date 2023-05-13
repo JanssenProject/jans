@@ -7859,15 +7859,15 @@ components:
           type: string
         whitePagesCanView:
           type: boolean
+        adminCanEdit:
+          type: boolean
         userCanAccess:
           type: boolean
         adminCanAccess:
           type: boolean
-        adminCanEdit:
+        adminCanView:
           type: boolean
         userCanEdit:
-          type: boolean
-        adminCanView:
           type: boolean
         userCanView:
           type: boolean
@@ -8602,6 +8602,8 @@ components:
             type: string
         httpLoggingResponseBodyContent:
           type: boolean
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8611,8 +8613,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -9218,8 +9218,6 @@ components:
         ttl:
           type: integer
           format: int32
-        displayName:
-          type: string
         authenticationMethod:
           type: string
           enum:
@@ -9245,6 +9243,8 @@ components:
             - tls_client_auth
             - self_signed_tls_client_auth
             - none
+        displayName:
+          type: string
         baseDn:
           type: string
         inum:
@@ -9352,10 +9352,10 @@ components:
           type: array
           items:
             type: object
-        value:
-          type: object
         displayValue:
           type: string
+        value:
+          type: object
     LocalizedString:
       type: object
       properties:
@@ -9474,8 +9474,6 @@ components:
     SmtpConfiguration:
       type: object
       properties:
-        valid:
-          type: boolean
         connectProtectionList:
           type: array
           items:
@@ -9484,6 +9482,8 @@ components:
             - None
             - StartTls
             - SslTls
+        valid:
+          type: boolean
         host:
           type: string
         port:
@@ -9599,14 +9599,14 @@ components:
           type: boolean
         internal:
           type: boolean
+        locationPath:
+          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
-        locationPath:
-          type: string
         baseDn:
           type: string
     ScriptError:

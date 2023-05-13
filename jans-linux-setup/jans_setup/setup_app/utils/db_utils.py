@@ -22,28 +22,20 @@ from setup_app.utils.cbm import CBM
 from setup_app.utils import ldif_utils
 from setup_app.utils.attributes import attribDataTypes
 
-#if base.current_app.profile == 'jans' or base.current_app.profile == 'disa-stig':
-#    from setup_app.utils.spanner import Spanner
-
-#my_path = PurePath(os.path.dirname(os.path.realpath(__file__)))
-#sys.path.append(my_path.parent.joinpath('pylib/sqlalchemy'))
-
 if base.current_app.profile != 'disa-stig':
+
     import pymysql
     from setup_app.utils.cbm import CBM
-    from setup_app.utils.spanner import Spanner
     from setup_app.utils.spanner_rest_client import SpannerClient
 
     my_path = PurePath(os.path.dirname(os.path.realpath(__file__)))
     sys.path.append(my_path.parent.joinpath('pylib/sqlalchemy'))
 
-#    import sqlalchemy
-#    import sqlalchemy.orm
-#    import sqlalchemy.ext.automap
 
 import sqlalchemy
 import sqlalchemy.orm
 import sqlalchemy.ext.automap
+
 
 class DBUtils:
 
