@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/jans/terraform-provider-jans/jans"
@@ -21,6 +22,11 @@ func resourceSmtpConfiguration() *schema.Resource {
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Schema: map[string]*schema.Schema{
+			"valid": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Boolean value with default value false.",
+			},
 			"host": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -31,10 +37,16 @@ func resourceSmtpConfiguration() *schema.Resource {
 				Optional:    true,
 				Description: "Port number of the SMTP server.",
 			},
-			"requires_ssl": {
-				Type:        schema.TypeBool,
+			"connect_protection": {
+				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Boolean value with default value false. If true, SSL will be enabled.",
+				Description: "Connect protection type. Possible values are None, StartTls, SslTls.",
+				ValidateDiagFunc: func(v interface{}, p cty.Path) diag.Diagnostics {
+
+					enums := []string{"None", "StartTls", "SsslTls"}
+
+					return validateEnum(v, enums)
+				},
 			},
 			"trust_host": {
 				Type:        schema.TypeBool,
@@ -56,15 +68,29 @@ func resourceSmtpConfiguration() *schema.Resource {
 				Optional:    true,
 				Description: "Boolean value with default value false. It true it will enable sender authentication.",
 			},
-			"user_name": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Username of the SMTP.",
+			"smtp_authentication_account_username": {
+				Type:     schema.TypeString,
+				Optional: true,
 			},
-			"password": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Password for the SMTP.",
+			"smtp_authentication_account_password": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"key_store": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"key_store_password": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"key_store_alias": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"signing_algorithm": {
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 		},
 	}

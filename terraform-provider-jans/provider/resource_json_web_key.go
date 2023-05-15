@@ -94,6 +94,14 @@ func resourceJsonWebKey() *schema.Resource {
 				Description: `The y member contains the y coordinate for the elliptic curve point. It is represented 
 						as the base64url encoding of the coordinate's big endian representation.`,
 			},
+			"key_ops_type": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "The key operations type.",
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
 		},
 	}
 }

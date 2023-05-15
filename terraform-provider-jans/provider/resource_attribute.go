@@ -66,17 +66,7 @@ func resourceAttribute() *schema.Resource {
 					return validateEnum(v, enums)
 				},
 			},
-			"lifetime": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "",
-			},
 			"source_attribute": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "",
-			},
-			"salt": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "",
