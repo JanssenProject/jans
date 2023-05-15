@@ -3,6 +3,7 @@
 import './popup.css';
 const axios = require('axios');
 const qs = require('qs');
+
 (function () {
 
   onLoad();
@@ -96,17 +97,25 @@ const qs = require('qs');
 
   async function trigCodeFlowButton() {
 
-    const redirectUrl = chrome.identity.getRedirectURL()/*chrome.runtime.getURL('redirect.html')*/
+    const redirectUrl = chrome.identity.getRedirectURL()
+    const { secret, hashed } = await generateRandomChallengePair();
+
     await chrome.storage.local.get(["oidcClient"]).then(async (result) => {
       if (result.oidcClient != undefined) {
-        let authzUrl = result.oidcClient.authorization_endpoint +
-          '?scope=' + `${result.oidcClient.scope[0]}+profile` +
-          '&acr_values=' + result.oidcClient.acr_values[0] +
-          '&response_type=' + result.oidcClient.response_type[0] +
-          '&redirect_uri=' + redirectUrl +
-          '&client_id=' + result.oidcClient.client_id +
-          '&state=' + uuidv4() +
-          '&nonce=' + uuidv4();
+
+        const options = {
+          scope: result.oidcClient.scope[0],
+          acr_values: result.oidcClient.acr_values[0],
+          response_type: result.oidcClient.response_type[0],
+          redirect_uri: redirectUrl,
+          client_id: result.oidcClient.client_id,
+          code_challenge_method: 'S256',
+          code_challenge: hashed,
+          state: uuidv4(),
+          nonce: uuidv4(),
+        };
+
+        let authzUrl = `${result.oidcClient.authorization_endpoint}?${qs.stringify(options)}`;
 
         let additionalParams = result.oidcClient.additionalParams
 
@@ -150,6 +159,7 @@ const qs = require('qs');
           const tokenReqData = qs.stringify({
             redirect_uri: redirectUrl,
             grant_type: 'authorization_code',
+            code_verifier: secret,
             client_id: result.oidcClient.client_id,
             code,
             scope: result.oidcClient.scope[0]
@@ -417,6 +427,45 @@ const qs = require('qs');
     return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, c =>
       (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
     );
+  }
+
+  async function generateRandomChallengePair() {
+    const randString = generateRandomString()
+    const secret = await randString;
+    const encryt = await sha256(secret);
+    const hashed = base64URLEncode(encryt);
+      return { secret, hashed };
+  }
+
+  function base64URLEncode(a) {
+    var str = "";
+    var bytes = new Uint8Array(a);
+    var len =  bytes.byteLength;
+    for (var i = 0; i < len; i++) {
+      str += String.fromCharCode(bytes[i]);
+    }
+
+    return btoa(str)
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_")
+      .replace(/=+$/, "");
+
+  }
+
+  function dec2hex(dec) {
+    return ('0' + dec.toString(16)).substr(-2)
+  }
+
+  function generateRandomString() {
+    var array = new Uint32Array(56 / 2);
+    window.crypto.getRandomValues(array);
+    return Array.from(array, dec2hex).join('');
+  }
+
+  async function sha256(plain) { // returns promise ArrayBuffer
+    const encoder = new TextEncoder();
+    const data = await encoder.encode(plain);
+    return window.crypto.subtle.digest('SHA-256', data);
   }
 
 })();
