@@ -16,6 +16,8 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertPathValidator;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -170,4 +172,27 @@ public class CertificateService {
         }
     }
 
+    public CertificateFactory instanceCertificateFactory(String type) throws CertificateException {
+        return CertificateFactory.getInstance(type);
+    }
+
+    public CertificateFactory instanceCertificateFactoryX509() {
+        try {
+            return instanceCertificateFactory("X.509");
+        } catch (CertificateException e) {
+            throw new RuntimeException("Failed to instance CertificateFactory X.509");
+        }
+    }
+
+    public CertPathValidator instanceCertPathValidator(String algorithm) throws NoSuchAlgorithmException {
+        return CertPathValidator.getInstance(algorithm);
+    }
+
+    public CertPathValidator instanceCertPathValidatorPKIX() {
+        try {
+            return instanceCertPathValidator("PKIX");
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("Failed to instance CertPathValidator using PKIX");
+        }
+    }
 }
