@@ -434,13 +434,13 @@ const qs = require('qs');
     const secret = await randString;
     const encryt = await sha256(secret);
     const hashed = base64URLEncode(encryt);
-      return { secret, hashed };
+    return { secret, hashed };
   }
 
   function base64URLEncode(a) {
     var str = "";
     var bytes = new Uint8Array(a);
-    var len =  bytes.byteLength;
+    var len = bytes.byteLength;
     for (var i = 0; i < len; i++) {
       str += String.fromCharCode(bytes[i]);
     }
