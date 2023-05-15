@@ -7,15 +7,20 @@ import (
 
 // SMTPConfiguration is the configuration for the SMTP server.
 type SMTPConfiguration struct {
-	Host                   string `schema:"host" json:"host,omitempty"`
-	Port                   int    `schema:"port" json:"port,omitempty"`
-	RequiresSSL            bool   `schema:"requires_ssl" json:"requires_ssl,omitempty"`
-	TrustHost              bool   `schema:"trust_host" json:"trust_host,omitempty"`
-	FromName               string `schema:"from_name" json:"from_name,omitempty"`
-	FromEmailAddress       string `schema:"from_email_address" json:"from_email_address,omitempty"`
-	RequiresAuthentication bool   `schema:"requires_authentication" json:"requires_authentication,omitempty"`
-	UserName               string `schema:"user_name" json:"user_name,omitempty"`
-	Password               string `schema:"password" json:"password,omitempty"`
+	Valid                             bool   `schema:"valid" json:"valid,omitempty"`
+	Host                              string `schema:"host" json:"host,omitempty"`
+	Port                              int    `schema:"port" json:"port,omitempty"`
+	ConnectProtection                 string `schema:"connect_protection" json:"connect_protection,omitempty"`
+	TrustHost                         bool   `schema:"trust_host" json:"trust_host,omitempty"`
+	FromName                          string `schema:"from_name" json:"from_name,omitempty"`
+	FromEmailAddress                  string `schema:"from_email_address" json:"from_email_address,omitempty"`
+	RequiresAuthentication            bool   `schema:"requires_authentication" json:"requires_authentication,omitempty"`
+	SmtpAuthenticationAccountUsername string `schema:"smtp_authentication_account_username" json:"smtp_authentication_account_username,omitempty"`
+	SmtpAuthenticationAccountPassword string `schema:"smtp_authentication_account_password" json:"smtp_authentication_account_password,omitempty"`
+	KeyStore                          string `schema:"key_store" json:"key_store,omitempty"`
+	KeyStorePassword                  string `schema:"key_store_password" json:"key_store_password,omitempty"`
+	KeyStoreAlias                     string `schema:"key_store_alias" json:"key_store_alias,omitempty"`
+	SigningAlgorithm                  string `schema:"signing_algorithm" json:"signing_algorithm,omitempty"`
 }
 
 // GetSMTPConfiguration returns the SMTP configuration.
