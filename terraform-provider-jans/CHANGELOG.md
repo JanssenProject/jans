@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.6.0](https://github.com/JanssenProject/terraform-provider-jans/compare/v0.5.0...v0.6.0) (2023-05-15)
+
+
+### Features
+
+* added read-only ttl attribute to oidc client 
+* aligned to latest auth-config-API 
+* implemented handling of Agama deployments 
+
 ## [0.5.0](https://github.com/JanssenProject/terraform-provider-jans/compare/v0.4.0...v0.5.0) (2023-04-17)
 
 

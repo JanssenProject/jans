@@ -41,11 +41,14 @@ EOF
 - `qname` (String) Flow qualified name
 - `revision` (Number) Revision number of the flow
 - `source` (String) Source code
+- `transpiled` (String)
 
 ### Read-Only
 
+- `base_dn` (String)
 - `dn` (String) Flow distinguished name
 - `id` (String) The ID of this resource.
+- `trans_hash` (String)
 
 <a id="nestedblock--metadata"></a>
 ### Nested Schema for `metadata`

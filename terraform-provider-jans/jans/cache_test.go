@@ -125,8 +125,8 @@ func TestRedisConfig(t *testing.T) {
 		client.PatchCacheConfiguration(ctx, patches)
 	})
 
-	if cacheCfg.RedisConfiguration.Servers != "localhost:6389" {
-		t.Fatal("expected updated redis servers")
+	if cacheCfg.RedisConfiguration.Servers != "localhost:11222" {
+		t.Fatalf("expected updated redis servers, got %v", cacheCfg.RedisConfiguration.Servers)
 	}
 
 }

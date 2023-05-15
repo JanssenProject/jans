@@ -168,6 +168,11 @@ func resourceRedisCacheConfiguration() *schema.Resource {
 				Optional:    true,
 				Description: "Directory Path to Trust Store.",
 			},
+			"ssl_trust_store_password": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Password for accessing the Trust Store.",
+			},
 			"max_idle_connections": {
 				Type:     schema.TypeInt,
 				Optional: true,
