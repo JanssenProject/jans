@@ -26,10 +26,15 @@ func resourceOidcClient() *schema.Resource {
 				Computed:    true,
 				Description: "",
 			},
-			"inum": {
+			"expiration_date": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "XRI i-number. Client Identifier to uniquely identify the client.",
+				Description: "",
+			},
+			"deletable": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "",
 			},
 			"client_secret": {
 				Type:        schema.TypeString,
@@ -145,11 +150,6 @@ func resourceOidcClient() *schema.Resource {
 						Token Bound ID Tokens. The presence of this parameter indicates that the Relying Party supports Token Binding of ID 
 						Tokens. If omitted, the default is that the Relying Party does not support Token Binding of ID Tokens.`,
 			},
-			"client_name": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "",
-			},
 			"logo_uri": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -169,6 +169,41 @@ func resourceOidcClient() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "URL that the Relying Party Client provides to the End-User to read about the Relying Party's terms of service.",
+			},
+			"client_name_localized": {
+				Type:     schema.TypeMap,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"logo_uri_localized": {
+				Type:     schema.TypeMap,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"client_uri_localized": {
+				Type:     schema.TypeMap,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"policy_uri_localized": {
+				Type:     schema.TypeMap,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"tos_uri_localized": {
+				Type:     schema.TypeMap,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
 			},
 			"jwks_uri": {
 				Type:     schema.TypeString,
@@ -295,11 +330,6 @@ func resourceOidcClient() *schema.Resource {
 				Type:        schema.TypeInt,
 				Optional:    true,
 				Description: "Specifies the Default Maximum Authentication Age. Example: 1000000",
-			},
-			"require_auth_time": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Description: "Boolean value specifying whether the auth_time Claim in the ID Token is required. It is required when the value is true.",
 			},
 			"default_acr_values": {
 				Type:     schema.TypeList,
@@ -655,40 +685,53 @@ func resourceOidcClient() *schema.Resource {
 				Optional:    true,
 				Description: "Boolean value specifying whether the Client supports the user_code parameter. If omitted, the default value is false.",
 			},
-			"expiration_date": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating when this permission will expire.",
-			},
-			"deletable": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Description: "Specifies whether client is deletable.",
-			},
-			"jans_id": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Attribute Scope Id.",
-			},
 			"description": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "Description of the client.",
 			},
+			"organization": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"groups": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "List of groups that the client belongs to.",
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"ttl": {
+				Type:        schema.TypeInt,
+				Computed:    true,
+				Description: "Time to live of the client.",
+			},
+			"display_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Display name of the client.",
+			},
 			"authentication_method": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "",
-			},
-			"token_binding_supported": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Description: "",
+				ValidateDiagFunc: func(v interface{}, p cty.Path) diag.Diagnostics {
+
+					enums := []string{"client_secret_basic", "client_secret_post", "client_secret_jwt",
+						"private_key_jwt", "access_token", "tls_client_auth", "self_signed_tls_client_auth", "none"}
+					return validateEnum(v, enums)
+				},
 			},
 			"base_dn": {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "",
+			},
+			"inum": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "XRI i-number. Client Identifier to uniquely identify the client.",
 			},
 		},
 	}

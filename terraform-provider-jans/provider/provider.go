@@ -4,9 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/jans/terraform-provider-jans/jans"
 )
@@ -15,6 +17,10 @@ var (
 	signingAlgs    = []string{"HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "PS256", "PS384", "PS512"}
 	encryptionAlgs = []string{"RSA1_5", "RSA-OAEP", "A128KW", "A256KW"}
 	encryptionEnc  = []string{"A128CBC+HS256", "A256CBC+HS512", "A128GCM", "A256GCM"}
+)
+
+const (
+	defaultTimeout = 1 * time.Minute
 )
 
 func Provider() *schema.Provider {
@@ -62,6 +68,7 @@ func Provider() *schema.Provider {
 			"jans_admin_ui_permission":              resourceAdminUIPermission(),
 			"jans_admin_ui_role":                    resourceAdminUIRole(),
 			"jans_admin_ui_role_permission_mapping": resourceAdminUIRolePermissionMapping(),
+			"jans_agama_deployment":                 resourceAgamaDeployment(),
 			"jans_agama_flow":                       resourceAgamaFlow(),
 			"jans_api_app_configuration":            resourceApiAppConfiguration(),
 			"jans_app_configuration":                resourceAppConfiguration(),
@@ -185,6 +192,19 @@ func resourceBlockCreate(ctx context.Context, d *schema.ResourceData, m any) dia
 	return diags
 }
 
+// resourceBlockUpdate is used with resources that do not have an update method.
+func resourceBlockUpdate(ctx context.Context, d *schema.ResourceData, m any) diag.Diagnostics {
+	var diags diag.Diagnostics
+
+	diags = append(diags, diag.Diagnostic{
+		Severity: diag.Error,
+		Summary:  "Update not supported",
+		Detail:   "This resource does not support update operations.",
+	})
+
+	return diags
+}
+
 // resourceUntrackOnDelete is used with resources that do not have a delete method. Mostly those
 // are configurations for the instance that exist only once. If such a resource is deleted from
 // the Terraoform configuration, it will be untracked from the state file.
@@ -221,4 +241,17 @@ func handleNotFoundError(ctx context.Context, err error, d *schema.ResourceData)
 	}
 
 	return diag.FromErr(err)
+}
+
+func isResourceTimeOut(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	timeOut, ok := err.(*resource.TimeoutError)
+	if !ok {
+		return false
+	}
+
+	return timeOut.LastError == nil
 }
