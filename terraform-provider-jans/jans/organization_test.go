@@ -37,6 +37,11 @@ func TestOrganization(t *testing.T) {
 			Path:  "/description",
 			Value: "TestDescription",
 		},
+		{
+			Op:    "replace",
+			Path:  "/CountryName",
+			Value: "TestCountry",
+		},
 	}
 
 	updatedOrga, err := client.PatchOrganization(ctx, patches)
@@ -47,6 +52,7 @@ func TestOrganization(t *testing.T) {
 	t.Cleanup(func() {
 		patches[0].Value = origOrga.DisplayName
 		patches[1].Value = origOrga.Description
+		patches[2].Value = origOrga.CountryName
 		_, _ = client.PatchOrganization(ctx, patches)
 	})
 

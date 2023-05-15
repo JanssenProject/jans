@@ -31,7 +31,6 @@ func TestReourceOidcClient_Mapping(t *testing.T) {
 		GrantTypes:      []string{"client_credentials"},
 		ApplicationType: "native",
 		// Contacts:                []string{},
-		ClientName:              "",
 		LogoUri:                 "",
 		ClientUri:               "",
 		PolicyUri:               "",
@@ -72,10 +71,14 @@ func TestReourceOidcClient_Mapping(t *testing.T) {
 			RequirePar:                              false,
 			JansDefaultPromptLogin:                  false,
 		},
-		AuthenticationMethod:  "client_secret_basic",
-		TokenBindingSupported: false,
-		BaseDn:                "inum=1201.d52300ed-8193-510e-b31d-5829f4af346e,ou=clients,o=jans",
-		Inum:                  "1201.d52300ed-8193-510e-b31d-5829f4af346e",
+		Description:  "Test client",
+		Organization: "inum=1200.33AFBA,ou=scopes,o=jans",
+		// Groups:               []string{},
+		// Ttl:                  3600,
+		DisplayName:          "SCIM client",
+		AuthenticationMethod: "client_secret_basic",
+		BaseDn:               "inum=1201.d52300ed-8193-510e-b31d-5829f4af346e,ou=clients,o=jans",
+		Inum:                 "1201.d52300ed-8193-510e-b31d-5829f4af346e",
 	}
 
 	if err := toSchemaResource(data, client); err != nil {
@@ -106,7 +109,7 @@ func TestAccResourceOidcClient_basic(t *testing.T) {
 				Config: testAccResourceOidcClientConfig_basic(),
 				Check: resource.ComposeTestCheckFunc(
 					testAccResourceCheckOidcClientExists(resourceName),
-					resource.TestCheckResourceAttr(resourceName, "client_name", "SCIM client"),
+					resource.TestCheckResourceAttr(resourceName, "display_name", "SCIM client"),
 					resource.TestCheckResourceAttr(resourceName, "grant_types.0", "client_credentials"),
 					resource.TestCheckResourceAttr(resourceName, "front_channel_logout_uri", "https://jans.io/logout"),
 				),
@@ -121,7 +124,8 @@ resource "jans_oidc_client" "test" {
 	inum 																	= "1201.d52300ed-8193-510e-b31d-5829f4af346e"
 	authentication_method 								= "client_secret_basic"
 	token_endpoint_auth_method						= "client_secret_basic"
-	client_name 													= "SCIM client"
+	application_type 											= "web"
+	display_name 													= "SCIM client"
 	client_secret 												= "SEw7VOX8m9ah"
 	front_channel_logout_uri 							= "https://jans.io/logout"
 	front_channel_logout_session_required = false
@@ -131,10 +135,25 @@ resource "jans_oidc_client" "test" {
 	grant_types 													= ["client_credentials"]
 	subject_type 													= "public"
 	
+	attributes {
+		par_lifetime 													= 600
+		additional_audience                   = []
+		backchannel_logout_uri                = []
+		consent_gathering_scripts             = []
+		introspection_scripts                 = []
+		jans_authorized_acr                   = []
+		post_authn_scripts                    = []
+		ropc_scripts                          = []
+		rpt_claims_scripts                    = []
+		spontaneous_scope_script_dns          = []
+		spontaneous_scopes                    = []
+		update_token_script_dns               = []
+	}
+
 	lifecycle {
 		# ignore changes to secret, as it will be 
 		# returned from the API as a hash
-    ignore_changes = [ client_secret ]
+    ignore_changes = [ client_secret, custom_attributes ]
   }
 }
 `
