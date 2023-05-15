@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import io.jans.fido2.service.CertificateService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -56,11 +57,14 @@ public class CertificateVerifier {
     @Inject
     private Base64Service base64Service;
 
+    @Inject
+    private CertificateService certificateService;
+
     public void checkForTrustedCertsInAttestation(List<X509Certificate> attestationCerts, List<X509Certificate> trustChainCertificates) {
         final List<String> trustedSignatures = trustChainCertificates.stream().map(cert -> base64Service.encodeToString(cert.getSignature()))
                 .collect(Collectors.toList());
         List<String> duplicateSignatures = attestationCerts.stream().map(cert -> base64Service.encodeToString(cert.getSignature()))
-                .filter(sig -> trustedSignatures.contains(sig)).collect(Collectors.toList());
+                .filter(trustedSignatures::contains).collect(Collectors.toList());
         if (!duplicateSignatures.isEmpty()) {
             throw new Fido2RuntimeException("Root certificate in the attestation");
         }
@@ -76,13 +80,13 @@ public class CertificateVerifier {
             }
 
             PKIXParameters params = new PKIXParameters(trustAnchors);
-            CertPathValidator cpv = CertPathValidator.getInstance("PKIX");
+            CertPathValidator cpv = certificateService.instanceCertPathValidatorPKIX();
 
             PKIXRevocationChecker rc = (PKIXRevocationChecker) cpv.getRevocationChecker();
             rc.setOptions(EnumSet.of(PKIXRevocationChecker.Option.SOFT_FAIL, PKIXRevocationChecker.Option.PREFER_CRLS));
             params.addCertPathChecker(rc);
 
-            CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+            CertificateFactory certFactory = certificateService.instanceCertificateFactoryX509();
             CertPath certPath = certFactory.generateCertPath(certs);
 
             X509Certificate cert = verifyPath(cpv, certPath, params);
@@ -90,7 +94,7 @@ public class CertificateVerifier {
                 return cert;
             } else {
                 params = new PKIXParameters(trustAnchors);
-                cpv = CertPathValidator.getInstance("PKIX");
+                cpv = certificateService.instanceCertPathValidatorPKIX();
                 rc = (PKIXRevocationChecker) cpv.getRevocationChecker();
                 rc.setOptions(Collections.emptySet());
                 params.setRevocationEnabled(false);
@@ -98,7 +102,7 @@ public class CertificateVerifier {
 
                 return verifyPath(cpv, certPath, params);
             }
-        } catch (NoSuchAlgorithmException | InvalidAlgorithmParameterException | CertificateException e) {
+        } catch (InvalidAlgorithmParameterException | CertificateException e) {
             log.warn("Cert verification problem {}", e.getMessage(), e);
             throw new Fido2RuntimeException("Problem with certificate");
         }
