@@ -52,42 +52,26 @@ func (c *Client) GetFido2Configuration(ctx context.Context) (*JansFido2DynConfig
 
 	ret := &JansFido2DynConfiguration{}
 
-	if err := c.get(ctx, "/jans-config-api/fido2/config", token, ret); err != nil {
+	if err := c.get(ctx, "/jans-config-api/fido2/fido2-config", token, ret); err != nil {
 		return nil, fmt.Errorf("get request failed: %w", err)
 	}
 
 	return ret, nil
 }
 
-// UpdateFido2Configuration updates Fido2 configuration for the Janssen server.
-func (c *Client) PatchFido2Configuration(ctx context.Context, patches []PatchRequest) (*JansFido2DynConfiguration, error) {
-
-	if len(patches) == 0 {
-		return c.GetFido2Configuration(ctx)
-	}
-
-	orig, err := c.GetFido2Configuration(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get fido2 configuration: %w", err)
-	}
-
-	updates, err := createPatchesDiff(orig, patches)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create patches: %w", err)
-	}
-
-	if len(updates) == 0 {
-		return c.GetFido2Configuration(ctx)
-	}
+// PutFido2Configuration updates Fido2 configuration for the Janssen server.
+func (c *Client) PutFido2Configuration(ctx context.Context, fido2Config *JansFido2DynConfiguration) (*JansFido2DynConfiguration, error) {
 
 	token, err := c.getToken(ctx, "https://jans.io/oauth/config/fido2.write")
 	if err != nil {
 		return nil, fmt.Errorf("failed to get token: %w", err)
 	}
 
-	if err := c.patch(ctx, "/jans-config-api/fido2/config", token, updates); err != nil {
-		return nil, fmt.Errorf("patch request failed: %w", err)
+	ret := &JansFido2DynConfiguration{}
+
+	if err := c.put(ctx, "/jans-config-api/fido2/fido2-config", token, fido2Config, ret); err != nil {
+		return nil, fmt.Errorf("put request failed: %w", err)
 	}
 
-	return c.GetFido2Configuration(ctx)
+	return ret, nil
 }
