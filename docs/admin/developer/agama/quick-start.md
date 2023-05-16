@@ -84,7 +84,7 @@ A line-by-line description follows:
 
 - Line 8: a logging statement. This appends the text `Done!` to the flow's log. The `Log` instruction is pretty versatile; it is used in its simplest form here.
 
-- Line 9: marks the flow ending. `Finish` has several forms but here a shorthand notation is used where we always report a positive success and supply the identifier of a user. If it turns out your local user database contains a user identified by `john_doe`, this will be the subject that will get authenticated by the server, otherwise an error page will be shown.
+- Line 9: marks the flow ending. `Finish` has several forms but here a shorthand notation is used where we always report a positive success and supply the identifier of a user. If it turns out your local user database contains a user identified by `john_doe`, this will be the subject that will get authenticated by the server, otherwise an error page will be shown. The mechanism used to lookup the identity of the user is detailed [here](./dsl-full.md#identity of-the-user-to-login)
 
 This flow is extremely static and unrealistic but showcases minimal key elements for flow building. Please **do not** try this flow in any of your production servers.
 
