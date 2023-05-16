@@ -36,14 +36,14 @@ func TestFido2Config(t *testing.T) {
 		},
 	}
 
-	updatedConfig, err := client.PatchFido2Configuration(ctx, patches)
+	updatedConfig, err := client.PutFido2Configuration(ctx, patches)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	t.Cleanup(func() {
 		patches[0].Value = origBasepoint
-		_, _ = client.PatchFido2Configuration(ctx, patches)
+		_, _ = client.PutFido2Configuration(ctx, patches)
 	})
 
 	if diff := cmp.Diff(cfg, updatedConfig); diff != "" {
