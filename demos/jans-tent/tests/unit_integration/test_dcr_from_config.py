@@ -47,7 +47,12 @@ class TestDrcFromConfig(TestCase):
     @patch('clientapp.helpers.client_handler.ClientHandler.__init__', MagicMock(return_value=None))
     def test_register_should_call_ClientHandler_with_params(self):
         dcr_from_config.register()
-        ClientHandler.__init__.assert_called_once_with(cfg.ISSUER, cfg.REDIRECT_URIS, {'scope': cfg.SCOPE.split(" ")})
+        ClientHandler.__init__.assert_called_once_with(
+            cfg.ISSUER, cfg.REDIRECT_URIS, {
+                'scope': cfg.SCOPE.split(" "),
+                "post_logout_redirect_uris": ['https://localhost:9090']
+            }
+        )
 
     def test_register_should_call_open(self):
         with patch('builtins.open', mock_open()) as open_mock:

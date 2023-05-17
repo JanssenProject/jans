@@ -36,6 +36,7 @@ class ClientHandler:
     __metadata_url = None
     __op_url = None
     __additional_metadata = None
+    __end_session_endpoint = None
     op_data = None
 
     def __init__(self, op_url: str, redirect_uris: list[str], additional_metadata: dict):
@@ -55,6 +56,7 @@ class ClientHandler:
         self.__metadata_url = '%s/.well-known/openid-configuration' % op_url
         self.op_data = self.discover(op_url)
         self.reg_info = self.register_client(op_data=self.op_data, redirect_uris=redirect_uris)
+        self.__end_session_endpoint = self.op_data['end_session_endpoint']
         self.__client_id = self.reg_info['client_id']
         self.__client_secret = self.reg_info['client_secret']
 
@@ -62,7 +64,8 @@ class ClientHandler:
         r = {
             'op_metadata_url': self.__metadata_url,
             'client_id': self.__client_id,
-            'client_secret': self.__client_secret
+            'client_secret': self.__client_secret,
+            'end_session_endpoint': self.__end_session_endpoint
         }
 
         return r
@@ -86,6 +89,7 @@ class ClientHandler:
                              'token_endpoint_auth_method': 'client_secret_post',
                              **self.__additional_metadata
                              }
+        logger.info('calling register with registration_args: %s', json.dumps(registration_args, indent=2))
         reg_info = self.clientAdapter.register(op_data['registration_endpoint'], **registration_args)
         logger.info('register_client - reg_info = %s', json.dumps(reg_info.to_dict(), indent=2))
         return reg_info
