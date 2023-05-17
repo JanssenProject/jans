@@ -91,7 +91,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 
 	private boolean disableAttributeMapping = false;
 
-	private boolean mariaDb = false;
+	private SupportedDbType dbType;
 
 	private PersistenceExtension persistenceExtension;
 
@@ -115,7 +115,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 	private void init() {
 		this.sqlQueryFactory = connectionProvider.getSqlQueryFactory();
 		this.schemaName = connectionProvider.getSchemaName();
-		this.mariaDb = connectionProvider.isMariaDb();
+		this.dbType = connectionProvider.getDbType();
 	}
 
     @Override
@@ -976,7 +976,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 			return false;
 		}
 
-		if (mariaDb && SqlOperationService.LONGTEXT_TYPE_NAME.equals(columnTypeName)) {
+		if ((SupportedDbType.MARIADB == dbType) && SqlOperationService.LONGTEXT_TYPE_NAME.equals(columnTypeName)) {
 			return true;
 		}
 		
