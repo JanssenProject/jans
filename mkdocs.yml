@@ -9005,28 +9005,28 @@ nav:
     - Locking or Disabling Accounts: admin/recipes/locking-accounts.md
   - Upgrade Guide:
     - admin/upgrade/README.md
-- Developer:
+- Contribute:
   - Contribution Guidelines: CONTRIBUTING.md
   - Code of Conduct: CODE_OF_CONDUCT.md
   - Design and Implementation:
-    - developer/implementation-design/README.md
-    - Agama: developer/implementation-design/agama.md
-    - jans-auth-server: developer/implementation-design/jans-auth-server.md
-    - jans-cli: developer/implementation-design/jans-cli.md
-    - jans-config-api: developer/implementation-design/jans-config-api.md
-    - jans-core: developer/implementation-design/jans-core.md
-    - jans-eleven: developer/implementation-design/jans-eleven.md
-    - jans-fido2: developer/implementation-design/jans-fido2.md
-    - jans-notify: developer/implementation-design/jans-notify.md
-    - jans-orm: developer/implementation-design/jans-orm.md
-    - jans-scim: developer/implementation-design/jans-scim.md
+    - contribute/implementation-design/README.md
+    - Agama: contribute/implementation-design/agama.md
+    - jans-auth-server: contribute/implementation-design/jans-auth-server.md
+    - jans-cli: contribute/implementation-design/jans-cli.md
+    - jans-config-api: contribute/implementation-design/jans-config-api.md
+    - jans-core: contribute/implementation-design/jans-core.md
+    - jans-eleven: contribute/implementation-design/jans-eleven.md
+    - jans-fido2: contribute/implementation-design/jans-fido2.md
+    - jans-notify: contribute/implementation-design/jans-notify.md
+    - jans-orm: contribute/implementation-design/jans-orm.md
+    - jans-scim: contribute/implementation-design/jans-scim.md
   - CI-CD:
-    - GitHub CI: developer/ci-cd/github-ci.md
-    - Jenkins CI: developer/ci-cd/jenkins-ci.md
-    - Release Process: developer/ci-cd/release-process.md
-  - Development: developer/development.md
-  - Testing: developer/testing.md
-  - Developer FAQ: developer/developer-faq.md
+    - GitHub CI: contribute/ci-cd/github-ci.md
+    - Jenkins CI: contribute/ci-cd/jenkins-ci.md
+    - Release Process: contribute/ci-cd/release-process.md
+  - Development: contribute/development.md
+  - Testing: contribute/testing.md
+  - Developer FAQ: contribute/developer-faq.md
 - Governance:
   - Charter: governance/charter.md
   - Copyright-notice: governance/copyright-notices.md
