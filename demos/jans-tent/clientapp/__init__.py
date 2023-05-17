@@ -120,18 +120,6 @@ def create_app():
         app.logger.info('Not authorized to logout, redirecting to index')
         return redirect(url_for('index'))
 
-        #
-        # app.logger.debug('Session keys logout:')
-        # app.logger.debug(session.keys())
-        # token_hint = session.get('id_token')
-        # session.pop('id_token')
-        # session.pop('user')
-        # app.logger.debug('Session after pop:')
-        # app.logger.debug(session.keys())
-        # return redirect('https://dev2.techno24x7.com/jans-auth/restv1/end_session?post_logout_redirect_uri=https://localhost:9090&token_hint=%s' % token_hint)
-
-
-
     @app.route('/register', methods=['POST'])
     def register():
         app.logger.info('/register called')
