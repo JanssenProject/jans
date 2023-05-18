@@ -40,6 +40,8 @@ type JansFido2DynConfiguration struct {
 	MetricReporterKeepDataDays  int                `schema:"metric_reporter_keep_data_days" json:"metricReporterKeepDataDays,omitempty"`
 	PersonCustomObjectClassList []string           `schema:"person_custom_object_class_list" json:"personCustomObjectClassList,omitempty"`
 	Fido2Configuration          Fido2Configuration `schema:"fido2_configuration" json:"fido2Configuration,omitempty"`
+	OldU2fMigrationEnabled      bool               `schema:"old_u2f_migration_enabled" json:"oldU2fMigrationEnabled,omitempty"`
+	SuperGluuEnabled            bool               `schema:"super_gluu_enabled" json:"superGluuEnabled,omitempty"`
 }
 
 // GetFido2Configuration returns the current Fido2 configuration.
