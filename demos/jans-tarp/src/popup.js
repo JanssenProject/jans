@@ -100,15 +100,15 @@ const qs = require('qs');
     const redirectUrl = chrome.identity.getRedirectURL()
     const { secret, hashed } = await generateRandomChallengePair();
 
-    await chrome.storage.local.get(["oidcClient"]).then(async (result) => {
+    chrome.storage.local.get(["oidcClient"]).then(async (result) => {
       if (result.oidcClient != undefined) {
 
         const options = {
-          scope: result.oidcClient.scope[0],
-          acr_values: result.oidcClient.acr_values[0],
-          response_type: result.oidcClient.response_type[0],
+          scope: result?.oidcClient?.scope[0],
+          acr_values: result?.oidcClient?.acr_values[0],
+          response_type: result?.oidcClient?.response_type[0],
           redirect_uri: redirectUrl,
-          client_id: result.oidcClient.client_id,
+          client_id: result?.oidcClient?.client_id,
           code_challenge_method: 'S256',
           code_challenge: hashed,
           state: uuidv4(),
@@ -430,8 +430,7 @@ const qs = require('qs');
   }
 
   async function generateRandomChallengePair() {
-    const randString = generateRandomString()
-    const secret = await randString;
+    const secret = await generateRandomString();
     const encryt = await sha256(secret);
     const hashed = base64URLEncode(encryt);
     return { secret, hashed };
