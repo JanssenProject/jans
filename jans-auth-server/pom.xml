@@ -206,11 +206,6 @@
 				<artifactId>jans-notify-client</artifactId>
 				<version>${jans-notify.version}</version>
 			</dependency>
-			<dependency>
-				<groupId>io.jans</groupId>
-				<artifactId>jans-notify-model</artifactId>
-				<version>${jans-notify.version}</version>
-			</dependency>
 
 			<!-- Omnifaces -->
 			<!-- <dependency>

@@ -1,6 +1,0 @@
-io.jans.notify.exception
-io.jans.notify.model.conf
-io.jans.notify.model.sns
-io.jans.notify.resource
-io.jans.notify.rest
-io.jans.notify.service
