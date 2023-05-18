@@ -47,19 +47,6 @@ const common = {
       },
     ],
   },
-  resolve: {
-    fallback: {
-      "fs": false,
-      "tls": false,
-      "net": false,
-      "path": false,
-      "zlib": false,
-      "http": false,
-      "https": require.resolve('https-browserify'),
-      "stream": require.resolve("stream-browserify"),
-      "crypto": require.resolve('crypto-browserify')
-    },
-  },
   plugins: [
     // Copy static assets from `public` folder to `build` folder
     new CopyWebpackPlugin({
