@@ -6,6 +6,10 @@ tags:
   - cluster
 ---
 
+!!! Note
+    For high availability, we [recommend](./kubernetes.md#does-the-deployment-need-to-be-highly-availableha) using 
+    the Cloud Native(CN) deployment instead of VM cluster deployments. 
+
 What if you need four or five nines availability, but cloud native is not
 an option? You could cluster Janssen using VM's, but you'll have to do
 some legwork, because we don't publish tools for this task. This planning
