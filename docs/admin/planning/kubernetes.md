@@ -29,11 +29,17 @@ If your organization or your customer base is growing fast rule out a VM setup.
 If you plan to use LDAP you are almost immediately locked to a VM setup. Our kuberentes deployment supports an LDAP zonal setup only and we generally do not recommend it for a kubernetes setup.
 
 #### Is this an on-premise vs hybrid vs cloud deployment?
-This question wieghs on the current infrastructure of your organization. Operating on-premis kubernetes setups needs generally more technical resources than operating a cloud setup. Comparing that to a vm setup, operating a vm setup is much easier in on-premise setups. The more the momentum of your org pulls to cloud vs onpremise the more it pulls to kuberetnes vs a vm setup respectively.
+This question weighs on the current infrastructure of your organization. Operating on-premis kubernetes setups needs generally more technical resources than operating a cloud setup. Comparing that to a vm setup, operating a vm setup is much easier in on-premise setups. The more the momentum of your org pulls to cloud vs onpremise the more it pulls to kuberetnes vs a vm setup respectively.
 
 #### What's my organizations technical expertise level on kubernetes vs vms?
 This determines the amount of investment needed to overcome the learning curve to operate a kubernetes cluster. If your kubernetes technical resources are low and the above questions point to a vm setup you should think about going with a vm setup. If you got conflicting answers above , forexample if the customer size dedicated that you should operate a kubernetes cluster you need to invest in your technical staff. If you are on the borderline invest in your kubernetes technical staff while operating a vm setup and prepare to move in the near future.
 
+#### Does the deployment need to be highly available(HA)?
+We recommend using Kubernetes based CN deployments for situations where high availability is a critical factor. Though
+[VM cluster](./vm-cluster.md) can provide high availability, we do not recommend the HA setup with VMs. Primarily 
+because effort required to upgrade multiple servers and configuring them is much more as compared to a cloud native 
+deployment and it is error-prone. We recommend you follow the CN setup for HA as you will get automatic upgrades, 
+patches with a single helm upgrade command.
 
 In general the kubernetes deployment offers an easy deployment strategy with a helm chart and an easy upgrade path but taking the above into account is very important. 
 
