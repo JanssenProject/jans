@@ -70,6 +70,7 @@
 	<modules>
 		<module>model</module>
 		<module>client</module>
+		<module>notify-client2</module>
 		<module>server</module>
 	</modules>
 	
