@@ -34,7 +34,7 @@ public interface NotifyClientService {
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Produces({ MediaType.APPLICATION_JSON })
 	@Path("/notify")
-	Response sendNotification(@HeaderParam("Authorization") String authorization, @FormParam("enpoint") String endpoint,
+	Response sendNotification(@HeaderParam("Authorization") String authorization, @FormParam("endpoint") String endpoint,
 			@FormParam("message") String message, @FormParam("platform_id") String platformId);
 
 
