@@ -10,7 +10,7 @@ tags:
 
 ## Benefits of Terraform and IaC
 
-**Consistency:** you create one terraform configuration and use it to configure environments repeatedly.
+**Consistency:** you create one Terraform configuration and use it to configure environments repeatedly.
 
 **Minimized human error:** the configuration is now `as code` and is deployed automatically.
 
@@ -22,13 +22,13 @@ tags:
 ## Janssen Terraform provider
 
 !!! Note
-    The janssen terraform resources cannot be created or destroyed/deleted using terraform, as they are always present in a Janssen deployment. Instead, they can be imported and then updated. The creation of such a resource using `terraform apply` will result in an error. Deletion on the other hand using `terraform destroy` will result in the resource being removed from the state file and become not under terraform management.
+    The Janssen Terraform resources cannot be created or destroyed/deleted using Terraform, as they are always present in a Janssen deployment. Instead, they can be imported and then updated. The creation of such a resource using `terraform apply` will result in an error. Deletion on the other hand using `terraform destroy` will result in the resource being removed from the state file and become not under Terraform management.
 
-The [Janssen](https://registry.terraform.io/providers/JanssenProject/jans/latest/docs) terraform provider is used to manage resources in a Janssen deployment. This includes all configurations, users, groups, OIDC clients, and more.
+The [Janssen](https://registry.terraform.io/providers/JanssenProject/jans/latest/docs) Terraform provider is used to manage resources in a Janssen deployment. This includes all configurations, users, groups, OIDC clients, and more.
 
 ## Example - Configure Janssen
 
-Let's have an example on `importing` the current `logging level` of a deployment and `changing` it using terraform.
+Let's have an example on `importing` the current `logging level` of a deployment and `changing` it using Terraform.
 
 1. Configure Terraform to install the required plugins for `Janssen provider`. Add this to your `.tf` file:
 
@@ -70,7 +70,7 @@ Let's have an example on `importing` the current `logging level` of a deployment
 5. Import:
    `terraform import jans_logging_configuration.global global`
 
-    Now after importing, the logging configuration is in terraform state file, i.e. terraform.tfstate, and it's under terraform management.
+    Now after importing, the logging configuration is in Terraform state file, i.e. terraform.tfstate, and it's under Terraform management.
 
     `terraform state list` will output:
     ```
@@ -102,7 +102,7 @@ Let's have an example on `importing` the current `logging level` of a deployment
     }
     ```
 
-7.  You can validate your terraform syntax using `terraform validate`
+7.  You can validate your Terraform syntax using `terraform validate`
 
 8.  Apply changes using `terraform apply` and enter `yes`
 
@@ -114,5 +114,5 @@ Let's have an example on `importing` the current `logging level` of a deployment
      ![svg](../../assets/changed-logging-info.png)    
 
 !!! Note
-    You can find the full list of resources you can import and manage using terraform under the `Resources` sidebar in the Janssen terraform [documentation](https://registry.terraform.io/providers/JanssenProject/jans/latest/docs)
+    You can find the full list of resources you can import and manage using Terraform under the `Resources` sidebar in the Janssen Terraform [documentation](https://registry.terraform.io/providers/JanssenProject/jans/latest/docs)
 
