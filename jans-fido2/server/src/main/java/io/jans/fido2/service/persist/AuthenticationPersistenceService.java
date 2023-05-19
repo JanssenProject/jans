@@ -93,7 +93,7 @@ public class AuthenticationPersistenceService {
         Fido2AuthenticationEntry authenticationEntity = new Fido2AuthenticationEntry(dn, authenticationData.getId(), now, userInum, authenticationData);
         authenticationEntity.setAuthenticationStatus(authenticationData.getStatus());
         if (StringUtils.isNotEmpty(challenge)) {
-        	authenticationEntity.setChallengeHash(String.valueOf(challengeGenerator.getChallengeHashCode(challenge)));
+        	authenticationEntity.setChallengeHash(challengeGenerator.getChallengeHashCode(challenge));
         }
         authenticationEntity.setRpId(authenticationData.getApplicationId());
 

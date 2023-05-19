@@ -90,7 +90,7 @@ public class SignatureVerifier {
                 return signatureChecker;
             }
             case -257: {
-                Signature signatureChecker = Signature.getInstance("SHA256withRSA");
+                Signature signatureChecker = Signature.getInstance("SHA256withRSA", provider);
                 return signatureChecker;
             }
             case -258: {
@@ -102,7 +102,7 @@ public class SignatureVerifier {
                 return signatureChecker;
             }
             case -65535: {
-                Signature signatureChecker = Signature.getInstance("SHA1withRSA");
+                Signature signatureChecker = Signature.getInstance("SHA1withRSA", provider);
                 return signatureChecker;
             }
 

@@ -46,6 +46,7 @@ import io.jans.fido2.ctap.CoseEC2Algorithm;
 import io.jans.fido2.ctap.CoseKeyType;
 import io.jans.fido2.ctap.CoseRSAAlgorithm;
 import io.jans.fido2.exception.Fido2RuntimeException;
+import io.jans.util.security.SecurityProviderUtility;
 import io.jans.as.model.exception.SignatureException;
 import org.slf4j.Logger;
 
@@ -131,7 +132,7 @@ public class CoseService {
             BigInteger n = new BigInteger(1, rsaKey_n);
             BigInteger e = new BigInteger(1, rsaKey_e);
             RSAPublicKeySpec publicKeySpec = new RSAPublicKeySpec(n, e);
-            final KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+            final KeyFactory keyFactory = KeyFactory.getInstance("RSA", SecurityProviderUtility.getBCProvider());
             return keyFactory.generatePublic(publicKeySpec);
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
             log.error("Problem here ", e);
@@ -142,7 +143,7 @@ public class CoseService {
     public ECPublicKey convertUncompressedPointToECKey(final byte[] uncompressedPoint, int curve) {
         AlgorithmParameters parameters = null;
         try {
-            parameters = AlgorithmParameters.getInstance("EC");
+            parameters = AlgorithmParameters.getInstance("EC", SecurityProviderUtility.getBCProvider());
 
             parameters.init(new ECGenParameterSpec(convertCoseCurveToSunCurveName(curve)));
             ECParameterSpec params = parameters.getParameterSpec(ECParameterSpec.class);
@@ -163,7 +164,7 @@ public class CoseService {
             final BigInteger y = new BigInteger(1, Arrays.copyOfRange(uncompressedPoint, offset, offset + keySizeBytes));
             final ECPoint w = new ECPoint(x, y);
             final ECPublicKeySpec ecPublicKeySpec = new ECPublicKeySpec(w, params);
-            final KeyFactory keyFactory = KeyFactory.getInstance("EC");
+            final KeyFactory keyFactory = KeyFactory.getInstance("EC", SecurityProviderUtility.getBCProvider());
             return (ECPublicKey) keyFactory.generatePublic(ecPublicKeySpec);
         } catch (NoSuchAlgorithmException | InvalidKeySpecException | InvalidParameterSpecException e) {
             throw new Fido2RuntimeException(e.getMessage());
@@ -216,7 +217,7 @@ public class CoseService {
         org.bouncycastle.math.ec.ECPoint point = curve.getCurve().decodePoint(encodedPublicKey);
 
         try {
-			return KeyFactory.getInstance("ECDSA").generatePublic(
+			return KeyFactory.getInstance("ECDSA", SecurityProviderUtility.getBCProvider()).generatePublic(
 			        new org.bouncycastle.jce.spec.ECPublicKeySpec(point,
 			                new org.bouncycastle.jce.spec.ECParameterSpec(
 			                        curve.getCurve(),

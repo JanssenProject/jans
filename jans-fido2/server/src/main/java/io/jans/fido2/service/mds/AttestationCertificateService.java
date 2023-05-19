@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.Provider;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -33,6 +34,8 @@ import io.jans.fido2.service.DataMapperService;
 import io.jans.fido2.service.KeyStoreCreator;
 import io.jans.fido2.service.verifier.CommonVerifiers;
 import io.jans.service.cdi.event.ApplicationInitialized;
+import io.jans.util.security.SecurityProviderUtility;
+
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -146,9 +149,9 @@ public class AttestationCertificateService {
 
 		KeyStore keyStore = getCertificationKeyStore(aaguid, trustedCertificates);
 
-		TrustManagerFactory trustManagerFactory = null;
 		try {
-			trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+			TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+
 			trustManagerFactory.init(keyStore);
 			TrustManager[] tms = trustManagerFactory.getTrustManagers();
 

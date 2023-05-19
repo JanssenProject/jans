@@ -45,6 +45,8 @@ import jakarta.inject.Inject;
 import io.jans.fido2.exception.Fido2MissingAttestationCertException;
 import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.service.Base64Service;
+import io.jans.util.security.SecurityProviderUtility;
+
 import org.slf4j.Logger;
 
 @ApplicationScoped
@@ -76,27 +78,19 @@ public class CertificateVerifier {
             }
 
             PKIXParameters params = new PKIXParameters(trustAnchors);
-            CertPathValidator cpv = CertPathValidator.getInstance("PKIX");
+            CertPathValidator cpv = CertPathValidator.getInstance("PKIX", SecurityProviderUtility.getBCProvider());
 
-            PKIXRevocationChecker rc = (PKIXRevocationChecker) cpv.getRevocationChecker();
-            rc.setOptions(EnumSet.of(PKIXRevocationChecker.Option.SOFT_FAIL, PKIXRevocationChecker.Option.PREFER_CRLS));
-            params.addCertPathChecker(rc);
+            params.setRevocationEnabled(false);
+            params.addCertPathChecker(null);
 
-            CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+            CertificateFactory certFactory = CertificateFactory.getInstance("X.509", SecurityProviderUtility.getBCProvider());
             CertPath certPath = certFactory.generateCertPath(certs);
 
             X509Certificate cert = verifyPath(cpv, certPath, params);
             if (cert != null) {
                 return cert;
             } else {
-                params = new PKIXParameters(trustAnchors);
-                cpv = CertPathValidator.getInstance("PKIX");
-                rc = (PKIXRevocationChecker) cpv.getRevocationChecker();
-                rc.setOptions(Collections.emptySet());
-                params.setRevocationEnabled(false);
-                params.addCertPathChecker(null);
-
-                return verifyPath(cpv, certPath, params);
+                throw new Fido2RuntimeException("Problem with certificate");
             }
         } catch (NoSuchAlgorithmException | InvalidAlgorithmParameterException | CertificateException e) {
             log.warn("Cert verification problem {}", e.getMessage(), e);

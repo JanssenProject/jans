@@ -32,6 +32,8 @@ import jakarta.inject.Inject;
 import org.apache.commons.io.IOUtils;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import io.jans.fido2.exception.Fido2RuntimeException;
+import io.jans.util.security.SecurityProviderUtility;
+
 import org.slf4j.Logger;
 
 /**
@@ -56,7 +58,7 @@ public class CertificateService {
 
     public X509Certificate getCertificate(InputStream is) {
         try {
-        	X509Certificate certificate = (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(is);
+        	X509Certificate certificate = (X509Certificate) CertificateFactory.getInstance("X.509", SecurityProviderUtility.getBCProvider()).generateCertificate(is);
         	certificate.checkValidity();
         	
         	return certificate;
@@ -68,7 +70,7 @@ public class CertificateService {
     public List<X509Certificate> getCertificates(List<String> certificatePath, boolean checkValidaty) {
         final CertificateFactory cf;
         try {
-            cf = CertificateFactory.getInstance("X.509");
+            cf = CertificateFactory.getInstance("X.509", SecurityProviderUtility.getBCProvider());
         } catch (CertificateException e) {
             throw new Fido2RuntimeException(e.getMessage(), e);
         }
