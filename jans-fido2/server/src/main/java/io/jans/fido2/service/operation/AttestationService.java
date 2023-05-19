@@ -255,6 +255,7 @@ public class AttestationService {
 
 		registrationData.setPublicKeyId(keyId);
 		registrationData.setType("public-key");
+		registrationData.setAttestationType(attestationData.getAttestationType());
 
         // Support cancel request
         if (cancelRequest) {
