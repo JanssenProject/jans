@@ -67,7 +67,11 @@ import jakarta.enterprise.inject.spi.BeanManager;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.ServletContext;
+
+import org.jboss.resteasy.plugins.providers.RegisterBuiltin;
+import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.jboss.weld.util.reflection.ParameterizedTypeImpl;
+import org.jboss.resteasy.plugins.providers.jackson.ResteasyJackson2Provider;
 import org.slf4j.Logger;
 
 import java.lang.annotation.Annotation;
@@ -198,6 +202,11 @@ public class AppInitializer {
 
     public void applicationInitialized(@Observes @Initialized(ApplicationScoped.class) Object init) {
         log.debug("Initializing application services");
+
+//        ResteasyProviderFactory.setRegisterBuiltinByDefault(true)
+        ResteasyProviderFactory instance = ResteasyProviderFactory.getInstance();
+        RegisterBuiltin.register(instance);
+        instance.registerProvider(ResteasyJackson2Provider.class);
 
         configurationFactory.create();
 
