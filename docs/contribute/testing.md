@@ -81,3 +81,15 @@ We can run the below command on the command line. For example:
 ```
 
 in the same way we can run other commands. Rest of the testing is same for jans and openbanking.
+
+## Release Quality Assurance
+
+Once all the code changes for a particular release have been committed, we perform a set of tests and go through a list
+of checkpoints to make sure release candidate (RC) build is healthy and functioning well.
+
+### Pre-release QA checklist
+
+
+
+### Post-release QA checklist
+
