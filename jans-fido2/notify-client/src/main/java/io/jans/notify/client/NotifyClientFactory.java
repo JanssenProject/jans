@@ -7,6 +7,8 @@
 package io.jans.notify.client;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.http.client.config.CookieSpecs;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -17,6 +19,7 @@ import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
 
 import io.jans.notify.model.NotifyMetadata;
 import jakarta.ws.rs.core.UriBuilder;
+
 /**
  * Helper class which creates proxy
  *
@@ -26,22 +29,11 @@ import jakarta.ws.rs.core.UriBuilder;
 public class NotifyClientFactory {
 
 	private final static NotifyClientFactory instance = new NotifyClientFactory();
-	private ResteasyClient client;
-	private ResteasyClient pooledClient;
+
+	private ApacheHttpClient43Engine engine;
 
 	private NotifyClientFactory() {
-		// Create single connection client
-		this.client = (ResteasyClient) ResteasyClientBuilder.newClient();
-
-		// Create polled client
-		PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
-		cm.setMaxTotal(200); // Increase max total connection to 200
-		cm.setDefaultMaxPerRoute(20); // Increase default max connection per route to 20
-
-		CloseableHttpClient httpClient = HttpClients.custom().setConnectionManager(cm).build();
-		ApacheHttpClient43Engine engine = new ApacheHttpClient43Engine(httpClient);
-		 
-		this.pooledClient = ((ResteasyClientBuilder) ResteasyClientBuilder.newBuilder()).httpEngine(engine).build();
+		this.engine = createEngine();
 	}
 
 	public static NotifyClientFactory instance() {
@@ -49,20 +41,37 @@ public class NotifyClientFactory {
 	}
 
 	public NotifyMetadataClientService createMetaDataConfigurationService(String issuer) {
-		ResteasyWebTarget target = client.target(UriBuilder.fromPath(issuer + "/.well-known/notify-configuration"));
-		return target.proxy(NotifyMetadataClientService.class);
+        ResteasyClient client = ((ResteasyClientBuilder) ResteasyClientBuilder.newBuilder()).httpEngine(engine).build();
+        ResteasyWebTarget target = client.target(UriBuilder.fromPath(issuer + "/.well-known/notify-configuration"));
+
+        return target.proxy(NotifyMetadataClientService.class);
 	}
 
 	public NotifyClientService createNotifyService(NotifyMetadata notifyMetadata) {
-		ResteasyWebTarget target = pooledClient.target(UriBuilder.fromPath(notifyMetadata.getNotifyEndpoint()));
-		return target.proxy(NotifyClientService.class);
+        ResteasyClient client = ((ResteasyClientBuilder) ResteasyClientBuilder.newBuilder()).httpEngine(engine).build();
+        ResteasyWebTarget target = client.target(UriBuilder.fromPath(notifyMetadata.getNotifyEndpoint()));
+
+        return target.proxy(NotifyClientService.class);
 	}
 
-	public static String getAuthorization(String accessKeyId,  String secretAccessKey) {
+	public static String getAuthorization(String accessKeyId, String secretAccessKey) {
 		String credentials = accessKeyId + ":" + secretAccessKey;
 		String authorization = "Basic " + Base64.encodeBase64String(credentials.getBytes());
 
 		return authorization;
 	}
+
+	private ApacheHttpClient43Engine createEngine() {
+        PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
+        CloseableHttpClient httpClient = HttpClients.custom()
+				.setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
+        		.setConnectionManager(cm).build();
+        cm.setMaxTotal(200); // Increase max total connection to 200
+        cm.setDefaultMaxPerRoute(20); // Increase default max connection per route to 20
+        ApacheHttpClient43Engine engine = new ApacheHttpClient43Engine(httpClient);
+        engine.setFollowRedirects(false);
+        
+        return engine;
+    }
 
 }

@@ -6,24 +6,6 @@
 
 package io.jans.as.model.util;
 
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.databind.AnnotationIntrospector;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
-import com.fasterxml.jackson.databind.type.TypeFactory;
-import com.fasterxml.jackson.module.jaxb.JaxbAnnotationIntrospector;
-import io.jans.as.model.common.HasParamName;
-import io.jans.orm.annotation.AttributeEnum;
-import io.jans.orm.model.base.LocalizedString;
-import io.jans.util.OxConstants;
-import org.apache.commons.lang.StringUtils;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
@@ -31,7 +13,35 @@ import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.TimeZone;
+
+import org.apache.commons.lang.StringUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.AnnotationIntrospector;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
+
+import io.jans.as.model.common.HasParamName;
+import io.jans.orm.annotation.AttributeEnum;
+import io.jans.orm.model.base.LocalizedString;
+import io.jans.util.OxConstants;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -68,14 +78,11 @@ public class Util {
     }
 
     public static ObjectMapper createJsonMapper() {
-        final AnnotationIntrospector jaxb = new JaxbAnnotationIntrospector(TypeFactory.defaultInstance());
         final AnnotationIntrospector jackson = new JacksonAnnotationIntrospector();
 
-        final AnnotationIntrospector pair = AnnotationIntrospector.pair(jackson, jaxb);
-
         final ObjectMapper mapper = new ObjectMapper();
-        mapper.getDeserializationConfig().with(pair);
-        mapper.getSerializationConfig().with(pair);
+        mapper.getDeserializationConfig().with(jackson);
+        mapper.getSerializationConfig().with(jackson);
         return mapper;
     }
 

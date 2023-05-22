@@ -6,6 +6,8 @@
 
 package io.jans.notify.client;
 
+import io.jans.notify.model.NotificationResponse;
+import io.jans.notify.model.RegisterDeviceResponse;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.FormParam;
 import jakarta.ws.rs.HeaderParam;
@@ -13,7 +15,6 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
 
 /**
  * Notification endpoint allows to register device and send notification
@@ -27,14 +28,14 @@ public interface NotifyClientService {
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Produces({ MediaType.APPLICATION_JSON })
 	@Path("/register")
-	Response registerDevice(@HeaderParam("Authorization") String authorization, @FormParam("token") String token,
+	RegisterDeviceResponse registerDevice(@HeaderParam("Authorization") String authorization, @FormParam("token") String token,
 			@FormParam("user_data") String userData, @FormParam("platform_id") String platformId);
 
 	@POST
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Produces({ MediaType.APPLICATION_JSON })
 	@Path("/notify")
-	Response sendNotification(@HeaderParam("Authorization") String authorization, @FormParam("endpoint") String endpoint,
+	NotificationResponse sendNotification(@HeaderParam("Authorization") String authorization, @FormParam("endpoint") String endpoint,
 			@FormParam("message") String message, @FormParam("platform_id") String platformId);
 
 
