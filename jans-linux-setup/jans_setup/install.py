@@ -57,11 +57,6 @@ bacup_ext = '-back.' + time.ctime()
 def check_install_dependencies():
 
     try:
-        from distutils import dist
-    except ImportError:
-        package_dependencies.append('python3-distutils')
-
-    try:
         import ldap3
     except ImportError:
         package_dependencies.append('python3-ldap3')
