@@ -89,7 +89,24 @@ of checkpoints to make sure release candidate (RC) build is healthy and function
 
 ### Pre-release QA checklist
 
+----------------------------------------------------------------------------------------------------------------------------
+| \#  |  ITEM To TEST                                                 | STATUS          | COMMENT                          |
+| --- | --------------------------------------------------------------|-----------------|----------------------------------|
+| 1 | SUSE 15 + DB(opendj/mysql/pgsql) installation and sanity testing |                |                                  |
+| 2 | RHEL8 + DB(opendj/mysql/pgsql) installation and sanity testing   |                |                                  |
+| 3 | Ubuntu22 + DB(opendj/mysql/pgsql) installation and sanity testing |               |                                  |
+| 4 | Ubuntu20 + DB(opendj/mysql/pgsql) installation and sanity testing |               |                                  |
+| 5 | Review .well-known config files: openid, fido, uma, scim          |               |                                  |
+| 6 | Start the TUI and use device-flow for login                       |               |                                  |
+| 7 | Jans Tent: password authentication, acr=simple_password_auth      |               |                                  |
+| 8 | Jans Tent: test Agama Project deployment,acr=agama&agama_flow=qa1 |               |                                  |
+----------------------------------------------------------------------------------------------------------------------------
+
 
 
 ### Post-release QA checklist
-
+-----------------------------------------------------------------------------------
+| # |       ITEM To TEST            |   STATUS                           |  COMMENT |
+|---|-------------------------------|------------------------------------|-----------|
+| 1 | POST release package installation verification |                   |           |
+--------------------------------------------------------------------------------------
