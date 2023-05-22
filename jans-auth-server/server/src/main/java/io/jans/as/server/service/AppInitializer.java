@@ -6,7 +6,18 @@
 
 package io.jans.as.server.service;
 
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import org.jboss.weld.util.reflection.ParameterizedTypeImpl;
+import org.slf4j.Logger;
+
 import com.google.common.collect.Lists;
+
 import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.as.common.service.common.EncryptionService;
 import io.jans.as.model.common.FeatureFlagType;
@@ -30,6 +41,8 @@ import io.jans.model.SimpleProperty;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.ldap.GluuLdapConfiguration;
+import io.jans.notify.client.NotifyClientFactory;
+import io.jans.notify.model.NotifyMetadata;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.PersistenceEntryManagerFactory;
 import io.jans.orm.exception.BasePersistenceException;
@@ -67,19 +80,6 @@ import jakarta.enterprise.inject.spi.BeanManager;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.ServletContext;
-
-import org.jboss.resteasy.plugins.providers.RegisterBuiltin;
-import org.jboss.resteasy.spi.ResteasyProviderFactory;
-import org.jboss.weld.util.reflection.ParameterizedTypeImpl;
-import org.jboss.resteasy.plugins.providers.jackson.ResteasyJackson2Provider;
-import org.slf4j.Logger;
-
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Javier Rojas Blum
@@ -202,11 +202,6 @@ public class AppInitializer {
 
     public void applicationInitialized(@Observes @Initialized(ApplicationScoped.class) Object init) {
         log.debug("Initializing application services");
-
-//        ResteasyProviderFactory.setRegisterBuiltinByDefault(true)
-        ResteasyProviderFactory instance = ResteasyProviderFactory.getInstance();
-        RegisterBuiltin.register(instance);
-        instance.registerProvider(ResteasyJackson2Provider.class);
 
         configurationFactory.create();
 
@@ -721,5 +716,12 @@ public class AppInitializer {
                     appConfiguration.getBackchannelRequestsProcessorJobIntervalSec());
         }
     }
+    
+    public static void main(String[] args) {
+    		NotifyClientFactory cf = NotifyClientFactory.instance();
+    		NotifyMetadata md = cf.instance().createMetaDataConfigurationService("https://cloud-dev.gluu.cloud/scan/push-api-server").getMetadataConfiguration();
+    		System.out.println(md);
+    		
+	}
 
 }
