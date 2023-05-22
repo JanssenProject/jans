@@ -41,7 +41,7 @@ spec:
                 {{- include "auth-server-key-rotation.usr-secret-envs" . | indent 16 }}
               imagePullPolicy: {{ .Values.image.pullPolicy }}
               lifecycle:
-{{- toYaml .Values.lifecycle | nindent 16 }}              
+{{- toYaml .Values.lifecycle | nindent 16 }}
               volumeMounts:
               {{ if or (eq .Values.global.configSecretAdapter "aws") (eq .Values.global.configAdapterName "aws") }}
                 - mountPath: {{ .Values.global.cnAwsSharedCredentialsFile }}
@@ -88,7 +88,7 @@ spec:
               resources:
 {{- toYaml .Values.resources | nindent 16 }}
               {{- end }}
-              args: ["patch", "auth", "--opts", "interval:{{ .Values.keysLife }}"]
+              args: ["patch", "auth", "--opts", "interval:{{ .Values.keysLife }}", "--opts", "key-strategy:{{ .Values.keysStrategy }}", "--opts", "privkey-push-delay:{{ .Values.keysPushDelay }}", "--opts", "privkey-push-strategy:{{ .Values.keysPushStrategy }}"]
           volumes:
           {{- with .Values.volumes }}
 {{- toYaml . | nindent 12 }}
@@ -126,4 +126,3 @@ spec:
             {{- end }}
           {{- end }}
           restartPolicy: Never
-
