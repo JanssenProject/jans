@@ -34,8 +34,9 @@ const qs = require('qs');
         document.getElementById('opHost').value = result.oidcClient.op_host
         document.getElementById('clientId').value = result.oidcClient.client_id
         document.getElementById('clientSecret').value = result.oidcClient.client_secret
-        if(result.oidcClient.additionalParams != undefined && result.oidcClient.additionalParams.trim() != '')
-        document.getElementById('additionalParam').value = result.oidcClient.additionalParams
+        if (result.oidcClient.additionalParams != undefined && result.oidcClient.additionalParams.trim() != '') {
+          document.getElementById('additionalParam').value = result.oidcClient.additionalParams
+        }
 
         showDiv(['oidcClientDetails']);
         hideDiv(['registerForm']);
@@ -119,12 +120,10 @@ const qs = require('qs');
 
         let authzUrl = `${result.oidcClient.authorization_endpoint}?${qs.stringify(options)}`;
 
-        //let additionalParams = result.oidcClient.additionalParams
-
         if (additionalParams != undefined && additionalParams.trim() != '') {
           result.oidcClient.additionalParams = additionalParams.trim();
 
-          chrome.storage.local.set({oidcClient: result.oidcClient});
+          chrome.storage.local.set({ oidcClient: result.oidcClient });
 
           let additionalParamJSON = JSON.parse(additionalParams)
           console.log('Processing additional parameters');
