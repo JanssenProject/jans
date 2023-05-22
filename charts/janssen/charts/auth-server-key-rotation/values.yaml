@@ -23,6 +23,12 @@ image:
   pullSecrets: [ ]
 # -- Auth server key rotation keys life in hours
 keysLife: 48
+# -- Set key selection strategy used by Auth server
+keysStrategy: NEWER
+# -- Delay (in seconds) before pushing private keys to Auth server
+keysPushDelay: 0
+# -- Set key selection strategy after pushing private keys to Auth server (only takes effect when keysPushDelay value is greater than 0)
+keysPushStrategy: NEWER
 # -- Resource specs.
 resources:
   limits:
