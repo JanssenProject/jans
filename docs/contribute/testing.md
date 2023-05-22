@@ -72,15 +72,6 @@ This test uses a Gluu Testing Certificate.
 
 After installation, we have to complete device authentication to use OpenBanking.
 
-### Testing using IM mode
-	launch jans-cli using the below command.
-
-```
-/opt/jans/jans-cli/config-cli.py -CC /opt/jans/jans-setup/output/CA/client.crt -CK /opt/jans/jans-setup/output/CA/client.key
-```
-
-		further testing is same as jans server
-
 ###  Testing using commnd line mode
 
 We can run the below command on the command line. For example:
