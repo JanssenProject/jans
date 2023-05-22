@@ -49,6 +49,11 @@ select {
   margin-bottom: 30px;
 }
 
+input:disabled {
+  background-color: #575757;
+  color: #ffff;
+}
+
 input[type="radio"],
 input[type="checkbox"] {
   margin: 0 4px 8px 0;
