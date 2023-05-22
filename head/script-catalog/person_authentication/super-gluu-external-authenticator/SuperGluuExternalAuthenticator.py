@@ -35,9 +35,6 @@ import json
 import datetime
 import urllib
 
-import sys
-import json
-
 try:
     from com.notnoop.apns import APNS
     has_apns = True
@@ -722,31 +719,13 @@ class PersonAuthentication(PersonAuthenticationType):
         encryptionService = CdiUtil.bean(EncryptionService)
 
         if android_creds["enabled"]:
-            gluu_access_key = android_creds["access_key"]
-            gluu_secret_access_key = android_creds["secret_access_key"]
-
-            try:
-                gluu_secret_access_key = encryptionService.decrypt(gluu_secret_access_key)
-            except:
-                # Ignore exception. Password is not encrypted
-                print "Super-Gluu. Initialize Gluu notification services. Assuming that 'gluu_secret_access_key' in not encrypted"
-
             self.pushAndroidService = gluuClient
-            self.pushAndroidServiceAuth = notifyClientFactory.getAuthorization(gluu_access_key, gluu_secret_access_key);
+            self.gluu_android_platform_id = android_creds["platform_id"]
             print "Super-Gluu. Initialize Gluu notification services. Created Android notification service"
 
         if ios_creds["enabled"]:
-            gluu_access_key = ios_creds["access_key"]
-            gluu_secret_access_key = ios_creds["secret_access_key"]
-
-            try:
-                gluu_secret_access_key = encryptionService.decrypt(gluu_secret_access_key)
-            except:
-                # Ignore exception. Password is not encrypted
-                print "Super-Gluu. Initialize Gluu notification services. Assuming that 'gluu_secret_access_key' in not encrypted"
-
-            self.pushAppleService = gluuClient
-            self.pushAppleServiceAuth = notifyClientFactory.getAuthorization(gluu_access_key, gluu_secret_access_key);
+            self.pushAndroidService = gluuClient
+            self.gluu_ios_platform_id = android_creds["platform_id"]
             print "Super-Gluu. Initialize Gluu notification services. Created iOS notification service"
 
         enabled = self.pushAndroidService != None or self.pushAppleService != None
@@ -844,7 +823,7 @@ class PersonAuthentication(PersonAuthenticationType):
                                 if debug:
                                     print "Super-Gluu. Send iOS SNS push notification. token: '%s', message: '%s', send_notification_result: '%s', apple_push_platform: '%s'" % (push_token, push_message, send_notification_result, apple_push_platform)
                             elif self.pushGluuMode:
-                                send_notification_result = self.pushAppleService.sendNotification(self.pushAppleServiceAuth, targetEndpointArn, push_message)
+                                send_notification_result = self.pushAppleService.sendNotification(buildNotifyAuthorizationHeader(), targetEndpointArn, push_message, self.gluu_ios_platform_id)
                                 if debug:
                                     print "Super-Gluu. Send iOS Gluu push notification. token: '%s', message: '%s', send_notification_result: '%s'" % (push_token, push_message, send_notification_result)
                         else:
@@ -891,7 +870,7 @@ class PersonAuthentication(PersonAuthenticationType):
                                 if debug:
                                     print "Super-Gluu. Send Android SNS push notification. token: '%s', message: '%s', send_notification_result: '%s'" % (push_token, push_message, send_notification_result)
                             elif self.pushGluuMode:
-                                send_notification_result = self.pushAndroidService.sendNotification(self.pushAndroidServiceAuth, targetEndpointArn, push_message)
+                                send_notification_result = self.pushAndroidService.sendNotification(buildNotifyAuthorizationHeader(), targetEndpointArn, push_message, self.gluu_android_platform_id)
                                 if debug:
                                     print "Super-Gluu. Send Android Gluu push notification. token: '%s', message: '%s', send_notification_result: '%s'" % (push_token, push_message, send_notification_result)
                         else:
@@ -921,18 +900,17 @@ class PersonAuthentication(PersonAuthenticationType):
         pushClient = None
         pushClientAuth = None
         platformApplicationArn = None
+        platformId = None
         if platform == PushPlatform.GCM:
             pushClient = self.pushAndroidService
+            platformId = self.gluu_android_platform_id
             if self.pushSnsMode:
                 platformApplicationArn = self.pushAndroidPlatformArn
-            if self.pushGluuMode:
-                pushClientAuth = self.pushAndroidServiceAuth
         elif platform == PushPlatform.APNS:
             pushClient = self.pushAppleService
+            platformId = self.gluu_ios_platform_id
             if self.pushSnsMode:
                 platformApplicationArn = self.pushApplePlatformArn
-            if self.pushGluuMode:
-                pushClientAuth = self.pushAppleServiceAuth
         else:
             return None
 
@@ -944,7 +922,7 @@ class PersonAuthentication(PersonAuthenticationType):
             targetEndpointArn = pushSnsService.createPlatformArn(pushClient, platformApplicationArn, pushToken, user)
         else:
             customUserData = pushSnsService.getCustomUserData(user)
-            registerDeviceResponse = pushClient.registerDevice(pushClientAuth, pushToken, customUserData);
+            registerDeviceResponse = pushClient.registerDevice(buildNotifyAuthorizationHeader(), pushToken, customUserData, platformId);
             if registerDeviceResponse != None and registerDeviceResponse.getStatusCode() == 200:
                 targetEndpointArn = registerDeviceResponse.getEndpointArn()
 
@@ -988,6 +966,10 @@ class PersonAuthentication(PersonAuthenticationType):
 
         identity.setWorkingParameter("download_url", downloadMap)
         identity.setWorkingParameter("super_gluu_qr_options", self.customQrOptions)
+
+    def buildNotifyAuthorizationHeader(self):
+        token = ""
+        return "Bearer %s" % token
 
     def addGeolocationData(self, session_attributes, super_gluu_request_dictionary):
         if session_attributes.containsKey("remote_ip"):
