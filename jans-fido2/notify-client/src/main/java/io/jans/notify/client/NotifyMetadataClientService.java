@@ -6,11 +6,10 @@
 
 package io.jans.notify.client;
 
+import io.jans.notify.model.NotifyMetadata;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
-
-import io.jans.notify.model.NotifyMetadata;
 
 /**
  * Metadata endpoint at which the requester can obtain Notify metadata
