@@ -25,5 +25,5 @@ Follow the links below to access respective documentation.
 ## Javadocs 
 
 Javadocs for all the modules can be accessed from left side navigation bar under respective module name in 
-[Reference Guide](../reference).
+[Reference Guide](../reference/README.md) > `Javadocs / OpenAPI`.
 
