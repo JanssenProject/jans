@@ -11,80 +11,81 @@
 </head>
 
 <body>
-  <div>
-    <div id="registerForm">
-      <div id="box">
-        <div><img src="./icons/JansTarp.png" /></div>
+<div>
+  <div id="registerForm">
+    <div id="box">
+      <div><img src="./icons/JansTarp.png" /></div>
 
-        <fieldset id="box">
-          <legend><span class="number">O</span> Register OIDC Client</legend>
-          <legend><span class="error" id="errorSpanTop"></span></legend>
+      <fieldset id="box">
+        <legend><span class="number">O</span> Register OIDC Client</legend>
+        <legend><span class="error" id="errorSpanTop"></span></legend>
 
-          <label for="issuer"><b>Issuer:</b><span class="required">*</span></label>
-          <input type="text" id="issuer" name="issuer" placeholder="e.g. https://<op-host>" autocomplete="off" required>
+        <label for="issuer"><b>Issuer:</b><span class="required">*</span></label>
+        <input type="text" id="issuer" name="issuer" placeholder="e.g. https://<op-host>" autocomplete="off" required>
 
-          <label for="redirectUri"><b>Redirect Url:</b></label>
-          <input type="text" id="redirectUri" name="redirectUri" placeholder="Not Required." autocomplete="off"
-            disabled>
+        <label for="redirectUri"><b>Redirect Url:</b></label>
+        <input type="text" id="redirectUri" name="redirectUri" placeholder="Not Required." autocomplete="off"
+               disabled>
 
-          <label for="acrValues"><b>Acr Values:</b><span class="required">*</span></label>
-          <input type="text" id="acrValues" name="acrValues" placeholder="e.g. basic" autocomplete="off" required>
+        <label for="acrValues"><b>Acr Values:</b><span class="required">*</span></label>
+        <input type="text" id="acrValues" name="acrValues" placeholder="e.g. basic" autocomplete="off" required>
 
-          <label for="additionalParam"><b>Additional Params:</b></label>
-          <input type="text" id="additionalParam" name="additionalParam"
-            placeholder='e.g. {"paramOne": "valueOne", "paramTwo": "valueTwo"}' autocomplete="off">
+        <label for="scope"><b>Scope:</b><span class="required">*</span></label>
+        <input type="text" id="scope" name="scope" placeholder="e.g. openid" autocomplete="off" required>
 
-          <label for="scope"><b>Scope:</b><span class="required">*</span></label>
-          <input type="text" id="scope" name="scope" placeholder="e.g. openid" autocomplete="off" required>
+        <legend><span class="error" id="errorSpanBot"></span></legend>
+        <button id="sbmtButton">Register</button>
+      </fieldset>
 
-          <legend><span class="error" id="errorSpanBot"></span></legend>
-          <button id="sbmtButton">Register</button>
-        </fieldset>
-
-      </div>
-    </div>
-    <div id="oidcClientDetails" style="display:none">
-
-      <div id="box">
-        <div><img src="./icons/JansTarp.png" /></div>
-        <fieldset id="box">
-
-          <legend><span class="number">O</span> Registered Client</legend>
-
-          <label for="issuer"><b>OP Host:</b></label>
-          <input type="text" id="opHost" name="opHost" disabled>
-
-          <label for="clientId"><b>Client Id:</b></label>
-          <input type="text" id="clientId" name="clientId" disabled>
-
-          <label for="clientId"><b>Client Secret:</b></label>
-          <input type="text" id="clientSecret" name="clientSecret" disabled>
-          <button id="trigCodeFlowButton">Trigger Auth Code Flow</button>
-          <button id="resetButton">Reset</button>
-        </fieldset>
-      </div>
-    </div>
-    <div id="userDetailsDiv" style="display:none">
-      <div id="box">
-        <div><img src="./icons/JansTarp.png" /></div>
-        <fieldset id="box">
-          <div class="w3-panel w3-pale-yellow w3-border">
-            <strong>Note!</strong> The extension will clear session on closing the tab or on opening the extension
-            again.
-            <br />
-          </div>
-          <legend><span class="number">=></span> User Details:</legend>
-          <hr />
-          <span id="userDetailsSpan"></span>
-          <hr />
-          <button id="logoutButton">Logout</button>
-        </fieldset>
-      </div>
     </div>
   </div>
-  <div class="loading" id="loadingDiv" style="display:none">Loading&#8230;</div>
-  <script type="text/javascript" src="popup.js">
-  </script>
+  <div id="oidcClientDetails" style="display:none">
+
+    <div id="box">
+      <div><img src="./icons/JansTarp.png" /></div>
+      <fieldset id="box">
+
+        <legend><span class="number">O</span> Registered Client</legend>
+
+        <label for="issuer"><b>OP Host:</b></label>
+        <input type="text" id="opHost" name="opHost" disabled>
+
+        <label for="clientId"><b>Client Id:</b></label>
+        <input type="text" id="clientId" name="clientId" disabled>
+
+        <label for="clientId"><b>Client Secret:</b></label>
+        <input type="text" id="clientSecret" name="clientSecret" disabled>
+
+        <label for="additionalParam"><b>Additional Params:</b></label>
+        <input type="text" id="additionalParam" name="additionalParam"
+               placeholder='e.g. {"paramOne": "valueOne", "paramTwo": "valueTwo"}' autocomplete="off">
+
+        <button id="trigCodeFlowButton">Trigger Auth Code Flow</button>
+        <button id="resetButton">Reset</button>
+      </fieldset>
+    </div>
+  </div>
+  <div id="userDetailsDiv" style="display:none">
+    <div id="box">
+      <div><img src="./icons/JansTarp.png" /></div>
+      <fieldset id="box">
+        <div class="w3-panel w3-pale-yellow w3-border">
+          <strong>Note!</strong> The extension will clear session on closing the tab or on opening the extension
+          again.
+          <br />
+        </div>
+        <legend><span class="number">=></span> User Details:</legend>
+        <hr />
+        <span id="userDetailsSpan"></span>
+        <hr />
+        <button id="logoutButton">Logout</button>
+      </fieldset>
+    </div>
+  </div>
+</div>
+<div class="loading" id="loadingDiv" style="display:none">Loading&#8230;</div>
+<script type="text/javascript" src="popup.js">
+</script>
 </body>
 
 </html>
