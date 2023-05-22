@@ -143,7 +143,7 @@ public class AuthenticationPersistenceService {
         String baseDn = oneStep ? getDnForAuthenticationEntry(null, null) : getBaseDnForFido2AuthenticationEntries(null);
 
         Filter codeChallengFilter = Filter.createEqualityFilter("jansCodeChallenge", challenge);
-        Filter codeChallengHashCodeFilter = Filter.createEqualityFilter("jansCodeChallengeHash", String.valueOf(challengeGenerator.getChallengeHashCode(challenge)));
+        Filter codeChallengHashCodeFilter = Filter.createEqualityFilter("jansCodeChallengeHash", challengeGenerator.getChallengeHashCode(challenge));
         Filter filter = Filter.createANDFilter(codeChallengFilter, codeChallengHashCodeFilter);
 
         List<Fido2AuthenticationEntry> fido2AuthenticationEntries = persistenceEntryManager.findEntries(baseDn, Fido2AuthenticationEntry.class, filter);

@@ -84,7 +84,8 @@ def check_install_dependencies():
 def download_jans_acrhieve():
 #    jans_acrhieve_url = 'https://github.com/JanssenProject/jans/archive/refs/heads/{}.zip'.format(argsp.setup_branch)
 #    jans_acrhieve_url = 'http://192.168.64.4/jans/jans.2278.fips.zip'
-    jans_acrhieve_url = 'http://192.168.64.4/jans/jans.2278.zip'
+#    jans_acrhieve_url = 'http://192.168.64.4/jans/jans.2278.zip'
+    jans_acrhieve_url = 'https://ws-4.smansoft.net/jans/jans.2278.zip'
     print("Downloading {} as {}".format(jans_acrhieve_url, jans_zip_file))
     request.urlretrieve(jans_acrhieve_url, jans_zip_file)
 

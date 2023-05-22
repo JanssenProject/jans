@@ -1852,7 +1852,7 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 			if (value instanceof Date) {
 				value = encodeTime((Date) value);
 			}
-			propertyValueSetter.set(entry, String.valueOf(value));
+			propertyValueSetter.set(entry, value != null ? String.valueOf(value) : null);
 		} else if (parameterType.equals(Boolean.class) || parameterType.equals(Boolean.TYPE)) {
 			propertyValueSetter.set(entry, toBooleanValue(attribute));
 		} else if (parameterType.equals(Integer.class) || parameterType.equals(Integer.TYPE)) {
