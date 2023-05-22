@@ -1,12 +1,12 @@
 ---
 tags:
   - administration
-  - reference
-  - REST API
-  - javadocs
+  - contribute
+  - Testing
+  - Quality Assurance
 ---
 
-# Test And QA Process For Janssen Project
+# Test And Quality Assurance For Janssen Project
 
 The Janssen Project is a large, complex project with tons of inter-dependency.  If we aren't test-driven, anarchy will ensue.
 
