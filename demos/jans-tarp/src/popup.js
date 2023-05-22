@@ -34,6 +34,9 @@ const qs = require('qs');
         document.getElementById('opHost').value = result.oidcClient.op_host
         document.getElementById('clientId').value = result.oidcClient.client_id
         document.getElementById('clientSecret').value = result.oidcClient.client_secret
+        if (result.oidcClient.additionalParams != undefined && result.oidcClient.additionalParams.trim() != '') {
+          document.getElementById('additionalParam').value = result.oidcClient.additionalParams
+        }
 
         showDiv(['oidcClientDetails']);
         hideDiv(['registerForm']);
@@ -99,7 +102,7 @@ const qs = require('qs');
 
     const redirectUrl = chrome.identity.getRedirectURL()
     const { secret, hashed } = await generateRandomChallengePair();
-
+    var additionalParams = document.getElementById('additionalParam').value
     chrome.storage.local.get(["oidcClient"]).then(async (result) => {
       if (result.oidcClient != undefined) {
 
@@ -117,9 +120,11 @@ const qs = require('qs');
 
         let authzUrl = `${result.oidcClient.authorization_endpoint}?${qs.stringify(options)}`;
 
-        let additionalParams = result.oidcClient.additionalParams
-
         if (additionalParams != undefined && additionalParams.trim() != '') {
+          result.oidcClient.additionalParams = additionalParams.trim();
+
+          chrome.storage.local.set({ oidcClient: result.oidcClient });
+
           let additionalParamJSON = JSON.parse(additionalParams)
           console.log('Processing additional parameters');
           Object.keys(additionalParamJSON).forEach(key => {
@@ -246,7 +251,6 @@ const qs = require('qs');
 
       var issuer = document.getElementById('issuer').value
       var acrValues = document.getElementById('acrValues').value
-      var additionalParam = document.getElementById('additionalParam').value
       var scope = document.getElementById('scope').value
 
       var registerObj = {}
@@ -254,7 +258,6 @@ const qs = require('qs');
 
       registerObj.redirect_uris = [chrome.identity.getRedirectURL()]
       registerObj.default_acr_values = [acrValues]
-      registerObj.additionalParam = additionalParam
       registerObj.scope = [scope, 'profile']
       registerObj.post_logout_redirect_uris = [chrome.runtime.getURL('options.html')]
       registerObj.response_types = ['code']
@@ -303,7 +306,6 @@ const qs = require('qs');
               'acr_values': registerObj.default_acr_values,
               'authorization_endpoint': openapiConfig.data.authorization_endpoint,
               'response_type': registerObj.response_types,
-              'additionalParams': registerObj.additionalParam,
               'post_logout_redirect_uris': registerObj.post_logout_redirect_uri,
 
             }
@@ -362,7 +364,6 @@ const qs = require('qs');
     document.getElementById('errorSpanBot').innerHTML = ''
     var issuer = document.getElementById('issuer').value
     var acrValues = document.getElementById('acrValues').value
-    var additionalParam = document.getElementById('additionalParam').value
     var scope = document.getElementById('scope').value
 
     var emptyField = ''
