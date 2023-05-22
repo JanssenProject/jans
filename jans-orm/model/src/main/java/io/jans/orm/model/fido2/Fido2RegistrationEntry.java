@@ -30,8 +30,8 @@ public class Fido2RegistrationEntry extends Fido2Entry implements Serializable {
     @AttributeName(name = "jansPublicKeyId")
     protected String publicKeyId;
 
-	@AttributeName(name = "jansPublicKeyIdHash")
-	private Integer publicKeyIdHash;
+    @AttributeName(name = "jansPublicKeyIdHash")
+    private Integer publicKeyIdHash;
 
     @JsonObject
     @AttributeName(name = "jansRegistrationData")
