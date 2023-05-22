@@ -27,5 +27,9 @@
 	        <groupId>org.jboss.resteasy</groupId>
 	        <artifactId>resteasy-jackson2-provider</artifactId>
 	    </dependency>
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-doc</artifactId>
+        </dependency>
    	</dependencies>
 </project>
