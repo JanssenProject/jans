@@ -795,6 +795,20 @@
       "type": "STRING"
     }
   },
+  "jansApp": {
+    "mysql": {
+      "size": 96,
+      "type": "VARCHAR"
+    },
+    "pgsql": {
+      "size": 96,
+      "type": "VARCHAR"
+    },
+    "spanner": {
+      "size": 96,
+      "type": "STRING"
+    }
+  },
   "jansReq": {
     "mysql": {
       "type": "TEXT"
