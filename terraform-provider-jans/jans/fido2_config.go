@@ -61,8 +61,8 @@ func (c *Client) GetFido2Configuration(ctx context.Context) (*JansFido2DynConfig
 	return ret, nil
 }
 
-// PutFido2Configuration updates Fido2 configuration for the Janssen server.
-func (c *Client) PutFido2Configuration(ctx context.Context, fido2Config *JansFido2DynConfiguration) (*JansFido2DynConfiguration, error) {
+// UpdateFido2Configuration updates Fido2 configuration for the Janssen server.
+func (c *Client) UpdateFido2Configuration(ctx context.Context, fido2Config *JansFido2DynConfiguration) (*JansFido2DynConfiguration, error) {
 
 	token, err := c.getToken(ctx, "https://jans.io/oauth/config/fido2.write")
 	if err != nil {
