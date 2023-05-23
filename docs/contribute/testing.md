@@ -89,34 +89,36 @@ of checkpoints to make sure release candidate (RC) build is healthy and function
 
 ### Pre-release QA checklist
 
-----------------------------------------------------------------------------------------------------------------------------
-| \#  |  OS Platform	   | Persistance Type          | Deployment Type (VM/CN)          | Test                             |
-| --- | -----------------|---------------------------|----------------------------------|----------------------------------|
-| 1 | SUSE 15            |     Opendj                |       VM                         |  installation and sanity testing |
-| 2 | SUSE 15            |       Mysql               |        VM                        |  installation and sanity testing |
-| 3 | SUSE 15            |      Pgsql                |       VM                         |  installation and sanity testing |
-| 4 | RHEL 8             |     Opendj                |       VM                         |  installation and sanity testing |
-| 5 | RHEL 8             |       Mysql               |        VM                        |  installation and sanity testing |
-| 6 | RHEL 8             |      Pgsql                |       VM                         |  installation and sanity testing |
-| 7 | Ubuntu20           |     Opendj                |       VM                         |  installation and sanity testing |
-| 8 | Ubuntu20           |       Mysql               |        VM                        |  installation and sanity testing |
-| 9 | Ubuntu20           |      Pgsql                |       VM                         |  installation and sanity testing |
-| 10| Ubuntu22           |     Opendj                |       VM                         |  installation and sanity testing |
-| 11| Ubuntu22           |       Mysql               |        VM                        |  installation and sanity testing |
-| 12| Ubuntu22           |      Pgsql                |       VM                         |  installation and sanity testing |
-----------------------------------------------------------------------------------------------------------------------------
-```
-13. Review .well-known config files: openid, fido, uma, scim 
-14. Start the TUI and use device-flow for login  
-15. Jans Tent: password authentication, acr=simple_password_auth 
-16. Jans Tent: test Agama Project deployment,acr=agama&agama_flow=qa1  
-```
+As part of pre-release QA check, we run a set of [manual sanity checks](#sanity-checks) on 
+[test environments](#test-environments) with various deployment configurations.
 
+#### Test Environments
 
+| \# | OS Platform	 | Persistance Type | Deployment Type (VM/CN) | Test                            |
+|----|--------------|------------------|-------------------------|---------------------------------|
+| 1  | SUSE 15      | Opendj           | VM                      | installation and sanity testing |
+| 2  | SUSE 15      | Mysql            | VM                      | installation and sanity testing |
+| 3  | SUSE 15      | Pgsql            | VM                      | installation and sanity testing |
+| 4  | RHEL 8       | Opendj           | VM                      | installation and sanity testing |
+| 5  | RHEL 8       | Mysql            | VM                      | installation and sanity testing |
+| 6  | RHEL 8       | Pgsql            | VM                      | installation and sanity testing |
+| 7  | Ubuntu20     | Opendj           | VM                      | installation and sanity testing |
+| 8  | Ubuntu20     | Mysql            | VM                      | installation and sanity testing |
+| 9  | Ubuntu20     | Pgsql            | VM                      | installation and sanity testing |
+| 10 | Ubuntu22     | Opendj           | VM                      | installation and sanity testing |
+| 11 | Ubuntu22     | Mysql            | VM                      | installation and sanity testing |
+| 12 | Ubuntu22     | Pgsql            | VM                      | installation and sanity testing |
+
+#### Sanity checks
+
+- Review functioning of `.well-known` endpoints for OpenId, Fido, UMA, SCIM modules 
+- Test device authentication flow using TUI  
+- Test password authentication flow using Janssen Server Tent 
+- Test Agama project deployment and functioning  
 
 ### Post-release QA checklist
------------------------------------------------------------------------------------
-| # |       ITEM To TEST            |   STATUS                           |  COMMENT |
-|---|-------------------------------|------------------------------------|-----------|
-| 1 | package installation verification on all OS Platforms |            |           |
---------------------------------------------------------------------------------------
+
+| # | ITEM To TEST                                          | STATUS | COMMENT |
+|---|-------------------------------------------------------|--------|---------|
+| 1 | package installation verification on all OS Platforms |        |         |
+
