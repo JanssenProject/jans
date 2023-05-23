@@ -101,9 +101,12 @@ end
 
 ### Step A: Ensure id_token has some info to identify the user:
 
-1. When the user logs in for the very first time and performs basic authentication, the Update Token script can be used to place a custom claim containing some user identification.  
+1. When the user logs in for the very first time and performs basic authentication, the Update Token script can be used to place a custom claim containing some user information like
+- User permissions
+- User personal information 
+- Internal user identifier.  
 In this example, we store the encrypted inum of the user as a "custom claim" in the id_token. 
-1. A good practice is to not put the primary key / user identifier in plain text
+2. A good practice is to not put the primary key / user identifier in plain text
 
 UpdateToken script:
 ```
