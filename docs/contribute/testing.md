@@ -118,7 +118,7 @@ As part of pre-release QA check, we run a set of [manual sanity checks](#sanity-
 
 ### Post-release QA checklist
 
-| # | ITEM To TEST                                          | STATUS | COMMENT |
-|---|-------------------------------------------------------|--------|---------|
-| 1 | package installation verification on all OS Platforms |        |         |
+| # | QA Checks                                                                     |
+|---|-------------------------------------------------------------------------------|
+| 1 | Package installation verification on all OS Platforms as in pre-release tests |
 
