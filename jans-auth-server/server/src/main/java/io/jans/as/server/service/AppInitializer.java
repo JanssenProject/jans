@@ -41,8 +41,6 @@ import io.jans.model.SimpleProperty;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.ldap.GluuLdapConfiguration;
-import io.jans.notify.client.NotifyClientFactory;
-import io.jans.notify.model.NotifyMetadata;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.PersistenceEntryManagerFactory;
 import io.jans.orm.exception.BasePersistenceException;
@@ -716,12 +714,5 @@ public class AppInitializer {
                     appConfiguration.getBackchannelRequestsProcessorJobIntervalSec());
         }
     }
-    
-    public static void main(String[] args) {
-    		NotifyClientFactory cf = NotifyClientFactory.instance();
-    		NotifyMetadata md = cf.instance().createMetaDataConfigurationService("https://cloud-dev.gluu.cloud/scan/push-api-server").getMetadataConfiguration();
-    		System.out.println(md);
-    		
-	}
 
 }
