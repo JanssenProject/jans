@@ -88,7 +88,7 @@ func testAccResourceCheckOrganizationImport(states []*terraform.InstanceState) e
 
 		found = true
 
-		if err := checkAttribute(is, "display_name", "Janssen"); err != nil {
+		if err := checkAttribute(is, "display_name", "Gluu"); err != nil {
 			return err
 		}
 
