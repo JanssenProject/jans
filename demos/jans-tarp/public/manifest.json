@@ -21,5 +21,6 @@
     "identity"
   ],
   "host_permissions": ["*://*/*"],
-  "options_page": "options.html"
+  "options_page": "options.html",
+  "incognito":"split"
 }
