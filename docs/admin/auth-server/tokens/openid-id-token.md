@@ -4,6 +4,7 @@ tags:
   - auth-server
   - token
   - id-token
+  - customize id_token
 ---
 
 ## OpenID Connect ID Token
@@ -74,3 +75,10 @@ an OAuth access token! Fundamentally, the `id_token` details how a person
 was authenticated, not which API's a client is authorized to call. Also,
 OAuth access tokens are short lived, while the expiration of an identity
 assertion is much longer.
+
+## Customizing claims in an id_token
+The [UpdateTokenType](https://docs.jans.io/head/admin/developer/scripts/update-token/) can be used in the following scenarios:
+1. In addition to the default claims in an ID token (`iss`, `aud`, `exp` etc), additional custom claims can be added to an ID token.
+2. You can also change the default value of a claim 
+
+
