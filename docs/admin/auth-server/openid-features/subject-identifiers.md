@@ -4,15 +4,14 @@ tags:
   - auth-server
   - openidc
   - feature
+  - subject identifier
 ---
 
-## This content is in progress
+# Subject identifiers
 
-The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.
-
-## Have questions in the meantime?
-
-While this documentation is in progress, you can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussion) or the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). Any questions you have will help determine what information our documentation should cover.
+- are they encrypted?
+- Are they sent as part of id-token and access token?
+- find out more about this : Similarly, in access tokens, for a given end-user the sub will differ for each resource server, identified by the token's audience.
 
 ## Want to contribute?
 
