@@ -41,21 +41,11 @@ func resourceOrganization() *schema.Resource {
 				Optional:    true,
 				Description: "String describing memberOf",
 			},
-			// "country_name": {
-			// 	Type:        schema.TypeString,
-			// 	Optional:    true,
-			// 	Description: "Organization country name",
-			// },
 			"organization": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "",
 			},
-			// "status": {
-			// 	Type:        schema.TypeString,
-			// 	Optional:    true,
-			// 	Description: "",
-			// },
 			"manager_group": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -71,37 +61,47 @@ func resourceOrganization() *schema.Resource {
 				Optional:    true,
 				Description: "",
 			},
-			// "custom_messages": {
-			// 	Type:        schema.TypeList,
-			// 	Optional:    true,
-			// 	Description: "",
-			// 	Elem: &schema.Schema{
-			// 		Type: schema.TypeString,
-			// 	},
-			// },
-			// "title": {
-			// 	Type:        schema.TypeString,
-			// 	Optional:    true,
-			// 	Description: "",
-			// },
+			"country_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Organization country name",
+			},
+			"status": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "",
+			},
+			"custom_messages": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "",
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			"title": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "",
+			},
 			"organization_title": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "",
 			},
-			// "js_logo_path": {
-			// 	Type:        schema.TypeString,
-			// 	Optional:    true,
-			// 	Description: "Path to organization logo image",
-			// },
-			// "js_favicon_path": {
-			// 	Type:        schema.TypeString,
-			// 	Optional:    true,
-			// 	Description: "Path to organization favicon image",
-			// },
+			"js_logo_path": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Path to organization logo image",
+			},
+			"js_favicon_path": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Path to organization favicon image",
+			},
 			"base_dn": {
 				Type:        schema.TypeString,
-				Computed:    true, // XXX: is this really computed?
+				Computed:    true,
 				Description: "",
 			},
 		},

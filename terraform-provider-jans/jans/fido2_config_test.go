@@ -39,7 +39,7 @@ func TestFido2Config(t *testing.T) {
 		SuperGluuEnabled:       true,
 		OldU2fMigrationEnabled: true,
 	}
-	updatedConfig, err := client.PutFido2Configuration(ctx, ret)
+	updatedConfig, err := client.UpdateFido2Configuration(ctx, ret)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -48,7 +48,7 @@ func TestFido2Config(t *testing.T) {
 		ret.BaseEndpoint = origBasepoint
 		ret.SuperGluuEnabled = origSuperGluuEnabled
 		ret.OldU2fMigrationEnabled = origOldU2fMigrationEnabled
-		_, _ = client.PutFido2Configuration(ctx, ret)
+		_, _ = client.UpdateFido2Configuration(ctx, ret)
 	})
 
 	if diff := cmp.Diff(cfg, updatedConfig); diff != "" {
