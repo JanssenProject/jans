@@ -21,7 +21,6 @@ import java.security.cert.CertificateException;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.inject.Inject;
 import javax.net.ssl.SSLContext;
 
 import org.apache.commons.codec.binary.Base64;
@@ -52,6 +51,7 @@ import io.jans.util.StringHelper;
 import io.jans.util.Util;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
 /**
  * Provides operations with http/https requests
@@ -203,7 +203,7 @@ public class HttpService2 implements Serializable {
 	}
 
 	public byte[] getResponseContent(HttpResponse httpResponse) throws IOException {
-        if ((httpResponse == null) || (httpResponse.getStatusLine().getStatusCode() != HttpStatus.SC_OK)) {
+        if ((httpResponse == null) || !isResponseStastusCodeOk(httpResponse)) {
         	return null;
         }
 
@@ -222,7 +222,7 @@ public class HttpService2 implements Serializable {
 	}
 
 	public void consume(HttpResponse httpResponse) throws IOException {
-        if ((httpResponse == null) || (httpResponse.getStatusLine().getStatusCode() != HttpStatus.SC_OK)) {
+        if ((httpResponse == null) || !isResponseStastusCodeOk(httpResponse)) {
         	return;
         }
 
@@ -259,10 +259,12 @@ public class HttpService2 implements Serializable {
 
 	public boolean isResponseStastusCodeOk(HttpResponse httpResponse) {
 		int responseStastusCode = httpResponse.getStatusLine().getStatusCode();
-		if (responseStastusCode == HttpStatus.SC_OK) {
+		if ((responseStastusCode == HttpStatus.SC_OK) || (responseStastusCode == HttpStatus.SC_CREATED) || (responseStastusCode == HttpStatus.SC_ACCEPTED) ||
+			(responseStastusCode == HttpStatus.SC_NON_AUTHORITATIVE_INFORMATION) || (responseStastusCode == HttpStatus.SC_NO_CONTENT) || (responseStastusCode == HttpStatus.SC_RESET_CONTENT) ||
+			(responseStastusCode == HttpStatus.SC_PARTIAL_CONTENT) || (responseStastusCode == HttpStatus.SC_MULTI_STATUS)) {
 			return true;
 		}
-		
+
 		return false;
 	}
 	
