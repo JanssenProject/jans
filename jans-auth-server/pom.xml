@@ -386,12 +386,6 @@
 
 			<!-- Documentation -->
 			<dependency>
-				<groupId>com.wordnik</groupId>
-				<artifactId>swagger-annotations</artifactId>
-				<version>${swagger.version}</version>
-	            <scope>provided</scope>
-			</dependency>
-			<dependency>
 				<groupId>org.jboss.resteasy</groupId>
 				<artifactId>resteasy-client-microprofile</artifactId>
 				<version>${org.jboss.resteasy.client.microprofile.version}</version>

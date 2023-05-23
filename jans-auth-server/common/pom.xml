@@ -204,12 +204,6 @@
             <artifactId>annotations</artifactId>
         </dependency>
 
-		<!-- Documentation -->
-		<dependency>
-			<groupId>com.wordnik</groupId>
-			<artifactId>swagger-annotations</artifactId>
-		</dependency>
-		
        	<!-- Swagger -->
 		<dependency>
 			<groupId>io.swagger.core.v3</groupId>
