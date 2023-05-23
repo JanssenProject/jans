@@ -15,8 +15,7 @@ A digitally signed or MACed JSON Web Token (JWT)
 that asserts metadata values about the client software.
 ```
 
-Janssen Server supports usage of software statements during dynamic client registration and as a client identifier
-in absence of prior client registration.
+Janssen Server supports usage of software statements during dynamic client registration.
 
 ## Use During Dynamic Client Registration
 
@@ -26,13 +25,6 @@ Janssen Server supports dynamic client registration using software statements. I
 to register client dynamically.
 
 Janssen Server also provides [SSA endpoint](../../auth-server/endpoints/ssa.md) to create and manage SSAs on the server.
-
-## As Client identifier
-
-```
-Content in progress
-```
-
 
 ## Want to contribute?
 
