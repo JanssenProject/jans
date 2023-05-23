@@ -186,8 +186,8 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
     def get_col_def(self, attrname, sql_tbl_name):
         data_type = self.get_sql_col_type(attrname, sql_tbl_name)
         col_def = '{0}{1}{0} {2}'.format(self.qchar, attrname, data_type)
-        if Config.rdbm_type == 'mysql' and data_type == 'JSON':
-            col_def += ' comment "json"'
+        if Config.rdbm_type == 'mysql' and self.dbUtils.mariadb and data_type == 'JSON':
+            col_def += ' check (json_valid({0}{1}{0}))'.format(self.qchar, attrname)
         return col_def
 
     def create_tables(self, jans_schema_files):
