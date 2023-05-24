@@ -101,6 +101,8 @@ nav:
     - Restarting Services: admin/vm-ops/restarting-services.md
     - Managing Key Rotation: admin/vm-ops/managing-key-rotation.md
     - Certificates: admin/vm-ops/certificates.md
+  - Terraform and IaC:
+    - admin/terraform/README.md   
   - Configuration Guide:
     - Config API:
       - admin/config-guide/config-api/README.md
