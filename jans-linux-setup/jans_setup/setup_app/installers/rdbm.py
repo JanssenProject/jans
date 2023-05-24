@@ -205,25 +205,27 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
         return data_type
 
 
+    def get_attr_description(self, attrname):
+        desc = ''
+        for attrib in self.dbUtils.jans_attributes:
+            if attrname in attrib['names']:
+                desc = attrib.get('desc')
+                break
+        else:
+            for attrib in self.opendj_attributes:
+                if attrname in attrib['NAME']:
+                    desc_t = attrib.get('DESC')
+                    if desc_t and desc_t[0]:
+                        desc = desc_t[0]
+                    break
+        return desc
+
     def get_col_def(self, attrname, sql_tbl_name):
         data_type = self.get_sql_col_type(attrname, sql_tbl_name)
         col_def = '{0}{1}{0} {2}'.format(self.qchar, attrname, data_type)
 
         if Config.rdbm_type == 'mysql':
-            desc = ''
-            for attrib in self.dbUtils.jans_attributes:
-                if attrname in attrib['names']:
-                    desc = attrib.get('desc')
-                    break
-            else:
-                for attrib in self.opendj_attributes:
-                    if attrname in attrib['NAME']:
-                        desc_t = attrib.get('DESC')
-                        if desc_t and desc_t[0]:
-                            desc = desc_t[0]
-                            
-                        break
-
+            desc = self.get_attr_description(attrname)
             if desc:
                 col_def += ' COMMENT "{}"'.format(desc)
 
@@ -272,7 +274,8 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                     continue
                 attr_list += all_schema[s]['may']
 
-            cols_ =[]
+            cols_ = []
+            col_comments = []
             for attrname in attr_list:
                 if attrname in cols_:
                     continue
@@ -284,6 +287,11 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                 col_def = self.get_col_def(attrname, sql_tbl_name) 
                 sql_tbl_cols.append(col_def)
 
+                if Config.rdbm_type == 'pgsql':
+                    desc = self.get_attr_description(attrname)
+                    if desc:
+                        col_comments.append('''COMMENT ON COLUMN "{}"."{}" IS '{}';'''.format(sql_tbl_name, attrname, desc))
+
             if not self.dbUtils.table_exists(sql_tbl_name):
                 doc_id_type = self.get_sql_col_type('doc_id', sql_tbl_name)
                 if Config.rdbm_type == 'pgsql':
@@ -293,6 +301,11 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                 else:
                     sql_cmd = 'CREATE TABLE `{}` (`doc_id` {} NOT NULL UNIQUE, `objectClass` VARCHAR(48), dn VARCHAR(128), {}, PRIMARY KEY (`doc_id`));'.format(sql_tbl_name, doc_id_type, ', '.join(sql_tbl_cols))
                 self.dbUtils.exec_rdbm_query(sql_cmd)
+                
+                for comment_sql in col_comments:
+                    self.dbUtils.exec_rdbm_query(comment_sql)
+                    tables.append(comment_sql)
+
                 tables.append(sql_cmd)
 
         for attrname in all_attribs:
