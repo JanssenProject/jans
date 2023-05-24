@@ -1,4 +1,5 @@
-import os
+from hashlib import sha256
+from pathlib import Path
 
 from jans.pycloudlib import get_manager
 
@@ -12,16 +13,24 @@ logger = logging.getLogger("entrypoint")
 manager = get_manager()
 
 
-def push_auth_conf():
+def push_auth_conf() -> None:
     conf_files = (
         "otp_configuration.json",
         "super_gluu_creds.json",
     )
     for conf_file in conf_files:
-        file_ = f"/etc/certs/{conf_file}"
-        secret_name = os.path.splitext(conf_file)[0]
-        logger.info(f"Pushing {file_} to secrets")
-        manager.secret.from_file(secret_name, file_)
+        file_ = Path(f"/etc/certs/{conf_file}")
+
+        # compare digest; if they are different, push the contents of file to secrets
+        if not digest_equals(manager.secret.get(file_.stem), file_.read_text()):
+            logger.info(f"Detected changes in {file_}; pushing changes to secrets.")
+            manager.secret.from_file(file_.stem, str(file_))
+
+
+def digest_equals(val1: str, val2: str) -> bool:
+    val1_digest = sha256(val1.encode()).hexdigest()
+    val2_digest = sha256(val2.encode()).hexdigest()
+    return val1_digest == val2_digest
 
 
 if __name__ == "__main__":
