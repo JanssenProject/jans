@@ -1871,6 +1871,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://jans.io/docs/head/admin/terraform/</loc>
+         <lastmod>2023-05-24</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://jans.io/docs/head/admin/to-be-placed/add-custom-ldifs/</loc>
          <lastmod>2023-05-24</lastmod>
          <changefreq>daily</changefreq>
