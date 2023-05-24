@@ -11,7 +11,7 @@ This Operation guide helps you learn about the common operations for Janssen on 
 
 
 ## Prerequisite
-- Review the [janssen](../reference/README.md) components and architecture
+- Review the [Janssen](../reference/kubernetes/README.md) components and architecture
 
 - Complete the [installation](../install/helm-install/local.md) of janssen on your desired Kubernetes provider.
 
@@ -23,5 +23,6 @@ This Operation guide helps you learn about the common operations for Janssen on 
 - [Customization](customization.md)  
 - [Start Order](start-order.md)  
 - [Logs](logs.md)
+- [External Secrets and Configmaps](external-secrets-configmaps.md)
 - [Health Check](health-check.md)
 - [FAQ](faq.md)
