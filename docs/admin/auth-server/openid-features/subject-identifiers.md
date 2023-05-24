@@ -33,7 +33,11 @@ More details about both types are given in
 
 ## Public Subject Identifiers
 
+
+
 ## Pairwise Subject Identifiers
+
+### Configuring Sector Identifiers
 
 ### Calculation Method for Pairwise Subject Identifiers
 
@@ -42,6 +46,12 @@ More details about both types are given in
 ### As Part Of ID Tokens
 
 ### As Part Of Access Tokens
+
+## Properties
+
+skipauthorization
+publicsubject
+pairwiseIdType/key/salt
 
 - are they encrypted?
 - Are they sent as part of id-token and access token?
