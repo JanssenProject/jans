@@ -28,7 +28,7 @@ The [Janssen](https://registry.terraform.io/providers/JanssenProject/jans/latest
 
 ## Directory structure
 
-The directory holding Terraform configuration files may look something like that
+The directory holding Terraform configuration files may look like the following:
 
 ```
 |-- versions.tf: specify the required providers, i.e. Janssen, with their respective version 
@@ -52,7 +52,7 @@ Let's have an example on `importing` the current `logging level` of a deployment
      required_providers {
         jans = {
         source = "JanssenProject/jans"
-        version = "0.6.0"
+        version = "0.7.0"
         }
      }
     }
@@ -94,7 +94,7 @@ Let's have an example on `importing` the current `logging level` of a deployment
         }
     ```
 
-5.  Configure the provider section in `configurations.tf` file:
+6.  Configure the provider section in `configurations.tf` file:
 
     ```
     provider "jans" {
@@ -105,7 +105,7 @@ Let's have an example on `importing` the current `logging level` of a deployment
     }
     ```
 
-5.  Before importing, we have to define an empty `resource` in `configurations.tf`:
+7.  Before importing, we have to define an empty `resource` in `configurations.tf`:
 
     ```
     resource "jans_logging_configuration" "global" {
@@ -113,7 +113,7 @@ Let's have an example on `importing` the current `logging level` of a deployment
     }
     ```
 
-6. Import:
+8. Import:
    `terraform import jans_logging_configuration.global global`
 
     Now after importing, the logging configuration is in Terraform state file, i.e. terraform.tfstate, and it's under Terraform management.
@@ -141,24 +141,24 @@ Let's have an example on `importing` the current `logging level` of a deployment
     As you can see the current logging level is `INFO`. We can double-check that in the `TUI`
     ![svg](../../assets/imported-logging-info.png)
 
-7.  Add configuration to your `configuration.tf file`
+9.  Add configuration to your `configuration.tf file`
     ```
     resource "jans_logging_configuration" "global" {
     logging_level = "TRACE"
     }
     ```
 
-7. You can run `terraform fmt` to rewrite Terraform configuration files to a canonical format and style.
+10. You can run `terraform fmt` to rewrite Terraform configuration files to a canonical format and style.
 
-7.  You can validate your Terraform syntax using `terraform validate`
+11.  You can validate your Terraform syntax using `terraform validate`
 
-8.  Apply changes using `terraform apply` and enter `yes`
+12.  Plan and then apply changes using `terraform plan` and `terraform apply` respectivley.
 
-9.  Review the changes now using `terraform state show jans_logging_configuration.global`. 
+13.  Review the changes now using `terraform state show jans_logging_configuration.global`. 
     Now it should show `logging_level               = "TRACE"`.
 
 
-10.  We can double-check the `logging level` in the TUI 
+14.  We can double-check the `logging level` in the TUI 
      ![svg](../../assets/changed-logging-info.png)    
 
 !!! Note
