@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.7.0](https://github.com/JanssenProject/terraform-provider-jans/compare/v0.6.0...v0.7.0) (2023-05-23)
+
+
+### Features
+
+* add missing attributes for fido2 app configuration updates 
+
+
+### Bug Fixes
+
+* fido2 config error and put operation 
+* fixed request for sending binary data 
+* update method name to match naming scheme 
+* updated organisation mappings 
+
 ## [0.6.0](https://github.com/JanssenProject/terraform-provider-jans/compare/v0.5.0...v0.6.0) (2023-05-15)
 
 

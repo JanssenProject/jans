@@ -452,6 +452,9 @@ class SQLBackend:
             ("agmFlow", "agFlowTrans"),
             ("agmFlow", "jansCustomMessage"),
             ("jansOrganization", "jansCustomMessage"),
+            ("jansDeviceRegistration", "jansApp"),
+            ("jansFido2AuthnEntry", "jansApp"),
+            ("jansFido2RegistrationEntry", "jansApp"),
         ]:
             change_column_type(mod[0], mod[1])
 

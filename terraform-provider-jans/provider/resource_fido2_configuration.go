@@ -207,7 +207,7 @@ func resourceFido2ConfigurationUpdate(ctx context.Context, d *schema.ResourceDat
 		return diag.FromErr(err)
 	}
 
-	if _, err := c.PutFido2Configuration(ctx, &fido2Config); err != nil {
+	if _, err := c.UpdateFido2Configuration(ctx, &fido2Config); err != nil {
 		return diag.FromErr(err)
 	}
 

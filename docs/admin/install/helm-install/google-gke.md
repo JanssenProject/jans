@@ -36,22 +36,24 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
 
 ## Initial Setup
 
-1.  If you are using Cloud Shell, you can skip to step 4.
+1.  Enable [GKE API](https://console.cloud.google.com/kubernetes) if not enabled yet.
 
-2.  Install [gcloud](https://cloud.google.com/sdk/docs/quickstarts)
+2.  If you are using `Cloud Shell`, you can skip to step 4.
+
+3.  Install [gcloud](https://cloud.google.com/sdk/docs/quickstarts).
     
-3.  Install kubectl using `gcloud components install kubectl` command
+4.  Install `kubectl` using `gcloud components install kubectl` command.
     
-4.  Create cluster using a command such as the following example:
+5.  Install [Helm3](https://helm.sh/docs/intro/install/).
+
+6.  Create cluster using a command such as the following example:
 
     ```  
     gcloud container clusters create janssen-cluster --num-nodes 2 --machine-type e2-highcpu-8 --zone us-west1-a
     ```
     You can adjust `num-nodes` and `machine-type` as per your desired cluster size
 
-5.  Install [Helm3](https://helm.sh/docs/intro/install/)    
-
-6.  Create `jans` namespace where our resources will reside
+7.  Create `jans` namespace where our resources will reside
     ```
     kubectl create namespace jans
     ```

@@ -260,18 +260,13 @@ func (c *Client) post(ctx context.Context, path, token string, req, resp any) er
 // a pointer type.
 func (c *Client) postZipFile(ctx context.Context, path, token string, req []byte, resp any) error {
 
-	payload, err := json.Marshal(req)
-	if err != nil {
-		return fmt.Errorf("could not marshal request: %w", err)
-	}
-
 	params := requestParams{
 		method:      "POST",
 		path:        path,
 		contentType: "application/zip",
 		accept:      "application/json",
 		token:       token,
-		payload:     payload,
+		payload:     req,
 		resp:        resp,
 	}
 
