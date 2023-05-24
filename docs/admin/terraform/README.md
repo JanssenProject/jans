@@ -22,19 +22,34 @@ tags:
 ## Janssen Terraform provider
 
 !!! Note
-    The Janssen Terraform resources cannot be created or destroyed/deleted using Terraform, as they are always present in a Janssen deployment. Instead, they can be imported and then updated. The creation of such a resource using `terraform apply` will result in an error. Deletion on the other hand using `terraform destroy` will result in the resource being removed from the state file and become not under Terraform management.
+    Every instance of [Janssen](https://registry.terraform.io/providers/JanssenProject/jans/latest/docs#instance-configuration) comes with a set of configurations, which are valid for the whole instance. These resources cannot be created or destroyed, as they are always present in a Janssen instance. Instead, they can be imported and updated. The creation of such a resource will result in an error. Deletion on the other hand will result in the resource being removed from the state file.
 
 The [Janssen](https://registry.terraform.io/providers/JanssenProject/jans/latest/docs) Terraform provider is used to manage resources in a Janssen deployment. This includes all configurations, users, groups, OIDC clients, and more.
+
+## Directory structure
+
+The directory holding Terraform configuration files may look something like that
+
+```
+|-- versions.tf: specify the required providers, i.e. Janssen, with their respective version 
+|-- backend.tf: defines where the state file of the current infrastructure will be stored. Terraform keeps track of the managed resources using the Terraform state file.
+|-- variables.tf: specify the variables, with their type and optionally the default values.
+|-- configurations.tf: using the Jans provider and creating other resources.
+|-- clients.tf: file that holds the configuration for Janssen clients creation if needed.
+|-- scopes.tf: file that holds the configuration for Janssen scopes creation if needed.
+|-- scripts.tf: file that holds the configuration for Janssen scripts creation if needed.
+
+```
 
 ## Example - Configure Janssen
 
 Let's have an example on `importing` the current `logging level` of a deployment and `changing` it using Terraform.
 
-1. Configure Terraform to install the required plugins for `Janssen provider`. Add this to your `.tf` file:
+1. Configure Terraform to install the required plugins for the `Janssen provider`. Add this to your `versions.tf` file:
 
     ```
     terraform {
-    required_providers {
+     required_providers {
         jans = {
         source = "JanssenProject/jans"
         version = "0.6.0"
@@ -43,23 +58,54 @@ Let's have an example on `importing` the current `logging level` of a deployment
     }
     ```
 
-2. Now we can run `terraform init`, which will fetch the plugins needed.
+2.  Now we can run `terraform init`, which will fetch the plugins needed.
+
+3.  In `backend.tf` we define where we store the Terraform state file. By default it's stored locally. However, configuring a remote backend like [S3](https://developer.hashicorp.com/terraform/language/settings/backends/s3) to store the state file allows multiple people to collaborate and work on the same infrastructure.
+
+    ```
+    terraform {
+        backend "local" {
+            path = "relative/path/to/terraform.tfstate"
+        }
+    }
+    ```
 
 
-2.  Have a `client_id` and `client_secret` with sufficient scopes and permissions.
+4.  Have a `client_id` and `client_secret` with sufficient scopes and permissions.
 
-3.  Configure provider section:
+5.  In your `variables.tf` file, add your `client_id`, `client_secret` and `FQDN`
+    ```
+    variable "jans_fqdn" {
+        description = "Jans FQQN"
+        type        = string
+        default     = "https://demoexample.jans.org" #Replace with https://<YOUR_DOMAIN>
+        }  
+        
+        variable "jans_client_id" {
+        description = "The Jans client id with sufficient scopes"
+        type        = string
+        default     = "1800.b8c31be4-952b-4770-b1e8-824187e940c9" #Replace with your client id 
+        }
+
+        variable "jans_client_secret" {
+        description = "The Jans client secret with sufficient scopes"
+        type        = string
+        default     = "mf7ELLeF6JSI" #Replace with your client secret 
+        }
+    ```
+
+5.  Configure the provider section in `configurations.tf` file:
 
     ```
     provider "jans" {
-        url           = "https://test-instnace.jans.io"
-        client_id     = "1800.3d29d884-e56b-47ac-83ab-b37942b83a89"
-        client_secret = "Ma3egYQ5dkqS"
+        url           = var.jans_fqdn
+        client_id     = var.jans_client_id
+        client_secret = var.jans_client_secret
         insecure_client = true # Optional. If set to `true`, the provider will not verify the TLS certificate of the Janssen server. This is useful for testing purposes and should not be used in production, unless absolutely unavoidable.
     }
     ```
 
-4.  Before importing, we have to define an empty `resource`:
+5.  Before importing, we have to define an empty `resource` in `configurations.tf`:
 
     ```
     resource "jans_logging_configuration" "global" {
@@ -67,7 +113,7 @@ Let's have an example on `importing` the current `logging level` of a deployment
     }
     ```
 
-5. Import:
+6. Import:
    `terraform import jans_logging_configuration.global global`
 
     Now after importing, the logging configuration is in Terraform state file, i.e. terraform.tfstate, and it's under Terraform management.
@@ -95,12 +141,14 @@ Let's have an example on `importing` the current `logging level` of a deployment
     As you can see the current logging level is `INFO`. We can double-check that in the `TUI`
     ![svg](../../assets/imported-logging-info.png)
 
-6.  Add configuration to your `.tf file`
+7.  Add configuration to your `configuration.tf file`
     ```
     resource "jans_logging_configuration" "global" {
     logging_level = "TRACE"
     }
     ```
+
+7. You can run `terraform fmt` to rewrite Terraform configuration files to a canonical format and style.
 
 7.  You can validate your Terraform syntax using `terraform validate`
 
