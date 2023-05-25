@@ -45,21 +45,21 @@ keytool -list -v -keystore /etc/certs/jans-auth-keys.p12 -storetype pkcs12 -stor
 
 The jans implementation of KeyGenerator accepts the following arguments:
 
-| Argument	         | Description                                                                                       |
+| Argument	        | Description                                                                                       |
 |-------------------|---------------------------------------------------------------------------------------------------|
-| -at               | 	oxEleven Access Token                                                                            |
-| -dnname           | 	DN of certificate issuer                                                                         |
+| -dnname           | DN of certificate issuer                                                                          |
 | -key_length       | Length of hash key                                                                                |
 | -enc_keys         | Encryption keys to generate (For example: RSA_OAEP, RSA1_5)                                       |
-| -expiration       | 	Expiration in days                                                                               |
+| -expiration       | Expiration in days                                                                                |
 | -expiration_hours | Expiration in hours                                                                               |
 | -h                | Show help                                                                                         |
 | -key_ops_type     | Purpose of the key, possible values: connect, ssa, all                                            |
-| -keypasswd        | 	Key Store password                                                                               |
-| -keystore         | 	Key Store file (such as /etc/certs/jans-auth-keys.p12)                                           |
-| -ox11             | 	oxEleven Generate Key Endpoint.                                                                  |
-| -sig_keys         | 	Signature keys to generate. (For example: RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512) |
-| test_prop_file    |                                                                                                   |
+| -keypasswd        | Key Store password                                                                                |
+| -keystore         | Key Store file (such as /etc/certs/jans-auth-keys.p12)                                            |
+| -sig_keys         | Signature keys to generate. (For example: RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512)  |
 | _keyId            | Key name suffix                                                                                   |
+| -test_prop_file   | Test property file used for test purpose only                                                     |
+| -ox11             | oxEleven Generate Key Endpoint.                                                                   |
+| -at               | oxEleven Access Token                                                                             |
 
 
