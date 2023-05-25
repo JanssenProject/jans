@@ -10,11 +10,11 @@ tags:
 
 ## Generating Cryptographic Keys
 
-The Jans Server is compatible with the [Java KeyGenerator](https://docs.oracle.com/javase/7/docs/api/javax/crypto/KeyGenerator.html) to create new cryptographic keys if needed.
+The Jans Server is compatible with the [Java KeyGenerator](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/client/src/main/java/io/jans/as/client/util/KeyGenerator.java) to create new cryptographic keys if needed.
 
 ### Backup
 
-* Backup `jansConfWebKeys` attribute data from LDAP. Location of this attribute is: `o=jans > ou=configuration > ou=jans-auth`
+* Backup `jansConfWebKeys` attribute data of `jansAppConf` entity from persistence. Location of this attribute is: `o=jans > ou=configuration > ou=jans-auth`
 * Backup `jans-auth-keys.p12` from `/etc/certs/`
 
 [N.B] Below if `Keystore` location is anywhere except `/etc/certs/` no need to backup.
