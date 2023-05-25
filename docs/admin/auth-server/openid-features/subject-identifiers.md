@@ -33,6 +33,32 @@ More details about both types are given in
 
 ## Public Subject Identifiers
 
+Public subject identifiers are identifiers that server generates and assigns to each subject. These identifiers are 
+unique for each server deployment. All the clients that are configured to use `public` type subject identifier will 
+be supplied this same identifier for a given subject by the Janssen Server. 
+
+Sharing common subject identifiers across multiple clients may enable clients to correlate data about a particular
+subject. If this is an unwanted situation, then the client should use `pairwise` subject identifiers.
+
+By default, the Janssen Server uses subject attribute `inum` as subject identifier.
+
+### Customizing Subject Identifier Attribute
+
+At server level, the administrator specifiy which subject attribute should be used as subject identifiers.
+This can be done by updating the value of 
+[openidSubAttribute](../../reference/json/properties/janssenauthserver-properties.md#openidsubattribute) 
+Janssen Server property.
+
+At client level, this can be further customized. If a client uses `public` type subject identifier, the client can 
+configure the subject attribute that should be used as subject identifier. This should be done at client registration
+time.
+
+To enable client level customization, Janssen Server property 
+[publicSubjectIdentifierPerClientEnabled](../../reference/json/properties/janssenauthserver-properties.md#publicsubjectidentifierperclientenabled)
+should be set to `true` and also the desired attribute should be part of the list
+defined by Janssen Server property 
+[subjectIdentifiersPerClientSupported](../../reference/json/properties/janssenauthserver-properties.md#subjectidentifiersperclientsupported).
+Both these properties can be set by administrator using [TUI](../../config-guide/jans-tui/README.md)
 
 
 ## Pairwise Subject Identifiers
@@ -49,9 +75,15 @@ More details about both types are given in
 
 ## Properties
 
+
+openidSubAttribute - is where the client can specify what should be the ldap attribute to store subject identifiers (applies to only `public`)
+publicSubjectIdentifierPerClientEnabled - client can use `openidSubAttribute` only if this flag is enabled
+subjectIdentifiersPerClientSupported - find out more about this. Why is this a list? Will it not be very similar to pairwise? 
+
 skipauthorization
-publicsubject
 pairwiseIdType/key/salt
+
+
 
 - are they encrypted?
 - Are they sent as part of id-token and access token?
