@@ -15,7 +15,7 @@ from io.jans.as.server.model.config import ConfigurationFactory
 from io.jans.as.server.service import AuthenticationService
 from io.jans.as.server.service import SessionIdService
 from io.jans.as.common.service.common.fido2 import RegistrationPersistenceService
-from io.jans.as.server.service.net import HttpService2
+from io.jans.as.server.service.net import HttpService, HttpService2
 from io.jans.as.server.util import ServerUtil
 from io.jans.util import StringHelper
 from io.jans.as.common.service.common import EncryptionService
@@ -147,8 +147,12 @@ class PersonAuthentication(PersonAuthenticationType):
 
         # Upon client creation, this value is populated, after that this call will not go through in subsequent script restart
         if StringHelper.isEmptyString(self.AS_CLIENT_ID):
-            if self.registerScanClient(self.AS_ENDPOINT, self.AS_REDIRECT_URI, self.AS_SSA, customScript):
-                self.AS_CLIENT_ID
+            clientRegistrationResponse = self.registerScanClient(self.AS_ENDPOINT, self.AS_REDIRECT_URI, self.AS_SSA, customScript)
+            if clientRegistrationResponse == None:
+                return False
+
+            self.AS_CLIENT_ID = clientRegistrationResponse['client_id']
+            self.AS_CLIENT_SECRET = clientRegistrationResponse['client_secret']
 
         self.enabledPushNotifications = self.initPushNotificationService(configurationAttributes)
 
@@ -1001,10 +1005,6 @@ class PersonAuthentication(PersonAuthenticationType):
         identity.setWorkingParameter("download_url", downloadMap)
         identity.setWorkingParameter("super_gluu_qr_options", self.customQrOptions)
 
-    def buildNotifyAuthorizationHeader(self):
-        token = self.getAccessTokenJansServer(self.AS_ENDPOINT, self.AS_REDIRECT_URI, self.AS_CLIENT_ID, self.AS_CLIENT_SECRET)
-        return "Bearer %s" % token
-
     def addGeolocationData(self, session_attributes, super_gluu_request_dictionary):
         if session_attributes.containsKey("remote_ip"):
             remote_ip = session_attributes.get("remote_ip")
@@ -1087,10 +1087,16 @@ class PersonAuthentication(PersonAuthenticationType):
             body = "User log in: %s" % user_id
             mailService.sendMail(self.audit_email, subject, body)
 
+    def buildNotifyAuthorizationHeader(self):
+        token = self.getAccessTokenJansServer(self.AS_ENDPOINT, self.AS_REDIRECT_URI, self.AS_CLIENT_ID, self.AS_CLIENT_SECRET)
+        authorizationHeader =  "Bearer %s" % token
+        
+        return authorizationHeader
+
     def getAccessTokenJansServer(self, asBaseUrl, asRedirectUri, asClientId, asClientSecret):
         endpointUrl = asBaseUrl + "/jans-auth/restv1/token"
 
-        body = "grant_type=client_credentials&redirect_uri=%s" % asRedirectUri
+        body = "grant_type=client_credentials&scope=https://api.gluu.org/auth/scopes/scan.supergluu&redirect_uri=%s" % asRedirectUri
 
         authData = base64.b64encode(("%s:%s" % (asClientId, asClientSecret)).encode('utf-8'))
         headers = {"Accept" : "application/json"}
@@ -1146,14 +1152,14 @@ class PersonAuthentication(PersonAuthenticationType):
             if not httpService.isResponseStastusCodeOk(httpResponse):
                 print "Super-Gluu. Scan. Get invalid registration"
                 httpService.consume(httpResponse)
-                return False
+                return None
 
             bytes = httpService.getResponseContent(httpResponse)
 
             response = httpService.convertEntityToString(bytes)
         except:
             print "Super-Gluu. Scan. Failed to send client registration request: ", sys.exc_info()[1]
-            return False
+            return None
 
         response_data = json.loads(response)
         client_id = response_data["client_id"]
@@ -1168,15 +1174,13 @@ class PersonAuthentication(PersonAuthenticationType):
             for conf in customScript.getConfigurationProperties():
                 if (StringHelper.equalsIgnoreCase(conf.getValue1(), "AS_CLIENT_ID")):
                     conf.setValue2(client_id)
-                    self.AS_CLIENT_ID = client_id
                 elif (StringHelper.equalsIgnoreCase(conf.getValue1(), "AS_CLIENT_SECRET")):
                     conf.setValue2(client_secret)
-                    self.AS_CLIENT_SECRET = client_secret
             custScriptService.update(customScript)    
 
             print "Super-Gluu. Scan. Stored client credentials in script parameters"
         except: 
             print "Super-Gluu. Scan. Failed to store client credentials.", sys.exc_info()[1]
-            return False
+            return None
 
-        return True
+        return {'client_id' : client_id, 'client_secret' : client_secret}
