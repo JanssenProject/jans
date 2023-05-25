@@ -4,14 +4,10 @@ tags:
   - scim
 ---
 
-## This content is in progress
+## Security considerations
 
-The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.
+SCIM API allows administrators and developers manage a key asset in an IAM deployment, namely users. Additionally, other resources like groups and registered fido devices can be managed in Janssen Server via SCIM.
 
-## Have questions in the meantime?
+Clearly, this kind of API must not be anonymously accessible. However, the SCIM standard does not define a specific mechanism to prevent unauthorized requests to endpoints. There are just a few guidelines in section 2 of [RFC 7644](https://tools.ietf.org/html/rfc7644) concerned with authentication and authorization.
 
-While this documentation is in progress, you can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussion) or the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). Any questions you have will help determine what information our documentation should cover.
-
-## Want to contribute?
-
-If you have content you'd like to contribute to this page in the meantime, you can get started with our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/).
+Currently, the Janssen server supports an OAuth-based mechanism to protect these endpoints; you can find more information in this regard [here](./oauth-protection.md). Nonetheless, it is recommended not to expose this API outside the organization's network. Ideally administrators should block any external attempt to access URLs under the path `https://your-jans-server/jans-scim`.
