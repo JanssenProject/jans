@@ -17,6 +17,7 @@ class FlaskBaseTestCase(TestCase):
         clientapp.cfg.CLIENT_ID = 'any-client-id-stub'
         clientapp.cfg.CLIENT_SECRET = 'any-client-secret-stub'
         clientapp.cfg.SERVER_META_URL = 'https://ophostname.com/server/meta/url'
+        clientapp.cfg.END_SESSION_ENDPOINT = 'https://ophostname.com/end_session_endpoint'
         clientapp.add_config_from_json = MagicMock(name='add_config_from_json')
         clientapp.add_config_from_json.return_value(None)
         self.stashed_discover = ClientHandler.discover

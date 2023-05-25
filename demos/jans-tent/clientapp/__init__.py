@@ -16,6 +16,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 '''
 import base64
+import urllib
 import json
 import os
 from urllib.parse import urlparse
@@ -38,6 +39,7 @@ def add_config_from_json():
         cfg.SERVER_META_URL = client_info['op_metadata_url']
         cfg.CLIENT_ID = client_info['client_id']
         cfg.CLIENT_SECRET = client_info['client_secret']
+        cfg.END_SESSION_ENDPOINT = client_info['end_session_endpoint'] # separate later
 
 
 def get_preselected_provider():
@@ -98,6 +100,25 @@ def create_app():
         user = session.get('user')
         id_token = session.get('id_token')
         return render_template("home.html", user=user, id_token=id_token)
+
+    @app.route('/logout')
+    def logout():
+        app.logger.info('Called /logout')
+        if 'id_token' in session.keys():
+            app.logger.info('Cleaning session credentials')
+            token_hint = session.get('id_token')
+            session.pop('id_token')
+            session.pop('user')
+            parsed_redirect_uri = urllib.parse.urlparse(cfg.REDIRECT_URIS[0])
+            post_logout_redirect_uri = '%s://%s' % (parsed_redirect_uri.scheme, parsed_redirect_uri.netloc)
+            return redirect(
+                '%s?post_logout_redirect_uri=%s&token_hint=%s' % (
+                    cfg.END_SESSION_ENDPOINT, post_logout_redirect_uri, token_hint
+                )
+            )
+
+        app.logger.info('Not authorized to logout, redirecting to index')
+        return redirect(url_for('index'))
 
     @app.route('/register', methods=['POST'])
     def register():
@@ -194,9 +215,9 @@ def create_app():
             user = oauth.op.userinfo()
             app.logger.debug('/callback - user = %s' % user)
             session['user'] = user
+            session['id_token'] = token['userinfo']
             app.logger.debug('/callback - cookies = %s' % request.cookies)
             app.logger.debug('/callback - session = %s' % session)
-            session['id_token'] = token['userinfo']
 
             return redirect('/')
 
