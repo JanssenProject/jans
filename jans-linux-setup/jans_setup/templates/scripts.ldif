@@ -299,8 +299,7 @@ dn: inum=92F0-BF9E,ou=scripts,o=jans
 description: Super Gluu authentication module
 displayName: super_gluu
 inum: 92F0-BF9E
-jansConfProperty: {"value1":"AS_ENDPOINT","value2":"https://account-dev.gluu.cloud","hide":false,"description":""}
-jansConfProperty: {"value1":"AS_REDIRECT_URI","value2":"https://account-dev.gluu.cloud","hide":false,"description":""}
+jansConfProperty: {"value1":"AS_ENDPOINT","value2":"https://account.gluu.org","hide":false,"description":""}
 jansConfProperty: {"value1":"AS_SSA","value2":"","hide":false,"description":""}
 jansConfProperty: {"value1":"AS_CLIENT_ID","value2":"","hide":false,"description":""}
 jansConfProperty: {"value1":"AS_CLIENT_SECRET","value2":"","hide":false,"description":""}
