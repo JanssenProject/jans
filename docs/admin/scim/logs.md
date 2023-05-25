@@ -4,14 +4,8 @@ tags:
   - scim
 ---
 
-## This content is in progress
+## SCIM Logs
 
-The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.
+Logs can be found under `/opt/jans/jetty/jans-scim/logs` in your Janssen Server. The default logging level is `INFO` but this can be changed to any of `TRACE`, `DEBUG`, `WARN`, OR `ERROR` via TUI. 
 
-## Have questions in the meantime?
-
-While this documentation is in progress, you can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussion) or the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). Any questions you have will help determine what information our documentation should cover.
-
-## Want to contribute?
-
-If you have content you'd like to contribute to this page in the meantime, you can get started with our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/).
+To do so launch TUI, e.g. `python3 /opt/jans/jans-cli/jans_cli_tui.py`, and navigate to SCIM tab. Then in "Logging Level" select the desired option. Finally hit "Save".
