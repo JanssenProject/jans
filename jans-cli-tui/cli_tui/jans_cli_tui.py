@@ -43,6 +43,8 @@ from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.key_binding.bindings.focus import focus_next, focus_previous
 from prompt_toolkit.layout.containers import Float, HSplit, VSplit
 from prompt_toolkit.formatted_text import HTML, merge_formatted_text
+from prompt_toolkit.patch_stdout import patch_stdout
+
 from prompt_toolkit.layout.containers import (
     Float,
     HSplit,
@@ -344,11 +346,7 @@ class JansCliApp(Application):
 
         status = self.cli_object.check_connection()
 
-
-
-
         self.invalidate()
-
 
         if status not in (True, 'ID Token is expired'):
             buttons = [Button(_("OK"), handler=self.jans_creds_dialog)]
@@ -1017,7 +1015,8 @@ class JansCliApp(Application):
 application = JansCliApp()
 
 def run():
-    result = application.run()
+    with patch_stdout(application):
+        result = application.run()
     print("See you next time.")
 
 
