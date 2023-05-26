@@ -38,7 +38,8 @@ unique for each server deployment. All the clients that are configured to use `p
 be supplied this same identifier for a given subject by the Janssen Server. 
 
 Sharing common subject identifiers across multiple clients may enable clients to correlate data about a particular
-subject. If this is an unwanted situation, then the client should use `pairwise` subject identifiers.
+subject. If this is an unwanted situation, then the client should use [pairwise](#pairwise-subject-identifiers) 
+subject identifiers.
 
 By default, the Janssen Server uses subject attribute `inum` as subject identifier.
 
@@ -50,24 +51,36 @@ This can be done by updating the value of
 Janssen Server property.
 
 At client level, this can be further customized. If a client uses `public` type subject identifier, the client can 
-configure the subject attribute that should be used as subject identifier. This should be done at client registration
-time.
+configure the subject attribute that should be used as subject identifier. This should be done at the client 
+registration time. 
 
 To enable client level customization, Janssen Server property 
 [publicSubjectIdentifierPerClientEnabled](../../reference/json/properties/janssenauthserver-properties.md#publicsubjectidentifierperclientenabled)
 should be set to `true` and also the desired attribute should be part of the list
 defined by Janssen Server property 
 [subjectIdentifiersPerClientSupported](../../reference/json/properties/janssenauthserver-properties.md#subjectidentifiersperclientsupported).
-Both these properties can be set by administrator using [TUI](../../config-guide/jans-tui/README.md)
-
+Both these properties can be set by administrator using [TUI](../../config-guide/jans-tui/README.md).
 
 ## Pairwise Subject Identifiers
 
-### Configuring Sector Identifiers
+When client chooses to use `pairwise` subject identifier, the Janssen Server generates and attaches a new identifier 
+to all the subjects requested by the client. This identifier is consistently used for the subject-client pair and never
+used for any other clients configured on the Janssen Server. If multiple clients are using `pairwise` type subject 
+identifiers, then same subject will have different identifier for each subject. 
 
-### Calculation Method for Pairwise Subject Identifiers
+Since every client has a different identifier for the same subject, the clients can't match identifiers and correlate
+information about a subject out of band.
 
-## Receiving Subject Identifiers
+### Pairwise Identifier Generation
+
+Janssen Server uses redirect URI or sector identifier host name string, local user ID, and a salt string as
+initial input to generate pairwise identifiers. This input is then signed with the HS256 signing algorithm to generate
+a pairwise identifier.
+
+Sector identifier configuration influences how pairwise identifiers are calculated. See
+[this](../client-management/sector-identifiers.md) document for more details.
+
+## Receiving Subject Identifiers    
 
 ### As Part Of ID Tokens
 
