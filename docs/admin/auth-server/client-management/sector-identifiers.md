@@ -43,12 +43,6 @@ URIs have the same host component. If the list of redirect URIs contains multipl
 providing a `Sector Identifier URI` is a must. When `Sector Identifier URI` is provided, the host component of the URI is
 used as a sector identifier.
 
-### Pairwise Identifier Generation
-
-Janssen Server uses the `Sector Identifier URI` host name string, local user ID, and a salt string as
-initial input to generate pairwise identifiers. This input is then signed with the HS256 signing algorithm to generate 
-a pairwise identifier.
-
 ## Configuration Properties
 
 Janssen Server allows customization concerning sector identifiers using the properties below:
