@@ -15,19 +15,19 @@ import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.util.Properties;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
-import io.jans.exception.PythonException;
-import io.jans.orm.reflect.util.ReflectHelper;
-import io.jans.util.StringHelper;
 import org.python.core.PyException;
 import org.python.core.PyObject;
 import org.python.util.PythonInterpreter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import io.jans.exception.PythonException;
+import io.jans.orm.reflect.util.ReflectHelper;
+import io.jans.util.StringHelper;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 /**
  * Provides operations with python module
@@ -71,7 +71,6 @@ public class PythonService implements Serializable {
     	log.info("Initializing PythonService with Jython: '{}'", pythonHome);
         if (StringHelper.isNotEmpty(pythonHome)) {
             try {
-
             	PythonInterpreter.initialize(getPreProperties(), getPostProperties(pythonModulesDir, pythonHome), null);
                 this.pythonInterpreter = new PythonInterpreter();
 
