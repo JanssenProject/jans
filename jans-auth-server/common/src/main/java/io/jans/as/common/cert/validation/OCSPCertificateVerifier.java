@@ -181,7 +181,7 @@ public class OCSPCertificateVerifier implements CertificateVerifier {
 
         AccessDescription[] accessDescriptions = authorityInformationAccess.getAccessDescriptions();
         for (AccessDescription accessDescription : accessDescriptions) {
-            boolean correctAccessMethod = accessDescription.getAccessMethod().equals(X509ObjectIdentifiers.ocspAccessMethod);
+            boolean correctAccessMethod = accessDescription.getAccessMethod().equals((Object)X509ObjectIdentifiers.ocspAccessMethod);            
             if (!correctAccessMethod) {
                 continue;
             }
