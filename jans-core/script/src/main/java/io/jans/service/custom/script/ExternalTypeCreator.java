@@ -103,13 +103,22 @@ public class ExternalTypeCreator {
 
         boolean initialized = false;
         try {
-            if (externalType.getApiVersion() > 10) {
-                initialized = externalType.init(customScript, configurationAttributes);
-            } else {
-                initialized = externalType.init(configurationAttributes);
-                log.warn(" Update the script's init method to init(self, customScript, configurationAttributes), script name: {}", customScript.getName());
-            }
-        } catch (Exception ex) {
+			// Workaround to allow load all required class in init method needed for proper script work
+			// At the end we restore ContextClassLoader
+			// More details: https://github.com/JanssenProject/jans/issues/5116
+			ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
+			Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
+			try {
+				if (externalType.getApiVersion() > 10) {
+	                initialized = externalType.init(customScript, configurationAttributes);
+	            } else {
+	                initialized = externalType.init(configurationAttributes);
+	                log.warn(" Update the script's init method to init(self, customScript, configurationAttributes), script name: {}", customScript.getName());
+	            }
+			} finally {
+				Thread.currentThread().setContextClassLoader(oldClassLoader);
+			}
+		} catch (Exception ex) {
             log.error("Failed to initialize custom script: '{}', exception: {}", customScript.getName(), ex);
         }
 
