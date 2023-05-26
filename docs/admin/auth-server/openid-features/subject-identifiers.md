@@ -73,34 +73,27 @@ information about a subject out of band.
 
 ### Pairwise Identifier Generation
 
-Janssen Server uses redirect URI or sector identifier host name string, local user ID, and a salt string as
-initial input to generate pairwise identifiers. This input is then signed with the HS256 signing algorithm to generate
+Janssen Server uses host name string from redirect URI or sector identifier, local user ID, and a salt string as
+initial inputs to generate pairwise identifiers. This input is then signed with the HS256 signing algorithm to generate
 a pairwise identifier.
 
 Sector identifier configuration influences how pairwise identifiers are calculated. See
 [this](../client-management/sector-identifiers.md) document for more details.
 
-## Receiving Subject Identifiers    
-
-### As Part Of ID Tokens
-
-### As Part Of Access Tokens
-
 ## Properties
 
+Janssen Server allows customization concerning subject identifiers using the properties below:
 
-openidSubAttribute - is where the client can specify what should be the ldap attribute to store subject identifiers (applies to only `public`)
-publicSubjectIdentifierPerClientEnabled - client can use `openidSubAttribute` only if this flag is enabled
-subjectIdentifiersPerClientSupported - find out more about this. Why is this a list? Will it not be very similar to pairwise? 
-
-skipauthorization
-pairwiseIdType/key/salt
-
-
-
-- are they encrypted?
-- Are they sent as part of id-token and access token?
-- find out more about this : Similarly, in access tokens, for a given end-user the sub will differ for each resource server, identified by the token's audience.
+- [subjectTypesSupported](../../reference/json/properties/janssenauthserver-properties.md#subjecttypessupported)
+- [defaultSubjectType](../../reference/json/properties/janssenauthserver-properties.md#defaultsubjecttype)
+- [shareSubjectIdBetweenClientsWithSameSectorId](../../reference/json/properties/janssenauthserver-properties.md#sharesubjectidbetweenclientswithsamesectorid)
+- [openidSubAttribute](../../reference/json/properties/janssenauthserver-properties.md#openidsubattribute)
+- [publicSubjectIdentifierPerClientEnabled](../../reference/json/properties/janssenauthserver-properties.md#publicsubjectidentifierperclientenabled)
+- [subjectIdentifiersPerClientSupported](../../reference/json/properties/janssenauthserver-properties.md#subjectidentifiersperclientsupported)
+- [skipAuthorizationForOpenIdScopeAndPairwiseId](../../reference/json/properties/janssenauthserver-properties.md#skipauthorizationforopenidscopeandpairwiseid)
+- [pairwiseCalculationKey](../../reference/json/properties/janssenauthserver-properties.md#pairwisecalculationkey)
+- [pairwiseCalculationSalt](../../reference/json/properties/janssenauthserver-properties.md#pairwisecalculationsalt)
+- [pairwiseIdType](../../reference/json/properties/janssenauthserver-properties.md#pairwiseidtype)
 
 ## Want to contribute?
 
