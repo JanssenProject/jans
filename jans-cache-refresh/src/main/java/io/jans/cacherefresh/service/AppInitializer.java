@@ -75,11 +75,6 @@ public class AppInitializer {
 	private Instance<PersistenceEntryManager> persistenceEntryManagerInstance;
 
 	@Inject
-	@Named(ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME)
-	@ReportMetric
-	private Instance<PersistenceEntryManager> persistenceMetricEntryManagerInstance;
-
-	@Inject
 	private ApplicationFactory applicationFactory;
 
 	@Inject
@@ -89,16 +84,10 @@ public class AppInitializer {
 	private PythonService pythonService;
 
 	@Inject
-	private MetricService metricService;
-
-	@Inject
 	private CustomScriptManager customScriptManager;
 
 	@Inject
 	private ConfigurationFactory configurationFactory;
-
-	@Inject
-	private CleanerTimer cleanerTimer;
 
 	@Inject
 	private QuartzSchedulerManager quartzSchedulerManager;
@@ -121,12 +110,6 @@ public class AppInitializer {
 	public void applicationInitialized(@Observes @Initialized(ApplicationScoped.class) Object init) {
 		log.debug("Initializing application services");
 
-		// Resteasy config - Turn off the default patch filter
-        System.setProperty(ResteasyContextParameters.RESTEASY_PATCH_FILTER_DISABLED, "true");
-        ResteasyProviderFactory instance = ResteasyProviderFactory.getInstance();
-        RegisterBuiltin.register(instance);
-        instance.registerProvider(ResteasyJackson2Provider.class);
-
 		configurationFactory.create();
 
 		PersistenceEntryManager localPersistenceEntryManager = persistenceEntryManagerInstance.get();
@@ -138,7 +121,7 @@ public class AppInitializer {
 				.initPythonInterpreter(configurationFactory.getBaseConfiguration().getString("pythonModulesDir", null));
 		
 		// Initialize script manager
-		List<CustomScriptType> supportedCustomScriptTypes = Lists.newArrayList(CustomScriptType.values());
+		List<CustomScriptType> supportedCustomScriptTypes = Lists.newArrayList(CustomScriptType.CACHE_REFRESH);
 
 		// There is no Fido2 scripts yet
 		//supportedCustomScriptTypes.clear();
@@ -146,12 +129,8 @@ public class AppInitializer {
 		// Start timer
 		initSchedulerService();
 
-		// Schedule timer tasks
-		//metricService.initTimer();
 		configurationFactory.initTimer();
 		loggerService.initTimer();
-// This one conform latest code
-//		loggerService.initTimer(true);
 		customScriptManager.initTimer(supportedCustomScriptTypes);
 		cacheRefreshTimer.initTimer();
 		// Notify plugins about finish application initialization
@@ -235,23 +214,6 @@ public class AppInitializer {
 		return persistenceEntryManager;
 	}
 
-	@Produces
-	@ApplicationScoped
-	@Named(ApplicationFactory.PERSISTENCE_METRIC_ENTRY_MANAGER_NAME)
-	@ReportMetric
-	public PersistenceEntryManager createMetricPersistenceEntryManager() {
-		Properties connectionProperties = prepareCustomPersistanceProperties(
-				ApplicationFactory.PERSISTENCE_METRIC_CONFIG_GROUP_NAME);
-
-		PersistenceEntryManager persistenceEntryManager = applicationFactory.getPersistenceEntryManagerFactory()
-				.createEntryManager(connectionProperties);
-		log.info("Created {}: {} with operation service: {}",
-				new Object[] { ApplicationFactory.PERSISTENCE_METRIC_ENTRY_MANAGER_NAME, persistenceEntryManager,
-						persistenceEntryManager.getOperationService() });
-
-		return persistenceEntryManager;
-	}
-
 	public void recreatePersistenceEntryManager(@Observes @LdapConfigurationReload String event) {
 		recreatePersistanceEntryManagerImpl(persistenceEntryManagerInstance,
 				ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME);
@@ -286,15 +248,5 @@ public class AppInitializer {
 			log.debug("Destroyed {}:{} with operation service: {}", persistenceEntryManagerName,
 					oldPersistenceEntryManager, oldPersistenceEntryManager.getOperationService());
 		}
-	}
-
-	public void destroy(@Observes @BeforeDestroyed(ApplicationScoped.class) ServletContext init) {
-		log.info("Stopping services and closing DB connections at server shutdown...");
-		log.debug("Checking who intiated destory", new Throwable());
-
-		metricService.close();
-
-		PersistenceEntryManager persistenceEntryManager = persistenceEntryManagerInstance.get();
-		closePersistenceEntryManager(persistenceEntryManager, ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME);
 	}
 }

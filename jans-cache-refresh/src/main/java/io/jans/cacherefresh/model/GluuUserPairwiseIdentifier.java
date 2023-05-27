@@ -18,11 +18,14 @@ public class GluuUserPairwiseIdentifier extends BaseEntry implements Serializabl
 
 	@AttributeName(ignoreDuringUpdate = true)
 	private String oxId;
-	@AttributeName(name = "oxAuthClientId")
+
+	@AttributeName(ignoreDuringUpdate = true, name = "jansId")
+	private String id;
+	@AttributeName(name = "jansClntId")
 	private String clientId;
-	@AttributeName(name = "oxSectorIdentifier")
+	@AttributeName(name = "jansSectorIdentifier")
 	private String sp;
-	@AttributeName(name = "oxAuthUserId")
+	@AttributeName(name = "jansUsrId")
     private String userInum;
 
 	public String getOxId() {

@@ -16,8 +16,7 @@ import java.util.UUID;
 
 import com.unboundid.ldap.sdk.LDAPException;
 
-import io.jans.cacherefresh.constants.OxTrustConstants;
-import io.jans.cacherefresh.model.Events;
+import io.jans.cacherefresh.constants.JansConstants;
 import io.jans.cacherefresh.model.JansCustomAttribute;
 import io.jans.cacherefresh.model.config.AppConfiguration;
 import io.jans.model.GluuAttribute;
@@ -52,10 +51,6 @@ public class AttributeService extends io.jans.service.AttributeService {
     @Inject
     private OrganizationService organizationService;
 
-    @Inject
-    @Any
-    private Event<Events> event;
-
     public static final String CUSTOM_ATTRIBUTE_OBJECTCLASS_PREFIX = "ox-";
 
     /**
@@ -67,7 +62,7 @@ public class AttributeService extends io.jans.service.AttributeService {
      */
     @SuppressWarnings("unchecked")
     public List<GluuAttribute> getAllPersonAttributes(GluuUserRole gluuUserRole) {
-        String key = OxTrustConstants.CACHE_ATTRIBUTE_PERSON_KEY_LIST + "_" + gluuUserRole.getValue();
+        String key = JansConstants.CACHE_ATTRIBUTE_PERSON_KEY_LIST + "_" + gluuUserRole.getValue();
         List<GluuAttribute> attributeList = (List<GluuAttribute>) cacheService.get(key);
         if (attributeList == null) {
             attributeList = getAllPersonAtributesImpl(gluuUserRole, getAllAttributes());
@@ -108,7 +103,7 @@ public class AttributeService extends io.jans.service.AttributeService {
 
     @SuppressWarnings("unchecked")
     public List<GluuAttribute> getAllActiveAttributes(GluuUserRole gluuUserRole) {
-        String key = OxTrustConstants.CACHE_ATTRIBUTE_PERSON_KEY_LIST + "_" + gluuUserRole.getValue();
+        String key = JansConstants.CACHE_ATTRIBUTE_PERSON_KEY_LIST + "_" + gluuUserRole.getValue();
         List<GluuAttribute> attributeList = (List<GluuAttribute>) cacheService.get(key);
         if (attributeList == null) {
             attributeList = getAllPersonAtributes(gluuUserRole, getAllAttributes());
@@ -152,7 +147,7 @@ public class AttributeService extends io.jans.service.AttributeService {
      */
     @SuppressWarnings("unchecked")
     public List<GluuAttribute> getAllContactAttributes(GluuUserRole gluuUserRole) {
-        String key = OxTrustConstants.CACHE_ATTRIBUTE_CONTACT_KEY_LIST + "_" + gluuUserRole.getValue();
+        String key = JansConstants.CACHE_ATTRIBUTE_CONTACT_KEY_LIST + "_" + gluuUserRole.getValue();
         List<GluuAttribute> attributeList = (List<GluuAttribute>) cacheService.get(key);
         if (attributeList == null) {
             attributeList = getAllContactAtributesImpl(gluuUserRole, getAllAttributes());
@@ -199,10 +194,10 @@ public class AttributeService extends io.jans.service.AttributeService {
     @SuppressWarnings("unchecked")
     public List<String> getAllAttributeOrigins() {
         List<String> attributeOriginList = (List<String>) cacheService
-                .get(OxTrustConstants.CACHE_ATTRIBUTE_ORIGIN_KEY_LIST);
+                .get(JansConstants.CACHE_ATTRIBUTE_ORIGIN_KEY_LIST);
         if (attributeOriginList == null) {
             attributeOriginList = getAllAttributeOrigins(getAllAttributes());
-            cacheService.put(OxTrustConstants.CACHE_ATTRIBUTE_ORIGIN_KEY_LIST, attributeOriginList);
+            cacheService.put(JansConstants.CACHE_ATTRIBUTE_ORIGIN_KEY_LIST, attributeOriginList);
         }
         return attributeOriginList;
     }
@@ -263,7 +258,7 @@ public class AttributeService extends io.jans.service.AttributeService {
     @SuppressWarnings("unchecked")
     public List<GluuAttribute> getCustomAttributes() {
         List<GluuAttribute> attributeList = (List<GluuAttribute>) cacheService
-                .get(OxTrustConstants.CACHE_ATTRIBUTE_CUSTOM_KEY_LIST);
+                .get(JansConstants.CACHE_ATTRIBUTE_CUSTOM_KEY_LIST);
         if (attributeList == null) {
             attributeList = new ArrayList<GluuAttribute>();
             for (GluuAttribute attribute : getAllAttributes()) {
@@ -271,7 +266,7 @@ public class AttributeService extends io.jans.service.AttributeService {
                     attributeList.add(attribute);
                 }
             }
-            cacheService.put(OxTrustConstants.CACHE_ATTRIBUTE_CUSTOM_KEY_LIST, attributeList);
+            cacheService.put(JansConstants.CACHE_ATTRIBUTE_CUSTOM_KEY_LIST, attributeList);
         }
         return attributeList;
     }
@@ -332,7 +327,7 @@ public class AttributeService extends io.jans.service.AttributeService {
     }
 
     public String toInumWithoutDelimiters(String inum) {
-        return inum.replace(".", "").replace(OxTrustConstants.inumDelimiter, "").replace("@", "");
+        return inum.replace(".", "").replace(JansConstants.inumDelimiter, "").replace("@", "");
     }
 
     public String generateRandomOid() {
@@ -501,9 +496,9 @@ public class AttributeService extends io.jans.service.AttributeService {
      */
     public List<GluuAttribute> searchAttributes(String pattern, int sizeLimit) throws Exception {
         String[] targetArray = new String[] { pattern };
-        Filter displayNameFilter = Filter.createSubstringFilter(OxTrustConstants.displayName, null, targetArray, null);
-        Filter descriptionFilter = Filter.createSubstringFilter(OxTrustConstants.description, null, targetArray, null);
-        Filter nameFilter = Filter.createSubstringFilter(OxTrustConstants.attributeName, null, targetArray, null);
+        Filter displayNameFilter = Filter.createSubstringFilter(JansConstants.displayName, null, targetArray, null);
+        Filter descriptionFilter = Filter.createSubstringFilter(JansConstants.description, null, targetArray, null);
+        Filter nameFilter = Filter.createSubstringFilter(JansConstants.attributeName, null, targetArray, null);
         Filter searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter, nameFilter);
         List<GluuAttribute> result = persistenceEntryManager.findEntries(getDnForAttribute(null), GluuAttribute.class,
                 searchFilter, sizeLimit);
@@ -519,10 +514,10 @@ public class AttributeService extends io.jans.service.AttributeService {
         String[] objectClassTypes = appConfiguration.getPersonObjectClassTypes();
         String[] targetArray = new String[] { pattern };
         List<Filter> originFilters = new ArrayList<Filter>();
-        Filter displayNameFilter = Filter.createSubstringFilter(OxTrustConstants.displayName, null, targetArray, null);
-        Filter descriptionFilter = Filter.createSubstringFilter(OxTrustConstants.description, null, targetArray, null);
+        Filter displayNameFilter = Filter.createSubstringFilter(JansConstants.displayName, null, targetArray, null);
+        Filter descriptionFilter = Filter.createSubstringFilter(JansConstants.description, null, targetArray, null);
         for (String objectClassType : objectClassTypes) {
-            Filter originFilter = Filter.createEqualityFilter(OxTrustConstants.origin, objectClassType);
+            Filter originFilter = Filter.createEqualityFilter(JansConstants.origin, objectClassType);
             originFilters.add(originFilter);
         }
         Filter searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter);

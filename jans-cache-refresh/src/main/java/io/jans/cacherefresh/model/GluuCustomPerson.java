@@ -41,7 +41,7 @@ public class GluuCustomPerson extends User
     @AttributeName(name = "gluuWhitePagesListed")
     private String gluuAllowPublication;
 
-    @AttributeName(name = "oxGuid")
+    @AttributeName(name = "jansGuid")
     private String guid;
 
     @AttributeName(name = "jansOptOuts")
@@ -50,18 +50,18 @@ public class GluuCustomPerson extends User
     @AttributeName(name = "jansAssociatedClnt")
     private List<String> associatedClient;
     
-    @AttributeName(name = "oxPPID")
+    @AttributeName(name = "jansPPID")
     private List<String> oxPPID;
 
    // @JsonObject
-    @AttributeName(name = "oxExternalUid")
+    @AttributeName(name = "jansExtUid")
     private List<String> oxExternalUid;
     
     @JsonObject
-    @AttributeName(name = "oxOTPDevices")
+    @AttributeName(name = "jansOTPDevices")
     private OTPDevice  oxOTPDevices;
     
-    @AttributeName(name = "oxMobileDevices")
+    @AttributeName(name = "jansMobileDevices")
     private String oxMobileDevices;
 
     public String getOxMobileDevices() {
@@ -120,7 +120,7 @@ public class GluuCustomPerson extends User
     }
 
     public String getStatus() {
-        return getAttribute("gluuStatus");
+        return getAttribute("jansStatus");
     }
 
     public void setStatus(String value) {
@@ -144,11 +144,11 @@ public class GluuCustomPerson extends User
     }
 
     public Boolean getSLAManager() {
-        return geBooleanAttribute("gluuSLAManager");
+        return geBooleanAttribute("jansSLAManager");
     }
 
     public void setSLAManager(Boolean value) {
-        setBooleanAttribute("gluuSLAManager", value);
+        setBooleanAttribute("jansSLAManager", value);
     }
 
     public List<String> getMemberOf() {

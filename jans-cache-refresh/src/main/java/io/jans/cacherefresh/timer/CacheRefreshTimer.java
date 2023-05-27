@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 //import javax.inject.Named;
 
 import io.jans.cacherefresh.CacheRefreshEvent;
-import io.jans.cacherefresh.constants.OxTrustConstants;
+import io.jans.cacherefresh.constants.JansConstants;
 import io.jans.cacherefresh.external.ExternalCacheRefreshService;
 import io.jans.cacherefresh.model.*;
 import io.jans.cacherefresh.model.config.AppConfiguration;
@@ -37,7 +37,6 @@ import io.jans.cacherefresh.model.config.CacheRefreshAttributeMapping;
 import io.jans.cacherefresh.service.*;
 import io.jans.cacherefresh.service.config.ApplicationFactory;
 import io.jans.cacherefresh.service.config.ConfigurationFactory;
-import io.jans.cacherefresh.service.config.ConfigurationService;
 import io.jans.cacherefresh.util.PropertyUtil;
 import io.jans.model.GluuStatus;
 import io.jans.model.SchemaEntry;
@@ -50,7 +49,6 @@ import io.jans.orm.exception.BasePersistenceException;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.exception.operation.SearchException;
 import io.jans.orm.ldap.impl.LdapEntryManagerFactory;
-import io.jans.orm.ldap.impl.LdapFilterConverter;
 import io.jans.orm.ldap.operation.LdapOperationService;
 import io.jans.orm.model.SearchScope;
 import io.jans.orm.model.base.DummyEntry;
@@ -86,7 +84,7 @@ import org.slf4j.Logger;
 public class CacheRefreshTimer {
 
 	private static final String LETTERS_FOR_SEARCH = "abcdefghijklmnopqrstuvwxyz1234567890.";
-	private static final String[] TARGET_PERSON_RETURN_ATTRIBUTES = { OxTrustConstants.inum };
+	private static final String[] TARGET_PERSON_RETURN_ATTRIBUTES = { JansConstants.inum };
 
 	private static final int DEFAULT_INTERVAL = 60;
 
@@ -113,9 +111,6 @@ public class CacheRefreshTimer {
 
 	@Inject
 	private PersistenceEntryManager ldapEntryManager;
-
-	@Inject
-	private ConfigurationService configurationService;
 
 	@Inject
 	private CacheRefreshSnapshotFileService cacheRefreshSnapshotFileService;
@@ -288,7 +283,7 @@ public class CacheRefreshTimer {
 			GluuLdapConfiguration ldapInumConfiguration = new GluuLdapConfiguration();
 			ldapInumConfiguration.setConfigId("local_inum");
 			ldapInumConfiguration.setBaseDNsStringsList(
-					Arrays.asList(new String[] { OxTrustConstants.CACHE_REFRESH_DEFAULT_BASE_DN }));
+					Arrays.asList(new String[] { JansConstants.CACHE_REFRESH_DEFAULT_BASE_DN }));
 
 			inumDbServerConnection = prepareLdapServerConnection(currentConfiguration, ldapInumConfiguration,
 					true);
@@ -560,7 +555,7 @@ public class CacheRefreshTimer {
 			person.setDn(personDn);
 
 			List<JansCustomAttribute> customAttributes = new ArrayList<JansCustomAttribute>();
-			customAttributes.add(new JansCustomAttribute(OxTrustConstants.inum, deletedInum));
+			customAttributes.add(new JansCustomAttribute(JansConstants.inum, deletedInum));
 			person.setCustomAttributes(customAttributes);
 
 			deletedPersons.add(person);
@@ -637,7 +632,7 @@ public class CacheRefreshTimer {
 			sourcePerson.setAttribute(returnAttribute, "Test");
 		}
 
-		String targetInum = inumService.generateInums(OxTrustConstants.INUM_TYPE_PEOPLE_SLUG, false);
+		String targetInum = inumService.generateInums(JansConstants.INUM_TYPE_PEOPLE_SLUG, false);
 		String targetPersonDn = personService.getDnForPerson(targetInum);
 
 		GluuCustomPerson targetPerson = new GluuCustomPerson();
@@ -777,7 +772,7 @@ public class CacheRefreshTimer {
 		List<String> result2 = new ArrayList<String>();
 
 		for (GluuSimplePerson removedPerson : removedPersons) {
-			String inum = removedPerson.getStringAttribute(OxTrustConstants.inum);
+			String inum = removedPerson.getStringAttribute(JansConstants.inum);
 
 			// Update GluuInumMap if it exist
 			JansInumMap currentInumMap = inumInumMap.get(inum);
@@ -806,7 +801,7 @@ public class CacheRefreshTimer {
 					//other ORM
 					targetPersistenceEntryManager.remove(removedPerson.getDn(), GluuCustomPerson.class);
 					 
-					Filter pairwiseIdentifiersFilter = Filter.createEqualityFilter(OxTrustConstants.oxAuthUserId, removedPerson.getDn());
+					Filter pairwiseIdentifiersFilter = Filter.createEqualityFilter(JansConstants.oxAuthUserId, removedPerson.getDn());
 					targetPersistenceEntryManager.remove(pairwiseIdService.getDnForPairWiseIdentifier(null, removedPerson.getDn()), GluuUserPairwiseIdentifier.class, pairwiseIdentifiersFilter,0);
 				
 					Filter equalityFilter = Filter.createEqualityFilter("personInum", removedPerson.getDn());
@@ -875,9 +870,9 @@ public class CacheRefreshTimer {
 		String inumbaseDn = inumDbServerConnection.getBaseDns()[0];
 
 		Filter filterObjectClass = Filter.createEqualityFilter(OxConstants.OBJECT_CLASS,
-				OxTrustConstants.objectClassInumMap);
+				JansConstants.objectClassInumMap);
 		Filter filterStatus = Filter.createNOTFilter(
-				Filter.createEqualityFilter(OxTrustConstants.gluuStatus, GluuStatus.INACTIVE.getValue()));
+				Filter.createEqualityFilter(JansConstants.gluuStatus, GluuStatus.INACTIVE.getValue()));
 		Filter filter = Filter.createANDFilter(filterObjectClass, filterStatus);
 
 		return inumDbPersistenceEntryManager.findEntries(inumbaseDn, JansInumMap.class, filter, SearchScope.SUB, null,
@@ -983,7 +978,7 @@ public class CacheRefreshTimer {
 
 	private List<TypedGluuSimplePerson> loadTargetServerEntries(CacheRefreshConfiguration cacheRefreshConfiguration,
 			PersistenceEntryManager targetPersistenceEntryManager) {
-		Filter filter = Filter.createEqualityFilter(OxConstants.OBJECT_CLASS, OxTrustConstants.objectClassPerson);
+		Filter filter = Filter.createEqualityFilter(OxConstants.OBJECT_CLASS, JansConstants.objectClassPerson);
 
 		return targetPersistenceEntryManager.findEntries(personService.getDnForPerson(null), TypedGluuSimplePerson.class,
 				filter, SearchScope.SUB, TARGET_PERSON_RETURN_ATTRIBUTES, null, 0, 0,
@@ -1084,7 +1079,7 @@ public class CacheRefreshTimer {
 		List<GluuSimplePerson> result = new ArrayList<GluuSimplePerson>();
 
 		for (GluuSimplePerson targetPerson : targetPersons) {
-			String personInum = targetPerson.getStringAttribute(OxTrustConstants.inum);
+			String personInum = targetPerson.getStringAttribute(JansConstants.inum);
 			if (!currInumWithEntryHashCodeMap.containsKey(personInum)) {
 				System.out.println("Person with such DN: '{}' isn't present on source server"+ targetPerson.getDn());
 				result.add(targetPerson);
@@ -1235,12 +1230,10 @@ public class CacheRefreshTimer {
 	}
 
 	private void updateStatus(AppConfiguration currentConfiguration, long lastRun) {
-		//GluuConfiguration configuration = getConfigurationService().getConfiguration();
 		Date currentDateTime = new Date();
 		currentConfiguration.setVdsCacheRefreshLastUpdate(currentDateTime);
 		currentConfiguration.setVdsCacheRefreshLastUpdateCount(currentConfiguration.getVdsCacheRefreshLastUpdateCount());
 		currentConfiguration.setVdsCacheRefreshProblemCount(currentConfiguration.getVdsCacheRefreshProblemCount());
-		//getConfigurationService().updateConfiguration(configuration);
 		CacheRefrshConfigurationService.updateConfiguration(currentConfiguration);
 	}
 
@@ -1262,14 +1255,6 @@ public class CacheRefreshTimer {
 
 	public void setConfigurationFactory(ConfigurationFactory configurationFactory) {
 		this.configurationFactory = configurationFactory;
-	}
-
-	public ConfigurationService getConfigurationService() {
-		return configurationService;
-	}
-
-	public void setConfigurationService(ConfigurationService configurationService) {
-		this.configurationService = configurationService;
 	}
 
 	private class LdapServerConnection {

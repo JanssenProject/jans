@@ -33,9 +33,6 @@ public class ApplicationFactory {
     @Inject
     private ConfigurationFactory configurationFactory;
 
-    @Inject
-    private ConfigurationService configurationService;
-
 	@Inject
 	private PersistanceFactoryService persistanceFactoryService;
 

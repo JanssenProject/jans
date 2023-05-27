@@ -20,7 +20,7 @@
 	<!-- Weld -->
 	<context-param>
 		<param-name>org.jboss.weld.development</param-name>
-		<param-value>true</param-value>
+		<param-value>${weld.debug}</param-value>
 	</context-param>
 
 	<listener>

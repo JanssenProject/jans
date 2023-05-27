@@ -20,21 +20,14 @@ import jakarta.xml.bind.annotation.XmlRootElement;
  */
 
 @Vetoed
-@XmlRootElement(name = "base-dn")
-@XmlAccessorType(XmlAccessType.FIELD)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class BaseDnConfiguration {
-    @XmlElement(name = "configuration")
     private String configuration;
-    @XmlElement(name = "people")
+
     private String people;
-    @XmlElement(name = "groups")
     private String groups;
-    @XmlElement(name = "attributes")
     private String attributes;
-    @XmlElement(name = "scripts")
     private String scripts;
-    @XmlElement(name = "metric")
     private String metric;
 
     public String getConfiguration() {

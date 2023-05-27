@@ -6,7 +6,7 @@ import java.util.List;
 
 //import javax.inject.Inject;
 
-import io.jans.cacherefresh.constants.OxTrustConstants;
+import io.jans.cacherefresh.constants.JansConstants;
 import io.jans.cacherefresh.model.GluuCustomPerson;
 import io.jans.cacherefresh.model.GluuFido2Device;
 import io.jans.orm.PersistenceEntryManager;
@@ -58,7 +58,7 @@ public class Fido2DeviceService implements Serializable {
 	public List<GluuFido2Device> findAllFido2Devices(GluuCustomPerson person) {
 		try {
 			String baseDnForU2fDevices = getDnForFido2Device(null, person.getInum());
-			Filter inumFilter = Filter.createEqualityFilter(OxTrustConstants.PERSON_INUM, person.getInum());
+			Filter inumFilter = Filter.createEqualityFilter(JansConstants.PERSON_INUM, person.getInum());
 			return ldapEntryManager.findEntries(baseDnForU2fDevices, GluuFido2Device.class, inumFilter);
 		} catch (EntryPersistenceException e) {
 			log.warn("No fido2 devices enrolled for " + person.getDisplayName());

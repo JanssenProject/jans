@@ -44,20 +44,6 @@ public class CacheRefrshConfigurationService implements Serializable {
     private static final SimpleDateFormat PERIOD_DATE_FORMAT = new SimpleDateFormat("yyyyMM");
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-    /*public boolean contains(String configurationDn) {
-        return persistenceEntryManager.contains(configurationDn, GluuConfiguration.class);
-    }*/
-
-    /**
-     * Add new configuration
-     * 
-     * @param configuration
-     *            Configuration
-     */
-    /*public void addConfiguration(GluuConfiguration configuration) {
-        persistenceEntryManager.persist(configuration);
-    }*?
-
     /**
      * Update configuration entry
      * 
@@ -74,16 +60,6 @@ public class CacheRefrshConfigurationService implements Serializable {
         }
     }
 
-
-    /**
-     * Check if LDAP server contains configuration with specified attributes
-     * 
-     * @return True if configuration with specified attributes exist
-     */
-    /*public boolean containsConfiguration(String dn) {
-        return persistenceEntryManager.contains(dn, GluuConfiguration.class);
-    }*/
-
     /**
      * Get configuration
      * 
@@ -95,17 +71,6 @@ public class CacheRefrshConfigurationService implements Serializable {
         result = persistenceEntryManager.find(getDnForConfiguration(), Conf.class, returnAttributes);
         
         return result;
-    }
-
- 
-    /**
-     * Get configuration
-     * 
-     * @return Configuration
-     * @throws Exception
-     */
-    public Conf getConfigurations() {
-        return getConfiguration(null);
     }
 
     /**

@@ -6,7 +6,6 @@
 
 package io.jans.cacherefresh.service;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,7 +16,7 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 
-import io.jans.cacherefresh.constants.OxTrustConstants;
+import io.jans.cacherefresh.constants.JansConstants;
 import io.jans.cacherefresh.model.JansCustomAttribute;
 import io.jans.cacherefresh.model.GluuCustomPerson;
 import io.jans.cacherefresh.model.JansInumMap;
@@ -126,7 +125,7 @@ public class CacheRefreshService{
     }
 
     private String generateInumForNewInumMapImpl() {
-        String inum = inumService.generateInums(OxTrustConstants.INUM_TYPE_PEOPLE_SLUG);
+        String inum = inumService.generateInums(JansConstants.INUM_TYPE_PEOPLE_SLUG);
         return inum;
     }
 

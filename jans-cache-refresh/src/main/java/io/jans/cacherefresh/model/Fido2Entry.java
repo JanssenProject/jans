@@ -23,23 +23,33 @@ public class Fido2Entry extends BaseEntry implements Serializable {
 	 */
 	private static final long serialVersionUID = 7351459527571263266L;
 
-	@AttributeName(ignoreDuringUpdate = true, name = "oxId")
+	@AttributeName(ignoreDuringUpdate = true, name = "jansId")
     private String id;
 
-    @AttributeName(ignoreDuringUpdate = true, name = "oxCodeChallenge")
+    @AttributeName(ignoreDuringUpdate = true, name = "jansCodeChallenge")
     private String challenge;
 
-    @AttributeName(ignoreDuringUpdate = true, name = "oxCodeChallengeHash")
+    @AttributeName(ignoreDuringUpdate = true, name = "jansCodeChallengeHash")
     private String challengeHash;
 
     @AttributeName(ignoreDuringUpdate = true, name = "creationDate")
     private Date creationDate;
 
-    @AttributeName(ignoreDuringUpdate = true, name = "oxSessionStateId")
+    @AttributeName(ignoreDuringUpdate = true, name = "jansSessStateId")
     private String sessionId;
 
     @AttributeName(name = "personInum")
     private String userInum;
+
+    @AttributeName(name = "jansApp")
+    private String rpId;
+
+
+    @AttributeName(name = "exp")
+    private Date expirationDate;
+
+    @AttributeName(name = "del")
+    private boolean deletable = true;
 
     public Fido2Entry() {
     }
@@ -105,4 +115,27 @@ public class Fido2Entry extends BaseEntry implements Serializable {
         this.userInum = userInum;
     }
 
+    public String getRpId() {
+        return rpId;
+    }
+
+    public void setRpId(String rpId) {
+        this.rpId = rpId;
+    }
+
+    public Date getExpirationDate() {
+        return expirationDate;
+    }
+
+    public void setExpirationDate(Date expirationDate) {
+        this.expirationDate = expirationDate;
+    }
+
+    public boolean isDeletable() {
+        return deletable;
+    }
+
+    public void setDeletable(boolean deletable) {
+        this.deletable = deletable;
+    }
 }
