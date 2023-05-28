@@ -26,14 +26,14 @@ public final class JansConstants extends OxConstants {
 	public static final String inum = "inum";
 	public static final String displayName = "displayName";
 	public static final String description = "description";
-	public static final String origin = "gluuAttributeOrigin";
+	public static final String origin = "jansAttrOrigin";
 	public static final String mail = "mail";
 	public static final String ppid = "oxPPID";
 
-	public static final String gluuStatus = "gluuStatus";
+	public static final String jansStatus = "jansStatus";
 	public static final String sn = "sn";
 
-	public static final String attributeName = "gluuAttributeName";
+	public static final String attributeName = "jansAttrName";
 	public static final String oxAuthUserId = "oxAuthUserId";
 
 

@@ -872,7 +872,7 @@ public class CacheRefreshTimer {
 		Filter filterObjectClass = Filter.createEqualityFilter(OxConstants.OBJECT_CLASS,
 				JansConstants.objectClassInumMap);
 		Filter filterStatus = Filter.createNOTFilter(
-				Filter.createEqualityFilter(JansConstants.gluuStatus, GluuStatus.INACTIVE.getValue()));
+				Filter.createEqualityFilter(JansConstants.jansStatus, GluuStatus.INACTIVE.getValue()));
 		Filter filter = Filter.createANDFilter(filterObjectClass, filterStatus);
 
 		return inumDbPersistenceEntryManager.findEntries(inumbaseDn, JansInumMap.class, filter, SearchScope.SUB, null,
