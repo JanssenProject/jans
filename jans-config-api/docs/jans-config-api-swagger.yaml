@@ -7859,17 +7859,17 @@ components:
           type: string
         whitePagesCanView:
           type: boolean
-        userCanAccess:
+        adminCanEdit:
           type: boolean
         userCanView:
-          type: boolean
-        adminCanAccess:
           type: boolean
         adminCanView:
           type: boolean
         userCanEdit:
           type: boolean
-        adminCanEdit:
+        userCanAccess:
+          type: boolean
+        adminCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -8602,8 +8602,6 @@ components:
             type: string
         httpLoggingResponseBodyContent:
           type: boolean
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8613,6 +8611,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
