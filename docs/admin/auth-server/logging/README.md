@@ -9,7 +9,7 @@ tags:
 
 All `jans-auth-server` log files are located in `/opt/jans/jetty/jans-auth/logs/`.
 
-Use [log levels](log-levels.md) to control logging noice of logs in [standard logs](standard-logs.md).
+Use [log levels](log-levels.md) to control noise of logs in [standard logs](standard-logs.md).
 
 Following AS configuration properties can be used to customize AS logging: 
 
