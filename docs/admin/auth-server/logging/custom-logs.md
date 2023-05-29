@@ -6,13 +6,18 @@ tags:
   - custom-logs
 ---
 
-## This content is in progress
+# Customize logs
 
-The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.
+Sometimes it can be useful to customize logging behavior or override AS loggers. 
+It is possible to fully override AS logging configuration by specifying own `log4j2.xml` file in `externalLoggerConfiguration` AS configuration property.
+It must point to valid `log4j2.xml` file. 
+
+Note: invalid external `log4j2.xml` can lead to AS start up issues and no logs in [standard log files](standard-logs.md) or otherwise in other log files if such are defined by `log4j2.xml`.
+
 
 ## Have questions in the meantime?
 
-While this documentation is in progress, you can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussion) or the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). Any questions you have will help determine what information our documentation should cover.
+You can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussion) or the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). Any questions you have will help determine what information our documentation should cover.
 
 ## Want to contribute?
 
