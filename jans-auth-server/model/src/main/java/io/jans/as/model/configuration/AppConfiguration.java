@@ -595,7 +595,7 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Choose whether to support front channel session logout")
     private Boolean frontChannelLogoutSessionSupported;
 
-    @DocProperty(description = "Specify the logging level for oxAuth loggers")
+    @DocProperty(description = "Specify the logging level of loggers")
     private String loggingLevel;
 
     @DocProperty(description = "Logging layout used for Jans Authorization Server loggers")
