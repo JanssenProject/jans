@@ -18,7 +18,7 @@ Consider you created a user with TUI and have the following line in `cli_cmd.log
 /usr/bin/python3 /opt/jans/jans-cli/cli/config_cli.py --operation-id post-user --data '{"customObjectClasses": ["top", "jansPerson"], "customAttributes": [{"name": "middleName", "multiValued": false, "values": [""]}, {"name": "sn", "multiValued": false, "values": ["Watts"]}, {"name": "nickname", "multiValued": false, "values": [""]}], "mail": "ewatts@foo.org", "userId": "ewatts", "displayName": "Emelia Watts", "givenName": "Emelia", "userPassword": "TopSecret", "jansStatus": "active"}'
 ```
 
-You can modifiy this line to create another user, let us change the followings:
+You can modify this line to create another user, let us change the followings:
 
 __userId__ padilla
 __userPassword__ NewSecret
