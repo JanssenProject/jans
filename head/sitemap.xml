@@ -631,6 +631,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://jans.io/docs/head/admin/config-guide/jans-cli/cli-using-command-line-log/</loc>
+         <lastmod>2023-05-30</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://jans.io/docs/head/admin/config-guide/jans-cli/device-flow/</loc>
          <lastmod>2023-05-30</lastmod>
          <changefreq>daily</changefreq>
