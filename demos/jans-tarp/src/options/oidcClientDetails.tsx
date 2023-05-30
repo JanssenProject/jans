@@ -3,10 +3,12 @@ import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
 import qs from 'qs';
 import './options.css'
+import { WindmillSpinner } from 'react-spinner-overlay'
 
 const OIDCClientDetails = (data) => {
     const [additionalParam, setAdditionalParam] = useState("");
-    
+    const [loading, setLoading] = useState(false);
+
     function customLaunchWebAuthFlow(options, callback) {
         var requestId = Math.random().toString(36).substring(2);
         var authUrl = options.url + "&state=" + requestId;
@@ -46,7 +48,7 @@ const OIDCClientDetails = (data) => {
     }
 
     async function triggerCodeFlowButton() {
-
+        setLoading(true);
         const redirectUrl = chrome.identity.getRedirectURL()
         const { secret, hashed } = await generateRandomChallengePair();
         chrome.storage.local.get(["oidcClient"]).then(async (result) => {
@@ -86,7 +88,6 @@ const OIDCClientDetails = (data) => {
                     }, (callbackUrl, error) => {
                         if (!!error) {
                             console.error('Error in executing auth url: ', error)
-                            //hideDiv(['loadingDiv'])
                             logout()
                             reject(error)
                         } else {
@@ -97,7 +98,6 @@ const OIDCClientDetails = (data) => {
                 });
 
                 if (resultUrl) {
-                    //showDiv(['loadingDiv'])
                     const urlParams = new URLSearchParams(new URL(resultUrl).search)
                     const code = urlParams.get('code')
                     console.log('code:' + code)
@@ -152,15 +152,7 @@ const OIDCClientDetails = (data) => {
                             }
                         }).then(async () => {
                             console.log("userDetails: " + userInfoResponse.data);
-                            //document.getElementById('userDetailsSpan').innerHTML = JSON.stringify(userInfoResponse.data)
-                            /*setShowContent([
-                                <UserDetails
-                                    userDetails={userInfoResponse.data}
-                                />
-                            ]);*/
-                            //showDiv(['userDetailsDiv']);
-                            //hideDiv(['registerForm', 'oidcClientDetails']);
-                            //hideDiv(['loadingDiv'])
+                            setLoading(false);
                         });
                     }
                 }
@@ -170,26 +162,21 @@ const OIDCClientDetails = (data) => {
 
     function logout() {
         chrome.identity.clearAllCachedAuthTokens(async () => {
-    
-            const loginDetails:string = await new Promise((resolve, reject) => {
+
+            const loginDetails: string = await new Promise((resolve, reject) => {
                 chrome.storage.local.get(["loginDetails"], (result) => {
                     resolve(JSON.stringify(result));
                 });
             });
-    
-            const openidConfiguration:string = await new Promise((resolve, reject) => { chrome.storage.local.get(["opConfiguration"], (result) => { resolve(JSON.stringify(result)); }) });
-    
+
+            const openidConfiguration: string = await new Promise((resolve, reject) => { chrome.storage.local.get(["opConfiguration"], (result) => { resolve(JSON.stringify(result)); }) });
+
             chrome.storage.local.remove(["loginDetails"], function () {
                 var error = chrome.runtime.lastError;
                 if (error) {
                     console.error(error);
                 } else {
-                    //document.getElementById('userDetailsSpan').innerHTML = ''
-                    //setShowContent([]);
-                    //showDiv(['oidcClientDetails']);
-                    //hideDiv(['userDetailsDiv', 'registerForm']);
                     window.location.href = `${JSON.parse(openidConfiguration).opConfiguration.end_session_endpoint}?state=${uuidv4()}&post_logout_redirect_uri=${chrome.runtime.getURL('options.html')}&id_token_hint=${JSON.parse(loginDetails).loginDetails.id_token}`
-                    //checkDB();
                 }
             });
         });
@@ -200,14 +187,6 @@ const OIDCClientDetails = (data) => {
             var error = chrome.runtime.lastError;
             if (error) {
                 console.error(error);
-            }
-        });
-    }
-
-    function hideDiv(idArray) {
-        idArray.forEach(ele => {
-            if (document.getElementById(ele) != null) {
-                document.getElementById(ele).style.display = "none";
             }
         });
     }
@@ -250,27 +229,34 @@ const OIDCClientDetails = (data) => {
         return window.crypto.subtle.digest('SHA-256', data);
     }
 
+    function updateInputValue(event) {
+        if (event.target.id === 'additionalParam') {
+            setAdditionalParam(event.target.value);
+        }
+    }
+
     return (
 
         <div className="box">
+            <>
+                <legend><span className="number">O</span> Registered Client</legend>
+                <WindmillSpinner loading={loading} color="#00ced1" />
+                <label><b>OP Host:</b></label>
+                <input type="text" id="opHost" name="opHost" value={data.data.op_host} disabled />
 
-            <legend><span className="number">O</span> Registered Client</legend>
+                <label><b>Client Id:</b></label>
+                <input type="text" id="clientId" name="clientId" value={data.data.client_id} disabled />
 
-            <label><b>OP Host:</b></label>
-            <input type="text" id="opHost" name="opHost" value={data.data.op_host} disabled />
+                <label><b>Client Secret:</b></label>
+                <input type="text" id="clientSecret" name="clientSecret" value={data.data.client_secret} disabled />
 
-            <label><b>Client Id:</b></label>
-            <input type="text" id="clientId" name="clientId" value={data.data.client_id} disabled />
+                <label><b>Additional Params:</b></label>
+                <input type="text" id="additionalParam" name="additionalParam" value={additionalParam} onChange={updateInputValue}
+                    placeholder='e.g. {"paramOne": "valueOne", "paramTwo": "valueTwo"}' autoComplete="off" />
 
-            <label><b>Client Secret:</b></label>
-            <input type="text" id="clientSecret" name="clientSecret" value={data.data.client_secret} disabled />
-
-            <label><b>Additional Params:</b></label>
-            <input type="text" id="additionalParam" name="additionalParam" value={data.data.additionalParams}
-                placeholder='e.g. {"paramOne": "valueOne", "paramTwo": "valueTwo"}' autoComplete="off" />
-
-            <button id="trigCodeFlowButton" onClick={triggerCodeFlowButton}>Trigger Auth Code Flow</button>
-            <button id="resetButton" onClick={resetClient}>Reset</button>
+                <button id="trigCodeFlowButton" onClick={triggerCodeFlowButton}>Trigger Auth Code Flow</button>
+                <button id="resetButton" onClick={resetClient}>Reset</button>
+            </>
         </div>
     )
 };
