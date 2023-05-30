@@ -1,15 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import { v4 as uuidv4 } from 'uuid';
 import './options.css'
+import { WindmillSpinner } from 'react-spinner-overlay'
 
 const UserDetails = (data) => {
-    //const [userDetails, setUserDetails] = useState("");
-
-    /*chrome.storage.local.get(["loginDetails"], (result) => {
-        setUserDetails(result.userDetails);
-    });*/
-
+    const [loading, setLoading] = useState(false);
     function logout() {
+        setLoading(true);
         chrome.identity.clearAllCachedAuthTokens(async () => {
 
             const loginDetails: string = await new Promise((resolve, reject) => {
@@ -25,19 +22,16 @@ const UserDetails = (data) => {
                 if (error) {
                     console.error(error);
                 } else {
-                    //document.getElementById('userDetailsSpan').innerHTML = ''
-                    //setShowContent([]);
-                    //showDiv(['oidcClientDetails']);
-                    //hideDiv(['userDetailsDiv', 'registerForm']);
                     window.location.href = `${JSON.parse(openidConfiguration).opConfiguration.end_session_endpoint}?state=${uuidv4()}&post_logout_redirect_uri=${chrome.runtime.getURL('options.html')}&id_token_hint=${JSON.parse(loginDetails).loginDetails.id_token}`
-                    //checkDB();
                 }
             });
         });
+        setLoading(false);
     }
 
     return (
         <div className="box">
+            <WindmillSpinner loading={loading} color="#00ced1" />
             <div className="w3-panel w3-pale-yellow w3-border">
                 <strong>Note!</strong> The extension will clear session on closing the tab or on opening the extension
                 again.

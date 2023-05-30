@@ -1,13 +1,15 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import axios from 'axios';
 import './options.css'
 import { v4 as uuidv4 } from 'uuid';
+import { WindmillSpinner } from 'react-spinner-overlay'
 
 const RegisterForm = (data) => {
     const [issuer, setIssuer] = useState("");
     const [acrValues, setAcrValues] = useState("");
     const [scope, setScope] = useState("");
     const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
 
     function updateInputValue(event) {
         if (event.target.id === 'issuer') {
@@ -40,10 +42,12 @@ const RegisterForm = (data) => {
     async function registerClient() {
         if (validateState()) {
             try {
+                setLoading(true);
                 const response = await register()
                 if (response.result !== 'success') {
                     setError('Error in registration.');
                 }
+                setLoading(false);
             } catch (err) {
                 console.error(err)
             }
@@ -143,7 +147,7 @@ const RegisterForm = (data) => {
         <div className="box">
             <legend><span className="number">O</span> Register OIDC Client</legend>
             <legend><span className="error">{error}</span></legend>
-
+            <WindmillSpinner loading={loading} color="#00ced1" />
             <label><b>Issuer:</b><span className="required">*</span></label>
             <input type="text" id="issuer" name="issuer" onChange={updateInputValue} value={issuer}
                 placeholder="e.g. https://<op-host>" autoComplete="off" required />

@@ -49,7 +49,6 @@ const Options = () => {
     <div className="container">
       <Header />
       {renderPage({ optionType, data })}
-
     </div>
   )
 };
