@@ -52,7 +52,7 @@ const OIDCClientDetails = (data) => {
         const redirectUrl = chrome.identity.getRedirectURL()
         const { secret, hashed } = await generateRandomChallengePair();
         chrome.storage.local.get(["oidcClient"]).then(async (result) => {
-            if (!result.oidcClient) {
+            if (!!result.oidcClient) {
 
                 const options = {
                     scope: result?.oidcClient?.scope[0],
@@ -68,7 +68,7 @@ const OIDCClientDetails = (data) => {
 
                 let authzUrl = `${result.oidcClient.authorization_endpoint}?${qs.stringify(options)}`;
 
-                if (additionalParam != undefined && additionalParam.trim() != '') {
+                if (!!additionalParam && additionalParam.trim() != '') {
                     result.oidcClient.additionalParams = additionalParam.trim();
 
                     chrome.storage.local.set({ oidcClient: result.oidcClient });
@@ -142,7 +142,6 @@ const OIDCClientDetails = (data) => {
                         };
 
                         const userInfoResponse = await axios(userInfoOptions);
-                        console.log('userInfoResponse:' + JSON.stringify(userInfoResponse))
 
                         chrome.storage.local.set({
                             loginDetails: {
@@ -151,7 +150,7 @@ const OIDCClientDetails = (data) => {
                                 'id_token': tokenResponse.data.id_token,
                             }
                         }).then(async () => {
-                            console.log("userDetails: " + userInfoResponse.data);
+                            console.log("userDetails: " + JSON.stringify(userInfoResponse.data));
                             setLoading(false);
                         });
                     }
