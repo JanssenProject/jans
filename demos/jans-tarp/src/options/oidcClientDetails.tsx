@@ -52,7 +52,7 @@ const OIDCClientDetails = (data) => {
         const redirectUrl = chrome.identity.getRedirectURL()
         const { secret, hashed } = await generateRandomChallengePair();
         chrome.storage.local.get(["oidcClient"]).then(async (result) => {
-            if (result.oidcClient != undefined) {
+            if (!result.oidcClient) {
 
                 const options = {
                     scope: result?.oidcClient?.scope[0],
