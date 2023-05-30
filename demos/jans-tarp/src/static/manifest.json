@@ -4,23 +4,25 @@
   "version": "1.0.0",
   "description": "My Chrome Extension",
   "icons": {
-    "16": "icons/icon_32.png",
-    "32": "icons/icon_32.png",
-    "48": "icons/icon_48.png",
-    "128": "icons/icon_128.png"
+    "16": "icon.png",
+    "32": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
   },
   "background": {
     "service_worker": "background.js"
   },
   "action": {
-    "default_title": "Gluu.oidc.rp",
+    "default_title": "jans-tarp",
     "default_popup": "popup.html"
   },
   "permissions": [
     "storage",
     "identity"
   ],
-  "host_permissions": ["*://*/*"],
+  "host_permissions": [
+    "*://*/*"
+  ],
   "options_page": "options.html",
-  "incognito":"split"
+  "incognito": "split"
 }
