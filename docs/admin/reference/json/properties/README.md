@@ -1,6 +1,19 @@
-# Overview
+---
+tags:
+  - administration
+  - auth-server
+  - reference
+  - properties
+---
 
-Please use the left navigation menu to browse the content of this section while we are still working on developing content for `Overview` page.
+# Properties
+
+Janssen Server modules are configured using properties. Each module has its own set of properties (navigate through the
+left navitation panel).
+
+## Setting Property Values
+
+Administrator can set properties using [TUI](../../../config-guide/jans-tui/README.md). 
 
 !!! Contribute
 If you’d like to contribute to this document, get started with the [Contribution Guide](https://docs.jans.io/head/CONTRIBUTING/#contributing-to-the-documentation)
