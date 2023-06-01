@@ -7853,10 +7853,6 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        userCanAccess:
-          type: boolean
-        adminCanView:
-          type: boolean
         userCanView:
           type: boolean
         userCanEdit:
@@ -7864,6 +7860,10 @@ components:
         adminCanEdit:
           type: boolean
         adminCanAccess:
+          type: boolean
+        userCanAccess:
+          type: boolean
+        adminCanView:
           type: boolean
         whitePagesCanView:
           type: boolean
