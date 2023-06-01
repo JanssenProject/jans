@@ -11,10 +11,12 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.session.SessionId;
+import io.jans.as.server.model.common.ExecutionContext;
 import io.jans.as.server.security.Identity;
 import io.jans.as.server.service.CookieService;
 import io.jans.as.server.service.RequestParameterService;
 import io.jans.as.server.service.SessionIdService;
+import io.jans.as.server.service.external.ExternalSelectAccountService;
 import io.jans.jsf2.service.FacesService;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -65,6 +67,9 @@ public class SelectAccountAction {
 
     @Inject
     private Authenticator authenticator;
+
+    @Inject
+    private ExternalSelectAccountService externalSelectAccountService;
 
 
     // OAuth 2.0 request parameters
@@ -133,6 +138,16 @@ public class SelectAccountAction {
             }
             cookieService.createSessionIdCookie(selectedSession.get(), false);
             identity.setSessionId(selectedSession.get());
+
+            ExecutionContext executionContext = new ExecutionContext((HttpServletRequest) externalContext.getRequest(), (HttpServletResponse) externalContext.getResponse());
+            executionContext.setSessionId(selectedSession.get());
+
+            final boolean isOk = externalSelectAccountService.externalOnSelect(executionContext);
+            if (!isOk) {
+                log.debug("SelectAccount is forbidded by OnSelect() method of external script.");
+                return;
+            }
+
             authenticator.authenticateBySessionId(selectedSessionId);
             String uri = buildAuthorizationUrl();
             log.trace("RedirectTo: {}", uri);

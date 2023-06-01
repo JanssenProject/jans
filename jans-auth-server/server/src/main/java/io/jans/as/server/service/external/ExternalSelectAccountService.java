@@ -26,6 +26,42 @@ public class ExternalSelectAccountService extends ExternalScriptService {
         super(CustomScriptType.SELECT_ACCOUNT);
     }
 
+    public boolean externalOnSelect(ExecutionContext context) {
+        final Set<CustomScriptConfiguration> scripts = getScriptsToExecute();
+        if (scripts.isEmpty()) {
+            return true;
+        }
+
+        log.trace("Found {} select-account scripts.", scripts.size());
+
+        for (CustomScriptConfiguration script : scripts) {
+            final boolean result = externalOnSelect(script, context);
+            if (!result) {
+                log.debug("onSelect return false, script: {}", script.getName());
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public boolean externalOnSelect(CustomScriptConfiguration scriptConfiguration, ExecutionContext context) {
+        try {
+            log.trace("Executing external 'externalOnSelect' method, script name: {}, context: {}", scriptConfiguration.getName(), context);
+
+            SelectAccountType script = (SelectAccountType) scriptConfiguration.getExternalType();
+            context.setScript(scriptConfiguration);
+            final boolean result = script.onSelect(context);
+
+            log.trace("Finished external 'externalOnSelect' method, script name: {}, context: {}, result: {}", scriptConfiguration.getName(), context, result);
+            return result;
+        } catch (Exception ex) {
+            log.error(ex.getMessage(), ex);
+            saveScriptError(scriptConfiguration.getCustomScript(), ex);
+            return false;
+        }
+    }
+
     public String externalGetSelectAccountPage(ExecutionContext context) {
         final Set<CustomScriptConfiguration> scripts = getScriptsToExecute();
         if (scripts.isEmpty()) {
