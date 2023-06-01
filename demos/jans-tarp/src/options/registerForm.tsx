@@ -1,15 +1,61 @@
-import React, { useState } from 'react'
+import React, { useState, KeyboardEventHandler } from 'react'
 import axios from 'axios';
 import './options.css'
 import { v4 as uuidv4 } from 'uuid';
 import { WindmillSpinner } from 'react-spinner-overlay'
+import CreatableSelect from 'react-select/creatable';
+
+const components = {
+    DropdownIndicator: null,
+};
+
+interface Option {
+    readonly label: string;
+    readonly value: string;
+}
+
+const createOption = (label: string) => ({
+    label,
+    value: label,
+});
 
 const RegisterForm = (data) => {
     const [issuer, setIssuer] = useState("");
-    const [acrValues, setAcrValues] = useState("");
-    const [scope, setScope] = useState("");
+    const [acrValues, setAcrValues] = useState(['basic']);
     const [error, setError] = useState("");
+    const [scope, setScope] = useState(['openid']);
     const [loading, setLoading] = useState(false);
+    const [inputValueScope, setInputValueScope] = useState('');
+    const [inputValueAcr, setInputValueAcr] = useState('');
+    const [scopeOption, setScopeOption] = useState<readonly Option[]>([createOption('openid')]);
+    const [acrOption, setAcrOption] = useState<readonly Option[]>([createOption('basic')]);
+
+    const handleScopeKeyDown: KeyboardEventHandler = (event) => {
+        console.log(JSON.stringify(scopeOption))
+        if (!inputValueScope) return;
+        switch (event.key) {
+            case 'Enter':
+            case 'Tab':
+                setScopeOption((prev) => [...prev, createOption(inputValueScope)]);
+                setScope((prev) => [...prev, inputValueScope])
+                setInputValueScope('');
+                event.preventDefault();
+        }
+    };
+
+    const handleAcrValueKeyDown: KeyboardEventHandler = (event) => {
+        console.log(JSON.stringify(acrOption))
+        if (!inputValueAcr) return;
+        switch (event.key) {
+            case 'Enter':
+            case 'Tab':
+                setAcrOption((prev) => [createOption(inputValueAcr)]);
+                setAcrValues((prev) => [inputValueAcr])
+                setInputValueAcr('');
+                event.preventDefault();
+        }
+    };
+    
 
     function updateInputValue(event) {
         if (event.target.id === 'issuer') {
@@ -18,18 +64,15 @@ const RegisterForm = (data) => {
         if (event.target.id === 'acrValues') {
             setAcrValues(event.target.value);
         }
-        if (event.target.id === 'scope') {
-            setScope(event.target.value);
-        }
     }
 
     function validateState() {
-
+        console.log(scope);
         let errorField = ''
         if (issuer === '') {
             errorField += 'issuer ';
         }
-        if (scope === '') {
+        if (scope.length === 0) {
             errorField += 'scope ';
         }
         if (errorField.trim() !== '') {
@@ -68,8 +111,8 @@ const RegisterForm = (data) => {
                 var registerObj = {
                     issuer: issuer,
                     redirect_uris: [chrome.identity.getRedirectURL()],
-                    default_acr_values: [acrValues],
-                    scope: [scope],
+                    default_acr_values: acrValues,
+                    scope: scope,
                     post_logout_redirect_uris: [chrome.runtime.getURL('options.html')],
                     response_types: ['code'],
                     grant_types: ['authorization_code', 'client_credentials'],
@@ -152,14 +195,38 @@ const RegisterForm = (data) => {
             <input type="text" id="issuer" name="issuer" onChange={updateInputValue} value={issuer}
                 placeholder="e.g. https://<op-host>" autoComplete="off" required />
 
-            <label><b>Acr Values:</b><span className="required">*</span></label>
-            <input type="text" id="acrValues" name="acrValues" onChange={updateInputValue} value={acrValues}
-                placeholder="e.g. basic" autoComplete="off" required />
+            <label><b>Acr Values</b><span className="required">*</span> (Type and press enter) :</label>
 
-            <label><b>Scope:</b><span className="required">*</span></label>
-            <input type="text" id="scope" name="scope" onChange={updateInputValue} value={scope}
-                placeholder="e.g. openid" autoComplete="off" required />
+            <CreatableSelect
+                components={components}
+                inputValue={inputValueAcr}
+                isClearable
+                isMulti
+                menuIsOpen={false}
+                onChange={(newValue) => setAcrOption(newValue)}
+                onInputChange={(newValue) => setInputValueAcr(newValue)}
+                onKeyDown={handleAcrValueKeyDown}
+                placeholder="Type something and press enter..."
+                value={acrOption}
+                className="typeahead"
+            />
 
+            <label><b>Scopes</b><span className="required">*</span> (Type and press enter) :</label>
+
+            <CreatableSelect
+                components={components}
+                inputValue={inputValueScope}
+                isClearable
+                isMulti
+                menuIsOpen={false}
+                onChange={(newValue) => setScopeOption(newValue)}
+                onInputChange={(newValue) => setInputValueScope(newValue)}
+                onKeyDown={handleScopeKeyDown}
+                placeholder="Type something and press enter..."
+                value={scopeOption}
+                className="typeahead"
+            />
+    
             <legend><span className="error">{error}</span></legend>
             <button id="sbmtButton" onClick={registerClient}>Register</button>
         </div>

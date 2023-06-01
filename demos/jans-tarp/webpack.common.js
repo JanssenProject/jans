@@ -2,7 +2,6 @@ const path = require('path');
 const CopyPlugin = require('copy-webpack-plugin');
 const HtmlPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
-const tailwindcss = require('tailwindcss')
 const autoprefixer = require('autoprefixer')
 
 module.exports = {
@@ -10,7 +9,6 @@ module.exports = {
         popup: path.resolve('src/popup/index.tsx'),
         options: path.resolve('src/options/index.tsx'),
         background: path.resolve('src/background/background.ts'),
-        contentScript: path.resolve('src/contentScript/contentScript.ts'),
     },
     module: {
         rules: [
@@ -34,7 +32,7 @@ module.exports = {
                         options: {
                             postcssOptions: {
                                 ident: 'postcss',
-                                plugins: [tailwindcss, autoprefixer],
+                                plugins: [autoprefixer],
                             },
                         },
                     },
