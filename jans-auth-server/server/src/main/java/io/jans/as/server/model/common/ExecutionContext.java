@@ -35,6 +35,7 @@ public class ExecutionContext {
 
     private Client client;
     private AuthorizationGrant grant;
+    private SessionId sessionId;
 
     private AppConfiguration appConfiguration;
     private AttributeService attributeService;
@@ -70,6 +71,14 @@ public class ExecutionContext {
     public ExecutionContext(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
         this.httpRequest = httpRequest;
         this.httpResponse = httpResponse;
+    }
+
+    public SessionId getSessionId() {
+        return sessionId;
+    }
+
+    public void setSessionId(SessionId sessionId) {
+        this.sessionId = sessionId;
     }
 
     public String getDeviceSecret() {
