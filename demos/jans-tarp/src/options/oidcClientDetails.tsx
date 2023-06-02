@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
 import qs from 'qs';
-import './options.css'
-import { WindmillSpinner } from 'react-spinner-overlay'
+import './options.css';
+import { WindmillSpinner } from 'react-spinner-overlay';
 
 const OIDCClientDetails = (data) => {
     const [additionalParam, setAdditionalParam] = useState("");
@@ -55,7 +55,7 @@ const OIDCClientDetails = (data) => {
             if (!!result.oidcClient) {
 
                 const options = {
-                    scope: result?.oidcClient?.scope[0],
+                    scope: result?.oidcClient?.scope.join(['+']),
                     acr_values: result?.oidcClient?.acr_values[0],
                     response_type: result?.oidcClient?.response_type[0],
                     redirect_uri: redirectUrl,
@@ -113,7 +113,7 @@ const OIDCClientDetails = (data) => {
                         code_verifier: secret,
                         client_id: result.oidcClient.client_id,
                         code,
-                        scope: result.oidcClient.scope[0]
+                        scope: result.oidcClient.scope.join(['+'])
                     })
 
                     const tokenReqOptions = {
