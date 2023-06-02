@@ -61,9 +61,6 @@ const RegisterForm = (data) => {
         if (event.target.id === 'issuer') {
             setIssuer(event.target.value);
         }
-        if (event.target.id === 'acrValues') {
-            setAcrValues(event.target.value);
-        }
     }
 
     function validateState() {
