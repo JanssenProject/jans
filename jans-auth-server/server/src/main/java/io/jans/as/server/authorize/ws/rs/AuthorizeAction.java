@@ -31,6 +31,7 @@ import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.server.model.authorize.ScopeChecker;
 import io.jans.as.server.model.common.CibaRequestCacheControl;
 import io.jans.as.server.model.common.DefaultScope;
+import io.jans.as.server.model.common.ExecutionContext;
 import io.jans.as.server.model.config.Constants;
 import io.jans.as.server.model.exception.AcrChangedException;
 import io.jans.as.server.security.Identity;
@@ -39,6 +40,7 @@ import io.jans.as.server.service.ciba.CibaRequestService;
 import io.jans.as.server.service.external.ExternalAuthenticationService;
 import io.jans.as.server.service.external.ExternalConsentGatheringService;
 import io.jans.as.server.service.external.ExternalPostAuthnService;
+import io.jans.as.server.service.external.ExternalSelectAccountService;
 import io.jans.as.server.service.external.context.ExternalPostAuthnContext;
 import io.jans.jsf2.message.FacesMessages;
 import io.jans.jsf2.service.FacesService;
@@ -107,6 +109,9 @@ public class AuthorizeAction {
 
     @Inject
     private ExternalConsentGatheringService externalConsentGatheringService;
+
+    @Inject
+    private ExternalSelectAccountService externalSelectAccountService;
 
     @Inject
     private AuthenticationMode defaultAuthenticationMode;
@@ -390,12 +395,14 @@ public class AuthorizeAction {
         }
 
         if (log.isTraceEnabled()) {
-            log.trace("checkPermissionGranted, userDn = " + session.getUserDn());
+            log.trace("checkPermissionGranted, userDn = {}", session.getUserDn());
         }
 
         if (prompts.contains(io.jans.as.model.common.Prompt.SELECT_ACCOUNT)) {
             Map requestParameterMap = requestParameterService.getAllowedParameters(externalContext.getRequestParameterMap());
-            facesService.redirect("/selectAccount.xhtml", requestParameterMap);
+            final String selectAccountPage = getSelectAccountPage(client);
+            log.trace("Select account page: {}" + selectAccountPage);
+            facesService.redirect(selectAccountPage, requestParameterMap);
             return;
         }
 
@@ -460,6 +467,17 @@ public class AuthorizeAction {
                 return;
             }
         }
+    }
+
+    private String getSelectAccountPage(Client client) {
+        ExecutionContext executionContext = ExecutionContext.of(externalContext);
+        executionContext.setClient(client);
+
+        String selectAccountPageFromScript = externalSelectAccountService.externalGetSelectAccountPage(executionContext);
+        if (StringUtils.isNotBlank(selectAccountPageFromScript)) {
+            return selectAccountPageFromScript;
+        }
+        return "/selectAccount.xhtml";
     }
 
     public boolean shouldSkipScript(List<String> acrValues) {
