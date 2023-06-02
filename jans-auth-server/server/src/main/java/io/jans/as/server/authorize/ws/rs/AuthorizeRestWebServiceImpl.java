@@ -40,6 +40,7 @@ import io.jans.as.server.security.Identity;
 import io.jans.as.server.service.*;
 import io.jans.as.server.service.ciba.CibaRequestService;
 import io.jans.as.server.service.external.ExternalPostAuthnService;
+import io.jans.as.server.service.external.ExternalSelectAccountService;
 import io.jans.as.server.service.external.ExternalUpdateTokenService;
 import io.jans.as.server.service.external.context.ExternalPostAuthnContext;
 import io.jans.as.server.service.external.context.ExternalUpdateTokenContext;
@@ -157,6 +158,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
     @Inject
     private AuthzRequestService authzRequestService;
+
+    @Inject
+    private ExternalSelectAccountService externalSelectAccountService;
 
     @Context
     private HttpServletRequest servletRequest;
@@ -853,12 +857,28 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     }
 
     private Response redirectToSelectAccountPage(AuthzRequest authzRequest, List<Prompt> prompts) {
-        return redirectTo("/selectAccount", authzRequest, prompts);
+        ExecutionContext executionContext = ExecutionContext.of(authzRequest);
+        executionContext.setAppConfiguration(appConfiguration);
+        executionContext.setAttributeService(attributeService);
+
+        String page = "/selectAccount";
+
+        String selectAccountPageFromScript = externalSelectAccountService.externalGetSelectAccountPage(executionContext);
+        if (StringUtils.isNotBlank(selectAccountPageFromScript)) {
+            if (selectAccountPageFromScript.endsWith(".xhtml")) {
+                selectAccountPageFromScript = StringUtils.removeEnd(selectAccountPageFromScript, ".xhtml");
+            }
+            page = selectAccountPageFromScript;
+        }
+
+        return redirectTo(page, authzRequest, prompts);
     }
 
     private Response redirectTo(String pathToRedirect, AuthzRequest authzRequest, List<Prompt> prompts) {
 
         final URI contextUri = URI.create(appConfiguration.getIssuer()).resolve(servletRequest.getContextPath() + pathToRedirect + configurationFactory.getFacesMapping());
+
+        log.debug("Redirecting to {}", contextUri);
 
         final RedirectUri redirect = authzRequest.getRedirectUriResponse().getRedirectUri();
         redirect.setBaseRedirectUri(contextUri.toString());
