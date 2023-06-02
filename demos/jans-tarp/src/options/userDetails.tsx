@@ -31,10 +31,9 @@ const UserDetails = (data) => {
 
     return (
         <div className="box">
-            <WindmillSpinner loading={loading} color="#00ced1" />
+
             <div className="w3-panel w3-pale-yellow w3-border">
-                <strong>Note!</strong> The extension will clear session on closing the tab or on opening the extension
-                again.
+                <WindmillSpinner loading={loading} color="#00ced1" />
                 <br />
             </div>
             <legend><span className="number">O</span> User Details:</legend>
