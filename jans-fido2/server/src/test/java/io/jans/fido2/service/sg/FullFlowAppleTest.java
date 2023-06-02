@@ -17,7 +17,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import java.util.Arrays;
 import java.util.Optional;
 
-import io.jans.util.security.SecurityProviderUtility;
 import org.jboss.weld.junit5.ExplicitParamInjection;
 import org.jboss.weld.junit5.auto.AddBeanClasses;
 import org.jboss.weld.junit5.auto.EnableAutoWeld;
@@ -59,6 +58,7 @@ import io.jans.fido2.service.processor.assertion.U2FSuperGluuAssertionFormatProc
 import io.jans.fido2.service.processor.attestation.U2FSuperGluuAttestationProcessor;
 import io.jans.fido2.service.sg.converter.AssertionSuperGluuController;
 import io.jans.fido2.service.sg.converter.AttestationSuperGluuController;
+import io.jans.fido2.service.shared.CustomScriptService;
 import io.jans.fido2.service.shared.UserService;
 import io.jans.fido2.service.verifier.CommonVerifiers;
 import io.jans.fido2.sg.SuperGluuMode;
@@ -70,6 +70,7 @@ import io.jans.orm.model.fido2.Fido2AuthenticationStatus;
 import io.jans.orm.model.fido2.Fido2RegistrationEntry;
 import io.jans.orm.model.fido2.Fido2RegistrationStatus;
 import io.jans.u2f.service.persist.DeviceRegistrationService;
+import io.jans.util.security.SecurityProviderUtility;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Inject;
@@ -123,6 +124,11 @@ public class FullFlowAppleTest {
 	@Produces
 	@ExcludeBean
 	PersistenceEntryManager persistenceEntryManager = Mockito.mock(PersistenceEntryManager.class);
+
+	@Mock
+	@Produces
+	@ExcludeBean
+	CustomScriptService customScriptService = Mockito.mock(CustomScriptService.class);
 
 	@Mock
 	@Produces
