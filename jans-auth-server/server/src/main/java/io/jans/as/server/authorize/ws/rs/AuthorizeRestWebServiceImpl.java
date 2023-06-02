@@ -857,8 +857,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     }
 
     private Response redirectToSelectAccountPage(AuthzRequest authzRequest, List<Prompt> prompts) {
-        ExecutionContext executionContext = new ExecutionContext(authzRequest.getHttpRequest(), authzRequest.getHttpResponse());
-        executionContext.setClient(authzRequest.getClient());
+        ExecutionContext executionContext = ExecutionContext.of(authzRequest);
         executionContext.setAppConfiguration(appConfiguration);
         executionContext.setAttributeService(attributeService);
 

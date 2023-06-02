@@ -16,8 +16,8 @@ public class DummySelectAccountType implements SelectAccountType {
     }
 
     @Override
-    public String getNextPage(Object context) {
-        return "";
+    public boolean prepare(Object context) {
+        return true;
     }
 
     @Override

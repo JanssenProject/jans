@@ -9,7 +9,7 @@ public interface SelectAccountType extends BaseExternalType {
 
     String getSelectAccountPage(Object context);
 
-    String getNextPage(Object context);
+    boolean prepare(Object context);
 
     String getAccountDisplayName(Object context);
 

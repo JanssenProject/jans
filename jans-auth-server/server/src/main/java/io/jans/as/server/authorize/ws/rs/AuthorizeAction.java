@@ -470,14 +470,11 @@ public class AuthorizeAction {
     }
 
     private String getSelectAccountPage(Client client) {
-        ExecutionContext executionContext = new ExecutionContext((HttpServletRequest) externalContext.getRequest(), (HttpServletResponse) externalContext.getResponse());
+        ExecutionContext executionContext = ExecutionContext.of(externalContext);
         executionContext.setClient(client);
 
         String selectAccountPageFromScript = externalSelectAccountService.externalGetSelectAccountPage(executionContext);
         if (StringUtils.isNotBlank(selectAccountPageFromScript)) {
-            if (selectAccountPageFromScript.endsWith(".xhtml")) {
-                selectAccountPageFromScript = StringUtils.removeEnd(selectAccountPageFromScript, ".xhtml");
-            }
             return selectAccountPageFromScript;
         }
         return "/selectAccount.xhtml";
