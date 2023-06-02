@@ -40,7 +40,7 @@ setup(
         "pyasn1==0.4.8",
         "ruamel.yaml>=0.16.5",
         "sqlalchemy==1.3.23",
-        "cryptography==36.0.1",
+        "cryptography==41.0.0",
         "protobuf",
         "google-cloud-spanner==3.13.0",
         "ldap3",
