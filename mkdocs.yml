@@ -303,6 +303,7 @@ nav:
       - Person Authentication: admin/developer/scripts/person-authentication.md
       - Consent Gathering: admin/developer/scripts/consent-gathering.md
       - Post Authentication: admin/developer/scripts/post-authentication.md
+      - Select Account: admin/developer/scripts/select-account.md
       - Resource Owner Password Credentials: admin/developer/scripts/ropc.md
       - CIBA End User Notification: admin/developer/scripts/ciba.md
       - OpenID Configuration: admin/developer/scripts/openid-config.md
