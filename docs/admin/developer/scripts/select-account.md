@@ -54,7 +54,6 @@ The select account script implements the [SelectAccountType](https://github.com/
 #
 # Author: Yuriy Z
 #
-#
 
 from io.jans.model.custom.script.type.selectaccount import SelectAccountType
 from java.lang import String
