@@ -58,13 +58,13 @@ import io.jans.fido2.service.processor.assertion.U2FSuperGluuAssertionFormatProc
 import io.jans.fido2.service.processor.attestation.U2FSuperGluuAttestationProcessor;
 import io.jans.fido2.service.sg.converter.AssertionSuperGluuController;
 import io.jans.fido2.service.sg.converter.AttestationSuperGluuController;
+import io.jans.fido2.service.shared.CustomScriptService;
 import io.jans.fido2.service.shared.UserService;
 import io.jans.fido2.service.verifier.CommonVerifiers;
 import io.jans.fido2.sg.SuperGluuMode;
 import io.jans.junit.extension.FileParameterExtension;
 import io.jans.junit.extension.Name;
 import io.jans.orm.PersistenceEntryManager;
-import io.jans.orm.model.fido2.Fido2AuthenticationData;
 import io.jans.orm.model.fido2.Fido2AuthenticationEntry;
 import io.jans.orm.model.fido2.Fido2AuthenticationStatus;
 import io.jans.orm.model.fido2.Fido2RegistrationEntry;
@@ -124,6 +124,11 @@ public class FullFlowAndroidTest {
 	@Produces
 	@ExcludeBean
 	PersistenceEntryManager persistenceEntryManager = Mockito.mock(PersistenceEntryManager.class);
+
+	@Mock
+	@Produces
+	@ExcludeBean
+	CustomScriptService customScriptService = Mockito.mock(CustomScriptService.class);
 
 	@Mock
 	@Produces
