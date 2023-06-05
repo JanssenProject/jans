@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.13](https://github.com/JanssenProject/jans/compare/agama-v1.0.12...agama-v1.0.13) (2023-05-10)
+
+
+### Bug Fixes
+
+* prepare for 1.0.13 release ([493478e](https://github.com/JanssenProject/jans/commit/493478e71f6231553c998b48c0f163c7f5869da4))
+
 ## [1.0.12](https://github.com/JanssenProject/jans/compare/agama-v1.0.11...agama-v1.0.12) (2023-04-18)
 
 

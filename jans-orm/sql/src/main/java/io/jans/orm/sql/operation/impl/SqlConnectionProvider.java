@@ -40,6 +40,7 @@ import io.jans.orm.exception.operation.ConnectionException;
 import io.jans.orm.model.AttributeType;
 import io.jans.orm.operation.auth.PasswordEncryptionMethod;
 import io.jans.orm.sql.dsl.template.MySQLJsonTemplates;
+import io.jans.orm.sql.dsl.template.MariaDBJsonTemplates;
 import io.jans.orm.sql.dsl.template.PostgreSQLJsonTemplates;
 import io.jans.orm.sql.model.ResultCode;
 import io.jans.orm.sql.model.TableMapping;
@@ -58,217 +59,249 @@ public class SqlConnectionProvider {
 
 	private static final Logger LOG = LoggerFactory.getLogger(SqlConnectionProvider.class);
 
-    private static final String MYSQL_QUERY_ENGINE_TYPE =
-    		"SELECT TABLE_NAME, ENGINE FROM information_schema.tables WHERE table_schema = ?";
+	private static final String MYSQL_QUERY_ENGINE_TYPE = "SELECT TABLE_NAME, ENGINE FROM information_schema.tables WHERE table_schema = ?";
 
-    private static final String DRIVER_PROPERTIES_PREFIX = "connection.driver-property";
+	private static final String MYSQL_QUERY_CONSTRAINT_CHECK = "SELECT CONSTRAINT_SCHEMA AS TABLE_SCHEMA, TABLE_NAME, CONSTRAINT_NAME, CHECK_CLAUSE AS DEFINITION FROM INFORMATION_SCHEMA.CHECK_CONSTRAINTS WHERE CONSTRAINT_SCHEMA = ? ORDER BY TABLE_SCHEMA, TABLE_NAME";
 
-    private Properties props;
+	private static final String DRIVER_PROPERTIES_PREFIX = "connection.driver-property";
 
-    private String connectionUri;
-    private Properties connectionProperties;
+	private Properties props;
 
-    private GenericObjectPoolConfig<PoolableConnection> objectPoolConfig;
-    private PoolingDataSource<PoolableConnection> poolingDataSource;
+	private String connectionUri;
+	private Properties connectionProperties;
 
-    private int creationResultCode;
+	private GenericObjectPoolConfig<PoolableConnection> objectPoolConfig;
+	private PoolingDataSource<PoolableConnection> poolingDataSource;
 
-    private ArrayList<String> binaryAttributes, certificateAttributes;
+	private int creationResultCode;
 
-    private PasswordEncryptionMethod passwordEncryptionMethod;
+	private ArrayList<String> binaryAttributes, certificateAttributes;
+
+	private PasswordEncryptionMethod passwordEncryptionMethod;
 
 	private SupportedDbType dbType;
 	private String dbVersion;
-
-	private boolean mariaDb = false;
 
 	private String schemaName;
 
 	private SQLTemplates sqlTemplates;
 
 	private SQLQueryFactory sqlQueryFactory;
-	
+
 	private Map<String, Map<String, AttributeType>> tableColumnsMap;
 	private Map<String, String> tableEnginesMap = new HashMap<>();
+	private Map<String, ArrayList<String>> tableJsonColumnsMap = new HashMap<>();
 
+	protected SqlConnectionProvider() {
+	}
 
-    protected SqlConnectionProvider() {
-    }
+	public SqlConnectionProvider(Properties props) {
+		this.props = props;
+		this.tableColumnsMap = new HashMap<>();
+	}
 
-    public SqlConnectionProvider(Properties props) {
-        this.props = props;
-        this.tableColumnsMap = new HashMap<>();
-    }
+	public void create() {
+		try {
+			init();
+			initDsl();
+		} catch (Exception ex) {
+			this.creationResultCode = ResultCode.OPERATIONS_ERROR_INT_VALUE;
 
-    public void create() {
-        try {
-            init();
-            initDsl();
-        } catch (Exception ex) {
-            this.creationResultCode = ResultCode.OPERATIONS_ERROR_INT_VALUE;
+			Properties clonedProperties = (Properties) props.clone();
+			if (clonedProperties.getProperty("auth.userName") != null) {
+				clonedProperties.setProperty("auth.userPassword", "REDACTED");
+			}
 
-            Properties clonedProperties = (Properties) props.clone();
-            if (clonedProperties.getProperty("auth.userName") != null) {
-                clonedProperties.setProperty("auth.userPassword", "REDACTED");
-            }
-
-            LOG.error("Failed to create connection pool with properties: '{}'. Exception: {}", clonedProperties, ex);
-        }
-    }
+			LOG.error("Failed to create connection pool with properties: '{}'. Exception: {}", clonedProperties, ex);
+		}
+	}
 
 	protected void init() throws Exception {
-        if (!props.containsKey("db.schema.name")) {
-        	throw new ConfigurationException("Property 'db.schema.name' is mandatory!");
-        }
-        this.schemaName = props.getProperty("db.schema.name");
+		if (!props.containsKey("db.schema.name")) {
+			throw new ConfigurationException("Property 'db.schema.name' is mandatory!");
+		}
+		this.schemaName = props.getProperty("db.schema.name");
 
-        if (!props.containsKey("connection.uri")) {
-        	throw new ConfigurationException("Property 'connection.uri' is mandatory!");
-        }
-        this.connectionUri = props.getProperty("connection.uri");
+		if (!props.containsKey("connection.uri")) {
+			throw new ConfigurationException("Property 'connection.uri' is mandatory!");
+		}
+		this.connectionUri = props.getProperty("connection.uri");
 
 		Properties filteredDriverProperties = PropertiesHelper.findProperties(props, DRIVER_PROPERTIES_PREFIX, ".");
-        this.connectionProperties = new Properties();
+		this.connectionProperties = new Properties();
 		for (Entry<Object, Object> driverPropertyEntry : filteredDriverProperties.entrySet()) {
-			String key = StringHelper.toString(driverPropertyEntry.getKey()).substring(DRIVER_PROPERTIES_PREFIX.length() + 1);
+			String key = StringHelper.toString(driverPropertyEntry.getKey())
+					.substring(DRIVER_PROPERTIES_PREFIX.length() + 1);
 			String value = StringHelper.toString(driverPropertyEntry.getValue());
 
 			connectionProperties.put(key, value);
 		}
 
-        String userName = props.getProperty("auth.userName");
-        String userPassword = props.getProperty("auth.userPassword");
+		String userName = props.getProperty("auth.userName");
+		String userPassword = props.getProperty("auth.userPassword");
 
-        connectionProperties.setProperty("user", userName);
-        connectionProperties.setProperty("password", userPassword);
+		connectionProperties.setProperty("user", userName);
+		connectionProperties.setProperty("password", userPassword);
 
 		this.objectPoolConfig = new GenericObjectPoolConfig<>();
 
-        Integer cpMaxTotal = StringHelper.toInteger(props.getProperty("connection.pool.max-total"), null);
-        if (cpMaxTotal != null) {
-        	objectPoolConfig.setMaxTotal(cpMaxTotal);
-        }
+		Integer cpMaxTotal = StringHelper.toInteger(props.getProperty("connection.pool.max-total"), null);
+		if (cpMaxTotal != null) {
+			objectPoolConfig.setMaxTotal(cpMaxTotal);
+		}
 
-        Integer cpMaxIdle = StringHelper.toInteger(props.getProperty("connection.pool.max-idle"), null);
-        if (cpMaxIdle != null) {
-        	objectPoolConfig.setMaxIdle(cpMaxIdle);
-        }
+		Integer cpMaxIdle = StringHelper.toInteger(props.getProperty("connection.pool.max-idle"), null);
+		if (cpMaxIdle != null) {
+			objectPoolConfig.setMaxIdle(cpMaxIdle);
+		}
 
-        Integer cpMinIdle = StringHelper.toInteger(props.getProperty("connection.pool.min-idle"), null);
-        if (cpMinIdle != null) {
-        	objectPoolConfig.setMinIdle(cpMinIdle);
-        }
+		Integer cpMinIdle = StringHelper.toInteger(props.getProperty("connection.pool.min-idle"), null);
+		if (cpMinIdle != null) {
+			objectPoolConfig.setMinIdle(cpMinIdle);
+		}
 
-        Integer cpMaxWaitTimeMillis = StringHelper.toInteger(props.getProperty("connection.pool.max-wait-time-millis"), null);
-        if (cpMaxWaitTimeMillis != null) {
-        	objectPoolConfig.setMaxWaitMillis(cpMaxWaitTimeMillis);
-        }
+		Integer cpMaxWaitTimeMillis = StringHelper.toInteger(props.getProperty("connection.pool.max-wait-time-millis"),
+				null);
+		if (cpMaxWaitTimeMillis != null) {
+			objectPoolConfig.setMaxWaitMillis(cpMaxWaitTimeMillis);
+		}
 
-        Integer cpMinEvictableIdleTimeMillis = StringHelper.toInteger(props.getProperty("connection.pool.min-evictable-idle-time-millis"), null);
-        if (cpMaxWaitTimeMillis != null) {
-        	objectPoolConfig.setMinEvictableIdleTimeMillis(cpMinEvictableIdleTimeMillis);
-        }
+		Integer cpMinEvictableIdleTimeMillis = StringHelper
+				.toInteger(props.getProperty("connection.pool.min-evictable-idle-time-millis"), null);
+		if (cpMaxWaitTimeMillis != null) {
+			objectPoolConfig.setMinEvictableIdleTimeMillis(cpMinEvictableIdleTimeMillis);
+		}
 
-        openWithWaitImpl();
-        LOG.info("Created connection pool");
+		openWithWaitImpl();
+		LOG.info("Created connection pool");
 
-        if (props.containsKey("password.encryption.method")) {
-            this.passwordEncryptionMethod = PasswordEncryptionMethod.getMethod(props.getProperty("password.encryption.method"));
-        } else {
-            this.passwordEncryptionMethod = PasswordEncryptionMethod.HASH_METHOD_SHA256;
-        }
+		if (props.containsKey("password.encryption.method")) {
+			this.passwordEncryptionMethod = PasswordEncryptionMethod
+					.getMethod(props.getProperty("password.encryption.method"));
+		} else {
+			this.passwordEncryptionMethod = PasswordEncryptionMethod.HASH_METHOD_SHA256;
+		}
 
-        this.binaryAttributes = new ArrayList<String>();
-        if (props.containsKey("binaryAttributes")) {
-            String[] binaryAttrs = StringHelper.split(props.get("binaryAttributes").toString().toLowerCase(), ",");
-            this.binaryAttributes.addAll(Arrays.asList(binaryAttrs));
-        }
-        LOG.debug("Using next binary attributes: '{}'", binaryAttributes);
+		this.binaryAttributes = new ArrayList<String>();
+		if (props.containsKey("binaryAttributes")) {
+			String[] binaryAttrs = StringHelper.split(props.get("binaryAttributes").toString().toLowerCase(), ",");
+			this.binaryAttributes.addAll(Arrays.asList(binaryAttrs));
+		}
+		LOG.debug("Using next binary attributes: '{}'", binaryAttributes);
 
-        this.certificateAttributes = new ArrayList<String>();
-        if (props.containsKey("certificateAttributes")) {
-            String[] binaryAttrs = StringHelper.split(props.get("certificateAttributes").toString().toLowerCase(), ",");
-            this.certificateAttributes.addAll(Arrays.asList(binaryAttrs));
-        }
-        LOG.debug("Using next binary certificateAttributes: '{}'", certificateAttributes);
+		this.certificateAttributes = new ArrayList<String>();
+		if (props.containsKey("certificateAttributes")) {
+			String[] binaryAttrs = StringHelper.split(props.get("certificateAttributes").toString().toLowerCase(), ",");
+			this.certificateAttributes.addAll(Arrays.asList(binaryAttrs));
+		}
+		LOG.debug("Using next binary certificateAttributes: '{}'", certificateAttributes);
 
-        try (Connection con = this.poolingDataSource.getConnection()) {
-        	DatabaseMetaData databaseMetaData = con.getMetaData();
-        	String dbTypeString = databaseMetaData.getDatabaseProductName();
-        	this.dbType = SupportedDbType.resolveDbType(dbTypeString.toLowerCase());
-        	
-        	if (this.dbType == null) {
-                throw new ConnectionException(String.format("Database type '%s' is not supported", dbTypeString));
-        	}
-        	
-        	this.dbVersion = databaseMetaData.getDatabaseProductVersion().toLowerCase();
-        	if ((this.dbVersion != null) && this.dbVersion.toLowerCase().contains("mariadb")) {
-        		this.mariaDb = true;
-        	}
-            LOG.debug("Database product name: '{}'", dbType);
-            loadTableMetaData(databaseMetaData, con);
-        } catch (Exception ex) {
-            throw new ConnectionException("Failed to detect database product name and load metadata", ex);
-        }
+		try (Connection con = this.poolingDataSource.getConnection()) {
+			DatabaseMetaData databaseMetaData = con.getMetaData();
+			String dbTypeString = databaseMetaData.getDatabaseProductName();
+			this.dbType = SupportedDbType.resolveDbType(dbTypeString.toLowerCase());
 
-        this.creationResultCode = ResultCode.SUCCESS_INT_VALUE;
-    }
+			if (this.dbType == null) {
+				throw new ConnectionException(String.format("Database type '%s' is not supported", dbTypeString));
+			}
 
-    private void loadTableMetaData(DatabaseMetaData databaseMetaData, Connection con) throws SQLException {
-        long takes = System.currentTimeMillis();
+			this.dbVersion = databaseMetaData.getDatabaseProductVersion().toLowerCase();
+			if ((this.dbVersion != null) && this.dbVersion.toLowerCase().contains("mariadb")) {
+				this.dbType = SupportedDbType.MARIADB;
+			}
+			LOG.debug("Database product name: '{}'", dbType);
+			loadTableMetaData(databaseMetaData, con);
+		} catch (Exception ex) {
+			throw new ConnectionException("Failed to detect database product name and load metadata", ex);
+		}
 
-        if (SupportedDbType.MYSQL == dbType) {
-	        LOG.info("Detecting engine types...");
-	    	PreparedStatement preparedStatement = con.prepareStatement(MYSQL_QUERY_ENGINE_TYPE);
-	    	preparedStatement.setString(1, schemaName);
-	
-	    	try (ResultSet tableEnginesResultSet = preparedStatement.executeQuery()) {
-		    	while (tableEnginesResultSet.next()) {
-		    		String tableName = tableEnginesResultSet.getString("TABLE_NAME");
-		    		String engineName = tableEnginesResultSet.getString("ENGINE");
-		
-		        	tableEnginesMap.put(tableName, engineName);
-		    	}
-	    	}
-        }
-	
-        LOG.info("Scanning DB metadata...");
-        try (ResultSet tableResultSet = databaseMetaData.getTables(null, schemaName, null, new String[]{"TABLE"})) {
-	    	while (tableResultSet.next()) {
-	    		String tableName = tableResultSet.getString("TABLE_NAME");
-	    		Map<String, AttributeType> tableColumns = new HashMap<>();
-	    		
-	//    		String engineType = tableEnginesMap.get(tableName);
-	    		
-	            LOG.debug("Found table: '{}'.", tableName);
-	            try (ResultSet columnResultSet = databaseMetaData.getColumns(null, schemaName, tableName, null)) {
-		        	while (columnResultSet.next()) {
-		        		String columnName = columnResultSet.getString("COLUMN_NAME").toLowerCase();
+		this.creationResultCode = ResultCode.SUCCESS_INT_VALUE;
+	}
+
+	private void loadTableMetaData(DatabaseMetaData databaseMetaData, Connection con) throws SQLException {
+		long takes = System.currentTimeMillis();
+
+		if (SupportedDbType.MYSQL == dbType) {
+			LOG.info("Detecting engine types...");
+			PreparedStatement preparedStatement = con.prepareStatement(MYSQL_QUERY_ENGINE_TYPE);
+			preparedStatement.setString(1, schemaName);
+
+			try (ResultSet tableEnginesResultSet = preparedStatement.executeQuery()) {
+				while (tableEnginesResultSet.next()) {
+					String tableName = tableEnginesResultSet.getString("TABLE_NAME");
+					String engineName = tableEnginesResultSet.getString("ENGINE");
+
+					tableEnginesMap.put(tableName, engineName);
+				}
+			}
+		}
+
+		if (SupportedDbType.MARIADB == dbType) {
+			LOG.info("Loading contrains to identify JSON columns ...");
+			PreparedStatement preparedStatement = con.prepareStatement(MYSQL_QUERY_CONSTRAINT_CHECK);
+			preparedStatement.setString(1, schemaName);
+
+			try (ResultSet tableEnginesResultSet = preparedStatement.executeQuery()) {
+				while (tableEnginesResultSet.next()) {
+					String tableName = tableEnginesResultSet.getString("TABLE_NAME");
+					String constraintName = tableEnginesResultSet.getString("CONSTRAINT_NAME");
+					String definition = tableEnginesResultSet.getString("DEFINITION");
+
+					ArrayList<String> tableJsonColumns = tableJsonColumnsMap.get(tableName);
+					if (tableJsonColumns == null) {
+						tableJsonColumns = new ArrayList<>();
+						tableJsonColumnsMap.put(tableName, tableJsonColumns);
+					}
+
+					if ((definition != null) && definition.toLowerCase().contains("json_valid")) { // Example:
+																									// json_valid(`memberOf`)
+						tableJsonColumns.add(constraintName.toLowerCase());
+					}
+				}
+			}
+			LOG.debug("Found JSON constrains: '{}'.", tableJsonColumnsMap);
+		}
+
+		LOG.info("Scanning DB metadata...");
+		try (ResultSet tableResultSet = databaseMetaData.getTables(null, schemaName, null, new String[] { "TABLE" })) {
+			while (tableResultSet.next()) {
+				String tableName = tableResultSet.getString("TABLE_NAME");
+				Map<String, AttributeType> tableColumns = new HashMap<>();
+
+				// String engineType = tableEnginesMap.get(tableName);
+
+				LOG.debug("Found table: '{}'.", tableName);
+				try (ResultSet columnResultSet = databaseMetaData.getColumns(null, schemaName, tableName, null)) {
+					while (columnResultSet.next()) {
+						String columnName = columnResultSet.getString("COLUMN_NAME").toLowerCase();
 						String columnTypeName = columnResultSet.getString("TYPE_NAME").toLowerCase();
-		
-						String remark = columnResultSet.getString("REMARKS");
-		        		if (mariaDb && SqlOperationService.LONGTEXT_TYPE_NAME.equalsIgnoreCase(columnTypeName) && SqlOperationService.JSON_TYPE_NAME.equalsIgnoreCase(remark)) {
-		        			columnTypeName = SqlOperationService.JSON_TYPE_NAME;
-		        		}
 
-		        		if (SqlOperationService.JSONB_TYPE_NAME.equalsIgnoreCase(columnTypeName)) {
-		        			columnTypeName = SqlOperationService.JSONB_TYPE_NAME;
-		        		}
-		
-		        		boolean multiValued = SqlOperationService.JSON_TYPE_NAME.equals(columnTypeName) || SqlOperationService.JSONB_TYPE_NAME.equals(columnTypeName);
-		
-		        		AttributeType attributeType = new AttributeType(columnName, columnTypeName, multiValued);
-		        		tableColumns.put(columnName, attributeType);
-		        	}
-	            }
-	
-	        	tableColumnsMap.put(StringHelper.toLowerCase(tableName), tableColumns);
-	    	}
-        }
+						if ((SupportedDbType.MARIADB == dbType) && SqlOperationService.LONGTEXT_TYPE_NAME.equalsIgnoreCase(columnTypeName)) {
+							ArrayList<String> tableJsonColumns = tableJsonColumnsMap.get(tableName);
+							if ((tableJsonColumns != null) && tableJsonColumns.contains(columnName)) {
+								columnTypeName = SqlOperationService.JSON_TYPE_NAME;
+							}
+						}
 
-    	takes = System.currentTimeMillis() - takes;
-        LOG.info("Metadata scan finisehd in {} milliseconds", takes);
-   	}
+						if (SqlOperationService.JSONB_TYPE_NAME.equalsIgnoreCase(columnTypeName)) {
+							columnTypeName = SqlOperationService.JSONB_TYPE_NAME;
+						}
+
+						boolean multiValued = SqlOperationService.JSON_TYPE_NAME.equals(columnTypeName)
+								|| SqlOperationService.JSONB_TYPE_NAME.equals(columnTypeName);
+
+						AttributeType attributeType = new AttributeType(columnName, columnTypeName, multiValued);
+						tableColumns.put(columnName, attributeType);
+					}
+				}
+
+				tableColumnsMap.put(StringHelper.toLowerCase(tableName), tableColumns);
+			}
+		}
+
+		takes = System.currentTimeMillis() - takes;
+		LOG.info("Metadata scan finisehd in {} milliseconds", takes);
+	}
 
 	private void initDsl() throws SQLException {
 		SQLTemplatesRegistry templatesRegistry = new SQLTemplatesRegistry();
@@ -277,6 +310,8 @@ public class SqlConnectionProvider {
 			SQLTemplates.Builder sqlBuilder = templatesRegistry.getBuilder(databaseMetaData);
 			if (SupportedDbType.MYSQL == dbType) {
 				sqlBuilder = MySQLJsonTemplates.builder();
+			} else if (SupportedDbType.MARIADB == dbType) {
+				sqlBuilder = MariaDBJsonTemplates.builder();
 			} else if (SupportedDbType.POSTGRESQL == dbType) {
 				sqlBuilder = PostgreSQLJsonTemplates.builder().quote();
 			}
@@ -287,56 +322,58 @@ public class SqlConnectionProvider {
 		}
 	}
 
-    private void openWithWaitImpl() throws Exception {
-    	long connectionMaxWaitTimeMillis = StringHelper.toLong(props.getProperty("connection.pool.create-max-wait-time-millis"), 30 * 1000L);
-        LOG.debug("Using connection timeout: '{}'", connectionMaxWaitTimeMillis);
+	private void openWithWaitImpl() throws Exception {
+		long connectionMaxWaitTimeMillis = StringHelper
+				.toLong(props.getProperty("connection.pool.create-max-wait-time-millis"), 30 * 1000L);
+		LOG.debug("Using connection timeout: '{}'", connectionMaxWaitTimeMillis);
 
-        Exception lastException = null;
+		Exception lastException = null;
 
-        int attempt = 0;
-        long currentTime = System.currentTimeMillis();
-        long maxWaitTime = currentTime + connectionMaxWaitTimeMillis;
-        do {
-            attempt++;
-            if (attempt > 0) {
-                LOG.info("Attempting to create connection pool: '{}'", attempt);
-            }
+		int attempt = 0;
+		long currentTime = System.currentTimeMillis();
+		long maxWaitTime = currentTime + connectionMaxWaitTimeMillis;
+		do {
+			attempt++;
+			if (attempt > 0) {
+				LOG.info("Attempting to create connection pool: '{}'", attempt);
+			}
 
-            try {
-                open();
-                if (isConnected()) {
-                	break;
-                } else {
-                    LOG.info("Failed to connect to DB");
-                    destroy();
-                    throw new ConnectionException("Failed to create connection pool");
-                }
-            } catch (Exception ex) {
-                lastException = ex;
-            }
+			try {
+				open();
+				if (isConnected()) {
+					break;
+				} else {
+					LOG.info("Failed to connect to DB");
+					destroy();
+					throw new ConnectionException("Failed to create connection pool");
+				}
+			} catch (Exception ex) {
+				lastException = ex;
+			}
 
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException ex) {
-                LOG.error("Exception happened in sleep", ex);
-                return;
-            }
-            currentTime = System.currentTimeMillis();
-        } while (maxWaitTime > currentTime);
+			try {
+				Thread.sleep(5000);
+			} catch (InterruptedException ex) {
+				LOG.error("Exception happened in sleep", ex);
+				return;
+			}
+			currentTime = System.currentTimeMillis();
+		} while (maxWaitTime > currentTime);
 
-        if (lastException != null) {
-            throw lastException;
-        }
-    }
+		if (lastException != null) {
+			throw lastException;
+		}
+	}
 
-    private void open() {
+	private void open() {
 		ConnectionFactory connectionFactory = new DriverManagerConnectionFactory(connectionUri, connectionProperties);
 		PoolableConnectionFactory poolableConnectionFactory = new PoolableConnectionFactory(connectionFactory, null);
-		ObjectPool<PoolableConnection> objectPool = new GenericObjectPool<>(poolableConnectionFactory, objectPoolConfig);
+		ObjectPool<PoolableConnection> objectPool = new GenericObjectPool<>(poolableConnectionFactory,
+				objectPoolConfig);
 
 		this.poolingDataSource = new PoolingDataSource<>(objectPool);
 		poolableConnectionFactory.setPool(objectPool);
-    }
+	}
 
 	public boolean destroy() {
 		boolean result = true;
@@ -355,57 +392,57 @@ public class SqlConnectionProvider {
 		return result;
 	}
 
-    public boolean isConnected() {
-        if (this.poolingDataSource == null) {
-            return false;
-        }
+	public boolean isConnected() {
+		if (this.poolingDataSource == null) {
+			return false;
+		}
 
-        boolean isConnected = true;
-        try (Connection con = this.poolingDataSource.getConnection()) {
-        	return con.isValid(30);
-        } catch (Exception ex) {
-            LOG.error("Failed to check connection", ex);
-            isConnected = false;
-        }
+		boolean isConnected = true;
+		try (Connection con = this.poolingDataSource.getConnection()) {
+			return con.isValid(30);
+		} catch (Exception ex) {
+			LOG.error("Failed to check connection", ex);
+			isConnected = false;
+		}
 
-        return isConnected;
-    }
+		return isConnected;
+	}
 
-    public int getCreationResultCode() {
-        return creationResultCode;
-    }
+	public int getCreationResultCode() {
+		return creationResultCode;
+	}
 
-    public boolean isCreated() {
-        return ResultCode.SUCCESS_INT_VALUE == creationResultCode;
-    }
+	public boolean isCreated() {
+		return ResultCode.SUCCESS_INT_VALUE == creationResultCode;
+	}
 
-    public ArrayList<String> getBinaryAttributes() {
-        return binaryAttributes;
-    }
+	public ArrayList<String> getBinaryAttributes() {
+		return binaryAttributes;
+	}
 
-    public ArrayList<String> getCertificateAttributes() {
-        return certificateAttributes;
-    }
+	public ArrayList<String> getCertificateAttributes() {
+		return certificateAttributes;
+	}
 
-    public boolean isBinaryAttribute(String attributeName) {
-        if (StringHelper.isEmpty(attributeName)) {
-            return false;
-        }
+	public boolean isBinaryAttribute(String attributeName) {
+		if (StringHelper.isEmpty(attributeName)) {
+			return false;
+		}
 
-        return binaryAttributes.contains(attributeName.toLowerCase());
-    }
+		return binaryAttributes.contains(attributeName.toLowerCase());
+	}
 
-    public boolean isCertificateAttribute(String attributeName) {
-        if (StringHelper.isEmpty(attributeName)) {
-            return false;
-        }
+	public boolean isCertificateAttribute(String attributeName) {
+		if (StringHelper.isEmpty(attributeName)) {
+			return false;
+		}
 
-        return certificateAttributes.contains(attributeName.toLowerCase());
-    }
+		return certificateAttributes.contains(attributeName.toLowerCase());
+	}
 
-    public PasswordEncryptionMethod getPasswordEncryptionMethod() {
-        return passwordEncryptionMethod;
-    }
+	public PasswordEncryptionMethod getPasswordEncryptionMethod() {
+		return passwordEncryptionMethod;
+	}
 
 	public String getSchemaName() {
 		return schemaName;
@@ -428,7 +465,7 @@ public class SqlConnectionProvider {
 		}
 
 		TableMapping tableMapping = new TableMapping(baseNameParts[0], tableName, objectClass, columTypes);
-		
+
 		return tableMapping;
 	}
 
@@ -439,24 +476,20 @@ public class SqlConnectionProvider {
 	}
 
 	public Connection getConnection() {
-        try {
+		try {
 			return this.poolingDataSource.getConnection();
 		} catch (SQLException ex) {
-            throw new ConnectionException("Failed to get connection from pool", ex);
+			throw new ConnectionException("Failed to get connection from pool", ex);
 		}
 	}
 
 	public DatabaseMetaData getDatabaseMetaData() {
-        try (Connection con = this.poolingDataSource.getConnection()) {
-        	DatabaseMetaData databaseMetaData = con.getMetaData();
-        	return databaseMetaData;
-        } catch (SQLException ex) {
-        	throw new ConnectionException("Failed to get database metadata", ex);
-        }
-	}
-
-	public boolean isMariaDb() {
-		return mariaDb;
+		try (Connection con = this.poolingDataSource.getConnection()) {
+			DatabaseMetaData databaseMetaData = con.getMetaData();
+			return databaseMetaData;
+		} catch (SQLException ex) {
+			throw new ConnectionException("Failed to get database metadata", ex);
+		}
 	}
 
 	public SupportedDbType getDbType() {

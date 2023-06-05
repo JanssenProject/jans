@@ -2,8 +2,6 @@ import os
 import uuid
 import inspect
 
-from distutils.version import LooseVersion
-
 from setup_app import paths
 from setup_app.utils import base
 from setup_app.config import Config

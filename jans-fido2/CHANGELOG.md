@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.0.13](https://github.com/JanssenProject/jans/compare/jans-fido2-v1.0.12...jans-fido2-v1.0.13) (2023-05-10)
+
+
+### Features
+
+* **jans-fido2:** enhancements to getHashedBuffer and tpm process method ([#4603](https://github.com/JanssenProject/jans/issues/4603)) ([a367d6e](https://github.com/JanssenProject/jans/commit/a367d6efce450ad15b812497235b570b307e9509))
+* **jans-fido2:** interception scripts issue 1485, swagger updates ([#4543](https://github.com/JanssenProject/jans/issues/4543)) ([80274ff](https://github.com/JanssenProject/jans/commit/80274ffd1a20318988d9cc99ee015c5c7d5984b7))
+
+
+### Bug Fixes
+
+* prepare for 1.0.13 release ([493478e](https://github.com/JanssenProject/jans/commit/493478e71f6231553c998b48c0f163c7f5869da4))
+
 ## [1.0.12](https://github.com/JanssenProject/jans/compare/jans-fido2-v1.0.11...jans-fido2-v1.0.12) (2023-04-18)
 
 

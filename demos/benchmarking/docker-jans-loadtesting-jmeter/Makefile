@@ -1,5 +1,5 @@
-CN_VERSION?=1.0.13-SNAPSHOT
-IMAGE_NAME=ghcr.io/janssenproject/jans/demo_loadtesting
+CN_VERSION?=1.0.14-SNAPSHOT
+IMAGE_NAME=ghcr.io/janssenproject/jans/loadtesting-jmeter
 DEV_VERSION?=$(shell echo ${CN_VERSION} | cut -d '-' -f 1)_dev
 
 # pass extra build args, i.e. `make build-dev BUILD_ARGS="--no-cache"`

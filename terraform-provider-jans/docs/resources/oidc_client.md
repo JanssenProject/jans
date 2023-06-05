@@ -44,23 +44,26 @@ description: |-
 						requesting party's user agent after completing its interaction.
 - `claims` (List of String) Provide list of claims granted to the client.
 - `client_id_issued_at` (String)
-- `client_name` (String)
+- `client_name_localized` (Map of String)
 - `client_secret` (String) The client secret.  The client MAY omit the parameter if the client secret is an empty string.
 - `client_secret_expires_at` (String)
 - `client_uri` (String) URL of the home page of the Client. The value of this field must point to a valid Web page.
+- `client_uri_localized` (Map of String)
 - `contacts` (List of String) e-mail addresses of people responsible for this Client.
 - `custom_attributes` (Block List) (see [below for nested schema](#nestedblock--custom_attributes))
 - `custom_object_classes` (List of String)
 - `default_acr_values` (List of String) Array of default requested Authentication Context Class Reference values that the Authorization Server 
 						must use for processing requests from the Client.
 - `default_max_age` (Number) Specifies the Default Maximum Authentication Age. Example: 1000000
-- `deletable` (Boolean) Specifies whether client is deletable.
+- `deletable` (Boolean)
 - `description` (String) Description of the client.
 - `disabled` (Boolean) Specifies whether client is disabled.
-- `expiration_date` (String) Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating when this permission will expire.
+- `display_name` (String) Display name of the client.
+- `expiration_date` (String)
 - `front_channel_logout_session_required` (Boolean)
 - `front_channel_logout_uri` (String)
 - `grant_types` (List of String) A list of the OAuth 2.0 Grant Types that the Client is declaring that it will restrict itself to using.
+- `groups` (List of String) List of groups that the client belongs to.
 - `id_token_encrypted_response_alg` (String) JWE alg algorithm (JWA) required for encrypting the ID Token issued to this Client.
 - `id_token_encrypted_response_enc` (String) JWE enc algorithm (JWA) required for encrypting the ID Token issued to this Client.
 - `id_token_signed_response_alg` (String) JWS alg algorithm (JWA) required for signing the ID Token issued to this Client.
@@ -70,7 +73,6 @@ description: |-
 - `include_claims_in_id_token` (Boolean) If true then claims are included in token id, default value is false.
 - `initiate_login_uri` (String) Specifies the URI using the https scheme that the authorization server can call to initiate a login at the client.
 - `inum` (String) XRI i-number. Client Identifier to uniquely identify the client.
-- `jans_id` (String) Attribute Scope Id.
 - `jwks` (String) List of JSON Web Key (JWK) - A JSON object that represents a cryptographic key. The members of the object 
 							represent properties of the key, including its value. Example: { "keys" : [ { "e" : "AQAB", "n" : "gmlDX_mgMcHX.." ] }
 - `jwks_uri` (String) URL for the Client's JSON Web Key Set (JWK) document containing key(s) that are used for signing requests to the OP. 
@@ -80,8 +82,11 @@ description: |-
 - `last_access_time` (Number) Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating last access time.
 - `last_logon_time` (Number) Integer timestamp, measured in the number of seconds since January 1 1970 UTC, indicating last login time.
 - `logo_uri` (String) URL that references a logo for the Client application.
+- `logo_uri_localized` (Map of String)
+- `organization` (String)
 - `persist_client_authorizations` (Boolean) Specifies if the client authorization details are to be persisted. Default value is true.
 - `policy_uri` (String) URL that the Relying Party Client provides to the End-User to read about the how the profile data will be used.
+- `policy_uri_localized` (Map of String)
 - `post_logout_redirect_uris` (List of String) Provide the URLs supplied by the RP to request that the user be redirected to this location after a logout has 
 						been performed. Example: [https://client.example.org/logout/page1 https://client.example.org/logout/page2 https://client.example.org/logout/page3]
 - `refresh_token_lifetime` (Number) Specifies the Client-specific refresh token expiration. Example: 100000000
@@ -90,7 +95,6 @@ description: |-
 - `request_object_encryption_enc` (String) JWE enc algorithm (JWA) the RP is declaring that it may use for encrypting Request Objects sent to the OP.
 - `request_object_signing_alg` (String) JWS alg algorithm (JWA) that must be used for signing Request Objects sent to the OP.
 - `request_uris` (List of String) Provide a list of requests_uri values that are pre-registered by the Client for use at the Authorization Server.
-- `require_auth_time` (Boolean) Boolean value specifying whether the auth_time Claim in the ID Token is required. It is required when the value is true.
 - `response_types` (List of String) A list of the OAuth 2.0 response_type values that the Client is declaring that it will restrict itself 
 						to using. If omitted, the default is that the Client will use only the code Response Type. Allowed values are code, token, id_token.
 - `rpt_as_jwt` (Boolean) Specifies whether RPT should be return as signed JWT.
@@ -105,11 +109,11 @@ description: |-
 							The value of the 'software_version' should change on any update to the client software identified 
 							by the same 'software_id'. Example: 2.1
 - `subject_type` (String) Subject type requested for the Client ID. Valid types include pairwise and public.
-- `token_binding_supported` (Boolean)
 - `token_endpoint_auth_method` (String) Requested Client Authentication method for the Token Endpoint.
 - `token_endpoint_auth_signing_alg` (String) JWS alg algorithm (JWA) that must be used for signing the JWT used to authenticate the Client at the Token Endpoint 
 							for the private_key_jwt and client_secret_jwt authentication methods.
 - `tos_uri` (String) URL that the Relying Party Client provides to the End-User to read about the Relying Party's terms of service.
+- `tos_uri_localized` (Map of String)
 - `trusted_client` (Boolean) Attribute which corresponds to the "Pre-Authorization" property. Default value is false.
 - `user_info_encrypted_response_alg` (String) JWE alg algorithm (JWA) required for encrypting UserInfo Responses.
 - `user_info_encrypted_response_enc` (String) JWE enc algorithm (JWA) required for encrypting UserInfo Responses.
@@ -120,6 +124,7 @@ description: |-
 - `base_dn` (String)
 - `dn` (String)
 - `id` (String) The ID of this resource.
+- `ttl` (Number) Time to live of the client.
 
 <a id="nestedblock--attributes"></a>
 ### Nested Schema for `attributes`

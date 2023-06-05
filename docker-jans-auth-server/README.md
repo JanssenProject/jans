@@ -12,8 +12,7 @@ Docker image packaging for Janssen Authorization Server.
 
 ## Versions
 
-See [Releases](https://github.com/JanssenProject/docker-jans-auth-server/releases) for stable versions.
-For bleeding-edge/unstable version, use `janssenproject/auth-server:1.0.13_dev`.
+See [Packages](https://github.com/orgs/JanssenProject/packages/container/package/jans%2Fauth-server) for available versions.
 
 ## Environment Variables
 
@@ -183,3 +182,4 @@ i.e. `http://container:9093/metrics`.
 
 Note that Prometheus JMX exporter uses pre-defined config file (see `conf/prometheus-config.yaml`).
 To customize the config, mount custom config file to `/opt/prometheus/prometheus-config.yaml` inside the container.
+

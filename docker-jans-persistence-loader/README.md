@@ -12,8 +12,7 @@ Persistence is a special container to load initial data for LDAP or Couchbase.
 
 ## Versions
 
-See [Releases](https://github.com/JanssenProject/docker-jans-persistence/releases) for stable versions.
-For bleeding-edge/unstable version, use `janssenproject/persistence:1.0.13_dev`.
+See [Packages](https://github.com/orgs/JanssenProject/packages/container/package/jans%2Fpersistence-loader) for available versions.
 
 ## Environment Variables
 
@@ -122,3 +121,4 @@ As per v1.0.1, hybrid persistence supports all available persistence types. To c
         "session": "spanner",
     }
     ```
+

@@ -469,6 +469,9 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "The interval for configuration update in seconds")
     private int configurationUpdateInterval;
 
+    @DocProperty(description = "Boolean value specifying whether to log not_found entity exception as error or as trace. Default value is false (trace).")
+    private Boolean logNotFoundEntityAsError;
+
     @DocProperty(description = "Choose if client can update Grant Type values")
     private Boolean enableClientGrantTypeUpdate;
 
@@ -592,7 +595,7 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Choose whether to support front channel session logout")
     private Boolean frontChannelLogoutSessionSupported;
 
-    @DocProperty(description = "Specify the logging level for oxAuth loggers")
+    @DocProperty(description = "Specify the logging level of loggers")
     private String loggingLevel;
 
     @DocProperty(description = "Logging layout used for Jans Authorization Server loggers")
@@ -686,6 +689,9 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "Boolean value specifying whether to extend refresh tokens on rotation", defaultValue = "false")
     private Boolean refreshTokenExtendLifetimeOnRotation = false;
+
+    @DocProperty(description = "Boolean value specifying whether to allow blank values in discovery response", defaultValue = "false")
+    private Boolean allowBlankValuesInDiscoveryResponse;
 
     @DocProperty(description = "Check whether user exists and is active before creating RefreshToken. Set it to true if check is needed(Default value is false - don't check.", defaultValue = "false")
     private Boolean checkUserPresenceOnRefreshToken = false;
@@ -878,6 +884,15 @@ public class AppConfiguration implements Configuration {
         this.rotateDeviceSecret = rotateDeviceSecret;
     }
 
+    public Boolean getLogNotFoundEntityAsError() {
+        if (logNotFoundEntityAsError == null) logNotFoundEntityAsError = false;
+        return logNotFoundEntityAsError;
+    }
+
+    public void setLogNotFoundEntityAsError(Boolean logNotFoundEntityAsError) {
+        this.logNotFoundEntityAsError = logNotFoundEntityAsError;
+    }
+
     public Boolean getRequirePkce() {
         if (requirePkce == null) requirePkce = false;
         return requirePkce;
@@ -1036,6 +1051,15 @@ public class AppConfiguration implements Configuration {
 
     public void setRefreshTokenExtendLifetimeOnRotation(Boolean refreshTokenExtendLifetimeOnRotation) {
         this.refreshTokenExtendLifetimeOnRotation = refreshTokenExtendLifetimeOnRotation;
+    }
+
+    public Boolean getAllowBlankValuesInDiscoveryResponse() {
+        if (allowBlankValuesInDiscoveryResponse == null) allowBlankValuesInDiscoveryResponse = false;
+        return allowBlankValuesInDiscoveryResponse;
+    }
+
+    public void setAllowBlankValuesInDiscoveryResponse(Boolean allowBlankValuesInDiscoveryResponse) {
+        this.allowBlankValuesInDiscoveryResponse = allowBlankValuesInDiscoveryResponse;
     }
 
     public int getSectorIdentifierCacheLifetimeInMinutes() {

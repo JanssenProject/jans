@@ -34,22 +34,22 @@ the extent of access to APIs), what [grants](client-configuration.md#grants) are
 [redirect_uri](client-configuration.md#redirect-uri), timeouts, whether to use a value or reference token, whether to
 expire the client, and several other options that impact security.
 
-## Client Tools
-
-There are a few ways clients are created and managed in Jans Auth Server:
+## Client Management Tools
+A client can be created (and managed) by using one of the following tools offered by the Jans Auth server:
 
 * [Jans Config API](../../config-guide/config-api/README.md)
 * [Command Line Tool (CLI)](../../config-guide/jans-cli/README.md)
 * [Jans Text UI (TUI)](../../config-guide/jans-tui/README.md)
 * [OpenID Connect Dynamic Client Registration](https://openid.net/specs/openid-connect-registration-1_0.html)
 
-Which mechanism to use depends on the deployment requirements. For *ad hoc*
-creation, the TUI is great. If you need to quickly script client creation (e.g.
-in a bash script), use the CLI or use `curl` to call the Jans Config API.  If
-developers need to have the ability to register clients, then adopt OpenID
-Connect Dynamic Client Registration.
+The choice of tool should be made based on your business requirement. 
+- For *ad hoc* creation, the TUI is great. 
+- If you need to quickly script client creation (e.g. in a bash script) use the CLI 
+- Use `curl` to call the Jans Config API. 
+- To allow apps to register as OIDC clients, without a manual process, the OpenID
+Connect Dynamic Client Registration (DCR) can be used.
 
-### OpenID Dynamic Client Registration
+### A. OpenID Dynamic Client Registration
 
 Jans Auth server publishes the `registration_endpoint` in the OpenID
 configuration JSON response, which you can find at `.well-known/openid-configuration`
@@ -62,7 +62,7 @@ registration. Also, check the
 [Registration Endpoint documentation](../endpoints/client-registration.md) for
 more details on the steps involved in dynamic client registration.
 
-### Jans-CLI
+### B. Jans-CLI
 
 Below is a one liner to add a client.
 
@@ -75,7 +75,7 @@ Below is a one liner to add a client.
 For more information about how to use
 the Jans-CLI, see the [docs](../../config-guide/jans-cli/README.md)
 
-### Using TUI
+### C. TUI
 
 To start registering a new client, navigate to
 `Auth Server`->`Clients`->`Add Client`.  This brings up a screen as shown below
@@ -85,7 +85,9 @@ with various sections to input client details.
 
 Refer to complete documentation [here](../../config-guide/jans-tui/README.md)
 
-### Using curl
+### D. Using curl commands
 
 To add a client via `curl`, see the information on the
 [curl documentation page](../../config-guide/curl.md).
+
+

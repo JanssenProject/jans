@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>io.jans</groupId>
 		<artifactId>jans-auth-server-parent</artifactId>
-		<version>1.0.13-SNAPSHOT</version>
+		<version>1.0.14-SNAPSHOT</version>
 	</parent>
 
 	<properties>
@@ -176,10 +176,6 @@
         </dependency>
 
         <!-- documentation -->
-		<dependency>
-			<groupId>com.wordnik</groupId>
-			<artifactId>swagger-annotations</artifactId>
-		</dependency>
 		<dependency>
 			<groupId>io.jans</groupId>
 			<artifactId>jans-doc</artifactId>

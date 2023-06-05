@@ -5,13 +5,26 @@ tags:
   - logging
 ---
 
-## This content is in progress
+# Audit Logs
 
-The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.
+Audit logs are located in `jans-auth_audit.log` log file.
+All `jans-auth-server` log files are located in `/opt/jans/jetty/jans-auth/logs/`.
+ 
+Audit is disabled by default on AS and can be enabled via `enabledOAuthAuditLogging` AS configuration property.
+
+Audit logs are logged to file when enabled, however if JMS configuration is specified it will be logged to JMS as well.
+
+JMS Configuration must be set inside AS global configuration
+
+| Name            | Description         |  
+|---------------- |---------------------|  
+|jmsBrokerURISet  | JMS Broker URI Set  |
+|jmsUserName      | JMS UserName        |  
+|jmsPassword      | JMS Password.       |  
 
 ## Have questions in the meantime?
 
-While this documentation is in progress, you can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussion) or the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). Any questions you have will help determine what information our documentation should cover.
+You can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussion) or the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). Any questions you have will help determine what information our documentation should cover.
 
 ## Want to contribute?
 

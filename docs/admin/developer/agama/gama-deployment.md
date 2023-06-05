@@ -116,7 +116,7 @@ Once a `.gama` file is built the deployment process follows. Here is a typical w
 The following tables summarize the available endpoints. All URLs are relative to `/jans-config-api/api/v1`. An OpenAPI document is also available [here](https://github.com/JanssenProject/jans/blob/main/jans-config-api/docs/jans-config-api-swagger.yaml#L110-L254).
 
 
-|Endpoint -> |`/agama-deployment/list`|
+|Endpoint -> |`/agama-deployment`|
 |-|-|
 |Purpose|Retrieve a list of deployments in the server. This is not a search, just a paged listing|
 |Method|GET|
@@ -132,7 +132,7 @@ The following tables summarize the available endpoints. All URLs are relative to
 |Method|GET|
 |Path params|`name`|
 |Sample output|The structure of a deployment is explained below|
-|Status|200 (deployment task is finished), 204 (task still in course), 404 (project unknown), 400 (a param is missing)|
+|Status|200 (deployment task is finished), 204 (task still in course), 404 (project unknown)|
 
 
 |Deployment structure|Notes|Example|
@@ -140,16 +140,17 @@ The following tables summarize the available endpoints. All URLs are relative to
 |dn|Distinguished name|`jansId=123,ou=deployments,ou=agama,o=jans`|
 |id|Identifier of deployment (generated automatically)|`115276`|
 |createdAt|Datetime (in UTC) of the instant the deployment task was created (POSTed)|`2022-12-07T21:47:42`|
-|taskActive|Boolean value indicating if the deployment task is being currently processed, ie. the .agama file is being scanned, flows analysed, etc.|`false`|
+|taskActive|Boolean value indicating if the deployment task is being currently processed, ie. the `gama` file is being scanned, flows analysed, etc.|`false`|
 |finishedAt|Datetime (in UTC) representing the instant when the deployment task was finished, or `null` if it hasn't ended|`2022-12-07T21:48:42`|
 |details|Extra details, see below|
 
 
 |Deployment details structure|Notes|Example|
 |-|-|-|
-|projectMetadata|Includes author, type, description, and project's name - as supplied when the deployment task was created||
+|projectMetadata|Includes author, type, description, project's name, and example configuration - as supplied when the deployment task was created||
 |error|A general description of the error (if presented) when processing the task, otherwise `null`|`Archive missing web and/or code subdirectories`|
 |flowsError|A mapping of the errors obtained per flow found in the archive. The keys correspond to qualified names. A `null` value indicates the flow was successfully added|`{ "co.acme.example": "Syntax error on line 4", "io.jans.test": null }`|
+|libs|A listing of paths to `java`, `groovy`, or `jar` files included in the project archive||
 
 
 |Endpoint -> |`/agama-deployment/{name}`|
@@ -168,7 +169,7 @@ The following tables summarize the available endpoints. All URLs are relative to
 |Method|GET|
 |Path params|`name` (the project's name)|
 |Output|A JSON object whose properties are flow names and values correspond to configuration properties defined (JSON objects too)|
-|Status|200 (successful response), 204 (this project is still in course of deployment), 404 (unknown project), 400 (a param is missing)|
+|Status|200 (successful response), 204 (this project is still in course of deployment), 404 (unknown project)|
 
 
 |Endpoint -> |`/agama-deployment/configs/{name}`|
@@ -176,6 +177,7 @@ The following tables summarize the available endpoints. All URLs are relative to
 |Purpose|Set or replace the configurations associated to flows that belong to the project of interest. The project must have been already processed fully|
 |Method|PUT|
 |Path params|`name` (the project's name)|
+|Body|JSON payload|
 |Output|A JSON object whose properties are flow names and values correspond to a boolean indicating the success of the update for the given flow|
 |Status|200 (successful response), 204 (this project is still in course of deployment), 404 (unknown project), 400 (a param is missing)|
 
@@ -185,7 +187,7 @@ The following tables summarize the available endpoints. All URLs are relative to
 |Purpose|Undeploy an ADS project from the server. Entails removing flows and assets initally supplied|
 |Method|DELETE|
 |Path params|`name` (the project's name)|
-|Status|204 (scheduled for removal), 409 (the project is being deployed currently), 404 (unknown project), 400 (a param is missing)|
+|Status|204 (scheduled for removal), 409 (the project is being deployed currently), 404 (unknown project)|
 
 ### Endpoints access
 

@@ -12,8 +12,7 @@ Docker image packaging for config-api.
 
 ## Versions
 
-See [Releases](https://github.com/JanssenProject/docker-jans-config-api/releases) for stable versions.
-For bleeding-edge/unstable version, use `janssenproject/config-api:1.0.13_dev`.
+See [Packages](https://github.com/orgs/JanssenProject/packages/container/package/jans%2Fconfig-api) for available versions.
 
 ## Environment Variables
 
@@ -213,3 +212,4 @@ i.e. `http://container:9093/metrics`.
 
 Note that Prometheus JMX exporter uses pre-defined config file (see `conf/prometheus-config.yaml`).
 To customize the config, mount custom config file to `/opt/prometheus/prometheus-config.yaml` inside the container.
+

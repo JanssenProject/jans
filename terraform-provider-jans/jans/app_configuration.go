@@ -74,6 +74,28 @@ type CorsConfigurationFilter struct {
 	CorsRequestDecorate    bool   `schema:"cors_request_decorate" json:"corsRequestDecorate"`
 }
 
+type SsaConfiguration struct {
+	SsaEndpoint         string   `schema:"ssa_endpoint" json:"ssaEndpoint"`
+	SsaCustomAttributes []string `schema:"ssa_custom_attributes" json:"ssaCustomAttributes"`
+	SsaSigningAlg       string   `schema:"ssa_signing_alg" json:"ssaSigningAlg"`
+	SsaExpirationInDays int      `schema:"ssa_expiration_in_days" json:"ssaExpirationInDays"`
+}
+
+type SsaValidationConfig struct {
+	Id                         string   `schema:"id" json:"id"`
+	Type                       string   `schema:"type" json:"type"`
+	DisplayName                string   `schema:"display_name" json:"display_name"`
+	Description                string   `schema:"description" json:"description"`
+	Scopes                     []string `schema:"scopes" json:"scopes"`
+	AllowedClaims              []string `schema:"allowed_claims" json:"allowed_claims"`
+	Jwks                       string   `schema:"jwks" json:"jwks"`
+	JwksUri                    string   `schema:"jwks_uri" json:"jwks_uri"`
+	Issuers                    []string `schema:"issuers" json:"issuers"`
+	ConfigurationEndpoint      string   `schema:"configuration_endpoint" json:"configuration_endpoint"`
+	ConfigurationEndpointClaim string   `schema:"configuration_endpoint_claim" json:"configuration_endpoint_claim"`
+	SharedSecret               string   `schema:"shared_secret" json:"shared_secret"`
+}
+
 // AppConfiguration represents the Janssen authorization server
 // configuration properties
 type AppConfiguration struct {
@@ -95,7 +117,6 @@ type AppConfiguration struct {
 	ParEndpoint                                               string                                `schema:"par_endpoint" json:"parEndpoint"`
 	RequirePar                                                bool                                  `schema:"require_par" json:"requirePar"`
 	DeviceAuthzEndpoint                                       string                                `schema:"device_authz_endpoint" json:"deviceAuthzEndpoint"`
-	SessionAsJwt                                              bool                                  `schema:"session_as_jwt" json:"sessionAsJwt"`
 	MtlsAuthorizationEndpoint                                 string                                `schema:"mtls_authorization_endpoint" json:"mtlsAuthorizationEndpoint"`
 	MtlsTokenEndpoint                                         string                                `schema:"mtls_token_endpoint" json:"mtlsTokenEndpoint"`
 	MtlsTokenRevocationEndpoint                               string                                `schema:"mtls_token_revocation_endpoint" json:"mtlsTokenRevocationEndpoint"`
@@ -112,7 +133,7 @@ type AppConfiguration struct {
 	RequireRequestObjectEncryption                            bool                                  `schema:"require_request_object_encryption" json:"requireRequestObjectEncryption"`
 	RequirePkce                                               bool                                  `schema:"require_pkce" json:"requirePkce"`
 	AllowAllValueForRevokeEndpoint                            bool                                  `schema:"allow_all_value_for_revoke_endpoint" json:"allowAllValueForRevokeEndpoint"`
-	SectorIdentifierCacheLifetime                             int                                   `schema:"sector_identifier_cache_lifetime" json:"sectorIdentifierCacheLifetime"`
+	SectorIdentifierCacheLifetimeInMinutes                    int                                   `schema:"sector_identifier_cache_lifetime_in_minutes" json:"sectorIdentifierCacheLifetimeInMinutes"`
 	UmaConfigurationEndpoint                                  string                                `schema:"uma_configuration_endpoint" json:"umaConfigurationEndpoint"`
 	UmaRptAsJwt                                               bool                                  `schema:"uma_rpt_as_jwt" json:"umaRptAsJwt"`
 	UmaRptLifetime                                            int                                   `schema:"uma_rpt_lifetime" json:"umaRptLifetime"`
@@ -144,6 +165,7 @@ type AppConfiguration struct {
 	IDTokenSigningAlgValuesSupported                          []string                              `schema:"id_token_signing_alg_values_supported" json:"idTokenSigningAlgValuesSupported"`
 	IDTokenEncryptionAlgValuesSupported                       []string                              `schema:"id_token_encryption_alg_values_supported" json:"idTokenEncryptionAlgValuesSupported"`
 	IDTokenEncryptionEncValuesSupported                       []string                              `schema:"id_token_encryption_enc_values_supported" json:"idTokenEncryptionEncValuesSupported"`
+	AccessTokenSigningAlgValuesSupported                      []string                              `schema:"access_token_signing_alg_values_supported" json:"accessTokenSigningAlgValuesSupported"`
 	ForceSignedRequestObject                                  bool                                  `schema:"force_signed_request_object" json:"forceSignedRequestObject"`
 	RequestObjectSigningAlgValuesSupported                    []string                              `schema:"request_object_signing_alg_values_supported" json:"requestObjectSigningAlgValuesSupported"`
 	RequestObjectEncryptionAlgValuesSupported                 []string                              `schema:"request_object_encryption_alg_values_supported" json:"requestObjectEncryptionAlgValuesSupported"`
@@ -175,22 +197,25 @@ type AppConfiguration struct {
 	KeyRegenerationEnabled                                    bool                                  `schema:"key_regeneration_enabled" json:"keyRegenerationEnabled"`
 	KeyRegenerationInterval                                   int                                   `schema:"key_regeneration_interval" json:"keyRegenerationInterval"`
 	DefaultSignatureAlgorithm                                 string                                `schema:"default_signature_algorithm" json:"defaultSignatureAlgorithm"`
-	OxOpenIDConnectVersion                                    string                                `schema:"ox_open_id_connect_version" json:"oxOpenIdConnectVersion"`
-	OxID                                                      string                                `schema:"ox_id" json:"oxId"`
+	JansOpenIDConnectVersion                                  string                                `schema:"jans_open_id_connect_version" json:"jansOpenIdConnectVersion"`
+	JansID                                                    string                                `schema:"jans_id" json:"jansId"`
 	TrustedClientEnabled                                      bool                                  `schema:"trusted_client_enabled" json:"trustedClientEnabled"`
 	SkipAuthorizationForOpenIDScopeAndPairwiseID              bool                                  `schema:"skip_authorization_for_open_id_scope_and_pairwise_id" json:"skipAuthorizationForOpenIDScopeAndPairwiseID"`
 	DynamicRegistrationExpirationTime                         int                                   `schema:"dynamic_registration_expiration_time" json:"dynamicRegistrationExpirationTime"`
 	DynamicRegistrationCustomAttributes                       []string                              `schema:"dynamic_registration_custom_attributes" json:"dynamicRegistrationCustomAttributes"`
+	DynamicRegistrationDefaultCustomAttributes                map[string]string                     `schema:"dynamic_registration_default_custom_attributes" json:"dynamicRegistrationDefaultCustomAttributes"`
 	DynamicRegistrationPersistClientAuthorizations            bool                                  `schema:"dynamic_registration_persist_client_authorizations" json:"dynamicRegistrationPersistClientAuthorizations"`
 	DynamicRegistrationAllowedPasswordGrantScopes             []string                              `schema:"dynamic_registration_allowed_password_grant_scopes" json:"dynamicRegistrationAllowedPasswordGrantScopes"`
 	DynamicRegistrationCustomObjectClass                      string                                `schema:"dynamic_registration_custom_object_class" json:"dynamicRegistrationCustomObjectClass"`
 	DynamicRegistrationScopesParamEnabled                     bool                                  `schema:"dynamic_registration_scopes_param_enabled" json:"dynamicRegistrationScopesParamEnabled"`
 	DynamicRegistrationPasswordGrantTypeEnabled               bool                                  `schema:"dynamic_registration_password_grant_type_enabled" json:"dynamicRegistrationPasswordGrantTypeEnabled"`
-	PersistIdTokenInLdap                                      bool                                  `schema:"persist_id_token_in_ldap" json:"persistIdTokenInLdap"`
-	PersistRefreshTokenInLdap                                 bool                                  `schema:"persist_refresh_token_in_ldap" json:"persistRefreshTokenInLdap"`
+	PersonCustomObjectClassList                               []string                              `schema:"person_custom_object_class_list" json:"personCustomObjectClassList"`
+	PersistIdToken                                            bool                                  `schema:"persist_id_token" json:"persistIdToken"`
+	PersistRefreshToken                                       bool                                  `schema:"persist_refresh_token" json:"persistRefreshToken"`
 	AllowPostLogoutRedirectWithoutValidation                  bool                                  `schema:"allow_post_logout_redirect_without_validation" json:"allowPostLogoutRedirectWithoutValidation"`
 	InvalidateSessionCookiesAfterAuthorizationFlow            bool                                  `schema:"invalidate_session_cookies_after_authorization_flow" json:"invalidateSessionCookiesAfterAuthorizationFlow"`
 	ReturnClientSecretOnRead                                  bool                                  `schema:"return_client_secret_on_read" json:"returnClientSecretOnRead"`
+	RotateClientRegistrationAccessTokenOnUsage                bool                                  `schema:"rotate_client_registration_access_token_on_usage" json:"rotateClientRegistrationAccessTokenOnUsage"`
 	RejectJwtWithNoneAlg                                      bool                                  `schema:"reject_jwt_with_none_alg" json:"rejectJwtWithNoneAlg"`
 	ExpirationNotificatorEnabled                              bool                                  `schema:"expiration_notificator_enabled" json:"expirationNotificatorEnabled"`
 	UseNestedJwtDuringEncryption                              bool                                  `schema:"use_nested_jwt_during_encryption" json:"useNestedJwtDuringEncryption"`
@@ -212,12 +237,17 @@ type AppConfiguration struct {
 	ChangeSessionIdOnAuthentication                           bool                                  `schema:"change_session_id_on_authentication" json:"changeSessionIdOnAuthentication"`
 	SessionIdPersistInCache                                   bool                                  `schema:"session_id_persist_in_cache" json:"sessionIdPersistInCache"`
 	IncludeSidInResponse                                      bool                                  `schema:"include_sid_in_response" json:"includeSidInResponse"`
+	DisablePromptLogin                                        bool                                  `schema:"disable_prompt_login" json:"disablePromptLogin"`
+	DisablePromptConsent                                      bool                                  `schema:"disable_prompt_consent" json:"disablePromptConsent"`
 	SessionIdLifetime                                         int                                   `schema:"session_id_lifetime" json:"sessionIdLifetime"`
 	ServerSessionIdLifetime                                   int                                   `schema:"server_session_id_lifetime" json:"serverSessionIdLifetime"`
 	ActiveSessionAuthorizationScope                           string                                `schema:"active_session_authorization_scope" json:"activeSessionAuthorizationScope"`
 	ConfigurationUpdateInterval                               int                                   `schema:"configuration_update_interval" json:"configurationUpdateInterval"`
 	EnableClientGrantTypeUpdate                               bool                                  `schema:"enable_client_grant_type_update" json:"enableClientGrantTypeUpdate"`
 	DynamicGrantTypeDefault                                   []string                              `schema:"dynamic_grant_type_default" json:"dynamicGrantTypeDefault"`
+	CssLocation                                               string                                `schema:"css_location" json:"cssLocation"`
+	JsLocation                                                string                                `schema:"js_location" json:"jsLocation"`
+	ImgLocation                                               string                                `schema:"img_location" json:"imgLocation"`
 	MetricReporterInterval                                    int                                   `schema:"metric_reporter_interval" json:"metricReporterInterval"`
 	MetricReporterKeepDataDays                                int                                   `schema:"metric_reporter_keep_data_days" json:"metricReporterKeepDataDays"`
 	PairwiseIdType                                            string                                `schema:"pairwise_id_type" json:"pairwiseIdType"`
@@ -233,14 +263,20 @@ type AppConfiguration struct {
 	KeyAlgsAllowedForGeneration                               []string                              `schema:"key_algs_allowed_for_generation" json:"keyAlgsAllowedForGeneration"`
 	StaticKid                                                 string                                `schema:"static_kid" json:"staticKid"`
 	StaticDecryptionKid                                       string                                `schema:"static_decryption_kid" json:"staticDecryptionKid"`
-	OxElevenGenerateKeyEndpoint                               string                                `schema:"ox_eleven_generate_key_endpoint" json:"oxElevenGenerateKeyEndpoint"`
-	OxElevenSignEndpoint                                      string                                `schema:"ox_eleven_sign_endpoint" json:"oxElevenSignEndpoint"`
-	OxElevenVerifySignatureEndpoint                           string                                `schema:"ox_eleven_verify_signature_endpoint" json:"oxElevenVerifySignatureEndpoint"`
-	OxElevenDeleteKeyEndpoint                                 string                                `schema:"ox_eleven_delete_key_endpoint" json:"oxElevenDeleteKeyEndpoint"`
-	OxElevenTestModeToken                                     string                                `schema:"ox_eleven_test_mode_token" json:"oxElevenTestModeToken"`
+	JansElevenTestModeToken                                   string                                `schema:"jans_eleven_test_mode_token" json:"jansElevenTestModeToken"`
+	JansElevenGenerateKeyEndpoint                             string                                `schema:"jans_eleven_generate_key_endpoint" json:"jansElevenGenerateKeyEndpoint"`
+	JansElevenSignEndpoint                                    string                                `schema:"jans_eleven_sign_endpoint" json:"jansElevenSignEndpoint"`
+	JansElevenVerifySignatureEndpoint                         string                                `schema:"jans_eleven_verify_signature_endpoint" json:"jansElevenVerifySignatureEndpoint"`
+	JansElevenDeleteKeyEndpoint                               string                                `schema:"jans_eleven_delete_key_endpoint" json:"jansElevenDeleteKeyEndpoint"`
 	IntrospectionAccessTokenMustHaveUmaProtectionScope        bool                                  `schema:"introspection_access_token_must_have_uma_protection_scope" json:"introspectionAccessTokenMustHaveUmaProtectionScope"`
 	IntrospectionSkipAuthorization                            bool                                  `schema:"introspection_skip_authorization" json:"introspectionSkipAuthorization"`
 	EndSessionWithAccessToken                                 bool                                  `schema:"end_session_with_access_token" json:"endSessionWithAccessToken"`
+	CookieDomain                                              string                                `schema:"cookie_domain" json:"cookieDomain"`
+	EnabledOAuthAuditLogging                                  bool                                  `schema:"enabled_oauth_audit_logging" json:"enabledOAuthAuditLogging"`
+	JmsBrokerUriSet                                           []string                              `schema:"jms_broker_uri_set" json:"jmsBrokerUriSet"`
+	JmsUserName                                               string                                `schema:"jms_user_name" json:"jmsUserName"`
+	JmsPassword                                               string                                `schema:"jms_password" json:"jmsPassword"`
+	ExternalUriWhiteList                                      []string                              `schema:"external_uri_white_list" json:"externalUriWhiteList"`
 	ClientWhiteList                                           []string                              `schema:"client_white_list" json:"clientWhiteList"`
 	ClientBlackList                                           []string                              `schema:"client_black_list" json:"clientBlackList"`
 	LegacyIdTokenClaims                                       bool                                  `schema:"legacy_id_token_claims" json:"legacyIdTokenClaims"`
@@ -256,18 +292,22 @@ type AppConfiguration struct {
 	AuthorizationRequestCustomAllowedParameters               []CustomAllowedParameter              `schema:"authorization_request_custom_allowed_parameters" json:"authorizationRequestCustomAllowedParameters"`
 	OpenidScopeBackwardCompatibility                          bool                                  `schema:"openid_scope_backward_compatibility" json:"openidScopeBackwardCompatibility"`
 	DisableU2fEndpoint                                        bool                                  `schema:"disable_u2f_endpoint" json:"disableU2fEndpoint"`
+	RotateDeviceSecret                                        bool                                  `schema:"rotate_device_secret" json:"rotateDeviceSecret"`
+	ReturnDeviceSecretFromAuthzEndpoint                       bool                                  `schema:"return_device_secret_from_authz_endpoint" json:"returnDeviceSecretFromAuthzEndpoint"`
 	DcrSignatureValidationEnabled                             bool                                  `schema:"dcr_signature_validation_enabled" json:"dcrSignatureValidationEnabled"`
+	DcrSignatureValidationSharedSecret                        string                                `schema:"dcr_signature_validation_shared_secret" json:"dcrSignatureValidationSharedSecret"`
+	DcrSignatureValidationSoftwareStatementJwksUriClaim       string                                `schema:"dcr_signature_validation_software_statement_jwks_uri_claim" json:"dcrSignatureValidationSoftwareStatementJwksUriClaim"`
+	DcrSignatureValidationSoftwareStatementJwksClaim          string                                `schema:"dcr_signature_validation_software_statement_jwks_claim" json:"dcrSignatureValidationSoftwareStatementJwksClaim"`
+	DcrSignatureValidationJwks                                string                                `schema:"dcr_signature_validation_jwks" json:"dcrSignatureValidationJwks"`
+	DcrSignatureValidationJwksUri                             string                                `schema:"dcr_signature_validation_jwks_uri" json:"dcrSignatureValidationJwksUri"`
 	DcrAuthorizationWithClientCredentials                     bool                                  `schema:"dcr_authorization_with_client_credentials" json:"dcrAuthorizationWithClientCredentials"`
 	DcrAuthorizationWithMTLS                                  bool                                  `schema:"dcr_authorization_with_mtls" json:"dcrAuthorizationWithMTLS"`
-	DcrSignatureValidationJwks                                string                                `schema:"dcr_signature_validation_jwks" json:"dcrSignatureValidationJwks"`
-	DcrSignatureValidationSoftwareStatementJwksUriClaim       string                                `schema:"dcr_signature_validation_software_statement_jwks_uri_claim" json:"dcrSignatureValidationSoftwareStatementJwksUriClaim"`
-	DcrSignatureValidationJwksUri                             string                                `schema:"dcr_signature_validation_jwks_uri" json:"dcrSignatureValidationJwksUri"`
-	DcrSignatureValidationSharedSecret                        string                                `schema:"dcr_signature_validation_shared_secret" json:"dcrSignatureValidationSharedSecret"`
-	DcrSignatureValidationSoftwareStatementJwksClaim          string                                `schema:"dcr_signature_validation_software_statement_jwks_claim" json:"dcrSignatureValidationSoftwareStatementJwksClaim"`
 	DcrIssuers                                                []string                              `schema:"dcr_issuers" json:"dcrIssuers"`
 	UseLocalCache                                             bool                                  `schema:"use_local_cache" json:"useLocalCache"`
 	FapiCompatibility                                         bool                                  `schema:"fapi_compatibility" json:"fapiCompatibility"`
 	ForceIdTokenHintPrecense                                  bool                                  `schema:"force_id_token_hint_precense" json:"forceIdTokenHintPrecense"`
+	RejectEndSessionIfIdTokenExpired                          bool                                  `schema:"reject_end_session_if_id_token_expired" json:"rejectEndSessionIfIdTokenExpired"`
+	AllowEndSessionWithUnmatchedSid                           bool                                  `schema:"allow_end_session_with_unmatched_sid" json:"allowEndSessionWithUnmatchedSid"`
 	ForceOfflineAccessScopeToEnableRefreshToken               bool                                  `schema:"force_offline_access_scope_to_enable_refresh_token" json:"forceOfflineAccessScopeToEnableRefreshToken"`
 	ErrorReasonEnabled                                        bool                                  `schema:"error_reason_enabled" json:"errorReasonEnabled"`
 	RemoveRefreshTokensForClientOnLogout                      bool                                  `schema:"remove_refresh_tokens_for_client_on_logout" json:"removeRefreshTokensForClientOnLogout"`
@@ -278,51 +318,49 @@ type AppConfiguration struct {
 	IntrospectionScriptBackwardCompatibility                  bool                                  `schema:"introspection_script_backward_compatibility" json:"introspectionScriptBackwardCompatibility"`
 	IntrospectionResponseScopesBackwardCompatibility          bool                                  `schema:"introspection_response_scopes_backward_compatibility" json:"introspectionResponseScopesBackwardCompatibility"`
 	SoftwareStatementValidationType                           string                                `schema:"software_statement_validation_type" json:"softwareStatementValidationType"`
+	SoftwareStatementValidationClaimName                      string                                `schema:"software_statement_validation_claim_name" json:"softwareStatementValidationClaimName"`
 	AuthenticationProtectionConfiguration                     AuthenticationProtectionConfiguration `schema:"authentication_protection_configuration" json:"authenticationProtectionConfiguration"`
 	ErrorHandlingMethod                                       string                                `schema:"error_handling_method" json:"errorHandlingMethod"`
+	DisableAuthnForMaxAgeZero                                 bool                                  `schema:"disable_authn_for_max_age_zero" json:"disableAuthnForMaxAgeZero"`
 	KeepAuthenticatorAttributesOnAcrChange                    bool                                  `schema:"keep_authenticator_attributes_on_acr_change" json:"keepAuthenticatorAttributesOnAcrChange"`
 	DeviceAuthzRequestExpiresIn                               int                                   `schema:"device_authz_request_expires_in" json:"deviceAuthzRequestExpiresIn"`
 	DeviceAuthzTokenPollInterval                              int                                   `schema:"device_authz_token_poll_interval" json:"deviceAuthzTokenPollInterval"`
 	DeviceAuthzResponseTypeToProcessAuthz                     string                                `schema:"device_authz_response_type_to_process_authz" json:"deviceAuthzResponseTypeToProcessAuthz"`
+	DeviceAuthzAcr                                            string                                `schema:"device_authz_acr" json:"deviceAuthzAcr"`
+	BackchannelClientId                                       string                                `schema:"backchannel_client_id" json:"backchannelClientId"`
 	BackchannelRedirectUri                                    string                                `schema:"backchannel_redirect_uri" json:"backchannelRedirectUri"`
 	BackchannelAuthenticationEndpoint                         string                                `schema:"backchannel_authentication_endpoint" json:"backchannelAuthenticationEndpoint"`
 	BackchannelDeviceRegistrationEndpoint                     string                                `schema:"backchannel_device_registration_endpoint" json:"backchannelDeviceRegistrationEndpoint"`
 	BackchannelTokenDeliveryModesSupported                    []string                              `schema:"backchannel_token_delivery_modes_supported" json:"backchannelTokenDeliveryModesSupported"`
+	BackchannelAuthenticationRequestSigningAlgValuesSupported []string                              `schema:"backchannel_authentication_request_signing_alg_values_supported" json:"backchannelAuthenticationRequestSigningAlgValuesSupported"`
 	BackchannelUserCodeParameterSupported                     bool                                  `schema:"backchannel_user_code_parameter_supported" json:"backchannelUserCodeParameterSupported"`
 	BackchannelBindingMessagePattern                          string                                `schema:"backchannel_binding_message_pattern" json:"backchannelBindingMessagePattern"`
 	BackchannelAuthenticationResponseExpiresIn                int                                   `schema:"backchannel_authentication_response_expires_in" json:"backchannelAuthenticationResponseExpiresIn"`
 	BackchannelAuthenticationResponseInterval                 int                                   `schema:"backchannel_authentication_response_interval" json:"backchannelAuthenticationResponseInterval"`
 	BackchannelLoginHintClaims                                []string                              `schema:"backchannel_login_hint_claims" json:"backchannelLoginHintClaims"`
-	CibaEndUserNotificationConfig                             CibaEndUserNotificationConfig         `schema:"ciba_end_user_notification_config" json:"cibaEndUserNotificationConfig"`
 	BackchannelRequestsProcessorJobIntervalSec                int                                   `schema:"backchannel_requests_processor_job_interval_sec" json:"backchannelRequestsProcessorJobIntervalSec"`
 	BackchannelRequestsProcessorJobChunkSize                  int                                   `schema:"backchannel_requests_processor_job_chunk_size" json:"backchannelRequestsProcessorJobChunkSize"`
+	CibaEndUserNotificationConfig                             CibaEndUserNotificationConfig         `schema:"ciba_end_user_notification_config" json:"cibaEndUserNotificationConfig"`
 	CibaGrantLifeExtraTimeSec                                 int                                   `schema:"ciba_grant_life_extra_time_sec" json:"cibaGrantLifeExtraTimeSec"`
 	CibaMaxExpirationTimeAllowedSec                           int                                   `schema:"ciba_max_expiration_time_allowed_sec" json:"cibaMaxExpirationTimeAllowedSec"`
 	DpopSigningAlgValuesSupported                             []string                              `schema:"dpop_signing_alg_values_supported" json:"dpopSigningAlgValuesSupported"`
 	DpopTimeframe                                             int                                   `schema:"dpop_timeframe" json:"dpopTimeframe"`
 	DpopJtiCacheTime                                          int                                   `schema:"dpop_jti_cache_time" json:"dpopJtiCacheTime"`
 	AllowIdTokenWithoutImplicitGrantType                      bool                                  `schema:"allow_id_token_without_implicit_grant_type" json:"allowIdTokenWithoutImplicitGrantType"`
-	DiscoveryAllowedKeys                                      []string                              `schema:"discovery_allowed_keys" json:"discoveryAllowedKeys"`
 	DiscoveryCacheLifetimeInMinutes                           int                                   `schema:"discovery_cache_lifetime_in_minutes" json:"discoveryCacheLifetimeInMinutes"`
+	DiscoveryAllowedKeys                                      []string                              `schema:"discovery_allowed_keys" json:"discoveryAllowedKeys"`
 	DiscoveryDenyKeys                                         []string                              `schema:"discovery_deny_keys" json:"discoveryDenyKeys"`
+	FeatureFlags                                              []string                              `schema:"feature_flags" json:"featureFlags"`
 	HttpLoggingEnabled                                        bool                                  `schema:"http_logging_enabled" json:"httpLoggingEnabled"`
 	HttpLoggingExcludePaths                                   []string                              `schema:"http_logging_exclude_paths" json:"httpLoggingExcludePaths"`
 	ExternalLoggerConfiguration                               string                                `schema:"external_logger_configuration" json:"externalLoggerConfiguration"`
 	AgamaConfiguration                                        EngineConfiguration                   `schema:"agama_configuration" json:"agamaConfiguration"`
-	EnabledComponents                                         []string                              `schema:"enabled_components" json:"enabledComponents"`
-	PersonCustomObjectClassList                               []string                              `schema:"person_custom_object_class_list" json:"personCustomObjectClassList"`
-	StatWebServiceIntervalLimitInSeconds                      int                                   `schema:"stat_web_service_interval_limit_in_seconds" json:"statWebServiceIntervalLimitInSeconds"`
-	ImgLocation                                               string                                `schema:"img_location" json:"imgLocation"`
-	SoftwareStatementValidationClaimName                      string                                `schema:"software_statement_validation_claim_name" json:"softwareStatementValidationClaimName"`
-	JmsBrokerUriSet                                           []string                              `schema:"jms_broker_uri_set" json:"jmsBrokerUriSet"`
-	JsLocation                                                string                                `schema:"js_location" json:"jsLocation"`
-	CssLocation                                               string                                `schema:"css_location" json:"cssLocation"`
-	BackchannelAuthenticationRequestSigningAlgValuesSupported []string                              `schema:"backchannel_authentication_request_signing_alg_values_supported" json:"backchannelAuthenticationRequestSigningAlgValuesSupported"`
-	BackchannelClientId                                       string                                `schema:"backchannel_client_id" json:"backchannelClientId"`
-	EnabledOAuthAuditLogging                                  bool                                  `schema:"enabled_oauth_audit_logging" json:"enabledOAuthAuditLogging"`
-	JmsUserName                                               string                                `schema:"jms_user_name" json:"jmsUserName"`
-	JmsPassword                                               string                                `schema:"jms_password" json:"jmsPassword"`
-	CookieDomain                                              string                                `schema:"cookie_domain" json:"cookieDomain"`
+	DcrSsaValidationConfigs                                   []SsaValidationConfig                 `schema:"dcr_ssa_validation_configs" json:"dcrSsaValidationConfigs"`
+	SsaConfiguration                                          SsaConfiguration                      `schema:"ssa_configuration" json:"ssaConfiguration"`
+	BlockWebviewAuthorizationEnabled                          bool                                  `schema:"block_webview_authorization_enabled" json:"blockWebviewAuthorizationEnabled"`
+	DateFormatterPatterns                                     map[string]string                     `schema:"date_formatter_patterns" json:"dateFormatterPatterns"`
+	Fapi                                                      bool                                  `schema:"fapi" json:"fapi"`
+	AllResponseTypesSupported                                 []string                              `schema:"all_response_types_supported" json:"allResponseTypesSupported"`
 }
 
 // GetAppConfiguration returns all Janssen authorization server configuration

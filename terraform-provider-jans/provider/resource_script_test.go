@@ -24,7 +24,7 @@ func TestResourceScripts_Mapping(t *testing.T) {
 		Name:                "test_script",
 		Aliases:             []string{"test_alias"},
 		Description:         "test_description",
-		Script:              "// source code",
+		Script:              "// script source",
 		ScriptType:          "introspection",
 		ProgrammingLanguage: "python",
 		ModuleProperties: []jans.SimpleCustomProperty{
@@ -95,7 +95,7 @@ resource "jans_script" "test" {
 	name 											= "test_script"
 	// aliases 									= 
 	description 							= "Test description"
-	script 										= ""
+	script 										= "// script source"
 	script_type 							= "introspection"
 	programming_language 			= "python"
 	level 										= 1

@@ -2,16 +2,29 @@
 tags:
   - administration
   - client
-  - software-statements
+  - software statements
 ---
 
-## This content is in progress
+# Software Statements
 
-The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.
+Software Statement is defined by OAuth dynamic client registration RFC
+[7591](https://datatracker.ietf.org/doc/html/rfc7591#section-1.2) as
 
-## Have questions in the meantime?
+```
+A digitally signed or MACed JSON Web Token (JWT) 
+that asserts metadata values about the client software.
+```
 
-While this documentation is in progress, you can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussion) or the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). Any questions you have will help determine what information our documentation should cover.
+Janssen Server supports usage of software statements during dynamic client registration.
+
+## Use During Dynamic Client Registration
+
+Janssen Server supports dynamic client registration using software statements. It can be
+[used as software statements](./../../auth-server/endpoints/client-registration.md#using-software-statement) or
+[as software statement assertions (SSA)](../../auth-server/endpoints/client-registration.md#special-mention-about-fapi)
+to register client dynamically.
+
+Janssen Server also provides [SSA endpoint](../../auth-server/endpoints/ssa.md) to create and manage SSAs on the server.
 
 ## Want to contribute?
 

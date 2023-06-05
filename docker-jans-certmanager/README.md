@@ -13,8 +13,7 @@ The container designed to run as one-time command (or Job in kubernetes world).
 
 ## Versions
 
-See [Releases](https://github.com/JanssenProject/docker-jans-certmanager/releases) for stable versions.
-For bleeding-edge/unstable version, use `janssenproject/certmanager:1.0.13_dev`.
+See [Packages](https://github.com/orgs/JanssenProject/packages/container/package/jans%2Fcertmanager) for available versions.
 
 ## Environment Variables
 
@@ -141,9 +140,9 @@ Supported services:
 
     - `interval`: crypto keys expiration time (in hours)
     - `push-to-container`: whether to _push_ `auth-keys.jks` and `auth-keys.json` to auth-server containers (default to `true`)
-    - `key-strategy`: key selection strategy (choose one of `OLDER`, `NEWER`, `FIRST`; default to `OLDER`)
+    - `key-strategy`: key selection strategy (choose one of `OLDER`, `NEWER`, `FIRST`; default to `NEWER`)
     - `privkey-push-delay`: delay time in seconds before pushing `auth-keys.jks` to auth containers (default to `0`)
-    - `privkey-push-strategy`: key selection strategy after `auth-keys.jks` is pushed to auth containers (choose one of `OLDER`, `NEWER`, `FIRST`; default to `OLDER`)
+    - `privkey-push-strategy`: key selection strategy after `auth-keys.jks` is pushed to auth containers (choose one of `OLDER`, `NEWER`, `FIRST`; default to `NEWER`)
     - `sig-keys`: space-separated key algorithm for signing (default to `RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512`)
     - `enc-keys`: space-separated key algorithm for encryption (default to `RSA1_5 RSA-OAEP`)
 
@@ -199,24 +198,6 @@ Supported services:
 
 ### Examples
 
-Docker example:
-
-```sh
-docker run \
-    --rm \
-    --network container:consul \
-    -e CN_CONFIG_ADAPTER=consul \
-    -e CN_CONFIG_CONSUL_HOST=consul \
-    -e CN_SECRET_ADAPTER=vault \
-    -e CN_SECRET_VAULT_HOST=vault \
-    -v $PWD/vault_role_id.txt:/etc/certs/vault_role_id \
-    -v $PWD/vault_secret_id.txt:/etc/certs/vault_secret_id \
-    -v $PWD/ssl.crt:/etc/certs/jans_https.crt \
-    -v $PWD/ssl.key:/etc/certs/jans_https.key \
-    -v /var/run/docker.sock:/var/run/docker.sock \
-    janssenproject/certmanager:1.0.13_dev patch web --opts source:from-files
-```
-
 Kubernetes CronJob example:
 
 ```yaml
@@ -233,7 +214,7 @@ spec:
         spec:
           containers:
             - name: auth-key-rotation
-              image: janssenproject/certmanager:1.0.4-1
+              image: ghcr.io/janssenproject/jans/certmanager:1.0.14_dev
               resources:
                 requests:
                   memory: "300Mi"
@@ -279,4 +260,3 @@ As per v1.0.1, hybrid persistence supports all available persistence types. To c
         "session": "spanner",
     }
     ```
-

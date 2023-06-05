@@ -4,19 +4,20 @@
 	<parent>
 		<groupId>io.jans</groupId>
 		<artifactId>jans-config-api-parent</artifactId>
-		<version>1.0.13-SNAPSHOT</version>
+		<version>1.0.14-SNAPSHOT</version>
 	</parent>
 
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>io.jans.jans-config-api.plugins</groupId>
 	<artifactId>plugins</artifactId>
-	<version>1.0.13-SNAPSHOT</version>
+	<version>1.0.14-SNAPSHOT</version>
 
 	<packaging>pom</packaging>
 
 	<modules>
 		<module>admin-ui-plugin</module>
+        <module>cache-refresh-plugin</module>
 		<module>scim-plugin</module>
 		<module>user-mgt-plugin</module>
 		<module>fido2-plugin</module>

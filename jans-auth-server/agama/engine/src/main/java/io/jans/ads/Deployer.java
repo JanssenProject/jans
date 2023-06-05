@@ -150,7 +150,8 @@ public class Deployer {
 
         if (Files.isDirectory(pcode) && Files.isDirectory(pweb)) {
             
-            try {  
+            try {
+                //craft a path so assets of different projects do not collide, see jans#4501
                 String prjBasepath = makeShortSafePath(prjId);
                 Set<String> flowIds = createFlows(pcode, dd, prjBasepath);
                 if (dd.getError() == null) {

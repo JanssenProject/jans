@@ -64,6 +64,7 @@ resource "jans_script" "test" {
 - `enabled` (Boolean) boolean value indicating if script enabled.
 - `internal` (Boolean) boolean value indicating if the script is internal.
 - `inum` (String) XRI i-number. Identifier to uniquely identify the script.
+- `location_path` (String)
 - `location_type` (String)
 - `modified` (Boolean) boolean value indicating if the script is modified.
 - `revision` (Number) Update revision number of the script.

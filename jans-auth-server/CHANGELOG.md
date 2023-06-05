@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.0.13](https://github.com/JanssenProject/jans/compare/jans-auth-server-v1.0.12...jans-auth-server-v1.0.13) (2023-05-10)
+
+
+### Features
+
+* **jans-auth-server:** add "introspection" scope check on introspection endpoint access [#4557](https://github.com/JanssenProject/jans/issues/4557) ([#4716](https://github.com/JanssenProject/jans/issues/4716)) ([ce2d75c](https://github.com/JanssenProject/jans/commit/ce2d75c32df382eb2a28f89793778a3e72659700))
+* **jans-auth-server:** avoided unnecessary "session not found" error messages during refresh token flow [#4785](https://github.com/JanssenProject/jans/issues/4785) ([#4786](https://github.com/JanssenProject/jans/issues/4786)) ([dbf0d52](https://github.com/JanssenProject/jans/commit/dbf0d52aa1501c7089c5682186d86db230f6d216))
+* **jans-auth-server:** invalidate discovery cache if some scripts are (re)loaded [#4500](https://github.com/JanssenProject/jans/issues/4500) ([#4812](https://github.com/JanssenProject/jans/issues/4812)) ([ed48b4f](https://github.com/JanssenProject/jans/commit/ed48b4fbf68def04cbe1924ab1c83bc737aedfd3))
+* **jans-auth-server:** log httpresponse body configurated by httpLoggingResponseBodyContent [#349](https://github.com/JanssenProject/jans/issues/349) ([#4417](https://github.com/JanssenProject/jans/issues/4417)) ([08d92b3](https://github.com/JanssenProject/jans/commit/08d92b303aa1d1733b2e51d258b0a09a21df6677))
+
+
+### Bug Fixes
+
+* cors filter should not store in local variable allowed ([#4688](https://github.com/JanssenProject/jans/issues/4688)) ([0d99195](https://github.com/JanssenProject/jans/commit/0d99195972dfe2963d3d0b785cd25b7337b55296)), closes [#4687](https://github.com/JanssenProject/jans/issues/4687)
+* jans-auth-server/pom.xml to reduce vulnerabilities ([#4271](https://github.com/JanssenProject/jans/issues/4271)) ([6f5db18](https://github.com/JanssenProject/jans/commit/6f5db186d4d7f9c21e8a5ee659012d4a8d1acdb0))
+* **jans-auth-server:** forced clientWhiteList when session is valid for post_logout_redirect_uri (allowPostLogoutRedirectWithoutValidation=true ) [#4672](https://github.com/JanssenProject/jans/issues/4672) ([#4681](https://github.com/JanssenProject/jans/issues/4681)) ([a9f045b](https://github.com/JanssenProject/jans/commit/a9f045b50d85d7f5ca8f168cff770d12554f55d9))
+* prepare for 1.0.13 release ([493478e](https://github.com/JanssenProject/jans/commit/493478e71f6231553c998b48c0f163c7f5869da4))
+* update test to conform errorHandlingMethod=remote config [#4815](https://github.com/JanssenProject/jans/issues/4815) ([#4816](https://github.com/JanssenProject/jans/issues/4816)) ([cf0cca4](https://github.com/JanssenProject/jans/commit/cf0cca4280e8bc94157cb5e06529936bdb03396e))
+* upgrade com.google.http-client:google-http-client-jackson2 from 1.40.1 to 1.42.3 ([#3531](https://github.com/JanssenProject/jans/issues/3531)) ([c363a63](https://github.com/JanssenProject/jans/commit/c363a639891bddfc767e71c4d1c30e58a4b0e4ab))
+
 ## [1.0.12](https://github.com/JanssenProject/jans/compare/jans-auth-server-v1.0.11...jans-auth-server-v1.0.12) (2023-04-18)
 
 

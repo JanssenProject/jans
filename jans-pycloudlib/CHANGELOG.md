@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.13](https://github.com/JanssenProject/jans/compare/jans-pycloudlib-v1.0.12...jans-pycloudlib-v1.0.13) (2023-05-10)
+
+
+### Bug Fixes
+
+* **jans-pycloudlib:** service label is missing on subsequent wait function calls ([#4832](https://github.com/JanssenProject/jans/issues/4832)) ([485478b](https://github.com/JanssenProject/jans/commit/485478b31d2fadeae744ce8c9bbd716f0f334c90))
+* prepare for 1.0.13 release ([493478e](https://github.com/JanssenProject/jans/commit/493478e71f6231553c998b48c0f163c7f5869da4))
+
 ## [1.0.12](https://github.com/JanssenProject/jans/compare/jans-pycloudlib-v1.0.11...jans-pycloudlib-v1.0.12) (2023-04-18)
 
 

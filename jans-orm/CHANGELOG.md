@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.0.13](https://github.com/JanssenProject/jans/compare/jans-orm-v1.0.12...jans-orm-v1.0.13) (2023-05-10)
+
+
+### Bug Fixes
+
+* **config-api:** filtering script is not working when backend is MySQL ([#4771](https://github.com/JanssenProject/jans/issues/4771)) ([967994b](https://github.com/JanssenProject/jans/commit/967994b1c86facc9901b302285f22c9171115835))
+* fix(jans-orm): npe in SqlFilterConverter [#4775](https://github.com/JanssenProject/jans/issues/4775) ([#4776](https://github.com/JanssenProject/jans/issues/4776)) ([6fca451](https://github.com/JanssenProject/jans/commit/6fca45166d504589c2b0e7be4a8cc77fbb293d74))
+* prepare for 1.0.13 release ([493478e](https://github.com/JanssenProject/jans/commit/493478e71f6231553c998b48c0f163c7f5869da4))
+
 ## [1.0.12](https://github.com/JanssenProject/jans/compare/jans-orm-v1.0.11...jans-orm-v1.0.12) (2023-04-18)
 
 

@@ -49,6 +49,7 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONException;
@@ -289,15 +290,15 @@ public class SessionIdService {
         }
 
         if (resetToStep <= currentStep) {
-	        for (int i = resetToStep; i <= currentStep; i++) {
-	            String key = String.format("auth_step_passed_%d", i);
-	            sessionAttributes.remove(key);
-	        }
+            for (int i = resetToStep; i <= currentStep; i++) {
+                String key = String.format("auth_step_passed_%d", i);
+                sessionAttributes.remove(key);
+            }
         } else {
-        	// Scenario when we sckip steps. In this case we need to mark all previous steps as passed
-	        for (int i = currentStep + 1; i < resetToStep; i++) {
-	            sessionAttributes.put(String.format("auth_step_passed_%d", i), Boolean.TRUE.toString());
-	        }
+            // Scenario when we sckip steps. In this case we need to mark all previous steps as passed
+            for (int i = currentStep + 1; i < resetToStep; i++) {
+                sessionAttributes.put(String.format("auth_step_passed_%d", i), Boolean.TRUE.toString());
+            }
         }
 
         sessionAttributes.put(io.jans.as.model.config.Constants.AUTH_STEP, String.valueOf(resetToStep));
@@ -342,16 +343,16 @@ public class SessionIdService {
             sessionId = identity.getSessionId().getId();
         }
 
-        SessionId result = null; 
+        SessionId result = null;
         if (StringHelper.isNotEmpty(sessionId)) {
-        	result = getSessionId(sessionId);
-        	if ((result == null) && identity.getSessionId() != null) {
-        		// Here we cover scenario when user were redirected from /device-code to ACR method
-        		// which call this method in prepareForStep for step 1. The cookie in this case is not updated yet.
-        		// hence actual information about session_id only in identity.
+            result = getSessionId(sessionId);
+            if ((result == null) && identity.getSessionId() != null) {
+                // Here we cover scenario when user were redirected from /device-code to ACR method
+                // which call this method in prepareForStep for step 1. The cookie in this case is not updated yet.
+                // hence actual information about session_id only in identity.
                 sessionId = identity.getSessionId().getId();
-            	result = getSessionId(sessionId);
-        	}
+                result = getSessionId(sessionId);
+            }
         } else {
             log.trace("Session cookie not exists");
         }
@@ -792,7 +793,11 @@ public class SessionIdService {
             return sessionId;
         } catch (Exception e) {
             if (!silently) {
-                log.error("Failed to get session by dn: {}. {}", dn, e.getMessage());
+                if (BooleanUtils.isTrue(appConfiguration.getLogNotFoundEntityAsError())) {
+                    log.error("Failed to get session by dn: {}. {}", dn, e.getMessage());
+                } else {
+                    log.trace("Failed to get session by dn: {}. {}", dn, e.getMessage());
+                }
             }
         }
         return null;

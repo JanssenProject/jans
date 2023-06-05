@@ -9,6 +9,8 @@ io.jans.fido2.service
 io.jans.fido2.service.app
 io.jans.fido2.service.client
 io.jans.fido2.service.exception
+io.jans.fido2.service.external
+io.jans.fido2.service.external.context
 io.jans.fido2.service.handler
 io.jans.fido2.service.mds
 io.jans.fido2.service.operation

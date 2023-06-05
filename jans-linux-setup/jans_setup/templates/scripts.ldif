@@ -299,6 +299,10 @@ dn: inum=92F0-BF9E,ou=scripts,o=jans
 description: Super Gluu authentication module
 displayName: super_gluu
 inum: 92F0-BF9E
+jansConfProperty: {"value1":"AS_ENDPOINT","value2":"https://account.gluu.org","hide":false,"description":""}
+jansConfProperty: {"value1":"AS_SSA","value2":"","hide":false,"description":""}
+jansConfProperty: {"value1":"AS_CLIENT_ID","value2":"","hide":false,"description":""}
+jansConfProperty: {"value1":"AS_CLIENT_SECRET","value2":"","hide":false,"description":""}
 jansConfProperty: {"value1":"qr_options","value2":"{ size: 500, mSize: 0.05 }","description":""}
 jansConfProperty: {"value1":"label","value2":"Super Gluu","description":""}
 jansConfProperty: {"value1":"registration_uri","value2":"https://%(hostname)s/identity/register","description":""}
@@ -439,7 +443,7 @@ inum: 8AF7.D82A
 jansLevel: 100
 jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansRevision: 1
-jansScr::%(persistence_extension_samplescript)s
+jansScr::%(persistence_extension_persistenceextension)s
 jansScrTyp: persistence_extension
 objectClass: top
 objectClass: jansCustomScr
@@ -539,6 +543,7 @@ displayName: agama
 inum: BADA-BADA
 jansConfProperty: {"value1":"cust_param_name","value2":"agama_flow","hide":false,"description":""}
 jansConfProperty: {"value1":"default_flow_name","value2":"","hide":false,"description":""}
+jansConfProperty: {"value1":"finish_userid_db_attribute","value2":"uid","hide":false,"description":""}
 jansEnabled: false
 jansLevel: 10
 jansModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}

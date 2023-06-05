@@ -31,6 +31,11 @@ func resourceAgamaFlow() *schema.Resource {
 				Optional:    true,
 				Description: "Flow qualified name",
 			},
+			"trans_hash": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "",
+			},
 			"revision": {
 				Type:        schema.TypeInt,
 				Optional:    true,
@@ -102,10 +107,19 @@ func resourceAgamaFlow() *schema.Resource {
 				Optional:    true,
 				Description: "Source code",
 			},
+			"transpiled": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "",
+			},
 			"code_error": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "Errors in the flow source detected by Agama transpiler",
+			},
+			"base_dn": {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 		},
 	}

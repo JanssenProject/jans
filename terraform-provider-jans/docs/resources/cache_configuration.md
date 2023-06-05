@@ -118,6 +118,7 @@ Optional:
 						enabled prior to entering the blocking operation to have effect. The timeout must be > 0. A timeout 
 						of zero is interpreted as an infinite timeout.
 - `ssl_trust_store_file_path` (String) Directory Path to Trust Store.
+- `ssl_trust_store_password` (String) Password for accessing the Trust Store.
 - `use_ssl` (Boolean) Enable SSL communication between Gluu Server and Redis cache.
 
 ## Import

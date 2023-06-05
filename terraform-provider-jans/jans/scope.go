@@ -12,6 +12,8 @@ type ScopeAttribute struct {
 
 type Scope struct {
 	Dn                       string            `schema:"dn" json:"dn,omitempty"`
+	ExpirationDate           string            `schema:"expiration_date" json:"expirationDate,omitempty"`
+	Deletable                bool              `schema:"deletable" json:"deletable,omitempty"`
 	Inum                     string            `schema:"inum" json:"inum,omitempty"`
 	DisplayName              string            `schema:"display_name" json:"displayName,omitempty"`
 	Id                       string            `schema:"scope_id" json:"id,omitempty"`
@@ -27,12 +29,10 @@ type Scope struct {
 	CreatorId                string            `schema:"creator_id" json:"creatorId,omitempty"`
 	CreatorType              string            `schema:"creator_type" json:"creatorType,omitempty"`
 	CreationDate             string            `schema:"creation_date" json:"creationDate,omitempty"`
-	CreatorAttributes        map[string]string `schema:"creator_attributes" json:"creatorAttributes,omitempty"` // XXX
-	UmaType                  bool              `schema:"uma_type" json:"umaType,omitempty"`
-	Deletable                bool              `schema:"deletable" json:"deletable,omitempty"`
-	ExpirationDate           string            `schema:"expiration_date" json:"expirationDate,omitempty"`
-	BaseDn                   string            `schema:"base_dn" json:"baseDn,omitempty"`
+	CreatorAttributes        map[string]string `schema:"creator_attributes" json:"creatorAttributes,omitempty"`
 	Clients                  []OidcClient      `schema:"clients" json:"clients,omitempty"`
+	UmaType                  bool              `schema:"uma_type" json:"umaType,omitempty"`
+	BaseDn                   string            `schema:"base_dn" json:"baseDn,omitempty"`
 }
 
 // GetScopes returns all currently configured scopes.

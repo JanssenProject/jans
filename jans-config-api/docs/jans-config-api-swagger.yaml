@@ -201,8 +201,6 @@ paths:
                   value: ""
         "204":
           description: No Content
-        "400":
-          description: Bad Request
         "401":
           description: Unauthorized
         "404":
@@ -271,8 +269,6 @@ paths:
       responses:
         "204":
           description: No Content
-        "400":
-          description: Bad Request
         "401":
           description: Unauthorized
         "404":
@@ -360,7 +356,7 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/agama.write
-  /api/v1/agama-deployment/list:
+  /api/v1/agama-deployment:
     get:
       tags:
       - Agama - Developer Studio
@@ -7652,12 +7648,12 @@ components:
           type: array
           items:
             type: string
+        error:
+          type: string
         flowsError:
           type: object
           additionalProperties:
             type: string
-        error:
-          type: string
         projectMetadata:
           $ref: '#/components/schemas/ProjectMetadata'
     ProjectMetadata:
@@ -7857,17 +7853,17 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        adminCanEdit:
+        userCanView:
           type: boolean
-        adminCanView:
+        userCanEdit:
+          type: boolean
+        adminCanEdit:
           type: boolean
         adminCanAccess:
           type: boolean
         userCanAccess:
           type: boolean
-        userCanEdit:
-          type: boolean
-        userCanView:
+        adminCanView:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -8290,6 +8286,8 @@ components:
         configurationUpdateInterval:
           type: integer
           format: int32
+        logNotFoundEntityAsError:
+          type: boolean
         enableClientGrantTypeUpdate:
           type: boolean
         dynamicGrantTypeDefault:
@@ -8471,6 +8469,8 @@ components:
           type: boolean
         refreshTokenExtendLifetimeOnRotation:
           type: boolean
+        allowBlankValuesInDiscoveryResponse:
+          type: boolean
         checkUserPresenceOnRefreshToken:
           type: boolean
         consentGatheringScriptBackwardCompatibility:
@@ -8598,6 +8598,8 @@ components:
           type: object
           additionalProperties:
             type: string
+        httpLoggingResponseBodyContent:
+          type: boolean
         fapi:
           type: boolean
         allResponseTypesSupported:
@@ -9216,20 +9218,6 @@ components:
           format: int32
         displayName:
           type: string
-        allAuthenticationMethods:
-          uniqueItems: true
-          type: array
-          items:
-            type: string
-            enum:
-            - client_secret_basic
-            - client_secret_post
-            - client_secret_jwt
-            - private_key_jwt
-            - access_token
-            - tls_client_auth
-            - self_signed_tls_client_auth
-            - none
         authenticationMethod:
           type: string
           enum:
@@ -9472,14 +9460,6 @@ components:
       properties:
         valid:
           type: boolean
-        connectProtectionList:
-          type: array
-          items:
-            type: string
-            enum:
-            - None
-            - StartTls
-            - SslTls
         host:
           type: string
         port:
@@ -9595,14 +9575,14 @@ components:
           type: boolean
         internal:
           type: boolean
-        locationPath:
-          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
+        locationPath:
+          type: string
         baseDn:
           type: string
     ScriptError:

@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.0.13](https://github.com/JanssenProject/jans/compare/v1.0.13...v1.0.13) (2023-05-10)
+
+
+### Bug Fixes
+
+* **docker-jans-loadtesting-jmeter:** rename incorrect reference to OCI image ([#4908](https://github.com/JanssenProject/jans/issues/4908)) ([7db2c11](https://github.com/JanssenProject/jans/commit/7db2c11c8335a35873c08387060454e8eb30d8e2))
+* **docs:** autogenerate docs ([#4933](https://github.com/JanssenProject/jans/issues/4933)) ([337239b](https://github.com/JanssenProject/jans/commit/337239ba8ae301a83eec58048a3f5141be54c8e6))
+* prepare for 1.0.13 release ([493478e](https://github.com/JanssenProject/jans/commit/493478e71f6231553c998b48c0f163c7f5869da4))
+
 ## [1.0.12](https://github.com/JanssenProject/jans/compare/v1.0.12...v1.0.12) (2023-04-18)
 
 

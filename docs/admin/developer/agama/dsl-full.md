@@ -450,6 +450,10 @@ Finish it.nonsense
 - A flow cannot be aborted by itself. This can only be achieved through a parent flow. Learn more about aborted flows [here](./flows-lifecycle.md#cancellation)
 - Check the best practices on finishing flows [here](./flows-lifecycle.md#finishing-flows)
 
+### Identity of the user to login
+
+When a top-level flow (i.e. no parents) finishes successfully, the selection of the user to authenticate is driven by the `userId` passed in `data`. By default this maps to the `uid` attribute that in most cases all user entries already have in the database, namely, the "user name". This attribute is configurable though via property `finish_userid_db_attribute` of the bridge script. Note this is a global configuration that applies to all Agama flows running in your server.
+
 ## Web interaction
 
 Web interaction constructs bring the most value to Agama. Developers can express the concepts of ”redirect a user to an external site and retrieve any data later provided” or “show a page and grab user data after interaction” using atomic instructions.

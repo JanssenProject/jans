@@ -90,8 +90,8 @@ A Kubernetes cluster can be created with three nodes or more in one region and t
    ```yaml
    config:
       image:
-        repository: janssenproject/configurator
-        tag: 1.0.13_dev 
+        repository: ghcr.io/janssenproject/jans/configurator
+        tag: replace-janssen-version_dev 
       countryCode: US
       email: support@gluu.org
       orgName: Gluu
@@ -134,18 +134,18 @@ A Kubernetes cluster can be created with three nodes or more in one region and t
    auth-server:
      image:
        pullPolicy: IfNotPresent
-       repository: janssenproject/auth-server
-       tag: 1.0.13_dev
+       repository: ghcr.io/janssenproject/jans/auth-server
+       tag: replace-janssen-version_dev
    config-api:
      image:
        pullPolicy: IfNotPresent
-       repository: janssenproject/config-api
-       tag: 1.0.13_dev
+       repository: ghcr.io/janssenproject/jans/config-api
+       tag: replace-janssen-version_dev
    persistence:
      image:
        pullPolicy: IfNotPresent
-       repository: janssenproject/persistence-loader
-       tag: 1.0.13_dev 
+       repository: ghcr.io/janssenproject/jans/persistence-loader
+       tag: replace-janssen-version_dev 
    nginx-ingress:
      ingress:
        path: /
@@ -176,11 +176,39 @@ Loading users requires a hefty but temporary amount of resources. By default, th
 1. Create a folder called `add_users`.
 
     ```bash
-    mkdir add_users && cd add_users
+    mkdir -p add_users && cd add_users
     ```
+
 2. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-users/load_users_rdbms_job.yaml) into the folder under the name `load_users.yaml`.
 
-3. Open the file and modify the sql connection parameters. To speed the loading process increase the CPU requests and limits.
+3.  Open the file and modify the required parameters. Note that the following environments can be used as configmaps data to configure the pod.
+
+    | ENV                              | Description                                                                                                   | Default                |
+    |----------------------------------|---------------------------------------------------------------------------------------------------------------|------------------------|
+    | `TEST_USERS_PREFIX_STRING`       | The user prefix string attached to the test users loaded                                                      | `test_user`            |
+    | `COUCHBASE_URL`                  | Couchbase URL if Couchbase is the persistence to load users in.                                               | ``                     |
+    | `COUCHBASE_PW`                   | Couchbase PW if Couchbase is the persistence to load users in.                                                | ``                     |
+    | `USER_NUMBER_STARTING_POINT`     | The user number to start from . This is appended to the username i.e test_user0                               | `0`                    |
+    | `USER_NUMBER_ENDING_POINT`       | The user number to end at.                                                                                    | `50000000`             |
+    | `LOAD_USERS_TO_COUCHBASE`        | Enable loading users to Couchbase persistence. `true` or `false` == ``                                        | `false`                |
+    | `LOAD_USERS_TO_LDAP`             | Enable loading users to LDAP persistence. `true` or `false` == ``                                             | `false`                |
+    | `LOAD_USERS_TO_SPANNER`          | Enable loading users to Spanner persistence. `true` or `false` == ``                                          | `false`                |
+    | `LOAD_USERS_TO_RDBMS`            | Enable loading users to RDBMS persistence. `true` or `false` == ``                                            | `false`                |
+    | `USER_SPLIT_PARALLEL_THREADS`    | The number of parallel threads to break the total number users across. This number heavily effects CPU usage. | `20`                   |
+    | `GOOGLE_APPLICATION_CREDENTIALS` | Google Credentials JSON SA file. **Used with Spanner**                                                        | ``                     |
+    | `GOOGLE_PROJECT_ID`              | Google Project ID. **Used with Spanner**                                                                      | ``                     |
+    | `GOOGLE_SPANNER_INSTANCE_ID`     | Google Spanner Instance ID. **Used with Spanner**                                                             | ``                     |
+    | `GOOGLE_SPANNER_DATABASE_ID`     | Google Spanner Database ID. **Used with Spanner**                                                             | ``                     |
+    | `LDAP_URL`                       | LDAP URL if LDAP is the persistence to load users in.                                                         | `opendj:1636`          |
+    | `LDAP_PW`                        | LDAP PW  if LDAP is the persistence to load users in.                                                         | ``                     |
+    | `LDAP_DN`                        | LDAP DN if LDAP is the persistence to load users in.                                                          | `cn=directory manager` |
+    | `RDBMS_TYPE`                     | RDBMS type if `mysql` or `pgsql` is the persistence to load users in.                                         | `mysql`                |
+    | `RDBMS_DB`                       | RDBMS Database name if `mysql` or `pgsql` is the persistence to load users in.                                | `jans`                 |
+    | `RDBMS_USER`                     | RDBMS user if `mysql` or `pgsql` is the persistence to load users in.                                         | `jans`                 |
+    | `RDBMS_PASSWORD`                 | RDBMS user password if `mysql` or `pgsql` is the persistence to load users in. .                              | ``                     |
+    | `RDBMS_HOST`                     | RDBMS host if `mysql` or `pgsql` is the persistence to load users in.                                         | `localhost`            |
+
+    __Tips:__ To speed the loading process, increase the CPU requests and limits of the pod.
 
 4. Create a namespace for load-testing.
 
@@ -199,7 +227,7 @@ Wait until all the users are up before moving forward. Tail the logs by running 
 
 ### Load testing
 
-#### Authorization code client
+#### Authorization code flow
 
 ##### Resources needed for Authorization code client jmeter test
 
@@ -217,7 +245,7 @@ Create the client needed to run the test by executing the following. Make sure t
 1. Create a folder called `load_test`.
 
     ```bash
-    mkdir load_test && cd load_test
+    mkdir -p load_test && cd load_test
     ```
 
 2. Create the client json file
@@ -282,7 +310,92 @@ Create the client needed to run the test by executing the following. Make sure t
    
 7. Finally, scale the load test. The replica number here should be manually controlled.
     ```bash
-    kubectl scale deploy load-testing -n load --replicas=20
+    kubectl scale deploy load-testing-authz -n load --replicas=20
    ```
 
+#### Resource Owner Password Credentials (ROPC) flow
 
+##### Resources needed for ROPC client jmeter test
+
+ The below resources were [calculated](#kubernetes-cluster-load-test-resources) when creating the nodes above.
+
+| NAME                  | # of pods | RAM(GiB) | CPU | Total RAM(GiB) | Total CPU |
+|-----------------------|-----------|----------|-----|----------------|-----------|
+| ROPC flow jmeter test | 20        | 8        | 1.3 | 190            | 24        |
+| Grand Total           |           |          |     | 190 GiB        | 24        |
+
+##### Setup Client
+
+Create the client needed to run the test by executing the following. Make sure to change the `FQDN`  :
+
+1. Create a folder called `load_test`.
+
+    ```bash
+    mkdir -p load_test && cd load_test
+    ```
+
+2. Create the client json file
+
+    ```bash
+    FQDN=example.gluu.info
+    cat << EOF > ropc_client.json
+    {
+        "dn": null,
+        "inum": null,
+        "displayName": "ROPC Flow Load Test Client",
+        "redirectUris": [
+          "https://$FQDN"
+        ],
+        "responseTypes": [
+          "id_token",
+          "code"
+        ],
+        "grantTypes": [
+          "authorization_code",
+          "implicit",
+          "refresh_token",
+          "password"
+        ],
+        "tokenEndpointAuthMethod": "client_secret_basic",
+        "scopes": [
+          "openid",
+          "profile",
+          "email",
+          "user_name"
+        ],
+        "trustedClient": true,
+        "includeClaimsInIdToken": false,
+        "accessTokenAsJwt": false,
+        "disabled": false,
+        "deletable": false,
+        "description": "ROPC Flow Load Testing Client"
+    }
+    EOF
+    ```
+3. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/load_test_ropc.yaml) into the folder.
+
+4. Download or build [config-cli-tui](../config-guide/jans-tui/README.md) and run:
+
+    ```bash
+    # Notice the namespace is jans here . Change it if it was changed during installation of janssen previously
+    TUI_CLIENT_ID=$(kubectl get cm cn -o json -n jans | grep '"tui_client_id":' | sed -e 's#.*:\(\)#\1#' | tr -d '"' | tr -d "," | tr -d '[:space:]')
+    TUI_CLIENT_SECRET=$(kubectl get secret cn -o json -n jans | grep '"tui_client_pw":' | sed -e 's#.*:\(\)#\1#' | tr -d '"' | tr -d "," | tr -d '[:space:]' | base64 -d)
+    # add -noverify if your fqdn is not registered
+    ./config-cli-tui.pyz --host $FQDN --client-id $TUI_CLIENT_ID --client-secret $TUI_CLIENT_SECRET --no-tui --operation-id=post-oauth-openid-client --data=ropc_client.json
+    ```
+
+5. Save the client id and secret from the response and enter them along with your FQDN in the yaml file `load_test_ropc.yaml`  under `ROPC_CLIENT_ID`, `ROPC_CLIENT_SECRET` and `FQDN` respectively then execute :
+
+    ```bash
+    kubectl apply -f load_test_ropc.yaml
+    ```
+
+6. The janssen setup by default installs an HPA which will automatically scale your pods if the metrics server is installed according to traffic. To load it very quickly scale the auth-server manually:
+    ```bash
+    kubectl scale deploy janssen-auth-server -n jans --replicas=40
+   ```
+   
+7. Finally, scale the load test. The replica number here should be manually controlled.
+    ```bash
+    kubectl scale deploy load-testing-ropc -n load --replicas=20
+   ```

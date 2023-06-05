@@ -40,6 +40,8 @@ type JansFido2DynConfiguration struct {
 	MetricReporterKeepDataDays  int                `schema:"metric_reporter_keep_data_days" json:"metricReporterKeepDataDays,omitempty"`
 	PersonCustomObjectClassList []string           `schema:"person_custom_object_class_list" json:"personCustomObjectClassList,omitempty"`
 	Fido2Configuration          Fido2Configuration `schema:"fido2_configuration" json:"fido2Configuration,omitempty"`
+	OldU2fMigrationEnabled      bool               `schema:"old_u2f_migration_enabled" json:"oldU2fMigrationEnabled,omitempty"`
+	SuperGluuEnabled            bool               `schema:"super_gluu_enabled" json:"superGluuEnabled,omitempty"`
 }
 
 // GetFido2Configuration returns the current Fido2 configuration.
@@ -52,7 +54,7 @@ func (c *Client) GetFido2Configuration(ctx context.Context) (*JansFido2DynConfig
 
 	ret := &JansFido2DynConfiguration{}
 
-	if err := c.get(ctx, "/jans-config-api/fido2/config", token, ret); err != nil {
+	if err := c.get(ctx, "/jans-config-api/fido2/fido2-config", token, ret); err != nil {
 		return nil, fmt.Errorf("get request failed: %w", err)
 	}
 
@@ -60,34 +62,18 @@ func (c *Client) GetFido2Configuration(ctx context.Context) (*JansFido2DynConfig
 }
 
 // UpdateFido2Configuration updates Fido2 configuration for the Janssen server.
-func (c *Client) PatchFido2Configuration(ctx context.Context, patches []PatchRequest) (*JansFido2DynConfiguration, error) {
-
-	if len(patches) == 0 {
-		return c.GetFido2Configuration(ctx)
-	}
-
-	orig, err := c.GetFido2Configuration(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get fido2 configuration: %w", err)
-	}
-
-	updates, err := createPatchesDiff(orig, patches)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create patches: %w", err)
-	}
-
-	if len(updates) == 0 {
-		return c.GetFido2Configuration(ctx)
-	}
+func (c *Client) UpdateFido2Configuration(ctx context.Context, fido2Config *JansFido2DynConfiguration) (*JansFido2DynConfiguration, error) {
 
 	token, err := c.getToken(ctx, "https://jans.io/oauth/config/fido2.write")
 	if err != nil {
 		return nil, fmt.Errorf("failed to get token: %w", err)
 	}
 
-	if err := c.patch(ctx, "/jans-config-api/fido2/config", token, updates); err != nil {
-		return nil, fmt.Errorf("patch request failed: %w", err)
+	ret := &JansFido2DynConfiguration{}
+
+	if err := c.put(ctx, "/jans-config-api/fido2/fido2-config", token, fido2Config, ret); err != nil {
+		return nil, fmt.Errorf("put request failed: %w", err)
 	}
 
-	return c.GetFido2Configuration(ctx)
+	return ret, nil
 }

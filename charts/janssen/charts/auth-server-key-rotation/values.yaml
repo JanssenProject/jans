@@ -18,11 +18,17 @@ image:
   # -- Image  to use for deploying.
   repository: janssenproject/certmanager
   # -- Image  tag to use for deploying.
-  tag: 1.0.13_dev
+  tag: 1.0.14_dev
   # -- Image Pull Secrets
   pullSecrets: [ ]
 # -- Auth server key rotation keys life in hours
 keysLife: 48
+# -- Set key selection strategy used by Auth server
+keysStrategy: NEWER
+# -- Delay (in seconds) before pushing private keys to Auth server
+keysPushDelay: 0
+# -- Set key selection strategy after pushing private keys to Auth server (only takes effect when keysPushDelay value is greater than 0)
+keysPushStrategy: NEWER
 # -- Resource specs.
 resources:
   limits:

@@ -14,7 +14,6 @@ on:
       - 'jans-config-api/**'
       - 'jans-scim/**'
       - 'jans-core/**'
-      - 'jans-notify/**'
       - 'jans-fido2/**'
       - 'jans-eleven/**'
       - 'agama/**'
@@ -38,7 +37,6 @@ on:
       - 'jans-config-api/**'
       - 'jans-scim/**'
       - 'jans-core/**'
-      - 'jans-notify/**'
       - 'jans-fido2/**'
       - 'jans-eleven/**'
       - 'agama/**'
@@ -57,7 +55,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        module: [jans-auth-server, agama, jans-config-api, jans-core, jans-linux-setup, jans-cli-tui, jans-fido2, jans-notify, jans-orm, jans-scim, jans-eleven, jans-pycloudlib]
+        module: [jans-auth-server, agama, jans-config-api, jans-core, jans-linux-setup, jans-cli-tui, jans-fido2, jans-orm, jans-scim, jans-eleven, jans-pycloudlib]
     env:
       JVM_PROJECTS: |
         jans-auth-server
@@ -65,7 +63,6 @@ jobs:
         jans-config-api
         jans-scim
         jans-core
-        jans-notify
         jans-fido2
         jans-eleven
         agama
