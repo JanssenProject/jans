@@ -29,8 +29,9 @@ spec:
       {{- end }}
     spec:
       securityContext:
-        runAsUser: 0
-        runAsNonRoot: false
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
       containers:
       - name: {{ include "opendj.name" $ }}
         imagePullPolicy: {{ $.Values.image.pullPolicy }}
