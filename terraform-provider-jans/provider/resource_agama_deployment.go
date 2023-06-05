@@ -2,7 +2,6 @@ package provider
 
 import (
 	"context"
-	"crypto/sha256"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -61,7 +60,7 @@ func resourceAgamaDeployment() *schema.Resource {
 			},
 			"deployment_file_hash": {
 				Type:        schema.TypeString,
-				Computed:    true,
+				Required:    true,
 				Description: "Hash of the deployment file, used to detect changes.",
 				ForceNew:    true,
 			},
@@ -80,6 +79,7 @@ func resourceAgamaDeploymentCreate(ctx context.Context, d *schema.ResourceData, 
 
 	name := d.Get("name").(string)
 	fileName := d.Get("deployment_file").(string)
+	fileHash := d.Get("deployment_file_hash").(string)
 
 	// check if file exists and can be accessed
 	if _, err := os.Stat(fileName); err != nil {
@@ -99,10 +99,6 @@ func resourceAgamaDeploymentCreate(ctx context.Context, d *schema.ResourceData, 
 		return diag.FromErr(err)
 	}
 
-	h := sha256.New()
-	h.Write(contents)
-	deploymentFileHash := fmt.Sprintf("%x", h.Sum(nil))
-
 	tflog.Debug(ctx, "Creating new agama deployment")
 	if err := c.CreateAgamaDeployment(ctx, name, contents); err != nil {
 		return diag.FromErr(err)
@@ -114,7 +110,7 @@ func resourceAgamaDeploymentCreate(ctx context.Context, d *schema.ResourceData, 
 
 	d.SetId(name)
 	d.Set("name", name)
-	d.Set("deployment_file_hash", deploymentFileHash)
+	d.Set("deployment_file_hash", fileHash)
 
 	return resourceAgamaDeploymentRead(ctx, d, meta)
 }
