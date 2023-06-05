@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.7.1](https://github.com/JanssenProject/terraform-provider-jans/compare/v0.7.0...v0.7.1) (2023-06-05)
+
+
+### Bug Fixes
+
+* changed agama deployment file hash to be required, instead of computed 
+* changed agama deployment file hash to be required, instead of computed 
+
 ## [0.7.0](https://github.com/JanssenProject/terraform-provider-jans/compare/v0.6.0...v0.7.0) (2023-05-23)
 
 
