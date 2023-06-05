@@ -105,6 +105,11 @@ func resourceUMAResource() *schema.Resource {
 				Optional:    true,
 				Description: "Specifies whether client is deletable.",
 			},
+			"ttl": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "Specifies the time in seconds that the resource will be valid.",
+			},
 		},
 	}
 }

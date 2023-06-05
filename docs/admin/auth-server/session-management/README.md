@@ -73,6 +73,16 @@ session events, see:
   * [Application Session](../../developer/scripts/application-session.md)
   * [End Session](../../developer/scripts/end-session.md)
 
+
+## Session data structure in Persistence
+
+### LDAP
+All sessions can be found under `ou=sessions,o=jans`
+Object class `janssessid` - https://github.com/JanssenProject/jans/blob/main/docs/admin/reference/database/ldap-schema.md#janssessid
+
+### MySQL 
+All session information is saved in this table : https://github.com/JanssenProject/jans/blob/main/docs/admin/reference/database/mysql-schema.md#janssessid 
+
 ## FAQ
 
 ### How can we force the user to log out if the user is idle on the RP for 4 hours?

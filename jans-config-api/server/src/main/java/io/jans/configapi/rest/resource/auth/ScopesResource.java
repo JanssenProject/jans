@@ -9,9 +9,10 @@ package io.jans.configapi.rest.resource.auth;
 import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 
+import static io.jans.as.model.util.Util.escapeLog;
 import io.jans.as.model.common.ScopeType;
 import io.jans.as.persistence.model.Scope;
-import io.jans.configapi.core.model.SearchRequest;
+import io.jans.model.SearchRequest;
 import io.jans.orm.model.PagedResult;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.rest.model.CustomScope;
@@ -36,7 +37,6 @@ import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
@@ -81,17 +81,18 @@ public class ScopesResource extends ConfigBaseResource {
             @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @Parameter(description = "Search pattern") @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
             @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
-            @Parameter(description = "Attribute whose value will be used to order the returned response") @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
-            @Parameter(description = "Order in which the sortBy param is applied. Allowed values are \"ascending\" and \"descending\"") @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder,
-            @Parameter(description = "Boolean fag to indicate if clients associated with the scope are to be returned") @DefaultValue("false") @QueryParam(value = ApiConstants.WITH_ASSOCIATED_CLIENTS) boolean withAssociatedClients) {
+            @Parameter(description = "Attribute whose value will be used to order the returned response") @DefaultValue(ApiConstants.INUM) @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
+            @Parameter(description = "Order in which the sortBy param is applied. Allowed values are \"ascending\" and \"descending\"") @DefaultValue(ApiConstants.ASCENDING) @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder,
+            @Parameter(description = "Boolean fag to indicate if clients associated with the scope are to be returned") @DefaultValue("false") @QueryParam(value = ApiConstants.WITH_ASSOCIATED_CLIENTS) boolean withAssociatedClients,
+            @Parameter(description = "Field and value pair for seraching", examples = @ExampleObject(name = "Field value example", value = "scopeType=spontaneous,defaultScope=true")) @DefaultValue("") @QueryParam(value = ApiConstants.FIELD_VALUE_PAIR) String fieldValuePair) {
         if (log.isDebugEnabled()) {
             log.debug(
-                    "SCOPES to be fetched based on type:{}, limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}, withAssociatedClients:{}",
-                    type, limit, pattern, startIndex, sortBy, sortOrder, withAssociatedClients);
+                    "SCOPES to be fetched based on type:{}, limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}, withAssociatedClients:{}, fieldValuePair:{}",
+                    escapeLog(type), escapeLog(limit), escapeLog(pattern), escapeLog(startIndex), escapeLog(sortBy), escapeLog(sortOrder), escapeLog(withAssociatedClients), escapeLog(fieldValuePair));
         }
-        
+
         SearchRequest searchReq = createSearchRequest(scopeService.getDnForScope(null), pattern, sortBy, sortOrder,
-                startIndex, limit, null, null, this.getMaxCount());
+                startIndex, limit, null, null, this.getMaxCount(), fieldValuePair, CustomScope.class);
 
         return Response.ok(doSearch(searchReq, type, withAssociatedClients)).build();
     }

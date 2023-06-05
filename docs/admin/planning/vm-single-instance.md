@@ -2,6 +2,8 @@
 tags:
   - administration
   - planning
+  - vm
+  - single instance
 ---
 
 While an active-active cluster enables you to achieve four or five nines

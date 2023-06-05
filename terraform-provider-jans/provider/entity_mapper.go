@@ -3,6 +3,7 @@ package provider
 import (
 	"fmt"
 	"reflect"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/jans/terraform-provider-jans/jans"
@@ -80,6 +81,8 @@ func recursivePatchFromResourceData(d *schema.ResourceData, entity any, jsonPath
 			// skip fields that don't have a json mapping name
 			continue
 		}
+
+		jsonTag = strings.TrimSuffix(jsonTag, ",omitempty")
 
 		val, ok := d.GetOk(schemaPath + schemaTag)
 		if !ok {

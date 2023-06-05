@@ -15,7 +15,7 @@ RUN apk update \
 # Jetty
 # =====
 
-ARG JETTY_VERSION=11.0.13
+ARG JETTY_VERSION=11.0.15
 ARG JETTY_HOME=/opt/jetty
 ARG JETTY_BASE=/opt/jans/jetty
 ARG JETTY_USER_HOME_LIB=/home/jetty/lib
@@ -42,8 +42,8 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # Config API
 # ==========
 
-ENV CN_VERSION=1.0.11-SNAPSHOT
-ENV CN_BUILD_DATE='2023-03-31 10:33'
+ENV CN_VERSION=1.0.14-SNAPSHOT
+ENV CN_BUILD_DATE='2023-05-10 08:32'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api-server/${CN_VERSION}/jans-config-api-server-${CN_VERSION}.war
 
 # Install Jans Config API
@@ -74,19 +74,19 @@ RUN wget -q https://github.com/GluuFederation/gluu-snap/raw/${PYFACTER_VERSION}/
 
 RUN mkdir -p /usr/share/java
 
-ENV SCIM_PLUGIN_BUILD_DATE='2023-03-16 11:45'
+ENV SCIM_PLUGIN_BUILD_DATE='2023-05-10 08:34'
 ENV SCIM_PLUGIN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/scim-plugin/${CN_VERSION}/scim-plugin-${CN_VERSION}-distribution.jar
 RUN wget -q ${SCIM_PLUGIN_SOURCE_URL} -O /usr/share/java/scim-plugin.jar
 
-ENV ADMIN_UI_PLUGIN_BUILD_DATE='2023-03-16 11:44'
+ENV ADMIN_UI_PLUGIN_BUILD_DATE='2023-05-10 08:33'
 ENV ADMIN_UI_PLUGIN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/admin-ui-plugin/${CN_VERSION}/admin-ui-plugin-${CN_VERSION}-distribution.jar
 RUN wget -q ${ADMIN_UI_PLUGIN_SOURCE_URL} -O /usr/share/java/admin-ui-plugin.jar
 
-ENV FIDO2_PLUGIN_BUILD_DATE='2023-03-16 11:45'
+ENV FIDO2_PLUGIN_BUILD_DATE='2023-05-10 08:34'
 ENV FIDO2_PLUGIN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/fido2-plugin/${CN_VERSION}/fido2-plugin-${CN_VERSION}-distribution.jar
 RUN wget -q ${FIDO2_PLUGIN_SOURCE_URL} -O /usr/share/java/fido2-plugin.jar
 
-ENV USER_MGT_PLUGIN_BUILD_DATE='2023-03-16 11:45'
+ENV USER_MGT_PLUGIN_BUILD_DATE='2023-05-10 08:34'
 ENV USER_MGT_PLUGIN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/user-mgt-plugin/${CN_VERSION}/user-mgt-plugin-${CN_VERSION}-distribution.jar
 RUN wget -q ${USER_MGT_PLUGIN_SOURCE_URL} -O /usr/share/java/user-mgt-plugin.jar
 
@@ -110,7 +110,7 @@ COPY conf/prometheus-config.yaml /opt/prometheus/
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_SOURCE_VERSION=b3756af0077aa38e1d8d2b11521c0e6897d3f739
+ENV JANS_SOURCE_VERSION=49054ae66d17d2e7d34febd31ac7ab25be3acdc4
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
 
@@ -223,7 +223,6 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_WAIT_SLEEP_DURATION=10 \
     CN_JAVA_OPTIONS="" \
     GOOGLE_PROJECT_ID="" \
-    GOOGLE_APPLICATION_CREDENTIALS=/etc/jans/conf/google-credentials.json \
     CN_GOOGLE_SECRET_MANAGER_PASSPHRASE=secret \
     CN_GOOGLE_SECRET_VERSION_ID=latest \
     CN_GOOGLE_SECRET_NAME_PREFIX=jans \
@@ -240,7 +239,7 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/config-api" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.0.11" \
+    org.opencontainers.image.version="1.0.14" \
     org.opencontainers.image.title="Janssen Config API" \
     org.opencontainers.image.description=""
 
@@ -265,7 +264,7 @@ RUN chmod +x /app/scripts/entrypoint.sh
 RUN sed -i 's/"${apiApprovedIssuer}"/${apiApprovedIssuer}/g' /app/templates/jans-config-api/dynamic-conf.json
 
 # create non-root user
-RUN adduser -s /bin/sh -D -G root -u 1000 jetty
+RUN adduser -s /bin/sh -h /home/1000 -D -G root -u 1000 jetty
 
 COPY --chown=1000:0 jetty/jans-config-api.xml ${JETTY_BASE}/jans-config-api/webapps/
 
@@ -286,6 +285,8 @@ RUN chmod -R g=u ${JETTY_BASE}/jans-config-api/custom \
     && chown -R 1000:0 /app/plugins
 
 USER 1000
+
+RUN mkdir -p $HOME/.config/gcloud
 
 ENTRYPOINT ["tini", "-e", "143", "-g", "--"]
 CMD ["sh", "/app/scripts/entrypoint.sh"]

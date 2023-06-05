@@ -11,7 +11,7 @@ function ${flow.@id}<#recurse flow>
 
 <#macro header>
 (
-<#if .node.configs?size = 0>_p<#else>${.node.configs.short_var}</#if>
+<#if .node.configs?size == 0>_p<#else>${.node.configs.short_var}</#if>
 <#if .node.inputs?size gt 0>
     , ${.node.inputs.short_var?join(", ")}
 </#if>
@@ -32,7 +32,7 @@ let idx = [], _items = []
 <#macro rrf_call>
     <#local hasbool = .node.BOOL?size gt 0>
 
-    <#if .node.variable?size = 0>
+    <#if .node.variable?size == 0>
         _it = {}
     <#else>
         _it = ${.node.variable}
@@ -76,19 +76,34 @@ try {
 </#macro>
 
 <#macro flow_call>
+    <#local catch=.node.preassign_catch?size gt 0>
+
+    <#if catch>
+try {
+    var ${.node.preassign_catch.short_var} = null
+    </#if>
+    
     <#if .node.variable?size gt 0>
         _it = ${.node.variable}
     <#else>
         _it = "${.node.qname}"
     </#if>
 _it = _flowCall(_it, _basePath, <@util_url_overrides node=.node.overrides/>, <@util_argslist node=.node />)
-if (_it === undefined) return
-if (_it.bubbleUp) return _it.value 
+
+if (_it === undefined) throw new Error("No Finish instruction was reached")
+
+if (_it.bubbleUp) return _it.value
     <@util_preassign node=.node /> _it.value
+    
+    <#if catch>
+} catch (_e) {
+    ${.node.preassign_catch.short_var} = _makeRhinoException(_e)
+}
+    </#if>
 </#macro>
 
 <#macro rfac>
-<#if .node.variable?size = 0>
+<#if .node.variable?size == 0>
     _it = ${.node.STRING}
 <#else>
     _it = ${.node.variable}
@@ -108,7 +123,7 @@ return _finish(_it)
 </#macro>
 
 <#macro loopy>
-    <#if .node.variable?size = 0>
+    <#if .node.variable?size == 0>
 _it = ${.node.UINT}
     <#else>
 _it = ${.node.variable}
@@ -182,7 +197,7 @@ _equals(${.node.simple_expr[0]}, ${.node.simple_expr[1]})
 </#macro>
 
 <#macro boolean_op_expr>
-    <#if .node.AND?size = 0>
+    <#if .node.AND?size == 0>
 ||
     <#else>
 &&
@@ -212,7 +227,7 @@ else {
 
 <#macro util_preassign node>
     <#local var = "" >
-    <#if node.preassign?size = 0>
+    <#if node.preassign?size == 0>
         <#if node.preassign_catch?size gt 0 && node.preassign_catch.variable?size gt 0>
             <#local var = node.preassign_catch.variable >
         </#if>

@@ -211,7 +211,7 @@ public class ConfigurationService implements Serializable {
 				CustomScriptType.PERSISTENCE_EXTENSION, CustomScriptType.IDP, CustomScriptType.CIBA_END_USER_NOTIFICATION};
 	}
 
-	public void encryptedSmtpPassword(SmtpConfiguration smtpConfiguration) {
+	public void encryptedSmtpPasswords(SmtpConfiguration smtpConfiguration) {
 		if (smtpConfiguration == null) {
 			return;
 		}
@@ -222,6 +222,15 @@ public class ConfigurationService implements Serializable {
 				smtpConfiguration.setSmtpAuthenticationAccountPassword(encryptedPassword);
 			} catch (EncryptionException ex) {
 				log.error("Failed to encrypt SMTP password", ex);
+			}
+		}
+		password = smtpConfiguration.getKeyStorePasswordDecrypted();
+		if (StringHelper.isNotEmpty(password)) {
+			try {
+				String encryptedPassword = encryptionService.encrypt(password);
+				smtpConfiguration.setKeyStorePassword(encryptedPassword);
+			} catch (EncryptionException ex) {
+				log.error("Failed to encrypt Kestore password", ex);
 			}
 		}
 	}

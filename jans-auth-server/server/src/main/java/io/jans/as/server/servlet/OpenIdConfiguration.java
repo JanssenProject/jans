@@ -28,6 +28,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -304,6 +305,16 @@ public class OpenIdConfiguration extends HttpServlet {
     }
 
     public static void filterOutKeys(JSONObject jsonObj, AppConfiguration appConfiguration) {
+
+        // filter out keys with blank values
+        if (BooleanUtils.isFalse(appConfiguration.getAllowBlankValuesInDiscoveryResponse())) {
+            for (String key : new HashSet<>(jsonObj.keySet())) {
+                if (jsonObj.get(key) == null || StringUtils.isBlank(jsonObj.optString(key))) {
+                    jsonObj.remove(key);
+                }
+            }
+        }
+
         final List<String> denyKeys = appConfiguration.getDiscoveryDenyKeys();
         if (!denyKeys.isEmpty()) {
             for (String key : new HashSet<>(jsonObj.keySet())) {

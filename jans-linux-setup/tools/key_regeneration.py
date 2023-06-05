@@ -11,19 +11,19 @@ import argparse
 import enum
 import requests
 import zipfile
-import time
 import ldap3
 import base64
 import bz2
 import pymysql
 import re
 import urllib3
-
+import tempfile
 
 import xml.etree.ElementTree as ET
 from types import ModuleType
 from urllib.parse import urlparse
 from requests.auth import HTTPBasicAuth
+from datetime import datetime
 
 requests.packages.urllib3.disable_warnings()
 
@@ -31,8 +31,9 @@ pydes_b64 = b'QlpoOTFBWSZTWZIkrogADOB/gHxwQAB7///3P+/f77////pgJLwB7nCgOjs19VgGgA
 pyDes = ModuleType('mod')
 exec(bz2.decompress(base64.b64decode(pydes_b64)).decode(), pyDes.__dict__)
 
-_VENDOR_ = 'jans'
+_VENDOR_ = 'gluu' if os.path.exists('/etc/gluu/conf/gluu.properties') else 'jans'
 _AUTH_NAME_ = 'oxAuth' if _VENDOR_ == 'gluu' else 'jans-auth'
+_BAKUP_TIME_ = datetime.utcnow().isoformat()
 
 parser = argparse.ArgumentParser('This script removes current key and creates new key for {}.'.format(_AUTH_NAME_))
 ldap_group = parser.add_mutually_exclusive_group()
@@ -72,9 +73,9 @@ def jproperties_parser(prop_fn):
 
 def backup_file(fn):
     if os.path.exists(fn):
-        file_list = glob.glob(fn+'.*')
-        n = len(file_list) + 1
-        shutil.move(fn, fn+'.'+str(n))
+        target_fn = fn+'.'+_BAKUP_TIME_
+        print("Backing up file", fn, "as", target_fn)
+        shutil.move(fn, target_fn)
 
 def run_command(args):
     if type(args) == type([]):
@@ -189,15 +190,25 @@ class KeyRegenerator:
 
     def __init__(self):
 
+        self.temp_dir = tempfile.mkdtemp()
         self.conf_dir = os.path.join('/etc', _VENDOR_, 'conf')
 
         # vendor specific definitions
-        self.conf_dyn = 'jansConfDyn'
-        self.conf_web_keys = 'jansConfWebKeys'
-        self.conf_rev = 'jansRevision'
-        self.conf_objc = 'jansAppConf'
-        self.dnname = 'CN=Jans Auth CA Certificates'
-        self.prop_dn = 'jansAuth_ConfigurationEntryDN'
+        if _VENDOR_ == 'gluu':
+            self.conf_dyn = 'oxAuthConfDynamic'
+            self.conf_web_keys = 'oxAuthConfWebKeys'
+            self.conf_rev = 'oxRevision'
+            self.conf_objc = 'oxAuthConfiguration'
+            self.dnname = 'CN=oxAuth CA Certificates'
+            self.prop_dn = 'oxauth_ConfigurationEntryDN'
+        else:
+            self.conf_dyn = 'jansConfDyn'
+            self.conf_web_keys = 'jansConfWebKeys'
+            self.conf_rev = 'jansRevision'
+            self.conf_objc = 'jansAppConf'
+            self.dnname = 'CN=Jans Auth CA Certificates'
+            self.prop_dn = 'jansAuth_ConfigurationEntryDN'
+
 
         self.conf_keystore_secret = 'keyStoreSecret'
         self.key_regenerator_jar = '{}-client-jar-with-dependencies.jar'.format(_AUTH_NAME_.lower())
@@ -212,10 +223,7 @@ class KeyRegenerator:
         if not os.path.exists(self.data_dir):
             os.makedirs(self.data_dir)
 
-        self.keys_json_fn = os.path.join(self.data_dir, 'keys.json')
-        store_ext = 'p12' if _VENDOR_ == 'jans' else 'pkcs12'
-        self.keystore_fn = os.path.join(self.data_dir, '{}-keys.{}'.format(_AUTH_NAME_.lower(), store_ext))
-
+        self.keys_json_fn = os.path.join(self.temp_dir, 'keys.json')
 
         salt_fn = os.path.join(self.conf_dir, 'salt')
         salt_dict = jproperties_parser(salt_fn)
@@ -223,18 +231,17 @@ class KeyRegenerator:
 
         self.find_auth_client_key_path()
 
-
-        backup_file(self.keystore_fn)
-
         self.get_persistence_type()
         self.read_credidentials()
 
-
         getattr(self, 'obtain_data_{}'.format(self.persistence_type.name))()
+
+        self.tmp_keystore_fn = os.path.join(self.temp_dir, os.path.basename(self.keystore_fn))
 
         self.generate_keys()
         self.validate_keys()
 
+        print("Updating database")
         getattr(self, 'update_{}'.format(self.persistence_type.name))()
 
 
@@ -271,10 +278,9 @@ class KeyRegenerator:
         self.sig_enc = {'sig':[], 'enc':[]}
 
         for key in web_keys['keys']:
-            if '_sig_' in key['kid']:
-                self.sig_enc['sig'].append(key['alg'])
-            elif '_enc_' in key['kid']:
-                self.sig_enc['enc'].append(key['alg'])
+            use = key['use']
+            if key['alg'] not in self.sig_enc[use]:
+                self.sig_enc[use].append(key['alg'])
 
 
     def get_persistence_type(self):
@@ -321,6 +327,7 @@ class KeyRegenerator:
         attributes_s = 'attributes'
         ox_auth_conf_dynamic = json.loads(result[0][attributes_s][self.conf_dyn][0])
         self.key_store_secret = ox_auth_conf_dynamic[self.conf_keystore_secret]
+        self.keystore_fn = ox_auth_conf_dynamic['keyStoreFile']
         self.get_sig_enc_algs(json.loads(result[0][attributes_s][self.conf_web_keys][0]))
         self.revision = int(result[0][attributes_s][self.conf_rev][0])
 
@@ -366,38 +373,21 @@ class KeyRegenerator:
 
     def generate_keys(self):
 
-        if _VENDOR_ == 'jans':
-
-            print("Creating empty JKS keystore")
-            run_command([
-                    self.keytool_cmd, '-genkey',
-                    '-alias', 'dummy',
-                    '-keystore', self.keystore_fn,
-                    '-storepass', self.key_store_secret,
-                    '-keypass', self.key_store_secret,
-                    '-dname', '"{}"'.format(self.dnname)
-                    ])
-
-            print("Delete dummy key from JKS")
-            run_command([
-                    self.keytool_cmd, '-delete',
-                    '-alias', 'dummy',
-                    '-keystore', self.keystore_fn,
-                    '-storepass', self.key_store_secret,
-                    '-keypass', self.key_store_secret,
-                    '-dname', '"{}"'.format(self.dnname)
-                    ])
-
         print("Generating keys")
         args = [self.java_cmd, '-Dlog4j.defaultInitOverride=true',
                 '-cp', self.client_jar_fn, self.key_gen_path,
-                '-key_ops_type', 'ALL',
-                '-keystore', self.keystore_fn,
+                '-keystore', self.tmp_keystore_fn,
                 '-keypasswd', self.key_store_secret,
                 '-sig_keys', ' '.join(self.sig_enc['sig']),
                 '-enc_keys', ' '.join(self.sig_enc['enc']),
                 '-dnname', '"{}"'.format(self.dnname)
                 ]
+
+        if _VENDOR_ == 'jans':
+            args +=['-key_ops_type', 'ALL']
+ 
+        if self.keystore_fn.lower().endswith('jks'):
+            args +=['-keystore_type', 'JKS']
 
         if argsp.expiration_hours:
             args += ['-expiration_hours', str(argsp.expiration_hours)]
@@ -406,24 +396,25 @@ class KeyRegenerator:
             
         args += ['>', self.keys_json_fn]
 
-        backup_file(self.keys_json_fn)
-
         run_command(args)
-
-        with open(self.keys_json_fn) as f:
-            self.keys_json = f.read()
 
 
     def validate_keys(self):
 
         print("Validating ... ")
 
-        output = run_command([self.keytool_cmd, '-list', '-v',
-                '-keystore', self.keystore_fn,
-                '-storepass', self.key_store_secret,
-                '|', 'grep', '"Alias name:"'
-                ])
+        key_tool_cmd = [self.keytool_cmd, '-list', '-v',
+                '-keystore', self.tmp_keystore_fn,
+                '-storepass', self.key_store_secret]
 
+        if self.tmp_keystore_fn.lower().endswith(('pkcs12', 'pk12', 'p12')):
+            key_tool_cmd += ['-storetype', 'PKCS12']
+        elif self.keystore_fn.lower().endswith('jks'):
+            key_tool_cmd += ['-storetype', 'JKS']
+
+        key_tool_cmd += ['|', 'grep', '"Alias name:"']
+
+        output = run_command(key_tool_cmd)
 
         jsk_aliases = []
         for l in output[0].splitlines():
@@ -432,7 +423,10 @@ class KeyRegenerator:
             alias_name = ls[n+1:].strip()
             jsk_aliases.append(alias_name)
 
+        print("Loading keys from", self.keys_json_fn)
 
+        with open(self.keys_json_fn) as f:
+            self.keys_json = f.read()
         keys = json.loads(self.keys_json)
 
         json_aliases = [ wkey['kid'] for wkey in keys['keys'] ]
@@ -440,23 +434,27 @@ class KeyRegenerator:
         valid1 = True
         for alias_name in json_aliases:
             if alias_name not in jsk_aliases:
-                print(keystore_fn, "does not contain", alias_name)
+                print(self.tmp_keystore_fn, "does not contain", alias_name)
                 valid1 = False
 
         valid2 = True
         for alias_name in jsk_aliases:
             if alias_name not in json_aliases:
-                print(oxauth_keys_json_fn, "does not contain", alias_name)
+                print(self.oxauth_keys_json_fn, "does not contain", alias_name)
                 valid2 = False
 
         if valid1 and valid2:
-            print("Content of {} and {} matches".format(self.keys_json_fn, self.keystore_fn))
+            print("Content of {} and {} matches".format(self.keys_json_fn, self.tmp_keystore_fn))
         else:
             print("Validation failed, not updating db")
             sys.exit(1)
 
         # validation passed, we can copy keystore to /etc/certs
-        run_command(['cp', '-f', self.keystore_fn, '/etc/certs'])
+        backup_file(self.keystore_fn)
+        backup_file(os.path.join(self.data_dir, os.path.basename(self.keys_json_fn)))
+        run_command(['mv', '-f', self.tmp_keystore_fn, '/etc/certs'])
+        run_command(['mv', '-f', self.keys_json_fn, self.data_dir])
+        run_command(['rm', '-r', '-f', self.temp_dir])
 
 
     def update_spanner(self):
@@ -490,6 +488,5 @@ class KeyRegenerator:
         print("Updating Couchbase db")
         self.cbm.exec_query("UPDATE {0} USE KEYS '{1}' set {0}.{3}={2}".format(self.default_bucket, self.key, self.keys_json, self.conf_web_keys))
         self.cbm.exec_query("UPDATE {0} USE KEYS '{1}' set {0}.{3}={2}".format(self.default_bucket, self.key, self.revision+1, self.conf_rev))
-
 
 key_regenerator = KeyRegenerator()

@@ -29,30 +29,45 @@ def test_get_wait_interval(monkeypatch, value, expected):
     assert get_wait_interval() == expected
 
 
-def test_on_backoff(caplog):
+@pytest.mark.parametrize("value, expected", [
+    ("random", "random"),
+    ("", "Service"),
+])
+def test_on_backoff(caplog, value, expected):
     from jans.pycloudlib.wait import on_backoff
 
-    details = {"kwargs": {"label": "Service"}, "wait": 10.0}
+    details = {"kwargs": {"label": value}, "wait": 10.0}
     on_backoff(details)
     assert "is not ready" in caplog.records[0].message
+    assert expected in caplog.records[0].message
 
 
-def test_on_succes(caplog):
+@pytest.mark.parametrize("value, expected", [
+    ("random", "random"),
+    ("", "Service"),
+])
+def test_on_succes(caplog, value, expected):
     import logging
     from jans.pycloudlib.wait import on_success
 
     with caplog.at_level(logging.INFO):
-        details = {"kwargs": {"label": "Service"}}
+        details = {"kwargs": {"label": value}}
         on_success(details)
         assert "is ready" in caplog.records[0].message
+        assert expected in caplog.records[0].message
 
 
-def test_on_giveup(caplog):
+@pytest.mark.parametrize("value, expected", [
+    ("random", "random"),
+    ("", "Service"),
+])
+def test_on_giveup(caplog, value, expected):
     from jans.pycloudlib.wait import on_giveup
 
-    details = {"kwargs": {"label": "Service"}, "elapsed": 10.0}
+    details = {"kwargs": {"label": value}, "elapsed": 10.0}
     on_giveup(details)
     assert "is not ready after" in caplog.records[0].message
+    assert expected in caplog.records[0].message
 
 
 def test_wait_for_config(gmanager, monkeypatch):

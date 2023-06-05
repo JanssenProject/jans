@@ -1,5 +1,75 @@
 # Changelog
 
+## [1.0.13](https://github.com/JanssenProject/jans/compare/jans-cli-tui-v1.0.12...jans-cli-tui-v1.0.13) (2023-05-10)
+
+
+### Features
+
+* **jans-cli-tui:** obtain auth scripts with single query ([#4677](https://github.com/JanssenProject/jans/issues/4677)) ([f7bea1f](https://github.com/JanssenProject/jans/commit/f7bea1f3feb66d647dbdbccd19ab33f346b06adb))
+* **jans-cli-tui:** smtp configuration ([#4262](https://github.com/JanssenProject/jans/issues/4262)) ([09999d7](https://github.com/JanssenProject/jans/commit/09999d791db22640d9f6ec38927b5bfb835ea89a))
+* **jans-cli-tui:** warn the user when agama is disabled and an upload is attempted (ref: [#4702](https://github.com/JanssenProject/jans/issues/4702)) ([#4763](https://github.com/JanssenProject/jans/issues/4763)) ([4341e23](https://github.com/JanssenProject/jans/commit/4341e23ae3da4121d273f26368fd2055aa9f6650))
+* **jans-fido2:** interception scripts issue 1485, swagger updates ([#4543](https://github.com/JanssenProject/jans/issues/4543)) ([80274ff](https://github.com/JanssenProject/jans/commit/80274ffd1a20318988d9cc99ee015c5c7d5984b7))
+
+
+### Bug Fixes
+
+* **jans-cli-tui:** add orgument --output-access-token for CLI ([#4671](https://github.com/JanssenProject/jans/issues/4671)) ([14d7854](https://github.com/JanssenProject/jans/commit/14d785480075bea9c9251a275af2ae62f9bd5d53))
+* **jans-cli-tui:** change help content for agama page ([#4765](https://github.com/JanssenProject/jans/issues/4765)) ([3310bc7](https://github.com/JanssenProject/jans/commit/3310bc702ec5b83740b4b8019aaa0010d2ac0bed))
+* **jans-cli-tui:** display agama popups only if on agama page ([#4665](https://github.com/JanssenProject/jans/issues/4665)) ([2bc852e](https://github.com/JanssenProject/jans/commit/2bc852e4346482dc8ab79a80b66421814e375c17))
+* **jans-cli-tui:** endpoint arguments with multiple value ([#4673](https://github.com/JanssenProject/jans/issues/4673)) ([672071d](https://github.com/JanssenProject/jans/commit/672071d887839f659a27f9f47617a084153525cb))
+* **jans-cli-tui:** f4 to close dialog ([#4736](https://github.com/JanssenProject/jans/issues/4736)) ([2f2d094](https://github.com/JanssenProject/jans/commit/2f2d094409427dea18526d44ae0c65df98473bbb))
+* **jans-cli-tui:** process auth  endpoint has security constraint ([#4882](https://github.com/JanssenProject/jans/issues/4882)) ([9881767](https://github.com/JanssenProject/jans/commit/9881767f9a3ff3aa17df88614be30307ef8bf0f6))
+* **jans-cli-tui:** remove duplicated fido value (ref: [#4838](https://github.com/JanssenProject/jans/issues/4838)) ([#4841](https://github.com/JanssenProject/jans/issues/4841)) ([324bdeb](https://github.com/JanssenProject/jans/commit/324bdeba8e0d5722da5f38f44d476861e1f85f60))
+* **jans-cli-tui:** remove popup on agama screen ([#4712](https://github.com/JanssenProject/jans/issues/4712)) ([e15ab79](https://github.com/JanssenProject/jans/commit/e15ab79b2389bcfb9ae0bc6e4facf3842fcb24b7))
+* **jans-cli-tui:** remove unused code ([#4679](https://github.com/JanssenProject/jans/issues/4679)) ([b9976f1](https://github.com/JanssenProject/jans/commit/b9976f1357ecf7effae9642431fbf8de31556b27))
+* **jans-cli-tui:** set seleted to zero in JansVerticalNav when cleared ([#4799](https://github.com/JanssenProject/jans/issues/4799)) ([dafb391](https://github.com/JanssenProject/jans/commit/dafb391fe2cec7be81adf309f07b7c992f3474ca))
+* **jans-cli-tui:** typo ([#4696](https://github.com/JanssenProject/jans/issues/4696)) ([d1aa680](https://github.com/JanssenProject/jans/commit/d1aa680fc593c8012f7a5653c2b9354f9c660e09))
+* prepare for 1.0.13 release ([493478e](https://github.com/JanssenProject/jans/commit/493478e71f6231553c998b48c0f163c7f5869da4))
+
+
+### Documentation
+
+* **jans-cli-tui:** update readme ([#4741](https://github.com/JanssenProject/jans/issues/4741)) ([c7bbd63](https://github.com/JanssenProject/jans/commit/c7bbd631920d548e3d88c00832af37c89d19245e))
+
+## [1.0.12](https://github.com/JanssenProject/jans/compare/jans-cli-tui-v1.0.11...jans-cli-tui-v1.0.12) (2023-04-18)
+
+
+### Features
+
+* **jans-cli-tui:** acr values are listbox on client advanced properties ([#4548](https://github.com/JanssenProject/jans/issues/4548)) ([743bfca](https://github.com/JanssenProject/jans/commit/743bfca9598e9a50004c3da702ee66c184694b92))
+
+
+### Bug Fixes
+
+* **jans-cli-tui:** agama deployments fixes ([#4515](https://github.com/JanssenProject/jans/issues/4515)) ([0c80bf7](https://github.com/JanssenProject/jans/commit/0c80bf71677606a40344e6ce7ae5c3e9dc816596))
+* **jans-cli-tui:** agama project romoval message ([#4573](https://github.com/JanssenProject/jans/issues/4573)) ([4c55459](https://github.com/JanssenProject/jans/commit/4c554596a530b1c7551849b4c584bcfc6d3b446e))
+* **jans-cli-tui:** check if verification uri exists during authorization ([#4560](https://github.com/JanssenProject/jans/issues/4560)) ([4360b9d](https://github.com/JanssenProject/jans/commit/4360b9d4ac303434f9f59c90e0c471effe87b542))
+* **jans-cli-tui:** container focus on page enter ([#4564](https://github.com/JanssenProject/jans/issues/4564)) ([41147ef](https://github.com/JanssenProject/jans/commit/41147ef56088d5ba5b48418f2194ee9ca332b5b6))
+* **jans-cli-tui:** display jansId when editing client's scope ([#4547](https://github.com/JanssenProject/jans/issues/4547)) ([107a0fb](https://github.com/JanssenProject/jans/commit/107a0fb566b76a245d25f01dab07e430b2b7282e))
+* **jans-cli-tui:** edit client's scope ([#4542](https://github.com/JanssenProject/jans/issues/4542)) ([d719420](https://github.com/JanssenProject/jans/commit/d719420889d19469cbfe5d4c790357f15ab25d4c))
+* **jans-cli-tui:** null valued agama flow error ([#4571](https://github.com/JanssenProject/jans/issues/4571)) ([9efc388](https://github.com/JanssenProject/jans/commit/9efc3887e19b39f9bee863da9f0c6742f758c2e2))
+* **jans-cli-tui:** save 'Suppress Authorization' ([#4572](https://github.com/JanssenProject/jans/issues/4572)) ([498c7fd](https://github.com/JanssenProject/jans/commit/498c7fdc306080b02b4a7eb8c9629cef363856b3))
+* **jans-tui-cli:** Jans cli tui agama post fixes ([#4561](https://github.com/JanssenProject/jans/issues/4561)) ([25dfe69](https://github.com/JanssenProject/jans/commit/25dfe699a78399a19990c8b7410b257e6fd561ce))
+* prepare for 1.0.12 release ([6f83197](https://github.com/JanssenProject/jans/commit/6f83197705511c39413456acdc64e9136a97ff39))
+
+## [1.0.11](https://github.com/JanssenProject/jans/compare/jans-cli-tui-v1.0.10...jans-cli-tui-v1.0.11) (2023-04-05)
+
+
+### Features
+
+* jans-cli-tui filter scopes (ref: [#4299](https://github.com/JanssenProject/jans/issues/4299)) ([#4414](https://github.com/JanssenProject/jans/issues/4414)) ([6142009](https://github.com/JanssenProject/jans/commit/614200937935e41c5a347278e2b1c6687d2b8cf1))
+* **jans-cli-tui:** device verification url with code ([#4328](https://github.com/JanssenProject/jans/issues/4328)) ([cee9ab4](https://github.com/JanssenProject/jans/commit/cee9ab43adfe3d711f9ae52cf846e6bc19882c06))
+
+
+### Bug Fixes
+
+* **jans-cli-tui:** agama related issues ([#4438](https://github.com/JanssenProject/jans/issues/4438)) ([1180e31](https://github.com/JanssenProject/jans/commit/1180e3126abfdfa31e94ad878deebb8eb979ca6b))
+* **jans-cli-tui:** display jans id in scope list ([#4263](https://github.com/JanssenProject/jans/issues/4263)) ([5d5e1cd](https://github.com/JanssenProject/jans/commit/5d5e1cd81e674a50f64126f458a575d1767bd74a))
+* **jans-cli-tui:** fromisoformat function for py &lt; 3.7 ([#4365](https://github.com/JanssenProject/jans/issues/4365)) ([6756b8f](https://github.com/JanssenProject/jans/commit/6756b8fbd1fc870b86fd4a08e88530c4a1c090c7))
+* **jans-cli-tui:** remove unused code ([#4367](https://github.com/JanssenProject/jans/issues/4367)) ([c944603](https://github.com/JanssenProject/jans/commit/c944603a90afe9b08343e0aa574d576fa38316b6))
+* **jans-cli-tui:** use -dev isntead of -SNAPSHOT in build version ([#4363](https://github.com/JanssenProject/jans/issues/4363)) ([32ea135](https://github.com/JanssenProject/jans/commit/32ea135fd642a82ed93bb45a06256d92db9009d8))
+* prepare for  release ([60775c0](https://github.com/JanssenProject/jans/commit/60775c09dc5ab9996bf80c03dcb457861d48dfb1))
+
 ## [1.0.10](https://github.com/JanssenProject/jans/compare/jans-cli-tui-v1.0.9...jans-cli-tui-v1.0.10) (2023-03-16)
 
 

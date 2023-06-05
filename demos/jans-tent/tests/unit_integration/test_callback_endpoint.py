@@ -1,8 +1,7 @@
-from unittest import TestCase
 import clientapp
 from flask import Flask, url_for
 from typing import List
-import os
+from helper import FlaskBaseTestCase
 
 
 def app_endpoints(app: Flask) -> List[str]:
@@ -15,16 +14,16 @@ def app_endpoints(app: Flask) -> List[str]:
     return endpoints
 
 
-class FlaskBaseTestCase(TestCase):
-    def setUp(self):
-        self.app = clientapp.create_app()
-        self.app.testing = True
-        self.app_context = self.app.test_request_context(
-            base_url="https://chris.testingenv.org")
-        self.app_context.push()
-        self.client = self.app.test_client()
-        #self.oauth = OAuth(self.app)
-        os.environ['AUTHLIB_INSECURE_TRANSPORT'] = "1"
+# class FlaskBaseTestCase(TestCase):
+#     def setUp(self):
+#         self.app = clientapp.create_app()
+#         self.app.testing = True
+#         self.app_context = self.app.test_request_context(
+#             base_url="https://chris.testingenv.org")
+#         self.app_context.push()
+#         self.client = self.app.test_client()
+#         #self.oauth = OAuth(self.app)
+#         os.environ['AUTHLIB_INSECURE_TRANSPORT'] = "1"
 
 
 class TestCallbackEndpoint(FlaskBaseTestCase):

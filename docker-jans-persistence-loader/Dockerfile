@@ -26,7 +26,7 @@ RUN python3 -m ensurepip \
 # =====================
 
 # janssenproject/jans SHA commit
-ENV JANS_SOURCE_VERSION=cd62ff9fe8783f2e87dd5e47c2362d35ba9713ef
+ENV JANS_SOURCE_VERSION=49054ae66d17d2e7d34febd31ac7ab25be3acdc4
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCRIPT_CATALOG_DIR=docs/script-catalog
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
@@ -41,12 +41,11 @@ RUN git clone --filter blob:none --no-checkout https://github.com/janssenproject
     && git sparse-checkout add ${JANS_SCRIPT_CATALOG_DIR} \
     && git sparse-checkout add ${JANS_CONFIG_API_RESOURCES}
 
-RUN mkdir -p /app/static /app/static/couchbase /app/schema /app/openbanking/static /app/static/opendj /app/templates
+RUN mkdir -p /app/static /app/static/couchbase /app/schema /app/static/opendj /app/templates
 
 # sync static files from linux-setup
 RUN cd /tmp/jans \
     && cp -R ${JANS_SETUP_DIR}/static/extension /app/static/extension \
-    && cp -R ${JANS_SETUP_DIR}/openbanking/static/extension /app/openbanking/static/extension \
     && cp ${JANS_SETUP_DIR}/static/couchbase/index.json /app/static/couchbase/index.json \
     && cp ${JANS_SETUP_DIR}/schema/opendj_types.json /app/schema/opendj_types.json \
     && cp -R ${JANS_SETUP_DIR}/static/rdbm /app/static/rdbm \
@@ -54,16 +53,11 @@ RUN cd /tmp/jans \
     && cp ${JANS_SETUP_DIR}/schema/custom_schema.json /app/schema/custom_schema.json \
     && cp ${JANS_SETUP_DIR}/static/opendj/index.json /app/static/opendj/index.json \
     && cp -R ${JANS_SCRIPT_CATALOG_DIR} /app/script-catalog \
-    && cp ${JANS_SETUP_DIR}/static/extension/introspection/introspection_role_based_scope.py /app/openbanking/static/extension/introspection/ \
     && cp ${JANS_CONFIG_API_RESOURCES}/config-api-rs-protect.json -P /app/static/ \
     && cp ${JANS_SETUP_DIR}/templates/*.ldif /app/templates \
     && cp -R ${JANS_SETUP_DIR}/templates/jans-auth /app/templates/jans-auth \
-    && cp ${JANS_SETUP_DIR}/openbanking/templates/scopes.ldif /app/templates/scopes.ob.ldif \
-    && cp ${JANS_SETUP_DIR}/openbanking/templates/attributes.ldif /app/templates/attributes.ob.ldif \
     && cp ${JANS_SETUP_DIR}/static/metric/o_metric.ldif /app/templates/o_metric.ldif \
     && cp ${JANS_SETUP_DIR}/static/cache-refresh/o_site.ldif /app/templates/o_site.ldif \
-    && cp -R ${JANS_SETUP_DIR}/templates/jans-fido2 /app/templates/jans-fido2 \
-    && cp -R ${JANS_SETUP_DIR}/templates/jans-scim /app/templates/jans-scim \
     && cp -R ${JANS_SETUP_DIR}/templates/jans-cli /app/templates/jans-cli
 
 # cleanup
@@ -157,7 +151,6 @@ ENV CN_CACHE_TYPE=NATIVE_PERSISTENCE \
     CN_JACKRABBIT_ADMIN_ID_FILE=/etc/jans/conf/jackrabbit_admin_id \
     CN_JACKRABBIT_ADMIN_PASSWORD_FILE=/etc/jans/conf/jackrabbit_admin_password \
     GOOGLE_PROJECT_ID="" \
-    GOOGLE_APPLICATION_CREDENTIALS=/etc/jans/conf/google-credentials.json \
     CN_GOOGLE_SECRET_MANAGER_PASSPHRASE=secret \
     CN_GOOGLE_SECRET_VERSION_ID=latest \
     CN_GOOGLE_SECRET_NAME_PREFIX=jans \
@@ -172,7 +165,7 @@ ENV CN_CACHE_TYPE=NATIVE_PERSISTENCE \
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/persistence-loader" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.0.11" \
+    org.opencontainers.image.version="1.0.14" \
     org.opencontainers.image.title="Janssen Authorization Server Persistence loader" \
     org.opencontainers.image.description="Generate initial data for persistence layer"
 
@@ -181,10 +174,14 @@ RUN mkdir -p /app/custom_ldif /etc/certs /etc/jans/conf
 COPY scripts /app/scripts
 # this overrides existing templates
 COPY templates /app/templates
+
+# disable keyRegeneration
+RUN sed -i -r 's/("keyRegenerationEnabled":)true/\1false/g' /app/templates/jans-auth/jans-auth-config.json
+
 RUN chmod +x /app/scripts/entrypoint.sh
 
 # create non-root user
-RUN adduser -s /bin/sh -D -G root -u 1000 1000
+RUN adduser -s /bin/sh -h /home/1000 -D -G root -u 1000 1000
 
 # adjust ownership and permission
 RUN chmod -R g=u /app/custom_ldif \
@@ -192,6 +189,8 @@ RUN chmod -R g=u /app/custom_ldif \
     && chmod -R g=u /etc/jans
 
 USER 1000
+
+RUN mkdir -p $HOME/.config/gcloud
 
 ENTRYPOINT ["tini", "-g", "--"]
 CMD ["sh", "/app/scripts/entrypoint.sh"]

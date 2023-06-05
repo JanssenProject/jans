@@ -1,5 +1,35 @@
 # Changelog
 
+## [1.0.13-1](https://github.com/JanssenProject/jans/compare/docker-jans-config-api-v1.0.12-1...docker-jans-config-api-v1.0.13-1) (2023-05-10)
+
+
+### Bug Fixes
+
+* **docker-jans:** sync role-based introspection script ([#4753](https://github.com/JanssenProject/jans/issues/4753)) ([f744330](https://github.com/JanssenProject/jans/commit/f74433098011bb9546d27ca2b55d7e83dc4e0531))
+* ensure google libs support all possible credentials ([#4777](https://github.com/JanssenProject/jans/issues/4777)) ([d0759e5](https://github.com/JanssenProject/jans/commit/d0759e595517ca16b97a1ce4f7cd168b29ff17dd))
+* prepare for 1.0.13 release ([493478e](https://github.com/JanssenProject/jans/commit/493478e71f6231553c998b48c0f163c7f5869da4))
+
+## [1.0.12-1](https://github.com/JanssenProject/jans/compare/docker-jans-config-api-v1.0.11-1...docker-jans-config-api-v1.0.12-1) (2023-04-18)
+
+
+### Bug Fixes
+
+* **docker-jans-config-api:** add missing smtp keystore ([#4530](https://github.com/JanssenProject/jans/issues/4530)) ([a45b841](https://github.com/JanssenProject/jans/commit/a45b8416eec560ea35b90c7d606739b56e5e5335))
+* opencontainer labels ([f8b0b36](https://github.com/JanssenProject/jans/commit/f8b0b365600bd700128bb9d92df6de7ba14830b6))
+* prepare for 1.0.12 release ([6f83197](https://github.com/JanssenProject/jans/commit/6f83197705511c39413456acdc64e9136a97ff39))
+
+## [1.0.11-1](https://github.com/JanssenProject/jans/compare/docker-jans-config-api-v1.0.10-1...docker-jans-config-api-v1.0.11-1) (2023-04-05)
+
+
+### Features
+
+* **docker-jans:** upstream changes for license credentials ([#4416](https://github.com/JanssenProject/jans/issues/4416)) ([1565095](https://github.com/JanssenProject/jans/commit/15650953e2f6ee449d389682dd624028c9001c47))
+
+
+### Bug Fixes
+
+* prepare for  release ([60775c0](https://github.com/JanssenProject/jans/commit/60775c09dc5ab9996bf80c03dcb457861d48dfb1))
+
 ## [1.0.10-1](https://github.com/JanssenProject/jans/compare/docker-jans-config-api-v1.0.9-1...docker-jans-config-api-v1.0.10-1) (2023-03-16)
 
 

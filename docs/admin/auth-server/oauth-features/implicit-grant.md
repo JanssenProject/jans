@@ -4,6 +4,8 @@ tags:
   - auth-server
   - oauth
   - feature
+  - grant
+  - implicit
 ---
 
 # OAuth 2.0 Implicit Grant 

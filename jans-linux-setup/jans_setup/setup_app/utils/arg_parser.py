@@ -145,7 +145,7 @@ def add_to_me(you):
 
 def get_parser():
     argsp, others = parser.parse_known_args()
-    if argsp.test_client_id:
+    if getattr(argsp, 'test_client_id', None):
         try:
             uuid.UUID(argsp.test_client_id)
         except:

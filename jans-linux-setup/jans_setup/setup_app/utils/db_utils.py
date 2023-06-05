@@ -38,6 +38,7 @@ class DBUtils:
     Base = None
     session = None
     cbm = None
+    mariadb = False
 
     def bind(self, use_ssl=True, force=False):
 
@@ -124,16 +125,34 @@ class DBUtils:
             Session = sqlalchemy.orm.sessionmaker(bind=self.engine)
             self.session = Session()
             self.metadata = sqlalchemy.MetaData()
-            myconn = self.session.connection()
+            self.session.connection()
 
             base.logIt("{} Connection was successful".format(Config.rdbm_type.upper()))
-            
+            if Config.rdbm_type == 'mysql':
+                self.set_mysql_version()
             return True, self.session
 
         except Exception as e:
             if log:
                 base.logIt("Can't connect to {} server: {}".format(Config.rdbm_type.upper(), str(e), True))
             return False, e
+
+
+    def set_mysql_version(self):
+        try:
+            base.logIt("Determining MySQL version")
+            qresult = self.exec_rdbm_query('select version()', getresult=1)
+            self.mysql_version = self.get_version(qresult[0])
+            base.logIt("MySQL version was found as {}".format(self.mysql_version))
+        except Exception as e:
+            base.logIt("Cant determine MySQL version due to {}. Set to unknown".format(e))
+            self.mysql_version = (0, 0, 0)
+
+        # are we on MariDB?
+        version_query = self.engine.execute(sqlalchemy.text('SELECT VERSION()'))
+        version_query_result = version_query.fetchone()
+        if version_query_result:
+            self.mariadb = 'mariadb' in version_query_result[0].lower()
 
     @property
     def json_dialects_instance(self):
@@ -701,11 +720,12 @@ class DBUtils:
 
 
         # fix JSON type for mariadb
-        if Config.rdbm_type == 'mysql':
+        if Config.rdbm_type == 'mysql' and self.mariadb:
             for tbl in self.Base.classes:
-                for col in tbl.__table__.columns:
-                    if isinstance(col.type, sqlalchemy.dialects.mysql.LONGTEXT) and col.comment and col.comment.lower() == 'json':
-                        col.type = sqlalchemy.dialects.mysql.json.JSON()
+                slq_query = self.engine.execute(sqlalchemy.text('SELECT CONSTRAINT_NAME from INFORMATION_SCHEMA.CHECK_CONSTRAINTS where TABLE_NAME="{}" and CHECK_CLAUSE like "%json_valid%"'.format(tbl.__table__.name)))
+                slq_query_result = slq_query.fetchall()
+                for col in slq_query_result:
+                    tbl.__table__.columns[col[0]].type = sqlalchemy.dialects.mysql.json.JSON()
 
         base.logIt("Reflected tables {}".format(list(self.metadata.tables.keys())))
 

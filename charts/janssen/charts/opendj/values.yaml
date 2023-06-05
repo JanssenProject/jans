@@ -105,6 +105,10 @@ readinessProbe:
 volumes: []
 # -- Configure any additional volumesMounts that need to be attached to the containers
 volumeMounts: []
+lifecycle:
+  preStop:
+      exec:
+        command: ["/bin/sh", "-c", "python3 /app/scripts/deregister_peer.py 1>&/proc/1/fd/1"]
 nameOverride: ""
 fullnameOverride: ""
 # VolumeMounts for StatefulSet

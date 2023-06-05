@@ -91,6 +91,15 @@ func TestResourceApiAppConfiguration_Mapping(t *testing.T) {
 
 	newConfig := jans.ApiAppConfiguration{}
 
+	patches, err := patchFromResourceData(data, &newConfig)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(patches) != 25 {
+		t.Errorf("Got %d patches, expected 25", len(patches))
+	}
+
 	if err := fromSchemaResource(data, &newConfig); err != nil {
 		t.Fatal(err)
 	}

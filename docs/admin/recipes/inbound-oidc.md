@@ -1,4 +1,13 @@
-## Overview
+---
+tags:
+- administration
+- recipe 
+- openid-connect
+- inbound
+- authentication
+---
+
+# Inbound OpenId-Connect Authentication
 
 In this tutorial, we will see how you can integrate any inbound external oauth2 provider authentication in the Janssen server. If you are looking for social login support then check out [passport](../recipes/passportjs.md) module for that.
 

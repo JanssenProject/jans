@@ -136,35 +136,6 @@ components:
           type: boolean
         fido2Configuration:
           $ref: '#/components/schemas/Fido2Configuration'
-        newUserSchema:
-          properties:
-            name:
-              example: John123
-            password:
-              example: P4SSW0RD
-            image:
-              example: https://robohash.org/John123.png
-        clientAuthSchema1:
-          properties:
-            children:
-              type: object
-              additionalProperties:
-                $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema1
-        clientAuthMapSchema:
-          properties:
-            children:
-              type: object
-              additionalProperties:
-                $ref: '#/components/schemas/Scope'
-          description: clientAuthMapSchema
-        clientAuthMapArraySchema:
-          properties:
-            children:
-              type: object
-              additionalProperties:
-                $ref: '#/components/schemas/Scope'
-          description: clientAuthMapArraySchema
     Fido2Configuration:
       type: object
       properties:
@@ -196,35 +167,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/RequestedParty'
-        newUserSchema:
-          properties:
-            name:
-              example: John123
-            password:
-              example: P4SSW0RD
-            image:
-              example: https://robohash.org/John123.png
-        clientAuthSchema1:
-          properties:
-            children:
-              type: object
-              additionalProperties:
-                $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema1
-        clientAuthMapSchema:
-          properties:
-            children:
-              type: object
-              additionalProperties:
-                $ref: '#/components/schemas/Scope'
-          description: clientAuthMapSchema
-        clientAuthMapArraySchema:
-          properties:
-            children:
-              type: object
-              additionalProperties:
-                $ref: '#/components/schemas/Scope'
-          description: clientAuthMapArraySchema
     RequestedParty:
       type: object
       properties:
@@ -234,35 +176,6 @@ components:
           type: array
           items:
             type: string
-        newUserSchema:
-          properties:
-            name:
-              example: John123
-            password:
-              example: P4SSW0RD
-            image:
-              example: https://robohash.org/John123.png
-        clientAuthSchema1:
-          properties:
-            children:
-              type: object
-              additionalProperties:
-                $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema1
-        clientAuthMapSchema:
-          properties:
-            children:
-              type: object
-              additionalProperties:
-                $ref: '#/components/schemas/Scope'
-          description: clientAuthMapSchema
-        clientAuthMapArraySchema:
-          properties:
-            children:
-              type: object
-              additionalProperties:
-                $ref: '#/components/schemas/Scope'
-          description: clientAuthMapArraySchema
     Fido2DeviceData:
       type: object
       properties:
@@ -287,35 +200,6 @@ components:
             type: string
         push_token:
           type: string
-        newUserSchema:
-          properties:
-            name:
-              example: John123
-            password:
-              example: P4SSW0RD
-            image:
-              example: https://robohash.org/John123.png
-        clientAuthSchema1:
-          properties:
-            children:
-              type: object
-              additionalProperties:
-                $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema1
-        clientAuthMapSchema:
-          properties:
-            children:
-              type: object
-              additionalProperties:
-                $ref: '#/components/schemas/Scope'
-          description: clientAuthMapSchema
-        clientAuthMapArraySchema:
-          properties:
-            children:
-              type: object
-              additionalProperties:
-                $ref: '#/components/schemas/Scope'
-          description: clientAuthMapArraySchema
     Fido2RegistrationData:
       type: object
       properties:
@@ -364,35 +248,6 @@ components:
           format: int32
         applicationId:
           type: string
-        newUserSchema:
-          properties:
-            name:
-              example: John123
-            password:
-              example: P4SSW0RD
-            image:
-              example: https://robohash.org/John123.png
-        clientAuthSchema1:
-          properties:
-            children:
-              type: object
-              additionalProperties:
-                $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema1
-        clientAuthMapSchema:
-          properties:
-            children:
-              type: object
-              additionalProperties:
-                $ref: '#/components/schemas/Scope'
-          description: clientAuthMapSchema
-        clientAuthMapArraySchema:
-          properties:
-            children:
-              type: object
-              additionalProperties:
-                $ref: '#/components/schemas/Scope'
-          description: clientAuthMapArraySchema
     Fido2RegistrationEntry:
       type: object
       properties:
@@ -450,35 +305,6 @@ components:
           writeOnly: true
         baseDn:
           type: string
-        newUserSchema:
-          properties:
-            name:
-              example: John123
-            password:
-              example: P4SSW0RD
-            image:
-              example: https://robohash.org/John123.png
-        clientAuthSchema1:
-          properties:
-            children:
-              type: object
-              additionalProperties:
-                $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema1
-        clientAuthMapSchema:
-          properties:
-            children:
-              type: object
-              additionalProperties:
-                $ref: '#/components/schemas/Scope'
-          description: clientAuthMapSchema
-        clientAuthMapArraySchema:
-          properties:
-            children:
-              type: object
-              additionalProperties:
-                $ref: '#/components/schemas/Scope'
-          description: clientAuthMapArraySchema
   securitySchemes:
     oauth2:
       type: oauth2

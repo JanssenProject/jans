@@ -28,7 +28,9 @@ resource "jans_fido2_configuration" "global" {
     "jansCustomPerson",
     "jansPerson",
   ]
-  use_local_cache                 = true 
+  use_local_cache                 = true
+  super_gluu_enabled              = true
+  old_u2f_migration_enabled       = true
 
   fido2_configuration {
     authentication_history_expiration = 1296000
@@ -70,7 +72,9 @@ resource "jans_fido2_configuration" "global" {
 - `metric_reporter_enabled` (Boolean) Boolean value specifying whether to enable Metric Reporter.
 - `metric_reporter_interval` (Number) The interval for metric reporter in seconds.
 - `metric_reporter_keep_data_days` (Number) The days to keep report data.
+- `old_u2f_migration_enabled` (Boolean) Boolean value to indicate if U2F migration is to be enabled.
 - `person_custom_object_class_list` (List of String) Custom object class list for dynamic person enrolment.
+- `super_gluu_enabled` (Boolean) Boolean value to indicate if SuperGluu is to be enabled.
 - `use_local_cache` (Boolean) Boolean value to indicate if Local Cache is to be used.
 
 ### Read-Only

@@ -55,15 +55,24 @@ function _flowCall(flowName, basePath, urlOverrides, args) {
     //wrapping with ArrayList is a workaround for a kryo deserialization exception
     p = new Packages.java.util.ArrayList(mapping.values())
     mapping = null
-    let result = f.apply(null, params)
 
-    _scriptUtils.closeSubflow()
+    let result
+    try {
+        result = f.apply(null, params)
+    } finally {
+        _scriptUtils.closeSubflow()
+    }
+
     if (_isNil(result)) return     //return undefined
     
     return { value: result,
         //determines if the parent should handle this returned value
         bubbleUp: result.aborted == true && !_scriptUtils.pathMatching(result.url, p) }
 
+}
+
+function _makeRhinoException(e) {
+    return new Packages.org.mozilla.javascript.SubflowRhinoException(e)
 }
 
 function _finish(val) {

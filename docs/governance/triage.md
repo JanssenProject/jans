@@ -1,3 +1,10 @@
+---
+tags:
+  - governance
+  - triage
+---
+
+
 # Janssen Triage Process and labels
 
 Triage process is used to quickly screen and categorise new issues and PRs. Aim is to determine characteristics of new PRs/issues and take quick actions if possible. 

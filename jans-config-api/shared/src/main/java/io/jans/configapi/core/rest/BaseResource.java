@@ -11,7 +11,7 @@ import static io.jans.as.model.util.Util.escapeLog;
 import io.jans.configapi.core.interceptor.RequestAuditInterceptor;
 import io.jans.configapi.core.interceptor.RequestInterceptor;
 import io.jans.configapi.core.model.ApiError;
-import io.jans.configapi.core.model.SearchRequest;
+import io.jans.model.SearchRequest;
 import io.jans.configapi.core.util.Util;
 import io.jans.orm.model.SortOrder;
 
@@ -67,6 +67,7 @@ public class BaseResource {
     public static final String MISSING_ATTRIBUTE_CODE = "OCA001";
     public static final String MISSING_ATTRIBUTE_MESSAGE = "A required attribute is missing.";
     public static final String TOKEN_DELIMITER = ",";
+    public static final String FIELD_VALUE_SEPARATOR = "=";
 
     public static <T> void checkResourceNotNull(T resource, String objectName) {
         if (resource == null) {
@@ -179,26 +180,28 @@ public class BaseResource {
     }
 
     protected SearchRequest createSearchRequest(String schemas, String filter, String sortBy, String sortOrder,
-            Integer startIndex, Integer count, String attrsList, String excludedAttrsList, int maximumRecCount) {
+            Integer startIndex, Integer count, String attrsList, String excludedAttrsList, int maximumRecCount, String fieldValuePair, Class<?> entityClass) {
         if (log.isDebugEnabled()) {
             log.debug(
-                    "Search Request params:: - schemas:{}, filter:{}, sortBy:{}, sortOrder:{}, startIndex:{}, count:{}, attrsList:{}, excludedAttrsList:{}, maximumRecCount:{}",
+                    "Search Request params:: - schemas:{}, filter:{}, sortBy:{}, sortOrder:{}, startIndex:{}, count:{}, attrsList:{}, excludedAttrsList:{}, maximumRecCount:{}, fieldValuePair:{}, entityClass:{}",
                     escapeLog(schemas), escapeLog(filter), escapeLog(sortBy), escapeLog(sortOrder),
                     escapeLog(startIndex), escapeLog(count), escapeLog(attrsList), escapeLog(excludedAttrsList),
-                    escapeLog(maximumRecCount));
+                    escapeLog(maximumRecCount), escapeLog(fieldValuePair), escapeLog(entityClass));
         }
+        
         SearchRequest searchRequest = new SearchRequest();
+        searchRequest.setEntityClass(entityClass);
 
         // Validation
         checkNotEmpty(schemas, "Schema");
         int maxCount = maximumRecCount;
-        log.debug(" count:{}, maxCount:{}", count, maxCount);
+        log.trace(" count:{}, maxCount:{}", count, maxCount);
         if (count > maxCount) {
             throwBadRequestException("Maximum number of results per page is " + maxCount);
         }
 
         count = count == null ? maxCount : count;
-        log.debug(" count:{} ", count);
+        log.trace(" count:{} ", count);
         // Per spec, a negative value SHALL be interpreted as "0" for count
         if (count < 0) {
             count = 0;
@@ -207,7 +210,7 @@ public class BaseResource {
         if (StringUtils.isEmpty(sortOrder) || !sortOrder.equals(SortOrder.DESCENDING.getValue())) {
             sortOrder = SortOrder.ASCENDING.getValue();
         }
-        log.debug(" util.getTokens(filter,TOKEN_DELIMITER):{} ", util.getTokens(filter, TOKEN_DELIMITER));
+        log.debug(" util.getTokens(filter,TOKEN_DELIMITER):{} , util.getFieldValueMap(searchRequest, fieldValuePair, TOKEN_DELIMITER, FIELD_VALUE_SEPARATOR)):{}", util.getTokens(filter, TOKEN_DELIMITER), util.getFieldValueMap(entityClass, fieldValuePair, TOKEN_DELIMITER, FIELD_VALUE_SEPARATOR));
         searchRequest.setSchemas(schemas);
         searchRequest.setAttributes(attrsList);
         searchRequest.setExcludedAttributes(excludedAttrsList);
@@ -218,6 +221,7 @@ public class BaseResource {
         searchRequest.setCount(count);
         searchRequest.setMaxCount(maximumRecCount);
         searchRequest.setFilterAssertionValue(util.getTokens(filter, TOKEN_DELIMITER));
+        searchRequest.setFieldValueMap((util.getFieldValueMap(entityClass, fieldValuePair, TOKEN_DELIMITER, FIELD_VALUE_SEPARATOR)));
         return searchRequest;
 
     }

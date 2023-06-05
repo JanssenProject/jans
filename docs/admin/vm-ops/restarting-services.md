@@ -3,7 +3,11 @@ tags:
   - administration
   - vm
   - operations
+  - services
+  - lifecycle
 ---
+
+# Janssen System Services Lifecycle Management
 
 ## Getting list of Jans services
 

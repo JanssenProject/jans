@@ -3,8 +3,11 @@ tags:
   - administration
   - reference
   - database
+  - mysql
   - Indexes
 ---
+
+# MySQL Indexes
 
 ## Indexes
 

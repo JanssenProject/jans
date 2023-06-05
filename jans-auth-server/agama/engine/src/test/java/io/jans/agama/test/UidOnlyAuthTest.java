@@ -5,6 +5,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlSubmitInput;
 
 import java.util.Collections;
+import java.net.URL;
 
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
@@ -16,12 +17,17 @@ public class UidOnlyAuthTest extends BaseTest {
     private static final String QNAME = "io.jans.agama.test.auth.uidOnly";
 
     @Test
-    public void randUid() {
+    @Parameters("redirectUri")
+    public void randUid(String redirectUri) {
 
-        HtmlPage page = (HtmlPage) start("" + Math.random());
+        Page page = start("" + Math.random());
         assertOK(page);
-        assertTrue(page.getUrl().toString().endsWith("error.htm"));
-        assertTextContained(page.getVisibleText().toLowerCase(), "failed", "authenticate");
+
+        URL url = page.getUrl();
+        //It is assumed errorHandlingMethod=remote in auth-server config, thus
+        //the RP handles the error - the built-in AS error page is not shown
+        assertTrue(url.toString().startsWith(redirectUri));        
+        assertTrue(url.getQuery().toString().contains("error="));
 
     }
 

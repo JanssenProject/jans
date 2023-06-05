@@ -1,5 +1,67 @@
 # Changelog
 
+## [1.0.13](https://github.com/JanssenProject/jans/compare/docs-v1.0.12...docs-v1.0.13) (2023-05-10)
+
+
+### Features
+
+* **jans-auth-server:** add "introspection" scope check on introspection endpoint access [#4557](https://github.com/JanssenProject/jans/issues/4557) ([#4716](https://github.com/JanssenProject/jans/issues/4716)) ([ce2d75c](https://github.com/JanssenProject/jans/commit/ce2d75c32df382eb2a28f89793778a3e72659700))
+* **jans-auth-server:** log httpresponse body configurated by httpLoggingResponseBodyContent [#349](https://github.com/JanssenProject/jans/issues/349) ([#4417](https://github.com/JanssenProject/jans/issues/4417)) ([08d92b3](https://github.com/JanssenProject/jans/commit/08d92b303aa1d1733b2e51d258b0a09a21df6677))
+* **jans-fido2:** interception scripts issue 1485, swagger updates ([#4543](https://github.com/JanssenProject/jans/issues/4543)) ([80274ff](https://github.com/JanssenProject/jans/commit/80274ffd1a20318988d9cc99ee015c5c7d5984b7))
+
+
+### Bug Fixes
+
+* **docker-jans-loadtesting-jmeter:** rename incorrect reference to OCI image ([#4908](https://github.com/JanssenProject/jans/issues/4908)) ([7db2c11](https://github.com/JanssenProject/jans/commit/7db2c11c8335a35873c08387060454e8eb30d8e2))
+* **docs:** autogenerate docs ([#4933](https://github.com/JanssenProject/jans/issues/4933)) ([337239b](https://github.com/JanssenProject/jans/commit/337239ba8ae301a83eec58048a3f5141be54c8e6))
+* **docs:** Jans cli tui update tui navigation docs ([#4767](https://github.com/JanssenProject/jans/issues/4767)) ([a8b055c](https://github.com/JanssenProject/jans/commit/a8b055cf80988d7918d99cdc45706cdde609b022))
+* **jans-cli-tui:** f4 to close dialog ([#4736](https://github.com/JanssenProject/jans/issues/4736)) ([2f2d094](https://github.com/JanssenProject/jans/commit/2f2d094409427dea18526d44ae0c65df98473bbb))
+* **jans-fido2:** interception script documentation ([#4751](https://github.com/JanssenProject/jans/issues/4751)) ([3b25801](https://github.com/JanssenProject/jans/commit/3b258017ed08b798f95fdb138ec4914aff6f6482))
+* prepare for 1.0.13 release ([493478e](https://github.com/JanssenProject/jans/commit/493478e71f6231553c998b48c0f163c7f5869da4))
+
+## [1.0.12](https://github.com/JanssenProject/jans/compare/docs-v1.0.11...docs-v1.0.12) (2023-04-18)
+
+
+### Features
+
+* **jans-auth-server:** redirect back to RP when session is expired or if not possible show error page [#4449](https://github.com/JanssenProject/jans/issues/4449) ([#4505](https://github.com/JanssenProject/jans/issues/4505)) ([0983e73](https://github.com/JanssenProject/jans/commit/0983e7397ea2aa99423e5e928690666cd67ca8b2))
+
+
+### Bug Fixes
+
+* adjust bleeding edge images ([4bb0b09](https://github.com/JanssenProject/jans/commit/4bb0b0983984314a51e7b43e547027d5226c84bb))
+* **docs:** [#2487](https://github.com/JanssenProject/jans/issues/2487) ([#4624](https://github.com/JanssenProject/jans/issues/4624)) ([ba7c347](https://github.com/JanssenProject/jans/commit/ba7c3478a52d6d8e8dbd542fedbf3a2e44fc8da9))
+* **docs:** [#3340](https://github.com/JanssenProject/jans/issues/3340) mention push notification server ([#4622](https://github.com/JanssenProject/jans/issues/4622)) ([7539857](https://github.com/JanssenProject/jans/commit/75398578b4a53c4bfa63e36fa8539fa5fc930b1b))
+* **docs:** autogenerate docs ([#4652](https://github.com/JanssenProject/jans/issues/4652)) ([e353874](https://github.com/JanssenProject/jans/commit/e35387414ba9a4610a4f5a5e690fb0e26efdacdb))
+* **docs:** Paraphrasing [#4369](https://github.com/JanssenProject/jans/issues/4369) ([#4512](https://github.com/JanssenProject/jans/issues/4512)) ([57e027e](https://github.com/JanssenProject/jans/commit/57e027ec73212c89e71779f4e0f1236b751de5fd))
+* **docs:** session persistence [#3235](https://github.com/JanssenProject/jans/issues/3235) ([#4616](https://github.com/JanssenProject/jans/issues/4616)) ([0575c9f](https://github.com/JanssenProject/jans/commit/0575c9f6b6e2be3dcca1eb5bce6fa972dd3cf104))
+* **jans-auth:** [#3340](https://github.com/JanssenProject/jans/issues/3340) incorrect folder location ([#4623](https://github.com/JanssenProject/jans/issues/4623)) ([ef0dbb4](https://github.com/JanssenProject/jans/commit/ef0dbb40b34c531d9ae5f33fb41e5bdecfda9524))
+* **jans-config-api:** agama deployment detail endpoint not including all flows IDs ([#4565](https://github.com/JanssenProject/jans/issues/4565)) ([358c494](https://github.com/JanssenProject/jans/commit/358c49409a172d6419382dd800a21b845a8cc708))
+* prepare for 1.0.12 release ([6f83197](https://github.com/JanssenProject/jans/commit/6f83197705511c39413456acdc64e9136a97ff39))
+
+## [1.0.11](https://github.com/JanssenProject/jans/compare/docs-v1.0.10...docs-v1.0.11) (2023-04-05)
+
+
+### Features
+
+* **agama:** add a "default agama flow" to bridge ([#4309](https://github.com/JanssenProject/jans/issues/4309)) ([3b2248f](https://github.com/JanssenProject/jans/commit/3b2248fdb2a8e842cde1baca81132fa47613c356))
+* **agama:** add means to selectively prevent flow crash when a subflow crashes ([#4436](https://github.com/JanssenProject/jans/issues/4436)) ([5d8f0ad](https://github.com/JanssenProject/jans/commit/5d8f0ad2d74f7d39a5eb4b79e807f175393959b5))
+* **jans-auth-server:** added configurable acr to Device Flow [#4305](https://github.com/JanssenProject/jans/issues/4305) ([#4424](https://github.com/JanssenProject/jans/issues/4424)) ([fbd4ede](https://github.com/JanssenProject/jans/commit/fbd4edeaf7d5cb32b03653d4f2c944d41389407d))
+* **jans-auth-server:** align JWT Response for OAuth Token Introspection with spec [#3240](https://github.com/JanssenProject/jans/issues/3240) ([#4151](https://github.com/JanssenProject/jans/issues/4151)) ([02e1595](https://github.com/JanssenProject/jans/commit/02e159516d9d41cfe3d81d13983256066f6e647d))
+* **jans-auth-server:** increase sessionIdUnauthenticatedUnusedLifetime value in setup [#4445](https://github.com/JanssenProject/jans/issues/4445) ([#4446](https://github.com/JanssenProject/jans/issues/4446)) ([ecf9395](https://github.com/JanssenProject/jans/commit/ecf93955f391bcda17ad6a2f6ead00d79afee165))
+
+
+### Bug Fixes
+
+* **docs:** autogenerate docs ([#4486](https://github.com/JanssenProject/jans/issues/4486)) ([a9b3eab](https://github.com/JanssenProject/jans/commit/a9b3eabf749cc5dde98c12ffa1b9a1bb9a8091f6))
+* **docs:** jans TUI configuration -- update user password ([#4435](https://github.com/JanssenProject/jans/issues/4435)) ([c34b156](https://github.com/JanssenProject/jans/commit/c34b156133ba314e6f04c290deedeb2fb4d2e59f))
+* **docs:** minor ([#4245](https://github.com/JanssenProject/jans/issues/4245)) ([65f5944](https://github.com/JanssenProject/jans/commit/65f59447c569b418ba55b943dd60d01495e538ba))
+* **docs:** post-install setup [#3340](https://github.com/JanssenProject/jans/issues/3340) ([#4327](https://github.com/JanssenProject/jans/issues/4327)) ([c214681](https://github.com/JanssenProject/jans/commit/c2146818fcd5d316e7a2e634bd90d9a27a55d8ea))
+* **docs:** temporary record incase of one_step [#3340](https://github.com/JanssenProject/jans/issues/3340) ([#4326](https://github.com/JanssenProject/jans/issues/4326)) ([921fd20](https://github.com/JanssenProject/jans/commit/921fd20df7397a78253c5c9a3e46f2dde55d7d51))
+* prepare for  release ([60775c0](https://github.com/JanssenProject/jans/commit/60775c09dc5ab9996bf80c03dcb457861d48dfb1))
+* SG endpoint moved inside the fido2 server ([#4321](https://github.com/JanssenProject/jans/issues/4321)) ([dacb0fa](https://github.com/JanssenProject/jans/commit/dacb0faea5cd485b5cd01abb5c5680856e747daa))
+* update push part in SG script to conform Jans config and API ([#4345](https://github.com/JanssenProject/jans/issues/4345)) ([e1cb416](https://github.com/JanssenProject/jans/commit/e1cb416080c6de9ad3f009f4cce8c9e812d73164))
+
 ## [1.0.10](https://github.com/JanssenProject/jans/compare/docs-v1.0.9...docs-v1.0.10) (2023-03-16)
 
 

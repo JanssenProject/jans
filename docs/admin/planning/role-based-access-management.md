@@ -2,6 +2,8 @@
 tags:
   - administration
   - planning
+  - RBAC
+  - Role
 ---
 
 Using roles to control access to resources makes sense for lots of security use

@@ -1,5 +1,49 @@
 # Changelog
 
+## [1.0.13](https://github.com/JanssenProject/jans/compare/jans-core-v1.0.12...jans-core-v1.0.13) (2023-05-10)
+
+
+### Features
+
+* **jans-fido2:** interception scripts issue 1485, swagger updates ([#4543](https://github.com/JanssenProject/jans/issues/4543)) ([80274ff](https://github.com/JanssenProject/jans/commit/80274ffd1a20318988d9cc99ee015c5c7d5984b7))
+
+
+### Bug Fixes
+
+* cors filter should not store in local variable allowed ([#4688](https://github.com/JanssenProject/jans/issues/4688)) ([0d99195](https://github.com/JanssenProject/jans/commit/0d99195972dfe2963d3d0b785cd25b7337b55296)), closes [#4687](https://github.com/JanssenProject/jans/issues/4687)
+* prepare for 1.0.13 release ([493478e](https://github.com/JanssenProject/jans/commit/493478e71f6231553c998b48c0f163c7f5869da4))
+
+## [1.0.12](https://github.com/JanssenProject/jans/compare/jans-core-v1.0.11...jans-core-v1.0.12) (2023-04-18)
+
+
+### Features
+
+* **config-api:** search pattern, client auth response and security fix ([#4595](https://github.com/JanssenProject/jans/issues/4595)) ([4dbfcc2](https://github.com/JanssenProject/jans/commit/4dbfcc241353c4e03672d4103d10768cbc0c5bdd))
+
+
+### Bug Fixes
+
+* jsonvalue has been added; ([#4604](https://github.com/JanssenProject/jans/issues/4604)) ([f3b46f4](https://github.com/JanssenProject/jans/commit/f3b46f4a2b8da47063efe8e3e90d98db58eeec81))
+* mailservice should send non signed emails, if keystore isn't defined (update); ([#4544](https://github.com/JanssenProject/jans/issues/4544)) ([57f4b75](https://github.com/JanssenProject/jans/commit/57f4b75ce68f0f12a775d397f97cf56df5299900))
+* mismatch in notation used for SmtpConfiguration [#4581](https://github.com/JanssenProject/jans/issues/4581) ([#4600](https://github.com/JanssenProject/jans/issues/4600)) ([3a62f05](https://github.com/JanssenProject/jans/commit/3a62f0588b996df97f9f21f26edd2d980b4fadec))
+* prepare for 1.0.12 release ([6f83197](https://github.com/JanssenProject/jans/commit/6f83197705511c39413456acdc64e9136a97ff39))
+* yaml has been updated; ([f3b46f4](https://github.com/JanssenProject/jans/commit/f3b46f4a2b8da47063efe8e3e90d98db58eeec81))
+
+## [1.0.11](https://github.com/JanssenProject/jans/compare/jans-core-v1.0.10...jans-core-v1.0.11) (2023-04-05)
+
+
+### Features
+
+* loggerService should update root log level [#4251](https://github.com/JanssenProject/jans/issues/4251) ([#4252](https://github.com/JanssenProject/jans/issues/4252)) ([20264a2](https://github.com/JanssenProject/jans/commit/20264a2f61e7b49015bbf6f7b93e9d241e3176a1))
+* userName -&gt; smtpAuthenticationAccountUsername; ([#4401](https://github.com/JanssenProject/jans/issues/4401)) ([2bbb95d](https://github.com/JanssenProject/jans/commit/2bbb95dc4558a3251d52f74ff88b41f1aafe8a5e))
+
+
+### Bug Fixes
+
+* mailservice should send non signed emails, if keystore isn't defied; ([#4455](https://github.com/JanssenProject/jans/issues/4455)) ([7b41c44](https://github.com/JanssenProject/jans/commit/7b41c44f2933b8fde79d0478cf8df69303b9b3ba))
+* prepare for  release ([60775c0](https://github.com/JanssenProject/jans/commit/60775c09dc5ab9996bf80c03dcb457861d48dfb1))
+* Unable to send emails issue 4121 ([#4333](https://github.com/JanssenProject/jans/issues/4333)) ([70a566b](https://github.com/JanssenProject/jans/commit/70a566b67f660750bf742f19ee127f79b2db8930))
+
 ## [1.0.10](https://github.com/JanssenProject/jans/compare/jans-core-v1.0.9...jans-core-v1.0.10) (2023-03-16)
 
 

@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.0.13](https://github.com/JanssenProject/jans/compare/jans-eleven-v1.0.12...jans-eleven-v1.0.13) (2023-05-10)
+
+
+### Bug Fixes
+
+* prepare for 1.0.13 release ([493478e](https://github.com/JanssenProject/jans/commit/493478e71f6231553c998b48c0f163c7f5869da4))
+
+## [1.0.12](https://github.com/JanssenProject/jans/compare/jans-eleven-v1.0.11...jans-eleven-v1.0.12) (2023-04-18)
+
+
+### Bug Fixes
+
+* prepare for 1.0.12 release ([6f83197](https://github.com/JanssenProject/jans/commit/6f83197705511c39413456acdc64e9136a97ff39))
+
+## [1.0.11](https://github.com/JanssenProject/jans/compare/jans-eleven-v1.0.10...jans-eleven-v1.0.11) (2023-04-05)
+
+
+### Bug Fixes
+
+* prepare for  release ([60775c0](https://github.com/JanssenProject/jans/commit/60775c09dc5ab9996bf80c03dcb457861d48dfb1))
+
 ## [1.0.10](https://github.com/JanssenProject/jans/compare/jans-eleven-v1.0.9...jans-eleven-v1.0.10) (2023-03-16)
 
 

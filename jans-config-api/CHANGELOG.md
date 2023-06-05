@@ -1,5 +1,60 @@
 # Changelog
 
+## [1.0.13](https://github.com/JanssenProject/jans/compare/jans-config-api-v1.0.12...jans-config-api-v1.0.13) (2023-05-10)
+
+
+### Features
+
+* **jans-fido2:** interception scripts issue 1485, swagger updates ([#4543](https://github.com/JanssenProject/jans/issues/4543)) ([80274ff](https://github.com/JanssenProject/jans/commit/80274ffd1a20318988d9cc99ee015c5c7d5984b7))
+
+
+### Bug Fixes
+
+* **config-api:** starup issue realted to mail service ([#4853](https://github.com/JanssenProject/jans/issues/4853)) ([6aad8c9](https://github.com/JanssenProject/jans/commit/6aad8c9adf1c00feac6a94e8f5c06e5b22f61c14))
+* jans-config-api/plugins/sample/demo/pom.xml to reduce vulnerabilities ([#4037](https://github.com/JanssenProject/jans/issues/4037)) ([e079b28](https://github.com/JanssenProject/jans/commit/e079b283c0ccbcf768349d3ed80668109e9b7ab2))
+* jans-config-api/plugins/sample/helloworld/pom.xml to reduce vulnerabilities ([#4039](https://github.com/JanssenProject/jans/issues/4039)) ([e0687f2](https://github.com/JanssenProject/jans/commit/e0687f22df61782c326a149930d94e93d5aaf676))
+* prepare for 1.0.13 release ([493478e](https://github.com/JanssenProject/jans/commit/493478e71f6231553c998b48c0f163c7f5869da4))
+* set appropriate redirect_uris for registration in DCR using ssa (admin-ui)[#4748](https://github.com/JanssenProject/jans/issues/4748) ([#4749](https://github.com/JanssenProject/jans/issues/4749)) ([749f66b](https://github.com/JanssenProject/jans/commit/749f66b2290d57d49c43481498f1515243a78495))
+
+## [1.0.12](https://github.com/JanssenProject/jans/compare/jans-config-api-v1.0.11...jans-config-api-v1.0.12) (2023-04-18)
+
+
+### Features
+
+* **config-api:** search pattern, client auth response and security fix ([#4595](https://github.com/JanssenProject/jans/issues/4595)) ([4dbfcc2](https://github.com/JanssenProject/jans/commit/4dbfcc241353c4e03672d4103d10768cbc0c5bdd))
+
+
+### Bug Fixes
+
+* **agama:** avoid assets mess/loss when different projects use the same folder/file names ([#4503](https://github.com/JanssenProject/jans/issues/4503)) ([def096b](https://github.com/JanssenProject/jans/commit/def096bddb8e81ab676d47d6f637dce75bb6991f))
+* **jans-config-api:** agama deployment detail endpoint not including all flows IDs ([#4565](https://github.com/JanssenProject/jans/issues/4565)) ([358c494](https://github.com/JanssenProject/jans/commit/358c49409a172d6419382dd800a21b845a8cc708))
+* jsonvalue has been added; ([#4604](https://github.com/JanssenProject/jans/issues/4604)) ([f3b46f4](https://github.com/JanssenProject/jans/commit/f3b46f4a2b8da47063efe8e3e90d98db58eeec81))
+* mailservice should send non signed emails, if keystore isn't defined (update); ([#4544](https://github.com/JanssenProject/jans/issues/4544)) ([57f4b75](https://github.com/JanssenProject/jans/commit/57f4b75ce68f0f12a775d397f97cf56df5299900))
+* prepare for 1.0.12 release ([6f83197](https://github.com/JanssenProject/jans/commit/6f83197705511c39413456acdc64e9136a97ff39))
+* update method wrt previous changes in getDeployment [#4563](https://github.com/JanssenProject/jans/issues/4563) ([#4566](https://github.com/JanssenProject/jans/issues/4566)) ([53adff1](https://github.com/JanssenProject/jans/commit/53adff1bd153a3e20223234b9e26946348dc1620))
+* yaml has been updated; ([f3b46f4](https://github.com/JanssenProject/jans/commit/f3b46f4a2b8da47063efe8e3e90d98db58eeec81))
+
+## [1.0.11](https://github.com/JanssenProject/jans/compare/jans-config-api-v1.0.10...jans-config-api-v1.0.11) (2023-04-05)
+
+
+### Features
+
+* backend changes for admin-ui to call licenseSpring apis via. SCAN [#4461](https://github.com/JanssenProject/jans/issues/4461) ([#4462](https://github.com/JanssenProject/jans/issues/4462)) ([3617a95](https://github.com/JanssenProject/jans/commit/3617a95cc9b651691acb8072790784db70e1b152))
+* backend changes to submit SSA from admin-ui [#4298](https://github.com/JanssenProject/jans/issues/4298) ([#4364](https://github.com/JanssenProject/jans/issues/4364)) ([7e27b6d](https://github.com/JanssenProject/jans/commit/7e27b6da1a3e8212f72185bbbc09fee99e4be616))
+* **config-api:** user consent mgmt code quality fix ([#4412](https://github.com/JanssenProject/jans/issues/4412)) ([acf64e4](https://github.com/JanssenProject/jans/commit/acf64e4bbc6544269daf863ce6110787fe2e64f9))
+* **jans-config-api:** new endpoint for users consent management ([#4409](https://github.com/JanssenProject/jans/issues/4409)) ([c34b592](https://github.com/JanssenProject/jans/commit/c34b592c6bdfaa3b907b37d5e3851a4870e30e7a))
+* loggerService should update root log level [#4251](https://github.com/JanssenProject/jans/issues/4251) ([#4252](https://github.com/JanssenProject/jans/issues/4252)) ([20264a2](https://github.com/JanssenProject/jans/commit/20264a2f61e7b49015bbf6f7b93e9d241e3176a1))
+* userName -&gt; smtpAuthenticationAccountUsername; ([#4401](https://github.com/JanssenProject/jans/issues/4401)) ([2bbb95d](https://github.com/JanssenProject/jans/commit/2bbb95dc4558a3251d52f74ff88b41f1aafe8a5e))
+
+
+### Bug Fixes
+
+* **config-api:** custom script revision increment on update ([#4452](https://github.com/JanssenProject/jans/issues/4452)) ([27988bd](https://github.com/JanssenProject/jans/commit/27988bd207ef20faa677415d921503b8775b398e))
+* **config-api:** user creation in couchbase DB ([#4450](https://github.com/JanssenProject/jans/issues/4450)) ([b8dfddd](https://github.com/JanssenProject/jans/commit/b8dfddd487f317c2531d593dc8527c9579bff965))
+* mailservice should send non signed emails, if keystore isn't defied; ([#4455](https://github.com/JanssenProject/jans/issues/4455)) ([7b41c44](https://github.com/JanssenProject/jans/commit/7b41c44f2933b8fde79d0478cf8df69303b9b3ba))
+* prepare for  release ([60775c0](https://github.com/JanssenProject/jans/commit/60775c09dc5ab9996bf80c03dcb457861d48dfb1))
+* Unable to send emails issue 4121 ([#4333](https://github.com/JanssenProject/jans/issues/4333)) ([70a566b](https://github.com/JanssenProject/jans/commit/70a566b67f660750bf742f19ee127f79b2db8930))
+
 ## [1.0.10](https://github.com/JanssenProject/jans/compare/jans-config-api-v1.0.9...jans-config-api-v1.0.10) (2023-03-16)
 
 

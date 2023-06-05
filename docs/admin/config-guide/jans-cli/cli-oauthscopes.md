@@ -4,6 +4,7 @@ tags:
   - configuration
   - cli
   - commandline
+  - scopes
 ---
 
 # OAuth Scopes

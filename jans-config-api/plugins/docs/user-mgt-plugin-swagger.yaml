@@ -49,12 +49,24 @@ paths:
         description: Attribute whose value will be used to order the returned response
         schema:
           type: string
+          default: inum
       - name: sortOrder
         in: query
         description: Order in which the sortBy param is applied. Allowed values are
           "ascending" and "descending"
         schema:
           type: string
+          default: ascending
+      - name: fieldValuePair
+        in: query
+        description: Field and value pair for seraching
+        schema:
+          type: string
+          default: ""
+        examples:
+          Field value example:
+            description: Field value example
+            value: "mail=abc@mail.com,jansStatus=true"
       responses:
         "200":
           description: Ok
@@ -830,35 +842,6 @@ components:
           type: object
         displayValue:
           type: string
-        newUserSchema:
-          properties:
-            name:
-              example: John123
-            password:
-              example: P4SSW0RD
-            image:
-              example: https://robohash.org/John123.png
-        clientAuthSchema1:
-          properties:
-            children:
-              type: object
-              additionalProperties:
-                $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema1
-        clientAuthMapSchema:
-          properties:
-            children:
-              type: object
-              additionalProperties:
-                $ref: '#/components/schemas/Scope'
-          description: clientAuthMapSchema
-        clientAuthMapArraySchema:
-          properties:
-            children:
-              type: object
-              additionalProperties:
-                $ref: '#/components/schemas/Scope'
-          description: clientAuthMapArraySchema
     CustomUser:
       type: object
       properties:
@@ -900,35 +883,6 @@ components:
           type: string
         baseDn:
           type: string
-        newUserSchema:
-          properties:
-            name:
-              example: John123
-            password:
-              example: P4SSW0RD
-            image:
-              example: https://robohash.org/John123.png
-        clientAuthSchema1:
-          properties:
-            children:
-              type: object
-              additionalProperties:
-                $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema1
-        clientAuthMapSchema:
-          properties:
-            children:
-              type: object
-              additionalProperties:
-                $ref: '#/components/schemas/Scope'
-          description: clientAuthMapSchema
-        clientAuthMapArraySchema:
-          properties:
-            children:
-              type: object
-              additionalProperties:
-                $ref: '#/components/schemas/Scope'
-          description: clientAuthMapArraySchema
     UserPagedResult:
       type: object
       properties:
@@ -945,35 +899,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CustomUser'
-        newUserSchema:
-          properties:
-            name:
-              example: John123
-            password:
-              example: P4SSW0RD
-            image:
-              example: https://robohash.org/John123.png
-        clientAuthSchema1:
-          properties:
-            children:
-              type: object
-              additionalProperties:
-                $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema1
-        clientAuthMapSchema:
-          properties:
-            children:
-              type: object
-              additionalProperties:
-                $ref: '#/components/schemas/Scope'
-          description: clientAuthMapSchema
-        clientAuthMapArraySchema:
-          properties:
-            children:
-              type: object
-              additionalProperties:
-                $ref: '#/components/schemas/Scope'
-          description: clientAuthMapArraySchema
     UserPatchRequest:
       type: object
       properties:
@@ -983,35 +908,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CustomObjectAttribute'
-        newUserSchema:
-          properties:
-            name:
-              example: John123
-            password:
-              example: P4SSW0RD
-            image:
-              example: https://robohash.org/John123.png
-        clientAuthSchema1:
-          properties:
-            children:
-              type: object
-              additionalProperties:
-                $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema1
-        clientAuthMapSchema:
-          properties:
-            children:
-              type: object
-              additionalProperties:
-                $ref: '#/components/schemas/Scope'
-          description: clientAuthMapSchema
-        clientAuthMapArraySchema:
-          properties:
-            children:
-              type: object
-              additionalProperties:
-                $ref: '#/components/schemas/Scope'
-          description: clientAuthMapArraySchema
   securitySchemes:
     oauth2:
       type: oauth2

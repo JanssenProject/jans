@@ -24,7 +24,6 @@ import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.session.EndSessionErrorResponseType;
 import io.jans.as.model.session.EndSessionRequestParam;
 import io.jans.as.model.token.JsonWebResponse;
-import io.jans.as.model.util.URLPatternList;
 import io.jans.as.model.util.Util;
 import io.jans.as.server.audit.ApplicationAuditLogger;
 import io.jans.as.server.model.audit.Action;
@@ -115,6 +114,9 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
 
     @Inject
     private AbstractCryptoProvider cryptoProvider;
+
+    @Inject
+    private EndSessionService endSessionService;
 
     @Override
     public Response requestEndSession(String idTokenHint, String postLogoutRedirectUri, String state, String sid,
@@ -295,7 +297,7 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
         final Boolean allowPostLogoutRedirectWithoutValidation = appConfiguration.getAllowPostLogoutRedirectWithoutValidation();
         return allowPostLogoutRedirectWithoutValidation != null &&
                 allowPostLogoutRedirectWithoutValidation &&
-                new URLPatternList(appConfiguration.getClientWhiteList()).isUrlListed(postLogoutRedirectUri);
+                endSessionService.isUrlWhiteListed(postLogoutRedirectUri);
     }
 
     private SessionId validateSidRequestParameter(String sid, String postLogoutRedirectUri) {
@@ -409,8 +411,8 @@ public class EndSessionRestWebServiceImpl implements EndSessionRestWebService {
             if (StringUtils.isBlank(postLogoutRedirectUri)) {
                 return "";
             }
-            if (isTrue(appConfiguration.getAllowPostLogoutRedirectWithoutValidation())) {
-                log.trace("Skipped post_logout_redirect_uri validation (because allowPostLogoutRedirectWithoutValidation=true)");
+            if (isTrue(appConfiguration.getAllowPostLogoutRedirectWithoutValidation()) && endSessionService.isUrlWhiteListed(postLogoutRedirectUri)) {
+                log.trace("Skipped post_logout_redirect_uri validation (because allowPostLogoutRedirectWithoutValidation=true and it's white listed)");
                 return postLogoutRedirectUri;
             }
 

@@ -346,6 +346,9 @@ public class SecurityProviderUtility {
      * @return
      */
     static public SecurityProviderUtility.KeyStorageType solveKeyStorageType(final String keyStoreFile) {
+        if (keyStoreFile == null) {
+            throw new InvalidParameterException("KeyStore File isn't defined. Check configuration.");
+        }
         SecurityProviderUtility.SecurityModeType securityMode = SecurityProviderUtility.getSecurityMode();
         if (securityMode == null) {
             throw new InvalidParameterException("Security Mode wasn't initialized. Call installBCProvider() before");

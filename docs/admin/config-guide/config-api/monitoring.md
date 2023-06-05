@@ -2,12 +2,10 @@
 tags:
   - administration
   - config-api
+  - monitoring
 ---
 
-## This content is in progress
-There are health endpoints for monitoring its performance, availability, and end-user experience to ensure the application is functioning properly.
-
-## Health - Check endpoints
+# Health - Check endpoints
 - /api/v1/health - Returns application consolidated health status - liveness and readiness
 - /api/v1/health/live - Returns application liveness status
 - /api/v1/health/ready -Returns application readiness status

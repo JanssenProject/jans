@@ -77,6 +77,21 @@ domains. The Janssen Server provides implementation for the SCIM specification.
 
 With Janssen CLI-TUI, it's possible to view / update SCIM configuration. ![image](../../../assets/Janssen_TUI_SCIM_1.png)
 
+## Command Line Logs
+Jans TUI logs all write (post/put/patch) activities to file `<log-dir>/cli_cmd.log`, default `log-dir` is home directory 
+of user executing TUI. Consider that we create a user as below
+
+![](../../../assets/jans-tui-create-user.png)
+
+We will have following line in `cli_cmd.log`:
+
+```
+/usr/bin/python3 /opt/jans/jans-cli/cli/config_cli.py --operation-id post-user --data '{"customObjectClasses": ["top", "jansPerson"], "customAttributes": [{"name": "middleName", "multiValued": false, "values": [""]}, {"name": "sn", "multiValued": false, "values": ["Watts"]}, {"name": "nickname", "multiValued": false, "values": [""]}], "mail": "ewatts@foo.org", "userId": "ewatts", "displayName": "Emelia Watts", "givenName": "Emelia", "userPassword": "TopSecret", "jansStatus": "active"}'
+```
+
+By using this line, you can create user via `jans-config.py`, [see for example](../jans-cli/cli-using-command-line-log.md)
+
+
 ## Standalone Installation
 
 Installation of a Jans TUI ( Text-Based User Interface ) need a Jans server to be installed as base. After that download and build Jans-ClI-TUI and make it.

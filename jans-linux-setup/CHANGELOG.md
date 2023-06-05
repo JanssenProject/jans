@@ -1,5 +1,62 @@
 # Changelog
 
+## [1.0.13](https://github.com/JanssenProject/jans/compare/jans-linux-setup-v1.0.12...jans-linux-setup-v1.0.13) (2023-05-10)
+
+
+### Features
+
+* **jans-auth-server:** add "introspection" scope check on introspection endpoint access [#4557](https://github.com/JanssenProject/jans/issues/4557) ([#4716](https://github.com/JanssenProject/jans/issues/4716)) ([ce2d75c](https://github.com/JanssenProject/jans/commit/ce2d75c32df382eb2a28f89793778a3e72659700))
+* **jans-linux-setup:** detect arch before starting setup ([#4667](https://github.com/JanssenProject/jans/issues/4667)) ([302aa9b](https://github.com/JanssenProject/jans/commit/302aa9b8243c6aa90ffb0a722eff3e47f2aaa3e5))
+* **jans-linux-setup:** move openbanking profile to gluu ([#4682](https://github.com/JanssenProject/jans/issues/4682)) ([05fc275](https://github.com/JanssenProject/jans/commit/05fc275948b4eceb6c9264c7107e0c2ae7ec6ebc))
+
+
+### Bug Fixes
+
+* **jans-linux-setup:** create opendj sysv script for k8s ([#4804](https://github.com/JanssenProject/jans/issues/4804)) ([64ba632](https://github.com/JanssenProject/jans/commit/64ba632ba8cf77414a46518ebcd83da154a42b06))
+* **jans-linux-setup:** default keystore type pkcs12 ([#4788](https://github.com/JanssenProject/jans/issues/4788)) ([b57739c](https://github.com/JanssenProject/jans/commit/b57739c2736bdae75771262e9ebfaef17a93f458))
+* **jans-linux-setup:** key_regeneration should look up db for keystore file ([#4780](https://github.com/JanssenProject/jans/issues/4780)) ([6fd85a8](https://github.com/JanssenProject/jans/commit/6fd85a83d715558835fe594a0c8ac76f6399bae6))
+* **jans-linux-setup:** role_based introspection script ([#4738](https://github.com/JanssenProject/jans/issues/4738)) ([86c4fee](https://github.com/JanssenProject/jans/commit/86c4feedd696db0271022e4de0a7ad8092d31738))
+* **jans-linux-setup:** use /opt/dist/scripts in case of k8s ([#4807](https://github.com/JanssenProject/jans/issues/4807)) ([461d96b](https://github.com/JanssenProject/jans/commit/461d96b9fda237c924d074f8ef2bbc98f19c429e))
+* prepare for 1.0.13 release ([493478e](https://github.com/JanssenProject/jans/commit/493478e71f6231553c998b48c0f163c7f5869da4))
+
+## [1.0.12](https://github.com/JanssenProject/jans/compare/jans-linux-setup-v1.0.11...jans-linux-setup-v1.0.12) (2023-04-18)
+
+
+### Features
+
+* **jans-auth-server:** redirect back to RP when session is expired or if not possible show error page [#4449](https://github.com/JanssenProject/jans/issues/4449) ([#4505](https://github.com/JanssenProject/jans/issues/4505)) ([0983e73](https://github.com/JanssenProject/jans/commit/0983e7397ea2aa99423e5e928690666cd67ca8b2))
+
+
+### Bug Fixes
+
+* avoid setting agama configuration root dir based on java system variable ([#4524](https://github.com/JanssenProject/jans/issues/4524)) ([1d93fd7](https://github.com/JanssenProject/jans/commit/1d93fd7cc3dfd0592781602c5b5bb00f6d5adf4c))
+* **jans-linux-setup:** remove scan_update_token ([#4621](https://github.com/JanssenProject/jans/issues/4621)) ([b20f115](https://github.com/JanssenProject/jans/commit/b20f115e7bf4fa75c7df9c120596e67273f1b10e))
+* **jans-linux-setup:** version 1.0.12 ([#4509](https://github.com/JanssenProject/jans/issues/4509)) ([5d80442](https://github.com/JanssenProject/jans/commit/5d8044229af9f5e44e05cef76b179e7359cff2a8))
+* prepare for 1.0.12 release ([6f83197](https://github.com/JanssenProject/jans/commit/6f83197705511c39413456acdc64e9136a97ff39))
+
+## [1.0.11](https://github.com/JanssenProject/jans/compare/jans-linux-setup-v1.0.10...jans-linux-setup-v1.0.11) (2023-04-05)
+
+
+### Features
+
+* **agama:** add a "default agama flow" to bridge ([#4309](https://github.com/JanssenProject/jans/issues/4309)) ([3b2248f](https://github.com/JanssenProject/jans/commit/3b2248fdb2a8e842cde1baca81132fa47613c356))
+* **jans-auth-server:** increase sessionIdUnauthenticatedUnusedLifetime value in setup [#4445](https://github.com/JanssenProject/jans/issues/4445) ([#4446](https://github.com/JanssenProject/jans/issues/4446)) ([ecf9395](https://github.com/JanssenProject/jans/commit/ecf93955f391bcda17ad6a2f6ead00d79afee165))
+
+
+### Bug Fixes
+
+* fix push config name ([#4342](https://github.com/JanssenProject/jans/issues/4342)) ([3c8f9f4](https://github.com/JanssenProject/jans/commit/3c8f9f4887981e9f0d391acf22f66de847793b92))
+* **jans-auth-server:** white/blank screen after device flow authn [#4237](https://github.com/JanssenProject/jans/issues/4237) ([#4243](https://github.com/JanssenProject/jans/issues/4243)) ([89f744d](https://github.com/JanssenProject/jans/commit/89f744dcaccb8f0813cee6663b4a8923898b8cc5))
+* **jans-linux-setup:** disable agama script by default (avoid blank page) [#4374](https://github.com/JanssenProject/jans/issues/4374) ([#4375](https://github.com/JanssenProject/jans/issues/4375)) ([cd62ff9](https://github.com/JanssenProject/jans/commit/cd62ff9fe8783f2e87dd5e47c2362d35ba9713ef))
+* **jans-linux-setup:** post setup ([#4325](https://github.com/JanssenProject/jans/issues/4325)) ([b3ae222](https://github.com/JanssenProject/jans/commit/b3ae2225134f4d41c61706bb936e35affc93a72d))
+* **jans-linux-setup:** re-orginize creating smtp configuration ([#4457](https://github.com/JanssenProject/jans/issues/4457)) ([5b543cd](https://github.com/JanssenProject/jans/commit/5b543cdab320de7918b9078735cfafff744ede23))
+* **jans-linux-setup:** remove password strength check for ldap ([#4376](https://github.com/JanssenProject/jans/issues/4376)) ([2c73b1d](https://github.com/JanssenProject/jans/commit/2c73b1d85b4b116797de85d5f8d2d196fe9cde9b))
+* **jans-linux-setup:** TUI string ([#4288](https://github.com/JanssenProject/jans/issues/4288)) ([5db3693](https://github.com/JanssenProject/jans/commit/5db3693a70db474c6886070d3d2dd64baec43846))
+* **jans-linux-setup:** typo - remove attribute county (ref: [#4058](https://github.com/JanssenProject/jans/issues/4058)) ([#4247](https://github.com/JanssenProject/jans/issues/4247)) ([b3756af](https://github.com/JanssenProject/jans/commit/b3756af0077aa38e1d8d2b11521c0e6897d3f739))
+* mailservice should send non signed emails, if keystore isn't defied; ([#4455](https://github.com/JanssenProject/jans/issues/4455)) ([7b41c44](https://github.com/JanssenProject/jans/commit/7b41c44f2933b8fde79d0478cf8df69303b9b3ba))
+* prepare for  release ([60775c0](https://github.com/JanssenProject/jans/commit/60775c09dc5ab9996bf80c03dcb457861d48dfb1))
+* Unable to send emails issue 4121 ([#4333](https://github.com/JanssenProject/jans/issues/4333)) ([70a566b](https://github.com/JanssenProject/jans/commit/70a566b67f660750bf742f19ee127f79b2db8930))
+
 ## [1.0.10](https://github.com/JanssenProject/jans/compare/jans-linux-setup-v1.0.9...jans-linux-setup-v1.0.10) (2023-03-16)
 
 

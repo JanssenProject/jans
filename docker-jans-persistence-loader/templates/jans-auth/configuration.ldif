@@ -1,9 +1,0 @@
-dn: ou=jans-auth,ou=configuration,o=jans
-jansConfDyn::%(auth_config_base64)s
-jansConfErrors::%(auth_error_base64)s
-jansConfStatic::%(auth_static_conf_base64)s
-jansConfWebKeys::%(auth_openid_key_base64)s
-jansRevision: 1
-objectClass: top
-objectClass: jansAppConf
-ou: jans-auth

@@ -187,6 +187,11 @@ func resourceScript() *schema.Resource {
 				Optional:    true,
 				Description: "",
 			},
+			"location_path": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "",
+			},
 			"base_dn": {
 				Type:        schema.TypeString,
 				Optional:    true,

@@ -119,6 +119,17 @@ jansScopeTyp: openid
 objectClass: top
 objectClass: jansScope
 
+dn: inum=6D91,ou=scopes,o=jans
+description: Introspection
+displayName: introspection
+inum: 6D91
+jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
+jansDefScope: false
+jansId: introspection
+jansScopeTyp: openid
+objectClass: top
+objectClass: jansScope
+
 dn: inum=7D90,ou=scopes,o=jans
 description: revoke_session scope which is required to be able call /revoke_session endpoint
 displayName: revoke_session
@@ -182,7 +193,7 @@ inum: C4F7
 description: This scope is required for calling Statistic Endpoint
 jansDefScope: false
 jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":false}
-jansScopeTyp: openid
+jansScopeTyp: oauth
 objectClass: top
 objectClass: jansScope
 

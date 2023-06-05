@@ -284,9 +284,7 @@ public class RegisterParamsValidator {
                         case WEB:
                             if (HTTP.equalsIgnoreCase(uri.getScheme())) {
                                 if (!LOCALHOST.equalsIgnoreCase(uri.getHost()) && !LOOPBACK.equalsIgnoreCase(uri.getHost())) {
-                                    log.debug("Invalid protocol for redirect_uri: " +
-                                            redirectUri +
-                                            " (only https protocol is allowed for application_type=web or localhost/127.0.0.1 for http)");
+                                    log.debug("Invalid protocol for redirect_uri: {} (only https protocol is allowed for application_type=web or localhost/127.0.0.1 for http)", redirectUri);
                                     valid = false;
                                 }
                             }
@@ -304,6 +302,7 @@ public class RegisterParamsValidator {
                                 grantTypes.contains(GrantType.CLIENT_CREDENTIALS)))
                 && !responseTypes.contains(ResponseType.TOKEN) && !responseTypes.contains(ResponseType.ID_TOKEN);
 
+        log.trace("Validating redirect uris ... valid: {}, redirectUris: {}, grantTypes: {}, subjectType: {}", valid, redirectUris, grantTypes, subjectType);
 
         /*
          * Providers that use pairwise sub (subject) values SHOULD utilize the sector_identifier_uri value
@@ -388,6 +387,10 @@ public class RegisterParamsValidator {
      * All the Redirect Uris must match to return true.
      */
     private boolean checkWhiteListRedirectUris(List<String> redirectUris) {
+        if (redirectUris == null || redirectUris.isEmpty()) {
+            return true;
+        }
+
         boolean valid = true;
         List<String> whiteList = appConfiguration.getClientWhiteList();
         URLPatternList urlPatternList = new URLPatternList(whiteList);
@@ -403,6 +406,10 @@ public class RegisterParamsValidator {
      * None of the Redirect Uris must match to return true.
      */
     private boolean checkBlackListRedirectUris(List<String> redirectUris) {
+        if (redirectUris == null || redirectUris.isEmpty()) {
+            return true;
+        }
+
         boolean valid = true;
         List<String> blackList = appConfiguration.getClientBlackList();
         URLPatternList urlPatternList = new URLPatternList(blackList);

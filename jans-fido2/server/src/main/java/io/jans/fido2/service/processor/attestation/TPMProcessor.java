@@ -19,7 +19,6 @@
 package io.jans.fido2.service.processor.attestation;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
@@ -105,7 +104,10 @@ public class TPMProcessor implements AttestationFormatProcessor {
             throw new Fido2RuntimeException("Problem with TPM attestation");
         }
 
-        byte[] hashedBuffer = getHashedBuffer(cborPublicKey.get("3").asInt(), authData.getAttestationBuffer(), clientDataHash);
+        verifyVersion2(attStmt);
+        int alg = verifyAlg(attStmt);
+
+        byte[] hashedBuffer = getHashedBuffer(alg, authData.getAttestationBuffer(), clientDataHash);
         byte[] keyBufferFromAuthData = base64Service.decode(cborPublicKey.get("-1").asText());
 
         Iterator<JsonNode> i = attStmt.get("x5c").elements();
@@ -135,7 +137,7 @@ public class TPMProcessor implements AttestationFormatProcessor {
             byte[] certInfoBuffer = base64Service.decode(certInfo);
             byte[] signatureBytes = base64Service.decode(signature.getBytes());
 
-            signatureVerifier.verifySignature(signatureBytes, certInfoBuffer, aikCertificate, authData.getKeyType());
+            signatureVerifier.verifySignature(signatureBytes, certInfoBuffer, aikCertificate, alg);
 
             byte[] pubAreaBuffer = base64Service.decode(pubArea);
             TPMT_PUBLIC tpmtPublic = TPMT_PUBLIC.fromTpm(pubAreaBuffer);
@@ -146,6 +148,9 @@ public class TPMProcessor implements AttestationFormatProcessor {
             verifyTPMSExtraData(hashedBuffer, tpmsAttest.extraData);
             verifyThatKeysAreSame(tpmtPublic, keyBufferFromAuthData);
 
+            credIdAndCounters.setAttestationType(getAttestationFormat().getFmt());
+            credIdAndCounters.setCredId(base64Service.urlEncodeToString(authData.getCredId()));
+            credIdAndCounters.setUncompressedEcPoint(base64Service.urlEncodeToString(authData.getCosePublicKey()));
         } else {
             throw new Fido2RuntimeException("Problem with TPM attestation. Unsupported");
         }
@@ -197,10 +202,9 @@ public class TPMProcessor implements AttestationFormatProcessor {
 
     private byte[] getHashedBuffer(int digestAlgorith, byte[] authenticatorDataBuffer, byte[] clientDataHashBuffer) {
         MessageDigest hashedBufferDigester = signatureVerifier.getDigest(digestAlgorith);
-        byte[] b1 = authenticatorDataBuffer;
-        byte[] b2 = clientDataHashBuffer;
-        byte[] buffer = ByteBuffer.allocate(b1.length + b2.length).put(b1).put(b2).array();
-        return hashedBufferDigester.digest(buffer);
+        hashedBufferDigester.update(authenticatorDataBuffer);
+        hashedBufferDigester.update(clientDataHashBuffer);
+        return hashedBufferDigester.digest();
     }
 
     private void verifyTPMCertificateExtenstion(X509Certificate aikCertificate, AuthData authData) {
@@ -220,5 +224,27 @@ public class TPMProcessor implements AttestationFormatProcessor {
             log.warn("Problem with AIK certificate {}", e.getMessage());
             throw new Fido2RuntimeException("Problem with TPM attestation");
         }
+    }
+
+    private void verifyVersion2(JsonNode attStmt) {
+        if (!attStmt.has("ver")) {
+            log.error("TPM does not contain the ver");
+            throw new Fido2RuntimeException("TPM does not contain the 'ver'");
+        }
+        String version = attStmt.get("ver").asText();
+        if (!version.equals("2.0")) {
+            log.error("TPM invalid version, ver 2.0 is required");
+            throw new Fido2RuntimeException("TPM invalid version, ver 2.0 is required");
+        }
+    }
+
+    private int verifyAlg(JsonNode attStmt) {
+        if (!attStmt.has("alg")) {
+            log.error("TPM does not contain the alg");
+            throw new Fido2RuntimeException("TPM does not contain the 'alg'");
+        }
+        int alg = attStmt.get("alg").asInt();
+        log.trace("TPM attStmt 'alg': {}", alg);
+        return alg;
     }
 }

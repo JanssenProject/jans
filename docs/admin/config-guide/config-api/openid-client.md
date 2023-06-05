@@ -2,7 +2,7 @@
 tags:
   - administration
   - config-api
-  - endpoints
+  - openid-connect client
 ---
 
 # OpenID Connect Client

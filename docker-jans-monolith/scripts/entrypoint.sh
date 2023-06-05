@@ -92,7 +92,8 @@ start_services() {
 check_installed_jans
 start_services
 
-tail -f /opt/jans/jetty/jans-auth/logs/*.log \
--f /opt/jans/jetty/jans-config-api/logs/*.log \
--f /opt/jans/jetty/jans-fido2/logs/*.log \
--f /opt/jans/jetty/jans-scim/logs/*.log
+# use -F option to follow (and retry) logs
+tail -F /opt/jans/jetty/jans-auth/logs/*.log \
+  /opt/jans/jetty/jans-config-api/logs/*.log \
+  /opt/jans/jetty/jans-fido2/logs/*.log \
+  /opt/jans/jetty/jans-scim/logs/*.log

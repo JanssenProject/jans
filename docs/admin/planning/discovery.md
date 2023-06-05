@@ -2,6 +2,7 @@
 tags:
   - administration
   - planning
+  - discovery
 ---
 
 In a federated identity topology, you can authenticate a person by redirecting

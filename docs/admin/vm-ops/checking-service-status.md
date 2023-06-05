@@ -3,7 +3,11 @@ tags:
   - administration
   - vm
   - operations
+  - services
+  - status
 ---
+
+# Janssen System Services
 
 In order to debug issues, checking the Jans services may be necessary. The process to do this differs slightly between operating systems. The following examples are shown on Ubuntu 20.04; however, they should work on any operating system using systemd.
 

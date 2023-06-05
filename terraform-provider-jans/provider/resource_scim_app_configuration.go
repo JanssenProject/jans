@@ -149,11 +149,12 @@ func resourceScimAppConfigurationUpdate(ctx context.Context, d *schema.ResourceD
 	c := meta.(*jans.Client)
 
 	var scimAppConfig jans.ScimAppConfigurations
-	if err := fromSchemaResource(d, &scimAppConfig); err != nil {
+	patches, err := patchFromResourceData(d, &scimAppConfig)
+	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	if _, err := c.UpdateScimAppConfiguration(ctx, &scimAppConfig); err != nil {
+	if _, err := c.PatchScimAppConfiguration(ctx, patches); err != nil {
 		return diag.FromErr(err)
 	}
 

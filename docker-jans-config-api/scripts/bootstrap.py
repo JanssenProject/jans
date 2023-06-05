@@ -119,6 +119,17 @@ def main():
         admin_ui_plugin.setup()
         configure_admin_ui_logging()
 
+    try:
+        manager.secret.to_file(
+            "smtp_jks_base64",
+            "/etc/certs/smtp-keys.pkcs12",
+            decode=True,
+            binary_mode=True,
+        )
+    except ValueError:
+        # likely secret is not created yet
+        logger.warning("Unable to pull file smtp-keys.pkcs12 from secrets")
+
 
 def modify_jetty_xml():
     fn = "/opt/jetty/etc/jetty.xml"

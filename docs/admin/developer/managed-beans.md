@@ -91,22 +91,27 @@ Relevant methods:
 #### a. Add a user
 ```
 from  io.jans.as.common.service.common import UserService
+from io.jans.orm.model.base import CustomObjectAttribute;
 ...
 
 new_user = User()
-new_user.setAttribute("uid", user_email, True)
-new_user.setAttribute("givenName", username, True)
-new_user.setAttribute("displayName", username, True)
-new_user.setAttribute("sn", "-", True)
-new_user.setAttribute("mail", user_email, True)
-new_user.setAttribute("gluuStatus", "active", True)
-new_user.setAttribute("password", user_password)
+found_user.getCustomAttributes().add(new CustomObjectAttribute("address", Arrays.asList("London", "Texas", "Kiev")));
+found_user.getCustomAttributes().add(new CustomObjectAttribute("jansGuid", "test_value"));
+found_user.getCustomAttributes().add(new CustomObjectAttribute("birthdate", new Date()));
+found_user.getCustomAttributes().add(new CustomObjectAttribute("jansActive", false));
+found_user.getCustomAttributes().add(new CustomObjectAttribute("scimCustomThird", 18));
+found_user.setUserRole(UserRole.ADMIN);
+found_user.setMemberOf(Arrays.asList("group_1", "group_2", "group_3"));
+
+CustomObjectAttribute multiValuedSingleValue = new CustomObjectAttribute("oxExternalUid", "multivalued_single_valued");
+multiValuedSingleValue.setMultiValued(true);
+foundUser.getCustomAttributes().add(multiValuedSingleValue);
 
 new_user = CdiUtil.bean(UserService).addUser(new_user, True)
 ```
 #### b. Add user attributes
 ```
-userObject = userService.addUserAttribute(user_name, "oxExternalUid", cert_user_external_uid)
+userObject = userService.addUserAttribute(user_name, "oxExternalUid", cert_user_external_uid, true)
 ```
 #### c. Get User
 ```
@@ -132,8 +137,18 @@ userService.removeUserAttribute(user.getUserId(),"oxTrustExternalId", "wwpass:%s
 #### g. Update users
 ```
 found_user = userService.getUser(user_name)
-found_user.setAttribute("userPassword", new_password)
+
+found_user.getCustomAttributes().add(new CustomObjectAttribute("address", Arrays.asList("London", "Texas", "Kiev")));
+found_user.getCustomAttributes().add(new CustomObjectAttribute("jansGuid", "test_value"));
+found_user.getCustomAttributes().add(new CustomObjectAttribute("birthdate", new Date()));
+found_user.getCustomAttributes().add(new CustomObjectAttribute("jansActive", false));
+found_user.getCustomAttributes().add(new CustomObjectAttribute("jansActive", false));
+found_user.getCustomAttributes().add(new CustomObjectAttribute("scimCustomThird", 18));
+found_user.setUserRole(UserRole.ADMIN);
+found_user.setMemberOf(Arrays.asList("group_1", "group_2", "group_3"));
+
 userService.updateUser(found_user)
+
 ```
 
 ### 4.  [User](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/common/src/main/java/io/jans/as/common/model/common/User.java)

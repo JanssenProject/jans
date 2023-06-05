@@ -1,12 +1,15 @@
 ---
 tags:
+  - administration
   - planning
+  - persistence
   - LDAP
   - MySQL
   - Couchbase
   - Aurora
   - Spanner
   - Postgres
+  - database
 ---
 
 The performance of the web tier is derived from the performance of the

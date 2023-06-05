@@ -24,9 +24,14 @@ resource "jans_app_configuration" "global" {
 ### Optional
 
 - `access_token_lifetime` (Number) The lifetime of the short-lived Access Token. Example: 3600
+- `access_token_signing_alg_values_supported` (List of String) A list of the access token signing algorithms (alg values) supported by the OP. 
+							One of "none", "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "ES256", "ES384", 
+							"ES512", "PS256", "PS384", "PS512"
 - `active_session_authorization_scope` (String) Authorization Scope for active session.
 - `agama_configuration` (Block List, Max: 1) Engine Config which offers an alternative way to build authentication flows in Janssen server (see [below for nested schema](#nestedblock--agama_configuration))
+- `all_response_types_supported` (List of String) List of all response types supported.
 - `allow_all_value_for_revoke_endpoint` (Boolean) Boolean value true allow all value for revoke endpoint.
+- `allow_end_session_with_unmatched_sid` (Boolean) Boolean value specifying whether to allow end session with unmatched SID.
 - `allow_id_token_without_implicit_grant_type` (Boolean) Specifies if a token without implicit grant types is allowed.
 - `allow_post_logout_redirect_without_validation` (Boolean) Allows post logout redirect without validation for End Session Endpoint.
 - `allow_spontaneous_scopes` (Boolean) Specifies whether to allow spontaneous scopes.
@@ -53,6 +58,7 @@ resource "jans_app_configuration" "global" {
 - `backchannel_token_delivery_modes_supported` (List of String) Backchannel Token Delivery Modes Supported.
 - `backchannel_user_code_parameter_supported` (Boolean) Backchannel User Code Parameter Supported
 - `base_endpoint` (String) The base URL for endpoints. Example: https://server.example.com/restv1
+- `block_webview_authorization_enabled` (Boolean) Boolean value specifying whether to block webview authorization.
 - `change_session_id_on_authentication` (Boolean) Boolean value specifying whether to change session_id on authentication.
 - `check_session_iframe` (String) URL for an OP IFrame that supports cross-origin communications for session state information with the RP Client using the HTML5 postMessage API. Example: https://server.example.com/opiframe.htm
 - `check_user_presence_on_refresh_token` (Boolean) Check whether user exists and is active before creating RefreshToken. Set it to true if check is needed (Default value is false - don't check.)
@@ -76,6 +82,7 @@ resource "jans_app_configuration" "global" {
 - `cors_configuration_filters` (Block List) CORS Configuration filters. (see [below for nested schema](#nestedblock--cors_configuration_filters))
 - `css_location` (String) The location for CSS files.
 - `custom_headers_with_authorization_response` (Boolean) Boolean value specifying whether to enable Custom Response Header parameter to return custom headers with the Authorization Response.
+- `date_formatter_patterns` (Map of String) Data formatter patterns.
 - `dcr_authorization_with_client_credentials` (Boolean) Boolean value indicating if DCR authorization to be performed using client credentials.
 - `dcr_authorization_with_mtls` (Boolean) Boolean value indicating if DCR authorization allowed with MTLS.
 - `dcr_issuers` (List of String) List of DCR issuers.
@@ -85,14 +92,19 @@ resource "jans_app_configuration" "global" {
 - `dcr_signature_validation_shared_secret` (String) Specifies shared secret for Dynamic Client Registration.
 - `dcr_signature_validation_software_statement_jwks_claim` (String) Specifies claim name inside software statement. Value of claim should point to inlined JWKS.
 - `dcr_signature_validation_software_statement_jwks_uri_claim` (String) Specifies claim name inside software statement. Value of claim should point to JWKS URI.
+- `dcr_ssa_validation_configs` (Block List) List of DCR SSA Validation Configs. (see [below for nested schema](#nestedblock--dcr_ssa_validation_configs))
 - `default_signature_algorithm` (String) The default signature algorithm to sign ID Tokens. One of "HS256", "HS384", "HS512", 
 							"RS256", "RS384", "RS512", "ES256", "ES384", "ES512"
 - `default_subject_type` (String) Default Subject Type used for Dynamic Client Registration. Valid types include pairwise and public.
+- `device_authz_acr` (String) ACR used to process device authz requests.
 - `device_authz_endpoint` (String) URL for the Device Authorization Endpoint. Example: https://server.example.com/restv1/device_authorization
 - `device_authz_request_expires_in` (Number) Expiration time given for device authorization requests.
 - `device_authz_response_type_to_process_authz` (String) Response type used to process device authz requests.
 - `device_authz_token_poll_interval` (Number) Default interval returned to the client to process device token requests.
+- `disable_authn_for_max_age_zero` (Boolean) Boolean value specifying whether to disable authentication for max age zero.
 - `disable_jdk_logger` (Boolean) Boolean value specifying whether to enable JDK Loggers.
+- `disable_prompt_consent` (Boolean) Boolean value specifying whether to disable prompt consent.
+- `disable_prompt_login` (Boolean) Boolean value specifying whether to disable prompt login.
 - `disable_u2f_endpoint` (Boolean) Enable/Disable U2F endpoints.
 - `discovery_allowed_keys` (List of String) List of configuration response claim allowed to be displayed in discovery endpoint. Example: authorization_endpoint, 
 				token_endpoint, jwks_uri, scopes_supported, response_types_supported, response_modes_supported, etc..
@@ -110,12 +122,12 @@ resource "jans_app_configuration" "global" {
 - `dynamic_registration_allowed_password_grant_scopes` (List of String) List of grant scopes for dynamic registration.
 - `dynamic_registration_custom_attributes` (List of String) Custom attributes for the Dynamic registration. One of 'jansTrustedClnt'.
 - `dynamic_registration_custom_object_class` (String) LDAP custom object class for dynamic registration.
+- `dynamic_registration_default_custom_attributes` (Map of String) Default custom attributes for the Dynamic registration.
 - `dynamic_registration_expiration_time` (Number) Expiration time in seconds for clients created with dynamic registration, -1 means never expire. Example: -1
 - `dynamic_registration_password_grant_type_enabled` (Boolean) Boolean value specifying whether to enable Password Grant Type during Dynamic Registration.
 - `dynamic_registration_persist_client_authorizations` (Boolean) Boolean value specifying whether to persist client authorizations.
 - `dynamic_registration_scopes_param_enabled` (Boolean) Boolean value specifying whether to enable scopes parameter in dynamic registration.
 - `enable_client_grant_type_update` (Boolean) Boolean value to specify if client can update Grant Type values.
-- `enabled_components` (List of String) List of auth components enabled Example: HEALTH_CHECK, USERINFO, CLIENTINFO, ID_GENERATION, REGISTRATION, INTROSPECTION, etc..
 - `enabled_oauth_audit_logging` (Boolean) enabled OAuth Audit Logging.
 - `end_session_endpoint` (String) URL at the OP to which an RP can perform a redirect to request that the end user be logged out at the OP. Example: https://server.example.com/restv1/end_session
 - `end_session_with_access_token` (Boolean) Accept access token to call end_session endpoint.
@@ -125,7 +137,10 @@ resource "jans_app_configuration" "global" {
 - `expiration_notificator_interval_in_seconds` (Number) The expiration notificator interval in seconds. Example: 600
 - `expiration_notificator_map_size_limit` (Number) The expiration notificator maximum size limit. Example: 100000
 - `external_logger_configuration` (String) Path to external log4j2 logging configuration. Example: /identity/logviewer/configure
+- `external_uri_white_list` (List of String) White List for external URIs.
+- `fapi` (Boolean) Boolean value specifying whether to enable FAPI.
 - `fapi_compatibility` (Boolean) Boolean value specifying whether turn on FAPI compatibility mode. If true AS behaves in more strict mode.
+- `feature_flags` (List of String) List of feature flags.
 - `force_id_token_hint_precense` (Boolean) Boolean value specifying whether force id_token_hint parameter presence.
 - `force_offline_access_scope_to_enable_refresh_token` (Boolean) Boolean value specifying whether force offline_access scope to enable refresh_token grant type.
 - `force_signed_request_object` (Boolean) Boolean value true indicates that signed request object is mandatory.
@@ -154,11 +169,18 @@ resource "jans_app_configuration" "global" {
 - `include_sid_in_response` (Boolean) Boolean value specifying whether to include sessionId in response.
 - `introspection_access_token_must_have_uma_protection_scope` (Boolean) Reject introspection requests if access_token in Authorization header does not have uma_protection scope.
 - `introspection_endpoint` (String) URL for the Introspection Endpoint. Example: https://server.example.com/restv1/introspection
-- `introspection_response_scopes_backward_compatibility` (Boolean) Boolean value specifying introspection response backward compatibility mode.
+- `introspection_response_scopes_backward_compatibility` (Boolean)
 - `introspection_script_backward_compatibility` (Boolean) Boolean value specifying whether switch off client's introspection scripts (true value) and run all scripts that exists on server.
 - `introspection_skip_authorization` (Boolean) Specifies if authorization to be skipped for introspection.
 - `invalidate_session_cookies_after_authorization_flow` (Boolean) Boolean value to specify whether to invalidate 'session_id' and 'consent_session_id' cookies right after successful or unsuccessful authorization.
 - `issuer` (String) URL using the https scheme that OP asserts as Issuer identifier. Example: https://server.example.com/
+- `jans_eleven_delete_key_endpoint` (String) URL for the jansEleven Delete Key Endpoint. Example: https://server.example.com/janseleven/rest/oxeleven/deleteKey
+- `jans_eleven_generate_key_endpoint` (String) URL for the jansEleven Generate Key Endpoint. Example: https://server.example.com/janseleven/rest/janseleven/generateKey
+- `jans_eleven_sign_endpoint` (String) URL for the jansEleven Sign Endpoint. Example: https://server.example.com/janseleven/rest/janseleven/sign
+- `jans_eleven_test_mode_token` (String) jansEleven Test Mode Token.
+- `jans_eleven_verify_signature_endpoint` (String) URL for the jansEleven Verify Signature Endpoint. Example: https://server.example.com/janseleven/rest/janseleven/verifySignature
+- `jans_id` (String) URL for the Inum generator Service. Example: https://server.example.com/oxid/service/jans/inum
+- `jans_open_id_connect_version` (String) OpenID Connect Version. Example: openidconnect-1.0
 - `jms_broker_uri_set` (List of String) JMS Broker URI Set.
 - `jms_password` (String) JMS Password.
 - `jms_user_name` (String) JMS UserName.
@@ -205,25 +227,19 @@ resource "jans_app_configuration" "global" {
 - `openid_discovery_endpoint` (String) URL of the OpenID Discovery Endpoint. Example: https://server.example.com/.well-known/webfinger
 - `openid_scope_backward_compatibility` (Boolean) Set to false to only allow token endpoint request for openid scope with grant type equals to authorization_code, restrict access to userinfo to scope openid and only return id_token if scope contains openid.
 - `openid_sub_attribute` (String) Specifies which LDAP attribute is used for the subject identifier claim. Example: inum
-- `ox_eleven_delete_key_endpoint` (String) URL for the oxEleven Delete Key Endpoint. Example: https://server.example.com/oxeleven/rest/oxeleven/deleteKey
-- `ox_eleven_generate_key_endpoint` (String) URL for the oxEleven Generate Key Endpoint. Example: https://server.example.com/oxeleven/rest/oxeleven/generateKey
-- `ox_eleven_sign_endpoint` (String) URL for the oxEleven Sign Endpoint. Example: https://server.example.com/oxeleven/rest/oxeleven/sign
-- `ox_eleven_test_mode_token` (String) oxEleven Test Mode Token.
-- `ox_eleven_verify_signature_endpoint` (String) URL for the oxEleven Verify Signature Endpoint. Example: https://server.example.com/oxeleven/rest/oxeleven/verifySignature
-- `ox_id` (String) URL for the Inum generator Service. Example: https://server.example.com/oxid/service/jans/inum
-- `ox_open_id_connect_version` (String) OpenID Connect Version. Example: openidconnect-1.0
 - `pairwise_calculation_key` (String) Key to calculate algorithmic pairwise IDs.
 - `pairwise_calculation_salt` (String) Salt to calculate algorithmic pairwise IDs.
 - `pairwise_id_type` (String) The pairwise ID type.
 - `par_endpoint` (String) URL for Pushed Authorisation Request (PAR) Endpoint. Example: https://server.example.com/jans-auth/restv1/par
-- `persist_id_token_in_ldap` (Boolean) Specifies whether to persist id_token into LDAP (otherwise saves into cache).
-- `persist_refresh_token_in_ldap` (Boolean) Specifies whether to persist refresh_token into LDAP (otherwise saves into cache).
+- `persist_id_token` (Boolean) Specifies whether to persist id_token (otherwise saves into cache).
+- `persist_refresh_token` (Boolean) Specifies whether to persist refresh_token (otherwise saves into cache).
 - `person_custom_object_class_list` (List of String) LDAP custom object class list for dynamic person enrolment. One of 'gluuCustomPerson', 'gluuPerson'.
 - `public_subject_identifier_per_client_enabled` (Boolean) Specifies whether public subject identifier is allowed per client.
 - `redirect_uris_regex_enabled` (Boolean) Enable/Disable redirect uris validation using regular expression.
 - `refresh_token_extend_lifetime_on_rotation` (Boolean) Boolean value specifying whether to extend refresh tokens on rotation.
 - `refresh_token_lifetime` (Number) The lifetime of the Refresh Token.
 - `registration_endpoint` (String) URL of the Registration Endpoint. Example: https://server.example.com/restv1/register
+- `reject_end_session_if_id_token_expired` (Boolean) Boolean value specifying whether to reject end session if id_token expired.
 - `reject_jwt_with_none_alg` (Boolean) Boolean value specifying whether reject JWT requested or validated with algorithm None.
 - `remove_refresh_tokens_for_client_on_logout` (Boolean) Boolean value specifying whether to remove refresh tokens on logout.
 - `request_object_encryption_alg_values_supported` (List of String) A list of the JWE encryption algorithms (alg values) supported by the OP for Request Objects. 
@@ -240,16 +256,18 @@ resource "jans_app_configuration" "global" {
 - `require_pkce` (Boolean) Boolean value true check for Proof Key for Code Exchange (PKCE).
 - `require_request_object_encryption` (Boolean) Boolean value true encrypts request object
 - `require_request_uri_registration` (Boolean) Boolean value specifying whether the OP requires any request_uri values used to be 
-								pre-registered using the request_uris registration parameter.
+				pre-registered using the request_uris registration parameter.
 - `response_modes_supported` (List of String) A list of the OAuth 2.0 Response Mode values that this OP supports. One of "query", 
 							"fragment", "form_post", "query.jwt", "fragment.jwt", "form_post.jwt", "jwt".
 - `response_types_supported` (List of List of String) A list of the OAuth 2.0 response_type values that this OP supports. One of "code", "token", "id_token".
 - `return_client_secret_on_read` (Boolean) Boolean value specifying whether a client_secret is returned on client GET or PUT. False value means not to return secret.
-- `sector_identifier_cache_lifetime` (Number) The cache lifetime in minutes of the sector identifier.
+- `return_device_secret_from_authz_endpoint` (Boolean) Boolean value to specify if the device secret should be returned by the authz endpoint.
+- `rotate_client_registration_access_token_on_usage` (Boolean) Boolean value specifying whether to rotate client registration access token on usage.
+- `rotate_device_secret` (Boolean) Enable/Disable device secret rotation.
+- `sector_identifier_cache_lifetime_in_minutes` (Number) The cache lifetime in minutes of the sector identifier.
 - `server_session_id_lifetime` (Number) The sessionId lifetime in seconds for sessionId. By default same as sessionIdLifetime.
 - `service_documentation` (String) URL of a page containing human-readable information that developers might want or need to know 
 							when using the OpenID Provider. Example: http://gluu.org/docs
-- `session_as_jwt` (Boolean) Boolean value true saves session data as a JWT.
 - `session_id_lifetime` (Number) The lifetime of session id in seconds. If 0 or -1 then expiration is not set. 'session_id' cookie expires when browser session ends.
 - `session_id_persist_in_cache` (Boolean) Boolean value specifying whether to persist session_id in cache.
 - `session_id_persist_on_prompt_none` (Boolean) Boolean value specifying whether to persist session ID on prompt none.
@@ -262,9 +280,9 @@ resource "jans_app_configuration" "global" {
 - `software_statement_validation_claim_name` (String) Validation claim name for software statement.
 - `software_statement_validation_type` (String) Validation type used for software statement.
 - `spontaneous_scope_lifetime` (Number) The lifetime of spontaneous scope in seconds.
+- `ssa_configuration` (Block List, Max: 1) List of SSA Configurations. (see [below for nested schema](#nestedblock--ssa_configuration))
 - `stat_authorization_scope` (String) Scope required for Statistical Authorization.
 - `stat_timer_interval_in_seconds` (Number) Statistical data capture time interval.
-- `stat_web_service_interval_limit_in_seconds` (Number) Statistical data capture time interval limit.
 - `static_decryption_kid` (String) Specifies static decryption Kid
 - `static_kid` (String) Specifies static Kid
 - `subject_identifiers_per_client_supported` (List of String) A list of the subject identifiers supported per client.
@@ -407,6 +425,39 @@ Optional:
 - `cors_preflight_max_age` (Number)
 - `cors_request_decorate` (Boolean)
 - `cors_support_credentials` (Boolean)
+
+
+<a id="nestedblock--dcr_ssa_validation_configs"></a>
+### Nested Schema for `dcr_ssa_validation_configs`
+
+Optional:
+
+- `allowed_claims` (List of String)
+- `configuration_endpoint` (String)
+- `configuration_endpoint_claim` (String)
+- `description` (String)
+- `display_name` (String)
+- `issuers` (List of String)
+- `jwks` (String)
+- `jwks_uri` (String)
+- `scopes` (List of String)
+- `shared_secret` (String)
+- `type` (String)
+
+Read-Only:
+
+- `id` (String) The ID of this resource.
+
+
+<a id="nestedblock--ssa_configuration"></a>
+### Nested Schema for `ssa_configuration`
+
+Optional:
+
+- `ssa_custom_attributes` (List of String)
+- `ssa_endpoint` (String)
+- `ssa_expiration_in_days` (Number)
+- `ssa_signing_alg` (String)
 
 ## Import
 

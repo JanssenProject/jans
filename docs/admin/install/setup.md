@@ -2,14 +2,14 @@
 tags:
   - administration
   - installation
-  - faq
+  - setup
 ---
 
-# Setup Script
+# Janssen Setup Script
 
 ## Running Setup
 
- After installation, executing setup.py will launch the SETUP Command Line by default. 
+ After installation, executing `setup.py` will launch the SETUP Command Line by default. 
  
  To run the script, run the following command:
  

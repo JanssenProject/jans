@@ -3,7 +3,11 @@ tags:
   - administration
   - reference
   - database
+  - mysql
+  - schema
 ---
+
+# MySQL Schema
 
 ## Tables
 

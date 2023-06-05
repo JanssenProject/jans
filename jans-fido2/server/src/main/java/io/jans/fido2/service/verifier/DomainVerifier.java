@@ -62,6 +62,7 @@ public class DomainVerifier {
             effectiveDomain = new URL(clientDataOrigin).getHost();
         } catch (MalformedURLException e) {
             //clientDataOrigin does not conform to tuple origin syntax! assuming it contains the 4th tuple element, ie. domain
+            log.warn("MalformedURLException {}", e.getMessage());
             effectiveDomain = clientDataOrigin;
         }
 

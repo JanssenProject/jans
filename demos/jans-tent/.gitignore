@@ -1,5 +1,6 @@
 #jans-tent-specific
 client_info.json
+*.log.*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

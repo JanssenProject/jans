@@ -28,38 +28,34 @@ func TestFido2Config(t *testing.T) {
 	origBasepoint := cfg.BaseEndpoint
 	cfg.BaseEndpoint = "newbasepoint"
 
-	if err := client.UpdateFido2Configuration(ctx, cfg); err != nil {
-		t.Fatal(err)
-	}
+	origSuperGluuEnabled := cfg.SuperGluuEnabled
+	cfg.SuperGluuEnabled = true
 
-	updatedConfig, err := client.GetFido2Configuration(ctx)
+	origOldU2fMigrationEnabled := cfg.OldU2fMigrationEnabled
+	cfg.OldU2fMigrationEnabled = true
+
+	ret := &JansFido2DynConfiguration{
+		BaseEndpoint:           "newbasepoint",
+		SuperGluuEnabled:       true,
+		OldU2fMigrationEnabled: true,
+	}
+	updatedConfig, err := client.UpdateFido2Configuration(ctx, ret)
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	t.Cleanup(func() {
+		ret.BaseEndpoint = origBasepoint
+		ret.SuperGluuEnabled = origSuperGluuEnabled
+		ret.OldU2fMigrationEnabled = origOldU2fMigrationEnabled
+		_, _ = client.UpdateFido2Configuration(ctx, ret)
+	})
 
 	if diff := cmp.Diff(cfg, updatedConfig); diff != "" {
 		t.Errorf("Got different configuration after update: %s", diff)
 	}
 
 	if updatedConfig.BaseEndpoint != "newbasepoint" {
-		t.Fatal("updatedConfig.BaseEndpoint was not updated")
-	}
-
-	cfg.BaseEndpoint = origBasepoint
-	if err := client.UpdateFido2Configuration(ctx, cfg); err != nil {
-		t.Fatal(err)
-	}
-
-	updatedConfig, err = client.GetFido2Configuration(ctx)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if diff := cmp.Diff(cfg, updatedConfig); diff != "" {
-		t.Errorf("Got different configuration after update: %s", diff)
-	}
-
-	if updatedConfig.BaseEndpoint != origBasepoint {
 		t.Fatal("updatedConfig.BaseEndpoint was not updated")
 	}
 

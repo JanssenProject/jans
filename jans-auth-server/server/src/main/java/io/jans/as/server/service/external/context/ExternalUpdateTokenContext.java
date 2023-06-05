@@ -13,6 +13,7 @@ import io.jans.as.model.common.GrantType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaims;
+import io.jans.as.model.jwt.JwtHeader;
 import io.jans.as.server.model.common.AccessToken;
 import io.jans.as.server.model.common.AuthorizationGrant;
 import io.jans.as.server.model.common.ExecutionContext;
@@ -33,7 +34,7 @@ public class ExternalUpdateTokenContext extends ExternalScriptContext {
     private static final Logger log = LoggerFactory.getLogger(ExternalUpdateTokenContext.class);
 
     private final Client client;
-    private final AuthorizationGrant grant;
+    private AuthorizationGrant grant;
 
     private final AppConfiguration appConfiguration;
     private final AttributeService attributeService;
@@ -60,6 +61,7 @@ public class ExternalUpdateTokenContext extends ExternalScriptContext {
         ExternalUpdateTokenContext context = new ExternalUpdateTokenContext(executionContext.getHttpRequest(), executionContext.getGrant(), executionContext.getClient(), executionContext.getAppConfiguration(), executionContext.getAttributeService());
         context.setExecutionContext(executionContext);
         context.setJwtSigner(jwtSigner);
+        context.setGrant(executionContext.getGrant());
         return context;
     }
 
@@ -83,6 +85,11 @@ public class ExternalUpdateTokenContext extends ExternalScriptContext {
     public JwtClaims getClaims() {
         Jwt jwt = getJwt();
         return jwt != null ? jwt.getClaims() : null;
+    }
+
+    public JwtHeader getHeader() {
+        Jwt jwt = getJwt();
+        return jwt != null ? jwt.getHeader() : null;
     }
 
     public Jwt getJwt() {
@@ -111,6 +118,10 @@ public class ExternalUpdateTokenContext extends ExternalScriptContext {
 
     public AuthorizationGrant getGrant() {
         return grant;
+    }
+
+    public void setGrant(AuthorizationGrant grant) {
+        this.grant = grant;
     }
 
     public AppConfiguration getAppConfiguration() {

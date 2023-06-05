@@ -11,15 +11,14 @@ import io.jans.as.server.util.ServerUtil;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.model.base.CustomEntry;
-import org.apache.commons.net.util.SubnetUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.apache.commons.net.util.SubnetUtils;
+import org.jboss.resteasy.spi.NoLogWebApplicationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Holds object required in custom scripts
@@ -33,7 +32,7 @@ public class ExternalScriptContext extends io.jans.service.external.context.Exte
 
     private final PersistenceEntryManager ldapEntryManager;
 
-    private WebApplicationException webApplicationException;
+    private NoLogWebApplicationException webApplicationException;
 
     public ExternalScriptContext(HttpServletRequest httpRequest) {
         this(httpRequest, null);
@@ -76,20 +75,20 @@ public class ExternalScriptContext extends io.jans.service.external.context.Exte
         return "";
     }
 
-    public WebApplicationException getWebApplicationException() {
+    public NoLogWebApplicationException getWebApplicationException() {
         return webApplicationException;
     }
 
-    public void setWebApplicationException(WebApplicationException webApplicationException) {
+    public void setWebApplicationException(NoLogWebApplicationException webApplicationException) {
         this.webApplicationException = webApplicationException;
     }
 
-    public WebApplicationException createWebApplicationException(Response response) {
-        return new WebApplicationException(response);
+    public NoLogWebApplicationException createWebApplicationException(Response response) {
+        return new NoLogWebApplicationException(response);
     }
 
-    public WebApplicationException createWebApplicationException(int status, String entity) {
-        this.webApplicationException = new WebApplicationException(Response
+    public NoLogWebApplicationException createWebApplicationException(int status, String entity) {
+        this.webApplicationException = new NoLogWebApplicationException(Response
                 .status(status)
                 .entity(entity)
                 .type(MediaType.APPLICATION_JSON_TYPE)

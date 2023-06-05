@@ -124,4 +124,55 @@ Save the client id and secret from the response and enter them along with any cu
 kubectl apply -f load_test_auth_code.yaml
 ```
 
+##### Resource owner password credentials flow
 
+1. Create the client needed to run the test by executing the following. Make sure to change the `FQDN`  :
+
+```bash
+cat << EOF > ropc_client.json
+{
+    "dn": null,
+    "inum": null,
+    "displayName": "ROPC Flow Load Test Client",
+    "redirectUris": [
+      "https://FQDN"
+    ],
+    "responseTypes": [
+      "id_token",
+      "code"
+    ],
+    "grantTypes": [
+      "authorization_code",
+      "implicit",
+      "refresh_token",
+      "password"
+    ],
+    "tokenEndpointAuthMethod": "client_secret_basic",
+    "scopes": [
+      "openid",
+      "profile",
+      "email",
+      "user_name"
+    ],
+    "trustedClient": true,
+    "includeClaimsInIdToken": false,
+    "accessTokenAsJwt": false,
+    "disabled": false,
+    "deletable": false,
+    "description": "ROPC Flow Load Testing Client"
+}
+EOF
+```
+
+Download or build [config-cli-tui](../../../jans-cli-tui) and run:
+
+```bash
+# add -noverify if your fqdn is not registered
+./config-cli-tui.pyz --host <FQDN> --client-id <ROLE_BASED_CLIENT_ID> --client-secret <ROLE_BASED_CLIENT_SECRET> --no-tui --operation-id=post-oauth-openid-client --data=ropc_client.json
+```
+
+Save the client id and secret from the response and enter them along with any custom property in the yaml [file](yaml/load-test/load_test_ropc.yaml) then execute :
+
+```bash
+kubectl apply -f load_test_ropc.yaml
+```

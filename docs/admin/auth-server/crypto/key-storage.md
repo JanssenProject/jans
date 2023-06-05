@@ -3,6 +3,7 @@ tags:
   - administration
   - auth-server
   - cryptography
+  - key-storage
 ---
 
 ## This content is in progress

@@ -18,9 +18,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class NetworkUtils {
+    
+    private static Logger LOG = LoggerFactory.getLogger(NetworkUtils.class);
 
     public static HTTPResponse sendGet(String url, MultivaluedMap<String, String> headers,
             MultivaluedMap<String, String> parameters) throws IOException {
@@ -54,6 +59,10 @@ public class NetworkUtils {
             throws IOException, ParseException {
         
         HTTPResponse response = sendGet(url, headers, parameters);
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Request to url {}\nHeaders: {}; Parameters: {}\nResponse (status code {}): {}",
+                    url, headers, parameters, response.getStatusCode(), response.getContent());
+        }
         if (ensureOKStatus) {
             response.ensureStatusCode(Response.Status.OK.getStatusCode());
         }

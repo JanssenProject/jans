@@ -58,7 +58,6 @@ class Plugin(DialogUtils):
         self.nav_buttons = VSplit([],width=D())
         self.app.center_container = HSplit([
                     VSplit([
-                        self.app.getButton(text=_("Get Users"), name='oauth:scopes:get', jans_help=_("Retreive first {} users").format(self.app.entries_per_page), handler=self.get_users),
                         self.app.getTitledText(_("Search"), name='oauth:scopes:search', jans_help=_("Press enter to perform search"), accept_handler=self.search_user, style='class:outh_containers_scopes.text'),
                         self.app.getButton(text=_("Add Users"), name='oauth:scopes:add', jans_help=_("To add a new user press this button"), handler=self.edit_user_dialog),
                         ],
@@ -241,7 +240,6 @@ class Plugin(DialogUtils):
 
         if not (raw_data['userId'].strip() and raw_data['mail'].strip()):
             self.app.show_message(fix_title, _("Username and/or Email is empty"))
-            return
 
         if 'baseDn' not in dialog.data and not raw_data['userPassword'].strip():
             self.app.show_message(fix_title, _("Please enter Password"))
@@ -252,7 +250,7 @@ class Plugin(DialogUtils):
             user_info[key_] = raw_data.pop(key_)
 
         if 'baseDn' not in dialog.data:
-            user_info['userPassword'] = raw_data['userPassword']
+            user_info['userPassword'] = raw_data.pop('userPassword')
 
         for key_ in ('inum', 'baseDn', 'dn'):
             if key_ in raw_data:
@@ -315,7 +313,7 @@ class Plugin(DialogUtils):
     def get_claims(self) -> None:
         """This method for getting claims
         """
-        if hasattr(common_data.users, 'claims'):
+        if hasattr(common_data.users, 'claims') and getattr(common_data, 'claims_retreived', False):
             return
         async def coroutine():
             cli_args = {'operation_id': 'get-attributes', 'endpoint_args':'limit:200,status:active'}
@@ -324,6 +322,7 @@ class Plugin(DialogUtils):
             self.app.stop_progressing()
             result = response.json()
             common_data.users.claims = result['entries']
+            common_data.claims_retreived = True
 
         asyncio.ensure_future(coroutine())
 

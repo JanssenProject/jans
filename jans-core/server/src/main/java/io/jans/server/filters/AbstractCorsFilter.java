@@ -160,7 +160,7 @@ public abstract class AbstractCorsFilter implements Filter {
         final String method = request.getMethod();
 
         // Section 6.1.2
-        if (!isOriginAllowed(origin)) {
+        if (!isOriginAllowed(request, origin)) {
             handleInvalidCORS(request, response, filterChain);
             return;
         }
@@ -172,7 +172,7 @@ public abstract class AbstractCorsFilter implements Filter {
 
         // Section 6.1.3
         // Add a single Access-Control-Allow-Origin header.
-        if (isAnyOriginAllowed() && !supportsCredentials) {
+        if (isAnyOriginAllowed(request) && !supportsCredentials) {
             // If resource doesn't support credentials and if any origin is
             // allowed
             // to make CORS request, return header with '*'.
@@ -238,7 +238,7 @@ public abstract class AbstractCorsFilter implements Filter {
                 .getHeader(AbstractCorsFilter.REQUEST_HEADER_ORIGIN);
 
         // Section 6.2.2
-        if (!isOriginAllowed(origin)) {
+        if (!isOriginAllowed(request, origin)) {
             handleInvalidCORS(request, response, filterChain);
             return;
         }
@@ -292,7 +292,7 @@ public abstract class AbstractCorsFilter implements Filter {
                     AbstractCorsFilter.RESPONSE_HEADER_ACCESS_CONTROL_ALLOW_CREDENTIALS,
                     "true");
         } else {
-            if (isAnyOriginAllowed()) {
+            if (isAnyOriginAllowed(request)) {
                 response.addHeader(
                         AbstractCorsFilter.RESPONSE_HEADER_ACCESS_CONTROL_ALLOW_ORIGIN,
                         "*");
@@ -565,17 +565,23 @@ public abstract class AbstractCorsFilter implements Filter {
      * Checks if the Origin is allowed to make a CORS request.
      *
      * @param origin The Origin.
+     * @param request 
      * @return <code>true</code> if origin is allowed; <code>false</code>
      * otherwise.
      */
-    private boolean isOriginAllowed(final String origin) {
-        if (isAnyOriginAllowed()) {
+    private boolean isOriginAllowed(ServletRequest servletRequest, final String origin) {
+        if (isAnyOriginAllowed(servletRequest)) {
             return true;
         }
 
         // If 'Origin' header is a case-sensitive match of any of allowed
         // origins, then return true, else return false.
-        return allowedOrigins.contains(origin);
+        if ((allowedOrigins != null) && allowedOrigins.contains(origin)) {
+        	return true;
+        }
+
+        Collection<String> clientAllowedOrigins = getContextClientAllowedOrigins(servletRequest);
+        return (clientAllowedOrigins != null) && clientAllowedOrigins.contains(origin);
     }
 
 
@@ -717,14 +723,41 @@ public abstract class AbstractCorsFilter implements Filter {
      *
      * @return <code>true</code> if it's enabled; false otherwise.
      */
-    public boolean isAnyOriginAllowed() {
-        if (allowedOrigins != null && allowedOrigins.size() == 0) {
-            return true;
-        }
+	public boolean isAnyOriginAllowed(ServletRequest servletRequest) {
+		if (allowedOrigins != null && allowedOrigins.size() == 0) {
+			if (!hasContextClientAllowedOrigins(servletRequest)) {
+				return true;
+			}
 
-        return false;
+			Collection<String> clientAllowedOrigins = getContextClientAllowedOrigins(servletRequest);
+			if (clientAllowedOrigins != null && clientAllowedOrigins.size() == 0) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+    protected void setContextClientAllowedOrigins(ServletRequest servletRequest, Collection<String> clientAllowedOrigins) {
+    	servletRequest.setAttribute(PARAM_CLIENT_ALLOWED_ORIGINS, clientAllowedOrigins);
     }
 
+    @SuppressWarnings("unchecked")
+	protected Collection<String> getContextClientAllowedOrigins(ServletRequest servletRequest) {
+    	return (Collection<String>) servletRequest.getAttribute(PARAM_CLIENT_ALLOWED_ORIGINS);
+    }
+
+	protected boolean hasContextClientAllowedOrigins(ServletRequest servletRequest) {
+    	Enumeration<String> attributeNames =  servletRequest.getAttributeNames();
+    	while (attributeNames.hasMoreElements()) {
+    		String attributeName = attributeNames.nextElement();
+    		if (PARAM_CLIENT_ALLOWED_ORIGINS.equals(attributeName)) {
+    			return true;
+    		}
+		}
+
+    	return false;
+    }
 
     /**
      * Returns a {@link Set} of headers that should be exposed by browser.
@@ -1068,6 +1101,8 @@ public abstract class AbstractCorsFilter implements Filter {
     public static final String PARAM_CORS_REQUEST_DECORATE =
             "cors.request.decorate";
 
+	public static final String PARAM_CLIENT_ALLOWED_ORIGINS = "CLIENT_ALLOWED_ORIGINS";
+
 }
 
 final class StringManager {
@@ -1268,6 +1303,7 @@ final class StringManager {
         // Return the default
         return getManager(packageName);
     }
+    
 }
 
 final class Constants {

@@ -8,7 +8,7 @@ from jans.pycloudlib.persistence.couchbase import CouchbaseClient
 
 from settings import LOGGING_CONFIG
 from utils import prepare_template_ctx
-from utils import get_ldif_mappings
+from hooks import get_ldif_mappings_hook
 
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("couchbase_setup")
@@ -44,11 +44,10 @@ def get_bucket_mappings(manager):
     }
 
     optional_scopes = json.loads(manager.config.get("optional_scopes", "[]"))
-    bucket_mappings = {
+    return {
         mapping: {"files": files} | _mappings[mapping]
-        for mapping, files in get_ldif_mappings("couchbase", optional_scopes).items()
+        for mapping, files in get_ldif_mappings_hook("couchbase", optional_scopes).items()
     }
-    return bucket_mappings
 
 
 class CouchbaseBackend:

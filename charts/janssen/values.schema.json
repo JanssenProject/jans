@@ -1042,6 +1042,18 @@
                 "description": "Auth server key rotation keys life in hours",
                 "type": "integer"
               },
+              "keysStrategy": {
+                "description": "Set key selection strategy used by Auth server",
+                "type": "string"
+              },
+              "keysPushDelay": {
+                "description": "Delay (in seconds) before pushing private keys to Auth server",
+                "type": "integer"
+              },
+              "keysPushStrategy": {
+                "description": "Set key selection strategy after pushing private keys to Auth server",
+                "type": "string"
+              },
               "resources": {
                 "description": "Resource specs.",
                 "type": "object",

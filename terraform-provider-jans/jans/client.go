@@ -254,6 +254,25 @@ func (c *Client) post(ctx context.Context, path, token string, req, resp any) er
 	return c.request(ctx, params)
 }
 
+// post performs an HTTP POST request to the given path, using the given token
+// and the provided request entity, which is marshaled into JSON. The response
+// data is unmarshaled into the provided response value, which has to be of
+// a pointer type.
+func (c *Client) postZipFile(ctx context.Context, path, token string, req []byte, resp any) error {
+
+	params := requestParams{
+		method:      "POST",
+		path:        path,
+		contentType: "application/zip",
+		accept:      "application/json",
+		token:       token,
+		payload:     req,
+		resp:        resp,
+	}
+
+	return c.request(ctx, params)
+}
+
 // delete performs an HTTP DELETE request to the given path, using the given
 // token.
 func (c *Client) delete(ctx context.Context, path, token string) error {
@@ -371,12 +390,16 @@ func (c *Client) request(ctx context.Context, params requestParams) error {
 
 	// fmt.Printf("Response:\n%s\n", string(data))
 
-	if len(data) == 0 {
+	if len(data) == 0 || params.resp == nil {
 		return nil
 	}
 
+	// if json.Valid(data) {
+	// 	return fmt.Errorf("response is not valid json")
+	// }
+
 	if err = json.Unmarshal(data, params.resp); err != nil {
-		return fmt.Errorf("could not unmarshaling response: %w", err)
+		return fmt.Errorf("could not unmarshal response: %w", err)
 	}
 
 	return nil

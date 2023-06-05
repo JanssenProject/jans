@@ -53,6 +53,7 @@ import java.util.Properties;
  * @version May 12, 2020
  */
 @ApplicationScoped
+@Named
 public class AppInitializer {
 
 	@Inject
@@ -126,10 +127,7 @@ public class AppInitializer {
 				.initPythonInterpreter(configurationFactory.getBaseConfiguration().getString("pythonModulesDir", null));
 
 		// Initialize script manager
-		List<CustomScriptType> supportedCustomScriptTypes = Lists.newArrayList(CustomScriptType.values());
-
-		// There is no Fido2 scripts yet
-		supportedCustomScriptTypes.clear();
+		List<CustomScriptType> supportedCustomScriptTypes = Lists.newArrayList(CustomScriptType.FIDO2_INTERCEPTION);
 
 		// Start timer
 		initSchedulerService();

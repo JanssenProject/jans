@@ -322,11 +322,12 @@ func resourceApiAppConfigurationUpdate(ctx context.Context, d *schema.ResourceDa
 	c := meta.(*jans.Client)
 
 	var config jans.ApiAppConfiguration
-	if err := fromSchemaResource(d, &config); err != nil {
+	patches, err := patchFromResourceData(d, &config)
+	if err != nil {
 		return diag.FromErr(err)
 	}
 	tflog.Debug(ctx, "Updating ApiAppConfiguration")
-	if _, err := c.UpdateApiAppConfiguration(ctx, &config); err != nil {
+	if _, err := c.PatchApiAppConfiguration(ctx, patches); err != nil {
 		return diag.FromErr(err)
 	}
 	tflog.Debug(ctx, "ApiAppConfiguration updated")

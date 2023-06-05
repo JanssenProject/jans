@@ -58,12 +58,11 @@ public class AttestationVerifier {
     @Inject
     private AttestationProcessorFactory attestationProcessorFactory;
 
-    public CredAndCounterData verifyAuthenticatorAttestationResponse(JsonNode response, Fido2RegistrationData credential) {
-        if (!(response.hasNonNull("attestationObject") && response.hasNonNull("clientDataJSON"))) {
+    public CredAndCounterData verifyAuthenticatorAttestationResponse(JsonNode authenticatorResponse, Fido2RegistrationData credential) {
+        if (!(authenticatorResponse.hasNonNull("attestationObject") && authenticatorResponse.hasNonNull("clientDataJSON"))) {
             throw new Fido2RuntimeException("Authenticator data is invalid");
         }
 
-        JsonNode authenticatorResponse = response;
         String base64AuthenticatorData = authenticatorResponse.get("attestationObject").asText();
         String clientDataJson = authenticatorResponse.get("clientDataJSON").asText();
         byte[] authenticatorDataBuffer = base64Service.urlDecode(base64AuthenticatorData);
@@ -79,7 +78,7 @@ public class AttestationVerifier {
                 throw new Fido2RuntimeException("Attestation JSON is empty");
             }
             String fmt = commonVerifiers.verifyFmt(authenticatorDataNode, "fmt");
-            log.debug("Authenticator data {} {}", fmt, authenticatorDataNode.toString());
+            log.debug("Authenticator data {} {}", fmt, authenticatorDataNode);
             
             credential.setAttestationType(fmt);
             

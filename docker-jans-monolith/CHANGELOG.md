@@ -1,5 +1,31 @@
 # Changelog
 
+## [1.0.13-1](https://github.com/JanssenProject/jans/compare/docker-jans-monolith-v1.0.12-1...docker-jans-monolith-v1.0.13-1) (2023-05-10)
+
+
+### Bug Fixes
+
+* **docker-jans-monolith:** add support for using /opt/dist/scripts ([#4810](https://github.com/JanssenProject/jans/issues/4810)) ([a2894ff](https://github.com/JanssenProject/jans/commit/a2894ff72b548e47a3db9aff41f01932d7600c00))
+* **docker-jans-monolith:** incorrect image tag for compose-based deployment ([#4818](https://github.com/JanssenProject/jans/issues/4818)) ([fa0a13d](https://github.com/JanssenProject/jans/commit/fa0a13df16b5071746342188203844744a4435e0))
+* **docker-jans:** sync role-based introspection script ([#4753](https://github.com/JanssenProject/jans/issues/4753)) ([f744330](https://github.com/JanssenProject/jans/commit/f74433098011bb9546d27ca2b55d7e83dc4e0531))
+* prepare for 1.0.13 release ([493478e](https://github.com/JanssenProject/jans/commit/493478e71f6231553c998b48c0f163c7f5869da4))
+
+## [1.0.12-1](https://github.com/JanssenProject/jans/compare/docker-jans-monolith-v1.0.11-1...docker-jans-monolith-v1.0.12-1) (2023-04-18)
+
+
+### Bug Fixes
+
+* adjust bleeding edge images ([4bb0b09](https://github.com/JanssenProject/jans/commit/4bb0b0983984314a51e7b43e547027d5226c84bb))
+* opencontainer labels ([f8b0b36](https://github.com/JanssenProject/jans/commit/f8b0b365600bd700128bb9d92df6de7ba14830b6))
+* prepare for 1.0.12 release ([6f83197](https://github.com/JanssenProject/jans/commit/6f83197705511c39413456acdc64e9136a97ff39))
+
+## [1.0.11-1](https://github.com/JanssenProject/jans/compare/docker-jans-monolith-v1.0.10-1...docker-jans-monolith-v1.0.11-1) (2023-04-05)
+
+
+### Bug Fixes
+
+* prepare for  release ([60775c0](https://github.com/JanssenProject/jans/commit/60775c09dc5ab9996bf80c03dcb457861d48dfb1))
+
 ## [1.0.10-1](https://github.com/JanssenProject/jans/compare/docker-jans-monolith-v1.0.9-1...docker-jans-monolith-v1.0.10-1) (2023-03-16)
 
 

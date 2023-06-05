@@ -85,19 +85,17 @@ Ideas for a good experience:
 
 In order to override a page, the path to the corresponding template can be easily derived from the URL seen at the browser's address bar when the subflow is `Trigger`ed. Note the page may not necessarily belong directly to the subflow  triggered but probably to another flow lying deep in a chain of `Trigger` invocations. 
 
-As an example suppose you are interested in building a flow A that reuses flow B. You identify a page shown that needs to be overriden. It might happen this page is actually rendered by C - a flow that B in turn reuses. In scenarios like this cancellation still works transparently and developers need not be aware of flows dependencies. In practice, when cancellation occurs at A, it bubbles up to B and then to C, which is the target of this process. 
+As an example suppose you are interested in building a flow A that reuses flow B. You identify a page shown that needs to be overriden. It might happen this page is actually rendered by C - a flow that B in turn reuses. In scenarios like this cancellation still works transparently and developers need not be aware of flows dependencies. In practice, when cancellation occurs at C, it bubbles up to B and then to A, which is the target of this process. 
 
-Note that even flow B (as is) may also be overriding A's templates. Resolution of a template path takes place from the inner to the outer flow, so it occurs this way in the example:
+Note that even flow B (as is) may also be overriding C's templates. Resolution of a template path takes place from the inner to the outer flow, so it occurs this way in the example:
 
-1. `path` is as found in A's `RRF` instruction
+1. `path` is as found in C's `RRF` instruction
 
 1. `path` is looked up on the list provided in B's `Override templates`. If a match is found, `path` is updated accordingly 
 
-1. `path` is looked up on the list provided in C's `Override templates`. If a match is found, `path` is updated accordingly
+1. `path` is looked up on the list provided in A's `Override templates`. If a match is found, `path` is updated accordingly
 
 1. The page referenced by `path` is rendered
-
-When a page POSTs a cancellation as described earlier, the flow to return control to is determined by the path of the template that issued the given POST. Similarly a lookup on B's `Override templates` takes place followed by other on A's. 
 
 ## Timeouts
 

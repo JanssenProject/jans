@@ -444,11 +444,15 @@ Finish it.nonsense
 **Notes:**
 
 - Any statements found after `Finish` is not reached and thus, not executed
-- If no `Finish` statement is found in a flow's execution, this will degenerate in flow crash 
+- If no `Finish` statement is found in a flow's execution, this will degenerate in flow [crash](./lifecycle.md#about-crashes)
 - When a flow is finished and was used as [subflow](#subflows) (part of the execution of a bigger parent flow), the parent does not terminate. Execution continues at the following instruction that triggered the subflow. More on `Trigger` later
 - Using `data` in the `Finish` directive is an effective way to communicate information to callers (parent flows). If a  flow has no parents, `data` is stored in the authentication server's session of the given user under the key `agamaData`. Contents are serialized to a JSON string previously 
 - A flow cannot be aborted by itself. This can only be achieved through a parent flow. Learn more about aborted flows [here](./flows-lifecycle.md#cancellation)
 - Check the best practices on finishing flows [here](./flows-lifecycle.md#finishing-flows)
+
+### Identity of the user to login
+
+When a top-level flow (i.e. no parents) finishes successfully, the selection of the user to authenticate is driven by the `userId` passed in `data`. By default this maps to the `uid` attribute that in most cases all user entries already have in the database, namely, the "user name". This attribute is configurable though via property `finish_userid_db_attribute` of the bridge script. Note this is a global configuration that applies to all Agama flows running in your server.
 
 ## Web interaction
 
@@ -713,6 +717,16 @@ Log "subflow returned with success?" outcome.success
 <td>
 
 ```
+outcome | E = Trigger jo.jo.PersonalInfoGathering null false 
+```
+
+</td>
+		<td>Similar to the previous example. If for some reason <code>PersonalInfoGathering</code> crashes, variable <code>E</code> will hold a reference to the error in the form of a <code>java.lang.Exception</code> for further processing. Otherwise <code>E</code> evaluates to <code>null</code>. The variable on the left of the pipe (<code>|</code>) can be omitted if the outcome of the flow will not be inspected</td>
+	</tr>
+	<tr>
+<td>
+
+```
 userPrefs = { otp: "...", ... }
 Match userPrefs.otp to
     "e-mail"
@@ -724,7 +738,7 @@ Trigger $flow
 
 </td>
 		<td>Starts a flow whose qualified name is determined at runtime</td>
-	</tr>
+	</tr>	
 </table> 
 
 ### Input parameters

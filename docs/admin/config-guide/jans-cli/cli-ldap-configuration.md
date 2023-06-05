@@ -4,10 +4,11 @@ tags:
   - configuration
   - cli
   - commandline
+  - ldap
 ---
 
 
-# Lightweight Directory Active Protocol (LDAP) Configuration
+# Lightweight Directory Access Protocol (LDAP) Configuration
 
 > Prerequisite: Know how to use the Janssen CLI in [command-line mode](../jans-cli/README.md)
 

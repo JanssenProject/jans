@@ -18,15 +18,15 @@ func TestResourceSmtpConfiguration_Mapping(t *testing.T) {
 	data := schema.Data(nil)
 
 	cfg := jans.SMTPConfiguration{
-		Host:                   "localhost",
-		Port:                   25,
-		RequiresSSL:            true,
-		TrustHost:              true,
-		FromName:               "Jans",
-		FromEmailAddress:       "jans@jansen.io",
-		RequiresAuthentication: true,
-		UserName:               "jans",
-		Password:               "password",
+		Host:                              "localhost",
+		Port:                              25,
+		ConnectProtection:                 "StartTls",
+		TrustHost:                         true,
+		FromName:                          "Jans",
+		FromEmailAddress:                  "jans@jansen.io",
+		RequiresAuthentication:            true,
+		SmtpAuthenticationAccountUsername: "jans",
+		SmtpAuthenticationAccountPassword: "password",
 	}
 
 	if err := toSchemaResource(data, cfg); err != nil {
@@ -79,18 +79,6 @@ func testAccResourceCheckSMTPConfigurationImport(states []*terraform.InstanceSta
 		}
 
 		found = true
-
-		// if err := checkAttribute(is, "base_dn", "o=jans"); err != nil {
-		// 	return err
-		// }
-
-		// if err := checkAttribute(is, "person_custom_object_class", "jansCustomPerson"); err != nil {
-		// 	return err
-		// }
-
-		// if err := checkAttribute(is, "max_count", "200"); err != nil {
-		// 	return err
-		// }
 
 		break
 	}

@@ -1,0 +1,18 @@
+#!/bin/bash
+
+if [ "$1" = "remove" ] ; then
+    rm -rf /etc/systemd/system/jans-*.service    
+    rm -rf /etc/systemd/system/opendj.service    
+    rm -rf /etc/jans
+    rm -rf /etc/certs
+    rm -rf /etc/default/jans-*
+    rm -rf /var/lib/dpkg/info/jans.*
+    rm -rf /opt/jans
+    rm -rf /opt/dist
+    rm -rf /opt/opendj
+    rm -rf /opt/amazon-corretto-*
+    rm -rf /opt/jython*
+    rm -rf /opt/jetty* 
+    rm -rf /opt/jre
+fi
+exit 0

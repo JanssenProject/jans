@@ -4,6 +4,7 @@ tags:
   - configuration
   - cli
   - commandline
+  - fido2
 ---
 
 # Janssen FIDO2 Configuration

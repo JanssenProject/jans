@@ -411,7 +411,7 @@ It returns all the information of the Jans Authorization server.
     }
   ],
   "sessionIdUnusedLifetime": 86400,
-  "sessionIdUnauthenticatedUnusedLifetime": 120,
+  "sessionIdUnauthenticatedUnusedLifetime": 7200,
   "sessionIdPersistOnPromptNone": true,
   "sessionIdRequestParameterEnabled": false,
   "changeSessionIdOnAuthentication": true,
@@ -519,7 +519,7 @@ It returns all the information of the Jans Authorization server.
     "delayTime": 2,
     "bruteForceProtectionEnabled": false
   },
-  "errorHandlingMethod": "internal",
+  "errorHandlingMethod": "remote",
   "keepAuthenticatorAttributesOnAcrChange": false,
   "deviceAuthzRequestExpiresIn": 1800,
   "deviceAuthzTokenPollInterval": 5,

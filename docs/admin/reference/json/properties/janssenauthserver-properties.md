@@ -15,6 +15,7 @@ tags:
 | activeSessionAuthorizationScope | Authorization Scope for active session | [Details](#activesessionauthorizationscope) |
 | agamaConfiguration | Engine Config which offers an alternative way to build authentication flows in Janssen server | [Details](#agamaconfiguration) |
 | allowAllValueForRevokeEndpoint | Boolean value true allow all value for revoke endpoint | [Details](#allowallvalueforrevokeendpoint) |
+| allowBlankValuesInDiscoveryResponse | Boolean value specifying whether to allow blank values in discovery response | [Details](#allowblankvaluesindiscoveryresponse) |
 | allowEndSessionWithUnmatchedSid | default value false. If true, sid check will be skipped | [Details](#allowendsessionwithunmatchedsid) |
 | allowIdTokenWithoutImplicitGrantType | Specifies if a token without implicit grant types is allowed | [Details](#allowidtokenwithoutimplicitgranttype) |
 | allowPostLogoutRedirectWithoutValidation | Allows post-logout redirect without validation for the End Session endpoint (still AS validates it against clientWhiteList url pattern property) | [Details](#allowpostlogoutredirectwithoutvalidation) |
@@ -79,6 +80,7 @@ tags:
 | dcrSsaValidationConfigs | DCR SSA Validation configurations used to perform validation of SSA or DCR | [Details](#dcrssavalidationconfigs) |
 | defaultSignatureAlgorithm | The default signature algorithm to sign ID Tokens | [Details](#defaultsignaturealgorithm) |
 | defaultSubjectType | The default subject type used for dynamic client registration | [Details](#defaultsubjecttype) |
+| deviceAuthzAcr | Device authz acr | [Details](#deviceauthzacr) |
 | deviceAuthzEndpoint | URL for the Device Authorization | [Details](#deviceauthzendpoint) |
 | deviceAuthzRequestExpiresIn | Expiration time given for device authorization requests | [Details](#deviceauthzrequestexpiresin) |
 | deviceAuthzResponseTypeToProcessAuthz | Response type used to process device authz requests | [Details](#deviceauthzresponsetypetoprocessauthz) |
@@ -109,7 +111,7 @@ tags:
 | enabledOAuthAuditLogging | enable OAuth Audit Logging | [Details](#enabledoauthauditlogging) |
 | endSessionEndpoint | URL at the OP to which an RP can perform a redirect to request that the end user be logged out at the OP | [Details](#endsessionendpoint) |
 | endSessionWithAccessToken | Choose whether to accept access tokens to call end_session endpoint | [Details](#endsessionwithaccesstoken) |
-| errorHandlingMethod | A list of possible error handling methods | [Details](#errorhandlingmethod) |
+| errorHandlingMethod | A list of possible error handling methods. Possible values: remote (send error back to RP), internal (show error page) | [Details](#errorhandlingmethod) |
 | errorReasonEnabled | Boolean value specifying whether to return detailed reason of the error from AS. Default value is false | [Details](#errorreasonenabled) |
 | expirationNotificatorEnabled | Boolean value specifying whether expiration notificator is enabled (used to identify expiration for persistence that support TTL, like Couchbase) | [Details](#expirationnotificatorenabled) |
 | expirationNotificatorIntervalInSeconds | The expiration notificator interval in second | [Details](#expirationnotificatorintervalinseconds) |
@@ -126,6 +128,7 @@ tags:
 | grantTypesSupported | This list details which OAuth 2.0 grant types are supported by this OP | [Details](#granttypessupported) |
 | httpLoggingEnabled | Enable/disable request/response logging filter | [Details](#httploggingenabled) |
 | httpLoggingExcludePaths | This list details the base URIs for which the request/response logging filter will not record activity | [Details](#httploggingexcludepaths) |
+| httpLoggingResponseBodyContent | Defines if Response body will be logged. Default value is false | [Details](#httploggingresponsebodycontent) |
 | idGenerationEndpoint | ID Generation endpoint URL | [Details](#idgenerationendpoint) |
 | idTokenEncryptionAlgValuesSupported | A list of the JWE encryption algorithms (alg values) supported by the OP for the ID Token to encode the Claims in a JWT | [Details](#idtokenencryptionalgvaluessupported) |
 | idTokenEncryptionEncValuesSupported | A list of the JWE encryption algorithms (enc values) supported by the OP for the ID Token to encode the Claims in a JWT | [Details](#idtokenencryptionencvaluessupported) |
@@ -135,6 +138,7 @@ tags:
 | idTokenTokenBindingCnfValuesSupported | Array containing a list of the JWT Confirmation Method member names supported by the OP for Token Binding of ID Tokens. The presence of this parameter indicates that the OpenID Provider supports Token Binding of ID Tokens. If omitted, the default is that the OpenID Provider does not support Token Binding of ID Tokens | [Details](#idtokentokenbindingcnfvaluessupported) |
 | imgLocation | The location for image files | [Details](#imglocation) |
 | includeSidInResponse | Boolean value specifying whether to include sessionId in response | [Details](#includesidinresponse) |
+| introspectionAccessTokenMustHaveIntrospectionScope | If True, rejects introspection requests if access_token does not have the 'introspection' scope in its authorization header. Comparing to 'uma_protection', 'introspection' scope is not allowed for dynamic registration' | [Details](#introspectionaccesstokenmusthaveintrospectionscope) |
 | introspectionAccessTokenMustHaveUmaProtectionScope | If True, rejects introspection requests if access_token does not have the uma_protection scope in its authorization header | [Details](#introspectionaccesstokenmusthaveumaprotectionscope) |
 | introspectionEndpoint | Introspection endpoint URL | [Details](#introspectionendpoint) |
 | introspectionResponseScopesBackwardCompatibility | Boolean value specifying introspection response backward compatibility mode | [Details](#introspectionresponsescopesbackwardcompatibility) |
@@ -168,6 +172,7 @@ tags:
 | logClientNameOnClientAuthentication | Choose if application should log the Client Name on client authentication | [Details](#logclientnameonclientauthentication) |
 | loggingLayout | Logging layout used for Jans Authorization Server loggers | [Details](#logginglayout) |
 | loggingLevel | Specify the logging level for oxAuth loggers | [Details](#logginglevel) |
+| logNotFoundEntityAsError | Boolean value specifying whether to log not_found entity exception as error or as trace. Default value is false (trace). | [Details](#lognotfoundentityaserror) |
 | metricReporterInterval | The interval for metric reporter in seconds | [Details](#metricreporterinterval) |
 | metricReporterKeepDataDays | The days to keep metric reported data | [Details](#metricreporterkeepdatadays) |
 | mtlsAuthorizationEndpoint | URL for Mutual TLS (mTLS) Client Authentication and Certificate-Bound Access Tokens (MTLS) Endpoint | [Details](#mtlsauthorizationendpoint) |
@@ -310,6 +315,15 @@ tags:
 ### allowAllValueForRevokeEndpoint
 
 - Description: Boolean value true allow all value for revoke endpoint
+
+- Required: No
+
+- Default value: false
+
+
+### allowBlankValuesInDiscoveryResponse
+
+- Description: Boolean value specifying whether to allow blank values in discovery response
 
 - Required: No
 
@@ -892,6 +906,15 @@ tags:
 - Default value: None
 
 
+### deviceAuthzAcr
+
+- Description: Device authz acr
+
+- Required: No
+
+- Default value: None
+
+
 ### deviceAuthzEndpoint
 
 - Description: URL for the Device Authorization
@@ -1164,11 +1187,11 @@ tags:
 
 ### errorHandlingMethod
 
-- Description: A list of possible error handling methods
+- Description: A list of possible error handling methods. Possible values: remote (send error back to RP), internal (show error page)
 
 - Required: No
 
-- Default value: None
+- Default value: remote
 
 
 ### errorReasonEnabled
@@ -1315,6 +1338,15 @@ tags:
 - Default value: None
 
 
+### httpLoggingResponseBodyContent
+
+- Description: Defines if Response body will be logged. Default value is false
+
+- Required: No
+
+- Default value: false
+
+
 ### idGenerationEndpoint
 
 - Description: ID Generation endpoint URL
@@ -1390,6 +1422,15 @@ tags:
 ### includeSidInResponse
 
 - Description: Boolean value specifying whether to include sessionId in response
+
+- Required: No
+
+- Default value: false
+
+
+### introspectionAccessTokenMustHaveIntrospectionScope
+
+- Description: If True, rejects introspection requests if access_token does not have the 'introspection' scope in its authorization header. Comparing to 'uma_protection', 'introspection' scope is not allowed for dynamic registration'
 
 - Required: No
 
@@ -2536,7 +2577,7 @@ tags:
 
 - Required: No
 
-- Default value: true
+- Default value: false
 
 
 ### useLocalCache

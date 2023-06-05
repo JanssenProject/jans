@@ -81,6 +81,7 @@ import static org.apache.commons.lang3.BooleanUtils.isTrue;
  * @version September 30, 2021
  */
 @WebFilter(
+        filterName = "AuthenticationFilter",
         asyncSupported = true,
         urlPatterns = {
                 "/restv1/authorize",

@@ -17,6 +17,7 @@ import io.jans.configapi.security.api.ApiProtectionCache;
 import io.jans.configapi.security.client.AuthClientFactory;
 import io.jans.configapi.configuration.ConfigurationFactory;
 import io.jans.configapi.core.rest.ProtectedApi;
+import io.jans.configapi.core.service.ConfService;
 import io.jans.configapi.core.util.ProtectionScopeType;
 import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.service.auth.ClientService;
@@ -66,6 +67,9 @@ public class AuthUtil {
     @Inject
     EncryptionService encryptionService;
 
+    @Inject
+    ConfService confService;
+
     public String getOpenIdConfigurationEndpoint() {
         return this.configurationService.find().getOpenIdConfigurationEndpoint();
     }
@@ -73,15 +77,15 @@ public class AuthUtil {
     public String getAuthOpenidConfigurationUrl() {
         return this.configurationFactory.getApiAppConfiguration().getAuthOpenidConfigurationUrl();
     }
-    
+
     public AuditLogConf getAuditLogConf() {
         return this.configurationFactory.getApiAppConfiguration().getAuditLogConf();
     }
-    
+
     public DataFormatConversionConf getDataFormatConversionConf() {
         return this.configurationFactory.getApiAppConfiguration().getDataFormatConversionConf();
     }
-    
+
     public List<PluginConf> getPluginConf() {
         return this.configurationFactory.getApiAppConfiguration().getPlugins();
     }
@@ -429,7 +433,7 @@ public class AuthUtil {
         return scopeList;
 
     }
-    
+
     public Date parseStringToDateObj(String dateString) {
         String DATE_PATTERN_YYYY_MM_DD = "yyyy-MM-dd";
         SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_PATTERN_YYYY_MM_DD);
@@ -438,7 +442,8 @@ public class AuthUtil {
         try {
             date = dateFormat.parse(dateString);
         } catch (ParseException e) {
-            log.error("Error in parsing string to date. Allowed Date Format : {},  Date-String : {} ", DATE_PATTERN_YYYY_MM_DD, dateString);
+            log.error("Error in parsing string to date. Allowed Date Format : {},  Date-String : {} ",
+                    DATE_PATTERN_YYYY_MM_DD, dateString);
         }
         return date;
     }

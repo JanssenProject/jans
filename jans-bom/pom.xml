@@ -5,7 +5,7 @@
 	<artifactId>jans-bom</artifactId>
 	<packaging>pom</packaging>
 	<name>jans-bom</name>
-	<version>1.0.11-SNAPSHOT</version>
+	<version>1.0.14-SNAPSHOT</version>
 
     <distributionManagement>
 	  <repository>
@@ -17,7 +17,10 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.min-version>3.0.3</maven.min-version>
-		
+
+		<maven.compiler.source>11</maven.compiler.source>
+		<maven.compiler.target>11</maven.compiler.target>
+
 		<httpcore.version>4.4.15</httpcore.version>
 		<httpclient.version>4.5.13</httpclient.version>
 
@@ -43,17 +46,21 @@
 		<jackson.bom.version>2.13.4.20221013</jackson.bom.version>
 		<jackson.version>2.13.4</jackson.version>
 		<jackson.databind.version>2.13.4.2</jackson.databind.version>
-		<json.version>20220924</json.version>
+		<json.version>20230227</json.version>
 
 		<log4j.version>2.19.0</log4j.version>
 		<slf4j.version>1.7.36</slf4j.version>
 
 		<guava.version>31.1-jre</guava.version>
 	
-		<aws.sns.version>1.12.327</aws.sns.version>
+		<aws.sns.version>1.12.448</aws.sns.version>
 		<jackrabbit.version>2.21.13</jackrabbit.version>
 
 		<bc.version>1.70</bc.version>
+		<junit.jupiter.version>5.9.2</junit.jupiter.version>
+		<mockito.version>5.1.1</mockito.version>
+
+		<jetty.version>11.0.15</jetty.version>
 	</properties>
 
 	<repositories>
@@ -387,7 +394,7 @@
 			<!-- <dependency>
 				<groupId>javax.persistence</groupId>
 				<artifactId>persistence-api</artifactId>
-				<version>1.0.11-SNAPSHOT</version>
+				<version>1.0.14-SNAPSHOT</version>
 			</dependency> -->
 
 			<!-- hibernate -->
@@ -568,7 +575,7 @@
 			<dependency>
 				<groupId>org.codehaus.jettison</groupId>
 				<artifactId>jettison</artifactId>
-				<version>1.5.2</version>
+				<version>1.5.4</version>
 			</dependency>
 
 			<!-- Jython -->
@@ -718,14 +725,14 @@
 			<dependency>
 				<groupId>com.unboundid</groupId>
 				<artifactId>unboundid-ldapsdk</artifactId>
-				<version>6.0.6</version>
+				<version>6.0.8</version>
 			</dependency>
 
 			<!-- Couchbase -->
 			<dependency>
 				<groupId>com.couchbase.client</groupId>
 				<artifactId>java-client</artifactId>
-				<version>3.3.4</version>
+				<version>3.4.4</version>
 			</dependency>
 
 			<!-- SQL JDBC Drivers -->
@@ -742,12 +749,12 @@
 			<dependency>
 				<groupId>com.mysql</groupId>
 				<artifactId>mysql-connector-j</artifactId>
-				<version>8.0.31</version>
+				<version>8.0.32</version>
 			</dependency>
 			<dependency>
 			    <groupId>org.postgresql</groupId>
 			    <artifactId>postgresql</artifactId>
-			    <version>42.5.1</version>
+			    <version>42.6.0</version>
 			</dependency>
 
 			<!-- SQL Query -->
@@ -766,7 +773,7 @@
 			<dependency>
 			    <groupId>com.google.cloud</groupId>
 			    <artifactId>google-cloud-spanner</artifactId>
-			    <version>6.31.2</version>
+			    <version>6.39.0</version>
 			</dependency>
 
 			<!-- Metrics -->
@@ -846,35 +853,42 @@
 				<version>4.0.0.Final</version>
 				<scope>test</scope>
 			</dependency>
-
+			<!-- JUnit Jupiter -->
 			<dependency>
 				<groupId>org.junit.jupiter</groupId>
 				<artifactId>junit-jupiter-api</artifactId>
-				<version>5.9.2</version>
+				<version>${junit.jupiter.version}</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.junit.jupiter</groupId>
 				<artifactId>junit-jupiter-engine</artifactId>
-				<version>5.9.2</version>
+				<version>${junit.jupiter.version}</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.junit.jupiter</groupId>
 				<artifactId>junit-jupiter-params</artifactId>
-				<version>5.9.2</version>
+				<version>${junit.jupiter.version}</version>
 				<scope>test</scope>
 			</dependency>
+			<!-- Mockito -->
 			<dependency>
 				<groupId>org.mockito</groupId>
 				<artifactId>mockito-core</artifactId>
-				<version>5.1.1</version>
+				<version>${mockito.version}</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.mockito</groupId>
 				<artifactId>mockito-inline</artifactId>
-				<version>5.1.1</version>
+				<version>${mockito.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-junit-jupiter</artifactId>
+				<version>${mockito.version}</version>
 				<scope>test</scope>
 			</dependency>
 				
@@ -920,4 +934,5 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
+
 </project>

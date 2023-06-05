@@ -8,6 +8,7 @@ import prompt_toolkit
 from cli_style import style
 from wui_components.jans_drop_down import DropDownWidget
 from wui_components.jans_spinner import Spinner
+from wui_components.jans_vetrical_nav import JansVerticalNav
 import sys
 
 from wui_components.jans_date_picker import DateSelectWidget
@@ -37,6 +38,12 @@ class DialogUtils:
                 value_ = me.value
             elif isinstance(me, Spinner):
                 value_ = me.value
+            elif isinstance(me, JansVerticalNav):
+                value_ = {lst[0]: lst[1] for lst in me.data}
+                
+            elif isinstance(me, prompt_toolkit.layout.containers.VSplit):
+                for wid in item.children:
+                    self.get_item_data(wid)
             else:
                 return
 

@@ -3,7 +3,7 @@ tags:
   - administration
   - kubernetes
   - operations
-  - start order
+  - start-order
 ---
 
 ## Service Start Order

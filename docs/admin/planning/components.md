@@ -1,7 +1,8 @@
 ---
 tags:
-  - components
+  - administration
   - planning
+  - components
   - architecture
 ---
 

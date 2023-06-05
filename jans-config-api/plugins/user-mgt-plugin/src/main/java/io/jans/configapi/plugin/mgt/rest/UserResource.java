@@ -11,7 +11,7 @@ import io.jans.configapi.plugin.mgt.util.Constants;
 import io.jans.configapi.plugin.mgt.util.MgtUtil;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
-import io.jans.configapi.core.model.SearchRequest;
+import io.jans.model.SearchRequest;
 import io.jans.orm.model.PagedResult;
 import io.jans.util.StringHelper;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -80,16 +80,18 @@ public class UserResource extends BaseResource {
             @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @Parameter(description = "Search pattern") @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
             @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
-            @Parameter(description = "Attribute whose value will be used to order the returned response") @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
-            @Parameter(description = "Order in which the sortBy param is applied. Allowed values are \"ascending\" and \"descending\"") @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder)
+            @Parameter(description = "Attribute whose value will be used to order the returned response") @DefaultValue(ApiConstants.INUM) @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
+            @Parameter(description = "Order in which the sortBy param is applied. Allowed values are \"ascending\" and \"descending\"") @DefaultValue(ApiConstants.ASCENDING) @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder,
+            @Parameter(description = "Field and value pair for seraching", examples = @ExampleObject(name = "Field value example", value = "mail=abc@mail.com,jansStatus=true")) @DefaultValue("") @QueryParam(value = ApiConstants.FIELD_VALUE_PAIR) String fieldValuePair)
             throws IllegalAccessException, InvocationTargetException {
         if (logger.isInfoEnabled()) {
-            logger.info("User search param - limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}",
+            logger.info("User search param - limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}, fieldValuePair:{}",
                     escapeLog(limit), escapeLog(pattern), escapeLog(startIndex), escapeLog(sortBy),
-                    escapeLog(sortOrder));
+                    escapeLog(sortOrder),escapeLog(fieldValuePair));
         }
+        
         SearchRequest searchReq = createSearchRequest(userMgmtSrv.getPeopleBaseDn(), pattern, sortBy, sortOrder,
-                startIndex, limit, null, userMgmtSrv.getUserExclusionAttributesAsString(), mgtUtil.getRecordMaxCount());
+                startIndex, limit, null, userMgmtSrv.getUserExclusionAttributesAsString(), mgtUtil.getRecordMaxCount(), fieldValuePair, CustomUser.class);
 
         return Response.ok(this.doSearch(searchReq, true)).build();
     }
@@ -185,8 +187,8 @@ public class UserResource extends BaseResource {
             @Parameter(description = "Boolean flag to indicate if attributes to be removed for non-LDAP DB. Default value is true, indicating non-LDAP attributes will be removed from request.") @DefaultValue("true") @QueryParam(value = ApiConstants.REMOVE_NON_LDAP_ATTRIBUTES) boolean removeNonLDAPAttributes)
             throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         if (logger.isInfoEnabled()) {
-            logger.info("User details to be updated - customUser:{}, removeNonLDAPAttributes:{}",
-                    escapeLog(customUser), removeNonLDAPAttributes);
+            logger.info("User details to be updated - customUser:{}, removeNonLDAPAttributes:{}", escapeLog(customUser),
+                    removeNonLDAPAttributes);
         }
 
         // get User object
@@ -285,7 +287,7 @@ public class UserResource extends BaseResource {
         return Response.noContent().build();
     }
 
-    private UserPagedResult doSearch(SearchRequest searchReq, Boolean removeNonLDAPAttributes)
+    private UserPagedResult doSearch(SearchRequest searchReq, boolean removeNonLDAPAttributes)
             throws IllegalAccessException, InvocationTargetException {
         if (logger.isInfoEnabled()) {
             logger.info("User search params - searchReq:{}, removeNonLDAPAttributes:{} ", escapeLog(searchReq),
@@ -338,7 +340,7 @@ public class UserResource extends BaseResource {
         throwMissingAttributeError(missingAttributes);
     }
 
-    private List<CustomUser> getCustomUserList(List<User> users, Boolean removeNonLDAPAttributes) {
+    private List<CustomUser> getCustomUserList(List<User> users, boolean removeNonLDAPAttributes) {
         List<CustomUser> customUserList = new ArrayList<>();
         if (users == null || users.isEmpty()) {
             return customUserList;
@@ -364,7 +366,7 @@ public class UserResource extends BaseResource {
         return customUser;
     }
 
-    public CustomUser setParentAttributes(CustomUser customUser, User user, Boolean removeNonLDAPAttributes) {
+    public CustomUser setParentAttributes(CustomUser customUser, User user, boolean removeNonLDAPAttributes) {
         customUser.setBaseDn(user.getBaseDn());
         customUser.setCreatedAt(user.getCreatedAt());
         customUser.setCustomAttributes(user.getCustomAttributes());
@@ -421,21 +423,17 @@ public class UserResource extends BaseResource {
         return user;
     }
 
-    private User ignoreCustomAttributes(User user, Boolean removeNonLDAPAttributes) {
-        logger.info("validate User CustomObjectClasses - User user:{}, removeNonLDAPAttributes:{}", user,
-                removeNonLDAPAttributes);
-        if (user == null || (user.getCustomObjectClasses() == null || user.getCustomObjectClasses().length == 0)) {
-            return user;
-        }
-
-        logger.trace("user.getCustomObjectClasses():{}, userMgmtSrv.getPersistenceType():{}, userMgmtSrv.isLDAP():?{}",
-                user.getCustomObjectClasses(), userMgmtSrv.getPersistenceType(), userMgmtSrv.isLDAP());
+    private User ignoreCustomAttributes(User user, boolean removeNonLDAPAttributes) {
+        logger.debug(
+                "** validate User CustomObjectClasses - User user:{}, removeNonLDAPAttributes:{}, user.getCustomObjectClasses():{}, userMgmtSrv.getPersistenceType():{}, userMgmtSrv.isLDAP():?{}",
+                user, removeNonLDAPAttributes, user.getCustomObjectClasses(), userMgmtSrv.getPersistenceType(),
+                userMgmtSrv.isLDAP());
 
         if (removeNonLDAPAttributes) {
             return userMgmtSrv.ignoreCustomObjectClassesForNonLDAP(user);
         }
-        return user;
 
+        return user;
     }
 
 }

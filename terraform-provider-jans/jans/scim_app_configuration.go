@@ -44,23 +44,26 @@ func (c *Client) GetScimAppConfiguration(ctx context.Context) (*ScimAppConfigura
 	return ret, nil
 }
 
-// // UpdateScimAppConfiguration updates the SCIM App configuration.
-func (c *Client) UpdateScimAppConfiguration(ctx context.Context, config *ScimAppConfigurations) (*ScimAppConfigurations, error) {
+// PatchScimAppConfiguration updates the SCIM App configuration based on the
+// provided set of patches.
+func (c *Client) PatchScimAppConfiguration(ctx context.Context, patches []PatchRequest) (*ScimAppConfigurations, error) {
 
-	if config == nil {
-		return nil, fmt.Errorf("config is nil")
+	if len(patches) == 0 {
+		return c.GetScimAppConfiguration(ctx)
 	}
 
-	// get the original so we don't have to send all fields
-	// as patch requests
 	orig, err := c.GetScimAppConfiguration(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get scim config: %w", err)
+		return nil, fmt.Errorf("failed to get scim configuration: %w", err)
 	}
 
-	patches, err := createPatches(config, orig)
+	updates, err := createPatchesDiff(orig, patches)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create patches: %w", err)
+	}
+
+	if len(updates) == 0 {
+		return c.GetScimAppConfiguration(ctx)
 	}
 
 	token, err := c.getToken(ctx, "https://jans.io/scim/config.write")
@@ -68,8 +71,8 @@ func (c *Client) UpdateScimAppConfiguration(ctx context.Context, config *ScimApp
 		return nil, fmt.Errorf("failed to get token: %w", err)
 	}
 
-	if err := c.patch(ctx, "/jans-config-api/scim/scim-config", token, patches); err != nil {
-		return nil, fmt.Errorf("put request failed: %w", err)
+	if err := c.patch(ctx, "/jans-config-api/scim/scim-config", token, updates); err != nil {
+		return nil, fmt.Errorf("patch request failed: %w", err)
 	}
 
 	return c.GetScimAppConfiguration(ctx)

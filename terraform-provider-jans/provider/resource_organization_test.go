@@ -34,6 +34,15 @@ func TestResourceOrganization_Mapping(t *testing.T) {
 
 	newOrg := jans.Organization{}
 
+	patches, err := patchFromResourceData(data, &newOrg)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(patches) != 8 {
+		t.Errorf("Got %d patches, expected 8", len(patches))
+	}
+
 	if err := fromSchemaResource(data, &newOrg); err != nil {
 		t.Fatal(err)
 	}

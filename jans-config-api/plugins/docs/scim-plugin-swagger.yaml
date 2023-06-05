@@ -115,67 +115,8 @@ components:
           type: boolean
         useLocalCache:
           type: boolean
-        newUserSchema:
-          properties:
-            name:
-              example: John123
-            password:
-              example: P4SSW0RD
-            image:
-              example: https://robohash.org/John123.png
-        clientAuthSchema1:
-          properties:
-            children:
-              type: object
-              additionalProperties:
-                $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema1
-        clientAuthMapSchema:
-          properties:
-            children:
-              type: object
-              additionalProperties:
-                $ref: '#/components/schemas/Scope'
-          description: clientAuthMapSchema
-        clientAuthMapArraySchema:
-          properties:
-            children:
-              type: object
-              additionalProperties:
-                $ref: '#/components/schemas/Scope'
-          description: clientAuthMapArraySchema
     JsonPatch:
       type: object
-      properties:
-        newUserSchema:
-          properties:
-            name:
-              example: John123
-            password:
-              example: P4SSW0RD
-            image:
-              example: https://robohash.org/John123.png
-        clientAuthSchema1:
-          properties:
-            children:
-              type: object
-              additionalProperties:
-                $ref: '#/components/schemas/Scope'
-          description: clientAuthSchema1
-        clientAuthMapSchema:
-          properties:
-            children:
-              type: object
-              additionalProperties:
-                $ref: '#/components/schemas/Scope'
-          description: clientAuthMapSchema
-        clientAuthMapArraySchema:
-          properties:
-            children:
-              type: object
-              additionalProperties:
-                $ref: '#/components/schemas/Scope'
-          description: clientAuthMapArraySchema
   securitySchemes:
     oauth2:
       type: oauth2

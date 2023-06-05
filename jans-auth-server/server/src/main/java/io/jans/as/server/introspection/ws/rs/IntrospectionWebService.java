@@ -131,10 +131,11 @@ public class IntrospectionWebService {
 
         if (isTrue(appConfiguration.getIntrospectionAccessTokenMustHaveUmaProtectionScope()) &&
                 !authorizationGrant.getScopesAsString().contains(UmaScopeType.PROTECTION.getValue())) { // #562 - make uma_protection optional
-            final String reason = "access_token used to access introspection endpoint does not have uma_protection scope, however in oxauth configuration `checkUmaProtectionScopePresenceDuringIntrospection` is true";
+            final String reason = "access_token used to access introspection endpoint does not have uma_protection scope, however in AS configuration `checkUmaProtectionScopePresenceDuringIntrospection` is true";
             log.trace(reason);
             throw new WebApplicationException(Response.status(Response.Status.UNAUTHORIZED).entity(errorResponseFactory.errorAsJson(AuthorizeErrorResponseType.ACCESS_DENIED, reason)).type(MediaType.APPLICATION_JSON_TYPE).build());
         }
+        introspectionService.validateIntrospectionScopePresence(authorizationGrant);
         return authorizationGrant;
     }
 

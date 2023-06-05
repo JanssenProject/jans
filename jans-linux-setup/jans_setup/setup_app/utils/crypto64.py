@@ -226,7 +226,7 @@ class Crypto64:
         self.run(import_cmd)
 
 
-    def gen_openid_jwks_jks_keys(self, jks_path, jks_pwd, jks_create=True, key_expiration=None, dn_name=None, key_algs=None, enc_keys=None):
+    def gen_openid_jwks_jks_keys(self, jks_path, jks_pwd, key_expiration=None, dn_name=None, key_algs=None, enc_keys=None):
         self.logIt("Generating oxAuth OpenID Connect keys")
 
         if dn_name == None:
@@ -241,57 +241,22 @@ class Crypto64:
         if not enc_keys:
             enc_keys = Config.default_enc_key_algs
 
-        # We can remove this once KeyGenerator will do the same
-        if jks_create == True:
-            self.logIt("Creating empty JKS keystore")
-            # Create JKS with dummy key
-            cmd = " ".join([Config.cmd_keytool,
-                            '-genkey',
-                            '-alias',
-                            'dummy',
-                            '-keystore',
-                            jks_path,
-                            '-storepass',
-                            jks_pwd,
-                            '-keypass',
-                            jks_pwd,
-                            '-dname',
-                            '"%s"' % dn_name])
-            self.run([cmd], shell=True)
+        args = [Config.cmd_java,
+                '-Dlog4j.defaultInitOverride=true',
+                "-cp", Config.non_setup_properties['oxauth_client_jar_fn'],
+                Config.non_setup_properties['key_gen_path'],
+                '-key_ops_type', 'ALL',
+                '-keystore', jks_path,
+                '-keypasswd', jks_pwd,
+                '-sig_keys', '%s' % key_algs,
+                '-enc_keys', '%s' % enc_keys,
+                '-dnname', '"%s"' % dn_name,
+                '-expiration', '%s' % key_expiration]
 
-            # Delete dummy key from JKS
-            cmd = " ".join([Config.cmd_keytool,
-                            '-delete',
-                            '-alias',
-                            'dummy',
-                            '-keystore',
-                            jks_path,
-                            '-storepass',
-                            jks_pwd,
-                            '-keypass',
-                            jks_pwd,
-                            '-dname',
-                            '"%s"' % dn_name])
-            self.run([cmd], shell=True)
+        if jks_path.lower().endswith('.jks'):
+            args += ['-keystore_type', 'JKS']
 
-        cmd = " ".join([Config.cmd_java,
-                        "-Dlog4j.defaultInitOverride=true",
-                        "-cp", Config.non_setup_properties['oxauth_client_jar_fn'], 
-                        Config.non_setup_properties['key_gen_path'],
-                        '-key_ops_type', 'ALL',
-                        "-keystore",
-                        jks_path,
-                        "-keypasswd",
-                        jks_pwd,
-                        "-sig_keys",
-                        "%s" % key_algs,
-                        "-enc_keys",
-                        "%s" % enc_keys,
-                        "-dnname",
-                        '"%s"' % dn_name,
-                        "-expiration",
-                        "%s" % key_expiration])
-
+        cmd = ' '.join(args)
         output = self.run([cmd], shell=True)
 
         if output:

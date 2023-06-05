@@ -22,11 +22,14 @@ import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.testng.MockitoTestNGListener;
 import org.slf4j.Logger;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -37,6 +40,7 @@ import static org.testng.Assert.assertTrue;
 @Listeners(MockitoTestNGListener.class)
 public class AuthorizeActionTest {
 
+    @Spy
     @InjectMocks
     private AuthorizeAction authorizeAction;
 
@@ -126,6 +130,20 @@ public class AuthorizeActionTest {
 
     @Mock
     private AuthorizeRestWebServiceValidator authorizeRestWebServiceValidator;
+
+    @Test
+    public void checkPermissionGranted_whenExceptionThrown_shouldDeny() {
+        authorizeAction.setClientId("testId");
+
+        // force throw exception
+        final RuntimeException exception = new RuntimeException();
+        when(clientService.getClient(anyString())).thenThrow(exception);
+
+        authorizeAction.checkPermissionGranted();
+
+        verify(log).error("Failed to perform checkPermissionGranted()", exception);
+        verify(authorizeAction).permissionDenied();
+    }
 
     @Test
     public void shouldSkipScript_forExplicitDefaultPasswordAuth_shouldReturnTrue() {

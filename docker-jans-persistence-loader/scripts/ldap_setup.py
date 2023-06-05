@@ -7,11 +7,10 @@ from ldap3.core.exceptions import LDAPSessionTerminatedByServerError
 from ldap3.core.exceptions import LDAPSocketOpenError
 
 from jans.pycloudlib.persistence.ldap import LdapClient
-# from jans.pycloudlib.persistence.utils import PersistenceMapper
 
 from settings import LOGGING_CONFIG
 from utils import prepare_template_ctx
-from utils import get_ldif_mappings
+from hooks import get_ldif_mappings_hook
 
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("ldap_setup")
@@ -55,7 +54,7 @@ class LDAPBackend:
         optional_scopes = json.loads(
             self.manager.config.get("optional_scopes", "[]")
         )
-        ldif_mappings = get_ldif_mappings("ldap", optional_scopes)
+        ldif_mappings = get_ldif_mappings_hook("ldap", optional_scopes)
 
         # ensure base.ldif (contains base RDNs) is in list of ldif files
         if ldif_mappings and "default" not in ldif_mappings:

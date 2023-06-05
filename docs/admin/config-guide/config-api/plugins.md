@@ -2,6 +2,7 @@
 tags:
   - administration
   - config-api
+  - plugins
 ---
 
 ## Overview

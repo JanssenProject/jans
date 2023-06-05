@@ -23,19 +23,26 @@ func TestScimAppConfiguration(t *testing.T) {
 		t.Fatalf("Expected 200, got %d", cfg.MaxCount)
 	}
 
-	cfg.MaxCount = 100
-	updatedCfg, err := client.UpdateScimAppConfiguration(ctx, cfg)
+	patches := []PatchRequest{
+		{
+			Op:    "replace",
+			Path:  "/maxCount",
+			Value: 100,
+		},
+	}
+
+	updatedCfg, err := client.PatchScimAppConfiguration(ctx, patches)
 	if err != nil {
 		t.Fatal(err)
 	}
 
+	t.Cleanup(func() {
+		patches[0].Value = 200
+		_, _ = client.PatchScimAppConfiguration(ctx, patches)
+	})
+
 	if updatedCfg.MaxCount != 100 {
 		t.Fatalf("Expected 100, got %d", updatedCfg.MaxCount)
-	}
-
-	cfg.MaxCount = 200
-	if _, err = client.UpdateScimAppConfiguration(ctx, cfg); err != nil {
-		t.Fatal(err)
 	}
 
 }

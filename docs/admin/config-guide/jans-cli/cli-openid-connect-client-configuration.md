@@ -4,6 +4,7 @@ tags:
   - configuration
   - cli
   - commandline
+  - openid-connect
 ---
 
 # OpenID Connect Configuration

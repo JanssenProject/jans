@@ -6,20 +6,9 @@
 
 package io.jans.fido2.service.operation;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import io.jans.entry.DeviceRegistration;
 import io.jans.fido2.ctap.AttestationFormat;
 import io.jans.fido2.ctap.AuthenticatorAttachment;
@@ -30,28 +19,36 @@ import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.ChallengeGenerator;
 import io.jans.fido2.service.DataMapperService;
+import io.jans.fido2.service.external.ExternalFido2InterceptionService;
+import io.jans.fido2.service.external.context.ExternalFido2InterceptionContext;
 import io.jans.fido2.service.persist.AuthenticationPersistenceService;
 import io.jans.fido2.service.persist.RegistrationPersistenceService;
 import io.jans.fido2.service.persist.UserSessionIdService;
 import io.jans.fido2.service.verifier.AssertionVerifier;
 import io.jans.fido2.service.verifier.CommonVerifiers;
 import io.jans.fido2.service.verifier.DomainVerifier;
-import io.jans.orm.model.fido2.Fido2AuthenticationData;
-import io.jans.orm.model.fido2.Fido2AuthenticationEntry;
-import io.jans.orm.model.fido2.Fido2AuthenticationStatus;
-import io.jans.orm.model.fido2.Fido2RegistrationData;
-import io.jans.orm.model.fido2.Fido2RegistrationEntry;
-import io.jans.orm.model.fido2.Fido2RegistrationStatus;
-import io.jans.orm.model.fido2.UserVerification;
+import io.jans.orm.model.fido2.*;
 import io.jans.service.net.NetworkService;
 import io.jans.u2f.service.persist.DeviceRegistrationService;
 import io.jans.util.StringHelper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.core.Context;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Core offering by the FIDO2 server, assertion is invoked upon authentication
- * 
+ *
  * @author Yuriy Movchan
  * @version May 08, 2020
  */
@@ -76,7 +73,7 @@ public class AssertionService {
 
 	@Inject
 	private DeviceRegistrationService deviceRegistrationService;
-	
+
 	@Inject
 	private UserSessionIdService userSessionIdService;
 
@@ -95,18 +92,31 @@ public class AssertionService {
 	@Inject
 	private NetworkService networkService;
 
+
+    @Inject
+    private ExternalFido2InterceptionService externalFido2InterceptionService;
+
     @Inject
     private Base64Service base64Service;
 
-	/*
-	 * Requires mandatory parameters: username Support non mandatory parameters:
-	 * userVerification, documentDomain, extensions, timeout
-	 */
-	public ObjectNode options(JsonNode params) {
-		log.debug("Assertion options {}", params);
+	@Context
+	private HttpServletRequest httpRequest;
+	@Context
+	private HttpServletResponse httpResponse;
 
-		boolean superGluu = commonVerifiers.hasSuperGluu(params);
-		boolean oneStep = commonVerifiers.isSuperGluuOneStepMode(params);
+    /*
+     * Requires mandatory parameters: username Support non mandatory parameters:
+     * userVerification, documentDomain, extensions, timeout
+     */
+    public ObjectNode options(JsonNode params) {
+        log.debug("Assertion options {}", params);
+
+        // Apply external custom scripts
+        ExternalFido2InterceptionContext externalFido2InterceptionContext = new ExternalFido2InterceptionContext(params, httpRequest, httpResponse);
+        boolean externalInterceptContext = externalFido2InterceptionService.interceptAuthenticateAssertion(params, externalFido2InterceptionContext);
+
+        boolean superGluu = commonVerifiers.hasSuperGluu(params);
+        boolean oneStep = commonVerifiers.isSuperGluuOneStepMode(params);
 
 		// Verify request parameters
 		String username = null;
@@ -213,9 +223,13 @@ public class AssertionService {
 	public ObjectNode verify(JsonNode params) {
 		log.debug("authenticateResponse {}", params);
 
-		boolean superGluu = commonVerifiers.hasSuperGluu(params);
-		boolean oneStep = commonVerifiers.isSuperGluuOneStepMode(params);
-		boolean cancelRequest = commonVerifiers.isSuperGluuCancelRequest(params);
+        // Apply external custom scripts
+        ExternalFido2InterceptionContext externalFido2InterceptionContext = new ExternalFido2InterceptionContext(params, httpRequest, httpResponse);
+        boolean externalInterceptContext = externalFido2InterceptionService.interceptVerifyAssertion(params, externalFido2InterceptionContext);
+
+        boolean superGluu = commonVerifiers.hasSuperGluu(params);
+        boolean oneStep = commonVerifiers.isSuperGluuOneStepMode(params);
+        boolean cancelRequest = commonVerifiers.isSuperGluuCancelRequest(params);
 
 		// Verify if there are mandatory request parameters
 		commonVerifiers.verifyBasicPayload(params);
@@ -289,7 +303,7 @@ public class AssertionService {
 		// initial value in Fido2RegistrationData to minimize DB updates
 		registrationEntry.setCounter(registrationData.getCounter());
 		registrationPersistenceService.update(registrationEntry);
-		
+
         // If SessionStateId is not empty update session
 		String sessionStateId = authenticationEntity.getSessionStateId();
         if (StringHelper.isNotEmpty(sessionStateId)) {
@@ -335,11 +349,11 @@ public class AssertionService {
 		List<JsonNode> allowedFido2Keys =  new ArrayList<>(allowedFido2Registrations.size());
 		allowedFido2Registrations.forEach((f) -> {
 			log.debug("attestation request:" + f.getRegistrationData().getAttenstationRequest());
-			String transports[]; 
+			String transports[];
 			if (superGluu) {
 				transports = new String[] { "net", "qr" };
 			} else {
-				transports = ((f.getRegistrationData().getAttestationType().equalsIgnoreCase(AttestationFormat.apple.getFmt())) || ( f.getRegistrationData().getAttenstationRequest() != null && 
+				transports = ((f.getRegistrationData().getAttestationType().equalsIgnoreCase(AttestationFormat.apple.getFmt())) || ( f.getRegistrationData().getAttenstationRequest() != null &&
 						f.getRegistrationData().getAttenstationRequest().contains(AuthenticatorAttachment.PLATFORM.getAttachment())))
 
 						? new String[] { "internal" }
@@ -347,11 +361,11 @@ public class AssertionService {
 			}
 			PublicKeyCredentialDescriptor descriptor = new PublicKeyCredentialDescriptor(
 					f.getRegistrationData().getType(), transports, f.getRegistrationData().getPublicKeyId());
-			
+
 			ObjectNode allowedFido2Key = dataMapperService.convertValue(descriptor, ObjectNode.class);
 			allowedFido2Keys.add(allowedFido2Key);
 		});
-		
+
 		Optional<Fido2RegistrationEntry> fidoRegistration = allowedFido2Registrations.parallelStream()
 				.filter(f -> StringUtils.isNotEmpty(f.getRegistrationData().getApplicationId())).findAny();
 		String applicationId = null;

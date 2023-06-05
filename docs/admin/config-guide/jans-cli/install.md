@@ -4,14 +4,7 @@ tags:
   - configuration
   - cli
   - commandline
----
-
----
-tags:
-  - administration
-  - configuration
-  - cli
-  - commandline
+  - tui
 ---
 
 Configure the Janssen server using the `jans-cli-tui` a Text based User Interface app which can be installed on any PC

@@ -2228,6 +2228,52 @@
           ]
         }
       ]
+    },
+    {
+      "path": "/jans-config-api/cacherefresh/cache-refresh-config",
+      "conditions": [
+        {
+          "httpMethods": [
+            "GET"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.54",
+              "name": "https://jans.io/oauth/config/cacherefresh.readonly"
+            }
+          ],
+          "groupScopes": [
+            {
+              "inum": "1800.01.55",
+              "name": "https://jans.io/oauth/config/cacherefresh.write"
+            }
+          ],
+          "superScopes": [
+            {
+              "inum": "1800.03.1",
+              "name": "https://jans.io/oauth/config/read-all"
+            }
+          ]
+        },
+        {
+          "httpMethods": [
+            "PUT"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.55",
+              "name": "https://jans.io/oauth/config/cacherefresh.write"
+            }
+          ],
+          "groupScopes": [],
+          "superScopes": [
+            {
+              "inum": "1800.03.2",
+              "name": "https://jans.io/oauth/config/write-all"
+            }
+          ]
+        }
+      ]
     }
   ]
 }

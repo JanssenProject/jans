@@ -12,7 +12,7 @@ from jans.pycloudlib.persistence.sql import SqlClient
 
 from settings import LOGGING_CONFIG
 from utils import prepare_template_ctx
-from utils import get_ldif_mappings
+from hooks import get_ldif_mappings_hook
 
 FIELD_RE = re.compile(r"[^0-9a-zA-Z\s]+")
 
@@ -224,7 +224,7 @@ class SQLBackend:
 
     def import_builtin_ldif(self, ctx):
         optional_scopes = json.loads(self.manager.config.get("optional_scopes", "[]"))
-        ldif_mappings = get_ldif_mappings("sql", optional_scopes)
+        ldif_mappings = get_ldif_mappings_hook("sql", optional_scopes)
 
         for _, files in ldif_mappings.items():
             for file_ in files:
@@ -452,6 +452,9 @@ class SQLBackend:
             ("agmFlow", "agFlowTrans"),
             ("agmFlow", "jansCustomMessage"),
             ("jansOrganization", "jansCustomMessage"),
+            ("jansDeviceRegistration", "jansApp"),
+            ("jansFido2AuthnEntry", "jansApp"),
+            ("jansFido2RegistrationEntry", "jansApp"),
         ]:
             change_column_type(mod[0], mod[1])
 

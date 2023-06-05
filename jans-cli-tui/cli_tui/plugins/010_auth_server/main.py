@@ -38,7 +38,7 @@ from edit_client_dialog import EditClientDialog
 from edit_scope_dialog import EditScopeDialog
 from ssa import SSA
 from agama import Agama
-from defaults import Defaults
+from authn import Authn
 from attributes import Attributes
 
 from prompt_toolkit.widgets import (
@@ -66,7 +66,7 @@ class Plugin(DialogUtils):
         self.oauth_update_properties_start_index = 0
         self.ssa = SSA(app)
         self.agama = Agama(app)
-        self.defaults = Defaults(app)
+        self.authn = Authn(app)
         self.attributes = Attributes(app)
         self.oauth_containers = {}
 
@@ -99,18 +99,46 @@ class Plugin(DialogUtils):
         self.app.app_configuration = response.json()
         self.oauth_logging()
 
+    def help(self):
+        current_tab = self.nav_bar.navbar_entries[self.nav_bar.cur_navbar_selection][0]
+        tap_help = getattr(getattr(self, current_tab, None), 'jans_help', None)
+        if tap_help:
+            help_message = tap_help
+        else:
+            help_message = self.app.jans_help
+        self.app.show_message(_("Help "),help_message,tobefocused=self.app.center_container)
 
     async def retrieve_sopes(self) -> None:
         """asyncio corotune for retreiving scopes
         """
-        self.app.logger.debug("retreiving scopes")
-        cli_args = {'operation_id': 'get-oauth-scopes', 'endpoint_args': 'limit:200,startIndex:0'}
-        response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-        common_data.scopes = response.json()['entries']
-        self.app.logger.debug("scopes retreived")
+
+        common_data.scopes = []
+        start_index = 0
+        limit = 100
+
+        while True:
+
+            cli_args = {'operation_id': 'get-oauth-scopes', 'endpoint_args': f'limit:{limit},startIndex:{start_index}'}
+            response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+
+            if response.status_code == 200:
+                try:
+                    data = response.json()
+                    if data.get('entriesCount', 0) == 0:
+                        break
+                    common_data.scopes += data['entries']
+                    self.app.logger.info("%d scopes retreived", data['entriesCount'])
+                except Exception as e:
+                    self.app.logger.error("Failed tor retreive scopes %s", e)
+                    break
+            else:
+                break
+
+            start_index += limit
+
 
     def on_cli_object_ready(self):
-        self.defaults.on_cli_object_ready()
+        self.authn.on_cli_object_ready()
 
     def process(self):
         """No pre-processing for this plugin.
@@ -137,7 +165,6 @@ class Plugin(DialogUtils):
 
         self.oauth_containers['scopes'] = HSplit([
                     VSplit([
-                        self.app.getButton(text=_("Get Scopes"), name='oauth:scopes:get', jans_help=_("Retreive first {} Scopes").format(self.app.entries_per_page), handler=self.oauth_get_scopes),
                         self.app.getTitledText(_("Search"), name='oauth:scopes:search', jans_help=_(common_strings.enter_to_search), accept_handler=self.search_scope,style='class:outh_containers_scopes.text'),
                         self.app.getButton(text=_("Add Scope"), name='oauth:scopes:add', jans_help=_("To add a new scope press this button"), handler=self.add_scope),
                         ],
@@ -149,7 +176,6 @@ class Plugin(DialogUtils):
 
         self.oauth_containers['clients'] = HSplit([
                     VSplit([
-                        self.app.getButton(text=_("Get Clients"), name='oauth:clients:get', jans_help=_("Retreive first {} OpenID Connect clients").format(self.app.entries_per_page), handler=self.oauth_update_clients),
                         self.app.getTitledText(_("Search"), name='oauth:clients:search', jans_help=_(common_strings.enter_to_search), accept_handler=self.search_clients,style='class:outh_containers_clients.text'),
                         self.app.getButton(text=_("Add Client"), name='oauth:clients:add', jans_help=_("To add a new client press this button"), handler=self.add_client),
 
@@ -195,7 +221,7 @@ class Plugin(DialogUtils):
 
         self.oauth_containers['ssa'] = self.ssa.main_container
         self.oauth_containers['agama'] = self.agama.main_container
-        self.oauth_containers['defaults'] = self.defaults.main_container
+        self.oauth_containers['authn'] = self.authn.main_container
         self.oauth_containers['attributes'] = self.attributes.main_container
         self.oauth_containers['logging'] = DynamicContainer(lambda: self.oauth_data_container['logging'])
 
@@ -212,7 +238,7 @@ class Plugin(DialogUtils):
         """
         self.nav_bar = JansNavBar(
                     self.app,
-                    entries=[('clients', 'C[l]ients'), ('scopes', 'Sc[o]pes'), ('keys', '[K]eys'), ('defaults', '[D]efaults'), ('properties', 'Properti[e]s'), ('logging', 'Lo[g]ging'), ('ssa', '[S]SA'), ('agama', 'Aga[m]a'), ('attributes', 'A[t]tributes')],
+                    entries=[('clients', 'C[l]ients'), ('scopes', 'Sc[o]pes'), ('keys', '[K]eys'), ('authn', 'Aut[h]n'), ('properties', 'Properti[e]s'), ('logging', 'Lo[g]ging'), ('ssa', '[S]SA'), ('agama', 'Aga[m]a'), ('attributes', 'A[t]tributes')],
                     selection_changed=self.oauth_nav_selection_changed,
                     select=0,
                     jans_name='oauth:nav_bar'
@@ -227,12 +253,20 @@ class Plugin(DialogUtils):
         Args:
             selection (str): the current selected tab
         """
+
+        set_area = None
+
         if selection in self.oauth_containers:
             if selection == 'properties':
                 self.oauth_update_properties(tofocus=False)
-            self.oauth_main_area = self.oauth_containers[selection]
-        else:
-            self.oauth_main_area = self.app.not_implemented
+            set_area = self.oauth_containers[selection]
+            self.app.current_page = selection
+
+        if set_area:
+            if hasattr(set_area, 'on_page_enter'):
+                set_area.on_page_enter()
+
+            self.oauth_main_area = set_area
 
     def oauth_update_clients(
         self,
@@ -513,7 +547,6 @@ class Plugin(DialogUtils):
             self.view_property(passed=passed, op_type='add')
 
         properties = VSplit([
-                Label(text=" ",width=1),
                 JansVerticalNav(
                         myparent=self.app,
                         headers=['Property Name'],

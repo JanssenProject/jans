@@ -44,7 +44,6 @@ class SSA(DialogUtils):
 
         self.main_container =  HSplit([
                     VSplit([
-                        self.app.getButton(text=_("Get SSA"), name='oauth:ssa:get', jans_help=_("Retreive all SSA"), handler=self.get_ssa),
                         self.app.getTitledText(_("Search"), name='oauth:ssa:search', jans_help=_(common_strings.enter_to_search), accept_handler=self.search_ssa, style=cli_style.edit_text),
                         self.app.getButton(text=_("Add SSA"), name='oauth:ssa:add', jans_help=_("To add a new SSA press this button"), handler=self.add_ssa),
                         ],

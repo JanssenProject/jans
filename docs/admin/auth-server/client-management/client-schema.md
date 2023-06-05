@@ -2,6 +2,7 @@
 tags:
   - administration
   - client
+  - schema
 ---
 
 ## This content is in progress

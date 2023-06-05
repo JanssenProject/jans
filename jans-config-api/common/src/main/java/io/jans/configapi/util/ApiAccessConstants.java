@@ -92,5 +92,8 @@ public class ApiAccessConstants {
     public static final String CLIENT_AUTHORIZATIONS_READ_ACCESS = "https://jans.io/oauth/client/authorizations.readonly";
     public static final String CLIENT_AUTHORIZATIONS_DELETE_ACCESS = "https://jans.io/oauth/client/authorizations.delete";
 
+    public static final String CACHEREFRESH_CONFIG_READ_ACCESS = "https://jans.io/oauth/config/cacherefresh.readonly";
+    public static final String CACHEREFRESH_CONFIG_WRITE_ACCESS = "https://jans.io/oauth/config/cacherefresh.write";
+
     
 }

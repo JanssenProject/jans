@@ -3,7 +3,7 @@ tags:
   - administration
   - kubernetes
   - operations
-  - health checks
+  - health-checks
 ---
 
 ## Overview

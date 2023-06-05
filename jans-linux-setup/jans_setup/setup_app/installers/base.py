@@ -2,8 +2,6 @@ import os
 import uuid
 import inspect
 
-from distutils.version import LooseVersion
-
 from setup_app import paths
 from setup_app.utils import base
 from setup_app.config import Config
@@ -133,6 +131,12 @@ class BaseInstaller:
                 if operation == 'start':
                     cmd_list.insert(-1, '--enable')
                 self.run(cmd_list, None, None, True)
+            elif base.systemctl:
+                local_script = os.path.join(Config.distFolder, 'scripts', service)
+                if os.path.exists(local_script):
+                    self.run([local_script, operation], useWait=True)
+                else:
+                    self.run([base.service_cmd, service, operation], useWait=True)
             elif (base.clone_type == 'rpm' and base.os_initdaemon == 'systemd') or base.deb_sysd_clone:
                 self.run([base.service_path, operation, service], None, None, True)
             else:

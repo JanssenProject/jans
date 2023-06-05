@@ -42,7 +42,6 @@ class Attributes(DialogUtils):
 
         self.main_container =  HSplit([
                     VSplit([
-                        self.app.getButton(text=_("Get Attributes"), name='oauth:attributes:get', jans_help=_("Retreive first {} Attributes").format(self.app.entries_per_page), handler=self.get_attributes),
                         self.app.getTitledText(_("Search"), name='oauth:attributes:search', jans_help=_(common_strings.enter_to_search), accept_handler=self.search_attributes, style=cli_style.edit_text),
                         self.app.getButton(text=_("Add Attribute"), name='oauth:attributes:add', jans_help=_("To add a new Agama project press this button"), handler=self.add_attributes),
                         ],
@@ -205,6 +204,8 @@ class Attributes(DialogUtils):
                 await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
                 self.app.stop_progressing()
                 self.get_attributes()
+                common_data.claims_retreived = False
+
             asyncio.ensure_future(coroutine())
 
 
@@ -311,6 +312,7 @@ class Attributes(DialogUtils):
                 await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
                 self.app.stop_progressing()
                 self.get_attributes()
+                common_data.claims_retreived = False
 
             asyncio.ensure_future(coroutine())
 

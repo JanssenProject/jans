@@ -2,6 +2,7 @@
 tags:
   - administration
   - scim
+  - custom-attributes
 ---
 
 ## This content is in progress

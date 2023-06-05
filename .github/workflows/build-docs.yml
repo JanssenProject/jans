@@ -124,10 +124,16 @@ jobs:
          git commit -a -S -m "docs: generate and add javadocs" || echo "Nothing to commit"
          cd ..
          
+         # update mkdocs.yml
+         sudo python3 -m pip install --upgrade pip
+         sudo pip3 install pyyaml
+         sudo python3 automation/docs/add-javadocs-to-mkdocs.py || echo "something went wrong with adding javadocs to mkdocs.yml"
+          
          git push --set-upstream origin cn-jans-update-auto-generated-docs
          MESSAGE="fix(docs): autogenerate docs"
          PR=$(gh pr create --body "Auto generated docs" --title "${MESSAGE}")
          cd ../../
+         
          sudo rm -rf temp
 
       - name: mike deploy ${{ github.event.inputs.version }}

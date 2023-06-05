@@ -11,7 +11,7 @@ import io.jans.configapi.plugin.mgt.model.user.UserPatchRequest;
 import io.jans.configapi.plugin.mgt.util.MgtUtil;
 import io.jans.configapi.util.AuthUtil;
 import io.jans.configapi.service.auth.ConfigurationService;
-import io.jans.configapi.core.model.SearchRequest;
+import io.jans.model.SearchRequest;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;
@@ -319,13 +319,16 @@ public class UserMgmtService {
 
     public User ignoreCustomObjectClassesForNonLDAP(User user) {
         String persistenceType = configurationService.getPersistenceType();
-        logger.debug("persistenceType: {}, isLDAP?:{}", persistenceType, isLDAP());
+        logger.debug("persistenceType: {}, isLDAP?:{}, user.getCustomObjectClasses():{}", persistenceType, isLDAP(),
+                user.getCustomObjectClasses());
+
         if (!isLDAP()) {
             logger.info(
                     "Setting CustomObjectClasses :{} to null as its used only for LDAP and current persistenceType is {} ",
                     user.getCustomObjectClasses(), persistenceType);
             user.setCustomObjectClasses(null);
         }
+        logger.debug("Final user.getCustomObjectClasses():{} ", user.getCustomObjectClasses());
         return user;
     }
 

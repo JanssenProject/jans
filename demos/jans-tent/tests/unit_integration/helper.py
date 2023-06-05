@@ -1,5 +1,48 @@
+
+from unittest import TestCase
+from unittest.mock import MagicMock
+import clientapp
+from clientapp import create_app
+from clientapp.helpers.client_handler import ClientHandler
 from flask import Flask
 from typing import List
+import helper
+import os
+import builtins
+
+
+class FlaskBaseTestCase(TestCase):
+    def setUp(self):
+        self.stashed_add_config_from_json = clientapp.add_config_from_json
+        clientapp.cfg.CLIENT_ID = 'any-client-id-stub'
+        clientapp.cfg.CLIENT_SECRET = 'any-client-secret-stub'
+        clientapp.cfg.SERVER_META_URL = 'https://ophostname.com/server/meta/url'
+        clientapp.cfg.END_SESSION_ENDPOINT = 'https://ophostname.com/end_session_endpoint'
+        clientapp.add_config_from_json = MagicMock(name='add_config_from_json')
+        clientapp.add_config_from_json.return_value(None)
+        self.stashed_discover = ClientHandler.discover
+        self.stashed_register_client = ClientHandler.register_client
+        self.stashed_open = builtins.open
+        builtins.open = MagicMock(name='open')
+        ClientHandler.discover = MagicMock(name='discover')
+        ClientHandler.discover.return_value = helper.OP_DATA_DICT_RESPONSE
+        ClientHandler.register_client = MagicMock(name='register_client')
+        ClientHandler.register_client.return_value = helper.REGISTER_CLIENT_RESPONSE
+        self.app = create_app()
+        self.app.testing = True
+        self.app_context = self.app.test_request_context(
+            base_url="https://chris.testingenv.org")
+        self.app_context.push()
+        self.client = self.app.test_client()
+
+        #self.oauth = OAuth(self.app)
+        os.environ['AUTHLIB_INSECURE_TRANSPORT'] = "1"
+
+    def tearDown(self) -> None:
+        ClientHandler.discover = self.stashed_discover
+        ClientHandler.register_client = self.stashed_register_client
+        builtins.open = self.stashed_open
+        clientapp.add_config_from_json = self.stashed_add_config_from_json
 
 
 # Helper functions

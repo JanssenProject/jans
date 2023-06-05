@@ -87,6 +87,11 @@
       "name": "user-management",
       "description": "user-management plugin",
       "className": "io.jans.configapi.plugin.mgt.rest.ApiApplication"
+    },
+    {
+      "name": "cache-refresh",
+      "description": "cache-refresh plugin",
+      "className": "io.jans.configapi.plugin.cacherefresh.rest.ApiApplication"
     }
   ]
 }

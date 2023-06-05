@@ -1,6 +1,7 @@
 package io.jans.ads.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.util.List;
 import java.util.Map;
@@ -10,9 +11,11 @@ public class DeploymentDetails {
 
     private List<String> folders;
     private List<String> libs;
-    private Map<String, String> flowsError;
     private String error;
     private ProjectMetadata metadata = new ProjectMetadata();
+    
+    @JsonInclude(JsonInclude.Include.ALWAYS)
+    private Map<String, String> flowsError;
     
     public ProjectMetadata getProjectMetadata() {
         return metadata;

@@ -66,10 +66,26 @@ configmap:
   cnGoogleSecretVersionId: "latest"
   # -- Prefix for Janssen secret in Google Secret Manager. Defaults to janssen. If left janssen-secret secret will be created. Used only when global.configAdapterName and global.configSecretAdapter is set to google.
   cnGoogleSecretNamePrefix: janssen
-  # -- Passphrase for Janssen secret in Google Secret Manager. This is used for encrypting and decrypting data from the Google Secret Manager. Used only when global.configAdapterName and global.configSecretAdapter is set to google.
-  cnGoogleSecretManagerPassPhrase: Test1234#
   # [google_secret_manager_envs] END
   # [google_envs] END
+  # [aws_envs] Envs related to using AWS
+  # [aws_secret_manager_envs]
+  # AWS Access key id  that belong to a user/id with SecretsManagerReadWrite policy
+  cnAwsAccessKeyId: ""
+  # AWS Secret Access key that belong to a user/id with SecretsManagerReadWrite policy
+  cnAwsSecretAccessKey: ""
+  # The URL of AWS secretsmanager service (if omitted, will use the one in the specified default region. Example: https://secretsmanager.us-west-1.amazonaws.com). Used only when global.configAdapterName and global.configSecretAdapter is set to aws.
+  cnAwsSecretsEndpointUrl: ""
+  # The prefix name of the secrets. Used only when global.configAdapterName and global.configSecretAdapter is set to aws.
+  cnAwsSecretsNamePrefix: janssen
+  # The default AWS Region to use, for example, `us-west-1` or `us-west-2`.
+  cnAwsDefaultRegion: us-west-1
+  # The aws named profile to use. Has to be created first. This is a sensible default and it's good to leave it as is. https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-profiles.html
+  cnAwsProfile: janssen
+  # Example replicated region [{"Region": "us-west-1"}, {"Region": "us-west-2"}]
+  cnAwsSecretsReplicaRegions: []
+  # [aws_secret_manager_envs] END
+  # [aws_envs] END
   # -- OpenDJ internal address. Leave as default. Used when `global.cnPersistenceType` is set to `ldap`.
   cnLdapUrl: "opendj:1636"
   # -- Value passed to Java option -XX:MaxRAMPercentage
@@ -106,7 +122,7 @@ image:
   # -- Image  to use for deploying.
   repository: janssenproject/configurator
   # -- Image  tag to use for deploying.
-  tag: 1.0.10-1
+  tag: 1.0.14_dev
   # -- Image Pull Secrets
   pullSecrets: [ ]
 # -- LDAP admin password if OpennDJ is used for persistence.
@@ -133,6 +149,13 @@ state: TX
 volumes: []
 # -- Configure any additional volumesMounts that need to be attached to the containers
 volumeMounts: []
+# Actions on lifecycle events such as postStart and preStop
+# Example
+# lifecycle:
+#   postStart:
+#     exec:
+#       command: ["sh", "-c", "mkdir /opt/jans/jetty/jans-auth/custom/static/stylesheet/"]
+lifecycle: {}
 # -- Add custom dns policy
 dnsPolicy: ""
 # -- Add custom dns config

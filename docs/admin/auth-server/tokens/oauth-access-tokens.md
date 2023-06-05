@@ -2,7 +2,9 @@
 tags:
   - administration
   - auth-server
-  - token
+  - oauth
+  - access-token
+  
 ---
 
 ## OAuth Access Tokens

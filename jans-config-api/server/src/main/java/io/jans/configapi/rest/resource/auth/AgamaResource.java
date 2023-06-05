@@ -21,7 +21,7 @@ import io.jans.configapi.core.util.Jackson;
 import io.jans.configapi.service.auth.AgamaFlowService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
-import io.jans.configapi.core.model.SearchRequest;
+import io.jans.model.SearchRequest;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.model.PagedResult;
 
@@ -87,7 +87,7 @@ public class AgamaResource extends ConfigBaseResource {
         }
 
         SearchRequest searchReq = createSearchRequest(agamaFlowService.getAgamaFlowDn(null), pattern, sortBy, sortOrder,
-                startIndex, limit, null, null, this.getMaxCount());
+                startIndex, limit, null, null, this.getMaxCount(), null, Flow.class);
 
         return Response.ok(doSearch(searchReq, includeSource)).build();
     }

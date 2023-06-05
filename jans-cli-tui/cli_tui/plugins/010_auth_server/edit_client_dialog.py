@@ -107,7 +107,6 @@ class EditClientDialog(JansGDialog, DialogUtils):
             'contacts',
             'authorizedOrigins',
             'requestUris',
-            'defaultAcrValues',
             'claimRedirectUris',
         ):
             if self.data[list_key]:
@@ -128,12 +127,10 @@ class EditClientDialog(JansGDialog, DialogUtils):
         self.data['attributes'] = {'requirePar': self.data['requirePar']}
 
         for list_key in (
-
             'backchannelLogoutUri',
             'additionalAudience',
             'rptClaimsScripts',
             'spontaneousScopeScriptDns',
-            'jansAuthorizedAcr',
             'tlsClientAuthSubjectDn',
             'spontaneousScopes',
             'updateTokenScriptDns',
@@ -156,6 +153,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                 self.data['attributes'][list_key] = self.data[list_key]
 
         self.data['displayName'] = self.data['clientName']
+        self.data['attributes']['jansAuthorizedAcr'] = self.data.pop('jansAuthorizedAcr')
 
         cfr = self.check_required_fields()
 
@@ -204,8 +202,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
         for scope_dn in self.data.get('scopes', []):
             scope = self.get_scope_by_inum(scope_dn)
             if scope:
-                label = scope.get('displayName') or scope.get(
-                    'inum') or scope_dn
+                label = scope['id']
                 if [scope_dn, label] not in self.client_scopes_entries:
                     self.client_scopes_entries.append([scope_dn, label])
                     if hasattr(self, 'client_scopes'):
@@ -215,6 +212,11 @@ class EditClientDialog(JansGDialog, DialogUtils):
     def prepare_tabs(self) -> None:
         """Prepare the tabs for Edil Client Dialogs
         """
+
+        acr_values_supported = self.myparent.cli_object.openid_configuration.get('acr_values_supported', [])[:]
+
+        acr_values_supported_list = [ (acr, acr) for acr in acr_values_supported ]
+
 
         schema = self.myparent.cli_object.get_schema_from_reference(
             '', '#/components/schemas/Client')
@@ -308,14 +310,11 @@ class EditClientDialog(JansGDialog, DialogUtils):
                     schema, 'responseTypes'),
                 style='class:outh-client-checkboxlist'),
 
-            self.myparent.getTitledCheckBox(_("Supress Authorization"),
-                                            name='dynamicRegistrationPersistClientAuthorizations',
-                                            checked=self.data.get(
-                                                'dynamicRegistrationPersistClientAuthorizations'),
-                                            jans_help=self.myparent.get_help_from_schema(
-                self.myparent.cli_object.get_schema_from_reference(
-                    '', '#/components/schemas/AppConfiguration'),
-                'tokenEndpointAuthMethodsSupported'),
+            self.myparent.getTitledCheckBox(
+                _("Suppress Authorization"),
+                name='trustedClient',
+                checked=self.data.get('trustedClient'),
+                jans_help=self.myparent.get_help_from_schema(schema, 'trustedClient'),
                 style=cli_style.check_box),
 
             self.myparent.getTitledRadioButton(
@@ -815,25 +814,22 @@ class EditClientDialog(JansGDialog, DialogUtils):
                                             schema, 'requestUris'),
                 style=cli_style.check_box),
 
-            self.myparent.getTitledText(_("Default  ACR"),  # height =3 >> "the type is array" cant be dropdown
+            self.myparent.getTitledCheckBoxList(_("Default  ACRs"),  # height =3 >> "the type is array" cant be dropdown
                                         name='defaultAcrValues',
-                                        value='\n'.join(self.data.get(
-                                            'defaultAcrValues', [])),
-                                        height=3,
+                                        values=acr_values_supported_list,
+                                        current_values=self.data.get('defaultAcrValues', []),
                                         jans_help=self.myparent.get_help_from_schema(
-                schema, 'defaultAcrValues'),
-                style=cli_style.check_box),
+                                                schema, 'defaultAcrValues'),
+                                        style=cli_style.check_box),
 
-            self.myparent.getTitledText(_("Allowed  ACR"),  # height =3 insted of the <+> button
+            self.myparent.getTitledCheckBoxList(_("Allowed  ACRs"),  # height =3 insted of the <+> button
                                         name='jansAuthorizedAcr',
-                                        value='\n'.join(self.data.get(
-                                            'attributes', {}).get('jansAuthorizedAcr', [])),
-                                        height=3,
+                                        values=acr_values_supported_list,
+                                        current_values=self.data.get('attributes', {}).get('jansAuthorizedAcr', []),
                                         jans_help=self.myparent.get_help_from_schema(
-                self.myparent.cli_object.get_schema_from_reference(
-                    '', ATTRIBUTE_SCHEMA_PATH),
-                'jansAuthorizedAcr'),
-                style=cli_style.check_box),
+                                            self.myparent.cli_object.get_schema_from_reference(
+                                            '', ATTRIBUTE_SCHEMA_PATH), 'jansAuthorizedAcr'),
+                                        style=cli_style.check_box),
 
             self.myparent.getTitledText(
                 _("TLS Subject DN"),
@@ -940,9 +936,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
             if item_id == scope_dn:
                 return True
         return False
-# 3
-# 3
-# 3
+
 
     def add_scopes(self) -> None:
 

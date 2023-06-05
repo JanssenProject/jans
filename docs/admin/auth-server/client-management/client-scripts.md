@@ -2,6 +2,7 @@
 tags:
   - administration
   - client
+  - scripts
 ---
 
 ## This content is in progress
