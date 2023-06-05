@@ -90,7 +90,6 @@ public class ConfigurationFactory {
 	private static final String DIR = BASE_DIR + File.separator + "conf" + File.separator;
 
 	private static final String BASE_PROPERTIES_FILE = DIR + "jans.properties";
-	private static final String APP_PROPERTIES_FILE = DIR + "fido2.properties";
 
 	private final String SALT_FILE_NAME = "salt";
 
