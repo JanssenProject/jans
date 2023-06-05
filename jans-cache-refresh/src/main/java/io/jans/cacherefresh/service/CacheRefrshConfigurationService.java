@@ -26,7 +26,6 @@ import jakarta.inject.Named;
  * @author Reda Zerrad Date: 08.10.2012
  */
 @ApplicationScoped
-@Named("CacheRefrshConfigurationService")
 public class CacheRefrshConfigurationService implements Serializable {
 
     private static final long serialVersionUID = 8842838732456296435L;
@@ -39,10 +38,6 @@ public class CacheRefrshConfigurationService implements Serializable {
     
     @Inject 
     private ConfigurationFactory configurationFactory;
-
-
-    private static final SimpleDateFormat PERIOD_DATE_FORMAT = new SimpleDateFormat("yyyyMM");
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     /**
      * Update configuration entry

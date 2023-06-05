@@ -6,8 +6,9 @@
 
 package io.jans.cacherefresh.service;
 
-import jakarta.annotation.Priority;
 import io.jans.cacherefresh.model.config.AppConfiguration;
+import io.jans.model.ApplicationType;
+import jakarta.annotation.Priority;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -18,7 +19,7 @@ import jakarta.inject.Inject;
  */
 @ApplicationScoped
 @Priority(value = 5)
-public class OrganizationService  {
+public class OrganizationService extends io.jans.service.OrganizationService {
 
 	private static final long serialVersionUID = -1959146007518514678L;
 
@@ -43,6 +44,11 @@ public class OrganizationService  {
 	 */
 	public String getBaseDn() {
 		return appConfiguration.getBaseDN();
+	}
+
+	@Override
+	public ApplicationType getApplicationType() {
+		return ApplicationType.CACHE_REFRESH;
 	}
 
 
