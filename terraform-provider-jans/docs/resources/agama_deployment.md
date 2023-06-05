@@ -18,13 +18,13 @@ Resource for managing agama authentication flow deployments.
 ### Required
 
 - `deployment_file` (String) Path to the deployment file (in zip format)
+- `deployment_file_hash` (String) Hash of the deployment file, used to detect changes.
 - `name` (String) Agama project name
 
 ### Read-Only
 
 - `base_dn` (String) Agama deployment base DN
 - `created_at` (String) Agama deployment creation time
-- `deployment_file_hash` (String) Hash of the deployment file, used to detect changes.
 - `dn` (String) Agama deployment DN
 - `id` (String) Agama deployment ID
 - `task_active` (Boolean) Boolean value with default value false.
