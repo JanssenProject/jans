@@ -12,6 +12,7 @@ tags:
 - Monthly Active Users (MAU)
 - Health Check
 - Token Issued
+- Audit Logs
 
 Statistic data are returned from `/jans-auth/restv1/internal/stat` protected endpoint.
 
@@ -19,20 +20,20 @@ Endpoint is protected by authorization token which must contain configurable sco
 Default scope value of `statAuthorizationScope`  is `jans_stat` which means that token must contain this scope or otherwise `UNAUTHORIZED` 401 response is returned.
 
 **Parameters**
-- `month` - specify month in YYYYMM format (e.g. January 2022 is 202201)
+- `month` - specify month in YYYYMM format (e.g. `January 2022` is `202201`)
 - `start-month` - start month for range request
 - `end-month` - end month for range request
 - `format` - if no value is specified than json value is returns. Possible explicit values are `openmetrics` (open metrics format) and `jsonmonth` (all data are flattened for given month) 
 
 **Example:** Request single month data (recommended)
 ```
-GET /oxauth/restv1/internal/stat?month=202101
+GET /jans-auth/restv1/internal/stat?month=202101
 Authorization: Bearer czZCaGRSa3F0MzpnWDFmQmF0M2JW
 ```
 
 **Example:** request multiple months data
 ```
-GET /oxauth/restv1/internal/stat?month=202012%20202101
+GET /jans-auth/restv1/internal/stat?month=202012%20202101
 Authorization: Bearer czZCaGRSa3F0MzpnWDFmQmF0M2JW
 ```
 
@@ -40,7 +41,7 @@ It is also possible to request data by specifying month ranges via `start-month`
 
 **Example:** request multiple months by specifying month range (all months from February 2021 till February 2022)
 ```
-GET /oxauth/restv1/internal/stat?start-month=202102&end-month=202202
+GET /jans-auth/restv1/internal/stat?start-month=202102&end-month=202202
 Authorization: Bearer czZCaGRSa3F0MzpnWDFmQmF0M2JW
 ```
 
