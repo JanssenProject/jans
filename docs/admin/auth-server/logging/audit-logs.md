@@ -22,6 +22,25 @@ JMS Configuration must be set inside AS global configuration
 |jmsUserName      | JMS UserName        |  
 |jmsPassword      | JMS Password.       |  
 
+Audit events: 
+- CLIENT_REGISTRATION
+- CLIENT_UPDATE
+- CLIENT_READ
+- CLIENT_DELETE
+- USER_AUTHORIZATION
+- BACKCHANNEL_AUTHENTICATION
+- BACKCHANNEL_DEVICE_REGISTRATION
+- USER_INFO
+- TOKEN_REQUEST
+- TOKEN_VALIDATE
+- TOKEN_REVOCATION
+- SESSION_UNAUTHENTICATED
+- SESSION_AUTHENTICATED
+- SESSION_DESTROYED
+- DEVICE_CODE_AUTHORIZATION
+- SSA_CREATE
+- SSA_READ 
+
 ## Have questions in the meantime?
 
 You can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussion) or the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). Any questions you have will help determine what information our documentation should cover.
