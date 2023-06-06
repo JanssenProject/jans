@@ -386,31 +386,6 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/head/admin/auth-server/reporting-metrics/failed-success-authn/</loc>
-         <lastmod>2023-06-06</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/admin/auth-server/reporting-metrics/health/</loc>
-         <lastmod>2023-06-06</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/admin/auth-server/reporting-metrics/mau/</loc>
-         <lastmod>2023-06-06</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/admin/auth-server/reporting-metrics/tokens-issued/</loc>
-         <lastmod>2023-06-06</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/admin/auth-server/reporting-metrics/user-client-count/</loc>
-         <lastmod>2023-06-06</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
          <loc>https://jans.io/docs/head/admin/auth-server/scopes/</loc>
          <lastmod>2023-06-06</lastmod>
          <changefreq>daily</changefreq>
