@@ -4,6 +4,7 @@ tags:
   - configuration
   - cli
   - commandline
+  - jans-auth-server
 ---
 
 # Janssen Authorization Server
@@ -20,10 +21,11 @@ Operation ID: get-properties
   Description: Gets all Jans authorization server configuration properties.
 Operation ID: patch-properties
   Description: Partially modifies Jans authorization server AppConfiguration properties.
-  Schema: Array of /components/schemas/PatchRequest
+  Schema: Array of JsonPatch
+Operation ID: get-properties-persistence
+  Description: Returns persistence type configured for Jans authorization server.
 
-To get sample shema type /opt/jans/jans-cli/config-cli.py --schema <schma>, for example /opt/jans/jans-cli/config-cli.py --schema /components/schemas/PatchRequest
-
+To get sample schema type /opt/jans/jans-cli/config-cli.py --schema <schma>, for example /opt/jans/jans-cli/config-cli.py --schema JsonPatch
 ```
 
 Jans Authorization server has two operations `id` to `get/modify` its properties.
@@ -35,6 +37,7 @@ Table of Contents
 - [Table of Contents](#table-of-contents)
   - [Get All Jans Auth Server Configuration Properties](#get-all-jans-auth-server-configuration-properties)
   - [Partially Modify Jans Auth Server Configuration Properties](#partially-modify-jans-auth-server-configuration-properties)
+  - [Get Persistence type for Jans Auth](#get-persistence-type-for-jans-auth-configuration)
 
 
 ## Get All Jans Auth Server Configuration Properties
@@ -42,7 +45,7 @@ Table of Contents
 It returns all the information of the Jans Authorization server.
 
 ```text
- python3 jans-cli-tui/cli_tui/cli/config_cli.py --operation-id get-properties
+ /opt/jans/jans-cli/config-cli.py --operation-id get-properties
  ```
  
  You will get output like below
@@ -92,50 +95,50 @@ It returns all the information of the Jans Authorization server.
   ],
   "responseTypesSupported": [
     [
-      "token",
+      "code",
       "id_token"
     ],
     [
-      "token",
-      "id_token",
+      "code",
+      "token"
+    ],
+    [
       "code"
     ],
     [
-      "id_token",
-      "code"
+      "token",
+      "id_token"
     ],
     [
       "token"
     ],
     [
+      "code",
+      "token",
       "id_token"
     ],
     [
-      "token",
-      "code"
-    ],
-    [
-      "code"
+      "id_token"
     ]
   ],
   "responseModesSupported": [
-    "fragment.jwt",
     "form_post.jwt",
-    "query.jwt",
-    "jwt",
     "form_post",
-    "query",
-    "fragment"
+    "fragment",
+    "query.jwt",
+    "fragment.jwt",
+    "jwt",
+    "query"
   ],
   "grantTypesSupported": [
-    "refresh_token",
-    "password",
-    "urn:ietf:params:oauth:grant-type:device_code",
-    "urn:ietf:params:oauth:grant-type:token-exchange",
-    "client_credentials",
     "urn:ietf:params:oauth:grant-type:uma-ticket",
+    "implicit",
+    "urn:ietf:params:oauth:grant-type:token-exchange",
+    "urn:ietf:params:oauth:grant-type:device_code",
+    "client_credentials",
+    "refresh_token",
     "authorization_code",
-    "implicit"
+    "password"
   ],
   "subjectTypesSupported": [
     "public",
@@ -338,8 +341,8 @@ It returns all the information of the Jans Authorization server.
     "localhost",
     "127.0.0.1"
   ],
-  "opPolicyUri": "http://www.jans.io/doku.php?id=jans:policy",
-  "opTosUri": "http://www.jans.io/doku.php?id=jans:tos",
+  "opPolicyUri": "https://example.jans.io/opPolicy",
+  "opTosUri": "https://example.jans.io/tos",
   "authorizationCodeLifetime": 60,
   "refreshTokenLifetime": 14400,
   "idTokenLifetime": 3600,
@@ -367,13 +370,14 @@ It returns all the information of the Jans Authorization server.
   "allowPostLogoutRedirectWithoutValidation": false,
   "invalidateSessionCookiesAfterAuthorizationFlow": false,
   "returnClientSecretOnRead": true,
+  "rotateClientRegistrationAccessTokenOnUsage": false,
   "rejectJwtWithNoneAlg": true,
   "expirationNotificatorEnabled": false,
   "useNestedJwtDuringEncryption": true,
   "expirationNotificatorMapSizeLimit": 100000,
   "expirationNotificatorIntervalInSeconds": 600,
   "redirectUrisRegexEnabled": true,
-  "useHighestLevelScriptIfAcrScriptNotFound": true,
+  "useHighestLevelScriptIfAcrScriptNotFound": false,
   "authenticationFiltersEnabled": false,
   "clientAuthenticationFiltersEnabled": false,
   "clientRegDefaultToCodeFlowWithRefresh": true,
@@ -417,29 +421,31 @@ It returns all the information of the Jans Authorization server.
   "changeSessionIdOnAuthentication": true,
   "sessionIdPersistInCache": false,
   "includeSidInResponse": false,
+  "disablePromptLogin": false,
+  "disablePromptConsent": false,
   "sessionIdLifetime": 86400,
   "serverSessionIdLifetime": 86400,
   "configurationUpdateInterval": 3600,
   "enableClientGrantTypeUpdate": true,
   "dynamicGrantTypeDefault": [
-    "refresh_token",
-    "urn:ietf:params:oauth:grant-type:device_code",
-    "urn:ietf:params:oauth:grant-type:token-exchange",
-    "client_credentials",
     "urn:ietf:params:oauth:grant-type:uma-ticket",
-    "authorization_code",
-    "implicit"
+    "implicit",
+    "urn:ietf:params:oauth:grant-type:token-exchange",
+    "urn:ietf:params:oauth:grant-type:device_code",
+    "client_credentials",
+    "refresh_token",
+    "authorization_code"
   ],
   "metricReporterInterval": 300,
   "metricReporterKeepDataDays": 15,
   "pairwiseIdType": "algorithmic",
-  "pairwiseCalculationKey": "Yr1IUdevJZPRszoeOJps9",
-  "pairwiseCalculationSalt": "3NrpD7CuD6yN8g1pvovDT8CWmr",
+  "pairwiseCalculationKey": "9jwJNNXd9mMua666QDhfEKGcR",
+  "pairwiseCalculationSalt": "aUn2q1HDtsUXtmTNovNeN1QTk",
   "shareSubjectIdBetweenClientsWithSameSectorId": true,
   "webKeysStorage": "keystore",
   "dnName": "CN=Jans Auth CA Certificates",
-  "keyStoreFile": "/etc/certs/jans-auth-keys.p12",
-  "keyStoreSecret": "wCPqCzNQxwLg",
+  "keyStoreFile": "/etc/certs/jans-auth-keys.pkcs12",
+  "keyStoreSecret": "S63ogThoRsEf",
   "keySelectionStrategy": "OLDER",
   "keySignWithSameKeyButDiffAlg": false,
   "jansElevenGenerateKeyEndpoint": "https://example.jans.io/oxeleven/rest/oxeleven/generateKey",
@@ -447,6 +453,7 @@ It returns all the information of the Jans Authorization server.
   "jansElevenVerifySignatureEndpoint": "https://example.jans.io/oxeleven/rest/oxeleven/verifySignature",
   "jansElevenDeleteKeyEndpoint": "https://example.jans.io/oxeleven/rest/oxeleven/deleteKey",
   "introspectionAccessTokenMustHaveUmaProtectionScope": false,
+  "introspectionAccessTokenMustHaveIntrospectionScope": false,
   "introspectionSkipAuthorization": false,
   "endSessionWithAccessToken": false,
   "clientWhiteList": [
@@ -471,10 +478,6 @@ It returns all the information of the Jans Authorization server.
       "returnInResponse": false
     },
     {
-      "paramName": "customParam1",
-      "returnInResponse": false
-    },
-    {
       "paramName": "customParam4",
       "returnInResponse": true
     },
@@ -483,11 +486,15 @@ It returns all the information of the Jans Authorization server.
       "returnInResponse": true
     },
     {
-      "paramName": "customParam2",
+      "paramName": "customParam1",
       "returnInResponse": false
     },
     {
       "paramName": "agama_flow",
+      "returnInResponse": false
+    },
+    {
+      "paramName": "customParam2",
       "returnInResponse": false
     }
   ],
@@ -571,7 +578,7 @@ It returns all the information of the Jans Authorization server.
   "httpLoggingEnabled": false,
   "agamaConfiguration": {
     "enabled": false,
-    "rootDir": "/opt/jans/jetty/jans-config-api/agama",
+    "rootDir": "/opt/jans/jetty/jans-auth/agama",
     "templatesPath": "/ftl",
     "scriptsPath": "/scripts",
     "serializerType": "KRYO",
@@ -592,13 +599,14 @@ It returns all the information of the Jans Authorization server.
   },
   "blockWebviewAuthorizationEnabled": false,
   "dateFormatterPatterns": {
-        "userinfo": "yyyy-MM-dd"
+    "birthdate": "yyyy-MM-dd"
   },
+  "httpLoggingResponseBodyContent": false,
   "fapi": false,
   "allResponseTypesSupported": [
-    "token",
+    "code",
     "id_token",
-    "code"
+    "token"
   ]
 }
 
@@ -652,5 +660,20 @@ Now, let's do the operation.
 If you run the following command line, you must see that `cibaEnabled` is `true`:
 
 ![Update result Jans Auth](../../../assets/image-cl-update-jans-auth-03042021.png)
+
+## Get Persistence type for Jans Auth Configuration
+
+You can get the persistence details for jans auth server.
+```
+/opt/jans/jans-cli/config-cli.py --operation-id get-properties-persistence
+```
+
+Default persistence type is `LDAP`.
+```
+Please wait while retrieving data ...
+{
+  "persistenceType": "ldap"
+}
+```
 
 
