@@ -5,106 +5,13 @@ tags:
   - agama
 ---
 
-# `.gama` files deployment
+# Agama projects deployment
 
-Flows management often incurs several tasks such as manual upload of UI templates and web assets plus java source files, and interaction with a REST API for the CRUD of flows themselves. Here, an alternative mechanism for deployment is described where several flows can be supplied alongside their assets and metadata in a single bundle for bulk processing at the server.
+The Agama framework defines a file [format](../../../agama/gama-format.md) to package and distribute Agama projects. Here we describe the process of deployment in the Jans Agama engine.
 
-This mechanism may facilitate developers' work when multiple flows need to be manipulated. Also it can be used in the  development of tools that may serve as IDEs for Agama.
+## Workflow
 
-## What's in an `.gama` file?
-
-A `.gama` file is an atomic deployment unit. It is an archive containing the several flows to deploy on the server plus related files and some metadata. This archive has to be "presented" to an [API endpoint](#api-endpoints) which takes charge of its processing.
-
-The below shows the structure of an extracted `.gama` file (recall it has to originally follow the ZIP format):
-
-```
-├── code/
-├── lib/           
-├── web/
-├── project.json   
-├── LICENSE        
-└── README.md      
-```
-
-- `code` directory holds Agama code. Every flow has to reside in a separate file with extension `flow` and with file name matching the qualified name of the flow in question   
-- `lib` can contain Java/Groovy source files and `jar` files. These are used to agument the classpath as explained [here](./java-classpath.md)
-- `web` is expected to hold all UI templates plus required web assets (stylesheets, images, etc.) of all flows in this bundle
-- `project.json` file contains metadata about this bundle, like display name, description, etc. More on this later
-- `README.md` file may contain extra documentation in markdown format
-
-**Notes**:
-
-- Except for `code` and `web` directories, all elements in the archive structure are optional
-- A `flow` file in `code` may reside at the top level or at any level in a directory structure  
-- `jar` files in `lib` are expected to be at top level only. Note these files are ignored in Cloud Native installations
-- `java` and `groovy` files in `lib` are expected to be placed in a directory hierarchy according to the Java packages they belong to
-- files in `web` must follow a directory structure that is consistent with respect to `Basepath` and `RRF` directives found in the included flows. Note except for templates, all files placed here will be publicly accessible via HTTP once the archive is deployed
-- The file extension `gama` is not mandatory, just a mere convention
-
-## Metadata
-
-`project.json` file is expected to contain metadata about the contents of the archive in JSON format. While these details don't have direct influence in the deployment process, data is saved for reference and can be later retrieved by the API for deployment listing purposes. This is an example:
-
-```
-{
-  "projectName": "A name that will be associated to this deployment",
-  "author": "A user handle that identifies you",
-  "description": "Other relevant data can go here"
-}
-```
-
-## Sample file
-
-As an example assume you want to deploy these two flows:
-
-```
-Flow test
-    Basepath "hello"
-
-in = { name: "John" }
-RRF "templates/index.ftlh" in
-
-Log "Done!"
-Finish "john_doe"
-```
-
-```
-Flow com.foods.sweet
-    Basepath "recipes/desserts"
-
-...
-
-choice = RRF "selection.ftl"
-list = Call com.foods.RecipeUtils#retrieveIngredients choice.meal
-...
-```
-
-Here is how the archive might look like:
-
-```
-├── code/
-│   └── test.flow
-│   └── com.foods.sweet.flow
-├── web/
-│   ├── hello/
-|   |   └── templates/
-│   |       └── index.ftlh
-│   |           └── js/
-│   |               └── font-awesome.js
-|   └── recipes/
-│       └── desserts/
-│           └── selection.ftl
-│           └── logo.png
-├── lib/
-│   └── com/
-│       └── foods/
-│           └── RecipeUtils.java
-└── project.json
-```
-
-## API endpoints
-
-Once a `.gama` file is built the deployment process follows. Here is a typical workflow:
+Deployment occurs through a REST API. Here is a typical workflow once a `.gama` file is ready:
 
 1. Send (POST) the archive contents to the deployment endpoint. Normally a 202 response should be obtained meaning a task has been queued for processing
 1. Poll (via GET) the status of the deployment. When the archive has been effectively deployed a status of 200 should be obtained. It may take up to 30 seconds for the process to complete once the archive is sent. This time may extend if there is another deployment in course
