@@ -1294,7 +1294,11 @@ class JCA_CLI:
 
         cmd_data = data
         if not data and data_fn:
-            cmd_data = self.get_json_from_file(data_fn)
+            for key in op_path.get('requestBody', {}).get('content', {}).keys():
+                if 'zip' in key:
+                    break
+            else:
+                cmd_data = self.get_json_from_file(data_fn)
 
         if call_method in ('post', 'put', 'patch'):
             self.log_cmd(operation_id, url_suffix, endpoint_args, cmd_data)
