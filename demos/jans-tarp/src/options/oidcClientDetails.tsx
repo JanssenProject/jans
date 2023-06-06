@@ -1,13 +1,42 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, KeyboardEventHandler } from 'react'
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
 import qs from 'qs';
 import './options.css';
 import { WindmillSpinner } from 'react-spinner-overlay';
+import Select from 'react-select';
+import {IOption} from './IOption';
+import {ILooseObject} from './ILooseObject';
+
+const components = {
+    DropdownIndicator: null,
+};
+
+const createOption = (label: string) => ({
+    label,
+    value: label,
+});
 
 const OIDCClientDetails = (data) => {
     const [additionalParam, setAdditionalParam] = useState("");
     const [loading, setLoading] = useState(false);
+    const [acrValueOption, setAcrValueOption] = useState<IOption | null>();
+    const [acrValueOptions, setAcrValueOptions] = useState<readonly IOption[]>([]);
+
+    useEffect(() => {
+        (async () => {
+
+            const opConfiguration: string = await new Promise((resolve, reject) => {
+                chrome.storage.local.get(["opConfiguration"], (result) => {
+                    resolve(JSON.stringify(result));
+                });
+            });
+
+            const supportedAcrValuesString = JSON.parse(opConfiguration).opConfiguration.acr_values_supported;
+            setAcrValueOptions(supportedAcrValuesString.map((ele) => createOption(ele)));
+        })();
+    }, [])
+
 
     function customLaunchWebAuthFlow(options, callback) {
         var requestId = Math.random().toString(36).substring(2);
@@ -38,6 +67,7 @@ const OIDCClientDetails = (data) => {
                             if (code != null) {
                                 callback(url, undefined);
                                 chrome.tabs.remove(tab.id);
+                                setLoading(false);
                             }
                         });
                     });
@@ -49,14 +79,13 @@ const OIDCClientDetails = (data) => {
 
     async function triggerCodeFlowButton() {
         setLoading(true);
-        const redirectUrl = chrome.identity.getRedirectURL()
+        const redirectUrl = data.data.op_host;
         const { secret, hashed } = await generateRandomChallengePair();
         chrome.storage.local.get(["oidcClient"]).then(async (result) => {
             if (!!result.oidcClient) {
 
-                const options = {
+                let options: ILooseObject = {
                     scope: result?.oidcClient?.scope.join(['+']),
-                    acr_values: result?.oidcClient?.acr_values[0],
                     response_type: result?.oidcClient?.response_type[0],
                     redirect_uri: redirectUrl,
                     client_id: result?.oidcClient?.client_id,
@@ -65,6 +94,10 @@ const OIDCClientDetails = (data) => {
                     state: uuidv4(),
                     nonce: uuidv4(),
                 };
+
+                if (!!acrValueOption && !isEmpty(acrValueOption.value)) {
+                    options.acr_values = acrValueOption.value;
+                }
 
                 let authzUrl = `${result.oidcClient.authorization_endpoint}?${qs.stringify(options)}`;
 
@@ -190,6 +223,20 @@ const OIDCClientDetails = (data) => {
         });
     }
 
+    async function getOpenidConfiguration(issuer) {
+        try {
+            const endpoint = issuer + '/.well-known/openid-configuration';
+            const oidcConfigOptions = {
+                method: 'GET',
+                url: endpoint,
+            };
+            const response = await axios(oidcConfigOptions);
+            return await response;
+        } catch (err) {
+            console.error(err)
+        }
+    }
+
     async function generateRandomChallengePair() {
         const secret = await generateRandomString();
         const encryt = await sha256(secret);
@@ -234,6 +281,10 @@ const OIDCClientDetails = (data) => {
         }
     }
 
+    function isEmpty(value) {
+        return (value == null || value.length === 0);
+    }
+
     return (
 
         <div className="box">
@@ -252,6 +303,18 @@ const OIDCClientDetails = (data) => {
                 <label><b>Additional Params:</b></label>
                 <input type="text" id="additionalParam" name="additionalParam" value={additionalParam} onChange={updateInputValue}
                     placeholder='e.g. {"paramOne": "valueOne", "paramTwo": "valueTwo"}' autoComplete="off" />
+
+                <label><b>Acr Value:</b></label>
+                <Select
+                    inputId="acrValues"
+                    className="basic-single typeahead"
+                    classNamePrefix="select"
+                    isClearable={true}
+                    isSearchable={true}
+                    name="color"
+                    onChange={(newValue) => setAcrValueOption(newValue)}
+                    options={acrValueOptions}
+                />
 
                 <button id="trigCodeFlowButton" onClick={triggerCodeFlowButton}>Trigger Auth Code Flow</button>
                 <button id="resetButton" onClick={resetClient}>Reset</button>
