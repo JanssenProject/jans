@@ -666,22 +666,12 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/head/admin/developer/agama/</loc>
+         <loc>https://jans.io/docs/head/admin/developer/agama/advanced-usages/</loc>
          <lastmod>2023-06-06</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/head/admin/developer/agama/dsl-full/</loc>
-         <lastmod>2023-06-06</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/admin/developer/agama/dsl/</loc>
-         <lastmod>2023-06-06</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/admin/developer/agama/engine-config/</loc>
+         <loc>https://jans.io/docs/head/admin/developer/agama/engine-bridge-config/</loc>
          <lastmod>2023-06-06</lastmod>
          <changefreq>daily</changefreq>
     </url>
@@ -691,32 +681,17 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/head/admin/developer/agama/flows-lifecycle/</loc>
+         <loc>https://jans.io/docs/head/admin/developer/agama/flows-navigation-ui/</loc>
          <lastmod>2023-06-06</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/head/admin/developer/agama/gama-deployment/</loc>
+         <loc>https://jans.io/docs/head/admin/developer/agama/jans-agama-engine/</loc>
          <lastmod>2023-06-06</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/head/admin/developer/agama/hello-world-closer/</loc>
-         <lastmod>2023-06-06</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/admin/developer/agama/java-classpath/</loc>
-         <lastmod>2023-06-06</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/admin/developer/agama/lifecycle/</loc>
-         <lastmod>2023-06-06</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/admin/developer/agama/logging/</loc>
+         <loc>https://jans.io/docs/head/admin/developer/agama/projects-deployment/</loc>
          <lastmod>2023-06-06</lastmod>
          <changefreq>daily</changefreq>
     </url>
@@ -726,17 +701,7 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/head/admin/developer/agama/quick-start/</loc>
-         <lastmod>2023-06-06</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/admin/developer/agama/samples/</loc>
-         <lastmod>2023-06-06</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/admin/developer/agama/ui-pages/</loc>
+         <loc>https://jans.io/docs/head/admin/developer/agama/recommended-practices/</loc>
          <lastmod>2023-06-06</lastmod>
          <changefreq>daily</changefreq>
     </url>
@@ -1967,6 +1932,26 @@
     </url>
     <url>
          <loc>https://jans.io/docs/head/admin/vm-ops/web-services/</loc>
+         <lastmod>2023-06-06</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/head/agama/execution-rules/</loc>
+         <lastmod>2023-06-06</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/head/agama/gama-format/</loc>
+         <lastmod>2023-06-06</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/head/agama/introduction/</loc>
+         <lastmod>2023-06-06</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/head/agama/language-reference/</loc>
          <lastmod>2023-06-06</lastmod>
          <changefreq>daily</changefreq>
     </url>
