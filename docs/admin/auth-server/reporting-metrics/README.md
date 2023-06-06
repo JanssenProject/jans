@@ -8,13 +8,15 @@ tags:
 
 # Overview
 
-`jans-auth-server` supports different metric data:
+Authorization Server (AS) supports different metric data:
 - Monthly Active Users (MAU)
 - Health Check
 - Token Issued
 - Audit Logs
 
-Statistic data are returned from `/jans-auth/restv1/internal/stat` protected endpoint.
+## Statistic Endpoint 
+
+Statistic data (MAU, Token Issued) is returned from `/jans-auth/restv1/internal/stat` protected endpoint.
 
 Endpoint is protected by authorization token which must contain configurable scope (via `statAuthorizationScope` AS configuration property).
 Default scope value of `statAuthorizationScope`  is `jans_stat` which means that token must contain this scope or otherwise `UNAUTHORIZED` 401 response is returned.
@@ -47,8 +49,8 @@ Authorization: Bearer czZCaGRSa3F0MzpnWDFmQmF0M2JW
 
 If both month range parameters (`start-month` or `end-month` ) and `month` parameter are used at the same time AS will return 400 Bad Request error.
 
-Note that data returned by endpoint is calculated and depending on request can be expensive to recalculate each time.
-Thus data (response) is cached during one hour and is not refresh during this period.  
+Note that data returned by endpoint is calculated and depending on request can be **expensive** to recalculate each time.
+Thus data (response) is cached during one hour and is not refreshed during this period.  
 
 **Example:** response when `format=jsonmonth`
 
@@ -93,7 +95,7 @@ server9 - size: 20483bytes, cardinality: 1002353
 UNION - size: 20483bytes, cardinality: 10010897
 ```
 
-Example:   
+**Example:** MAU with no `format` parameter in request   
 ```
 {
   "response": {
