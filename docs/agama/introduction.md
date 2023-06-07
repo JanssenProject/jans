@@ -11,7 +11,7 @@ Agama is a framework that consists of:
 
 - A DSL (domain-specific language) purposedly designed for writing web flows
 - A set of rules that drive the behavior of such flows when they are executed
-- The specification of a file format - known as `.gama` - useful for sharing Agama flows  
+- The specification of a file format - known as `.gama` - useful for sharing Agama flows. Flows have the `.flow` file extension.  
 
 Here, a web flow is understood as a process composed by one or more stages, where at each stage an actor - normally a person - provides some kind of data or response by using a web browser or similar client. Throughout the process only a single actor is involved.
 
