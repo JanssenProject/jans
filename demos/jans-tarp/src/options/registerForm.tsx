@@ -53,7 +53,6 @@ const RegisterForm = (data) => {
         if (opConfigurationEndpointOption.length === 0) {
             errorField += 'issuer ';
         }
-        
         if (scopeOption.length === 0) {
             errorField += 'scope ';
         }
@@ -63,7 +62,6 @@ const RegisterForm = (data) => {
         }
 
         const configEndpoint = opConfigurationEndpointOption.map((iss) => iss.value)[0];
-
         if(!configEndpoint || !configEndpoint.includes('/.well-known/openid-configuration')){
             setError('Incorrect Openid configuration URL.');
             return false;
