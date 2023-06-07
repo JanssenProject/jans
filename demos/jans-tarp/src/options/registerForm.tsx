@@ -47,10 +47,14 @@ const RegisterForm = (data) => {
         }
     };
 
-    function validateState() {
+    function validate() {
         let errorField = ''
         if (opConfigurationEndpointOption.length === 0) {
             errorField += 'issuer ';
+        }
+        if(!(opConfigurationEndpointOption.map((iss) => iss.value)[0]).includes('/.well-known/openid-configuration')){
+            setError('Incorrect Openid configuration URL.');
+            return false;
         }
 
         if (scopeOption.length === 0) {
@@ -64,7 +68,7 @@ const RegisterForm = (data) => {
     }
 
     async function registerClient() {
-        if (validateState()) {
+        if (validate()) {
             try {
                 setLoading(true);
                 const response = await register()
@@ -130,7 +134,7 @@ const RegisterForm = (data) => {
                     return await { result: "error", message: "Error in registration!" };
                 }
             } else {
-                return await { result: "error", message: "Error in registration!" };
+                return await { result: "error", message: "Error in fetching Openid configuration!" };
             }
         } catch (err) {
             console.error(err)
@@ -150,7 +154,7 @@ const RegisterForm = (data) => {
             const response = await axios(registerReqOptions);
             return await response;
         } catch (err) {
-            console.error(err)
+            console.error('Error in fetching Openid configuration: '+err)
         }
     }
 
