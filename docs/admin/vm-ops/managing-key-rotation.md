@@ -7,6 +7,9 @@ tags:
 
 # Managing Key Rotation
 
+
+"Key-rotation" is a standard procedure for all OpenID Connect deployment. "Key-rotation" means replacing existing signing key with newer cryptographic key. For Janssen server, that specific cryptographic key is `jans-auth-keys.pkcs12`. 
+
 There are two possible ways to manage key rotation:
 - built-in key rotation
 - external key rotation
