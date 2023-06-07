@@ -7,6 +7,9 @@ tags:
 
 # Managing Key Rotation
 
+
+"Key-rotation" is a standard procedure for all OpenID Connect deployment. "Key-rotation" means replacing existing signing key with newer cryptographic key. For Janssen server, that specific cryptographic key is `jans-auth-keys.pkcs12`. 
+
 There are two possible ways to manage key rotation:
 - built-in key rotation
 - external key rotation
@@ -46,6 +49,26 @@ Configuration properties related to key store file:
 
 `jans-auth-server` has [KeyGeneratorTimer](https://github.com/JanssenProject/jans/blob/70a566b67f660750bf742f19ee127f79b2db8930/jans-auth-server/client/src/main/java/io/jans/as/client/util/KeyGenerator.java) 
 which is responsible for key rotation. Built-in rotation can be switch on/off via `keyRegenerationEnabled` AS configuration property (by setting `true` or `false` value).
+
+```mermaid
+graph LR
+A[Auth Server] --> V(Properties)
+   
+```
+
+```mermaid
+erDiagram
+    keyRotation {
+        string keyRegenerationEnabled "True"
+        string keyRenerationInterval  "48"
+        string keySelectionStrategy "OLDER"
+        string keySignWithSameKeyButDiffAlg "False"
+        string keyStoreFile "/etc/certs/jans-auth-keys.pkcs12"
+    }
+```
+
+
+
 
 Configuration properties relation to built-in rotation:
 - `keyRegenerationEnabled` - boolean value specifying whether to turn on (`true` value) or off (`false` value) built-in key rotation
