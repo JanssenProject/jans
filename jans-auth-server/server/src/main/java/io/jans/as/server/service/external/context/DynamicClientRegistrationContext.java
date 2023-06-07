@@ -130,19 +130,21 @@ public class DynamicClientRegistrationContext extends ExternalScriptContext {
     }
 
     public void validateIssuer() {
-        final List<String> dcrIssuers = CdiUtil.bean(AppConfiguration.class).getDcrIssuers();
-        if (dcrIssuers.isEmpty()) { // nothing to check
+        final List<String> issuers = CdiUtil.bean(AppConfiguration.class).getTrustedSsaIssuers();
+        if (issuers.isEmpty()) { // nothing to check
             return;
         }
 
         final String issuer = softwareStatement.getClaims().getClaimAsString("iss");
-        if (!dcrIssuers.contains(issuer)) {
+        if (!issuers.contains(issuer)) {
             throwWebApplicationException("SSA Issuer is not allowed.", RegisterErrorResponseType.INVALID_CLIENT_METADATA);
         }
 
-        final String certificateIssuer = certificate.getIssuerX500Principal().getName();
-        if (!dcrIssuers.contains(certificateIssuer)) {
-            throwWebApplicationException("Certificate Issuer is not allowed.", RegisterErrorResponseType.INVALID_CLIENT_METADATA);
+        if (certificate != null) {
+            final String certificateIssuer = certificate.getIssuerX500Principal().getName();
+            if (!issuers.contains(certificateIssuer)) {
+                throwWebApplicationException("Certificate Issuer is not allowed.", RegisterErrorResponseType.INVALID_CLIENT_METADATA);
+            }
         }
     }
 
