@@ -4,7 +4,7 @@ import './options.css'
 import { v4 as uuidv4 } from 'uuid';
 import { WindmillSpinner } from 'react-spinner-overlay'
 import CreatableSelect from 'react-select/creatable';
-import {IOption} from './IOption';
+import { IOption } from './IOption';
 
 const components = {
     DropdownIndicator: null,
@@ -18,20 +18,20 @@ const createOption = (label: string) => ({
 const RegisterForm = (data) => {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
-    const [inputValueIssuer, setInputValueIssuer] = useState('');
+    const [inputValueOPConfigurationEndpoint, setInputValueOPConfigurationEndpoint] = useState('');
     const [inputValueScope, setInputValueScope] = useState('');
-    const [issuerOption, setIssuerOption] = useState<readonly IOption[]>([]);
+    const [opConfigurationEndpointOption, setOPConfigurationEndpointOption] = useState<readonly IOption[]>([]);
     const [scopeOption, setScopeOption] = useState<readonly IOption[]>([createOption('openid')]);
 
     const handleKeyDown: KeyboardEventHandler = (event) => {
         const inputId = (event.target as HTMLInputElement).id;
-        if (inputId === 'issuer') {
-            if (!inputValueIssuer) return;
+        if (inputId === 'opConfigurationEndpoint') {
+            if (!inputValueOPConfigurationEndpoint) return;
             switch (event.key) {
                 case 'Enter':
                 case 'Tab':
-                    setIssuerOption([createOption(inputValueIssuer)]);
-                    setInputValueIssuer('');
+                    setOPConfigurationEndpointOption([createOption(inputValueOPConfigurationEndpoint)]);
+                    setInputValueOPConfigurationEndpoint('');
                     event.preventDefault();
             }
         } else if (inputId === 'scope') {
@@ -47,12 +47,12 @@ const RegisterForm = (data) => {
         }
     };
 
-    function validateState() {
+    function validate() {
         let errorField = ''
-        if (issuerOption.length === 0) {
+
+        if (opConfigurationEndpointOption.length === 0) {
             errorField += 'issuer ';
         }
-
         if (scopeOption.length === 0) {
             errorField += 'scope ';
         }
@@ -60,11 +60,18 @@ const RegisterForm = (data) => {
             setError('The following fields are mandatory: ' + errorField);
             return false;
         }
+
+        const configEndpoint = opConfigurationEndpointOption.map((iss) => iss.value)[0];
+        if(!configEndpoint || !configEndpoint.includes('/.well-known/openid-configuration')){
+            setError('Incorrect Openid configuration URL.');
+            return false;
+        }
+
         return true;
     }
 
     async function registerClient() {
-        if (validateState()) {
+        if (validate()) {
             try {
                 setLoading(true);
                 const response = await register()
@@ -80,9 +87,10 @@ const RegisterForm = (data) => {
 
     async function register() {
         try {
-            const issuer = issuerOption.map((iss) => iss.value)[0];
+            const opConfigurationEndpoint = new URL(opConfigurationEndpointOption.map((iss) => iss.value)[0]);
+            const issuer = opConfigurationEndpoint.protocol + '//' + opConfigurationEndpoint.hostname;
             const scope = scopeOption.map((ele) => ele.value);
-            const openapiConfig = await getOpenidConfiguration(issuer);
+            const openapiConfig = await getOpenidConfiguration(opConfigurationEndpointOption.map((iss) => iss.value)[0]);
 
             if (openapiConfig != undefined) {
                 chrome.storage.local.set({ opConfiguration: openapiConfig.data }).then(() => {
@@ -129,7 +137,7 @@ const RegisterForm = (data) => {
                     return await { result: "error", message: "Error in registration!" };
                 }
             } else {
-                return await { result: "error", message: "Error in registration!" };
+                return await { result: "error", message: "Error in fetching Openid configuration!" };
             }
         } catch (err) {
             console.error(err)
@@ -149,16 +157,15 @@ const RegisterForm = (data) => {
             const response = await axios(registerReqOptions);
             return await response;
         } catch (err) {
-            console.error(err)
+            console.error('Error in fetching Openid configuration: '+err)
         }
     }
 
-    async function getOpenidConfiguration(issuer) {
+    async function getOpenidConfiguration(opConfigurationEndpoint) {
         try {
-            const endpoint = issuer + '/.well-known/openid-configuration';
             const oidcConfigOptions = {
                 method: 'GET',
-                url: endpoint,
+                url: opConfigurationEndpoint,
             };
             const response = await axios(oidcConfigOptions);
             return await response;
@@ -172,19 +179,19 @@ const RegisterForm = (data) => {
             <legend><span className="number">O</span> Register OIDC Client</legend>
             <legend><span className="error">{error}</span></legend>
             <WindmillSpinner loading={loading} color="#00ced1" />
-            <label><b>Issuer:</b><span className="required">*</span>(Type and press enter) :</label>
+            <label><b>OP Configuration Endpoint:</b><span className="required">*</span> (Type and press enter) :</label>
             <CreatableSelect
-                inputId="issuer"
+                inputId="opConfigurationEndpoint"
                 components={components}
-                inputValue={inputValueIssuer}
+                inputValue={inputValueOPConfigurationEndpoint}
                 isClearable
                 isMulti
                 menuIsOpen={false}
-                onChange={(newValue) => setIssuerOption(newValue)}
-                onInputChange={(newValue) => setInputValueIssuer(newValue)}
+                onChange={(newValue) => setOPConfigurationEndpointOption(newValue)}
+                onInputChange={(newValue) => setInputValueOPConfigurationEndpoint(newValue)}
                 onKeyDown={handleKeyDown}
                 placeholder="Type something and press enter..."
-                value={issuerOption}
+                value={opConfigurationEndpointOption}
                 className="typeahead"
             />
 
