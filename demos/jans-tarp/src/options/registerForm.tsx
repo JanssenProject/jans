@@ -49,14 +49,11 @@ const RegisterForm = (data) => {
 
     function validate() {
         let errorField = ''
+
         if (opConfigurationEndpointOption.length === 0) {
             errorField += 'issuer ';
         }
-        if(!(opConfigurationEndpointOption.map((iss) => iss.value)[0]).includes('/.well-known/openid-configuration')){
-            setError('Incorrect Openid configuration URL.');
-            return false;
-        }
-
+        
         if (scopeOption.length === 0) {
             errorField += 'scope ';
         }
@@ -64,6 +61,14 @@ const RegisterForm = (data) => {
             setError('The following fields are mandatory: ' + errorField);
             return false;
         }
+
+        const configEndpoint = opConfigurationEndpointOption.map((iss) => iss.value)[0];
+
+        if(!configEndpoint || !configEndpoint.includes('/.well-known/openid-configuration')){
+            setError('Incorrect Openid configuration URL.');
+            return false;
+        }
+
         return true;
     }
 
