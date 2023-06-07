@@ -7673,6 +7673,10 @@ components:
           type: object
           additionalProperties:
             type: object
+        noDirectLaunch:
+          type: array
+          items:
+            type: string
     PagedResult:
       type: object
       properties:
@@ -7853,19 +7857,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        userCanView:
+        whitePagesCanView:
+          type: boolean
+        userCanAccess:
           type: boolean
         userCanEdit:
           type: boolean
         adminCanEdit:
           type: boolean
-        adminCanAccess:
-          type: boolean
-        userCanAccess:
+        userCanView:
           type: boolean
         adminCanView:
           type: boolean
-        whitePagesCanView:
+        adminCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -8600,8 +8604,6 @@ components:
             type: string
         httpLoggingResponseBodyContent:
           type: boolean
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8611,6 +8613,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -9538,6 +9542,7 @@ components:
           - spontaneous_scope
           - end_session
           - post_authn
+          - select_account
           - scim
           - ciba_end_user_notification
           - revoke_token

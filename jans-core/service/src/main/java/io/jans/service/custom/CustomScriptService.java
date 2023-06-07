@@ -33,7 +33,6 @@ import io.jans.util.OxConstants;
  * @author Yuriy Movchan Date: 09/07/2020
  */
 @ApplicationScoped
-@Alternative
 public class CustomScriptService extends AbstractCustomScriptService {
 
     private static final long serialVersionUID = -7670016078535552193L;
