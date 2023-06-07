@@ -6,9 +6,6 @@
 
 package io.jans.model.custom.script;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import io.jans.model.custom.script.model.CustomScript;
 import io.jans.model.custom.script.model.auth.AuthenticationCustomScript;
 import io.jans.model.custom.script.type.BaseExternalType;
@@ -46,6 +43,8 @@ import io.jans.model.custom.script.type.scim.DummyScimType;
 import io.jans.model.custom.script.type.scim.ScimType;
 import io.jans.model.custom.script.type.scope.DummyDynamicScopeType;
 import io.jans.model.custom.script.type.scope.DynamicScopeType;
+import io.jans.model.custom.script.type.selectaccount.DummySelectAccountType;
+import io.jans.model.custom.script.type.selectaccount.SelectAccountType;
 import io.jans.model.custom.script.type.session.ApplicationSessionType;
 import io.jans.model.custom.script.type.session.DummyApplicationSessionType;
 import io.jans.model.custom.script.type.spontaneous.DummySpontaneousScopeType;
@@ -54,15 +53,13 @@ import io.jans.model.custom.script.type.ssa.DummyModifySsaResponseType;
 import io.jans.model.custom.script.type.ssa.ModifySsaResponseType;
 import io.jans.model.custom.script.type.token.DummyUpdateTokenType;
 import io.jans.model.custom.script.type.token.UpdateTokenType;
-import io.jans.model.custom.script.type.uma.UmaClaimsGatheringType;
-import io.jans.model.custom.script.type.uma.UmaDummyClaimsGatheringType;
-import io.jans.model.custom.script.type.uma.UmaDummyRptClaimsType;
-import io.jans.model.custom.script.type.uma.UmaDummyRptPolicyType;
-import io.jans.model.custom.script.type.uma.UmaRptClaimsType;
-import io.jans.model.custom.script.type.uma.UmaRptPolicyType;
+import io.jans.model.custom.script.type.uma.*;
 import io.jans.model.custom.script.type.user.CacheRefreshType;
 import io.jans.model.custom.script.type.user.DummyCacheRefreshType;
 import io.jans.orm.annotation.AttributeEnum;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * List of supported custom scripts
@@ -95,6 +92,7 @@ public enum CustomScriptType implements AttributeEnum {
     SPONTANEOUS_SCOPE("spontaneous_scope", "Spontaneous Scopes", SpontaneousScopeType.class, CustomScript.class, "SpontaneousScope", new DummySpontaneousScopeType()),
     END_SESSION("end_session", "End Session", EndSessionType.class, CustomScript.class, "EndSession", new DummyEndSessionType()),
     POST_AUTHN("post_authn", "Post Authentication", PostAuthnType.class, CustomScript.class, "PostAuthn", new DummyPostAuthnType()),
+    SELECT_ACCOUNT("select_account", "Select Account", SelectAccountType.class, CustomScript.class, "SelectAccount", new DummySelectAccountType()),
     SCIM("scim", "SCIM", ScimType.class, CustomScript.class, "ScimEventHandler", new DummyScimType()),
     CIBA_END_USER_NOTIFICATION("ciba_end_user_notification", "CIBA End User Notification", EndUserNotificationType.class,
             CustomScript.class, "EndUserNotification", new DummyEndUserNotificationType()),
