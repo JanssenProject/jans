@@ -70,7 +70,7 @@ tags:
 | dateFormatterPatterns | List of key value date formatters, e.g. 'userinfo: 'yyyy-MM-dd', etc. | [Details](#dateformatterpatterns) |
 | dcrAuthorizationWithClientCredentials | Boolean value indicating if DCR authorization to be performed using client credentials | [Details](#dcrauthorizationwithclientcredentials) |
 | dcrAuthorizationWithMTLS | Boolean value indicating if DCR authorization allowed with MTLS | [Details](#dcrauthorizationwithmtls) |
-| dcrIssuers | List of DCR issuers | [Details](#dcrissuers) |
+| trustedSsaIssuers | List of trusted SSA issuers. If MTLS private key is used to sign DCR JWT, certificate issuer is checked as well. | [Details](#trustedssaissuers) |
 | dcrSignatureValidationEnabled | Boolean value enables DCR signature validation. Default is false | [Details](#dcrsignaturevalidationenabled) |
 | dcrSignatureValidationJwks | Specifies JWKS for all DCR's validations | [Details](#dcrsignaturevalidationjwks) |
 | dcrSignatureValidationJwksUri | Specifies JWKS URI for all DCR's validations | [Details](#dcrsignaturevalidationjwksuri) |
@@ -816,9 +816,9 @@ tags:
 - Default value: false
 
 
-### dcrIssuers
+### trustedSsaIssuers
 
-- Description: List of DCR issuers
+- Description: List of trusted SSA issuers. If MTLS private key is used to sign DCR JWT, certificate issuer is checked as well.
 
 - Required: No
 
