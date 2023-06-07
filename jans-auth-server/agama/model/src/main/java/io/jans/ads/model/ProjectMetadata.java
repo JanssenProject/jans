@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.List;
 import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -18,6 +19,9 @@ public class ProjectMetadata {
     @JsonProperty("configs")
     @JsonInclude(JsonInclude.Include.ALWAYS)
     private Map<String, Object> configHints;
+
+    @JsonProperty("noDirectLaunch")
+    private List<String> noDirectLaunchFlows;
 
     public String getProjectName() {
         return projectName;
@@ -65,6 +69,14 @@ public class ProjectMetadata {
 
     public void setConfigHints(Map<String, Object> configHints) {
         this.configHints = configHints;
+    }
+
+    public List<String> getNoDirectLaunchFlows() {
+        return noDirectLaunchFlows;
+    }
+
+    public void setNoDirectLaunchFlows(List<String> noDirectLaunchFlows) {
+        this.noDirectLaunchFlows = noDirectLaunchFlows;
     }
 
 }
