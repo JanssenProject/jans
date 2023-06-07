@@ -8445,7 +8445,7 @@ components:
           type: boolean
         dcrAuthorizationWithMTLS:
           type: boolean
-        dcrIssuers:
+        trustedSsaIssuers:
           type: array
           items:
             type: string

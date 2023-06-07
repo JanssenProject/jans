@@ -495,7 +495,7 @@ When create entry in `dcrSsaValidationConfigs` configuration property :
 
 * **dcrSignatureValidationJwks** - specifies JWKS for DCR's validations
 * **dcrSignatureValidationJwksUri** - specifies JWKS URI for  DCR's validations
-* **dcrIssuers** - List of issues if MTLS private key is used to sign DCR JWT
+* **trustedSsaIssuers** - List of trusted SSA issuers. If MTLS private key is used to sign DCR JWT, certificate issuer is checked as well.
 * **dcrSignatureValidationSharedSecret** - if HMAC is used, this is the shared secret
 * **dcrSignatureValidationEnabled** - boolean value enables DCR signature validation. Default is false
 * **dcrSignatureValidationSoftwareStatementJwksURIClaim** - specifies claim name inside software statement. Value of claim should point to JWKS URI
