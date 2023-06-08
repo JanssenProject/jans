@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -32,14 +33,11 @@ import io.jans.fido2.service.CertificateService;
 import io.jans.fido2.service.CoseService;
 import io.jans.fido2.service.mds.AttestationCertificateService;
 import io.jans.fido2.service.processors.AttestationFormatProcessor;
-import io.jans.fido2.service.verifier.AuthenticatorDataVerifier;
 import io.jans.fido2.service.verifier.CertificateVerifier;
-import io.jans.fido2.service.verifier.CommonVerifiers;
-import io.jans.fido2.service.verifier.UserVerificationVerifier;
 
 /**
  * For Apple's anonymous attestation fmt="apple"
- * 
+ *
  * @author madhumitas
  *
  */
@@ -47,15 +45,6 @@ import io.jans.fido2.service.verifier.UserVerificationVerifier;
 public class AppleAttestationProcessor implements AttestationFormatProcessor {
 	@Inject
 	private Logger log;
-
-	@Inject
-	private CommonVerifiers commonVerifiers;
-
-	@Inject
-	private AuthenticatorDataVerifier authenticatorDataVerifier;
-
-	@Inject
-	private UserVerificationVerifier userVerificationVerifier;
 
 	@Inject
 	private AttestationCertificateService attestationCertificateService;
@@ -72,20 +61,14 @@ public class AppleAttestationProcessor implements AttestationFormatProcessor {
 	@Inject
 	private CertificateService certificateService;
 
-	private final String KEY_DESCRIPTION_OID = "1.2.840.113635.100.8.2";
+    private static final String KEY_DESCRIPTION_OID = "1.2.840.113635.100.8.2";
+
+	private static final String SUBJECT_DN = "st=california, o=apple inc., cn=apple webauthn root ca";
 
 	@Override
 	public AttestationFormat getAttestationFormat() {
 		return AttestationFormat.apple;
 	}
-
-	/**
-	 * Apple WebAuthn Root CA PEM - Downloaded from
-	 * https://www.apple.com/certificateauthority/Apple_WebAuthn_Root_CA.pem
-	 *
-	 * Valid until 03/14/2045 @ 5:00 PM PST
-	 */
-	private static final String APPLE_WEBAUTHN_ROOT_CA = "/etc/jans/conf/fido2/apple/";
 
 	// @Override
 	public void process(JsonNode attStmt, AuthData authData, Fido2RegistrationData credential, byte[] clientDataHash,
@@ -111,14 +94,12 @@ public class AppleAttestationProcessor implements AttestationFormatProcessor {
 			// the first certificate in x5c
 			X509Certificate credCert = certificates.get(0);
 
-			List<X509Certificate> trustAnchorCertificates = new ArrayList<X509Certificate>();
-			trustAnchorCertificates.addAll(certificateService.getCertificates(APPLE_WEBAUTHN_ROOT_CA));
-			try {
-				log.debug("APPLE_WEBAUTHN_ROOT_CA root certificate" + trustAnchorCertificates.size());
-				X509Certificate verifiedCert = certificateVerifier.verifyAttestationCertificates(certificates,
-						trustAnchorCertificates);
-				log.info("Step 1 completed  ");
-
+            List<X509Certificate> trustAnchorCertificates = attestationCertificateService.getRootCertificatesBySubjectDN(SUBJECT_DN);
+            try {
+                log.debug("APPLE_WEBAUTHN_ROOT_CA root certificate" + trustAnchorCertificates.size());
+                X509Certificate verifiedCert = certificateVerifier.verifyAttestationCertificates(certificates,
+                        trustAnchorCertificates);
+                log.info("Step 1 completed  ");
 			} catch (Fido2MissingAttestationCertException ex) {
 				X509Certificate certificate = certificates.get(0);
 				String issuerDN = certificate.getIssuerDN().getName();
@@ -234,5 +215,4 @@ public class AppleAttestationProcessor implements AttestationFormatProcessor {
 			throw new AttestationException("Failed to extract nonce from Apple anonymous attestation statement.");
 		}
 	}
-
 }

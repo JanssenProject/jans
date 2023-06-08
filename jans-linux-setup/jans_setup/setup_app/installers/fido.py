@@ -80,7 +80,7 @@ class FidoInstaller(JettyInstaller):
 
         # copy Apple_WebAuthn_Root_CA
         if os.path.exists(self.source_files[1][0]):
-            target_dir = os.path.join(self.fido2ConfigFolder, 'apple')
+            target_dir = os.path.join(self.fido2ConfigFolder, 'authenticator_cert')
             self.run([paths.cmd_mkdir, '-p', target_dir])
             self.copyFile(self.source_files[1][0], target_dir)
 
