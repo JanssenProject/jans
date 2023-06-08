@@ -7,7 +7,6 @@ This process is usually referred to as "inbound identity". In this document the 
 ## Requisites
 
 - A Janssen server with config-api installed
-- Understanding of how to [add and modify Agama flows](https://docs.jans.io/head/admin/developer/agama/quick-start/#add-the-flow-to-the-server) in your server
 - Starter knowledge of [OAuth2](https://www.ietf.org/rfc/rfc6749) and the Java programming language
 
 ## Terminology
@@ -31,18 +30,16 @@ For every provider to support there has to be an Agama flow that must:
 - Redirect the browser to the provider's site for the user to enter his login credentials
 - Return profile data of the given user
 
-Note the scope here is limited: no session is created in the Janssen server for the user - this occurs later in the [main](#main-flow) parent flow.
-
 To facilitate administrators' work, the following flows are already implemented:
 
-- [Apple](./apple/README.md)
-- [Facebook](./facebook)
-- [Github](./github)
-- [Google](./google)
+- Apple
+- Facebook
+- Github
+- Google
 
 ### Main flow
 
-The actual process of inbound identity occurs here. This flow is already [implemented](https://github.com/JanssenProject/jans/raw/main/docs/agama-catalog/jans/inboundID/io.jans.inbound.ExternalSiteLogin) and ready to use. The following is a summary of the steps involved:
+The actual process of inbound identity occurs here. This flow is already [implemented](https://github.com/JanssenProject/jans/raw/main/docs/agama-catalog/jans/inboundID/project/io.jans.inbound.ExternalSiteLogin) and ready to use. The following is a summary of the steps involved:
 
 1. A provider selection page is displayed. The list includes all (*enabled*) providers defined in the configuration of this flow. Additionally an option to use an existing local account is displayed (i.e. no inbound identity)
 
@@ -62,125 +59,66 @@ Feel free to modify this flow or create one based on it if customizations are re
 
 ## Deployment
 
+To start, ensure the Agama engine and bridge are enabled. More info [here](https://docs.jans.io/head/admin/developer/agama/engine-bridge-config/#availability).
+
 ### Add agama-inbound jar
 
-To start, let's add the required libraries to the authentication server:
+Let's add the required libraries to the authentication server:
 
 - Visit [this](https://maven.jans.io/maven/io/jans/agama-inbound/) page, navigate to the folder matching your Janssen server version, and download the file suffixed with `jar-with-dependencies.jar`
 - SSH to the server. Transfer the file to directory `/opt/jans/jetty/jans-auth/custom/libs`
 - Navigate to `/opt/jans/jetty/jans-auth/webapps` and edit the file `jans-auth.xml` by adding `<Set name="extraClasspath">./custom/libs/*</Set>` before the root tag closes
 - Restart the server, e.g. `systemctl restart jans-auth`
 
-### Add the basic authentication flow
+### Make a `gama` archive
 
-The basic authentication flow is employed when no provider is picked from the list (step 1 [here](#main-flow)) but the option to use an existing local account is taken. This flow is detailed in the Agama sample flows [page](https://docs.jans.io/head/admin/developer/agama/samples/#basic-authentication), however those contents can be skipped for the purpose of this setup.
+[gama files](https://docs.jans.io/head/agama/gama-format/) are deployable units in the Agama engine. To create one, simply zip the contents of [project](./project) subdirectory. The resulting archive must have two folders at top-level: `web` and `code`. The file extension does not matter in the end.
 
-- Ensure Agama engine is [enabled](https://docs.jans.io/head/admin/developer/agama/quick-start/#enable-the-engine). Download the basic flow [source](https://raw.githubusercontent.com/JanssenProject/jans/main/docs/admin/developer/agama/basic/io.jans.flow.sample.basic) file
+To quickly collect the contents of _project_, you can download the whole Jans repository or make a shallow clone of main branch using `git`. Using `git` is probably a faster way.
 
-- Use the API for adding flows as explained [here](https://docs.jans.io/head/admin/developer/agama/quick-start/#getting-an-access-token) and [here](https://docs.jans.io/head/admin/developer/agama/quick-start/#add-the-flow-to-the-server). A sample `curl` command would look like this: 
+### Deploy the archive
 
-    ```
-    curl -k -i -H 'Authorization: Bearer <token>' -H 'Content-Type: text/plain'
-         --data-binary @io.jans.flow.sample.basic
-         https://<your-host>/jans-config-api/api/v1/agama/io.jans.flow.sample.basic
-    ```
-- In the server, navigate to `/opt/jans/jetty/jans-auth/agama/ftl`. Create the folder hierarchy `samples/basic` there
+Transfer the archive to your server, and then run `/opt/jans/jans-cli/jans_cli_tui.py`. Follow the prompts and then enter the Agama menu (`Alt + m`). Using you keyboard TAB key, highlight the button "Upload", and press ENTER. Browse and select the file. 
 
-- Download the login [template](https://raw.githubusercontent.com/JanssenProject/jans/main/docs/admin/developer/agama/basic/login.ftlh) to `basic` directory 
+Wait 30 seconds and press the `d` key. This will show the result of the deployment. Ensure no errors are reported.
 
-### Add the main inbound flow
+## Configuration handling
 
-- Download the flow [source](https://raw.githubusercontent.com/JanssenProject/jans/main/docs/agama-catalog/jans/inboundID/io.jans.inbound.ExternalSiteLogin) and add it as you did with the basic flow, ensure you use `io.jans.inbound.ExternalSiteLogin` this time
+### Collect providers configurations
 
-- In the server, navigate to `/opt/jans/jetty/jans-auth/agama`. Create folders named `inboundID` inside existing `ftl` and `fl` subdirectories
+For every provider flow (see `code/provider` directory of the `project` folder) collect OAuth 2.0 configurations. Instructions to do this vary across different social sites. For the case of Facebook, for instance, this is approximately what needs to be done:
 
-- Download the default [logo](https://github.com/JanssenProject/jans/blob/main/docs/agama-catalog/jans/inboundID/none.png) and place it inside `/opt/jans/jetty/jans-auth/agama/fl/inboundID` folder
+- Login to Facebook and [register](https://developers.facebook.com/docs/development/register) as developer
+- Create an application with Facebook login capabilities
+- In the Facebook login settings add `https://<your-host>/jans-auth/fl/callback` as a valid OAuth redirect URI
+- Finally grab the app Id and secret from the app settings page
 
-- Download the provider selector [template](https://raw.githubusercontent.com/JanssenProject/jans/main/docs/agama-catalog/jans/inboundID/login-chooser.ftlh) and place it inside `/opt/jans/jetty/jans-auth/agama/ftl/inboundID` folder. Note templates go under **ftl**, not **fl**. Do the same with the e-mail prompt [template](https://raw.githubusercontent.com/JanssenProject/jans/main/docs/agama-catalog/jans/inboundID/email-prompt.ftlh)
+For Apple, some guidelines are included at the end of this document.
 
-### Add a provider flow
+### Supply providers flows configurations
 
-For simplicity, we'll illustrate here how to add one of the already implemented demo flows, namely, Facebook. Some guidelines on how to create a provider flow your own are given [here](#creating-a-provider-flow).
+Still in TUI, press the `c` key and then choose to export the sample configurations locally. Inspect the generated file. It provides "dummy" placeholders to supply the actual configurations.
 
-- Download the [utility flows](#utility-flows). Add them to the server as you did with the main flow
+Providers flows adhere to the following structure:
 
-- Download the Facebook flow [code](https://raw.githubusercontent.com/JanssenProject/jans/main/docs/agama-catalog/jans/inboundID/facebook/io.jans.inbound.Facebook). Add it using the API as well
+|Name|Description|
+|-|-|
+|`authzEndpoint`|The authorization endpoint as in section 3.1 of [RFC 7649](https://www.ietf.org/rfc/rfc6749)| 
+|`tokenEndpoint`|The token endpoint as in section 3.2 of [RFC 7649](https://www.ietf.org/rfc/rfc6749)|
+|`userInfoEndpoint`|The endpoint where profile data can be retrieved. This is not part of the OAuth2 specification|
+|`clientId`|The identifier of the client to use, see section 1.1 and 2.2 of [RFC 7649](https://www.ietf.org/rfc/rfc6749). This client is assumed to be *confidential* as in section 2.1|
+|`clientSecret`|Secret associated to the client|
+|`scopes`|A JSON array of strings that represent the scopes of the access tokens to retrieve|
+|`redirectUri`|Redirect URI as in section 3.1.2 of [RFC 7649](https://www.ietf.org/rfc/rfc6749)|
+|`clientCredsInRequestBody`|`true` indicates the client authenticates at the token endpoint by including the credentials in the body of the request, otherwise, HTTP Basic authentication is assumed. See section 2.3.1 of [RFC 7649](https://www.ietf.org/rfc/rfc6749)|
+|`custParamsAuthReq`|A JSON object (keys and values expected to be strings) with extra parameters to pass to the authorization endpoint if desired|
+|`custParamsTokenReq`|A JSON object (keys and values expected to be strings) with extra parameters to pass to the token endpoint if desired|
 
-- Download the [logo](https://github.com/JanssenProject/jans/blob/main/docs/agama-catalog/jans/inboundID/facebook/facebook.png) image and place it in `/opt/jans/jetty/jans-auth/agama/fl/inboundID`
+Edit the file with the properties you consider relevant for every provider. Generally, the first six are the only needed.
 
-- Login to Facebook and [register](https://developers.facebook.com/docs/development/register) as developer. Create an application with *Facebook login* capabilities. In the *Facebook login* settings add  `https://<your-host>/jans-auth/fl/callback` as a valid OAuth redirect URI. Finally grab the app Id and secret from the app settings page
+### Supply the main flow configurations
 
-#### Set configuration parameters
-
-- Create a JSON file like the below. Replace data in the placeholders appropriately:
-
-    ```
-    [{
-      "op": "replace",
-      "path": "/metadata/properties",
-      "value": {
-        "authzEndpoint": "https://www.facebook.com/v14.0/dialog/oauth",
-        "tokenEndpoint": "https://graph.facebook.com/v14.0/oauth/access_token",
-        "userInfoEndpoint": "https://graph.facebook.com/v14.0/me",
-        "clientId": "<APP-ID>",
-        "clientSecret": "<APP-SECRET>",
-        "scopes": ["email", "public_profile"]
-      }
-    }]
-    ```
-
-- Patch the flow using the API. A sample `curl` command would look like this (assuming the JSON file is named `fb.json`):
-
-    ```
-    curl -k -i -H 'Authorization: Bearer <token>' -H 'Content-Type: application/json-patch+json'
-         -X PATCH -d@fb.json
-         https://<your-host>/jans-config-api/api/v1/agama/io.jans.inbound.Facebook
-    ```
-
-Later, we'll dive into the meaning of the [configuration parameters](#provider-flow-configurations) set in this JSON file.
-
-### Parameterize the main flow
-
-So far, if the main flow is launched (learn about this topic [here](https://docs.jans.io/head/admin/developer/agama/quick-start/#craft-an-authentication-request)) a screen with an empty "Sign in with" list will be shown. Adding information about the known providers is required.
-
-- Create a JSON file like the below:
-
-    ```
-    [{
-      "op": "replace",
-      "path": "/metadata/properties",
-      "value": {
-        "facebook": {
-          "flowQname": "io.jans.inbound.Facebook",
-          "displayName": "Facebook",
-          "mappingClassField": "io.jans.inbound.Mappings.FACEBOOK",
-          "logoImg": "facebook.png"
-        }
-      }
-    }]
-    ```
-
-- Patch the main flow using the API. A sample `curl` command would look like this (assuming the JSON file is named `main.json`):
-
-    ```
-    curl -k -i -H 'Authorization: Bearer <token>' -H 'Content-Type: application/json-patch+json'
-         -X PATCH -d@main.json
-         https://<your-host>/jans-config-api/api/v1/agama/io.jans.inbound.ExternalSiteLogin
-    ```
-
-Later, we'll dive into the meaning of the [configuration parameters](#main-flow-configurations) set in this JSON file.
-
-**Note**: for limitations in the PATCH endpoint, do not use `"op": "add"` to add another provider. Use `"op": "replace"` and pass the whole JSON configuration (all providers) for `value`.
-
-### Test
-
-Launch the main flow (learn about this topic [here](https://docs.jans.io/head/admin/developer/agama/quick-start/#craft-an-authentication-request)). If everything was setup correctly, a screen with a "Sign in using" heading will be shown and next to it a link titled "Facebook". When clicking on the link, the browser will be taken to the Facebook website for authentication. A prompt for consent of release of personal information may appear as well. Finally, the browser is taken back to your server and then to the target application as described [here](#main-flow). 
-
-## Configuration parameters of flows 
-    
-### Main flow configurations
-
-Configuration is supplied in a JSON object whose keys are the identifiers of the existing identity providers. The associated value for a key is a JSON object itself and follows the structure represented by [this](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-auth-server/agama/inboundID/src/main/java/io/jans/inbound/Provider.java) Java class.
+The main flow (`io.jans.inbound.ExternalSiteLogin`) has to be parameterized as well. The configuration is held in a JSON object whose keys are the identifiers of the existing identity providers. The associated value for a key is a JSON object itself and follows the structure represented by [this](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-auth-server/agama/inboundID/src/main/java/io/jans/inbound/Provider.java) Java class.
 
 This is an example of a configuration for a couple of identity providers:
 
@@ -221,43 +159,9 @@ The table below explains the meaning of properties:
 **Notes:**
 
 - `logoImg` path is relative to the base path of the main flow, i.e. `inboundID`
-- Set `emailLinkingSafe` to true only if you trust the provider, i.e. the incoming e-mail data is securely verified. For security, never set it to `true` when `requestForEmail` is also `true` 
-    
-### Provider flow configurations
+- Set `emailLinkingSafe` to true only if you trust the provider, i.e. the incoming e-mail data is securely verified. For security, never set it to `true` when `requestForEmail` is also `true`
 
-Configurations for this kind of flows don't have to adhere to any specific structure. Developers are free to choose what fits best for their needs. Also note provider flows **must not** receive any inputs: the main flow won't pass any arguments when triggering them. Thus, design your flows so there is no use of `Inputs` but `Configs` directive in the [header](https://docs.jans.io/head/admin/developer/agama/dsl-full/#header-basics).
-
-In practice many identity providers adhere to the OAuth2 `code` grant, so you can re-use the structure represented by [this](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/agama/inboundID/src/main/java/io/jans/inbound/oauth2/OAuthParams.java) Java class for the purpose. Particularly, the already implemented flows (like Facebook) use it for their configuration.
-
-The table below explains the meaning of its properties:
-
-|Name|Description|
-|-|-|
-|`authzEndpoint`|The authorization endpoint as in section 3.1 of [RFC 7649](https://www.ietf.org/rfc/rfc6749)| 
-|`tokenEndpoint`|The token endpoint as in section 3.2 of [RFC 7649](https://www.ietf.org/rfc/rfc6749)|
-|`userInfoEndpoint`|The endpoint where profile data can be retrieved. This is not part of the OAuth2 specification|
-|`clientId`|The identifier of the client to use, see section 1.1 and 2.2 of [RFC 7649](https://www.ietf.org/rfc/rfc6749). This client is assumed to be *confidential* as in section 2.1|
-|`clientSecret`|Secret associated to the client|
-|`scopes`|A JSON array of strings that represent the scopes of the access tokens to retrieve|
-|`redirectUri`|Redirect URI as in section 3.1.2 of [RFC 7649](https://www.ietf.org/rfc/rfc6749)|
-|`clientCredsInRequestBody`|`true` indicates the client authenticates at the token endpoint by including the credentials in the body of the request, otherwise, HTTP Basic authentication is assumed. See section 2.3.1 of [RFC 7649](https://www.ietf.org/rfc/rfc6749)|
-|`custParamsAuthReq`|A JSON object (keys and values expected to be strings) with extra parameters to pass to the authorization endpoint if desired|
-|`custParamsTokenReq`|A JSON object (keys and values expected to be strings) with extra parameters to pass to the token endpoint if desired|
-
-Here is an example:
-
-```
-{
-  "authzEndpoint": "https://www.facebook.com/v14.0/dialog/oauth",
-  "tokenEndpoint": "https://graph.facebook.com/v14.0/oauth/access_token",
-  "userInfoEndpoint": "https://graph.facebook.com/v14.0/me",
-  "clientId": "90210",
-  "clientSecret": "changeit",
-  "scopes": ["email", "public_profile"]
-}
-```
-
-### Attribute mappings
+#### Attribute mappings
 
 This is the process through which the raw user profile data received by an identity provider is transformed into an object suitable for being stored in the Janssen's user database. Here, developers have the opportunity to "map" or "transform" the incoming data to one compatible with the data types, formats, and names required by the database.
 
@@ -272,40 +176,124 @@ As an example suppose a provider returned the following:
 }
 ```
 
-None of this attributes exist in Janssen, database adheres to LDAP naming. Conformant names would be `uid`, `mail`, `sn`, and `givenName`. Also, let's assume you want to set `displayName` to a string composed by the first and last names separated by a white space. Writing a mapping is required.
+None of this attributes exist in Janssen; database adheres to LDAP naming. Conformant names would be `uid`, `mail`, `sn`, and `givenName`. Also, let's assume you want to set `displayName` to a string composed by the first and last names separated by a white space. Writing a mapping is required.
 
 A mapping is implemented in Java in the form of a `java.util.function.UnaryOperator<Map<String, Object>>`, that is, a function that takes a `Map<String, Object>` as input and returns a `Map<String, Object>` as result. Several examples are provided [here](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/agama/inboundID/src/main/java/io/jans/inbound/Mappings.java). 
 
-Note property `mappingClassField` of every provider defined in the [main flow](#main-flow-configurations) points to the fully qualified name of a mapping. Some important considerations:
+Note property `mappingClassField` of every provider defined in the main flow points to the fully qualified name of a mapping. Not all mappings have to belong to the same class.
+
+### Import configurations
+
+Once the JSON file you have been editing is ready, hit `c` key again in TUI. This time choose to import the configuration and select the file.
+
+## Test
+
+Launch the main flow (learn about this topic [here](https://docs.jans.io/head/admin/developer/agama/jans-agama-engine/#launching-flows)). If everything was setup correctly, a screen with a "Sign in using" heading will be shown and next to it links to the providers sites. When clicking on a link, the browser will be taken to the given website for authentication. A prompt for consent of release of personal information may appear as well. Finally, the browser is returned back to your server and then to the target application as described [earlier](#main-flow). 
+
+## How to add another provider?
+
+<!-- **Note**: If you want to integrate Apple, guidelines are included at the end of this document. -->
+
+In practice most identity providers adhere to the OAuth2 `code` grant and require configurations similar to the flows already bundled here like Facebook or Google. In this case, follow these steps:
+
+1. In your local machine, create a new project with the required layout: directories `web`, `code` and `lib`
+1. Add a `.flow` file in `code`. Probably you can reuse the Facebook flow as is; rename it as needed
+1. If an existing attribute mapping cannot be reused, [implement](#writing-your-own-mapping) one for this provider and put the class in `lib` directory 
+1. Place the logo inside `web`
+1. Create the archive and deploy it in the server using TUI
+1. Set the configuration properties for this new project
+1. In the bigger project (the one containing the main flow), include the new provider, for instance:
+
+```
+"new-provider-ID": {
+  "flowQname": "flow filename omitting the .flow extension)",
+  "displayName": "...",
+  "mappingClassField": "Qualified name of the attribute mapping",
+  "logoImg": "path to the logo image relative to the base path of the main flow (you can use things like ../)"
+}
+```
+
+## Writing your own mapping
+
+Ensure you went through [this](#attribute-mappings) already. Some important considerations:
 
 - A mapping has to be declared as a public field in a public class
-- Not all mappings have to belong to the same class
 - Several providers can use the same mapping
 
-While working on a mapping, having to pack the class in a jar file, uploading it to the server, and then restarting  every time a modification is made can be a big burden. To avoid this you can upload the source (java) file to the scripts directory of Agama and leverage hot reloading as outlined [here](https://docs.jans.io/head/admin/developer/agama/java-classpath/). A "template" for quickly start writing a mapping is already [available](https://raw.githubusercontent.com/JanssenProject/jans/main/jans-auth-server/agama/inboundID/CustomMappings.java.txt). Save with `.java` extension only, edit the body of the lambda expression, upload to the server, and then update the main flow as follows:   
+While working on a mapping, having to pack the class in a jar file, uploading it to the server, and then restarting  every time a modification is made can be a big burden. To avoid this you can place the source (java) file in the _lib_ directory of your project and leverage hot reloading. Ensure to create the usual directory hierarchy in _lib_ corresponding to your class package. 
 
-- Add an instruction like `Call io.jans.inbound.CustomMappings#class` at the beginning of the flow body for the class to be effectively reloaded when the file is modified
+A "template" for quickly start writing a mapping is already [available](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/agama/inboundID/CustomMappings.java.txt). Save with `.java` extension and edit the body of the lambda expression. Also you have to update the main flow as follows:
+
+- Add an instruction like `Call io.jans.inbound.CustomMappings#class` at the beginning of the provider flow body (`.flow` file) for the class to be effectively reloaded when the file is modified
 - Set `mappingClassField` to `io.jans.inbound.CustomMappings.SAMPLE_MAPPING` for the provider of interest. You may like the idea of using a different name for the field - update the java file accordingly
 
 From there onwards, you only need to re-upload the file as many times as needed.
 
-If you use `DEBUG` [logging](https://docs.jans.io/head/admin/developer/agama/) level in your server, you will see in the log the result of the mapping every time it is applied. Check for a message like "Mapped profile is".
+If you use `DEBUG` level in your server, you will see in the log the result of the mapping every time it is applied. Check for a message like "Mapped profile is".
 
-## Utility flows
- 
-A couple of utility flows are available for developers writing flows:
+## Appendix: integrating "Sign In With Apple"
 
-|Qualified name|Source code|
-|-|-|
-|`io.jans.inbound.oauth2.AuthzCode`|[link](https://github.com/JanssenProject/jans/raw/main/docs/agama-catalog/jans/inboundID/io.jans.inbound.oauth2.AuthzCode)|
-|`io.jans.inbound.oauth2.AuthzCodeWithUserInfo`|[link](https://github.com/JanssenProject/jans/raw/main/docs/agama-catalog/jans/inboundID/io.jans.inbound.oauth2.AuthzCodeWithUserInfo)|
+Integrating this provider requires a good amount of work. In the following we provide a summary.
 
-- Authorization Code flow (`io.jans.inbound.oauth2.AuthzCode`): This flow implements the OAuth 2.0 authorization code grant where client authentication at the token endpoint occurs as described in section 2.3.1 of [RFC 6749](https://www.ietf.org/rfc/rfc6749) (HTTP basic authentication scheme). In summary, this flow redirects the browser to the external provider's site where the user will enter his credentials, then back at the Janssen redirect URL a `code` is obtained which is employed to issue an access token request. The flow returns the token response as received by the provider
+Ensure you have an Apple developer account to start. [This tutorial](https://github.com/ananay/apple-auth/blob/master/SETUP.md) does a great job at explaining the necessary steps. As you go with it, please collect the following elements:
 
-- Authorization Code flow with userInfo request (`io.jans.inbound.oauth2.AuthzCodeWithUserInfo`): This flow reuses the previous flow and additionally issues a request to a given userInfo URL passing the access token in the HTTP Authorization header. The response obtained (the profile data of the user) is returned in conjuction with the token response of the authorization code flow
+- A service ID
+- A team ID
+- A key ID and a key file 
 
-The above means that often, when writing a new flow for a provider, the task boils down to calling the latter flow and returning profile data only.
+You will be prompted to provide a domain name and a return URL. Provide `<your-jans-host>` and `https://<your-jans-host>/jans-auth/fl/callback` respectively, ensuring the changes are effectively saved in the developer's portal.
 
-## Creating a provider flow
+The configuration for this provider would look like: 
 
-A provider flow must fulfil the conditions as summarized [earlier](#provider). Developers have to figure out if the OAuth2 `code` authorization grant is supported, where the task is simplified to get the required [configurations](#provider-flow-configurations). Here, the source code flow of a flow like [Facebook](https://github.com/JanssenProject/jans/raw/main/docs/agama-catalog/jans/inboundID/facebook/io.jans.inbound.Facebook) can be re-used - probably without modification other than in the header.
+```
+{
+  "authzEndpoint": "https://appleid.apple.com/auth/authorize",
+  "tokenEndpoint": "https://appleid.apple.com/auth/token",
+  "clientId": "<SERVICE ID>",
+  "key": "<ONE-LINER CONTENTS OF KEY FILE>",
+  "keyId": "<KEY ID>",
+  "teamId": "<TEAM ID>",
+  "scopes": ["email", "name"],
+  "custParamsAuthReq": { "response_mode": "form_post" },
+  "clientCredsInRequestBody": true
+}
+```
+
+For the `key`, remove the lines regarding begin/end of the private key entirely. Also remove any line breaks: a one-liner is required. 
+
+For the main flow configuration, this should suffice:
+
+```
+"apple": {
+  "flowQname": "io.jans.inbound.Apple",
+  "displayName": "Apple",
+  "mappingClassField": "io.jans.inbound.Mappings.APPLE",
+  "logoImg": "apple.png"
+}
+```
+
+### Expected journey
+
+The accompanying images illustrate the steps end-users will go through when using the inbound identity flow taking the Apple route:
+
+1. Initial provider selector page
+
+    ![provider selector](apple/provider_selector.png)
+
+1. Prompt for credentials at Apple website
+
+    ![prompt credentials](apple/SIWA_creds.png)
+
+1. Prompt for a second factor, e.g. SMS (optional)
+
+    ![prompt second factor](apple/SIWA_MFA.png)
+
+1. Prompt for browser trust
+
+    ![browser trust](apple/SIWA_trust.png)
+
+1. Prompt before returning to original site
+
+    ![prompt continue](apple/SIWA_proceed.png)
+
+Finally, the user should land at the target application.
