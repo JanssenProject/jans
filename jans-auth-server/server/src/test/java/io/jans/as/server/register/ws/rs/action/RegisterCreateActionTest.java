@@ -26,6 +26,7 @@ import static org.testng.Assert.assertEquals;
 /**
  * @author Yuriy Z
  */
+@SuppressWarnings("java:S5979")
 @Listeners(MockitoTestNGListener.class)
 public class RegisterCreateActionTest {
 
@@ -77,7 +78,7 @@ public class RegisterCreateActionTest {
         RegisterRequest request = new RegisterRequest();
         request.setLifetime(5);
 
-        assertEquals(10, registerCreateAction.getClientLifetime(request));
+        assertEquals(registerCreateAction.getClientLifetime(request), 10);
     }
 
     @Test
@@ -88,6 +89,6 @@ public class RegisterCreateActionTest {
         RegisterRequest request = new RegisterRequest();
         request.setLifetime(5);
 
-        assertEquals(5, registerCreateAction.getClientLifetime(request));
+        assertEquals(registerCreateAction.getClientLifetime(request), 5);
     }
 }
