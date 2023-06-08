@@ -41,6 +41,12 @@ Audit events:
 - SSA_CREATE
 - SSA_READ 
 
+
+# Enable/Disable Audit Logs on Jans TUI
+Using Jans TUI we can easily `Enable` or `Disable` Audit Logs. Go to `/opt/jans/jans-cli/config-cli-tui.py` select `Auth Server` tab then `Properties` tab. Now set the value of  `enabledOAuthAuditLogging` pressing Enter button on your keyboard. Save it and let's see below image 
+
+![auditLogs](https://github.com/mmrraju/jans/assets/43112579/a72430fd-6616-4dc7-841c-9a1d8feb994a)
+
 ## Have questions in the meantime?
 
 You can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussion) or the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). Any questions you have will help determine what information our documentation should cover.
