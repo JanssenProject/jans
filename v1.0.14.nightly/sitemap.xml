@@ -1971,11 +1971,6 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/v1.0.14.nightly/agama-catalog/jans/inboundID/apple/</loc>
-         <lastmod>2023-06-08</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
          <loc>https://jans.io/docs/v1.0.14.nightly/agama-catalog/vendor/</loc>
          <lastmod>2023-06-08</lastmod>
          <changefreq>daily</changefreq>
