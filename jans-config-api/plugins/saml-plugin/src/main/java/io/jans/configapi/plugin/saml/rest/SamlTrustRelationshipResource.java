@@ -5,6 +5,7 @@ import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.plugin.saml.util.Constants;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
+import io.jans.configapi.plugin.saml.model.config.SAMLTrustRelationship;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -23,7 +24,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
 
-import java.util.List;
+import java.util.*;
 
 @Path(Constants.TRUST_RELATIONSHIP)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -36,14 +37,13 @@ public class SamlTrustRelationshipResource extends BaseResource {
 
     @Operation(summary = "Get details of of Trust Relationship", description = "Get details of of Trust Relationship", operationId = "get-saml-trust-relationship", tags = {
     "SAML - Trust Relationship" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-            "https://jans.io/oauth/config/saml.readonly" }))
+            Constants.SAML_READ_ACCESS }))
     @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = samlRegistrationEntry.class)))),
+    @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = SAMLTrustRelationship.class)))),
     @ApiResponse(responseCode = "401", description = "Unauthorized"),
     @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @Path(Constants.ENTRIES + ApiConstants.USERNAME_PATH)
-    @ProtectedApi(scopes = {ApiAccessConstants.saml_CONFIG_READ_ACCESS})
+    @ProtectedApi(scopes = {Constants.SAML_READ_ACCESS})
     public Response findAllRegistered() {
         List entries = new ArrayList();
         return Response.ok(entries).build();

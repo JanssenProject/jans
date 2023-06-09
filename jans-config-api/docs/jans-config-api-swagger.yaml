@@ -7857,19 +7857,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        whitePagesCanView:
-          type: boolean
-        adminCanAccess:
-          type: boolean
-        userCanEdit:
-          type: boolean
-        adminCanEdit:
+        userCanView:
           type: boolean
         adminCanView:
           type: boolean
         userCanAccess:
           type: boolean
-        userCanView:
+        adminCanAccess:
+          type: boolean
+        adminCanEdit:
+          type: boolean
+        userCanEdit:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -8191,8 +8191,6 @@ components:
         dynamicRegistrationExpirationTime:
           type: integer
           format: int32
-        dcrForbidExpirationTimeInRequest:
-          type: boolean
         dynamicRegistrationPersistClientAuthorizations:
           type: boolean
         trustedClientEnabled:
@@ -8434,6 +8432,8 @@ components:
         rotateDeviceSecret:
           type: boolean
         returnDeviceSecretFromAuthzEndpoint:
+          type: boolean
+        dcrForbidExpirationTimeInRequest:
           type: boolean
         dcrSignatureValidationEnabled:
           type: boolean
@@ -9222,8 +9222,6 @@ components:
         ttl:
           type: integer
           format: int32
-        displayName:
-          type: string
         authenticationMethod:
           type: string
           enum:
@@ -9235,6 +9233,8 @@ components:
           - tls_client_auth
           - self_signed_tls_client_auth
           - none
+        displayName:
+          type: string
         baseDn:
           type: string
         inum:
@@ -9331,6 +9331,9 @@ components:
           type: array
           items:
             type: string
+        requestedLifetime:
+          type: integer
+          format: int32
     CustomObjectAttribute:
       type: object
       properties:
@@ -9342,10 +9345,10 @@ components:
           type: array
           items:
             type: object
-        value:
-          type: object
         displayValue:
           type: string
+        value:
+          type: object
     LocalizedString:
       type: object
       properties:
