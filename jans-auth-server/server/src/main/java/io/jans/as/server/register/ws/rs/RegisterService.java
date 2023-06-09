@@ -325,6 +325,9 @@ public class RegisterService {
         if (requestObject.getDefaultMaxAge() != null) {
             client.setDefaultMaxAge(requestObject.getDefaultMaxAge());
         }
+        if (!update) { // do not allow update it. It can be set only during creation
+            client.getAttributes().setRequestedLifetime(requestObject.getLifetime());
+        }
         List<String> defaultAcrValues = requestObject.getDefaultAcrValues();
         if (defaultAcrValues != null && !defaultAcrValues.isEmpty()) {
             client.setDefaultAcrValues(listAsArrayWithoutDuplicates(defaultAcrValues));

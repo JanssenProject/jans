@@ -319,6 +319,7 @@
     "jansOpenIdConnectVersion":"openidconnect-1.0",
     "jansId":"https://%(hostname)s/oxid/service/jans/inum",
     "dynamicRegistrationExpirationTime":-1,
+    "dcrForbidExpirationTimeInRequest": false,
     "dynamicRegistrationPersistClientAuthorizations":true,
     "trustedClientEnabled":true,
     "skipAuthorizationForOpenIdScopeAndPairwiseId": false,
