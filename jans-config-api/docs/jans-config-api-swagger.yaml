@@ -8191,6 +8191,8 @@ components:
         dynamicRegistrationExpirationTime:
           type: integer
           format: int32
+        dcrForbidExpirationTimeInRequest:
+          type: boolean
         dynamicRegistrationPersistClientAuthorizations:
           type: boolean
         trustedClientEnabled:
