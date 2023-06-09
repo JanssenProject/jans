@@ -11,8 +11,7 @@ Modern systems can work with different DB. Jans is also not exception from this 
 
 One of the main targets of ORM module is to provide simple lightweight layer to access DB. Also it provides abstractions which hide dependency to specific DB.
 
-
-** Supported DB **
+## Supported DB
 
 Jans has next persistence modules out-of-the-box:
 ~  [LDAP](.//ldap-config.md)
@@ -23,7 +22,7 @@ Jans has next persistence modules out-of-the-box:
 ~  [MariaDB](.//mariadb.md)
 ~  [Hybrid](.//postgres-config.md). This is virtual DB layer which allows to combine few DB types based on record type.
 
-** Configuration **
+## Configuration
 
 Type of DB layer plugin is specified in */etc/jans/conf/*:
 
@@ -44,7 +43,7 @@ These files contains DB specific properties and format of them is specified in t
 
 The applications reloads configration from these files after start up on files date time modifications.
 
-** Architecture **
+## Architecture
 
 Jans ORM has modular architecture. The are few layers in this implementation
 
@@ -67,7 +66,7 @@ Jans ORM has modular architecture. The are few layers in this implementation
 1. *jans-orm-ldap, jans-orm-couchbase, jans-orm-spanner, jans-orm-sql*: These are DB specific implementations.
 
 
-** Sample table and ORM API **
+## Sample table and ORM API
 
 In order to work with DB ORM should know which data is needed by application. Most part of this information it takes from DB schema at startup but rest of it developer should define in java bean. Here is typical schema with comments:
 
@@ -173,7 +172,7 @@ Main *PersistenceEntryManager* API methods which applications can use:
     <T> void importEntry(String dn, Class<T> entryClass, List<AttributeData> data);
 ``` 
 
-** New DB support and integration **
+## New DB support and integration
 
 New ORM implementation requires only few classes and interfaces implementation
 
@@ -188,7 +187,7 @@ New ORM implementation requires only few classes and interfaces implementation
 After this it's enough to put new ORM DB module into final war or follow customization sections to add jar file to custom jetty classpath.
 
 
-** DB Schema **
+## DB Schema
 
 The DB schema and beans definitions should match each other. During deployment setup generates schema and indexes based on rules in 
 schema [file](https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/schema/jans_schema.json). The data types defined in it setup map to DB SQL types based on default [rules](https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/rdbm/ldap_sql_data_type_mapping.json).
