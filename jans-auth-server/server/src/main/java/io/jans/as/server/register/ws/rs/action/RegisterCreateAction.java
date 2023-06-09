@@ -44,6 +44,7 @@ import org.slf4j.Logger;
 import java.net.URI;
 import java.util.*;
 
+import static org.apache.commons.lang.BooleanUtils.isFalse;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 /**
@@ -145,13 +146,14 @@ public class RegisterCreateAction {
             final Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
             client.setClientIdIssuedAt(calendar.getTime());
 
-            if (appConfiguration.getDynamicRegistrationExpirationTime() > 0) { // #883 : expiration can be -1, mean does not expire
-                calendar.add(Calendar.SECOND, appConfiguration.getDynamicRegistrationExpirationTime());
+            final int lifetime = getClientLifetime(r);
+            if (lifetime > 0) { // #883 : expiration can be -1, mean does not expire
+                calendar.add(Calendar.SECOND, lifetime);
                 client.setClientSecretExpiresAt(calendar.getTime());
                 client.setExpirationDate(calendar.getTime());
-                client.setTtl(appConfiguration.getDynamicRegistrationExpirationTime());
+                client.setTtl(lifetime);
             }
-            client.setDeletable(client.getClientSecretExpiresAt() != null);
+            client.setDeletable(client.getExpirationDate() != null);
 
             setClientName(r, client);
 
@@ -193,6 +195,15 @@ public class RegisterCreateAction {
         builder.type(MediaType.APPLICATION_JSON_TYPE);
         applicationAuditLogger.sendMessage(oAuth2AuditLog);
         return builder.build();
+    }
+
+    public int getClientLifetime(RegisterRequest registerRequest) {
+        int lifetime = appConfiguration.getDynamicRegistrationExpirationTime();
+        final Integer requestedLifeTime = registerRequest.getLifetime();
+        if (isFalse(appConfiguration.getDcrForbidExpirationTimeInRequest()) && requestedLifeTime != null) {
+            return requestedLifeTime;
+        }
+        return lifetime;
     }
 
     private void executeDynamicScrypt(RegisterRequest r, Client client, HttpServletRequest httpRequest) {
