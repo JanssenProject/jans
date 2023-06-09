@@ -224,6 +224,7 @@ public class TocService {
 				if (metadataEntry.hasNonNull("aaguid")) {
 					String aaguid = metadataEntry.get("aaguid").asText();
 					try {
+						certificateVerifier.verifyStatusAcceptable(aaguid, metadataEntry);
 						JsonNode metaDataStatement = dataMapperService
 								.readTree(metadataEntry.get("metadataStatement").toPrettyString());
 						if (metaDataStatement != null) {
@@ -234,6 +235,8 @@ public class TocService {
 
 					} catch (IOException e) {
 						log.error("Error parsing the metadata statement", e);
+					} catch (Fido2RuntimeException e) {
+						log.error("Failed to verify acceptable status: {}", e.getMessage());
 					}
 
 				} else if (metadataEntry.hasNonNull("aaid")) {
