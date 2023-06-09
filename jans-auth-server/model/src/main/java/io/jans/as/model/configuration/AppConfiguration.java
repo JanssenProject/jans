@@ -633,6 +633,9 @@ public class AppConfiguration implements Configuration {
     private Boolean returnDeviceSecretFromAuthzEndpoint = false;
 
     // DCR
+    @DocProperty(description = "Boolean value specifying whether to allow to set client's expiration time in seconds during dynamic registration.", defaultValue = "false")
+    private Boolean dcrForbidExpirationTimeInRequest = false;
+
     @DocProperty(description = "Boolean value enables DCR signature validation. Default is false", defaultValue = "false")
     private Boolean dcrSignatureValidationEnabled = false;
 
@@ -2181,6 +2184,17 @@ public class AppConfiguration implements Configuration {
 
     public void setJansId(String jansId) {
         this.jansId = jansId;
+    }
+
+    public Boolean getDcrForbidExpirationTimeInRequest() {
+        if (dcrForbidExpirationTimeInRequest == null) {
+            dcrForbidExpirationTimeInRequest = false;
+        }
+        return dcrForbidExpirationTimeInRequest;
+    }
+
+    public void setDcrForbidExpirationTimeInRequest(Boolean dcrForbidExpirationTimeInRequest) {
+        this.dcrForbidExpirationTimeInRequest = dcrForbidExpirationTimeInRequest;
     }
 
     public int getDynamicRegistrationExpirationTime() {
