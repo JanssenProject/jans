@@ -119,6 +119,17 @@ public class ClientAttributes implements Serializable {
     @JsonProperty("minimumAcrPriorityList")
     private List<String> minimumAcrPriorityList;
 
+    @JsonProperty("requestedLifetime")
+    private Integer requestedLifetime; // in seconds
+
+    public Integer getRequestedLifetime() {
+        return requestedLifetime;
+    }
+
+    public void setRequestedLifetime(Integer requestedLifetime) {
+        this.requestedLifetime = requestedLifetime;
+    }
+
     public Boolean getMinimumAcrLevelAutoresolve() {
         return minimumAcrLevelAutoresolve;
     }
@@ -430,6 +441,7 @@ public class ClientAttributes implements Serializable {
                 ", additionalTokenEndpointAuthMethods=" + additionalTokenEndpointAuthMethods +
                 ", minimumAcrPriorityList=" + minimumAcrPriorityList +
                 ", defaultPromptLogin=" + defaultPromptLogin +
+                ", requestedLifetime=" + requestedLifetime +
                 '}';
     }
 }

@@ -220,6 +220,11 @@ public enum RegisterRequestParam {
     DEFAULT_MAX_AGE("default_max_age"),
 
     /**
+     * Client lifetime in seconds.
+     */
+    LIFETIME("lifetime"),
+
+    /**
      * Boolean value specifying whether the auth_time Claim in the ID Token is required. It is required when the value
      * is true. The auth_time Claim request in the Request Object overrides this setting.
      */

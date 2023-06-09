@@ -112,6 +112,7 @@ public class RegisterRequest extends BaseRequest {
     private List<AuthenticationMethod> additionalTokenEndpointAuthMethods;
     private SignatureAlgorithm tokenEndpointAuthSigningAlg;
     private Integer defaultMaxAge;
+    private Integer lifetime;
     private List<String> defaultAcrValues;
     private Integer minimumAcrLevel;
     private Boolean minimumAcrLevelAutoresolve;
@@ -1069,6 +1070,24 @@ public class RegisterRequest extends BaseRequest {
     }
 
     /**
+     * Gets client life time
+     *
+     * @return client life time
+     */
+    public Integer getLifetime() {
+        return lifetime;
+    }
+
+    /**
+     * Sets client life time
+     *
+     * @param lifetime life time
+     */
+    public void setLifetime(Integer lifetime) {
+        this.lifetime = lifetime;
+    }
+
+    /**
      * Gets minimum acr level
      *
      * @return minimum acr level
@@ -1599,6 +1618,7 @@ public class RegisterRequest extends BaseRequest {
         result.setParLifetime(integerOrNull(requestObject, PAR_LIFETIME.toString()));
         result.setRequirePar(booleanOrNull(requestObject, REQUIRE_PAR.toString()));
         result.setDefaultMaxAge(integerOrNull(requestObject, DEFAULT_MAX_AGE.toString()));
+        result.setLifetime(integerOrNull(requestObject, LIFETIME.toString()));
         result.setTlsClientAuthSubjectDn(requestObject.optString(TLS_CLIENT_AUTH_SUBJECT_DN.toString()));
         result.setAllowSpontaneousScopes(requestObject.optBoolean(ALLOW_SPONTANEOUS_SCOPES.toString()));
         result.setSpontaneousScopes(extractListByKey(requestObject, SPONTANEOUS_SCOPES.toString()));
@@ -1808,6 +1828,9 @@ public class RegisterRequest extends BaseRequest {
         }
         if (defaultMaxAge != null) {
             function.apply(DEFAULT_MAX_AGE.toString(), defaultMaxAge.toString());
+        }
+        if (lifetime != null) {
+            function.apply(LIFETIME.toString(), lifetime.toString());
         }
         if (defaultAcrValues != null && !defaultAcrValues.isEmpty()) {
             function.apply(DEFAULT_ACR_VALUES.toString(), toJSONArray(defaultAcrValues));
