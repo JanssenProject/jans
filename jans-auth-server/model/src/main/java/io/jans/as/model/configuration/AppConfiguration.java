@@ -2187,7 +2187,9 @@ public class AppConfiguration implements Configuration {
     }
 
     public Boolean getDcrForbidExpirationTimeInRequest() {
-        if (dcrForbidExpirationTimeInRequest) dcrForbidExpirationTimeInRequest = false;
+        if (dcrForbidExpirationTimeInRequest == null) {
+            dcrForbidExpirationTimeInRequest = false;
+        }
         return dcrForbidExpirationTimeInRequest;
     }
 

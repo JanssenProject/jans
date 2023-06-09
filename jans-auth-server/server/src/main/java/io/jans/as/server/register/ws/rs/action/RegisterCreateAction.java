@@ -44,6 +44,7 @@ import org.slf4j.Logger;
 import java.net.URI;
 import java.util.*;
 
+import static org.apache.commons.lang.BooleanUtils.isFalse;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 /**
@@ -199,7 +200,7 @@ public class RegisterCreateAction {
     public int getClientLifetime(RegisterRequest registerRequest) {
         int lifetime = appConfiguration.getDynamicRegistrationExpirationTime();
         final Integer requestedLifeTime = registerRequest.getLifetime();
-        if (!appConfiguration.getDcrForbidExpirationTimeInRequest() && requestedLifeTime != null) {
+        if (isFalse(appConfiguration.getDcrForbidExpirationTimeInRequest()) && requestedLifeTime != null) {
             return requestedLifeTime;
         }
         return lifetime;
