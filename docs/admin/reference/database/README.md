@@ -33,15 +33,15 @@ persistence.type=ldap
 The list of allowed values is *ldap, couchbase, sql, spanner, hybrid*. It's defined in [list](https://github.com/JanssenProject/jans/blob/main/jans-orm/core/src/main/java/io/jans/orm/PersistenceEntryManager.java#L48).
 
 The corresponding list of configuration files for these persistence types are:
-- jans-ldap.properties
-- jans-couchbase.properties
-- jans-spanner.properties
-- jans-sql.properties
-- jans-hybrid.properties
+- *jans-ldap.properties*
+- *jans-couchbase.properties*
+- *jans-spanner.properties*
+- *jans-sql.properties*
+- *jans-hybrid.properties*
 
 These files contains DB specific properties and format of them is specified in the relevant sections of this documentation.
 
-The applications reloads configration from these files after start up on files date time modifications.
+The applications reloads configuration from these files after start up on files date time modifications.
 
 ## Architecture
 
