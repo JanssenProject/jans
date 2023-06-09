@@ -29,7 +29,13 @@
             <class name="io.jans.as.server.authorize.ws.rs.AuthorizeRestWebServiceValidatorTest" />
             <class name="io.jans.as.server.authorize.ws.rs.AuthorizeRestWebServiceImplTest" />
             <class name="io.jans.as.server.authorize.ws.rs.AuthorizeActionTest" />
+
+            <!-- REGISTER -->
             <class name="io.jans.as.server.register.ws.rs.SsaValidationConfigServiceTest" />
+            <class name="io.jans.as.server.register.ws.rs.action.RegisterCreateActionTest" />
+            <class name="io.jans.as.server.register.ws.rs.RegisterServiceTest" />
+
+            <!-- SESSION -->
             <class name="io.jans.as.server.session.ws.rs.EndSessionRestWebServiceImplTest" />
             <class name="io.jans.as.server.session.ws.rs.EndSessionServiceTest" />
         </classes>
