@@ -1,5 +1,9 @@
 package io.jans.fido2.service.verifier;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import io.jans.fido2.exception.Fido2MissingAttestationCertException;
 import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.service.Base64Service;
@@ -34,6 +38,8 @@ class CertificateVerifierTest {
 
     @Mock
     private CertificateService certificateService;
+
+    private final ObjectMapper mapper = new ObjectMapper();
 
     @Test
     void checkForTrustedCertsInAttestation_ifDuplicateSignatureNotIsEmpty_fido2RuntimeException() {
@@ -217,5 +223,90 @@ class CertificateVerifierTest {
         verify(log).warn("Probably not self signed cert. Cert verification problem {}", ex.getMessage());
         verify(cert, never()).getIssuerDN();
         verify(cert, never()).getSubjectDN();
+    }
+
+    @Test
+    void verifyStatusAcceptable_ifStatusReportsIsNull_fido2RuntimeException() {
+        String aaguid = "test_aaguid";
+        JsonNode metadataEntry = mock(JsonNode.class);
+        when(metadataEntry.has("statusReports")).thenReturn(false);
+
+        Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> certificateVerifier.verifyStatusAcceptable(aaguid, metadataEntry));
+        assertNotNull(ex);
+        assertEquals(ex.getMessage(), String.format("Ignore entry AAGUID: %s due it does not contain 'statusReports' field", aaguid));
+
+        verifyNoInteractions(log);
+    }
+
+    @Test
+    void verifyStatusAcceptable_ifStatusReportsIsEmpty_fido2RuntimeException() {
+        String aaguid = "test_aaguid";
+        JsonNode metadataEntry = mock(JsonNode.class);
+        when(metadataEntry.has("statusReports")).thenReturn(true);
+        when(metadataEntry.get("statusReports")).thenReturn(mapper.createObjectNode());
+
+        Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> certificateVerifier.verifyStatusAcceptable(aaguid, metadataEntry));
+        assertNotNull(ex);
+        assertEquals(ex.getMessage(), String.format("Ignore entry AAGUID: %s because 'statusReports' doesn't contain values", aaguid));
+
+        verifyNoInteractions(log);
+    }
+
+    @Test
+    void verifyStatusAcceptable_ifStatusIsNull_fido2RuntimeException() {
+        String aaguid = "test_aaguid";
+        JsonNode metadataEntry = mock(JsonNode.class);
+        when(metadataEntry.has("statusReports")).thenReturn(true);
+        JsonNode statusItem = mock(JsonNode.class);
+        ArrayNode statusReports = mapper.createArrayNode();
+        statusReports.add(statusItem);
+        when(metadataEntry.get("statusReports")).thenReturn(statusReports);
+        when(statusItem.has("status")).thenReturn(false);
+
+        Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> certificateVerifier.verifyStatusAcceptable(aaguid, metadataEntry));
+        assertNotNull(ex);
+        assertEquals(ex.getMessage(), String.format("Ignore entry AAGUID: %s due it does not contain 'status' field", aaguid));
+
+        verifyNoInteractions(log);
+    }
+
+    @Test
+    void verifyStatusAcceptable_ifAcceptableStatusIsFalse_fido2RuntimeException() {
+        String aaguid = "test_aaguid";
+        JsonNode metadataEntry = mock(JsonNode.class);
+        when(metadataEntry.has("statusReports")).thenReturn(true);
+        JsonNode statusItem = mock(JsonNode.class);
+        ArrayNode statusReports = mapper.createArrayNode();
+        statusReports.add(statusItem);
+        when(metadataEntry.get("statusReports")).thenReturn(statusReports);
+        when(statusItem.has("status")).thenReturn(true);
+        String statusString = "USER_VERIFICATION_BYPASS";
+        when(statusItem.get("status")).thenReturn(new TextNode(statusString));
+        when(statusItem.get("effectiveDate")).thenReturn(new TextNode("TEST_DATE"));
+
+        Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> certificateVerifier.verifyStatusAcceptable(aaguid, metadataEntry));
+        assertNotNull(ex);
+        assertEquals(ex.getMessage(), String.format("Ignore entry AAGUID: %s due to status: %s", aaguid, statusString));
+
+        verify(log).debug(eq("Authenticator AAGUID {} status {} effective date {}"), any(), any(), any());
+    }
+
+    @Test
+    void verifyStatusAcceptable_validValues_valid() {
+        String aaguid = "test_aaguid";
+        JsonNode metadataEntry = mock(JsonNode.class);
+        when(metadataEntry.has("statusReports")).thenReturn(true);
+        JsonNode statusItem = mock(JsonNode.class);
+        ArrayNode statusReports = mapper.createArrayNode();
+        statusReports.add(statusItem);
+        when(metadataEntry.get("statusReports")).thenReturn(statusReports);
+        when(statusItem.has("status")).thenReturn(true);
+        String statusString = "FIDO_CERTIFIED";
+        when(statusItem.get("status")).thenReturn(new TextNode(statusString));
+        when(statusItem.get("effectiveDate")).thenReturn(new TextNode("TEST_DATE"));
+
+        certificateVerifier.verifyStatusAcceptable(aaguid, metadataEntry);
+
+        verify(log).debug(eq("Authenticator AAGUID {} status {} effective date {}"), any(), any(), any());
     }
 }
