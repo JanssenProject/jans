@@ -7,24 +7,24 @@ tags:
 
 # Overview
 
-Modern systems can work with different DB. Jans is also not exception from this rule. Currently it can work with different DB types and also can work in hybrid environment where application can use the strong power of each DB. This parts is based on [jans-orm](https://github.com/JanssenProject/jans/tree/main/jans-orm) layer. It has pluggable architecture which allows to add support of more DB in future.
+Modern systems can work with different DB. Jans is also not exception from this rule. Currently it can work with different DB types and also can work in hybrid environment where application can use the strong power of each DB. This parts is based on [jans-orm](https://github.com/JanssenProject/jans/tree/main/jans-orm) layer. It has pluggable architecture which allows to add support more DB in future.
 
 One of the main targets of ORM module is to provide simple lightweight layer to access DB. Also it provides abstractions which hide dependency to specific DB.
 
 ## Supported DB
 
 Jans has next persistence modules out-of-the-box:
-~  [LDAP](.//ldap-config.md)
-~  [Couchbase](.//cb-config.md)
-~  [Spanner](.//spanner-config.md)
-~  [MySQL](.//mysql-config.md)
-~  [PostreSQL](.//postgres-config.md)
-~  [MariaDB](.//mariadb.md)
-~  [Hybrid](.//postgres-config.md). This is virtual DB layer which allows to combine few DB types based on record type.
+-  [LDAP](.//ldap-config.md)
+-  [Couchbase](.//cb-config.md)
+-  [Spanner](.//spanner-config.md)
+-  [MySQL](.//mysql-config.md)
+-  [PostreSQL](.//postgres-config.md)
+-  [MariaDB](.//mariadb.md)
+-  [Hybrid](.//postgres-config.md). This is virtual DB layer which allows to combine few DB types based on record type.
 
 ## Configuration
 
-Type of DB layer plugin is specified in */etc/jans/conf/*:
+Type of DB layer is specified in */etc/jans/conf/*:
 
 ```
 persistence.type=ldap
@@ -33,11 +33,11 @@ persistence.type=ldap
 The list of allowed values is *ldap, couchbase, sql, spanner, hybrid*. It's defined in [list](https://github.com/JanssenProject/jans/blob/main/jans-orm/core/src/main/java/io/jans/orm/PersistenceEntryManager.java#L48).
 
 The corresponding list of configuration files for these persistence types are:
-~ jans-ldap.properties
-~ jans-couchbase.properties
-~ jans-spanner.properties
-~ jans-sql.properties
-~ jans-hybrid.properties
+- jans-ldap.properties
+- jans-couchbase.properties
+- jans-spanner.properties
+- jans-sql.properties
+- jans-hybrid.properties
 
 These files contains DB specific properties and format of them is specified in the relevant sections of this documentation.
 
@@ -49,11 +49,11 @@ Jans ORM has modular architecture. The are few layers in this implementation
 
 1. *jans-orm-core*: This is base layer with next functionality:
 
-~ define API methods to work with DB without specific DB dependency
+    - define API methods to work with DB without specific DB dependency
 
-~ provide base implementation with reusable parts needed for DB modules implementations
+    - provide base implementation with reusable parts needed for DB modules implementation
 
-~ scan beans and work with ORM layer annotations
+    - scan beans and work with ORM layer annotations
   
 1. *jans-orm-annotation*: Define annotations which instruct ORM about how to wrok with beans and properties 
 
@@ -68,7 +68,7 @@ Jans ORM has modular architecture. The are few layers in this implementation
 
 ## Sample table and ORM API
 
-In order to work with DB ORM should know which data is needed by application. Most part of this information it takes from DB schema at startup but rest of it developer should define in java bean. Here is typical schema with comments:
+In order to work with DB ORM should know which data is needed for application. Most part of this information it takes from DB schema at startup but rest of it developer should define in java bean. Here is typical schema with comments:
 
 ```
 // Specify that this is Table/objectClass structure
@@ -174,7 +174,7 @@ Main *PersistenceEntryManager* API methods which applications can use:
 
 ## New DB support and integration
 
-New ORM implementation requires only few classes and interfaces implementation
+The ORM developed with perspective to simplify add new DB support. New ORM implementation requires only few classes and interfaces implementation.
 
 1. Extend `public interface NewDbOperationService extends PersistenceOperationService` interface to define list of CRUD method which `DbEntryManager` can use.
 
