@@ -1,0 +1,14 @@
+io.jans.orm
+io.jans.orm.event
+io.jans.orm.exception
+io.jans.orm.exception.operation
+io.jans.orm.extension
+io.jans.orm.impl
+io.jans.orm.impl.model
+io.jans.orm.model
+io.jans.orm.operation
+io.jans.orm.operation.auth
+io.jans.orm.reflect.property
+io.jans.orm.reflect.util
+io.jans.orm.service
+io.jans.orm.watch
