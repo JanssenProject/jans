@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.0.14](https://github.com/JanssenProject/jans/compare/jans-config-api-v1.0.13...jans-config-api-v1.0.14) (2023-06-12)
+
+
+### Features
+
+* **config-api:** cache-refresh plugin code ([#5000](https://github.com/JanssenProject/jans/issues/5000)) ([eed9526](https://github.com/JanssenProject/jans/commit/eed9526415996278b52806cfe37a4dfb5076aa00))
+* **jans-auth-server:** added ability to set client expiration via DCR [#5057](https://github.com/JanssenProject/jans/issues/5057) ([#5185](https://github.com/JanssenProject/jans/issues/5185)) ([a15054b](https://github.com/JanssenProject/jans/commit/a15054b1c3350d6ee0bb9c92d39f6b2d992abfa1))
+* **jans-auth-server:** made not found exceptions logging level configurable [#4973](https://github.com/JanssenProject/jans/issues/4973) ([#4982](https://github.com/JanssenProject/jans/issues/4982)) ([98be22b](https://github.com/JanssenProject/jans/commit/98be22b81d365b631d2b7ffcf76d1f3a5ea1935b))
+
+
+### Bug Fixes
+
+* **config-api:** resolved dependency conflict for CustomScriptService ([3121833](https://github.com/JanssenProject/jans/commit/312183373f72f7916b3c4c6cc5176420bba3bae0))
+* **config-api:** revert hide smtp and client model utility method ([#4976](https://github.com/JanssenProject/jans/issues/4976)) ([6519744](https://github.com/JanssenProject/jans/commit/651974408565441951b6a4ca80a4ab555c01352f))
+* **config-api:** test compile issue for cache refresh plugin ([#5144](https://github.com/JanssenProject/jans/issues/5144)) ([af3e707](https://github.com/JanssenProject/jans/commit/af3e7075896cec36f32ee91947dfa1304ca1ebbd))
+* **jans-auth-server:** Illegal op_policy_uri parameter: - exclude entries with blank values from discovery response (oxauth counterpart) [#4888](https://github.com/JanssenProject/jans/issues/4888) ([#4934](https://github.com/JanssenProject/jans/issues/4934)) ([8603290](https://github.com/JanssenProject/jans/commit/8603290cee37c609f9572760c8cf299aba80160e))
+* prepare for 1.0.14 release ([25ccadf](https://github.com/JanssenProject/jans/commit/25ccadf85327ea14685c6066dc6609919e4f2865))
+
 ## [1.0.13](https://github.com/JanssenProject/jans/compare/jans-config-api-v1.0.12...jans-config-api-v1.0.13) (2023-05-10)
 
 
