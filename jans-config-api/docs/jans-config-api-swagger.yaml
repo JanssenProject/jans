@@ -8026,6 +8026,8 @@ components:
           type: boolean
         returnDeviceSecretFromAuthzEndpoint:
           type: boolean
+        dcrForbidExpirationTimeInRequest:
+          type: boolean
         dcrSignatureValidationEnabled:
           type: boolean
         dcrSignatureValidationSharedSecret:
@@ -8042,7 +8044,7 @@ components:
           type: boolean
         dcrAuthorizationWithMTLS:
           type: boolean
-        dcrIssuers:
+        trustedSsaIssuers:
           type: array
           items:
             type: string
@@ -8828,20 +8830,6 @@ components:
           - tls_client_auth
           - self_signed_tls_client_auth
           - none
-        allAuthenticationMethods:
-          uniqueItems: true
-          type: array
-          items:
-            type: string
-            enum:
-            - client_secret_basic
-            - client_secret_post
-            - client_secret_jwt
-            - private_key_jwt
-            - access_token
-            - tls_client_auth
-            - self_signed_tls_client_auth
-            - none
         baseDn:
           type: string
         inum:
@@ -8938,6 +8926,9 @@ components:
           type: array
           items:
             type: string
+        requestedLifetime:
+          type: integer
+          format: int32
     CustomObjectAttribute:
       type: object
       properties:
@@ -8949,10 +8940,10 @@ components:
           type: array
           items:
             type: object
-        value:
-          type: object
         displayValue:
           type: string
+        value:
+          type: object
     LocalizedString:
       type: object
       properties:
@@ -9073,14 +9064,6 @@ components:
       properties:
         valid:
           type: boolean
-        connectProtectionList:
-          type: array
-          items:
-            type: string
-            enum:
-            - None
-            - StartTls
-            - SslTls
         host:
           type: string
         port:
@@ -9159,6 +9142,7 @@ components:
           - spontaneous_scope
           - end_session
           - post_authn
+          - select_account
           - scim
           - ciba_end_user_notification
           - revoke_token
