@@ -55,7 +55,7 @@ RUN /opt/jython/bin/pip uninstall -y pip setuptools
 # Auth server
 # ===========
 
-ENV CN_VERSION=1.0.14
+ENV CN_VERSION=1.0.15-SNAPSHOT
 ENV CN_BUILD_DATE='2023-06-12 08:41'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-server/${CN_VERSION}/jans-auth-server-${CN_VERSION}.war
 
@@ -88,7 +88,7 @@ ARG CASA_CONFIG_BUILD_DATE="2023-02-13 11:44"
 RUN wget -q https://jenkins.gluu.org/maven/org/gluu/casa-config/${CASA_CONFIG_VERSION}/casa-config-${CASA_CONFIG_VERSION}.jar -P /usr/share/java/
 
 # A workaround for Fido2 integration
-ARG FIDO2_CLIENT_VERSION=1.0.14
+ARG FIDO2_CLIENT_VERSION=1.0.15-SNAPSHOT
 ARG FIDO2_CLIENT_BUILD_DATE="2023-01-31 15:04"
 RUN wget -q https://jenkins.jans.io/maven/io/jans/jans-fido2-client/${FIDO2_CLIENT_VERSION}/jans-fido2-client-${FIDO2_CLIENT_VERSION}.jar -P /usr/share/java/
 
@@ -255,7 +255,7 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/auth-server" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.0.14" \
+    org.opencontainers.image.version="1.0.15" \
     org.opencontainers.image.title="Janssen Authorization Server" \
     org.opencontainers.image.description="OAuth 2.0 server and client; OpenID Connect Provider (OP) & UMA Authorization Server (AS)"
 
