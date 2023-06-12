@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.0.14](https://github.com/JanssenProject/jans/compare/jans-orm-v1.0.13...jans-orm-v1.0.14) (2023-06-12)
+
+
+### Features
+
+* add json_valid valid check to MariaDB JSON column to determione ([#4987](https://github.com/JanssenProject/jans/issues/4987)) ([633c49d](https://github.com/JanssenProject/jans/commit/633c49ddf366253f91aa8a9a1961b5cf8b5ef729))
+* add json_valid valid check to MariaDB JSON column to determione ([#4989](https://github.com/JanssenProject/jans/issues/4989)) ([be92541](https://github.com/JanssenProject/jans/commit/be92541336ae29f9fe44ba36f6a59591d74898a1))
+* update MariaDB JSON_CONTAINS function usage to conform latest ([#5025](https://github.com/JanssenProject/jans/issues/5025)) ([ee67a3b](https://github.com/JanssenProject/jans/commit/ee67a3b9251da81eb2568b146e75c3ebe3e371cc)), closes [#5021](https://github.com/JanssenProject/jans/issues/5021)
+
+
+### Bug Fixes
+
+* prepare for 1.0.14 release ([25ccadf](https://github.com/JanssenProject/jans/commit/25ccadf85327ea14685c6066dc6609919e4f2865))
+
 ## [1.0.13](https://github.com/JanssenProject/jans/compare/jans-orm-v1.0.12...jans-orm-v1.0.13) (2023-05-10)
 
 
