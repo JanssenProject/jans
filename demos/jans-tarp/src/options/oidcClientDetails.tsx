@@ -51,8 +51,6 @@ const OIDCClientDetails = (data) => {
                 setError('The client will expire in ' + secondsToDhms(lifetime) )
             }
 
-
-
         })();
     }, [])
 
