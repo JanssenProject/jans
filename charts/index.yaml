@@ -29,7 +29,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.15-dev
-    created: "2023-06-12T12:06:15.76337592Z"
+    created: "2023-06-12T13:36:04.213762684Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -110,7 +110,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.14
-    created: "2023-06-12T12:06:15.751136811Z"
+    created: "2023-06-12T13:36:04.184463697Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -191,7 +191,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.14-dev
-    created: "2023-06-12T12:06:15.737587379Z"
+    created: "2023-06-12T13:36:04.145931588Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -272,7 +272,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.13
-    created: "2023-06-12T12:06:15.725201068Z"
+    created: "2023-06-12T13:36:04.117469391Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -353,7 +353,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.13-dev
-    created: "2023-06-12T12:06:15.712183245Z"
+    created: "2023-06-12T13:36:04.080329126Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -434,7 +434,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.12
-    created: "2023-06-12T12:06:15.69958683Z"
+    created: "2023-06-12T13:36:04.053469064Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -515,7 +515,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.12-dev
-    created: "2023-06-12T12:06:15.685258585Z"
+    created: "2023-06-12T13:36:04.035887702Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -596,7 +596,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.11
-    created: "2023-06-12T12:06:15.672495167Z"
+    created: "2023-06-12T13:36:04.003553686Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -677,7 +677,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.10
-    created: "2023-06-12T12:06:15.658998436Z"
+    created: "2023-06-12T13:36:03.965171775Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -758,7 +758,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.10-dev
-    created: "2023-06-12T12:06:15.645448105Z"
+    created: "2023-06-12T13:36:03.934396567Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -839,7 +839,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.9-dev
-    created: "2023-06-12T12:06:15.951901842Z"
+    created: "2023-06-12T13:36:04.807905929Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -920,7 +920,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.9
-    created: "2023-06-12T12:06:15.941332261Z"
+    created: "2023-06-12T13:36:04.777426782Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -1001,7 +1001,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.8
-    created: "2023-06-12T12:06:15.928091035Z"
+    created: "2023-06-12T13:36:04.729739491Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -1082,7 +1082,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.8-dev
-    created: "2023-06-12T12:06:15.914804208Z"
+    created: "2023-06-12T13:36:04.711748596Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -1163,7 +1163,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.7
-    created: "2023-06-12T12:06:15.902616Z"
+    created: "2023-06-12T13:36:04.689549356Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -1244,7 +1244,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.7-dev
-    created: "2023-06-12T12:06:15.886962832Z"
+    created: "2023-06-12T13:36:04.639154002Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -1325,7 +1325,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.6
-    created: "2023-06-12T12:06:15.875044829Z"
+    created: "2023-06-12T13:36:04.601014413Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -1406,7 +1406,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.6-dev
-    created: "2023-06-12T12:06:15.863094224Z"
+    created: "2023-06-12T13:36:04.563262046Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -1487,7 +1487,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.5-dev
-    created: "2023-06-12T12:06:15.851597128Z"
+    created: "2023-06-12T13:36:04.507361516Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -1568,7 +1568,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.5-dev
-    created: "2023-06-12T12:06:15.836128664Z"
+    created: "2023-06-12T13:36:04.48237823Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -1649,7 +1649,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.4
-    created: "2023-06-12T12:06:15.823722351Z"
+    created: "2023-06-12T13:36:04.443855703Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -1730,7 +1730,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.4-dev
-    created: "2023-06-12T12:06:15.813324874Z"
+    created: "2023-06-12T13:36:04.40371466Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -1811,7 +1811,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.3
-    created: "2023-06-12T12:06:15.800999363Z"
+    created: "2023-06-12T13:36:04.366447407Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -1892,7 +1892,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.3-dev
-    created: "2023-06-12T12:06:15.785915305Z"
+    created: "2023-06-12T13:36:04.317835727Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -1972,7 +1972,7 @@ entries:
       catalog.cattle.io/display-name: Janssen Cloud Identity and Access Management
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
-    created: "2023-06-12T12:06:15.77622834Z"
+    created: "2023-06-12T13:36:04.268783513Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -2057,7 +2057,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.1-dev
-    created: "2023-06-12T12:06:15.633256597Z"
+    created: "2023-06-12T13:36:03.913559646Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -2114,265 +2114,4 @@ entries:
     urls:
     - janssen-1.0.1.tgz
     version: 1.0.1
-  - annotations:
-      artifacthub.io/changes: |
-        - Update always
-      artifacthub.io/containsSecurityUpdates: "true"
-      artifacthub.io/images: |
-        - name: auth-server
-          image: janssenproject/auth-server:1.0.0-beta.16
-        - name: auth-server-key-rotation
-          image: janssenproject/certmanager:1.0.0-beta.16
-        - name:  client-api
-          image: janssenproject/client-api:1.0.0-beta.16
-        - name: configuration-manager
-          image: janssenproject/configurator:1.0.0-beta.16
-        - name:  config-api
-          image: janssenproject/config-api:1.0.0-beta.16
-        - name: fido2
-          image: janssenproject/fido2:1.0.0-beta.16
-        - name: opendj
-          image: gluufederation/opendj:5.0.0_dev
-        - name: persistence
-          image: janssenproject/persistence-loader:1.0.0-beta.16
-        - name: scim
-          image: janssenproject/scim:1.0.0-beta.16
-      artifacthub.io/license: Apache-2.0
-      artifacthub.io/prerelease: "true"
-      catalog.cattle.io/certified: partner
-      catalog.cattle.io/display-name: Janssen Cloud Identity and Access Management
-      catalog.cattle.io/release-name: janssen
-    apiVersion: v2
-    appVersion: 1.0.0
-    created: "2023-06-12T12:06:15.610084401Z"
-    dependencies:
-    - condition: global.config.enabled
-      name: config
-      repository: ""
-      version: 1.0.0-beta.16
-    - condition: global.config-api.enabled
-      name: config-api
-      repository: ""
-      version: 1.0.0-beta.16
-    - condition: global.opendj.enabled
-      name: opendj
-      repository: ""
-      version: 1.0.0-beta.16
-    - condition: global.auth-server.enabled
-      name: auth-server
-      repository: ""
-      version: 1.0.0-beta.16
-    - condition: global.fido2.enabled
-      name: fido2
-      repository: ""
-      version: 1.0.0-beta.16
-    - condition: global.scim.enabled
-      name: scim
-      repository: ""
-      version: 1.0.0-beta.16
-    - condition: global.nginx-ingress.enabled
-      name: nginx-ingress
-      repository: ""
-      version: 1.0.0-beta.16
-    - condition: global.auth-server-key-rotation.enabled
-      name: auth-server-key-rotation
-      repository: ""
-      version: 1.0.0-beta.16
-    - condition: global.client-api.enabled
-      name: client-api
-      repository: ""
-      version: 1.0.0-beta.16
-    - condition: global.persistence.enabled
-      name: persistence
-      repository: ""
-      version: 1.0.0-beta.16
-    description: Janssen Access and Identity Management
-    digest: a78e34cb0ffc779ac5108632acec52d8adb708dc0d14ce210b39814236920673
-    home: https://jans.io
-    icon: https://github.com/JanssenProject/jans/raw/main/docs/logo/janssen_project_favicon_transparent_50px_50px.png
-    kubeVersion: '>=v1.21.0-0'
-    maintainers:
-    - email: support@jans.io
-      name: moabu
-    name: janssen
-    sources:
-    - https://jans.io
-    - https://github.com/JanssenProject/jans/charts/janssen
-    urls:
-    - janssen-1.0.0-beta.16.tgz
-    version: 1.0.0-beta.16
-  - annotations:
-      artifacthub.io/changes: |
-        - Update always
-      artifacthub.io/containsSecurityUpdates: "true"
-      artifacthub.io/images: |
-        - name: auth-server
-          image: janssenproject/auth-server:1.0.0-beta.15
-        - name: auth-server-key-rotation
-          image: janssenproject/certmanager:1.0.0-beta.15
-        - name:  client-api
-          image: janssenproject/client-api:1.0.0-beta.15
-        - name: configuration-manager
-          image: janssenproject/configurator:1.0.0-beta.15
-        - name:  config-api
-          image: janssenproject/config-api:1.0.0-beta.15
-        - name: fido2
-          image: janssenproject/fido2:1.0.0-beta.15
-        - name: opendj
-          image: gluufederation/opendj:5.0.0_dev
-        - name: persistence
-          image: janssenproject/persistence-loader:1.0.0-beta.15
-        - name: scim
-          image: janssenproject/scim:1.0.0-beta.15
-      artifacthub.io/license: Apache-2.0
-      artifacthub.io/prerelease: "true"
-      catalog.cattle.io/certified: partner
-      catalog.cattle.io/display-name: Janssen Cloud Identity and Access Management
-      catalog.cattle.io/release-name: janssen
-    apiVersion: v2
-    appVersion: 1.0.0
-    created: "2023-06-12T12:06:15.596392067Z"
-    dependencies:
-    - condition: global.config.enabled
-      name: config
-      repository: ""
-      version: 1.0.0-beta.15
-    - condition: global.config-api.enabled
-      name: config-api
-      repository: ""
-      version: 1.0.0-beta.15
-    - condition: global.opendj.enabled
-      name: opendj
-      repository: ""
-      version: 1.0.0-beta.15
-    - condition: global.auth-server.enabled
-      name: auth-server
-      repository: ""
-      version: 1.0.0-beta.15
-    - condition: global.fido2.enabled
-      name: fido2
-      repository: ""
-      version: 1.0.0-beta.15
-    - condition: global.scim.enabled
-      name: scim
-      repository: ""
-      version: 1.0.0-beta.15
-    - condition: global.nginx-ingress.enabled
-      name: nginx-ingress
-      repository: ""
-      version: 1.0.0-beta.15
-    - condition: global.auth-server-key-rotation.enabled
-      name: auth-server-key-rotation
-      repository: ""
-      version: 1.0.0-beta.15
-    - condition: global.client-api.enabled
-      name: client-api
-      repository: ""
-      version: 1.0.0-beta.15
-    - condition: global.persistence.enabled
-      name: persistence
-      repository: ""
-      version: 1.0.0-beta.15
-    description: Janssen Access and Identity Management
-    digest: c2505f6a003df19f3c449382db7b327c764ae2d94df8e04e73d6444b27745208
-    home: https://jans.io
-    icon: https://github.com/JanssenProject/jans/raw/main/docs/logo/janssen_project_favicon_transparent_50px_50px.png
-    kubeVersion: '>=v1.21.0-0'
-    maintainers:
-    - email: support@jans.io
-      name: moabu
-    name: janssen
-    sources:
-    - https://jans.io
-    - https://github.com/JanssenProject/jans/charts/janssen
-    urls:
-    - janssen-1.0.0-beta.15.tgz
-    version: 1.0.0-beta.15
-  - annotations:
-      artifacthub.io/changes: |
-        - Update always
-      artifacthub.io/containsSecurityUpdates: "true"
-      artifacthub.io/images: |
-        - name: auth-server
-          image: janssenproject/auth-server:1.0.0-beta.14
-        - name: auth-server-key-rotation
-          image: janssenproject/certmanager:1.0.0-beta.14
-        - name:  client-api
-          image: janssenproject/client-api:1.0.0-beta.14
-        - name: configuration-manager
-          image: janssenproject/configurator:1.0.0-beta.14
-        - name:  config-api
-          image: janssenproject/config-api:1.0.0-beta.14
-        - name: fido2
-          image: janssenproject/fido2:1.0.0-beta.14
-        - name: opendj
-          image: gluufederation/opendj:5.0.0_dev
-        - name: persistence
-          image: janssenproject/persistence-loader:1.0.0-beta.14
-        - name: scim
-          image: janssenproject/scim:1.0.0-beta.14
-      artifacthub.io/license: Apache-2.0
-      artifacthub.io/prerelease: "true"
-      catalog.cattle.io/certified: partner
-      catalog.cattle.io/display-name: Janssen Cloud Identity and Access Management
-      catalog.cattle.io/release-name: janssen
-    apiVersion: v2
-    appVersion: 1.0.0
-    created: "2023-06-12T12:06:15.573836581Z"
-    dependencies:
-    - condition: global.config.enabled
-      name: config
-      repository: ""
-      version: 1.0.0-beta.14
-    - condition: global.config-api.enabled
-      name: config-api
-      repository: ""
-      version: 1.0.0-beta.14
-    - condition: global.opendj.enabled
-      name: opendj
-      repository: ""
-      version: 1.0.0-beta.14
-    - condition: global.auth-server.enabled
-      name: auth-server
-      repository: ""
-      version: 1.0.0-beta.14
-    - condition: global.fido2.enabled
-      name: fido2
-      repository: ""
-      version: 1.0.0-beta.14
-    - condition: global.scim.enabled
-      name: scim
-      repository: ""
-      version: 1.0.0-beta.14
-    - condition: global.nginx-ingress.enabled
-      name: nginx-ingress
-      repository: ""
-      version: 1.0.0-beta.14
-    - condition: global.auth-server-key-rotation.enabled
-      name: auth-server-key-rotation
-      repository: ""
-      version: 1.0.0-beta.14
-    - condition: global.client-api.enabled
-      name: client-api
-      repository: ""
-      version: 1.0.0-beta.14
-    - condition: global.persistence.enabled
-      name: persistence
-      repository: ""
-      version: 1.0.0-beta.14
-    description: Janssen Access and Identity Management
-    digest: 19e4af126d7b62435439749d1d0ca7c31f84fc4bfceef4adc1c63912cc9176d3
-    home: https://jans.io
-    icon: https://github.com/JanssenProject/jans/raw/main/docs/logo/janssen_project_favicon_transparent_50px_50px.png
-    kubeVersion: '>=v1.21.0-0'
-    maintainers:
-    - email: support@jans.io
-      name: moabu
-    name: janssen
-    sources:
-    - https://jans.io
-    - https://github.com/JanssenProject/jans/charts/janssen
-    urls:
-    - janssen-1.0.0-beta.14.tgz
-    version: 1.0.0-beta.14
-generated: "2023-06-12T12:06:15.558734023Z"
+generated: "2023-06-12T13:36:03.879471118Z"

@@ -1,1 +1,0 @@
-packageSearchIndex = [{"l":"All Packages","url":"allpackages-index.html"},{"l":"io.jans.scim2.client"},{"l":"io.jans.scim2.client.exception"},{"l":"io.jans.scim2.client.factory"},{"l":"io.jans.scim2.client.rest"},{"l":"io.jans.scim2.client.rest.provider"}]
