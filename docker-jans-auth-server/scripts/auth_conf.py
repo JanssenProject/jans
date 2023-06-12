@@ -22,7 +22,10 @@ def push_auth_conf() -> None:
         file_ = Path(f"/etc/certs/{conf_file}")
 
         # compare digest; if they are different, push the contents of file to secrets
-        if not digest_equals(manager.secret.get(file_.stem), file_.read_text()):
+        val1 = manager.secret.get(file_.stem) or ""
+        val2 = file_.read_text()
+
+        if not digest_equals(val1, val2):
             logger.info(f"Detected changes in {file_}; pushing changes to secrets.")
             manager.secret.from_file(file_.stem, str(file_))
 

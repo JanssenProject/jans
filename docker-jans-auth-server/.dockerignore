@@ -2,7 +2,6 @@
 *
 
 # include required files/directories
-!certs
 !conf
 !jetty
 !libs
