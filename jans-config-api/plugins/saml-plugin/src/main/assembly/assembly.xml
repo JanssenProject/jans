@@ -13,7 +13,7 @@
 			<outputDirectory>/</outputDirectory>
 			<useProjectArtifact>false</useProjectArtifact>
 			<includes>
-				<include>io.jans:jans-saml-model</include>
+				<include>org.keycloak:keycloak-admin-client</include>
 			</includes>
 			<scope>runtime</scope>
 		</dependencySet>

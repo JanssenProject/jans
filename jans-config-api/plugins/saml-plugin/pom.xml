@@ -11,6 +11,8 @@
 		<httpcore.version>4.4.14</httpcore.version>
 		<httpclient.version>4.5.13</httpclient.version>
 		<jans.version>${project.version}</jans.version>
+		
+		<keycloak.version>21.1.1</keycloak.version>
 	</properties>
 
 	<dependencies>
@@ -32,7 +34,14 @@
 			<version>${jans.version}</version>
 		</dependency>
 
-
+		<!-- keycloak -->
+		<dependency>
+		    <groupId>org.keycloak</groupId>
+		    <artifactId>keycloak-admin-client</artifactId>
+		   <version>${keycloak.version}</version>
+		</dependency>
+		
+		
 		<!-- Microprofile -->
 		<dependency>
 			<groupId>io.smallrye</groupId>
