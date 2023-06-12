@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.0.14](https://github.com/JanssenProject/jans/compare/v1.0.14...v1.0.14) (2023-06-12)
+
+
+### Bug Fixes
+
+* **docker-jans-auth-server:** handle missing secret when comparing contents ([#5187](https://github.com/JanssenProject/jans/issues/5187)) ([f2a373e](https://github.com/JanssenProject/jans/commit/f2a373e95b73d38c8f867fd686152aa18248c392))
+* **docs:** autogenerate docs ([#5225](https://github.com/JanssenProject/jans/issues/5225)) ([9c8e510](https://github.com/JanssenProject/jans/commit/9c8e510e6571362009b4ca422ab946ba711e0122))
+* prepare for 1.0.14 release ([25ccadf](https://github.com/JanssenProject/jans/commit/25ccadf85327ea14685c6066dc6609919e4f2865))
+
 ## [1.0.13](https://github.com/JanssenProject/jans/compare/v1.0.13...v1.0.13) (2023-05-10)
 
 
