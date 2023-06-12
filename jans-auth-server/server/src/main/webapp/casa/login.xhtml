@@ -38,6 +38,7 @@
 					</p>
 				</h:panelGroup>
 				<h:inputHidden id="platform" />
+                <h:inputHidden id="platformAuthenticator" />
 			</h:form>
 		</section>
 		<script>
@@ -45,8 +46,24 @@
 			$(".focused-text").attr("required", "true")
 			
 			$(document).ready(function () {
-				fillPlatformField()
+                storedCredsWorkaround();
+				fillPlatformField();
+				fillPlatforAuthenticatorField();
 			})
+            
+            function storedCredsWorkaround() {
+                //Needed when browser pre-fills usr/pwd due to JSF issue with required attribute (see above)
+                let user = document.getElementById("loginForm:username")
+                let pwd = document.getElementById("loginForm:password")
+                if ($(user).val()) {
+                    $(user).focus()
+                    $(user).blur()
+                }
+                if ($(pwd).val()) {
+                    $(pwd).focus()
+                    $(pwd).blur()
+                }
+            }
 			
 			function fillPlatformField() {
 				try {
@@ -61,6 +78,23 @@
 				} catch (e) {
 				}
 			}
+			 function fillPlatforAuthenticatorField()
+	            {
+	            	
+					PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
+					  .then(function(available){
+					    if(available){
+					    	 document.getElementById("loginForm:platformAuthenticator").value = "true";
+					    }
+					    else
+					    {
+					    	 document.getElementById("loginForm:platformAuthenticator").value = "false";
+					    }
+					    
+					  }).catch(function(err){
+					    console.error("Error in detecting platform authenticator : "+err);
+					  });
+	            }
 		</script>
 	</ui:define>
 
