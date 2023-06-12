@@ -118,7 +118,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/agama/fl \
     ${JETTY_BASE}/jans-auth/agama/scripts
 
 # janssenproject/jans SHA commit
-ENV JANS_SOURCE_VERSION=49054ae66d17d2e7d34febd31ac7ab25be3acdc4
+ENV JANS_SOURCE_VERSION=16001859895d5aa5d840cfc9d425d0ee95149979
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the agama code
@@ -126,9 +126,11 @@ RUN git clone --filter blob:none --no-checkout https://github.com/janssenproject
     && cd /tmp/jans \
     && git sparse-checkout init --cone \
     && git checkout ${JANS_SOURCE_VERSION} \
-    && git sparse-checkout add agama/misc
+    && git sparse-checkout add agama/misc \
+    && git sparse-checkout add jans-linux-setup/jans_setup/static/auth/conf
 
 RUN cp -R /tmp/jans/agama/misc/* ${JETTY_BASE}/jans-auth/agama/ \
+    && cp -R /tmp/jans/jans-linux-setup/jans_setup/static/auth/conf /etc/certs \
     && rm -rf /tmp/jans
 
 # ======
@@ -265,9 +267,9 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/custom/pages \
     ${JETTY_BASE}/common/libs/spanner \
     ${JETTY_BASE}/common/libs/couchbase \
     /etc/jans/conf \
-    /app/templates
+    /app/templates \
+    /etc/certs
 
-COPY certs /etc/certs
 COPY jetty/jans-auth_web_resources.xml ${JETTY_BASE}/jans-auth/webapps/
 COPY jetty/agama_web_resources.xml ${JETTY_BASE}/jans-auth/webapps/
 COPY jetty/log4j2.xml /app/templates
