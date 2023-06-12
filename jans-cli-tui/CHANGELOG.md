@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.0.14](https://github.com/JanssenProject/jans/compare/jans-cli-tui-v1.0.13...jans-cli-tui-v1.0.14) (2023-06-12)
+
+
+### Features
+
+* **jans-cli-tui:** log command line for write operations ([#5113](https://github.com/JanssenProject/jans/issues/5113)) ([1d213ad](https://github.com/JanssenProject/jans/commit/1d213ad4ff5e7ed897d58f7529c09e9033b92368))
+
+
+### Bug Fixes
+
+* **jans-cli-tui:** agama project upload ([#5161](https://github.com/JanssenProject/jans/issues/5161)) ([2bb9ecc](https://github.com/JanssenProject/jans/commit/2bb9ecc4482212217f09c907baad89b4cf2e0cfe))
+* **jans-cli-tui:** height of checkbox field ([#4985](https://github.com/JanssenProject/jans/issues/4985)) ([c8dc113](https://github.com/JanssenProject/jans/commit/c8dc1136df5d81886108ca54bcd45ededd427055))
+* **jans-cli-tui:** userPassword should not be sent in customAttributes ([#5130](https://github.com/JanssenProject/jans/issues/5130)) ([f02aa7e](https://github.com/JanssenProject/jans/commit/f02aa7e681cd8519ffd3f1973802b738bee6a173))
+* prepare for 1.0.14 release ([25ccadf](https://github.com/JanssenProject/jans/commit/25ccadf85327ea14685c6066dc6609919e4f2865))
+
 ## [1.0.13](https://github.com/JanssenProject/jans/compare/jans-cli-tui-v1.0.12...jans-cli-tui-v1.0.13) (2023-05-10)
 
 
