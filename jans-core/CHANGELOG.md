@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.0.14](https://github.com/JanssenProject/jans/compare/jans-core-v1.0.13...jans-core-v1.0.14) (2023-06-12)
+
+
+### Features
+
+* **jans-auth-server:** Support of Select Account interception script [#3452](https://github.com/JanssenProject/jans/issues/3452) ([#5149](https://github.com/JanssenProject/jans/issues/5149)) ([b062148](https://github.com/JanssenProject/jans/commit/b062148b7395e2828432061363058d7e1a9dd6db))
+* **jans-cache-refresh:** add cache refresh to Jans ([#5007](https://github.com/JanssenProject/jans/issues/5007)) ([878dd5e](https://github.com/JanssenProject/jans/commit/878dd5e414345aac8ba49490cd1aa8604e834533))
+
+
+### Bug Fixes
+
+* **config-api:** resolved dependency conflict for CustomScriptService ([3121833](https://github.com/JanssenProject/jans/commit/312183373f72f7916b3c4c6cc5176420bba3bae0))
+* **config-api:** revert hide smtp and client model utility method ([#4976](https://github.com/JanssenProject/jans/issues/4976)) ([6519744](https://github.com/JanssenProject/jans/commit/651974408565441951b6a4ca80a4ab555c01352f))
+* failed to initialize resteasy proxy from script at server ([#5118](https://github.com/JanssenProject/jans/issues/5118)) ([51f9ad9](https://github.com/JanssenProject/jans/commit/51f9ad9bfa02c285b99deab81e593817b6c61137)), closes [#5116](https://github.com/JanssenProject/jans/issues/5116)
+* prepare for 1.0.14 release ([25ccadf](https://github.com/JanssenProject/jans/commit/25ccadf85327ea14685c6066dc6609919e4f2865))
+
 ## [1.0.13](https://github.com/JanssenProject/jans/compare/jans-core-v1.0.12...jans-core-v1.0.13) (2023-05-10)
 
 
