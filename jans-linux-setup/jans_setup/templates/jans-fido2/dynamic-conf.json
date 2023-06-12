@@ -36,6 +36,7 @@
       ],
       "userAutoEnrollment":false,
       "unfinishedRequestExpiration":180,
-      "authenticationHistoryExpiration":1296000
+      "authenticationHistoryExpiration":1296000,
+      "metadataUrlsProvider":""
    }
 }
