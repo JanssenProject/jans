@@ -1,5 +1,36 @@
 # Changelog
 
+## [1.0.14](https://github.com/JanssenProject/jans/compare/docs-v1.0.13...docs-v1.0.14) (2023-06-12)
+
+
+### Features
+
+* add authorization headers needed to access scan API from SG ([#5093](https://github.com/JanssenProject/jans/issues/5093)) ([631abf2](https://github.com/JanssenProject/jans/commit/631abf2f822c9ddd05f962718d0dc70d0f3ceb6f)), closes [#5092](https://github.com/JanssenProject/jans/issues/5092)
+* Add DCR flow ([#5096](https://github.com/JanssenProject/jans/issues/5096)) ([4bdea42](https://github.com/JanssenProject/jans/commit/4bdea425bb3d2b174049d03f3664db559e449eb9)), closes [#5092](https://github.com/JanssenProject/jans/issues/5092)
+* **agama:** allow flows to supply the identity of the user to authenticate with a parameterizable attribute ([#5010](https://github.com/JanssenProject/jans/issues/5010)) ([ca941ce](https://github.com/JanssenProject/jans/commit/ca941ce0c2b54a84cd0327f8ac21fe926b533660))
+* **agama:** update deployer to account project's metadata `noDirectLaunch` ([#5182](https://github.com/JanssenProject/jans/issues/5182)) ([cb4ae38](https://github.com/JanssenProject/jans/commit/cb4ae38779e48a6c63351b444ec305c9cfcb90a9))
+* **jans-auth-server:** added ability to set client expiration via DCR [#5057](https://github.com/JanssenProject/jans/issues/5057) ([#5185](https://github.com/JanssenProject/jans/issues/5185)) ([a15054b](https://github.com/JanssenProject/jans/commit/a15054b1c3350d6ee0bb9c92d39f6b2d992abfa1))
+* **jans-auth-server:** made not found exceptions logging level configurable [#4973](https://github.com/JanssenProject/jans/issues/4973) ([#4982](https://github.com/JanssenProject/jans/issues/4982)) ([98be22b](https://github.com/JanssenProject/jans/commit/98be22b81d365b631d2b7ffcf76d1f3a5ea1935b))
+* **jans-auth-server:** Support of Select Account interception script [#3452](https://github.com/JanssenProject/jans/issues/3452) ([#5149](https://github.com/JanssenProject/jans/issues/5149)) ([b062148](https://github.com/JanssenProject/jans/commit/b062148b7395e2828432061363058d7e1a9dd6db))
+* move notify-client2 library to fido2 project [#5030](https://github.com/JanssenProject/jans/issues/5030) ([#5031](https://github.com/JanssenProject/jans/issues/5031)) ([ed5e09e](https://github.com/JanssenProject/jans/commit/ed5e09eff23dbea45e026728886d1e95f3e5cd95))
+* update SG script and notify client to conform scan API [#5061](https://github.com/JanssenProject/jans/issues/5061) ([#5062](https://github.com/JanssenProject/jans/issues/5062)) ([7afc42b](https://github.com/JanssenProject/jans/commit/7afc42b2ec00d35cb980d35f286289de2bdadff2))
+* update SG script to conform prod server ([#5103](https://github.com/JanssenProject/jans/issues/5103)) ([0ec3ca8](https://github.com/JanssenProject/jans/commit/0ec3ca8b0e4e8e7287c8041dc75be9b29632da81))
+
+
+### Bug Fixes
+
+* [#5084](https://github.com/JanssenProject/jans/issues/5084) ([#5086](https://github.com/JanssenProject/jans/issues/5086)) ([a0336a8](https://github.com/JanssenProject/jans/commit/a0336a8d696048004af34eb1069af9d55e8f2c32))
+* **docker-jans-loadtesting-jmeter:** errors running flow executor ([#5001](https://github.com/JanssenProject/jans/issues/5001)) ([79c1948](https://github.com/JanssenProject/jans/commit/79c1948a12024a3371427da42909717f6f672e8c))
+* **docs:** [#3675](https://github.com/JanssenProject/jans/issues/3675) ([#5068](https://github.com/JanssenProject/jans/issues/5068)) ([2aa76b2](https://github.com/JanssenProject/jans/commit/2aa76b2c90e15524299716bedf2a68d427deda62))
+* **docs:** [#4707](https://github.com/JanssenProject/jans/issues/4707) ([#5090](https://github.com/JanssenProject/jans/issues/5090)) ([f93c750](https://github.com/JanssenProject/jans/commit/f93c75022432717a75821820d264cade8e9223d2))
+* **docs:** [#4881](https://github.com/JanssenProject/jans/issues/4881) improvised ([#5035](https://github.com/JanssenProject/jans/issues/5035)) ([065edad](https://github.com/JanssenProject/jans/commit/065edade0bb1d96391b4c894498b8d7ec5f0ad79))
+* **docs:** autogenerate docs ([#5225](https://github.com/JanssenProject/jans/issues/5225)) ([9c8e510](https://github.com/JanssenProject/jans/commit/9c8e510e6571362009b4ca422ab946ba711e0122))
+* **docs:** Mention of Update Token script [#3465](https://github.com/JanssenProject/jans/issues/3465) ([#5069](https://github.com/JanssenProject/jans/issues/5069)) ([a3efe9b](https://github.com/JanssenProject/jans/commit/a3efe9b3dc577a889ecb1df09f0ec355f7d434c3))
+* **docs:** minor addition [#4881](https://github.com/JanssenProject/jans/issues/4881) ([#5083](https://github.com/JanssenProject/jans/issues/5083)) ([948b9aa](https://github.com/JanssenProject/jans/commit/948b9aa0c2b562d20296921e511396f3e820a6ae))
+* **docs:** renamed SampleScript.py to PersistenceExtension.py ([#5087](https://github.com/JanssenProject/jans/issues/5087)) ([9ed9c2e](https://github.com/JanssenProject/jans/commit/9ed9c2ebbd53af38a9f974c352abefb822cdd614))
+* **jans-auth-server:** Illegal op_policy_uri parameter: - exclude entries with blank values from discovery response (oxauth counterpart) [#4888](https://github.com/JanssenProject/jans/issues/4888) ([#4934](https://github.com/JanssenProject/jans/issues/4934)) ([8603290](https://github.com/JanssenProject/jans/commit/8603290cee37c609f9572760c8cf299aba80160e))
+* prepare for 1.0.14 release ([25ccadf](https://github.com/JanssenProject/jans/commit/25ccadf85327ea14685c6066dc6609919e4f2865))
+
 ## [1.0.13](https://github.com/JanssenProject/jans/compare/docs-v1.0.12...docs-v1.0.13) (2023-05-10)
 
 
