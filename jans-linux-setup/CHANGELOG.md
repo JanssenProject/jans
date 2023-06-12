@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.0.14](https://github.com/JanssenProject/jans/compare/jans-linux-setup-v1.0.13...jans-linux-setup-v1.0.14) (2023-06-12)
+
+
+### Features
+
+* Add DCR flow ([#5096](https://github.com/JanssenProject/jans/issues/5096)) ([4bdea42](https://github.com/JanssenProject/jans/commit/4bdea425bb3d2b174049d03f3664db559e449eb9)), closes [#5092](https://github.com/JanssenProject/jans/issues/5092)
+* **agama:** allow flows to supply the identity of the user to authenticate with a parameterizable attribute ([#5010](https://github.com/JanssenProject/jans/issues/5010)) ([ca941ce](https://github.com/JanssenProject/jans/commit/ca941ce0c2b54a84cd0327f8ac21fe926b533660))
+* **config-api:** cache-refresh plugin code ([#5000](https://github.com/JanssenProject/jans/issues/5000)) ([eed9526](https://github.com/JanssenProject/jans/commit/eed9526415996278b52806cfe37a4dfb5076aa00))
+* **fido2:** Apple_WebAuthn_Root_CA certificate is now downloaded to /authentication_cert folder and read from AttestationCertificateService ([#4756](https://github.com/JanssenProject/jans/issues/4756)) ([1600185](https://github.com/JanssenProject/jans/commit/16001859895d5aa5d840cfc9d425d0ee95149979))
+* **jans-auth-server:** added ability to set client expiration via DCR [#5057](https://github.com/JanssenProject/jans/issues/5057) ([#5185](https://github.com/JanssenProject/jans/issues/5185)) ([a15054b](https://github.com/JanssenProject/jans/commit/a15054b1c3350d6ee0bb9c92d39f6b2d992abfa1))
+* update SG script to conform prod server ([#5103](https://github.com/JanssenProject/jans/issues/5103)) ([0ec3ca8](https://github.com/JanssenProject/jans/commit/0ec3ca8b0e4e8e7287c8041dc75be9b29632da81))
+
+
+### Bug Fixes
+
+* **jans-linux-setup:** change location of persistence script ([#5095](https://github.com/JanssenProject/jans/issues/5095)) ([49054ae](https://github.com/JanssenProject/jans/commit/49054ae66d17d2e7d34febd31ac7ab25be3acdc4))
+* **jans-linux-setup:** maridb json columns ([#5079](https://github.com/JanssenProject/jans/issues/5079)) ([c2be202](https://github.com/JanssenProject/jans/commit/c2be20230a58d1d0ca4111454051fcce83611cce))
+* **jans-linux-setup:** remove dependency distutils ([#5011](https://github.com/JanssenProject/jans/issues/5011)) ([ca42086](https://github.com/JanssenProject/jans/commit/ca42086ef05a63a11006458416ef266a42c958f6))
+* **jans-linux-setup:** type of jans_stat is oauth ([#5059](https://github.com/JanssenProject/jans/issues/5059)) ([c6cc459](https://github.com/JanssenProject/jans/commit/c6cc4595c4f266a26fbcb0ab919352bfc7b9d454))
+* prepare for 1.0.14 release ([25ccadf](https://github.com/JanssenProject/jans/commit/25ccadf85327ea14685c6066dc6609919e4f2865))
+
 ## [1.0.13](https://github.com/JanssenProject/jans/compare/jans-linux-setup-v1.0.12...jans-linux-setup-v1.0.13) (2023-05-10)
 
 
