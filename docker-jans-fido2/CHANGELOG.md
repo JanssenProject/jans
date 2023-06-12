@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.14-1](https://github.com/JanssenProject/jans/compare/docker-jans-fido2-v1.0.13-1...docker-jans-fido2-v1.0.14-1) (2023-06-12)
+
+
+### Bug Fixes
+
+* prepare for 1.0.14 release ([25ccadf](https://github.com/JanssenProject/jans/commit/25ccadf85327ea14685c6066dc6609919e4f2865))
+
 ## [1.0.13-1](https://github.com/JanssenProject/jans/compare/docker-jans-fido2-v1.0.12-1...docker-jans-fido2-v1.0.13-1) (2023-05-10)
 
 
