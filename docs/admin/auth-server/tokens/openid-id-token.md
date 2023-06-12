@@ -3,7 +3,7 @@ tags:
   - administration
   - auth-server
   - token
-  - id-token
+  - id token
   - customize id_token
 ---
 
@@ -61,6 +61,7 @@ storage generating a token you don't need.
 ## Validating an ID Token
 
 At a minimum, client developers should always validate the following:
+
 - Signature of the ID token
 - `iss` make sure the ID Token was issued by the OP you trust
 - `aud` make sure the ID Token was issued to your `client_id`
@@ -77,7 +78,9 @@ OAuth access tokens are short lived, while the expiration of an identity
 assertion is much longer.
 
 ## Customizing claims in an id_token
+
 The [UpdateTokenType](https://docs.jans.io/head/admin/developer/scripts/update-token/) can be used in the following scenarios:
+
 1. In addition to the default claims in an ID token (`iss`, `aud`, `exp` etc), additional custom claims can be added to an ID token.
 2. You can also change the default value of a claim 
 
