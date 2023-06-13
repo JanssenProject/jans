@@ -7,7 +7,7 @@ tags:
 - endpoint
 ---
 
-# Pushed Authorization Request(PAR) Endpoint
+# Pushed Authorization Request (PAR) Endpoint
 
 PAR endpoint is used by client to send authorization request directly to the Janssen Server without using the usual
 redirection mechanism via user agent. When PAR endpoint receives a valid request, it responds with a request URI. 
@@ -24,7 +24,7 @@ URL to access PAR endpoint on Janssen Server is listed in the response of Jansse
 https://janssen.server.host/jans-auth/.well-known/openid-configuration
 ```
 
-`pushed_authorization_request_endpoint` claim in the response specifies the URL for PAR endpoint. By default, PAR endpoint looks
+`pushed_authorization_request_endpoint` claim in the response specifies the URL for the PAR endpoint. By default, PAR endpoint looks
 like below:
 
 ```
@@ -54,7 +54,7 @@ the OpenAPI specification of
 
 ## Disabling The Endpoint Using Feature Flag
 
-`PAR` endpoint can be enabled or disable using [PAR feature flag](../../reference/json/feature-flags/janssenauthserver-feature-flags.md#par).
+`PAR` endpoint can be enabled or disabled using [PAR feature flag](../../reference/json/feature-flags/janssenauthserver-feature-flags.md#par).
 Use [Janssen Text-based UI(TUI)](../../config-guide/jans-tui/README.md) or [Janssen command-line interface](../../config-guide/jans-cli/README.md) to perform this task.
 
 When using TUI, navigate via `Auth Server`->`Properties`->`enabledFeatureFlags` to screen below. From here, enable or
@@ -64,14 +64,26 @@ disable `PAR` flag as required.
 
 ## Configuration Properties
 
-PAR endpoint can be further configured using Janssen Server configuration properties listed below. When using
-[Janssen Text-based UI(TUI)](../../config-guide/jans-tui/README.md) to configure the properties,
-navigate via `Auth Server`->`Properties`.
+### Global Janssen Server configuration properties
 
-- [mtlsParEndpoint](../../reference/json/properties/janssenauthserver-properties.md#mtlsparendpoint)
-- [parEndpoint](../../reference/json/properties/janssenauthserver-properties.md#parendpoint)
-- [requirePar](../../reference/json/properties/janssenauthserver-properties.md#requirepar)
-- [requestUriParameterSupported](../../reference/json/properties/janssenauthserver-properties.md#requesturiparametersupported)
+PAR endpoint can be further configured using Janssen Server configuration properties listed below. It can be configured via
+[Janssen Text-based UI(TUI)](../../config-guide/jans-tui/README.md) (navigate to `Auth Server`->`Properties`), admin UI or directly in persistence layer.
+
+- [mtlsParEndpoint](../../reference/json/properties/janssenauthserver-properties.md#mtlsparendpoint) - Mutual TLS (mTLS) Pushed Authorization Requests (PAR) endpoint URL
+- [parEndpoint](../../reference/json/properties/janssenauthserver-properties.md#parendpoint) - Pushed Authorization Requests (PAR) Endpoint location
+- [requirePar](../../reference/json/properties/janssenauthserver-properties.md#requirepar) - Boolean value to indicate whether Pushed Authorisation Request (PAR) endpoint is required
+- [requestUriParameterSupported](../../reference/json/properties/janssenauthserver-properties.md#requesturiparametersupported) - Boolean value specifying whether the OP supports use of the request_uri parameter
+
+### Client specific PAR related configuration properties
+
+Some configuration properties are configured on client level to allow more granular configuration which depends on client.
+
+- `par_lifetime` - PAR object lifetime in seconds. If value is not specified then defaults to `600` value.
+- `require_par`  - specified whether all authorization requests made by this client to Authorization Endpoint must be PAR. If `true` and authorization request is not PAR then error is returned back by Authorization Server. 
+
+## Have questions in the meantime?
+
+You can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussion) or the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). Any questions you have will help determine what information our documentation should cover.
 
 ## Want to contribute?
 
