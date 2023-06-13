@@ -6,31 +6,38 @@ tags:
 ---
 
 ### Configuration Parameters of Janssen's FIDO2 server:
-| Field named | Example | Description|
-|--|--|--|
-|issuer| https://my-jans-server.jans.io | URL using the https scheme with no query or fragment component. The OP asserts this as its Issuer Identifier|
-  |baseEndpoint| https://my-jans-server/jans-fido2/restv1 | Base URL of the FIDO2 server Endpoints |
-  | cleanServiceInterval | 60| Time interval for the Clean Service in seconds. |
-  |cleanServiceBatchChunkSize | 10000| Each clean up iteration fetches chunk of expired data per base dn and removes it from storage. |
-  | useLocalCache | true| Boolean value specifying whether to enable local in-memory cache for attributes, scopes, clients and organization configuration|
-  | disableJdkLogger |true| Boolean value specifying whether to enable JDK Loggers |
-  |loggingLevel | "INFO" or "TRACE" or "DEBUG" | Logging level for FIDO2 server|
-  |loggingLayout |"text" or "json"|Contents of logs as plain text or json format|
-  |externalLoggerConfiguration||Path to external log4j2 logging configuration|
-  |metricReporterInterval|300|The interval for metric reporter in seconds.|
-  |metricReporterKeepDataDays|15|The number of days to retain metric reported data in the system|
-  |metricReporterEnabled| true |Boolean value specifying whether to enable Metric Reporter|
-  | personCustomObjectClassList | ["jansCustomPerson", "jansPerson"  ] |LDAP custom object class list for dynamic person enrollment.|
-  |fido2Configuration|See JSON contents in the below example | FIDO2 Configuration |
-| authenticatorCertsFolder | /etc/jans/conf/fido2/authenticator_cert |Authenticators certificates fodler. |
-| mdsCertsFolder | /etc/jans/conf/fido2/mds/cert |MDS TOC root certificates folder. |
-| mdsTocsFolder | /etc/jans/conf/fido2/mds/toc |MDS TOC files folder. |
-| serverMetadataFolder | /etc/jans/conf/fido2/server_metadata | Authenticators metadata in json format. Example: virtual devices.|
-|requestedCredentialTypes|["RS256","ES256"]| |
-|  requestedParties| [{"name":"https://my-jans-server.jans.io","domains":["my-jans-server.jans.io"]}]| Requested party name.|
-  |userAutoEnrollment |false|Allow to enroll users on enrollment/authentication requests. (Useful while running tests)|
-  |unfinishedRequestExpiration| 180|Expiration time in seconds for pending enrollment/authentication requests|
-  |authenticationHistoryExpiration|1296000|Expiration time in seconds for approved authentication requests.|
+
+| Field named                 | Example                                  | Description                                                                                                                     |
+|-----------------------------|------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------|
+| issuer                      | https://my-jans-server.jans.io           | URL using the https scheme with no query or fragment component. The OP asserts this as its Issuer Identifier                    |
+| baseEndpoint                | https://my-jans-server/jans-fido2/restv1 | Base URL of the FIDO2 server Endpoints                                                                                          |
+| cleanServiceInterval        | 60                                       | Time interval for the Clean Service in seconds.                                                                                 |
+| cleanServiceBatchChunkSize  | 10000                                    | Each clean up iteration fetches chunk of expired data per base dn and removes it from storage.                                  |
+| useLocalCache               | true                                     | Boolean value specifying whether to enable local in-memory cache for attributes, scopes, clients and organization configuration |
+| disableJdkLogger            | true                                     | Boolean value specifying whether to enable JDK Loggers                                                                          |
+| loggingLevel                | "INFO" or "TRACE" or "DEBUG"             | Logging level for FIDO2 server                                                                                                  |
+| loggingLayout               | "text" or "json"                         | Contents of logs as plain text or json format                                                                                   |
+| externalLoggerConfiguration |                                          | Path to external log4j2 logging configuration                                                                                   |
+| metricReporterInterval      | 300                                      | The interval for metric reporter in seconds.                                                                                    |
+| metricReporterKeepDataDays  | 15                                       | The number of days to retain metric reported data in the system                                                                 |
+| metricReporterEnabled       | true                                     | Boolean value specifying whether to enable Metric Reporter                                                                      |
+| personCustomObjectClassList | ["jansCustomPerson", "jansPerson"  ]     | LDAP custom object class list for dynamic person enrollment.                                                                    |
+| fido2Configuration          | See JSON contents in the below example   | FIDO2 Configuration                                                                                                             |
+
+#### Fido2Configuration structure
+
+| Field named                     | Example                                                                          | Description                                                                               |
+|---------------------------------|----------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------|
+| authenticatorCertsFolder        | /etc/jans/conf/fido2/authenticator_cert                                          | Authenticators certificates fodler.                                                       |
+| mdsCertsFolder                  | /etc/jans/conf/fido2/mds/cert                                                    | MDS TOC root certificates folder.                                                         |
+| mdsTocsFolder                   | /etc/jans/conf/fido2/mds/toc                                                     | MDS TOC files folder.                                                                     |
+| serverMetadataFolder            | /etc/jans/conf/fido2/server_metadata                                             | Authenticators metadata in json format. Example: virtual devices.                         |
+| metadataUrlsProvider            | https://mds3.fido.tools                                                          | String value to provide source of URLs with external metadata.                            |
+| requestedCredentialTypes        | ["RS256","ES256"]                                                                |                                                                                           |
+| requestedParties                | [{"name":"https://my-jans-server.jans.io","domains":["my-jans-server.jans.io"]}] | Requested party name.                                                                     |
+| userAutoEnrollment              | false                                                                            | Allow to enroll users on enrollment/authentication requests. (Useful while running tests) |
+| unfinishedRequestExpiration     | 180                                                                              | Expiration time in seconds for pending enrollment/authentication requests                 |
+| authenticationHistoryExpiration | 1296000                                                                          | Expiration time in seconds for approved authentication requests.                          |
 
 ### Configuring the FIDO2 server:
 #### 1. Read Configuration parameters:
@@ -68,6 +75,7 @@ Response:
     "unfinishedRequestExpiration": 180,
     "authenticationHistoryExpiration": 1296000,
     "serverMetadataFolder": "/etc/jans/conf/fido2/server_metadata",
+    "metadataUrlsProvider": "",
     "requestedCredentialTypes": [
       "RS256",
       "ES256"

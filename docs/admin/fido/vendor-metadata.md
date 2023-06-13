@@ -232,6 +232,19 @@ Janssen's FIDO2 server -
 ### 3. Skip metadata validation
 Metadata validation is recommended but not mandatory as per FIDO2 specifications. As per the current implementation, there is no provision in the jans-fido2 server to turn this feature off. However, the intention is to implement it in the future.
 
+### 4. How Apple does it differently
+
+If you check `attStmt` and it contains `x5c`, it is a FULL attestation. FULL basically means that it is a certificate
+that is chained to the vendor. It's signed by a batch private key whose public key is in a batch certificate that is
+chained to the Apple attestation root certificate. Usually certificates have an authorityInfoAccess extension that helps
+locate the root, but Apple chose not to do that. Nevertheless, a quick google give us the needed root
+certificate https://www.apple.com/certificateauthority/Apple_WebAuthn_Root_CA.pem.
+
+This certificate is downloaded to the path `/etc/jans/conf/fido2/authenticator_cert`.
+
+You can see more details of the implementation in this link from
+https://medium.com/webauthnworks/webauthn-fido2-verifying-apple-anonymous-attestation-5eaff334c849.
+
 ### References:
 
 1. https://fidoalliance.org/announcing-the-new-streamlined-and-simplified-metadata-service-for-authenticator-vendors-and-customers/
