@@ -102,6 +102,9 @@ const RegisterForm = (data) => {
         if (scopeOption.length === 0) {
             errorField += 'scope ';
         }
+        if(!clientExpiryDate) {
+            errorField += 'client-expiry ';
+        }
         if (errorField.trim() !== '') {
             setError('The following fields are mandatory: ' + errorField);
             return false;
@@ -239,7 +242,7 @@ const RegisterForm = (data) => {
                 className="inputText"
             />
 
-            <label><b>Client expiry</b><span className="required">*</span> <span style={{ fontSize: 12 }}>(Select the date)</span> :</label>
+            <label><b>Client expiry date</b><span className="required">*</span> <span style={{ fontSize: 12 }}>(Select the date)</span> :</label>
             <DatePicker
                 showTimeSelect
                 selected={clientExpiryDate}
