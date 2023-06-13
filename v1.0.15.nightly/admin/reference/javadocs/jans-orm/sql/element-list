@@ -1,0 +1,7 @@
+io.jans.orm.sql.dsl.template
+io.jans.orm.sql.dsl.types
+io.jans.orm.sql.impl
+io.jans.orm.sql.model
+io.jans.orm.sql.operation
+io.jans.orm.sql.operation.impl
+io.jans.orm.sql.operation.watch
