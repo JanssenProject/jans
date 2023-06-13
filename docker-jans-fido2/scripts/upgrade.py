@@ -29,10 +29,12 @@ def _transform_fido2_dynamic_config(conf):
     for k, v in [
         ("superGluuEnabled", False),
         ("oldU2fMigrationEnabled", True),
+        ("metadataUrlsProvider", ""),
     ]:
         # dont update if key exists
         if k in conf:
             continue
+        logger.info(f"adding {k}={v}")
 
         conf[k] = v
         should_update = True
