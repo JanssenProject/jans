@@ -502,7 +502,6 @@ class JCA_CLI:
             raise ValueError(
                 self.colored_text("Unable to connect jans-auth server:\n {}".format(str(e)), error_color))
 
-
         self.log_response(response)
 
         if self.wrapped:
@@ -511,6 +510,10 @@ class JCA_CLI:
             print(response.status_code)
             print(response.text)
 
+        for key in ('user_data', 'access_token_enc', 'access_token'):
+            if key in config['DEFAULT']:
+                config['DEFAULT'].pop(key)
+        write_config()
 
 
     def check_access_token(self):
