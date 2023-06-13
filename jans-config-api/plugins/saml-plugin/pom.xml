@@ -12,7 +12,7 @@
 		<httpclient.version>4.5.13</httpclient.version>
 		<jans.version>${project.version}</jans.version>
 		
-		<keycloak.version>21.1.1</keycloak.version>
+		<keycloak.version>20.0.2</keycloak.version>
 	</properties>
 
 	<dependencies>
@@ -37,7 +37,7 @@
 		<!-- keycloak -->
 		<dependency>
 		    <groupId>org.keycloak</groupId>
-		    <artifactId>keycloak-admin-client</artifactId>
+		    <artifactId>keycloak-admin-client-jakarta</artifactId>
 		   <version>${keycloak.version}</version>
 		</dependency>
 		

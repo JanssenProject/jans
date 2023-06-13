@@ -25,6 +25,7 @@ import org.keycloak.representations.idm.UserRepresentation;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import java.util.*;
+import jakarta.ws.rs.core.Response;
 
 @ApplicationScoped
 public class SamlService {

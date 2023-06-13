@@ -31,6 +31,7 @@ import jakarta.ws.rs.core.Response;
 import java.util.*;
 import java.util.stream.*;
 
+import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.slf4j.Logger;
 
@@ -58,7 +59,7 @@ public class SamlTrustRelationshipResource extends BaseResource {
     @GET
     @ProtectedApi(scopes = { Constants.SAML_READ_ACCESS })
     public Response getAllClients() {
-        List<UserRepresentation> users = keycloakConfig.getInstance().realm("master").users();
+        UsersResource users = keycloakConfig.getInstance().realm("master").users();
 
         logger.info("All users:{}", users);
         return Response.ok(users).build();
@@ -77,11 +78,11 @@ public class SamlTrustRelationshipResource extends BaseResource {
     public Response searchClient(@Parameter(description = "Client name") @PathParam(Constants.NAME) @NotNull String name, boolean exact) {
         List entries = new ArrayList();
 
-        logger.info("Searching by username: {} (exact {})", username, exact);
-        List<UserRepresentation> users = keycloakConfig.getInstance().realm("master").users().searchByUsername(username,
+        logger.info("Searching by username: {} (exact {})", name, exact);
+        List<UserRepresentation> users = keycloakConfig.getInstance().realm("master").users().searchByUsername(name,
                 exact);
 
-        logger.info("Users found by username:{}, users:{}", username, users);
+        logger.info("Users found by username:{}, users:{}", name, users);
 
         return Response.ok(users).build();
     }
@@ -98,7 +99,7 @@ public class SamlTrustRelationshipResource extends BaseResource {
     public Response createClient(String name) {
     
         logger.info("Create user name:{}", name);
-        UserRepresentation user = samlService.createUser(name,"user123");
+        UserRepresentation user = samlService.createClient(name,"user123");
         logger.info("Users created by name:{}, user:{}", name, user);
 
         return Response.ok(user).build();
