@@ -7,13 +7,18 @@ tags:
   - par
 ---
 
-## This content is in progress
+# Pushed Authorization Request (PAR)
 
-The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.
+Pushed Authorization Request (PAR) allows to push the payload of an OAuth 2.0 authorization request to the authorization server via 
+a direct request and provides back with a request URI that is used as reference to the data in a subsequent call to the authorization endpoint.
+
+For more information and implementation details please check [PAR Endpoint documentation](../endpoints/par.md)
+
+[PAR specification](https://datatracker.ietf.org/doc/html/rfc9126)
 
 ## Have questions in the meantime?
 
-While this documentation is in progress, you can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussion) or the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). Any questions you have will help determine what information our documentation should cover.
+You can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussion) or the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). Any questions you have will help determine what information our documentation should cover.
 
 ## Want to contribute?
 
