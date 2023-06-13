@@ -22,6 +22,7 @@ io.jans.model.custom.script.type.postauthn
 io.jans.model.custom.script.type.revoke
 io.jans.model.custom.script.type.scim
 io.jans.model.custom.script.type.scope
+io.jans.model.custom.script.type.selectaccount
 io.jans.model.custom.script.type.session
 io.jans.model.custom.script.type.spontaneous
 io.jans.model.custom.script.type.ssa

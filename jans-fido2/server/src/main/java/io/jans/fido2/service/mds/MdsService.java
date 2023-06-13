@@ -63,9 +63,6 @@ public class MdsService {
     private Base64Service base64Service;
 
     @Inject
-    private ResteasyClientFactory resteasyClientFactory;
-
-    @Inject
     private AppConfiguration appConfiguration;
 
     private Map<String, JsonNode> mdsEntries;
@@ -121,14 +118,17 @@ public class MdsService {
 	}
 
     private void verifyStatusAcceptable(String aaguid, AuthenticatorCertificationStatus status) {
-        final List<AuthenticatorCertificationStatus> undesiredAuthenticatorStatus = Arrays
-                .asList(new AuthenticatorCertificationStatus[] { AuthenticatorCertificationStatus.USER_VERIFICATION_BYPASS, AuthenticatorCertificationStatus.ATTESTATION_KEY_COMPROMISE,
-                        AuthenticatorCertificationStatus.USER_KEY_REMOTE_COMPROMISE, AuthenticatorCertificationStatus.USER_KEY_PHYSICAL_COMPROMISE,
-                        AuthenticatorCertificationStatus.ATTESTATION_KEY_COMPROMISE });
+		final List<AuthenticatorCertificationStatus> undesiredAuthenticatorStatus = Arrays.asList(
+				AuthenticatorCertificationStatus.USER_VERIFICATION_BYPASS,
+				AuthenticatorCertificationStatus.ATTESTATION_KEY_COMPROMISE,
+				AuthenticatorCertificationStatus.USER_KEY_REMOTE_COMPROMISE,
+				AuthenticatorCertificationStatus.USER_KEY_PHYSICAL_COMPROMISE,
+				AuthenticatorCertificationStatus.NOT_FIDO_CERTIFIED,
+				AuthenticatorCertificationStatus.REVOKED
+		);
         if (undesiredAuthenticatorStatus.contains(status)) {
             throw new Fido2RuntimeException("Authenticator " + aaguid + "status undesirable " + status);
         }
-
     }
     
     public void clear() {

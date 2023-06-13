@@ -70,7 +70,7 @@ tags:
 | dateFormatterPatterns | List of key value date formatters, e.g. 'userinfo: 'yyyy-MM-dd', etc. | [Details](#dateformatterpatterns) |
 | dcrAuthorizationWithClientCredentials | Boolean value indicating if DCR authorization to be performed using client credentials | [Details](#dcrauthorizationwithclientcredentials) |
 | dcrAuthorizationWithMTLS | Boolean value indicating if DCR authorization allowed with MTLS | [Details](#dcrauthorizationwithmtls) |
-| trustedSsaIssuers | List of trusted SSA issuers. If MTLS private key is used to sign DCR JWT, certificate issuer is checked as well. | [Details](#trustedssaissuers) |
+| dcrForbidExpirationTimeInRequest | Boolean value specifying whether to allow to set client's expiration time in seconds during dynamic registration. | [Details](#dcrforbidexpirationtimeinrequest) |
 | dcrSignatureValidationEnabled | Boolean value enables DCR signature validation. Default is false | [Details](#dcrsignaturevalidationenabled) |
 | dcrSignatureValidationJwks | Specifies JWKS for all DCR's validations | [Details](#dcrsignaturevalidationjwks) |
 | dcrSignatureValidationJwksUri | Specifies JWKS URI for all DCR's validations | [Details](#dcrsignaturevalidationjwksuri) |
@@ -171,7 +171,7 @@ tags:
 | logClientIdOnClientAuthentication | Choose if application should log the Client ID on client authentication | [Details](#logclientidonclientauthentication) |
 | logClientNameOnClientAuthentication | Choose if application should log the Client Name on client authentication | [Details](#logclientnameonclientauthentication) |
 | loggingLayout | Logging layout used for Jans Authorization Server loggers | [Details](#logginglayout) |
-| loggingLevel | Specify the logging level for oxAuth loggers | [Details](#logginglevel) |
+| loggingLevel | Specify the logging level of loggers | [Details](#logginglevel) |
 | logNotFoundEntityAsError | Boolean value specifying whether to log not_found entity exception as error or as trace. Default value is false (trace). | [Details](#lognotfoundentityaserror) |
 | metricReporterInterval | The interval for metric reporter in seconds | [Details](#metricreporterinterval) |
 | metricReporterKeepDataDays | The days to keep metric reported data | [Details](#metricreporterkeepdatadays) |
@@ -253,6 +253,7 @@ tags:
 | tokenEndpointAuthSigningAlgValuesSupported | A list of the JWS signing algorithms (alg values) supported by the Token Endpoint for the signature on the JWT used to authenticate the Client at the Token Endpoint for the private_key_jwt and client_secret_jwt authentication methods | [Details](#tokenendpointauthsigningalgvaluessupported) |
 | tokenRevocationEndpoint | The URL for the access_token or refresh_token revocation endpoint | [Details](#tokenrevocationendpoint) |
 | trustedClientEnabled | Boolean value specifying whether a client is trusted and no authorization is required | [Details](#trustedclientenabled) |
+| trustedSsaIssuers | List of trusted SSA issuers. If MTLS private key is used to sign DCR JWT, certificate issuer is checked as well. | [Details](#trustedssaissuers) |
 | uiLocalesSupported | This list details the languages and scripts supported for the user interface | [Details](#uilocalessupported) |
 | umaAddScopesAutomatically | Add UMA scopes automatically if it is not registered yet | [Details](#umaaddscopesautomatically) |
 | umaConfigurationEndpoint | UMA Configuration endpoint URL | [Details](#umaconfigurationendpoint) |
@@ -816,13 +817,13 @@ tags:
 - Default value: false
 
 
-### trustedSsaIssuers
+### dcrForbidExpirationTimeInRequest
 
-- Description: List of trusted SSA issuers. If MTLS private key is used to sign DCR JWT, certificate issuer is checked as well.
+- Description: Boolean value specifying whether to allow to set client's expiration time in seconds during dynamic registration.
 
 - Required: No
 
-- Default value: None
+- Default value: false
 
 
 ### dcrSignatureValidationEnabled
@@ -1727,7 +1728,16 @@ tags:
 
 ### loggingLevel
 
-- Description: Specify the logging level for oxAuth loggers
+- Description: Specify the logging level of loggers
+
+- Required: No
+
+- Default value: None
+
+
+### logNotFoundEntityAsError
+
+- Description: Boolean value specifying whether to log not_found entity exception as error or as trace. Default value is false (trace).
 
 - Required: No
 
@@ -2448,6 +2458,15 @@ tags:
 ### trustedClientEnabled
 
 - Description: Boolean value specifying whether a client is trusted and no authorization is required
+
+- Required: No
+
+- Default value: None
+
+
+### trustedSsaIssuers
+
+- Description: List of trusted SSA issuers. If MTLS private key is used to sign DCR JWT, certificate issuer is checked as well.
 
 - Required: No
 

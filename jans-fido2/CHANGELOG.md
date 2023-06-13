@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.0.14](https://github.com/JanssenProject/jans/compare/jans-fido2-v1.0.13...jans-fido2-v1.0.14) (2023-06-12)
+
+
+### Features
+
+* **fido2:** Apple_WebAuthn_Root_CA certificate is now downloaded to /authentication_cert folder and read from AttestationCertificateService ([#4756](https://github.com/JanssenProject/jans/issues/4756)) ([1600185](https://github.com/JanssenProject/jans/commit/16001859895d5aa5d840cfc9d425d0ee95149979))
+* **fido2:** unit test for the io.jans.fido2.service.sg package ([#5006](https://github.com/JanssenProject/jans/issues/5006)) ([70a5b38](https://github.com/JanssenProject/jans/commit/70a5b3815c09d9ef6d39d2cf7a6e216ca29e17a4))
+* **fido2:** validate acceptable status when loading MDS ([#5192](https://github.com/JanssenProject/jans/issues/5192)) ([dd27295](https://github.com/JanssenProject/jans/commit/dd27295ec11adba9c49a250c29d091fa53db2851))
+* **jans-fido2:** unit test for CertificateVerifier, CommonVerifiers and userVerificationVerifier ([#4782](https://github.com/JanssenProject/jans/issues/4782)) ([676c6ac](https://github.com/JanssenProject/jans/commit/676c6ac3e5737a92858ad78be32f4d5e6050a4be))
+* move notify-client2 library to fido2 project [#5030](https://github.com/JanssenProject/jans/issues/5030) ([#5031](https://github.com/JanssenProject/jans/issues/5031)) ([ed5e09e](https://github.com/JanssenProject/jans/commit/ed5e09eff23dbea45e026728886d1e95f3e5cd95))
+* store AttestationType ([#4813](https://github.com/JanssenProject/jans/issues/4813)) ([819f78a](https://github.com/JanssenProject/jans/commit/819f78ac4ebb9030097166e0fdc0926896c11df5))
+* update SG script and notify client to conform scan API [#5061](https://github.com/JanssenProject/jans/issues/5061) ([#5062](https://github.com/JanssenProject/jans/issues/5062)) ([7afc42b](https://github.com/JanssenProject/jans/commit/7afc42b2ec00d35cb980d35f286289de2bdadff2))
+
+
+### Bug Fixes
+
+* FullFlowAppleTest and FullFlowAndroidTest with error [#5032](https://github.com/JanssenProject/jans/issues/5032) ([#5150](https://github.com/JanssenProject/jans/issues/5150)) ([399dc55](https://github.com/JanssenProject/jans/commit/399dc555f409cd11e7d7f925a279a26795e6bbf6))
+* **jans-fido2:** compilation is failing due to missed jans-doc dependency [#5051](https://github.com/JanssenProject/jans/issues/5051) ([#5052](https://github.com/JanssenProject/jans/issues/5052)) ([ad2332e](https://github.com/JanssenProject/jans/commit/ad2332ee0b3b94232c8c79321fbc3e99d43a88d0))
+* **jans-fido2:** created TPMAssertionFormatProcessor class ([#4827](https://github.com/JanssenProject/jans/issues/4827)) ([f019dcf](https://github.com/JanssenProject/jans/commit/f019dcfb5b9de43877f21cffd9ab43d7a1d3df9d))
+* prepare for 1.0.14 release ([25ccadf](https://github.com/JanssenProject/jans/commit/25ccadf85327ea14685c6066dc6609919e4f2865))
+
 ## [1.0.13](https://github.com/JanssenProject/jans/compare/jans-fido2-v1.0.12...jans-fido2-v1.0.13) (2023-05-10)
 
 
