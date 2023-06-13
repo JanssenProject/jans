@@ -34,7 +34,7 @@ const OIDCClientDetails = (data) => {
                 });
             });
 
-            const supportedAcrValuesString = JSON.parse(opConfiguration).opConfiguration.acr_values_supported;
+            const supportedAcrValuesString = JSON.parse(opConfiguration)?.opConfiguration?.acr_values_supported;
             setAcrValueOptions(supportedAcrValuesString.map((ele) => createOption(ele)));
 
             const oidcClient: string = await new Promise((resolve, reject) => {
@@ -42,7 +42,7 @@ const OIDCClientDetails = (data) => {
                     resolve(JSON.stringify(result));
                 });
             });
-            const expireAt = JSON.parse(oidcClient).oidcClient.expire_at;
+            const expireAt = JSON.parse(oidcClient)?.oidcClient?.expire_at;
 
             const lifetime = Math.floor((expireAt - moment().toDate().getTime()) / 1000);
             if (lifetime <= 0) {
