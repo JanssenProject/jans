@@ -28,6 +28,16 @@ In order to understand how various logout flows work, it is important to underst
 Either an RP (application) or an OpenID Provider (OP) can initiate user logout. Front-channel logout or back-channel
 logout are the mechanisms used by OP to initiate logout. While RP uses RP-initiated logout to log user out.
 
+## Client Configuration
+
+Which kind of logout mechanism is used by the client is dictated by client's configuration on Janssen Server. 
+
+When using
+[Janssen Text-based UI(TUI)](../../config-guide/jans-tui/README.md) to configure the client, navigate via `Auth Server`->
+`Clients`->`logout` as show in image below:
+
+![](../../../../assets/image-logout-client-config.png)
+
 ## RP-Initiated Logout
 
 RP can initiat logout for a user by redirecting user-agent to Janssen Server's `end_session_endpoint`. This URL can be
@@ -38,8 +48,13 @@ more details [here](../../endpoints/end-session.md)
 A request to `end_session_endpoint` endpoint of OP will clear the user session on OP. Along with this, it is important
 that RP also removes the local user session. RP can do this before redirecting user agent to `end_session_endpoint`. In
 case RP is configured to receive an intimation from the OP about user logouts
-(either via front or backchannel logout mechanisms), then RP may choose to remove local session only after OP informs
+(either via front or backchannel logout mechanisms), then RP may choose to remove local session after OP informs
 the RP about the successful logout.
+
+### Configuration Properties
+
+Client configuration property of `Post Logout Redirection URIs` plays important role when using RP initiated logout. 
+After successful logout from Janssen Server, the server will redirect user-agent to the URI specified in this property.
 
 ## Front-Channel Logout
 
