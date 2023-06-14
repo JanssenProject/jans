@@ -38,6 +38,14 @@ When using
 
 ![](../../../../assets/image-logout-client-config.png)
 
+## Janssen Server Configuration Properties
+
+Following properties drive how Janssen Server as OpenID Connect Provider (OP) will execute logout.
+
+- [allowPostLogoutRedirectWithoutValidation](../../../reference/json/properties/janssenauthserver-properties.md#allowpostlogoutredirectwithoutvalidation)
+- [frontChannelLogoutSessionSupported](../../../reference/json/properties/janssenauthserver-properties.md#frontchannellogoutsessionsupported)
+- [removeRefreshTokensForClientOnLogout](../../../reference/json/properties/janssenauthserver-properties.md#removerefreshtokensforclientonlogout)
+
 ## RP-Initiated Logout
 
 RP can initiat logout for a user by redirecting user-agent to Janssen Server's `end_session_endpoint`. This URL can be
