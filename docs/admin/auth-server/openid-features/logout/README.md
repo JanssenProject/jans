@@ -68,19 +68,29 @@ After successful logout from Janssen Server, the server will redirect user-agent
 
 Although Jans Auth Server has a `session_id` for each person who has authenticated,
 applications generally have their *own* sessions. Upon logout from an OpenID Provider, ideally all RPs are notified,
-so they can also their local sessions. The OpenID solution to implement logout is currently described in
+so they can also remove their local sessions. The OpenID solution to implement logout is currently described in
 the [OpenID Connect Front Channel Logout specification](http://openid.net/specs/openid-connect-frontchannel-1_0.html).
 
 In practice, here's how it works:
 
-- Jans Auth Server `end_session` endpoint returns an HTML page, which contains an iFrame for each application to
+- From the user-agent when the end-user initiates logout, the Janssen Server `end_session` endpoint is called. 
+- `end_session` endpoint returns an HTML page, which contains an iFrame for each application to
   which the user has authenticated.
 - The iFrame contains a link to each application's respective logout URL.
 - The special HTML page should be loaded in the background and not displayed to the user.
 - The iFrame URLs should be loaded by the browser.
-- Now, upon logout, the user is calling the logout page of each application, the local cookies are cleared, and the user is signed out of all applications.
+- Now, upon logout, the user is calling the logout page of each application, the local cookies are cleared, 
+and the user is signed out of all applications.
 
 ### Configuration Properties
+
+A client can use configuration values of `Front Channel Logout URI` to specifity URI to be used by Janssen Server to 
+render in the iFrame at the time of logout. Client can also specify if Janssen Server should send session information
+(issuer and session ID) as query parameters along with logout URI using `Frong channel logout session required`. These
+configuration values can be updated using TUI as shown [here](#client-configuration)
+
+At Janssen Server level, property value `frontChannelLogoutSessionSupported` can be used to enable or disable support 
+for front channel logout as show [here](#janssen-server-configuration-properties).
 
 ## Back-Channel Logout
 
