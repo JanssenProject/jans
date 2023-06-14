@@ -30,7 +30,16 @@ logout are the mechanisms used by OP to initiate logout. While RP uses RP-initia
 
 ## RP-Initiated Logout
 
+RP can initiat logout for a user by redirecting user-agent to Janssen Server's `end_session_endpoint`. This URL can be
+obtained as value of `end_session_endpoint` claim in the OpenID Connect
+[.well-known metadata](../../endpoints/configuration.md) endpoint response. Please read about `end_session_endpoint` in
+more details [here](../../endpoints/end-session.md)
 
+A request to `end_session_endpoint` endpoint of OP will clear the user session on OP. Along with this, it is important
+that RP also removes the local user session. RP can do this before redirecting user agent to `end_session_endpoint`. In
+case RP is configured to receive an intimation from the OP about user logouts
+(either via front or backchannel logout mechanisms), then RP may choose to remove local session only after OP informs
+the RP about the successful logout.
 
 ## Front-Channel Logout
 
