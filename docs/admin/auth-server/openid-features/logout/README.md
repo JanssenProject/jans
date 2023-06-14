@@ -12,17 +12,25 @@ tags:
 
 # Logout
 
-Janssen Server supports various end-user logout scenrios by supporting OpenID Connect specifications. Mechanisms 
-defined in OpenID Connect specifications of [RP-Initiated Logout](https://openid.net/specs/openid-connect-rpinitiated-1_0.html), 
+Janssen Server supports various end-user logout scenrios by implementing OpenID Connect specifications. OpenID Connect 
+specifications of [RP-Initiated Logout](https://openid.net/specs/openid-connect-rpinitiated-1_0.html), 
 [Front-Channel Logout](https://openid.net/specs/openid-connect-frontchannel-1_0.html) and 
 [Back-Channel Logout](https://openid.net/specs/openid-connect-backchannel-1_0.html) can be leveraged by 
 applications(RPs) to implement end-user logout. Simpler logout scenarios can be fulfiled by using features of one of the 
 specifications (just using RP initiated logout for example), but for more complex scenarios like single sign-out,
 features from multiple specifications may have to be combined. 
 
+In order to understand how various logout flows work, it is important to understand 
+
+- [How Janssen Server manages sessions?](https://docs.jans.io/v1.0.14/admin/auth-server/session-management/)
+- [OpenID Connect Session management specification](https://openid.net/specs/openid-connect-session-1_0.html)
+
+Either an RP (application) or an OpenID Provider (OP) can initiate user logout. Front-channel logout or back-channel
+logout are the mechanisms used by OP to initiate logout. While RP uses RP-initiated logout to log user out.
+
 ## RP-Initiated Logout
 
-### Configuration Properties
+
 
 ## Front-Channel Logout
 
