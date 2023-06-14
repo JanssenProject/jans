@@ -96,7 +96,7 @@ public class SamlTrustRelationshipResource extends BaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
     @ProtectedApi(scopes = { Constants.SAML_WRITE_ACCESS })
-    public Response createClient(String name) {
+    public Response createClient(String name) throws Exception {
     
         logger.info("Create user name:{}", name);
         UserRepresentation user = samlService.createClient(name,"user123");

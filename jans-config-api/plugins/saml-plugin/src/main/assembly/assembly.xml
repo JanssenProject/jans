@@ -13,7 +13,9 @@
 			<outputDirectory>/</outputDirectory>
 			<useProjectArtifact>false</useProjectArtifact>
 			<includes>
-				<include>org.keycloak:keycloak-admin-client</include>
+				<include>org.keycloak:keycloak-admin-client-jakarta</include>
+				<include>org.keycloak:keycloak-core</include>
+				<include>org.keycloak:keycloak-common</include>
 			</includes>
 			<scope>runtime</scope>
 		</dependencySet>

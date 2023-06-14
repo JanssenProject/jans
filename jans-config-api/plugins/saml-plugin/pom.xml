@@ -40,7 +40,16 @@
 		    <artifactId>keycloak-admin-client-jakarta</artifactId>
 		   <version>${keycloak.version}</version>
 		</dependency>
-		
+		<dependency>
+		    <groupId>org.keycloak</groupId>
+		    <artifactId>keycloak-core</artifactId>
+		   <version>${keycloak.version}</version>
+		</dependency>
+		<dependency>
+		    <groupId>org.keycloak</groupId>
+		    <artifactId>keycloak-common</artifactId>
+		   <version>${keycloak.version}</version>
+		</dependency>
 		
 		<!-- Microprofile -->
 		<dependency>
