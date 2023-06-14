@@ -133,7 +133,7 @@ const RegisterForm = (data) => {
             const opConfigurationEndpoint = generateOpenIdConfigurationURL(issuerOption.map((iss) => iss.value)[0]);
             const opConfigurationEndpointURL = new URL(opConfigurationEndpoint);
             const issuer = opConfigurationEndpointURL.protocol + '//' + opConfigurationEndpointURL.hostname;
-            const scope = scopeOption.map((ele) => ele.value);
+            const scope = scopeOption.map((ele) => ele.value).join(" ");
             const openapiConfig = await getOpenidConfiguration(opConfigurationEndpoint);
 
             if (openapiConfig != undefined) {
