@@ -1614,6 +1614,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             registerRequest.setResponseTypes(responseTypes);
             registerRequest.addCustomAttribute("jansTrustedClnt", "true");
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+            registerRequest.setScope(Tester.standardScopes);
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
             registerClient.setRequest(registerRequest);
@@ -1666,6 +1667,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             registerRequest.setResponseTypes(responseTypes);
             registerRequest.addCustomAttribute("jansTrustedClnt", "true");
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+            registerRequest.setScope(Tester.standardScopes);
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
             registerClient.setRequest(registerRequest);
@@ -1732,6 +1734,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             registerRequest.setResponseTypes(responseTypes);
             registerRequest.addCustomAttribute("jansTrustedClnt", "true");
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+            registerRequest.setScope(Tester.standardScopes);
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
             registerClient.setRequest(registerRequest);
@@ -1799,6 +1802,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             registerRequest.setResponseTypes(responseTypes);
             registerRequest.addCustomAttribute("jansTrustedClnt", "true");
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+            registerRequest.setScope(Tester.standardScopes);
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
             registerClient.setRequest(registerRequest);
@@ -2139,6 +2143,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.NONE);
             registerRequest.addCustomAttribute("jansTrustedClnt", "true");
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+            registerRequest.setScope(Tester.standardScopes);
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
             registerClient.setRequest(registerRequest);
@@ -2218,6 +2223,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             registerRequest.setResponseTypes(responseTypes);
             registerRequest.addCustomAttribute("jansTrustedClnt", "true");
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+            registerRequest.setScope(Tester.standardScopes);
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
             registerClient.setRequest(registerRequest);
@@ -2306,6 +2312,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             registerRequest.setResponseTypes(responseTypes);
             registerRequest.addCustomAttribute("jansTrustedClnt", "true");
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+            registerRequest.setScope(Tester.standardScopes);
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
             registerClient.setRequest(registerRequest);
@@ -2394,6 +2401,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             registerRequest.setResponseTypes(responseTypes);
             registerRequest.addCustomAttribute("jansTrustedClnt", "true");
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+            registerRequest.setScope(Tester.standardScopes);
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
             registerClient.setRequest(registerRequest);
@@ -2482,6 +2490,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             registerRequest.setResponseTypes(responseTypes);
             registerRequest.addCustomAttribute("jansTrustedClnt", "true");
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+            registerRequest.setScope(Tester.standardScopes);
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
             registerClient.setRequest(registerRequest);
@@ -2561,6 +2570,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
             registerRequest.setResponseTypes(responseTypes);
             registerRequest.addCustomAttribute("jansTrustedClnt", "true");
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+            registerRequest.setScope(Tester.standardScopes);
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
             registerClient.setRequest(registerRequest);

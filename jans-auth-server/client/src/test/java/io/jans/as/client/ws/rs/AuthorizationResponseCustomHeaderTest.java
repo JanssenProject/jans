@@ -34,12 +34,15 @@ public class AuthorizationResponseCustomHeaderTest extends BaseTest {
             final String redirectUris, final String redirectUri, final String sectorIdentifierUri) throws Exception {
         showTitle("AuthorizationResponseCustomHeaderTest");
 
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -51,7 +54,6 @@ public class AuthorizationResponseCustomHeaderTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization and receive the authorization code.
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String state = UUID.randomUUID().toString();
         String nonce = UUID.randomUUID().toString();
 

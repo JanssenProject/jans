@@ -6,16 +6,7 @@
 
 package io.jans.as.client.interop;
 
-import io.jans.as.client.AuthorizationRequest;
-import io.jans.as.client.AuthorizationResponse;
-import io.jans.as.client.AuthorizeClient;
-import io.jans.as.client.BaseTest;
-import io.jans.as.client.RegisterClient;
-import io.jans.as.client.RegisterRequest;
-import io.jans.as.client.RegisterResponse;
-import io.jans.as.client.UserInfoClient;
-import io.jans.as.client.UserInfoResponse;
-
+import io.jans.as.client.*;
 import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
@@ -28,10 +19,6 @@ import org.testng.annotations.Test;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
-
-import static io.jans.as.client.client.Asserter.*;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
 
 /**
  * OC5:FeatureTest-Can Provide Signed UserInfo Response
@@ -49,6 +36,7 @@ public class CanProvideSignedUserInfoResponse extends BaseTest {
         showTitle("OC5:FeatureTest-Can Provide Signed UserInfo Response HS256");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
@@ -56,6 +44,7 @@ public class CanProvideSignedUserInfoResponse extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.HS256);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -68,7 +57,6 @@ public class CanProvideSignedUserInfoResponse extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -107,6 +95,7 @@ public class CanProvideSignedUserInfoResponse extends BaseTest {
         showTitle("OC5:FeatureTest-Can Provide Signed UserInfo Response HS384");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
@@ -114,6 +103,7 @@ public class CanProvideSignedUserInfoResponse extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.HS384);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -126,7 +116,6 @@ public class CanProvideSignedUserInfoResponse extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -165,6 +154,7 @@ public class CanProvideSignedUserInfoResponse extends BaseTest {
         showTitle("OC5:FeatureTest-Can Provide Signed UserInfo Response HS512");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
@@ -172,6 +162,7 @@ public class CanProvideSignedUserInfoResponse extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.HS512);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -184,7 +175,6 @@ public class CanProvideSignedUserInfoResponse extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -223,6 +213,7 @@ public class CanProvideSignedUserInfoResponse extends BaseTest {
         showTitle("OC5:FeatureTest-Can Provide Signed UserInfo Response RS256");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
@@ -230,6 +221,7 @@ public class CanProvideSignedUserInfoResponse extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.RS256);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -241,7 +233,6 @@ public class CanProvideSignedUserInfoResponse extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -280,6 +271,7 @@ public class CanProvideSignedUserInfoResponse extends BaseTest {
         showTitle("OC5:FeatureTest-Can Provide Signed UserInfo Response RS384");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
@@ -287,6 +279,7 @@ public class CanProvideSignedUserInfoResponse extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.RS384);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -298,7 +291,6 @@ public class CanProvideSignedUserInfoResponse extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -337,6 +329,7 @@ public class CanProvideSignedUserInfoResponse extends BaseTest {
         showTitle("OC5:FeatureTest-Can Provide Signed UserInfo Response RS512");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
@@ -344,6 +337,7 @@ public class CanProvideSignedUserInfoResponse extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.RS512);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -355,7 +349,6 @@ public class CanProvideSignedUserInfoResponse extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -394,6 +387,7 @@ public class CanProvideSignedUserInfoResponse extends BaseTest {
         showTitle("OC5:FeatureTest-Can Provide Signed UserInfo Response ES256");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
@@ -401,6 +395,7 @@ public class CanProvideSignedUserInfoResponse extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.ES256);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -412,7 +407,6 @@ public class CanProvideSignedUserInfoResponse extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -451,6 +445,7 @@ public class CanProvideSignedUserInfoResponse extends BaseTest {
         showTitle("OC5:FeatureTest-Can Provide Signed UserInfo Response ES384");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
@@ -458,6 +453,7 @@ public class CanProvideSignedUserInfoResponse extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.ES384);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -469,7 +465,6 @@ public class CanProvideSignedUserInfoResponse extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -508,6 +503,7 @@ public class CanProvideSignedUserInfoResponse extends BaseTest {
         showTitle("OC5:FeatureTest-Can Provide Signed UserInfo Response ES512");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
@@ -515,6 +511,7 @@ public class CanProvideSignedUserInfoResponse extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.ES512);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -526,7 +523,6 @@ public class CanProvideSignedUserInfoResponse extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
