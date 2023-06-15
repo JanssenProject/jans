@@ -80,8 +80,14 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
 
         # extract yaml files
         base.extract_file(base.current_app.jans_zip, 'jans-config-api/docs/jans-config-api-swagger.yaml', os.path.join(ops_dir, 'jca', 'jans-config-api-swagger.yaml'), ren=True)
-        for plugin_yaml_file in ('fido2-plugin-swagger.yaml', 'jans-admin-ui-plugin-swagger.yaml', 'scim-plugin-swagger.yaml', 'user-mgt-plugin-swagger.yaml'):
+        plugin_yamls = ['fido2-plugin-swagger.yaml', 'jans-admin-ui-plugin-swagger.yaml', 'scim-plugin-swagger.yaml', 'user-mgt-plugin-swagger.yaml']
+
+        if Config.install_cache_refresh:
+            plugin_yamls.append('cache-refresh-plugin-swagger.yaml')
+
+        for plugin_yaml_file in plugin_yamls:
             base.extract_file(base.current_app.jans_zip, 'jans-config-api/plugins/docs/'+plugin_yaml_file, os.path.join(ops_dir, 'jca', plugin_yaml_file), ren=True)
+
         base.extract_file(base.current_app.jans_zip, 'jans-scim/server/src/main/resources/jans-scim-openapi.yaml', os.path.join(ops_dir, 'scim', 'scim.yaml'), ren=True)
         base.extract_file(base.current_app.jans_zip, 'jans-auth-server/docs/swagger.yaml', os.path.join(ops_dir, 'auth', 'swagger.yaml'), ren=True)
 
