@@ -15,7 +15,7 @@
     "memory": {
       "max_allowed_mb": 512,
       "jvm_heap_ration": 0.7,
-      "ratio": 0.20
+      "ratio": 0.15
     },
     "jetty": {
       "modules": "server,deploy,resources,http,http-forwarded,threadpool,console-capture,jsp"
@@ -51,12 +51,24 @@
     "memory": {
       "max_allowed_mb": 1024,
       "jvm_heap_ration": 0.7,
-      "ratio": 0.20
+      "ratio": 0.15
     },
     "jetty": {
       "modules": "server,deploy,resources,http,http-forwarded,console-capture,jsp,websocket"
     },
     "installed": false,
     "name": "jans-config-api"
+  },
+  "jans-cache-refresh": {
+    "memory": {
+      "max_allowed_mb": 1024,
+      "jvm_heap_ration": 0.7,
+      "ratio": 0.10
+    },
+    "jetty": {
+      "modules": "server,deploy,resources,http,http-forwarded,console-capture,jsp,websocket"
+    },
+    "installed": false,
+    "name": "jans-cache-refresh"
   }
 }
