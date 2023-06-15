@@ -216,7 +216,6 @@ nav:
         - List/Delete Consent: admin/auth-server/openid-features/consent/list-delete.md
       - CIBA: admin/auth-server/openid-features/ciba.md
       - JARM: admin/auth-server/openid-features/jarm.md
-      - SIOP: admin/auth-server/openid-features/siop.md
       - Native SSO: admin/auth-server/openid-features/native-sso.md
       - User Claims:
         - admin/auth-server/openid-features/user-claims/README.md
@@ -8752,6 +8751,11 @@ nav:
     - User Journeys: admin/recipes/ACRouter.md
   - Upgrade Guide:
     - admin/upgrade/README.md
+  - User Management:
+      - admin/usermgmt/README.md
+      - Using SCIM: admin/usermgmt/usermgmt-scim.md
+      - Using CLI/TUI: admin/usermgmt/usermgmt-cli-tui.md
+      - Cache Refresh: admin/usermgmt/usermgmt-cache-refresh.md
 - Contribute:
   - Contribution Guidelines: CONTRIBUTING.md
   - Code of Conduct: CODE_OF_CONDUCT.md
