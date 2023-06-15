@@ -6,25 +6,9 @@
 
 package io.jans.as.client.ws.rs;
 
-import io.jans.as.client.AuthorizationRequest;
-import io.jans.as.client.AuthorizationResponse;
-import io.jans.as.client.AuthorizeClient;
-import io.jans.as.client.BaseTest;
-import io.jans.as.client.RegisterClient;
-import io.jans.as.client.RegisterRequest;
-import io.jans.as.client.RegisterResponse;
-import io.jans.as.client.TokenClient;
-import io.jans.as.client.TokenRequest;
-import io.jans.as.client.TokenResponse;
-import io.jans.as.client.UserInfoClient;
-import io.jans.as.client.UserInfoResponse;
-
+import io.jans.as.client.*;
 import io.jans.as.client.client.AssertBuilder;
-import io.jans.as.model.common.AuthenticationMethod;
-import io.jans.as.model.common.AuthorizationMethod;
-import io.jans.as.model.common.GrantType;
-import io.jans.as.model.common.Prompt;
-import io.jans.as.model.common.ResponseType;
+import io.jans.as.model.common.*;
 import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.StringUtils;
@@ -32,9 +16,9 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
-import static io.jans.as.client.client.Asserter.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
@@ -50,14 +34,17 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
     @Test
     public void sessionWorkFlow1(
             final String redirectUris, final String userId, final String userSecret, final String redirectUri,
-            final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) {
         showTitle("sessionWorkFlow1");
+
+        final List<String> scopes = Arrays.asList("openid", "profile", "email");
 
         // Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -74,7 +61,7 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
         AuthorizationRequest authorizationRequest1 = new AuthorizationRequest(
                 Arrays.asList(ResponseType.CODE),
                 clientId,
-                Arrays.asList("openid", "profile", "email"),
+                scopes,
                 redirectUri,
                 null);
 
@@ -130,7 +117,7 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
         AuthorizationRequest authorizationRequest2 = new AuthorizationRequest(
                 Arrays.asList(ResponseType.CODE),
                 clientId,
-                Arrays.asList("openid", "profile", "email"),
+                scopes,
                 redirectUri,
                 null);
 
@@ -193,11 +180,14 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
             final String sectorIdentifierUri) throws Exception {
         showTitle("sessionWorkFlow2");
 
+        final List<String> scopes = Arrays.asList("openid", "profile", "email");
+
         // Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_POST);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -216,7 +206,7 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
         AuthorizationRequest authorizationRequest1 = new AuthorizationRequest(
                 Arrays.asList(ResponseType.CODE),
                 clientId,
-                Arrays.asList("openid", "profile", "email"),
+                scopes,
                 redirectUri,
                 null);
 
@@ -260,7 +250,7 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
         AuthorizationRequest authorizationRequest2 = new AuthorizationRequest(
                 Arrays.asList(ResponseType.CODE),
                 clientId,
-                Arrays.asList("openid", "profile", "email"),
+                scopes,
                 redirectUri,
                 null);
 
@@ -308,7 +298,7 @@ public class SSOWithMultipleBackendServicesHttpTest extends BaseTest {
         AuthorizationRequest authorizationRequest3 = new AuthorizationRequest(
                 Arrays.asList(ResponseType.CODE),
                 clientId,
-                Arrays.asList("openid", "profile", "email"),
+                scopes,
                 redirectUri,
                 null);
 
