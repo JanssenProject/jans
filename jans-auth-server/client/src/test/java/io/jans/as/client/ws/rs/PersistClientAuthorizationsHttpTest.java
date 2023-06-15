@@ -426,6 +426,7 @@ public class PersistClientAuthorizationsHttpTest extends BaseTest {
         showTitle("doNotPersistAuthorizationWhenPreAuthorized");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN);
+        List<String> scopes = Arrays.asList("openid", "profile");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
@@ -433,6 +434,7 @@ public class PersistClientAuthorizationsHttpTest extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.addCustomAttribute("jansTrustedClnt", "true");
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -447,7 +449,6 @@ public class PersistClientAuthorizationsHttpTest extends BaseTest {
         // 2. Request authorization
         // Scopes: openid, profile
         // Authenticate user with login password, do not show authorize page because the client is pre-authorized.
-        List<String> scopes = Arrays.asList("openid", "profile");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 

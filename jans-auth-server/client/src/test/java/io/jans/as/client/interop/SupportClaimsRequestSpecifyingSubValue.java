@@ -47,12 +47,14 @@ public class SupportClaimsRequestSpecifyingSubValue extends BaseTest {
         showTitle("OC5:FeatureTest-Support claims Request Specifying sub Value (succeed)");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
+        List<String> scopes = Arrays.asList("openid", "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
         registerRequest.setClaims(Arrays.asList(
                 JwtClaimName.GIVEN_NAME,
                 JwtClaimName.FAMILY_NAME));
@@ -67,7 +69,6 @@ public class SupportClaimsRequestSpecifyingSubValue extends BaseTest {
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
 
-        List<String> scopes = Arrays.asList("openid", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
