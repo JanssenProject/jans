@@ -43,6 +43,8 @@ public class TurnOffConsentForPairwiseOpenIdOnlyConsentTest extends BaseTest {
                 ResponseType.TOKEN,
                 ResponseType.ID_TOKEN);
 
+        List<String> scopes = Arrays.asList("openid");
+
         // 1. Dynamic Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
@@ -50,6 +52,7 @@ public class TurnOffConsentForPairwiseOpenIdOnlyConsentTest extends BaseTest {
         registerRequest.setUserInfoSignedResponseAlg(SignatureAlgorithm.RS256);
         registerRequest.setSubjectType(SubjectType.PAIRWISE);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -61,7 +64,6 @@ public class TurnOffConsentForPairwiseOpenIdOnlyConsentTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request Authorization
-        List<String> scopes = Arrays.asList("openid");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 

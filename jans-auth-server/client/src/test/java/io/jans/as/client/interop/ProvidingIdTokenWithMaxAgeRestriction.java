@@ -54,6 +54,7 @@ public class ProvidingIdTokenWithMaxAgeRestriction extends BaseTest {
         registerRequest.setPostLogoutRedirectUris(StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setDefaultMaxAge(3600);
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
