@@ -85,13 +85,48 @@ and the user is signed out of all applications.
 ### Configuration Properties
 
 A client can use configuration values of `Front Channel Logout URI` to specifity URI to be used by Janssen Server to 
-render in the iFrame at the time of logout. Client can also specify if Janssen Server should send session information
-(issuer and session ID) as query parameters along with logout URI using `Frong channel logout session required`. These
-configuration values can be updated using TUI as shown [here](#client-configuration)
+render in the iFrame at the time of logout. This 
+configuration values can be updated using TUI as shown [here](#client-configuration) 
 
-At Janssen Server level, property value `frontChannelLogoutSessionSupported` can be used to enable or disable support 
-for front channel logout as show [here](#janssen-server-configuration-properties).
+Janssen Server also provides a feature flag 
+[END_SESSION](../../../reference/json/feature-flags/janssenauthserver-feature-flags.md#endsession) 
+that enables or disables this endpoint. If this flag is enabled, it has the same effect as having 
+`frontchannel_logout_supported` and `frontchannel_logout_session_supported` metadata values set to `true`. These
+metadata values are defined [here](https://openid.net/specs/openid-connect-frontchannel-1_0.html#OPLogout) in 
+`OpenID Connect Front-Channel Logout 1.0` specification.
 
 ## Back-Channel Logout
 
-### Configuration Properties
+Janssen Server supports back-channel logout as a mechanism for OP to intimate the RP about user logout. As against 
+front-channel logout, where OP can initimate RP about user logout using user-agent, the back-channel logout uses
+direct message communication over HTTP with RP to convey the logout. 
+
+Since this approach doesn't depend on user-agent, it is more reliable. At the same time, it is more complex to implement
+since clearing user-agent state has to be taken care separately by RP. 
+
+Central to the back-channel logout approach is `logout token`. This token along with claims like `sid`, `sub` and `iss`
+are sent by OP to RP to indicate that the subject or the session identified in logout token has been logged out. 
+Janssen Server follows recommendations published in the
+[specification](https://openid.net/specs/openid-connect-backchannel-1_0.html#LogoutToken) in order to construct the 
+logout token. 
+
+Upon receipt of logout token, the RP should 
+[validate the token](https://openid.net/specs/openid-connect-backchannel-1_0.html#Validation) and 
+[perform appropriate actions](https://openid.net/specs/openid-connect-backchannel-1_0.html#BCActions). It should also 
+send 
+[an appropriate response](https://openid.net/specs/openid-connect-backchannel-1_0.html#BCResponse) to OP informing the 
+OP that logout has been successfully executed by RP.
+
+### Configuration Properties  
+
+If an RP has specified `Back channel logout URL` as part of its [client configuration](#client-configuration) then 
+Janssen Server uses this URI to send the HTTP logout request. The client can also enable 
+`backchannel_logout_session_required` as specified 
+[here](https://openid.net/specs/openid-connect-backchannel-1_0.html#BCRegistration) by using client configuration. 
+
+Janssen Server also provides a feature flag
+[END_SESSION](../../../reference/json/feature-flags/janssenauthserver-feature-flags.md#endsession)
+that enables or disables this endpoint. If this flag is enabled, it has the same effect as having
+`backchannel_logout_supported` and `backchannel_logout_session_supported` metadata values set to `true`. These
+metadata values are defined [here](https://openid.net/specs/openid-connect-backchannel-1_0.html#BCSupport) in
+`OpenID Connect Back-Channel Logout 1.0` specification.
