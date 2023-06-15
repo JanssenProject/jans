@@ -48,7 +48,7 @@ public class OrganizationService extends io.jans.service.OrganizationService {
 
 	@Override
 	public ApplicationType getApplicationType() {
-		return ApplicationType.CACHE_REFRESH;
+		return null;
 	}
 
 
