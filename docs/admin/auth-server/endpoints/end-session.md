@@ -8,7 +8,8 @@ tags:
 
 # Overview
 
-Janssen Server's `/end_session` endpoint supports logout using [OpenId Connect Front Channel Logout](https://openid.net/specs/openid-connect-frontchannel-1_0.html) mechanism.
+Janssen Server's `/end_session` endpoint supports logout using 
+[OpenId Connect RP-initiated Logout](https://openid.net/specs/openid-connect-rpinitiated-1_0.html) mechanism.
 When using OpenID Connect Logout, it is recommended to use Front-Channel Logout. In Front-Channel Logout the browser 
 receives a page with a list of application logout urls within an iframe. This prompts the browser to call each 
 application logout individually and the OpenID Connect end-session endpoint via Javascript.
