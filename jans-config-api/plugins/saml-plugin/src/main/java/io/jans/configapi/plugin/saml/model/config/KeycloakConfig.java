@@ -1,6 +1,5 @@
 package io.jans.configapi.plugin.saml.model.config;
 
-
 import io.jans.exception.ConfigurationException;
 import java.io.InputStream;
 import java.util.Collections;
@@ -17,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.CreatedResponseUtil;
+import org.keycloak.admin.client.Config;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
 import org.keycloak.admin.client.resource.RealmResource;
@@ -26,6 +26,8 @@ import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
+import org.keycloak.admin.client.resource.ServerInfoResource;
+import org.keycloak.representations.info.ServerInfoRepresentation;
 
 
 
@@ -54,6 +56,19 @@ public class KeycloakConfig {
     public Keycloak getInstance(String serverUrl, String realm, String username, String password, String clientId,String grantType) {
         log.error("Keycloak instance param serverUrl:{}, realm:{}, username:{}, password:{}, clientId:{}, grantType:{} ",serverUrl, realm, username, password, clientId, grantType);
         log.error("samlConfigSource.getProperties():{}, samlConfigSource.getPropertyNames():{} ", samlConfigSource.getProperties(), samlConfigSource.getPropertyNames());
-        return Keycloak.getInstance(serverUrl,  realm,  username,  password,  clientId);
+        
+        Keycloak keycloak = Keycloak.getInstance(serverUrl,  realm,  username,  password,  clientId);
+        log.error("keycloak:{} ", keycloak);
+        
+        /*
+         * ServerInfoResource serverInfoResource = keycloak.serverInfo();
+         * log.error("serverInfoResource:{} ", serverInfoResource);
+         */
+        /*
+         * ServerInfoRepresentation serverInfoRepresentation =
+         * serverInfoResource.getInfo(); log.error("serverInfoRepresentation:{} ",
+         * serverInfoRepresentation);
+         */  
+        return keycloak;
       }
 }
