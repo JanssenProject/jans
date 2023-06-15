@@ -44,11 +44,13 @@ public class RejectsRedirectUriWhenQueryParameterDoesNotMatch extends BaseTest {
         showTitle("OC5:FeatureTest-Rejects redirect uri when Query Parameter Does Not Match");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUri + "?foo1=bar"));
         registerRequest.setResponseTypes(responseTypes);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -60,7 +62,6 @@ public class RejectsRedirectUriWhenQueryParameterDoesNotMatch extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization and receive the authorization code.
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String state = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes,

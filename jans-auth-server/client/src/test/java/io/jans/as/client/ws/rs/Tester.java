@@ -15,6 +15,13 @@ public class Tester {
             "address",
             "email");
 
+    public static final List<String> addressScopes = ImmutableList.of(
+            "openid",
+            "address");
+
+    public static final List<String> clientInfoScopes = ImmutableList.of(
+            "openid",
+            "clientinfo");
     private Tester() {
     }
 }

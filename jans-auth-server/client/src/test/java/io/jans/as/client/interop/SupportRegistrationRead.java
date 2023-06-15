@@ -12,7 +12,6 @@ import io.jans.as.client.RegisterRequest;
 import io.jans.as.client.RegisterResponse;
 import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.common.AuthenticationMethod;
-import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.register.ApplicationType;
@@ -21,12 +20,9 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
-import java.util.List;
 
-import static io.jans.as.client.client.Asserter.*;
+import static io.jans.as.client.client.Asserter.assertRegisterResponseClaimsNotNull;
 import static io.jans.as.model.register.RegisterRequestParam.*;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
 
 /**
  * OC5:FeatureTest-Support Registration Read
@@ -40,10 +36,8 @@ public class SupportRegistrationRead extends BaseTest {
     @Test
     public void supportRegistrationRead(
             final String redirectUris, final String redirectUri, final String userId, final String userSecret,
-            final String sectorIdentifierUri) throws Exception {
+            final String sectorIdentifierUri) {
         showTitle("OC5:FeatureTest-Support Registration Read");
-
-        List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
 
         // 1. Register client
         RegisterRequest registerRequest1 = new RegisterRequest(ApplicationType.WEB, "jans test app",
@@ -66,7 +60,6 @@ public class SupportRegistrationRead extends BaseTest {
         AssertBuilder.registerResponse(registerResponse1).created().check();
         assertRegisterResponseClaimsNotNull(registerResponse1, SCOPE);
 
-        String clientId = registerResponse1.getClientId();
         String registrationAccessToken = registerResponse1.getRegistrationAccessToken();
         String registrationClientUri = registerResponse1.getRegistrationClientUri();
 

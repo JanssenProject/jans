@@ -6,18 +6,7 @@
 
 package io.jans.as.client.interop;
 
-import io.jans.as.client.AuthorizationRequest;
-import io.jans.as.client.AuthorizationResponse;
-import io.jans.as.client.BaseTest;
-import io.jans.as.client.JwkClient;
-import io.jans.as.client.JwkResponse;
-import io.jans.as.client.RegisterClient;
-import io.jans.as.client.RegisterRequest;
-import io.jans.as.client.RegisterResponse;
-import io.jans.as.client.TokenClient;
-import io.jans.as.client.TokenRequest;
-import io.jans.as.client.TokenResponse;
-
+import io.jans.as.client.*;
 import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
@@ -34,10 +23,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static io.jans.as.client.client.Asserter.*;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 /**
  * @author Javier Rojas Blum
@@ -57,6 +43,7 @@ public class OPRegistrationJwks extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
         List<GrantType> grantTypes = Arrays.asList(GrantType.AUTHORIZATION_CODE);
         List<String> contacts = Arrays.asList("javier@gluu.org", "javier.rojas.blum@gmail.com");
+        List<String> scopes = Arrays.asList("openid");
 
         // 1. Register client
         JwkClient jwkClient = new JwkClient(clientJwksUri);
@@ -70,6 +57,7 @@ public class OPRegistrationJwks extends BaseTest {
         registerRequest.setContacts(contacts);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setJwks(jwkResponse.getJwks().toString());
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -89,7 +77,6 @@ public class OPRegistrationJwks extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
-        List<String> scopes = Arrays.asList("openid");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -142,6 +129,7 @@ public class OPRegistrationJwks extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
         List<GrantType> grantTypes = Arrays.asList(GrantType.AUTHORIZATION_CODE);
         List<String> contacts = Arrays.asList("javier@gluu.org", "javier.rojas.blum@gmail.com");
+        List<String> scopes = Arrays.asList("openid");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
@@ -152,6 +140,7 @@ public class OPRegistrationJwks extends BaseTest {
         registerRequest.setContacts(contacts);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setJwksUri(clientJwksUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -171,7 +160,6 @@ public class OPRegistrationJwks extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
-        List<String> scopes = Arrays.asList("openid");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
