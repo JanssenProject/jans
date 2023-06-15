@@ -13,10 +13,7 @@ from setup_app.installers.jetty import JettyInstaller
 class CacheRefreshInstaller(JettyInstaller):
 
     source_files = [
-            (os.path.join(Config.dist_jans_dir, 'jans-cache-refresh.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-cache-refresh/{0}/jans-cache-refresh-{0}.war').format(
-                            #base.current_app.app_info['ox_version']
-                            '1.0.11-SNAPSHOT' # for temporarily
-                            ))
+            (os.path.join(Config.dist_jans_dir, 'jans-cache-refresh.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-cache-refresh/{0}/jans-cache-refresh-{0}.war').format(base.current_app.app_info['ox_version']))
             ]
 
     def __init__(self):
