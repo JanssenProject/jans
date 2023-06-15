@@ -16,7 +16,6 @@ import static org.testng.Assert.assertNotNull;
 
 /**
  * Integration tests to validate redirect uris regex behavior
- *
  */
 public class AuthorizationAcrValuesTest extends BaseTest {
 
@@ -40,6 +39,7 @@ public class AuthorizationAcrValuesTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -95,6 +95,7 @@ public class AuthorizationAcrValuesTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -117,7 +118,7 @@ public class AuthorizationAcrValuesTest extends BaseTest {
         AuthorizationRequest authorizationRequest1 = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest1.setState(state);
         authorizationRequest1.setNonce(nonce);
-        authorizationRequest1.setAcrValues(Arrays.asList("basic") );
+        authorizationRequest1.setAcrValues(Arrays.asList("basic"));
 
         AuthorizationResponse authorizationResponse1 = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest1, userId, userSecret);
