@@ -43,6 +43,7 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
             final String sectorIdentifierUri) throws Exception {
         showTitle("defaultResponseModeBasicCode");
 
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
 
         // 1. Register client
@@ -50,6 +51,7 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -61,7 +63,6 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String state = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
@@ -84,12 +85,14 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         showTitle("fragmentResponseModeBasicCode");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -101,7 +104,6 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String state = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
@@ -125,12 +127,14 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         showTitle("queryResponseModeBasicCode");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -142,7 +146,6 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String state = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
@@ -166,12 +169,14 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         showTitle("formPostResponseModeBasicCode");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -183,7 +188,6 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String state = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
@@ -204,12 +208,14 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         showTitle("defaultResponseModeImplicitIdToken");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -221,7 +227,6 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -245,12 +250,14 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         showTitle("fragmentResponseModeImplicitIdToken");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -262,7 +269,6 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -287,12 +293,14 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         showTitle("queryResponseModeImplicitIdToken");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -304,7 +312,6 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -329,12 +336,14 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         showTitle("formPostResponseModeImplicitIdToken");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -346,7 +355,6 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -368,12 +376,14 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         showTitle("defaultResponseModeImplicitIdTokenToken");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN, ResponseType.TOKEN);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -385,7 +395,6 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -410,12 +419,14 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         showTitle("fragmentResponseModeImplicitIdTokenToken");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN, ResponseType.TOKEN);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -427,7 +438,6 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -453,12 +463,14 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         showTitle("queryResponseModeImplicitIdTokenToken");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN, ResponseType.TOKEN);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -470,7 +482,6 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -496,12 +507,14 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         showTitle("formPostResponseModeImplicitIdTokenToken");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN, ResponseType.TOKEN);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -513,7 +526,6 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -535,12 +547,14 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         showTitle("defaultResponseModeHybridCodeIdToken");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -552,7 +566,6 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -574,12 +587,14 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         showTitle("fragmentResponseModeHybridCodeIdToken");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -591,7 +606,6 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -614,12 +628,14 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         showTitle("queryResponseModeHybridCodeIdToken");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -631,7 +647,6 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -654,12 +669,14 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         showTitle("formPostResponseModeHybridCodeIdToken");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -671,7 +688,6 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -693,12 +709,14 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         showTitle("defaultResponseModeHybridCodeIdTokenToken");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN, ResponseType.TOKEN);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -710,7 +728,6 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -736,12 +753,14 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         showTitle("fragmentResponseModeHybridCodeIdTokenToken");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN, ResponseType.TOKEN);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -753,7 +772,6 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -780,12 +798,14 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         showTitle("queryResponseModeHybridCodeIdTokenToken");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN, ResponseType.TOKEN);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -797,7 +817,6 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -824,12 +843,14 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         showTitle("formPostResponseModeHybridCodeIdTokenToken");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN, ResponseType.TOKEN);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -841,7 +862,6 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -863,12 +883,14 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         showTitle("defaultResponseModeHybridCodeToken");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.TOKEN);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -880,7 +902,6 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -905,12 +926,14 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         showTitle("fragmentResponseModeHybridCodeToken");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.TOKEN);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -922,7 +945,6 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -948,12 +970,14 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         showTitle("queryResponseModeHybridCodeToken");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.TOKEN);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -965,7 +989,6 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -991,12 +1014,14 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         showTitle("formPostResponseModeHybridCodeToken");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.TOKEN);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1008,7 +1033,6 @@ public class AuthorizationResponseModeHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 

@@ -9,6 +9,7 @@ package io.jans.as.client.interop;
 import io.jans.as.client.*;
 import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.client.model.authorize.JwtAuthorizationRequest;
+import io.jans.as.client.ws.rs.Tester;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
@@ -98,8 +99,8 @@ public class ProvidingIdTokenWithMaxAgeRestriction extends BaseTest {
             showClient(tokenClient);
 
             AssertBuilder.tokenResponse(tokenResponse)
-                .notNullRefreshToken()
-                .check();
+                    .notNullRefreshToken()
+                    .check();
 
             // 4. Validate id_token
             AssertBuilder.jwtParse(idToken)
@@ -144,8 +145,8 @@ public class ProvidingIdTokenWithMaxAgeRestriction extends BaseTest {
 
             showClient(tokenClient);
             AssertBuilder.tokenResponse(tokenResponse)
-                .notNullRefreshToken()
-                .check();
+                    .notNullRefreshToken()
+                    .check();
 
             // 7. Validate id_token
             AssertBuilder.jwtParse(idToken)
@@ -172,6 +173,7 @@ public class ProvidingIdTokenWithMaxAgeRestriction extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -214,8 +216,8 @@ public class ProvidingIdTokenWithMaxAgeRestriction extends BaseTest {
 
             showClient(tokenClient);
             AssertBuilder.tokenResponse(tokenResponse)
-                .notNullRefreshToken()
-                .check();
+                    .notNullRefreshToken()
+                    .check();
         }
 
         Thread.sleep(60000);
@@ -257,8 +259,8 @@ public class ProvidingIdTokenWithMaxAgeRestriction extends BaseTest {
 
             showClient(tokenClient);
             AssertBuilder.tokenResponse(tokenResponse)
-                .notNullRefreshToken()
-                .check();
+                    .notNullRefreshToken()
+                    .check();
         }
     }
 }
