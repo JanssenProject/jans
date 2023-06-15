@@ -6,15 +6,7 @@
 
 package io.jans.as.client.ws.rs;
 
-import io.jans.as.client.AuthorizationRequest;
-import io.jans.as.client.AuthorizationResponse;
-import io.jans.as.client.AuthorizeClient;
-import io.jans.as.client.BaseTest;
-import io.jans.as.client.RegisterClient;
-import io.jans.as.client.RegisterRequest;
-import io.jans.as.client.RegisterResponse;
-import io.jans.as.client.UserInfoClient;
-import io.jans.as.client.UserInfoResponse;
+import io.jans.as.client.*;
 import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.client.model.authorize.Claim;
 import io.jans.as.client.model.authorize.ClaimValue;
@@ -36,15 +28,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static io.jans.as.client.client.Asserter.*;
-import static io.jans.as.model.register.RegisterRequestParam.CLIENT_NAME;
-import static io.jans.as.model.register.RegisterRequestParam.ID_TOKEN_SIGNED_RESPONSE_ALG;
-import static io.jans.as.model.register.RegisterRequestParam.REDIRECT_URIS;
-import static io.jans.as.model.register.RegisterRequestParam.RESPONSE_TYPES;
-import static io.jans.as.model.register.RegisterRequestParam.SCOPE;
+import static io.jans.as.client.client.Asserter.assertRegisterResponseClaimsNotNull;
+import static io.jans.as.model.register.RegisterRequestParam.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
 
 /**
  * Functional tests for Authorize Web Services (HTTP)
@@ -61,11 +48,14 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
 
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -91,7 +81,6 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization and receive the authorization code.
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String state = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
@@ -111,12 +100,14 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         showTitle("requestAuthorizationCodeUserBasicAuth");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -142,7 +133,6 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization and receive the authorization code.
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String state = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
@@ -162,12 +152,14 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         showTitle("requestAuthorizationCodeNoRedirection");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -193,7 +185,6 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization and receive the authorization code.
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String state = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
@@ -238,12 +229,14 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         showTitle("requestAuthorizationCodeFail2");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -269,7 +262,6 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String state = UUID.randomUUID().toString();
         String redirectUri = "https://INVALID_REDIRECT_URI";
 
@@ -323,12 +315,14 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         showTitle("requestAuthorizationCodeFail4");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN);
+        List<String> scopes = Arrays.asList("openid", "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -354,7 +348,6 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
-        List<String> scopes = Arrays.asList("openid", "email");
         String nonce = UUID.randomUUID().toString();
         String redirectUri = "https://evil.com/oxLicenceAdmin";
 
@@ -379,12 +372,14 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         showTitle("requestAuthorizationToken");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -410,7 +405,6 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -431,12 +425,14 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         showTitle("requestAuthorizationTokenUserBasicAuth");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -462,7 +458,6 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -508,12 +503,14 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         showTitle("requestAuthorizationTokenFail2");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -539,7 +536,6 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = null;
         String state = UUID.randomUUID().toString();
 
@@ -572,11 +568,14 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
                 ResponseType.TOKEN,
                 ResponseType.ID_TOKEN);
 
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -602,7 +601,6 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -641,11 +639,14 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
                 ResponseType.TOKEN,
                 ResponseType.ID_TOKEN);
 
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -671,7 +672,6 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -710,11 +710,14 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
                 ResponseType.CODE,
                 ResponseType.ID_TOKEN);
 
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -740,7 +743,6 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String state = UUID.randomUUID().toString();
         String nonce = UUID.randomUUID().toString();
 
@@ -782,11 +784,14 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
                 ResponseType.CODE,
                 ResponseType.ID_TOKEN);
 
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -812,7 +817,6 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String state = UUID.randomUUID().toString();
         String nonce = UUID.randomUUID().toString();
 
@@ -853,11 +857,14 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
                 ResponseType.TOKEN,
                 ResponseType.CODE);
 
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -883,7 +890,6 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -911,11 +917,14 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
                 ResponseType.TOKEN,
                 ResponseType.CODE);
 
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -941,7 +950,6 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -970,11 +978,14 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
                 ResponseType.CODE,
                 ResponseType.ID_TOKEN);
 
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1000,7 +1011,6 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -1047,11 +1057,14 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
                 ResponseType.CODE,
                 ResponseType.ID_TOKEN);
 
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1077,7 +1090,6 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -1119,12 +1131,14 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         showTitle("requestAuthorizationIdToken");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1150,7 +1164,6 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -1173,12 +1186,14 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         showTitle("requestAuthorizationIdTokenUserBasicAuth");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.ID_TOKEN);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1204,7 +1219,6 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -1284,6 +1298,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         showTitle("requestAuthorizationPromptNoneTrustedClient");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
@@ -1291,6 +1306,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.addCustomAttribute("jansTrustedClnt", "true");
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1316,7 +1332,6 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String state = UUID.randomUUID().toString();
 
         AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
@@ -1343,12 +1358,14 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         showTitle("requestAuthorizationPromptNoneFail");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1374,7 +1391,6 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String state = UUID.randomUUID().toString();
 
         AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
@@ -1401,12 +1417,14 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         showTitle("requestAuthorizationPromptLogin");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1432,7 +1450,6 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String state = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
@@ -1453,12 +1470,14 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         showTitle("requestAuthorizationPromptConsent");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1484,7 +1503,6 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String state = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
@@ -1505,6 +1523,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         showTitle("requestAuthorizationPromptConsentTrustedClient");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
@@ -1512,6 +1531,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.addCustomAttribute("jansTrustedClnt", "true");
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1537,7 +1557,6 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String state = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
@@ -1558,12 +1577,14 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         showTitle("requestAuthorizationPromptLoginConsent");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1589,7 +1610,6 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String state = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
@@ -1611,6 +1631,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         showTitle("requestAuthorizationPromptLoginConsentTrustedClient");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
@@ -1618,6 +1639,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.addCustomAttribute("jansTrustedClnt", "true");
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1643,7 +1665,6 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String state = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
@@ -1665,12 +1686,14 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         showTitle("requestAuthorizationPromptLoginConsent");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1696,7 +1719,6 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String state = UUID.randomUUID().toString();
 
         AuthorizationRequest request = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
@@ -1726,7 +1748,10 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         showTitle("requestAuthorizationCodeWithoutRedirectUri");
 
         List<String> redirectUriList = Arrays.asList(redirectUri.split(StringUtils.SPACE));
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", redirectUriList);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1738,7 +1763,6 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String state = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
@@ -1756,10 +1780,13 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
             final String redirectUri, final String userId, final String userSecret) throws Exception {
         showTitle("requestAuthorizationCodeWithoutRedirectUriUserBasicAuth");
 
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+
         List<String> redirectUriList = Arrays.asList(redirectUri.split(StringUtils.SPACE));
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", redirectUriList);
         registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setSubjectType(SubjectType.PUBLIC);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1771,7 +1798,6 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String state = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, null, null);
@@ -1795,10 +1821,13 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
             final String redirectUris, final String userId, final String userSecret, final String sectorIdentifierUri) throws Exception {
         showTitle("requestAuthorizationCodeWithoutRedirectUriFail");
 
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.addCustomAttribute("jansTrustedClnt", "true");
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1810,7 +1839,6 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String state = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, null, null);
@@ -1841,11 +1869,14 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
                 ResponseType.TOKEN,
                 ResponseType.ID_TOKEN);
 
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1876,7 +1907,6 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
                 ResponseType.TOKEN,
                 ResponseType.ID_TOKEN);
 
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -1955,11 +1985,14 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
                 ResponseType.TOKEN,
                 ResponseType.ID_TOKEN);
 
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1969,7 +2002,6 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         AssertBuilder.registerResponse(registerResponse).created().check();
 
         String clientId = registerResponse.getClientId();
-        String clientSecret = registerResponse.getClientSecret();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
         String registrationClientUri = registerResponse.getRegistrationClientUri();
 
@@ -1990,7 +2022,6 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
                 ResponseType.TOKEN,
                 ResponseType.ID_TOKEN);
 
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -2066,11 +2097,14 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
                 ResponseType.CODE,
                 ResponseType.ID_TOKEN);
 
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -2096,7 +2130,6 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = null;
         String state = UUID.randomUUID().toString();
 
@@ -2126,11 +2159,14 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
 
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = newRegisterClient(registerRequest);
         RegisterResponse registerResponse = registerClient.exec();
@@ -2143,7 +2179,6 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
 
         // 2. Request authorization, authenticate resource owner and deny access
         {
-            List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
             String state = UUID.randomUUID().toString();
 
             AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
@@ -2164,7 +2199,6 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
 
         // 3. Request authorization and deny access (resource owner is already authenticated)
         {
-            List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
             String state = UUID.randomUUID().toString();
 
             AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
@@ -2184,7 +2218,6 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
 
         // 4. Request authorization and grant access (resource owner is already authenticated)
         {
-            List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
             String state = UUID.randomUUID().toString();
 
             AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
@@ -2213,12 +2246,14 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         showTitle("requestAuthorizationForOpenIdScopeAndPairwiseId");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList("openid");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -2244,7 +2279,6 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization and receive the authorization code.
-        List<String> scopes = Arrays.asList("openid");
         String state = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
@@ -2268,11 +2302,14 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
                 ResponseType.TOKEN,
                 ResponseType.ID_TOKEN);
 
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -2303,7 +2340,6 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
                 ResponseType.TOKEN,
                 ResponseType.ID_TOKEN);
 
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -2329,11 +2365,14 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
                 ResponseType.TOKEN,
                 ResponseType.ID_TOKEN);
 
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = newRegisterClient(registerRequest);
         RegisterResponse registerResponse = registerClient.exec();
@@ -2347,7 +2386,6 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         // 2. Request authorization
         AuthCryptoProvider cryptoProvider = new AuthCryptoProvider();
 
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -2398,12 +2436,15 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
                 ResponseType.TOKEN,
                 ResponseType.ID_TOKEN);
 
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setSubjectType(SubjectType.PUBLIC);
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -2434,7 +2475,6 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
                 ResponseType.TOKEN,
                 ResponseType.ID_TOKEN);
 
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
