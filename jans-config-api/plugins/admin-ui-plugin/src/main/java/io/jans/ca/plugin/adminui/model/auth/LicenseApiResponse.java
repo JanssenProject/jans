@@ -1,9 +1,21 @@
 package io.jans.ca.plugin.adminui.model.auth;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 public class LicenseApiResponse {
     private boolean apiResult;
     private String responseMessage;
     private int responseCode;
+
+    public JsonNode getResponseObject() {
+        return responseObject;
+    }
+
+    public void setResponseObject(JsonNode responseObject) {
+        this.responseObject = responseObject;
+    }
+
+    private JsonNode responseObject;
 
     public String getResponseMessage() {
         return responseMessage;
@@ -29,12 +41,14 @@ public class LicenseApiResponse {
         this.apiResult = apiResult;
     }
 
+
     @Override
     public String toString() {
         return "LicenseApiResponse{" +
                 "apiResult=" + apiResult +
                 ", responseMessage='" + responseMessage + '\'' +
                 ", responseCode=" + responseCode +
+                ", responseObject=" + responseObject +
                 '}';
     }
 }

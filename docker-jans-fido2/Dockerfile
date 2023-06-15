@@ -46,7 +46,7 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # =====
 
 ENV CN_VERSION=1.0.15-SNAPSHOT
-ENV CN_BUILD_DATE='2023-06-12 08:44'
+ENV CN_BUILD_DATE='2023-06-13 00:13'
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-fido2-server/${CN_VERSION}/jans-fido2-server-${CN_VERSION}.war
 
 # Install FIDO2

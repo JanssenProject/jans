@@ -101,7 +101,7 @@ const OIDCClientDetails = (data) => {
             if (!!result.oidcClient) {
 
                 let options: ILooseObject = {
-                    scope: result?.oidcClient?.scope.join(['+']),
+                    scope: result?.oidcClient?.scope,
                     response_type: result?.oidcClient?.response_type[0],
                     redirect_uri: redirectUrl,
                     client_id: result?.oidcClient?.client_id,
@@ -155,14 +155,14 @@ const OIDCClientDetails = (data) => {
                             resolve(JSON.stringify(result));
                         });
                     });
-
+                    
                     const tokenReqData = qs.stringify({
                         redirect_uri: redirectUrl,
                         grant_type: 'authorization_code',
                         code_verifier: secret,
                         client_id: result.oidcClient.client_id,
                         code,
-                        scope: result.oidcClient.scope.join(['+'])
+                        scope: result.oidcClient.scope
                     })
 
                     const tokenReqOptions = {
