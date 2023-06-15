@@ -376,9 +376,12 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
                 ResponseType.CODE,
                 ResponseType.ID_TOKEN);
 
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
+        registerRequest.setScope(scopes);
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
 
@@ -393,7 +396,7 @@ public class AuthorizationCodeFlowHttpTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization and receive the authorization code.
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
+
         String state = UUID.randomUUID().toString();
 
         String nonce = UUID.randomUUID().toString();
