@@ -78,7 +78,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         showClient(readClient);
         AssertBuilder.registerResponse(readClientResponse).ok().check();
 
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization and receive the authorization code.
         String state = UUID.randomUUID().toString();
@@ -130,7 +130,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         showClient(readClient);
         AssertBuilder.registerResponse(readClientResponse).ok().check();
 
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization and receive the authorization code.
         String state = UUID.randomUUID().toString();
@@ -182,7 +182,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         showClient(readClient);
         AssertBuilder.registerResponse(readClientResponse).ok().check();
 
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization and receive the authorization code.
         String state = UUID.randomUUID().toString();
@@ -259,7 +259,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         showClient(readClient);
         AssertBuilder.registerResponse(readClientResponse).ok().check();
 
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         String state = UUID.randomUUID().toString();
@@ -345,7 +345,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         showClient(readClient);
         AssertBuilder.registerResponse(readClientResponse).ok().check();
 
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         String nonce = UUID.randomUUID().toString();
@@ -402,7 +402,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         showClient(readClient);
         AssertBuilder.registerResponse(readClientResponse).ok().check();
 
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         String nonce = UUID.randomUUID().toString();
@@ -455,7 +455,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         showClient(readClient);
         AssertBuilder.registerResponse(readClientResponse).ok().check();
 
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         String nonce = UUID.randomUUID().toString();
@@ -533,7 +533,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         showClient(readClient);
         AssertBuilder.registerResponse(readClientResponse).ok().check();
 
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         String nonce = null;
@@ -598,7 +598,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         showClient(readClient);
         AssertBuilder.registerResponse(readClientResponse).ok().check();
 
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         String nonce = UUID.randomUUID().toString();
@@ -669,7 +669,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         showClient(readClient);
         AssertBuilder.registerResponse(readClientResponse).ok().check();
 
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         String nonce = UUID.randomUUID().toString();
@@ -740,7 +740,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         showClient(readClient);
         AssertBuilder.registerResponse(readClientResponse).ok().check();
 
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         String state = UUID.randomUUID().toString();
@@ -814,7 +814,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         showClient(readClient);
         AssertBuilder.registerResponse(readClientResponse).ok().check();
 
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         String state = UUID.randomUUID().toString();
@@ -887,7 +887,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         showClient(readClient);
         AssertBuilder.registerResponse(readClientResponse).ok().check();
 
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         String nonce = UUID.randomUUID().toString();
@@ -947,7 +947,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         showClient(readClient);
         AssertBuilder.registerResponse(readClientResponse).ok().check();
 
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         String nonce = UUID.randomUUID().toString();
@@ -1008,7 +1008,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         showClient(readClient);
         AssertBuilder.registerResponse(readClientResponse).ok().check();
 
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         String nonce = UUID.randomUUID().toString();
@@ -1087,7 +1087,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         showClient(readClient);
         AssertBuilder.registerResponse(readClientResponse).ok().check();
 
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         String nonce = UUID.randomUUID().toString();
@@ -1161,7 +1161,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         showClient(readClient);
         AssertBuilder.registerResponse(readClientResponse).ok().check();
 
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         String nonce = UUID.randomUUID().toString();
@@ -1216,7 +1216,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         showClient(readClient);
         AssertBuilder.registerResponse(readClientResponse).ok().check();
 
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         String nonce = UUID.randomUUID().toString();
@@ -1249,6 +1249,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1271,7 +1272,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         showClient(readClient);
         AssertBuilder.registerResponse(readClientResponse).ok().check();
 
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<String> scopes = new ArrayList<String>(); // Empty scopes list
@@ -1329,7 +1330,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         showClient(readClient);
         AssertBuilder.registerResponse(readClientResponse).ok().check();
 
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         String state = UUID.randomUUID().toString();
@@ -1388,7 +1389,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         showClient(readClient);
         AssertBuilder.registerResponse(readClientResponse).ok().check();
 
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         String state = UUID.randomUUID().toString();
@@ -1447,7 +1448,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         showClient(readClient);
         AssertBuilder.registerResponse(readClientResponse).ok().check();
 
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         String state = UUID.randomUUID().toString();
@@ -1500,7 +1501,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         showClient(readClient);
         AssertBuilder.registerResponse(readClientResponse).ok().check();
 
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         String state = UUID.randomUUID().toString();
@@ -1554,7 +1555,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         showClient(readClient);
         AssertBuilder.registerResponse(readClientResponse).ok().check();
 
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         String state = UUID.randomUUID().toString();
@@ -1607,7 +1608,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         showClient(readClient);
         AssertBuilder.registerResponse(readClientResponse).ok().check();
 
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         String state = UUID.randomUUID().toString();
@@ -1662,7 +1663,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         showClient(readClient);
         AssertBuilder.registerResponse(readClientResponse).ok().check();
 
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         String state = UUID.randomUUID().toString();
@@ -1716,7 +1717,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         showClient(readClient);
         AssertBuilder.registerResponse(readClientResponse).ok().check();
 
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         String state = UUID.randomUUID().toString();
@@ -1900,7 +1901,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         showClient(readClient);
         AssertBuilder.registerResponse(readClientResponse).ok().check();
 
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         responseTypes = Arrays.asList(
@@ -2015,7 +2016,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         showClient(readClient);
         AssertBuilder.registerResponse(readClientResponse).ok().check();
 
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         responseTypes = Arrays.asList(
@@ -2127,7 +2128,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         showClient(readClient);
         AssertBuilder.registerResponse(readClientResponse).ok().check();
 
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         String nonce = null;
@@ -2276,7 +2277,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         showClient(readClient);
         AssertBuilder.registerResponse(readClientResponse).ok().check();
 
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization and receive the authorization code.
         String state = UUID.randomUUID().toString();
@@ -2333,7 +2334,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         showClient(readClient);
         AssertBuilder.registerResponse(readClientResponse).ok().check();
 
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         responseTypes = Arrays.asList(
@@ -2468,7 +2469,7 @@ public class AuthorizeRestWebServiceHttpTest extends BaseTest {
         showClient(readClient);
         AssertBuilder.registerResponse(readClientResponse).ok().check();
 
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         responseTypes = Arrays.asList(

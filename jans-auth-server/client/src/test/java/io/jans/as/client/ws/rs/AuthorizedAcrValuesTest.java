@@ -31,6 +31,7 @@ public class AuthorizedAcrValuesTest extends BaseTest {
             final String sectorIdentifierUri) {
         showTitle("authorizedAcrValues");
 
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN);
 
         // 1. Register client
@@ -41,6 +42,7 @@ public class AuthorizedAcrValuesTest extends BaseTest {
         registerRequest.setAuthorizedAcrValues(Arrays.asList(
                 "acr_1", "acr_2", "acr_3", "basic"
         ));
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = newRegisterClient(registerRequest);
         RegisterResponse registerResponse = registerClient.exec();
@@ -52,7 +54,6 @@ public class AuthorizedAcrValuesTest extends BaseTest {
 
         String clientId = registerResponse.getClientId();
 
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String state = UUID.randomUUID().toString();
         String nonce = UUID.randomUUID().toString();
 
@@ -74,6 +75,7 @@ public class AuthorizedAcrValuesTest extends BaseTest {
             final String redirectUris, final String redirectUri, final String sectorIdentifierUri) {
         showTitle("authorizedAcrValuesFail");
 
+        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN);
 
         // 1. Register client
@@ -84,6 +86,7 @@ public class AuthorizedAcrValuesTest extends BaseTest {
         registerRequest.setAuthorizedAcrValues(Arrays.asList(
                 "acr_1", "acr_2", "acr_3"
         ));
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = newRegisterClient(registerRequest);
         RegisterResponse registerResponse = registerClient.exec();
@@ -95,7 +98,6 @@ public class AuthorizedAcrValuesTest extends BaseTest {
 
         String clientId = registerResponse.getClientId();
 
-        List<String> scopes = Arrays.asList("openid", "profile", "address", "email");
         String state = UUID.randomUUID().toString();
         String nonce = UUID.randomUUID().toString();
 
