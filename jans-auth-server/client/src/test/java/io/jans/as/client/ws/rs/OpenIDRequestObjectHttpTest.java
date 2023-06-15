@@ -6,18 +6,7 @@
 
 package io.jans.as.client.ws.rs;
 
-import io.jans.as.client.AuthorizationRequest;
-import io.jans.as.client.AuthorizationResponse;
-import io.jans.as.client.AuthorizeClient;
-import io.jans.as.client.BaseTest;
-import io.jans.as.client.JwkClient;
-import io.jans.as.client.JwkResponse;
-import io.jans.as.client.RegisterClient;
-import io.jans.as.client.RegisterRequest;
-import io.jans.as.client.RegisterResponse;
-import io.jans.as.client.UserInfoClient;
-import io.jans.as.client.UserInfoResponse;
-
+import io.jans.as.client.*;
 import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.client.model.authorize.Claim;
 import io.jans.as.client.model.authorize.ClaimValue;
@@ -51,9 +40,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.fail;
+import static org.testng.Assert.*;
 
 /**
  * Functional tests for OpenID Request Object (HTTP)
@@ -81,6 +68,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -149,6 +137,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -215,6 +204,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -263,6 +253,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -310,6 +301,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1870,6 +1862,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1952,6 +1945,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setResponseTypes(responseTypes);
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+            registerRequest.setScope(Tester.standardScopes);
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
             registerClient.setRequest(registerRequest);
@@ -2007,6 +2001,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
                     StringUtils.spaceSeparatedToList(redirectUris));
             registerRequest.setResponseTypes(responseTypes);
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+            registerRequest.setScope(Tester.standardScopes);
 
             RegisterClient registerClient = newRegisterClient(registerRequest);
             RegisterResponse registerResponse = registerClient.exec();
@@ -2061,6 +2056,7 @@ public class OpenIDRequestObjectHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
