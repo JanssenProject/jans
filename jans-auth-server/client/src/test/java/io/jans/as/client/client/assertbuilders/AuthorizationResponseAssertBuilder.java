@@ -26,7 +26,7 @@ public class AuthorizationResponseAssertBuilder extends BaseAssertBuilder {
         this.status = 200;
         this.responseTypes = null;
         this.nullState = false;
-        this.nullScope = true;
+        this.nullScope = false;
     }
 
     public AuthorizationResponseAssertBuilder status(int status) {
