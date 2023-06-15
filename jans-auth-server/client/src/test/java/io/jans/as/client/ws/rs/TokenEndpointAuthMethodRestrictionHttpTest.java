@@ -6,16 +6,7 @@
 
 package io.jans.as.client.ws.rs;
 
-import io.jans.as.client.AuthorizationRequest;
-import io.jans.as.client.AuthorizationResponse;
-import io.jans.as.client.BaseTest;
-import io.jans.as.client.RegisterClient;
-import io.jans.as.client.RegisterRequest;
-import io.jans.as.client.RegisterResponse;
-import io.jans.as.client.TokenClient;
-import io.jans.as.client.TokenRequest;
-import io.jans.as.client.TokenResponse;
-
+import io.jans.as.client.*;
 import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
@@ -31,19 +22,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static io.jans.as.client.client.Asserter.*;
-import static io.jans.as.model.register.RegisterRequestParam.APPLICATION_TYPE;
-import static io.jans.as.model.register.RegisterRequestParam.CLIENT_NAME;
-import static io.jans.as.model.register.RegisterRequestParam.ID_TOKEN_SIGNED_RESPONSE_ALG;
-import static io.jans.as.model.register.RegisterRequestParam.REDIRECT_URIS;
-import static io.jans.as.model.register.RegisterRequestParam.RESPONSE_TYPES;
-import static io.jans.as.model.register.RegisterRequestParam.SCOPE;
-import static io.jans.as.model.register.RegisterRequestParam.TOKEN_ENDPOINT_AUTH_METHOD;
-import static io.jans.as.model.register.RegisterRequestParam.TOKEN_ENDPOINT_AUTH_SIGNING_ALG;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
+import static io.jans.as.client.client.Asserter.assertRegisterResponseClaimsNotNull;
+import static io.jans.as.model.register.RegisterRequestParam.*;
+import static org.testng.Assert.*;
 
 /**
  * @author Javier Rojas Blum
@@ -64,6 +45,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -88,7 +70,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
                 AuthenticationMethod.CLIENT_SECRET_BASIC.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
     }
 
     /**
@@ -109,6 +91,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -135,18 +118,13 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
                 AuthenticationMethod.CLIENT_SECRET_BASIC.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -190,6 +168,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -216,18 +195,13 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
                 AuthenticationMethod.CLIENT_SECRET_BASIC.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -271,6 +245,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -297,18 +272,13 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
                 AuthenticationMethod.CLIENT_SECRET_BASIC.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -354,6 +324,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -380,18 +351,13 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
                 AuthenticationMethod.CLIENT_SECRET_BASIC.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -415,7 +381,6 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
-
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
         tokenClient.setRequest(tokenRequest);
@@ -445,6 +410,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_POST);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -471,18 +437,13 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
                 AuthenticationMethod.CLIENT_SECRET_POST.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -526,6 +487,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_POST);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -552,18 +514,13 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
                 AuthenticationMethod.CLIENT_SECRET_POST.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -607,6 +564,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_POST);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -633,18 +591,13 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
                 AuthenticationMethod.CLIENT_SECRET_POST.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -690,6 +643,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_POST);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -716,18 +670,13 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
                 AuthenticationMethod.CLIENT_SECRET_POST.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -751,7 +700,6 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
-
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
         tokenClient.setRequest(tokenRequest);
@@ -782,6 +730,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -808,18 +757,13 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
                 AuthenticationMethod.CLIENT_SECRET_JWT.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -869,6 +813,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -895,18 +840,13 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
                 AuthenticationMethod.CLIENT_SECRET_JWT.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -957,6 +897,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -983,18 +924,13 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
                 AuthenticationMethod.CLIENT_SECRET_JWT.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -1045,6 +981,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1071,18 +1008,13 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
                 AuthenticationMethod.CLIENT_SECRET_JWT.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -1134,6 +1066,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1160,18 +1093,13 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
                 AuthenticationMethod.CLIENT_SECRET_JWT.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -1224,6 +1152,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1250,18 +1179,13 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
                 AuthenticationMethod.CLIENT_SECRET_JWT.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -1314,6 +1238,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1340,18 +1265,13 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
                 AuthenticationMethod.CLIENT_SECRET_JWT.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -1404,6 +1324,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1430,18 +1351,13 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
                 AuthenticationMethod.CLIENT_SECRET_JWT.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -1494,6 +1410,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1520,18 +1437,13 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
                 AuthenticationMethod.CLIENT_SECRET_JWT.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -1584,6 +1496,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1610,18 +1523,13 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
                 AuthenticationMethod.CLIENT_SECRET_JWT.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -1674,6 +1582,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1700,18 +1609,13 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
                 AuthenticationMethod.CLIENT_SECRET_JWT.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -1764,6 +1668,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1790,18 +1695,13 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
                 AuthenticationMethod.CLIENT_SECRET_JWT.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -1854,6 +1754,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1880,18 +1781,13 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
                 AuthenticationMethod.CLIENT_SECRET_JWT.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -1940,6 +1836,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.HS256);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -1969,18 +1866,13 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
                 SignatureAlgorithm.HS256.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -2028,6 +1920,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.HS256);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -2061,14 +1954,9 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -2116,6 +2004,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.HS256);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -2149,14 +2038,9 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -2204,6 +2088,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.HS384);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -2237,14 +2122,9 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -2292,6 +2172,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.HS384);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -2325,14 +2206,9 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -2380,6 +2256,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.HS384);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -2413,14 +2290,9 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -2468,6 +2340,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.HS512);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -2501,14 +2374,9 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -2556,6 +2424,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.HS512);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -2585,18 +2454,13 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
                 SignatureAlgorithm.HS512.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -2644,6 +2508,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.HS512);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -2673,18 +2538,13 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
                 SignatureAlgorithm.HS512.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -2733,6 +2593,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -2759,18 +2620,13 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
                 AuthenticationMethod.CLIENT_SECRET_JWT.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -2814,6 +2670,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -2840,18 +2697,13 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
                 AuthenticationMethod.CLIENT_SECRET_JWT.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -2896,6 +2748,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_JWT);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -2922,18 +2775,13 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
                 AuthenticationMethod.CLIENT_SECRET_JWT.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -2957,7 +2805,6 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         tokenRequest.setRedirectUri(redirectUri);
         tokenRequest.setAuthUsername(clientId);
         tokenRequest.setAuthPassword(clientSecret);
-
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
         tokenClient.setRequest(tokenRequest);
@@ -2990,6 +2837,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -3015,18 +2863,13 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
                 AuthenticationMethod.PRIVATE_KEY_JWT.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -3076,6 +2919,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -3102,18 +2946,13 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
                 AuthenticationMethod.PRIVATE_KEY_JWT.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -3158,6 +2997,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -3184,18 +3024,13 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
                 AuthenticationMethod.PRIVATE_KEY_JWT.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -3240,6 +3075,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -3266,18 +3102,13 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
                 AuthenticationMethod.PRIVATE_KEY_JWT.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -3322,6 +3153,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -3347,18 +3179,13 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
                 AuthenticationMethod.PRIVATE_KEY_JWT.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -3407,6 +3234,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -3432,18 +3260,13 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
                 AuthenticationMethod.PRIVATE_KEY_JWT.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -3492,6 +3315,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -3517,18 +3341,13 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
                 AuthenticationMethod.PRIVATE_KEY_JWT.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -3577,6 +3396,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -3602,18 +3422,13 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
                 AuthenticationMethod.PRIVATE_KEY_JWT.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -3662,6 +3477,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -3687,18 +3503,13 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
                 AuthenticationMethod.PRIVATE_KEY_JWT.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -3747,6 +3558,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -3772,18 +3584,13 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
                 AuthenticationMethod.PRIVATE_KEY_JWT.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -3832,6 +3639,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -3857,18 +3665,13 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
                 AuthenticationMethod.PRIVATE_KEY_JWT.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -3917,6 +3720,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -3942,18 +3746,13 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
                 AuthenticationMethod.PRIVATE_KEY_JWT.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -4002,6 +3801,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.PRIVATE_KEY_JWT);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -4027,18 +3827,13 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_METHOD.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_METHOD.toString()),
                 AuthenticationMethod.PRIVATE_KEY_JWT.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -4088,6 +3883,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS256);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -4116,18 +3912,13 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
                 SignatureAlgorithm.RS256.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -4177,6 +3968,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS256);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -4205,18 +3997,13 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
                 SignatureAlgorithm.RS256.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -4266,6 +4053,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS256);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -4294,18 +4082,13 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
                 SignatureAlgorithm.RS256.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -4355,6 +4138,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS256);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -4383,18 +4167,14 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
                 SignatureAlgorithm.RS256.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
+
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -4444,6 +4224,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS256);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -4472,18 +4253,14 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
                 SignatureAlgorithm.RS256.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
+
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -4533,6 +4310,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS256);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -4561,18 +4339,14 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
                 SignatureAlgorithm.RS256.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
+
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -4622,6 +4396,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS384);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -4650,18 +4425,14 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
                 SignatureAlgorithm.RS384.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
+
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -4711,6 +4482,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS384);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -4739,18 +4511,14 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
                 SignatureAlgorithm.RS384.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
+
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -4800,6 +4568,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS384);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -4828,18 +4597,14 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
                 SignatureAlgorithm.RS384.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
+
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -4889,6 +4654,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS384);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -4917,18 +4683,14 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
                 SignatureAlgorithm.RS384.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
+
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -4978,6 +4740,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS384);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -5006,18 +4769,14 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
                 SignatureAlgorithm.RS384.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
+
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -5067,6 +4826,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS384);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -5095,18 +4855,14 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
                 SignatureAlgorithm.RS384.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
+
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -5156,6 +4912,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS512);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -5184,18 +4941,14 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
                 SignatureAlgorithm.RS512.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
+
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -5245,6 +4998,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS512);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -5273,18 +5027,14 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
                 SignatureAlgorithm.RS512.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
+
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -5334,6 +5084,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS512);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -5362,18 +5113,14 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
                 SignatureAlgorithm.RS512.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
+
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -5423,6 +5170,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS512);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -5451,18 +5199,14 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
                 SignatureAlgorithm.RS512.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
+
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -5512,6 +5256,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS512);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -5540,18 +5285,14 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
                 SignatureAlgorithm.RS512.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
+
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -5601,6 +5342,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.RS512);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -5629,18 +5371,14 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
                 SignatureAlgorithm.RS512.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
+
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -5690,6 +5428,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES256);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -5718,18 +5457,14 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
                 SignatureAlgorithm.ES256.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
+
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -5779,6 +5514,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES256);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -5807,18 +5543,14 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
                 SignatureAlgorithm.ES256.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
+
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -5868,6 +5600,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES256);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -5896,18 +5629,14 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
                 SignatureAlgorithm.ES256.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
+
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -5957,6 +5686,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES256);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -5985,18 +5715,14 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
                 SignatureAlgorithm.ES256.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
+
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -6046,6 +5772,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES256);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -6074,18 +5801,14 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
                 SignatureAlgorithm.ES256.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
+
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -6135,6 +5858,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES256);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -6163,18 +5887,14 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
                 SignatureAlgorithm.ES256.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
+
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -6224,6 +5944,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES384);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -6252,18 +5973,14 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
                 SignatureAlgorithm.ES384.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
+
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -6313,6 +6030,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES384);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -6341,18 +6059,14 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
                 SignatureAlgorithm.ES384.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
+
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -6402,6 +6116,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES384);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -6430,18 +6145,14 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
                 SignatureAlgorithm.ES384.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
+
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -6491,6 +6202,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES384);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -6519,18 +6231,14 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
                 SignatureAlgorithm.ES384.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
+
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -6580,6 +6288,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES384);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -6608,18 +6317,14 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
                 SignatureAlgorithm.ES384.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
+
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -6669,6 +6374,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES384);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -6697,18 +6403,14 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
                 SignatureAlgorithm.ES384.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
+
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -6758,6 +6460,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES512);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -6786,18 +6489,14 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
                 SignatureAlgorithm.ES512.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
+
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -6847,6 +6546,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES512);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -6875,18 +6575,14 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
                 SignatureAlgorithm.ES512.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
+
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -6936,6 +6632,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES512);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -6964,18 +6661,14 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
                 SignatureAlgorithm.ES512.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
+
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -7025,6 +6718,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES512);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -7053,18 +6747,14 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
                 SignatureAlgorithm.ES512.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
+
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -7114,6 +6804,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES512);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -7142,18 +6833,14 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
                 SignatureAlgorithm.ES512.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
+
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -7203,6 +6890,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.ES512);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -7231,18 +6919,14 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
                 SignatureAlgorithm.ES512.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
+
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -7292,6 +6976,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS256);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -7320,18 +7005,14 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
                 SignatureAlgorithm.PS256.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
+
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -7381,6 +7062,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS256);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -7409,18 +7091,14 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
                 SignatureAlgorithm.PS256.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
+
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -7470,6 +7148,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS256);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -7498,18 +7177,14 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
                 SignatureAlgorithm.PS256.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
+
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -7559,6 +7234,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS256);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -7587,18 +7263,14 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
                 SignatureAlgorithm.PS256.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
+
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -7648,6 +7320,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS256);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -7676,18 +7349,14 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
                 SignatureAlgorithm.PS256.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
+
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -7737,6 +7406,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS256);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -7765,18 +7435,14 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
                 SignatureAlgorithm.PS256.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
+
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -7826,6 +7492,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS384);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -7854,18 +7521,14 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
                 SignatureAlgorithm.PS384.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
+
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -7915,6 +7578,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS384);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = newRegisterClient(registerRequest);
         RegisterResponse registerResponse = registerClient.exec();
@@ -7943,18 +7607,14 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
                 SignatureAlgorithm.PS384.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
+
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -8003,6 +7663,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS384);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -8031,18 +7692,14 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
                 SignatureAlgorithm.PS384.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
+
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -8092,6 +7749,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS384);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -8120,18 +7778,14 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
                 SignatureAlgorithm.PS384.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
+
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -8181,6 +7835,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS384);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -8209,18 +7864,14 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
                 SignatureAlgorithm.PS384.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
+
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -8270,6 +7921,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS384);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -8298,18 +7950,14 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
                 SignatureAlgorithm.PS384.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
+
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -8359,6 +8007,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS512);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -8387,18 +8036,14 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
                 SignatureAlgorithm.PS512.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
+
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -8448,6 +8093,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS512);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -8476,18 +8122,14 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
                 SignatureAlgorithm.PS512.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
+
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -8537,6 +8179,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS512);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -8565,18 +8208,14 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
                 SignatureAlgorithm.PS512.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
+
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -8626,6 +8265,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS512);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -8654,18 +8294,14 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
                 SignatureAlgorithm.PS512.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
+
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -8715,6 +8351,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS512);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -8743,18 +8380,14 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
                 SignatureAlgorithm.PS512.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
+
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
@@ -8804,6 +8437,7 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         registerRequest.setTokenEndpointAuthSigningAlg(SignatureAlgorithm.PS512);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -8832,18 +8466,14 @@ public class TokenEndpointAuthMethodRestrictionHttpTest extends BaseTest {
         assertTrue(readClientResponse.getClaims().containsKey(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()));
         assertEquals(readClientResponse.getClaims().get(TOKEN_ENDPOINT_AUTH_SIGNING_ALG.toString()),
                 SignatureAlgorithm.PS512.toString());
-        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
+        assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS.APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
+
         String state = UUID.randomUUID().toString();
 
-        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
+        AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, Tester.standardScopes, redirectUri, null);
         authorizationRequest.setState(state);
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
