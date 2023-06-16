@@ -130,7 +130,7 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         List<String> scopes = Arrays.asList("openid", "profile", "address", "email", "org_name", "work_phone");
 
         // 1. Register client
-        RegisterResponse registerResponse = register(redirectUris, responseTypes, grantTypes, sectorIdentifierUri);
+        RegisterResponse registerResponse = register(redirectUris, responseTypes, grantTypes, sectorIdentifierUri, scopes);
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
@@ -246,15 +246,16 @@ public class UserInfoRestWebServiceHttpTest extends BaseTest {
         List<GrantType> grantTypes = Arrays.asList(
                 GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS
         );
+        String scope = "openid profile address email org_name work_phone";
 
-        RegisterResponse registerResponse = register(redirectUris, responseTypes, grantTypes, sectorIdentifierUri);
+        RegisterResponse registerResponse = register(redirectUris, responseTypes, grantTypes, sectorIdentifierUri, Arrays.asList(scope.split(" ")));
         String clientId = registerResponse.getClientId();
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization
         String username = userId;
         String password = userSecret;
-        String scope = "openid profile address email org_name work_phone";
+
 
         TokenClient tokenClient = new TokenClient(tokenEndpoint);
         TokenResponse response1 = tokenClient.execResourceOwnerPasswordCredentialsGrant(username, password, scope,
