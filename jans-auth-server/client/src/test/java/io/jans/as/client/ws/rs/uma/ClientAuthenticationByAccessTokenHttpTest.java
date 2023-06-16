@@ -22,6 +22,7 @@ import io.jans.as.client.uma.UmaClientFactory;
 import io.jans.as.client.uma.UmaRptIntrospectionService;
 import io.jans.as.client.uma.UmaTokenService;
 import io.jans.as.client.uma.wrapper.UmaClient;
+import io.jans.as.client.ws.rs.Tester;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.Prompt;
@@ -104,6 +105,7 @@ public class ClientAuthenticationByAccessTokenHttpTest extends BaseTest {
         registerRequest.setGrantTypes(grantTypes);
         registerRequest.setAuthenticationMethod(AuthenticationMethod.CLIENT_SECRET_BASIC);
         registerRequest.addCustomAttribute("jansTrustedClnt", "true");
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setExecutor(clientEngine(true));
