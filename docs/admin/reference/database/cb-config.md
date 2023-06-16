@@ -5,6 +5,19 @@ tags:
   - database
 ---
 
+# Couchbase ORM persistence layer
+
+The recommended Couchbase version is 7.x. Before installing Jans administrator should install it and create cluster.
+During Jans setup administrator should provide user/password with role to allow create buckets and import initial data.
+
+After installation 
+Before starting setup administrator should pre-install Couchbase DB or allow to setup During installation setup generates default **/etc/jans/conf/jans-couchbase.properties** and creates required buckets in DB with initial data set. After end of deployemnt 
+
+The list of default setting of `jans-couchbase.properties`
+``
+
+``
+
 ## This content is in progress
 
 The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.
