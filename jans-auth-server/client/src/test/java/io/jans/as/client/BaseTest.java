@@ -16,6 +16,7 @@ import io.jans.as.client.par.ParClient;
 import io.jans.as.client.par.ParRequest;
 import io.jans.as.client.ssa.create.SsaCreateClient;
 import io.jans.as.client.ssa.create.SsaCreateResponse;
+import io.jans.as.client.ws.rs.Tester;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseMode;
 import io.jans.as.model.common.ResponseType;
@@ -1171,6 +1172,7 @@ public abstract class BaseTest {
         registerRequest.setUserInfoSignedResponseAlg(signatureAlgorithm);
         registerRequest.setUserInfoEncryptedResponseAlg(keyEncryptionAlgorithm);
         registerRequest.setUserInfoEncryptedResponseEnc(blockEncryptionAlgorithm);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
