@@ -14,11 +14,23 @@ to enhance security of resources protected by access token.
 
 When DPoP is being used, the Janssen Server checks whether the presenter of the access token is the one to whom the 
 access token was actually issued. Hence making sure that an stolen access token is not being used to access the 
-protected resource. 
+protected resource. OAuth 2.0 DPoP specification is available 
+[here](https://www.ietf.org/archive/id/draft-ietf-oauth-dpop-16.html)
 
 OAuth also provides [MTLS(Mutual TLS)](./mtls.md) as mechanism to ensure that the token presenting party is legitimate.
 While MTLS should be preferred whenever it is possible to use it, for other cases like single
-page application (SPA), DPoP can be used.
+page application(SPA), DPoP can be used.
+
+## Janssen Server Configuration for DPoP
+
+Following properties of Janssen Server can be used to tailor the behavior with respect to DPoP.
+
+- [dpopJtiCacheTime](https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#dpopjticachetime)
+- [dpopSigningAlgValuesSupported](https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#dpopsigningalgvaluessupported)
+- [dpopTimeframe](https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#dpoptimeframe)
+
+
+
 
 ## Have questions in the meantime?
 
