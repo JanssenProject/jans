@@ -36,7 +36,7 @@ public class KeycloakConfig {
 
     private static Logger log = LoggerFactory.getLogger(SamlConfigSource.class);
     
-    private static String serverUrl= "http://localhost:8080";
+    private static String serverUrl= "http://localhost:8180";
     private static String realm = "master";
     private static String clientId = "https://samltest.id/saml/sp";
     private static String grantType = OAuth2Constants.PASSWORD;
