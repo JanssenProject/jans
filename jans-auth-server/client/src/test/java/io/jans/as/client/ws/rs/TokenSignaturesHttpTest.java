@@ -61,6 +61,11 @@ public class TokenSignaturesHttpTest extends BaseTest {
         showTitle("requestAuthorizationIdTokenNone");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
 
         // 1. Registration
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
@@ -69,6 +74,7 @@ public class TokenSignaturesHttpTest extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.NONE);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -81,11 +87,6 @@ public class TokenSignaturesHttpTest extends BaseTest {
         String clientSecret = registerResponse.getClientSecret();
 
         // 2. Request authorization and receive the authorization code.
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
