@@ -32,7 +32,7 @@ Developers are encouraged to take a peep at the [FreeMarker manual](https://free
 
 Rendering is the process of "injecting" the variable passed (_map-variable_ in the above) into a template. If no variable is present in the instruction, it is assumed an empty _map_ was passed, i.e. `{ }`. 
 
-The variable injected ("data model" in FreeMarker terms) always have to be an Agama _map_, Java bean or object implementing the `java.util.Map` interface. This will allow access to the contents of such variable from within the template.
+The variable injected ("data model" in FreeMarker terms) always has to be an Agama _map_, Java bean or object implementing the `java.util.Map` interface. This will allow access to the contents of such variable from within the template.
 
 Here is a simple example. Suppose you want to ask for a username and password in a page called `login.ftl` and that such page will be stored in `<AGAMA-DIR>/ftl/myflow/pages/login.ftl`. Assume the flow has the header directive `Basepath "myflow"`. Also, let's say we want to pass a custom salutation message to be shown at the top of the page. Here is how the Agama code would look like:
 
@@ -116,7 +116,7 @@ credentials = RRF "pages/login.ftl" obj
 ...
 ```
 
-the form values can then be referenced as `credentials.username` and `credentials.password` in the flow. In other words, the keys of the resulting map will correspond to the form field names. The values will all be _string_s.
+the form values can then be referenced as `credentials.username` and `credentials.password` in the flow. In other words, the keys of the resulting map will correspond to the form field names. The values will all be _strings_.
 
 ## 3-param variant
 
