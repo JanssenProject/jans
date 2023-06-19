@@ -43,15 +43,17 @@ DPoP proofs are created differently for cases listed above. DPoP specification d
 When an access token is requested with DPoP header (1 above), the Janssen Server returns an access token (or refresh token) that
 is bound to the public key attached with the DPoP proof. 
 
-When client attaches DPoP proof along with the access token to access the protected resource (2 above), the RP checks
-the validity of the request using steps laid out in the 
+When client attaches DPoP proof along with the access token to access the protected resource (2 above), the 
+resource server checks the validity of the request using steps laid out in the 
 [specification](https://www.ietf.org/archive/id/draft-ietf-oauth-dpop-16.html#name-checking-dpop-proofs).
 
 ### Using Introspection Endpoint 
 
-
-
-Do we support 
+Janssen Server [introspection endpoint](../../auth-server/endpoints/introspection.md) supports JWK thumbprint
+confirmation method. Using this, the resource server can introspect an access token and obtain the hash of the public
+key associated with the access token. Response from introspection endpoint will share this information in the format
+as recommended in the 
+[specificaiton](https://www.ietf.org/archive/id/draft-ietf-oauth-dpop-16.html#name-jwk-thumbprint-confirmation-)
 
 ## Janssen Server Configuration for DPoP
 
