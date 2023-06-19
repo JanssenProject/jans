@@ -61,6 +61,7 @@ jobs:
         export JANS_INSECURE_CLIENT=true
         export TF_ACC=1
         cd terraform-provider-jans
+        go install github.com/jstemmer/go-junit-report/v2@latest
         go test -v 2>&1 ./... | go-junit-report > ${{ matrix.persistence-backends }}report.xml
 
     - uses: actions/upload-artifact@v2  # upload test results
