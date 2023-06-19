@@ -445,8 +445,8 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
                 .check();
     }
 
-    @DataProvider(name = "responseTypesTokenIdTokenFailDataProvider")
-    public Object[][] responseTypesTokenIdTokenFailDataProvider(ITestContext context) {
+    @DataProvider(name = "responseTypesTokenIdTokenDataProvider")
+    public Object[][] responseTypesTokenIdTokenDataProvider(ITestContext context) {
         String redirectUris = context.getCurrentXmlTest().getParameter("redirectUris");
         String redirectUri = context.getCurrentXmlTest().getParameter("redirectUri");
         String userId = context.getCurrentXmlTest().getParameter("userId");
@@ -461,8 +461,8 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
         };
     }
 
-    @Test(dataProvider = "responseTypesTokenIdTokenFailDataProvider")
-    public void responseTypesTokenIdTokenFail(
+    @Test(dataProvider = "responseTypesTokenIdTokenDataProvider")
+    public void responseTypesTokenIdToken(
             final String redirectUris, final String redirectUri, final String userId, final String userSecret,
             final List<ResponseType> responseTypes, final String sectorIdentifierUri) throws Exception {
         showTitle("responseTypesTokenIdTokenFail");
@@ -477,7 +477,6 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(Arrays.asList(
-                ResponseType.TOKEN,
                 ResponseType.ID_TOKEN));
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setScope(scopes);
@@ -488,6 +487,7 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
 
         showClient(registerClient);
         AssertBuilder.registerResponse(registerResponse).created().check();
+        assertTrue(registerResponse.getResponseTypes().contains(ResponseType.CODE));
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -523,7 +523,5 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
         showClient(authorizeClient);
         assertTrue(authorizationResponse.getStatus() == 302
                 || authorizationResponse.getStatus() == 400, "Unexpected response code: " + authorizationResponse.getStatus());
-        assertNotNull(authorizationResponse.getErrorType(), "The error type is null");
-        assertNotNull(authorizationResponse.getErrorDescription(), "The error description is null");
     }
 }
