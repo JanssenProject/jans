@@ -65,6 +65,8 @@ if [[ $JANS_PERSISTENCE == "MYSQL" ]]; then
   docker compose -f /tmp/jans/docker-jans-monolith/jans-mysql-compose.yml up -d
 elif [[ $JANS_PERSISTENCE == "PGSQL" ]]; then
   docker compose -f /tmp/jans/docker-jans-monolith/jans-postgres-compose.yml up -d
+elif [[ $JANS_PERSISTENCE == "LDAP" ]]; then
+  docker compose -f /tmp/jans/docker-jans-monolith/jans-ldap-compose.yml up -d
 fi
 echo "$EXT_IP $JANS_FQDN" | sudo tee -a /etc/hosts > /dev/null
 jans_status="unhealthy"
