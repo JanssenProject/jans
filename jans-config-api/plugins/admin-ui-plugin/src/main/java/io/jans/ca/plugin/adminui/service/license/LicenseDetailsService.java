@@ -152,7 +152,7 @@ public class LicenseDetailsService extends BaseService {
         //check is license is already active
         LicenseApiResponse licenseApiResponse = checkLicense();
         if (licenseApiResponse.isApiResult()) {
-            return createLicenseResponse(false, 500, "The license has been already activated.");
+            return createLicenseResponse(true, 200, "The license has been already activated.");
         }
         try {
             AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
