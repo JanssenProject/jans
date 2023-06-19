@@ -10,7 +10,6 @@ import static io.jans.scim.model.scim2.Constants.USER_EXT_SCHEMA_DESCRIPTION;
 import static io.jans.scim.model.scim2.Constants.USER_EXT_SCHEMA_ID;
 import static io.jans.scim.model.scim2.Constants.USER_EXT_SCHEMA_NAME;
 
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -152,26 +151,14 @@ public class ExtensionService {
      *            passed. These values are coming from LDAP
      * @return List of opaque values
      */
-    public List<Object> convertValues(ExtensionField field, String strValues[], boolean ldapBackend) {
+    public List<Object> convertValues(ExtensionField field, String strValues[]) {
 
         List<Object> values = new ArrayList<>();
 
         for (String val : strValues) {
             // In practice, there should not be nulls in strValues
             if (val != null) {
-                Object value;
-
-                //See io.jans.scim.model.scim2.util.DateUtil.gluuCouchbaseISODate()
-                if (!ldapBackend && field.getType().equals(AttributeDataType.DATE)) {
-                    try {
-                        DateTimeFormatter.ISO_DATE_TIME.parse(val);
-                        value = val;
-                    } catch (Exception e) {
-                        value = null;
-                    }
-                } else {
-                    value = ExtensionField.valueFromString(field, val);
-                }
+                Object value  = ExtensionField.valueFromString(field, val);
                 // won't happen either (value being null) because calls to this method occurs
                 // after lots of validations have taken place
                 if (value != null) {
