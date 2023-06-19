@@ -68,4 +68,4 @@ jobs:
       if: success() || failure()        # run this step even if previous step failed
       with:
         name: go-test-results
-        path: ./jans/terraform-provider-jans/${{ matrix.persistence-backends }}report.xml
+        path: ./terraform-provider-jans/${{ matrix.persistence-backends }}report.xml
