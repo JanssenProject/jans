@@ -97,6 +97,7 @@ public class CookieService {
 
     public Set<String> getCurrentSessions(HttpServletRequest request) {
         final String valueFromCookie = getValueFromCookie(request, CURRENT_SESSIONS_COOKIE_NAME);
+        log.trace("current_sessions cookie value: {}", valueFromCookie);
         if (StringUtils.isBlank(valueFromCookie)) {
             return Sets.newHashSet();
         }
@@ -115,6 +116,7 @@ public class CookieService {
         currentSessions.add(sessionId.getId());
 
         String header = CURRENT_SESSIONS_COOKIE_NAME + "=" + new JSONArray(currentSessions).toString();
+        log.trace("on add - {}, addedValue: {}", header, sessionId.getId());
         header += "; Path=/";
         header += "; Secure";
         header += "; HttpOnly";
