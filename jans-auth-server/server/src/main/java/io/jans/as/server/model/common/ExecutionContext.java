@@ -101,7 +101,7 @@ public class ExecutionContext {
                 executionContext.setHttpRequest((HttpServletRequest) externalContext.getRequest());
             }
             if (externalContext.getResponse() instanceof HttpServletResponse) {
-                executionContext.setHttpResponse((HttpServletResponse) externalContext.getRequest());
+                executionContext.setHttpResponse((HttpServletResponse) externalContext.getResponse());
             }
         }
         return executionContext;
