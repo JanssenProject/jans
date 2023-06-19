@@ -38,7 +38,8 @@ public class KeycloakConfig {
     
     private static String serverUrl= "http://localhost:8180";
     private static String realm = "master";
-    private static String clientId = "https://samltest.id/saml/sp";
+    private static String clientId = "jans-client-1";
+    private static String clientSecret = "yxsKi8ah9pU7ANyjH7HBwJh4XTLYN4x3";
     private static String grantType = OAuth2Constants.PASSWORD;
     private static String username = "admin1";
     private static String password = "admin123";
@@ -47,28 +48,25 @@ public class KeycloakConfig {
     @Inject
     SamlConfigSource samlConfigSource;
     
+    public KeycloakConfig() {
+        
+    }
+
     public Keycloak getInstance() {
         log.error("Keycloak instance entry - samlConfigSource:{}", samlConfigSource);
         log.error("samlConfigSource.getProperties():{}, samlConfigSource.getPropertyNames():{} ", samlConfigSource.getProperties(), samlConfigSource.getPropertyNames());
-        return getInstance(serverUrl, realm, username, password, clientId, grantType);
+        return getInstance(serverUrl, realm, username, password, clientId, clientSecret);
       }
     
-    public Keycloak getInstance(String serverUrl, String realm, String username, String password, String clientId,String grantType) {
-        log.error("Keycloak instance param serverUrl:{}, realm:{}, username:{}, password:{}, clientId:{}, grantType:{} ",serverUrl, realm, username, password, clientId, grantType);
+    public Keycloak getInstance(String serverUrl, String realm, String username, String password, String clientId, String clientSecret) {
+        log.error("Keycloak instance param serverUrl:{}, realm:{}, username:{}, password:{}, clientId:{}, clientSecret:{} ",serverUrl, realm, username, password, clientId, clientSecret);
         log.error("samlConfigSource.getProperties():{}, samlConfigSource.getPropertyNames():{} ", samlConfigSource.getProperties(), samlConfigSource.getPropertyNames());
         
-        Keycloak keycloak = Keycloak.getInstance(serverUrl,  realm,  username,  password,  clientId);
+        Keycloak keycloak = Keycloak.getInstance(serverUrl,  realm,  username,  password,  clientId, clientSecret);
         log.error("keycloak:{} ", keycloak);
-        
-        /*
-         * ServerInfoResource serverInfoResource = keycloak.serverInfo();
-         * log.error("serverInfoResource:{} ", serverInfoResource);
-         */
-        /*
-         * ServerInfoRepresentation serverInfoRepresentation =
-         * serverInfoResource.getInfo(); log.error("serverInfoRepresentation:{} ",
-         * serverInfoRepresentation);
-         */  
+       
         return keycloak;
       }
+    
+    
 }
