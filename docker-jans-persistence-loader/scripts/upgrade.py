@@ -307,15 +307,18 @@ class Upgrade:
         kwargs = {}
         scim_id = JANS_SCIM_SCRIPT_DN
         basic_id = JANS_BASIC_SCRIPT_DN
+        cache_refresh_id = "inum=13D3-E7AD,ou=scripts,o=jans"
 
         if self.backend.type in ("sql", "spanner"):
             kwargs = {"table_name": "jansCustomScr"}
             scim_id = doc_id_from_dn(scim_id)
             basic_id = doc_id_from_dn(basic_id)
+            cache_refresh_id = doc_id_from_dn(cache_refresh_id)
         elif self.backend.type == "couchbase":
             kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
             scim_id = id_from_dn(scim_id)
             basic_id = id_from_dn(basic_id)
+            cache_refresh_id = id_from_dn(cache_refresh_id)
 
         # toggle scim script
         scim_entry = self.backend.get_entry(scim_id, **kwargs)
@@ -331,6 +334,14 @@ class Upgrade:
         if basic_entry and not as_boolean(basic_entry.attrs["jansEnabled"]):
             basic_entry.attrs["jansEnabled"] = True
             self.backend.modify_entry(basic_entry.id, basic_entry.attrs, **kwargs)
+
+        # toggle cache-refresh script
+        cache_refresh_entry = self.backend.get_entry(cache_refresh_id, **kwargs)
+        cache_refresh_enabled = as_boolean(os.environ.get("CN_CACHE_REFRESH_ENABLED", False))
+
+        if cache_refresh_entry and cache_refresh_entry.attrs["jansEnabled"] != cache_refresh_enabled:
+            cache_refresh_entry.attrs["jansEnabled"] = cache_refresh_enabled
+            self.backend.modify_entry(cache_refresh_entry.id, cache_refresh_entry.attrs, **kwargs)
 
     def update_auth_dynamic_config(self):
         # default to ldap persistence

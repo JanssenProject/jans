@@ -26,7 +26,7 @@ RUN python3 -m ensurepip \
 # =====================
 
 # janssenproject/jans SHA commit
-ENV JANS_SOURCE_VERSION=8c583d93ed1ad39998c9706e997549c147042223
+ENV JANS_SOURCE_VERSION=17222c99beb7bc08bb012f96aa6bd454b546d117
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCRIPT_CATALOG_DIR=docs/script-catalog
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
@@ -156,7 +156,8 @@ ENV CN_CACHE_TYPE=NATIVE_PERSISTENCE \
     CN_GOOGLE_SECRET_NAME_PREFIX=jans \
     CN_AWS_SECRETS_ENDPOINT_URL="" \
     CN_AWS_SECRETS_PREFIX=jans \
-    CN_AWS_SECRETS_REPLICA_FILE=""
+    CN_AWS_SECRETS_REPLICA_FILE="" \
+    CN_CACHE_REFRESH_ENABLED=false
 
 # ====
 # misc
