@@ -90,6 +90,10 @@ ENV USER_MGT_PLUGIN_BUILD_DATE='2023-06-12 08:50'
 ENV USER_MGT_PLUGIN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/user-mgt-plugin/${CN_VERSION}/user-mgt-plugin-${CN_VERSION}-distribution.jar
 RUN wget -q ${USER_MGT_PLUGIN_SOURCE_URL} -O /usr/share/java/user-mgt-plugin.jar
 
+ENV CACHE_REFRESH_PLUGIN_BUILD_DATE='2023-06-20 08:38'
+ENV CACHE_REFRESH_PLUGIN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api/plugins/cache-refresh-plugin/${CN_VERSION}/cache-refresh-plugin-${CN_VERSION}-distribution.jar
+RUN wget -q ${CACHE_REFRESH_PLUGIN_SOURCE_URL} -O /usr/share/java/cache-refresh-plugin.jar
+
 # ======
 # Python
 # ======
@@ -110,7 +114,7 @@ COPY conf/prometheus-config.yaml /opt/prometheus/
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_SOURCE_VERSION=8c583d93ed1ad39998c9706e997549c147042223
+ENV JANS_SOURCE_VERSION=28fed198e972b4550427d96cd436d392268e1d78
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
 
