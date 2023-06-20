@@ -9,62 +9,56 @@ tags:
 
 # DPoP (Demonstrating Proof-of-Possession at the Application Layer)
 
-Janssen Server supports DPoP, Demonstrating Proof-of-Possession at the Application Layer, which is OAuth 2.0 feature
-to enhance security of resources protected by access token.
+Janssen Server supports `DPoP` (Demonstrating Proof-of-Possession) at the Application Layer, which is OAuth 2.0 feature
+to enhance the security of resources protected by access tokens.
 
-When DPoP is being used, the Janssen Server checks whether the presenter of the access token is the one to whom the 
-access token was actually issued. Hence, making sure that a stolen access token is not being used by someone
-else to access the protected resource. OAuth 2.0 DPoP specification is available 
+When DPoP is being used, the Janssen Server checks whether the presenter of the access token is the one to whom the
+access token was issued. Hence, making sure that a stolen access token is not being used by someone
+else to access the protected resource. OAuth 2.0 DPoP specification is available
 [here](https://www.ietf.org/archive/id/draft-ietf-oauth-dpop-16.html)
 
-Janssen Server also supports OAuth [MTLS(Mutual TLS)](./mtls.md) as mechanism to ensure that the token presenting 
-party is legitimate. While MTLS should be preferred whenever it is possible to use it, for other cases like single
+Janssen Server also supports OAuth [MTLS(Mutual TLS)](./mtls.md) as a mechanism to ensure that the token presenting
+party is legitimate. While **MTLS should be preferred** whenever it is possible to use it, for other cases like single
 page application(SPA), DPoP can be used.
 
-## Using DPoP 
-
-## DCR and client registration
-
-Janssen Server client configuration does not need to enable anything specifically on Janssen Server to use DPoP.
-
-TODO: When using dynamic client registration, do we support this `dpop_bound_access_tokens`? 
+## Using DPoP
 
 ## Using DPoP Proof JWT
 
-In order to use DPoP protection, client needs to create DPoP Proof JWT (or DPoP Proof) and send it using `DPoP`
-request header to Janssen Server when 
+To use DPoP protection, the client needs to create DPoP Proof JWT (or DPoP Proof) and send it using `DPoP`
+request header to Janssen Server when:
 
-1. Requesting for a new access token 
+1. Requesting for a new access token
 2. Accessing a protected resource using the access token
 
-DPoP proofs are created differently for cases listed above. DPoP specification describes 
+DPoP proofs are created differently for the cases listed above. DPoP specification describes
 [how](https://www.ietf.org/archive/id/draft-ietf-oauth-dpop-16.html#name-dpop-proof-jwts).
 
-When an access token is requested with DPoP header (1 above), the Janssen Server returns an access token (or refresh token) that
-is bound to the public key attached with the DPoP proof. 
+When an access token is requested with the DPoP header (1 above), the Janssen Server returns an access token (or refresh token) that
+is bound(mapped) to the public key attached with the DPoP proof.
 
-When client attaches DPoP proof along with the access token to access the protected resource (2 above), the 
-resource server checks the validity of the request using steps laid out in the 
-[specification](https://www.ietf.org/archive/id/draft-ietf-oauth-dpop-16.html#name-checking-dpop-proofs).
+Subsequently, when the client uses the access token to access the protected resource (2 above), it again creates and
+attaches the DPoP Proof with the request. The resource server checks the validity of the request by ensuring that the
+access token used is bound to the same public key which is presented in the DPoP proof in the request. The resource
+server uses steps laid out in the
+[specification](https://www.ietf.org/archive/id/draft-ietf-oauth-dpop-16.html#name-checking-dpop-proofs) to acertain 
+this.
 
-### Using Introspection Endpoint 
+### Using Introspection Endpoint
 
-Janssen Server [introspection endpoint](../../auth-server/endpoints/introspection.md) supports JWK thumbprint
+Janssen Server [introspection endpoint](../../auth-server/endpoints/introspection.md) supports the JWK thumbprint
 confirmation method. Using this, the resource server can introspect an access token and obtain the hash of the public
-key associated with the access token. Response from introspection endpoint will share this information in the format
-as recommended in the 
+key associated with the access token. Response from the introspection endpoint will share this information in the format
+recommended in the
 [specificaiton](https://www.ietf.org/archive/id/draft-ietf-oauth-dpop-16.html#name-jwk-thumbprint-confirmation-)
 
 ## Janssen Server Configuration for DPoP
 
-Following properties of Janssen Server can be used to tailor the behavior with respect to DPoP.
+Following properties of the Janssen Server can be used to tailor the behavior concerning DPoP.
 
 - [dpopJtiCacheTime](https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#dpopjticachetime)
 - [dpopSigningAlgValuesSupported](https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#dpopsigningalgvaluessupported)
 - [dpopTimeframe](https://docs.jans.io/head/admin/reference/json/properties/janssenauthserver-properties/#dpoptimeframe)
-
-
-
 
 ## Have questions in the meantime?
 
@@ -72,5 +66,5 @@ While this documentation is in progress, you can ask questions through [GitHub D
 
 ## Want to contribute?
 
-If you have content you'd 
+If you have content you'd
 like to contribute to this page in the meantime, you can get started with our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/).
