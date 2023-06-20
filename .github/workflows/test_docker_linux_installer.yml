@@ -64,7 +64,7 @@ jobs:
         go install github.com/jstemmer/go-junit-report/v2@latest
         go test -v 2>&1 ./... | go-junit-report > ${{ matrix.persistence-backends }}report.xml
 
-    - uses: actions/upload-artifact@v2  # upload test results
+    - uses: actions/upload-artifact@v3  # upload test results
       if: success() || failure()        # run this step even if previous step failed
       with:
         name: go-test-results
