@@ -1,0 +1,18 @@
+apiVersion: v2
+name: cache-refresh
+version: 1.0.15-dev
+kubeVersion: ">=v1.21.0-0"
+description: Jans Cache Refresh
+type: application
+keywords:
+  - cache-refresh
+home: https://jans.io
+sources:
+  - https://github.com/JanssenProject/jans/jans-cache-refresh
+  - https://github.com/JanssenProject/jans/docker-jans-cache-refresh
+maintainers:
+  - name: Mohammad Abudayyeh
+    email: support@jans.io
+    url: https://github.com/moabu
+icon: https://github.com/JanssenProject/jans/raw/main/docs/assets/logo/janssen_project_favicon_transparent_50px_50px.png
+appVersion: "1.0.15-dev"

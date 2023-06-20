@@ -1,0 +1,38 @@
+{{- if and (.Values.global.istio.ingress) (index .Values "global" "cache-refresh" "ingress" "configApiEnabled") }}
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ .Release.Name }}-istio-cache-refresh
+  namespace: {{.Release.Namespace}}
+  labels:
+    APP_NAME:cache-refresh 
+{{ include "cache-refresh.labels" . | indent 4 }}
+{{- if .Values.additionalLabels }}
+{{ toYaml .Values.additionalLabels | indent 4 }}
+{{- end }}
+{{- if .Values.additionalAnnotations }}
+  annotations:
+{{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+spec:
+{{- if .Values.global.istio.gateways }}
+  gateways:
+{{ toYaml .Values.global.istio.gateways | indent 2 }}
+{{- else }}
+  gateways:
+  - {{ .Release.Name }}-global-gtw
+{{- end }}
+  hosts:
+  - {{ .Values.global.fqdn }}
+  http:
+  - name: {{ .Release.Name }}-istio-cache-refresh
+    match:
+    - uri:
+        prefix: /jans-cache-refresh
+    route:
+    - destination:
+        host: {{ index .Values "global" "cache-refresh" "cacheRefreshServiceName" }}.{{.Release.Namespace}}.svc.cluster.local
+        port:
+          number: 8074
+      weight: 100
+{{- end }}

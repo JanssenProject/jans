@@ -711,6 +711,75 @@
               "type": "string"
             }
           }
+        },
+        "cache-refresh": {
+          "type": "object",
+          "properties": {
+            "cacheRefreshServiceName": {
+              "description": "Name of the cache-refresh service. Please keep it as default.",
+              "type": "string",
+              "pattern": "^[a-z0-9-]+$"
+            },
+            "enabled": {
+              "description": "Boolean flag to enable/disable the cache-refresh chart.",
+              "type": "boolean"
+            },
+            "appLoggers": {
+              "type": "object",
+              "properties": {
+                "cacheRefreshLogTarget": {
+                  "description": "cachrefresh.log target",
+                  "type": "string",
+                  "pattern": "^(STDOUT|FILE)$"
+                },
+                "cacheRefreshLogLevel": {
+                  "description": "cacherefresh.log level",
+                  "type": "string",
+                  "pattern": "^(FATAL|ERROR|WARN|INFO|DEBUG|TRACE)$"
+                },
+                "persistenceLogTarget": {
+                  "description": "cacherefresh_persistence.log target",
+                  "type": "string",
+                  "pattern": "^(STDOUT|FILE)$"
+                },
+                "persistenceLogLevel": {
+                  "description": "cacherefresh_persistence.log level",
+                  "type": "string",
+                  "pattern": "^(FATAL|ERROR|WARN|INFO|DEBUG|TRACE)$"
+                },
+                "persistenceDurationLogTarget": {
+                  "description": "cacherefresh_persistence_duration.log target",
+                  "type": "string",
+                  "pattern": "^(STDOUT|FILE)$"
+                },
+                "persistenceDurationLogLevel": {
+                  "description": "cacherefresh_persistence_duration.log level",
+                  "type": "string",
+                  "pattern": "^(FATAL|ERROR|WARN|INFO|DEBUG|TRACE)$"
+                },
+                "ldapStatsLogTarget": {
+                  "description": "cacherefresh_persistence_ldap_statistics.log target",
+                  "type": "string",
+                  "pattern": "^(STDOUT|FILE)$"
+                },
+                "ldapStatsLogLevel": {
+                  "description": "cacherefresh_persistence_ldap_statistics.log level",
+                  "type": "string",
+                  "pattern": "^(FATAL|ERROR|WARN|INFO|DEBUG|TRACE)$"
+                },
+                "scriptLogTarget": {
+                  "description": "cacherefresh_script.log target",
+                  "type": "string",
+                  "pattern": "^(STDOUT|FILE)$"
+                },
+                "scriptLogLevel": {
+                  "description": "cacherefresh_script.log level",
+                  "type": "string",
+                  "pattern": "^(FATAL|ERROR|WARN|INFO|DEBUG|TRACE)$"
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -731,6 +800,11 @@
     },
     "scim": {
       "description": "System for Cross-domain Identity Management (SCIM) version 2.0",
+      "type": "object",
+      "properties": {}
+    },
+    "cache-refresh": {
+      "description": "Cache Refresh",
       "type": "object",
       "properties": {}
     }

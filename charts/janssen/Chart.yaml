@@ -20,6 +20,8 @@ annotations:
       image: ghcr.io/janssenproject/jans/persistence-loader:1.0.15_dev
     - name: scim
       image: ghcr.io/janssenproject/jans/scim:1.0.15_dev
+    - name: cache-refresh
+      image: ghcr.io/janssenproject/jans/cache-refresh:1.0.15_dev
   artifacthub.io/license: Apache-2.0
   artifacthub.io/prerelease: 'true'
   catalog.cattle.io/certified: partner
@@ -74,4 +76,8 @@ dependencies:
 
     - name: persistence
       condition: global.persistence.enabled
+      version: 1.0.15-dev
+
+    - name: cache-refresh
+      condition: global.cache-refresh.enabled
       version: 1.0.15-dev
