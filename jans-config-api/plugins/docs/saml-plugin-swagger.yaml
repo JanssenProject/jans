@@ -16,7 +16,705 @@ servers:
 tags:
 - name: SAML - Configuration
 - name: SAML - Trust Relationship
+paths:
+  /saml/saml-config:
+    get:
+      tags:
+      - SAML - Configuration
+      summary: Gets Jans SAML configuration properties
+      description: Gets Jans SAML configuration properties
+      operationId: get-properties-saml
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SamlConfig'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/saml-config.readonly
+  /saml/trust-relationship:
+    get:
+      tags:
+      - SAML - Client
+      summary: Get all Clients
+      description: Get all Clients.
+      operationId: get-saml-client
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SAMLTrustRelationship'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/saml.readonly
+    put:
+      tags:
+      - SAML - Client
+      summary: Update client
+      description: Update client
+      operationId: put-client_1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientRepresentation'
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SAMLTrustRelationship'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/saml.write
+    post:
+      tags:
+      - SAML - Client
+      summary: Create Client
+      description: Create Client
+      operationId: post-client
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientRepresentation'
+      responses:
+        "201":
+          description: clientList
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SAMLTrustRelationship'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/saml.write
+    delete:
+      tags:
+      - SAML - Client
+      summary: Delete client
+      description: Delete client
+      operationId: put-client
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+      responses:
+        "204":
+          description: No Content
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SAMLTrustRelationship'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/saml.write
+  /saml/trust-relationship/user:
+    get:
+      tags:
+      - SAML - User
+      summary: Get all users
+      description: Get all users
+      operationId: get-saml-user
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SAMLTrustRelationship'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/saml.readonly
+  /saml/trust-relationship/{name}:
+    get:
+      tags:
+      - SAML - Client
+      summary: Get client by name
+      description: Get client by name
+      operationId: get-saml-client-by-name
+      parameters:
+      - name: name
+        in: path
+        description: Client name
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SAMLTrustRelationship'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/saml.readonly
 components:
+  schemas:
+    SamlConfig:
+      type: object
+      properties:
+        serverUrl:
+          type: string
+        realm:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+        clientId:
+          type: string
+        clientSecret:
+          type: string
+    CustomAttribute:
+      type: object
+      properties:
+        name:
+          type: string
+        multiValued:
+          type: boolean
+        values:
+          type: array
+          items:
+            type: string
+        value:
+          type: string
+        displayValue:
+          type: string
+    MetadataFilter:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        extensionSchemas:
+          type: array
+          items:
+            type: string
+        extensionSchema:
+          type: string
+        removeRolelessEntityDescriptors:
+          type: boolean
+        removeEmptyEntitiesDescriptors:
+          type: boolean
+        retainedRole:
+          type: string
+        retainedRoles:
+          type: array
+          items:
+            type: string
+        maxValidityInterval:
+          type: integer
+          format: int32
+        id:
+          type: string
+        certPath:
+          type: string
+        requireSignedMetadata:
+          type: boolean
+        filterCertFileName:
+          type: string
+    ProfileConfiguration:
+      type: object
+      properties:
+        name:
+          type: string
+        includeAttributeStatement:
+          type: boolean
+        signResponses:
+          type: string
+        signAssertions:
+          type: string
+        signRequests:
+          type: string
+        assertionLifetime:
+          type: integer
+          format: int32
+        assertionProxyCount:
+          type: integer
+          format: int32
+        encryptNameIds:
+          type: string
+        encryptAssertions:
+          type: string
+        profileConfigurationCertFileName:
+          type: string
+        defaultAuthenticationMethod:
+          type: string
+        nameIDFormatPrecedence:
+          type: string
+        nameIDFormatPrecedenceList:
+          type: array
+          items:
+            type: string
+    SAMLTrustRelationship:
+      required:
+      - description
+      - displayName
+      - spMetaDataSourceType
+      type: object
+      properties:
+        dn:
+          type: string
+        inum:
+          type: string
+        displayName:
+          maxLength: 60
+          minLength: 0
+          type: string
+        description:
+          maxLength: 4000
+          minLength: 0
+          type: string
+        status:
+          type: string
+          enum:
+          - active
+          - inactive
+          - expired
+          - register
+        validationStatus:
+          type: string
+          enum:
+          - In Progress
+          - Success
+          - Scheduled
+          - Failed
+        releasedAttributes:
+          type: array
+          items:
+            type: string
+        spMetaDataSourceType:
+          type: string
+          enum:
+          - file
+          - uri
+          - federation
+          - manual
+          - mdq
+        spMetaDataFN:
+          type: string
+        spMetaDataURL:
+          type: string
+        owner:
+          type: string
+        maxRefreshDelay:
+          type: string
+        releasedCustomAttributes:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomAttribute'
+        metadataFilters:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/MetadataFilter'
+        profileConfigurations:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/ProfileConfiguration'
+        gluuSAMLMetaDataFilter:
+          type: array
+          items:
+            type: string
+        gluuTrustContact:
+          type: array
+          items:
+            type: string
+        gluuTrustDeconstruction:
+          type: array
+          items:
+            type: string
+        gluuContainerFederation:
+          type: string
+        gluuIsFederation:
+          type: string
+        gluuEntityId:
+          type: array
+          items:
+            type: string
+        gluuProfileConfiguration:
+          type: array
+          items:
+            type: string
+        gluuSpecificRelyingPartyConfig:
+          type: string
+        url:
+          pattern: "^(https?|http)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]"
+          type: string
+        spLogoutURL:
+          pattern: "^$|(^(https?|http)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|])"
+          type: string
+        validationLog:
+          type: array
+          items:
+            type: string
+        researchBundleEnabled:
+          type: string
+        entityType:
+          type: string
+          enum:
+          - Single SP
+          - Federation/Aggregate
+        metadataStr:
+          type: string
+        certificate:
+          type: string
+        researchBundle:
+          type: boolean
+        mdqFederation:
+          type: boolean
+        entityId:
+          type: string
+        federation:
+          type: boolean
+        fileMetadataSourceType:
+          type: boolean
+        mdqMetadataSourceType:
+          type: boolean
+        uriMetadataSourceType:
+          type: boolean
+        specificRelyingPartyConfig:
+          type: boolean
+        containerFederation:
+          $ref: '#/components/schemas/SAMLTrustRelationship'
+        uniqueGluuEntityId:
+          uniqueItems: true
+          type: array
+          writeOnly: true
+          items:
+            type: string
+        baseDn:
+          type: string
+    ClientRepresentation:
+      type: object
+      properties:
+        id:
+          type: string
+        clientId:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        rootUrl:
+          type: string
+        adminUrl:
+          type: string
+        baseUrl:
+          type: string
+        surrogateAuthRequired:
+          type: boolean
+        enabled:
+          type: boolean
+        alwaysDisplayInConsole:
+          type: boolean
+        clientAuthenticatorType:
+          type: string
+        secret:
+          type: string
+        registrationAccessToken:
+          type: string
+        defaultRoles:
+          type: array
+          items:
+            type: string
+        redirectUris:
+          type: array
+          items:
+            type: string
+        webOrigins:
+          type: array
+          items:
+            type: string
+        notBefore:
+          type: integer
+          format: int32
+        bearerOnly:
+          type: boolean
+        consentRequired:
+          type: boolean
+        standardFlowEnabled:
+          type: boolean
+        implicitFlowEnabled:
+          type: boolean
+        directAccessGrantsEnabled:
+          type: boolean
+        serviceAccountsEnabled:
+          type: boolean
+        authorizationServicesEnabled:
+          type: boolean
+        directGrantsOnly:
+          type: boolean
+        publicClient:
+          type: boolean
+        frontchannelLogout:
+          type: boolean
+        protocol:
+          type: string
+        attributes:
+          type: object
+          additionalProperties:
+            type: string
+        authenticationFlowBindingOverrides:
+          type: object
+          additionalProperties:
+            type: string
+        fullScopeAllowed:
+          type: boolean
+        nodeReRegistrationTimeout:
+          type: integer
+          format: int32
+        registeredNodes:
+          type: object
+          additionalProperties:
+            type: integer
+            format: int32
+        protocolMappers:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProtocolMapperRepresentation'
+        clientTemplate:
+          type: string
+        useTemplateConfig:
+          type: boolean
+        useTemplateScope:
+          type: boolean
+        useTemplateMappers:
+          type: boolean
+        defaultClientScopes:
+          type: array
+          items:
+            type: string
+        optionalClientScopes:
+          type: array
+          items:
+            type: string
+        authorizationSettings:
+          $ref: '#/components/schemas/ResourceServerRepresentation'
+        access:
+          type: object
+          additionalProperties:
+            type: boolean
+        origin:
+          type: string
+    PolicyRepresentation:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+        policies:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+        resources:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+        scopes:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+        logic:
+          type: string
+          enum:
+          - POSITIVE
+          - NEGATIVE
+        decisionStrategy:
+          type: string
+          enum:
+          - AFFIRMATIVE
+          - UNANIMOUS
+          - CONSENSUS
+        owner:
+          type: string
+        resourcesData:
+          uniqueItems: true
+          type: array
+          items:
+            $ref: '#/components/schemas/ResourceRepresentation'
+        scopesData:
+          uniqueItems: true
+          type: array
+          items:
+            $ref: '#/components/schemas/ScopeRepresentation'
+        config:
+          type: object
+          additionalProperties:
+            type: string
+    ProtocolMapperRepresentation:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        protocol:
+          type: string
+        protocolMapper:
+          type: string
+        consentRequired:
+          type: boolean
+        consentText:
+          type: string
+        config:
+          type: object
+          additionalProperties:
+            type: string
+    ResourceOwnerRepresentation:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+    ResourceRepresentation:
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+        owner:
+          $ref: '#/components/schemas/ResourceOwnerRepresentation'
+        ownerManagedAccess:
+          type: boolean
+        displayName:
+          type: string
+        attributes:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+        _id:
+          type: string
+        uris:
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+        scopes:
+          uniqueItems: true
+          type: array
+          items:
+            $ref: '#/components/schemas/ScopeRepresentation'
+        icon_uri:
+          type: string
+        uri:
+          type: string
+          writeOnly: true
+        resource_scopes:
+          uniqueItems: true
+          type: array
+          writeOnly: true
+          items:
+            $ref: '#/components/schemas/ScopeRepresentation'
+    ResourceServerRepresentation:
+      type: object
+      properties:
+        id:
+          type: string
+        clientId:
+          type: string
+        name:
+          type: string
+        allowRemoteResourceManagement:
+          type: boolean
+        policyEnforcementMode:
+          type: string
+          enum:
+          - ENFORCING
+          - PERMISSIVE
+          - DISABLED
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResourceRepresentation'
+        policies:
+          type: array
+          items:
+            $ref: '#/components/schemas/PolicyRepresentation'
+        scopes:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScopeRepresentation'
+        decisionStrategy:
+          type: string
+          enum:
+          - AFFIRMATIVE
+          - UNANIMOUS
+          - CONSENSUS
+    ScopeRepresentation:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        iconUri:
+          type: string
+        policies:
+          type: array
+          items:
+            $ref: '#/components/schemas/PolicyRepresentation'
+        displayName:
+          type: string
   securitySchemes:
     oauth2:
       type: oauth2
@@ -24,5 +722,9 @@ components:
         clientCredentials:
           tokenUrl: "https://{op-hostname}/.../token"
           scopes:
-            ? ""
-            : ""
+            https://jans.io/oauth/config/saml.readonly: View SAML related information
+            https://jans.io/oauth/config/saml.write: Manage SAML related information
+            https://jans.io/oauth/config/saml-config.readonly: View SAML configuration
+              related information
+            https://jans.io/oauth/config/saml-config.write: Manage SAML configuration
+              related information

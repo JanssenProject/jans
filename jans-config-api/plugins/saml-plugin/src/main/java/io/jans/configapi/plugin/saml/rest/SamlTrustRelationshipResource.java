@@ -78,7 +78,7 @@ public class SamlTrustRelationshipResource extends BaseResource {
     public Response getAllUsers() {
 
         logger.error("Searching users()");
-
+        //    to get only SAML use  "protocol": "saml",
         List<UserRepresentation> userList = samlService.getAllUsers();
 
         logger.error("All userList:{}", userList);
