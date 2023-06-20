@@ -42,13 +42,13 @@ class CacheRefreshInstaller(JettyInstaller):
     def render_import_templates(self):
         self.logIt("Preparing base64 encodings configuration files")
         self.renderTemplateInOut(self.config_json_fn, self.templates_folder, self.output_folder)
-        Config.templateRenderingDict['jans_auth_config_base64'] = self.generate_base64_ldap_file(
+        Config.templateRenderingDict['cache_refresh_config_base64'] = self.generate_base64_ldap_file(
                 os.path.join(
                     self.output_folder,
                     os.path.basename(self.config_json_fn)
                 )
             )
-        Config.templateRenderingDict['jans_auth_static_conf_base64'] = self.generate_base64_ldap_file(self.static_config_json_fn)
+        Config.templateRenderingDict['cache_refresh_static_conf_base64'] = self.generate_base64_ldap_file(self.static_config_json_fn)
 
         self.renderTemplateInOut(self.ldif_config_fn, self.templates_folder, self.output_folder)
 
