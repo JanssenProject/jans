@@ -1,0 +1,254 @@
+FROM bellsoft/liberica-openjre-alpine:11.0.16
+
+# ===============
+# Alpine packages
+# ===============
+
+RUN apk update \
+    && apk upgrade --available \
+    && apk add --no-cache openssl python3 tini curl py3-cryptography py3-psycopg2 py3-grpcio \
+    && apk add --no-cache --virtual .build-deps wget git zip \
+    && mkdir -p /usr/java/latest \
+    && ln -sf /usr/lib/jvm/jre /usr/java/latest/jre
+
+# =====
+# Jetty
+# =====
+
+ARG JETTY_VERSION=11.0.15
+ARG JETTY_HOME=/opt/jetty
+ARG JETTY_BASE=/opt/jans/jetty
+ARG JETTY_USER_HOME_LIB=/home/jetty/lib
+
+# Install jetty
+RUN wget -q https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/${JETTY_VERSION}/jetty-home-${JETTY_VERSION}.tar.gz -O /tmp/jetty.tar.gz \
+    && mkdir -p /opt \
+    && tar -xzf /tmp/jetty.tar.gz -C /opt \
+    && mv /opt/jetty-home-${JETTY_VERSION} ${JETTY_HOME} \
+    && rm -rf /tmp/jetty.tar.gz
+
+# Ports required by jetty
+EXPOSE 9091
+
+# ======
+# Jython
+# ======
+
+ARG JYTHON_VERSION=2.7.3
+ARG JYTHON_BUILD_DATE='2022-08-01 17:37'
+RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSION}/jython-installer-${JYTHON_VERSION}.jar -O /tmp/jython-installer.jar \
+    && mkdir -p /opt/jython \
+    && java -jar /tmp/jython-installer.jar -v -s -d /opt/jython -e ensurepip \
+    && rm -f /tmp/jython-installer.jar /tmp/*.properties
+
+# =============
+# Cache Refresh
+# =============
+
+ENV CN_VERSION=1.0.15-SNAPSHOT
+ENV CN_BUILD_DATE='2023-06-19 08:46'
+ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-cache-refresh/${CN_VERSION}/jans-cache-refresh-${CN_VERSION}.war
+
+RUN mkdir -p ${JETTY_BASE}/jans-cache-refresh/webapps \
+    && wget -q ${CN_SOURCE_URL} -O /tmp/jans-cache-refresh.war \
+    && cd /tmp \
+    && zip -d jans-cache-refresh.war WEB-INF/jetty-web.xml \
+    && cp jans-cache-refresh.war ${JETTY_BASE}/jans-cache-refresh/webapps/jans-cache-refresh.war \
+    && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-cache-refresh --add-module=server,deploy,resources,http,http-forwarded,threadpool,jsp,cdi-decorate,jmx,stats,logging-log4j2 --approve-all-licenses \
+    && rm -rf /tmp/jans-cache-refresh.war /tmp/WEB-INF
+
+# =====================
+# jans-linux-setup sync
+# =====================
+
+ENV JANS_SOURCE_VERSION=28fed198e972b4550427d96cd436d392268e1d78
+ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
+
+# note that as we're pulling from a monorepo (with multiple project in it)
+# we are using partial-clone and sparse-checkout to get the jans-linux-setup code
+RUN git clone --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
+    && cd /tmp/jans \
+    && git sparse-checkout init --cone \
+    && git checkout ${JANS_SOURCE_VERSION} \
+    && git sparse-checkout add ${JANS_SETUP_DIR}/schema \
+    && git sparse-checkout add ${JANS_SETUP_DIR}/static/rdbm \
+    && git sparse-checkout add ${JANS_SETUP_DIR}/templates/jans-cache-refresh
+
+RUN mkdir -p /app/static/rdbm \
+    /app/schema \
+    /app/templates
+
+# sync static files from linux-setup
+RUN cd /tmp/jans \
+    && cp ${JANS_SETUP_DIR}/static/rdbm/sql_data_types.json /app/static/rdbm/ \
+    && cp ${JANS_SETUP_DIR}/static/rdbm/ldap_sql_data_type_mapping.json /app/static/rdbm/ \
+    && cp ${JANS_SETUP_DIR}/static/rdbm/opendj_attributes_syntax.json /app/static/rdbm/ \
+    && cp ${JANS_SETUP_DIR}/static/rdbm/sub_tables.json /app/static/rdbm/ \
+    && cp ${JANS_SETUP_DIR}/schema/jans_schema.json /app/schema/ \
+    && cp ${JANS_SETUP_DIR}/schema/custom_schema.json /app/schema/ \
+    && cp ${JANS_SETUP_DIR}/schema/opendj_types.json /app/schema/ \
+    && cp -R ${JANS_SETUP_DIR}/templates/jans-cache-refresh /app/templates/jans-cache-refresh
+
+# cleanup
+RUN rm -rf /tmp/jans
+
+# ======
+# Python
+# ======
+
+COPY requirements.txt /app/requirements.txt
+RUN python3 -m ensurepip \
+    && pip3 install --no-cache-dir -U pip wheel setuptools \
+    && pip3 install --no-cache-dir -r /app/requirements.txt \
+    && pip3 uninstall -y pip wheel
+
+# ==========
+# Prometheus
+# ==========
+
+COPY conf/prometheus-config.yaml /opt/prometheus/
+
+# =======
+# Cleanup
+# =======
+
+RUN apk del .build-deps \
+    && rm -rf /var/cache/apk/*
+
+# =======
+# License
+# =======
+
+COPY LICENSE /licenses/LICENSE
+
+# ==========
+# Config ENV
+# ==========
+
+ENV CN_CONFIG_ADAPTER=consul \
+    CN_CONFIG_CONSUL_HOST=localhost \
+    CN_CONFIG_CONSUL_PORT=8500 \
+    CN_CONFIG_CONSUL_CONSISTENCY=stale \
+    CN_CONFIG_CONSUL_SCHEME=http \
+    CN_CONFIG_CONSUL_VERIFY=false \
+    CN_CONFIG_CONSUL_CACERT_FILE=/etc/certs/consul_ca.crt \
+    CN_CONFIG_CONSUL_CERT_FILE=/etc/certs/consul_client.crt \
+    CN_CONFIG_CONSUL_KEY_FILE=/etc/certs/consul_client.key \
+    CN_CONFIG_CONSUL_TOKEN_FILE=/etc/certs/consul_token \
+    CN_CONFIG_CONSUL_NAMESPACE=jans \
+    CN_CONFIG_KUBERNETES_NAMESPACE=default \
+    CN_CONFIG_KUBERNETES_CONFIGMAP=jans \
+    CN_CONFIG_KUBERNETES_USE_KUBE_CONFIG=false
+
+# ==========
+# Secret ENV
+# ==========
+
+ENV CN_SECRET_ADAPTER=vault \
+    CN_SECRET_VAULT_SCHEME=http \
+    CN_SECRET_VAULT_HOST=localhost \
+    CN_SECRET_VAULT_PORT=8200 \
+    CN_SECRET_VAULT_VERIFY=false \
+    CN_SECRET_VAULT_ROLE_ID_FILE=/etc/certs/vault_role_id \
+    CN_SECRET_VAULT_SECRET_ID_FILE=/etc/certs/vault_secret_id \
+    CN_SECRET_VAULT_CERT_FILE=/etc/certs/vault_client.crt \
+    CN_SECRET_VAULT_KEY_FILE=/etc/certs/vault_client.key \
+    CN_SECRET_VAULT_CACERT_FILE=/etc/certs/vault_ca.crt \
+    CN_SECRET_VAULT_NAMESPACE=jans \
+    CN_SECRET_KUBERNETES_NAMESPACE=default \
+    CN_SECRET_KUBERNETES_SECRET=jans \
+    CN_SECRET_KUBERNETES_USE_KUBE_CONFIG=false
+
+# ===============
+# Persistence ENV
+# ===============
+
+ENV CN_PERSISTENCE_TYPE=ldap \
+    CN_HYBRID_MAPPING="{}" \
+    CN_LDAP_URL=localhost:1636 \
+    CN_LDAP_USE_SSL=true \
+    CN_COUCHBASE_URL=localhost \
+    CN_COUCHBASE_USER=admin \
+    CN_COUCHBASE_CERT_FILE=/etc/certs/couchbase.crt \
+    CN_COUCHBASE_PASSWORD_FILE=/etc/jans/conf/couchbase_password \
+    CN_COUCHBASE_CONN_TIMEOUT=10000 \
+    CN_COUCHBASE_CONN_MAX_WAIT=20000 \
+    CN_COUCHBASE_SCAN_CONSISTENCY=not_bounded \
+    CN_COUCHBASE_BUCKET_PREFIX=jans \
+    CN_COUCHBASE_TRUSTSTORE_ENABLE=true \
+    CN_COUCHBASE_KEEPALIVE_INTERVAL=30000 \
+    CN_COUCHBASE_KEEPALIVE_TIMEOUT=2500
+
+# ===========
+# Generic ENV
+# ===========
+
+ENV CN_MAX_RAM_PERCENTAGE=75.0 \
+    CN_WAIT_MAX_TIME=300 \
+    CN_WAIT_SLEEP_DURATION=10 \
+    CN_JAVA_OPTIONS="" \
+    GOOGLE_PROJECT_ID="" \
+    CN_GOOGLE_SECRET_MANAGER_PASSPHRASE=secret \
+    CN_GOOGLE_SECRET_VERSION_ID=latest \
+    CN_GOOGLE_SECRET_NAME_PREFIX=jans \
+    CN_PROMETHEUS_PORT="" \
+    CN_AWS_SECRETS_ENDPOINT_URL="" \
+    CN_AWS_SECRETS_PREFIX=jans \
+    CN_AWS_SECRETS_REPLICA_FILE=""
+
+# ==========
+# misc stuff
+# ==========
+
+LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/cache-refresh" \
+    org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
+    org.opencontainers.image.vendor="Janssen Project" \
+    org.opencontainers.image.version="1.0.15" \
+    org.opencontainers.image.title="Janssen Cache Refresh" \
+    org.opencontainers.image.description="Cache Refresh"
+
+RUN mkdir -p /etc/certs \
+    /etc/jans/conf \
+    ${JETTY_BASE}/jans-cache-refresh/logs \
+    ${JETTY_BASE}/jans-cache-refresh/custom/libs \
+    ${JETTY_BASE}/common/libs/spanner \
+    ${JETTY_BASE}/common/libs/couchbase \
+    /usr/share/java \
+    /var/jans/cr-snapshots
+
+COPY jetty/log4j2.xml /app/templates/
+COPY conf/*.tmpl /app/templates/
+
+# # workaround until upstream has the required templates
+# COPY templates /app/templates
+
+COPY scripts /app/scripts
+RUN chmod +x /app/scripts/entrypoint.sh
+
+RUN sed -i 's/jans_auth_/jans_cacherefresh_/g' /app/templates/jans-cache-refresh/configuration.ldif \
+    && sed -i 's/\/var\/cr-snapshots/\/var\/jans\/cr-snapshots/g' /app/templates/jans-cache-refresh/jans-cache-refresh-config.json
+
+# create non-root user
+RUN adduser -s /bin/sh -h /home/1000 -D -G root -u 1000 jetty
+
+COPY --chown=1000:0 jetty/jans-cache-refresh.xml ${JETTY_BASE}/jans-cache-refresh/webapps/
+
+# adjust ownership and permission
+RUN chmod 664 ${JETTY_BASE}/jans-cache-refresh/resources/log4j2.xml \
+    && chmod -R g=u ${JETTY_BASE}/jans-cache-refresh/logs \
+    && chmod -R g=u /etc/certs \
+    && chmod -R g=u /etc/jans \
+    && chmod 664 /usr/java/latest/jre/lib/security/cacerts \
+    && chmod 664 /opt/jetty/etc/jetty.xml \
+    && chmod 664 /opt/jetty/etc/webdefault.xml \
+    && chown -R 1000:0 ${JETTY_BASE}/common/libs \
+    && chown -R 1000:0 /usr/share/java \
+    && chown -R 1000:0 /opt/prometheus \
+    && chown -R 1000:0 /var/jans/cr-snapshots
+
+USER 1000
+
+RUN mkdir -p $HOME/.config/gcloud
+
+ENTRYPOINT ["tini", "-e", "143", "-g", "--"]
+CMD ["sh", "/app/scripts/entrypoint.sh"]
