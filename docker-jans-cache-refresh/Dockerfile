@@ -61,7 +61,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-cache-refresh/webapps \
 # jans-linux-setup sync
 # =====================
 
-ENV JANS_SOURCE_VERSION=28fed198e972b4550427d96cd436d392268e1d78
+ENV JANS_SOURCE_VERSION=17222c99beb7bc08bb012f96aa6bd454b546d117
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -219,14 +219,8 @@ RUN mkdir -p /etc/certs \
 COPY jetty/log4j2.xml /app/templates/
 COPY conf/*.tmpl /app/templates/
 
-# # workaround until upstream has the required templates
-# COPY templates /app/templates
-
 COPY scripts /app/scripts
 RUN chmod +x /app/scripts/entrypoint.sh
-
-RUN sed -i 's/jans_auth_/jans_cacherefresh_/g' /app/templates/jans-cache-refresh/configuration.ldif \
-    && sed -i 's/\/var\/cr-snapshots/\/var\/jans\/cr-snapshots/g' /app/templates/jans-cache-refresh/jans-cache-refresh-config.json
 
 # create non-root user
 RUN adduser -s /bin/sh -h /home/1000 -D -G root -u 1000 jetty

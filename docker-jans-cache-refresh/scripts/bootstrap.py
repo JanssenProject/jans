@@ -243,16 +243,16 @@ class PersistenceSetup:
             "ldap_hostname": self.manager.config.get("ldap_init_host"),
             "ldaps_port": self.manager.config.get("ldap_init_port"),
             "encoded_ox_ldap_pw": self.manager.secret.get("encoded_ox_ldap_pw"),
+            "snapshots_dir": "/var/jans/cr-snapshots",
         }
 
-        # pre-populate jans_cacherefresh_config_base64
+        # pre-populate cache_refresh_config_base64
         with open("/app/templates/jans-cache-refresh/jans-cache-refresh-config.json") as f:
-            ctx["jans_cacherefresh_config_base64"] = generate_base64_contents(f.read() % ctx)
+            ctx["cache_refresh_config_base64"] = generate_base64_contents(f.read() % ctx)
 
-        # pre-populate jans_cacherefresh_static_conf_base64
+        # pre-populate cache_refresh_static_conf_base64
         with open("/app/templates/jans-cache-refresh/jans-cache-refresh-static-config.json") as f:
-            ctx["jans_cacherefresh_static_conf_base64"] = generate_base64_contents(f.read())
-
+            ctx["cache_refresh_static_conf_base64"] = generate_base64_contents(f.read())
         return ctx
 
     @cached_property
