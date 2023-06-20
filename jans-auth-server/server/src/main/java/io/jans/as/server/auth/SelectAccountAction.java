@@ -123,6 +123,8 @@ public class SelectAccountAction {
                 log.trace("User: {}, sessionId: {}", uid, session.getId());
                 currentSessions.add(session);
                 uids.add(uid);
+            } else {
+                log.trace("Unable to find session for session_id: {}", session.getId());
             }
         }
         log.trace("Found {} sessions", currentSessions.size());

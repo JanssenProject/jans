@@ -340,6 +340,7 @@ public class CibaPingModeJwtAuthRequestTests extends BaseTest {
         showTitle("idTokenHintRS384");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
+        List<String> scopes = Collections.singletonList("openid");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
@@ -347,6 +348,7 @@ public class CibaPingModeJwtAuthRequestTests extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.RS384);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -358,7 +360,6 @@ public class CibaPingModeJwtAuthRequestTests extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        List<String> scopes = Collections.singletonList("openid");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
