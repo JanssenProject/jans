@@ -3,10 +3,8 @@ package io.jans.configapi.plugin.saml.rest;
 import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.plugin.saml.util.Constants;
-import io.jans.configapi.util.ApiAccessConstants;
-import io.jans.configapi.plugin.saml.model.config.SAMLTrustRelationship;
+import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.plugin.saml.service.SamlService;
-import io.jans.configapi.plugin.saml.model.config.KeycloakConfig;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -17,9 +15,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.*;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -28,13 +23,9 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 import java.util.*;
-import java.util.stream.*;
 
-import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
-import org.keycloak.admin.client.resource.ClientsResource;
-import org.keycloak.admin.client.resource.RealmResource;
 
 import org.slf4j.Logger;
 
@@ -53,7 +44,7 @@ public class SamlTrustRelationshipResource extends BaseResource {
             "SAML - Client" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.SAML_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = SAMLTrustRelationship.class)))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = ClientRepresentation.class)))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
@@ -69,7 +60,7 @@ public class SamlTrustRelationshipResource extends BaseResource {
     @Operation(summary = "Get all users", description = "Get all users", operationId = "get-saml-user", tags = {
             "SAML - User" }, security = @SecurityRequirement(name = "oauth2", scopes = { Constants.SAML_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = SAMLTrustRelationship.class)))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = ClientRepresentation.class)))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
@@ -78,7 +69,7 @@ public class SamlTrustRelationshipResource extends BaseResource {
     public Response getAllUsers() {
 
         logger.error("Searching users()");
-        //    to get only SAML use  "protocol": "saml",
+        // to get only SAML use "protocol": "saml",
         List<UserRepresentation> userList = samlService.getAllUsers();
 
         logger.error("All userList:{}", userList);
@@ -89,7 +80,7 @@ public class SamlTrustRelationshipResource extends BaseResource {
             "SAML - Client" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.SAML_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = SAMLTrustRelationship.class)))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = ClientRepresentation.class)))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
@@ -110,12 +101,12 @@ public class SamlTrustRelationshipResource extends BaseResource {
             "SAML - Client" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.SAML_WRITE_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "clientList", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = SAMLTrustRelationship.class)))),
+            @ApiResponse(responseCode = "201", description = "clientList", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = ClientRepresentation.class)))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
     @ProtectedApi(scopes = { Constants.SAML_WRITE_ACCESS })
-    public Response createClient(ClientRepresentation clientRepresentation) throws Exception {
+    public Response createClient(@Valid ClientRepresentation clientRepresentation) {
 
         logger.info("Create client clientRepresentation:{}", clientRepresentation);
 
@@ -130,16 +121,16 @@ public class SamlTrustRelationshipResource extends BaseResource {
             "SAML - Client" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.SAML_WRITE_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = SAMLTrustRelationship.class)))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = ClientRepresentation.class)))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PUT
     @ProtectedApi(scopes = { Constants.SAML_WRITE_ACCESS })
-    public Response updateClient(ClientRepresentation clientRepresentation) throws Exception {
+    public Response updateClient(@Valid ClientRepresentation clientRepresentation) {
 
         logger.info("Update client:{}", clientRepresentation);
 
-        //TO-DO validation of client
+        // TO-DO validation of client
         ClientRepresentation client = samlService.updateClient(clientRepresentation);
 
         logger.info("Post update client:{}", client);
@@ -151,12 +142,14 @@ public class SamlTrustRelationshipResource extends BaseResource {
             "SAML - Client" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.SAML_WRITE_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "No Content", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = SAMLTrustRelationship.class)))),
+            @ApiResponse(responseCode = "204", description = "No Content", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = ClientRepresentation.class)))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @DELETE
     @ProtectedApi(scopes = { Constants.SAML_WRITE_ACCESS })
-    public Response deleteClient(String id) throws Exception {
+    public Response deleteClient(
+            @Parameter(description = "Unique Id of client") @PathParam(ApiConstants.INUM) @NotNull String id)
+            {
 
         logger.info("Delete client identified by id:{}", id);
 
