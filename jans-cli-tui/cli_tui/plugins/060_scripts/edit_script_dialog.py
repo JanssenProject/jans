@@ -304,8 +304,7 @@ class EditScriptDialog(JansGDialog, DialogUtils):
             title=self.title,
             content= HSplit(
                 self.edit_dialog_content,
-                width=D(),
-                height=D()
+                width=D()
                 ),
             button_functions=[(self.cancel, _("Cancel")), (self.save, _("Save"))],
             height=self.myparent.dialog_height,
