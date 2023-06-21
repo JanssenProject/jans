@@ -28,7 +28,7 @@ firewall-cmd --reload
 ```
 -Download the GPG key zip file , unzip and import GPG key
 ```
-wget https://github.com/GluuFederation/flex/files/11814579/automation-jans-public-gpg.zip
+wget https://github.com/JanssenProject/jans/files/11814522/automation-jans-public-gpg.zip
 unzip automation-jans-public-gpg.zip
 rpm -import automation-jans-public-gpg.asc
 ```
