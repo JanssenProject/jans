@@ -964,12 +964,14 @@ class EditClientDialog(JansGDialog, DialogUtils):
                     matching_items.append(item)
             if matching_items:
                 self.add_scope_checkbox.values = matching_items
-
-                self.add_scope_frame.body = HSplit(
-                    children=[self.add_scope_checkbox])
+                self.add_scope_frame.body = HSplit(children=[self.add_scope_checkbox])
+                self.add_scope_checkbox._selected_index = 0
             else:
                 self.add_scope_frame.body = HSplit(children=[Label(text=_("No Items "), style=cli_style.label,
                                                                    width=len(_("No Items "))),], width=D())
+
+            
+
         ta = TextArea(
             height=D(),
             width=D(),
