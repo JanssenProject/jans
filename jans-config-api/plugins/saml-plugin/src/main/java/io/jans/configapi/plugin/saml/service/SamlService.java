@@ -107,7 +107,7 @@ public class SamlService {
     public List<ClientRepresentation> serachClients(String name, String realm) {
         logger.info("Searching client by name:{} in realm:{})", name, realm);
 
-        List<ClientRepresentation> clientList = getClientsResource(null).query(name);
+        List<ClientRepresentation> clientList = getClientsResource(null).findByClientId(name);
 
         logger.info("All clientList:{}", clientList);
         return clientList;
@@ -171,3 +171,4 @@ public class SamlService {
     }
 
 }
+
