@@ -14,7 +14,9 @@ public class Constants {
     public static final String TRUST_RELATIONSHIP = "/trust-relationship";
     public static final String NAME_PARAM_PATH = "/{name}";
     public static final String NAME = "name";
+    public static final String ID_PATH = "{id}";
     public static final String ID = "id";
+    
     
     //Scopes
     public static final String SAML_READ_ACCESS = "https://jans.io/oauth/config/saml.readonly";

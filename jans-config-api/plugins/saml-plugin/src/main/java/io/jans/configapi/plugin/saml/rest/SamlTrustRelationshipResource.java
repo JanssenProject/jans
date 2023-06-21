@@ -3,7 +3,6 @@ package io.jans.configapi.plugin.saml.rest;
 import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.plugin.saml.util.Constants;
-import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.plugin.saml.service.SamlService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -53,7 +52,7 @@ public class SamlTrustRelationshipResource extends BaseResource {
 
         List<ClientRepresentation> clientList = samlService.getAllClients();
 
-        logger.error("All clientList:{}", clientList);
+        logger.info("All clientList:{}", clientList);
         return Response.ok(clientList).build();
     }
 
@@ -68,11 +67,11 @@ public class SamlTrustRelationshipResource extends BaseResource {
     @Path("/user")
     public Response getAllUsers() {
 
-        logger.error("Searching users()");
+        logger.info("Searching users()");
         // to get only SAML use "protocol": "saml",
         List<UserRepresentation> userList = samlService.getAllUsers();
 
-        logger.error("All userList:{}", userList);
+        logger.info("All userList:{}", userList);
         return Response.ok(userList).build();
     }
 
@@ -146,10 +145,10 @@ public class SamlTrustRelationshipResource extends BaseResource {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @DELETE
+    @Path(Constants.ID_PATH)
     @ProtectedApi(scopes = { Constants.SAML_WRITE_ACCESS })
     public Response deleteClient(
-            @Parameter(description = "Unique Id of client") @PathParam(ApiConstants.INUM) @NotNull String id)
-            {
+            @Parameter(description = "Unique Id of client") @PathParam(Constants.ID) @NotNull String id) {
 
         logger.info("Delete client identified by id:{}", id);
 

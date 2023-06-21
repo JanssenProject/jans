@@ -47,15 +47,21 @@ public class KeycloakConfig {
         
     @Inject
     SamlConfigSource samlConfigSource;
-    
-    public KeycloakConfig() {
-        
-    }
+
 
     public Keycloak getInstance() {
         log.error("Keycloak instance entry - samlConfigSource:{}", samlConfigSource);
         log.error("samlConfigSource.getProperties():{}, samlConfigSource.getPropertyNames():{} ", samlConfigSource.getProperties(), samlConfigSource.getPropertyNames());
-        return getInstance(serverUrl, realm, username, password, clientId, clientSecret);
+        log.error("Keycloak instance entry - samlConfigSource:{}", samlConfigSource);
+        log.error("Keycloak instance entry - samlConfigSource.getValue(\"saml.server.url\"):{}", samlConfigSource.getValue("saml.server.url"));
+        log.error("Keycloak instance entry - samlConfigSource.getValue(\"saml.realm.name\"):{}", samlConfigSource.getValue("saml.realm.name"));
+        log.error("Keycloak instance entry - samlConfigSource.getValue(\"saml.client.id\"):{}", samlConfigSource.getValue("saml.client.id"));
+        log.error("Keycloak instance entry - samlConfigSource.getValue(\"saml.grant.type\"):{}", samlConfigSource.getValue("saml.grant.type"));
+        log.error("Keycloak instance entry - samlConfigSource.getValue(\"saml.admin.username\"):{}", samlConfigSource.getValue("saml.admin.username"));
+        log.error("Keycloak instance entry - samlConfigSource.getValue(\"saml.admin.password\"):{}", samlConfigSource.getValue("saml.admin.password"));
+        log.error("Keycloak instance entry - samlConfigSource.getValue(\"saml.client.id\"):{}", samlConfigSource.getValue("saml.client.id"));
+        log.error("Keycloak instance entry - samlConfigSource.getValue(\"saml.client.secret\"):{}", samlConfigSource.getValue("saml.client.secret"));
+        return getInstance(samlConfigSource.getValue("saml.server.url"), realm, username, password, clientId, clientSecret);
       }
     
     public Keycloak getInstance(String serverUrl, String realm, String username, String password, String clientId, String clientSecret) {
