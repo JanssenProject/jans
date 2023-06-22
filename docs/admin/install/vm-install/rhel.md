@@ -127,7 +127,6 @@ Stopping jans-auth
 Removing /etc/default/jans-client-api
 Stopping jans-client-api
 Stopping OpenDj Server
-sh: 1: /opt/opendj/bin/stop-ds: not found
 Executing rm -r -f /etc/certs
 Executing rm -r -f /etc/jans
 Executing rm -r -f /opt/jans
