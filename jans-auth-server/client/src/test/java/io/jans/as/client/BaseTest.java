@@ -16,6 +16,7 @@ import io.jans.as.client.par.ParClient;
 import io.jans.as.client.par.ParRequest;
 import io.jans.as.client.ssa.create.SsaCreateClient;
 import io.jans.as.client.ssa.create.SsaCreateResponse;
+import io.jans.as.client.ws.rs.Tester;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseMode;
 import io.jans.as.model.common.ResponseType;
@@ -28,10 +29,8 @@ import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.error.IErrorType;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.as.model.util.DateUtil;
-import io.jans.as.model.util.Util;
 import io.jans.util.StringHelper;
 import io.jans.util.security.SecurityProviderUtility;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpClient;
@@ -51,6 +50,7 @@ import org.apache.http.ssl.SSLContexts;
 import org.jboss.resteasy.client.jaxrs.ClientHttpEngine;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
 import org.jetbrains.annotations.Nullable;
+import org.json.JSONObject;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.*;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
@@ -67,8 +67,8 @@ import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -117,8 +117,139 @@ public abstract class BaseTest {
     protected String loginFormUsername;
     protected String loginFormPassword;
     protected String loginFormLoginButton;
-    private String authorizeFormAllowButton;
     protected String authorizeFormDoNotAllowButton;
+    private String authorizeFormAllowButton;
+
+    public static boolean isJsonError(String str) {
+        try {
+            final JSONObject jsonObject = new JSONObject(str);
+            return jsonObject.has("error");
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public static String waitForPageSwitch(WebDriver driver, String previousUrl) {
+        return AbstractPage.waitForPageSwitch(driver, previousUrl);
+    }
+
+    public static void showClient(BaseClient client) {
+        ClientUtils.showClient(client);
+    }
+
+    public static void showClient(BaseClient client, CookieStore cookieStore) {
+        ClientUtils.showClient(client, cookieStore);
+    }
+
+    public static void showClientUserAgent(BaseClient client) {
+        ClientUtils.showClientUserAgent(client);
+    }
+
+    public static void assertErrorResponse(BaseResponseWithErrors p_response, IErrorType p_errorType) {
+        assertEquals(p_response.getStatus(), 400, "Unexpected response code. Entity: " + p_response.getEntity());
+        assertNotNull(p_response.getEntity(), "The entity is null");
+        assertEquals(p_response.getErrorType(), p_errorType);
+        assertTrue(StringUtils.isNotBlank(p_response.getErrorDescription()));
+    }
+
+    public static CloseableHttpClient createHttpClient() {
+        return createHttpClient(HostnameVerifierType.DEFAULT);
+    }
+
+    public static CloseableHttpClient createHttpClient(HostnameVerifierType p_verifierType) {
+        if (p_verifierType == HostnameVerifierType.ALLOW_ALL) {
+            return HttpClients.custom()
+                    .setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
+                    .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE).build();
+        }
+
+        return HttpClients.custom()
+                .setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
+                .build();
+    }
+
+    public static ClientHttpEngine clientEngine() throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException, UnrecoverableKeyException {
+        return clientEngine(false);
+    }
+
+    public static ClientHttpEngine clientEngine(boolean trustAll) throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException, UnrecoverableKeyException {
+        if (trustAll) {
+            return new ApacheHttpClient43Engine(createAcceptSelfSignedCertificateClient());
+        }
+        return new ApacheHttpClient43Engine(createClient());
+    }
+
+    public static HttpClient createClient() {
+        return createClient(null);
+    }
+
+    public static HttpClient createAcceptSelfSignedCertificateClient()
+            throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
+        SSLConnectionSocketFactory connectionFactory = createAcceptSelfSignedSocketFactory();
+
+        return createClient(connectionFactory);
+    }
+
+    private static HttpClient createClient(SSLConnectionSocketFactory connectionFactory) {
+        PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
+        HttpClientBuilder httClientBuilder = HttpClients.custom();
+        if (connectionFactory != null) {
+            httClientBuilder = httClientBuilder.setSSLSocketFactory(connectionFactory);
+        }
+
+        HttpClient httpClient = httClientBuilder
+                .setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
+                .setConnectionManager(cm).build();
+        cm.setMaxTotal(200); // Increase max total connection to 200
+        cm.setDefaultMaxPerRoute(20); // Increase default max connection per route to 20
+
+        return httpClient;
+    }
+
+    private static SSLConnectionSocketFactory createAcceptSelfSignedSocketFactory()
+            throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException {
+        // Use the TrustSelfSignedStrategy to allow Self Signed Certificates
+        SSLContext sslContext = SSLContextBuilder.create().loadTrustMaterial(new TrustSelfSignedStrategy()).build();
+
+        // We can optionally disable hostname verification.
+        // If you don't want to further weaken the security, you don't have to include this.
+        HostnameVerifier allowAllHosts = new NoopHostnameVerifier();
+
+        // Create an SSL Socket Factory to use the SSLContext with the trust self signed certificate strategy
+        // and allow all hosts verifier.
+        SSLConnectionSocketFactory connectionFactory = new SSLConnectionSocketFactory(sslContext, allowAllHosts);
+
+        return connectionFactory;
+    }
+
+    public static CloseableHttpClient createHttpClientTrustAll()
+            throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException, UnrecoverableKeyException {
+        SSLContext sslContext = SSLContexts.custom().loadTrustMaterial(new TrustStrategy() {
+            @Override
+            public boolean isTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+                return true;
+            }
+        }).build();
+        SSLConnectionSocketFactory sslContextFactory = new SSLConnectionSocketFactory(sslContext);
+        CloseableHttpClient httpclient = HttpClients.custom()
+                .setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
+                .setSSLSocketFactory(sslContextFactory)
+                .setRedirectStrategy(new LaxRedirectStrategy()).build();
+
+        return httpclient;
+    }
+
+    public static String randomUUID() {
+        return UUID.randomUUID().toString();
+    }
+
+    public static void output(String str) {
+        System.out.println(str); // switch to logger?
+    }
+
+    public static AbstractCryptoProvider createCryptoProviderWithAllowedNone() throws Exception {
+        return new AuthCryptoProvider(null, null, null, false);
+    }
 
     @BeforeSuite
     public void initTestSuite(ITestContext context) throws IOException {
@@ -397,6 +528,12 @@ public abstract class BaseTest {
         if (userSecret != null) {
             final String previousUrl = currentDriver.getCurrentUrl();
 
+            final String pageSource = currentDriver.getPageSource();
+            if (isJsonError(pageSource)) {
+                fail("JSON Error is returned: " + pageSource);
+                return null;
+            }
+
             WebElement loginButton = waitForRequredElementLoad(currentDriver, loginFormLoginButton);
 
             if (userId != null) {
@@ -462,6 +599,12 @@ public abstract class BaseTest {
 
         // Check for authorization form if client has no persistent authorization
         if (!authorizationResponseStr.contains("#")) {
+            final String pageSource = currentDriver.getPageSource();
+            if (isJsonError(pageSource)) {
+                fail("JSON Error is returned: " + pageSource);
+                return null;
+            }
+
             WebElement allowButton = waitForRequredElementLoad(currentDriver, authorizeFormAllowButton);
 
             // We have to use JavaScript because target is link with onclick
@@ -498,10 +641,6 @@ public abstract class BaseTest {
 
     public String waitForPageSwitch(String previousUrl) {
         return waitForPageSwitch(driver, previousUrl);
-    }
-
-    public static String waitForPageSwitch(WebDriver driver, String previousUrl) {
-        return AbstractPage.waitForPageSwitch(driver, previousUrl);
     }
 
     protected AuthorizationResponse buildAuthorizationResponse(AuthorizationRequest authorizationRequest,
@@ -890,118 +1029,8 @@ public abstract class BaseTest {
         System.out.println("#######################################################");
     }
 
-    public static void showClient(BaseClient client) {
-        ClientUtils.showClient(client);
-    }
-
-    public static void showClient(BaseClient client, CookieStore cookieStore) {
-        ClientUtils.showClient(client, cookieStore);
-    }
-
-    public static void showClientUserAgent(BaseClient client) {
-        ClientUtils.showClientUserAgent(client);
-    }
-
-    public static void assertErrorResponse(BaseResponseWithErrors p_response, IErrorType p_errorType) {
-        assertEquals(p_response.getStatus(), 400, "Unexpected response code. Entity: " + p_response.getEntity());
-        assertNotNull(p_response.getEntity(), "The entity is null");
-        assertEquals(p_response.getErrorType(), p_errorType);
-        assertTrue(StringUtils.isNotBlank(p_response.getErrorDescription()));
-    }
-
-    public static CloseableHttpClient createHttpClient() {
-        return createHttpClient(HostnameVerifierType.DEFAULT);
-    }
-
-    public static CloseableHttpClient createHttpClient(HostnameVerifierType p_verifierType) {
-        if (p_verifierType == HostnameVerifierType.ALLOW_ALL) {
-            return HttpClients.custom()
-                    .setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
-                    .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE).build();
-        }
-
-        return HttpClients.custom()
-                .setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
-                .build();
-    }
-
-    public static ClientHttpEngine clientEngine() throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException, UnrecoverableKeyException {
-        return clientEngine(false);
-    }
-
-    public static ClientHttpEngine clientEngine(boolean trustAll) throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException, UnrecoverableKeyException {
-        if (trustAll) {
-            return new ApacheHttpClient43Engine(createAcceptSelfSignedCertificateClient());
-        }
-        return new ApacheHttpClient43Engine(createClient());
-    }
-
-    public static HttpClient createClient() {
-        return createClient(null);
-    }
-
-    public static HttpClient createAcceptSelfSignedCertificateClient()
-            throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException {
-        SSLConnectionSocketFactory connectionFactory = createAcceptSelfSignedSocketFactory();
-
-        return createClient(connectionFactory);
-    }
-
-    private static HttpClient createClient(SSLConnectionSocketFactory connectionFactory) {
-        PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
-        HttpClientBuilder httClientBuilder = HttpClients.custom();
-        if (connectionFactory != null) {
-            httClientBuilder = httClientBuilder.setSSLSocketFactory(connectionFactory);
-        }
-
-        HttpClient httpClient = httClientBuilder
-                .setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
-                .setConnectionManager(cm).build();
-        cm.setMaxTotal(200); // Increase max total connection to 200
-        cm.setDefaultMaxPerRoute(20); // Increase default max connection per route to 20
-
-        return httpClient;
-    }
-
-    private static SSLConnectionSocketFactory createAcceptSelfSignedSocketFactory()
-            throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException {
-        // Use the TrustSelfSignedStrategy to allow Self Signed Certificates
-        SSLContext sslContext = SSLContextBuilder.create().loadTrustMaterial(new TrustSelfSignedStrategy()).build();
-
-        // We can optionally disable hostname verification.
-        // If you don't want to further weaken the security, you don't have to include this.
-        HostnameVerifier allowAllHosts = new NoopHostnameVerifier();
-
-        // Create an SSL Socket Factory to use the SSLContext with the trust self signed certificate strategy
-        // and allow all hosts verifier.
-        SSLConnectionSocketFactory connectionFactory = new SSLConnectionSocketFactory(sslContext, allowAllHosts);
-
-        return connectionFactory;
-    }
-
-    public static CloseableHttpClient createHttpClientTrustAll()
-            throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException, UnrecoverableKeyException {
-        SSLContext sslContext = SSLContexts.custom().loadTrustMaterial(new TrustStrategy() {
-            @Override
-            public boolean isTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-                return true;
-            }
-        }).build();
-        SSLConnectionSocketFactory sslContextFactory = new SSLConnectionSocketFactory(sslContext);
-        CloseableHttpClient httpclient = HttpClients.custom()
-                .setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
-                .setSSLSocketFactory(sslContextFactory)
-                .setRedirectStrategy(new LaxRedirectStrategy()).build();
-
-        return httpclient;
-    }
-
     protected void navigateToAuhorizationUrl(WebDriver driver, String authorizationRequestUrl) {
-        try {
-            driver.navigate().to(URLDecoder.decode(authorizationRequestUrl, Util.UTF8_STRING_ENCODING));
-        } catch (UnsupportedEncodingException ex) {
-            fail("Failed to decode the authorization URL.");
-        }
+        driver.navigate().to(URLDecoder.decode(authorizationRequestUrl, StandardCharsets.UTF_8));
     }
 
     private ClientHttpEngine getClientExecutor() throws UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
@@ -1092,18 +1121,6 @@ public abstract class BaseTest {
         return config;
     }
 
-    public static String randomUUID() {
-        return UUID.randomUUID().toString();
-    }
-
-    public static void output(String str) {
-        System.out.println(str); // switch to logger?
-    }
-
-    public static AbstractCryptoProvider createCryptoProviderWithAllowedNone() throws Exception {
-        return new AuthCryptoProvider(null, null, null, false);
-    }
-
     public RegisterResponse registerClient(final String redirectUris, List<ResponseType> responseTypes, List<String> scopes, String sectorIdentifierUri) {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 io.jans.as.model.util.StringUtils.spaceSeparatedToList(redirectUris));
@@ -1155,6 +1172,7 @@ public abstract class BaseTest {
         registerRequest.setUserInfoSignedResponseAlg(signatureAlgorithm);
         registerRequest.setUserInfoEncryptedResponseAlg(keyEncryptionAlgorithm);
         registerRequest.setUserInfoEncryptedResponseEnc(blockEncryptionAlgorithm);
+        registerRequest.setScope(Tester.standardScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);

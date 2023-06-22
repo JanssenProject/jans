@@ -59,7 +59,7 @@ Except for `code` and `web` directories, all elements in the file structure abov
 
 The `configs` section is a JSON object containing exemplifying [configuration properties](./language-reference.md#header-basics) for flows that may need them. Note `.gama` files **must not** contain **real** configuration properties because these files can be freely distributed; in practice, configurations hold sensitive data that should not be exposed. The keys of object `configs`, if any, are qualified flow names already part of the project.  
 
-The `noDirectLaunch` section is an array holding zero or more qualified flow names. Use this list to prevent certain flows to be launched directly from a web browser. This is a security measure to avoid users trigger flows that may inadvertently grant access due to poor design.
+The `noDirectLaunch` section is an array holding zero or more qualified flow names. Use this list to prevent certain flows to be launched directly from a web browser. This is a security measure to avoid end-users triggering flows at will.
 
 Other fields can be added in `project.json`.
 

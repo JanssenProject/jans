@@ -132,6 +132,8 @@ public class SessionIdService {
 
     public Set<SessionId> getCurrentSessions() {
         final Set<String> ids = cookieService.getCurrentSessions();
+
+        log.trace("current_sessions: {}", ids);
         final Set<SessionId> sessions = Sets.newHashSet();
         for (String sessionId : ids) {
             if (StringUtils.isBlank(sessionId)) {

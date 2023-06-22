@@ -633,6 +633,9 @@ public class AppConfiguration implements Configuration {
     private Boolean returnDeviceSecretFromAuthzEndpoint = false;
 
     // DCR
+    @DocProperty(description = "Boolean value specifying whether to allow to set client's expiration time in seconds during dynamic registration.", defaultValue = "false")
+    private Boolean dcrForbidExpirationTimeInRequest = false;
+
     @DocProperty(description = "Boolean value enables DCR signature validation. Default is false", defaultValue = "false")
     private Boolean dcrSignatureValidationEnabled = false;
 
@@ -657,8 +660,8 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Boolean value indicating if DCR authorization allowed with MTLS", defaultValue = "false")
     private Boolean dcrAuthorizationWithMTLS = false;
 
-    @DocProperty(description = "List of DCR issuers")
-    private List<String> dcrIssuers = new ArrayList<>();
+    @DocProperty(description = "List of trusted SSA issuers. If MTLS private key is used to sign DCR JWT, certificate issuer is checked as well.")
+    private List<String> trustedSsaIssuers = new ArrayList<>();
 
     @DocProperty(description = "Cache in local memory cache attributes, scopes, clients and organization entry with expiration 60 seconds", defaultValue = "false")
     private Boolean useLocalCache = false;
@@ -1294,13 +1297,13 @@ public class AppConfiguration implements Configuration {
         this.dcrAuthorizationWithMTLS = dcrAuthorizationWithMTLS;
     }
 
-    public List<String> getDcrIssuers() {
-        if (dcrIssuers == null) dcrIssuers = new ArrayList<>();
-        return dcrIssuers;
+    public List<String> getTrustedSsaIssuers() {
+        if (trustedSsaIssuers == null) trustedSsaIssuers = new ArrayList<>();
+        return trustedSsaIssuers;
     }
 
-    public void setDcrIssuers(List<String> dcrIssuers) {
-        this.dcrIssuers = dcrIssuers;
+    public void setTrustedSsaIssuers(List<String> trustedSsaIssuers) {
+        this.trustedSsaIssuers = trustedSsaIssuers;
     }
 
     public Boolean getForceIdTokenHintPrecense() {
@@ -2181,6 +2184,17 @@ public class AppConfiguration implements Configuration {
 
     public void setJansId(String jansId) {
         this.jansId = jansId;
+    }
+
+    public Boolean getDcrForbidExpirationTimeInRequest() {
+        if (dcrForbidExpirationTimeInRequest == null) {
+            dcrForbidExpirationTimeInRequest = false;
+        }
+        return dcrForbidExpirationTimeInRequest;
+    }
+
+    public void setDcrForbidExpirationTimeInRequest(Boolean dcrForbidExpirationTimeInRequest) {
+        this.dcrForbidExpirationTimeInRequest = dcrForbidExpirationTimeInRequest;
     }
 
     public int getDynamicRegistrationExpirationTime() {

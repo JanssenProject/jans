@@ -238,6 +238,7 @@ class CollectProperties(SetupUtils, BaseInstaller):
         Config.installFido2 = os.path.exists(os.path.join(Config.jetty_base, 'jans-fido2/start.ini'))
         Config.installEleven = os.path.exists(os.path.join(Config.jetty_base, 'jans-eleven/start.ini'))
         Config.install_config_api = os.path.exists(os.path.join(Config.jansOptFolder, 'jans-config-api'))
+        Config.install_cache_refresh = os.path.exists(os.path.join(Config.jansOptFolder, 'jans-cache-refresh'))
 
     def save(self):
         if os.path.exists(Config.setup_properties_fn):

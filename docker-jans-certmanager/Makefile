@@ -1,4 +1,4 @@
-CN_VERSION?=1.0.14-SNAPSHOT
+CN_VERSION?=1.0.15-SNAPSHOT
 IMAGE_NAME=ghcr.io/janssenproject/jans/certmanager
 DEV_VERSION?=$(shell echo ${CN_VERSION} | cut -d '-' -f 1)_dev
 

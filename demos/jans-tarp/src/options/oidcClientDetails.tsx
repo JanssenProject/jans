@@ -5,8 +5,9 @@ import qs from 'qs';
 import './options.css';
 import { WindmillSpinner } from 'react-spinner-overlay';
 import Select from 'react-select';
-import {IOption} from './IOption';
-import {ILooseObject} from './ILooseObject';
+import { IOption } from './IOption';
+import { ILooseObject } from './ILooseObject';
+import moment from 'moment';
 
 const components = {
     DropdownIndicator: null,
@@ -19,6 +20,7 @@ const createOption = (label: string) => ({
 
 const OIDCClientDetails = (data) => {
     const [additionalParam, setAdditionalParam] = useState("");
+    const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
     const [acrValueOption, setAcrValueOption] = useState<IOption | null>();
     const [acrValueOptions, setAcrValueOptions] = useState<readonly IOption[]>([]);
@@ -32,11 +34,25 @@ const OIDCClientDetails = (data) => {
                 });
             });
 
-            const supportedAcrValuesString = JSON.parse(opConfiguration).opConfiguration.acr_values_supported;
+            const supportedAcrValuesString = JSON.parse(opConfiguration)?.opConfiguration?.acr_values_supported;
             setAcrValueOptions(supportedAcrValuesString.map((ele) => createOption(ele)));
+
+            const oidcClient: string = await new Promise((resolve, reject) => {
+                chrome.storage.local.get(["oidcClient"]).then(async (result) => {
+                    resolve(JSON.stringify(result));
+                });
+            });
+            const expireAt = JSON.parse(oidcClient)?.oidcClient?.expire_at;
+
+            const lifetime = Math.floor((expireAt - moment().toDate().getTime()) / 1000);
+            if (lifetime <= 0) {
+                setError('This client is expired. Please reset and register a new client.')
+            } else {
+                setError('The client will expire in ' + secondsToDhms(lifetime) )
+            }
+
         })();
     }, [])
-
 
     function customLaunchWebAuthFlow(options, callback) {
         var requestId = Math.random().toString(36).substring(2);
@@ -85,7 +101,7 @@ const OIDCClientDetails = (data) => {
             if (!!result.oidcClient) {
 
                 let options: ILooseObject = {
-                    scope: result?.oidcClient?.scope.join(['+']),
+                    scope: result?.oidcClient?.scope,
                     response_type: result?.oidcClient?.response_type[0],
                     redirect_uri: redirectUrl,
                     client_id: result?.oidcClient?.client_id,
@@ -139,14 +155,14 @@ const OIDCClientDetails = (data) => {
                             resolve(JSON.stringify(result));
                         });
                     });
-
+                    
                     const tokenReqData = qs.stringify({
                         redirect_uri: redirectUrl,
                         grant_type: 'authorization_code',
                         code_verifier: secret,
                         client_id: result.oidcClient.client_id,
                         code,
-                        scope: result.oidcClient.scope.join(['+'])
+                        scope: result.oidcClient.scope
                     })
 
                     const tokenReqOptions = {
@@ -285,11 +301,26 @@ const OIDCClientDetails = (data) => {
         return (value == null || value.length === 0);
     }
 
+    function secondsToDhms(seconds) {
+        seconds = Number(seconds)
+        var d = Math.floor(seconds / (3600 * 24))
+        var h = Math.floor((seconds % (3600 * 24)) / 3600)
+        var m = Math.floor((seconds % 3600) / 60)
+        var s = Math.floor(seconds % 60)
+        // console.log(d, h, m, s)
+        var dDisplay = d > 0 ? d + (d == 1 ? " day, " : " days, ") : ""
+        var hDisplay = h > 0 ? h + (h == 1 ? " hour, " : " hours, ") : ""
+        var mDisplay = m > 0 ? m + (m == 1 ? " minute, " : " minutes, ") : ""
+        var sDisplay = s > 0 ? s + (s == 1 ? " second" : " seconds") : ""
+        return dDisplay + hDisplay + mDisplay + sDisplay
+    }
+
     return (
 
         <div className="box">
             <>
                 <legend><span className="number">O</span> Registered Client</legend>
+                <legend><span className="error">{error}</span></legend>
                 <WindmillSpinner loading={loading} color="#00ced1" />
                 <label><b>OP Host:</b></label>
                 <input type="text" id="opHost" name="opHost" value={data.data.op_host} disabled />
@@ -302,12 +333,12 @@ const OIDCClientDetails = (data) => {
 
                 <label><b>Additional Params:</b></label>
                 <input type="text" id="additionalParam" name="additionalParam" value={additionalParam} onChange={updateInputValue}
-                    placeholder='e.g. {"paramOne": "valueOne", "paramTwo": "valueTwo"}' autoComplete="off" />
+                    placeholder='e.g. {"paramOne": "valueOne", "paramTwo": "valueTwo"}' autoComplete="off" className="inputText inputStyle" />
 
                 <label><b>Acr Value:</b></label>
                 <Select
                     inputId="acrValues"
-                    className="basic-single typeahead"
+                    className="basic-single inputText"
                     classNamePrefix="select"
                     isClearable={true}
                     isSearchable={true}

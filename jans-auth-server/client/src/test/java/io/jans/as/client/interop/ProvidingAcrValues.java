@@ -6,13 +6,7 @@
 
 package io.jans.as.client.interop;
 
-import io.jans.as.client.AuthorizationRequest;
-import io.jans.as.client.AuthorizationResponse;
-import io.jans.as.client.BaseTest;
-import io.jans.as.client.RegisterClient;
-import io.jans.as.client.RegisterRequest;
-import io.jans.as.client.RegisterResponse;
-
+import io.jans.as.client.*;
 import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseType;
@@ -25,9 +19,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-
-
-import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
@@ -45,6 +36,7 @@ public class ProvidingAcrValues extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE, ResponseType.ID_TOKEN);
         List<GrantType> grantTypes = Arrays.asList(GrantType.AUTHORIZATION_CODE, GrantType.IMPLICIT);
         List<String> contacts = Arrays.asList("javier@gluu.org", "javier.rojas.blum@gmail.com");
+        List<String> scopes = Arrays.asList("openid");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
@@ -53,6 +45,7 @@ public class ProvidingAcrValues extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setGrantTypes(grantTypes);
         registerRequest.setContacts(contacts);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -68,7 +61,6 @@ public class ProvidingAcrValues extends BaseTest {
         String clientId = response.getClientId();
 
         // 3. Request authorization
-        List<String> scopes = Arrays.asList("openid");
         List<String> acrValues = Arrays.asList("basic");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();

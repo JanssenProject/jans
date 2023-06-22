@@ -203,6 +203,7 @@ class Config:
         self.installOxd = False
         self.installEleven = False
         self.install_jans_cli = True
+        self.install_cache_refresh = True
         self.loadTestData = False
         self.allowPreReleasedFeatures = False
 

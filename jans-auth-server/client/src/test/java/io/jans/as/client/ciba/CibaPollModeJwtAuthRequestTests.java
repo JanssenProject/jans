@@ -6,19 +6,10 @@
 
 package io.jans.as.client.ciba;
 
-import io.jans.as.client.AuthorizationRequest;
-import io.jans.as.client.AuthorizationResponse;
-import io.jans.as.client.AuthorizeClient;
-import io.jans.as.client.BackchannelAuthenticationClient;
-import io.jans.as.client.BackchannelAuthenticationRequest;
-import io.jans.as.client.BackchannelAuthenticationResponse;
-import io.jans.as.client.BaseTest;
-import io.jans.as.client.RegisterClient;
-import io.jans.as.client.RegisterRequest;
-import io.jans.as.client.RegisterResponse;
-
+import io.jans.as.client.*;
 import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.client.model.authorize.JwtAuthorizationRequest;
+import io.jans.as.client.ws.rs.Tester;
 import io.jans.as.model.ciba.BackchannelAuthenticationErrorResponseType;
 import io.jans.as.model.common.BackchannelTokenDeliveryMode;
 import io.jans.as.model.common.GrantType;
@@ -32,17 +23,7 @@ import org.apache.commons.lang.time.DateUtils;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
-
-import static io.jans.as.client.client.Asserter.*;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
+import java.util.*;
 
 /**
  * Responsible to validate many cases using JWT Requests for Ciba Poll flows.
@@ -225,6 +206,7 @@ public class CibaPollModeJwtAuthRequestTests extends BaseTest {
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", null);
         registerRequest.setJwksUri(clientJwksUri);
         registerRequest.setGrantTypes(Collections.singletonList(GrantType.CIBA));
+        registerRequest.setScope(Tester.standardScopes);
 
         registerRequest.setBackchannelTokenDeliveryMode(mode);
         registerRequest.setBackchannelAuthenticationRequestSigningAlg(algorithm);
@@ -331,6 +313,7 @@ public class CibaPollModeJwtAuthRequestTests extends BaseTest {
         showTitle("idTokenHintRS384");
 
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN);
+        List<String> scopes = Collections.singletonList("openid");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
@@ -338,6 +321,7 @@ public class CibaPollModeJwtAuthRequestTests extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
         registerRequest.setIdTokenSignedResponseAlg(SignatureAlgorithm.RS384);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -349,7 +333,6 @@ public class CibaPollModeJwtAuthRequestTests extends BaseTest {
         String clientId = registerResponse.getClientId();
 
         // 2. Request authorization
-        List<String> scopes = Collections.singletonList("openid");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 

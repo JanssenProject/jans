@@ -1,0 +1,8 @@
+dn: ou=jans-cache-refresh,ou=configuration,o=jans
+jansConfDyn::%(cache_refresh_config_base64)s
+jansConfStatic::%(cache_refresh_static_conf_base64)s
+jansRevision: 1
+objectClass: top
+objectClass: jansAppConf
+ou: jans-cache-refresh
+

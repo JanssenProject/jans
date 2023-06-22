@@ -43,6 +43,8 @@ public class Fido2Configuration {
     private List<String> requestedCredentialTypes = new ArrayList<String>();
     @DocProperty(description = "Authenticators metadata in json format")
     private List<RequestedParty> requestedParties = new ArrayList<RequestedParty>();
+    @DocProperty(description = "String value to provide source of URLs with external metadata")
+    private String metadataUrlsProvider;
 
     public String getAuthenticatorCertsFolder() {
         return authenticatorCertsFolder;
@@ -132,4 +134,11 @@ public class Fido2Configuration {
 		this.requestedParties = requestedParties;
 	}
 
+    public String getMetadataUrlsProvider() {
+        return metadataUrlsProvider;
+    }
+
+    public void setMetadataUrlsProvider(String metadataUrlsProvider) {
+        this.metadataUrlsProvider = metadataUrlsProvider;
+    }
 }

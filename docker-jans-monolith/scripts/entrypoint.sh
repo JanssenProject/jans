@@ -32,16 +32,15 @@ install_jans() {
   echo "city=${CN_CITY}" | tee -a setup.properties > /dev/null
   echo "state=${CN_STATE}" | tee -a setup.properties > /dev/null
   echo "countryCode=${CN_COUNTRY}" | tee -a setup.properties > /dev/null
-  echo "test_client_id=${TEST_CLIENT_ID}"| tee -a setup.properties > /dev/null
-  echo "test_client_pw=${TEST_CLIENT_SECRET}" | tee -a setup.properties > /dev/null
-  echo "test_client_trusted=""$([[ ${TEST_CLIENT_TRUSTED} == true ]] && echo True || echo True)" | tee -a setup.properties > /dev/null
   # shellcheck disable=SC2016
   echo "ldapPass=${CN_ADMIN_PASS}" | tee -a setup.properties > /dev/null
   echo "installLdap=""$([[ ${CN_INSTALL_LDAP} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
   echo "install_config_api=""$([[ ${CN_INSTALL_CONFIG_API} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
   echo "install_scim_server=""$([[ ${CN_INSTALL_SCIM} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
   echo "installFido2=""$([[ ${CN_INSTALL_FIDO2} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
-
+  echo "test_client_id=${TEST_CLIENT_ID}"| tee -a setup.properties > /dev/null
+  echo "test_client_pw=${TEST_CLIENT_SECRET}" | tee -a setup.properties > /dev/null
+  echo "test_client_trusted=""$([[ ${TEST_CLIENT_TRUSTED} == true ]] && echo True || echo True)" | tee -a setup.properties > /dev/null
   if [[ "${CN_INSTALL_MYSQL}" == "true" ]] || [[ "${CN_INSTALL_PGSQL}" == "true" ]]; then
     echo "Installing with RDBMS"
     echo "rdbm_install=2" | tee -a setup.properties > /dev/null
@@ -60,6 +59,7 @@ install_jans() {
     echo "rdbm_type=pgsql" | tee -a setup.properties > /dev/null
     echo "rdbm_port=5432" | tee -a setup.properties > /dev/null
   fi
+
 
   echo "*****   Running the setup script for ${CN_ORG_NAME}!!   *****"
   echo "*****   PLEASE NOTE THAT THIS MAY TAKE A WHILE TO FINISH. PLEASE BE PATIENT!!   *****"

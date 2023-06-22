@@ -6,15 +6,9 @@
 
 package io.jans.as.client.interop;
 
-import io.jans.as.client.AuthorizationRequest;
-import io.jans.as.client.AuthorizationResponse;
-import io.jans.as.client.AuthorizeClient;
-import io.jans.as.client.BaseTest;
-import io.jans.as.client.RegisterClient;
-import io.jans.as.client.RegisterRequest;
-import io.jans.as.client.RegisterResponse;
-
+import io.jans.as.client.*;
 import io.jans.as.client.client.AssertBuilder;
+import io.jans.as.client.ws.rs.Tester;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.crypto.AuthCryptoProvider;
 import io.jans.as.model.crypto.encryption.BlockEncryptionAlgorithm;
@@ -31,8 +25,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static io.jans.as.client.client.Asserter.*;
-import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.fail;
 
@@ -61,6 +53,7 @@ public class CanProvideEncryptedIdTokenResponse extends BaseTest {
             registerRequest.setIdTokenEncryptedResponseAlg(KeyEncryptionAlgorithm.A128KW);
             registerRequest.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.A128GCM);
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+            registerRequest.setScope(Tester.standardScopes);
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
             registerClient.setRequest(registerRequest);
@@ -92,8 +85,8 @@ public class CanProvideEncryptedIdTokenResponse extends BaseTest {
             // 3. Read Encrypted ID Token
             Jwe jwe = Jwe.parse(idToken, null, clientSecret.getBytes(StandardCharsets.UTF_8));
             AssertBuilder.jwe(jwe)
-                .notNullAccesTokenHash()
-                .check();
+                    .notNullAccesTokenHash()
+                    .check();
         } catch (Exception ex) {
             fail(ex.getMessage(), ex);
         }
@@ -116,6 +109,7 @@ public class CanProvideEncryptedIdTokenResponse extends BaseTest {
             registerRequest.setIdTokenEncryptedResponseAlg(KeyEncryptionAlgorithm.A256KW);
             registerRequest.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.A256GCM);
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+            registerRequest.setScope(Tester.standardScopes);
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
             registerClient.setRequest(registerRequest);
@@ -147,8 +141,8 @@ public class CanProvideEncryptedIdTokenResponse extends BaseTest {
             // 3. Read Encrypted ID Token
             Jwe jwe = Jwe.parse(idToken, null, clientSecret.getBytes(StandardCharsets.UTF_8));
             AssertBuilder.jwe(jwe)
-                .notNullAccesTokenHash()
-                .check();
+                    .notNullAccesTokenHash()
+                    .check();
         } catch (Exception ex) {
             fail(ex.getMessage(), ex);
         }
@@ -175,6 +169,7 @@ public class CanProvideEncryptedIdTokenResponse extends BaseTest {
             registerRequest.setIdTokenEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA1_5);
             registerRequest.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.A128CBC_PLUS_HS256);
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+            registerRequest.setScope(Tester.standardScopes);
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
             registerClient.setRequest(registerRequest);
@@ -234,6 +229,7 @@ public class CanProvideEncryptedIdTokenResponse extends BaseTest {
             registerRequest.setIdTokenEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA1_5);
             registerRequest.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.A256CBC_PLUS_HS512);
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+            registerRequest.setScope(Tester.standardScopes);
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
             registerClient.setRequest(registerRequest);
@@ -298,6 +294,7 @@ public class CanProvideEncryptedIdTokenResponse extends BaseTest {
             registerRequest.setIdTokenEncryptedResponseAlg(KeyEncryptionAlgorithm.RSA_OAEP);
             registerRequest.setIdTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.A256GCM);
             registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+            registerRequest.setScope(Tester.standardScopes);
 
             RegisterClient registerClient = new RegisterClient(registrationEndpoint);
             registerClient.setRequest(registerRequest);

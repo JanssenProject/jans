@@ -21,6 +21,15 @@ AS under the hood is using `log4j2` and `slf4j`. Thus logging levels in `logging
 |TRACE      | A fine-grained debug message, typically capturing the flow through the application.|  
 |ALL        | All events should be logged.                                                       |
 
+
+# Select Log Levels on TUI
+
+Go to Jans TUI  `/opt/jans/jans-cli/config-cli-tui.py`. Select `Auth Server` tab then select `Logging` tab after that select Auth Server `Log Level`
+finally `save logging` and exit from TUI.
+
+![logLevels](https://github.com/JanssenProject/jans/assets/43112579/26d014eb-43f2-4a02-b7b0-e24201b37298)
+
+
 ## Have questions in the meantime?
 
 You can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussion) or the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). Any questions you have will help determine what information our documentation should cover.

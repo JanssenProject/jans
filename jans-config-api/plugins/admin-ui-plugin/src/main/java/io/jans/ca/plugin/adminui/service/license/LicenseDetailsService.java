@@ -2,6 +2,7 @@ package io.jans.ca.plugin.adminui.service.license;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Strings;
 import io.jans.as.client.TokenRequest;
 import io.jans.as.model.common.GrantType;
@@ -151,7 +152,7 @@ public class LicenseDetailsService extends BaseService {
         //check is license is already active
         LicenseApiResponse licenseApiResponse = checkLicense();
         if (licenseApiResponse.isApiResult()) {
-            return createLicenseResponse(false, 500, "The license has been already activated.");
+            return createLicenseResponse(true, 200, "The license has been already activated.");
         }
         try {
             AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
@@ -206,6 +207,73 @@ public class LicenseDetailsService extends BaseService {
         } catch (Exception e) {
             log.error(ErrorResponse.ACTIVATE_LICENSE_ERROR.getDescription(), e);
             return createLicenseResponse(false, 500, ErrorResponse.ACTIVATE_LICENSE_ERROR.getDescription());
+        }
+    }
+
+    /**
+     * This function generates a trial license by sending a request to a specified URL and saving the license key in the
+     * configuration.
+     *
+     * @return The method is returning a LicenseApiResponse object.
+     */
+    public LicenseApiResponse generateTrialLicense() {
+
+        try {
+            AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
+            LicenseConfiguration licenseConfiguration = auiConfiguration.getLicenseConfiguration();
+
+            log.debug("Trying to generate trial License.");
+            String trialLicenseUrl = (new StringBuffer()).append(StringUtils.removeEnd(licenseConfiguration.getScanApiHostname(), "/"))
+                    .append("/scan/license/trial")
+                    .toString();
+
+            io.jans.as.client.TokenResponse tokenResponse = generateToken(licenseConfiguration.getScanAuthServerHostname(), licenseConfiguration.getScanApiClientId(), licenseConfiguration.getScanApiClientSecret());
+            if (tokenResponse == null) {
+                log.info(ErrorResponse.TOKEN_GENERATION_ERROR.getDescription());
+                return createLicenseResponse(false, 500, ErrorResponse.TOKEN_GENERATION_ERROR.getDescription());
+            }
+
+            Map<String, String> body = new HashMap<>();
+            body.put(HARDWARE_ID, licenseConfiguration.getHardwareId());
+
+            Invocation.Builder request = ClientFactory.instance().getClientBuilder(trialLicenseUrl);
+            request.header(AUTHORIZATION, BEARER + tokenResponse.getAccessToken());
+            request.header(CONTENT_TYPE, APPLICATION_JSON);
+            Response response = request.post(Entity.entity(body, MediaType.APPLICATION_JSON));
+
+            log.info("Generate trial license request status code: {}", response.getStatus());
+            if (response.getStatus() == 200) {
+                JsonObject entity = response.readEntity(JsonObject.class);
+                if (!Strings.isNullOrEmpty(entity.getString("license"))) {
+                    //save license spring credentials
+                    AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
+                    adminConf.getMainSettings().getLicenseConfig().setLicenseKey(entity.getString("license"));
+                    entryManager.merge(adminConf);
+                    //save in license configuration
+                    licenseConfiguration.setLicenseKey(entity.getString("license"));
+                    auiConfiguration.setLicenseConfiguration(licenseConfiguration);
+                    auiConfigurationService.setAuiConfiguration(auiConfiguration);
+
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    JsonNode jsonNode = objectMapper.createObjectNode();
+                    ((ObjectNode) jsonNode).put("license-key", entity.getString("license"));
+
+                    return createLicenseResponse(true, 200, "Trial license generated.", jsonNode);
+                }
+            }
+            //getting error
+            String jsonData = response.readEntity(String.class);
+            ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            JsonNode jsonNode = mapper.readValue(jsonData, com.fasterxml.jackson.databind.JsonNode.class);
+            if (!Strings.isNullOrEmpty(jsonNode.get(MESSAGE).textValue())) {
+                log.error("Generate trial license error response: {}", jsonData);
+                return createLicenseResponse(false, jsonNode.get("status").intValue(), jsonNode.get(MESSAGE).textValue());
+            }
+            log.error("Generate trial license error response: {}", jsonData);
+            return createLicenseResponse(false, response.getStatus(), "Error in generating trial license.");
+        } catch (Exception e) {
+            log.error(ErrorResponse.ERROR_IN_TRIAL_LICENSE.getDescription(), e);
+            return createLicenseResponse(false, 500, ErrorResponse.ERROR_IN_TRIAL_LICENSE.getDescription());
         }
     }
 
@@ -323,10 +391,15 @@ public class LicenseDetailsService extends BaseService {
     }
 
     private LicenseApiResponse createLicenseResponse(boolean result, int responseCode, String responseMessage) {
+        return createLicenseResponse(result, responseCode, responseMessage, null);
+    }
+
+    private LicenseApiResponse createLicenseResponse(boolean result, int responseCode, String responseMessage, JsonNode node) {
         LicenseApiResponse licenseResponse = new LicenseApiResponse();
         licenseResponse.setResponseCode(responseCode);
         licenseResponse.setResponseMessage(responseMessage);
         licenseResponse.setApiResult(result);
+        licenseResponse.setResponseObject(node);
         return licenseResponse;
     }
 }

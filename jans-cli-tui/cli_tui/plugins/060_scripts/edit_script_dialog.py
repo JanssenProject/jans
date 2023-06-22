@@ -172,6 +172,9 @@ class EditScriptDialog(JansGDialog, DialogUtils):
         for prop in self.data.get('configurationProperties', []):
             config_properties_data.append([prop['value1'], prop.get('value2', ''), prop.get('hide', False)])
 
+        config_prop_data_lenght = len(config_properties_data)
+        config_prop_max_height = config_prop_data_lenght if config_prop_data_lenght > 2 else 3
+
         self.config_properties_container = JansVerticalNav(
                 myparent=self.myparent,
                 headers=['Key', 'Value', 'Hide'],
@@ -188,7 +191,7 @@ class EditScriptDialog(JansGDialog, DialogUtils):
                 underline_headings=False,
                 max_width=52,
                 jans_name='configurationProperties',
-                max_height=False
+                max_height=config_prop_max_height
                 )
 
         module_properties_data = []
@@ -196,6 +199,9 @@ class EditScriptDialog(JansGDialog, DialogUtils):
             if prop['value1'] == 'location_type':
                 continue
             module_properties_data.append([prop['value1'], prop.get('value2', '')])
+
+        module_prop_data_lenght = len(module_properties_data)
+        module_prop_max_height = module_prop_data_lenght if module_prop_data_lenght > 2 else 3
 
         self.module_properties_container = JansVerticalNav(
                 myparent=self.myparent,
@@ -213,7 +219,7 @@ class EditScriptDialog(JansGDialog, DialogUtils):
                 underline_headings=False,
                 max_width=44,
                 jans_name='moduleProperties',
-                max_height=3
+                max_height=module_prop_max_height
                 )
 
         open_editor_button_title = _("Edit Script")
@@ -282,7 +288,7 @@ class EditScriptDialog(JansGDialog, DialogUtils):
                                 Button(text=add_property_title, width=len(add_property_title)+4, handler=partial(self.edit_property, jans_name='configurationProperties')),
                                 ]),
                             ],
-                            height=5, width=D(),
+                            height=config_prop_max_height+1, width=D(),
                             ),
 
                     VSplit([
@@ -294,7 +300,7 @@ class EditScriptDialog(JansGDialog, DialogUtils):
                                 Button(text=add_property_title, width=len(add_property_title)+4, handler=partial(self.edit_property, jans_name='moduleProperties')),
                                 ]),
                             ],
-                             height=5
+                             height=module_prop_max_height+1
                             ),
                     VSplit([open_editor_button, import_script_button, Window(width=D())], padding=2),
                     ]
@@ -304,8 +310,7 @@ class EditScriptDialog(JansGDialog, DialogUtils):
             title=self.title,
             content= HSplit(
                 self.edit_dialog_content,
-                width=D(),
-                height=D()
+                width=D()
                 ),
             button_functions=[(self.cancel, _("Cancel")), (self.save, _("Save"))],
             height=self.myparent.dialog_height,

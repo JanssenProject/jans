@@ -4,8 +4,11 @@ import './options.css'
 import { v4 as uuidv4 } from 'uuid';
 import { WindmillSpinner } from 'react-spinner-overlay'
 import CreatableSelect from 'react-select/creatable';
-import {IOption} from './IOption';
-
+import { IOption } from './IOption';
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import moment from 'moment';
+import { ILooseObject } from './ILooseObject';
 const components = {
     DropdownIndicator: null,
 };
@@ -17,22 +20,33 @@ const createOption = (label: string) => ({
 
 const RegisterForm = (data) => {
     const [error, setError] = useState("");
-    const [loading, setLoading] = useState(false);
+    const [pageLoading, setPageLoading] = useState(false);
     const [inputValueIssuer, setInputValueIssuer] = useState('');
     const [inputValueScope, setInputValueScope] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
     const [issuerOption, setIssuerOption] = useState<readonly IOption[]>([]);
     const [scopeOption, setScopeOption] = useState<readonly IOption[]>([createOption('openid')]);
-
-    const handleKeyDown: KeyboardEventHandler = (event) => {
+    const [clientExpiryDate, setClientExpiryDate] = useState(moment().add(1, 'days').toDate());
+    
+    const handleKeyDown: KeyboardEventHandler = async (event) => {
         const inputId = (event.target as HTMLInputElement).id;
         if (inputId === 'issuer') {
             if (!inputValueIssuer) return;
             switch (event.key) {
                 case 'Enter':
                 case 'Tab':
-                    setIssuerOption([createOption(inputValueIssuer)]);
-                    setInputValueIssuer('');
-                    event.preventDefault();
+                    setError('');
+                    if (await validateIssuerOnEnter(inputValueIssuer)) {
+                        setIssuerOption([createOption(inputValueIssuer)]);
+                        setIsLoading(false);
+                        setPageLoading(false);
+                        setInputValueIssuer('');
+                        event.preventDefault();
+                    } else {
+                        setIsLoading(false);
+                        setPageLoading(false);
+                        setError('Invalid input. Either enter correct Issuer or OpenID Configuration URL.')
+                    }
             }
         } else if (inputId === 'scope') {
             if (!inputValueScope) return;
@@ -47,31 +61,67 @@ const RegisterForm = (data) => {
         }
     };
 
-    function validateState() {
+    function generateOpenIdConfigurationURL(issuer) {
+        if (issuer.length === 0) {
+            return '';
+        }
+        if (!issuer.includes('/.well-known/openid-configuration')) {
+            issuer = issuer + '/.well-known/openid-configuration';
+        }
+
+        if (!issuer.includes('https') || !issuer.includes('http')) {
+            issuer = 'https://' + issuer;
+        }
+        return issuer;
+    }
+
+    async function validateIssuerOnEnter(issuer) {
+        setIsLoading(true);
+        setPageLoading(true);
+        if (issuer.length === 0) {
+            return false;
+        }
+        issuer = generateOpenIdConfigurationURL(issuer);
+        try {
+            const opConfiguration = await getOpenidConfiguration(issuer);
+            if (!opConfiguration || !opConfiguration.data.issuer) {
+                return false;
+            }
+            return true;
+        } catch (err) {
+            return false;
+        }
+    }
+
+    function validate() {
         let errorField = ''
+
         if (issuerOption.length === 0) {
             errorField += 'issuer ';
         }
-
         if (scopeOption.length === 0) {
             errorField += 'scope ';
+        }
+        if(!clientExpiryDate) {
+            errorField += 'client-expiry ';
         }
         if (errorField.trim() !== '') {
             setError('The following fields are mandatory: ' + errorField);
             return false;
         }
+
         return true;
     }
 
     async function registerClient() {
-        if (validateState()) {
+        if (validate()) {
             try {
-                setLoading(true);
+                setPageLoading(true);
                 const response = await register()
                 if (response.result !== 'success') {
                     setError('Error in registration.');
                 }
-                setLoading(false);
+                setPageLoading(false);
             } catch (err) {
                 console.error(err)
             }
@@ -80,9 +130,11 @@ const RegisterForm = (data) => {
 
     async function register() {
         try {
-            const issuer = issuerOption.map((iss) => iss.value)[0];
-            const scope = scopeOption.map((ele) => ele.value);
-            const openapiConfig = await getOpenidConfiguration(issuer);
+            const opConfigurationEndpoint = generateOpenIdConfigurationURL(issuerOption.map((iss) => iss.value)[0]);
+            const opConfigurationEndpointURL = new URL(opConfigurationEndpoint);
+            const issuer = opConfigurationEndpointURL.protocol + '//' + opConfigurationEndpointURL.hostname;
+            const scope = scopeOption.map((ele) => ele.value).join(" ");
+            const openapiConfig = await getOpenidConfiguration(opConfigurationEndpoint);
 
             if (openapiConfig != undefined) {
                 chrome.storage.local.set({ opConfiguration: openapiConfig.data }).then(() => {
@@ -91,7 +143,7 @@ const RegisterForm = (data) => {
 
                 const registrationUrl = openapiConfig.data.registration_endpoint;
 
-                var registerObj = {
+                var registerObj: ILooseObject = {
                     issuer: issuer,
                     redirect_uris: [issuer],
                     scope: scope,
@@ -100,7 +152,8 @@ const RegisterForm = (data) => {
                     grant_types: ['authorization_code', 'client_credentials'],
                     application_type: 'web',
                     client_name: 'Gluu-RP-' + uuidv4(),
-                    token_endpoint_auth_method: 'client_secret_basic'
+                    token_endpoint_auth_method: 'client_secret_basic',
+                    lifetime: ((clientExpiryDate.getTime() - moment().toDate().getTime())/1000)
                 };
 
                 const registrationResp = await registerOIDCClient(registrationUrl, registerObj);
@@ -117,6 +170,7 @@ const RegisterForm = (data) => {
                             'authorization_endpoint': openapiConfig.data.authorization_endpoint,
                             'response_type': registerObj.response_types,
                             'post_logout_redirect_uris': registerObj.post_logout_redirect_uris,
+                            'expire_at': clientExpiryDate.getTime()
 
                         }
                     })
@@ -129,7 +183,7 @@ const RegisterForm = (data) => {
                     return await { result: "error", message: "Error in registration!" };
                 }
             } else {
-                return await { result: "error", message: "Error in registration!" };
+                return await { result: "error", message: "Error in fetching Openid configuration!" };
             }
         } catch (err) {
             console.error(err)
@@ -149,16 +203,15 @@ const RegisterForm = (data) => {
             const response = await axios(registerReqOptions);
             return await response;
         } catch (err) {
-            console.error(err)
+            console.error('Error in fetching Openid configuration: ' + err)
         }
     }
 
-    async function getOpenidConfiguration(issuer) {
+    async function getOpenidConfiguration(opConfigurationEndpoint) {
         try {
-            const endpoint = issuer + '/.well-known/openid-configuration';
             const oidcConfigOptions = {
                 method: 'GET',
-                url: endpoint,
+                url: opConfigurationEndpoint,
             };
             const response = await axios(oidcConfigOptions);
             return await response;
@@ -171,24 +224,35 @@ const RegisterForm = (data) => {
         <div className="box">
             <legend><span className="number">O</span> Register OIDC Client</legend>
             <legend><span className="error">{error}</span></legend>
-            <WindmillSpinner loading={loading} color="#00ced1" />
-            <label><b>Issuer:</b><span className="required">*</span>(Type and press enter) :</label>
+            <WindmillSpinner loading={pageLoading} color="#00ced1" />
+            <label><b>Issuer</b><span className="required">*</span> <span style={{ fontSize: 12 }}>(Enter OpenID Provider URL and press ENTER to validate)</span> :</label>
             <CreatableSelect
                 inputId="issuer"
                 components={components}
                 inputValue={inputValueIssuer}
                 isClearable
                 isMulti
+                isLoading={isLoading}
                 menuIsOpen={false}
                 onChange={(newValue) => setIssuerOption(newValue)}
                 onInputChange={(newValue) => setInputValueIssuer(newValue)}
                 onKeyDown={handleKeyDown}
                 placeholder="Type something and press enter..."
                 value={issuerOption}
-                className="typeahead"
+                className="inputText"
             />
 
-            <label><b>Scopes</b><span className="required">*</span> (Type and press enter) :</label>
+            <label><b>Client expiry date</b><span className="required">*</span> <span style={{ fontSize: 12 }}>(Select the date)</span> :</label>
+            <DatePicker
+                showTimeSelect
+                selected={clientExpiryDate}
+                onChange={(date) => setClientExpiryDate(date)}
+                minDate={new Date()}
+                className="inputText inputStyle"
+                dateFormat="yyyy/MM/dd h:mm aa"
+            />
+
+            <label><b>Scopes</b><span className="required">*</span> <span style={{ fontSize: 12 }}>(Type and press enter)</span> :</label>
 
             <CreatableSelect
                 inputId='scope'
@@ -202,7 +266,7 @@ const RegisterForm = (data) => {
                 onKeyDown={handleKeyDown}
                 placeholder="Type something and press enter..."
                 value={scopeOption}
-                className="typeahead"
+                className="inputText"
             />
 
             <legend><span className="error">{error}</span></legend>

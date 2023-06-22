@@ -214,7 +214,7 @@ spec:
         spec:
           containers:
             - name: auth-key-rotation
-              image: ghcr.io/janssenproject/jans/certmanager:1.0.14_dev
+              image: ghcr.io/janssenproject/jans/certmanager:1.0.15_dev
               resources:
                 requests:
                   memory: "300Mi"
@@ -260,3 +260,4 @@ As per v1.0.1, hybrid persistence supports all available persistence types. To c
         "session": "spanner",
     }
     ```
+

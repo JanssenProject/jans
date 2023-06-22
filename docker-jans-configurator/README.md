@@ -133,7 +133,7 @@ To generate initial config and secrets:
                 name: config-generate-params
           containers:
             - name: configurator-load
-              image: ghcr.io/janssenproject/jans/configurator:1.0.14_dev
+              image: ghcr.io/janssenproject/jans/configurator:1.0.15_dev
               volumeMounts:
                 - mountPath: /app/db/generate.json
                   name: config-generate-params
@@ -173,7 +173,7 @@ To restore configuration and secrets from a backup of `/path/to/host/volume/conf
                 name: secret-params
           containers:
             - name: configurator-load
-              image: ghcr.io/janssenproject/jans/configurator:1.0.14_dev
+              image: ghcr.io/janssenproject/jans/configurator:1.0.15_dev
               volumeMounts:
                 - mountPath: /app/db/config.json
                   name: config-params
@@ -203,7 +203,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: configurator-dump-job
-          image: ghcr.io/janssenproject/jans/configurator:1.0.14_dev
+          image: ghcr.io/janssenproject/jans/configurator:1.0.15_dev
           command:
             - /bin/sh
             - -c
@@ -218,3 +218,4 @@ spec:
 Copy over the files to host
 
 `kubectl cp config-init-load-job:/app/db .`
+
