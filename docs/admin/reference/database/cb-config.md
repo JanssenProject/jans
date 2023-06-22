@@ -135,7 +135,7 @@ ORM also uses Couchbase sub-document API to store attributes defined in java bea
 
 ![](../../../assets/database-cb-configuration.jpg)
 
-## Java examples
+# Java examples
 
 This example shows how to use ORM. It opens connection to Couchbase DB and add user entry to it:
 
