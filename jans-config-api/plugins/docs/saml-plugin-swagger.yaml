@@ -115,6 +115,7 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/saml.write
+  /saml/trust-relationship/{id}:
     delete:
       tags:
       - SAML - Client
@@ -122,7 +123,7 @@ paths:
       description: Delete client
       operationId: put-client
       parameters:
-      - name: inum
+      - name: id
         in: path
         description: Unique Id of client
         required: true
