@@ -27,7 +27,7 @@ class RDBMSchemaGenerator:
             self.index_titles = ('tablename', 'indexname', 'indexdef')
 
         self.schema_file = argsp.schema_file or argsp.rdbm_type + '-schema.md'
-        self.schema_indexes_file = argsp.schema_file or argsp.rdbm_type + '-schema-indexes.md'
+        self.schema_indexes_file = argsp.schema_indexes_file or argsp.rdbm_type + '-schema-indexes.md'
 
     def connect(self):
         getattr(self, 'connect_to_' + argsp.rdbm_type)()
