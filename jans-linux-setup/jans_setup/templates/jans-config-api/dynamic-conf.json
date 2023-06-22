@@ -92,6 +92,11 @@
       "name": "cache-refresh",
       "description": "cache-refresh plugin",
       "className": "io.jans.configapi.plugin.cacherefresh.rest.ApiApplication"
+    },
+    {
+      "name": "saml",
+      "description": "saml plugin",
+      "className": "io.jans.configapi.plugin.saml.rest.ApiApplication"
     }
   ]
 }
