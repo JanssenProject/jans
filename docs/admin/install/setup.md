@@ -71,21 +71,24 @@ To check usage of this script run help command
 ```
     python3 /opt/jans/jans-setup/setup.py --help
 
-      usage: setup.py [-h] [--version] [-c] [-d D] [-f F] [-n] [-N] [-u] [-csx] [-remote-rdbm {mysql,pgsql,spanner} | -local-rdbm 
-      {mysql,pgsql}]
-      [-ip-address IP_ADDRESS] [-host-name HOST_NAME] [-org-name ORG_NAME] [-email EMAIL] [-city CITY] [-state STATE] [-country COUNTRY] 
-      [-rdbm-user RDBM_USER] [-rdbm-password RDBM_PASSWORD] [-rdbm-port RDBM_PORT] [-rdbm-db RDBM_DB] [-rdbm-host RDBM_HOST] 
-      [--reset-rdbm-db] [--shell] [--dump-config-on-error] [--no-progress] [-admin-password ADMIN_PASSWORD]  [-jans-max-mem JANS_MAX_MEM] 
-      [-properties-password PROPERTIES_PASSWORD] [-approved-issuer APPROVED_ISSUER] [--force-download] [--download-exit] 
-      [-jans-app-version JANS_APP_VERSION] [-jans-build JANS_BUILD] [-setup-branch SETUP_BRANCH]  [--disable-config-api-security]
-      [--cli-test-client] [--import-ldif IMPORT_LDIF] [-enable-script ENABLE_SCRIPT]  [-disable-script DISABLE_SCRIPT] [-stm] [-w]
-      [-t] [-x] [--allow-pre-released-features] [--listen_all_interfaces] [--remote-ldap | --disable-local-ldap] [--remote-couchbase]
-      [--local-couchbase] [-couchbase-admin-user COUCHBASE_ADMIN_USER]  [-couchbase-admin-password COUCHBASE_ADMIN_PASSWORD] 
-      [-couchbase-bucket-prefix COUCHBASE_BUCKET_PREFIX][-couchbase-hostname COUCHBASE_HOSTNAME] [--no-data] [--no-jsauth] 
-      [-ldap-admin-password LDAP_ADMIN_PASSWORD] [--no-config-api] [--no-scim] [--no-fido2] [--install-eleven] [--load-config-api-test] 
-      [-config-patch-creds CONFIG_PATCH_CREDS] [-spanner-project SPANNER_PROJECT] [-spanner-instance SPANNER_INSTANCE] [
-      -spanner-database SPANNER_DATABASE]  [-spanner-emulator-host SPANNER_EMULATOR_HOST | -google-application-credentials       
-      GOOGLE_APPLICATION_CREDENTIALS]
+      usage: setup.py [-h] [--version] [-c] [-d D] [-f F] [-n] [-N] [-u] [-csx]
+                     [-remote-rdbm {mysql,pgsql,spanner} | -local-rdbm {mysql,pgsql}] [-ip-address IP_ADDRESS] [-host-name HOST_NAME]
+                     [-org-name ORG_NAME] [-email EMAIL] [-city CITY] [-state STATE] [-country COUNTRY] [-rdbm-user RDBM_USER]
+                     [-rdbm-password RDBM_PASSWORD] [-rdbm-port RDBM_PORT] [-rdbm-db RDBM_DB] [-rdbm-host RDBM_HOST] [--reset-rdbm-db]
+                     [--shell] [--dump-config-on-error] [--no-progress] [-admin-password ADMIN_PASSWORD] [-jans-max-mem JANS_MAX_MEM]
+                     [-properties-password PROPERTIES_PASSWORD] [-approved-issuer APPROVED_ISSUER] [--force-download] [--download-exit]
+                     [-jans-app-version JANS_APP_VERSION] [-jans-build JANS_BUILD] [-setup-branch SETUP_BRANCH]
+                     [--disable-config-api-security] [--cli-test-client] [--import-ldif IMPORT_LDIF] [-enable-script ENABLE_SCRIPT]
+                     [-disable-script DISABLE_SCRIPT] [-stm] [-w] [-t] [-x] [--allow-pre-released-features] [--listen_all_interfaces]
+                     [--remote-ldap | --disable-local-ldap] [--remote-couchbase] [--local-couchbase]
+                     [-couchbase-admin-user COUCHBASE_ADMIN_USER] [-couchbase-admin-password COUCHBASE_ADMIN_PASSWORD]
+                     [-couchbase-bucket-prefix COUCHBASE_BUCKET_PREFIX] [-couchbase-hostname COUCHBASE_HOSTNAME] [--no-data]
+                     [--no-jsauth] [-ldap-admin-password LDAP_ADMIN_PASSWORD] [--no-config-api] [--no-scim] [--no-fido2]
+                     [--install-eleven] [--install-cache-refresh] [--load-config-api-test] [-config-patch-creds CONFIG_PATCH_CREDS]
+                     [-spanner-project SPANNER_PROJECT] [-spanner-instance SPANNER_INSTANCE] [-spanner-database SPANNER_DATABASE]
+                     [-spanner-emulator-host SPANNER_EMULATOR_HOST | -google-application-credentials GOOGLE_APPLICATION_CREDENTIALS]
+                     [-test-client-id TEST_CLIENT_ID] [-test-client-pw TEST_CLIENT_PW]
+                     [-test-client-redirect-uri TEST_CLIENT_REDIRECT_URI] [--test-client-trusted]
 ```
 
 Use this script to configure your Jans Server and to add initial data required for oxAuth and oxTrust to start. If setup.properties is found in this folder, these properties will automatically be used instead of the interactive setup.
@@ -157,9 +160,14 @@ Below are the optional arguments:
 | --no-fido2 | Do not install Fido2 Server |
 | --install-eleven | Install Eleven Server |
 | --load-config-api-test | Load Config Api Test Data |
+| --install-cache-refresh | Install Cache Refresh Server |
 | -config-patch-creds CONFIG_PATCH_CREDS | password:username for downloading auto test ciba password |
 | -spanner-project SPANNER_PROJECT | Spanner project name |
 | -spanner-instance SPANNER_INSTANCE | Spanner instance name |
 | -spanner-database SPANNER_DATABASE | Spanner database name |
 | -spanner-emulator-host SPANNER_EMULATOR_HOST | Use Spanner emulator host |
 | -google-application-credentials GOOGLE_APPLICATION_CREDENTIALS | Path to Google application credentials json file |
+| -test-client-id TEST_CLIENT_ID | ID of test client which has all available scopes. Must be in UUID format. |
+| -test-client-pw TEST_CLIENT_PW | Secret for test client |
+| -test-client-redirect-uri TEST_CLIENT_REDIRECT_URI | Redirect URI for test client |
+| --test-client-trusted | Make test client trusted |

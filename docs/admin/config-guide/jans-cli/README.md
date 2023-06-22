@@ -122,6 +122,115 @@ Getting access token for scope https://jans.io/oauth/config/acrs.readonly
 
 This is how we can execute single line command to get information about the Janssen Server. 
 
+## Operation Modes
+Default operation mode is **jca**, i.e., all queries are done to Jans Config Api Server. CLI has also SCIM and OAUTH modes:
+
+### SCIM Mode
+To switch SCIM mode user `-scim` switch. For example to get help for SCIM mode:
+
+`/opt/jans/jans-cli/config-cli.py -scim -h`
+
+Only `--info` arguments will be different from **jca** mode:
+
+```
+--info {Discovery,Fido2Devices,FidoDevices,GlobalSearch,Group,User}
+```
+
+You can get information about operation `Discovery`:
+
+```
+/opt/jans/jans-cli/config-cli.py -scim --info Fido2Devices
+Operation ID: get-fido2-devices
+  Description: Query Fido 2 resources
+  Parameters:
+  attributes: A comma-separated list of attribute names to return in the response [string]
+  excludedAttributes: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list) [string]
+  userId: Used to restrict the search to fido 2 resources owned by a specific user [string]
+  filter: An expression specifying the search criteria. See section 3.4.2.2 of RFC 7644 [string]
+  startIndex: The 1-based index of the first query result [integer]
+  count: Specifies the desired maximum number of query results per page [integer]
+  sortBy: The attribute whose value will be used to order the returned responses [string]
+  sortOrder: Order in which the sortBy param is applied. Allowed values are "ascending" and "descending" [string]
+Operation ID: get-fido2-device-by-id
+  Description: Retrieves a Fido 2 device by Id
+  Parameters:
+  attributes: A comma-separated list of attribute names to return in the response [string]
+  excludedAttributes: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list) [string]
+  userId: Identifier (inum) of the device owner. This param is not required when underlying database is LDAP [string]
+  id: No description is provided for this parameter [string]
+Operation ID: update-fido2-device-by-id
+  Description: Updates a Fido 2 resource. Update works in a replacement fashion&amp;#58; every attribute value found in the payload sent will replace the one in the existing resource representation. Attributes not passed in the payload will be left intact.
+
+  Parameters:
+  attributes: A comma-separated list of attribute names to return in the response [string]
+  excludedAttributes: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list) [string]
+  id: No description is provided for this parameter [string]
+  Schema: Fido2DeviceResource
+  Schema: Fido2DeviceResource
+Operation ID: delete-fido2-device-by-id
+  Description: Deletes a Fido 2 resource
+  Parameters:
+  id: Identifier of the resource to delete [string]
+Operation ID: search-fido2-device
+  Description: Query Fido 2 resources
+  Parameters:
+  userId: Used to restrict the search to fido 2 resources owned by a specific user [string]
+  Schema: SearchRequest
+  Schema: SearchRequest
+
+To get sample schema type /opt/jans/jans-cli/config-cli.py -scim --schema <schma>, for example /opt/jans/jans-cli/config-cli.py -scim --schema SearchRequest
+```
+
+Here is how you can get sample schema for **SearchRequest**:
+
+```
+/opt/jans/jans-cli/config-cli.py -scim --schema SearchRequest
+{
+  "schemas": [
+    "string"
+  ],
+  "attributes": [
+    "string"
+  ],
+  "excludedAttributes": [
+    "string"
+  ],
+  "filter": "userName eq \"jhon\" and meta.lastModified gt \"2011-05-13T04:42:34Z\"",
+  "sortBy": "string",
+  "sortOrder": "string",
+  "startIndex": 143,
+  "count": 58
+}
+```
+
+### AUTH Mode
+To switch AUTH mode user `-auth` switch. For example to get help for AUTH mode:
+
+`/opt/jans/jans-cli/config-cli.py -auth -h`
+
+`--info` arguments will be:
+
+```
+--info {Authorization,ClientInfo,ClientRegistration,FidoU2F,JwkJsonWebKeySetJwks,Registration,ServerConfiguration,SessionManagement,Ssa,Token,TokenIntrospection,Uma2Resource,UmaScope,UmaUserManagedAccess,UserInfo}
+```
+
+To get information about operation `ClientRegistration`:
+
+```
+/opt/jans/jans-cli/config-cli.py -auth --info ClientInfo
+Operation ID: get_clientinfo
+  Description: The ClientInfo Endpoint is an OAuth 2.0 Protected Resource that returns Claims about the registered client.
+  Parameters:
+  access_token: No description is provided for this parameter [string]
+  Authorization: No description is provided for this parameter [string]
+Operation ID: post_clientinfo
+  Description: The ClientInfo Endpoint is an OAuth 2.0 Protected Resource that returns Claims about the registered client.
+  Parameters:
+  Authorization: No description is provided for this parameter [string]
+  Parameters:
+    access_token*: Client-specific access token.
+```
+
 
 ## Basic command-line switches
 
