@@ -2,6 +2,7 @@
 
 import sys
 import os
+import glob
 import argparse
 import zipfile
 import shutil
@@ -223,7 +224,7 @@ def uninstall_jans():
             print("Stopping", service)
             os.system('systemctl stop ' + service)
 
-    if argsp.profile == 'jans':
+    if os.path.exists('/opt/opendj/bin/stop-ds'):
         print("Stopping OpenDj Server")
         os.system('/opt/opendj/bin/stop-ds')
 
@@ -234,9 +235,10 @@ def uninstall_jans():
         remove_list.append('/opt/dist')
 
     for p in remove_list:
-        cmd = 'rm -r -f ' + p
-        print("Executing", cmd)
-        os.system('rm -r -f ' + p)
+        if glob.glob(p):
+            cmd = 'rm -r -f ' + p
+            print("Executing", cmd)
+            os.system('rm -r -f ' + p)
 
     apache_conf_fn_list = []
 
