@@ -28,7 +28,7 @@ import org.keycloak.representations.idm.UserRepresentation;
 
 import org.slf4j.Logger;
 
-@Path(Constants.CLIENT)
+@Path(Constants.SAML_CLIENT)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class SamlClientResource extends BaseResource {
@@ -86,7 +86,7 @@ public class SamlClientResource extends BaseResource {
     @ProtectedApi(scopes = { Constants.SAML_READ_ACCESS })
     @Path(Constants.CLIENTID_PATH)
     public Response searchClient(
-            @Parameter(description = "Client name") @PathParam(Constants.CLIENTID) @NotNull String clientId) {
+            @Parameter(description = "Client Id") @PathParam(Constants.CLIENTID) @NotNull String clientId) {
         logger.info("Searching client by clientId: {}", clientId);
 
         List<ClientRepresentation> clients = samlService.serachClients(clientId);

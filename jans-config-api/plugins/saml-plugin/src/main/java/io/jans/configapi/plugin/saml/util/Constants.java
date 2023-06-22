@@ -10,9 +10,9 @@ public class Constants {
 
     private Constants() {}
 
-    public static final String SAML_CONFIG = "/saml-config";
-    public static final String CLIENT = "/client";
-    public static final String CLIENT_SCOPE = "/{client-scope}";
+    public static final String SAML_CONFIG = "/samlConfig";
+    public static final String SAML_CLIENT = "/samlClient";
+    public static final String SAML_CLIENT_SCOPE = "/clientScope";
     public static final String NAME_PARAM_PATH = "/{name}";
     public static final String NAME = "name";
     public static final String ID_PATH = "{id}";
@@ -24,8 +24,11 @@ public class Constants {
     //Scopes
     public static final String SAML_READ_ACCESS = "https://jans.io/oauth/config/saml.readonly";
     public static final String SAML_WRITE_ACCESS = "https://jans.io/oauth/config/saml.write";
-    
+
     public static final String SAML_CONFIG_READ_ACCESS = "https://jans.io/oauth/config/saml-config.readonly";
     public static final String SAML_CONFIG_WRITE_ACCESS = "https://jans.io/oauth/config/saml-config.write";
+    
+    public static final String SAML_CLIENT_SCOPE_READ_ACCESS = "https://jans.io/oauth/config/saml-client-scope.readonly";
+    public static final String SAML_CLIENT_SCOPE_WRITE_ACCESS = "https://jans.io/oauth/config/saml-client-scope.write";
     
 }

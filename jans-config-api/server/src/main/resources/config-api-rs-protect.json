@@ -2276,7 +2276,7 @@
       ]
     },
     {
-      "path": "/jans-config-api/saml/trust-relationship",
+      "path": "/jans-config-api/saml/samlClient",
       "conditions": [
         {
           "httpMethods": [
@@ -2303,7 +2303,7 @@
         },
         {
           "httpMethods": [
-            "PUT"
+            "POST","PUT","DELETE"
           ],
           "scopes": [
             {
@@ -2322,7 +2322,7 @@
       ]
     },
     {
-      "path": "/jans-config-api/saml/saml-config",
+      "path": "/jans-config-api/saml/samlConfig",
       "conditions": [
         {
           "httpMethods": [
@@ -2349,12 +2349,58 @@
         },
         {
           "httpMethods": [
-            "PUT"
+            "POST","PUT","DELETE"
           ],
           "scopes": [
             {
               "inum": "1800.01.59",
               "name": "https://jans.io/oauth/config/saml-config.write"
+            }
+          ],
+          "groupScopes": [],
+          "superScopes": [
+            {
+              "inum": "1800.03.2",
+              "name": "https://jans.io/oauth/config/write-all"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/jans-config-api/saml/clientScope",
+      "conditions": [
+        {
+          "httpMethods": [
+            "GET"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.60",
+              "name": "https://jans.io/oauth/config/saml-client-scope.readonly"
+            }
+          ],
+          "groupScopes": [
+            {
+              "inum": "1800.01.61",
+              "name": "https://jans.io/oauth/config/saml-client-scope.write"
+            }
+          ],
+          "superScopes": [
+            {
+              "inum": "1800.03.1",
+              "name": "https://jans.io/oauth/config/read-all"
+            }
+          ]
+        },
+        {
+          "httpMethods": [
+            "POST","PUT","DELETE"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.61",
+              "name": "https://jans.io/oauth/config/saml-client-scope.write"
             }
           ],
           "groupScopes": [],

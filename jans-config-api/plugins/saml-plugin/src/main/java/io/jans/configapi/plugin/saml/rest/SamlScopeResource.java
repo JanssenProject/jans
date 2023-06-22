@@ -25,10 +25,11 @@ import java.util.*;
 
 import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
-
+import org.keycloak.admin.client.resource.ProtocolMappersResource;
+import org.keycloak.representations.idm.ProtocolMapperRepresentation;
 import org.slf4j.Logger;
 
-@Path(Constants.CLIENT_SCOPE)
+@Path(Constants.SAML_CLIENT_SCOPE)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class SamlScopeResource extends BaseResource {
@@ -41,20 +42,27 @@ public class SamlScopeResource extends BaseResource {
 
     @Operation(summary = "Get Client Scope", description = "Get Client Scope", operationId = "get-saml-client-scope", tags = {
             "SAML - Client Scope" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    Constants.SAML_READ_ACCESS }))
+                    Constants.SAML_CLIENT_SCOPE_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = ClientRepresentation.class)))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = ProtocolMapperRepresentation.class)))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @Path(Constants.CLIENTID_PATH)
-    @ProtectedApi(scopes = { Constants.SAML_READ_ACCESS })
+    @ProtectedApi(scopes = { Constants.SAML_CLIENT_SCOPE_READ_ACCESS })
     public Response getClientScope(@Parameter(description = "Client Id") @PathParam(Constants.CLIENTID) @NotNull String clientId) {
-
-        List<ClientRepresentation> clientList = samlService.getAllClients();
-
-        logger.info("All clientList:{}", clientList);
-        return Response.ok(clientList).build();
+        List<ProtocolMapperRepresentation> protocolMappers = null; 
+        List<ClientRepresentation> clients = samlService.serachClients(clientId);
+        logger.info("Clients found by clientId:{}, clients:{}", clientId, clients);
+        if(clients!=null && !clients.isEmpty()) {
+            ClientRepresentation client = clients.get(0);
+            logger.info(" clientId:{}, client:{}", clientId, client);
+            protocolMappers = client.getProtocolMappers();
+            
+        }
+        
+        logger.info("protocolMappers:{}", protocolMappers);
+        return Response.ok(protocolMappers).build();
     }
 
  
