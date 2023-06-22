@@ -143,7 +143,8 @@ public class UserSessionIdService {
             return null;
         }
 
-        if (SessionIdState.UNAUTHENTICATED != entity.getState()) {
+        if (!((SessionIdState.UNAUTHENTICATED == entity.getState())
+        		|| (SessionIdState.AUTHENTICATED == entity.getState()))) {
             log.warn("Unexpected session id '{}' state: '{}'", sessionId, entity.getState());
             return null;
         }

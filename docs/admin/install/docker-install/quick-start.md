@@ -73,6 +73,14 @@ And then use CLI tools to configure Janssen Server as needed.
 #or
 /opt/jans/jans-cli/scim-cli.py
 ```
+Administrative password can be collected from `setup.properties.last` file. 
+
+```bash
+ - find / -name 'setup.properties.last'
+ - cat /var/lib/docker/overlay2/xxxxxx/diff/opt/jans/jans-setup/setup.properties.last | grep -i password
+ - `admin_password` value is the password
+```
+
 
 ## Uninstall / Remove the Janssen Server
 

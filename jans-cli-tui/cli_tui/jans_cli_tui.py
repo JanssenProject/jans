@@ -805,19 +805,19 @@ class JansCliApp(Application):
 
     def getTitledWidget(
         self, 
-        title: AnyFormattedText,  
-        name: AnyFormattedText,  
-        widget:AnyContainer, 
-        jans_help: AnyFormattedText= "",
-        style: AnyFormattedText= "",
-        other_widgets: Optional[Sequence[AnyContainer]]=None
+        title: AnyFormattedText,
+        name: AnyFormattedText,
+        widget: AnyContainer,
+        jans_help: AnyFormattedText="",
+        style: AnyFormattedText="",
+        other_widgets: Optional[Sequence[AnyContainer]]=None,
+        height: int=1
         )-> AnyContainer:
         title += ': '
         widget.window.jans_name = name
         widget.window.jans_help = jans_help
-        #li, w2, width = self.handle_long_string(title, widget.values, widget)
 
-        my_widgets = [Window(FormattedTextControl(title), width=len(title)+1, style=style,), widget]
+        my_widgets = [Window(FormattedTextControl(title), width=len(title)+1, style=style, height=height), widget]
         if other_widgets:
             my_widgets.append(other_widgets)
 

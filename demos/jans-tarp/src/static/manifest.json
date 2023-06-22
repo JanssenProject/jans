@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "jans-tarp",
   "version": "1.0.0",
-  "description": "My Chrome Extension",
+  "description": "Relying Party tool in form of a Chrome Extension.",
   "icons": {
     "16": "icon.png",
     "32": "icon.png",

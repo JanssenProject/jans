@@ -8,13 +8,29 @@ tags:
   - password
 ---
 
-## This content is in progress
+# Password Grant
 
-The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.
+Janssen Server supports the password grant. At the same time, inline with
+[OAuth 2.0 security best practices](https://oauth.net/2/oauth-best-practice/), this password grant should never be used
+in practice. [OAuth 2.1](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-08) has removed this grant type.
 
-## Have questions in the meantime?
+## Configuration
 
-While this documentation is in progress, you can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussion) or the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). Any questions you have will help determine what information our documentation should cover.
+A client can use the password grant if it is enabled in the configuration. An administrator can use
+[TUI](../../config-guide/jans-tui/README.md) to enable password grant for a client.
+
+![](../../../assets/image-tui-client-registration-basic.png)
+
+## Usage
+
+Using the password grant involves sharing user credentials with a third-party application. This third-party app which has
+registered with Janssen Server as a client, will then use user-id/password credentials from the user to obtain an
+access token from Janssen Server.
+
+Janssen Server also requires the client to authenticate itself based on the client configuration.
+
+Since sharing user credentials with a third-party app is a security risk and against the basic purpose of OAuth, this
+grant type shall not be used.
 
 ## Want to contribute?
 

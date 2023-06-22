@@ -97,6 +97,11 @@ changetype: modify
 jansDefScope: true
 replace: jansDefScope
 
+dn: inum=B9D2-D6E5,ou=scopes,o=jans
+changetype: modify
+jansDefScope: true
+replace: jansDefScope
+
 dn: inum=341A,ou=scopes,o=jans
 changetype: modify
 add: jansClaim

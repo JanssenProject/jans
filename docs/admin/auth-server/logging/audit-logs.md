@@ -22,6 +22,31 @@ JMS Configuration must be set inside AS global configuration
 |jmsUserName      | JMS UserName        |  
 |jmsPassword      | JMS Password.       |  
 
+Audit events: 
+- CLIENT_REGISTRATION
+- CLIENT_UPDATE
+- CLIENT_READ
+- CLIENT_DELETE
+- USER_AUTHORIZATION
+- BACKCHANNEL_AUTHENTICATION
+- BACKCHANNEL_DEVICE_REGISTRATION
+- USER_INFO
+- TOKEN_REQUEST
+- TOKEN_VALIDATE
+- TOKEN_REVOCATION
+- SESSION_UNAUTHENTICATED
+- SESSION_AUTHENTICATED
+- SESSION_DESTROYED
+- DEVICE_CODE_AUTHORIZATION
+- SSA_CREATE
+- SSA_READ 
+
+
+# Enable/Disable Audit Logs on Jans TUI
+Using Jans TUI we can easily `Enable` or `Disable` Audit Logs. Go to `/opt/jans/jans-cli/config-cli-tui.py` select `Auth Server` tab then `Properties` tab. Now set the value of  `enabledOAuthAuditLogging` pressing Enter button on your keyboard. Save it and let's see below image 
+
+![auditLogs](https://github.com/JanssenProject/jans/assets/43112579/2bf87258-083c-47f5-bce5-13285582ec4b)
+
 ## Have questions in the meantime?
 
 You can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussion) or the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). Any questions you have will help determine what information our documentation should cover.

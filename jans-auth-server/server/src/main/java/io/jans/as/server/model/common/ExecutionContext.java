@@ -6,14 +6,17 @@
 
 package io.jans.as.server.model.common;
 
+import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.model.session.SessionId;
 import io.jans.as.common.service.AttributeService;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.token.JsonWebResponse;
+import io.jans.as.server.authorize.ws.rs.AuthzRequest;
 import io.jans.as.server.model.audit.OAuth2AuditLog;
 import io.jans.as.server.model.ldap.TokenEntity;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
+import jakarta.faces.context.ExternalContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.core.Response;
@@ -35,6 +38,12 @@ public class ExecutionContext {
 
     private Client client;
     private AuthorizationGrant grant;
+    private User user;
+
+    private SessionId sessionId;
+    private List<SessionId> currentSessions;
+
+    private AuthzRequest authzRequest;
 
     private AppConfiguration appConfiguration;
     private AttributeService attributeService;
@@ -70,6 +79,64 @@ public class ExecutionContext {
     public ExecutionContext(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
         this.httpRequest = httpRequest;
         this.httpResponse = httpResponse;
+    }
+
+    public static ExecutionContext of(AuthzRequest authzRequest) {
+        ExecutionContext executionContext = new ExecutionContext();
+        if (authzRequest == null) {
+            return executionContext;
+        }
+
+        executionContext.setHttpRequest(authzRequest.getHttpRequest());
+        executionContext.setHttpResponse(authzRequest.getHttpResponse());
+        executionContext.setClient(authzRequest.getClient());
+        executionContext.setAuthzRequest(authzRequest);
+        return executionContext;
+    }
+
+    public static ExecutionContext of(ExternalContext externalContext) {
+        ExecutionContext executionContext = new ExecutionContext();
+        if (externalContext != null) {
+            if (externalContext.getRequest() instanceof HttpServletRequest) {
+                executionContext.setHttpRequest((HttpServletRequest) externalContext.getRequest());
+            }
+            if (externalContext.getResponse() instanceof HttpServletResponse) {
+                executionContext.setHttpResponse((HttpServletResponse) externalContext.getResponse());
+            }
+        }
+        return executionContext;
+    }
+
+    public AuthzRequest getAuthzRequest() {
+        return authzRequest;
+    }
+
+    public void setAuthzRequest(AuthzRequest authzRequest) {
+        this.authzRequest = authzRequest;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public List<SessionId> getCurrentSessions() {
+        return currentSessions;
+    }
+
+    public void setCurrentSessions(List<SessionId> currentSessions) {
+        this.currentSessions = currentSessions;
+    }
+
+    public SessionId getSessionId() {
+        return sessionId;
+    }
+
+    public void setSessionId(SessionId sessionId) {
+        this.sessionId = sessionId;
     }
 
     public String getDeviceSecret() {

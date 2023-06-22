@@ -11,8 +11,8 @@ import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.crypto.signature.AsymmetricSignatureAlgorithm;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.register.ApplicationType;
-
 import jakarta.ws.rs.HttpMethod;
+
 import java.util.List;
 
 public class RegistrationBuilder implements Builder {
@@ -22,6 +22,7 @@ public class RegistrationBuilder implements Builder {
     private String clientName;
     private String jwks;
     private List<String> redirectUris;
+    private List<String> scopes;
     private String registrationEndpoint;
     private String sectorIdentifierUri;
     private String jwksUri;
@@ -61,6 +62,11 @@ public class RegistrationBuilder implements Builder {
 
     public RegistrationBuilder withRedirectUris(List<String> redirectUris) {
         this.redirectUris = redirectUris;
+        return this;
+    }
+
+    public RegistrationBuilder withScopes(List<String> value) {
+        this.scopes = value;
         return this;
     }
 
@@ -207,6 +213,9 @@ public class RegistrationBuilder implements Builder {
         }
         if (backchannekAuthRequestSigningAlgorithm != null) {
             registerRequest.setBackchannelAuthenticationRequestSigningAlg(backchannekAuthRequestSigningAlgorithm);
+        }
+        if (scopes != null) {
+            registerRequest.setScope(scopes);
         }
 
         if (tokenEndpointAuthMethod != null) {

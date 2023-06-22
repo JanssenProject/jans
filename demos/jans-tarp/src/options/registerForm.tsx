@@ -1,53 +1,127 @@
-import React, { useState } from 'react'
+import React, { useState, KeyboardEventHandler } from 'react'
 import axios from 'axios';
 import './options.css'
 import { v4 as uuidv4 } from 'uuid';
 import { WindmillSpinner } from 'react-spinner-overlay'
+import CreatableSelect from 'react-select/creatable';
+import { IOption } from './IOption';
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import moment from 'moment';
+import { ILooseObject } from './ILooseObject';
+const components = {
+    DropdownIndicator: null,
+};
+
+const createOption = (label: string) => ({
+    label,
+    value: label,
+});
 
 const RegisterForm = (data) => {
-    const [issuer, setIssuer] = useState("");
-    const [acrValues, setAcrValues] = useState("");
-    const [scope, setScope] = useState("");
     const [error, setError] = useState("");
-    const [loading, setLoading] = useState(false);
+    const [pageLoading, setPageLoading] = useState(false);
+    const [inputValueIssuer, setInputValueIssuer] = useState('');
+    const [inputValueScope, setInputValueScope] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [issuerOption, setIssuerOption] = useState<readonly IOption[]>([]);
+    const [scopeOption, setScopeOption] = useState<readonly IOption[]>([createOption('openid')]);
+    const [clientExpiryDate, setClientExpiryDate] = useState(moment().add(1, 'days').toDate());
+    
+    const handleKeyDown: KeyboardEventHandler = async (event) => {
+        const inputId = (event.target as HTMLInputElement).id;
+        if (inputId === 'issuer') {
+            if (!inputValueIssuer) return;
+            switch (event.key) {
+                case 'Enter':
+                case 'Tab':
+                    setError('');
+                    if (await validateIssuerOnEnter(inputValueIssuer)) {
+                        setIssuerOption([createOption(inputValueIssuer)]);
+                        setIsLoading(false);
+                        setPageLoading(false);
+                        setInputValueIssuer('');
+                        event.preventDefault();
+                    } else {
+                        setIsLoading(false);
+                        setPageLoading(false);
+                        setError('Invalid input. Either enter correct Issuer or OpenID Configuration URL.')
+                    }
+            }
+        } else if (inputId === 'scope') {
+            if (!inputValueScope) return;
+            switch (event.key) {
+                case 'Enter':
+                case 'Tab':
+                    setScopeOption((prev) => [...prev, createOption(inputValueScope)]);
+                    setInputValueScope('');
+                    event.preventDefault();
+            }
 
-    function updateInputValue(event) {
-        if (event.target.id === 'issuer') {
-            setIssuer(event.target.value);
         }
-        if (event.target.id === 'acrValues') {
-            setAcrValues(event.target.value);
+    };
+
+    function generateOpenIdConfigurationURL(issuer) {
+        if (issuer.length === 0) {
+            return '';
         }
-        if (event.target.id === 'scope') {
-            setScope(event.target.value);
+        if (!issuer.includes('/.well-known/openid-configuration')) {
+            issuer = issuer + '/.well-known/openid-configuration';
+        }
+
+        if (!issuer.includes('https') || !issuer.includes('http')) {
+            issuer = 'https://' + issuer;
+        }
+        return issuer;
+    }
+
+    async function validateIssuerOnEnter(issuer) {
+        setIsLoading(true);
+        setPageLoading(true);
+        if (issuer.length === 0) {
+            return false;
+        }
+        issuer = generateOpenIdConfigurationURL(issuer);
+        try {
+            const opConfiguration = await getOpenidConfiguration(issuer);
+            if (!opConfiguration || !opConfiguration.data.issuer) {
+                return false;
+            }
+            return true;
+        } catch (err) {
+            return false;
         }
     }
 
-    function validateState() {
-
+    function validate() {
         let errorField = ''
-        if (issuer === '') {
+
+        if (issuerOption.length === 0) {
             errorField += 'issuer ';
         }
-        if (scope === '') {
+        if (scopeOption.length === 0) {
             errorField += 'scope ';
+        }
+        if(!clientExpiryDate) {
+            errorField += 'client-expiry ';
         }
         if (errorField.trim() !== '') {
             setError('The following fields are mandatory: ' + errorField);
             return false;
         }
+
         return true;
     }
 
     async function registerClient() {
-        if (validateState()) {
+        if (validate()) {
             try {
-                setLoading(true);
+                setPageLoading(true);
                 const response = await register()
                 if (response.result !== 'success') {
                     setError('Error in registration.');
                 }
-                setLoading(false);
+                setPageLoading(false);
             } catch (err) {
                 console.error(err)
             }
@@ -56,7 +130,11 @@ const RegisterForm = (data) => {
 
     async function register() {
         try {
-            const openapiConfig = await getOpenidConfiguration(issuer);
+            const opConfigurationEndpoint = generateOpenIdConfigurationURL(issuerOption.map((iss) => iss.value)[0]);
+            const opConfigurationEndpointURL = new URL(opConfigurationEndpoint);
+            const issuer = opConfigurationEndpointURL.protocol + '//' + opConfigurationEndpointURL.hostname;
+            const scope = scopeOption.map((ele) => ele.value).join(" ");
+            const openapiConfig = await getOpenidConfiguration(opConfigurationEndpoint);
 
             if (openapiConfig != undefined) {
                 chrome.storage.local.set({ opConfiguration: openapiConfig.data }).then(() => {
@@ -65,17 +143,17 @@ const RegisterForm = (data) => {
 
                 const registrationUrl = openapiConfig.data.registration_endpoint;
 
-                var registerObj = {
+                var registerObj: ILooseObject = {
                     issuer: issuer,
-                    redirect_uris: [chrome.identity.getRedirectURL()],
-                    default_acr_values: [acrValues],
-                    scope: [scope],
+                    redirect_uris: [issuer],
+                    scope: scope,
                     post_logout_redirect_uris: [chrome.runtime.getURL('options.html')],
                     response_types: ['code'],
                     grant_types: ['authorization_code', 'client_credentials'],
                     application_type: 'web',
                     client_name: 'Gluu-RP-' + uuidv4(),
-                    token_endpoint_auth_method: 'client_secret_basic'
+                    token_endpoint_auth_method: 'client_secret_basic',
+                    lifetime: ((clientExpiryDate.getTime() - moment().toDate().getTime())/1000)
                 };
 
                 const registrationResp = await registerOIDCClient(registrationUrl, registerObj);
@@ -89,10 +167,10 @@ const RegisterForm = (data) => {
                             'client_secret': registrationResp.data.client_secret,
                             'scope': registerObj.scope,
                             'redirect_uri': registerObj.redirect_uris,
-                            'acr_values': registerObj.default_acr_values,
                             'authorization_endpoint': openapiConfig.data.authorization_endpoint,
                             'response_type': registerObj.response_types,
                             'post_logout_redirect_uris': registerObj.post_logout_redirect_uris,
+                            'expire_at': clientExpiryDate.getTime()
 
                         }
                     })
@@ -105,7 +183,7 @@ const RegisterForm = (data) => {
                     return await { result: "error", message: "Error in registration!" };
                 }
             } else {
-                return await { result: "error", message: "Error in registration!" };
+                return await { result: "error", message: "Error in fetching Openid configuration!" };
             }
         } catch (err) {
             console.error(err)
@@ -125,16 +203,15 @@ const RegisterForm = (data) => {
             const response = await axios(registerReqOptions);
             return await response;
         } catch (err) {
-            console.error(err)
+            console.error('Error in fetching Openid configuration: ' + err)
         }
     }
 
-    async function getOpenidConfiguration(issuer) {
+    async function getOpenidConfiguration(opConfigurationEndpoint) {
         try {
-            const endpoint = issuer + '/.well-known/openid-configuration';
             const oidcConfigOptions = {
                 method: 'GET',
-                url: endpoint,
+                url: opConfigurationEndpoint,
             };
             const response = await axios(oidcConfigOptions);
             return await response;
@@ -147,18 +224,50 @@ const RegisterForm = (data) => {
         <div className="box">
             <legend><span className="number">O</span> Register OIDC Client</legend>
             <legend><span className="error">{error}</span></legend>
-            <WindmillSpinner loading={loading} color="#00ced1" />
-            <label><b>Issuer:</b><span className="required">*</span></label>
-            <input type="text" id="issuer" name="issuer" onChange={updateInputValue} value={issuer}
-                placeholder="e.g. https://<op-host>" autoComplete="off" required />
+            <WindmillSpinner loading={pageLoading} color="#00ced1" />
+            <label><b>Issuer</b><span className="required">*</span> <span style={{ fontSize: 12 }}>(Enter OpenID Provider URL and press ENTER to validate)</span> :</label>
+            <CreatableSelect
+                inputId="issuer"
+                components={components}
+                inputValue={inputValueIssuer}
+                isClearable
+                isMulti
+                isLoading={isLoading}
+                menuIsOpen={false}
+                onChange={(newValue) => setIssuerOption(newValue)}
+                onInputChange={(newValue) => setInputValueIssuer(newValue)}
+                onKeyDown={handleKeyDown}
+                placeholder="Type something and press enter..."
+                value={issuerOption}
+                className="inputText"
+            />
 
-            <label><b>Acr Values:</b><span className="required">*</span></label>
-            <input type="text" id="acrValues" name="acrValues" onChange={updateInputValue} value={acrValues}
-                placeholder="e.g. basic" autoComplete="off" required />
+            <label><b>Client expiry date</b><span className="required">*</span> <span style={{ fontSize: 12 }}>(Select the date)</span> :</label>
+            <DatePicker
+                showTimeSelect
+                selected={clientExpiryDate}
+                onChange={(date) => setClientExpiryDate(date)}
+                minDate={new Date()}
+                className="inputText inputStyle"
+                dateFormat="yyyy/MM/dd h:mm aa"
+            />
 
-            <label><b>Scope:</b><span className="required">*</span></label>
-            <input type="text" id="scope" name="scope" onChange={updateInputValue} value={scope}
-                placeholder="e.g. openid" autoComplete="off" required />
+            <label><b>Scopes</b><span className="required">*</span> <span style={{ fontSize: 12 }}>(Type and press enter)</span> :</label>
+
+            <CreatableSelect
+                inputId='scope'
+                components={components}
+                inputValue={inputValueScope}
+                isClearable
+                isMulti
+                menuIsOpen={false}
+                onChange={(newValue) => setScopeOption(newValue)}
+                onInputChange={(newValue) => setInputValueScope(newValue)}
+                onKeyDown={handleKeyDown}
+                placeholder="Type something and press enter..."
+                value={scopeOption}
+                className="inputText"
+            />
 
             <legend><span className="error">{error}</span></legend>
             <button id="sbmtButton" onClick={registerClient}>Register</button>

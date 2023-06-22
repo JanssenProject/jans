@@ -6,76 +6,52 @@ tags:
 ---
 
 # SCIM configuration
-[SCIM](https://github.com/JanssenProject/jans/tree/main/jans-scim) configuration enables to manage application-level configuration.
 
+Relevant configuration properties of the Jans SCIM server are summarized in the table below:
 
-### Existing SCIM dynamic configuration
-| Field named | Example | Description|
-|--|--|--|
-| baseDN| o=jans | Application config Base DN.|
-| applicationUrl| https://my-jans-server.jans.io | Application base URL. |
-| baseEndpoint | https://my-jans-server.jans.io/jans-scim/restv1| SCIM base endpoint URL.|
-| personCustomObjectClass | jansCustomPerson| Person Object Class.|
-| oxAuthIssuer | https://my-jans-server.jans.io | Jans Auth - Issuer identifier.|
-| umaIssuer | https://my-jans-server.jans.io | Jans Auth -  UMA Issuer identifier.|
-| maxCount|200| Maximum number of results per page.|
-| bulkMaxOperations|30| Specifies maximum bulk operations in bulk request.|
-| bulkMaxPayloadSize|3072000| Specifies maximum bulk operations.|
-| userExtensionSchemaURI|urn:ietf:params:scim:schemas:extension:gluu:2.0:User| User Extension Schema URI.|
-| useLocalCache| true | Boolean value specifying whether to enable local in-memory cache.|
-| disableJdkLogger| true | Boolean value specifying whether to enable JDK Loggers.|
-| loggingLevel| "INFO" | Logging level for scim logger.|
-| loggingLayout |"text" | Logging layout used for Server loggers. |
-| externalLoggerConfiguration|| Path to external log4j2 logging configuration.|
-| metricReporterInterval|300| The interval for metric reporter in seconds.|
-| metricReporterKeepDataDays|15| The number of days to retain metric reported data in the system.|
-| metricReporterEnabled| true |Boolean value specifying metric reported data enabled flag.|
+|Property|Default value|Description|
+|-|-|-|
+|maxCount|200|Maximum number of results per page in search endpoints|
+|bulkMaxOperations|30|Maximum number of operations admitted in a single bulk request|
+|bulkMaxPayloadSize|3072000|Maximum payload size in bytes admitted in a single bulk request|
+|userExtensionSchemaURI|`urn:ietf:params:scim:schemas:extension:gluu:2.0:User`|URI schema associated to the User Extension|
+|loggingLevel|`INFO`|The logging [level](./logs.md)|
 
+## Configuration management using CLI
 
-### Configuring the SCIM server:
-#### 1. Read Configuration parameters:
+To retrieve the current server configuration run the command `python3 /opt/jans/jans-cli/config-cli.py --operation-id get-scim-config`
 
-Use the following command to obtain configuration parameters:
+To modify some aspect of the retrieved configuration prepare a PATCH request in JSON format. For instance:
 
-`/opt/jans/jans-cli/config-cli.py --operation-id get-scim-config`
-
-> ```javascript
->{
->   "baseDN":"o=jans",
->
->   "applicationUrl":"https://my.jans.server",
->   "baseEndpoint":"https://my.jans.server/jans-scim/restv1",
->
->   "personCustomObjectClass":"jansCustomPerson",
->
->   "oxAuthIssuer":"https://my.jans.server",
->   "umaIssuer":"https://my.jans.server",
->
->   "maxCount": 200,
->   "bulkMaxOperations": 30,
->   "bulkMaxPayloadSize": 3072000,
->   "userExtensionSchemaURI": "urn:ietf:params:scim:schemas:extension:gluu:2.0:User",
->
->   "useLocalCache":true,
->
->   "disableJdkLogger":true,
->   "loggingLevel":"INFO",
->   "loggingLayout":"text",
->   "externalLoggerConfiguration":"",
->
->   "metricReporterInterval":300,
->   "metricReporterKeepDataDays":15,
->   "metricReporterEnabled":true
+```
+[
+{ 
+  "op":"replace",
+  "path": "bulkMaxOperations",
+  "value": 100
+},
+{ 
+  "op":"replace",
+  "path": "loggingLevel",
+  "value": "DEBUG"
 }
-> ```
+]
 
+```
 
-## Reflect update
+These contents should be then passed to the `patch-scim-config` operation, e.g. `python3 /opt/jans/jans-cli/config-cli.py --operation-id patch-scim-config --data <path-to-JSON-file>`.
 
-`jansRevision` property of the configuration is used to manage any change
+## Configuration management using TUI
 
-### Two options to make effect of the changes done to the configuration
+To retrieve the current server configuration using TUI proceed as below:
 
-1. Restart jans-scim
-2. Increment the `jansRevision` property of the configuration without restarting the application. The timer job will detect the change and fetch the latest configuration from the DB.
+1. Launch TUI, e.g. by running `python3 /opt/jans/jans-cli/jans_cli_tui.py`, and follow the prompts
+1. Highlight the SCIM tab using your keyboard's left/right arrow key
+1. Highlight the "Get Scim Configuration" button using the tab key
+1. Press enter
 
+You can modify the configuration in place by editing the fields of your interest. To persist the changes, highlight the "Save" button at the bottom and press enter 
+
+## When will changes take effect?
+
+Any configuration update will take effect one minute after it has been applied whether via CLI or TUI. 

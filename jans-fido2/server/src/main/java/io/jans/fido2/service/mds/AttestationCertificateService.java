@@ -11,10 +11,7 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
@@ -159,8 +156,26 @@ public class AttestationCertificateService {
 		}
 	}
 
+	/**
+	 * Get root certificates by subjectDN
+	 *
+	 * @param subjectDN subjectDN
+	 * @return List with certificates or empty
+	 */
+	public List<X509Certificate> getRootCertificatesBySubjectDN(String subjectDN) {
+		if (rootCertificatesMap == null || rootCertificatesMap.isEmpty() || subjectDN == null || subjectDN.isEmpty()) {
+			return Collections.emptyList();
+		}
+		List<X509Certificate> certificates = new ArrayList<>();
+		rootCertificatesMap.forEach((s, x509Certificate) -> {
+			if (s.equals(subjectDN)) {
+				certificates.add(x509Certificate);
+			}
+		});
+		return certificates;
+	}
+
 	private KeyStore getCertificationKeyStore(String aaguid, List<X509Certificate> certificates) {
 		return keyStoreCreator.createKeyStore(aaguid, certificates);
 	}
-
 }

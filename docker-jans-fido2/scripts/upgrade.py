@@ -29,6 +29,7 @@ def _transform_fido2_dynamic_config(conf):
     for k, v in [
         ("superGluuEnabled", False),
         ("oldU2fMigrationEnabled", True),
+        ("metadataUrlsProvider", ""),
     ]:
         # dont update if key exists
         if k in conf:

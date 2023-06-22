@@ -18,7 +18,7 @@ jobs:
       max-parallel: 6
       matrix:
         # add '"pgsql" when supported
-        persistence-backends: ["MYSQL", "PGSQL"]
+        persistence-backends: ["MYSQL", "PGSQL", "LDAP"]
         python-version: ["3.7"]
       fail-fast: false
     steps:
@@ -61,4 +61,11 @@ jobs:
         export JANS_INSECURE_CLIENT=true
         export TF_ACC=1
         cd terraform-provider-jans
-        go test -v ./...
+        go install github.com/jstemmer/go-junit-report/v2@latest
+        go test -v 2>&1 ./... | go-junit-report > ${{ matrix.persistence-backends }}report.xml
+
+    - uses: actions/upload-artifact@v2  # upload test results
+      if: success() || failure()        # run this step even if previous step failed
+      with:
+        name: go-test-results
+        path: ./terraform-provider-jans/${{ matrix.persistence-backends }}report.xml

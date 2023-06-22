@@ -5,7 +5,7 @@
 	<artifactId>jans-bom</artifactId>
 	<packaging>pom</packaging>
 	<name>jans-bom</name>
-	<version>1.0.14-SNAPSHOT</version>
+	<version>1.0.15-SNAPSHOT</version>
 
     <distributionManagement>
 	  <repository>
@@ -51,7 +51,7 @@
 		<log4j.version>2.19.0</log4j.version>
 		<slf4j.version>1.7.36</slf4j.version>
 
-		<guava.version>31.1-jre</guava.version>
+		<guava.version>32.0.0-jre</guava.version>
 	
 		<aws.sns.version>1.12.448</aws.sns.version>
 		<jackrabbit.version>2.21.13</jackrabbit.version>
@@ -394,7 +394,7 @@
 			<!-- <dependency>
 				<groupId>javax.persistence</groupId>
 				<artifactId>persistence-api</artifactId>
-				<version>1.0.14-SNAPSHOT</version>
+				<version>1.0.15-SNAPSHOT</version>
 			</dependency> -->
 
 			<!-- hibernate -->

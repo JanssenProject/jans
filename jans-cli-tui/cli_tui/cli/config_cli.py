@@ -502,7 +502,6 @@ class JCA_CLI:
             raise ValueError(
                 self.colored_text("Unable to connect jans-auth server:\n {}".format(str(e)), error_color))
 
-
         self.log_response(response)
 
         if self.wrapped:
@@ -511,6 +510,10 @@ class JCA_CLI:
             print(response.status_code)
             print(response.text)
 
+        for key in ('user_data', 'access_token_enc', 'access_token'):
+            if key in config['DEFAULT']:
+                config['DEFAULT'].pop(key)
+        write_config()
 
 
     def check_access_token(self):
@@ -1294,7 +1297,11 @@ class JCA_CLI:
 
         cmd_data = data
         if not data and data_fn:
-            cmd_data = self.get_json_from_file(data_fn)
+            for key in op_path.get('requestBody', {}).get('content', {}).keys():
+                if 'zip' in key:
+                    break
+            else:
+                cmd_data = self.get_json_from_file(data_fn)
 
         if call_method in ('post', 'put', 'patch'):
             self.log_cmd(operation_id, url_suffix, endpoint_args, cmd_data)
