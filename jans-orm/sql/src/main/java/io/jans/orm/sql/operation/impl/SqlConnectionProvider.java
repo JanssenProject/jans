@@ -160,16 +160,6 @@ public class SqlConnectionProvider {
 			objectPoolConfig.setMinIdle(cpMinIdle);
 		}
 
-		Boolean testOnCreate = StringHelper.toBoolean(props.getProperty("connection.pool.test-on-create"), null);
-		if (testOnCreate != null) {
-			objectPoolConfig.setTestOnCreate(testOnCreate);
-		}
-
-		Boolean testOnReturn = StringHelper.toBoolean(props.getProperty("connection.pool.test-on-return"), null);
-		if (testOnReturn != null) {
-			objectPoolConfig.setTestOnReturn(testOnReturn);
-		}
-
 		Integer cpMaxWaitTimeMillis = StringHelper.toInteger(props.getProperty("connection.pool.max-wait-time-millis"),
 				null);
 		if (cpMaxWaitTimeMillis != null) {
@@ -180,6 +170,16 @@ public class SqlConnectionProvider {
 				.toInteger(props.getProperty("connection.pool.min-evictable-idle-time-millis"), null);
 		if (cpMaxWaitTimeMillis != null) {
 			objectPoolConfig.setMinEvictableIdleTimeMillis(cpMinEvictableIdleTimeMillis);
+		}
+
+		Boolean testOnCreate = StringHelper.toBoolean(props.getProperty("connection.pool.test-on-create"), null);
+		if (testOnCreate != null) {
+			objectPoolConfig.setTestOnCreate(testOnCreate);
+		}
+
+		Boolean testOnReturn = StringHelper.toBoolean(props.getProperty("connection.pool.test-on-return"), null);
+		if (testOnReturn != null) {
+			objectPoolConfig.setTestOnReturn(testOnReturn);
 		}
 
 		openWithWaitImpl();
