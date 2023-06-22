@@ -37,8 +37,9 @@ public class ApiApplication extends Application {
         HashSet<Class<?>> classes = new HashSet<>();
 
         classes.add(SamlConfigResource.class);
-        classes.add(SamlTrustRelationshipResource.class);
-        
+        classes.add(SamlClientResource.class);
+        classes.add(SamlScopeResource.class);
+				
         return classes;
     }
 }

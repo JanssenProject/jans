@@ -28,10 +28,10 @@ import org.keycloak.representations.idm.UserRepresentation;
 
 import org.slf4j.Logger;
 
-@Path(Constants.TRUST_RELATIONSHIP)
+@Path(Constants.CLIENT)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public class SamlTrustRelationshipResource extends BaseResource {
+public class SamlClientResource extends BaseResource {
 
     @Inject
     Logger logger;
@@ -75,7 +75,7 @@ public class SamlTrustRelationshipResource extends BaseResource {
         return Response.ok(userList).build();
     }
 
-    @Operation(summary = "Get client by name", description = "Get client by name", operationId = "get-saml-client-by-name", tags = {
+    @Operation(summary = "Get client by clientId", description = "Get client by clientId", operationId = "get-saml-client-by-name", tags = {
             "SAML - Client" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.SAML_READ_ACCESS }))
     @ApiResponses(value = {
@@ -84,14 +84,14 @@ public class SamlTrustRelationshipResource extends BaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { Constants.SAML_READ_ACCESS })
-    @Path(Constants.NAME_PARAM_PATH)
+    @Path(Constants.CLIENTID_PATH)
     public Response searchClient(
-            @Parameter(description = "Client name") @PathParam(Constants.NAME) @NotNull String name) {
-        logger.info("Searching client by name: {}", name);
+            @Parameter(description = "Client name") @PathParam(Constants.CLIENTID) @NotNull String clientId) {
+        logger.info("Searching client by clientId: {}", clientId);
 
-        List<ClientRepresentation> clients = samlService.serachClients(name);
+        List<ClientRepresentation> clients = samlService.serachClients(clientId);
 
-        logger.info("Clients found by name:{}, clients:{}", name, clients);
+        logger.info("Clients found by name:{}, clients:{}", clientId, clients);
 
         return Response.ok(clients).build();
     }

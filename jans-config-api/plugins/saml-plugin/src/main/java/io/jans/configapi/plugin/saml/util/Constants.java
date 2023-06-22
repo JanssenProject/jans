@@ -11,11 +11,14 @@ public class Constants {
     private Constants() {}
 
     public static final String SAML_CONFIG = "/saml-config";
-    public static final String TRUST_RELATIONSHIP = "/trust-relationship";
+    public static final String CLIENT = "/client";
+    public static final String CLIENT_SCOPE = "/{client-scope}";
     public static final String NAME_PARAM_PATH = "/{name}";
     public static final String NAME = "name";
     public static final String ID_PATH = "{id}";
     public static final String ID = "id";
+    public static final String CLIENTID_PATH = "/{clientId}";
+    public static final String CLIENTID = "clientId";
     
     
     //Scopes
