@@ -51,7 +51,7 @@ public class SamlScopeResource extends BaseResource {
     public Response getClientScope(
             @Parameter(description = "Client Id") @PathParam(Constants.CLIENTID) @NotNull String clientId) {
         List<ProtocolMapperRepresentation> protocolMappers = null;
-        List<ClientRepresentation> clients = samlService.serachClients(clientId);
+        List<ClientRepresentation> clients = samlService.getClientByClientId(clientId);
         logger.info("Clients found by clientId:{}, clients:{}", clientId, clients);
         if (clients != null && !clients.isEmpty()) {
             ClientRepresentation client = clients.get(0);
@@ -74,11 +74,11 @@ public class SamlScopeResource extends BaseResource {
     @POST
     @Path("test"+Constants.CLIENTID_PATH)
     @ProtectedApi(scopes = { Constants.SAML_CLIENT_SCOPE_WRITE_ACCESS })
-    public Response addClientScopeNEw(
+    public Response addClientScopeNew(
             @Parameter(description = "Client Id") @PathParam(Constants.CLIENTID) @NotNull String clientId,
             @Valid @NotNull ProtocolMapperRepresentation protocolMapperRepresentation) {
 
-        List<ClientRepresentation> clients = samlService.serachClients(clientId);
+        List<ClientRepresentation> clients = samlService.getClientByClientId(clientId);
         logger.info("clientId:{}, protocolMapperRepresentation:{}, clients:{}", clientId, protocolMapperRepresentation,
                 clients);
 
@@ -106,7 +106,7 @@ public class SamlScopeResource extends BaseResource {
             @Parameter(description = "Client Id") @PathParam(Constants.CLIENTID) @NotNull String clientId,
             @Valid @NotNull ProtocolMapperRepresentation protocolMapperRepresentation) {
 
-        List<ClientRepresentation> clients = samlService.serachClients(clientId);
+        List<ClientRepresentation> clients = samlService.getClientByClientId(clientId);
         logger.info("clientId:{}, protocolMapperRepresentation:{}, clients:{}", clientId, protocolMapperRepresentation,
                 clients);
 
@@ -137,7 +137,7 @@ public class SamlScopeResource extends BaseResource {
             @Parameter(description = "Client Id") @PathParam(Constants.CLIENTID) @NotNull String clientId,
             @Valid List<ProtocolMapperRepresentation> protocolMapperRepresentationList) {
         List<ProtocolMapperRepresentation> protocolMappers = null;
-        List<ClientRepresentation> clients = samlService.serachClients(clientId);
+        List<ClientRepresentation> clients = samlService.getClientByClientId(clientId);
         logger.info("Clients found by clientId:{}, clients:{}", clientId, clients);
         if (clients != null && !clients.isEmpty()) {
             ClientRepresentation client = clients.get(0);

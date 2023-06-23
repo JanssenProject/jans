@@ -75,7 +75,7 @@ public class SamlClientResource extends BaseResource {
         return Response.ok(userList).build();
     }
 
-    @Operation(summary = "Get client by clientId", description = "Get client by clientId", operationId = "get-saml-client-by-name", tags = {
+    @Operation(summary = "Get client by clientId", description = "Get client by clientId", operationId = "get-saml-client-by-clientId", tags = {
             "SAML - Client" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.SAML_READ_ACCESS }))
     @ApiResponses(value = {
@@ -85,15 +85,36 @@ public class SamlClientResource extends BaseResource {
     @GET
     @ProtectedApi(scopes = { Constants.SAML_READ_ACCESS })
     @Path(Constants.CLIENTID_PATH)
-    public Response searchClient(
+    public Response getClientByClientId(
             @Parameter(description = "Client Id") @PathParam(Constants.CLIENTID) @NotNull String clientId) {
         logger.info("Searching client by clientId: {}", clientId);
 
-        List<ClientRepresentation> clients = samlService.serachClients(clientId);
+        List<ClientRepresentation> clients = samlService.getClientByClientId(clientId);
 
         logger.info("Clients found by name:{}, clients:{}", clientId, clients);
 
         return Response.ok(clients).build();
+    }
+
+    @Operation(summary = "Get client by Id", description = "Get client by Id", operationId = "get-saml-client-by-id", tags = {
+            "SAML - Client" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    Constants.SAML_READ_ACCESS }))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ClientRepresentation.class))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
+    @GET
+    @ProtectedApi(scopes = { Constants.SAML_READ_ACCESS })
+    @Path(Constants.ID_PATH + Constants.ID_PATH_PARAM)
+    public Response searchClient(
+            @Parameter(description = "Unique identifier of Client - Id") @PathParam(Constants.ID) @NotNull String id) {
+        logger.info("Searching client by id: {}", id);
+
+        ClientRepresentation client = samlService.getClientById(id);
+
+        logger.info("Client found by id:{}, client:{}", id, client);
+
+        return Response.ok(client).build();
     }
 
     @Operation(summary = "Create Client", description = "Create Client", operationId = "post-client", tags = {
@@ -145,7 +166,7 @@ public class SamlClientResource extends BaseResource {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @DELETE
-    @Path(Constants.ID_PATH)
+    @Path(Constants.ID_PATH_PARAM)
     @ProtectedApi(scopes = { Constants.SAML_WRITE_ACCESS })
     public Response deleteClient(
             @Parameter(description = "Unique Id of client") @PathParam(Constants.ID) @NotNull String id) {

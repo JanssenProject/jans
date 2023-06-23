@@ -20,10 +20,13 @@ import org.apache.commons.lang.StringUtils;
 import org.keycloak.admin.client.CreatedResponseUtil;
 import org.keycloak.admin.client.resource.ClientResource;
 import org.keycloak.admin.client.resource.ClientsResource;
+import org.keycloak.admin.client.resource.ProtocolMappersResource;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.idm.ClientRepresentation;
+import org.keycloak.representations.idm.ProtocolMapperRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
+
 
 import org.slf4j.Logger;
 
@@ -72,6 +75,19 @@ public class SamlService {
         logger.info(" usersResource:{})", usersResource);
 
         return usersResource;
+    }   
+
+    public List<UserRepresentation> getAllUsers() {
+        List<UserRepresentation> userList = getUsers(null);
+        logger.info("All userList:{}", userList);
+        return userList;
+    }
+    
+    public List<UserRepresentation> getUsers(String realm) {
+        logger.info("Fetching users in realm:{})", realm);
+        List<UserRepresentation> userList = getUsersResource(null).list();
+        logger.info("All userList:{}", userList);
+        return userList;
     }
 
     public List<ClientRepresentation> getAllClients() {
@@ -79,13 +95,7 @@ public class SamlService {
         logger.info("All clients - clientList:{}", clientList);
         return clientList;
     }
-
-    public List<UserRepresentation> getAllUsers() {
-        List<UserRepresentation> userList = getUsers(null);
-        logger.info("All userList:{}", userList);
-        return userList;
-    }
-
+    
     public List<ClientRepresentation> getClients(String realm) {
         logger.info("Serach client in realm:{})", realm);
 
@@ -95,29 +105,33 @@ public class SamlService {
         return clients;
     }
 
-    public List<ClientRepresentation> serachClients(String name) {
-        logger.info("Searching client by name:{}", name);
+    public List<ClientRepresentation> getClientByClientId(String clientId) {
+        logger.info("Searching client by clientId:{}", clientId);
 
-        List<ClientRepresentation> clientList = serachClients(name, null);
+        List<ClientRepresentation> clientList = serachClients(clientId, null);
 
-        logger.info("Clients by name:{} are clientList:{}", name, clientList);
+        logger.info("Clients by clientId:{} are clientList:{}", clientId, clientList);
         return clientList;
     }
+    
+    public List<ClientRepresentation> serachClients(String clientId, String realm) {
+        logger.info("Searching client by clientId:{} in realm:{})", clientId, realm);
 
-    public List<ClientRepresentation> serachClients(String name, String realm) {
-        logger.info("Searching client by name:{} in realm:{})", name, realm);
-
-        List<ClientRepresentation> clientList = getClientsResource(null).findByClientId(name);
+        List<ClientRepresentation> clientList = getClientsResource(null).findByClientId(clientId);
 
         logger.info("All clientList:{}", clientList);
         return clientList;
     }
+    
+    public ClientRepresentation getClientById(String id) {
+        logger.info("Searching client by String id:{}", id);
 
-    public List<UserRepresentation> getUsers(String realm) {
-        logger.info("Fetching users in realm:{})", realm);
-        List<UserRepresentation> userList = getUsersResource(null).list();
-        logger.info("All userList:{}", userList);
-        return userList;
+        ClientResource clientResource = getClientsResource(null).get(id);
+        logger.info("clientResource:{}", clientResource);
+        
+        ClientRepresentation client = clientResource.toRepresentation();
+        logger.info("ClientRepresentation:{}", client);
+        return client;
     }
 
     public ClientRepresentation createClient(ClientRepresentation clientRepresentation)  {
@@ -168,6 +182,57 @@ public class SamlService {
         clientResource.remove();
         logger.info("afrer deleting client identified by id:{})", id);
 
+    }
+    
+    public ProtocolMappersResource getClientProtocolMappersResource(String clientId) {
+        logger.info(" Get Client ProtocolMappersResource for client - clientId:{}", clientId);
+        ProtocolMappersResource protocolMappersResource = null;
+        List<ClientRepresentation> clients = this.getClientByClientId(clientId);
+        logger.info("clients:{}", clients);
+
+        if (clients != null && !clients.isEmpty()) {
+            ClientResource clientResource = getClientsResource(null).get(clients.get(0).getId());
+            logger.info(" clientResource:{}", clientResource);
+    
+            protocolMappersResource = clientResource.getProtocolMappers();
+               
+            logger.info(" protocolMappersResource:{} for client:{}", protocolMappersResource, clientId);
+        }
+
+        return protocolMappersResource;
+    }
+    
+    public List<ProtocolMapperRepresentation> getClientProtocolMapperRepresentation(String clientId) {
+        logger.info(" Get Client ProtocolMapper for client - clientId:{}", clientId);
+        List<ProtocolMapperRepresentation> protocolMapperRepresentationList = null;
+        ProtocolMappersResource protocolMappersResource = this.getClientProtocolMappersResource(clientId);
+        logger.info("clientId:{} -> protocolMappersResource:{}", clientId, protocolMappersResource);
+
+        if (protocolMappersResource != null ) {
+            protocolMapperRepresentationList = protocolMappersResource.getMappers();           
+            logger.info(" protocolMappers:{} for client:{}", protocolMapperRepresentationList, clientId);
+        }
+
+        return protocolMapperRepresentationList;
+    }
+    
+    public List<ProtocolMapperRepresentation> addClientProtocolMappersResource(String clientId, ProtocolMapperRepresentation protocolMapperRepresentation) {
+        logger.info(" Add ProtocolMapper for client - clientId:{} with protocolMapperRepresentation:{}", clientId, protocolMapperRepresentation);
+        List<ProtocolMapperRepresentation> protocolMappers = null;
+        List<ClientRepresentation> clients = this.getClientByClientId(clientId);
+        logger.info("clients:{}", clients);
+
+        if (clients != null && !clients.isEmpty()) {
+            ClientResource clientResource = getClientsResource(null).get(clients.get(0).getId());
+            logger.info(" clientResource:{}", clientResource);
+    
+            ProtocolMappersResource protocolMappersResource = clientResource.getProtocolMappers();
+            protocolMappers = protocolMappersResource.getMappers();
+           
+            logger.info(" protocolMappers:{} for client:{}", protocolMappers, clientId);
+        }
+
+        return protocolMappers;
     }
 
 }

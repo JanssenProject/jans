@@ -153,7 +153,7 @@ paths:
       - SAML - Client
       summary: Get client by clientId
       description: Get client by clientId
-      operationId: get-saml-client-by-name
+      operationId: get-saml-client-by-clientId
       parameters:
       - name: clientId
         in: path
@@ -170,6 +170,34 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ClientRepresentation'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/saml.readonly
+  /saml/samlClient/id/{id}:
+    get:
+      tags:
+      - SAML - Client
+      summary: Get client by Id
+      description: Get client by Id
+      operationId: get-saml-client-by-id
+      parameters:
+      - name: id
+        in: path
+        description: Unique identifier of Client - Id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientRepresentation'
         "401":
           description: Unauthorized
         "500":
@@ -228,6 +256,106 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/saml-client-scope.readonly
+    put:
+      tags:
+      - SAML - Client Scope
+      summary: Update Client Scope
+      description: Update Client Scope
+      operationId: post-saml-client-scope_1
+      parameters:
+      - name: clientId
+        in: path
+        description: Client Id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/ProtocolMapperRepresentation'
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProtocolMapperRepresentation'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/saml-client-scope.write
+    post:
+      operationId: addClientScope
+      parameters:
+      - name: clientId
+        in: path
+        description: Client Id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProtocolMapperRepresentation'
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProtocolMapperRepresentation'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+  /saml/clientScope/test/{clientId}:
+    post:
+      tags:
+      - SAML - Client Scope
+      summary: Add new Client Scope
+      description: Add new Client Scope
+      operationId: post-saml-client-scope
+      parameters:
+      - name: clientId
+        in: path
+        description: Client Id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProtocolMapperRepresentation'
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProtocolMapperRepresentation'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/saml-client-scope.write
 components:
   schemas:
     ClientRepresentation:

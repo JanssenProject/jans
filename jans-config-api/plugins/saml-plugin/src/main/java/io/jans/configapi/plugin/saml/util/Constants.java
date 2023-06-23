@@ -15,7 +15,8 @@ public class Constants {
     public static final String SAML_CLIENT_SCOPE = "/clientScope";
     public static final String NAME_PARAM_PATH = "/{name}";
     public static final String NAME = "name";
-    public static final String ID_PATH = "{id}";
+    public static final String ID_PATH = "/id";
+    public static final String ID_PATH_PARAM = "/{id}";
     public static final String ID = "id";
     public static final String CLIENTID_PATH = "/{clientId}";
     public static final String CLIENTID = "clientId";
