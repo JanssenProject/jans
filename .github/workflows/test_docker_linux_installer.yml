@@ -58,13 +58,8 @@ jobs:
         
         echo "generating rdbms docs for ${{ matrix.persistence-backends }}..."
         sudo bash ./automation/docs/generate-rdbms-docs.sh "$persistence" || echo "generating rdbms docs failed for ${{ matrix.persistence-backends }}!!!"
-        git add ./docs/* && git update-index --refresh || echo "generating rdbms docs failed for ${{ matrix.persistence-backends }}!!!"
-        git commit -m "docs: update rdbms docs"] || echo "generating rdbms docs failed for ${{ matrix.persistence-backends }}!!!"
-        git push --set-upstream origin cn-jans-update-rdbms-auto-generated-docs || echo "generating rdbms docs failed for ${{ matrix.persistence-backends }}!!!"
         echo "generating rdbms docs for ${{ matrix.persistence-backends }} done"
-        MESSAGE="fix(docs): autogenerate RDBMS docs"
-        gh pr create --body "Auto generated RDBMS docs" --title "${MESSAGE}"
-        
+
         export JANS_URL=https://demoexample.jans.io
         export JANS_CLIENT_ID=9876baac-de39-4c23-8a78-674b59df8c09
         export JANS_CLIENT_SECRET=1t5Fin3#security
