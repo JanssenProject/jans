@@ -72,6 +72,34 @@ public class SamlScopeResource extends BaseResource {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
+    @Path("test"+Constants.CLIENTID_PATH)
+    @ProtectedApi(scopes = { Constants.SAML_CLIENT_SCOPE_WRITE_ACCESS })
+    public Response addClientScopeNEw(
+            @Parameter(description = "Client Id") @PathParam(Constants.CLIENTID) @NotNull String clientId,
+            @Valid @NotNull ProtocolMapperRepresentation protocolMapperRepresentation) {
+
+        List<ClientRepresentation> clients = samlService.serachClients(clientId);
+        logger.info("clientId:{}, protocolMapperRepresentation:{}, clients:{}", clientId, protocolMapperRepresentation,
+                clients);
+
+        if (protocolMapperRepresentation != null && !clients.isEmpty()) {
+            ClientRepresentation client = clients.get(0);
+            logger.info(" clientId:{}, client:{}", clientId, client);
+            List<ProtocolMapperRepresentation> protocolMappers = client.getProtocolMappers();
+            protocolMappers.add(protocolMapperRepresentation);
+            client = samlService.updateClient(client);
+            logger.info(" After update of protocolMappers - clientId:{}, client:{}", clientId, client);
+        }
+
+        logger.info("protocolMapperRepresentation:{}", protocolMapperRepresentation);
+        return Response.ok(protocolMapperRepresentation).build();
+    }
+    
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = ProtocolMapperRepresentation.class)))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
+    @POST
     @Path(Constants.CLIENTID_PATH)
     @ProtectedApi(scopes = { Constants.SAML_CLIENT_SCOPE_WRITE_ACCESS })
     public Response addClientScope(
