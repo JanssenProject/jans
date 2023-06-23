@@ -31,8 +31,6 @@ import org.slf4j.Logger;
 @Produces(MediaType.APPLICATION_JSON)
 public class SamlConfigResource extends BaseResource {
 
-    private static final String SAML_CONFIGURATION = "samlConfiguration";
-
     @Inject
     Logger logger;
 
