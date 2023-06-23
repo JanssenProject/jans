@@ -13,4 +13,4 @@ git add ./docs/* && git update-index --refresh || echo "generating rdbms docs fa
 git commit -m "docs: update rdbms docs"] || echo "generating rdbms docs failed for ${{ matrix.persistence-backends }}!!!"
 git push --set-upstream origin cn-jans-update-rdbms-auto-generated-docs || echo "generating rdbms docs failed for ${{ matrix.persistence-backends }}!!!"
 MESSAGE="fix(docs): autogenerate RDBMS docs"
-gh pr create --body "Auto generated RDBMS docs" --title "${MESSAGE}"
+gh pr create --body "Auto generated RDBMS docs" --title "${MESSAGE}" || echo "PR exists"
