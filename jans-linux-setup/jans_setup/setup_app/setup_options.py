@@ -25,6 +25,7 @@ def get_setup_options():
         'loadTestDataExit': False,
         'loadData': True,
         'properties_password': None,
+        'install_saml_integration': False,
     }
 
     if not (getattr(base.argsp, 'remote_couchbase', None) or base.argsp.remote_rdbm or base.argsp.local_rdbm):
@@ -189,6 +190,8 @@ def get_setup_options():
 
     if base.argsp.no_httpd:
         setupOptions['installHTTPD'] = False
+
+    setupOptions['install_saml_integration'] = base.argsp.install_saml_integration
 
 
     return setupOptions

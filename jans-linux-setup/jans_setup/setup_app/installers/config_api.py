@@ -25,6 +25,7 @@ class ConfigApiInstaller(JettyInstaller):
                 (os.path.join(Config.dist_jans_dir, 'user-mgt-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/user-mgt-plugin/{0}/user-mgt-plugin-{0}-distribution.jar').format(base.current_app.app_info['ox_version'])),
                 (os.path.join(Config.dist_jans_dir, 'fido2-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/fido2-plugin/{0}/fido2-plugin-{0}-distribution.jar').format(base.current_app.app_info['ox_version'])),
                 (os.path.join(Config.dist_jans_dir, 'cache-refresh-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/cache-refresh-plugin/{0}/cache-refresh-plugin-{0}-distribution.jar').format(base.current_app.app_info['ox_version'])),
+                (os.path.join(Config.dist_jans_dir, 'saml-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/saml-plugin-plugin/{0}/saml-plugin-{0}-distribution.jar').format(base.current_app.app_info['ox_version'])),
                 ]
 
     def __init__(self):
@@ -69,6 +70,9 @@ class ConfigApiInstaller(JettyInstaller):
 
         if Config.install_cache_refresh:
             self.install_plugin('cache-refresh-plugin')
+
+        if Config.install_saml_integration:
+            self.install_plugin('saml-plugin')
 
         self.enable()
 
