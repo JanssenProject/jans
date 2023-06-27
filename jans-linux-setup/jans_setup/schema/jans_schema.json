@@ -3241,7 +3241,120 @@
       "substr": "caseIgnoreSubstringsMatch",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
       "x_origin": "Jans created attribute"
-    }
+    },
+	{
+		"equality": "caseIgnoreMatch",
+		"names": [
+			"jansValidationStatus"
+		],
+		"oid": "jansAttr",
+		"substr": "caseIgnoreSubstringsMatch",
+		"syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+		"x_origin": "Jans created attribute"
+	},
+	{
+	"desc": "Used to specify if a SAML Trust Relationship is a federation.  It could also be a website",
+	"equality": "caseIgnoreMatch",
+	"names": [
+		"jansIsFed"
+	],
+	"oid": "jansAttr",
+	"substr": "caseIgnoreSubstringsMatch",
+	"syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+	"x_origin": "Jans created attribute"
+	},
+	{
+	"desc": "SAML Trust Relationship attribute",
+	"equality": "caseIgnoreMatch",
+	"names": [
+		"jansProfileConf"
+	],
+	"multivalued": true,
+	"oid": "jansAttr",
+	"substr": "caseIgnoreSubstringsMatch",
+	"syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+	"x_origin": "Jans created attribute"
+	},
+	{
+		"desc": "dn of the released attribute",
+		"equality": "caseIgnoreMatch",
+		"names": [
+			"jansReleasedAttr"
+		],
+		"multivalued": true,
+		"oid": "jansAttr",
+		"substr": "caseIgnoreSubstringsMatch",
+		"syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+		"x_origin": "Jans created attribute"
+	},
+	{
+		"desc": "Metadata filter in SAML trust relationship",
+		"equality": "caseIgnoreMatch",
+		"names": [
+			"jansSAMLMetaDataFilter"
+		],
+		"multivalued": true,
+		"oid": "jansAttr",
+		"substr": "caseIgnoreSubstringsMatch",
+		"syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+		"x_origin": "Jans created attribute"
+	},
+	{
+		"desc": "SAML Trust Relationship SP metadata type - file, URI, federation",
+		"equality": "caseIgnoreMatch",
+		"names": [
+			"jansSAMLspMetaDataSourceTyp"
+		],
+		"oid": "jansAttr",
+		"substr": "caseIgnoreSubstringsMatch",
+		"syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+		"x_origin": "Jans created attribute"
+	},
+	{
+		"desc": "SAML Trust Relationship URI location of metadata",
+		"equality": "caseIgnoreMatch",
+		"names": [
+			"jansSAMLspMetaDataURL"
+		],
+		"oid": "jansAttr",
+		"substr": "caseIgnoreSubstringsMatch",
+		"syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+		"x_origin": "Jans created attribute"
+	},
+	{
+		"equality": "caseIgnoreMatch",
+		"names": [
+			"jansValidationLog"
+		],
+		"multivalued": true,
+		"oid": "jansAttr",
+		"substr": "caseIgnoreSubstringsMatch",
+		"syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+		"x_origin": "Jans created attribute"
+	},
+	{
+		"desc": "Specifies SAML trust relationship entity ID",
+		"equality": "caseIgnoreMatch",
+		"names": [
+			"jansEntityId"
+		],
+		"multivalued": true,
+		"oid": "jansAttr",
+		"substr": "caseIgnoreSubstringsMatch",
+		"syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+		"x_origin": "Jans created attribute"
+	},
+	{
+		"desc": "This data has information about TR EntityType",
+		"equality": "caseIgnoreMatch",
+		"names": [
+			"jansEntityTyp"
+		],
+		"oid": "jansAttr",
+		"substr": "caseIgnoreSubstringsMatch",
+		"syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+		"x_origin": "Jans created attribute"
+	}
   ],
   "objectClasses": [
     {
@@ -4398,7 +4511,41 @@
         "top"
       ],
       "x_origin": "Jans created objectclass"
-    }
+    },
+	{
+		"kind": "STRUCTURAL",
+		"may": [
+			"inum",
+			"description",
+			"displayName",
+			"jansStatus",
+			"jansValidationStatus",
+			"jansIsFed",
+			"jansProfileConf",
+			"jansReleasedAttr",			
+		    "jansSAMLMetaDataFilter",		
+			"jansSAMLspMetaDataSourceTyp",
+			"jansSAMLspMetaDataURL",
+			"jansValidationLog",
+			"o",
+			"jansPostLogoutRedirectURI",
+			"url",
+			"researchAndScholarshipEnabled",
+            "jansEntityId",
+			"jansEntityTyp"
+		],
+		"must": [
+			"objectclass"
+		],
+		"names": [
+			"jansSAMLconfig"
+		],
+		"oid": "jansObjClass",
+		"sup": [
+			"top"
+		],
+		"x_origin": "Jans created objectclass"
+	}
   ],
   "oidMacros": {
     "jansAttr": "jansPublished:3",
