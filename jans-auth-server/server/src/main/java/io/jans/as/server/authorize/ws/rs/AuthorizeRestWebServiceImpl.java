@@ -534,6 +534,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
     private void checkPromptSelectAccount(AuthzRequest authzRequest, List<Prompt> prompts) {
         if (prompts.contains(Prompt.SELECT_ACCOUNT)) {
+            if (log.isTraceEnabled()) {
+                cookieService.getCurrentSessions(authzRequest.getHttpRequest()); // force print current_sessions
+            }
             throw new WebApplicationException(redirectToSelectAccountPage(authzRequest, prompts));
         }
     }
