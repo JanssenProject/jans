@@ -223,10 +223,19 @@ def uninstall_jans():
                 os.remove(default_fn)
             print("Stopping", service)
             os.system('systemctl stop ' + service)
+            os.system('systemctl disable ' + service)
+            unit_fn = os.path.join('/etc/systemd/system', service + '.service')
+            if os.path.exists(unit_fn):
+                os.remove(unit_fn)
 
     if os.path.exists('/opt/opendj/bin/stop-ds'):
         print("Stopping OpenDj Server")
         os.system('/opt/opendj/bin/stop-ds')
+        os.system('systemctl disable opendj')
+        os.remove('/etc/systemd/system/opendj.service')
+
+    os.system('systemctl daemon-reload')
+    os.system('systemctl reset-failed')
 
     remove_list = ['/etc/certs', '/etc/jans', '/opt/jans', '/opt/amazon-corretto*', '/opt/jre', '/opt/node*', '/opt/jetty*', '/opt/jython*']
     if argsp.profile == 'jans':
