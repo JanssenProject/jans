@@ -2,6 +2,7 @@
 set -euo pipefail
 PERSISTENCE=$1
 echo "Generate RDBMS docs"
+cd jans
 git config pull.rebase true
 git checkout -b cn-jans-update-"$PERSISTENCE"-auto-generated-docs || echo "Branch exists"
 git pull origin cn-jans-update-"$PERSISTENCE"-auto-generated-docs || echo "Nothing to pull"
