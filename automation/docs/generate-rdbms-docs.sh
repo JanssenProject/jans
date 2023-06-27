@@ -2,8 +2,6 @@
 set -euo pipefail
 PERSISTENCE=$1
 echo "Generate RDBMS docs"
-git clone https://github.com/JanssenProject/jans.git
-cd jans
 git config pull.rebase true
 git checkout -b cn-jans-update-rdbms-auto-generated-docs || echo "Branch exists"
 git pull origin cn-jans-update-rdbms-auto-generated-docs || echo "Nothing to pull"
@@ -13,7 +11,7 @@ docker exec docker-jans-monolith-jans-1 ls -l /opt/
 docker cp docker-jans-monolith-jans-1:/opt/"$PERSISTENCE"-schema.md ./docs/admin/reference/database/"$PERSISTENCE"-schema.md || echo "No schema file found"
 docker cp docker-jans-monolith-jans-1:/opt/"$PERSISTENCE"-schema-indexes.md ./docs/admin/reference/database/"$PERSISTENCE"-schema-indexes.md || echo "No schema indexes file found"
 git add . && git update-index --refresh || echo "generating rdbms docs failed !!!"
-git commit -m -S "docs: update rdbms docs"] || echo "generating rdbms docs failed !!!"
+git commit -m -S "docs: update rdbms docs" || echo "generating rdbms docs failed !!!"
 git push --set-upstream origin cn-jans-update-rdbms-auto-generated-docs || echo "generating rdbms docs failed !!!"
 MESSAGE="fix(docs): autogenerate RDBMS docs"
 gh pr create --body "Auto generated RDBMS docs" --title "${MESSAGE}" || echo "PR exists"
