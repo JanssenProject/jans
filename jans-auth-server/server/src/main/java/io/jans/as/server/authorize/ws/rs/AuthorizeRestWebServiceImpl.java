@@ -259,6 +259,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         authzRequestService.createOauth2AuditLog(authzRequest);
 
         log.debug("Attempting to request authorization: {}", authzRequest);
+        if (log.isTraceEnabled()) {
+            log.trace("Attempting to request authorization with cookies: {}", cookieService.getCookiesAsString(servletRequest));
+        }
 
         ResponseBuilder builder;
 
