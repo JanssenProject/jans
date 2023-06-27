@@ -206,6 +206,7 @@ class Config:
         self.install_cache_refresh = True
         self.loadTestData = False
         self.allowPreReleasedFeatures = False
+        self.install_saml_integration = False
 
         # backward compatibility
         self.os_type = base.os_type

@@ -112,6 +112,9 @@ if PROFILE != OPENBANKING_PROFILE:
     parser.add_argument('-test-client-redirect-uri', help="Redirect URI for test client")
     parser.add_argument('--test-client-trusted', help="Make test client trusted", action='store_true')
 
+    parser.add_argument('--install-saml-integration', help="Installs SAML Integration", action='store_true')
+
+
 else:
     # openbanking
     parser.add_argument('--no-external-key', help="Don't use external key", action='store_true')

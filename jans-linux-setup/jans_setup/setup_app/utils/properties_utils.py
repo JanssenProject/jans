@@ -869,6 +869,18 @@ class PropertiesUtils(SetupUtils):
 
             Config.ob_alias = self.getPrompt('  Openbanking Key Alias', Config.ob_alias)
 
+    def prompt_saml_integration(self):
+        if Config.installed_instance and Config.install_saml_integration:
+            return
+
+        prompt_for_saml_integration = self.getPrompt("Install SAML Integration?", 
+                            self.getDefaultOption(Config.install_saml_integration)
+                            )[0].lower()
+
+        Config.install_saml_integration = prompt_for_saml_integration == 'y'
+
+        if Config.installed_instance and Config.install_saml_integration:
+            Config.addPostSetupService.append('install_saml_integration')
 
     def promptForProperties(self):
 
@@ -954,6 +966,7 @@ class PropertiesUtils(SetupUtils):
             self.promptForScimServer()
             self.promptForFido2Server()
             self.prompt_for_cache_refresh()
+            self.prompt_saml_integration()
             #self.promptForEleven()
             #if (not Config.installOxd) and Config.oxd_package:
             #    self.promptForOxd()
