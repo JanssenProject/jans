@@ -54,7 +54,12 @@ jobs:
         ip=$(ifconfig eth0 | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1')
         sudo chmod u+x automation/startjanssenmonolithdemo.sh
         sudo bash ./automation/startjanssenmonolithdemo.sh demoexample.jans.io ${{ matrix.persistence-backends }} $ip ${{ github.sha }}
-        sudo bash ./automation/docs/generate-rdbms-docs.sh || echo "generating rdbms docs failed!!!"
+        persistence=$(echo "${{ matrix.persistence-backends }}" | tr '[:upper:]' '[:lower:]')
+        
+        echo "generating rdbms docs for ${{ matrix.persistence-backends }}..."
+        sudo bash ./automation/docs/generate-rdbms-docs.sh "$persistence" || echo "generating rdbms docs failed for ${{ matrix.persistence-backends }}!!!"
+        echo "generating rdbms docs for ${{ matrix.persistence-backends }} done"
+
         export JANS_URL=https://demoexample.jans.io
         export JANS_CLIENT_ID=9876baac-de39-4c23-8a78-674b59df8c09
         export JANS_CLIENT_SECRET=1t5Fin3#security
