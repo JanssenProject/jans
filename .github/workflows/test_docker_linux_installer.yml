@@ -57,6 +57,7 @@ jobs:
         persistence=$(echo "${{ matrix.persistence-backends }}" | tr '[:upper:]' '[:lower:]')
         
         echo "generating rdbms docs for ${{ matrix.persistence-backends }}..."
+        git clone  https://mo-auto:${{ secrets.MOAUTO_WORKFLOW_TOKEN }}@github.com/JanssenProject/jans.git
         sudo bash ./automation/docs/generate-rdbms-docs.sh "$persistence" || echo "generating rdbms docs failed for ${{ matrix.persistence-backends }}!!!"
         echo "generating rdbms docs for ${{ matrix.persistence-backends }} done"
 
