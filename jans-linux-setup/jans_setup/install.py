@@ -43,6 +43,7 @@ parser.add_argument('-uninstall', help="Uninstall Jans server and removes all fi
 parser.add_argument('--args', help="Arguments to be passed to setup.py")
 parser.add_argument('-yes', help="No prompt", action='store_true')
 parser.add_argument('--keep-downloads', help="Keep downloaded files (applicable for uninstallation only)", action='store_true')
+parser.add_argument('--keep-setup', help="Keep setup files for future install", action='store_true')
 parser.add_argument('--profile', help="Setup profile", choices=['jans', 'openbanking'], default='jans')
 parser.add_argument('-download-exit', help="Downloads files and exits", action='store_true')
 parser.add_argument('--setup-branch', help="Jannsen setup github branch", default="main")
@@ -237,11 +238,21 @@ def uninstall_jans():
     os.system('systemctl daemon-reload')
     os.system('systemctl reset-failed')
 
-    remove_list = ['/etc/certs', '/etc/jans', '/opt/jans', '/opt/amazon-corretto*', '/opt/jre', '/opt/node*', '/opt/jetty*', '/opt/jython*']
+    remove_list = ['/etc/certs', '/etc/jans', '/opt/amazon-corretto*', '/opt/jre', '/opt/node*', '/opt/jetty*', '/opt/jython*']
     if argsp.profile == 'jans':
         remove_list.append('/opt/opendj')
     if not argsp.keep_downloads:
         remove_list.append('/opt/dist')
+
+    if not argsp.keep_setup:
+        remove_list.append('/opt/jans')
+    else:
+        for rdir in glob.glob('/opt/jans/*'):
+            if rdir != '/opt/jans/jans-setup':
+                remove_list.append(rdir)
+        os.system('rm -r -f /opt/jans/jans-setup/output')
+        os.system('rm -f /opt/jans/jans-setup/logs/*.log')
+        os.system('rm -f /opt/jans/jans-setup/setup.properties.last')
 
     for p in remove_list:
         if glob.glob(p):
