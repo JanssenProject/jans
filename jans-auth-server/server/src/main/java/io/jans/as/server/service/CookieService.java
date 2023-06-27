@@ -167,24 +167,6 @@ public class CookieService {
         currentSessions.removeAll(toRemove);
     }
 
-    public String getCookiesAsString(HttpServletRequest request) {
-        StringBuilder result = new StringBuilder();
-        try {
-            final Cookie[] cookies = request.getCookies();
-            if (cookies != null) {
-                for (Cookie cookie : cookies) {
-                    result.append(cookie.getName());
-                    result.append("=");
-                    result.append(cookie.getValue());
-                    result.append("\n");
-                }
-            }
-        } catch (Exception e) {
-            log.error(e.getMessage(), e);
-        }
-        return result.toString();
-    }
-
     public String getValueFromCookie(HttpServletRequest request, String cookieName) {
         try {
             final Cookie[] cookies = request.getCookies();
