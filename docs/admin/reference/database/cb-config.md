@@ -8,13 +8,15 @@ tags:
 # Couchbase ORM persistence layer
 
 The recommended Couchbase version is 7.x. This DB should be installed before installing Jans.
-After running Jans setup administrator should provide user/password with role which allowto  create buckets and import initial data and configuration.
+After running Jans setup administrator should provide user/password with role which allow to create buckets and import initial data and configuration.
 
 During installation setup generates default **/etc/jans/conf/jans-couchbase.properties** and creates required buckets in DB with initial data set.
 
 ![](../../../assets/database-cb-buckets.jpg)
 
-The list of specific for Couchbase default setting of `jans-couchbase.properties`:
+## Configuration properties
+
+List of specific for Couchbase default setting from `jans-couchbase.properties`:
 
 ```
 servers: localhost
@@ -90,7 +92,7 @@ tls.enable: false
 
 ```
 
-The rest of properties which are static for all other supported DB:
+The rest of properties are static for all other supported DB:
 
 ```
 binaryAttributes=objectGUID
@@ -99,7 +101,7 @@ certificateAttributes=userCertificate
 
 ## `doc_id` building rules
 
-In order to support transparency  for end applications and allow data migration from one DB to another ORM requires `DN` attribute in each entry. This attribute it also uses to build `doc_id`. Here is example of this `DN` -> `doc_id` conversion:
+In order to support transparency for end applications and allow data migration from one DB to another ORM requires `DN` attribute in each entry. This attribute it also uses to build `doc_id`. Here is example of this `DN` -> `doc_id` conversion:
 
 ![](../../../assets/database-cb-scope-1.jpg)
 
@@ -149,8 +151,8 @@ This example shows how to use ORM. It opens connection to Couchbase DB and add u
         newUser.setDn(String.format("inum=%s,ou=people,o=jans", System.currentTimeMillis()));
         newUser.setUserId("sample_user_" + System.currentTimeMillis());
         newUser.setUserPassword("test");
-        newUser.getCustomAttributes().add(new CustomObjectAttribute("streetAddress", Arrays.asList("London", "Texas", "New York")));
-        newUser.getCustomAttributes().add(new CustomObjectAttribute("test", "test_value"));
+        newUser.getCustomAttributes().add(new CustomObjectAttribute("jansAddres", Arrays.asList("London", "Texas", "New York")));
+        newUser.getCustomAttributes().add(new CustomObjectAttribute("jansGuid", "test_value"));
         
         // Call ORM API to store entry
         couchbaseEntryManager.persist(newUser);
@@ -187,6 +189,9 @@ This example shows how to use ORM. It opens connection to Couchbase DB and add u
         connectionProperties.put("couchbase#bucket.jans_session.mapping", "sessions");
 
         connectionProperties.put("couchbase#password.encryption.method", "SSHA-256");
+
+        connectionProperties.put("couchbase#binaryAttributes", "objectGUID");
+        connectionProperties.put("couchbase#certificateAttributes", "userCertificate");
 
         return connectionProperties;
     }
