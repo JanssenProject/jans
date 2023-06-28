@@ -51,7 +51,7 @@ public class OAuth2Resource {
             AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration(appType);
 
             OAuth2ConfigResponse oauth2Config = new OAuth2ConfigResponse();
-            oauth2Config.setOpHost(auiConfiguration.getAuthServerHost());
+            oauth2Config.setAuthServerHost(auiConfiguration.getAuthServerHost());
             oauth2Config.setAuthzBaseUrl(auiConfiguration.getAuthServerAuthzBaseUrl());
             oauth2Config.setClientId(auiConfiguration.getAuthServerClientId());
             oauth2Config.setResponseType("code");
