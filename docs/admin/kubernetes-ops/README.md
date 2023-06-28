@@ -17,6 +17,7 @@ This Operation guide helps you learn about the common operations for Janssen on 
 
 ## Common Operations
 
+- [Upgrade](upgrade.md)
 - [Scaling](scaling.md)
 - [Backup and Restore](backup-restore.md)  
 - [Certificate Management](cert-management.md)  
