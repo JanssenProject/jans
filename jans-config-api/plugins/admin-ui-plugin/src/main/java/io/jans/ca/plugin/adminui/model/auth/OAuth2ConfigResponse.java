@@ -2,6 +2,7 @@ package io.jans.ca.plugin.adminui.model.auth;
 
 public class OAuth2ConfigResponse {
 
+    private String opHost;
     private String authzBaseUrl;
     private String clientId;
     private String responseType;
@@ -11,6 +12,14 @@ public class OAuth2ConfigResponse {
     private String frontChannelLogoutUrl;
     private String postLogoutRedirectUri;
     private String endSessionEndpoint;
+
+    public String getOpHost() {
+        return opHost;
+    }
+
+    public void setOpHost(String opHost) {
+        this.opHost = opHost;
+    }
 
     public String getAuthzBaseUrl() {
         return authzBaseUrl;
