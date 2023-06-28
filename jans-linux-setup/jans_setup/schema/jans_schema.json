@@ -3354,7 +3354,99 @@
 		"substr": "caseIgnoreSubstringsMatch",
 		"syntax": "1.3.6.1.4.1.1466.115.121.1.15",
 		"x_origin": "Jans created attribute"
-	}
+	},
+	{
+		"desc": "This data has information about client type",
+		"equality": "caseIgnoreMatch",
+		"names": [
+			"clientType"
+		],
+		"oid": "jansAttr",
+		"substr": "caseIgnoreSubstringsMatch",
+		"syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+		"x_origin": "Jans created attribute"
+	},
+	{
+		"equality": "booleanMatch",
+		"names": [
+			"displayInConsole"
+		],
+		"oid": "jansAttr",
+		"syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+		"x_origin": "Jans created attribute"
+	},
+	{
+      "desc": "SP Root URL",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "rootUrl"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Default URL to use when the auth server needs to redirect or link back to the client.",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "baseUrl"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+	{
+      "desc": "URL to the admin interface of the client.",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "adminUrl"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+	{
+	    "desc": "Specifies if users have to consent to client access.",
+		"equality": "booleanMatch",
+		"names": [
+			"consentRequired"
+		],
+		"oid": "jansAttr",
+		"syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+		"x_origin": "Jans created attribute"
+	},
+	{
+		"equality": "booleanMatch",
+		"names": [
+			"publicClient"
+		],
+		"oid": "jansAttr",
+		"syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+		"x_origin": "Jans created attribute"
+	},
+	{
+		"equality": "booleanMatch",
+		"names": [
+			"frontchannelLogout"
+		],
+		"oid": "jansAttr",
+		"syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+		"x_origin": "Jans created attribute"
+	},
+	{
+		"desc": "Client protocol",
+		"equality": "caseIgnoreMatch",
+		"names": [
+			"protocol"
+		],
+		"oid": "jansAttr",
+		"substr": "caseIgnoreSubstringsMatch",
+		"syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+		"x_origin": "Jans created attribute"
+	}	
   ],
   "objectClasses": [
     {
@@ -4516,23 +4608,33 @@
 		"kind": "STRUCTURAL",
 		"may": [
 			"inum",
-			"description",
+			"jansClntId",
+			"protocol",
 			"displayName",
+			"description",
 			"jansStatus",
 			"jansValidationStatus",
+			"jansEnabled",
+			"displayInConsole",
+			"jansPreferredMethod",
+			"jansClntSecret",
+			"rootUrl",
+			"baseUrl",
+			"adminUrl",
+            "jansRedirectURI",
+			"consentRequired",
+			"publicClient",
+			"frontchannelLogout",
 			"jansIsFed",
+		    "jansEntityId",
+			"jansEntityTyp"
 			"jansProfileConf",
 			"jansReleasedAttr",			
 		    "jansSAMLMetaDataFilter",		
 			"jansSAMLspMetaDataSourceTyp",
 			"jansSAMLspMetaDataURL",
 			"jansValidationLog",
-			"o",
-			"jansPostLogoutRedirectURI",
-			"url",
-			"researchAndScholarshipEnabled",
-            "jansEntityId",
-			"jansEntityTyp"
+			"jansPostLogoutRedirectURI"
 		],
 		"must": [
 			"objectclass"

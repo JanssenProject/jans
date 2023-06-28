@@ -29,12 +29,19 @@ import jakarta.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.*;
 
-@DataEntry(sortBy = {"displayName"})
+@DataEntry(sortBy = { "displayName" })
 @ObjectClass(value = "jansSAMLconfig")
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class JansTrustRelationship extends Entry implements Serializable{
+public class JansTrustRelationship extends Entry implements Serializable {
+
     @AttributeName(ignoreDuringUpdate = true)
     private String inum;
+
+    @AttributeName(name = "jansClntId")
+    private String clientId;
+
+    @AttributeName
+    private String protocol;
 
     @NotNull
     @Size(min = 0, max = 60, message = "Length of the Display Name should not exceed 60")
@@ -52,15 +59,68 @@ public class JansTrustRelationship extends Entry implements Serializable{
     @AttributeName(name = "jansValidationStatus")
     private ValidationStatus validationStatus;
 
+    /**
+     * Always list this client in the Account UI, even if the user does not have an
+     * active session.
+     */
+    @AttributeName(name = "jansEnabled")
+    private boolean alwaysDisplayInConsole;
+
+    @AttributeName(name = "jansEnabled")
+    private boolean enabled;
+
+    @AttributeName(name = "jansPreferredMethod")
+    private boolean clientAuthenticatorType;
+
+    @AttributeName(name = "jansClntSecret")
+    private String clientSecret;
+
+    // Access settings
+    /**
+     * Root URL appended to relative URLs
+     */
+    @AttributeName
+    private String rootUrl;
+
+    /**
+     * Default URL, Home URL to use when the auth server needs to redirect or link
+     * back to the client.
+     * 
+     */
+    @AttributeName
+    private String baseUrl;
+
+    /**
+     * URL to the admin interface of the client.
+     * 
+     */
+    @AttributeName
+    private String adminUrl;
+
+    /**
+     * Valid URI pattern a browser can redirect to after a successful login. Simple
+     * wildcards are allowed such as 'http://example.com/*'. Relative path can be
+     * specified too such as /my/relative/path/*. Relative paths are relative to the
+     * client root URL, or if none is specified the auth server root URL is used.
+     * For SAML, you must set valid URI patterns if you are relying on the consumer
+     * service URL embedded with the login request.
+     */
+    private List<String> redirectUris;
+
+    private Boolean consentRequired;
+
+    private Boolean publicClient;
+
+    private Boolean frontchannelLogout;
+
+    private Boolean jansIsFed;
+
     @AttributeName(name = "jansReleasedAttr")
     private List<String> releasedAttributes;
 
     @NotNull
     @AttributeName(name = "jansSAMLspMetaDataSourceTyp")
     private MetadataSourceType spMetaDataSourceType;
-
-    @AttributeName(name = "o")
-    private String owner;
 
     @Transient
     private transient List<CustomAttribute> releasedCustomAttributes = new ArrayList<CustomAttribute>();
@@ -71,10 +131,6 @@ public class JansTrustRelationship extends Entry implements Serializable{
 
     @AttributeName(name = "jansSAMLMetaDataFilter")
     private List<String> jansSAMLMetaDataFilter;
-
-
-    @AttributeName(name = "jansIsFed")
-    private String jansIsFed;
 
     @AttributeName(name = "jansEntityId")
     private List<String> jansEntityId;
@@ -92,18 +148,30 @@ public class JansTrustRelationship extends Entry implements Serializable{
 
     @AttributeName(name = "jansValidationLog")
     private List<String> validationLog;
-
-    @AttributeName(name = "jansEntityTyp")
-    private EntityType entityType;
     
     
-
     public String getInum() {
         return inum;
     }
 
     public void setInum(String inum) {
         this.inum = inum;
+    }
+
+    public String getClientId() {
+        return clientId;
+    }
+
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
+    }
+
+    public String getProtocol() {
+        return protocol;
+    }
+
+    public void setProtocol(String protocol) {
+        this.protocol = protocol;
     }
 
     public String getDisplayName() {
@@ -138,6 +206,102 @@ public class JansTrustRelationship extends Entry implements Serializable{
         this.validationStatus = validationStatus;
     }
 
+    public boolean isAlwaysDisplayInConsole() {
+        return alwaysDisplayInConsole;
+    }
+
+    public void setAlwaysDisplayInConsole(boolean alwaysDisplayInConsole) {
+        this.alwaysDisplayInConsole = alwaysDisplayInConsole;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public boolean isClientAuthenticatorType() {
+        return clientAuthenticatorType;
+    }
+
+    public void setClientAuthenticatorType(boolean clientAuthenticatorType) {
+        this.clientAuthenticatorType = clientAuthenticatorType;
+    }
+
+    public String getClientSecret() {
+        return clientSecret;
+    }
+
+    public void setClientSecret(String clientSecret) {
+        this.clientSecret = clientSecret;
+    }
+
+    public String getRootUrl() {
+        return rootUrl;
+    }
+
+    public void setRootUrl(String rootUrl) {
+        this.rootUrl = rootUrl;
+    }
+
+    public String getBaseUrl() {
+        return baseUrl;
+    }
+
+    public void setBaseUrl(String baseUrl) {
+        this.baseUrl = baseUrl;
+    }
+
+    public String getAdminUrl() {
+        return adminUrl;
+    }
+
+    public void setAdminUrl(String adminUrl) {
+        this.adminUrl = adminUrl;
+    }
+
+    public List<String> getRedirectUris() {
+        return redirectUris;
+    }
+
+    public void setRedirectUris(List<String> redirectUris) {
+        this.redirectUris = redirectUris;
+    }
+
+    public Boolean getConsentRequired() {
+        return consentRequired;
+    }
+
+    public void setConsentRequired(Boolean consentRequired) {
+        this.consentRequired = consentRequired;
+    }
+
+    public Boolean getPublicClient() {
+        return publicClient;
+    }
+
+    public void setPublicClient(Boolean publicClient) {
+        this.publicClient = publicClient;
+    }
+
+    public Boolean getFrontchannelLogout() {
+        return frontchannelLogout;
+    }
+
+    public void setFrontchannelLogout(Boolean frontchannelLogout) {
+        this.frontchannelLogout = frontchannelLogout;
+    }
+
+    public Boolean getJansIsFed() {
+        return jansIsFed;
+    }
+
+    public void setJansIsFed(Boolean jansIsFed) {
+        this.jansIsFed = jansIsFed;
+    }
+
     public List<String> getReleasedAttributes() {
         return releasedAttributes;
     }
@@ -152,14 +316,6 @@ public class JansTrustRelationship extends Entry implements Serializable{
 
     public void setSpMetaDataSourceType(MetadataSourceType spMetaDataSourceType) {
         this.spMetaDataSourceType = spMetaDataSourceType;
-    }
-
-    public String getOwner() {
-        return owner;
-    }
-
-    public void setOwner(String owner) {
-        this.owner = owner;
     }
 
     public List<CustomAttribute> getReleasedCustomAttributes() {
@@ -192,14 +348,6 @@ public class JansTrustRelationship extends Entry implements Serializable{
 
     public void setJansSAMLMetaDataFilter(List<String> jansSAMLMetaDataFilter) {
         this.jansSAMLMetaDataFilter = jansSAMLMetaDataFilter;
-    }
-
-    public String getJansIsFed() {
-        return jansIsFed;
-    }
-
-    public void setJansIsFed(String jansIsFed) {
-        this.jansIsFed = jansIsFed;
     }
 
     public List<String> getJansEntityId() {
@@ -242,14 +390,6 @@ public class JansTrustRelationship extends Entry implements Serializable{
         this.validationLog = validationLog;
     }
 
-    public EntityType getEntityType() {
-        return entityType;
-    }
-
-    public void setEntityType(EntityType entityType) {
-        this.entityType = entityType;
-    }
-
     private static class SortByDatasourceTypeComparator implements Comparator<JansTrustRelationship> {
 
         public int compare(JansTrustRelationship first, JansTrustRelationship second) {
@@ -259,6 +399,6 @@ public class JansTrustRelationship extends Entry implements Serializable{
     }
 
     public static void sortByDataSourceType(List<JansTrustRelationship> trustRelationships) {
-        Collections.sort(trustRelationships,new SortByDatasourceTypeComparator());
+        Collections.sort(trustRelationships, new SortByDatasourceTypeComparator());
     }
 }
