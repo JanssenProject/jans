@@ -40,9 +40,6 @@ public class JansTrustRelationship extends Entry implements Serializable {
     @AttributeName(name = "jansClntId")
     private String clientId;
 
-    @AttributeName
-    private String protocol;
-
     @NotNull
     @Size(min = 0, max = 60, message = "Length of the Display Name should not exceed 60")
     @AttributeName
@@ -52,28 +49,7 @@ public class JansTrustRelationship extends Entry implements Serializable {
     @Size(min = 0, max = 4000, message = "Length of the Description should not exceed 4000")
     @AttributeName
     private String description;
-
-    @AttributeName(name = "jansStatus")
-    private GluuStatus status;
-
-    @AttributeName(name = "jansValidationStatus")
-    private ValidationStatus validationStatus;
-
-    /**
-     * Always list this client in the Account UI, even if the user does not have an
-     * active session.
-     */
-    @AttributeName(name = "jansEnabled")
-    private boolean alwaysDisplayInConsole;
-
-    @AttributeName(name = "jansEnabled")
-    private boolean enabled;
-
-    @AttributeName(name = "jansPreferredMethod")
-    private boolean clientAuthenticatorType;
-
-    @AttributeName(name = "jansClntSecret")
-    private String clientSecret;
+    
 
     // Access settings
     /**
@@ -81,15 +57,7 @@ public class JansTrustRelationship extends Entry implements Serializable {
      */
     @AttributeName
     private String rootUrl;
-
-    /**
-     * Default URL, Home URL to use when the auth server needs to redirect or link
-     * back to the client.
-     * 
-     */
-    @AttributeName
-    private String baseUrl;
-
+    
     /**
      * URL to the admin interface of the client.
      * 
@@ -98,6 +66,37 @@ public class JansTrustRelationship extends Entry implements Serializable {
     private String adminUrl;
 
     /**
+     * Default URL, Home URL to use when the auth server needs to redirect or link
+     * back to the client.
+     * 
+     */
+    @AttributeName
+    private String baseUrl;
+    
+    @AttributeName(name = "surrogateAuthRequired")
+    private boolean surrogateAuthRequired;    
+    
+    @AttributeName(name = "jansEnabled")
+    private boolean enabled;    
+    
+    /**
+     * Always list this client in the Account UI, even if the user does not have an
+     * active session.
+     */
+    @AttributeName(name = "displayInConsole")
+    private boolean alwaysDisplayInConsole;
+    
+
+    @AttributeName(name = "jansPreferredMethod")
+    private boolean clientAuthenticatorType;
+    
+    @AttributeName(name = "jansClntSecret")
+    private String clientSecret;
+    
+    @AttributeName(name ="jansRegistrationAccessTkn")
+    private String registrationAccessToken;
+    
+    /**
      * Valid URI pattern a browser can redirect to after a successful login. Simple
      * wildcards are allowed such as 'http://example.com/*'. Relative path can be
      * specified too such as /my/relative/path/*. Relative paths are relative to the
@@ -105,51 +104,45 @@ public class JansTrustRelationship extends Entry implements Serializable {
      * For SAML, you must set valid URI patterns if you are relying on the consumer
      * service URL embedded with the login request.
      */
+    @AttributeName(name ="jansRedirectURI")
     private List<String> redirectUris;
-
-    private Boolean consentRequired;
-
-    private Boolean publicClient;
-
-    private Boolean frontchannelLogout;
-
-    private Boolean jansIsFed;
-
-    @AttributeName(name = "jansReleasedAttr")
-    private List<String> releasedAttributes;
+    
+    @AttributeName(name ="jansWebOrigins")
+    private List<String> webOrigins;
+    
+    private Boolean consentRequired;        
 
     @NotNull
     @AttributeName(name = "jansSAMLspMetaDataSourceTyp")
     private MetadataSourceType spMetaDataSourceType;
+    
+    @AttributeName(name = "jansMetaLocation")
+    private String metaLocation;
+    
+    private Boolean jansIsFed;
+    
+    private ProfileConfiguration ssoProfileConfiguration;
 
-    @Transient
-    private transient List<CustomAttribute> releasedCustomAttributes = new ArrayList<CustomAttribute>();
+    @AttributeName(name = "jansReleasedAttr")
+    private List<String> releasedAttributes;
+    
+    @AttributeName
+    private String protocol;    
+        
+    @AttributeName(name = "jansStatus")
+    private GluuStatus status;
 
-    private Map<String, MetadataFilter> metadataFilters = new HashMap<String, MetadataFilter>();
-
-    private Map<String, ProfileConfiguration> profileConfigurations = new HashMap<String, ProfileConfiguration>();
-
-    @AttributeName(name = "jansSAMLMetaDataFilter")
-    private List<String> jansSAMLMetaDataFilter;
+    @AttributeName(name = "jansValidationStatus")
+    private ValidationStatus validationStatus;
 
     @AttributeName(name = "jansEntityId")
     private List<String> jansEntityId;
 
-    @AttributeName(name = "jansProfileConf")
-    private List<String> jansProfileConf;
-
-    @Pattern(regexp = "^(https?|http)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]", message = "Please enter a valid SP url, including protocol (http/https)")
-    @AttributeName(name = "url")
-    private String url;
-
-    @Pattern(regexp = "^$|(^(https?|http)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|])", message = "Please enter a valid url, including protocol (http/https)")
-    @AttributeName(name = "jansPostLogoutRedirectURI")
-    private String spLogoutURL;
 
     @AttributeName(name = "jansValidationLog")
     private List<String> validationLog;
-    
-    
+      
+
     public String getInum() {
         return inum;
     }
@@ -164,14 +157,6 @@ public class JansTrustRelationship extends Entry implements Serializable {
 
     public void setClientId(String clientId) {
         this.clientId = clientId;
-    }
-
-    public String getProtocol() {
-        return protocol;
-    }
-
-    public void setProtocol(String protocol) {
-        this.protocol = protocol;
     }
 
     public String getDisplayName() {
@@ -190,28 +175,36 @@ public class JansTrustRelationship extends Entry implements Serializable {
         this.description = description;
     }
 
-    public GluuStatus getStatus() {
-        return status;
+    public String getRootUrl() {
+        return rootUrl;
     }
 
-    public void setStatus(GluuStatus status) {
-        this.status = status;
+    public void setRootUrl(String rootUrl) {
+        this.rootUrl = rootUrl;
     }
 
-    public ValidationStatus getValidationStatus() {
-        return validationStatus;
+    public String getAdminUrl() {
+        return adminUrl;
     }
 
-    public void setValidationStatus(ValidationStatus validationStatus) {
-        this.validationStatus = validationStatus;
+    public void setAdminUrl(String adminUrl) {
+        this.adminUrl = adminUrl;
     }
 
-    public boolean isAlwaysDisplayInConsole() {
-        return alwaysDisplayInConsole;
+    public String getBaseUrl() {
+        return baseUrl;
     }
 
-    public void setAlwaysDisplayInConsole(boolean alwaysDisplayInConsole) {
-        this.alwaysDisplayInConsole = alwaysDisplayInConsole;
+    public void setBaseUrl(String baseUrl) {
+        this.baseUrl = baseUrl;
+    }
+
+    public boolean isSurrogateAuthRequired() {
+        return surrogateAuthRequired;
+    }
+
+    public void setSurrogateAuthRequired(boolean surrogateAuthRequired) {
+        this.surrogateAuthRequired = surrogateAuthRequired;
     }
 
     public boolean isEnabled() {
@@ -220,6 +213,14 @@ public class JansTrustRelationship extends Entry implements Serializable {
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
+    }
+
+    public boolean isAlwaysDisplayInConsole() {
+        return alwaysDisplayInConsole;
+    }
+
+    public void setAlwaysDisplayInConsole(boolean alwaysDisplayInConsole) {
+        this.alwaysDisplayInConsole = alwaysDisplayInConsole;
     }
 
     public boolean isClientAuthenticatorType() {
@@ -238,28 +239,12 @@ public class JansTrustRelationship extends Entry implements Serializable {
         this.clientSecret = clientSecret;
     }
 
-    public String getRootUrl() {
-        return rootUrl;
+    public String getRegistrationAccessToken() {
+        return registrationAccessToken;
     }
 
-    public void setRootUrl(String rootUrl) {
-        this.rootUrl = rootUrl;
-    }
-
-    public String getBaseUrl() {
-        return baseUrl;
-    }
-
-    public void setBaseUrl(String baseUrl) {
-        this.baseUrl = baseUrl;
-    }
-
-    public String getAdminUrl() {
-        return adminUrl;
-    }
-
-    public void setAdminUrl(String adminUrl) {
-        this.adminUrl = adminUrl;
+    public void setRegistrationAccessToken(String registrationAccessToken) {
+        this.registrationAccessToken = registrationAccessToken;
     }
 
     public List<String> getRedirectUris() {
@@ -270,6 +255,14 @@ public class JansTrustRelationship extends Entry implements Serializable {
         this.redirectUris = redirectUris;
     }
 
+    public List<String> getWebOrigins() {
+        return webOrigins;
+    }
+
+    public void setWebOrigins(List<String> webOrigins) {
+        this.webOrigins = webOrigins;
+    }
+
     public Boolean getConsentRequired() {
         return consentRequired;
     }
@@ -278,36 +271,12 @@ public class JansTrustRelationship extends Entry implements Serializable {
         this.consentRequired = consentRequired;
     }
 
-    public Boolean getPublicClient() {
-        return publicClient;
+    public String getProtocol() {
+        return protocol;
     }
 
-    public void setPublicClient(Boolean publicClient) {
-        this.publicClient = publicClient;
-    }
-
-    public Boolean getFrontchannelLogout() {
-        return frontchannelLogout;
-    }
-
-    public void setFrontchannelLogout(Boolean frontchannelLogout) {
-        this.frontchannelLogout = frontchannelLogout;
-    }
-
-    public Boolean getJansIsFed() {
-        return jansIsFed;
-    }
-
-    public void setJansIsFed(Boolean jansIsFed) {
-        this.jansIsFed = jansIsFed;
-    }
-
-    public List<String> getReleasedAttributes() {
-        return releasedAttributes;
-    }
-
-    public void setReleasedAttributes(List<String> releasedAttributes) {
-        this.releasedAttributes = releasedAttributes;
+    public void setProtocol(String protocol) {
+        this.protocol = protocol;
     }
 
     public MetadataSourceType getSpMetaDataSourceType() {
@@ -318,36 +287,52 @@ public class JansTrustRelationship extends Entry implements Serializable {
         this.spMetaDataSourceType = spMetaDataSourceType;
     }
 
-    public List<CustomAttribute> getReleasedCustomAttributes() {
-        return releasedCustomAttributes;
+    public String getMetaLocation() {
+        return metaLocation;
     }
 
-    public void setReleasedCustomAttributes(List<CustomAttribute> releasedCustomAttributes) {
-        this.releasedCustomAttributes = releasedCustomAttributes;
+    public void setMetaLocation(String metaLocation) {
+        this.metaLocation = metaLocation;
     }
 
-    public Map<String, MetadataFilter> getMetadataFilters() {
-        return metadataFilters;
+    public Boolean getJansIsFed() {
+        return jansIsFed;
     }
 
-    public void setMetadataFilters(Map<String, MetadataFilter> metadataFilters) {
-        this.metadataFilters = metadataFilters;
+    public void setJansIsFed(Boolean jansIsFed) {
+        this.jansIsFed = jansIsFed;
     }
 
-    public Map<String, ProfileConfiguration> getProfileConfigurations() {
-        return profileConfigurations;
+    public ProfileConfiguration getSsoProfileConfiguration() {
+        return ssoProfileConfiguration;
     }
 
-    public void setProfileConfigurations(Map<String, ProfileConfiguration> profileConfigurations) {
-        this.profileConfigurations = profileConfigurations;
+    public void setSsoProfileConfiguration(ProfileConfiguration ssoProfileConfiguration) {
+        this.ssoProfileConfiguration = ssoProfileConfiguration;
     }
 
-    public List<String> getJansSAMLMetaDataFilter() {
-        return jansSAMLMetaDataFilter;
+    public List<String> getReleasedAttributes() {
+        return releasedAttributes;
     }
 
-    public void setJansSAMLMetaDataFilter(List<String> jansSAMLMetaDataFilter) {
-        this.jansSAMLMetaDataFilter = jansSAMLMetaDataFilter;
+    public void setReleasedAttributes(List<String> releasedAttributes) {
+        this.releasedAttributes = releasedAttributes;
+    }
+
+    public GluuStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(GluuStatus status) {
+        this.status = status;
+    }
+
+    public ValidationStatus getValidationStatus() {
+        return validationStatus;
+    }
+
+    public void setValidationStatus(ValidationStatus validationStatus) {
+        this.validationStatus = validationStatus;
     }
 
     public List<String> getJansEntityId() {
@@ -356,30 +341,6 @@ public class JansTrustRelationship extends Entry implements Serializable {
 
     public void setJansEntityId(List<String> jansEntityId) {
         this.jansEntityId = jansEntityId;
-    }
-
-    public List<String> getJansProfileConf() {
-        return jansProfileConf;
-    }
-
-    public void setJansProfileConf(List<String> jansProfileConf) {
-        this.jansProfileConf = jansProfileConf;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
-    public String getSpLogoutURL() {
-        return spLogoutURL;
-    }
-
-    public void setSpLogoutURL(String spLogoutURL) {
-        this.spLogoutURL = spLogoutURL;
     }
 
     public List<String> getValidationLog() {
