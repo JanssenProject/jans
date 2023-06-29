@@ -3,7 +3,7 @@ package io.jans.configapi.plugin.saml.rest;
 import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.plugin.saml.util.Constants;
-import io.jans.configapi.plugin.saml.service.SamlService;
+import io.jans.configapi.plugin.saml.service.SamlKeycloakService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -36,7 +36,7 @@ public class SamlScopeResource extends BaseResource {
     Logger logger;
 
     @Inject
-    SamlService samlService;
+    SamlKeycloakService samlService;
 
     @Operation(summary = "Get Client Scope", description = "Get Client Scope", operationId = "get-saml-client-scope", tags = {
             "SAML - Client Scope" }, security = @SecurityRequirement(name = "oauth2", scopes = {

@@ -6,27 +6,22 @@
 
 package io.jans.configapi.plugin.saml.service;
 
+import io.jans.configapi.plugin.saml.model.JansTrustRelationship;
+import io.jans.model.SearchRequest;
+import io.jans.as.common.model.registration.Client;
+import io.jans.as.common.util.AttributeConstants;
 import io.jans.configapi.configuration.ConfigurationFactory;
-import io.jans.configapi.plugin.saml.model.config.KeycloakConfig;
 import io.jans.orm.PersistenceEntryManager;
-
+import io.jans.orm.model.PagedResult;
+import io.jans.orm.model.SortOrder;
+import io.jans.orm.search.filter.Filter;
+import io.jans.util.StringHelper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import java.util.*;
-import jakarta.ws.rs.core.Response;
 
-import org.apache.commons.lang.StringUtils;
-
-import org.keycloak.admin.client.CreatedResponseUtil;
-import org.keycloak.admin.client.resource.ClientResource;
-import org.keycloak.admin.client.resource.ClientsResource;
-import org.keycloak.admin.client.resource.ProtocolMappersResource;
-import org.keycloak.admin.client.resource.RealmResource;
-import org.keycloak.admin.client.resource.UsersResource;
-import org.keycloak.representations.idm.ClientRepresentation;
-import org.keycloak.representations.idm.ProtocolMapperRepresentation;
-import org.keycloak.representations.idm.UserRepresentation;
-
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 
@@ -37,203 +32,124 @@ public class SamlService {
     Logger logger;
 
     @Inject
-    PersistenceEntryManager persistenceManager;
+    PersistenceEntryManager persistenceEntryManager;
 
     @Inject
     ConfigurationFactory configurationFactory;
 
-    @Inject
-    KeycloakConfig keycloakConfig;
+    private static final String SAML_DN_BASE = "ou=jansSAMLconfig,o=jans";
 
-    public RealmResource getRealmResource(String realm) {
-        logger.info("Get RealmResource for realm:{})", realm);
-        if (StringUtils.isBlank(realm)) {
-            realm = "master";
+    public String baseDn() {
+        // return staticConfiguration.getBaseDn().getTrustRelationshipDn();
+        return SAML_DN_BASE;
+    }
+
+    public boolean contains(String dn) {
+        return persistenceEntryManager.contains(dn, JansTrustRelationship.class);
+    }
+
+    public JansTrustRelationship getJansTrustRelationshipByInum(String inum) {
+        JansTrustRelationship result = null;
+        try {
+            result = persistenceEntryManager.find(JansTrustRelationship.class, getDnForJansTrustRelationship(inum));
+        } catch (Exception ex) {
+            logger.error("Failed to load JansTrustRelationship entry", ex);
         }
-        RealmResource realmResource = keycloakConfig.getInstance().realm(realm);
-        logger.info("realmResource:{})", realmResource);
-        return realmResource;
+        return result;
     }
 
-    public ClientsResource getClientsResource(String realm) {
-        logger.info("Get ClientsResource for realm:{})", realm);
-        RealmResource realmResource = this.getRealmResource(realm);
-        logger.info("realm-resource:{})", realmResource);
+    public List<JansTrustRelationship> searchJansTrustRelationship(String pattern, int sizeLimit) {
 
-        ClientsResource clientsResource = realmResource.clients();
-        logger.info(" clientsResource:{})", clientsResource);
+        logger.debug("Search JansTrustRelationship with pattern:{}, sizeLimit:{}", pattern, sizeLimit);
 
-        return clientsResource;
+        String[] targetArray = new String[] { pattern };
+        Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.DISPLAY_NAME, null, targetArray,
+                null);
+        Filter descriptionFilter = Filter.createSubstringFilter(AttributeConstants.DESCRIPTION, null, targetArray,
+                null);
+        Filter inumFilter = Filter.createSubstringFilter(AttributeConstants.INUM, null, targetArray, null);
+        Filter searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter, inumFilter);
+
+        logger.debug("Search JansTrustRelationship with searchFilter:{}", searchFilter);
+        return persistenceEntryManager.findEntries(getDnForJansTrustRelationship(null), JansTrustRelationship.class,
+                searchFilter, sizeLimit);
     }
 
-    public UsersResource getUsersResource(String realm) {
-        logger.info("Get UsersResource for realm:{})", realm);
-        RealmResource realmResource = this.getRealmResource(realm);
-        logger.info("realmResource:{})", realmResource);
-
-        UsersResource usersResource = realmResource.users();
-        logger.info(" usersResource:{})", usersResource);
-
-        return usersResource;
-    }   
-
-    public List<UserRepresentation> getAllUsers() {
-        List<UserRepresentation> userList = getUsers(null);
-        logger.info("All userList:{}", userList);
-        return userList;
-    }
-    
-    public List<UserRepresentation> getUsers(String realm) {
-        logger.info("Fetching users in realm:{})", realm);
-        List<UserRepresentation> userList = getUsersResource(null).list();
-        logger.info("All userList:{}", userList);
-        return userList;
+    public List<JansTrustRelationship> getAllJansTrustRelationship(int sizeLimit) {
+        return persistenceEntryManager.findEntries(getDnForJansTrustRelationship(null), JansTrustRelationship.class,
+                null, sizeLimit);
     }
 
-    public List<ClientRepresentation> getAllClients() {
-        List<ClientRepresentation> clientList = getClients(null);
-        logger.info("All clients - clientList:{}", clientList);
-        return clientList;
-    }
-    
-    public List<ClientRepresentation> getClients(String realm) {
-        logger.info("Serach client in realm:{})", realm);
-
-        List<ClientRepresentation> clients = getClientsResource(null).findAll();
-
-        logger.info("clients:{}", clients);
-        return clients;
+    public List<JansTrustRelationship> getAllJansTrustRelationship() {
+        return persistenceEntryManager.findEntries(getDnForJansTrustRelationship(null), JansTrustRelationship.class,
+                null);
     }
 
-    public List<ClientRepresentation> getClientByClientId(String clientId) {
-        logger.info("Searching client by clientId:{}", clientId);
+    public PagedResult<Client> getJansTrustRelationship(SearchRequest searchRequest) {
+        logger.debug("Search JansTrustRelationship with searchRequest:{}", searchRequest);
 
-        List<ClientRepresentation> clientList = serachClients(clientId, null);
+        Filter searchFilter = null;
+        List<Filter> filters = new ArrayList<>();
+        if (searchRequest.getFilterAssertionValue() != null && !searchRequest.getFilterAssertionValue().isEmpty()) {
 
-        logger.info("Clients by clientId:{} are clientList:{}", clientId, clientList);
-        return clientList;
-    }
-    
-    public List<ClientRepresentation> serachClients(String clientId, String realm) {
-        logger.info("Searching client by clientId:{} in realm:{})", clientId, realm);
-
-        List<ClientRepresentation> clientList = getClientsResource(null).findByClientId(clientId);
-
-        logger.info("All clientList:{}", clientList);
-        return clientList;
-    }
-    
-    public ClientRepresentation getClientById(String id) {
-        logger.info("Searching client by String id:{}", id);
-
-        ClientResource clientResource = getClientsResource(null).get(id);
-        logger.info("clientResource:{}", clientResource);
-        
-        ClientRepresentation client = clientResource.toRepresentation();
-        logger.info("ClientRepresentation:{}", client);
-        return client;
-    }
-
-    public ClientRepresentation createClient(ClientRepresentation clientRepresentation)  {
-        logger.info(" createClient() - clientRepresentation:{}", clientRepresentation);
-
-        ClientsResource clientsResource = getClientsResource(null);
-
-        // Create client (requires manage-users role)
-        Response response = clientsResource.create(clientRepresentation);
-        logger.info(" createClient() - response:{}", response);
-
-        logger.info(
-                " createClient() - response.getStatus():{}, response.getStatusInfo():{}, response.getLocation():{}",
-                response.getStatus(), response.getStatusInfo(), response.getLocation());
-        logger.info("response.getLocation():{}", response.getLocation());
-        String id = CreatedResponseUtil.getCreatedId(response);
-
-        logger.info("New client created with id:{}", id);
-
-        ClientResource clientResource = clientsResource.get(id);
-        ClientRepresentation client = clientResource.toRepresentation();
-        logger.info("New client created with client:{}", client);
-
-        return client;
-    }
-
-    public ClientRepresentation updateClient(ClientRepresentation clientRepresentation) {
-        logger.info(" updateClient() - clientRepresentation:{}", clientRepresentation);
-
-        ClientsResource clientsResource = getClientsResource(null);
-
-        ClientResource clientResource = clientsResource.get(clientRepresentation.getId());
-        clientResource.update(clientRepresentation);
-
-        ClientRepresentation client = clientResource.toRepresentation();
-        logger.info("Updated client:{}", client);
-        return client;
-    }
-
-    public void deleteClient(String id)  {
-        logger.info(" deleteClient() - id:{}", id);
-
-        ClientsResource clientsResource = getClientsResource(null);
-        logger.info("clientsResource:{})", clientsResource);
-
-        ClientResource clientResource = clientsResource.get(id);
-        logger.info("client resource to delete:{})", clientResource);
-        clientResource.remove();
-        logger.info("afrer deleting client identified by id:{})", id);
-
-    }
-    
-    public ProtocolMappersResource getClientProtocolMappersResource(String clientId) {
-        logger.info(" Get Client ProtocolMappersResource for client - clientId:{}", clientId);
-        ProtocolMappersResource protocolMappersResource = null;
-        List<ClientRepresentation> clients = this.getClientByClientId(clientId);
-        logger.info("clients:{}", clients);
-
-        if (clients != null && !clients.isEmpty()) {
-            ClientResource clientResource = getClientsResource(null).get(clients.get(0).getId());
-            logger.info(" clientResource:{}", clientResource);
-    
-            protocolMappersResource = clientResource.getProtocolMappers();
-               
-            logger.info(" protocolMappersResource:{} for client:{}", protocolMappersResource, clientId);
+            for (String assertionValue : searchRequest.getFilterAssertionValue()) {
+                String[] targetArray = new String[] { assertionValue };
+                Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.DISPLAY_NAME, null,
+                        targetArray, null);
+                Filter descriptionFilter = Filter.createSubstringFilter(AttributeConstants.DESCRIPTION, null,
+                        targetArray, null);
+                Filter inumFilter = Filter.createSubstringFilter(AttributeConstants.INUM, null, targetArray, null);
+                filters.add(Filter.createORFilter(displayNameFilter, descriptionFilter, inumFilter));
+            }
+            searchFilter = Filter.createORFilter(filters);
         }
 
-        return protocolMappersResource;
-    }
-    
-    public List<ProtocolMapperRepresentation> getClientProtocolMapperRepresentation(String clientId) {
-        logger.info(" Get Client ProtocolMapper for client - clientId:{}", clientId);
-        List<ProtocolMapperRepresentation> protocolMapperRepresentationList = null;
-        ProtocolMappersResource protocolMappersResource = this.getClientProtocolMappersResource(clientId);
-        logger.info("clientId:{} -> protocolMappersResource:{}", clientId, protocolMappersResource);
-
-        if (protocolMappersResource != null ) {
-            protocolMapperRepresentationList = protocolMappersResource.getMappers();           
-            logger.info(" protocolMappers:{} for client:{}", protocolMapperRepresentationList, clientId);
+        logger.trace("JansTrustRelationship pattern searchFilter:{}", searchFilter);
+        List<Filter> fieldValueFilters = new ArrayList<>();
+        if (searchRequest.getFieldValueMap() != null && !searchRequest.getFieldValueMap().isEmpty()) {
+            for (Map.Entry<String, String> entry : searchRequest.getFieldValueMap().entrySet()) {
+                Filter dataFilter = Filter.createEqualityFilter(entry.getKey(), entry.getValue());
+                logger.trace("JansTrustRelationship dataFilter:{}", dataFilter);
+                fieldValueFilters.add(Filter.createANDFilter(dataFilter));
+            }
+            searchFilter = Filter.createANDFilter(Filter.createORFilter(filters),
+                    Filter.createANDFilter(fieldValueFilters));
         }
 
-        return protocolMapperRepresentationList;
+        logger.debug("JansTrustRelationship searchFilter:{}", searchFilter);
+
+        return persistenceEntryManager.findPagedEntries(getDnForJansTrustRelationship(null), Client.class, searchFilter,
+                null, searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
+                searchRequest.getStartIndex(), searchRequest.getCount(), searchRequest.getMaxCount());
+
     }
-    
-    public List<ProtocolMapperRepresentation> addClientProtocolMappersResource(String clientId, ProtocolMapperRepresentation protocolMapperRepresentation) {
-        logger.info(" Add ProtocolMapper for client - clientId:{} with protocolMapperRepresentation:{}", clientId, protocolMapperRepresentation);
-        List<ProtocolMapperRepresentation> protocolMappers = null;
-        List<ClientRepresentation> clients = this.getClientByClientId(clientId);
-        logger.info("clients:{}", clients);
 
-        if (clients != null && !clients.isEmpty()) {
-            ClientResource clientResource = getClientsResource(null).get(clients.get(0).getId());
-            logger.info(" clientResource:{}", clientResource);
-    
-            ProtocolMappersResource protocolMappersResource = clientResource.getProtocolMappers();
-            protocolMappers = protocolMappersResource.getMappers();
-           
-            logger.info(" protocolMappers:{} for client:{}", protocolMappers, clientId);
+    public JansTrustRelationship addTrustRelationship(JansTrustRelationship trustRelationship) {
+        setJansTrustRelationship(trustRelationship, false);
+        persistenceEntryManager.persist(trustRelationship);
+        return getJansTrustRelationshipByInum(trustRelationship.getInum());
+    }
+
+    public void removeTrustRelationship(JansTrustRelationship trustRelationship) {
+        persistenceEntryManager.removeRecursively(trustRelationship.getDn(), JansTrustRelationship.class);
+
+    }
+
+    public JansTrustRelationship updateTrustRelationship(JansTrustRelationship trustRelationship) {
+        setJansTrustRelationship(trustRelationship, true);
+        persistenceEntryManager.merge(trustRelationship);
+        return getJansTrustRelationshipByInum(trustRelationship.getInum());
+    }
+
+    public JansTrustRelationship setJansTrustRelationship(JansTrustRelationship trustRelationship, boolean update) {
+        return trustRelationship;
+    }
+
+    public String getDnForJansTrustRelationship(String inum) {
+        if (StringHelper.isEmpty(inum)) {
+            return String.format("ou=jansSAMLconfig,%s", SAML_DN_BASE);
         }
-
-        return protocolMappers;
+        return String.format("inum=%s,ou=jansSAMLconfig,%s", inum, SAML_DN_BASE);
     }
 
 }
-

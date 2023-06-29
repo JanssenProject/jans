@@ -20,10 +20,10 @@ paths:
   /saml/samlClient:
     get:
       tags:
-      - SAML - Client
-      summary: Get all Clients
-      description: Get all Clients.
-      operationId: get-saml-client
+      - SAML - Trust Relationship
+      summary: Get all Trust Relationship
+      description: Get all TrustRelationship.
+      operationId: get-trust-relationship
       responses:
         "200":
           description: Ok
@@ -32,7 +32,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ClientRepresentation'
+                  $ref: '#/components/schemas/JansTrustRelationship'
         "401":
           description: Unauthorized
         "500":
@@ -42,15 +42,15 @@ paths:
         - https://jans.io/oauth/config/saml.readonly
     put:
       tags:
-      - SAML - Client
-      summary: Update client
-      description: Update client
-      operationId: put-client_1
+      - SAML - Trust Relationship
+      summary: Update TrustRelationship
+      description: Update TrustRelationship
+      operationId: put-trust-relationship
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ClientRepresentation'
+              $ref: '#/components/schemas/JansTrustRelationship'
       responses:
         "200":
           description: Ok
@@ -59,7 +59,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ClientRepresentation'
+                  $ref: '#/components/schemas/JansTrustRelationship'
         "401":
           description: Unauthorized
         "500":
@@ -69,15 +69,15 @@ paths:
         - https://jans.io/oauth/config/saml.write
     post:
       tags:
-      - SAML - Client
-      summary: Create Client
-      description: Create Client
-      operationId: post-client
+      - SAML - Trust Relationship
+      summary: Create Trust Relationship
+      description: Create Trust Relationship
+      operationId: post-trust-relationship
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ClientRepresentation'
+              $ref: '#/components/schemas/JansTrustRelationship'
       responses:
         "201":
           description: clientList
@@ -86,7 +86,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ClientRepresentation'
+                  $ref: '#/components/schemas/JansTrustRelationship'
         "401":
           description: Unauthorized
         "500":
@@ -97,7 +97,7 @@ paths:
   /saml/samlClient/{id}:
     delete:
       tags:
-      - SAML - Client
+      - SAML - Trust Relationship
       summary: Delete client
       description: Delete client
       operationId: put-client
@@ -116,7 +116,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ClientRepresentation'
+                  $ref: '#/components/schemas/JansTrustRelationship'
         "401":
           description: Unauthorized
         "500":
@@ -124,22 +124,27 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/saml.write
-  /saml/samlClient/user:
+  /saml/samlClient/id/{id}:
     get:
       tags:
-      - SAML - User
-      summary: Get all users
-      description: Get all users
-      operationId: get-saml-user
+      - SAML - Trust Relationship
+      summary: Get TrustRelationship by Id
+      description: Get TrustRelationship by Id
+      operationId: get-trust-relationship-by-id
+      parameters:
+      - name: id
+        in: path
+        description: Unique identifier - Id
+        required: true
+        schema:
+          type: string
       responses:
         "200":
           description: Ok
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ClientRepresentation'
+                $ref: '#/components/schemas/JansTrustRelationship'
         "401":
           description: Unauthorized
         "500":
@@ -150,14 +155,14 @@ paths:
   /saml/samlClient/{clientId}:
     get:
       tags:
-      - SAML - Client
-      summary: Get client by clientId
-      description: Get client by clientId
-      operationId: get-saml-client-by-clientId
+      - SAML - Trust Relationship
+      summary: Get TrustRelationship by name
+      description: Get TrustRelationship by name
+      operationId: get-trust-relationship-by-name
       parameters:
       - name: clientId
         in: path
-        description: Client Id
+        description: Name
         required: true
         schema:
           type: string
@@ -169,35 +174,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ClientRepresentation'
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/saml.readonly
-  /saml/samlClient/id/{id}:
-    get:
-      tags:
-      - SAML - Client
-      summary: Get client by Id
-      description: Get client by Id
-      operationId: get-saml-client-by-id
-      parameters:
-      - name: id
-        in: path
-        description: Unique identifier of Client - Id
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ClientRepresentation'
+                  $ref: '#/components/schemas/JansTrustRelationship'
         "401":
           description: Unauthorized
         "500":
@@ -358,16 +335,26 @@ paths:
         - https://jans.io/oauth/config/saml-client-scope.write
 components:
   schemas:
-    ClientRepresentation:
+    JansTrustRelationship:
+      required:
+      - description
+      - displayName
+      - spMetaDataSourceType
       type: object
       properties:
-        id:
+        dn:
+          type: string
+        inum:
           type: string
         clientId:
           type: string
-        name:
+        displayName:
+          maxLength: 60
+          minLength: 0
           type: string
         description:
+          maxLength: 4000
+          minLength: 0
           type: string
         rootUrl:
           type: string
@@ -382,15 +369,11 @@ components:
         alwaysDisplayInConsole:
           type: boolean
         clientAuthenticatorType:
-          type: string
-        secret:
+          type: boolean
+        clientSecret:
           type: string
         registrationAccessToken:
           type: string
-        defaultRoles:
-          type: array
-          items:
-            type: string
         redirectUris:
           type: array
           items:
@@ -399,130 +382,74 @@ components:
           type: array
           items:
             type: string
-        notBefore:
-          type: integer
-          format: int32
-        bearerOnly:
-          type: boolean
         consentRequired:
           type: boolean
-        standardFlowEnabled:
+        spMetaDataSourceType:
+          type: string
+          enum:
+          - file
+          - uri
+          - federation
+          - manual
+          - mdq
+        metaLocation:
+          type: string
+        jansIsFed:
           type: boolean
-        implicitFlowEnabled:
-          type: boolean
-        directAccessGrantsEnabled:
-          type: boolean
-        serviceAccountsEnabled:
-          type: boolean
-        authorizationServicesEnabled:
-          type: boolean
-        directGrantsOnly:
-          type: boolean
-        publicClient:
-          type: boolean
-        frontchannelLogout:
-          type: boolean
+        ssoProfileConfiguration:
+          $ref: '#/components/schemas/ProfileConfiguration'
+        releasedAttributes:
+          type: array
+          items:
+            type: string
         protocol:
           type: string
-        attributes:
-          type: object
-          additionalProperties:
-            type: string
-        authenticationFlowBindingOverrides:
-          type: object
-          additionalProperties:
-            type: string
-        fullScopeAllowed:
-          type: boolean
-        nodeReRegistrationTimeout:
-          type: integer
-          format: int32
-        registeredNodes:
-          type: object
-          additionalProperties:
-            type: integer
-            format: int32
-        protocolMappers:
-          type: array
-          items:
-            $ref: '#/components/schemas/ProtocolMapperRepresentation'
-        clientTemplate:
+        status:
           type: string
-        useTemplateConfig:
-          type: boolean
-        useTemplateScope:
-          type: boolean
-        useTemplateMappers:
-          type: boolean
-        defaultClientScopes:
-          type: array
-          items:
-            type: string
-        optionalClientScopes:
-          type: array
-          items:
-            type: string
-        authorizationSettings:
-          $ref: '#/components/schemas/ResourceServerRepresentation'
-        access:
-          type: object
-          additionalProperties:
-            type: boolean
-        origin:
+          enum:
+          - active
+          - inactive
+          - expired
+          - register
+        validationStatus:
           type: string
-    PolicyRepresentation:
+          enum:
+          - In Progress
+          - Success
+          - Scheduled
+          - Failed
+        jansEntityId:
+          type: array
+          items:
+            type: string
+        validationLog:
+          type: array
+          items:
+            type: string
+        baseDn:
+          type: string
+    ProfileConfiguration:
       type: object
       properties:
-        id:
-          type: string
         name:
           type: string
-        description:
+        signResponses:
           type: string
-        type:
+    SamlConfig:
+      type: object
+      properties:
+        serverUrl:
           type: string
-        policies:
-          uniqueItems: true
-          type: array
-          items:
-            type: string
-        resources:
-          uniqueItems: true
-          type: array
-          items:
-            type: string
-        scopes:
-          uniqueItems: true
-          type: array
-          items:
-            type: string
-        logic:
+        realm:
           type: string
-          enum:
-          - POSITIVE
-          - NEGATIVE
-        decisionStrategy:
+        username:
           type: string
-          enum:
-          - AFFIRMATIVE
-          - UNANIMOUS
-          - CONSENSUS
-        owner:
+        password:
           type: string
-        resourcesData:
-          uniqueItems: true
-          type: array
-          items:
-            $ref: '#/components/schemas/ResourceRepresentation'
-        scopesData:
-          uniqueItems: true
-          type: array
-          items:
-            $ref: '#/components/schemas/ScopeRepresentation'
-        config:
-          type: object
-          additionalProperties:
-            type: string
+        clientId:
+          type: string
+        clientSecret:
+          type: string
     ProtocolMapperRepresentation:
       type: object
       properties:
@@ -542,120 +469,6 @@ components:
           type: object
           additionalProperties:
             type: string
-    ResourceOwnerRepresentation:
-      type: object
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-    ResourceRepresentation:
-      type: object
-      properties:
-        name:
-          type: string
-        type:
-          type: string
-        owner:
-          $ref: '#/components/schemas/ResourceOwnerRepresentation'
-        ownerManagedAccess:
-          type: boolean
-        displayName:
-          type: string
-        attributes:
-          type: object
-          additionalProperties:
-            type: array
-            items:
-              type: string
-        _id:
-          type: string
-        uris:
-          uniqueItems: true
-          type: array
-          items:
-            type: string
-        scopes:
-          uniqueItems: true
-          type: array
-          items:
-            $ref: '#/components/schemas/ScopeRepresentation'
-        icon_uri:
-          type: string
-        uri:
-          type: string
-          writeOnly: true
-        resource_scopes:
-          uniqueItems: true
-          type: array
-          writeOnly: true
-          items:
-            $ref: '#/components/schemas/ScopeRepresentation'
-    ResourceServerRepresentation:
-      type: object
-      properties:
-        id:
-          type: string
-        clientId:
-          type: string
-        name:
-          type: string
-        allowRemoteResourceManagement:
-          type: boolean
-        policyEnforcementMode:
-          type: string
-          enum:
-          - ENFORCING
-          - PERMISSIVE
-          - DISABLED
-        resources:
-          type: array
-          items:
-            $ref: '#/components/schemas/ResourceRepresentation'
-        policies:
-          type: array
-          items:
-            $ref: '#/components/schemas/PolicyRepresentation'
-        scopes:
-          type: array
-          items:
-            $ref: '#/components/schemas/ScopeRepresentation'
-        decisionStrategy:
-          type: string
-          enum:
-          - AFFIRMATIVE
-          - UNANIMOUS
-          - CONSENSUS
-    ScopeRepresentation:
-      type: object
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-        iconUri:
-          type: string
-        policies:
-          type: array
-          items:
-            $ref: '#/components/schemas/PolicyRepresentation'
-        displayName:
-          type: string
-    SamlConfig:
-      type: object
-      properties:
-        serverUrl:
-          type: string
-        realm:
-          type: string
-        username:
-          type: string
-        password:
-          type: string
-        clientId:
-          type: string
-        clientSecret:
-          type: string
   securitySchemes:
     oauth2:
       type: oauth2

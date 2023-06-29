@@ -23,8 +23,7 @@ import jakarta.ws.rs.core.Response;
 
 import java.util.*;
 
-import org.keycloak.representations.idm.ClientRepresentation;
-import org.keycloak.representations.idm.UserRepresentation;
+import io.jans.configapi.plugin.saml.model.JansTrustRelationship;
 
 import org.slf4j.Logger;
 
@@ -39,130 +38,113 @@ public class SamlClientResource extends BaseResource {
     @Inject
     SamlService samlService;
 
-    @Operation(summary = "Get all Clients", description = "Get all Clients.", operationId = "get-saml-client", tags = {
-            "SAML - Client" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+    @Operation(summary = "Get all Trust Relationship", description = "Get all TrustRelationship.", operationId = "get-trust-relationship", tags = {
+            "SAML - Trust Relationship" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.SAML_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = ClientRepresentation.class)))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = JansTrustRelationship.class)))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { Constants.SAML_READ_ACCESS })
-    public Response getAllClients() {
+    public Response getAllTrustRelationship() {
 
-        List<ClientRepresentation> clientList = samlService.getAllClients();
+        List<JansTrustRelationship> trustRelationshipList = samlService.getAllJansTrustRelationship();
 
-        logger.info("All clientList:{}", clientList);
-        return Response.ok(clientList).build();
+        logger.info("All trustRelationshipList:{}", trustRelationshipList);
+        return Response.ok(trustRelationshipList).build();
     }
 
-    @Operation(summary = "Get all users", description = "Get all users", operationId = "get-saml-user", tags = {
-            "SAML - User" }, security = @SecurityRequirement(name = "oauth2", scopes = { Constants.SAML_READ_ACCESS }))
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = ClientRepresentation.class)))),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "500", description = "InternalServerError") })
-    @GET
-    @ProtectedApi(scopes = { Constants.SAML_READ_ACCESS })
-    @Path("/user")
-    public Response getAllUsers() {
+   
 
-        logger.info("Searching users()");
-        // to get only SAML use "protocol": "saml",
-        List<UserRepresentation> userList = samlService.getAllUsers();
-
-        logger.info("All userList:{}", userList);
-        return Response.ok(userList).build();
-    }
-
-    @Operation(summary = "Get client by clientId", description = "Get client by clientId", operationId = "get-saml-client-by-clientId", tags = {
-            "SAML - Client" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+    @Operation(summary = "Get TrustRelationship by name", description = "Get TrustRelationship by name", operationId = "get-trust-relationship-by-name", tags = {
+            "SAML - Trust Relationship" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.SAML_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = ClientRepresentation.class)))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = JansTrustRelationship.class)))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { Constants.SAML_READ_ACCESS })
     @Path(Constants.CLIENTID_PATH)
-    public Response getClientByClientId(
-            @Parameter(description = "Client Id") @PathParam(Constants.CLIENTID) @NotNull String clientId) {
-        logger.info("Searching client by clientId: {}", clientId);
+    public Response getTrustRelationshipByName(
+            @Parameter(description = "Name") @PathParam(Constants.CLIENTID) @NotNull String clientName) {
+        logger.info("Searching client by name: {}", clientName);
 
-        List<ClientRepresentation> clients = samlService.getClientByClientId(clientId);
+        JansTrustRelationship trustRelationship = samlService.getJansTrustRelationshipByInum(clientName);
 
-        logger.info("Clients found by name:{}, clients:{}", clientId, clients);
+        logger.info("TrustRelationship found by clientName:{}, trustRelationship:{}", clientName, trustRelationship);
 
-        return Response.ok(clients).build();
+        return Response.ok(trustRelationship).build();
     }
 
-    @Operation(summary = "Get client by Id", description = "Get client by Id", operationId = "get-saml-client-by-id", tags = {
-            "SAML - Client" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+    @Operation(summary = "Get TrustRelationship by Id", description = "Get TrustRelationship by Id", operationId = "get-trust-relationship-by-id", tags = {
+            "SAML - Trust Relationship" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.SAML_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ClientRepresentation.class))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JansTrustRelationship.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { Constants.SAML_READ_ACCESS })
     @Path(Constants.ID_PATH + Constants.ID_PATH_PARAM)
-    public Response searchClient(
-            @Parameter(description = "Unique identifier of Client - Id") @PathParam(Constants.ID) @NotNull String id) {
+    public Response getTrustRelationshipById(
+            @Parameter(description = "Unique identifier - Id") @PathParam(Constants.ID) @NotNull String id) {
         logger.info("Searching client by id: {}", id);
 
-        ClientRepresentation client = samlService.getClientById(id);
+        JansTrustRelationship trustRelationship = samlService.getJansTrustRelationshipByInum(id);
 
-        logger.info("Client found by id:{}, client:{}", id, client);
+        logger.info("TrustRelationship found by id:{}, trustRelationship:{}", id, trustRelationship);
 
-        return Response.ok(client).build();
+        return Response.ok(trustRelationship).build();
     }
 
-    @Operation(summary = "Create Client", description = "Create Client", operationId = "post-client", tags = {
-            "SAML - Client" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+    @Operation(summary = "Create Trust Relationship", description = "Create Trust Relationship", operationId = "post-trust-relationship", tags = {
+            "SAML - Trust Relationship" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.SAML_WRITE_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "clientList", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = ClientRepresentation.class)))),
+            @ApiResponse(responseCode = "201", description = "clientList", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = JansTrustRelationship.class)))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
     @ProtectedApi(scopes = { Constants.SAML_WRITE_ACCESS })
-    public Response createClient(@Valid ClientRepresentation clientRepresentation) {
+    public Response createTrustRelationship(@Valid JansTrustRelationship jansTrustRelationship) {
 
-        logger.info("Create client clientRepresentation:{}", clientRepresentation);
+        logger.info("Create jansTrustRelationship:{}", jansTrustRelationship);
 
         // TO-DO validation of client
-        ClientRepresentation client = samlService.createClient(clientRepresentation);
+        jansTrustRelationship = samlService.addTrustRelationship(jansTrustRelationship);
 
-        logger.info("Create created by client:{}", client);
-        return Response.status(Response.Status.CREATED).entity(client).build();
+        logger.info("Create created by client:{}", jansTrustRelationship);
+        return Response.status(Response.Status.CREATED).entity(jansTrustRelationship).build();
     }
 
-    @Operation(summary = "Update client", description = "Update client", operationId = "put-client", tags = {
-            "SAML - Client" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+    @Operation(summary = "Update TrustRelationship", description = "Update TrustRelationship", operationId = "put-trust-relationship", tags = {
+            "SAML - Trust Relationship" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.SAML_WRITE_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = ClientRepresentation.class)))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = JansTrustRelationship.class)))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PUT
     @ProtectedApi(scopes = { Constants.SAML_WRITE_ACCESS })
-    public Response updateClient(@Valid ClientRepresentation clientRepresentation) {
+    public Response updateTrustRelationship(@Valid JansTrustRelationship jansTrustRelationship) {
 
-        logger.info("Update client:{}", clientRepresentation);
+        logger.info("Update jansTrustRelationship:{}", jansTrustRelationship);
 
-        // TO-DO validation of client
-        ClientRepresentation client = samlService.updateClient(clientRepresentation);
+        // TO-DO validation of jansTrustRelationship
+        jansTrustRelationship = samlService.updateTrustRelationship(jansTrustRelationship);
 
-        logger.info("Post update client:{}", client);
+        logger.info("Post update client:{}", jansTrustRelationship);
 
-        return Response.ok(client).build();
+        return Response.ok(jansTrustRelationship).build();
     }
 
     @Operation(summary = "Delete client", description = "Delete client", operationId = "put-client", tags = {
-            "SAML - Client" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+            "SAML - Trust Relationship" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.SAML_WRITE_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "No Content", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = ClientRepresentation.class)))),
+            @ApiResponse(responseCode = "204", description = "No Content", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = JansTrustRelationship.class)))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @DELETE
@@ -172,9 +154,12 @@ public class SamlClientResource extends BaseResource {
             @Parameter(description = "Unique Id of client") @PathParam(Constants.ID) @NotNull String id) {
 
         logger.info("Delete client identified by id:{}", id);
-
-        // TO-DO validation of client
-        samlService.deleteClient(id);
+        
+        JansTrustRelationship jansTrustRelationship = samlService.getJansTrustRelationshipByInum(id);
+        if(jansTrustRelationship==null) {
+            //throw error;
+        }
+        samlService.removeTrustRelationship(jansTrustRelationship);
 
         return Response.noContent().build();
     }
