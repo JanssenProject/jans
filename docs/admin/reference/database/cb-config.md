@@ -7,7 +7,7 @@ tags:
 
 # Couchbase ORM persistence layer
 
-The recommended Couchbase version is 7.x. This DB should be installed before installing Jans.
+The recommended Couchbase version is 7.x or newer. This DB should be installed before installing Jans.
 After running Jans setup administrator should provide user/password with role which allow to create buckets and import initial data and configuration.
 
 During installation setup generates default **/etc/jans/conf/jans-couchbase.properties** and creates required buckets in DB with initial data set.

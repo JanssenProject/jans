@@ -8,7 +8,7 @@ tags:
 
 # MySQL ORM persistence layer
 
-The recommended MySQL version is 8.x. Before running installation the administrator can pre-install DB and provide credentials to access it or he can select option to install MySQL on same server during setup.
+The recommended MySQL version is 8.x or newer. Before running installation the administrator can pre-install DB and provide credentials to access it or he can select option to install MySQL on same server during setup.
 
 During installation setup generates default **/etc/jans/conf/jans-sql.properties** and creates **jansdb** schema with tables and  initial data set.
 
@@ -83,7 +83,7 @@ Each table in **jansdb** MySQL schema follow next rules:
 
 1. one table for every LDAP **objectClass**
 1. has 2 mandatory column `DN` and `doc_id`
-1. Index for primary key and `DN`
+1. Index for primary key
 
 ![](../../../assets/database-mysql-scope-index.jpg)
 
@@ -94,7 +94,7 @@ ORM uses **VARCHAR / DATETIME(3) / INT / BINARY / SMALLINT / BLOB / JSON** data 
 
 ![](../../../assets/database-mysql-scope-schema.jpg)
 
-`JSON` it uses to store multi-valued attribute value. The generic format of such values is:
+`JSON` it uses to store multi-valued attribute values. The generic format of such values is:
 
 ```
 {"v": ["value_1", "value_2", ...]}
@@ -122,7 +122,7 @@ To store attributes defined in java beans with `@JsonObject` annotation ORM uses
 
 # Java examples
 
-This example shows how to use ORM. It opens connection to Couchbase DB and add user entry to it:
+This example shows how to use ORM. It opens connection to MySQL DB and add user entry to it:
 
 ```
     public static void main(String[] args) {
@@ -157,14 +157,14 @@ This example shows how to use ORM. It opens connection to Couchbase DB and add u
         Properties connectionProperties = new Properties();
 
         connectionProperties.put("sql#db.schema.name", "jansdb");
-        connectionProperties.put("sql#connection.uri", "jdbc:mysql://u224.gluu.info:3306/jansdb?profileSQL=true");
+        connectionProperties.put("sql#connection.uri", "jdbc:mysql://localhost:3306/jansdb?profileSQL=true");
 
         connectionProperties.put("sql#connection.driver-property.serverTimezone", "GMT+2");
         connectionProperties.put("sql#connection.pool.max-total", "300");
         connectionProperties.put("sql#connection.pool.max-idle", "300");
 
         connectionProperties.put("sql#auth.userName", "jans");
-        connectionProperties.put("sql#auth.userPassword", "Secret1!");
+        connectionProperties.put("sql#auth.userPassword", "secret");
         
         // Password hash method
         connectionProperties.put("sql#password.encryption.method", "SSHA-256");
@@ -185,6 +185,4 @@ This example shows how to use ORM. It opens connection to Couchbase DB and add u
     }
 ```
 
-More Couchbase ORM examples is in [this](https://github.com/JanssenProject/jans/tree/main/jans-orm/couchbase-sample/src/main/java/io/jans/orm/couchbase) sample module.
-
-
+More MySQL ORM examples is in [this](https://github.com/JanssenProject/jans/tree/main/jans-orm/sql-sample/src/main/java/io/jans/orm/sql) sample module.
