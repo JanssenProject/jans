@@ -965,6 +965,24 @@ public class SessionIdService {
         return persistenceEntryManager.findEntries(staticConfiguration.getBaseDn().getSessions(), SessionId.class, filter);
     }
 
+    public boolean hasAllScopes(SessionId sessionId, Set<String> scopes) {
+        if (sessionId == null || sessionId.getSessionAttributes().isEmpty() || scopes == null || scopes.isEmpty()) {
+            return false;
+        }
+
+        final String scopesAsString = sessionId.getSessionAttributes().get("scope");
+        if (StringUtils.isBlank(scopesAsString)) {
+            return false;
+        }
+
+        for (String scope : scopes) {
+            if (!scopesAsString.contains(scope)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public void externalEvent(SessionEvent event) {
         externalApplicationSessionService.externalEvent(event);
     }
