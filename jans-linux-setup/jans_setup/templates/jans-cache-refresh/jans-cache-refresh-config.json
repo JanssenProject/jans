@@ -66,7 +66,7 @@
       "destination": "sn"
     }
   ],
-  "snapshotFolder": "/var/cr-snapshots",
+  "snapshotFolder": "%(snapshots_dir)s",
   "snapshotMaxCount": 10,
   "baseDN": "o=jans",
   "personObjectClassTypes": [

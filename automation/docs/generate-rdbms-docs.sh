@@ -1,10 +1,9 @@
 #!/bin/bash
 set -euo pipefail
-git pull origin main
+PERSISTENCE=$1
+echo "Generate RDBMS docs"
 docker cp automation/docs/generate-rdbms-docs.py docker-jans-monolith-jans-1:/opt/generate-rdbms-docs.py
-docker exec docker-jans-monolith-jans-1 python3 /opt/generate-rdbms-docs.py mysql jans 1t5Fin3#security jans utf8 mysql-schema.md mysql-schema-indexes.md
-docker cp docker-jans-monolith-jans-1:/opt/mysql-schema.md docs/admin/reference/database/mysql-schema.md
-docker cp docker-jans-monolith-jans-1:/opt/mysql-schema-indexes.md docs/admin/reference/database/mysql-schema-indexes.md
-git add docs/* && git update-index --refresh
-git commit -m "docs: update rdbms docs"
-git diff-index --quiet HEAD -- || git commit -S -m "docs: update rdbms docs" && git push
+docker exec docker-jans-monolith-jans-1 python3 /opt/generate-rdbms-docs.py -hostname "$PERSISTENCE" -username "jans" -password "1t5Fin3#security" -database "jans" -rdbm-type "$PERSISTENCE" -schema-file "/opt/$PERSISTENCE-schema.md" -schema-indexes-file "/opt/$PERSISTENCE-schema-indexes.md"
+docker exec docker-jans-monolith-jans-1 ls -l /opt/
+docker cp docker-jans-monolith-jans-1:/opt/"$PERSISTENCE"-schema.md ./docs/admin/reference/database/"$PERSISTENCE"-schema.md || echo "No schema file found"
+docker cp docker-jans-monolith-jans-1:/opt/"$PERSISTENCE"-schema-indexes.md ./docs/admin/reference/database/"$PERSISTENCE"-schema-indexes.md || echo "No schema indexes file found"
