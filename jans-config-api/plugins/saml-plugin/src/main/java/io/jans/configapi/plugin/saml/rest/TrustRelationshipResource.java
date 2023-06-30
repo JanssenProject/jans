@@ -32,6 +32,8 @@ import org.slf4j.Logger;
 @Produces(MediaType.APPLICATION_JSON)
 public class TrustRelationshipResource extends BaseResource {
 
+    private static final String SAML_TRUST_RELATIONSHIP= "Trus tRelationship";
+    
     @Inject
     Logger logger;
 
@@ -159,6 +161,26 @@ public class TrustRelationshipResource extends BaseResource {
         samlService.removeTrustRelationship(TrustRelationship);
 
         return Response.noContent().build();
+    }
+    
+    private TrustRelationship saveTrustRelationship(TrustRelationship trustRelationship, boolean update) {
+        logger.info("Delete client identified by trustRelationship:{}, update:{}", trustRelationship, update);
+        
+        //Validations
+        checkResourceNotNull(trustRelationship, SAML_TRUST_RELATIONSHIP);
+        
+        // If relationship exists and action is add then throw error
+        List<TrustRelationship> existingRelationships = samlService.getAllTrustRelationshipByName(trustRelationship.getDisplayName());
+
+        //If update check by inum
+        
+        //Save metadatfile
+       /* String resultInitMetadataFilters = metadataFiltersAction.initMetadataFilters(this.trustRelationship);
+        if (!StringHelper.equalsIgnoreCase(OxTrustConstants.RESULT_SUCCESS, resultInitMetadataFilters)) {
+            return false;
+        }
+       */
+        return trustRelationship;
     }
 
 }

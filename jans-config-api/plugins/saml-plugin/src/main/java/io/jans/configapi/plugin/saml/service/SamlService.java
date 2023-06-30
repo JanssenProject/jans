@@ -37,7 +37,7 @@ public class SamlService {
     @Inject
     ConfigurationFactory configurationFactory;
 
-    private static final String SAML_DN_BASE = "ou=jansSAMLconfig,o=jans";
+    private static final String SAML_DN_BASE = "ou=trustRelationships,o=jans";
 
     public String baseDn() {
         // return staticConfiguration.getBaseDn().getTrustRelationshipDn();
@@ -70,6 +70,25 @@ public class SamlService {
         return result;
     }
     
+    public List<TrustRelationship> getAllTrustRelationship() {
+        return persistenceEntryManager.findEntries(getDnForTrustRelationship(null), TrustRelationship.class,
+                null);
+    }
+    public List<TrustRelationship> getAllTrustRelationshipByInum(String inum) {
+        return persistenceEntryManager.findEntries(getDnForTrustRelationship(inum), TrustRelationship.class,
+                null);
+    }
+    
+    public List<TrustRelationship> getAllTrustRelationshipByName(String name) {
+        log.debug("Search TrustRelationship with name:{}", name);
+
+        String[] targetArray = new String[] { name };
+        Filter displayNameFilter = Filter.createEqualityFilter(AttributeConstants.DISPLAY_NAME, targetArray);
+        log.debug("Search TrustRelationship with displayNameFilter:{}", displayNameFilter);
+        return persistenceEntryManager.findEntries(getDnForTrustRelationship(null), TrustRelationship.class,
+                displayNameFilter);
+    }
+    
     public TrustRelationship getTrustContainerFederation(TrustRelationship trustRelationship) {
         TrustRelationship relationshipByDn = getRelationshipByDn(trustRelationship.getDn());
         return relationshipByDn;
@@ -80,7 +99,7 @@ public class SamlService {
         return relationshipByDn;
     }
 
-    public List<TrustRelationship> getAllSAMLTrustRelationships(int sizeLimit) {
+    public List<TrustRelationship> getAllTrustRelationships(int sizeLimit) {
         return persistenceEntryManager.findEntries(getDnForTrustRelationship(null), TrustRelationship.class,
                 null, sizeLimit);
     }
@@ -107,10 +126,7 @@ public class SamlService {
                 null, sizeLimit);
     }
 
-    public List<TrustRelationship> getAllTrustRelationship() {
-        return persistenceEntryManager.findEntries(getDnForTrustRelationship(null), TrustRelationship.class,
-                null);
-    }
+ 
 
     public PagedResult<Client> getTrustRelationship(SearchRequest searchRequest) {
         log.debug("Search TrustRelationship with searchRequest:{}", searchRequest);
@@ -174,9 +190,9 @@ public class SamlService {
 
     public String getDnForTrustRelationship(String inum) {
         if (StringHelper.isEmpty(inum)) {
-            return String.format("ou=jansSAMLconfig,%s", SAML_DN_BASE);
+            return String.format("%s", SAML_DN_BASE);
         }
-        return String.format("inum=%s,ou=jansSAMLconfig,%s", inum, SAML_DN_BASE);
+        return String.format("inum=%s,%s", inum, SAML_DN_BASE);
     }
 
 }
