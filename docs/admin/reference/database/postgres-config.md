@@ -28,7 +28,7 @@ connection.uri=jdbc:postgresql://localhost:5432/jansdb
 
 
 auth.userName=jans
-auth.userPassword=RawhfMYCZSw3ka8VaGPkEQ==
+auth.userPassword=CC0NHhtXW78=
 
 # Password hash method
 password.encryption.method=SSHA-256
@@ -147,7 +147,7 @@ This example shows how to use ORM. It opens connection to PostgreSQL DB and add 
         Properties connectionProperties = new Properties();
 
         connectionProperties.put("sql#db.schema.name", "public");
-        connectionProperties.put("sql#connection.uri", "jdbc:postgresql://jenkins-dev1.jans.io:5432/jansdb");
+        connectionProperties.put("sql#connection.uri", "jdbc:postgresql://localhost:5432/jansdb");
 
         connectionProperties.put("sql#auth.userName", "jans");
         connectionProperties.put("sql#auth.userPassword", "secret");

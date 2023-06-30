@@ -35,7 +35,7 @@ connection.driver-property.metadataCacheSize=500
 #connection.driver-property.prepStmtCacheSqlLimit=1024
 
 auth.userName=jans
-auth.userPassword=5g2O0M94jSQ0exJFoboBxA==
+auth.userPassword=CC0NHhtXW78=
 
 # Password hash method
 password.encryption.method=SSHA-256
