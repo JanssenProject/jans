@@ -51,6 +51,7 @@ public class ForceSignedRequestObjectTest extends BaseTest {
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS256);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.addressScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -110,6 +111,7 @@ public class ForceSignedRequestObjectTest extends BaseTest {
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS384);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.addressScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -170,6 +172,7 @@ public class ForceSignedRequestObjectTest extends BaseTest {
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.RS512);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.addressScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -228,6 +231,7 @@ public class ForceSignedRequestObjectTest extends BaseTest {
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.ES256);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.addressScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -287,6 +291,7 @@ public class ForceSignedRequestObjectTest extends BaseTest {
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.ES384);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.addressScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -347,6 +352,7 @@ public class ForceSignedRequestObjectTest extends BaseTest {
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.ES512);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.addressScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -406,6 +412,7 @@ public class ForceSignedRequestObjectTest extends BaseTest {
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.PS256);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.addressScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -465,6 +472,7 @@ public class ForceSignedRequestObjectTest extends BaseTest {
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.PS384);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.addressScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -524,6 +532,7 @@ public class ForceSignedRequestObjectTest extends BaseTest {
         registerRequest.setJwksUri(jwksUri);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.PS512);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.addressScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -612,6 +621,7 @@ public class ForceSignedRequestObjectTest extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setRequestObjectSigningAlg(SignatureAlgorithm.NONE);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(Tester.addressScopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);

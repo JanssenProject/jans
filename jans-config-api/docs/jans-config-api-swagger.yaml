@@ -31,7 +31,7 @@ tags:
 - name: OAuth - UMA Resources
 - name: OAuth - Scopes
 - name: Agama - Configuration
-- name: Agama - Developer Studio
+- name: Agama
 - name: Statistics - User
 - name: Health - Check
 - name: Server Stats
@@ -177,7 +177,7 @@ paths:
   /api/v1/agama-deployment/{name}:
     get:
       tags:
-      - Agama - Developer Studio
+      - Agama
       summary: Fetches deployed Agama project based on name.
       description: Fetches deployed Agama project based on name.
       operationId: get-agama-dev-studio-prj-by-name
@@ -212,7 +212,7 @@ paths:
         - https://jans.io/oauth/config/agama.readonly
     post:
       tags:
-      - Agama - Developer Studio
+      - Agama
       summary: Deploy an Agama project.
       description: Deploy an Agama project.
       operationId: post-agama-dev-studio-prj
@@ -255,7 +255,7 @@ paths:
         - https://jans.io/oauth/config/agama.write
     delete:
       tags:
-      - Agama - Developer Studio
+      - Agama
       summary: Delete a deployed Agama project.
       description: Delete a deployed Agama project.
       operationId: delete-agama-dev-studio-prj
@@ -283,7 +283,7 @@ paths:
   /api/v1/agama-deployment/configs/{name}:
     get:
       tags:
-      - Agama - Developer Studio
+      - Agama
       summary: Retrieve the list of configs based on name.
       description: Retrieve the list of configs based on name.
       operationId: get-agama-dev-prj-configs
@@ -314,7 +314,7 @@ paths:
         - https://jans.io/oauth/config/agama.readonly
     put:
       tags:
-      - Agama - Developer Studio
+      - Agama
       summary: Update an Agama project.
       description: Update an Agama project.
       operationId: put-agama-dev-studio-prj
@@ -359,7 +359,7 @@ paths:
   /api/v1/agama-deployment:
     get:
       tags:
-      - Agama - Developer Studio
+      - Agama
       summary: Retrieve the list of projects deployed currently.
       description: Retrieve the list of projects deployed currently.
       operationId: get-agama-dev-prj
@@ -7452,9 +7452,11 @@ components:
           type: string
         whitePagesCanView:
           type: boolean
-        userCanAccess:
+        adminCanAccess:
           type: boolean
         adminCanView:
+          type: boolean
+        userCanAccess:
           type: boolean
         adminCanEdit:
           type: boolean

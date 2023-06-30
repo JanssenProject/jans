@@ -132,6 +132,8 @@ public class SessionIdService {
 
     public Set<SessionId> getCurrentSessions() {
         final Set<String> ids = cookieService.getCurrentSessions();
+
+        log.trace("current_sessions: {}", ids);
         final Set<SessionId> sessions = Sets.newHashSet();
         for (String sessionId : ids) {
             if (StringUtils.isBlank(sessionId)) {
@@ -961,6 +963,24 @@ public class SessionIdService {
         }
         Filter filter = Filter.createEqualityFilter("jansUsrDN", userDn);
         return persistenceEntryManager.findEntries(staticConfiguration.getBaseDn().getSessions(), SessionId.class, filter);
+    }
+
+    public boolean hasAllScopes(SessionId sessionId, Set<String> scopes) {
+        if (sessionId == null || sessionId.getSessionAttributes().isEmpty() || scopes == null || scopes.isEmpty()) {
+            return false;
+        }
+
+        final String scopesAsString = sessionId.getSessionAttributes().get("scope");
+        if (StringUtils.isBlank(scopesAsString)) {
+            return false;
+        }
+
+        for (String scope : scopes) {
+            if (!scopesAsString.contains(scope)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public void externalEvent(SessionEvent event) {

@@ -117,6 +117,62 @@ components:
         snapshotMaxCount:
           type: integer
           format: int32
+        baseDN:
+          type: string
+        personObjectClassTypes:
+          type: array
+          items:
+            type: string
+        personCustomObjectClass:
+          type: string
+        personObjectClassDisplayNames:
+          type: array
+          items:
+            type: string
+        contactObjectClassTypes:
+          type: array
+          items:
+            type: string
+        allowPersonModification:
+          type: boolean
+        supportedUserStatus:
+          type: array
+          items:
+            type: string
+        loggingLevel:
+          type: string
+        loggingLayout:
+          type: string
+        externalLoggerConfiguration:
+          type: string
+        metricReporterInterval:
+          type: integer
+          format: int32
+        metricReporterKeepDataDays:
+          type: integer
+          format: int32
+        metricReporterEnabled:
+          type: boolean
+        disableJdkLogger:
+          type: boolean
+        cleanServiceInterval:
+          type: integer
+          format: int32
+        vdsCacheRefreshEnabled:
+          type: boolean
+        cacheRefreshServerIpAddress:
+          type: string
+        vdsCacheRefreshPollingInterval:
+          type: string
+        vdsCacheRefreshLastUpdate:
+          type: string
+          format: date-time
+        vdsCacheRefreshLastUpdateCount:
+          type: string
+        vdsCacheRefreshProblemCount:
+          type: string
+        useLocalCache:
+          type: boolean
     GluuLdapConfiguration:
       type: object
       properties:

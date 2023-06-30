@@ -18,7 +18,7 @@ jobs:
       max-parallel: 6
       matrix:
         # add '"pgsql" when supported
-        persistence-backends: ["MYSQL", "PGSQL"]
+        persistence-backends: ["MYSQL", "PGSQL", "LDAP"]
         python-version: ["3.7"]
       fail-fast: false
     steps:
@@ -54,11 +54,34 @@ jobs:
         ip=$(ifconfig eth0 | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1')
         sudo chmod u+x automation/startjanssenmonolithdemo.sh
         sudo bash ./automation/startjanssenmonolithdemo.sh demoexample.jans.io ${{ matrix.persistence-backends }} $ip ${{ github.sha }}
-        sudo bash ./automation/docs/generate-rdbms-docs.sh || echo "generating rdbms docs failed!!!"
+        persistence=$(echo "${{ matrix.persistence-backends }}" | tr '[:upper:]' '[:lower:]')
+        
+        echo "generating rdbms docs for ${{ matrix.persistence-backends }}..."
+        git clone  https://mo-auto:${{ secrets.MOAUTO_WORKFLOW_TOKEN }}@github.com/JanssenProject/jans.git
+        cd jans
+        git config pull.rebase true
+        git checkout -b cn-jans-update-${{ matrix.persistence-backends }}-auto-generated-docs || echo "Branch exists"
+        git pull origin cn-jans-update-${{ matrix.persistence-backends }}-auto-generated-docs || echo "Nothing to pull"
+        sudo bash ./automation/docs/generate-rdbms-docs.sh "$persistence" || echo "generating rdbms docs failed for ${{ matrix.persistence-backends }}!!!"
+        git add . || echo "generating rdbms docs failed !!!"
+        git commit -a -S -m "docs: auto-generated ${{ matrix.persistence-backends }} docs" || echo "Nothing to commit"
+        git push --set-upstream origin cn-jans-update-${{ matrix.persistence-backends }}-auto-generated-docs || echo "generating rdbms docs failed !!!"
+        MESSAGE="fix(docs): autogenerate ${{ matrix.persistence-backends }} RDBMS docs"
+        gh pr create --body "Auto generated RDBMS docs" --title "${MESSAGE}" || echo "PR exists"
+        cd ..
+        echo "generating rdbms docs for ${{ matrix.persistence-backends }} done"
+
         export JANS_URL=https://demoexample.jans.io
         export JANS_CLIENT_ID=9876baac-de39-4c23-8a78-674b59df8c09
         export JANS_CLIENT_SECRET=1t5Fin3#security
         export JANS_INSECURE_CLIENT=true
         export TF_ACC=1
         cd terraform-provider-jans
-        go test -v ./...
+        go install github.com/jstemmer/go-junit-report/v2@latest
+        go test -v 2>&1 ./... | go-junit-report > ${{ matrix.persistence-backends }}report.xml
+
+    - uses: actions/upload-artifact@v2  # upload test results
+      if: success() || failure()        # run this step even if previous step failed
+      with:
+        name: go-test-results
+        path: ./terraform-provider-jans/${{ matrix.persistence-backends }}report.xml

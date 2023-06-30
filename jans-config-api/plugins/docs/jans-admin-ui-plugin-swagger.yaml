@@ -19,7 +19,7 @@ tags:
 - name: Admin UI - Role-Permissions Mapping
 - name: Admin UI - License
 paths:
-  /admin-ui/license/activateLicense:
+  /admin-ui/license/activate:
     post:
       tags:
       - Admin UI - License
@@ -56,7 +56,7 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/license.write
-  /admin-ui/license/licenseDetails:
+  /admin-ui/license/details:
     get:
       tags:
       - Admin UI - License
@@ -178,6 +178,37 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/license.write
+  /admin-ui/license/trial:
+    get:
+      tags:
+      - Admin UI - License
+      summary: Generate trial license
+      description: Generate trial license
+      operationId: get-trial-license
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LicenseApiResponse'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LicenseApiResponse'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LicenseApiResponse'
+      security:
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly
   /admin-ui/adminUIPermissions:
     get:
       tags:
@@ -629,6 +660,8 @@ components:
       properties:
         licenseKey:
           type: string
+    JsonNode:
+      type: object
     LicenseApiResponse:
       type: object
       properties:
@@ -639,6 +672,8 @@ components:
         responseCode:
           type: integer
           format: int32
+        responseObject:
+          $ref: '#/components/schemas/JsonNode'
     LicenseResponse:
       type: object
       properties:

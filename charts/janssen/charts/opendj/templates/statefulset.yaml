@@ -29,45 +29,10 @@ spec:
       {{- end }}
     spec:
       securityContext:
-        runAsUser: 1000
         runAsNonRoot: true
-      initContainers:
-      - command:
-        - /bin/sh
-        - -c
-        - ls -l /opt/opendj; /bin/chown -R 1000:1000 /opt/opendj || echo "did not work"; ls -l /opt/opendj; sleep 5
-        image: busybox:latest
-        imagePullPolicy: Always
-        name: change-folders-ownership
-        resources: {}
-        terminationMessagePath: /dev/termination-log
-        terminationMessagePolicy: File
-        volumeMounts:
-        {{- range $key, $values := $.Values.openDjVolumeMounts }}
-          - mountPath: {{$values.mountPath}}
-            name: {{$values.name}}
-            subPath: {{$key}}
-        {{- end }}
-        {{- with $.Values.volumeMounts }}
-{{- toYaml . | nindent 10 }}
-        {{- end }}
-    {{- with $.Values.image.pullSecrets }}
-      imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
-    {{- end }}
-      dnsPolicy: {{ $.Values.dnsPolicy | quote }}
-    {{- with $.Values.dnsConfig }}
-      dnsConfig:
-{{ toYaml . | indent 8 }}
-    {{- end }}
-      volumes:
-      {{- with $.Values.volumes }}
-{{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- if .Values.topologySpreadConstraints }}
-      topologySpreadConstraints:
-        {{- include "opendj.topology-spread-constraints" . | indent 8 }}
-      {{- end }}
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
       containers:
       - name: {{ include "opendj.name" $ }}
         imagePullPolicy: {{ $.Values.image.pullPolicy }}

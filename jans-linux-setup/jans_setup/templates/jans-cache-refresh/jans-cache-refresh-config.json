@@ -1,0 +1,98 @@
+{
+  "sourceConfigs": [
+  ],
+  "inumConfig": {
+    "configId": "local_inum",
+    "bindDN": "%(ldap_binddn)s",
+    "bindPassword": "%(encoded_ox_ldap_pw)s",
+    "servers": [
+      "%(ldap_hostname)s:%(ldaps_port)s"
+    ],
+    "maxConnections": 10,
+    "useSSL": true,
+    "baseDNs": [
+      "ou=cache-refresh,o=site"
+    ],
+    "primaryKey": null,
+    "localPrimaryKey": null,
+    "useAnonymousBind": false,
+    "enabled": true,
+    "version": 0,
+    "level": 0
+  },
+  "targetConfig": {
+    "configId": null,
+    "bindDN": null,
+    "bindPassword": null,
+    "servers": [],
+    "maxConnections": 2,
+    "useSSL": false,
+    "baseDNs": [],
+    "primaryKey": null,
+    "localPrimaryKey": null,
+    "useAnonymousBind": false,
+    "enabled": false,
+    "version": 0,
+    "level": 0
+  },
+  "ldapSearchSizeLimit": 1000,
+  "keyAttributes": [
+    "uid"
+  ],
+  "keyObjectClasses": [
+    "gluuPerson"
+  ],
+  "sourceAttributes": [
+    "mail",
+    "cn",
+    "sn"
+  ],
+  "customLdapFilter": "",
+  "updateMethod": "copy",
+  "defaultInumServer": true,
+  "keepExternalPerson": true,
+  "useSearchLimit": false,
+  "attributeMapping": [
+    {
+      "source": "uid",
+      "destination": "uid"
+    },
+    {
+      "source": "cn",
+      "destination": "cn"
+    },
+    {
+      "source": "sn",
+      "destination": "sn"
+    }
+  ],
+  "snapshotFolder": "%(snapshots_dir)s",
+  "snapshotMaxCount": 10,
+  "baseDN": "o=jans",
+  "personObjectClassTypes": [
+    "jansCustomPerson",
+    "jansPerson",
+    "eduPerson"
+  ],
+  "personCustomObjectClass": "jansCustomPerson",
+  "contactObjectClassTypes": [],
+  "allowPersonModification": false,
+  "supportedUserStatus": [
+    "active",
+    "inactive"
+  ],
+  "loggingLevel": null,
+  "loggingLayout": null,
+  "externalLoggerConfiguration": null,
+  "metricReporterInterval": 0,
+  "metricReporterKeepDataDays": 0,
+  "metricReporterEnabled": null,
+  "disableJdkLogger": true,
+  "cleanServiceInterval": 0,
+  "vdsCacheRefreshEnabled": true,
+  "cacheRefreshServerIpAddress": "255.255.255.255",
+  "vdsCacheRefreshPollingInterval": null,
+  "vdsCacheRefreshLastUpdateCount": "0",
+  "vdsCacheRefreshProblemCount": "3",
+  "useLocalCache": false
+}

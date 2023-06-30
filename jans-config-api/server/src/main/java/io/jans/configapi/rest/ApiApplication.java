@@ -40,7 +40,7 @@ import jakarta.ws.rs.core.Application;
                 @Tag(name = "Configuration – JWK - JSON Web Key (JWK)"), @Tag(name = "Custom Scripts"),
                 @Tag(name = "Database - LDAP configuration"), @Tag(name = "OAuth - OpenID Connect - Clients"),
                 @Tag(name = "OAuth - UMA Resources"), @Tag(name = "OAuth - Scopes"),
-                @Tag(name = "Agama - Configuration"), @Tag(name = "Agama - Developer Studio"),
+                @Tag(name = "Agama - Configuration"), @Tag(name = "Agama"),
                 @Tag(name = "Statistics - User"), @Tag(name = "Health - Check"), @Tag(name = "Server Stats"),
                 @Tag(name = "Auth - Session Management"), @Tag(name = "Organization Configuration"),
                 @Tag(name = "Auth Server Health - Check"), @Tag(name = "Plugins"),
