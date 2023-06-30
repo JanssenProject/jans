@@ -3,11 +3,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.jans</groupId>
-    <artifactId>jans-cache-refresh</artifactId>
+    <artifactId>jans-link</artifactId>
     <version>1.0.15-SNAPSHOT</version>
     <packaging>war</packaging>
 
-    <name>jans-cache-refresh</name>
+    <name>jans-link</name>
     <url>http://maven.apache.org</url>
 
     <properties>
