@@ -141,6 +141,67 @@ public class LicenseDetailsService extends BaseService {
         }
     }
 
+    public LicenseApiResponse retrieveLicense() {
+        try {
+            AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
+            LicenseConfiguration licenseConfiguration = auiConfiguration.getLicenseConfiguration();
+            if (licenseConfiguration == null || Strings.isNullOrEmpty(licenseConfiguration.getHardwareId())) {
+                log.info("License configuration is not present.");
+                return createLicenseResponse(false, 500, "License configuration is not present.");
+            }
+            if (Strings.isNullOrEmpty(licenseConfiguration.getScanApiHostname())) {
+                log.info("SCAN api hostname is missing in configuration.");
+                return createLicenseResponse(false, 500, "SCAN api hostname is missing in configuration.");
+            }
+
+            io.jans.as.client.TokenResponse tokenResponse = generateToken(licenseConfiguration.getScanAuthServerHostname(), licenseConfiguration.getScanApiClientId(), licenseConfiguration.getScanApiClientSecret());
+            if (tokenResponse == null) {
+                log.info(ErrorResponse.TOKEN_GENERATION_ERROR.getDescription());
+                return createLicenseResponse(false, 500, ErrorResponse.TOKEN_GENERATION_ERROR.getDescription());
+            }
+
+            String retriveLicenseUrl = (new StringBuffer()).append(StringUtils.removeEnd(licenseConfiguration.getScanApiHostname(), "/"))
+                    .append("/scan/license/retrieve?org_id="+ licenseConfiguration.getHardwareId())
+                    .toString();
+
+
+            Invocation.Builder request = ClientFactory.instance().getClientBuilder(retriveLicenseUrl);
+            request.header(AUTHORIZATION, BEARER + tokenResponse.getAccessToken());
+            request.header(CONTENT_TYPE, APPLICATION_JSON);
+            Response response = request.get();
+
+            log.info("license request status code: {}", response.getStatus());
+
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode jsonNode = mapper.createObjectNode();
+            if (response.getStatus() == 200) {
+                JsonObject entity = response.readEntity(JsonObject.class);
+
+                ((ObjectNode) jsonNode).put("license-key", entity.getString("license_key"));
+
+                if (Strings.isNullOrEmpty(entity.getString("license_key"))) {
+                   return createLicenseResponse(true, 200, "Valid license present.", jsonNode);
+                } else {
+                    return createLicenseResponse(false, 200, jsonNode.get(MESSAGE).textValue());
+                }
+            }
+            //getting error
+            String jsonData = response.readEntity(String.class);
+            ((ObjectNode) jsonNode).put(MESSAGE, jsonData);
+
+            if (!Strings.isNullOrEmpty(jsonNode.get(MESSAGE).textValue())) {
+                log.error("license retrieve error response: {}", jsonData);
+                return createLicenseResponse(false, jsonNode.get("status").intValue(), jsonNode.get(MESSAGE).textValue());
+            }
+            log.error("license isActive error response: {}", jsonData);
+            return createLicenseResponse(false, 500, ErrorResponse.RETRIEVE_LICENSE_ERROR.getDescription());
+
+        } catch (Exception e) {
+            log.error(ErrorResponse.CHECK_LICENSE_ERROR.getDescription(), e);
+            return createLicenseResponse(false, 500, ErrorResponse.RETRIEVE_LICENSE_ERROR.getDescription());
+        }
+    }
+
     /**
      * The function checks if the license is already active, if not, it creates a header map, creates a body map, and sends
      * a POST request to the license server

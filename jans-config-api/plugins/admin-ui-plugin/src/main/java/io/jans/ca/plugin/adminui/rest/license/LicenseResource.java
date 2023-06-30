@@ -33,6 +33,7 @@ public class LicenseResource {
     static final String ACTIVATE = "/activate";
     static final String TRIAL = "/trial";
     static final String DETAILS = "/details";
+    static final String RETRIEVE = "/retrieve";
     static final String SSA = "/ssa";
     static final String IS_LICENSE_CONFIG_VALID = "/isConfigValid";
 
@@ -66,6 +67,23 @@ public class LicenseResource {
             return Response.ok(licenseResponse).build();
         } catch (Exception e) {
             log.error(ErrorResponse.CHECK_LICENSE_ERROR.getDescription(), e);
+            return Response.serverError().entity(licenseResponse).build();
+        }
+    }
+
+    @GET
+    @Path(RETRIEVE)
+    @ProtectedApi(scopes = {SCOPE_LICENSE_READ}, groupScopes = {SCOPE_LICENSE_WRITE}, superScopes = {AppConstants.SCOPE_ADMINUI_READ})
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response retrieveLicense() {
+        LicenseApiResponse licenseResponse = null;
+        try {
+            log.info("Retrieve license from SCAN.");
+            licenseResponse = licenseDetailsService.retrieveLicense();
+            log.info("Retrieve license from SCAN result (true/false): {}", licenseResponse.isApiResult());
+            return Response.ok(licenseResponse).build();
+        } catch (Exception e) {
+            log.error(ErrorResponse.RETRIEVE_LICENSE_ERROR.getDescription(), e);
             return Response.serverError().entity(licenseResponse).build();
         }
     }
