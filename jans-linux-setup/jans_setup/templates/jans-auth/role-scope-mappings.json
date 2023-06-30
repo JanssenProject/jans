@@ -211,12 +211,12 @@
     {
       "permission": "https://jans.io/oauth/config/stats.readonly",
       "description": null,
-      "defaultPermissionInToken": false
+      "defaultPermissionInToken": true
     },
     {
       "permission": "jans_stat",
       "description": null,
-      "defaultPermissionInToken": false
+      "defaultPermissionInToken": true
     },
     {
       "permission": "https://jans.io/oauth/jans-auth-server/config/adminui/user/role.readonly",
@@ -262,8 +262,22 @@
       "permission": "openid",
       "description": null,
       "defaultPermissionInToken": true
+    },
+    {
+      "permission": "https://jans.io/auth/ssa.admin",
+      "description": "",
+      "defaultPermissionInToken": false
+    },
+    {
+      "permission": "https://jans.io/auth/ssa.portal",
+      "description": "",
+      "defaultPermissionInToken": false
+    },
+    {
+      "permission": "https://jans.io/auth/ssa.developer",
+      "description": "",
+      "defaultPermissionInToken": false
     }
-
   ],
   "rolePermissionMapping": [
     {
@@ -427,7 +441,10 @@
         "https://jans.io/scim/groups.read",
         "https://jans.io/scim/fido2.write",
         "https://jans.io/scim/fido.write",
-        "https://jans.io/oauth/jans-auth-server/config/properties.write"
+        "https://jans.io/oauth/jans-auth-server/config/properties.write",
+        "https://jans.io/auth/ssa.admin",
+        "https://jans.io/auth/ssa.portal",
+        "https://jans.io/auth/ssa.developer"
       ]
     }
   ]
