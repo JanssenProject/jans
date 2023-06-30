@@ -17,171 +17,6 @@ tags:
 - name: SAML - Configuration
 - name: SAML - Trust Relationship
 paths:
-  /saml/samlClient:
-    get:
-      tags:
-      - SAML - Trust Relationship
-      summary: Get all Trust Relationship
-      description: Get all TrustRelationship.
-      operationId: get-trust-relationship
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/JansTrustRelationship'
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/saml.readonly
-    put:
-      tags:
-      - SAML - Trust Relationship
-      summary: Update TrustRelationship
-      description: Update TrustRelationship
-      operationId: put-trust-relationship
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/JansTrustRelationship'
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/JansTrustRelationship'
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/saml.write
-    post:
-      tags:
-      - SAML - Trust Relationship
-      summary: Create Trust Relationship
-      description: Create Trust Relationship
-      operationId: post-trust-relationship
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/JansTrustRelationship'
-      responses:
-        "201":
-          description: clientList
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/JansTrustRelationship'
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/saml.write
-  /saml/samlClient/{id}:
-    delete:
-      tags:
-      - SAML - Trust Relationship
-      summary: Delete client
-      description: Delete client
-      operationId: put-client
-      parameters:
-      - name: id
-        in: path
-        description: Unique Id of client
-        required: true
-        schema:
-          type: string
-      responses:
-        "204":
-          description: No Content
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/JansTrustRelationship'
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/saml.write
-  /saml/samlClient/id/{id}:
-    get:
-      tags:
-      - SAML - Trust Relationship
-      summary: Get TrustRelationship by Id
-      description: Get TrustRelationship by Id
-      operationId: get-trust-relationship-by-id
-      parameters:
-      - name: id
-        in: path
-        description: Unique identifier - Id
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/JansTrustRelationship'
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/saml.readonly
-  /saml/samlClient/{clientId}:
-    get:
-      tags:
-      - SAML - Trust Relationship
-      summary: Get TrustRelationship by name
-      description: Get TrustRelationship by name
-      operationId: get-trust-relationship-by-name
-      parameters:
-      - name: clientId
-        in: path
-        description: Name
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/JansTrustRelationship'
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/saml.readonly
   /saml/samlConfig:
     get:
       tags:
@@ -333,9 +168,215 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/saml-client-scope.write
+  /saml/samlClient:
+    get:
+      tags:
+      - SAML - Trust Relationship
+      summary: Get all Trust Relationship
+      description: Get all TrustRelationship.
+      operationId: get-trust-relationship
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TrustRelationship'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/saml.readonly
+    put:
+      tags:
+      - SAML - Trust Relationship
+      summary: Update TrustRelationship
+      description: Update TrustRelationship
+      operationId: put-trust-relationship
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TrustRelationship'
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TrustRelationship'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/saml.write
+    post:
+      tags:
+      - SAML - Trust Relationship
+      summary: Create Trust Relationship
+      description: Create Trust Relationship
+      operationId: post-trust-relationship
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TrustRelationship'
+      responses:
+        "201":
+          description: clientList
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TrustRelationship'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/saml.write
+  /saml/samlClient/{id}:
+    delete:
+      tags:
+      - SAML - Trust Relationship
+      summary: Delete client
+      description: Delete client
+      operationId: put-client
+      parameters:
+      - name: id
+        in: path
+        description: Unique Id of client
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: No Content
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TrustRelationship'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/saml.write
+  /saml/samlClient/id/{id}:
+    get:
+      tags:
+      - SAML - Trust Relationship
+      summary: Get TrustRelationship by Id
+      description: Get TrustRelationship by Id
+      operationId: get-trust-relationship-by-id
+      parameters:
+      - name: id
+        in: path
+        description: Unique identifier - Id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrustRelationship'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/saml.readonly
+  /saml/samlClient/{clientId}:
+    get:
+      tags:
+      - SAML - Trust Relationship
+      summary: Get TrustRelationship by name
+      description: Get TrustRelationship by name
+      operationId: get-trust-relationship-by-name
+      parameters:
+      - name: clientId
+        in: path
+        description: Name
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TrustRelationship'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/saml.readonly
 components:
   schemas:
-    JansTrustRelationship:
+    SamlConfig:
+      type: object
+      properties:
+        serverUrl:
+          type: string
+        realm:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+        clientId:
+          type: string
+        clientSecret:
+          type: string
+    ProtocolMapperRepresentation:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        protocol:
+          type: string
+        protocolMapper:
+          type: string
+        consentRequired:
+          type: boolean
+        consentText:
+          type: string
+        config:
+          type: object
+          additionalProperties:
+            type: string
+    ProfileConfiguration:
+      type: object
+      properties:
+        name:
+          type: string
+        signResponses:
+          type: string
+    TrustRelationship:
       required:
       - description
       - displayName
@@ -428,47 +469,6 @@ components:
             type: string
         baseDn:
           type: string
-    ProfileConfiguration:
-      type: object
-      properties:
-        name:
-          type: string
-        signResponses:
-          type: string
-    SamlConfig:
-      type: object
-      properties:
-        serverUrl:
-          type: string
-        realm:
-          type: string
-        username:
-          type: string
-        password:
-          type: string
-        clientId:
-          type: string
-        clientSecret:
-          type: string
-    ProtocolMapperRepresentation:
-      type: object
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-        protocol:
-          type: string
-        protocolMapper:
-          type: string
-        consentRequired:
-          type: boolean
-        consentText:
-          type: string
-        config:
-          type: object
-          additionalProperties:
-            type: string
   securitySchemes:
     oauth2:
       type: oauth2

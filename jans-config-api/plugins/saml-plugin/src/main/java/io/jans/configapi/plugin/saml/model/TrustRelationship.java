@@ -32,7 +32,7 @@ import java.util.*;
 @DataEntry(sortBy = { "displayName" })
 @ObjectClass(value = "jansSAMLconfig")
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class JansTrustRelationship extends Entry implements Serializable {
+public class TrustRelationship extends Entry implements Serializable {
 
     @AttributeName(ignoreDuringUpdate = true)
     private String inum;
@@ -351,15 +351,15 @@ public class JansTrustRelationship extends Entry implements Serializable {
         this.validationLog = validationLog;
     }
 
-    private static class SortByDatasourceTypeComparator implements Comparator<JansTrustRelationship> {
+    private static class SortByDatasourceTypeComparator implements Comparator<TrustRelationship> {
 
-        public int compare(JansTrustRelationship first, JansTrustRelationship second) {
+        public int compare(TrustRelationship first, TrustRelationship second) {
 
             return first.getSpMetaDataSourceType().getRank() - second.getSpMetaDataSourceType().getRank();
         }
     }
 
-    public static void sortByDataSourceType(List<JansTrustRelationship> trustRelationships) {
+    public static void sortByDataSourceType(List<TrustRelationship> trustRelationships) {
         Collections.sort(trustRelationships, new SortByDatasourceTypeComparator());
     }
 }

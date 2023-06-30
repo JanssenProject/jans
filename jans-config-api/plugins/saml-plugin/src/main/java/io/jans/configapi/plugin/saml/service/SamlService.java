@@ -6,7 +6,7 @@
 
 package io.jans.configapi.plugin.saml.service;
 
-import io.jans.configapi.plugin.saml.model.JansTrustRelationship;
+import io.jans.configapi.plugin.saml.model.TrustRelationship;
 import io.jans.model.SearchRequest;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.util.AttributeConstants;
@@ -29,7 +29,7 @@ import org.slf4j.Logger;
 public class SamlService {
 
     @Inject
-    Logger logger;
+    Logger log;
 
     @Inject
     PersistenceEntryManager persistenceEntryManager;
@@ -45,22 +45,49 @@ public class SamlService {
     }
 
     public boolean contains(String dn) {
-        return persistenceEntryManager.contains(dn, JansTrustRelationship.class);
+        return persistenceEntryManager.contains(dn, TrustRelationship.class);
+    }
+    
+    public TrustRelationship getRelationshipByDn(String dn) {
+        if (StringHelper.isNotEmpty(dn)) {
+            try {
+                return persistenceEntryManager.find(TrustRelationship.class, dn);
+            } catch (Exception e) {
+                log.info(e.getMessage());
+            }
+
+        }
+        return null;
     }
 
-    public JansTrustRelationship getJansTrustRelationshipByInum(String inum) {
-        JansTrustRelationship result = null;
+    public TrustRelationship getTrustRelationshipByInum(String inum) {
+        TrustRelationship result = null;
         try {
-            result = persistenceEntryManager.find(JansTrustRelationship.class, getDnForJansTrustRelationship(inum));
+            result = persistenceEntryManager.find(TrustRelationship.class, getDnForTrustRelationship(inum));
         } catch (Exception ex) {
-            logger.error("Failed to load JansTrustRelationship entry", ex);
+            log.error("Failed to load TrustRelationship entry", ex);
         }
         return result;
     }
+    
+    public TrustRelationship getTrustContainerFederation(TrustRelationship trustRelationship) {
+        TrustRelationship relationshipByDn = getRelationshipByDn(trustRelationship.getDn());
+        return relationshipByDn;
+    }
 
-    public List<JansTrustRelationship> searchJansTrustRelationship(String pattern, int sizeLimit) {
+    public TrustRelationship getTrustContainerFederation(String dn) {
+        TrustRelationship relationshipByDn = getRelationshipByDn(dn);
+        return relationshipByDn;
+    }
 
-        logger.debug("Search JansTrustRelationship with pattern:{}, sizeLimit:{}", pattern, sizeLimit);
+    public List<TrustRelationship> getAllSAMLTrustRelationships(int sizeLimit) {
+        return persistenceEntryManager.findEntries(getDnForTrustRelationship(null), TrustRelationship.class,
+                null, sizeLimit);
+    }
+
+    public List<TrustRelationship> searchTrustRelationship(String pattern, int sizeLimit) {
+
+        log.debug("Search TrustRelationship with pattern:{}, sizeLimit:{}", pattern, sizeLimit);
 
         String[] targetArray = new String[] { pattern };
         Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.DISPLAY_NAME, null, targetArray,
@@ -70,23 +97,23 @@ public class SamlService {
         Filter inumFilter = Filter.createSubstringFilter(AttributeConstants.INUM, null, targetArray, null);
         Filter searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter, inumFilter);
 
-        logger.debug("Search JansTrustRelationship with searchFilter:{}", searchFilter);
-        return persistenceEntryManager.findEntries(getDnForJansTrustRelationship(null), JansTrustRelationship.class,
+        log.debug("Search TrustRelationship with searchFilter:{}", searchFilter);
+        return persistenceEntryManager.findEntries(getDnForTrustRelationship(null), TrustRelationship.class,
                 searchFilter, sizeLimit);
     }
 
-    public List<JansTrustRelationship> getAllJansTrustRelationship(int sizeLimit) {
-        return persistenceEntryManager.findEntries(getDnForJansTrustRelationship(null), JansTrustRelationship.class,
+    public List<TrustRelationship> getAllTrustRelationship(int sizeLimit) {
+        return persistenceEntryManager.findEntries(getDnForTrustRelationship(null), TrustRelationship.class,
                 null, sizeLimit);
     }
 
-    public List<JansTrustRelationship> getAllJansTrustRelationship() {
-        return persistenceEntryManager.findEntries(getDnForJansTrustRelationship(null), JansTrustRelationship.class,
+    public List<TrustRelationship> getAllTrustRelationship() {
+        return persistenceEntryManager.findEntries(getDnForTrustRelationship(null), TrustRelationship.class,
                 null);
     }
 
-    public PagedResult<Client> getJansTrustRelationship(SearchRequest searchRequest) {
-        logger.debug("Search JansTrustRelationship with searchRequest:{}", searchRequest);
+    public PagedResult<Client> getTrustRelationship(SearchRequest searchRequest) {
+        log.debug("Search TrustRelationship with searchRequest:{}", searchRequest);
 
         Filter searchFilter = null;
         List<Filter> filters = new ArrayList<>();
@@ -104,48 +131,48 @@ public class SamlService {
             searchFilter = Filter.createORFilter(filters);
         }
 
-        logger.trace("JansTrustRelationship pattern searchFilter:{}", searchFilter);
+        log.trace("TrustRelationship pattern searchFilter:{}", searchFilter);
         List<Filter> fieldValueFilters = new ArrayList<>();
         if (searchRequest.getFieldValueMap() != null && !searchRequest.getFieldValueMap().isEmpty()) {
             for (Map.Entry<String, String> entry : searchRequest.getFieldValueMap().entrySet()) {
                 Filter dataFilter = Filter.createEqualityFilter(entry.getKey(), entry.getValue());
-                logger.trace("JansTrustRelationship dataFilter:{}", dataFilter);
+                log.trace("TrustRelationship dataFilter:{}", dataFilter);
                 fieldValueFilters.add(Filter.createANDFilter(dataFilter));
             }
             searchFilter = Filter.createANDFilter(Filter.createORFilter(filters),
                     Filter.createANDFilter(fieldValueFilters));
         }
 
-        logger.debug("JansTrustRelationship searchFilter:{}", searchFilter);
+        log.debug("TrustRelationship searchFilter:{}", searchFilter);
 
-        return persistenceEntryManager.findPagedEntries(getDnForJansTrustRelationship(null), Client.class, searchFilter,
+        return persistenceEntryManager.findPagedEntries(getDnForTrustRelationship(null), Client.class, searchFilter,
                 null, searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
                 searchRequest.getStartIndex(), searchRequest.getCount(), searchRequest.getMaxCount());
 
     }
 
-    public JansTrustRelationship addTrustRelationship(JansTrustRelationship trustRelationship) {
-        setJansTrustRelationship(trustRelationship, false);
+    public TrustRelationship addTrustRelationship(TrustRelationship trustRelationship) {
+        setTrustRelationship(trustRelationship, false);
         persistenceEntryManager.persist(trustRelationship);
-        return getJansTrustRelationshipByInum(trustRelationship.getInum());
+        return getTrustRelationshipByInum(trustRelationship.getInum());
     }
 
-    public void removeTrustRelationship(JansTrustRelationship trustRelationship) {
-        persistenceEntryManager.removeRecursively(trustRelationship.getDn(), JansTrustRelationship.class);
+    public void removeTrustRelationship(TrustRelationship trustRelationship) {
+        persistenceEntryManager.removeRecursively(trustRelationship.getDn(), TrustRelationship.class);
 
     }
 
-    public JansTrustRelationship updateTrustRelationship(JansTrustRelationship trustRelationship) {
-        setJansTrustRelationship(trustRelationship, true);
+    public TrustRelationship updateTrustRelationship(TrustRelationship trustRelationship) {
+        setTrustRelationship(trustRelationship, true);
         persistenceEntryManager.merge(trustRelationship);
-        return getJansTrustRelationshipByInum(trustRelationship.getInum());
+        return getTrustRelationshipByInum(trustRelationship.getInum());
     }
 
-    public JansTrustRelationship setJansTrustRelationship(JansTrustRelationship trustRelationship, boolean update) {
+    public TrustRelationship setTrustRelationship(TrustRelationship trustRelationship, boolean update) {
         return trustRelationship;
     }
 
-    public String getDnForJansTrustRelationship(String inum) {
+    public String getDnForTrustRelationship(String inum) {
         if (StringHelper.isEmpty(inum)) {
             return String.format("ou=jansSAMLconfig,%s", SAML_DN_BASE);
         }
