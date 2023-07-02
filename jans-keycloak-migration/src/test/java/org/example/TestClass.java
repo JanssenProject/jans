@@ -4,13 +4,17 @@ import jakarta.ws.rs.client.WebTarget;
 import org.jboss.resteasy.client.jaxrs.internal.ResteasyClientBuilderImpl;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
+import org.keycloak.admin.client.resource.RealmResource;
+import org.keycloak.admin.client.resource.RealmsResource;
 import org.keycloak.admin.client.token.TokenManager;
+import org.keycloak.representations.idm.RealmRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 
 import java.lang.reflect.Constructor;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
+import java.util.ArrayList;
 import java.util.List;
 
 public class TestClass {
@@ -52,6 +56,24 @@ public class TestClass {
                     .password("keycloak")
                     .resteasyClient(new ResteasyClientBuilderImpl().connectionPoolSize(10).build())
                     .build();
+        //System.out.println("check " + instance.realms());
+        List<UserRepresentation> finalUsersResourceList = new ArrayList<>();
+        RealmsResource RealmsResource = instance.realms();
+        List<RealmRepresentation> RealmResource = RealmsResource.findAll();//realm();
+
+        /*for(RealmRepresentation realmRepresentation : RealmResource){
+            System.out.println("check " + realmRepresentation.getRealm());
+        }*/
+        for(RealmRepresentation realmRepresentation : RealmResource){
+            System.out.println("check " + realmRepresentation.getRealm());
+            String realm = realmRepresentation.getRealm();
+            List<UserRepresentation> usersResourceList = instance.realm(realm).users().list();
+            finalUsersResourceList.addAll(usersResourceList);
+        }
+
+        for(UserRepresentation userRepresentation : finalUsersResourceList){
+            System.out.println("username  " + userRepresentation.getUsername());
+        }
 
        /* TokenManager tokenmanager = instance.tokenManager();
         String accessToken = tokenmanager.getAccessTokenString();

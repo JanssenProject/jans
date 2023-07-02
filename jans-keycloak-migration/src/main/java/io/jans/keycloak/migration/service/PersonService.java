@@ -9,12 +9,14 @@ package io.jans.keycloak.migration.service;
 import java.io.Serializable;
 import java.util.Date;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 //import javax.inject.Inject;
 
 import io.jans.keycloak.migration.model.*;
 import io.jans.keycloak.migration.model.GluuCustomPerson;
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.search.filter.Filter;
 import io.jans.util.StringHelper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -103,6 +105,27 @@ public class PersonService implements Serializable, IPersonService {
 		String id = null;
 		return id == null ? UUID.randomUUID().toString() : id;
 
+	}
+
+	public List<GluuCustomPerson> getPersonsByUid(String uid, String... returnAttributes) {
+		log.debug("Getting user information from DB: userId = {}", uid);
+
+		if (StringHelper.isEmpty(uid)) {
+			return null;
+		}
+
+		String personDn = getDnForPerson(null);
+		Filter userUidFilter;
+
+			userUidFilter = Filter.createEqualityFilter(Filter.createLowercaseFilter("uid"),
+					StringHelper.toLowerCase(uid));
+
+
+		List<GluuCustomPerson> entries = persistenceEntryManager.findEntries(personDn,
+				GluuCustomPerson.class, userUidFilter, returnAttributes);
+		log.debug("Found {} entries for userId = {}", entries.size(), uid);
+
+		return entries;
 	}
 
 }
