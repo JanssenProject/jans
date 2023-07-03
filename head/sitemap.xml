@@ -1661,6 +1661,16 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://jans.io/docs/head/admin/reference/database/pgsql-schema-indexes/</loc>
+         <lastmod>2023-07-03</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/head/admin/reference/database/pgsql-schema/</loc>
+         <lastmod>2023-07-03</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://jans.io/docs/head/admin/reference/database/postgres-config/</loc>
          <lastmod>2023-07-03</lastmod>
          <changefreq>daily</changefreq>
