@@ -810,6 +810,30 @@ class CouchbaseClient:
             return False
         return True
 
+    def delete(self, bucket: str, id_: str) -> bool:
+        """Delete document from a bucket.
+
+        Args:
+            bucket: Bucket name
+            id_: ID of the document.
+        """
+        bucket = bucket
+        kwargs: dict[str, _t.Any] = {"key": id_}
+        req = self.exec_query(
+            f"DELETE FROM {bucket} USE KEYS $key",  # nosec: B608
+            **kwargs,
+        )
+
+        if not req.ok:
+            try:
+                data = json.loads(req.text)
+                err = data["errors"][0]["msg"]
+            except (ValueError, KeyError, IndexError):
+                err = req.reason
+            logger.warning(f"Unable to find document {id_} in bucket {bucket}; reason={err}")
+            return False
+        return bool(req.json()["status"] == "success")
+
 
 # backward-compat
 def suppress_verification_warning() -> None:

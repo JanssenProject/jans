@@ -404,6 +404,15 @@ class SpannerClient(SqlSchemaMixin):
                 break
         return exists
 
+    def delete(self, table_name: str, id_: str) -> bool:
+        """Delete a row from a table with matching ID."""
+        deleted = False
+
+        with self.database.batch() as batch:
+            batch.delete(table_name, KeySet([[id_]]))
+            deleted = True
+        return deleted
+
 
 def render_spanner_properties(manager: Manager, src: str, dest: str) -> None:
     """Render file contains properties to connect to Spanner database.
