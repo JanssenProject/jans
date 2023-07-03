@@ -141,6 +141,14 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly
+  /admin-ui/license/retrieve:
+    get:
+      operationId: retrieveLicense
+      responses:
+        default:
+          description: default response
+          content:
+            application/json: {}
   /admin-ui/license/ssa:
     post:
       tags:

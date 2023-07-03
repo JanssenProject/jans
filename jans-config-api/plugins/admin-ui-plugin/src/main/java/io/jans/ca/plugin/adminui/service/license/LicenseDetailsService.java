@@ -173,10 +173,9 @@ public class LicenseDetailsService extends BaseService {
             log.info("license request status code: {}", response.getStatus());
 
             ObjectMapper mapper = new ObjectMapper();
-            JsonNode jsonNode = mapper.createObjectNode();
             if (response.getStatus() == 200) {
                 JsonObject entity = response.readEntity(JsonObject.class);
-
+                JsonNode jsonNode = mapper.createObjectNode();
                 ((ObjectNode) jsonNode).put("license-key", entity.getString("license_key"));
 
                 if (Strings.isNullOrEmpty(entity.getString("license_key"))) {
@@ -187,7 +186,7 @@ public class LicenseDetailsService extends BaseService {
             }
             //getting error
             String jsonData = response.readEntity(String.class);
-            ((ObjectNode) jsonNode).put(MESSAGE, jsonData);
+            JsonNode jsonNode = mapper.readValue(jsonData, com.fasterxml.jackson.databind.JsonNode.class);
 
             if (!Strings.isNullOrEmpty(jsonNode.get(MESSAGE).textValue())) {
                 log.error("license retrieve error response: {}", jsonData);
@@ -303,6 +302,8 @@ public class LicenseDetailsService extends BaseService {
             Response response = request.post(Entity.entity(body, MediaType.APPLICATION_JSON));
 
             log.info("Generate trial license request status code: {}", response.getStatus());
+
+            ObjectMapper objectMapper = new ObjectMapper();
             if (response.getStatus() == 200) {
                 JsonObject entity = response.readEntity(JsonObject.class);
                 if (!Strings.isNullOrEmpty(entity.getString("license"))) {
@@ -314,8 +315,6 @@ public class LicenseDetailsService extends BaseService {
                     licenseConfiguration.setLicenseKey(entity.getString("license"));
                     auiConfiguration.setLicenseConfiguration(licenseConfiguration);
                     auiConfigurationService.setAuiConfiguration(auiConfiguration);
-
-                    ObjectMapper objectMapper = new ObjectMapper();
                     JsonNode jsonNode = objectMapper.createObjectNode();
                     ((ObjectNode) jsonNode).put("license-key", entity.getString("license"));
 
@@ -324,8 +323,7 @@ public class LicenseDetailsService extends BaseService {
             }
             //getting error
             String jsonData = response.readEntity(String.class);
-            ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
-            JsonNode jsonNode = mapper.readValue(jsonData, com.fasterxml.jackson.databind.JsonNode.class);
+            JsonNode jsonNode = objectMapper.readValue(jsonData, com.fasterxml.jackson.databind.JsonNode.class);
             if (!Strings.isNullOrEmpty(jsonNode.get(MESSAGE).textValue())) {
                 log.error("Generate trial license error response: {}", jsonData);
                 return createLicenseResponse(false, jsonNode.get("status").intValue(), jsonNode.get(MESSAGE).textValue());

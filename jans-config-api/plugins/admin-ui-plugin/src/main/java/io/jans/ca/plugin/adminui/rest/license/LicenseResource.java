@@ -64,7 +64,7 @@ public class LicenseResource {
             log.info("Check if active license present.");
             licenseResponse = licenseDetailsService.checkLicense();
             log.info("Active license present (true/false): {}", licenseResponse.isApiResult());
-            return Response.ok(licenseResponse).build();
+            return Response.status(licenseResponse.getResponseCode()).entity(licenseResponse).build();
         } catch (Exception e) {
             log.error(ErrorResponse.CHECK_LICENSE_ERROR.getDescription(), e);
             return Response.serverError().entity(licenseResponse).build();
@@ -81,7 +81,7 @@ public class LicenseResource {
             log.info("Retrieve license from SCAN.");
             licenseResponse = licenseDetailsService.retrieveLicense();
             log.info("Retrieve license from SCAN result (true/false): {}", licenseResponse.isApiResult());
-            return Response.ok(licenseResponse).build();
+            return Response.status(licenseResponse.getResponseCode()).entity(licenseResponse).build();
         } catch (Exception e) {
             log.error(ErrorResponse.RETRIEVE_LICENSE_ERROR.getDescription(), e);
             return Response.serverError().entity(licenseResponse).build();
@@ -106,7 +106,7 @@ public class LicenseResource {
             log.info("Generate trial license.");
             licenseResponse = licenseDetailsService.generateTrialLicense();
             log.info("Generate trial license (true/false): {}", licenseResponse.isApiResult());
-            return Response.ok(licenseResponse).build();
+            return Response.status(licenseResponse.getResponseCode()).entity(licenseResponse).build();
         } catch (Exception e) {
             log.error(ErrorResponse.CHECK_LICENSE_ERROR.getDescription(), e);
             return Response.serverError().entity(licenseResponse).build();
@@ -132,7 +132,7 @@ public class LicenseResource {
             log.info("Trying to activate license using licese-key.");
             licenseResponse = licenseDetailsService.activateLicense(licenseRequest);
             log.info("License activated (true/false): {}", licenseResponse.isApiResult());
-            return Response.ok(licenseResponse).build();
+            return Response.status(licenseResponse.getResponseCode()).entity(licenseResponse).build();
         } catch (Exception e) {
             log.error(ErrorResponse.ACTIVATE_LICENSE_ERROR.getDescription(), e);
             return Response.serverError().entity(licenseResponse).build();
@@ -158,7 +158,7 @@ public class LicenseResource {
             log.info("Trying to execute post ssa.");
             licenseResponse = licenseDetailsService.postSSA(ssaRequest);
             log.info("SSA Saved (true/false): {}", licenseResponse.isApiResult());
-            return Response.ok(licenseResponse).build();
+            return Response.status(licenseResponse.getResponseCode()).entity(licenseResponse).build();
         } catch (Exception e) {
             log.error(ErrorResponse.ACTIVATE_LICENSE_ERROR.getDescription(), e);
             return Response.serverError().entity(licenseResponse).build();
@@ -183,7 +183,7 @@ public class LicenseResource {
             log.info("Check if license config valid.");
             licenseResponse = licenseDetailsService.validateLicenseConfiguration();
             log.info("License config valid (true/false): {}", licenseResponse.isApiResult());
-            return Response.ok(licenseResponse).build();
+            return Response.status(licenseResponse.getResponseCode()).entity(licenseResponse).build();
         } catch (Exception e) {
             log.error(ErrorResponse.ACTIVATE_LICENSE_ERROR.getDescription(), e);
             return Response.serverError().entity(licenseResponse).build();
