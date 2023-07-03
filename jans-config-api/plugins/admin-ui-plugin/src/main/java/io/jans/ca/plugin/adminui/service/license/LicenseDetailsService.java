@@ -94,7 +94,7 @@ public class LicenseDetailsService extends BaseService {
             }
             if (Strings.isNullOrEmpty(licenseConfiguration.getLicenseKey())) {
                 log.info(ErrorResponse.LICENSE_NOT_PRESENT.getDescription());
-                return createLicenseResponse(false, 500, ErrorResponse.LICENSE_NOT_PRESENT.getDescription());
+                return createLicenseResponse(false, 404, ErrorResponse.LICENSE_NOT_PRESENT.getDescription());
             }
 
             //check license-key
@@ -133,7 +133,7 @@ public class LicenseDetailsService extends BaseService {
                 return createLicenseResponse(false, jsonNode.get("status").intValue(), jsonNode.get(MESSAGE).textValue());
             }
             log.error("license isActive error response: {}", jsonData);
-            return createLicenseResponse(false, 500, ErrorResponse.LICENSE_NOT_PRESENT.getDescription());
+            return createLicenseResponse(false, 404, ErrorResponse.LICENSE_NOT_PRESENT.getDescription());
 
         } catch (Exception e) {
             log.error(ErrorResponse.CHECK_LICENSE_ERROR.getDescription(), e);
