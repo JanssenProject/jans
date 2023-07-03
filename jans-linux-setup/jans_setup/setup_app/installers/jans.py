@@ -130,7 +130,32 @@ class JansInstaller(BaseInstaller, SetupUtils):
         else:
             self.logIt("Key generator path was determined as {}".format(Config.non_setup_properties['key_export_path']))
 
+        self.disable_selinux()
+
         self.extract_scripts()
+
+    def disable_selinux(self):
+        setenforce_cmd = shutil.which('setenforce')
+        selinux_config_fn = '/etc/selinux/config'
+
+        if setenforce_cmd:
+            self.run([setenforce_cmd, '0'])
+
+        if not os.path.exists(selinux_config_fn):
+            return
+
+        selinux_config = self.readFile(selinux_config_fn).splitlines()
+        for i, line in enumerate(selinux_config):
+            if not line.startswith('#'):
+                n = line.find('=')
+                if n > -1:
+                    ckey = line[:n].strip()
+                    cval = line[n+1:].strip()
+                    if ckey == 'SELINUX' and  cval == 'enforcing':
+                        selinux_config[i] = 'SELINUX=disabled'
+                        self.writeFile(selinux_config_fn, '\n'.join(selinux_config))
+                        Config.post_messages.append("{}SELinux was disabled permanently{}.".format(static.colors.WARNING, static.colors.ENDC))
+                        break
 
     def configureSystem(self):
         self.logIt("Configuring system", 'jans')
