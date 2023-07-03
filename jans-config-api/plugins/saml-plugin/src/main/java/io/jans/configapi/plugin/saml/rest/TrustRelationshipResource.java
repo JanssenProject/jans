@@ -107,15 +107,17 @@ public class TrustRelationshipResource extends BaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
     @ProtectedApi(scopes = { Constants.SAML_WRITE_ACCESS })
-    public Response createTrustRelationship(@Valid TrustRelationship TrustRelationship) {
+    public Response createTrustRelationship(@Valid TrustRelationship trustRelationship) {
 
-        logger.info("Create TrustRelationship:{}", TrustRelationship);
+        logger.info("Create TrustRelationship:{}", trustRelationship);
 
         // TO-DO validation of client
-        TrustRelationship = samlService.addTrustRelationship(TrustRelationship);
+        String inum = samlService.generateInumForNewRelationship();
+        trustRelationship.setInum(inum);
+        trustRelationship = samlService.addTrustRelationship(trustRelationship);
 
-        logger.info("Create created by client:{}", TrustRelationship);
-        return Response.status(Response.Status.CREATED).entity(TrustRelationship).build();
+        logger.info("Create created by client:{}", trustRelationship);
+        return Response.status(Response.Status.CREATED).entity(trustRelationship).build();
     }
 
     @Operation(summary = "Update TrustRelationship", description = "Update TrustRelationship", operationId = "put-trust-relationship", tags = {

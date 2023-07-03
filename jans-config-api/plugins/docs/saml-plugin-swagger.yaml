@@ -411,7 +411,6 @@ components:
           type: boolean
         clientAuthenticatorType:
           type: string
-          writeOnly: true
         secret:
           type: string
         registrationAccessToken:
@@ -434,6 +433,8 @@ components:
           - federation
           - manual
           - mdq
+        spMetaDataFN:
+          type: string
         metaLocation:
           type: string
         jansIsFed:

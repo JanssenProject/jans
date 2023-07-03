@@ -7,6 +7,7 @@
 package io.jans.configapi.configuration;
 
 import io.jans.as.common.service.common.ApplicationFactory;
+import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.security.api.ApiProtectionService;
 import io.jans.configapi.security.service.AuthorizationService;
 import io.jans.configapi.security.service.OpenIdAuthorizationService;
@@ -22,6 +23,8 @@ import io.jans.service.PythonService;
 import io.jans.service.cdi.event.LdapConfigurationReload;
 import io.jans.service.cdi.util.CdiUtil;
 import io.jans.service.custom.script.CustomScriptManager;
+import io.jans.service.document.store.conf.DocumentStoreConfiguration;
+import io.jans.service.document.store.conf.LocalDocumentStoreConfiguration;
 import io.jans.service.timer.QuartzSchedulerManager;
 import io.jans.util.StringHelper;
 import org.jboss.resteasy.plugins.server.servlet.ResteasyContextParameters;
@@ -85,6 +88,9 @@ public class AppInitializer {
 
     @Inject
     private PythonService pythonService;
+
+    @Inject
+    private ConfigurationService configurationService;
 
     public void onStart(@Observes @Initialized(ApplicationScoped.class) Object init) {
         log.info("=============  STARTING API APPLICATION  ========================");
@@ -181,6 +187,27 @@ public class AppInitializer {
         persistenceEntryManagerInstance.destroy(ldapEntryManager);
         log.debug("Recreated instance {} with operation service: {} - event:{}", ldapEntryManager,
                 ldapEntryManager.getOperationService(), event);
+    }
+
+    @Produces
+    @ApplicationScoped
+    public DocumentStoreConfiguration getDocumentStoreConfiguration() {
+        DocumentStoreConfiguration documentStoreConfiguration = configurationService.findGluuConfiguration()
+                .getDocumentStoreConfiguration();
+        if ((documentStoreConfiguration == null) || (documentStoreConfiguration.getDocumentStoreType() == null)) {
+            log.error(
+                    "Failed to read document store configuration from DB. Please check configuration jsDocStoreConf attribute that must contain document store configuration JSON represented by DocumentStoreConfiguration.class. Appliance DN:{} ",
+                    configurationService.findGluuConfiguration().getDn());
+            log.info("Creating fallback LOCAL document store configuration ... ");
+
+            documentStoreConfiguration = new DocumentStoreConfiguration();
+            documentStoreConfiguration.setLocalConfiguration(new LocalDocumentStoreConfiguration());
+
+            log.info("LOCAL document store configuration is created.");
+        }
+
+        log.error("Document store configuration:{}", documentStoreConfiguration);
+        return documentStoreConfiguration;
     }
 
     private void closePersistenceEntryManager() {

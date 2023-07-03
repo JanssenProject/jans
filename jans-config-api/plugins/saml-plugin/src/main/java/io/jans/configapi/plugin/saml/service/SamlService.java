@@ -7,8 +7,10 @@
 package io.jans.configapi.plugin.saml.service;
 
 import io.jans.configapi.plugin.saml.model.TrustRelationship;
+import io.jans.util.exception.InvalidConfigurationException;
 import io.jans.model.SearchRequest;
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.common.service.common.InumService;
 import io.jans.as.common.util.AttributeConstants;
 import io.jans.configapi.configuration.ConfigurationFactory;
 import io.jans.orm.PersistenceEntryManager;
@@ -19,14 +21,25 @@ import io.jans.util.StringHelper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.slf4j.Logger;
 
 @ApplicationScoped
 public class SamlService {
+
+    private static final String SAML_DN_BASE = "ou=trustRelationships,o=jans";
+    public static final String SHIB3_IDP_TEMPMETADATA_FOLDER = "temp_metadata";
+    private static final String SHIB3_SP_METADATA_FILE_PATTERN = "%s-sp-metadata.xml";
 
     @Inject
     Logger log;
@@ -36,15 +49,17 @@ public class SamlService {
 
     @Inject
     ConfigurationFactory configurationFactory;
+    
+    @Inject
+    private transient InumService inumService;
 
-    private static final String SAML_DN_BASE = "ou=trustRelationships,o=jans";
 
     public String baseDn() {
         // return staticConfiguration.getBaseDn().getTrustRelationshipDn();
         return SAML_DN_BASE;
     }
 
-    public boolean contains(String dn) {
+    public boolean containsRelationship(String dn) {
         return persistenceEntryManager.contains(dn, TrustRelationship.class);
     }
     
@@ -168,6 +183,7 @@ public class SamlService {
     }
 
     public TrustRelationship addTrustRelationship(TrustRelationship trustRelationship) {
+        log.debug("Add new trustRelationship:{}", trustRelationship);
         setTrustRelationship(trustRelationship, false);
         persistenceEntryManager.persist(trustRelationship);
         return getTrustRelationshipByInum(trustRelationship.getInum());
@@ -193,6 +209,36 @@ public class SamlService {
             return String.format("%s", SAML_DN_BASE);
         }
         return String.format("inum=%s,%s", inum, SAML_DN_BASE);
+    }    
+
+    public String generateInumForNewRelationship() {
+        String newInum = null;
+        String newDn = null;
+        do {
+            newInum = UUID.randomUUID().toString();
+            newDn = getDnForTrustRelationship(newInum);
+        } while (containsRelationship(newDn));
+
+        return newInum;
+    }
+    
+    private boolean saveSpMetaDataFileSourceTypeFile(TrustRelationship trustRelationship) throws IOException {
+        log.debug("TrustRelationship trustRelationship:{}", trustRelationship);
+        String spMetadataFileName = trustRelationship.getSpMetaDataFN();
+        boolean emptySpMetadataFileName = StringHelper.isEmpty(spMetadataFileName);
+        String result = null;
+        return false;
+        
+    }
+    
+    public String getSpNewMetadataFileName(TrustRelationship trustRel) {
+        return getSpNewMetadataFileName(trustRel.getInum());
+    }
+    
+    public String getSpNewMetadataFileName(String inum) {
+        String relationshipInum = StringHelper.removePunctuation(inum);
+        return String.format(SHIB3_SP_METADATA_FILE_PATTERN, relationshipInum);
     }
 
+    
 }

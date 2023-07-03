@@ -51,7 +51,6 @@ public class TrustRelationship extends Entry implements Serializable {
     @Size(min = 0, max = 4000, message = "Length of the Description should not exceed 4000")
     @AttributeName
     private String description;
-    
 
     // Access settings
     /**
@@ -59,7 +58,7 @@ public class TrustRelationship extends Entry implements Serializable {
      */
     @AttributeName
     private String rootUrl;
-    
+
     /**
      * URL to the admin interface of the client.
      * 
@@ -74,30 +73,29 @@ public class TrustRelationship extends Entry implements Serializable {
      */
     @AttributeName
     private String baseUrl;
-    
+
     @AttributeName(name = "surrogateAuthRequired")
-    private boolean surrogateAuthRequired;    
-    
+    private boolean surrogateAuthRequired;
+
     @AttributeName(name = "jansEnabled")
-    private boolean enabled;    
-    
+    private boolean enabled;
+
     /**
      * Always list this client in the Account UI, even if the user does not have an
      * active session.
      */
     @AttributeName(name = "displayInConsole")
     private boolean alwaysDisplayInConsole;
-    
 
     @AttributeName(name = "jansPreferredMethod")
     private String clientAuthenticatorType;
-    
+
     @AttributeName(name = "jansClntSecret")
     private String secret;
-    
-    @AttributeName(name ="jansRegistrationAccessTkn")
+
+    @AttributeName(name = "jansRegistrationAccessTkn")
     private String registrationAccessToken;
-    
+
     /**
      * Valid URI pattern a browser can redirect to after a successful login. Simple
      * wildcards are allowed such as 'http://example.com/*'. Relative path can be
@@ -106,31 +104,34 @@ public class TrustRelationship extends Entry implements Serializable {
      * For SAML, you must set valid URI patterns if you are relying on the consumer
      * service URL embedded with the login request.
      */
-    @AttributeName(name ="jansRedirectURI")
+    @AttributeName(name = "jansRedirectURI")
     private List<String> redirectUris;
-    
-    @AttributeName(name ="jansWebOrigins")
+
+    @AttributeName(name = "jansWebOrigins")
     private List<String> webOrigins;
-    
-    private Boolean consentRequired;        
+
+    private Boolean consentRequired;
 
     @NotNull
     @AttributeName(name = "jansSAMLspMetaDataSourceTyp")
     private MetadataSourceType spMetaDataSourceType;
-    
+
+    @AttributeName(name = "gluuSAMLspMetaDataFN")
+    private String spMetaDataFN;
+
     @AttributeName(name = "jansMetaLocation")
     private String metaLocation;
-    
+
     private Boolean jansIsFed;
-    
+
     private ProfileConfiguration ssoProfileConfiguration;
 
     @AttributeName(name = "jansReleasedAttr")
     private List<String> releasedAttributes;
-    
+
     @AttributeName
-    private String protocol;    
-        
+    private String protocol;
+
     @AttributeName(name = "jansStatus")
     private GluuStatus status;
 
@@ -140,10 +141,8 @@ public class TrustRelationship extends Entry implements Serializable {
     @AttributeName(name = "jansEntityId")
     private List<String> jansEntityId;
 
-
     @AttributeName(name = "jansValidationLog")
     private List<String> validationLog;
-      
 
     public String getInum() {
         return inum;
@@ -225,7 +224,7 @@ public class TrustRelationship extends Entry implements Serializable {
         this.alwaysDisplayInConsole = alwaysDisplayInConsole;
     }
 
-    public String isClientAuthenticatorType() {
+    public String getClientAuthenticatorType() {
         return clientAuthenticatorType;
     }
 
@@ -273,20 +272,20 @@ public class TrustRelationship extends Entry implements Serializable {
         this.consentRequired = consentRequired;
     }
 
-    public String getProtocol() {
-        return protocol;
-    }
-
-    public void setProtocol(String protocol) {
-        this.protocol = protocol;
-    }
-
     public MetadataSourceType getSpMetaDataSourceType() {
         return spMetaDataSourceType;
     }
 
     public void setSpMetaDataSourceType(MetadataSourceType spMetaDataSourceType) {
         this.spMetaDataSourceType = spMetaDataSourceType;
+    }
+
+    public String getSpMetaDataFN() {
+        return spMetaDataFN;
+    }
+
+    public void setSpMetaDataFN(String spMetaDataFN) {
+        this.spMetaDataFN = spMetaDataFN;
     }
 
     public String getMetaLocation() {
@@ -321,6 +320,14 @@ public class TrustRelationship extends Entry implements Serializable {
         this.releasedAttributes = releasedAttributes;
     }
 
+    public String getProtocol() {
+        return protocol;
+    }
+
+    public void setProtocol(String protocol) {
+        this.protocol = protocol;
+    }
+
     public GluuStatus getStatus() {
         return status;
     }
@@ -351,6 +358,21 @@ public class TrustRelationship extends Entry implements Serializable {
 
     public void setValidationLog(List<String> validationLog) {
         this.validationLog = validationLog;
+    }
+
+    @Override
+    public String toString() {
+        return "TrustRelationship [inum=" + inum + ", clientId=" + clientId + ", displayName=" + displayName
+                + ", description=" + description + ", rootUrl=" + rootUrl + ", adminUrl=" + adminUrl + ", baseUrl="
+                + baseUrl + ", surrogateAuthRequired=" + surrogateAuthRequired + ", enabled=" + enabled
+                + ", alwaysDisplayInConsole=" + alwaysDisplayInConsole + ", clientAuthenticatorType="
+                + clientAuthenticatorType + ", secret=" + secret + ", registrationAccessToken="
+                + registrationAccessToken + ", redirectUris=" + redirectUris + ", webOrigins=" + webOrigins
+                + ", consentRequired=" + consentRequired + ", spMetaDataSourceType=" + spMetaDataSourceType
+                + ", spMetaDataFN=" + spMetaDataFN + ", metaLocation=" + metaLocation + ", jansIsFed=" + jansIsFed
+                + ", ssoProfileConfiguration=" + ssoProfileConfiguration + ", releasedAttributes=" + releasedAttributes
+                + ", protocol=" + protocol + ", status=" + status + ", validationStatus=" + validationStatus
+                + ", jansEntityId=" + jansEntityId + ", validationLog=" + validationLog + "]";
     }
 
     private static class SortByDatasourceTypeComparator implements Comparator<TrustRelationship> {
