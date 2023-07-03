@@ -410,8 +410,9 @@ components:
         alwaysDisplayInConsole:
           type: boolean
         clientAuthenticatorType:
-          type: boolean
-        clientSecret:
+          type: string
+          writeOnly: true
+        secret:
           type: string
         registrationAccessToken:
           type: string

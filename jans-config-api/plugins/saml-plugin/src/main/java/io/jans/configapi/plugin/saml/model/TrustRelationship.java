@@ -34,6 +34,8 @@ import java.util.*;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class TrustRelationship extends Entry implements Serializable {
 
+    private static final long serialVersionUID = 7912166229997681502L;
+
     @AttributeName(ignoreDuringUpdate = true)
     private String inum;
 
@@ -88,10 +90,10 @@ public class TrustRelationship extends Entry implements Serializable {
     
 
     @AttributeName(name = "jansPreferredMethod")
-    private boolean clientAuthenticatorType;
+    private String clientAuthenticatorType;
     
     @AttributeName(name = "jansClntSecret")
-    private String clientSecret;
+    private String secret;
     
     @AttributeName(name ="jansRegistrationAccessTkn")
     private String registrationAccessToken;
@@ -223,20 +225,20 @@ public class TrustRelationship extends Entry implements Serializable {
         this.alwaysDisplayInConsole = alwaysDisplayInConsole;
     }
 
-    public boolean isClientAuthenticatorType() {
+    public String isClientAuthenticatorType() {
         return clientAuthenticatorType;
     }
 
-    public void setClientAuthenticatorType(boolean clientAuthenticatorType) {
+    public void setClientAuthenticatorType(String clientAuthenticatorType) {
         this.clientAuthenticatorType = clientAuthenticatorType;
     }
 
-    public String getClientSecret() {
-        return clientSecret;
+    public String getSecret() {
+        return secret;
     }
 
-    public void setClientSecret(String clientSecret) {
-        this.clientSecret = clientSecret;
+    public void setSecret(String secret) {
+        this.secret = secret;
     }
 
     public String getRegistrationAccessToken() {
