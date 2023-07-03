@@ -139,11 +139,6 @@ class JansInstaller(BaseInstaller, SetupUtils):
         setenforce_cmd = shutil.which('setenforce')
         selinux_config_fn = '/etc/selinux/config'
 
-        current_sestatus = None
-
-        if getenforce_cmd:
-            current_sestatus = self.run([getenforce_cmd]).strip().lower()
-
         if setenforce_cmd:
             self.run([setenforce_cmd, '0'])
 
@@ -154,14 +149,12 @@ class JansInstaller(BaseInstaller, SetupUtils):
                     n = line.find('=')
                     if n > -1:
                         ckey = line[:n].strip()
-                        if ckey == 'SELINUX':
-                            cval = line[n+1:].strip()
-                            if cval.lower() == 'enforcing':
-                                selinux_config[i] = 'SELINUX=disabled'
-                                self.writeFile(selinux_config_fn, '\n'.join(selinux_config))
-                                Config.post_messages.append("{}SELinux was disabled permanently{}.".format(static.colors.WARNING, static.colors.ENDC))
-                                break
-
+                        cval = line[n+1:].strip()
+                        if ckey == 'SELINUX' and  cval == 'enforcing':
+                            selinux_config[i] = 'SELINUX=disabled'
+                            self.writeFile(selinux_config_fn, '\n'.join(selinux_config))
+                            Config.post_messages.append("{}SELinux was disabled permanently{}.".format(static.colors.WARNING, static.colors.ENDC))
+                            break
 
     def configureSystem(self):
         self.logIt("Configuring system", 'jans')
