@@ -4650,6 +4650,7 @@
       "kind": "STRUCTURAL",
       "may": [
         "inum",
+		"owner",
         "jansClntId",
         "displayName",
         "description",
@@ -4665,22 +4666,22 @@
         "jansRedirectURI",
         "jansWebOrigins",
         "consentRequired",
+		"jansSAMLMetaDataFilter",
         "jansSAMLspMetaDataSourceTyp",
+		"jansSAMLspMetaDataFN",
+		"jansSAMLspMetaDataURL",
         "jansMetaLocation",
         "jansIsFed",
         "jansEntityId",
         "jansEntityTyp",
         "jansProfileConf",
         "jansReleasedAttr",
-        "jansSAMLMetaDataFilter",
-        "jansSAMLspMetaDataSourceTyp",
-		"jansSAMLspMetaDataFN",
-        "jansSAMLspMetaDataURL",
-        "jansValidationLog",
+        "url",
         "jansPostLogoutRedirectURI",
-        "protocol",
+        "protocol",		
         "jansStatus",
-        "jansValidationStatus"
+        "jansValidationStatus",
+		"jansValidationLog"
       ],
       "must": [
         "objectclass"

@@ -387,6 +387,8 @@ components:
           type: string
         inum:
           type: string
+        owner:
+          type: string
         clientId:
           type: string
         displayName:
@@ -425,6 +427,10 @@ components:
             type: string
         consentRequired:
           type: boolean
+        jansSAMLMetaDataFilter:
+          type: array
+          items:
+            type: string
         spMetaDataSourceType:
           type: string
           enum:
@@ -435,16 +441,35 @@ components:
           - mdq
         spMetaDataFN:
           type: string
+        spMetaDataURL:
+          type: string
         metaLocation:
           type: string
         jansIsFed:
           type: boolean
-        ssoProfileConfiguration:
-          $ref: '#/components/schemas/ProfileConfiguration'
+        jansEntityId:
+          type: array
+          items:
+            type: string
+        entityType:
+          type: string
+          enum:
+          - Single SP
+          - Federation/Aggregate
+        jansProfileConf:
+          type: array
+          items:
+            type: string
         releasedAttributes:
           type: array
           items:
             type: string
+        url:
+          pattern: "^(https?|http)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]"
+          type: string
+        spLogoutURL:
+          pattern: "^$|(^(https?|http)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|])"
+          type: string
         protocol:
           type: string
         status:
@@ -461,14 +486,14 @@ components:
           - Success
           - Scheduled
           - Failed
-        jansEntityId:
-          type: array
-          items:
-            type: string
         validationLog:
           type: array
           items:
             type: string
+        profileConfigurations:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/ProfileConfiguration'
         baseDn:
           type: string
   securitySchemes:

@@ -6,8 +6,9 @@
 
 package io.jans.configapi.plugin.saml.service;
 
+
 import io.jans.configapi.plugin.saml.model.TrustRelationship;
-import io.jans.util.exception.InvalidConfigurationException;
+import io.jans.as.common.service.OrganizationService;
 import io.jans.model.SearchRequest;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.common.InumService;
@@ -17,7 +18,13 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;
 import io.jans.orm.search.filter.Filter;
+import io.jans.service.document.store.conf.DBDocumentStoreConfiguration;
+import io.jans.service.document.store.conf.DocumentStoreConfiguration;
+import io.jans.service.document.store.conf.JcaDocumentStoreConfiguration;
+import io.jans.service.document.store.conf.LocalDocumentStoreConfiguration;
+import io.jans.service.document.store.conf.WebDavDocumentStoreConfiguration;
 import io.jans.util.StringHelper;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -51,7 +58,13 @@ public class SamlService {
     ConfigurationFactory configurationFactory;
     
     @Inject
+    OrganizationService organizationService;
+    
+    @Inject
     private transient InumService inumService;
+    
+    @Inject 
+    DocumentStoreConfiguration documentStoreConfiguration;
 
 
     public String baseDn() {
@@ -95,11 +108,11 @@ public class SamlService {
     }
     
     public List<TrustRelationship> getAllTrustRelationshipByName(String name) {
-        log.debug("Search TrustRelationship with name:{}", name);
+        log.error("Search TrustRelationship with name:{}", name);
 
         String[] targetArray = new String[] { name };
         Filter displayNameFilter = Filter.createEqualityFilter(AttributeConstants.DISPLAY_NAME, targetArray);
-        log.debug("Search TrustRelationship with displayNameFilter:{}", displayNameFilter);
+        log.error("Search TrustRelationship with displayNameFilter:{}", displayNameFilter);
         return persistenceEntryManager.findEntries(getDnForTrustRelationship(null), TrustRelationship.class,
                 displayNameFilter);
     }
@@ -121,7 +134,7 @@ public class SamlService {
 
     public List<TrustRelationship> searchTrustRelationship(String pattern, int sizeLimit) {
 
-        log.debug("Search TrustRelationship with pattern:{}, sizeLimit:{}", pattern, sizeLimit);
+        log.error("Search TrustRelationship with pattern:{}, sizeLimit:{}", pattern, sizeLimit);
 
         String[] targetArray = new String[] { pattern };
         Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.DISPLAY_NAME, null, targetArray,
@@ -131,7 +144,7 @@ public class SamlService {
         Filter inumFilter = Filter.createSubstringFilter(AttributeConstants.INUM, null, targetArray, null);
         Filter searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter, inumFilter);
 
-        log.debug("Search TrustRelationship with searchFilter:{}", searchFilter);
+        log.error("Search TrustRelationship with searchFilter:{}", searchFilter);
         return persistenceEntryManager.findEntries(getDnForTrustRelationship(null), TrustRelationship.class,
                 searchFilter, sizeLimit);
     }
@@ -144,7 +157,7 @@ public class SamlService {
  
 
     public PagedResult<Client> getTrustRelationship(SearchRequest searchRequest) {
-        log.debug("Search TrustRelationship with searchRequest:{}", searchRequest);
+        log.error("Search TrustRelationship with searchRequest:{}", searchRequest);
 
         Filter searchFilter = null;
         List<Filter> filters = new ArrayList<>();
@@ -174,7 +187,7 @@ public class SamlService {
                     Filter.createANDFilter(fieldValueFilters));
         }
 
-        log.debug("TrustRelationship searchFilter:{}", searchFilter);
+        log.error("TrustRelationship searchFilter:{}", searchFilter);
 
         return persistenceEntryManager.findPagedEntries(getDnForTrustRelationship(null), Client.class, searchFilter,
                 null, searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
@@ -182,10 +195,13 @@ public class SamlService {
 
     }
 
-    public TrustRelationship addTrustRelationship(TrustRelationship trustRelationship) {
-        log.debug("Add new trustRelationship:{}", trustRelationship);
+    public TrustRelationship addTrustRelationship(TrustRelationship trustRelationship) throws IOException{
+        log.error("Add new trustRelationship:{}", trustRelationship);
         setTrustRelationship(trustRelationship, false);
         persistenceEntryManager.persist(trustRelationship);
+        
+        saveSpMetaDataFileSourceTypeFile(trustRelationship);
+        
         return getTrustRelationshipByInum(trustRelationship.getInum());
     }
 
@@ -205,12 +221,14 @@ public class SamlService {
     }
 
     public String getDnForTrustRelationship(String inum) {
+        String orgDn = organizationService.getDnForOrganization();
         if (StringHelper.isEmpty(inum)) {
-            return String.format("%s", SAML_DN_BASE);
+            return String.format("ou=trustRelationships,%s", orgDn);
         }
-        return String.format("inum=%s,%s", inum, SAML_DN_BASE);
-    }    
-
+        return String.format("inum=%s,ou=trustRelationships,%s", inum, orgDn);
+    } 
+    
+ 
     public String generateInumForNewRelationship() {
         String newInum = null;
         String newDn = null;
@@ -223,9 +241,14 @@ public class SamlService {
     }
     
     private boolean saveSpMetaDataFileSourceTypeFile(TrustRelationship trustRelationship) throws IOException {
-        log.debug("TrustRelationship trustRelationship:{}", trustRelationship);
+        log.error("TrustRelationship trustRelationship:{}", trustRelationship);
         String spMetadataFileName = trustRelationship.getSpMetaDataFN();
         boolean emptySpMetadataFileName = StringHelper.isEmpty(spMetadataFileName);
+        log.error("emptySpMetadataFileName:{}", emptySpMetadataFileName);
+        
+        LocalDocumentStoreConfiguration localConfiguration = getDocumentStoreConfiguration();
+        log.error("localConfiguration:{}", localConfiguration);
+        
         String result = null;
         return false;
         
@@ -238,6 +261,24 @@ public class SamlService {
     public String getSpNewMetadataFileName(String inum) {
         String relationshipInum = StringHelper.removePunctuation(inum);
         return String.format(SHIB3_SP_METADATA_FILE_PATTERN, relationshipInum);
+    }
+    
+    private LocalDocumentStoreConfiguration getDocumentStoreConfiguration() {
+        log.error("Getting DocumentStoreConfiguration documentStoreConfiguration:{}",documentStoreConfiguration);
+        
+        LocalDocumentStoreConfiguration localConfiguration = documentStoreConfiguration.getLocalConfiguration();
+        log.error("Getting localConfiguration:{}",localConfiguration);
+        
+        JcaDocumentStoreConfiguration jcaConfiguration  = documentStoreConfiguration.getJcaConfiguration();
+        log.error("Getting jcaConfiguration:{}",jcaConfiguration);
+        
+        WebDavDocumentStoreConfiguration webDavConfiguration  = documentStoreConfiguration.getWebDavConfiguration();
+        log.error("Getting webDavConfiguration:{}",webDavConfiguration);
+        
+        DBDocumentStoreConfiguration dbConfiguration  = documentStoreConfiguration.getDbConfiguration();
+        log.error("Getting dbConfiguration:{}",dbConfiguration);
+        
+        return localConfiguration;
     }
 
     

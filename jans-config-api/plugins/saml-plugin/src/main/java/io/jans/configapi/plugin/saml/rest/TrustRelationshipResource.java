@@ -21,6 +21,7 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
+import java.io.IOException;
 import java.util.*;
 
 import io.jans.configapi.plugin.saml.model.TrustRelationship;
@@ -107,13 +108,14 @@ public class TrustRelationshipResource extends BaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
     @ProtectedApi(scopes = { Constants.SAML_WRITE_ACCESS })
-    public Response createTrustRelationship(@Valid TrustRelationship trustRelationship) {
+    public Response createTrustRelationship(@Valid TrustRelationship trustRelationship) throws IOException {
 
         logger.info("Create TrustRelationship:{}", trustRelationship);
 
         // TO-DO validation of client
         String inum = samlService.generateInumForNewRelationship();
         trustRelationship.setInum(inum);
+        trustRelationship.setDn(samlService.getDnForTrustRelationship(inum));
         trustRelationship = samlService.addTrustRelationship(trustRelationship);
 
         logger.info("Create created by client:{}", trustRelationship);

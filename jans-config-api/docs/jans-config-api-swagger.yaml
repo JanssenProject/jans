@@ -7452,15 +7452,15 @@ components:
           type: string
         adminCanAccess:
           type: boolean
+        userCanEdit:
+          type: boolean
+        userCanView:
+          type: boolean
         adminCanEdit:
           type: boolean
         adminCanView:
           type: boolean
         userCanAccess:
-          type: boolean
-        userCanView:
-          type: boolean
-        userCanEdit:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -9180,14 +9180,14 @@ components:
           type: boolean
         internal:
           type: boolean
-        locationPath:
-          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
+        locationPath:
+          type: string
         baseDn:
           type: string
     ScriptError:
