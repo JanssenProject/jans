@@ -14,17 +14,17 @@ parser.add_argument('-schema-indexes-file', help="Path of schema indexes file")
 parser.add_argument('-rdbm-type', help="Type of RDBM", choices=['mysql', 'pgsql'], default='mysql')
 argsp = parser.parse_args()
 
-
+rdbm_names = {'mysql': 'MySQL', 'pgsql': 'PostgreSQL'}
 
 class RDBMSchemaGenerator:
 
     def __init__(self):
         if argsp.rdbm_type == 'mysql':
-            self.table_titles = ('Field', 'Type', 'Null', 'Key', 'Default', 'Comment')
-            self.index_titles = ('Table', 'Non_unique', 'Key_name', 'Seq_in_index', 'Column_name', 'Null', 'Comment', 'Index_comment')
+            self.table_titles = ['Field', 'Type', 'Null', 'Key', 'Default', 'Comment']
+            self.index_titles = ['Table', 'Non_unique', 'Key_name', 'Seq_in_index', 'Column_name', 'Null', 'Comment', 'Index_comment']
         else:
-            self.table_titles = ('Field', 'Type', 'Character Maximum Length', 'Null', 'Default', 'Comment')
-            self.index_titles = ('tablename', 'indexname', 'indexdef')
+            self.table_titles = ['Field', 'Type', 'Character Maximum Length', 'Null', 'Default', 'Comment']
+            self.index_titles = ['tablename', 'indexname', 'indexdef']
 
         self.schema_file = argsp.schema_file or argsp.rdbm_type + '-schema.md'
         self.schema_indexes_file = argsp.schema_indexes_file or argsp.rdbm_type + '-schema-indexes.md'
@@ -103,26 +103,83 @@ class RDBMSchemaGenerator:
     def get_list_from_dict(self, data_dict, key_list):
         return [str(data_dict.get(key, '')) for key in key_list]
 
+    def get_row_lengths(self, table_content):
+        row_lengths = [len(col) for col in table_content[0]]
+        for row in table_content[1:]:
+            for i, col in enumerate(row):
+                if len(col) > row_lengths[i]:
+                    row_lengths[i] = len(col)
+        return row_lengths
+
+    def get_md_table_row(self, row, row_lengths):
+        row_ls = [ col.ljust(row_lengths[i]) for i, col in enumerate(row)]
+        return '| ' + ' | '.join(row_ls) + ' |'
+
+    def get_md_table(self, table_content):
+        row_lengths = self.get_row_lengths(table_content)
+        md_table = [self.get_md_table_row(table_content[0], row_lengths)]
+        header_row = ['-'*row_lengths[i] for i, _ in enumerate(table_content[0])]
+        md_table.append(self.get_md_table_row(header_row, row_lengths))
+        for row in table_content[1:]:
+            md_table.append(self.get_md_table_row(row, row_lengths))
+
+        return('\n'.join(md_table))
+
+
+    def get_tags(self):
+        tags = [
+            '---',
+            'tags:',
+            '  - administration',
+            '  - reference',
+            '  - database',
+            '  - ' + rdbm_names[argsp.rdbm_type],
+            '  - Indexes',
+            '---'
+            ]
+        return '\n'.join(tags)
+
     def print_tables(self):
         with open(self.schema_file, 'w') as w:
-            for table in self.tables:
-                w.write('\n\n**' + table + '**\n')
-                w.write('|' + '|'.join(self.table_titles) + '|\n')
-                w.write('|-'*len(self.table_titles)+'|\n')
-                fields = self.get_table_fields(table)
-                for field in fields:
-                    w.write("|" + "|".join(self.get_list_from_dict(field, self.table_titles)) + '|\n')
+            w.write(self.get_tags())
+            w.write('\n\n')
+            w.write('# {} Schema\n\n'.format(rdbm_names[argsp.rdbm_type]))
+            w.write('## Tables\n')
 
+            table_names_content = [['Table names']]
+            for table in self.tables:
+                table_names_content.append([table])
+            w.write(self.get_md_table(table_names_content))
+
+            for table in self.tables:
+                table_content = [self.table_titles]
+                fields = self.get_table_fields(table)
+
+                for field in fields:
+                    table_content.append(self.get_list_from_dict(field, self.table_titles))
+
+                w.write('\n\n### ' + table + '\n')
+                w.write(self.get_md_table(table_content))
+
+            w.write('\n')
 
     def print_indexes(self):
         with open(self.schema_indexes_file, 'w') as w:
+            w.write(self.get_tags())
+            w.write('\n\n')
+            w.write('# {} Indexes\n'.format(rdbm_names[argsp.rdbm_type]))
+
             for table in self.tables:
-                w.write("\n\n**" + table + "**\n")
-                w.write('|' + '|'.join(self.index_titles) + '|\n')
-                w.write('|-'*len(self.index_titles)+'|\n')
+                table_content = [self.index_titles]
                 indexes = self.get_indexes(table)
+
                 for index in indexes:
-                    w.write("|" + "|".join(self.get_list_from_dict(index, self.index_titles)) + '|\n')
+                    table_content.append(self.get_list_from_dict(index, self.index_titles))
+
+                w.write('\n\n### ' + table + '\n')
+                w.write(self.get_md_table(table_content))
+
+            w.write('\n')
 
 def main():
     schema_generator = RDBMSchemaGenerator()
