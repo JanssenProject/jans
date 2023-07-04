@@ -191,7 +191,7 @@ dn: inum=C4F7,ou=scopes,o=jans
 jansId: jans_stat
 inum: C4F7
 description: This scope is required for calling Statistic Endpoint
-jansDefScope: false
+jansDefScope: true
 jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":false}
 jansScopeTyp: oauth
 objectClass: top
