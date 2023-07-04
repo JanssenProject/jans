@@ -130,11 +130,11 @@ class JansInstaller(BaseInstaller, SetupUtils):
         else:
             self.logIt("Key generator path was determined as {}".format(Config.non_setup_properties['key_export_path']))
 
-        self.disable_selinux()
 
         self.extract_scripts()
 
     def disable_selinux(self):
+        self.logIt("Disabling SELinux")
         setenforce_cmd = shutil.which('setenforce')
         selinux_config_fn = '/etc/selinux/config'
 
@@ -499,6 +499,9 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
 
     def post_install_tasks(self):
+
+        if base.argsp.disable_selinux:
+            self.disable_selinux()
 
         self.deleteLdapPw()
 
