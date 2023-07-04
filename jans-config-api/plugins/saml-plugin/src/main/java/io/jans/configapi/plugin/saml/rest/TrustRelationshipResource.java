@@ -21,6 +21,7 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
@@ -33,8 +34,8 @@ import org.slf4j.Logger;
 @Produces(MediaType.APPLICATION_JSON)
 public class TrustRelationshipResource extends BaseResource {
 
-    private static final String SAML_TRUST_RELATIONSHIP= "Trus tRelationship";
-    
+    private static final String SAML_TRUST_RELATIONSHIP = "Trus tRelationship";
+
     @Inject
     Logger logger;
 
@@ -55,7 +56,6 @@ public class TrustRelationshipResource extends BaseResource {
         logger.info("All trustRelationshipList:{}", trustRelationshipList);
         return Response.ok(trustRelationshipList).build();
     }
-
 
     @Operation(summary = "Get TrustRelationship by name", description = "Get TrustRelationship by name", operationId = "get-trust-relationship-by-name", tags = {
             "SAML - Trust Relationship" }, security = @SecurityRequirement(name = "oauth2", scopes = {
@@ -122,6 +122,31 @@ public class TrustRelationshipResource extends BaseResource {
         return Response.status(Response.Status.CREATED).entity(trustRelationship).build();
     }
 
+    @Operation(summary = "Create Trust Relationship with File", description = "Create Trust Relationship with File", operationId = "post-trust-relationship-file", tags = {
+            "SAML - Trust Relationship" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    Constants.SAML_WRITE_ACCESS }))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "clientList", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA, array = @ArraySchema(schema = @Schema(implementation = TrustRelationship.class)))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
+    @POST
+    @ProtectedApi(scopes = { Constants.SAML_WRITE_ACCESS })
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    public Response createTrustRelationshipWithFile(@Valid TrustRelationship trustRelationship, File file)
+            throws IOException {
+
+        logger.info("Create TrustRelationship:{}", trustRelationship);
+
+        // TO-DO validation of client
+        String inum = samlService.generateInumForNewRelationship();
+        trustRelationship.setInum(inum);
+        trustRelationship.setDn(samlService.getDnForTrustRelationship(inum));
+        trustRelationship = samlService.addTrustRelationship(trustRelationship, file);
+
+        logger.info("Create created by client:{}", trustRelationship);
+        return Response.status(Response.Status.CREATED).entity(trustRelationship).build();
+    }
+
     @Operation(summary = "Update TrustRelationship", description = "Update TrustRelationship", operationId = "put-trust-relationship", tags = {
             "SAML - Trust Relationship" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.SAML_WRITE_ACCESS }))
@@ -157,33 +182,35 @@ public class TrustRelationshipResource extends BaseResource {
             @Parameter(description = "Unique Id of client") @PathParam(Constants.ID) @NotNull String id) {
 
         logger.info("Delete client identified by id:{}", id);
-        
+
         TrustRelationship TrustRelationship = samlService.getTrustRelationshipByInum(id);
-        if(TrustRelationship==null) {
-            //throw error;
+        if (TrustRelationship == null) {
+            // throw error;
         }
         samlService.removeTrustRelationship(TrustRelationship);
 
         return Response.noContent().build();
     }
-    
+
     private TrustRelationship saveTrustRelationship(TrustRelationship trustRelationship, boolean update) {
         logger.info("Delete client identified by trustRelationship:{}, update:{}", trustRelationship, update);
-        
-        //Validations
-        checkResourceNotNull(trustRelationship, SAML_TRUST_RELATIONSHIP);
-        
-        // If relationship exists and action is add then throw error
-        List<TrustRelationship> existingRelationships = samlService.getAllTrustRelationshipByName(trustRelationship.getDisplayName());
 
-        //If update check by inum
-        
-        //Save metadatfile
-       /* String resultInitMetadataFilters = metadataFiltersAction.initMetadataFilters(this.trustRelationship);
-        if (!StringHelper.equalsIgnoreCase(OxTrustConstants.RESULT_SUCCESS, resultInitMetadataFilters)) {
-            return false;
-        }
-       */
+        // Validations
+        checkResourceNotNull(trustRelationship, SAML_TRUST_RELATIONSHIP);
+
+        // If relationship exists and action is add then throw error
+        List<TrustRelationship> existingRelationships = samlService
+                .getAllTrustRelationshipByName(trustRelationship.getDisplayName());
+
+        // If update check by inum
+
+        // Save metadatfile
+        /*
+         * String resultInitMetadataFilters =
+         * metadataFiltersAction.initMetadataFilters(this.trustRelationship); if
+         * (!StringHelper.equalsIgnoreCase(OxTrustConstants.RESULT_SUCCESS,
+         * resultInitMetadataFilters)) { return false; }
+         */
         return trustRelationship;
     }
 

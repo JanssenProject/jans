@@ -6,7 +6,6 @@
 
 package io.jans.configapi.plugin.saml.service;
 
-
 import io.jans.configapi.plugin.saml.model.TrustRelationship;
 import io.jans.as.common.service.OrganizationService;
 import io.jans.model.SearchRequest;
@@ -30,6 +29,7 @@ import jakarta.inject.Inject;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -56,16 +56,18 @@ public class SamlService {
 
     @Inject
     ConfigurationFactory configurationFactory;
-    
+
     @Inject
     OrganizationService organizationService;
-    
+
     @Inject
     private transient InumService inumService;
-    
-    @Inject 
+
+    @Inject
     DocumentStoreConfiguration documentStoreConfiguration;
 
+    @Inject
+    SamlIdpService samlIdpService;
 
     public String baseDn() {
         // return staticConfiguration.getBaseDn().getTrustRelationshipDn();
@@ -75,7 +77,7 @@ public class SamlService {
     public boolean containsRelationship(String dn) {
         return persistenceEntryManager.contains(dn, TrustRelationship.class);
     }
-    
+
     public TrustRelationship getRelationshipByDn(String dn) {
         if (StringHelper.isNotEmpty(dn)) {
             try {
@@ -97,16 +99,15 @@ public class SamlService {
         }
         return result;
     }
-    
+
     public List<TrustRelationship> getAllTrustRelationship() {
-        return persistenceEntryManager.findEntries(getDnForTrustRelationship(null), TrustRelationship.class,
-                null);
+        return persistenceEntryManager.findEntries(getDnForTrustRelationship(null), TrustRelationship.class, null);
     }
+
     public List<TrustRelationship> getAllTrustRelationshipByInum(String inum) {
-        return persistenceEntryManager.findEntries(getDnForTrustRelationship(inum), TrustRelationship.class,
-                null);
+        return persistenceEntryManager.findEntries(getDnForTrustRelationship(inum), TrustRelationship.class, null);
     }
-    
+
     public List<TrustRelationship> getAllTrustRelationshipByName(String name) {
         log.error("Search TrustRelationship with name:{}", name);
 
@@ -116,7 +117,7 @@ public class SamlService {
         return persistenceEntryManager.findEntries(getDnForTrustRelationship(null), TrustRelationship.class,
                 displayNameFilter);
     }
-    
+
     public TrustRelationship getTrustContainerFederation(TrustRelationship trustRelationship) {
         TrustRelationship relationshipByDn = getRelationshipByDn(trustRelationship.getDn());
         return relationshipByDn;
@@ -128,8 +129,8 @@ public class SamlService {
     }
 
     public List<TrustRelationship> getAllTrustRelationships(int sizeLimit) {
-        return persistenceEntryManager.findEntries(getDnForTrustRelationship(null), TrustRelationship.class,
-                null, sizeLimit);
+        return persistenceEntryManager.findEntries(getDnForTrustRelationship(null), TrustRelationship.class, null,
+                sizeLimit);
     }
 
     public List<TrustRelationship> searchTrustRelationship(String pattern, int sizeLimit) {
@@ -150,11 +151,9 @@ public class SamlService {
     }
 
     public List<TrustRelationship> getAllTrustRelationship(int sizeLimit) {
-        return persistenceEntryManager.findEntries(getDnForTrustRelationship(null), TrustRelationship.class,
-                null, sizeLimit);
+        return persistenceEntryManager.findEntries(getDnForTrustRelationship(null), TrustRelationship.class, null,
+                sizeLimit);
     }
-
- 
 
     public PagedResult<Client> getTrustRelationship(SearchRequest searchRequest) {
         log.error("Search TrustRelationship with searchRequest:{}", searchRequest);
@@ -195,14 +194,21 @@ public class SamlService {
 
     }
 
-    public TrustRelationship addTrustRelationship(TrustRelationship trustRelationship) throws IOException{
-        log.error("Add new trustRelationship:{}", trustRelationship);
+    public TrustRelationship addTrustRelationship(TrustRelationship trustRelationship, File file) throws IOException {
+        log.error("Add new trustRelationship:{}, file:{}", trustRelationship, file);
         setTrustRelationship(trustRelationship, false);
         persistenceEntryManager.persist(trustRelationship);
-        
-        saveSpMetaDataFileSourceTypeFile(trustRelationship);
-        
+
+        if (file != null) {
+            saveSpMetaDataFileSourceTypeFile(trustRelationship, file);
+        }
+
         return getTrustRelationshipByInum(trustRelationship.getInum());
+    }
+
+    public TrustRelationship addTrustRelationship(TrustRelationship trustRelationship) throws IOException {
+
+        return addTrustRelationship(trustRelationship, null);
     }
 
     public void removeTrustRelationship(TrustRelationship trustRelationship) {
@@ -226,9 +232,8 @@ public class SamlService {
             return String.format("ou=trustRelationships,%s", orgDn);
         }
         return String.format("inum=%s,ou=trustRelationships,%s", inum, orgDn);
-    } 
-    
- 
+    }
+
     public String generateInumForNewRelationship() {
         String newInum = null;
         String newDn = null;
@@ -239,47 +244,113 @@ public class SamlService {
 
         return newInum;
     }
-    
-    private boolean saveSpMetaDataFileSourceTypeFile(TrustRelationship trustRelationship) throws IOException {
-        log.error("TrustRelationship trustRelationship:{}", trustRelationship);
+
+    private boolean saveMetaData(TrustRelationship trustRelationship, File file) {
+        log.error("Saving MetaData trustRelationship:{}, file:{}", trustRelationship, file);
+
+        if (trustRelationship == null || trustRelationship.getSpMetaDataSourceType() == null) {
+            return false;
+        }
+
+        switch (trustRelationship.getSpMetaDataSourceType()) {
+        case FILE:
+            try {
+                if (saveSpMetaDataFileSourceTypeFile(trustRelationship, file)) {
+
+                } else {
+                    log.error("Failed to save SP meta-data file {}");
+                    return false;
+                }
+            } catch (IOException ex) {
+                log.error("Failed to download SP metadata", ex);
+                return false;
+            }
+            return true;
+        }
+        return true;
+    }
+
+    private boolean saveSpMetaDataFileSourceTypeFile(TrustRelationship trustRelationship, File file)
+            throws IOException {
+        log.error("TrustRelationship trustRelationship:{}", trustRelationship, file);
         String spMetadataFileName = trustRelationship.getSpMetaDataFN();
         boolean emptySpMetadataFileName = StringHelper.isEmpty(spMetadataFileName);
         log.error("emptySpMetadataFileName:{}", emptySpMetadataFileName);
-        
+        if ((file == null) || !file.exists()) {
+            if (emptySpMetadataFileName) {
+                log.debug("The trust relationship {} has an empty Metadata filename", trustRelationship.getInum());
+                return false;
+            }
+            String filePath = samlIdpService.getSpMetadataFilePath(spMetadataFileName);
+            if (filePath == null) {
+                log.debug("The trust relationship {} has an invalid Metadata file storage path",
+                        trustRelationship.getInum());
+                return false;
+            }
+
+            if (samlIdpService.isLocalDocumentStoreType()) {
+
+                File newFile = new File(filePath);
+                if (!newFile.exists()) {
+                    log.debug(
+                            "The trust relationship {} metadata used local storage but the SP metadata file `{}` was not found",
+                            trustRelationship.getInum(), filePath);
+                    return false;
+                }
+            }
+            return true;
+        }
+        if (emptySpMetadataFileName) {
+            spMetadataFileName = samlIdpService.getSpNewMetadataFileName(trustRelationship);
+            trustRelationship.setSpMetaDataFN(spMetadataFileName);
+            /*
+             * if (trustRelationship.getDn() == null) { String dn =
+             * getDnForTrustRelationship(trustRelationship.getInum());
+             * trustRelationship.setDn(dn); addTrustRelationship(trustRelationship); } else
+             * { updateTrustRelationship(trustRelationship); }
+             */
+        }
+        InputStream targetStream = new FileInputStream(file);
+        String result = samlIdpService.saveSpMetadataFile(spMetadataFileName, targetStream);
+        if (StringHelper.isNotEmpty(result)) {
+            // metadataValidationTimer.queue(result);
+        } else {
+            log.error("Failed to save SP meta-data file. Please check if you provide correct file");
+        }
+
+        // To-be-removed
         LocalDocumentStoreConfiguration localConfiguration = getDocumentStoreConfiguration();
         log.error("localConfiguration:{}", localConfiguration);
-        
-        String result = null;
+
         return false;
-        
+
     }
-    
+
     public String getSpNewMetadataFileName(TrustRelationship trustRel) {
         return getSpNewMetadataFileName(trustRel.getInum());
     }
-    
+
     public String getSpNewMetadataFileName(String inum) {
         String relationshipInum = StringHelper.removePunctuation(inum);
         return String.format(SHIB3_SP_METADATA_FILE_PATTERN, relationshipInum);
     }
-    
+
     private LocalDocumentStoreConfiguration getDocumentStoreConfiguration() {
-        log.error("Getting DocumentStoreConfiguration documentStoreConfiguration:{}",documentStoreConfiguration);
-        
+        log.error("Getting DocumentStoreConfiguration documentStoreConfiguration:{}", documentStoreConfiguration);
+
         LocalDocumentStoreConfiguration localConfiguration = documentStoreConfiguration.getLocalConfiguration();
-        log.error("Getting localConfiguration:{}",localConfiguration);
-        
-        JcaDocumentStoreConfiguration jcaConfiguration  = documentStoreConfiguration.getJcaConfiguration();
-        log.error("Getting jcaConfiguration:{}",jcaConfiguration);
-        
-        WebDavDocumentStoreConfiguration webDavConfiguration  = documentStoreConfiguration.getWebDavConfiguration();
-        log.error("Getting webDavConfiguration:{}",webDavConfiguration);
-        
-        DBDocumentStoreConfiguration dbConfiguration  = documentStoreConfiguration.getDbConfiguration();
-        log.error("Getting dbConfiguration:{}",dbConfiguration);
-        
+        log.error("Getting localConfiguration:{}", localConfiguration);
+
+        JcaDocumentStoreConfiguration jcaConfiguration = documentStoreConfiguration.getJcaConfiguration();
+        log.error("Getting jcaConfiguration:{}", jcaConfiguration);
+
+        WebDavDocumentStoreConfiguration webDavConfiguration = documentStoreConfiguration.getWebDavConfiguration();
+        log.error("Getting webDavConfiguration:{}", webDavConfiguration);
+
+        DBDocumentStoreConfiguration dbConfiguration = documentStoreConfiguration.getDbConfiguration();
+        log.error("Getting dbConfiguration:{}", dbConfiguration);
+
         return localConfiguration;
     }
 
-    
 }

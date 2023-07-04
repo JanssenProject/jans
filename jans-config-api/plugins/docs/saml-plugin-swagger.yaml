@@ -221,19 +221,19 @@ paths:
     post:
       tags:
       - SAML - Trust Relationship
-      summary: Create Trust Relationship
-      description: Create Trust Relationship
-      operationId: post-trust-relationship
+      summary: Create Trust Relationship with File
+      description: Create Trust Relationship with File
+      operationId: post-trust-relationship-file
       requestBody:
         content:
-          application/json:
+          multipart/form-data:
             schema:
               $ref: '#/components/schemas/TrustRelationship'
       responses:
         "201":
           description: clientList
           content:
-            application/json:
+            multipart/form-data:
               schema:
                 type: array
                 items:
