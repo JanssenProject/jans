@@ -56,7 +56,7 @@
     </Appenders>
 
     <Loggers>
-        <Logger name="io.jans.cacherefresh" level="${log4j.default.log.level}">
+        <Logger name="io.jans.link" level="${log4j.default.log.level}">
             <AppenderRef ref="FILE" />
         </Logger>
 
