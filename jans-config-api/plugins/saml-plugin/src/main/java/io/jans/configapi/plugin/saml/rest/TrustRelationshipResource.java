@@ -108,6 +108,7 @@ public class TrustRelationshipResource extends BaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
     @ProtectedApi(scopes = { Constants.SAML_WRITE_ACCESS })
+    @Path("/test")
     public Response createTrustRelationship(@Valid TrustRelationship trustRelationship) throws IOException {
 
         logger.info("Create TrustRelationship:{}", trustRelationship);
@@ -132,21 +133,53 @@ public class TrustRelationshipResource extends BaseResource {
     @POST
     @ProtectedApi(scopes = { Constants.SAML_WRITE_ACCESS })
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    public Response createTrustRelationshipWithFile(@Valid TrustRelationship trustRelationship, File file)
+    @Path("/file")
+    public Response createTrustRelationshipWithFile(@Valid TrustRelationship trustRelationship, File metadatafile)
             throws IOException {
 
-        logger.info("Create TrustRelationship:{}", trustRelationship);
+        logger.info("Create TrustRelationship:{}, metadatafile:{}", trustRelationship, metadatafile);
 
         // TO-DO validation of client
         String inum = samlService.generateInumForNewRelationship();
         trustRelationship.setInum(inum);
         trustRelationship.setDn(samlService.getDnForTrustRelationship(inum));
-        trustRelationship = samlService.addTrustRelationship(trustRelationship, file);
+        trustRelationship = samlService.addTrustRelationship(trustRelationship, metadatafile);
 
         logger.info("Create created by client:{}", trustRelationship);
         return Response.status(Response.Status.CREATED).entity(trustRelationship).build();
     }
 
+    
+    @Operation(summary = "Create Trust Relationship with File", description = "Create Trust Relationship with File", operationId = "post-trust-relationship-file", tags = {
+    "SAML - Trust Relationship" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+            Constants.SAML_WRITE_ACCESS }))
+@ApiResponses(value = {
+    @ApiResponse(responseCode = "201", description = "clientList", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA, array = @ArraySchema(schema = @Schema(implementation = TrustRelationship.class)))),
+    @ApiResponse(responseCode = "401", description = "Unauthorized"),
+    @ApiResponse(responseCode = "500", description = "InternalServerError") })
+@POST
+@ProtectedApi(scopes = { Constants.SAML_WRITE_ACCESS })
+@Consumes(MediaType.MULTIPART_FORM_DATA)
+@Path("/uploadfile")
+public Response createTrustRelationshipWithFile2(File metadatafile, @Valid TrustRelationship trustRelationship)
+    throws IOException {
+        logger.error("Upload file metadatafile:{}",  metadatafile);
+    
+logger.error("Create TrustRelationship:{}, metadatafile:{}", trustRelationship, metadatafile);
+
+// TO-DO validation of client
+String inum = samlService.generateInumForNewRelationship();
+trustRelationship.setInum(inum);
+trustRelationship.setDn(samlService.getDnForTrustRelationship(inum));
+trustRelationship = samlService.addTrustRelationship(trustRelationship, metadatafile);
+
+logger.error("Create created by client:{}", trustRelationship);
+return Response.status(Response.Status.CREATED).entity(trustRelationship).build();
+
+
+        //return Response.ok("Well done").build();
+}
+    
     @Operation(summary = "Update TrustRelationship", description = "Update TrustRelationship", operationId = "put-trust-relationship", tags = {
             "SAML - Trust Relationship" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.SAML_WRITE_ACCESS }))
