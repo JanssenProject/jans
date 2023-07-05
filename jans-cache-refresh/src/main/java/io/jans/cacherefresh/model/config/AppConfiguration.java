@@ -53,8 +53,10 @@ public class AppConfiguration extends CacheRefreshConfiguration {
 
     private boolean vdsCacheRefreshEnabled;
 	private String cacheRefreshServerIpAddress;
-	private String vdsCacheRefreshPollingInterval;
-	private Date vdsCacheRefreshLastUpdate;
+
+    private String vdsCacheRefreshPollingInterval;
+
+    private Date vdsCacheRefreshLastUpdate;
 	private String vdsCacheRefreshLastUpdateCount;
 	private String vdsCacheRefreshProblemCount;
 
@@ -140,6 +142,14 @@ public class AppConfiguration extends CacheRefreshConfiguration {
 	public String getVdsCacheRefreshPollingInterval() {
 		return vdsCacheRefreshPollingInterval;
 	}
+
+    public void setVdsCacheRefreshPollingInterval(String vdsCacheRefreshPollingInterval) {
+        this.vdsCacheRefreshPollingInterval = vdsCacheRefreshPollingInterval;
+    }
+
+    public Date getVdsCacheRefreshLastUpdate() {
+        return vdsCacheRefreshLastUpdate;
+    }
 
     public void setVdsCacheRefreshLastUpdate(Date vdsCacheRefreshLastUpdate) {
 		this.vdsCacheRefreshLastUpdate = vdsCacheRefreshLastUpdate;

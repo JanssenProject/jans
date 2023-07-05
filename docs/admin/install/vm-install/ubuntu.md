@@ -8,11 +8,27 @@ tags:
 
 # Ubuntu Janssen Installation
 
-Before you install, check the [VM system requirements](vm-requirements.md).
-
 ## Supported Versions
 - Ubuntu 22.04
 - Ubuntu 20.04
+
+Before you install, check the [VM system requirements](vm-requirements.md).
+
+
+- Download the GPG key zip file , unzip and import GPG key
+
+```shell
+wget https://github.com/JanssenProject/jans/files/11814522/automation-jans-public-gpg.zip
+```
+
+```shell
+unzip automation-jans-public-gpg.zip
+```
+
+```shell
+sudo gpg --import automation-jans-public-gpg.asc;
+
+```
 
 ## Install the Package
 
@@ -37,7 +53,7 @@ wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-v
 
     ```shell
     cd /tmp
-    sha256sum -c /tmp/jans_replace-janssen-version.ubuntu22.04_amd64.deb.sha256sum
+    sha256sum -c jans_replace-janssen-version.ubuntu22.04_amd64.deb.sha256sum
     ```
 
     Output similar to below should confirm the integrity of the downloaded package.
@@ -49,7 +65,7 @@ wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-v
 - Install the package
 
 ```
-apt install -y /tmp/jans_replace-janssen-version.ubuntu22.04_amd64.deb
+sudo apt install  ./jans_replace-janssen-version.ubuntu22.04_amd64.deb
 ```
 
 ### Ubuntu 20.04
@@ -73,7 +89,7 @@ wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-v
 
     ```shell
     cd /tmp
-    sha256sum -c /tmp/jans_replace-janssen-version.ubuntu20.04_amd64.deb.sha256sum
+    sha256sum -c jans_replace-janssen-version.ubuntu20.04_amd64.deb.sha256sum
     ```
 
     Output similar to below should confirm the integrity of the downloaded package.
@@ -85,7 +101,7 @@ wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-v
 - Install the package
 
 ```
-apt install -y /tmp/jans_replace-janssen-version.ubuntu20.04_amd64.deb
+sudo apt install  ./jans_replace-janssen-version.ubuntu20.04_amd64.deb
 ```
 
 ## Run the setup script
@@ -93,7 +109,7 @@ apt install -y /tmp/jans_replace-janssen-version.ubuntu20.04_amd64.deb
 - Run the setup script in interactive mode:
 
 ```
-python3 /opt/jans/jans-setup/setup.py
+sudo python3 /opt/jans/jans-setup/setup.py
 ```
 
 See more detailed [instructions](../setup.md) on the setup script if you're
@@ -110,7 +126,7 @@ After the successful completion of setup process, [verify the system health](../
 Begin configuration by accessing the TUI with the following command:
 
 ```
-/opt/jans/jans-cli/jans_cli_tui.py
+sudo /opt/jans/jans-cli/jans_cli_tui.py
 ```
 
 Full TUI documentation can be found [here](../../config-guide/jans-tui/README.md)
@@ -125,7 +141,7 @@ Removing Janssen is a two step process:
 Use the command below to uninstall the Janssen server
 
 ```
-python3 /opt/jans/jans-setup/install.py -uninstall
+sudo python3 /opt/jans/jans-setup/install.py -uninstall
 ```
 
 You'll see the following confirmation:

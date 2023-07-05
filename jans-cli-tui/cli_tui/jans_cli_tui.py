@@ -451,10 +451,13 @@ class JansCliApp(Application):
 
     def jans_creds_dialog(self, *params: Any) -> None:
         body=HSplit([
-            self.getTitledText(_("Hostname"), name='jans_host', value=config_cli.host or '', jans_help=_("FQN name of Jannsen Config Api Server"),style='class:jans-main-usercredintial.titletext'),
-            self.getTitledText(_("Client ID"), name='jca_client_id', value=config_cli.client_id or '', jans_help=_("Jannsen Config Api Client ID"),style='class:jans-main-usercredintial.titletext'),
-            self.getTitledText(_("Client Secret"), name='jca_client_secret', value=config_cli.client_secret or '', jans_help=_("Jannsen Config Api Client Secret"),style='class:jans-main-usercredintial.titletext'),
-            ],style='class:jans-main-usercredintial')
+                self.getTitledText(_("OP Hostname"), name='jans_host', value=config_cli.host or '', jans_help=_("FQN name of Jannsen Config Api Server"), style=cli_style.edit_text_required),
+                self.getTitledText(_("Client ID"), name='jca_client_id', value=config_cli.client_id or '', jans_help=_("Jannsen Config Api Client ID"), style=cli_style.edit_text_required),
+                self.getTitledText(_("Client Secret"), name='jca_client_secret', value=config_cli.client_secret or '', password=True, jans_help=_("Jannsen Config Api Client Secret"), style=cli_style.edit_text_required),
+                self.getTitledText(_("Logging Directory"), name='log_dir', value=config_cli.log_dir or '', jans_help=_("Logging Directory"), style=cli_style.edit_text),
+                ],
+                style='class:jans-main-usercredintial'
+                )
 
         buttons = [Button(_("Save"), handler=self.save_creds)]
         dialog = JansGDialog(self, title=_("Janssen Config Api Client Credentials"), body=body, buttons=buttons)
@@ -671,6 +674,7 @@ class JansCliApp(Application):
             lexer: PygmentsLexer = None,
             text_type: Optional[str] = 'string',
             jans_list_type: Optional[bool] = False,
+            password: Optional[bool] = False,
             ) -> AnyContainer:
 
         title += ': '
@@ -687,6 +691,7 @@ class JansCliApp(Application):
                 scrollbar=scrollbar,
                 line_numbers=line_numbers,
                 lexer=lexer,
+                password=password,
             )
 
 
@@ -973,11 +978,20 @@ class JansCliApp(Application):
 
         config_cli.host = config_cli.config['DEFAULT']['jans_host']
         config_cli.client_id = config_cli.config['DEFAULT']['jca_client_id']
+
         if 'jca_client_secret' in config_cli.config['DEFAULT']:
             config_cli.client_secret = config_cli.config['DEFAULT']['jca_client_secret']
         else:
             config_cli.client_secret = config_cli.unobscure(config_cli.config['DEFAULT']['jca_client_secret_enc'])
         config_cli.access_token = None
+
+        log_dir = config_cli.config['DEFAULT'].get('log_dir')
+        if log_dir:
+            if not os.path.exists(log_dir):
+                os.makedirs(log_dir, mode=0o700)
+            config_cli.log_dir = log_dir
+            if getattr(self, 'cli_object'):
+                self.cli_object.set_logging()
 
     def show_message(
             self, 
