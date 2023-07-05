@@ -111,6 +111,9 @@ public class ExternalCacheRefreshService extends ExternalScriptService {
     }
 
 	public boolean executeExternalIsStartProcessMethods() {
+        if(this.customScriptConfigurations == null){
+            reload(CustomScriptType.CACHE_REFRESH.toString());
+        }
 		boolean result = this.customScriptConfigurations.size() > 0;
 
 		for (CustomScriptConfiguration customScriptConfiguration : this.customScriptConfigurations) {

@@ -173,19 +173,19 @@ public class CacheRefreshTimer {
 	@Asynchronous
 	public void process(@Observes @Scheduled CacheRefreshEvent cacheRefreshEvent) {
 		if (this.isActive.get()) {
-			System.out.println("Another process is active");
+			log.info("Another process is active");
 			return;
 		}
 
 		if (!this.isActive.compareAndSet(false, true)) {
-			System.out.println("Failed to start process exclusively");
+			log.info("Failed to start process exclusively");
 			return;
 		}
 
 		try {
 			processInt();
 		} finally {
-			System.out.println("Allowing to run new process exclusively");
+			log.info("Allowing to run new process exclusively");
 			this.isActive.set(false);
 		}
 	}
@@ -193,13 +193,9 @@ public class CacheRefreshTimer {
 	public void processInt() {
 		AppConfiguration currentConfiguration = getConfigurationFactory().getAppConfiguration();
 		try {
-			//GluuConfiguration currentConfiguration = getConfigurationService().getConfiguration();
-			//GluuConfiguration currentConfiguration = new GluuConfiguration();
-			currentConfiguration.setLinkEnabled(true);
-			//currentConfiguration.setVdsCacheRefreshPollingInterval();
 			currentConfiguration.setServerIpAddress("255.255.255.255");
 			if (!isStartCacheRefresh(currentConfiguration)) {
-				System.out.println("Starting conditions aren't reached");
+				log.info("Starting conditions aren't reached");
 				return;
 			}
 
@@ -209,7 +205,7 @@ public class CacheRefreshTimer {
 			this.lastFinishedTime = System.currentTimeMillis();
 		} catch (Throwable ex) {
 			ex.printStackTrace();
-			System.out.println("Exception happened while executing cache refresh synchronization"+ ex);
+			log.info("Exception happened while executing cache refresh synchronization"+ ex);
 		}
 	}
 
@@ -251,12 +247,12 @@ public class CacheRefreshTimer {
 		}
 
 		if (!cacheRefreshServer) {
-			//cacheRefreshServer = externalCacheRefreshService.executeExternalIsStartProcessMethods();
+			cacheRefreshServer = externalCacheRefreshService.executeExternalIsStartProcessMethods();
 			cacheRefreshServer = true;
 		}
 
 		if (!cacheRefreshServer) {
-			System.out.println("This server isn't master Cache Refresh server");
+			log.info("This server isn't master Cache Refresh server");
 			return false;
 		}
 
@@ -342,7 +338,7 @@ public class CacheRefreshTimer {
 		boolean isVDSMode = CacheRefreshUpdateMethod.VDS.equals(updateMethod);
 
 		// Load all entries from Source servers
-		System.out.println("Attempting to load entries from source server");
+		log.info("Attempting to load entries from source server");
 		List<GluuSimplePerson> sourcePersons;
 
 		if (currentConfiguration.isUseSearchLimit()) {
@@ -351,11 +347,11 @@ public class CacheRefreshTimer {
 			sourcePersons = loadSourceServerEntriesWithoutLimits(currentConfiguration, sourceServerConnections);
 		}
 
-		System.out.println("Found '{}' entries in source server"+ sourcePersons.size());
+		log.info("Found '{}' entries in source server"+ sourcePersons.size());
 
 		Map<CacheCompoundKey, GluuSimplePerson> sourcePersonCacheCompoundKeyMap = getSourcePersonCompoundKeyMap(
 				currentConfiguration, sourcePersons);
-		System.out.println("Found '{}' unique entries in source server"+ sourcePersonCacheCompoundKeyMap.size());
+		log.info("Found '{}' unique entries in source server"+ sourcePersonCacheCompoundKeyMap.size());
 
 		// Load all inum entries
 		List<JansInumMap> inumMaps = null;
@@ -366,7 +362,7 @@ public class CacheRefreshTimer {
 		if (loadedObject != null) {
 			try {
 				inumMaps = (List<JansInumMap>) loadedObject;
-				System.out.println("Found '{}' entries in inum objects disk cache"+ inumMaps.size());
+				log.info("Found '{}' entries in inum objects disk cache"+ inumMaps.size());
 			} catch (Exception ex) {
 				log.error("Failed to convert to GluuInumMap list"+ ex);
 				objectSerializationService.cleanup(inumCachePath);
@@ -376,7 +372,7 @@ public class CacheRefreshTimer {
 		if (inumMaps == null) {
 			// Load all inum entries from LDAP
 			inumMaps = loadInumServerEntries(currentConfiguration, inumDbServerConnection);
-			System.out.println("Found '{}' entries in inum server"+ inumMaps.size());
+			log.info("Found '{}' entries in inum server"+ inumMaps.size());
 		}
 
 		HashMap<CacheCompoundKey, JansInumMap> primaryKeyAttrValueInumMap = getPrimaryKeyAttrValueInumMap(inumMaps);
@@ -388,11 +384,11 @@ public class CacheRefreshTimer {
 
 		HashMap<CacheCompoundKey, JansInumMap> allPrimaryKeyAttrValueInumMap = getAllInumServerEntries(
 				primaryKeyAttrValueInumMap, addedPrimaryKeyAttrValueInumMap);
-		System.out.println("Count actual inum entries '{}' after updating inum server"+ allPrimaryKeyAttrValueInumMap.size());
+		log.info("Count actual inum entries '{}' after updating inum server"+ allPrimaryKeyAttrValueInumMap.size());
 
 		HashMap<String, Integer> currInumWithEntryHashCodeMap = getSourcePersonsHashCodesMap(inumDbServerConnection,
 				sourcePersonCacheCompoundKeyMap, allPrimaryKeyAttrValueInumMap);
-		System.out.println("Count actual source entries '{}' after calculating hash code"+ currInumWithEntryHashCodeMap.size());
+		log.info("Count actual source entries '{}' after calculating hash code"+ currInumWithEntryHashCodeMap.size());
 
 		// Create snapshots cache folder if needed
 		boolean result = cacheRefreshSnapshotFileService.prepareSnapshotsFolder(currentConfiguration);
@@ -407,12 +403,12 @@ public class CacheRefreshTimer {
 		// Compare 2 snapshot and invoke update if needed
 		Set<String> changedInums = getChangedInums(currInumWithEntryHashCodeMap, prevInumWithEntryHashCodeMap,
 				isVDSMode);
-		System.out.println("Found '{}' changed entries"+ changedInums.size());
+		log.info("Found '{}' changed entries"+ changedInums.size());
 
 		// Load problem list from disk and add to changedInums
 		List<String> problemInums = cacheRefreshSnapshotFileService.readProblemList(currentConfiguration);
 		if (problemInums != null) {
-			System.out.println("Loaded '{}' problem entries from problem file"+ problemInums.size());
+			log.info("Loaded '{}' problem entries from problem file"+ problemInums.size());
 			// Process inums from problem list too
 			changedInums.addAll(problemInums);
 		}
@@ -426,9 +422,9 @@ public class CacheRefreshTimer {
 					allPrimaryKeyAttrValueInumMap, changedInums);
 		}
 
-		System.out.println("Updated '{}' entries"+ updatedInums.size());
+		log.info("Updated '{}' entries"+ updatedInums.size());
 		changedInums.removeAll(updatedInums);
-		System.out.println("Failed to update '{}' entries"+ changedInums.size());
+		log.info("Failed to update '{}' entries"+ changedInums.size());
 
 		// Persist snapshot to cache folder
 		result = cacheRefreshSnapshotFileService.createSnapshot(currentConfiguration,
@@ -449,7 +445,7 @@ public class CacheRefreshTimer {
 		List<GluuSimplePerson> personsForRemoval = null;
 
 		boolean keepExternalPerson = currentConfiguration.isKeepExternalPerson();
-		System.out.println("Keep external persons: '{}'"+ keepExternalPerson);
+		log.info("Keep external persons: '{}'"+ keepExternalPerson);
 		if (keepExternalPerson) {
 			// Determine entries which need to remove
 			personsForRemoval = getRemovedPersons(currInumWithEntryHashCodeMap, prevInumWithEntryHashCodeMap);
@@ -458,12 +454,12 @@ public class CacheRefreshTimer {
 
 			// Load all entries from Target server
 			List<TypedGluuSimplePerson> targetPersons = loadTargetServerEntries(currentConfiguration, getLdapEntryManager());
-			System.out.println("Found '{}' entries in target server"+ targetPersons.size());
+			log.info("Found '{}' entries in target server"+ targetPersons.size());
 
 			// Detect entries which need to remove
 			personsForRemoval = processTargetPersons(targetPersons, currInumWithEntryHashCodeMap);
 		}
-		System.out.println("Count entries '{}' for removal from target server"+ personsForRemoval.size());
+		log.info("Count entries '{}' for removal from target server"+ personsForRemoval.size());
 
 		// Remove entries from target server
 		HashMap<String, JansInumMap> inumInumMap = getInumInumMap(inumMaps);
@@ -471,7 +467,7 @@ public class CacheRefreshTimer {
 				getLdapEntryManager(), personsForRemoval, inumInumMap);
 		List<String> removedPersonInums = removeTargetEntriesResult.getFirst();
 		List<String> removedGluuInumMaps = removeTargetEntriesResult.getSecond();
-		System.out.println("Removed '{}' persons from target server"+ removedPersonInums.size());
+		log.info("Removed '{}' persons from target server"+ removedPersonInums.size());
 
 		// Prepare list of inum for serialization
 		ArrayList<JansInumMap> currentInumMaps = applyChangesToInumMap(inumInumMap, addedPrimaryKeyAttrValueInumMap,
@@ -488,15 +484,15 @@ public class CacheRefreshTimer {
 
 	private ArrayList<JansInumMap> applyChangesToInumMap(HashMap<String, JansInumMap> inumInumMap,
 			HashMap<CacheCompoundKey, JansInumMap> addedPrimaryKeyAttrValueInumMap, List<String> removedGluuInumMaps) {
-		System.out.println("There are '{}' entries before updating inum list"+ inumInumMap.size());
+		log.info("There are '{}' entries before updating inum list"+ inumInumMap.size());
 		for (String removedGluuInumMap : removedGluuInumMaps) {
 			inumInumMap.remove(removedGluuInumMap);
 		}
-		System.out.println("There are '{}' entries after removal '{}' entries" + inumInumMap.size() +" : " +removedGluuInumMaps.size());
+		log.info("There are '{}' entries after removal '{}' entries" + inumInumMap.size() +" : " +removedGluuInumMaps.size());
 
 		ArrayList<JansInumMap> currentInumMaps = new ArrayList<JansInumMap>(inumInumMap.values());
 		currentInumMaps.addAll(addedPrimaryKeyAttrValueInumMap.values());
-		System.out.println("There are '{}' entries after adding '{}' entries"+ currentInumMaps.size()+" : " +
+		log.info("There are '{}' entries after adding '{}' entries"+ currentInumMaps.size()+" : " +
 				addedPrimaryKeyAttrValueInumMap.size());
 
 		return currentInumMaps;
@@ -577,7 +573,7 @@ public class CacheRefreshTimer {
 				targetPersistenceEntryManager.findEntries(baseDn, DummyEntry.class, filter, SearchScope.SUB, null,
 						null, 0, 0, cacheRefreshConfiguration.getLdapSearchSizeLimit());
 				result.add(changedInum);
-				System.out.println("Updated entry with inum {}"+ changedInum);
+				log.info("Updated entry with inum {}"+ changedInum);
 			} catch (BasePersistenceException ex) {
 				log.error("Failed to update entry with inum '{}' using baseDN {}"+ changedInum, baseDn, ex);
 			}
@@ -702,7 +698,7 @@ public class CacheRefreshTimer {
 		if (personService.contains(targetPersonDn)) {
 			try {
 				targetPerson = personService.findPersonByDn(targetPersonDn);
-				System.out.println("Found person by inum '{}'"+ targetInum);
+				log.info("Found person by inum '{}'"+ targetInum);
 			} catch (EntryPersistenceException ex) {
 				log.error("Failed to find person '{}'"+ targetInum, ex);
 				return false;
@@ -735,10 +731,10 @@ public class CacheRefreshTimer {
 		try {
 			if (updatePerson) {
 				personService.updatePersonWithoutCheck(targetPerson);
-				System.out.println("Updated person '{}'"+ targetInum);
+				log.info("Updated person '{}'"+ targetInum);
 			} else {
 				personService.addPersonWithoutCheck(targetPerson);
-				System.out.println("Added new person '{}'"+ targetInum);
+				log.info("Added new person '{}'"+ targetInum);
 			}
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -817,7 +813,7 @@ public class CacheRefreshTimer {
 				continue;
 			}
 
-			System.out.println("Person with DN: '{}' removed from target server"+ removedPerson.getDn());
+			log.info("Person with DN: '{}' removed from target server"+ removedPerson.getDn());
 		}
 
 		return new Pair<List<String>, List<String>>(result1, result2);
@@ -1035,7 +1031,7 @@ public class CacheRefreshTimer {
 				currentInumMap = addGluuInumMap(inumbaseDn, inumDbPersistenceEntryManager, keyAttributesWithoutValues,
 						keyAttributesValues);
 				result.put(cacheCompoundKey, currentInumMap);
-				System.out.println("Added new inum entry for DN: {}"+ sourcePerson.getDn());
+				log.info("Added new inum entry for DN: {}"+ sourcePerson.getDn());
 			} else {
 				log.trace("Inum entry for DN: '{}' exist"+ sourcePerson.getDn());
 			}
@@ -1082,7 +1078,7 @@ public class CacheRefreshTimer {
 		for (GluuSimplePerson targetPerson : targetPersons) {
 			String personInum = targetPerson.getStringAttribute(JansConstants.inum);
 			if (!currInumWithEntryHashCodeMap.containsKey(personInum)) {
-				System.out.println("Person with such DN: '{}' isn't present on source server"+ targetPerson.getDn());
+				log.info("Person with such DN: '{}' isn't present on source server"+ targetPerson.getDn());
 				result.add(targetPerson);
 			}
 		}
@@ -1189,7 +1185,7 @@ public class CacheRefreshTimer {
 		}
 		PersistenceEntryManager customPersistenceEntryManager = entryManagerFactory
 				.createEntryManager(ldapDecryptedProperties);
-		System.out.println("Created Cache Refresh PersistenceEntryManager: {}"+ customPersistenceEntryManager);
+		log.info("Created Cache Refresh PersistenceEntryManager: {}"+ customPersistenceEntryManager);
 
 		if (!customPersistenceEntryManager.getOperationService().isConnected()) {
 			log.error("Failed to connect to LDAP server using configuration {}"+ ldapConfig);
