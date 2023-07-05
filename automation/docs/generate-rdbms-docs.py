@@ -131,7 +131,6 @@ class RDBMSchemaGenerator:
             '---',
             'tags:',
             '  - administration',
-            '  - reference',
             '  - database',
             '  - ' + rdbm_names[argsp.rdbm_type],
             '  - Indexes',
