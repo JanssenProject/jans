@@ -3,9 +3,11 @@ package io.jans.ca.plugin.adminui.rest.user;
 import io.jans.as.model.config.adminui.AdminPermission;
 import io.jans.as.model.config.adminui.AdminRole;
 import io.jans.as.model.config.adminui.RolePermissionMapping;
+import io.jans.ca.plugin.adminui.model.auth.GenericResponse;
 import io.jans.ca.plugin.adminui.model.exception.ApplicationException;
 import io.jans.ca.plugin.adminui.service.user.UserManagementService;
 import io.jans.ca.plugin.adminui.utils.AppConstants;
+import io.jans.ca.plugin.adminui.utils.CommonUtils;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.swagger.v3.oas.annotations.Operation;
@@ -58,9 +60,9 @@ public class UserManagementResource {
             SCOPE_ROLE_READ}))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = AdminRole.class, description = "List of AdminRole")))),
-            @ApiResponse(responseCode = "400", description = "Bad Request"),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "Bad Request"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "500", description = "InternalServerError")})
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "InternalServerError")))})
     @GET
     @Path(ROLES)
     @Produces(MediaType.APPLICATION_JSON)
@@ -73,10 +75,16 @@ public class UserManagementResource {
             return Response.ok(roles).build();
         } catch (ApplicationException e) {
             log.error(ErrorResponse.GET_ADMIUI_ROLES_ERROR.getDescription(), e);
-            return Response.status(e.getErrorCode()).entity(e.getMessage()).build();
+            return Response
+                    .status(e.getErrorCode())
+                    .entity(CommonUtils.createGenericResponse(false, e.getErrorCode(), e.getMessage()))
+                    .build();
         } catch (Exception e) {
             log.error(ErrorResponse.GET_ADMIUI_ROLES_ERROR.getDescription(), e);
-            return Response.serverError().entity(e.getMessage()).build();
+            return Response
+                    .serverError()
+                    .entity(CommonUtils.createGenericResponse(false, 500, ErrorResponse.GET_ADMIUI_ROLES_ERROR.getDescription()))
+                    .build();
         }
     }
 
@@ -86,9 +94,9 @@ public class UserManagementResource {
     @RequestBody(description = "AdminRole object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AdminRole.class)))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = AdminRole.class, description = "List of AdminRole")))),
-            @ApiResponse(responseCode = "400", description = "Bad Request"),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "Bad Request"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "500", description = "InternalServerError")})
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "InternalServerError")))})
     @POST
     @Path(ROLES)
     @Produces(MediaType.APPLICATION_JSON)
@@ -101,10 +109,16 @@ public class UserManagementResource {
             return Response.ok(savedRoles).build();
         } catch (ApplicationException e) {
             log.error(ErrorResponse.SAVE_ADMIUI_ROLES_ERROR.getDescription(), e);
-            return Response.status(e.getErrorCode()).entity(e.getMessage()).build();
+            return Response
+                    .status(e.getErrorCode())
+                    .entity(CommonUtils.createGenericResponse(false, e.getErrorCode(), e.getMessage()))
+                    .build();
         } catch (Exception e) {
             log.error(ErrorResponse.SAVE_ADMIUI_ROLES_ERROR.getDescription(), e);
-            return Response.serverError().entity(e.getMessage()).build();
+            return Response
+                    .serverError()
+                    .entity(CommonUtils.createGenericResponse(false, 500, ErrorResponse.SAVE_ADMIUI_ROLES_ERROR.getDescription()))
+                    .build();
         }
     }
 
@@ -114,9 +128,9 @@ public class UserManagementResource {
     @RequestBody(description = "AdminRole object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AdminRole.class)))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = AdminRole.class, description = "List of  AdminRole")))),
-            @ApiResponse(responseCode = "400", description = "Bad Request"),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "Bad Request"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "500", description = "InternalServerError")})
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "InternalServerError")))})
     @PUT
     @Path(ROLES)
     @Produces(MediaType.APPLICATION_JSON)
@@ -129,10 +143,16 @@ public class UserManagementResource {
             return Response.ok(savedRoles).build();
         } catch (ApplicationException e) {
             log.error(ErrorResponse.EDIT_ADMIUI_ROLES_ERROR.getDescription(), e);
-            return Response.status(e.getErrorCode()).entity(e.getMessage()).build();
+            return Response
+                    .status(e.getErrorCode())
+                    .entity(CommonUtils.createGenericResponse(false, e.getErrorCode(), e.getMessage()))
+                    .build();
         } catch (Exception e) {
             log.error(ErrorResponse.EDIT_ADMIUI_ROLES_ERROR.getDescription(), e);
-            return Response.serverError().entity(e.getMessage()).build();
+            return Response
+                    .serverError()
+                    .entity(CommonUtils.createGenericResponse(false, 500, ErrorResponse.EDIT_ADMIUI_ROLES_ERROR.getDescription()))
+                    .build();
         }
     }
 
@@ -141,9 +161,9 @@ public class UserManagementResource {
             SCOPE_ROLE_READ}))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = AdminRole.class, description = "List of AdminRole")))),
-            @ApiResponse(responseCode = "400", description = "Bad Request"),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "Bad Request"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "500", description = "InternalServerError")})
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "InternalServerError")))})
     @GET
     @Path(ROLES + ROLE_PATH_VARIABLE)
     @Produces(MediaType.APPLICATION_JSON)
@@ -156,10 +176,16 @@ public class UserManagementResource {
             return Response.ok(roleObj).build();
         } catch (ApplicationException e) {
             log.error(ErrorResponse.GET_ADMIUI_ROLES_ERROR.getDescription(), e);
-            return Response.status(e.getErrorCode()).entity(e.getMessage()).build();
+            return Response
+                    .status(e.getErrorCode())
+                    .entity(CommonUtils.createGenericResponse(false, e.getErrorCode(), e.getMessage()))
+                    .build();
         } catch (Exception e) {
             log.error(ErrorResponse.GET_ADMIUI_ROLES_ERROR.getDescription(), e);
-            return Response.serverError().entity(e.getMessage()).build();
+            return Response
+                    .serverError()
+                    .entity(CommonUtils.createGenericResponse(false, 500, ErrorResponse.GET_ADMIUI_ROLES_ERROR.getDescription()))
+                    .build();
         }
     }
 
@@ -168,9 +194,9 @@ public class UserManagementResource {
             SCOPE_ROLE_DELETE}))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = AdminRole.class, description = "List of AdminRole")))),
-            @ApiResponse(responseCode = "400", description = "Bad Request"),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "Bad Request"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "500", description = "InternalServerError")})
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "InternalServerError")))})
     @DELETE
     @Path(ROLES + ROLE_PATH_VARIABLE)
     @Produces(MediaType.APPLICATION_JSON)
@@ -183,10 +209,16 @@ public class UserManagementResource {
             return Response.ok(roles).build();
         } catch (ApplicationException e) {
             log.error(ErrorResponse.ERROR_IN_MAPPING_ROLE_PERMISSION.getDescription(), e);
-            return Response.status(e.getErrorCode()).entity(e.getMessage()).build();
+            return Response
+                    .status(e.getErrorCode())
+                    .entity(CommonUtils.createGenericResponse(false, e.getErrorCode(), e.getMessage()))
+                    .build();
         } catch (Exception e) {
             log.error(ErrorResponse.ERROR_IN_MAPPING_ROLE_PERMISSION.getDescription(), e);
-            return Response.serverError().entity(e.getMessage()).build();
+            return Response
+                    .serverError()
+                    .entity(CommonUtils.createGenericResponse(false, 500, ErrorResponse.ERROR_IN_MAPPING_ROLE_PERMISSION.getDescription()))
+                    .build();
         }
     }
 
@@ -195,9 +227,9 @@ public class UserManagementResource {
             SCOPE_PERMISSION_READ}))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = AdminPermission.class, description = "List of AdminPermission")))),
-            @ApiResponse(responseCode = "400", description = "Bad Request"),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "Bad Request"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "500", description = "InternalServerError")})
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "InternalServerError")))})
     @GET
     @Path(PERMISSIONS)
     @Produces(MediaType.APPLICATION_JSON)
@@ -210,10 +242,16 @@ public class UserManagementResource {
             return Response.ok(permissions).build();
         } catch (ApplicationException e) {
             log.error(ErrorResponse.GET_ADMIUI_PERMISSIONS_ERROR.getDescription(), e);
-            return Response.status(e.getErrorCode()).entity(e.getMessage()).build();
+            return Response
+                    .status(e.getErrorCode())
+                    .entity(CommonUtils.createGenericResponse(false, e.getErrorCode(), e.getMessage()))
+                    .build();
         } catch (Exception e) {
             log.error(ErrorResponse.GET_ADMIUI_PERMISSIONS_ERROR.getDescription(), e);
-            return Response.serverError().entity(e.getMessage()).build();
+            return Response
+                    .serverError()
+                    .entity(CommonUtils.createGenericResponse(false, 500, ErrorResponse.GET_ADMIUI_PERMISSIONS_ERROR.getDescription()))
+                    .build();
         }
     }
 
@@ -223,9 +261,9 @@ public class UserManagementResource {
     @RequestBody(description = "AdminPermission object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AdminPermission.class)))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = AdminPermission.class, description = "List of AdminPermission")))),
-            @ApiResponse(responseCode = "400", description = "Bad Request"),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "Bad Request"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "500", description = "InternalServerError")})
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "InternalServerError")))})
     @POST
     @Path(PERMISSIONS)
     @Produces(MediaType.APPLICATION_JSON)
@@ -238,10 +276,16 @@ public class UserManagementResource {
             return Response.ok(savedPermissions).build();
         } catch (ApplicationException e) {
             log.error(ErrorResponse.SAVE_ADMIUI_PERMISSIONS_ERROR.getDescription(), e);
-            return Response.status(e.getErrorCode()).entity(e.getMessage()).build();
+            return Response
+                    .status(e.getErrorCode())
+                    .entity(CommonUtils.createGenericResponse(false, e.getErrorCode(), e.getMessage()))
+                    .build();
         } catch (Exception e) {
             log.error(ErrorResponse.SAVE_ADMIUI_PERMISSIONS_ERROR.getDescription(), e);
-            return Response.serverError().entity(e.getMessage()).build();
+            return Response
+                    .serverError()
+                    .entity(CommonUtils.createGenericResponse(false, 500, ErrorResponse.SAVE_ADMIUI_PERMISSIONS_ERROR.getDescription()))
+                    .build();
         }
     }
 
@@ -251,9 +295,9 @@ public class UserManagementResource {
     @RequestBody(description = "AdminPermission object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AdminPermission.class)))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = AdminPermission.class, description = "List of AdminPermission")))),
-            @ApiResponse(responseCode = "400", description = "Bad Request"),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "Bad Request"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "500", description = "InternalServerError")})
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "InternalServerError")))})
     @PUT
     @Path(PERMISSIONS)
     @Produces(MediaType.APPLICATION_JSON)
@@ -266,10 +310,16 @@ public class UserManagementResource {
             return Response.ok(savedPermissions).build();
         } catch (ApplicationException e) {
             log.error(ErrorResponse.EDIT_ADMIUI_ROLES_ERROR.getDescription(), e);
-            return Response.status(e.getErrorCode()).entity(e.getMessage()).build();
+            return Response
+                    .status(e.getErrorCode())
+                    .entity(CommonUtils.createGenericResponse(false, e.getErrorCode(), e.getMessage()))
+                    .build();
         } catch (Exception e) {
-            log.error(ErrorResponse.SAVE_ADMIUI_PERMISSIONS_ERROR.getDescription(), e);
-            return Response.serverError().entity(e.getMessage()).build();
+            log.error(ErrorResponse.EDIT_ADMIUI_ROLES_ERROR.getDescription(), e);
+            return Response
+                    .serverError()
+                    .entity(CommonUtils.createGenericResponse(false, 500, ErrorResponse.EDIT_ADMIUI_ROLES_ERROR.getDescription()))
+                    .build();
         }
     }
 
@@ -278,9 +328,9 @@ public class UserManagementResource {
             SCOPE_PERMISSION_READ}))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = AdminPermission.class, description = "List of AdminPermission")))),
-            @ApiResponse(responseCode = "400", description = "Bad Request"),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "Bad Request"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "500", description = "InternalServerError")})
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "InternalServerError")))})
     @GET
     @Path(PERMISSIONS + PERMISSION_PATH_VARIABLE)
     @Produces(MediaType.APPLICATION_JSON)
@@ -293,10 +343,16 @@ public class UserManagementResource {
             return Response.ok(permissionObj).build();
         } catch (ApplicationException e) {
             log.error(ErrorResponse.GET_ADMIUI_PERMISSIONS_ERROR.getDescription(), e);
-            return Response.status(e.getErrorCode()).entity(e.getMessage()).build();
+            return Response
+                    .status(e.getErrorCode())
+                    .entity(CommonUtils.createGenericResponse(false, e.getErrorCode(), e.getMessage()))
+                    .build();
         } catch (Exception e) {
             log.error(ErrorResponse.GET_ADMIUI_PERMISSIONS_ERROR.getDescription(), e);
-            return Response.serverError().entity(e.getMessage()).build();
+            return Response
+                    .serverError()
+                    .entity(CommonUtils.createGenericResponse(false, 500, ErrorResponse.GET_ADMIUI_PERMISSIONS_ERROR.getDescription()))
+                    .build();
         }
     }
 
@@ -305,9 +361,9 @@ public class UserManagementResource {
             SCOPE_PERMISSION_DELETE}))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = AdminPermission.class, description = "List of AdminPermission")))),
-            @ApiResponse(responseCode = "400", description = "Bad Request"),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "Bad Request"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "500", description = "InternalServerError")})
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "InternalServerError")))})
     @DELETE
     @Path(PERMISSIONS + PERMISSION_PATH_VARIABLE)
     @Produces(MediaType.APPLICATION_JSON)
@@ -320,10 +376,16 @@ public class UserManagementResource {
             return Response.ok(permissions).build();
         } catch (ApplicationException e) {
             log.error(ErrorResponse.DELETE_ADMIUI_PERMISSIONS_ERROR.getDescription(), e);
-            return Response.status(e.getErrorCode()).entity(e.getMessage()).build();
+            return Response
+                    .status(e.getErrorCode())
+                    .entity(CommonUtils.createGenericResponse(false, e.getErrorCode(), e.getMessage()))
+                    .build();
         } catch (Exception e) {
             log.error(ErrorResponse.DELETE_ADMIUI_PERMISSIONS_ERROR.getDescription(), e);
-            return Response.serverError().entity(e.getMessage()).build();
+            return Response
+                    .serverError()
+                    .entity(CommonUtils.createGenericResponse(false, 500, ErrorResponse.DELETE_ADMIUI_PERMISSIONS_ERROR.getDescription()))
+                    .build();
         }
     }
 
@@ -332,9 +394,9 @@ public class UserManagementResource {
             SCOPE_ROLE_PERMISSION_MAPPING_READ}))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = RolePermissionMapping.class, description = "List of RolePermissionMapping")))),
-            @ApiResponse(responseCode = "400", description = "Bad Request"),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "Bad Request"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "500", description = "InternalServerError")})
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "InternalServerError")))})
     @GET
     @Path(ROLE_PERMISSIONS_MAPPING)
     @Produces(MediaType.APPLICATION_JSON)
@@ -347,10 +409,16 @@ public class UserManagementResource {
             return Response.ok(roleScopeMapping).build();
         } catch (ApplicationException e) {
             log.error(ErrorResponse.ERROR_READING_ROLE_PERMISSION_MAP.getDescription(), e);
-            return Response.status(e.getErrorCode()).entity(e.getMessage()).build();
+            return Response
+                    .status(e.getErrorCode())
+                    .entity(CommonUtils.createGenericResponse(false, e.getErrorCode(), e.getMessage()))
+                    .build();
         } catch (Exception e) {
             log.error(ErrorResponse.ERROR_READING_ROLE_PERMISSION_MAP.getDescription(), e);
-            return Response.serverError().entity(e.getMessage()).build();
+            return Response
+                    .serverError()
+                    .entity(CommonUtils.createGenericResponse(false, 500, ErrorResponse.ERROR_READING_ROLE_PERMISSION_MAP.getDescription()))
+                    .build();
         }
     }
 
@@ -360,9 +428,9 @@ public class UserManagementResource {
     @RequestBody(description = "RolePermissionMapping object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = RolePermissionMapping.class)))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = RolePermissionMapping.class, description = "List of RolePermissionMapping")))),
-            @ApiResponse(responseCode = "400", description = "Bad Request"),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "Bad Request"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "500", description = "InternalServerError")})
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "InternalServerError")))})
     @POST
     @Path(ROLE_PERMISSIONS_MAPPING)
     @Produces(MediaType.APPLICATION_JSON)
@@ -375,10 +443,16 @@ public class UserManagementResource {
             return Response.ok(roleScopeMapping).build();
         } catch (ApplicationException e) {
             log.error(ErrorResponse.ERROR_IN_MAPPING_ROLE_PERMISSION.getDescription(), e);
-            return Response.status(e.getErrorCode()).entity(e.getMessage()).build();
+            return Response
+                    .status(e.getErrorCode())
+                    .entity(CommonUtils.createGenericResponse(false, e.getErrorCode(), e.getMessage()))
+                    .build();
         } catch (Exception e) {
             log.error(ErrorResponse.ERROR_IN_MAPPING_ROLE_PERMISSION.getDescription(), e);
-            return Response.serverError().entity(e.getMessage()).build();
+            return Response
+                    .serverError()
+                    .entity(CommonUtils.createGenericResponse(false, 500, ErrorResponse.ERROR_IN_MAPPING_ROLE_PERMISSION.getDescription()))
+                    .build();
         }
     }
 
@@ -388,9 +462,9 @@ public class UserManagementResource {
     @RequestBody(description = "RolePermissionMapping object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = RolePermissionMapping.class)))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = RolePermissionMapping.class, description = "List of RolePermissionMapping")))),
-            @ApiResponse(responseCode = "400", description = "Bad Request"),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "Bad Request"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "500", description = "InternalServerError")})
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "InternalServerError")))})
     @PUT
     @Path(ROLE_PERMISSIONS_MAPPING)
     @Produces(MediaType.APPLICATION_JSON)
@@ -403,10 +477,16 @@ public class UserManagementResource {
             return Response.ok(roleScopeMapping).build();
         } catch (ApplicationException e) {
             log.error(ErrorResponse.ERROR_IN_MAPPING_ROLE_PERMISSION.getDescription(), e);
-            return Response.status(e.getErrorCode()).entity(e.getMessage()).build();
+            return Response
+                    .status(e.getErrorCode())
+                    .entity(CommonUtils.createGenericResponse(false, e.getErrorCode(), e.getMessage()))
+                    .build();
         } catch (Exception e) {
             log.error(ErrorResponse.ERROR_IN_MAPPING_ROLE_PERMISSION.getDescription(), e);
-            return Response.serverError().entity(e.getMessage()).build();
+            return Response
+                    .serverError()
+                    .entity(CommonUtils.createGenericResponse(false, 500, ErrorResponse.ERROR_IN_MAPPING_ROLE_PERMISSION.getDescription()))
+                    .build();
         }
     }
 
@@ -415,9 +495,9 @@ public class UserManagementResource {
             SCOPE_ROLE_PERMISSION_MAPPING_READ}))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = RolePermissionMapping.class, description = "List of RolePermissionMapping")))),
-            @ApiResponse(responseCode = "400", description = "Bad Request"),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "Bad Request"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "500", description = "InternalServerError")})
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "InternalServerError")))})
     @GET
     @Path(ROLE_PERMISSIONS_MAPPING + ROLE_PATH_VARIABLE)
     @Produces(MediaType.APPLICATION_JSON)
@@ -430,10 +510,16 @@ public class UserManagementResource {
             return Response.ok(roleScopeMapping).build();
         } catch (ApplicationException e) {
             log.error(ErrorResponse.ERROR_READING_ROLE_PERMISSION_MAP.getDescription(), e);
-            return Response.status(e.getErrorCode()).entity(e.getMessage()).build();
+            return Response
+                    .status(e.getErrorCode())
+                    .entity(CommonUtils.createGenericResponse(false, e.getErrorCode(), e.getMessage()))
+                    .build();
         } catch (Exception e) {
             log.error(ErrorResponse.ERROR_READING_ROLE_PERMISSION_MAP.getDescription(), e);
-            return Response.serverError().entity(e.getMessage()).build();
+            return Response
+                    .serverError()
+                    .entity(CommonUtils.createGenericResponse(false, 500, ErrorResponse.ERROR_READING_ROLE_PERMISSION_MAP.getDescription()))
+                    .build();
         }
     }
 
@@ -442,9 +528,9 @@ public class UserManagementResource {
             SCOPE_ROLE_PERMISSION_MAPPING_DELETE}))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = RolePermissionMapping.class, description = "List of RolePermissionMapping")))),
-            @ApiResponse(responseCode = "400", description = "Bad Request"),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "Bad Request"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "500", description = "InternalServerError")})
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "InternalServerError")))})
     @DELETE
     @Path(ROLE_PERMISSIONS_MAPPING + ROLE_PATH_VARIABLE)
     @Produces(MediaType.APPLICATION_JSON)
@@ -456,11 +542,18 @@ public class UserManagementResource {
             log.info("Removed permissions to Admin-UI role..");
             return Response.ok(roleScopeMapping).build();
         } catch (ApplicationException e) {
-            log.error(ErrorResponse.ERROR_IN_MAPPING_ROLE_PERMISSION.getDescription(), e);
-            return Response.status(e.getErrorCode()).entity(e.getMessage()).build();
+            log.error(ErrorResponse.ERROR_IN_DELETING_ROLE_PERMISSION.getDescription(), e);
+            return Response
+                    .status(e.getErrorCode())
+                    .entity(CommonUtils.createGenericResponse(false, e.getErrorCode(), e.getMessage()))
+                    .build();
         } catch (Exception e) {
-            log.error(ErrorResponse.ERROR_IN_MAPPING_ROLE_PERMISSION.getDescription(), e);
-            return Response.serverError().entity(e.getMessage()).build();
+            log.error(ErrorResponse.ERROR_IN_DELETING_ROLE_PERMISSION.getDescription(), e);
+            return Response
+                    .serverError()
+                    .entity(CommonUtils.createGenericResponse(false, 500, ErrorResponse.ERROR_IN_DELETING_ROLE_PERMISSION.getDescription()))
+                    .build();
+
         }
     }
 }

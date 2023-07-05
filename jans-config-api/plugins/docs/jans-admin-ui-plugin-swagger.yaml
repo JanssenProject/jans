@@ -38,13 +38,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LicenseApiResponse'
+                $ref: '#/components/schemas/GenericResponse'
         "400":
           description: Bad Request
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LicenseApiResponse'
+                $ref: '#/components/schemas/GenericResponse'
         "401":
           description: Unauthorized
         "500":
@@ -52,7 +52,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LicenseApiResponse'
+                $ref: '#/components/schemas/GenericResponse'
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/license.write
@@ -72,10 +72,18 @@ paths:
                 $ref: '#/components/schemas/LicenseResponse'
         "400":
           description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
         "401":
           description: Unauthorized
         "500":
           description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly
@@ -92,13 +100,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LicenseApiResponse'
+                $ref: '#/components/schemas/GenericResponse'
         "400":
           description: Bad Request
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LicenseApiResponse'
+                $ref: '#/components/schemas/GenericResponse'
         "401":
           description: Unauthorized
         "500":
@@ -106,7 +114,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LicenseApiResponse'
+                $ref: '#/components/schemas/GenericResponse'
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly
@@ -123,13 +131,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LicenseApiResponse'
+                $ref: '#/components/schemas/GenericResponse'
         "400":
           description: Bad Request
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LicenseApiResponse'
+                $ref: '#/components/schemas/GenericResponse'
         "401":
           description: Unauthorized
         "500":
@@ -137,7 +145,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LicenseApiResponse'
+                $ref: '#/components/schemas/GenericResponse'
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly
@@ -160,13 +168,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LicenseApiResponse'
+                $ref: '#/components/schemas/GenericResponse'
         "400":
           description: Bad Request
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LicenseApiResponse'
+                $ref: '#/components/schemas/GenericResponse'
         "401":
           description: Unauthorized
         "500":
@@ -174,7 +182,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LicenseApiResponse'
+                $ref: '#/components/schemas/GenericResponse'
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/license.write
@@ -191,13 +199,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LicenseApiResponse'
+                $ref: '#/components/schemas/GenericResponse'
         "400":
           description: Bad Request
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LicenseApiResponse'
+                $ref: '#/components/schemas/GenericResponse'
         "401":
           description: Unauthorized
         "500":
@@ -205,7 +213,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LicenseApiResponse'
+                $ref: '#/components/schemas/GenericResponse'
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly
@@ -227,10 +235,18 @@ paths:
                   $ref: '#/components/schemas/AdminPermission'
         "400":
           description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
         "401":
           description: Unauthorized
         "500":
           description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.readonly
@@ -257,10 +273,18 @@ paths:
                   $ref: '#/components/schemas/AdminPermission'
         "400":
           description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
         "401":
           description: Unauthorized
         "500":
           description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.write
@@ -287,10 +311,18 @@ paths:
                   $ref: '#/components/schemas/AdminPermission'
         "400":
           description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
         "401":
           description: Unauthorized
         "500":
           description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.write
@@ -312,10 +344,18 @@ paths:
                   $ref: '#/components/schemas/RolePermissionMapping'
         "400":
           description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
         "401":
           description: Unauthorized
         "500":
           description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.readonly
@@ -342,10 +382,18 @@ paths:
                   $ref: '#/components/schemas/RolePermissionMapping'
         "400":
           description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
         "401":
           description: Unauthorized
         "500":
           description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.write
@@ -372,10 +420,18 @@ paths:
                   $ref: '#/components/schemas/RolePermissionMapping'
         "400":
           description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
         "401":
           description: Unauthorized
         "500":
           description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.write
@@ -397,10 +453,18 @@ paths:
                   $ref: '#/components/schemas/AdminRole'
         "400":
           description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
         "401":
           description: Unauthorized
         "500":
           description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/user/role.readonly
@@ -427,10 +491,18 @@ paths:
                   $ref: '#/components/schemas/AdminRole'
         "400":
           description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
         "401":
           description: Unauthorized
         "500":
           description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/user/role.write
@@ -457,10 +529,18 @@ paths:
                   $ref: '#/components/schemas/AdminRole'
         "400":
           description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
         "401":
           description: Unauthorized
         "500":
           description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/user/role.write
@@ -489,10 +569,18 @@ paths:
                   $ref: '#/components/schemas/AdminPermission'
         "400":
           description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
         "401":
           description: Unauthorized
         "500":
           description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.readonly
@@ -520,10 +608,18 @@ paths:
                   $ref: '#/components/schemas/AdminPermission'
         "400":
           description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
         "401":
           description: Unauthorized
         "500":
           description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/user/permission.delete
@@ -552,10 +648,18 @@ paths:
                   $ref: '#/components/schemas/AdminRole'
         "400":
           description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
         "401":
           description: Unauthorized
         "500":
           description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/user/role.readonly
@@ -583,10 +687,18 @@ paths:
                   $ref: '#/components/schemas/AdminRole'
         "400":
           description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
         "401":
           description: Unauthorized
         "500":
           description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/user/role.delete
@@ -615,10 +727,18 @@ paths:
                   $ref: '#/components/schemas/RolePermissionMapping'
         "400":
           description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
         "401":
           description: Unauthorized
         "500":
           description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.readonly
@@ -646,10 +766,18 @@ paths:
                   $ref: '#/components/schemas/RolePermissionMapping'
         "400":
           description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
         "401":
           description: Unauthorized
         "500":
           description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.delete
@@ -660,12 +788,10 @@ components:
       properties:
         licenseKey:
           type: string
-    JsonNode:
-      type: object
-    LicenseApiResponse:
+    GenericResponse:
       type: object
       properties:
-        apiResult:
+        success:
           type: boolean
         responseMessage:
           type: string
@@ -674,6 +800,8 @@ components:
           format: int32
         responseObject:
           $ref: '#/components/schemas/JsonNode'
+    JsonNode:
+      type: object
     LicenseResponse:
       type: object
       properties:
