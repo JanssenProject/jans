@@ -34,6 +34,7 @@ public class LicenseResource {
     static final String ACTIVATE = "/activate";
     static final String TRIAL = "/trial";
     static final String DETAILS = "/details";
+    static final String RETRIEVE = "/retrieve";
     static final String SSA = "/ssa";
     static final String IS_LICENSE_CONFIG_VALID = "/isConfigValid";
 
@@ -67,6 +68,31 @@ public class LicenseResource {
             return Response.status(licenseResponse.getResponseCode()).entity(licenseResponse).build();
         } catch (Exception e) {
             log.error(ErrorResponse.CHECK_LICENSE_ERROR.getDescription(), e);
+            return Response.serverError().entity(licenseResponse).build();
+        }
+    }
+
+    @Operation(summary = "Retrieve license from SCAN", description = "Retrieve license from SCAN", operationId = "retrieve-license", tags = {
+            "Admin UI - License"}, security = @SecurityRequirement(name = "oauth2", scopes = {
+            SCOPE_LICENSE_READ}))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = GenericResponse.class, description = "License response")))})
+    @GET
+    @Path(RETRIEVE)
+    @ProtectedApi(scopes = {SCOPE_LICENSE_READ}, groupScopes = {SCOPE_LICENSE_WRITE}, superScopes = {AppConstants.SCOPE_ADMINUI_READ})
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response retrieveLicense() {
+        GenericResponse licenseResponse = null;
+        try {
+            log.info("Retrieve license from SCAN.");
+            licenseResponse = licenseDetailsService.retrieveLicense();
+            log.info("Retrieve license from SCAN result (true/false): {}", licenseResponse.isSuccess());
+            return Response.status(licenseResponse.getResponseCode()).entity(licenseResponse).build();
+        } catch (Exception e) {
+            log.error(ErrorResponse.RETRIEVE_LICENSE_ERROR.getDescription(), e);
             return Response.serverError().entity(licenseResponse).build();
         }
     }

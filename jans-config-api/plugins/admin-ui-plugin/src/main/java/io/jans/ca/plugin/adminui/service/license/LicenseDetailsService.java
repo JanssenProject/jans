@@ -95,7 +95,7 @@ public class LicenseDetailsService extends BaseService {
             }
             if (Strings.isNullOrEmpty(licenseConfiguration.getLicenseKey())) {
                 log.info(ErrorResponse.LICENSE_NOT_PRESENT.getDescription());
-                return CommonUtils.createGenericResponse(false, 500, ErrorResponse.LICENSE_NOT_PRESENT.getDescription());
+                return CommonUtils.createGenericResponse(false, 404, ErrorResponse.LICENSE_NOT_PRESENT.getDescription());
             }
 
             //check license-key
@@ -134,11 +134,77 @@ public class LicenseDetailsService extends BaseService {
                 return CommonUtils.createGenericResponse(false, jsonNode.get("status").intValue(), jsonNode.get(MESSAGE).textValue());
             }
             log.error("license isActive error response: {}", jsonData);
-            return CommonUtils.createGenericResponse(false, 500, ErrorResponse.LICENSE_NOT_PRESENT.getDescription());
+            return CommonUtils.createGenericResponse(false, 404, ErrorResponse.LICENSE_NOT_PRESENT.getDescription());
 
         } catch (Exception e) {
             log.error(ErrorResponse.CHECK_LICENSE_ERROR.getDescription(), e);
             return CommonUtils.createGenericResponse(false, 500, ErrorResponse.CHECK_LICENSE_ERROR.getDescription());
+        }
+    }
+
+    /**
+     * The function `retrieveLicense()` retrieves a license using the provided configuration and returns a generic
+     * response.
+     *
+     * @return The method `retrieveLicense()` returns a `GenericResponse` object.
+     */
+    public GenericResponse retrieveLicense() {
+        try {
+            AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
+            LicenseConfiguration licenseConfiguration = auiConfiguration.getLicenseConfiguration();
+            if (licenseConfiguration == null || Strings.isNullOrEmpty(licenseConfiguration.getHardwareId())) {
+                log.info("License configuration is not present.");
+                return CommonUtils.createGenericResponse(false, 500, "License configuration is not present.");
+            }
+            if (Strings.isNullOrEmpty(licenseConfiguration.getScanApiHostname())) {
+                log.info("SCAN api hostname is missing in configuration.");
+                return CommonUtils.createGenericResponse(false, 500, "SCAN api hostname is missing in configuration.");
+            }
+
+            io.jans.as.client.TokenResponse tokenResponse = generateToken(licenseConfiguration.getScanAuthServerHostname(), licenseConfiguration.getScanApiClientId(), licenseConfiguration.getScanApiClientSecret());
+            if (tokenResponse == null) {
+                log.info(ErrorResponse.TOKEN_GENERATION_ERROR.getDescription());
+                return CommonUtils.createGenericResponse(false, 500, ErrorResponse.TOKEN_GENERATION_ERROR.getDescription());
+            }
+
+            String retriveLicenseUrl = (new StringBuffer()).append(StringUtils.removeEnd(licenseConfiguration.getScanApiHostname(), "/"))
+                    .append("/scan/license/retrieve?org_id="+ licenseConfiguration.getHardwareId())
+                    .toString();
+
+
+            Invocation.Builder request = ClientFactory.instance().getClientBuilder(retriveLicenseUrl);
+            request.header(AUTHORIZATION, BEARER + tokenResponse.getAccessToken());
+            request.header(CONTENT_TYPE, APPLICATION_JSON);
+            Response response = request.get();
+
+            log.info("license request status code: {}", response.getStatus());
+
+            ObjectMapper mapper = new ObjectMapper();
+            if (response.getStatus() == 200) {
+                JsonObject entity = response.readEntity(JsonObject.class);
+                JsonNode jsonNode = mapper.createObjectNode();
+                ((ObjectNode) jsonNode).put("license-key", entity.getString("license_key"));
+
+                if (Strings.isNullOrEmpty(entity.getString("license_key"))) {
+                    return CommonUtils.createGenericResponse(true, 200, "Valid license present.", jsonNode);
+                } else {
+                    return CommonUtils.createGenericResponse(false, 200, jsonNode.get(MESSAGE).textValue());
+                }
+            }
+            //getting error
+            String jsonData = response.readEntity(String.class);
+            JsonNode jsonNode = mapper.readValue(jsonData, com.fasterxml.jackson.databind.JsonNode.class);
+
+            if (!Strings.isNullOrEmpty(jsonNode.get(MESSAGE).textValue())) {
+                log.error("license retrieve error response: {}", jsonData);
+                return CommonUtils.createGenericResponse(false, jsonNode.get("status").intValue(), jsonNode.get(MESSAGE).textValue());
+            }
+            log.error("license isActive error response: {}", jsonData);
+            return CommonUtils.createGenericResponse(false, 500, ErrorResponse.RETRIEVE_LICENSE_ERROR.getDescription());
+
+        } catch (Exception e) {
+            log.error(ErrorResponse.CHECK_LICENSE_ERROR.getDescription(), e);
+            return CommonUtils.createGenericResponse(false, 500, ErrorResponse.RETRIEVE_LICENSE_ERROR.getDescription());
         }
     }
 
@@ -243,6 +309,8 @@ public class LicenseDetailsService extends BaseService {
             Response response = request.post(Entity.entity(body, MediaType.APPLICATION_JSON));
 
             log.info("Generate trial license request status code: {}", response.getStatus());
+
+            ObjectMapper objectMapper = new ObjectMapper();
             if (response.getStatus() == 200) {
                 JsonObject entity = response.readEntity(JsonObject.class);
                 if (!Strings.isNullOrEmpty(entity.getString("license"))) {
@@ -255,7 +323,6 @@ public class LicenseDetailsService extends BaseService {
                     auiConfiguration.setLicenseConfiguration(licenseConfiguration);
                     auiConfigurationService.setAuiConfiguration(auiConfiguration);
 
-                    ObjectMapper objectMapper = new ObjectMapper();
                     JsonNode jsonNode = objectMapper.createObjectNode();
                     ((ObjectNode) jsonNode).put("license-key", entity.getString("license"));
 
@@ -264,8 +331,7 @@ public class LicenseDetailsService extends BaseService {
             }
             //getting error
             String jsonData = response.readEntity(String.class);
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode jsonNode = mapper.readValue(jsonData, JsonNode.class);
+            JsonNode jsonNode = objectMapper.readValue(jsonData, com.fasterxml.jackson.databind.JsonNode.class);
             if (!Strings.isNullOrEmpty(jsonNode.get(MESSAGE).textValue())) {
                 log.error("Generate trial license error response: {}", jsonData);
                 return CommonUtils.createGenericResponse(false, jsonNode.get("status").intValue(), jsonNode.get(MESSAGE).textValue());

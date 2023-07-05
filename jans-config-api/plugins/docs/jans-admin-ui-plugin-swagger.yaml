@@ -149,6 +149,37 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly
+  /admin-ui/license/retrieve:
+    get:
+      tags:
+      - Admin UI - License
+      summary: Retrieve license from SCAN
+      description: Retrieve license from SCAN
+      operationId: retrieve-license
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+      security:
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly
   /admin-ui/license/ssa:
     post:
       tags:
