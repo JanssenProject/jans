@@ -6,6 +6,7 @@
 
 package io.jans.cacherefresh.model;
 
+import io.jans.model.JansCustomAttribute;
 import io.jans.orm.annotation.CustomObjectClass;
 import io.jans.orm.model.base.Entry;
 import io.jans.util.StringHelper;

@@ -38,29 +38,72 @@ public class AppConfiguration extends CacheRefreshConfiguration {
     // In seconds; will be converted to millis
 
     private List<String> supportedUserStatus= Arrays.asList("active","inactive");
-
     private String loggingLevel;
     private String loggingLayout;
     private String externalLoggerConfiguration;
-
     private int metricReporterInterval;
     private int metricReporterKeepDataDays;
     private Boolean metricReporterEnabled;
     private Boolean disableJdkLogger = true;
-
     // in seconds
     private int cleanServiceInterval;
+    private boolean linkEnabled;
+	private String serverIpAddress;
+    private String pollingInterval;
 
-    private boolean vdsCacheRefreshEnabled;
-	private String cacheRefreshServerIpAddress;
-
-    private String vdsCacheRefreshPollingInterval;
-
-    private Date vdsCacheRefreshLastUpdate;
-	private String vdsCacheRefreshLastUpdateCount;
-	private String vdsCacheRefreshProblemCount;
+    private Date lastUpdate;
+    private String lastUpdateCount;
+    private String problemCount;
 
     private Boolean useLocalCache = false;
+
+    public boolean isLinkEnabled() {
+        return linkEnabled;
+    }
+
+    public void setLinkEnabled(boolean linkEnabled) {
+        this.linkEnabled = linkEnabled;
+    }
+
+    public String getServerIpAddress() {
+        return serverIpAddress;
+    }
+
+    public void setServerIpAddress(String serverIpAddress) {
+        this.serverIpAddress = serverIpAddress;
+    }
+
+    public String getPollingInterval() {
+        return pollingInterval;
+    }
+
+    public void setPollingInterval(String pollingInterval) {
+        this.pollingInterval = pollingInterval;
+    }
+
+    public Date getLastUpdate() {
+        return lastUpdate;
+    }
+
+    public void setLastUpdate(Date lastUpdate) {
+        this.lastUpdate = lastUpdate;
+    }
+
+    public String getLastUpdateCount() {
+        return lastUpdateCount;
+    }
+
+    public void setLastUpdateCount(String lastUpdateCount) {
+        this.lastUpdateCount = lastUpdateCount;
+    }
+
+    public String getProblemCount() {
+        return problemCount;
+    }
+
+    public void setProblemCount(String problemCount) {
+        this.problemCount = problemCount;
+    }
 
     public String getBaseDN() {
         return baseDN;
@@ -121,54 +164,6 @@ public class AppConfiguration extends CacheRefreshConfiguration {
 
     public Boolean getUseLocalCache() {
 		return useLocalCache;
-	}
-
-    public boolean isVdsCacheRefreshEnabled() {
-		return vdsCacheRefreshEnabled;
-	}
-
-	public void setVdsCacheRefreshEnabled(boolean vdsCacheRefreshEnabled) {
-		this.vdsCacheRefreshEnabled = vdsCacheRefreshEnabled;
-	}
-
-	public String getCacheRefreshServerIpAddress() {
-		return cacheRefreshServerIpAddress;
-	}
-
-	public void setCacheRefreshServerIpAddress(String cacheRefreshServerIpAddress) {
-		this.cacheRefreshServerIpAddress = cacheRefreshServerIpAddress;
-	}
-
-	public String getVdsCacheRefreshPollingInterval() {
-		return vdsCacheRefreshPollingInterval;
-	}
-
-    public void setVdsCacheRefreshPollingInterval(String vdsCacheRefreshPollingInterval) {
-        this.vdsCacheRefreshPollingInterval = vdsCacheRefreshPollingInterval;
-    }
-
-    public Date getVdsCacheRefreshLastUpdate() {
-        return vdsCacheRefreshLastUpdate;
-    }
-
-    public void setVdsCacheRefreshLastUpdate(Date vdsCacheRefreshLastUpdate) {
-		this.vdsCacheRefreshLastUpdate = vdsCacheRefreshLastUpdate;
-	}
-
-	public String getVdsCacheRefreshLastUpdateCount() {
-		return vdsCacheRefreshLastUpdateCount;
-	}
-
-	public void setVdsCacheRefreshLastUpdateCount(String vdsCacheRefreshLastUpdateCount) {
-		this.vdsCacheRefreshLastUpdateCount = vdsCacheRefreshLastUpdateCount;
-	}
-
-	public String getVdsCacheRefreshProblemCount() {
-		return vdsCacheRefreshProblemCount;
-	}
-
-	public void setVdsCacheRefreshProblemCount(String vdsCacheRefreshProblemCount) {
-		this.vdsCacheRefreshProblemCount = vdsCacheRefreshProblemCount;
 	}
 
 }

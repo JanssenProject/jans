@@ -4,7 +4,7 @@
  * Copyright (c) 2014, Gluu
  */
 
-package io.jans.cacherefresh.model;
+package io.jans.model;
 
 import java.beans.Transient;
 import java.io.Serializable;

@@ -17,7 +17,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 
 import io.jans.cacherefresh.constants.JansConstants;
-import io.jans.cacherefresh.model.JansCustomAttribute;
+import io.jans.model.JansCustomAttribute;
 import io.jans.cacherefresh.model.GluuCustomPerson;
 import io.jans.cacherefresh.model.JansInumMap;
 import io.jans.cacherefresh.model.GluuSimplePerson;

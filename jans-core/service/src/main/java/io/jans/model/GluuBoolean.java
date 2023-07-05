@@ -1,14 +1,14 @@
-package io.jans.cacherefresh.model;
+package io.jans.model;
 /*
  * oxCore is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
  *
  * Copyright (c) 2014, Gluu
  */
 
+import io.jans.orm.annotation.AttributeEnum;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import io.jans.orm.annotation.AttributeEnum;
 
 /**
  * Boolean value

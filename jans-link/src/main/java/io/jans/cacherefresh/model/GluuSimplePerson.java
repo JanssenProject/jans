@@ -6,6 +6,7 @@
 
 package io.jans.cacherefresh.model;
 
+import io.jans.model.JansCustomAttribute;
 import io.jans.orm.annotation.AttributesList;
 import io.jans.orm.annotation.DataEntry;
 

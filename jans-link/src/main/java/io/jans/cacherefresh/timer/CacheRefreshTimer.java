@@ -39,6 +39,7 @@ import io.jans.cacherefresh.service.config.ApplicationFactory;
 import io.jans.cacherefresh.service.config.ConfigurationFactory;
 import io.jans.cacherefresh.util.PropertyUtil;
 import io.jans.model.GluuStatus;
+import io.jans.model.JansCustomAttribute;
 import io.jans.model.SchemaEntry;
 import io.jans.model.custom.script.model.bind.BindCredentials;
 import io.jans.model.ldap.GluuLdapConfiguration;
@@ -194,9 +195,9 @@ public class CacheRefreshTimer {
 		try {
 			//GluuConfiguration currentConfiguration = getConfigurationService().getConfiguration();
 			//GluuConfiguration currentConfiguration = new GluuConfiguration();
-			currentConfiguration.setVdsCacheRefreshEnabled(true);
+			currentConfiguration.setLinkEnabled(true);
 			//currentConfiguration.setVdsCacheRefreshPollingInterval();
-			currentConfiguration.setCacheRefreshServerIpAddress("255.255.255.255");
+			currentConfiguration.setServerIpAddress("255.255.255.255");
 			if (!isStartCacheRefresh(currentConfiguration)) {
 				System.out.println("Starting conditions aren't reached");
 				return;
@@ -213,16 +214,16 @@ public class CacheRefreshTimer {
 	}
 
 	private boolean isStartCacheRefresh(AppConfiguration currentConfiguration) {
-		if (!currentConfiguration.isVdsCacheRefreshEnabled()) {
+		if (!currentConfiguration.isLinkEnabled()) {
 			return false;
 		}
 
-		long poolingInterval = StringHelper.toInteger(currentConfiguration.getVdsCacheRefreshPollingInterval()) * 60 * 1000;
+		long poolingInterval = StringHelper.toInteger(currentConfiguration.getPollingInterval()) * 60 * 1000;
 		if (poolingInterval < 0) {
 			return false;
 		}
 
-		String cacheRefreshServerIpAddress = currentConfiguration.getCacheRefreshServerIpAddress();
+		String cacheRefreshServerIpAddress = currentConfiguration.getServerIpAddress();
 		// if (StringHelper.isEmpty(cacheRefreshServerIpAddress)) {
 		// log.debug("There is no master Cache Refresh server");
 		// return false;
@@ -441,7 +442,7 @@ public class CacheRefreshTimer {
 				currentConfiguration.getSnapshotMaxCount());
 
 		// Save changedInums as problem list to disk
-		currentConfiguration.setVdsCacheRefreshProblemCount(String.valueOf(changedInums.size()));
+		currentConfiguration.setProblemCount(String.valueOf(changedInums.size()));
 		cacheRefreshSnapshotFileService.writeProblemList(currentConfiguration, changedInums);
 
 		// Prepare list of persons for removal
@@ -480,7 +481,7 @@ public class CacheRefreshTimer {
 		objectSerializationService.saveObject(inumCachePath, currentInumMaps);
 
 		currentConfiguration
-				.setVdsCacheRefreshLastUpdateCount(String.valueOf(updatedInums.size() + removedPersonInums.size()));
+				.setLastUpdateCount(String.valueOf(updatedInums.size() + removedPersonInums.size()));
 
 		return true;
 	}
@@ -1231,9 +1232,9 @@ public class CacheRefreshTimer {
 
 	private void updateStatus(AppConfiguration currentConfiguration, long lastRun) {
 		Date currentDateTime = new Date();
-		currentConfiguration.setVdsCacheRefreshLastUpdate(currentDateTime);
-		currentConfiguration.setVdsCacheRefreshLastUpdateCount(currentConfiguration.getVdsCacheRefreshLastUpdateCount());
-		currentConfiguration.setVdsCacheRefreshProblemCount(currentConfiguration.getVdsCacheRefreshProblemCount());
+		currentConfiguration.setLastUpdate(currentDateTime);
+		currentConfiguration.setLastUpdateCount(currentConfiguration.getLastUpdateCount());
+		currentConfiguration.setProblemCount(currentConfiguration.getProblemCount());
 		CacheRefrshConfigurationService.updateConfiguration(currentConfiguration);
 	}
 

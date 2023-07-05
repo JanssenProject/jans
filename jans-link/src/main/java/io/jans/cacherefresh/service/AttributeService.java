@@ -8,7 +8,7 @@ package io.jans.cacherefresh.service;
 
 import com.unboundid.ldap.sdk.LDAPException;
 import io.jans.cacherefresh.constants.JansConstants;
-import io.jans.cacherefresh.model.JansCustomAttribute;
+import io.jans.model.JansCustomAttribute;
 import io.jans.cacherefresh.model.config.AppConfiguration;
 import io.jans.model.GluuAttribute;
 import io.jans.model.GluuAttributeUsageType;
