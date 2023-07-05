@@ -217,11 +217,11 @@ public class UserManagementService {
 
     public List<AdminPermission> deletePermission(String permission) throws ApplicationException {
         try {
-            String decodePermission = CommonUtils.decode(permission);
+            String decodedPermission = CommonUtils.decode(permission);
             AdminConf adminConf = entryManager.find(AdminConf.class, AppConstants.ADMIN_UI_CONFIG_DN);
 
             boolean anyPermissionMapped = adminConf.getDynamic().getRolePermissionMapping()
-                    .stream().anyMatch(ele -> ele.getPermissions().contains(decodePermission));
+                    .stream().anyMatch(ele -> ele.getPermissions().contains(decodedPermission));
 
             if (anyPermissionMapped) {
                 log.error(ErrorResponse.UNABLE_TO_DELETE_PERMISSION_MAPPED_TO_ROLE.getDescription());
@@ -229,7 +229,7 @@ public class UserManagementService {
             }
 
             List<AdminPermission> permissions = adminConf.getDynamic().getPermissions();
-            permissions.removeIf(ele -> ele.getPermission().equals(decodePermission));
+            permissions.removeIf(ele -> ele.getPermission().equals(decodedPermission));
 
             adminConf.getDynamic().setPermissions(permissions);
             entryManager.merge(adminConf);
