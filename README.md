@@ -1,8 +1,18 @@
-<h1 align="center"><img src="https://github.com/JanssenProject/jans/blob/main/docs/assets/logo/janssen_project_transparent_630px_182px.png" alt="Janssen Project - cloud native identity and access management platform"></h1>
+<h1 align="center"><img src="https://github.com/JanssenProject/jans/blob/main/docs/assets/logo/janssen_project_transparent_630px_182px.png" alt="Janssen Project - Open Source Digital Identity Infrastructure Software"></h1>
 
 ## Welcome to the Janssen Project
 
-Janssen enables organizations to build a scalable centralized authentication and authorization service using free open source software. The components of the project include client and server implementations of the OAuth, OpenID Connect, SCIM, and FIDO standards.
+Linux Foundation Janssen Project is a collaboration hub for digital identity
+infrastructure software. It is also the home of Agama, a domain specific
+language and archive format for interoperable identity orchestration.
+
+The Janssen server distribution is used by domains who need to self-host
+a modern digital authentication service. It enables domains to pick the services
+they want to run ala carte, and it plays well with existing and legacy IAM
+infrastructure.  In addition to the Janssen server software, the project
+includes Agama, relying party software, cloud native assets and some useful
+demos. We've proud to say that we've been recognized as a
+[Digital Public Good](https://app.digitalpublicgoods.net/a/10470).
 
 [![The Linux Foundation](https://img.shields.io/badge/Member-The%20Linux%20Foundation-blue?style=flat-square)](https://www.linuxfoundation.org/press/press-release/the-janssen-project-takes-on-worlds-most-demanding-digital-trust-challenges-at-linux-foundation)
 [![DPGA](https://img.shields.io/badge/DPGA-digital%20public%20good-green?style=flat-square)](https://app.digitalpublicgoods.net/a/10470)
@@ -31,7 +41,7 @@ Janssen enables organizations to build a scalable centralized authentication and
 
 **Table of Contents**
 
-- [Janssen Modules](#janssen-modules)
+- [Janssen Components](#janssen-components)
 - [Getting Started](#getting-started)
   - [Installation](#installation)
 - [Users and Community](#users-and-community)
@@ -48,28 +58,34 @@ Janssen enables organizations to build a scalable centralized authentication and
   - [History](#history)
   - [why the name Janssen](#why-the-name-janssen)
 
+## Janssen Components
 
+A partial list of software in this project:
 
-## Janssen Modules
+1. **[jans-auth-server](jans-auth-server)**: A fairly comprehensive Java OAuth
+Authorization Server and an OIDF certified OpenID Connect Provider. It's the
+upstream open source used in [Gluu Flex](https://gluu.org).
 
-Janssen is not a big monolith--it's a lot of services working together. Whether you deploy Janssen to a Kubernetes cluster, or you are a developer running everything on one server, it's important to understand the different parts.
+1. **[jans-fido2](jans-fido2)**: A FIDO Server that enables people to
+authenticate with USB, NFC, BT or platform FIDO devices.
 
-1. **[jans-auth-server](jans-auth-server)**: This component is the OAuth Authorization Server, the OpenID Connect Provider, and the UMA Authorization Server--this is the main Internet facing component of Janssen. It's the service that returns tokens, JWT, and identity assertions. This service must be Internet facing.
+1. **[jans-scim](jans-scim)**: [SCIM](http://www.simplecloud.info/) JSON/REST
+[API](https://datatracker.ietf.org/doc/html/rfc7644#section-3.2) for identity
+provisioning automation for users and fido devices persisted in the Janssen
+database.
 
-1. **[jans-fido2](jans-fido2)**:  This component provides the server side endpoints to enroll and validate devices that use FIDO. It provides both FIDO U2F (register, authenticate) and FIDO 2 (attestation, assertion) endpoints. This service must be internet facing.
+1. **[jans-config-api](jans-config-api)**: Java Config API Server: service
+provides single control plane for all Janssen services.
 
-1. **[jans-config-api](jans-config-api)**: The API to configure the auth-server and other components is consolidated in this component. This service should not be Internet-facing.
+1. **[jans-cli-tui](jans-cli-tui)**: Text-only tools for interactive and
+single-line configuration for those who don't like long curl commands.
 
-1. **[jans-scim](jans-scim)**: [SCIM](http://www.simplecloud.info/) is JSON/REST API to manage user data. Use it to add, edit and update user information. This service should not be Internet facing.
+1. **[Agama](agama)**: Language reference and Java implementation. Agama
+offers an interoperable way to design authentication flows, coded in a DSL
+purpose built for writing identity journeys.
 
-1. **[jans-cli](jans-cli-tui)**: This module is a command line interface for configuring the Janssen software, providing a both interactive and simple single line
-   options for configuration.
-
-1. **[jans-core](jans-core)**: This library has code that is shared across several Janssen projects. You will most likely need this project when you build other Janssen components.
-
-1. **[jans-orm](jans-orm)**: This is the library for persistence and caching implementations in Janssen. Currently, LDAP and Couchbase are supported. RDBMS is coming soon.
-
-1. **[Agama](agama)**: Agama module offers an alternative way to build authentication flows in Janssen Server. With Agama, flows are coded in a DSL (domain specific language) designed for the sole purpose of writing web flows.
+1. **[Jans Tarp](demos/jans-tarp)**: A fun test browser plugin for invoking
+OpenID Connect authentication flows (i.e. a "test RP").
 
 ## Getting Started
 
@@ -99,7 +115,7 @@ There are many ways you can contribute. Of course, you can contribute code. But 
   <img src="https://github.com/JanssenProject/jans/blob/main/docs/assets/DPGA_color_logo.png" alt="DPGA" width="113"/>
 </a>
 
-The Janssen Project community takes immense pride in the fact that Janssen Project is [recognized as a digital public good (DPG)](https://app.digitalpublicgoods.net/a/10470) by [Digital Public Good Alliance](https://digitalpublicgoods.net/). This is a validation of our social and global impact on millions of people. Today, countries and communities globally use Janssen Project to create affordable and accessible digital identity infrastructure. Please read the [announcement](https://www.linkedin.com/pulse/linux-foundation-janssen-project-recognized-digital-public/) to know more. 
+The Janssen Project community takes immense pride in the fact that Janssen Project is [recognized as a digital public good (DPG)](https://app.digitalpublicgoods.net/a/10470) by [Digital Public Good Alliance](https://digitalpublicgoods.net/). This is a validation of our social and global impact on millions of people. Today, countries and communities globally use Janssen Project to create affordable and accessible digital identity infrastructure. Please read the [announcement](https://www.linkedin.com/pulse/linux-foundation-janssen-project-recognized-digital-public/) to know more.
 
 Building a large community is our number one goal. Please let us know what we can do to make you feel more welcome, no matter what you want to contribute.
 
