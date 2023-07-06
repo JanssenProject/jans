@@ -89,10 +89,11 @@
   "metricReporterEnabled": null,
   "disableJdkLogger": true,
   "cleanServiceInterval": 0,
-  "vdsCacheRefreshEnabled": true,
-  "cacheRefreshServerIpAddress": "255.255.255.255",
-  "vdsCacheRefreshPollingInterval": null,
-  "vdsCacheRefreshLastUpdateCount": "0",
-  "vdsCacheRefreshProblemCount": "3",
+  "linkEnabled": true,
+  "serverIpAddress": "255.255.255.255",
+  "pollingInterval": null,
+  "lastUpdate": 1688581648776,
+  "lastUpdateCount": "0",
+  "problemCount": "3",
   "useLocalCache": false
 }
