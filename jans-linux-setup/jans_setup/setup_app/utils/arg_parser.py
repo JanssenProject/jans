@@ -61,7 +61,9 @@ parser.add_argument('--cli-test-client', help="Use config api test client for CL
 parser.add_argument('--import-ldif', help="Render ldif templates from directory and import them in Database")
 
 parser.add_argument('-enable-script', action='append', help="inum of script to enable", required=False)
-parser.add_argument('-disable-script', action='append', help="inum of script to enable", required=False)
+parser.add_argument('-disable-script', action='append', help="inum of script to disable", required=False)
+parser.add_argument('-disable-selinux', action='store_true', help="Disable SELinux")
+
 
 if PROFILE != OPENBANKING_PROFILE:
 

@@ -331,6 +331,7 @@ class Upgrade:
             basic_id = doc_id_from_dn(basic_id)
             duo_id = doc_id_from_dn(duo_id)
             cache_refresh_id = doc_id_from_dn(cache_refresh_id)
+
         elif self.backend.type == "couchbase":
             kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
             scim_id = id_from_dn(scim_id)

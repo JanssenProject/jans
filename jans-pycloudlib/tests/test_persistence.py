@@ -930,3 +930,19 @@ def test_persistence_mapper_groups_rdn(monkeypatch):
         "sql": ["", "cache", "sessions"],
     }
     assert PersistenceMapper().groups_with_rdn() == groups
+
+
+@pytest.mark.parametrize("given, expected", [
+    ("8.0.30", (8, 0, 30)),
+    ("5.7.22-standard", (5, 7, 22)),
+    ("8.0.25-221000 MySQL Community Server", (8, 0, 25)),
+])
+def test_get_server_version(gmanager, given, expected):
+    from jans.pycloudlib.persistence.sql import SqlClient
+
+    def patched_server_version(cls):
+        return given
+
+    SqlClient.server_version = property(patched_server_version)
+    client = SqlClient(gmanager)
+    assert client.get_server_version() == expected

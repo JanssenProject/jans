@@ -21,11 +21,24 @@ You can disable SELinux temporarily by executing `setenforce 0`. To disable perm
 - Install EPEL and mod-auth-openidc as dependencies
 
 ```
-yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
-yum -y module enable mod_auth_openidc 
+sudo yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+sudo yum -y module enable mod_auth_openidc 
 ```
 
-- Disable SELinux temporarily by executing `setenforce 0`. If required, to disable permanently edit the `/etc/selinux/config` file.
+
+- Download the GPG key zip file , unzip and import GPG key
+
+```shell
+wget https://github.com/JanssenProject/jans/files/11814522/automation-jans-public-gpg.zip
+```
+
+```shell
+unzip automation-jans-public-gpg.zip
+```
+
+```shell
+sudo rpm -import automation-jans-public-gpg.asc
+```
 
 - Download the release package from the Github Janssen Project
   [Releases](https://github.com/JanssenProject/jans/releases)
@@ -57,7 +70,7 @@ wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-v
 - Install the package
 
 ```
-yum install ~/jans-replace-janssen-version-el8.x86_64.rpm
+sudo yum install ~/jans-replace-janssen-version-el8.x86_64.rpm
 ```
 
 ## Run the setup script
@@ -87,7 +100,7 @@ After the successful completion of setup process, [verify the system health](../
 Begin configuration by accessing the TUI with the following command:
 
 ```
-/opt/jans/jans-cli/jans_cli_tui.py
+sudo /opt/jans/jans-cli/jans_cli_tui.py
 ```
 
 Full TUI documentation can be found [here](../../config-guide/jans-tui/README.md)
@@ -102,7 +115,7 @@ Removing Janssen is a two step process:
 * Use the command below to uninstall the Janssen server
 
 ```
-python3 /opt/jans/jans-setup/install.py -uninstall
+sudo python3 /opt/jans/jans-setup/install.py -uninstall
 ```
 
 Console output like below will confirm the successful uninstallation of the Janssen Server
@@ -127,7 +140,6 @@ Stopping jans-auth
 Removing /etc/default/jans-client-api
 Stopping jans-client-api
 Stopping OpenDj Server
-sh: 1: /opt/opendj/bin/stop-ds: not found
 Executing rm -r -f /etc/certs
 Executing rm -r -f /etc/jans
 Executing rm -r -f /opt/jans

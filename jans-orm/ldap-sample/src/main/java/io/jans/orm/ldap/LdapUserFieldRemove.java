@@ -1,14 +1,13 @@
 package io.jans.orm.ldap;
 
-import java.util.List;
-
+import io.jans.orm.ldap.impl.LdapEntryManager;
+import io.jans.orm.ldap.model.SimpleUser;
+import io.jans.orm.search.filter.Filter;
 import org.apache.log4j.Logger;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.status.StatusLogger;
 
-import io.jans.orm.ldap.impl.LdapEntryManager;
-import io.jans.orm.ldap.model.SimpleUser;
-import io.jans.orm.search.filter.Filter;
+import java.util.List;
 
 /**
  * @author Yuriy Movchan Date: 2021/09/08
@@ -66,7 +65,7 @@ public final class LdapUserFieldRemove {
             return;
         }
         
-        String enrollmentCode = userWithoutEnrollment.getAttribute("jansEnrollmentCode");
+        Object enrollmentCode = userWithoutEnrollment.getAttribute("jansEnrollmentCode");
         LOG.debug("jansEnrollmentCode: " + enrollmentCode);
     }
 
