@@ -147,6 +147,9 @@ class LDAPBackend:
             attrs[k] = [(mod, v)]
         return self.client.modify(key, attrs)
 
+    def delete_entry(self, key, **kwargs):
+        return self.client.delete(key)
+
 
 class SQLBackend:
     def __init__(self, manager):
@@ -166,6 +169,10 @@ class SQLBackend:
         attrs = attrs or {}
         table_name = kwargs.get("table_name")
         return self.client.update(table_name, key, attrs), ""
+
+    def delete_entry(self, key, **kwargs):
+        table_name = kwargs.get("table_name")
+        return self.client.delete(table_name, key)
 
 
 class CouchbaseBackend:
@@ -238,6 +245,10 @@ class CouchbaseBackend:
         # drop the index
         self.client.exec_query(f'DROP INDEX `{bucket}`.`def_jans_fix_oc`')
 
+    def delete_entry(self, key, **kwargs):
+        bucket = kwargs.get("bucket")
+        return self.client.delete(bucket, key)
+
 
 class SpannerBackend:
     def __init__(self, manager):
@@ -257,6 +268,10 @@ class SpannerBackend:
         attrs = attrs or {}
         table_name = kwargs.get("table_name")
         return self.client.update(table_name, key, attrs), ""
+
+    def delete_entry(self, key, **kwargs):
+        table_name = kwargs.get("table_name")
+        return self.client.delete(table_name, key)
 
 
 BACKEND_CLASSES = {
@@ -307,17 +322,20 @@ class Upgrade:
         kwargs = {}
         scim_id = JANS_SCIM_SCRIPT_DN
         basic_id = JANS_BASIC_SCRIPT_DN
+        duo_id = "inum=5018-F9CF,ou=scripts,o=jans"
         cache_refresh_id = "inum=13D3-E7AD,ou=scripts,o=jans"
 
         if self.backend.type in ("sql", "spanner"):
             kwargs = {"table_name": "jansCustomScr"}
             scim_id = doc_id_from_dn(scim_id)
             basic_id = doc_id_from_dn(basic_id)
+            duo_id = doc_id_from_dn(duo_id)
             cache_refresh_id = doc_id_from_dn(cache_refresh_id)
         elif self.backend.type == "couchbase":
             kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
             scim_id = id_from_dn(scim_id)
             basic_id = id_from_dn(basic_id)
+            duo_id = id_from_dn(duo_id)
             cache_refresh_id = id_from_dn(cache_refresh_id)
 
         # toggle scim script
@@ -334,6 +352,11 @@ class Upgrade:
         if basic_entry and not as_boolean(basic_entry.attrs["jansEnabled"]):
             basic_entry.attrs["jansEnabled"] = True
             self.backend.modify_entry(basic_entry.id, basic_entry.attrs, **kwargs)
+
+        # delete DUO entry
+        duo_entry = self.backend.get_entry(duo_id, **kwargs)
+        if duo_entry and not as_boolean(os.environ.get("CN_DUO_ENABLED")):
+            self.backend.delete_entry(duo_entry.id, **kwargs)
 
         # toggle cache-refresh script
         cache_refresh_entry = self.backend.get_entry(cache_refresh_id, **kwargs)
