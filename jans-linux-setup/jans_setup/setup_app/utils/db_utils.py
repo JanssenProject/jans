@@ -959,12 +959,14 @@ class DBUtils:
                             else:
                                 data_list = self.spanner_client.get_dict_data('SELECT {} FROM {} WHERE doc_id="{}"'.format(entry['add'][0], table, doc_id))
                                 cur_data = data_list[0]
-                                if cur_data:
+                                if cur_data and change_attr in cur_data:
+                                    if not cur_data[change_attr]:
+                                        cur_data[change_attr] = []
                                     for cur_val in entry[change_attr]:
                                         typed_val = self.get_rdbm_val(change_attr, cur_val, rdbm_type='spanner')
-                                        cur_data.append(typed_val)
+                                        cur_data[change_attr].append(typed_val)
 
-                                self.spanner_client.write_data(table=table, columns=['doc_id', change_attr], values=[doc_id, cur_data], mutation='update')
+                                self.spanner_client.write_data(table=table, columns=['doc_id', change_attr], values=[doc_id, cur_data[change_attr]], mutation='update')
 
                     elif 'replace' in entry and 'changetype' in entry:
                         table = self.get_spanner_table_for_dn(dn)
