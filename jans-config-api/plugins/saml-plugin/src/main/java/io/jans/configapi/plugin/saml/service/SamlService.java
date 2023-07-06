@@ -194,7 +194,7 @@ public class SamlService {
 
     }
 
-    public TrustRelationship addTrustRelationship(TrustRelationship trustRelationship, File file) throws IOException {
+    public TrustRelationship addTrustRelationship(TrustRelationship trustRelationship, InputStream file) throws IOException {
         log.error("Add new trustRelationship:{}, file:{}", trustRelationship, file);
         setTrustRelationship(trustRelationship, false);
         persistenceEntryManager.persist(trustRelationship);
@@ -245,7 +245,7 @@ public class SamlService {
         return newInum;
     }
 
-    private boolean saveMetaData(TrustRelationship trustRelationship, File file) {
+    private boolean saveMetaData(TrustRelationship trustRelationship, InputStream file) {
         log.error("Saving MetaData trustRelationship:{}, file:{}", trustRelationship, file);
 
         if (trustRelationship == null || trustRelationship.getSpMetaDataSourceType() == null) {
@@ -270,13 +270,13 @@ public class SamlService {
         return true;
     }
 
-    private boolean saveSpMetaDataFileSourceTypeFile(TrustRelationship trustRelationship, File file)
+    private boolean saveSpMetaDataFileSourceTypeFile(TrustRelationship trustRelationship, InputStream file)
             throws IOException {
         log.error("TrustRelationship trustRelationship:{}", trustRelationship, file);
         String spMetadataFileName = trustRelationship.getSpMetaDataFN();
         boolean emptySpMetadataFileName = StringHelper.isEmpty(spMetadataFileName);
         log.error("emptySpMetadataFileName:{}", emptySpMetadataFileName);
-        if ((file == null) || !file.exists()) {
+        if ((file == null) ) {
             if (emptySpMetadataFileName) {
                 log.debug("The trust relationship {} has an empty Metadata filename", trustRelationship.getInum());
                 return false;
@@ -310,7 +310,7 @@ public class SamlService {
              * { updateTrustRelationship(trustRelationship); }
              */
         }
-        InputStream targetStream = new FileInputStream(file);
+        InputStream targetStream = file;
         String result = samlIdpService.saveSpMetadataFile(spMetadataFileName, targetStream);
         if (StringHelper.isNotEmpty(result)) {
             // metadataValidationTimer.queue(result);

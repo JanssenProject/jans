@@ -169,24 +169,6 @@ public class TrustRelationship extends Entry implements Serializable {
 
     private Map<String, ProfileConfiguration> profileConfigurations = new HashMap<String, ProfileConfiguration>();
 
-    @Override
-    public String toString() {
-        return "TrustRelationship [inum=" + inum + ", owner=" + owner + ", clientId=" + clientId + ", displayName="
-                + displayName + ", description=" + description + ", rootUrl=" + rootUrl + ", adminUrl=" + adminUrl
-                + ", baseUrl=" + baseUrl + ", surrogateAuthRequired=" + surrogateAuthRequired + ", enabled=" + enabled
-                + ", alwaysDisplayInConsole=" + alwaysDisplayInConsole + ", clientAuthenticatorType="
-                + clientAuthenticatorType + ", secret=" + secret + ", registrationAccessToken="
-                + registrationAccessToken + ", redirectUris=" + redirectUris + ", webOrigins=" + webOrigins
-                + ", consentRequired=" + consentRequired + ", jansSAMLMetaDataFilter=" + jansSAMLMetaDataFilter
-                + ", spMetaDataSourceType=" + spMetaDataSourceType + ", spMetaDataFN=" + spMetaDataFN
-                + ", spMetaDataURL=" + spMetaDataURL + ", metaLocation=" + metaLocation + ", jansIsFed=" + jansIsFed
-                + ", jansEntityId=" + jansEntityId + ", entityType=" + entityType + ", jansProfileConf="
-                + jansProfileConf + ", releasedAttributes=" + releasedAttributes + ", url=" + url + ", spLogoutURL="
-                + spLogoutURL + ", protocol=" + protocol + ", status=" + status + ", validationStatus="
-                + validationStatus + ", validationLog=" + validationLog + ", profileConfigurations="
-                + profileConfigurations + "]";
-    }
-
     public String getInum() {
         return inum;
     }
@@ -470,4 +452,24 @@ public class TrustRelationship extends Entry implements Serializable {
     public static void sortByDataSourceType(List<TrustRelationship> trustRelationships) {
         Collections.sort(trustRelationships, new SortByDatasourceTypeComparator());
     }
+
+    @Override
+    public String toString() {
+        return "TrustRelationship [inum=" + inum + ", owner=" + owner + ", clientId=" + clientId + ", displayName="
+                + displayName + ", description=" + description + ", rootUrl=" + rootUrl + ", adminUrl=" + adminUrl
+                + ", baseUrl=" + baseUrl + ", surrogateAuthRequired=" + surrogateAuthRequired + ", enabled=" + enabled
+                + ", alwaysDisplayInConsole=" + alwaysDisplayInConsole + ", clientAuthenticatorType="
+                + clientAuthenticatorType + ", secret=" + secret + ", registrationAccessToken="
+                + registrationAccessToken + ", redirectUris=" + redirectUris + ", webOrigins=" + webOrigins
+                + ", consentRequired=" + consentRequired + ", jansSAMLMetaDataFilter=" + jansSAMLMetaDataFilter
+                + ", spMetaDataSourceType=" + spMetaDataSourceType + ", spMetaDataFN=" + spMetaDataFN
+                + ", spMetaDataURL=" + spMetaDataURL + ", metaLocation=" + metaLocation + ", jansIsFed=" + jansIsFed
+                + ", jansEntityId=" + jansEntityId + ", entityType=" + entityType + ", jansProfileConf="
+                + jansProfileConf + ", releasedAttributes=" + releasedAttributes + ", url=" + url + ", spLogoutURL="
+                + spLogoutURL + ", protocol=" + protocol + ", status=" + status + ", validationStatus="
+                + validationStatus + ", validationLog=" + validationLog + ", profileConfigurations="
+                + profileConfigurations + "]";
+    }   
+    
+    
 }
