@@ -35,6 +35,11 @@
 			<artifactId>jans-orm-annotation</artifactId>
 			<version>${jans.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-core-document-store</artifactId>
+			<version>${jans.version}</version>
+		</dependency>
 
 		<!-- keycloak -->
 		<dependency>

@@ -180,7 +180,7 @@ public class TrustRelationshipResource extends BaseResource {
     @DELETE
     @Path(Constants.ID_PATH_PARAM)
     @ProtectedApi(scopes = { Constants.SAML_WRITE_ACCESS })
-    public Response deleteClient(
+    public Response deleteTrustRelationship(
             @Parameter(description = "Unique Id of client") @PathParam(Constants.ID) @NotNull String id) {
 
         logger.info("Delete client identified by id:{}", id);
