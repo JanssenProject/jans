@@ -189,8 +189,7 @@ Gluu team believed the Janssen Project would provide a vendor neutral home for
 the code which would help us build a bigger community.
 
 Much of the initial software for the Janssen Project is a fork of Gluu
-Server 4, which has many [OpenID self-certifications](https://openid.net/certification/),  
-going back around ten years.
+Server 4, which has many [OpenID self-certifications](https://openid.net/certification/), going back around ten years.
 
 After this initial contribution, the Janssen Project developers added a new
 configuration control plane, tools, documentation, packaging and deployment
