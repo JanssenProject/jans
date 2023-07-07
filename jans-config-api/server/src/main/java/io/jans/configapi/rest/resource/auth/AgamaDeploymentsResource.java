@@ -45,10 +45,10 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
     
     private ObjectMapper mapper;
 
-    @Operation(summary = "Retrieve the list of projects deployed currently.", description = "Retrieve the list of projects deployed currently.", operationId = "get-agama-dev-prj", tags = {
+    @Operation(summary = "Retrieve the list of projects deployed currently.", description = "Retrieve the list of projects deployed currently.", operationId = "get-agama-prj", tags = {
     "Agama" }, security = @SecurityRequirement(name = "oauth2", scopes = {ApiAccessConstants.AGAMA_READ_ACCESS}))
     @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Agama projects", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PagedResult.class), examples = @ExampleObject(name = "Response json example", value = "example/agama/agama-dev-prj-get-all.json"))),
+    @ApiResponse(responseCode = "200", description = "Agama projects", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PagedResult.class), examples = @ExampleObject(name = "Response json example", value = "example/agama/agama-prj-get-all.json"))),
     @ApiResponse(responseCode = "401", description = "Unauthorized"),
     @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
@@ -64,10 +64,10 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
 
     }
     
-    @Operation(summary = "Fetches deployed Agama project based on name.", description = "Fetches deployed Agama project based on name.", operationId = "get-agama-dev-studio-prj-by-name", tags = {
+    @Operation(summary = "Fetches deployed Agama project based on name.", description = "Fetches deployed Agama project based on name.", operationId = "get-agama-prj-by-name", tags = {
     "Agama" }, security = @SecurityRequirement(name = "oauth2", scopes = {ApiAccessConstants.AGAMA_READ_ACCESS} ))
     @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Agama project", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Deployment.class), examples = @ExampleObject(name = "Response json example", value = "example/agama/agama-dev-prj-get.json"))),
+    @ApiResponse(responseCode = "200", description = "Agama project", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Deployment.class), examples = @ExampleObject(name = "Response json example", value = "example/agama/agama-prj-get.json"))),
     @ApiResponse(responseCode = "204", description = "No Content"),
     @ApiResponse(responseCode = "401", description = "Unauthorized"),
     @ApiResponse(responseCode = "404", description = "Not Found"),
@@ -87,10 +87,10 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
 
     }
 
-    @Operation(summary = "Deploy an Agama project.", description = "Deploy an Agama project.", operationId = "post-agama-dev-studio-prj", tags = {
+    @Operation(summary = "Deploy an Agama project.", description = "Deploy an Agama project.", operationId = "post-agama-prj", tags = {
     "Agama" }, security = @SecurityRequirement(name = "oauth2", scopes = {ApiAccessConstants.AGAMA_WRITE_ACCESS}))
     @ApiResponses(value = {
-    @ApiResponse(responseCode = "202", description = "Agama project accepted", content = @Content(mediaType = "application/zip", schema = @Schema(implementation = String.class), examples = @ExampleObject(name = "Response json example", value = "example/agama/agama-dev-prj-post.json"))),
+    @ApiResponse(responseCode = "202", description = "Agama project accepted", content = @Content(mediaType = "application/zip", schema = @Schema(implementation = String.class), examples = @ExampleObject(name = "Response json example", value = "example/agama/agama-prj-post.json"))),
     @ApiResponse(responseCode = "400", description = "Bad Request"),
     @ApiResponse(responseCode = "401", description = "Unauthorized"),
     @ApiResponse(responseCode = "409", description = "Conflict"),
@@ -117,7 +117,7 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
 
     }
 
-    @Operation(summary = "Delete a deployed Agama project.", description = "Delete a deployed Agama project.", operationId = "delete-agama-dev-studio-prj", tags = {
+    @Operation(summary = "Delete a deployed Agama project.", description = "Delete a deployed Agama project.", operationId = "delete-agama-prj", tags = {
     "Agama" }, security = @SecurityRequirement(name = "oauth2", scopes = {
             ApiAccessConstants.AGAMA_DELETE_ACCESS }))
     @ApiResponses(value = {
@@ -146,10 +146,10 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
         
     }
 
-    @Operation(summary = "Retrieve the list of configs based on name.", description = "Retrieve the list of configs based on name.", operationId = "get-agama-dev-prj-configs", tags = {
+    @Operation(summary = "Retrieve the list of configs based on name.", description = "Retrieve the list of configs based on name.", operationId = "get-agama-prj-configs", tags = {
     "Agama" }, security = @SecurityRequirement(name = "oauth2", scopes = {ApiAccessConstants.AGAMA_READ_ACCESS}))
     @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Agama projects configs", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Map.class), examples = @ExampleObject(name = "Response json example", value = "example/agama/agama-dev-prj-get-configs-all.json"))),
+    @ApiResponse(responseCode = "200", description = "Agama projects configs", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Map.class), examples = @ExampleObject(name = "Response json example", value = "example/agama/agama-prj-get-configs-all.json"))),
     @ApiResponse(responseCode = "401", description = "Unauthorized"),
     @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
@@ -188,10 +188,10 @@ public class AgamaDeploymentsResource extends ConfigBaseResource {
 
     }
 
-    @Operation(summary = "Update an Agama project.", description = "Update an Agama project.", operationId = "put-agama-dev-studio-prj", tags = {
+    @Operation(summary = "Update an Agama project.", description = "Update an Agama project.", operationId = "put-agama-prj", tags = {
     "Agama" }, security = @SecurityRequirement(name = "oauth2", scopes = {ApiAccessConstants.AGAMA_WRITE_ACCESS}))
     @ApiResponses(value = {
-    @ApiResponse(responseCode = "202", description = "Agama project accepted", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Map.class), examples = @ExampleObject(name = "Response json example", value = "example/agama/agama-dev-prj-post.json"))),
+    @ApiResponse(responseCode = "202", description = "Agama project accepted", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Map.class), examples = @ExampleObject(name = "Response json example", value = "example/agama/agama-prj-post.json"))),
     @ApiResponse(responseCode = "400", description = "Bad Request"),
     @ApiResponse(responseCode = "401", description = "Unauthorized"),
     @ApiResponse(responseCode = "409", description = "Conflict"),

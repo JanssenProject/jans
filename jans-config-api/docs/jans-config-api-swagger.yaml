@@ -180,7 +180,7 @@ paths:
       - Agama
       summary: Fetches deployed Agama project based on name.
       description: Fetches deployed Agama project based on name.
-      operationId: get-agama-dev-studio-prj-by-name
+      operationId: get-agama-prj-by-name
       parameters:
       - name: name
         in: path
@@ -215,7 +215,7 @@ paths:
       - Agama
       summary: Deploy an Agama project.
       description: Deploy an Agama project.
-      operationId: post-agama-dev-studio-prj
+      operationId: post-agama-prj
       parameters:
       - name: name
         in: path
@@ -258,7 +258,7 @@ paths:
       - Agama
       summary: Delete a deployed Agama project.
       description: Delete a deployed Agama project.
-      operationId: delete-agama-dev-studio-prj
+      operationId: delete-agama-prj
       parameters:
       - name: name
         in: path
@@ -286,7 +286,7 @@ paths:
       - Agama
       summary: Retrieve the list of configs based on name.
       description: Retrieve the list of configs based on name.
-      operationId: get-agama-dev-prj-configs
+      operationId: get-agama-prj-configs
       parameters:
       - name: name
         in: path
@@ -317,7 +317,7 @@ paths:
       - Agama
       summary: Update an Agama project.
       description: Update an Agama project.
-      operationId: put-agama-dev-studio-prj
+      operationId: put-agama-prj
       parameters:
       - name: name
         in: path
@@ -362,7 +362,7 @@ paths:
       - Agama
       summary: Retrieve the list of projects deployed currently.
       description: Retrieve the list of projects deployed currently.
-      operationId: get-agama-dev-prj
+      operationId: get-agama-prj
       parameters:
       - name: start
         in: query
@@ -7452,15 +7452,15 @@ components:
           type: string
         whitePagesCanView:
           type: boolean
-        adminCanAccess:
-          type: boolean
-        adminCanEdit:
-          type: boolean
         adminCanView:
           type: boolean
         userCanAccess:
           type: boolean
         userCanView:
+          type: boolean
+        adminCanAccess:
+          type: boolean
+        adminCanEdit:
           type: boolean
         userCanEdit:
           type: boolean
@@ -8199,6 +8199,8 @@ components:
             type: string
         httpLoggingResponseBodyContent:
           type: boolean
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8208,8 +8210,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -8940,10 +8940,10 @@ components:
           type: array
           items:
             type: object
-        value:
-          type: object
         displayValue:
           type: string
+        value:
+          type: object
     LocalizedString:
       type: object
       properties:
