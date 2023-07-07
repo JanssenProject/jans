@@ -272,7 +272,12 @@ public class SamlService {
 
     private boolean saveSpMetaDataFileSourceTypeFile(TrustRelationship trustRelationship, InputStream file)
             throws IOException {
+        
         log.error("TrustRelationship trustRelationship:{}", trustRelationship, file);
+        // To-be-removed
+        LocalDocumentStoreConfiguration localConfiguration = getDocumentStoreConfiguration();
+        log.error("localConfiguration:{}", localConfiguration);
+        
         String spMetadataFileName = trustRelationship.getSpMetaDataFN();
         boolean emptySpMetadataFileName = StringHelper.isEmpty(spMetadataFileName);
         log.error("emptySpMetadataFileName:{}", emptySpMetadataFileName);
@@ -318,9 +323,7 @@ public class SamlService {
             log.error("Failed to save SP meta-data file. Please check if you provide correct file");
         }
 
-        // To-be-removed
-        LocalDocumentStoreConfiguration localConfiguration = getDocumentStoreConfiguration();
-        log.error("localConfiguration:{}", localConfiguration);
+       
 
         return false;
 
