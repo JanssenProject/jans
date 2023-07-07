@@ -53,6 +53,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static io.jans.as.model.util.StringUtils.spaceSeparatedToList;
 import static org.apache.commons.lang.BooleanUtils.isFalse;
 import static org.apache.commons.lang.BooleanUtils.isTrue;
 
@@ -167,14 +168,14 @@ public class AuthorizeService {
             }
 
             String scope = session.getSessionAttributes().get(AuthorizeRequestParam.SCOPE);
+            Set<String> scopeSet = Sets.newHashSet(spaceSeparatedToList(scope));
             String responseType = session.getSessionAttributes().get(AuthorizeRequestParam.RESPONSE_TYPE);
 
             boolean persistDuringImplicitFlow = !io.jans.as.model.common.ResponseType.isImplicitFlow(responseType);
             if (!client.getTrustedClient() && persistDuringImplicitFlow && client.getPersistClientAuthorizations()) {
-                final Set<String> scopes = Sets.newHashSet(io.jans.as.model.util.StringUtils.spaceSeparatedToList(scope));
-                clientAuthorizationsService.add(user.getAttribute("inum"), client.getClientId(), scopes);
+                clientAuthorizationsService.add(user.getAttribute("inum"), client.getClientId(), scopeSet);
             }
-            session.addPermission(clientId, true);
+            session.addPermission(clientId, true, scopeSet);
             sessionIdService.updateSessionId(session);
             identity.setSessionId(session);
 

@@ -607,11 +607,12 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         // - If session already contains all scopes
         // - If a client is configured for pairwise identifiers, and the openid scope is the only scope requested.
         //   Also, we should make sure that the claims request is not enabled.
-        final boolean sessionHasAllScopes = sessionIdService.hasAllScopes(sessionUser, scopes);
+        final boolean clientHasAllScopes = sessionIdService.hasClientAllScopes(sessionUser, client.getClientId(), scopes);
         final boolean permissionGrantedForClient = isTrue(sessionUser.isPermissionGrantedForClient(client.getClientId()));
         final boolean pairwiseWithOnlyOpenIdScope = isPairwiseWithOnlyOpenIdScope(client, authzRequest, scopes);
-        if (client.getTrustedClient() || (sessionHasAllScopes && permissionGrantedForClient) || pairwiseWithOnlyOpenIdScope) {
-            log.trace("Granting access to session {}, clientTrusted: {}, sessionHasAllScopes: {}, pairwiseWithOnlyOpenIdScope: {}", sessionUser.getId(), client.getTrustedClient(), sessionHasAllScopes, pairwiseWithOnlyOpenIdScope);
+        if (client.getTrustedClient() || (clientHasAllScopes && permissionGrantedForClient) || pairwiseWithOnlyOpenIdScope) {
+            log.trace("Granting access to session {}, clientTrusted: {}, clientHasAllScopes: {}, permissionGrantedForClient: {}, pairwiseWithOnlyOpenIdScope: {}",
+                    sessionUser.getId(), client.getTrustedClient(), clientHasAllScopes, permissionGrantedForClient, pairwiseWithOnlyOpenIdScope);
             sessionUser.addPermission(authzRequest.getClientId(), true);
             sessionIdService.updateSessionId(sessionUser);
         } else {
