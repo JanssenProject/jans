@@ -211,9 +211,6 @@ class PropertiesUtils(SetupUtils):
         if p.get('rdbm_type') == 'pgsql' and not p.get('rdbm_port'):
             p['rdbm_port'] = '5432'
 
-        if p.get('disable_selinux'):
-            base.argsp.disable_selinux = base.as_bool(p.get('disable_selinux'))
-
         properties_list = list(p.keys())
 
         for prop in properties_list:
