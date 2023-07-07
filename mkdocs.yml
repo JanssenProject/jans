@@ -137,6 +137,7 @@ nav:
       - SCIM User Resources: admin/config-guide/jans-cli/cli-user.md
       - SCIM Group Management: admin/config-guide/jans-cli/cli-group.md
       - Authentication via Device Flow: admin/config-guide/jans-cli/device-flow.md
+      - CLI For Agama Developer Studio: admin/config-guide/jans-cli/cli-agama.md
     - SCIM CLI: admin/config-guide/scim-cli.md
   - Database Guide:
     - admin/reference/database/README.md
