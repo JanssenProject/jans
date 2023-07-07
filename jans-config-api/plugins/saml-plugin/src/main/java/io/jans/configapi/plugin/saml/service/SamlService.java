@@ -282,11 +282,13 @@ public class SamlService {
         boolean emptySpMetadataFileName = StringHelper.isEmpty(spMetadataFileName);
         log.error("emptySpMetadataFileName:{}", emptySpMetadataFileName);
         if ((file == null) ) {
+            log.error("File is null");
             if (emptySpMetadataFileName) {
                 log.debug("The trust relationship {} has an empty Metadata filename", trustRelationship.getInum());
                 return false;
             }
             String filePath = samlIdpService.getSpMetadataFilePath(spMetadataFileName);
+            log.error("filePath:{}",filePath);
             if (filePath == null) {
                 log.debug("The trust relationship {} has an invalid Metadata file storage path",
                         trustRelationship.getInum());
@@ -296,6 +298,7 @@ public class SamlService {
             if (samlIdpService.isLocalDocumentStoreType()) {
 
                 File newFile = new File(filePath);
+                log.error("newFile:{}",newFile);
                 if (!newFile.exists()) {
                     log.debug(
                             "The trust relationship {} metadata used local storage but the SP metadata file `{}` was not found",
@@ -306,7 +309,9 @@ public class SamlService {
             return true;
         }
         if (emptySpMetadataFileName) {
+            log.error("emptySpMetadataFileName:{}",emptySpMetadataFileName);
             spMetadataFileName = samlIdpService.getSpNewMetadataFileName(trustRelationship);
+            log.error("spMetadataFileName:{}",spMetadataFileName);
             trustRelationship.setSpMetaDataFN(spMetadataFileName);
             /*
              * if (trustRelationship.getDn() == null) { String dn =
@@ -316,6 +321,7 @@ public class SamlService {
              */
         }
         InputStream targetStream = file;
+        log.error("targetStream:{}, spMetadataFileName:{}",targetStream, spMetadataFileName);
         String result = samlIdpService.saveSpMetadataFile(spMetadataFileName, targetStream);
         if (StringHelper.isNotEmpty(result)) {
             // metadataValidationTimer.queue(result);

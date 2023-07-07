@@ -80,16 +80,19 @@ public class SamlIdpService {
     }
 
     private String getTempMetadataFilename(String idpMetadataFolder, String fileName) {
+        logger.error("documentStoreService:{}, idpMetadataFolder:{}, fileName:{}",documentStoreService, idpMetadataFolder, fileName);
         synchronized (getClass()) {
             String possibleTemp;
             do {
                 possibleTemp = fileName + INumGenerator.generate(2);
+                logger.error("possibleTemp:{}",possibleTemp);
             } while (documentStoreService.hasDocument(idpMetadataFolder + possibleTemp));
             return possibleTemp;
         }
     }
 
     public String saveSpMetadataFile(String spMetadataFileName, InputStream stream) {
+        logger.error("spMetadataFileName:{}, stream:{}",spMetadataFileName, stream);
         // if (appConfiguration.getShibboleth3IdpRootDir() == null) {
         if (StringUtils.isBlank(KEYCLOAK_IDP_ROOT_DIR)) {
             throw new InvalidConfigurationException(
@@ -97,8 +100,11 @@ public class SamlIdpService {
         }
 
         String idpMetadataTempFolder = getIdpMetadataTempDir();
+        logger.error("idpMetadataTempFolder:{}",idpMetadataTempFolder);
         String tempFileName = getTempMetadataFilename(idpMetadataTempFolder, spMetadataFileName);
+        logger.error("idpMetadataTempFolder:{}, tempFileName:{}",idpMetadataTempFolder, tempFileName);
         String spMetadataFile = idpMetadataTempFolder + tempFileName;
+        logger.error("documentStoreService:{}, spMetadataFile:{}",documentStoreService, spMetadataFile);
         try {
             boolean result = documentStoreService.saveDocumentStream(spMetadataFile, stream,
                     List.of("oxtrust-server", "Shibboleth"));

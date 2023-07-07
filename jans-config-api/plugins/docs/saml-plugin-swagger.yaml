@@ -228,9 +228,9 @@ paths:
     delete:
       tags:
       - SAML - Trust Relationship
-      summary: Delete client
-      description: Delete client
-      operationId: put-client
+      summary: Delete TrustRelationship
+      description: Delete TrustRelationship
+      operationId: put-trust-relationship
       parameters:
       - name: id
         in: path
@@ -282,7 +282,7 @@ paths:
       - SAML - Trust Relationship
       summary: Update TrustRelationship
       description: Update TrustRelationship
-      operationId: put-trust-relationship
+      operationId: put-trust-relationship_1
       requestBody:
         content:
           application/json:
