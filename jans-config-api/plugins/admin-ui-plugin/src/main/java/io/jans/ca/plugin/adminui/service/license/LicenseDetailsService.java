@@ -119,15 +119,16 @@ public class LicenseDetailsService extends BaseService {
             Response response = request.post(Entity.entity(body, MediaType.APPLICATION_JSON));
 
             log.info("license request status code: {}", response.getStatus());
+            ObjectMapper mapper = new ObjectMapper();
             if (response.getStatus() == 200) {
                 JsonObject entity = response.readEntity(JsonObject.class);
                 if (entity.getBoolean("license_active") && !entity.getBoolean("is_expired")) {
-                    return CommonUtils.createGenericResponse(true, 200, "Valid license present.");
+                    return CommonUtils.createGenericResponse(true, 200, "Valid license present.",
+                            mapper.readTree(entity.getJsonArray("custom_fields").toString()));
                 }
             }
             //getting error
             String jsonData = response.readEntity(String.class);
-            ObjectMapper mapper = new ObjectMapper();
             JsonNode jsonNode = mapper.readValue(jsonData, JsonNode.class);
             if (!Strings.isNullOrEmpty(jsonNode.get(MESSAGE).textValue())) {
                 log.error("license isActive error response: {}", jsonData);
@@ -246,6 +247,7 @@ public class LicenseDetailsService extends BaseService {
             Response response = request.post(Entity.entity(body, MediaType.APPLICATION_JSON));
 
             log.info("license Activation request status code: {}", response.getStatus());
+            ObjectMapper mapper = new ObjectMapper();
             if (response.getStatus() == 200) {
                 JsonObject entity = response.readEntity(JsonObject.class);
                 if (entity.getString("license_key").equals(licenseRequest.getLicenseKey())) {
@@ -258,12 +260,12 @@ public class LicenseDetailsService extends BaseService {
                     auiConfiguration.setLicenseConfiguration(licenseConfiguration);
                     auiConfigurationService.setAuiConfiguration(auiConfiguration);
 
-                    return CommonUtils.createGenericResponse(true, 200, "License have been activated.");
+                    return CommonUtils.createGenericResponse(true, 200, "License have been activated."
+                            , mapper.readTree(entity.getJsonArray("custom_fields").toString()));
                 }
             }
             //getting error
             String jsonData = response.readEntity(String.class);
-            ObjectMapper mapper = new ObjectMapper();
             JsonNode jsonNode = mapper.readValue(jsonData, JsonNode.class);
             if (!Strings.isNullOrEmpty(jsonNode.get(MESSAGE).textValue())) {
                 log.error("license Activation error response: {}", jsonData);
