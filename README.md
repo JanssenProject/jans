@@ -182,13 +182,15 @@ Below is the list of current mega releases that hold information about every sin
 
 ### History
 
-In 2020, [Gluu](https://gluu.org) decided to giving contributors a role in the
-governance of its core open source software. The Linux Foundation provided
-a vendor neutral home for the code and a new open trademark: Janssen.
+In 2020, [Gluu](https://gluu.org) decided to give contributors a role in the
+governance of its core open source software, and collaborated with the
+Linux Foundation to charter a new project, called the Janssen Project. The
+Gluu team believed the Janssen Project would provide a vendor neutral home for
+the code which would help us build a bigger community.
 
 Much of the initial software for the Janssen Project is a fork of Gluu
-Server 4, which has submitted many [self-certifications](https://openid.net/certification/)
-at the OpenID Foundation going back around ten years.
+Server 4, which has many [OpenID self-certifications](https://openid.net/certification/),  
+going back around ten years.
 
 After this initial contribution, the Janssen Project developers added a new
 configuration control plane, tools, documentation, packaging and deployment
@@ -196,4 +198,4 @@ assets.
 
 ### Why the name Janssen?
 
-Pigeons (or doves if you like...) are universally regarded as a symbol of peace. But they are also fast. Powered by a handful of seeds, a well-trained racing pigeon can fly 1000 kilometers in a day. The Janssen brothers of Arendonk in Belgium bred the world's fastest family of racing pigeons. Complex open source infrastructure, like competitive animal husbandry, requires incremental improvement. Janssen racing pigeons revolutionized the sport. The Janssen Project seeks to revolutionize open source identity and access management.
+Pigeons (or doves if you like...) are universally regarded as a symbol of peace. But they are also fast. Powered by a handful of seeds, a well-trained racing pigeon can fly 1000 kilometers in a day. The Janssen brothers of Arendonk in Belgium bred the world's fastest family of racing pigeons. Like competitive animal husbandry, building a complex open source infrastructure requires tenacity, and a long-term commitment to incremental improvement. Janssen racing pigeons revolutionized the sport. The Janssen Project seeks to revolutionize open source identity and access management infrastructure.
