@@ -86,7 +86,7 @@ public class SamlIdpService {
             do {
                 possibleTemp = fileName + INumGenerator.generate(2);
                 logger.error("possibleTemp:{}",possibleTemp);
-            } while (localDocumentStoreService.hasDocument(idpMetadataFolder + possibleTemp));
+            } while (documentStoreService.hasDocument(idpMetadataFolder + possibleTemp));
             return possibleTemp;
         }
     }
@@ -106,7 +106,7 @@ public class SamlIdpService {
         String spMetadataFile = idpMetadataTempFolder + tempFileName;
         logger.error("documentStoreService:{}, spMetadataFile:{}, localDocumentStoreService:{} ",documentStoreService, spMetadataFile, localDocumentStoreService);
         try {
-            boolean result = localDocumentStoreService.saveDocumentStream(spMetadataFile, stream,
+            boolean result = documentStoreService.saveDocumentStream(spMetadataFile, stream,
                     List.of("oxtrust-server", "Shibboleth"));
             if (result) {
                 return tempFileName;
