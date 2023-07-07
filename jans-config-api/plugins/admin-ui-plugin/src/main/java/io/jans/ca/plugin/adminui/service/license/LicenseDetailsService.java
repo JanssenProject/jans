@@ -53,6 +53,10 @@ public class LicenseDetailsService extends BaseService {
     public static final String HARDWARE_ID = "hardwareId";
     public static final String BEARER = "Bearer ";
     public static final String MESSAGE = "message";
+    public static final String LICENSE_ISACTIVE_ERROR_RESPONSE = "License isActive error response";
+    public static final String LICENSE_RETRIEVE_ERROR_RESPONSE = "License retrieve error response";
+    public static final String LICENSE_ACTIVATE_ERROR_RESPONSE = "License activate error response";
+    public static final String TRIAL_GENERATE_ERROR_RESPONSE = "Generate Trial license error response";
 
     /**
      * The function checks the license key and the api key and returns a response object
@@ -86,12 +90,12 @@ public class LicenseDetailsService extends BaseService {
             AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
             LicenseConfiguration licenseConfiguration = auiConfiguration.getLicenseConfiguration();
             if (licenseConfiguration == null || Strings.isNullOrEmpty(licenseConfiguration.getHardwareId())) {
-                log.info("License configuration is not present.");
-                return CommonUtils.createGenericResponse(false, 500, "License configuration is not present.");
+                log.error(ErrorResponse.LICENSE_CONFIG_ABSENT.getDescription());
+                return CommonUtils.createGenericResponse(false, 500, ErrorResponse.LICENSE_CONFIG_ABSENT.getDescription());
             }
             if (Strings.isNullOrEmpty(licenseConfiguration.getScanApiHostname())) {
-                log.info("SCAN api hostname is missing in configuration.");
-                return CommonUtils.createGenericResponse(false, 500, "SCAN api hostname is missing in configuration.");
+                log.error(ErrorResponse.SCAN_HOSTNAME_MISSING.getDescription());
+                return CommonUtils.createGenericResponse(false, 500, ErrorResponse.SCAN_HOSTNAME_MISSING.getDescription());
             }
             if (Strings.isNullOrEmpty(licenseConfiguration.getLicenseKey())) {
                 log.info(ErrorResponse.LICENSE_NOT_PRESENT.getDescription());
@@ -131,10 +135,10 @@ public class LicenseDetailsService extends BaseService {
             String jsonData = response.readEntity(String.class);
             JsonNode jsonNode = mapper.readValue(jsonData, JsonNode.class);
             if (!Strings.isNullOrEmpty(jsonNode.get(MESSAGE).textValue())) {
-                log.error("license isActive error response: {}", jsonData);
+                log.error("{}: {}", LICENSE_ISACTIVE_ERROR_RESPONSE, jsonData);
                 return CommonUtils.createGenericResponse(false, jsonNode.get("status").intValue(), jsonNode.get(MESSAGE).textValue());
             }
-            log.error("license isActive error response: {}", jsonData);
+            log.error("{}: {}", LICENSE_ISACTIVE_ERROR_RESPONSE, jsonData);
             return CommonUtils.createGenericResponse(false, 404, ErrorResponse.LICENSE_NOT_PRESENT.getDescription());
 
         } catch (Exception e) {
@@ -154,12 +158,12 @@ public class LicenseDetailsService extends BaseService {
             AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
             LicenseConfiguration licenseConfiguration = auiConfiguration.getLicenseConfiguration();
             if (licenseConfiguration == null || Strings.isNullOrEmpty(licenseConfiguration.getHardwareId())) {
-                log.info("License configuration is not present.");
-                return CommonUtils.createGenericResponse(false, 500, "License configuration is not present.");
+                log.error(ErrorResponse.LICENSE_CONFIG_ABSENT.getDescription());
+                return CommonUtils.createGenericResponse(false, 500, ErrorResponse.LICENSE_CONFIG_ABSENT.getDescription());
             }
             if (Strings.isNullOrEmpty(licenseConfiguration.getScanApiHostname())) {
-                log.info("SCAN api hostname is missing in configuration.");
-                return CommonUtils.createGenericResponse(false, 500, "SCAN api hostname is missing in configuration.");
+                log.error(ErrorResponse.SCAN_HOSTNAME_MISSING.getDescription());
+                return CommonUtils.createGenericResponse(false, 500, ErrorResponse.SCAN_HOSTNAME_MISSING.getDescription());
             }
 
             io.jans.as.client.TokenResponse tokenResponse = generateToken(licenseConfiguration.getScanAuthServerHostname(), licenseConfiguration.getScanApiClientId(), licenseConfiguration.getScanApiClientSecret());
@@ -197,10 +201,10 @@ public class LicenseDetailsService extends BaseService {
             JsonNode jsonNode = mapper.readValue(jsonData, com.fasterxml.jackson.databind.JsonNode.class);
 
             if (!Strings.isNullOrEmpty(jsonNode.get(MESSAGE).textValue())) {
-                log.error("license retrieve error response: {}", jsonData);
+                log.error("{}: {}", LICENSE_RETRIEVE_ERROR_RESPONSE, jsonData);
                 return CommonUtils.createGenericResponse(false, jsonNode.get("status").intValue(), jsonNode.get(MESSAGE).textValue());
             }
-            log.error("license isActive error response: {}", jsonData);
+            log.error("{}: {}", LICENSE_RETRIEVE_ERROR_RESPONSE, jsonData);
             return CommonUtils.createGenericResponse(false, 500, ErrorResponse.RETRIEVE_LICENSE_ERROR.getDescription());
 
         } catch (Exception e) {
@@ -220,7 +224,7 @@ public class LicenseDetailsService extends BaseService {
         //check is license is already active
         GenericResponse licenseApiResponse = checkLicense();
         if (licenseApiResponse.isSuccess()) {
-            return CommonUtils.createGenericResponse(true, 200, "The license has been already activated.");
+            return CommonUtils.createGenericResponse(true, 200, ErrorResponse.LICENSE_ALREADY_ACTIVE.getDescription());
         }
         try {
             AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
@@ -269,9 +273,11 @@ public class LicenseDetailsService extends BaseService {
             JsonNode jsonNode = mapper.readValue(jsonData, JsonNode.class);
             if (!Strings.isNullOrEmpty(jsonNode.get(MESSAGE).textValue())) {
                 log.error("license Activation error response: {}", jsonData);
+                log.error("{}: {}", LICENSE_ACTIVATE_ERROR_RESPONSE, jsonData);
                 return CommonUtils.createGenericResponse(false, jsonNode.get("status").intValue(), jsonNode.get(MESSAGE).textValue());
             }
             log.error("license Activation error response: {}", jsonData);
+            log.error("{}: {}", LICENSE_ACTIVATE_ERROR_RESPONSE, jsonData);
             return CommonUtils.createGenericResponse(false, response.getStatus(), "License is not activated.");
         } catch (Exception e) {
             log.error(ErrorResponse.ACTIVATE_LICENSE_ERROR.getDescription(), e);
@@ -335,10 +341,10 @@ public class LicenseDetailsService extends BaseService {
             String jsonData = response.readEntity(String.class);
             JsonNode jsonNode = objectMapper.readValue(jsonData, com.fasterxml.jackson.databind.JsonNode.class);
             if (!Strings.isNullOrEmpty(jsonNode.get(MESSAGE).textValue())) {
-                log.error("Generate trial license error response: {}", jsonData);
+                log.error("{}: {}", TRIAL_GENERATE_ERROR_RESPONSE, jsonData);
                 return CommonUtils.createGenericResponse(false, jsonNode.get("status").intValue(), jsonNode.get(MESSAGE).textValue());
             }
-            log.error("Generate trial license error response: {}", jsonData);
+            log.error("{}: {}", TRIAL_GENERATE_ERROR_RESPONSE, jsonData);
             return CommonUtils.createGenericResponse(false, response.getStatus(), "Error in generating trial license.");
         } catch (Exception e) {
             log.error(ErrorResponse.ERROR_IN_TRIAL_LICENSE.getDescription(), e);
