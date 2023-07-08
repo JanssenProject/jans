@@ -104,7 +104,8 @@ public class AndroidSafetyNetAttestationProcessor implements AttestationFormatPr
 
         Instant timestamp = Instant.ofEpochMilli(stmt.getTimestampMs());
 
-        if (timestamp.isAfter(Instant.now())) {
+        // TODO - Added 1 second more to Instant.now(), because timestamp was bigger
+        if (timestamp.isAfter(Instant.now().plusSeconds(1))) {
             throw new Fido2RuntimeException("Invalid safety net attestation");
         }
 
