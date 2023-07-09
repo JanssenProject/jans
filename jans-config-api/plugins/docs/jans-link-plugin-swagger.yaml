@@ -1,6 +1,6 @@
 openapi: 3.0.1
 info:
-  title: Jans Config API - jans-link-plugin
+  title: Jans Config API - Jans Link Plugin
   contact:
     name: Gluu Support
     url: https://support.gluu.org
