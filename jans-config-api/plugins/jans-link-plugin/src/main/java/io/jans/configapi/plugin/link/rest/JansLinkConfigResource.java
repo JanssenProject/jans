@@ -4,17 +4,17 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.configapi.plugin.cacherefresh.rest;
+package io.jans.configapi.plugin.link.rest;
 
 import io.jans.as.common.service.common.EncryptionService;
 import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
-import io.jans.configapi.plugin.cacherefresh.util.Constants;
+import io.jans.configapi.plugin.link.util.Constants;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.model.ldap.GluuLdapConfiguration;
 import io.jans.util.security.StringEncrypter.EncryptionException;
-import io.jans.configapi.plugin.cacherefresh.service.CacheRefreshService;
-import io.jans.configapi.plugin.cacherefresh.model.config.CacheRefreshConfiguration;
+import io.jans.configapi.plugin.link.service.JansLinkService;
+import io.jans.configapi.plugin.link.model.config.JansLinkConfiguration;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -34,61 +34,61 @@ import java.util.List;
 
 import org.slf4j.Logger;
 
-@Path(Constants.CACHEREFRESH_CONFIG)
+@Path(Constants.JANSLINK_CONFIG)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public class CacheRefreshConfigResource extends BaseResource {
+public class JansLinkConfigResource extends BaseResource {
 
-    private static final String CACHEREFRESH_CONFIGURATION = "cacheRefreshConfiguration";
+    private static final String JANSLINK_CONFIGURATION = "jansLinkConfiguration";
 
     @Inject
     Logger logger;
 
     @Inject
-    CacheRefreshService cacheRefreshService;
+    JansLinkService jansLinkService;
 
     @Inject
     private EncryptionService encryptionService;
 
-    @Operation(summary = "Gets Cache Refresh configuration.", description = "Gets Cache Refresh configuration.", operationId = "get-properties-cache-refresh", tags = {
-            "Cache Refresh - Configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.CACHEREFRESH_CONFIG_READ_ACCESS }))
+    @Operation(summary = "Gets Jans Link configuration.", description = "Gets Jans Link configuration.", operationId = "get-jans-link-properties", tags = {
+            "Jans Link - Configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    Constants.JANSLINK_CONFIG_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CacheRefreshConfiguration.class))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JansLinkConfiguration.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.CACHEREFRESH_CONFIG_READ_ACCESS }, groupScopes = {
-            ApiAccessConstants.CACHEREFRESH_CONFIG_WRITE_ACCESS }, superScopes = {
+    @ProtectedApi(scopes = { Constants.JANSLINK_CONFIG_READ_ACCESS }, groupScopes = {
+            Constants.JANSLINK_CONFIG_WRITE_ACCESS }, superScopes = {
                     ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
-    public Response getCacheRefreshConfiguration() {
-        CacheRefreshConfiguration appConfiguration = this.cacheRefreshService.find();
-        logger.debug("Cache Refresh details appConfiguration():{}", appConfiguration);
+    public Response getJansLinkConfiguration() {
+        JansLinkConfiguration appConfiguration = this.jansLinkService.find();
+        logger.debug("Jans Link details appConfiguration():{}", appConfiguration);
         return Response.ok(appConfiguration).build();
     }
 
-    @Operation(summary = "Updates Cache Refresh configuration properties.", description = "Updates Cache Refresh configuration properties.", operationId = "put-properties-cache-refresh", tags = {
-            "Cache Refresh - Configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.CACHEREFRESH_CONFIG_WRITE_ACCESS }))
-    @RequestBody(description = "CacheRefreshConfiguration", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CacheRefreshConfiguration.class)))
+    @Operation(summary = "Updates Jans Link configuration properties.", description = "Updates Jans Link configuration properties.", operationId = "put-jans-link-properties", tags = {
+            "Jans Link - Configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    Constants.JANSLINK_CONFIG_WRITE_ACCESS }))
+    @RequestBody(description = "JansLinkConfiguration", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JansLinkConfiguration.class)))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "CacheRefreshConfiguration", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CacheRefreshConfiguration.class))),
+            @ApiResponse(responseCode = "200", description = "JansLinkConfiguration", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JansLinkConfiguration.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PUT
-    @ProtectedApi(scopes = { ApiAccessConstants.CACHEREFRESH_CONFIG_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+    @ProtectedApi(scopes = { Constants.JANSLINK_CONFIG_WRITE_ACCESS }, groupScopes = {}, superScopes = {
             ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
-    public Response updateCacheRefreshConfiguration(@NotNull CacheRefreshConfiguration appConfiguration)
+    public Response updateJansLinkConfiguration(@NotNull JansLinkConfiguration appConfiguration)
             throws EncryptionException {
-        logger.debug("Cache Refresh details to be updated - appConfiguration:{} ", appConfiguration);
-        checkResourceNotNull(appConfiguration, CACHEREFRESH_CONFIGURATION);
+        logger.debug("Jans Link details to be updated - appConfiguration:{} ", appConfiguration);
+        checkResourceNotNull(appConfiguration, JANSLINK_CONFIGURATION);
         passwordEncryption(appConfiguration);
-        this.cacheRefreshService.merge(appConfiguration);
-        appConfiguration = this.cacheRefreshService.find();
+        this.jansLinkService.merge(appConfiguration);
+        appConfiguration = this.jansLinkService.find();
         return Response.ok(appConfiguration).build();
     }
 
-    private CacheRefreshConfiguration passwordEncryption(CacheRefreshConfiguration appConfiguration)
+    private JansLinkConfiguration passwordEncryption(JansLinkConfiguration appConfiguration)
             throws EncryptionException {
         logger.debug("Password  Encryption - appConfiguration:{} ", appConfiguration);
 

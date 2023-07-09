@@ -4,11 +4,11 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.configapi.plugin.cacherefresh.service;
+package io.jans.configapi.plugin.link.service;
 
 import io.jans.configapi.configuration.ConfigurationFactory;
-import io.jans.configapi.plugin.cacherefresh.model.config.Conf;
-import io.jans.configapi.plugin.cacherefresh.model.config.CacheRefreshConfiguration;
+import io.jans.configapi.plugin.link.model.config.Conf;
+import io.jans.configapi.plugin.link.model.config.JansLinkConfiguration;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.BasePersistenceException;
 import org.slf4j.Logger;
@@ -17,7 +17,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 @ApplicationScoped
-public class CacheRefreshService {
+public class JansLinkService {
 
     @Inject
     Logger logger;
@@ -34,12 +34,12 @@ public class CacheRefreshService {
                     .getString("cacheRefresh_ConfigurationEntryDN");
             return persistenceManager.find(Conf.class, configurationDn);
         } catch (BasePersistenceException var3) {
-            logger.error("Failed to load cache-refresh configuration from LDAP");
+            logger.error("Failed to load jans-link configuration from LDAP");
             return null;
         }
     }
 
-    public CacheRefreshConfiguration find() {
+    public JansLinkConfiguration find() {
         final Conf conf = findConf();
         return conf.getDynamicConf();
     }
@@ -49,9 +49,9 @@ public class CacheRefreshService {
         persistenceManager.merge(conf);
     }
 
-    public void merge(CacheRefreshConfiguration cacheRefreshConfigJson) {
+    public void merge(JansLinkConfiguration jansLinkConfigJson) {
         Conf conf = this.findConf();
-        conf.setDynamicConf(cacheRefreshConfigJson);
+        conf.setDynamicConf(jansLinkConfigJson);
         mergeConf(conf);
     }
 }

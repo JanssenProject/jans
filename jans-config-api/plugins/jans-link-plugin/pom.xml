@@ -234,7 +234,7 @@
 							<contextId>${project.artifactId}</contextId>
 							<prettyPrint>true</prettyPrint>
 							<resourcePackages>
-								<package>io.jans.configapi.plugin.cacherefresh.rest</package>
+								<package>io.jans.configapi.plugin.link.rest</package>
 							</resourcePackages>
 						</configuration>
 					</execution>

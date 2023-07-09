@@ -1,20 +1,20 @@
 
-Feature: Verify Cache refresh configuration endpoint
+Feature: Verify Jans Link configuration endpoint
 
-	Background:cache-refresh
-  	* def mainUrl = cacheRefreshUrl
+	Background:jans-link
+  	* def mainUrl = jansLinkUrl
 
 	@ignore
-	@cacherefresh-get-error
-    Scenario: Retrieve Cache refresh configuration without bearer token
+	@jansLink-get-error
+    Scenario: Retrieve Jans Link configuration without bearer token
     Given url  mainUrl
     When method GET
     Then status 401
     And print response
  
     @ignore
- 	@cacherefresh-get
-  	Scenario: Retrieve Cache refresh configuration
+ 	@jansLink-get
+  	Scenario: Retrieve Jans Link configuration
     Given url  mainUrl
     And  header Authorization = 'Bearer ' + accessToken
     When method GET
@@ -23,8 +23,8 @@ Feature: Verify Cache refresh configuration endpoint
     And assert response.length != null
 
 	@ignore
-    @cacherefresh-put
-  	Scenario: Update Cache refresh configuration
+    @jansLink-put
+  	Scenario: Update Jans Link configuration
     Given url  mainUrl
     And  header Authorization = 'Bearer ' + accessToken
     When method GET

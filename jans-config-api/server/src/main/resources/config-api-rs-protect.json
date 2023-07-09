@@ -2230,7 +2230,7 @@
       ]
     },
     {
-      "path": "/jans-config-api/cacherefresh/cache-refresh-config",
+      "path": "/jans-config-api/jans-link/link-config",
       "conditions": [
         {
           "httpMethods": [
@@ -2239,13 +2239,13 @@
           "scopes": [
             {
               "inum": "1800.01.54",
-              "name": "https://jans.io/oauth/config/cacherefresh.readonly"
+              "name": "https://jans.io/oauth/config/jans-link.readonly"
             }
           ],
           "groupScopes": [
             {
               "inum": "1800.01.55",
-              "name": "https://jans.io/oauth/config/cacherefresh.write"
+              "name": "https://jans.io/oauth/config/jans-link.write"
             }
           ],
           "superScopes": [
@@ -2262,7 +2262,7 @@
           "scopes": [
             {
               "inum": "1800.01.55",
-              "name": "https://jans.io/oauth/config/cacherefresh.write"
+              "name": "https://jans.io/oauth/config/jans-link.write"
             }
           ],
           "groupScopes": [],

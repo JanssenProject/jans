@@ -1,4 +1,4 @@
-package io.jans.configapi.plugin.cacherefresh.model.config;
+package io.jans.configapi.plugin.link.model.config;
 
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.orm.annotation.*;
@@ -11,7 +11,7 @@ public class Conf {
 
     @JsonObject
     @AttributeName(name = "jansConfDyn")
-    private CacheRefreshConfiguration dynamicConf;
+    private JansLinkConfiguration dynamicConf;
 
     @JsonObject
     @AttributeName(name = "jansConfStatic")
@@ -31,11 +31,11 @@ public class Conf {
         dn = p_dn;
     }
 
-    public CacheRefreshConfiguration getDynamicConf() {
+    public JansLinkConfiguration getDynamicConf() {
         return dynamicConf;
     }
 
-    public void setDynamicConf(CacheRefreshConfiguration dynamicConf) {
+    public void setDynamicConf(JansLinkConfiguration dynamicConf) {
         this.dynamicConf = dynamicConf;
     }
 

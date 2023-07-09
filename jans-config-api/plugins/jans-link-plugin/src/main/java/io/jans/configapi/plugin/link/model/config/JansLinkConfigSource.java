@@ -1,4 +1,4 @@
-package io.jans.configapi.plugin.cacherefresh.model.config;
+package io.jans.configapi.plugin.link.model.config;
 
 import io.jans.exception.ConfigurationException;
 import java.io.InputStream;
@@ -14,14 +14,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @ApplicationScoped
-public class CacheRefreshConfigSource implements ConfigSource {
+public class JansLinkConfigSource implements ConfigSource {
 
-    private static Logger log = LoggerFactory.getLogger(CacheRefreshConfigSource.class);
-    private static final String FILE_CONFIG = "cacherefresh.properties";
+    private static Logger log = LoggerFactory.getLogger(JansLinkConfigSource.class);
+    private static final String FILE_CONFIG = "jans-link.properties";
     private Properties properties = null;
     Map<String, String> propertiesMap = new HashMap<>();
 
-    public CacheRefreshConfigSource() {
+    public JansLinkConfigSource() {
         this.loadProperties();
     }
 
@@ -50,7 +50,7 @@ public class CacheRefreshConfigSource implements ConfigSource {
 
     @Override
     public String getValue(String name) {
-        log.debug("CacheRefreshConfigSource()::getValue() - name:{}", name);
+        log.debug("JansLinkConfigSource()::getValue() - name:{}", name);
         try {
             return properties.getProperty(name);
         } catch (Exception e) {

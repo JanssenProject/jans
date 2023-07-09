@@ -1,4 +1,4 @@
-package io.jans.configapi.plugin.cacherefresh.model.config;
+package io.jans.configapi.plugin.link.model.config;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.jans.config.oxtrust.CacheRefreshAttributeMapping;
@@ -12,7 +12,7 @@ import java.util.Date;
 
 @Vetoed
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CacheRefreshConfiguration implements Configuration {
+public class JansLinkConfiguration implements Configuration {
 
     private List<GluuLdapConfiguration> sourceConfigs;
     private GluuLdapConfiguration inumConfig;

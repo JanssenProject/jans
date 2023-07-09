@@ -43,7 +43,7 @@ function() {
         issuer: issuer,
         accessToken: '123',
         
-        cacheRefreshUrl: baseUrl + '/jans-config-api/cacherefresh/cache-refresh-config',
+        jansLinkUrl: baseUrl + '/jans-config-api/jans-link/link-config',
     };
 
     karate.configure('connectTimeout', 30000);
