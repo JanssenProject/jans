@@ -1,8 +1,10 @@
-# <img src="public/icons/icon_48.png" width="45" align="left"> jans-tarp
+# Jans Tarp
 
-## Relying Party tool in form of a Chrome Extension. 
 
-[![Demo Video](![image](public/icons/icon_48.png))](https://www.youtube.com/watch?v=fahY31FtvlM)
+
+## Relying Party tool in form of a Chrome Extension.
+
+[Demo Video](https://www.youtube.com/watch?v=fahY31FtvlM)
 
 This extension is for convenient testing of authentication flows on browser.
 
@@ -34,4 +36,3 @@ Suggestions and pull requests are welcomed!.
 ---
 
 This project was bootstrapped with [Chrome Extension CLI](https://github.com/dutiyesh/chrome-extension-cli)
-
