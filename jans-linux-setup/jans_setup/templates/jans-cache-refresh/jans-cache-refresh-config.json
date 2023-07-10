@@ -89,7 +89,7 @@
   "metricReporterEnabled": null,
   "disableJdkLogger": true,
   "cleanServiceInterval": 0,
-  "linkEnabled": true,
+  "linkEnabled": false,
   "serverIpAddress": "255.255.255.255",
   "pollingInterval": null,
   "lastUpdate": 1688581648776,
