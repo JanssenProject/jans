@@ -24,9 +24,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-//import javax.inject.Inject;
-//import javax.inject.Named;
-
 import io.jans.link.CacheRefreshEvent;
 import io.jans.link.constants.JansConstants;
 import io.jans.link.external.ExternalCacheRefreshService;

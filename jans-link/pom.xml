@@ -3,9 +3,14 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.jans</groupId>
-    <artifactId>jans-link</artifactId>
+    <artifactId>jans-link-server-parent</artifactId>
     <version>1.0.15-SNAPSHOT</version>
-    <packaging>war</packaging>
+    <modules>
+        <module>model</module>
+		<module>server</module>
+		<module>service</module>
+	</modules>
+    <packaging>pom</packaging>
 
     <name>jans-link</name>
     <url>http://maven.apache.org</url>
@@ -111,7 +116,7 @@
         </dependency>
 
     </dependencies>
-    <build>
+    <!--<build>
         <plugins>
             <plugin>
                 <groupId>org.eclipse.jetty</groupId>
@@ -149,7 +154,7 @@
 						<version>3.3.1</version>
 						<configuration>
 							<webResources>
-								<!-- Duplicity for m2e-wtp plugin -->
+								&lt;!&ndash; Duplicity for m2e-wtp plugin &ndash;&gt;
 								<resource>
 									<directory>src/main/webapp</directory>
 									<filtering>true</filtering>
@@ -179,6 +184,6 @@
 				</plugins>
 			</build>
 		</profile>
-	</profiles>
+	</profiles>-->
 
 </project>
