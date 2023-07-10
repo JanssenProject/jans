@@ -1,0 +1,13 @@
+[Unit]
+Description=Janssen Link Server
+After=jans-auth.service
+
+[Service]
+Type=forking
+ExecStart=/opt/dist/scripts/jans-link start
+ExecStop=/opt/dist/scripts/jans-link stop
+User=jetty
+Group=jetty
+
+[Install]
+WantedBy=multi-user.target
