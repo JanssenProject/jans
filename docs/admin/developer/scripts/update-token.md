@@ -282,3 +282,11 @@ from org.json import JSONObject;
         print "Update token script. Modify idToken: %s" % jsonWebResponse
         return True
 ```
+2. How can I set integer value in id token claim?
+```
+jsonWebResponse.getClaims().setClaim("claimY", Integer.valueOf(124456191))
+```
+Get it as integer, via 
+```
+getClaims().getClaimAsInteger("claimY")
+```
