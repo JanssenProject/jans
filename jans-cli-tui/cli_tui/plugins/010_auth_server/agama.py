@@ -92,7 +92,7 @@ class Agama(DialogUtils):
 
         async def coroutine():
 
-            cli_args = {'operation_id': 'get-agama-dev-studio-prj-by-name', 'url_suffix': 'name:{}'.format(project_name)}
+            cli_args = {'operation_id': 'get-agama-prj-by-name', 'url_suffix': 'name:{}'.format(project_name)}
             self.app.start_progressing(_("Retrieving details for project {}".format(project_name)))
             details_response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
             self.app.stop_progressing()
@@ -109,7 +109,7 @@ class Agama(DialogUtils):
 
 
             async def do_import_config_coroutine(config):
-                cli_args = {'operation_id': 'put-agama-dev-studio-prj', 'url_suffix':'name:{}'.format(project_name), 'data':config}
+                cli_args = {'operation_id': 'put-agama-prj', 'url_suffix':'name:{}'.format(project_name), 'data':config}
                 self.app.start_progressing(_("Saving project configuration..."))
                 response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
 
@@ -157,7 +157,7 @@ class Agama(DialogUtils):
 
             async def get_current_config_coroutine():
 
-                cli_args = {'operation_id': 'get-agama-dev-prj-configs', 'url_suffix':'name:{}'.format(project_name)}
+                cli_args = {'operation_id': 'get-agama-prj-configs', 'url_suffix':'name:{}'.format(project_name)}
                 self.app.start_progressing(_("Retrieving project configuration..."))
                 response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
                 self.app.stop_progressing()
@@ -265,7 +265,7 @@ class Agama(DialogUtils):
 
 
     async def get_projects_coroutine(self, search_str=''):
-        cli_args = {'operation_id': 'get-agama-dev-prj'}
+        cli_args = {'operation_id': 'get-agama-prj'}
         self.app.start_progressing(_("Retreiving agama projects..."))
         response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
         self.app.stop_progressing()
@@ -294,7 +294,7 @@ class Agama(DialogUtils):
 
         def project_uploader(path, project_name):
             async def coroutine():
-                cli_args = {'operation_id': 'post-agama-dev-studio-prj', 'data_fn': path, 'url_suffix':'name:{}'.format(project_name)}
+                cli_args = {'operation_id': 'post-agama-prj', 'data_fn': path, 'url_suffix':'name:{}'.format(project_name)}
                 self.app.start_progressing(_("Uploading agama project..."))
                 await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
                 self.app.stop_progressing()
@@ -368,7 +368,7 @@ class Agama(DialogUtils):
 
         def do_delete_agama_project(result):
             async def coroutine():
-                cli_args = {'operation_id': 'delete-agama-dev-studio-prj', 'url_suffix': 'name:{}'.format(agama['details']['projectMetadata']['projectName'])}
+                cli_args = {'operation_id': 'delete-agama-prj', 'url_suffix': 'name:{}'.format(agama['details']['projectMetadata']['projectName'])}
                 self.app.start_progressing(_("Deleting agama project {}".format(project_name)))
                 response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
                 self.app.stop_progressing()
@@ -392,7 +392,7 @@ class Agama(DialogUtils):
         project_name = params['data']['details']['projectMetadata'].get('projectName')
 
         async def coroutine():
-            cli_args = {'operation_id': 'get-agama-dev-studio-prj-by-name', 'url_suffix': 'name:{}'.format(project_name)}
+            cli_args = {'operation_id': 'get-agama-prj-by-name', 'url_suffix': 'name:{}'.format(project_name)}
             self.app.start_progressing(_("Retrieving details for project {}".format(project_name)))
             response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
             self.app.stop_progressing()
