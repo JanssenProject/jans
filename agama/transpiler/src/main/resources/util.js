@@ -26,7 +26,11 @@ function _redirectFetchAtCallback(url) {
     throw new TypeError("Data passed to RFAC was not a string")
 }
 
-function _log(args) {
+function _log2(qname, args) {
+    _logUtils.logPrefixed(qname, args.map(_scan))
+}
+
+function _log(args) {   //Preserved for backwards compat (jans <= 1.0.15)
     _logUtils.log(args.map(_scan))
 }
 
