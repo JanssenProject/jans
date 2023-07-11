@@ -7450,11 +7450,7 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        whitePagesCanView:
-          type: boolean
-        adminCanView:
-          type: boolean
-        userCanAccess:
+        userCanEdit:
           type: boolean
         userCanView:
           type: boolean
@@ -7462,7 +7458,11 @@ components:
           type: boolean
         adminCanEdit:
           type: boolean
-        userCanEdit:
+        adminCanView:
+          type: boolean
+        userCanAccess:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -8817,8 +8817,6 @@ components:
         ttl:
           type: integer
           format: int32
-        displayName:
-          type: string
         authenticationMethod:
           type: string
           enum:
@@ -8830,6 +8828,8 @@ components:
           - tls_client_auth
           - self_signed_tls_client_auth
           - none
+        displayName:
+          type: string
         baseDn:
           type: string
         inum:
