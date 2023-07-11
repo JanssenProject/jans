@@ -1,6 +1,6 @@
 [Unit]
 Description=Janssen Fido2 Service
-After=jans-auth.service
+After=%(order_jans_fido2_service)s
 
 [Service]
 Type=forking

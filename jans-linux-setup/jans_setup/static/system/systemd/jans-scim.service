@@ -1,6 +1,6 @@
 [Unit]
 Description=Janssen Scim service
-After=jans-auth.service
+After=%(order_jans_scim_service)s
 
 [Service]
 Type=forking
