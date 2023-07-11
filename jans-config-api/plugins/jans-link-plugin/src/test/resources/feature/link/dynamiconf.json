@@ -9,7 +9,7 @@
         "maxConnections": 10,
         "useSSL": true,
         "baseDNs": [
-            "ou=cache-refresh,o=site"
+            "ou=link,o=site"
         ],
         "useAnonymousBind": false,
         "enabled": true,
