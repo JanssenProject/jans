@@ -30,6 +30,11 @@ firewall-cmd --permanent --zone=public --add-service=https
 firewall-cmd --reload
 ```
 
+- for SLES, we need to enable PackageHub as per OSversion and architecture
+```
+sudo SUSEConnect -p PackageHub/15.4/x86_64
+
+```
 - Download the GPG key zip file , unzip and import GPG key
 
 ```shell
