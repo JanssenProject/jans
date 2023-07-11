@@ -158,7 +158,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 running = bridge.prepareFlow(session.getId(), qn, ins)
                 
                 if running == None:
-                    print "Agama. Flow '%s' does not exist!" % qn
+                    print "Agama. Flow '%s' does not exist or cannot be launched from a browser!" % qn
                     return False
                 elif running:
                     print "Agama. A flow is already in course"
