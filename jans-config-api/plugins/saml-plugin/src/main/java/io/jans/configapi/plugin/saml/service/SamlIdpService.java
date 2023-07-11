@@ -41,6 +41,7 @@ public class SamlIdpService {
     @Inject
     Logger logger;
 
+    @Inject
     private DocumentStoreService documentStoreService;
 
     @Inject
