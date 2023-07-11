@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import net.sf.saxon.sapling.SaplingDocument;
@@ -51,8 +52,16 @@ public class Visitor {
         INCLUDE_SYMBOLS = new HashSet(Arrays.asList(includeSymbols));
     }
     
-    public static SaplingDocument document(ParseTree tree, int ruleIndex, String treeId) {
-        return Saplings.doc().withChild(visitElement(tree, ruleIndex).withAttr("id", treeId));
+    public static SaplingDocument document(ParseTree tree, int ruleIndex, Map<String, String> attrs) {
+
+        SaplingElement el = visitElement(tree, ruleIndex);
+        if (attrs != null) {
+            for (String key : attrs.keySet()) {
+                el = el.withAttr(key, attrs.get(key));
+            }            
+        }
+        return Saplings.doc().withChild(el);
+
     }
  
     private static String getRuleName(int ruleIndex) {
