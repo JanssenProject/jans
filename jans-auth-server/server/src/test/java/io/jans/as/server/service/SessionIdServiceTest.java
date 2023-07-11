@@ -84,7 +84,7 @@ public class SessionIdServiceTest {
 
     @Test
     public void hasAllScopes_whenSessionIsNull_shouldReturnFalse() {
-        assertFalse(sessionIdService.hasAllScopes(null, null));
+        assertFalse(sessionIdService.hasAllScopes((SessionId) null, null));
     }
 
     @Test
