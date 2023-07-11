@@ -6,7 +6,8 @@
 - An initial underscore in variables and function names prevent flow writers to use variables with the same names in their DSL code
 -->
 //Generated at ${.now?iso_utc}
-function ${flow.@id}<#recurse flow>
+<#assign fqname = flow.@fqname>
+function ${flow.@fun}<#recurse flow>
 }
 
 <#macro header>
@@ -16,7 +17,7 @@ function ${flow.@id}<#recurse flow>
     , ${.node.inputs.short_var?join(", ")}
 </#if>
 ) {
-const _basePath = ${.node.base.STRING}
+const _fqname = "${fqname}", _basePath = ${.node.base.STRING}
 let _it = null, _it2 = null
 <#-- idx is accessible to flow writers (it's not underscore-prefixed). It allows to access the status of loops -->
 let idx = [], _items = []
@@ -206,7 +207,7 @@ _equals(${.node.simple_expr[0]}, ${.node.simple_expr[1]})
 </#macro>
 
 <#macro log>
-_log(<@util_argslist node=.node />)
+_log2(_fqname, <@util_argslist node=.node />)
 </#macro>
 
 <#macro util_loop_body node>
