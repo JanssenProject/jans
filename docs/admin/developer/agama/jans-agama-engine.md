@@ -63,11 +63,21 @@ Depending on specific needs, `sessionIdUnauthenticatedUnusedLifetime` may have t
 
 ## Logging
 
-There are two sources of log data that may be of interest to flow developers: the engine and the flows themselves. The engine logs information related to the processing of flows plus tasks that run in the background. This usually provides low-level information and only deserve to be inspected when an error or unexpected behavior occurs. On the other hand, flows add data by means of the `Log` instruction used in the source code of flows.
+There are three relevant sources of log data:
 
-Engine's log data is sent to the main log file of the authentication server, that is, file `/opt/jans/jetty/jans-auth/log/jans-auth.log`. Flows' log data is found in the scripting log of the server, namely `/opt/jans/jetty/jans-auth/log/jans-auth_script.log`. This log also contains the output of `print` statements used in standard Jython custom scripts of Jans Server.
+- The engine. It emits information related to flows transpilation, projects deployment, and flow crashes - generally low-level information
+- [Log](../../../agama/language-reference.md#logging) instructions. These are statements originated directly from the Agama code
+- [Call](#foreign-calls) directives. Foreign code can issue logging statements as well as any other code a `Call` may depend on
 
-Depending on the specificity required, you may have to change the logging level of the server so more or less details appear. This can be done by altering the `loggingLevel` property of the [auth server configuration](../../config-guide/jans-cli/cli-jans-authorization-server.md). `DEBUG` usually suffices for troubleshooting.
+The following table details the location of log data. Paths are relative to directory `/opt/jans/jetty/jans-auth/log`:
+
+|Source|Destination file|Notes|
+|-|-|-|
+|Engine|`jans-auth.log`||
+|`Log` instructions|`jans-auth_script.log`|This log also contains the output of `print` statements used in standard Jython custom scripts of Jans Server|
+|Foreign code|`jans-auth.log`|Usage of [slf4j](https://slf4j.org) recommended. Proper visualization of logging statements may require customization of the server [loggers](../../auth-server/logging/log4j2.md) (Log4j2 descriptor)|
+
+Depending on the specificity required, you may have to change the logging level so more or less details appear in the logs. This can be done by altering the `loggingLevel` property of the [auth server configuration](../../config-guide/jans-cli/cli-jans-authorization-server.md). `DEBUG` usually suffices for troubleshooting.
 
 The available levels for statements issued with the `Log` instruction are:
 
