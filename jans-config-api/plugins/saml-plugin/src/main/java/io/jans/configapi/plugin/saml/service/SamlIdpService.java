@@ -109,6 +109,17 @@ public class SamlIdpService {
         try {
             boolean result = documentStoreService.saveDocumentStream(spMetadataFile, stream,
                     List.of("oxtrust-server", "Shibboleth"));
+            logger.error("SP File saving result:{}",result);
+            
+            InputStream newFile = documentStoreService.readDocumentAsStream(spMetadataFile);      
+            logger.error("SP File read newFile:{}",newFile);
+            
+            String newName = idpMetadataTempFolder + "puja123.xml";
+            logger.error("Renaming file newName:{}",newName);
+            boolean renamed = documentStoreService.renameDocument(spMetadataFile, spMetadataFile);
+            logger.error("File renabled? renamed:{}",renamed);
+            
+            
             if (result) {
                 return tempFileName;
             }
