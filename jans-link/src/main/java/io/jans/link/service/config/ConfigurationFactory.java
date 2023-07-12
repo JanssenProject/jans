@@ -290,7 +290,7 @@ public class ConfigurationFactory {
 
 	private Conf loadConfigurationFromLdap(String... returnAttributes) {
 		final PersistenceEntryManager persistenceEntryManager = persistenceEntryManagerInstance.get();
-		final String dn = this.baseConfiguration.getString("cacheRefresh_ConfigurationEntryDN");
+		final String dn = this.baseConfiguration.getString("link_ConfigurationEntryDN");
 		try {
 			final Conf conf = persistenceEntryManager.find(dn, Conf.class, returnAttributes);
 
