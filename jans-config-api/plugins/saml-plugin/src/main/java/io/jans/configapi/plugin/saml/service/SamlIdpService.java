@@ -114,11 +114,12 @@ public class SamlIdpService {
             InputStream newFile = documentStoreService.readDocumentAsStream(spMetadataFile);      
             logger.error("SP File read newFile:{}",newFile);
             
-            String newName = idpMetadataTempFolder + "puja123.xml";
-            logger.error("Renaming file newName:{}",newName);
-            boolean renamed = documentStoreService.renameDocument(spMetadataFile, spMetadataFile);
-            logger.error("File renabled? renamed:{}",renamed);
-            
+            /*
+             * String newName = idpMetadataTempFolder + "puja123.xml";
+             * logger.error("Renaming file newName:{}",newName); boolean renamed =
+             * documentStoreService.renameDocument(spMetadataFile, spMetadataFile);
+             * logger.error("File renabled? renamed:{}",renamed);
+             */
             
             if (result) {
                 return tempFileName;

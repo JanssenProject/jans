@@ -168,64 +168,6 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/saml-client-scope.write
-  /saml/samlClient/upload:
-    post:
-      tags:
-      - SAML - Trust Relationship
-      summary: Create Trust Relationship with File
-      description: Create Trust Relationship with File
-      operationId: post-trust-relationship-file
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-      responses:
-        "201":
-          description: clientList
-          content:
-            multipart/form-data:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/TrustRelationship'
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/saml.write
-  /saml/samlClient/{id}:
-    delete:
-      tags:
-      - SAML - Trust Relationship
-      summary: Delete TrustRelationship
-      description: Delete TrustRelationship
-      operationId: put-trust-relationship
-      parameters:
-      - name: id
-        in: path
-        description: Unique Id of client
-        required: true
-        schema:
-          type: string
-      responses:
-        "204":
-          description: No Content
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/TrustRelationship'
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/saml.write
   /saml/samlClient:
     get:
       tags:
@@ -263,6 +205,91 @@ paths:
       responses:
         "200":
           description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TrustRelationship'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/saml.write
+    post:
+      tags:
+      - SAML - Trust Relationship
+      summary: Create Trust Relationship without File
+      description: Create Trust Relationship without File
+      operationId: post-trust-relationship
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TrustRelationship'
+      responses:
+        "201":
+          description: clientList
+          content:
+            multipart/form-data:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TrustRelationship'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/saml.write
+  /saml/samlClient/upload:
+    post:
+      tags:
+      - SAML - Trust Relationship
+      summary: Create Trust Relationship with File
+      description: Create Trust Relationship with File
+      operationId: post-trust-relationship-file
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TrustRelationship'
+      responses:
+        "201":
+          description: clientList
+          content:
+            multipart/form-data:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TrustRelationship'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/saml.write
+  /saml/samlClient/{id}:
+    delete:
+      tags:
+      - SAML - Trust Relationship
+      summary: Delete TrustRelationship
+      description: Delete TrustRelationship
+      operationId: put-trust-relationship
+      parameters:
+      - name: id
+        in: path
+        description: Unique Id of client
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: No Content
           content:
             application/json:
               schema:

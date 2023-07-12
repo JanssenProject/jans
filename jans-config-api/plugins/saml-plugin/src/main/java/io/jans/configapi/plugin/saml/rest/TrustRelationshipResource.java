@@ -3,13 +3,18 @@ package io.jans.configapi.plugin.saml.rest;
 import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.plugin.saml.util.Constants;
+import io.jans.configapi.util.ApiAccessConstants;
+import io.jans.configapi.util.AttributeNames;
+import io.jans.model.GluuAttribute;
 import io.jans.configapi.plugin.saml.service.SamlService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.*;
@@ -100,7 +105,31 @@ public class TrustRelationshipResource extends BaseResource {
         return Response.ok(trustRelationship).build();
     }
 
-   
+    @Operation(summary = "Create Trust Relationship without File", description = "Create Trust Relationship without File", operationId = "post-trust-relationship", tags = {
+            "SAML - Trust Relationship" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    Constants.SAML_WRITE_ACCESS }))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "clientList", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA, array = @ArraySchema(schema = @Schema(implementation = TrustRelationship.class)))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @POST
+    @ProtectedApi(scopes = { Constants.SAML_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            Constants.SAML_WRITE_ACCESS })
+    public Response createTrustRelationship(@Valid TrustRelationship trustRelationship) throws Exception {
+        logger.debug(" Create trustRelationship:{}", trustRelationship);
+        checkResourceNotNull(trustRelationship, SAML_TRUST_RELATIONSHIP);
+        checkNotNull(trustRelationship.getClientId(), AttributeNames.NAME);
+        // TO-DO validation of TrustRelationship
+        String inum = samlService.generateInumForNewRelationship();
+        trustRelationship.setInum(inum);
+        trustRelationship.setDn(samlService.getDnForTrustRelationship(inum));
+        trustRelationship = samlService.addTrustRelationship(trustRelationship, null);
+
+        logger.error("Create created by TrustRelationship:{}", trustRelationship);
+        return Response.status(Response.Status.CREATED).entity(trustRelationship).build();
+    }
 
     @Operation(summary = "Create Trust Relationship with File", description = "Create Trust Relationship with File", operationId = "post-trust-relationship-file", tags = {
             "SAML - Trust Relationship" }, security = @SecurityRequirement(name = "oauth2", scopes = {
@@ -111,12 +140,14 @@ public class TrustRelationshipResource extends BaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
     @Path("/upload")
-    public Response createTrustRelationshipWithFile3(InputStream metadatafile,
-            @Valid TrustRelationship trustRelationship) throws IOException {
-
-        logger.error("Create TrustRelationship:{}, metadatafile:{}", trustRelationship, metadatafile);
-
-        //TO-DO validation of TrustRelationship
+    @ProtectedApi(scopes = { Constants.SAML_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+            Constants.SAML_WRITE_ACCESS })
+    public Response createTrustRelationshipWithFile(@Valid TrustRelationship trustRelationship,
+            InputStream metadatafile) throws IOException {
+        logger.debug(" Create trustRelationship:{}, metadatafile:{} ", trustRelationship, metadatafile);
+        checkResourceNotNull(trustRelationship, SAML_TRUST_RELATIONSHIP);
+        checkNotNull(trustRelationship.getClientId(), AttributeNames.NAME);
+        // TO-DO validation of TrustRelationship
         String inum = samlService.generateInumForNewRelationship();
         trustRelationship.setInum(inum);
         trustRelationship.setDn(samlService.getDnForTrustRelationship(inum));
@@ -124,7 +155,6 @@ public class TrustRelationshipResource extends BaseResource {
 
         logger.error("Create created by TrustRelationship:{}", trustRelationship);
         return Response.status(Response.Status.CREATED).entity(trustRelationship).build();
-
     }
 
     @Operation(summary = "Update TrustRelationship", description = "Update TrustRelationship", operationId = "put-trust-relationship", tags = {
@@ -171,6 +201,5 @@ public class TrustRelationshipResource extends BaseResource {
 
         return Response.noContent().build();
     }
-
 
 }
