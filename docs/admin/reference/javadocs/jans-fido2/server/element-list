@@ -1,5 +1,6 @@
 io.jans.fido2.androind
 io.jans.fido2.exception
+io.jans.fido2.exception.mds
 io.jans.fido2.google.safetynet
 io.jans.fido2.model.auth
 io.jans.fido2.model.cert
