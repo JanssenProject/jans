@@ -631,7 +631,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
                         ('jans-auth', 'installOxAuth'),
                         ('jans-config-api', 'install_config_api'),
                         ('jans-fido2', 'installFido2'),
-                        ('jans-cache-refresh', 'install_cache_refresh'),
+                        ('jans-link', 'install_jans_link'),
                         ('jans-scim', 'install_scim_server'),
                         ]
         service_listr = service_list[:]
