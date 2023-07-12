@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.0.15](https://github.com/JanssenProject/jans/compare/jans-cli-tui-v1.0.14...jans-cli-tui-v1.0.15) (2023-07-12)
+
+
+### Features
+
+* **jans-cli-tui:** configure screen changes ([#5389](https://github.com/JanssenProject/jans/issues/5389)) ([5d73ac3](https://github.com/JanssenProject/jans/commit/5d73ac34027a39bbdefcfe08e29991fb58f64e5a))
+
+
+### Bug Fixes
+
+* **jans-cli-tui:** combobox spacing ([#5307](https://github.com/JanssenProject/jans/issues/5307)) ([bf05c56](https://github.com/JanssenProject/jans/commit/bf05c563055cea3616b82f4b5f13b72d2114f46f))
+* **jans-cli-tui:** error while saving auth creds ([#5446](https://github.com/JanssenProject/jans/issues/5446)) ([2555578](https://github.com/JanssenProject/jans/commit/2555578207c0837e1f261652a2ea5d699b094f95))
+* **jans-cli-tui:** remove agama developer studio ([#5466](https://github.com/JanssenProject/jans/issues/5466)) ([205e6ca](https://github.com/JanssenProject/jans/commit/205e6cac829c391c135ce26836bb2090d5de6c2a))
+* **jans-cli-tui:** set checkbox selected index to 0 upon filtering ([#5308](https://github.com/JanssenProject/jans/issues/5308)) ([d31c01c](https://github.com/JanssenProject/jans/commit/d31c01c088f404ad2f2db2a6c9dd8fe748d69783))
+* **jans-cli:** remove local jwt token when session is revoked ([#5249](https://github.com/JanssenProject/jans/issues/5249)) ([788d2f7](https://github.com/JanssenProject/jans/commit/788d2f7d48bf269f1f54115d16159f5f5f728fa3))
+* prepare for 1.0.15 release ([0e3cc2f](https://github.com/JanssenProject/jans/commit/0e3cc2f5ea287c2c35f45def54f074daa473ec49))
+
 ## [1.0.14](https://github.com/JanssenProject/jans/compare/jans-cli-tui-v1.0.13...jans-cli-tui-v1.0.14) (2023-06-12)
 
 
