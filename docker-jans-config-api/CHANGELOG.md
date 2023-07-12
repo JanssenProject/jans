@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.15-1](https://github.com/JanssenProject/jans/compare/docker-jans-config-api-v1.0.14-1...docker-jans-config-api-v1.0.15-1) (2023-07-12)
+
+
+### Bug Fixes
+
+* prepare for 1.0.15 release ([0e3cc2f](https://github.com/JanssenProject/jans/commit/0e3cc2f5ea287c2c35f45def54f074daa473ec49))
+
 ## [1.0.14-1](https://github.com/JanssenProject/jans/compare/docker-jans-config-api-v1.0.13-1...docker-jans-config-api-v1.0.14-1) (2023-06-12)
 
 
