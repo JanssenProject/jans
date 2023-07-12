@@ -1,0 +1,5 @@
+io.jans.configapi.plugin.link.extensions
+io.jans.configapi.plugin.link.model.config
+io.jans.configapi.plugin.link.rest
+io.jans.configapi.plugin.link.service
+io.jans.configapi.plugin.link.util
