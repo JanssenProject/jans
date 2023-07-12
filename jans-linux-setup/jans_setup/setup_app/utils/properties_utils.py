@@ -597,18 +597,18 @@ class PropertiesUtils(SetupUtils):
             Config.addPostSetupService.append('installEleven')
 
 
-    def prompt_for_cache_refresh(self):
-        if Config.installed_instance and Config.install_cache_refresh:
+    def prompt_for_jans_link(self):
+        if Config.installed_instance and Config.install_jans_link:
             return
 
-        promp_cache_refresh = self.getPrompt("Install Cache Refresh Server?",
-                                            self.getDefaultOption(Config.install_cache_refresh)
+        prompt_jans_link = self.getPrompt("Install Jans Link Server?",
+                                            self.getDefaultOption(Config.install_jans_link)
                                             )[0].lower()
 
-        Config.install_cache_refresh = promp_cache_refresh == 'y'
+        Config.install_jans_link = prompt_jans_link == 'y'
 
-        if Config.installed_instance and Config.install_cache_refresh:
-            Config.addPostSetupService.append('install_cache_refresh')
+        if Config.installed_instance and Config.install_jans_link:
+            Config.addPostSetupService.append('install_jans_link')
 
 
     def promptForConfigApi(self):
@@ -956,7 +956,7 @@ class PropertiesUtils(SetupUtils):
             self.promptForConfigApi()
             self.promptForScimServer()
             self.promptForFido2Server()
-            self.prompt_for_cache_refresh()
+            self.prompt_for_jans_link()
             #self.promptForEleven()
             #if (not Config.installOxd) and Config.oxd_package:
             #    self.promptForOxd()

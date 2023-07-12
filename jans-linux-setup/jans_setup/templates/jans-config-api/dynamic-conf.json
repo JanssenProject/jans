@@ -38,20 +38,20 @@
     "userPassword"
   ],
    "userMandatoryAttributes": [
-	"mail",
-	"displayName",
-	"jansStatus",
-	"userPassword",
-	"givenName"
+    "mail",
+    "displayName",
+    "jansStatus",
+    "userPassword",
+    "givenName"
   ],
   "agamaConfiguration": {
-     "mandatoryAttributes": [
-	 "qname",
-	 "source"
+    "mandatoryAttributes": [
+    "qname",
+    "source"
      ],
-	 "optionalAttributes": [
-	 "serialVersionUID",
-	 "enabled"
+    "optionalAttributes": [
+    "serialVersionUID",
+    "enabled"
      ]
   },
   "auditLogConf": {
@@ -89,9 +89,9 @@
       "className": "io.jans.configapi.plugin.mgt.rest.ApiApplication"
     },
     {
-      "name": "cache-refresh",
-      "description": "cache-refresh plugin",
-      "className": "io.jans.configapi.plugin.cacherefresh.rest.ApiApplication"
+      "name": "jans-link",
+      "description": "jans-link plugin",
+      "className": "io.jans.configapi.plugin.janslink.rest.ApiApplication"
     }
   ]
 }
