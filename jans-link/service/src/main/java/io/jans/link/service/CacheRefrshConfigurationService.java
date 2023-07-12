@@ -85,7 +85,7 @@ public class CacheRefrshConfigurationService implements Serializable {
      * @throws Exception
      */
     public String getDnForConfiguration() {
-    	String dn = configurationFactory.getBaseConfiguration().getString("cacheRefresh_ConfigurationEntryDN");
+    	String dn = configurationFactory.getBaseConfiguration().getString("link_ConfigurationEntryDN");
         return dn;
     }
 

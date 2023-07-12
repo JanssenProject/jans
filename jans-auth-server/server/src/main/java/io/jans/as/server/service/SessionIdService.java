@@ -971,12 +971,26 @@ public class SessionIdService {
         }
 
         final String scopesAsString = sessionId.getSessionAttributes().get("scope");
-        if (StringUtils.isBlank(scopesAsString)) {
+        return hasAllScopes(scopesAsString, scopes);
+    }
+
+    public boolean hasClientAllScopes(SessionId sessionId, String clientId, Set<String> scopes) {
+        if (sessionId == null || sessionId.getSessionAttributes().isEmpty() || StringUtils.isBlank(clientId) || scopes == null || scopes.isEmpty()) {
+            return false;
+        }
+        final String key = clientId + "_authz_scopes";
+
+        String clientScopes = sessionId.getSessionAttributes().get(key);
+        return hasAllScopes(clientScopes, scopes);
+    }
+
+    public static boolean hasAllScopes(String existingScopes, Set<String> scopes) {
+        if (StringUtils.isBlank(existingScopes)) {
             return false;
         }
 
         for (String scope : scopes) {
-            if (!scopesAsString.contains(scope)) {
+            if (!existingScopes.contains(scope)) {
                 return false;
             }
         }

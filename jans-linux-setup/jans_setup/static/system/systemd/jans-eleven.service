@@ -1,6 +1,6 @@
 [Unit]
 Description=Janssen Eleven service
-After=jans-auth.service
+After=%(backend_service)s
 
 [Service]
 Type=forking
