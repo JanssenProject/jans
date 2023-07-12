@@ -75,7 +75,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
             if Config.profile == 'jans':
                 txt += 'Install Fido2 Server'.ljust(30) + repr(Config.installFido2).rjust(35) + (' *' if 'installFido2' in Config.addPostSetupService else '') + "\n"
                 txt += 'Install Scim Server'.ljust(30) + repr(Config.install_scim_server).rjust(35) + (' *' if 'install_scim_server' in Config.addPostSetupService else '') + "\n"
-                txt += 'Install Cache Refresh Server'.ljust(30) + repr(Config.install_cache_refresh).rjust(35) + (' *' if 'install_cache_refresh' in Config.addPostSetupService else '') + "\n"
+                txt += 'Install Jans Link Server'.ljust(30) + repr(Config.install_jans_link).rjust(35) + (' *' if 'install_jans_link' in Config.addPostSetupService else '') + "\n"
                 #txt += 'Install Oxd '.ljust(30) + repr(Config.installOxd).rjust(35) + (' *' if 'installOxd' in Config.addPostSetupService else '') + "\n"
 
             if Config.profile == 'jans' and Config.installEleven:
@@ -631,7 +631,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
                         ('jans-auth', 'installOxAuth'),
                         ('jans-config-api', 'install_config_api'),
                         ('jans-fido2', 'installFido2'),
-                        ('jans-cache-refresh', 'install_cache_refresh'),
+                        ('jans-link', 'install_jans_link'),
                         ('jans-scim', 'install_scim_server'),
                         ]
         service_listr = service_list[:]
