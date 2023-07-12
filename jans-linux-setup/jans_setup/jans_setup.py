@@ -399,6 +399,8 @@ def main():
                 if Config.rdbm_install:
                     rdbmInstaller.start_installation()
 
+            jansInstaller.order_services()
+
             if (Config.installed_instance and 'installHttpd' in Config.addPostSetupService) or (
                     not Config.installed_instance and Config.installHttpd):
                 httpdinstaller.configure()

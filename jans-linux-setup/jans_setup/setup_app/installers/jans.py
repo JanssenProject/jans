@@ -623,3 +623,27 @@ class JansInstaller(BaseInstaller, SetupUtils):
                     ]
 
         self.run(cmd_cert_gen)
+
+    def order_services(self):
+
+        service_list = [
+                        ('jans-eleven', 'installEleven'),
+                        ('jans-auth', 'installOxAuth'),
+                        ('jans-config-api', 'install_config_api'),
+                        ('jans-fido2', 'installFido2'),
+                        ('jans-cache-refresh', 'install_cache_refresh'),
+                        ('jans-scim', 'install_scim_server'),
+                        ]
+        service_listr = service_list[:]
+        service_listr.reverse()
+        for i, service in enumerate(service_listr):
+            order_var_str = 'order_{}_service'.format(service[0].replace('-','_'))
+            for sservice in (service_listr[i+1:]):
+                if getattr(Config, sservice[1]):
+                    Config.templateRenderingDict[order_var_str] = sservice[0]+'.service'
+                    break
+                else:
+                    if service[0] != 'jans-auth':
+                        Config.templateRenderingDict[order_var_str] = 'jans-auth.service'
+                    else:
+                        Config.templateRenderingDict['order_jans_auth_service'] =  'jans-eleven.service' if Config.installEleven else  Config.backend_service

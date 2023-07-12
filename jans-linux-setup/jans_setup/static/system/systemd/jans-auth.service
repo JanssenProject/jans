@@ -1,6 +1,6 @@
 [Unit]
 Description=Janssen Auth Server
-After=%(start_auth_after)s
+After=%(order_jans_auth_service)s
 
 [Service]
 Type=forking

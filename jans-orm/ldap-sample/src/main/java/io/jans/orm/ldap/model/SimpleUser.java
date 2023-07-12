@@ -6,18 +6,14 @@
 
 package io.jans.orm.ldap.model;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-
-import io.jans.orm.annotation.AttributeName;
-import io.jans.orm.annotation.AttributesList;
-import io.jans.orm.annotation.CustomObjectClass;
-import io.jans.orm.annotation.DN;
-import io.jans.orm.annotation.DataEntry;
-import io.jans.orm.annotation.ObjectClass;
+import io.jans.orm.annotation.*;
 import io.jans.orm.model.base.CustomObjectAttribute;
 import io.jans.orm.util.StringHelper;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * @author Yuriy Movchan
@@ -147,6 +143,25 @@ public class SimpleUser implements Serializable {
                 }
             }
             customAttributes.add(new CustomObjectAttribute(attributeName, attributeValues));
+        }
+    }
+
+    public void setAttribute(String attributeName, String attributeValue, Boolean multiValued) {
+        CustomObjectAttribute attribute = new CustomObjectAttribute(attributeName, attributeValue);
+        if (multiValued != null) {
+            attribute.setMultiValued(multiValued);
+        }
+
+        removeAttribute(attributeName);
+        getCustomAttributes().add(attribute);
+    }
+
+    public void removeAttribute(String attributeName) {
+        for (Iterator<CustomObjectAttribute> it = getCustomAttributes().iterator(); it.hasNext(); ) {
+            if (StringHelper.equalsIgnoreCase(attributeName, it.next().getName())) {
+                it.remove();
+                break;
+            }
         }
     }
 

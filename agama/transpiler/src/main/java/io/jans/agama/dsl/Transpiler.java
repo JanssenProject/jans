@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -93,7 +94,7 @@ public class Transpiler {
         if (flowQName == null)
             throw new TranspilerException("Qualified name cannot be null", new NullPointerException());
         
-        this.flowId = flowQName;
+        flowId = flowQName;
         fanny = "_" + flowQName.replaceAll("\\.", "_");    //Generates a valid JS function name
 
         processor = new Processor(false);
@@ -166,7 +167,8 @@ public class Transpiler {
         logger.debug("Traversing parse tree");
 
         //Generate XML representation
-        SaplingDocument document = Visitor.document(flowContext, AuthnFlowParser.RULE_flow, fanny);
+        SaplingDocument document = Visitor.document(flowContext, AuthnFlowParser.RULE_flow,
+                Map.of("fqname", flowId, "fun", fanny));
         applyValidations(document);
         return document.toXdmNode(processor);
 
