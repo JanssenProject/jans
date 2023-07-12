@@ -4,7 +4,7 @@
 
     <groupId>io.jans</groupId>
     <artifactId>jans-link</artifactId>
-    <version>1.0.15</version>
+    <version>1.0.16-SNAPSHOT</version>
     <packaging>war</packaging>
 
     <name>jans-link</name>
