@@ -168,34 +168,6 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/saml-client-scope.write
-  /saml/samlClient/test:
-    post:
-      tags:
-      - SAML - Trust Relationship
-      summary: Create Trust Relationship
-      description: Create Trust Relationship
-      operationId: post-trust-relationship
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/TrustRelationship'
-      responses:
-        "201":
-          description: clientList
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/TrustRelationship'
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/saml.write
   /saml/samlClient/upload:
     post:
       tags:
