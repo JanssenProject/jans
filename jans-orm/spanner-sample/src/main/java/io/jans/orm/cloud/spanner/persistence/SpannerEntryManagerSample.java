@@ -27,8 +27,13 @@ public class SpannerEntryManagerSample {
         connectionProperties.put("spanner#connection.instance", "jans-instance");
         connectionProperties.put("spanner#connection.database", "jansdb");
 
-        connectionProperties.put("spanner#connection.emulator-host", "localhost:9010");
-        
+        boolean emulator = true;
+		if (emulator) {
+			connectionProperties.put("spanner#connection.emulator-host", "localhost:9010");
+		} else {
+			connectionProperties.put("spanner#connection.credentials-file", "V:\\dev-gluu-cloud-platform-32136abdceb7.json");
+		}
+
         // Password hash method
         connectionProperties.put("spanner#password.encryption.method", "SSHA-256");
         
