@@ -990,7 +990,6 @@ class JansCliApp(Application):
             if not os.path.exists(log_dir):
                 os.makedirs(log_dir, mode=0o700)
             config_cli.log_dir = log_dir
-
             if hasattr(self, 'cli_object'):
                 self.cli_object.set_logging()
 
