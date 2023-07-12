@@ -122,15 +122,15 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                     self.restart('mariadb')
                     self.fix_unit_file('mariadb')
                     self.enable('mariadb')
-                    Config.start_auth_after = 'mariadb.service'
+                    Config.backend_service = 'mariadb.service'
 
                 elif base.clone_type == 'rpm':
                     self.restart('mysqld')
                     self.enable('mysqld')
-                    Config.start_auth_after = 'mysqld.service'
+                    Config.backend_service = 'mysqld.service'
 
                 else:
-                    Config.start_auth_after = 'mysql.service'
+                    Config.backend_service = 'mysql.service'
 
                 result, conn = self.dbUtils.mysqlconnection(log=False)
                 if not result:
@@ -145,10 +145,10 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
             elif Config.rdbm_type == 'pgsql':
                 if base.clone_type == 'rpm':
                     self.run(['postgresql-setup', 'initdb'])
-                    Config.start_auth_after = 'postgresql.service'
+                    Config.backend_service = 'postgresql.service'
                 elif base.clone_type == 'deb':
                     self.run([paths.cmd_chmod, '640', '/etc/ssl/private/ssl-cert-snakeoil.key'])
-                    Config.start_auth_after = 'postgresql.service'
+                    Config.backend_service = 'postgresql.service'
 
                 self.restart('postgresql')
 

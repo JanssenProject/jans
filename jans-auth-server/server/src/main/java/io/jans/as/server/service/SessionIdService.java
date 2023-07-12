@@ -965,6 +965,38 @@ public class SessionIdService {
         return persistenceEntryManager.findEntries(staticConfiguration.getBaseDn().getSessions(), SessionId.class, filter);
     }
 
+    public boolean hasAllScopes(SessionId sessionId, Set<String> scopes) {
+        if (sessionId == null || sessionId.getSessionAttributes().isEmpty() || scopes == null || scopes.isEmpty()) {
+            return false;
+        }
+
+        final String scopesAsString = sessionId.getSessionAttributes().get("scope");
+        return hasAllScopes(scopesAsString, scopes);
+    }
+
+    public boolean hasClientAllScopes(SessionId sessionId, String clientId, Set<String> scopes) {
+        if (sessionId == null || sessionId.getSessionAttributes().isEmpty() || StringUtils.isBlank(clientId) || scopes == null || scopes.isEmpty()) {
+            return false;
+        }
+        final String key = clientId + "_authz_scopes";
+
+        String clientScopes = sessionId.getSessionAttributes().get(key);
+        return hasAllScopes(clientScopes, scopes);
+    }
+
+    public static boolean hasAllScopes(String existingScopes, Set<String> scopes) {
+        if (StringUtils.isBlank(existingScopes)) {
+            return false;
+        }
+
+        for (String scope : scopes) {
+            if (!existingScopes.contains(scope)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public void externalEvent(SessionEvent event) {
         externalApplicationSessionService.externalEvent(event);
     }

@@ -30,6 +30,11 @@ firewall-cmd --permanent --zone=public --add-service=https
 firewall-cmd --reload
 ```
 
+- for SLES, we need to enable PackageHub as per OSversion and architecture
+```
+sudo SUSEConnect -p PackageHub/15.4/x86_64
+
+```
 - Download the GPG key zip file , unzip and import GPG key
 
 ```shell
@@ -41,7 +46,7 @@ unzip automation-jans-public-gpg.zip
 ```
 
 ```shell
-rpm -import automation-jans-public-gpg.asc
+sudo rpm -import automation-jans-public-gpg.asc
 ```
 
 - Download the release package from the GitHub Janssen Project
@@ -75,7 +80,7 @@ Output similar to below should confirm the integrity of the downloaded package.
 - Install the package
 
 ```
-zypper install ~/jans-replace-janssen-version-suse15.x86_64.rpm
+sudo zypper install ~/jans-replace-janssen-version-suse15.x86_64.rpm
 ```
 
 ## Run the setup script
@@ -83,7 +88,7 @@ zypper install ~/jans-replace-janssen-version-suse15.x86_64.rpm
 - Run the setup script in interactive mode:
 
 ```
-python3 /opt/jans/jans-setup/setup.py
+sudo python3 /opt/jans/jans-setup/setup.py
 ```
 
 See more detailed [instructions](../setup.md) on the setup script if you're
@@ -102,7 +107,7 @@ After the successful completion of setup process,
 Begin configuration by accessing the TUI with the following command:
 
 ```
-/opt/jans/jans-cli/jans_cli_tui.py
+sudo /opt/jans/jans-cli/jans_cli_tui.py
 ```
 
 Full TUI documentation can be found [here](../../config-guide/jans-tui/README.md)
@@ -120,7 +125,7 @@ the package.
 First, run command below to uninstall the Janssen server
 
 ```
-python3 /opt/jans/jans-setup/install.py -uninstall
+sudo python3 /opt/jans/jans-setup/install.py -uninstall
 ```
 
 You'll see the following confirmation:

@@ -24,6 +24,7 @@ tags:
 | mdsAccessToken | MDS access token | [Details](#mdsaccesstoken) |
 | mdsCertsFolder | MDS TOC root certificates folder | [Details](#mdscertsfolder) |
 | mdsTocsFolder | MDS TOC files folder | [Details](#mdstocsfolder) |
+| metadataUrlsProvider | String value to provide source of URLs with external metadata | [Details](#metadataurlsprovider) |
 | metricReporterEnabled | Boolean value specifying whether metric reporter is enabled | [Details](#metricreporterenabled) |
 | metricReporterInterval | The interval for metric reporter in seconds | [Details](#metricreporterinterval) |
 | metricReporterKeepDataDays | The days to keep report data | [Details](#metricreporterkeepdatadays) |
@@ -158,6 +159,15 @@ tags:
 ### mdsTocsFolder
 
 - Description: MDS TOC files folder
+
+- Required: No
+
+- Default value: None
+
+
+### metadataUrlsProvider
+
+- Description: String value to provide source of URLs with external metadata
 
 - Required: No
 

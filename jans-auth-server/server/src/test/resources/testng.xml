@@ -22,6 +22,7 @@
             <class name="io.jans.as.server.service.net.UriServiceTest" />
             <class name="io.jans.as.server.service.GrantServiceTest" />
             <class name="io.jans.as.server.service.LocalResponseCacheTest" />
+            <class name="io.jans.as.server.service.SessionIdServiceTest" />
 
             <class name="io.jans.as.server.token.ws.rs.TokenExchangeServiceTest" />
             <class name="io.jans.as.server.token.ws.rs.TokenRestWebServiceValidatorTest" />
