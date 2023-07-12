@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.15](https://github.com/JanssenProject/jans/compare/jans-core-v1.0.14...jans-core-v1.0.15) (2023-07-12)
+
+
+### Bug Fixes
+
+* **jans-auth-server:** initializing of jsf navigation has been updated; ([#5253](https://github.com/JanssenProject/jans/issues/5253)) ([bed5d6f](https://github.com/JanssenProject/jans/commit/bed5d6fb7f9718c40a347108f8433c6552cacae9))
+* prepare for 1.0.15 release ([0e3cc2f](https://github.com/JanssenProject/jans/commit/0e3cc2f5ea287c2c35f45def54f074daa473ec49))
+
 ## [1.0.14](https://github.com/JanssenProject/jans/compare/jans-core-v1.0.13...jans-core-v1.0.14) (2023-06-12)
 
 
