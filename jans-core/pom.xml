@@ -62,6 +62,7 @@
 		<module>demo-cdi</module>
 		<module>doc</module>
 		<module>uma-rs-core</module>
+		<module>notify-client</module>
 	</modules>
 
 	<dependencyManagement>
