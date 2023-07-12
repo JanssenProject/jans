@@ -18,6 +18,7 @@ from sqlalchemy import create_engine
 from sqlalchemy import MetaData
 from sqlalchemy import func
 from sqlalchemy import select
+from sqlalchemy import delete
 from ldif import LDIFParser
 from ldap3.utils import dn as dnutils
 
@@ -32,7 +33,7 @@ if _t.TYPE_CHECKING:  # pragma: no cover
 
 logger = logging.getLogger(__name__)
 
-SERVER_VERSION_RE = re.compile(r"\d+(.\d+)+")
+SERVER_VERSION_RE = re.compile(r"[\d.]+")
 
 
 def get_sql_password(manager: Manager) -> str:
@@ -540,13 +541,22 @@ class SqlClient(SqlSchemaMixin):
 
     def get_server_version(self) -> tuple[int, ...]:
         """Get server version as tuple."""
-        # major and minor format
-        version = [0, 0]
+        # major.minor.patch format
+        version = [0, 0, 0]
 
         pattern = SERVER_VERSION_RE.search(self.server_version)
         if pattern:
             version = [int(comp) for comp in pattern.group().split(".")]
         return tuple(version)
+
+    def delete(self, table_name: str, id_: str) -> bool:
+        """Delete a row from a table with matching ID."""
+        table = self.metadata.tables.get(table_name)
+
+        query = delete(table).where(table.c.doc_id == id_)
+        with self.engine.connect() as conn:
+            result = conn.execute(query)
+            return bool(result.rowcount)
 
 
 def render_sql_properties(manager: Manager, src: str, dest: str) -> None:

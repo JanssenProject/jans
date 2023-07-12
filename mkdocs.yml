@@ -85,6 +85,7 @@ nav:
     - FAQ: admin/install/install-faq.md
   - Kubernetes Operation Guide:
     - admin/kubernetes-ops/README.md
+    - Upgrade: admin/kubernetes-ops/upgrade.md
     - Scaling: admin/kubernetes-ops/scaling.md
     - Backup and Restore: admin/kubernetes-ops/backup-restore.md
     - Certificate Management: admin/kubernetes-ops/cert-management.md
@@ -136,6 +137,7 @@ nav:
       - SCIM User Resources: admin/config-guide/jans-cli/cli-user.md
       - SCIM Group Management: admin/config-guide/jans-cli/cli-group.md
       - Authentication via Device Flow: admin/config-guide/jans-cli/device-flow.md
+      - CLI For Agama Developer Studio: admin/config-guide/jans-cli/cli-agama.md
     - SCIM CLI: admin/config-guide/scim-cli.md
   - Database Guide:
     - admin/reference/database/README.md

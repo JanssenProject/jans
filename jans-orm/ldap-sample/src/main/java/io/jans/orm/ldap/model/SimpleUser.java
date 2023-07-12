@@ -6,25 +6,20 @@
 
 package io.jans.orm.ldap.model;
 
+import io.jans.orm.annotation.*;
+import io.jans.orm.model.base.CustomObjectAttribute;
+import io.jans.orm.util.StringHelper;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import io.jans.orm.model.base.CustomAttribute;
-import io.jans.orm.annotation.AttributeName;
-import io.jans.orm.annotation.AttributesList;
-import io.jans.orm.annotation.CustomObjectClass;
-import io.jans.orm.annotation.DN;
-import io.jans.orm.annotation.DataEntry;
-import io.jans.orm.annotation.ObjectClass;
-import io.jans.orm.util.StringHelper;
-
 /**
  * @author Yuriy Movchan
  * Date: 11/03/2016
  */
-@DataEntry(sortBy = "userId", sortByName = "uid")
+@DataEntry
 @ObjectClass(value = "jansPerson")
 public class SimpleUser implements Serializable {
 
@@ -36,8 +31,17 @@ public class SimpleUser implements Serializable {
     @AttributeName(name = "uid")
     private String userId;
 
-    @AttributesList(name = "name", value = "values", sortByName = true)
-    private List<CustomAttribute> customAttributes = new ArrayList<CustomAttribute>();
+    @AttributeName(name = "userPassword")
+    private String userPassword;
+    
+    @AttributeName(name = "role")
+    private UserRole userRole; 
+
+    @AttributeName(name = "memberOf")
+    private List<String> memberOf; 
+
+    @AttributesList(name = "name", value = "values", multiValued = "multiValued", sortByName = true)
+    private List<CustomObjectAttribute> customAttributes = new ArrayList<CustomObjectAttribute>();
 
     @CustomObjectClass
     private String[] customObjectClasses;
@@ -58,19 +62,43 @@ public class SimpleUser implements Serializable {
         this.userId = userId;
     }
 
-    public List<CustomAttribute> getCustomAttributes() {
+    public String getUserPassword() {
+        return userPassword;
+    }
+
+    public void setUserPassword(String userPassword) {
+        this.userPassword = userPassword;
+    }
+
+    public UserRole getUserRole() {
+		return userRole;
+	}
+
+	public void setUserRole(UserRole userRole) {
+		this.userRole = userRole;
+	}
+
+	public List<String> getMemberOf() {
+		return memberOf;
+	}
+
+	public void setMemberOf(List<String> memberOf) {
+		this.memberOf = memberOf;
+	}
+
+	public List<CustomObjectAttribute> getCustomAttributes() {
         return customAttributes;
     }
 
-    public void setCustomAttributes(List<CustomAttribute> customAttributes) {
+    public void setCustomAttributes(List<CustomObjectAttribute> customAttributes) {
         this.customAttributes = customAttributes;
     }
 
-    public String getAttribute(String ldapAttribute) {
-        String attribute = null;
-        if (ldapAttribute != null && !ldapAttribute.isEmpty()) {
-            for (CustomAttribute customAttribute : customAttributes) {
-                if (customAttribute.getName().equals(ldapAttribute)) {
+    public Object getAttribute(String attributeName) {
+    	Object attribute = null;
+        if (attributeName != null && !attributeName.isEmpty()) {
+            for (CustomObjectAttribute customAttribute : customAttributes) {
+                if (customAttribute.getName().equals(attributeName)) {
                     attribute = customAttribute.getValue();
                     break;
                 }
@@ -80,11 +108,11 @@ public class SimpleUser implements Serializable {
         return attribute;
     }
 
-    public List<String> getAttributeValues(String ldapAttribute) {
-        List<String> values = null;
-        if (ldapAttribute != null && !ldapAttribute.isEmpty()) {
-            for (CustomAttribute customAttribute : customAttributes) {
-                if (StringHelper.equalsIgnoreCase(customAttribute.getName(), ldapAttribute)) {
+    public List<Object> getAttributeValues(String attributeName) {
+        List<Object> values = null;
+        if (attributeName != null && !attributeName.isEmpty()) {
+            for (CustomObjectAttribute customAttribute : customAttributes) {
+                if (StringHelper.equalsIgnoreCase(customAttribute.getName(), attributeName)) {
                     values = customAttribute.getValues();
                     break;
                 }
@@ -94,24 +122,48 @@ public class SimpleUser implements Serializable {
         return values;
     }
 
+    public void setAttributeValue(String attributeName, Object attributeValue) {
+        if (attributeName != null && !attributeName.isEmpty()) {
+            for (CustomObjectAttribute customAttribute : customAttributes) {
+                if (StringHelper.equalsIgnoreCase(customAttribute.getName(), attributeName)) {
+                	customAttribute.setValue(attributeValue);
+                    return;
+                }
+            }
+            customAttributes.add(new CustomObjectAttribute(attributeName, attributeValue));
+        }
+    }
+
+    public void setAttributeValues(String attributeName, List<Object> attributeValues) {
+        if (attributeName != null && !attributeName.isEmpty()) {
+            for (CustomObjectAttribute customAttribute : customAttributes) {
+                if (StringHelper.equalsIgnoreCase(customAttribute.getName(), attributeName)) {
+                	customAttribute.setValues(attributeValues);
+                    return;
+                }
+            }
+            customAttributes.add(new CustomObjectAttribute(attributeName, attributeValues));
+        }
+    }
+
     public void setAttribute(String attributeName, String attributeValue, Boolean multiValued) {
-		CustomAttribute attribute = new CustomAttribute(attributeName, attributeValue);
-		if (multiValued != null) {
-			attribute.setMultiValued(multiValued);
-		}
+        CustomObjectAttribute attribute = new CustomObjectAttribute(attributeName, attributeValue);
+        if (multiValued != null) {
+            attribute.setMultiValued(multiValued);
+        }
 
-		removeAttribute(attributeName);
-		getCustomAttributes().add(attribute);
-	}
+        removeAttribute(attributeName);
+        getCustomAttributes().add(attribute);
+    }
 
-	public void removeAttribute(String attributeName) {
-		for (Iterator<CustomAttribute> it = getCustomAttributes().iterator(); it.hasNext();) {
-			if (StringHelper.equalsIgnoreCase(attributeName, it.next().getName())) {
-				it.remove();
-				break;
-			}
-		}
-	}
+    public void removeAttribute(String attributeName) {
+        for (Iterator<CustomObjectAttribute> it = getCustomAttributes().iterator(); it.hasNext(); ) {
+            if (StringHelper.equalsIgnoreCase(attributeName, it.next().getName())) {
+                it.remove();
+                break;
+            }
+        }
+    }
 
     public String[] getCustomObjectClasses() {
         return customObjectClasses;

@@ -25,6 +25,7 @@ public class LogUtils {
     private static final Logger LOG = LoggerFactory.getLogger(LogUtils.class);
     //MUST be a single character string
     private static final String PLACEHOLDER = "%";
+    private static final String PREFIX_FORMAT = "|%s| ";
 
     private static int maxIterableItems = 1;
     
@@ -42,6 +43,14 @@ public class LogUtils {
      * @param rest 
      */
     public static void log(Object ...rest) {
+        logPrefixed(null, rest);
+    }
+
+    /**
+     * rest has at least 1 element
+     * @param rest 
+     */
+    public static void logPrefixed(String prefix, Object ...rest) {
 
         LogLevel level;
         int dummyArgs = 0;
@@ -74,7 +83,8 @@ public class LogUtils {
             args[i] = asString(rest[i + 1]);
         }
         Arrays.fill(args, nargs, args.length, "");
-        String result = String.format(sfirst, args);
+        String pref = prefix == null ? "" : String.format(PREFIX_FORMAT, prefix);
+        String result = pref + String.format(sfirst, args);
 
         switch (level) {
             case ERROR:

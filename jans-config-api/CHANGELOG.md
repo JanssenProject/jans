@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.0.15](https://github.com/JanssenProject/jans/compare/jans-config-api-v1.0.14...jans-config-api-v1.0.15) (2023-07-12)
+
+
+### Features
+
+* **config-api:** cache config plugin refresh attributes ([#5276](https://github.com/JanssenProject/jans/issues/5276)) ([84dc3ee](https://github.com/JanssenProject/jans/commit/84dc3eed60f57da791557a61a738cc18ed8bdbc6))
+* **config-api:** rename cache-refresh-plugin to jans-link-plugin ([#5457](https://github.com/JanssenProject/jans/issues/5457)) ([98d984c](https://github.com/JanssenProject/jans/commit/98d984cc25198067ae07e4e48377deb06175e506))
+* **jans-link:** change schema name cache refresh to link ([#5484](https://github.com/JanssenProject/jans/issues/5484)) ([412f753](https://github.com/JanssenProject/jans/commit/412f753f1f11337b51ab1e212b9bd013021102be))
+
+
+### Bug Fixes
+
+* admin-ui should redirect to login page if license has been already activated [#5282](https://github.com/JanssenProject/jans/issues/5282) ([#5283](https://github.com/JanssenProject/jans/issues/5283)) ([11f6fa6](https://github.com/JanssenProject/jans/commit/11f6fa6c1c3b150411ea2d8ee9bdf787f0f59524))
+* **config-api:** cache refresh pwd encryption and agama spec ([#5449](https://github.com/JanssenProject/jans/issues/5449)) ([f931ce7](https://github.com/JanssenProject/jans/commit/f931ce7330b68cdb9bdfc3dfff9b5d6581be019d))
+* prepare for 1.0.15 release ([0e3cc2f](https://github.com/JanssenProject/jans/commit/0e3cc2f5ea287c2c35f45def54f074daa473ec49))
+
+
+### Documentation
+
+* **config-api:** rectify agama doc title ([#5314](https://github.com/JanssenProject/jans/issues/5314)) ([ea743c6](https://github.com/JanssenProject/jans/commit/ea743c6d356e9104ebe3af9a73e5831b91812094))
+
 ## [1.0.14](https://github.com/JanssenProject/jans/compare/jans-config-api-v1.0.13...jans-config-api-v1.0.14) (2023-06-12)
 
 

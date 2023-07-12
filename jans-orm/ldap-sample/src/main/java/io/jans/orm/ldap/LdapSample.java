@@ -6,12 +6,6 @@
 
 package io.jans.orm.ldap;
 
-import java.util.List;
-
-import org.apache.log4j.Logger;
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.status.StatusLogger;
-
 import io.jans.orm.ldap.impl.LdapEntryManager;
 import io.jans.orm.ldap.model.SimpleAttribute;
 import io.jans.orm.ldap.model.SimpleGrant;
@@ -20,8 +14,13 @@ import io.jans.orm.ldap.model.SimpleUser;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SearchScope;
 import io.jans.orm.model.SortOrder;
-import io.jans.orm.model.base.CustomAttribute;
+import io.jans.orm.model.base.CustomObjectAttribute;
 import io.jans.orm.search.filter.Filter;
+import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.status.StatusLogger;
+
+import java.util.List;
 
 /**
  * @author Yuriy Movchan Date: 11/03/2016
@@ -55,7 +54,7 @@ public final class LdapSample {
         if (users.size() > 0) {
             // Add attribute "streetAddress" to first user
             SimpleUser user = users.get(0);
-            user.getCustomAttributes().add(new CustomAttribute("streetAddress", "Somewhere: " + System.currentTimeMillis()));
+            user.getCustomAttributes().add(new CustomObjectAttribute("streetAddress", "Somewhere: " + System.currentTimeMillis()));
 
             ldapEntryManager.merge(user);
         }

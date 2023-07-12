@@ -75,7 +75,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
             if Config.profile == 'jans':
                 txt += 'Install Fido2 Server'.ljust(30) + repr(Config.installFido2).rjust(35) + (' *' if 'installFido2' in Config.addPostSetupService else '') + "\n"
                 txt += 'Install Scim Server'.ljust(30) + repr(Config.install_scim_server).rjust(35) + (' *' if 'install_scim_server' in Config.addPostSetupService else '') + "\n"
-                txt += 'Install Cache Refresh Server'.ljust(30) + repr(Config.install_cache_refresh).rjust(35) + (' *' if 'install_cache_refresh' in Config.addPostSetupService else '') + "\n"
+                txt += 'Install Jans Link Server'.ljust(30) + repr(Config.install_jans_link).rjust(35) + (' *' if 'install_jans_link' in Config.addPostSetupService else '') + "\n"
                 #txt += 'Install Oxd '.ljust(30) + repr(Config.installOxd).rjust(35) + (' *' if 'installOxd' in Config.addPostSetupService else '') + "\n"
 
             if Config.profile == 'jans' and Config.installEleven:
@@ -130,7 +130,32 @@ class JansInstaller(BaseInstaller, SetupUtils):
         else:
             self.logIt("Key generator path was determined as {}".format(Config.non_setup_properties['key_export_path']))
 
+
         self.extract_scripts()
+
+    def disable_selinux(self):
+        self.logIt("Disabling SELinux")
+        setenforce_cmd = shutil.which('setenforce')
+        selinux_config_fn = '/etc/selinux/config'
+
+        if setenforce_cmd:
+            self.run([setenforce_cmd, '0'])
+
+        if not os.path.exists(selinux_config_fn):
+            return
+
+        selinux_config = self.readFile(selinux_config_fn).splitlines()
+        for i, line in enumerate(selinux_config):
+            if not line.startswith('#'):
+                n = line.find('=')
+                if n > -1:
+                    ckey = line[:n].strip()
+                    cval = line[n+1:].strip()
+                    if ckey == 'SELINUX' and  cval == 'enforcing':
+                        selinux_config[i] = 'SELINUX=disabled'
+                        self.writeFile(selinux_config_fn, '\n'.join(selinux_config))
+                        Config.post_messages.append("{}SELinux was disabled permanently{}.".format(static.colors.WARNING, static.colors.ENDC))
+                        break
 
     def configureSystem(self):
         self.logIt("Configuring system", 'jans')
@@ -475,6 +500,9 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
     def post_install_tasks(self):
 
+        if base.argsp.disable_selinux:
+            self.disable_selinux()
+
         self.deleteLdapPw()
 
         self.dbUtils.bind(force=True)
@@ -595,3 +623,27 @@ class JansInstaller(BaseInstaller, SetupUtils):
                     ]
 
         self.run(cmd_cert_gen)
+
+    def order_services(self):
+
+        service_list = [
+                        ('jans-eleven', 'installEleven'),
+                        ('jans-auth', 'installOxAuth'),
+                        ('jans-config-api', 'install_config_api'),
+                        ('jans-fido2', 'installFido2'),
+                        ('jans-link', 'install_jans_link'),
+                        ('jans-scim', 'install_scim_server'),
+                        ]
+        service_listr = service_list[:]
+        service_listr.reverse()
+        for i, service in enumerate(service_listr):
+            order_var_str = 'order_{}_service'.format(service[0].replace('-','_'))
+            for sservice in (service_listr[i+1:]):
+                if getattr(Config, sservice[1]):
+                    Config.templateRenderingDict[order_var_str] = sservice[0]+'.service'
+                    break
+                else:
+                    if service[0] != 'jans-auth':
+                        Config.templateRenderingDict[order_var_str] = 'jans-auth.service'
+                    else:
+                        Config.templateRenderingDict['order_jans_auth_service'] =  'jans-eleven.service' if Config.installEleven else  Config.backend_service
