@@ -236,6 +236,7 @@ tags:
 | sessionIdUnauthenticatedUnusedLifetime | The lifetime for unused unauthenticated session states | [Details](#sessionidunauthenticatedunusedlifetime) |
 | sessionIdUnusedLifetime | The lifetime for unused session states | [Details](#sessionidunusedlifetime) |
 | shareSubjectIdBetweenClientsWithSameSectorId | When true, clients with the same Sector ID also share the same Subject ID | [Details](#sharesubjectidbetweenclientswithsamesectorid) |
+| skipAuthenticationFilterOptionsMethod | Force Authentication Filtker to process OPTIONS request | [Details](#skipauthenticationfilteroptionsmethod) |
 | skipAuthorizationForOpenIdScopeAndPairwiseId | Choose whether to skip authorization if a client has an OpenId scope and a pairwise ID | [Details](#skipauthorizationforopenidscopeandpairwiseid) |
 | skipRefreshTokenDuringRefreshing | Boolean value specifying whether to skip refreshing tokens on refreshing | [Details](#skiprefreshtokenduringrefreshing) |
 | softwareStatementValidationClaimName | Validation claim name for software statement | [Details](#softwarestatementvalidationclaimname) |
@@ -2309,6 +2310,15 @@ tags:
 - Required: No
 
 - Default value: false
+
+
+### skipAuthenticationFilterOptionsMethod
+
+- Description: Force Authentication Filtker to process OPTIONS request
+
+- Required: No
+
+- Default value: true
 
 
 ### skipAuthorizationForOpenIdScopeAndPairwiseId
