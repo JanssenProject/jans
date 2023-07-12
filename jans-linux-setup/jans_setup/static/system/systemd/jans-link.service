@@ -1,6 +1,6 @@
 [Unit]
 Description=Janssen Link Server
-After=%(order_jans_cache_refresh_service)s
+After=%(order_jans_link_service)s
 
 [Service]
 Type=forking
