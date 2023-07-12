@@ -839,6 +839,9 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Defines if Response body will be logged. Default value is false", defaultValue = "false")
     private Boolean httpLoggingResponseBodyContent = false;
 
+    @DocProperty(description = "Force Authentication Filtker to process OPTIONS request", defaultValue = "true")
+    private Boolean skipAuthenticationFilterOptionsMethod = true;
+
     public Map<String, String> getDateFormatterPatterns() {
         return dateFormatterPatterns;
     }
@@ -3219,4 +3222,13 @@ public class AppConfiguration implements Configuration {
     public void setHttpLoggingResponseBodyContent(Boolean httpLoggingResponseBodyContent) {
         this.httpLoggingResponseBodyContent = httpLoggingResponseBodyContent;
     }
+
+	public Boolean isSkipAuthenticationFilterOptionsMethod() {
+		return skipAuthenticationFilterOptionsMethod;
+	}
+
+	public void setSkipAuthenticationFilterOptionsMethod(Boolean skipAuthenticationFilterOptionsMethod) {
+		this.skipAuthenticationFilterOptionsMethod = skipAuthenticationFilterOptionsMethod;
+	}
+
 }
