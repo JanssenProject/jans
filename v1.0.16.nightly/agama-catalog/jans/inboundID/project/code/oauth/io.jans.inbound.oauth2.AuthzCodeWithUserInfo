@@ -1,0 +1,22 @@
+Flow io.jans.inbound.oauth2.AuthzCodeWithUserInfo
+    Basepath ""
+    Inputs oauthParams
+    
+obj = Trigger io.jans.inbound.oauth2.AuthzCode oauthParams
+When obj.success is false
+    Finish obj
+
+token = obj.data.access_token
+p | E = Call io.jans.util.NetworkUtils#mapFromGetRequestWithToken oauthParams.userInfoEndpoint token
+
+When E is not null
+    msg = "Unable to retrieve user profile."
+    Log "@e " msg E
+    msg = [ msg, E.message ]
+    msg = Call java.lang.String#join " " msg 
+    obj = { success: false, error: msg }
+Otherwise
+    Log "@d Profile data\n" p
+    obj = { success: true, data: { profile: p, tokenResponse: obj.data } }
+
+Finish obj

@@ -1,0 +1,5 @@
+io.jans.orm.couchbase.impl
+io.jans.orm.couchbase.model
+io.jans.orm.couchbase.operation
+io.jans.orm.couchbase.operation.impl
+io.jans.orm.couchbase.operation.watch
