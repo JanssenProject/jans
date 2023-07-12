@@ -13,19 +13,19 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="jans-core-service" />
     <orderEntry type="module" module-name="jans-core-model" />
-    <orderEntry type="library" name="Maven: io.jans:jans-orm-annotation:1.0.15-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: io.jans:jans-orm-model:1.0.15-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: io.jans:jans-orm-util:1.0.15-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: io.jans:jans-orm-annotation:1.0.15" level="project" />
+    <orderEntry type="library" name="Maven: io.jans:jans-orm-model:1.0.15" level="project" />
+    <orderEntry type="library" name="Maven: io.jans:jans-orm-util:1.0.15" level="project" />
     <orderEntry type="library" name="Maven: org.json:json:20230227" level="project" />
     <orderEntry type="library" name="Maven: jakarta.annotation:jakarta.annotation-api:2.0.0" level="project" />
-    <orderEntry type="library" name="Maven: io.jans:jans-orm-ldap:1.0.15-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: io.jans:jans-orm-core:1.0.15-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: io.jans:jans-orm-filter:1.0.15-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: io.jans:jans-orm-ldap:1.0.15" level="project" />
+    <orderEntry type="library" name="Maven: io.jans:jans-orm-core:1.0.15" level="project" />
+    <orderEntry type="library" name="Maven: io.jans:jans-orm-filter:1.0.15" level="project" />
     <orderEntry type="library" name="Maven: com.unboundid:unboundid-ldapsdk:6.0.8" level="project" />
     <orderEntry type="library" name="Maven: jakarta.enterprise:jakarta.enterprise.cdi-api:3.0.0" level="project" />
     <orderEntry type="library" name="Maven: commons-io:commons-io:2.11.0" level="project" />
-    <orderEntry type="library" name="Maven: io.jans:jans-orm-couchbase:1.0.15-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: io.jans:jans-orm-sql:1.0.15-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: io.jans:jans-orm-couchbase:1.0.15" level="project" />
+    <orderEntry type="library" name="Maven: io.jans:jans-orm-sql:1.0.15" level="project" />
     <orderEntry type="library" name="Maven: org.apache.commons:commons-dbcp2:2.9.0" level="project" />
     <orderEntry type="library" name="Maven: com.mysql:mysql-connector-j:8.0.32" level="project" />
     <orderEntry type="library" name="Maven: com.google.protobuf:protobuf-java:3.19.6" level="project" />
@@ -37,10 +37,10 @@
     <orderEntry type="library" name="Maven: javax.validation:validation-api:1.1.0.Final" level="project" />
     <orderEntry type="library" name="Maven: org.apache.servicemix.bundles:org.apache.servicemix.bundles.javax-inject:1_2" level="project" />
     <orderEntry type="library" name="Maven: com.infradna.tool:bridge-method-annotation:1.13" level="project" />
-    <orderEntry type="library" name="Maven: io.jans:jans-orm-spanner:1.0.15-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: io.jans:jans-orm-spanner:1.0.15" level="project" />
     <orderEntry type="library" name="Maven: com.github.jsqlparser:jsqlparser:4.5" level="project" />
-    <orderEntry type="library" name="Maven: io.jans:jans-orm-hybrid:1.0.15-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="Maven: io.jans:jans-orm-cdi:1.0.15-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: io.jans:jans-orm-hybrid:1.0.15" level="project" />
+    <orderEntry type="library" name="Maven: io.jans:jans-orm-cdi:1.0.15" level="project" />
     <orderEntry type="module" module-name="jans-core-util" />
     <orderEntry type="library" name="Maven: jakarta.persistence:jakarta.persistence-api:3.0.0" level="project" />
     <orderEntry type="library" name="Maven: org.apache.logging.log4j:log4j-api:2.19.0" level="project" />
