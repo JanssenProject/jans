@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","url":"allpackages-index.html"},{"l":"io.jans.configapi.exception"},{"l":"io.jans.configapi.model.configuration"},{"l":"io.jans.configapi.model.status"},{"l":"io.jans.configapi.rest.model"},{"l":"io.jans.configapi.util"}]

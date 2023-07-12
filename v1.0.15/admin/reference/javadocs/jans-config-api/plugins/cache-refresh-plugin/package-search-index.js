@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","url":"allpackages-index.html"},{"l":"io.jans.configapi.plugin.cacherefresh.extensions"},{"l":"io.jans.configapi.plugin.cacherefresh.model.config"},{"l":"io.jans.configapi.plugin.cacherefresh.rest"},{"l":"io.jans.configapi.plugin.cacherefresh.service"},{"l":"io.jans.configapi.plugin.cacherefresh.util"}]
