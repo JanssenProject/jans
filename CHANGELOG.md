@@ -5,6 +5,14 @@
 
 ### Bug Fixes
 
+* authentication Filter should not process OPTIONS request ([#5525](https://github.com/JanssenProject/jans/issues/5525)) ([aed5e4f](https://github.com/JanssenProject/jans/commit/aed5e4f52cc0ac6d0f278a6813e698068cd4ec9e)), closes [#5524](https://github.com/JanssenProject/jans/issues/5524)
+* **docs:** autogenerate docs ([#5515](https://github.com/JanssenProject/jans/issues/5515)) ([25f9566](https://github.com/JanssenProject/jans/commit/25f95667422d2eed828fb4afbae378a1cac71f32))
+
+## [1.0.15](https://github.com/JanssenProject/jans/compare/v1.0.15...v1.0.15) (2023-07-12)
+
+
+### Bug Fixes
+
 * prepare for 1.0.15 release ([0e3cc2f](https://github.com/JanssenProject/jans/commit/0e3cc2f5ea287c2c35f45def54f074daa473ec49))
 
 ## [1.0.14](https://github.com/JanssenProject/jans/compare/v1.0.14...v1.0.14) (2023-06-12)
