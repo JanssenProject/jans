@@ -7,13 +7,13 @@ tags:
 
 # Spanner ORM persistence layer
 
-The recommended Spanner version is 6.3x or newer. Setup supports both Spanner emulator and Spanner Cloud DB servers. Spanner emulator has many limitations and it's recommended only for development and testing. For case with Spanner Cloud the administrator should pre-create database and get Google credentials file. During install setup will prompt to enter project/instance/database and path to Google credentials file. After entering these details setup will check connection and start tables creating in specified DB.
+The recommended Spanner version is 6.3x or newer. Setup supports both Spanner emulator and Spanner Cloud DB servers. Spanner emulator has many limitations and it's recommended only for development and testing. For case with Spanner Cloud the administrator should pre-create database and get Google credentials file. During install setup will prompt to enter project/instance/database and path to Google credentials file. After entering these details setup will check connection and start tables creation in specified DB.
 
 ![](../../../assets/database-spanner-db.png)
 
-During install setup generates default **/etc/jans/conf/jans-spanner.properties** for Jans applications
-
 ![](../../../assets/database-spanner-tables.png)
+
+During install setup generates default **/etc/jans/conf/jans-spanner.properties** for Jans applications
 
 ## Configuration properties
 
@@ -80,7 +80,7 @@ Each table in **jansdb** Spanner schema follow next rules:
 
 # Multi-valued attributes support
 
-Spanner DB supports ARRAY attributes but at same time it's possible to index them. This led to full table scan when query has filter with these attributes. Alternative for this is to use interleaved child tables. These tables can increase queries performance but in parallel with this this approach requires additional storage space for child table and index. Administrator should move only attributes which need ARRAY index to such tables.
+Spanner DB supports ARRAY attributes but at same time it's not possible to index them. This led to full table scan when query has filter with these attributes. Alternative for this is to use interleaved child tables. These tables can increase queries performance but in parallel with this this approach requires additional storage space for child table and index. Administrator should move only attributes which need ARRAY index to such tables.
 
 **ARRAY columns:**
 
@@ -98,33 +98,22 @@ More details about interleaved tables, DB size and performance is in ORM [Spanne
 
 ## Data mapping rules
 
-ORM uses **VARCHAR / DATETIME(3) / INT / BINARY / SMALLINT / BLOB / JSON** data types. **SMALLINT** represents boolean attribute type.
+ORM uses **STRING / TIMESTAMP / INT64 / BYTES / BOOL / ARRAY<STRING(MAX)>** data types.
 
 ![](../../../assets/database-spanner-scope-schema.png)
 
 `ARRAY` it uses to store multi-valued attribute values. The generic format of such values is:
 
 ```
-{"v": ["value_1", "value_2", ...]}
+["value_1", "value_2", ...]
 
 ```
-ORM add `v` key on top level due to Spanner limitations of indexing JSON array if they are on to level. If it's specified in schema that application can do search in multi-valued attribute setup add next indexes for each column:
-
-```
-  KEY `jansExtUid_json_1` ((cast(json_extract(`jansExtUid`,_utf8mb4'$.v') as char(128) array))),
-  KEY `jansExtUid_json_2` ((cast(json_extract(`jansExtUid`,_utf8mb4'$.v[0]') as char(128) charset utf8mb4))),
-  KEY `jansExtUid_json_3` ((cast(json_extract(`jansExtUid`,_utf8mb4'$.v[1]') as char(128) charset utf8mb4))),
-  KEY `jansExtUid_json_4` ((cast(json_extract(`jansExtUid`,_utf8mb4'$.v[2]') as char(128) charset utf8mb4))),
-```
-By default it creates indexes for first 3 values. Administrator should add more indexes to confrom maximum count of values.
-
->> In future versions if top level JSON array indexing will work well we can review format to use simple JSON array.
 
 For user password field ORM on persist/update operations automatically create hash. On authentication ORM compares hashes.
 
 ![](../../../assets/database-spanner-person.png)
 
-To store attributes defined in java beans with `@JsonObject` annotation ORM uses **TEXT** column type.
+To store attributes defined in java beans with `@JsonObject` annotation ORM uses **STRING(MAX)** column type.
 
 ![](../../../assets/database-spanner-configuration.png)
 
@@ -135,7 +124,7 @@ This example shows how to use ORM. It opens connection to Spanner DB and add use
 ```
     public static void main(String[] args) {
         // Create Sql entry manager
-        SpannerEntryManager couchbaseEntryManager = createSpannerEntryManager();
+        SpannerEntryManager spannerEntryManager = createSpannerEntryManager();
 
         // Create and fill user bean
         SimpleUser newUser = new SimpleUser();
@@ -146,19 +135,19 @@ This example shows how to use ORM. It opens connection to Spanner DB and add use
         newUser.getCustomAttributes().add(new CustomObjectAttribute("jansGuid", "test_value"));
         
         // Call ORM API to store entry
-        couchbaseEntryManager.persist(newUser);
+        spannerEntryManager.persist(newUser);
         
-        couchbaseEntryManager.destroy();
+        spannerEntryManager.destroy();
     }
 
     public static SpannerEntryManager createSpannerEntryManager() {
-    	SpannerEntryManagerFactory couchbaseEntryManagerFactory = new SpannerEntryManagerFactory();
-        couchbaseEntryManagerFactory.create();
+    	SpannerEntryManagerFactory spannerEntryManagerFactory = new SpannerEntryManagerFactory();
+        spannerEntryManagerFactory.create();
         Properties connectionProperties = getSampleConnectionProperties();
 
-        SpannerEntryManager couchbaseEntryManager = couchbaseEntryManagerFactory.createEntryManager(connectionProperties);
+        SpannerEntryManager spannerEntryManager = spannerEntryManagerFactory.createEntryManager(connectionProperties);
 
-        return couchbaseEntryManager;
+        return spannerEntryManager;
     }
 
     private static Properties getSampleConnectionProperties() {
