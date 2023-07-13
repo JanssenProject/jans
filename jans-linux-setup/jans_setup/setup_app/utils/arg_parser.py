@@ -62,8 +62,6 @@ parser.add_argument('--import-ldif', help="Render ldif templates from directory 
 
 parser.add_argument('-enable-script', action='append', help="inum of script to enable", required=False)
 parser.add_argument('-disable-script', action='append', help="inum of script to disable", required=False)
-parser.add_argument('-disable-selinux', action='store_true', help="Disable SELinux")
-
 
 if PROFILE != OPENBANKING_PROFILE:
 
