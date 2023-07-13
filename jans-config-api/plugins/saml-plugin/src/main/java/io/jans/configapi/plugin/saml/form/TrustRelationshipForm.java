@@ -4,33 +4,33 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.configapi.plugin.saml.model;
+package io.jans.configapi.plugin.saml.form;
 
 import io.jans.configapi.plugin.saml.model.TrustRelationship;
 
 import java.io.Serializable;
 
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Valid;
+import jakarta.validation.Valid;
 
 
 import java.io.File;
 
 import org.jboss.resteasy.annotations.providers.multipart.PartType;
-import org.jboss.resteasy.annotations.providers.multipart.FormParams;
+import jakarta.ws.rs.FormParam;
 
 public class TrustRelationshipForm implements Serializable {
 
-
+    private static final long serialVersionUID = 1L;
 
     @NotNull
 	@Valid
-	@FormParams("trustRelationship")
+	@FormParam("trustRelationship")
 	@PartType("application/json")
     private TrustRelationship trustRelationship;
 
     @NotNull
-	@FormParams("metaDataFile")
+	@FormParam("metaDataFile")
 	@PartType("application/octet-stream")
     private File metaDataFile;
 

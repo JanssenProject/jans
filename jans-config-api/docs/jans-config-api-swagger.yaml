@@ -7452,17 +7452,17 @@ components:
           type: string
         whitePagesCanView:
           type: boolean
-        adminCanEdit:
+        adminCanAccess:
+          type: boolean
+        userCanAccess:
           type: boolean
         userCanView:
           type: boolean
         adminCanView:
           type: boolean
-        adminCanAccess:
+        adminCanEdit:
           type: boolean
         userCanEdit:
-          type: boolean
-        userCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -8942,10 +8942,10 @@ components:
           type: array
           items:
             type: object
-        displayValue:
-          type: string
         value:
           type: object
+        displayValue:
+          type: string
     LocalizedString:
       type: object
       properties:

@@ -92,7 +92,13 @@
       "name": "jans-link",
       "description": "jans-link plugin",
       "className": "io.jans.configapi.plugin.link.rest.ApiApplication"
+    },
+	{
+      "name": "saml",
+      "description": "saml plugin",
+      "className": "io.jans.configapi.plugin.saml.rest.ApiApplication"
     }
+	
   ]
 }
 

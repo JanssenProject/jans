@@ -27,12 +27,15 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.IOException;
 import java.util.*;
 
 import io.jans.configapi.plugin.saml.model.TrustRelationship;
+import io.jans.configapi.plugin.saml.form.TrustRelationshipForm;
 
+import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 import org.slf4j.Logger;
 
 @Path(Constants.SAML_CLIENT)
@@ -41,6 +44,7 @@ import org.slf4j.Logger;
 public class TrustRelationshipResource extends BaseResource {
 
     private static final String SAML_TRUST_RELATIONSHIP = "Trust Relationship";
+    private static final String SAML_TRUST_RELATIONSHIP_FORM = "Trust Relationship From";
 
     @Inject
     Logger logger;
@@ -112,8 +116,6 @@ public class TrustRelationshipResource extends BaseResource {
             @ApiResponse(responseCode = "201", description = "clientList", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA, array = @ArraySchema(schema = @Schema(implementation = TrustRelationship.class)))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
     @POST
     @ProtectedApi(scopes = { Constants.SAML_WRITE_ACCESS }, groupScopes = {}, superScopes = {
             Constants.SAML_WRITE_ACCESS })
@@ -139,19 +141,33 @@ public class TrustRelationshipResource extends BaseResource {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Path("/upload")
     @ProtectedApi(scopes = { Constants.SAML_WRITE_ACCESS }, groupScopes = {}, superScopes = {
             Constants.SAML_WRITE_ACCESS })
-    public Response createTrustRelationshipWithFile(@Valid TrustRelationship trustRelationship,
+    public Response createTrustRelationshipWithFile(@MultipartForm TrustRelationshipForm trustRelationshipForm,
             InputStream metadatafile) throws IOException {
-        logger.debug(" Create trustRelationship:{}, metadatafile:{} ", trustRelationship, metadatafile);
-        checkResourceNotNull(trustRelationship, SAML_TRUST_RELATIONSHIP);
-        checkNotNull(trustRelationship.getClientId(), AttributeNames.NAME);
+        logger.debug(" Create trustRelationshipForm:{} ", trustRelationshipForm);
+        checkResourceNotNull(trustRelationshipForm, SAML_TRUST_RELATIONSHIP_FORM);
+       
+        TrustRelationship trustRelationship = trustRelationshipForm.getTrustRelationship();
+        logger.debug(" Create trustRelationship:{} ", trustRelationship);
+        checkResourceNotNull(trustRelationshipForm.getTrustRelationship(), SAML_TRUST_RELATIONSHIP);
+        checkNotNull(trustRelationshipForm.getTrustRelationship().getClientId(), AttributeNames.NAME);
+        
+        InputStream inputStream = null;
+        File metaDataFile = trustRelationshipForm.getMetaDataFile();
+        logger.debug(" Create metaDataFile:{} ", metaDataFile);        
+        if(metaDataFile!=null) {
+            logger.debug(" Create metaDataFile.getName():{} , metaDataFile.length():{}", metaDataFile.getName(), metaDataFile.length());
+            inputStream = new FileInputStream(metaDataFile);
+        }
+        
         // TO-DO validation of TrustRelationship
         String inum = samlService.generateInumForNewRelationship();
         trustRelationship.setInum(inum);
         trustRelationship.setDn(samlService.getDnForTrustRelationship(inum));
-        trustRelationship = samlService.addTrustRelationship(trustRelationship, metadatafile);
+        trustRelationship = samlService.addTrustRelationship(trustRelationship, inputStream);
 
         logger.error("Create created by TrustRelationship:{}", trustRelationship);
         return Response.status(Response.Status.CREATED).entity(trustRelationship).build();
@@ -193,11 +209,11 @@ public class TrustRelationshipResource extends BaseResource {
 
         logger.error("Delete client identified by id:{}", id);
 
-        TrustRelationship TrustRelationship = samlService.getTrustRelationshipByInum(id);
-        if (TrustRelationship == null) {
-            // throw error;
+        TrustRelationship trustRelationship = samlService.getTrustRelationshipByInum(id);
+        if (trustRelationship == null) {
+            checkResourceNotNull(trustRelationship, SAML_TRUST_RELATIONSHIP);
         }
-        samlService.removeTrustRelationship(TrustRelationship);
+        samlService.removeTrustRelationship(trustRelationship);
 
         return Response.noContent().build();
     }

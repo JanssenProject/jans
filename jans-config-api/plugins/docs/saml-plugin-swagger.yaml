@@ -254,9 +254,9 @@ paths:
       operationId: post-trust-relationship-file
       requestBody:
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref: '#/components/schemas/TrustRelationship'
+              $ref: '#/components/schemas/TrustRelationshipForm'
       responses:
         "201":
           description: clientList
@@ -524,6 +524,17 @@ components:
             $ref: '#/components/schemas/ProfileConfiguration'
         baseDn:
           type: string
+    TrustRelationshipForm:
+      required:
+      - metaDataFile
+      - trustRelationship
+      type: object
+      properties:
+        trustRelationship:
+          $ref: '#/components/schemas/TrustRelationship'
+        metaDataFile:
+          type: string
+          format: binary
   securitySchemes:
     oauth2:
       type: oauth2

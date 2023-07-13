@@ -34,8 +34,8 @@ public class SamlIdpService {
 
     public static final String IDP_ROOT_DIR = "/opt/idp";
     public static final String KEYCLOAK_IDP_ROOT_DIR = IDP_ROOT_DIR + "/keycloak";
-    public static final String KEYCLOAK_IDP_METADATA_TEMP_DIR = "/opt/saml/idp/metadata/temp";
-    public static final String SAML_IDP_TEMPMETADATA_FOLDER = "temp_metadata";
+    public static final String KEYCLOAK_IDP_METADATA_DIR = "metadatafile";
+    public static final String KEYCLOAK_IDP_METADATA_TEMP_DIR = "temp_metadata";
     private static final String SAML_SP_METADATA_FILE_PATTERN = "%s-sp-metadata.xml";
 
     @Inject
@@ -64,7 +64,7 @@ public class SamlIdpService {
     }
 
     public String getIdpMetadataDir() {
-        return KEYCLOAK_IDP_ROOT_DIR + File.separator + KEYCLOAK_IDP_METADATA_TEMP_DIR + File.separator;
+        return KEYCLOAK_IDP_ROOT_DIR + File.separator + KEYCLOAK_IDP_METADATA_DIR + File.separator;
     }
 
     public String getSpNewMetadataFileName(TrustRelationship trustRel) {
@@ -77,7 +77,7 @@ public class SamlIdpService {
     }
 
     public String getIdpMetadataTempDir() {
-        return KEYCLOAK_IDP_ROOT_DIR + File.separator + SAML_IDP_TEMPMETADATA_FOLDER + File.separator;
+        return KEYCLOAK_IDP_ROOT_DIR + File.separator + KEYCLOAK_IDP_METADATA_TEMP_DIR + File.separator;
     }
 
     private String getTempMetadataFilename(String idpMetadataFolder, String fileName) {
