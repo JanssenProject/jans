@@ -59,7 +59,7 @@
     "installed": false,
     "name": "jans-config-api"
   },
-  "jans-cache-refresh": {
+  "jans-link": {
     "memory": {
       "max_allowed_mb": 1024,
       "jvm_heap_ration": 0.7,
@@ -69,6 +69,6 @@
       "modules": "server,deploy,resources,http,http-forwarded,console-capture,jsp,websocket"
     },
     "installed": false,
-    "name": "jans-cache-refresh"
+    "name": "jans-link"
   }
 }

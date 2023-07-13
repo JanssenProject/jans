@@ -70,7 +70,7 @@ In order to support transparency for end applications and allow data migration f
 
 `doc_id` is primary key. In order to build unique document identifier ORM uses another unique attribute `DN`. `doc_id` is last `RDN` value.
 
-# Generic tables structure
+## Generic tables structure
 
 Each table in **jansdb** PostgreSQL database follow next rules:
 
@@ -110,7 +110,7 @@ To store attributes defined in java beans with `@JsonObject` annotation ORM uses
 
 ![](../../../assets/database-postgresql-configuration.jpg)
 
-# Java examples
+# Java example
 
 This example shows how to use ORM. It opens connection to PostgreSQL DB and add user entry to it:
 

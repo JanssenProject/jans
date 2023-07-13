@@ -1,5 +1,33 @@
 # Changelog
 
+## [1.0.15](https://github.com/JanssenProject/jans/compare/jans-linux-setup-v1.0.14...jans-linux-setup-v1.0.15) (2023-07-12)
+
+
+### Features
+
+* **fido2:** loading mds using external urls ([#5162](https://github.com/JanssenProject/jans/issues/5162)) ([d3d2294](https://github.com/JanssenProject/jans/commit/d3d2294ffabe3de9baa067b39f9578947b6d475f))
+* **jans-link:** change schema name cache refresh to link ([#5484](https://github.com/JanssenProject/jans/issues/5484)) ([412f753](https://github.com/JanssenProject/jans/commit/412f753f1f11337b51ab1e212b9bd013021102be))
+* **jans-link:** set jans-link by default disabled ([#5472](https://github.com/JanssenProject/jans/issues/5472)) ([67a6329](https://github.com/JanssenProject/jans/commit/67a63290addccb0c3244722c19d0a8591e92b458))
+* **jans-linux-setup:** add option --keep-setup ([#5343](https://github.com/JanssenProject/jans/issues/5343)) ([cdec0d2](https://github.com/JanssenProject/jans/commit/cdec0d211d8bd7dda7d668c492c249541740a715))
+* **jans-linux-setup:** argument -disable-selinux ([#5401](https://github.com/JanssenProject/jans/issues/5401)) ([11f5ab1](https://github.com/JanssenProject/jans/commit/11f5ab12471ca0424bacbd5e01099a6dd42401db))
+* **jans-linux-setup:** cache refresh installation ([#4745](https://github.com/JanssenProject/jans/issues/4745)) ([94983ea](https://github.com/JanssenProject/jans/commit/94983ea08b12eb24603223f282eb64ea8981b6fe))
+* **jans-linux-setup:** disable selinux ([#5386](https://github.com/JanssenProject/jans/issues/5386)) ([e684c5f](https://github.com/JanssenProject/jans/commit/e684c5f6e5216a5b5544c269770821f1ef662adc))
+* **jans-linux-setup:** make jans_stat a default oauth scope [#5393](https://github.com/JanssenProject/jans/issues/5393) ([#5394](https://github.com/JanssenProject/jans/issues/5394)) ([1f62b47](https://github.com/JanssenProject/jans/commit/1f62b47f09d347501a5ae8bc302b29cb50140c63))
+
+
+### Bug Fixes
+
+* **jans-auth-server:** ClassCastException during select account [#5285](https://github.com/JanssenProject/jans/issues/5285) ([#5286](https://github.com/JanssenProject/jans/issues/5286)) ([4d17cbc](https://github.com/JanssenProject/jans/commit/4d17cbcdab3272653f2cf547bcef1d8181353ffd))
+* **jans-link:** corrected import class in py script ([#5440](https://github.com/JanssenProject/jans/issues/5440)) ([9b02417](https://github.com/JanssenProject/jans/commit/9b024171c55f17dc3a3d588b250eb8b23d53e165))
+* **jans-linux-setup:** cache refresh port ([#5279](https://github.com/JanssenProject/jans/issues/5279)) ([28fed19](https://github.com/JanssenProject/jans/commit/28fed198e972b4550427d96cd436d392268e1d78))
+* **jans-linux-setup:** CR variable names and snapshot dir ([#5302](https://github.com/JanssenProject/jans/issues/5302)) ([17222c9](https://github.com/JanssenProject/jans/commit/17222c99beb7bc08bb012f96aa6bd454b546d117))
+* **jans-linux-setup:** mapping changes for admin-ui ([#5362](https://github.com/JanssenProject/jans/issues/5362)) ([d7b0f54](https://github.com/JanssenProject/jans/commit/d7b0f54490a1ab48daed0fa4080036ce46374567))
+* **jans-linux-setup:** opendj stop for nonldap backends ([#5318](https://github.com/JanssenProject/jans/issues/5318)) ([b084517](https://github.com/JanssenProject/jans/commit/b084517863b3b0b4739f4a97aaf96753b529f54d))
+* **jans-linux-setup:** remove unit files upon uninstall ([#5344](https://github.com/JanssenProject/jans/issues/5344)) ([b42fbb8](https://github.com/JanssenProject/jans/commit/b42fbb86c913973f2a85388635b0bd61b75207ef))
+* **jans-linux-setup:** scope offline_access is non-default ([#5359](https://github.com/JanssenProject/jans/issues/5359)) ([cc8cfc1](https://github.com/JanssenProject/jans/commit/cc8cfc1482a913720ba424128a7892798f947e4a))
+* **jans-linux-setup:** spanner import ldif with modify add ([#5430](https://github.com/JanssenProject/jans/issues/5430)) ([6a2b408](https://github.com/JanssenProject/jans/commit/6a2b40889f25d8dd5c92e95f421f290f375b7edd))
+* prepare for 1.0.15 release ([0e3cc2f](https://github.com/JanssenProject/jans/commit/0e3cc2f5ea287c2c35f45def54f074daa473ec49))
+
 ## [1.0.14](https://github.com/JanssenProject/jans/compare/jans-linux-setup-v1.0.13...jans-linux-setup-v1.0.14) (2023-06-12)
 
 

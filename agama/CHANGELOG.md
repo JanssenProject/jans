@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.0.15](https://github.com/JanssenProject/jans/compare/agama-v1.0.14...agama-v1.0.15) (2023-07-12)
+
+
+### Features
+
+* add a prefix to Log statements [#5201](https://github.com/JanssenProject/jans/issues/5201) ([#5475](https://github.com/JanssenProject/jans/issues/5475)) ([ccb3f05](https://github.com/JanssenProject/jans/commit/ccb3f056f29d7262cad31ebb545f814f086fdf83))
+
+
+### Bug Fixes
+
+* prepare for 1.0.15 release ([0e3cc2f](https://github.com/JanssenProject/jans/commit/0e3cc2f5ea287c2c35f45def54f074daa473ec49))
+
 ## [1.0.14](https://github.com/JanssenProject/jans/compare/agama-v1.0.13...agama-v1.0.14) (2023-06-12)
 
 

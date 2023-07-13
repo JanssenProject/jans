@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.0.15](https://github.com/JanssenProject/jans/compare/jans-fido2-v1.0.14...jans-fido2-v1.0.15) (2023-07-12)
+
+
+### Features
+
+* **fido2:** loading mds using external urls ([#5162](https://github.com/JanssenProject/jans/issues/5162)) ([d3d2294](https://github.com/JanssenProject/jans/commit/d3d2294ffabe3de9baa067b39f9578947b6d475f))
+
+
+### Bug Fixes
+
+* **jans-fido2:** buildfix - removed stale notify-client reference after move to jans-core [#5257](https://github.com/JanssenProject/jans/issues/5257) ([#5258](https://github.com/JanssenProject/jans/issues/5258)) ([90c6360](https://github.com/JanssenProject/jans/commit/90c6360cb9ec4b44f312feda48960efdbde8b1a5))
+* prepare for 1.0.15 release ([0e3cc2f](https://github.com/JanssenProject/jans/commit/0e3cc2f5ea287c2c35f45def54f074daa473ec49))
+
 ## [1.0.14](https://github.com/JanssenProject/jans/compare/jans-fido2-v1.0.13...jans-fido2-v1.0.14) (2023-06-12)
 
 
