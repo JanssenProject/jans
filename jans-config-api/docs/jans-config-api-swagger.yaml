@@ -7450,19 +7450,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        adminCanAccess:
-          type: boolean
-        adminCanView:
+        whitePagesCanView:
           type: boolean
         adminCanEdit:
           type: boolean
-        userCanAccess:
-          type: boolean
         userCanView:
           type: boolean
-        whitePagesCanView:
+        adminCanView:
+          type: boolean
+        adminCanAccess:
           type: boolean
         userCanEdit:
+          type: boolean
+        userCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -8198,6 +8198,8 @@ components:
           additionalProperties:
             type: string
         httpLoggingResponseBodyContent:
+          type: boolean
+        skipAuthenticationFilterOptionsMethod:
           type: boolean
         fapi:
           type: boolean
