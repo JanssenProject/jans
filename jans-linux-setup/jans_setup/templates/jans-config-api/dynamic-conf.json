@@ -91,7 +91,7 @@
     {
       "name": "jans-link",
       "description": "jans-link plugin",
-      "className": "io.jans.configapi.plugin.janslink.rest.ApiApplication"
+      "className": "io.jans.configapi.plugin.link.rest.ApiApplication"
     }
   ]
 }
