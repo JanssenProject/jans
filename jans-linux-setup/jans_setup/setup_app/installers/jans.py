@@ -75,7 +75,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
             if Config.profile == 'jans':
                 txt += 'Install Fido2 Server'.ljust(30) + repr(Config.installFido2).rjust(35) + (' *' if 'installFido2' in Config.addPostSetupService else '') + "\n"
                 txt += 'Install Scim Server'.ljust(30) + repr(Config.install_scim_server).rjust(35) + (' *' if 'install_scim_server' in Config.addPostSetupService else '') + "\n"
-                txt += 'Install Cache Refresh Server'.ljust(30) + repr(Config.install_cache_refresh).rjust(35) + (' *' if 'install_cache_refresh' in Config.addPostSetupService else '') + "\n"
+                txt += 'Install Jans Link Server'.ljust(30) + repr(Config.install_jans_link).rjust(35) + (' *' if 'install_jans_link' in Config.addPostSetupService else '') + "\n"
                 #txt += 'Install Oxd '.ljust(30) + repr(Config.installOxd).rjust(35) + (' *' if 'installOxd' in Config.addPostSetupService else '') + "\n"
 
             if Config.profile == 'jans' and Config.installEleven:
@@ -623,3 +623,27 @@ class JansInstaller(BaseInstaller, SetupUtils):
                     ]
 
         self.run(cmd_cert_gen)
+
+    def order_services(self):
+
+        service_list = [
+                        ('jans-eleven', 'installEleven'),
+                        ('jans-auth', 'installOxAuth'),
+                        ('jans-config-api', 'install_config_api'),
+                        ('jans-fido2', 'installFido2'),
+                        ('jans-link', 'install_jans_link'),
+                        ('jans-scim', 'install_scim_server'),
+                        ]
+        service_listr = service_list[:]
+        service_listr.reverse()
+        for i, service in enumerate(service_listr):
+            order_var_str = 'order_{}_service'.format(service[0].replace('-','_'))
+            for sservice in (service_listr[i+1:]):
+                if getattr(Config, sservice[1]):
+                    Config.templateRenderingDict[order_var_str] = sservice[0]+'.service'
+                    break
+                else:
+                    if service[0] != 'jans-auth':
+                        Config.templateRenderingDict[order_var_str] = 'jans-auth.service'
+                    else:
+                        Config.templateRenderingDict['order_jans_auth_service'] =  'jans-eleven.service' if Config.installEleven else  Config.backend_service

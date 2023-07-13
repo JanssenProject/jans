@@ -31,7 +31,7 @@ public class JansLinkService {
     public Conf findConf() {
         try {
             String configurationDn = configurationFactory.getBaseConfiguration()
-                    .getString("cacheRefresh_ConfigurationEntryDN");
+                    .getString("link_ConfigurationEntryDN");
             return persistenceManager.find(Conf.class, configurationDn);
         } catch (BasePersistenceException var3) {
             logger.error("Failed to load jans-link configuration from LDAP");

@@ -52,7 +52,7 @@ binaryAttributes=objectGUID
 certificateAttributes=userCertificate
 ```
 
-# Generic entry type
+## Generic entry type
 
 Each entry type in **o=jans** LDAP schema follow next rules:
 
@@ -74,7 +74,7 @@ To store attributes defined in java beans with `@JsonObject` annotation ORM uses
 
 ![](../../../assets/database-ldap-scope-1.jpg)
 
-# Java examples
+# Java example
 
 This example shows how to use ORM. It opens connection to LDAP DB and add user entry to it:
 

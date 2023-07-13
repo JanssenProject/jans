@@ -172,6 +172,16 @@ public class SqlConnectionProvider {
 			objectPoolConfig.setMinEvictableIdleTimeMillis(cpMinEvictableIdleTimeMillis);
 		}
 
+		Boolean testOnCreate = StringHelper.toBoolean(props.getProperty("connection.pool.test-on-create"), null);
+		if (testOnCreate != null) {
+			objectPoolConfig.setTestOnCreate(testOnCreate);
+		}
+
+		Boolean testOnReturn = StringHelper.toBoolean(props.getProperty("connection.pool.test-on-return"), null);
+		if (testOnReturn != null) {
+			objectPoolConfig.setTestOnReturn(testOnReturn);
+		}
+
 		openWithWaitImpl();
 		LOG.info("Created connection pool");
 
