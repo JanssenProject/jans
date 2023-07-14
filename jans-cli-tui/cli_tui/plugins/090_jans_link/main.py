@@ -16,6 +16,7 @@ from utils.multi_lang import _
 from utils.utils import DialogUtils
 from utils.static import cli_style
 
+SOURCE_ATTRIBUTE_S = _("Source Attribute")
 
 class Plugin(DialogUtils):
     """This is a general class for plugins 
@@ -40,9 +41,6 @@ class Plugin(DialogUtils):
         self.prepare_navbar()
         self.prepare_containers()
 
-
-    def process(self) -> None:
-        pass
 
     def init_plugin(self) -> None:
         """The initialization for this plugin
@@ -72,7 +70,7 @@ class Plugin(DialogUtils):
             title = _("Add Attribute Mapping")
             source_attribute, destination_attribute = ('','')
 
-        source_widget = self.app.getTitledText(_("Source Attribute"), name='source_attribute', value=source_attribute, style=cli_style.titled_text, jans_help=_("Source LDAP Attribute"))
+        source_widget = self.app.getTitledText(SOURCE_ATTRIBUTE_S, name='source_attribute', value=source_attribute, style=cli_style.titled_text, jans_help=_("Source LDAP Attribute"))
         destination_widget = self.app.getTitledText(_("Destination Attrbiute"), name='destination_attribute', value=destination_attribute, style=cli_style.titled_text, jans_help=_("Destination LDAP Attribute"))
 
         def add_property(dialog: Dialog) -> None:
@@ -145,7 +143,7 @@ class Plugin(DialogUtils):
 
     def add_source_attribute(self) -> None:
 
-        source_attribute_widget = self.app.getTitledText(_("Source Attribute"), name='source_attribute', value='', style=cli_style.titled_text, jans_help=_("Source Attribute"))
+        source_attribute_widget = self.app.getTitledText(SOURCE_ATTRIBUTE_S, name='source_attribute', value='', style=cli_style.titled_text, jans_help=SOURCE_ATTRIBUTE_S)
 
         def do_add_source_attribute(dialog: Dialog) -> None:
             self.source_attribute_container.add_label(source_attribute_widget.me.text, source_attribute_widget.me.text)
@@ -397,7 +395,6 @@ class Plugin(DialogUtils):
 
         configuration = self.make_data_from_dialog(tabs={'configuration': self.tabs['configuration']})
         customer_backend = self.make_data_from_dialog(tabs={'customer_backend': self.tabs['customer_backend']})
-        source_backend = self.make_data_from_dialog(tabs={'source_backend': self.tabs['source_backend']})
 
         new_data = copy.deepcopy(self.data)
         if 'sourceConfigs' not in new_data:
