@@ -253,7 +253,7 @@ tags:
 | tokenEndpointAuthSigningAlgValuesSupported | A list of the JWS signing algorithms (alg values) supported by the Token Endpoint for the signature on the JWT used to authenticate the Client at the Token Endpoint for the private_key_jwt and client_secret_jwt authentication methods | [Details](#tokenendpointauthsigningalgvaluessupported) |
 | tokenRevocationEndpoint | The URL for the access_token or refresh_token revocation endpoint | [Details](#tokenrevocationendpoint) |
 | trustedClientEnabled | Boolean value specifying whether a client is trusted and no authorization is required | [Details](#trustedclientenabled) |
-| trustedSsaIssuers | List of trusted SSA issuers. If MTLS private key is used to sign DCR JWT, certificate issuer is checked as well. | [Details](#trustedssaissuers) |
+| trustedSsaIssuers | List of trusted SSA issuers with configuration (e.g. automatically granted scopes). | [Details](#trustedssaissuers) |
 | uiLocalesSupported | This list details the languages and scripts supported for the user interface | [Details](#uilocalessupported) |
 | umaAddScopesAutomatically | Add UMA scopes automatically if it is not registered yet | [Details](#umaaddscopesautomatically) |
 | umaConfigurationEndpoint | UMA Configuration endpoint URL | [Details](#umaconfigurationendpoint) |
@@ -2466,7 +2466,7 @@ tags:
 
 ### trustedSsaIssuers
 
-- Description: List of trusted SSA issuers. If MTLS private key is used to sign DCR JWT, certificate issuer is checked as well.
+- Description: List of trusted SSA issuers with configuration (e.g. automatically granted scopes).
 
 - Required: No
 

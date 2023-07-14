@@ -9,6 +9,7 @@ package io.jans.as.server.service.external.context;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.configuration.TrustedIssuerConfig;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.error.IErrorType;
 import io.jans.as.model.jwt.Jwt;
@@ -17,18 +18,19 @@ import io.jans.as.model.util.CertUtils;
 import io.jans.model.SimpleCustomProperty;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.service.cdi.util.CdiUtil;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.asn1.x500.style.BCStyle;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.ws.rs.core.Response;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -130,7 +132,8 @@ public class DynamicClientRegistrationContext extends ExternalScriptContext {
     }
 
     public void validateIssuer() {
-        final List<String> issuers = CdiUtil.bean(AppConfiguration.class).getTrustedSsaIssuers();
+        final Map<String, TrustedIssuerConfig> issuerConfigs = CdiUtil.bean(AppConfiguration.class).getTrustedSsaIssuers();
+        final Set<String> issuers = issuerConfigs.keySet();
         if (issuers.isEmpty()) { // nothing to check
             return;
         }

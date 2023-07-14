@@ -660,8 +660,8 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Boolean value indicating if DCR authorization allowed with MTLS", defaultValue = "false")
     private Boolean dcrAuthorizationWithMTLS = false;
 
-    @DocProperty(description = "List of trusted SSA issuers. If MTLS private key is used to sign DCR JWT, certificate issuer is checked as well.")
-    private List<String> trustedSsaIssuers = new ArrayList<>();
+    @DocProperty(description = "List of trusted SSA issuers with configuration (e.g. automatically granted scopes).")
+    private Map<String, TrustedIssuerConfig> trustedSsaIssuers = new HashMap<>();
 
     @DocProperty(description = "Cache in local memory cache attributes, scopes, clients and organization entry with expiration 60 seconds", defaultValue = "false")
     private Boolean useLocalCache = false;
@@ -1300,12 +1300,12 @@ public class AppConfiguration implements Configuration {
         this.dcrAuthorizationWithMTLS = dcrAuthorizationWithMTLS;
     }
 
-    public List<String> getTrustedSsaIssuers() {
-        if (trustedSsaIssuers == null) trustedSsaIssuers = new ArrayList<>();
+    public Map<String, TrustedIssuerConfig> getTrustedSsaIssuers() {
+        if (trustedSsaIssuers == null) trustedSsaIssuers = new HashMap<>();
         return trustedSsaIssuers;
     }
 
-    public void setTrustedSsaIssuers(List<String> trustedSsaIssuers) {
+    public void setTrustedSsaIssuers(Map<String, TrustedIssuerConfig> trustedSsaIssuers) {
         this.trustedSsaIssuers = trustedSsaIssuers;
     }
 

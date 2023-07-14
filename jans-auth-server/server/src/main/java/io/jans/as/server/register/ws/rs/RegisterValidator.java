@@ -11,6 +11,7 @@ import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.SoftwareStatementValidationType;
 import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.model.configuration.TrustedIssuerConfig;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.crypto.signature.AlgorithmFamily;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
@@ -18,7 +19,9 @@ import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.exception.CryptoProviderException;
 import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwt.Jwt;
+import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.register.RegisterErrorResponseType;
+import io.jans.as.model.register.RegisterRequestParam;
 import io.jans.as.model.ssa.SsaValidationType;
 import io.jans.as.model.util.Pair;
 import io.jans.as.server.ciba.CIBARegisterParamsValidatorService;
@@ -37,10 +40,17 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.Nullable;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import static io.jans.as.model.register.RegisterRequestParam.SOFTWARE_STATEMENT;
+import static io.jans.as.model.util.StringUtils.implode;
 import static org.apache.commons.lang3.BooleanUtils.isFalse;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
@@ -214,6 +224,57 @@ public class RegisterValidator {
     }
 
     public JSONObject validateSoftwareStatement(HttpServletRequest httpServletRequest, JSONObject requestObject) {
+        final JSONObject jsonObject = validateSSA(httpServletRequest, requestObject);
+        TrustedIssuerConfig trustedIssuerConfig = validateIssuer(jsonObject);
+        applyTrustedIssuerConfig(trustedIssuerConfig, jsonObject);
+        return jsonObject;
+    }
+
+    public void applyTrustedIssuerConfig(TrustedIssuerConfig trustedIssuerConfig, JSONObject jsonObject) {
+        if (trustedIssuerConfig == null) {
+            return;
+        }
+
+        final List<String> automaticallyGrantedScopes = trustedIssuerConfig.getAutomaticallyGrantedScopes();
+        if (automaticallyGrantedScopes.isEmpty()) {
+            return;
+        }
+
+        final Set<String> scopes = new HashSet<>(automaticallyGrantedScopes);
+        final String scopeString = jsonObject.optString(RegisterRequestParam.SCOPE.toString());
+        if (StringUtils.isNotBlank(scopeString)) {
+            scopes.addAll(io.jans.as.model.util.StringUtils.spaceSeparatedToList(scopeString));
+        }
+
+        final JSONArray scopeJsonArray = jsonObject.optJSONArray(RegisterRequestParam.SCOPE.toString());
+        if (scopeJsonArray != null) {
+            scopes.addAll(io.jans.as.model.util.StringUtils.toList(scopeJsonArray));
+        }
+
+        jsonObject.putOpt(RegisterRequestParam.SCOPE.toString(), implode(scopes, " "));
+    }
+
+    public TrustedIssuerConfig validateIssuer(JSONObject jsonObject) {
+        final String issuer = jsonObject.optString(JwtClaimName.ISSUER);
+        if (StringUtils.isBlank(issuer)) {
+            log.trace("SSA does not contain 'iss' (issuer).");
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_SOFTWARE_STATEMENT, "Failed to find 'iss' (issuer) in software statement");
+        }
+
+        final Map<String, TrustedIssuerConfig> trustedSsaIssuers = appConfiguration.getTrustedSsaIssuers();
+        if (trustedSsaIssuers.isEmpty()) {
+            return null; // nothing to check
+        }
+
+        final TrustedIssuerConfig trustedIssuerConfig = trustedSsaIssuers.get(issuer);
+        if (trustedIssuerConfig == null) {
+            log.trace("SSA issuer is not added as trusted in 'trustedSsaIssuers' AS configuration.");
+            throw errorResponseFactory.createWebApplicationException(Response.Status.BAD_REQUEST, RegisterErrorResponseType.INVALID_SOFTWARE_STATEMENT, "Failed to validate 'iss' (issuer) of software statement.");
+        }
+        return trustedIssuerConfig;
+    }
+
+    public JSONObject validateSSA(HttpServletRequest httpServletRequest, JSONObject requestObject) {
         if (!requestObject.has(SOFTWARE_STATEMENT.toString())) {
             return null;
         }
