@@ -32,7 +32,7 @@ class Plugin():
         """
         self.app = app
         self.pid = 'admin'
-        self.name = '[C]onfig-API'
+        self.name = 'Co[n]fig-API'
         self.server_side_plugin = True
         self.page_entered = False
         self.role_type = 'api-viewer'
