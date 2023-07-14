@@ -16,6 +16,10 @@
 				<include>org.keycloak:keycloak-admin-client-jakarta</include>
 				<include>org.keycloak:keycloak-core</include>
 				<include>org.keycloak:keycloak-common</include>
+				<include>org.jboss.resteasy:resteasy-multipart-provider</include>
+				<include>org.apache.james:apache-mime4j-dom</include>
+				<include>org.apache.james:apache-mime4j-storage</include>
+				<include>org.apache.james:apache-mime4j-core</include>
 			</includes>
 			<scope>runtime</scope>
 		</dependencySet>

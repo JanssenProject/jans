@@ -533,8 +533,7 @@ components:
         trustRelationship:
           $ref: '#/components/schemas/TrustRelationship'
         metaDataFile:
-          type: string
-          format: binary
+          type: object
   securitySchemes:
     oauth2:
       type: oauth2

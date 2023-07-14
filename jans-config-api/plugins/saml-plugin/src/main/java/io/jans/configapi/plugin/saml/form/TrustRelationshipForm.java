@@ -14,10 +14,11 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.Valid;
 
 
-import java.io.File;
+import java.io.InputStream;
 
 import org.jboss.resteasy.annotations.providers.multipart.PartType;
 import jakarta.ws.rs.FormParam;
+import jakarta.ws.rs.core.MediaType;
 
 public class TrustRelationshipForm implements Serializable {
 
@@ -26,13 +27,13 @@ public class TrustRelationshipForm implements Serializable {
     @NotNull
 	@Valid
 	@FormParam("trustRelationship")
-	@PartType("application/json")
+	@PartType(MediaType.APPLICATION_JSON)
     private TrustRelationship trustRelationship;
 
     @NotNull
 	@FormParam("metaDataFile")
-	@PartType("application/octet-stream")
-    private File metaDataFile;
+	@PartType(MediaType.APPLICATION_OCTET_STREAM)
+    private InputStream  metaDataFile;
 
     public TrustRelationship getTrustRelationship() {
         return trustRelationship;
@@ -42,11 +43,11 @@ public class TrustRelationshipForm implements Serializable {
         this.trustRelationship = trustRelationship;
     }
 
-    public File getMetaDataFile() {
+    public InputStream getMetaDataFile() {
         return metaDataFile;
     }
 
-    public void setMetaDataFile(File metaDataFile) {
+    public void setMetaDataFile(InputStream metaDataFile) {
         this.metaDataFile = metaDataFile;
     }
 

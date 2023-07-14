@@ -104,8 +104,7 @@ public class SamlIdpService {
         logger.error("idpMetadataTempFolder:{}",idpMetadataTempFolder);
         String tempFileName = getTempMetadataFilename(idpMetadataTempFolder, spMetadataFileName);
         logger.error("idpMetadataTempFolder:{}, tempFileName:{}",idpMetadataTempFolder, tempFileName);
-        //String spMetadataFile = idpMetadataTempFolder + tempFileName;
-        String spMetadataFile = idpMetadataTempFolder + spMetadataFileName;
+        String spMetadataFile = idpMetadataTempFolder + tempFileName;
         logger.error("documentStoreService:{}, spMetadataFile:{}, localDocumentStoreService:{} ",documentStoreService, spMetadataFile, localDocumentStoreService);
         try {
             boolean result = documentStoreService.saveDocumentStream(spMetadataFile, stream,

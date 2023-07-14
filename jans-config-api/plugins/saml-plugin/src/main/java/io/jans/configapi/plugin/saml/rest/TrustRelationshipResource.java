@@ -149,25 +149,24 @@ public class TrustRelationshipResource extends BaseResource {
             InputStream metadatafile) throws IOException {
         logger.debug(" Create trustRelationshipForm:{} ", trustRelationshipForm);
         checkResourceNotNull(trustRelationshipForm, SAML_TRUST_RELATIONSHIP_FORM);
-       
+
         TrustRelationship trustRelationship = trustRelationshipForm.getTrustRelationship();
         logger.debug(" Create trustRelationship:{} ", trustRelationship);
         checkResourceNotNull(trustRelationshipForm.getTrustRelationship(), SAML_TRUST_RELATIONSHIP);
         checkNotNull(trustRelationshipForm.getTrustRelationship().getClientId(), AttributeNames.NAME);
-        
-        InputStream inputStream = null;
-        File metaDataFile = trustRelationshipForm.getMetaDataFile();
-        logger.debug(" Create metaDataFile:{} ", metaDataFile);        
-        if(metaDataFile!=null) {
-            logger.debug(" Create metaDataFile.getName():{} , metaDataFile.length():{}", metaDataFile.getName(), metaDataFile.length());
-            inputStream = new FileInputStream(metaDataFile);
+
+        InputStream metaDataFile = trustRelationshipForm.getMetaDataFile();
+        logger.debug(" Create metaDataFile:{} ", metaDataFile);
+        if (metaDataFile != null) {
+            logger.debug(" Create metaDataFile.available():{}", metaDataFile.available());
+            // inputStream = new FileInputStream(metaDataFile);
         }
-        
+
         // TO-DO validation of TrustRelationship
         String inum = samlService.generateInumForNewRelationship();
         trustRelationship.setInum(inum);
         trustRelationship.setDn(samlService.getDnForTrustRelationship(inum));
-        trustRelationship = samlService.addTrustRelationship(trustRelationship, inputStream);
+        trustRelationship = samlService.addTrustRelationship(trustRelationship, metaDataFile);
 
         logger.error("Create created by TrustRelationship:{}", trustRelationship);
         return Response.status(Response.Status.CREATED).entity(trustRelationship).build();
