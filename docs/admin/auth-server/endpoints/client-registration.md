@@ -171,6 +171,23 @@ parameters:
 point to JWKS URI.
  - `dcrSignatureValidationSoftwareStatementJwksClaim` - specifies claim name inside software statement. Value of claim 
 should point to inlined JWKS.
+ - `trustedSsaIssuers` - map of trusted SSA issuers with configuration (e.g. automatically granted scopes). When empty - no issuers validation is performed. When not empty - AS forces validation and each SSA must match at least one entry from list.
+   - `automaticallyGrantedScopes` - automatically granted scopes for trusted issuer
+    ```json
+    {
+      "https://trusted.as.com": {
+        "automaticallyGrantedScopes": [
+          "a",
+          "b"
+        ]
+      },
+      "https://another-trusted.as.com": {
+        "automaticallyGrantedScopes": [
+          "d"
+        ]
+      }
+    }
+    ``` 
 
 Configure the AS using steps explained in the [link](#curl-commands-to-configure-jans-auth-server)
 
@@ -501,9 +518,25 @@ When create entry in `dcrSsaValidationConfigs` configuration property :
 
 **Via other configuration properties**
 
+* **trustedSsaIssuers** - map of trusted SSA issuers with configuration (e.g. automatically granted scopes). When empty - no issuers validation is performed. When not empty - AS forces validation and each SSA must match at least one entry from list.
+  * **automaticallyGrantedScopes** - automatically granted scopes for trusted issuer
+    ```json
+    {
+      "https://trusted.as.com": {
+        "automaticallyGrantedScopes": [
+          "a",
+          "b"
+        ]
+      },
+      "https://another-trusted.as.com": {
+        "automaticallyGrantedScopes": [
+          "d"
+        ]
+      }
+    }
+    ``` 
 * **dcrSignatureValidationJwks** - specifies JWKS for DCR's validations
 * **dcrSignatureValidationJwksUri** - specifies JWKS URI for  DCR's validations
-* **trustedSsaIssuers** - List of trusted SSA issuers. If MTLS private key is used to sign DCR JWT, certificate issuer is checked as well.
 * **dcrSignatureValidationSharedSecret** - if HMAC is used, this is the shared secret
 * **dcrSignatureValidationEnabled** - boolean value enables DCR signature validation. Default is false
 * **dcrSignatureValidationSoftwareStatementJwksURIClaim** - specifies claim name inside software statement. Value of claim should point to JWKS URI
