@@ -30,7 +30,7 @@ class Plugin(DialogUtils):
             app (Generic): The main Application class
         """
         self.app = app
-        self.pid = 'cache-refresh'
+        self.pid = 'jans-link'
         self.name = 'Jans Lin[k]'
         self.server_side_plugin = True
         self.page_entered = False
@@ -191,11 +191,12 @@ class Plugin(DialogUtils):
         self.edit_source_config_dialog()
 
     def create_widgets(self):
-        self.schema = self.app.cli_object.get_schema_from_reference('cacherefresh', '#/components/schemas/CacheRefreshConfiguration')
+        self.schema = self.app.cli_object.get_schema_from_reference('Jans Link Plugin', '#/components/schemas/JansLinkConfiguration')
 
         mappings_title = _("Mappings:")
         add_mapping_title = _("Add Mapping")
 
+        save_config_buttonc = VSplit([Button(_("Save"), handler=self.save_config)], align=HorizontalAlign.CENTER)
         mappings_data = [(mapping['source'], mapping['destination']) for mapping in self.data.get('attributeMapping', [])]
 
         self.mappings_container = JansVerticalNav(
@@ -218,6 +219,7 @@ class Plugin(DialogUtils):
                 )
 
         self.tabs['configuration'] = HSplit([
+                                self.app.getTitledCheckBox(_("Enabled"), name='linkEnabled', checked=self.data.get('linkEnabled'), jans_help=self.app.get_help_from_schema(self.schema, 'linkEnabled'), style=cli_style.check_box, widget_style=cli_style.black_bg_widget),
                                 self.app.getTitledWidget(
                                     _("Refresh Method"),
                                     name='updateMethod',
@@ -240,15 +242,15 @@ class Plugin(DialogUtils):
                                     ],
                                     height=5, width=D(),
                                     ),
-                                self.app.getTitledText(_("Server IP Address"), name='cacheRefreshServerIpAddress', value=self.data.get('cacheRefreshServerIpAddress',''), jans_help=self.app.get_help_from_schema(self.schema, 'cacheRefreshServerIpAddress'), style=cli_style.titled_text, widget_style=cli_style.black_bg_widget),
-                                self.app.getTitledText(_("Polling Interval (minutes)"), name='vdsCacheRefreshPollingInterval', value=self.data.get('vdsCacheRefreshPollingInterval') or '20', jans_help=self.app.get_help_from_schema(self.schema, 'vdsCacheRefreshPollingInterval'), style=cli_style.titled_text, widget_style=cli_style.black_bg_widget, text_type='integer'),
+                                self.app.getTitledText(_("Server IP Address"), name='serverIpAddress', value=self.data.get('serverIpAddress',''), jans_help=self.app.get_help_from_schema(self.schema, 'serverIpAddress'), style=cli_style.titled_text, widget_style=cli_style.black_bg_widget),
+                                self.app.getTitledText(_("Polling Interval (minutes)"), name='pollingInterval', value=self.data.get('pollingInterval') or '20', jans_help=self.app.get_help_from_schema(self.schema, 'pollingInterval'), style=cli_style.titled_text, widget_style=cli_style.black_bg_widget, text_type='integer'),
                                 self.app.getTitledText(_("Snapshot Directory"), name='snapshotFolder', value=self.data.get('snapshotFolder',''), jans_help=self.app.get_help_from_schema(self.schema, 'snapshotFolder'), style=cli_style.edit_text_required, widget_style=cli_style.black_bg_widget),
                                 self.app.getTitledText(_("Snapshot Count"), name='snapshotMaxCount', value=self.data.get('snapshotMaxCount', '10'), jans_help=self.app.get_help_from_schema(self.schema, 'snapshotMaxCount'), style=cli_style.edit_text_required, widget_style=cli_style.black_bg_widget, text_type='integer'),
                                 self.app.getTitledCheckBox(_("Keep External Persons"), name='keepExternalPerson', checked=self.data.get('keepExternalPerson'), jans_help=self.app.get_help_from_schema(self.schema, 'keepExternalPerson'), style=cli_style.check_box, widget_style=cli_style.black_bg_widget),
                                 self.app.getTitledCheckBox(_("Load Source Data withLimited Search"), name='useSearchLimit', checked=self.data.get('useSearchLimit'), jans_help=self.app.get_help_from_schema(self.schema, 'useSearchLimit'), style=cli_style.check_box, widget_style=cli_style.black_bg_widget),
 
                                 Window(height=1),
-                                VSplit([Button(_("Save"), handler=self.save_config)], align=HorizontalAlign.CENTER),
+                                save_config_buttonc,
                                 ],
                                 width=D()
                                 )
@@ -280,6 +282,8 @@ class Plugin(DialogUtils):
                                     jans_help=_("Space seperated source attributes")
                                 ),
                                 self.app.getTitledText(_("Custom LDAP Filter"), name='customLdapFilter', value=self.data.get('customLdapFilter',''), jans_help=self.app.get_help_from_schema(self.schema, 'customLdapFilter'), style=cli_style.titled_text, widget_style=cli_style.black_bg_widget),
+                                Window(height=1),
+                                save_config_buttonc,
                                 ],
                                 width=D()
                                 )
@@ -312,10 +316,10 @@ class Plugin(DialogUtils):
         self.nav_selection_changed(list(self.tabs)[0])
 
     async def get_configuration(self) -> None:
-        'Coroutine for getting cache refresh configuration.'
+        'Coroutine for getting Janssen Link configuration.'
         try:
             response = self.app.cli_object.process_command_by_id(
-                        operation_id='get-properties-cache-refresh',
+                        operation_id='get-jans-link-properties',
                         url_suffix='',
                         endpoint_args='',
                         data_fn=None,
@@ -323,12 +327,12 @@ class Plugin(DialogUtils):
                         )
 
         except Exception as e:
-            self.app.show_message(_("Error getting Cache Refresh configuration"), str(e), tobefocused=self.app.center_container)
+            self.app.show_message(_("Error getting Janssen Link configuration"), str(e), tobefocused=self.app.center_container)
             self.app.disable_plugin(self.pid)
             return
 
         if response.status_code not in (200, 201):
-            self.app.show_message(_("Error getting Cache Refresh configuration"), str(response.text), tobefocused=self.app.center_container)
+            self.app.show_message(_("Error getting Janssen Link configuration"), str(response.text), tobefocused=self.app.center_container)
             self.app.disable_plugin(self.pid)
             return
 
@@ -396,6 +400,8 @@ class Plugin(DialogUtils):
         source_backend = self.make_data_from_dialog(tabs={'source_backend': self.tabs['source_backend']})
 
         new_data = copy.deepcopy(self.data)
+        if 'sourceConfigs' not in new_data:
+            new_data['sourceConfigs'] = []
 
         if delete_source_config is None:
             configuration['attributeMapping'] = [ {'source': source, 'destination': destination} for source, destination in self.mappings_container.data ]
@@ -405,10 +411,13 @@ class Plugin(DialogUtils):
             configuration['customLdapFilter'] = customer_backend['customLdapFilter']
             new_data.update(configuration)
         else:
-            new_data['sourceConfigs'].pop(delete_source_config)
+            try:
+                new_data['sourceConfigs'].pop(delete_source_config)
+            except Exception as e:
+                self.app.show_message(_('Error Deleting Source Config'), str(e))
 
         async def coroutine():
-            cli_args = {'operation_id': 'put-properties-cache-refresh', 'data': new_data}
+            cli_args = {'operation_id': 'put-jans-link-properties', 'data': new_data}
             self.app.start_progressing(_("Saving Jans Link Configuration..."))
             response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
             if response.status_code == 200:
@@ -499,6 +508,9 @@ class Plugin(DialogUtils):
             sc_data['level'] = 0
             sc_data['servers'] = sc_data['servers'].split()
             sc_data['baseDNs'] = sc_data['baseDNs'].split()
+
+            if 'sourceConfigs' not in self.data:
+                self.data['sourceConfigs'] = []
 
             if selected is not None:
                 self.data['sourceConfigs'][selected] = sc_data
