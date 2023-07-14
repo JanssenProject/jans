@@ -16,33 +16,37 @@ First thing, let's get the information for `Attribute`:
 In return, we get a list of Operations ID as below:
 
 ```text
-Operation ID: get-all-attribute
-  Description: Gets all attributes. Optionally max-size of the result, attribute status and pattern can be provided.
+Operation ID: get-attributes
+  Description: Gets a list of Gluu attributes.
   Parameters:
-  limit: Search size - max size of the results to return. [integer]
-  pattern: Search pattern. [string]
+  limit: Search size - max size of the results to return [integer]
+  pattern: Search pattern [string]
   status: Status of the attribute [string]
-  startIndex: The 1-based index of the first query result. [integer]
-  sortBy: Attribute whose value will be used to order the returned response. [string]
-  sortOrder: Order in which the sortBy param is applied. Allowed values are "ascending" and "descending". [string]
-Operation ID: post-attributes
-  Description: Adds a new attribute.
-  Schema: /components/schemas/GluuAttribute
+  startIndex: The 1-based index of the first query result [integer]
+  sortBy: Attribute whose value will be used to order the returned response [string]
+  sortOrder: Order in which the sortBy param is applied. Allowed values are "ascending" and "descending" [string]
+  fieldValuePair: Field and value pair for seraching [string]
 Operation ID: put-attributes
-  Description: Updates an existing attribute.
-  Schema: /components/schemas/GluuAttribute
+  Description: Updates an existing attribute
+  Schema: GluuAttribute
+Operation ID: post-attributes
+  Description: Adds a new attribute
+  Schema: GluuAttribute
 Operation ID: get-attributes-by-inum
-  Description: Gets an attribute based on inum.
-  url-suffix: inum
+  Description: Gets an attribute based on inum
+  Parameters:
+  inum: Attribute Id [string]
 Operation ID: delete-attributes-by-inum
-  Description: Deletes an attribute based on inum.
-  url-suffix: inum
+  Description: Deletes an attribute based on inum
+  Parameters:
+  inum: Attribute Id [string]
 Operation ID: patch-attributes-by-inum
-  Description: Partially modify a GluuAttribute.
-  url-suffix: inum
-  Schema: Array of /components/schemas/PatchRequest
+  Description: Partially modify a GluuAttribute
+  Parameters:
+  inum: Attribute Id [string]
+  Schema: Array of PatchRequest
 
-To get sample schema type /opt/jans/jans-cli/config-cli.py --schema <schma>, for example /opt/jans/jans-cli/config-cli.py --schema /components/schemas/PatchRequest
+To get sample schema type /opt/jans/jans-cli/config-cli.py --schema <schma>, for example /opt/jans/jans-cli/config-cli.py --schema PatchRequest
 ```
 
 We have discussed here about each of this operations ID with few examples to understand how these really works.
@@ -65,288 +69,160 @@ Table of Contents
 As we know, Attributes are individual pieces of user data, like `uid` or `email`, that are required by applications in order to identify a user and grant access to protect resources. The user attributes that are available in your Janssen Server can be found by using this operation-ID. If we look at the description below:
 
 ```text
-Operation ID: get-all-attribute
-  Description: Gets all attributes. Optionally max-size of the result, attribute status and pattern can be provided.
+Operation ID: get-attributes
+  Description: Gets a list of Gluu attributes.
   Parameters:
-  limit: Search size - max size of the results to return. [integer]
-  pattern: Search pattern. [string]
+  limit: Search size - max size of the results to return [integer]
+  pattern: Search pattern [string]
   status: Status of the attribute [string]
-  startIndex: The 1-based index of the first query result. [integer]
-  sortBy: Attribute whose value will be used to order the returned response. [string]
-  sortOrder: Order in which the sortBy param is applied. Allowed values are "ascending" and "descending". [string]
+  startIndex: The 1-based index of the first query result [integer]
+  sortBy: Attribute whose value will be used to order the returned response [string]
+  sortOrder: Order in which the sortBy param is applied. Allowed values are "ascending" and "descending" [string]
+  fieldValuePair: Field and value pair for seraching [string]
 ```
 
 To get all the attributes without any arguments, run the following command:
 ```commandline
-/opt/jans/jans-cli/config-cli.py --operation-id get-all-attribute
+/opt/jans/jans-cli/config-cli.py --operation-id get-attributes
 ```
 
 To get attributes with passing the arguments, let's retrieve randomly limit:5:
 
 ```commandline
-/opt/jans/jans-cli/config-cli.py --operation-id get-attributes --endpoint-args limit:5
+/opt/jans/jans-cli/config-cli.py --operation-id get-attributes --endpoint-args limit:1
 ```
 
-It will return any 5 attributes randomly:
+It will return only one attribute details randomly:
 ```text
 Getting access token for scope https://jans.io/oauth/config/attributes.readonly
-Calling with params limit=5
-[
-  {
-    "dn": "inum=B4B0,ou=attributes,o=jans",
-    "inum": "B4B0",
-    "selected": false,
-    "name": "givenName",
-    "displayName": "First Name",
-    "description": "Given name(s) or first name(s) of the End-User.Note that in some cultures, people can have multiple given names;all can be present, with the names being separated by space characters.",
-    "dataType": "STRING",
-    "status": "ACTIVE",
-    "lifetime": null,
-    "sourceAttribute": null,
-    "salt": null,
-    "nameIdType": null,
-    "origin": "jansPerson",
-    "editType": [
-      "USER",
-      "ADMIN"
-    ],
-    "viewType": [
-      "USER",
-      "ADMIN"
-    ],
-    "usageType": null,
-    "claimName": "given_name",
-    "seeAlso": null,
-    "saml1Uri": "urn:mace:dir:attribute-def:givenName",
-    "saml2Uri": "urn:oid:2.5.4.42",
-    "urn": "urn:mace:dir:attribute-def:givenName",
-    "scimCustomAttr": null,
-    "oxMultiValuedAttribute": false,
-    "custom": false,
-    "requred": false,
-    "attributeValidation": null,
-    "tooltip": null
-  },
-  {
-    "dn": "inum=29DA,ou=attributes,o=jans",
-    "inum": "29DA",
-    "selected": false,
-    "name": "inum",
-    "displayName": "Inum",
-    "description": "XRI i-number, persistent non-reassignable identifier",
-    "dataType": "STRING",
-    "status": "ACTIVE",
-    "lifetime": null,
-    "sourceAttribute": null,
-    "salt": null,
-    "nameIdType": null,
-    "origin": "jansPerson",
-    "editType": null,
-    "viewType": [
-      "USER",
-      "ADMIN"
-    ],
-    "usageType": null,
-    "claimName": "inum",
-    "seeAlso": null,
-    "saml1Uri": "urn:mace:dir:attribute-def:inum",
-    "saml2Uri": "urn:oid:1.3.6.1.4.1.48710.1.3.117",
-    "urn": "urn:jans:dir:attribute-def:inum",
-    "scimCustomAttr": null,
-    "oxMultiValuedAttribute": false,
-    "custom": false,
-    "requred": false,
-    "attributeValidation": null,
-    "tooltip": null
-  },
-  {
-    "dn": "inum=B52A,ou=attributes,o=jans",
-    "inum": "B52A",
-    "selected": false,
-    "name": "jansPrefUsrName",
-    "displayName": "Preferred Username",
-    "description": "A domain issued and managed identifier for the person.Subject - Identifier for the End-User at the Issuer.",
-    "dataType": "STRING",
-    "status": "ACTIVE",
-    "lifetime": null,
-    "sourceAttribute": null,
-    "salt": null,
-    "nameIdType": null,
-    "origin": "jansPerson",
-    "editType": [
-      "ADMIN"
-    ],
-    "viewType": [
-      "USER",
-      "ADMIN"
-    ],
-    "usageType": null,
-    "claimName": "preferred_username",
-    "seeAlso": null,
-    "saml1Uri": "urn:mace:dir:attribute-def:preferredUsername",
-    "saml2Uri": "urn:oid:1.3.6.1.4.1.48710.1.3.320",
-    "urn": "http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/preferred_username",
-    "scimCustomAttr": null,
-    "oxMultiValuedAttribute": false,
-    "custom": false,
-    "requred": false,
-    "attributeValidation": null,
-    "tooltip": null
-  },
-  {
-    "dn": "inum=64A0,ou=attributes,o=jans",
-    "inum": "64A0",
-    "selected": false,
-    "name": "profile",
-    "displayName": "Profile URL",
-    "description": "URL of the End-User's profile page. The contents of this Web page SHOULD be about the End-User.",
-    "dataType": "STRING",
-    "status": "ACTIVE",
-    "lifetime": null,
-    "sourceAttribute": null,
-    "salt": null,
-    "nameIdType": null,
-    "origin": "jansPerson",
-    "editType": [
-      "USER",
-      "ADMIN"
-    ],
-    "viewType": [
-      "USER",
-      "ADMIN"
-    ],
-    "usageType": null,
-    "claimName": "profile",
-    "seeAlso": null,
-    "saml1Uri": "urn:mace:dir:attribute-def:profile",
-    "saml2Uri": "urn:oid:1.3.6.1.4.1.48710.1.3.321",
-    "urn": "http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/profile",
-    "scimCustomAttr": null,
-    "oxMultiValuedAttribute": false,
-    "custom": false,
-    "requred": false,
-    "attributeValidation": null,
-    "tooltip": null
-  },
-  {
-    "dn": "inum=42E0,ou=attributes,o=jans",
-    "inum": "42E0",
-    "selected": false,
-    "name": "uid",
-    "displayName": "Username",
-    "description": "A domain issued and managed identifier for the person.Subject - Identifier for the End-User at the Issuer.",
-    "dataType": "STRING",
-    "status": "ACTIVE",
-    "lifetime": null,
-    "sourceAttribute": null,
-    "salt": null,
-    "nameIdType": null,
-    "origin": "jansPerson",
-    "editType": [
-      "ADMIN"
-    ],
-    "viewType": [
-      "USER",
-      "ADMIN"
-    ],
-    "usageType": null,
-    "claimName": "user_name",
-    "seeAlso": null,
-    "saml1Uri": "urn:mace:dir:attribute-def:uid",
-    "saml2Uri": "urn:oid:0.9.2342.19200300.100.1.1",
-    "urn": "urn:mace:dir:attribute-def:uid",
-    "scimCustomAttr": null,
-    "oxMultiValuedAttribute": false,
-    "custom": false,
-    "requred": false,
-    "attributeValidation": null,
-    "tooltip": null
-  }
-]
+Calling with params limit=1
+{
+  "start": 0,
+  "totalEntriesCount": 71,
+  "entriesCount": 1,
+  "entries": [
+    {
+      "dn": "inum=29DA,ou=attributes,o=jans",
+      "selected": false,
+      "inum": "29DA",
+      "name": "inum",
+      "displayName": "Inum",
+      "description": "XRI i-number, persistent non-reassignable identifier",
+      "origin": "jansPerson",
+      "dataType": "string",
+      "editType": [
+        "admin"
+      ],
+      "viewType": [
+        "user",
+        "admin"
+      ],
+      "claimName": "inum",
+      "status": "active",
+      "saml1Uri": "urn:mace:dir:attribute-def:inum",
+      "saml2Uri": "urn:oid:1.3.6.1.4.1.48710.1.3.117",
+      "urn": "urn:jans:dir:attribute-def:inum",
+      "oxMultiValuedAttribute": false,
+      "custom": false,
+      "requred": false,
+      "adminCanAccess": true,
+      "adminCanView": true,
+      "adminCanEdit": true,
+      "userCanAccess": true,
+      "userCanView": true,
+      "userCanEdit": false,
+      "whitePagesCanView": false,
+      "baseDn": "inum=29DA,ou=attributes,o=jans"
+    }
+  ]
+}
+
 ```
 
 To get attributes with `pattern & status`:
 
 ```commandline
-/opt/jans/jans-cli/config-cli.py --operation-id get-attributes --endpoint-args limit:5,pattern:profile,status:ACTIVE
+/opt/jans/jans-cli/config-cli.py --operation-id get-attributes --endpoint-args limit:3,pattern:profile,status:ACTIVE
 ```
 In return, we get a list of attribute that are matched with the given `pattern` and `status`:
 
 ```properties
-Getting access token for scope https://jans.io/oauth/config/attributes.readonly
-Calling with params limit=5&pattern=profile&status=ACTIVE
-[
-  {
-    "dn": "inum=EC3A,ou=attributes,o=jans",
-    "inum": "EC3A",
-    "selected": false,
-    "name": "picture",
-    "displayName": "Picture URL",
-    "description": "URL of the End-User's profile picture",
-    "dataType": "STRING",
-    "status": "ACTIVE",
-    "lifetime": null,
-    "sourceAttribute": null,
-    "salt": null,
-    "nameIdType": null,
-    "origin": "jansPerson",
-    "editType": [
-      "USER",
-      "ADMIN"
-    ],
-    "viewType": [
-      "USER",
-      "ADMIN"
-    ],
-    "usageType": null,
-    "claimName": "picture",
-    "seeAlso": null,
-    "saml1Uri": "urn:mace:dir:attribute-def:picture",
-    "saml2Uri": "urn:oid:1.3.6.1.4.1.48710.1.3.322",
-    "urn": "http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/picture",
-    "scimCustomAttr": null,
-    "oxMultiValuedAttribute": false,
-    "custom": false,
-    "requred": false,
-    "attributeValidation": null,
-    "tooltip": null
-  },
-  {
-    "dn": "inum=64A0,ou=attributes,o=jans",
-    "inum": "64A0",
-    "selected": false,
-    "name": "profile",
-    "displayName": "Profile URL",
-    "description": "URL of the End-User's profile page. The contents of this Web page SHOULD be about the End-User.",
-    "dataType": "STRING",
-    "status": "ACTIVE",
-    "lifetime": null,
-    "sourceAttribute": null,
-    "salt": null,
-    "nameIdType": null,
-    "origin": "jansPerson",
-    "editType": [
-      "USER",
-      "ADMIN"
-    ],
-    "viewType": [
-      "USER",
-      "ADMIN"
-    ],
-    "usageType": null,
-    "claimName": "profile",
-    "seeAlso": null,
-    "saml1Uri": "urn:mace:dir:attribute-def:profile",
-    "saml2Uri": "urn:oid:1.3.6.1.4.1.48710.1.3.321",
-    "urn": "http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/profile",
-    "scimCustomAttr": null,
-    "oxMultiValuedAttribute": false,
-    "custom": false,
-    "requred": false,
-    "attributeValidation": null,
-    "tooltip": null
-  }
-]
+Please wait while retrieving data ...
+{
+  "start": 0,
+  "totalEntriesCount": 2,
+  "entriesCount": 2,
+  "entries": [
+    {
+      "dn": "inum=64A0,ou=attributes,o=jans",
+      "selected": false,
+      "inum": "64A0",
+      "name": "profile",
+      "displayName": "Profile URL",
+      "description": "URL of the End-User's profile page. The contents of this Web page SHOULD be about the End-User.",
+      "origin": "jansPerson",
+      "dataType": "string",
+      "editType": [
+        "user",
+        "admin"
+      ],
+      "viewType": [
+        "user",
+        "admin"
+      ],
+      "claimName": "profile",
+      "status": "active",
+      "saml1Uri": "urn:mace:dir:attribute-def:profile",
+      "saml2Uri": "urn:oid:1.3.6.1.4.1.48710.1.3.321",
+      "urn": "http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/profile",
+      "oxMultiValuedAttribute": false,
+      "custom": false,
+      "requred": false,
+      "adminCanAccess": true,
+      "adminCanView": true,
+      "adminCanEdit": true,
+      "userCanAccess": true,
+      "userCanView": true,
+      "userCanEdit": true,
+      "whitePagesCanView": false,
+      "baseDn": "inum=64A0,ou=attributes,o=jans"
+    },
+    {
+      "dn": "inum=EC3A,ou=attributes,o=jans",
+      "selected": false,
+      "inum": "EC3A",
+      "name": "picture",
+      "displayName": "Picture URL",
+      "description": "URL of the End-User's profile picture",
+      "origin": "jansPerson",
+      "dataType": "string",
+      "editType": [
+        "user",
+        "admin"
+      ],
+      "viewType": [
+        "user",
+        "admin"
+      ],
+      "claimName": "picture",
+      "status": "active",
+      "saml1Uri": "urn:mace:dir:attribute-def:picture",
+      "saml2Uri": "urn:oid:1.3.6.1.4.1.48710.1.3.322",
+      "urn": "http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/picture",
+      "oxMultiValuedAttribute": false,
+      "custom": false,
+      "requred": false,
+      "adminCanAccess": true,
+      "adminCanView": true,
+      "adminCanEdit": true,
+      "userCanAccess": true,
+      "userCanView": true,
+      "userCanEdit": true,
+      "whitePagesCanView": false,
+      "baseDn": "inum=EC3A,ou=attributes,o=jans"
+    }
+  ]
+}
 ```
 
 ## Creating an Attribute
@@ -355,48 +231,69 @@ To create SSO for certain applications, you may need to add custom attributes to
 
 ```text
 Operation ID: post-attributes
-  Description: Adds a new attribute.
-  Schema: /components/schemas/GluuAttribute
+  Description: Adds a new attribute
+  Schema: GluuAttribute
 ```
 Before adding a new attribute, let's get sample `schema`:
 ```commandline
-/opt/jans/jans-cli/config-cli.py --schema /components/schemas/GluuAttribute > /tmp/attribute.json
+/opt/jans/jans-cli/config-cli.py --schema GluuAttribute > /tmp/attribute.json
 ```  
 It will return as below:
 
-```text
+```json
 {
-  "dn": null,
-  "inum": null,
-  "selected": true,
-  "name": "name, displayName, birthdate, email",
+  "dn": "string",
+  "selected": false,
+  "inum": "string",
+  "sourceAttribute": "string",
+  "nameIdType": "string",
+  "name": "string",
   "displayName": "string",
   "description": "string",
-  "dataType": "STRING",
-  "status": "REGISTER",
-  "lifetime": null,
-  "sourceAttribute": null,
-  "salt": null,
-  "nameIdType": null,
-  "origin": null,
-  "editType": [],
-  "viewType": "array",
-  "usageType": [],
-  "claimName": null,
-  "seeAlso": null,
-  "saml1Uri": null,
-  "saml2Uri": null,
-  "urn": null,
+  "origin": "string",
+  "dataType": "certificate",
+  "editType": [
+    "manager"
+  ],
+  "viewType": [
+    "user"
+  ],
+  "usageType": [
+    "openid"
+  ],
+  "claimName": "string",
+  "seeAlso": "string",
+  "status": "inactive",
+  "saml1Uri": "string",
+  "saml2Uri": "string",
+  "urn": "string",
   "scimCustomAttr": true,
   "oxMultiValuedAttribute": true,
-  "custom": true,
+  "jansHideOnDiscovery": true,
+  "custom": false,
   "requred": true,
   "attributeValidation": {
-    "regexp": null,
-    "minLength": null,
-    "maxLength": null
+    "minLength": {
+      "type": "integer",
+      "format": "int32"
+    },
+    "maxLength": {
+      "type": "integer",
+      "format": "int32"
+    },
+    "regexp": {
+      "type": "string"
+    }
   },
-  "tooltip": null
+  "tooltip": "string",
+  "whitePagesCanView": false,
+  "adminCanView": true,
+  "userCanAccess": false,
+  "userCanView": true,
+  "adminCanAccess": false,
+  "adminCanEdit": false,
+  "userCanEdit": true,
+  "baseDn": "string"
 }
 ```
 Modify it to update attribute `name`, `display name`, `view type`:
@@ -412,56 +309,49 @@ Now, let's add this attribute using `post-attributes`:
 ```
 It will create a new attribute into the Attribute list with updated `inum & dn`:
 
-```text
-Getting access token for scope https://jans.io/oauth/config/attributes.write
-Server Response:
+```json
 {
-  "dn": "inum=256135af-56eb-43f3-9583-d7e9fc75c672,ou=attributes,o=jans",
-  "inum": "256135af-56eb-43f3-9583-d7e9fc75c672",
+  "dn": "inum=0272b98e-0ead-43e9-94eb-4af9548af97d,ou=attributes,o=jans",
   "selected": false,
+  "inum": "0272b98e-0ead-43e9-94eb-4af9548af97d",
+  "nameIdType": "string",
   "name": "testAttribute",
-  "displayName": "test Attribute",
-  "description": "testing post-attributes",
-  "dataType": "CERTIFICATE",
-  "status": "REGISTER",
-  "lifetime": null,
-  "sourceAttribute": null,
-  "salt": null,
-  "nameIdType": null,
-  "origin": null,
-  "editType": null,
-  "viewType": [
-    "ADMIN",
-    "OWNER",
-    "USER"
+  "displayName": "testAttribute",
+  "description": "testAttribute",
+  "dataType": "certificate",
+  "editType": [
+    "manager"
   ],
-  "usageType": null,
-  "claimName": null,
-  "seeAlso": null,
-  "saml1Uri": null,
-  "saml2Uri": null,
-  "urn": null,
-  "scimCustomAttr": false,
-  "oxMultiValuedAttribute": false,
+  "viewType": [
+    "user"
+  ],
+  "usageType": [
+    "openid"
+  ],
+  "status": "inactive",
+  "scimCustomAttr": true,
+  "oxMultiValuedAttribute": true,
+  "jansHideOnDiscovery": true,
   "custom": false,
   "requred": false,
-  "attributeValidation": {
-    "regexp": null,
-    "minLength": null,
-    "maxLength": null
-  },
-  "tooltip": null
+  "tooltip": "string",
+  "adminCanAccess": false,
+  "adminCanView": false,
+  "adminCanEdit": false,
+  "userCanAccess": true,
+  "userCanView": true,
+  "userCanEdit": false,
+  "whitePagesCanView": false,
+  "baseDn": "inum=0272b98e-0ead-43e9-94eb-4af9548af97d,ou=attributes,o=jans"
 }
 ```
 
 ## Updating an Attribute
 
-This operation-id can be used to update an existing attribute information.
-The Janssen Server administrator can make changes to attributes, such as changing their status to `active/inactive` by using this operation-ID.
-Let's look at the schema:
+This operation-id can be used to update an existing attribute information. The Janssen Server administrator can make changes to attributes, such as changing their status to `active/inactive` by using this operation-ID. Let's look at the schema:
 
 ```
-/opt/jans/jans-cli/config-cli.py --schema /components/schemas/GluuAttribute > /tmp/attrib.json
+/opt/jans/jans-cli/config-cli.py --schema GluuAttribute > /tmp/attrib.json
 ```
 
 You must see the similar schema while performed in `post-attributes` operation.
@@ -541,12 +431,14 @@ As we know, There are a lot of attributes available in the Janssen Server includ
 Getting an attribute information by using its `inum` is pretty simple.
 
 ```
+/opt/jans/jans-cli/config-cli.py --operation-id get-attributes-by-inum --url-suffix inum:attribute-iunm-value
+```
+
+It will show all details information of the selected Attribute as below example.
+
+```
 /opt/jans/jans-cli/config-cli.py --operation-id get-attributes-by-inum --url-suffix inum:b691f2ab-a7db-4725-b85b-9961575b441f
-```
 
-It will show all details information of the selected Attribute.
-
-```
 Getting access token for scope https://jans.io/oauth/config/attributes.readonly
 {
   "dn": "inum=b691f2ab-a7db-4725-b85b-9961575b441f,ou=attributes,o=jans",
@@ -603,13 +495,13 @@ This operation can also used for updating an existing attribute by using its `in
 Operation ID: patch-attributes-by-inum
   Description: Partially modify a GluuAttribute.
   url-suffix: inum
-  Schema: Array of /components/schemas/PatchRequest
+  Schema: Array of PatchRequest
 ```
 
 If we look at the description, we see that there is a schema file. Let's get the schema file with below command:
 
 ```
-/opt/jans/jans-cli/config-cli.py --schema /components/schemas/PatchRequest > /tmp/patch.json
+/opt/jans/jans-cli/config-cli.py --schema PatchRequest > /tmp/patch.json
 ```
 
 ```
