@@ -66,6 +66,9 @@ with open(os_release_fn) as f:
                     os_type = 'ubuntu'
                 elif ('sles' in os_type) or ('opensuse' in os_type):
                     os_type = 'suse'
+                    if 'tumbleweed' in row[1]:
+                        os_version = 'tumbleweed'
+                        break
             elif row[0] == 'VERSION_ID':
                 os_version = row[1].split('.')[0]
 
