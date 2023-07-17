@@ -62,7 +62,7 @@ livenessProbe:
   # -- Executes the python3 healthcheck.
   httpGet:
     path: /jans-link/api/v1/health/live
-    port: 8074
+    port: 9091
   initialDelaySeconds: 30
   periodSeconds: 30
   timeoutSeconds: 5
@@ -70,7 +70,7 @@ livenessProbe:
 readinessProbe:
   httpGet:
     path: /jans-link/api/v1/health/ready
-    port: 8074
+    port: 9091
   initialDelaySeconds: 25
   periodSeconds: 25
   timeoutSeconds: 5

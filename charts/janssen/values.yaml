@@ -1257,7 +1257,7 @@ link:
     # -- http liveness probe endpoint
     httpGet:
       path: /jans-link/api/v1/health/live
-      port: 8074
+      port: 9091
     initialDelaySeconds: 30
     periodSeconds: 30
     timeoutSeconds: 5
@@ -1265,7 +1265,7 @@ link:
     # -- http readiness probe endpoint
     httpGet:
       path: jans-link/api/v1/health/ready
-      port: 8074
+      port: 9091
     initialDelaySeconds: 25
     periodSeconds: 25
     timeoutSeconds: 5

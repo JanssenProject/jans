@@ -332,7 +332,7 @@ Kubernetes: `>=v1.21.0-0`
 | global.usrEnvs | object | `{"normal":{},"secret":{}}` | Add custom normal and secret envs to the service. Envs defined in global.userEnvs will be globally available to all services |
 | global.usrEnvs.normal | object | `{}` | Add custom normal envs to the service. variable1: value1 |
 | global.usrEnvs.secret | object | `{}` | Add custom secret envs to the service. variable1: value1 |
-| link | object | `{"additionalAnnotations":{},"additionalLabels":{},"dnsConfig":{},"dnsPolicy":"","hpa":{"behavior":{},"enabled":true,"maxReplicas":10,"metrics":[],"minReplicas":1,"targetCPUUtilizationPercentage":50},"image":{"pullPolicy":"IfNotPresent","pullSecrets":[],"repository":"ghcr.io/janssenproject/jans/link","tag":"1.0.16_dev"},"lifecycle":{},"livenessProbe":{"httpGet":{"path":"/jans-link/api/v1/health/live","port":8074},"initialDelaySeconds":30,"periodSeconds":30,"timeoutSeconds":5},"pdb":{"enabled":true,"maxUnavailable":"90%"},"readinessProbe":{"httpGet":{"path":"jans-link/api/v1/health/ready","port":8074},"initialDelaySeconds":25,"periodSeconds":25,"timeoutSeconds":5},"replicas":1,"resources":{"limits":{"cpu":"500m","memory":"1000Mi"},"requests":{"cpu":"500m","memory":"1000Mi"}},"topologySpreadConstraints":{},"usrEnvs":{"normal":{},"secret":{}},"volumeMounts":[],"volumes":[]}` | Link. |
+| link | object | `{"additionalAnnotations":{},"additionalLabels":{},"dnsConfig":{},"dnsPolicy":"","hpa":{"behavior":{},"enabled":true,"maxReplicas":10,"metrics":[],"minReplicas":1,"targetCPUUtilizationPercentage":50},"image":{"pullPolicy":"IfNotPresent","pullSecrets":[],"repository":"ghcr.io/janssenproject/jans/link","tag":"1.0.16_dev"},"lifecycle":{},"livenessProbe":{"httpGet":{"path":"/jans-link/api/v1/health/live","port":9091},"initialDelaySeconds":30,"periodSeconds":30,"timeoutSeconds":5},"pdb":{"enabled":true,"maxUnavailable":"90%"},"readinessProbe":{"httpGet":{"path":"jans-link/api/v1/health/ready","port":9091},"initialDelaySeconds":25,"periodSeconds":25,"timeoutSeconds":5},"replicas":1,"resources":{"limits":{"cpu":"500m","memory":"1000Mi"},"requests":{"cpu":"500m","memory":"1000Mi"}},"topologySpreadConstraints":{},"usrEnvs":{"normal":{},"secret":{}},"volumeMounts":[],"volumes":[]}` | Link. |
 | link.additionalAnnotations | object | `{}` | Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"} |
 | link.additionalLabels | object | `{}` | Additional labels that will be added across the gateway in the format of {mylabel: "myapp"} |
 | link.dnsConfig | object | `{}` | Add custom dns config |
@@ -344,10 +344,10 @@ Kubernetes: `>=v1.21.0-0`
 | link.image.pullSecrets | list | `[]` | Image Pull Secrets |
 | link.image.repository | string | `"ghcr.io/janssenproject/jans/link"` | Image  to use for deploying. |
 | link.image.tag | string | `"1.0.16_dev"` | Image  tag to use for deploying. |
-| link.livenessProbe | object | `{"httpGet":{"path":"/jans-link/api/v1/health/live","port":8074},"initialDelaySeconds":30,"periodSeconds":30,"timeoutSeconds":5}` | Configure the liveness healthcheck for the auth server if needed. |
-| link.livenessProbe.httpGet | object | `{"path":"/jans-link/api/v1/health/live","port":8074}` | http liveness probe endpoint |
+| link.livenessProbe | object | `{"httpGet":{"path":"/jans-link/api/v1/health/live","port":9091},"initialDelaySeconds":30,"periodSeconds":30,"timeoutSeconds":5}` | Configure the liveness healthcheck for the auth server if needed. |
+| link.livenessProbe.httpGet | object | `{"path":"/jans-link/api/v1/health/live","port":9091}` | http liveness probe endpoint |
 | link.pdb | object | `{"enabled":true,"maxUnavailable":"90%"}` | Configure the PodDisruptionBudget |
-| link.readinessProbe.httpGet | object | `{"path":"jans-link/api/v1/health/ready","port":8074}` | http readiness probe endpoint |
+| link.readinessProbe.httpGet | object | `{"path":"jans-link/api/v1/health/ready","port":9091}` | http readiness probe endpoint |
 | link.replicas | int | `1` | Service replica number. |
 | link.resources | object | `{"limits":{"cpu":"500m","memory":"1000Mi"},"requests":{"cpu":"500m","memory":"1000Mi"}}` | Resource specs. |
 | link.resources.limits.cpu | string | `"500m"` | CPU limit. |
