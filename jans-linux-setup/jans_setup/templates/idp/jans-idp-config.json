@@ -1,5 +1,9 @@
 {
    "applicationName":"saml",
+   "idpRootDir":"/opt/idp",
+   "keycloakIdpRootDir":"/keycloak",
+   "keycloakIdpMetadataDir":"/metadatafile",
+   "keycloakIdpMetadataTempDir":"/metadatafile",
    "samlBaseDn":"ou=trustRelationships,o=jans",
    "idpRootDir":"/opt/idp",
    "idpTempmetadataFolder":"temp_metadata",

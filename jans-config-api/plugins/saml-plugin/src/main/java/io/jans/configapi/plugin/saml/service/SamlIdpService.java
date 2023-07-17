@@ -32,10 +32,10 @@ import org.slf4j.Logger;
 @ApplicationScoped
 public class SamlIdpService {
 
-    public static final String IDP_ROOT_DIR = "/opt/idp";
-    public static final String KEYCLOAK_IDP_ROOT_DIR = IDP_ROOT_DIR + "/keycloak";
-    public static final String KEYCLOAK_IDP_METADATA_DIR = "metadatafile";
-    public static final String KEYCLOAK_IDP_METADATA_TEMP_DIR = "temp_metadata";
+    private static final String IDP_ROOT_DIR = "/opt/idp";
+    private static final String KEYCLOAK_IDP_ROOT_DIR = IDP_ROOT_DIR + "/keycloak";
+    private static final String KEYCLOAK_IDP_METADATA_DIR = "metadatafile";
+    private static final String KEYCLOAK_IDP_METADATA_TEMP_DIR = "temp_metadata";
     private static final String SAML_SP_METADATA_FILE_PATTERN = "%s-sp-metadata.xml";
 
     @Inject

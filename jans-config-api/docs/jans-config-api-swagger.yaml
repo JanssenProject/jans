@@ -7450,19 +7450,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        whitePagesCanView:
-          type: boolean
         adminCanAccess:
           type: boolean
         adminCanView:
           type: boolean
-        userCanAccess:
-          type: boolean
         adminCanEdit:
+          type: boolean
+        userCanEdit:
+          type: boolean
+        userCanAccess:
           type: boolean
         userCanView:
           type: boolean
-        userCanEdit:
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -8045,9 +8045,9 @@ components:
         dcrAuthorizationWithMTLS:
           type: boolean
         trustedSsaIssuers:
-          type: array
-          items:
-            type: string
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/TrustedIssuerConfig'
         useLocalCache:
           type: boolean
         fapiCompatibility:
@@ -8201,8 +8201,6 @@ components:
           type: boolean
         skipAuthenticationFilterOptionsMethod:
           type: boolean
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8212,6 +8210,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -8404,6 +8404,13 @@ components:
           type: string
         sharedSecret:
           type: string
+    TrustedIssuerConfig:
+      type: object
+      properties:
+        automaticallyGrantedScopes:
+          type: array
+          items:
+            type: string
     PersistenceConfiguration:
       type: object
       properties:
@@ -8942,10 +8949,10 @@ components:
           type: array
           items:
             type: object
-        value:
-          type: object
         displayValue:
           type: string
+        value:
+          type: object
     LocalizedString:
       type: object
       properties:
