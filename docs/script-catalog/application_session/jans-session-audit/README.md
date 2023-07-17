@@ -1,6 +1,7 @@
 ## README Auditing Authentication Attempts
 
 Name of the script in **janssen** (for example, using **/opt/jans/jans-cli/config-cli.py** or **/opt/jans/jans-cli/config-cli-tui.py**): **jans-session-audit**.  
+Script type:  **Application Sessions**.  
 
 The script generates audit report and creates record in DB. Also **jansData** field (in JSON format), that contains summary info of session audit will be generated.  
 
@@ -18,7 +19,8 @@ File should contain follow properties:
     - **AUTHENTICATED**
     - **UNAUTHENTICATED**
     - **UPDATED**
-    - **GONE**
+    - **GONE**  
+    .
 
 1. **audit_data**.  
     List of properties of **Session** (**SessionId**):
@@ -32,7 +34,8 @@ File should contain follow properties:
     - **sessionState**
     - **permissionGranted**
     - **permissionGrantedMap**
-    - **deviceSecrets**
+    - **deviceSecrets**  
+    .
 
 1. **audit_cust_data**.  
     List of **Extra Session Attributes** (**SessionId**):
@@ -51,12 +54,31 @@ File should contain follow properties:
     - **state**
     - **casa_prefix**
     - **casa_contextPath**
-    - **casa_extraCss**
+    - **casa_extraCss**  
+    .
 
 1. **audit_cust_data** Can contain only one attribute:
-    - **sessionAttributes**
+    - **sessionAttributes**  
+    .
     
-    The value (**sessionAttributes**) covers list of all **Extra Session Attributes** (**SessionId**).  
+    The value (**sessionAttributes**) covers list of all **Extra Session Attributes** (**SessionId**):
+    - **auth_external_attributes**
+    - **opbs**
+    - **response_type**
+    - **client_id**
+    - **auth_step**
+    - **acr**
+    - **casa_logoUrl**
+    - **remote_ip**
+    - **scope**
+    - **acr_values**
+    - **casa_faviconUrl**
+    - **redirect_uri**
+    - **state**
+    - **casa_prefix**
+    - **casa_contextPath**
+    - **casa_extraCss**  
+    .    
 
 Generated value **jansData** in JSON format will contain type of event (one of **AUTHENTICATED**, **UNAUTHENTICATED**, **UPDATED**, **GONE**) and all properties/attributes defined by **audit_data** and **audit_cust_data**.
 
