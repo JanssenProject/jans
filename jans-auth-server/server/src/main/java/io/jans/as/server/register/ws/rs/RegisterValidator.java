@@ -225,6 +225,9 @@ public class RegisterValidator {
 
     public JSONObject validateSoftwareStatement(HttpServletRequest httpServletRequest, JSONObject requestObject) {
         final JSONObject jsonObject = validateSSA(httpServletRequest, requestObject);
+        if (jsonObject == null) {
+            return null;
+        }
         TrustedIssuerConfig trustedIssuerConfig = validateIssuer(jsonObject);
         applyTrustedIssuerConfig(trustedIssuerConfig, jsonObject);
         return jsonObject;
