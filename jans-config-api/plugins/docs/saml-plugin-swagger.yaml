@@ -365,19 +365,6 @@ components:
   schemas:
     SamlConfig:
       type: object
-      properties:
-        serverUrl:
-          type: string
-        realm:
-          type: string
-        username:
-          type: string
-        password:
-          type: string
-        clientId:
-          type: string
-        clientSecret:
-          type: string
     ProtocolMapperRepresentation:
       type: object
       properties:

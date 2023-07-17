@@ -1,18 +1,21 @@
 {
    "applicationName":"saml",
-   "idpRootDir":"/opt/idp",
-   "keycloakIdpRootDir":"/keycloak",
-   "keycloakIdpMetadataDir":"/metadatafile",
-   "keycloakIdpMetadataTempDir":"/metadatafile",
    "samlBaseDn":"ou=trustRelationships,o=jans",
+   "samlEnabled": "${samlEnabled}",
+   "selectedIdp": "${selectedIdp}",
    "idpRootDir":"/opt/idp",
-   "idpTempmetadataFolder":"temp_metadata",
+   "idpTempMetadataFolder":"/temp_metadata",
+   "idpMetadataFolder":"/metadata",
+   "idpMetadataFilePattern":"%s-idp-metadata.xml",
    "spMetadataFilePattern":"%s-sp-metadata.xml",
    "idpConfigs":[
       {
          "configId":"keycloak",
-         "rootDir":"/opt/idp/keycloak",
-         "metadataTempDir":"/opt/idp/keycloak/metadata/temp"
+         "rootDir":"/keycloak",
+		 "enabled": "${enabled}", 
+         "metadataTempDir":"/temp_metadata",
+		 "metadataDir":"/metadata",
+		 "metadataFilePattern":"%s-idp-metadata.xml",
       }
    ]
 }
