@@ -33,6 +33,6 @@ spec:
     - destination:
         host: {{ index .Values "global" "link" "linkServiceName" }}.{{.Release.Namespace}}.svc.cluster.local
         port:
-          number: 8074
+          number: 9091
       weight: 100
 {{- end }}

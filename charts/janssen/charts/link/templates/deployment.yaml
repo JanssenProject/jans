@@ -60,8 +60,7 @@ spec:
                 /app/scripts/entrypoint.sh
           {{- end }}
           ports:
-            - containerPort: 9444
-            - containerPort: 8074
+            - containerPort: 9091
             {{ if .Values.global.cnPrometheusPort }}
             - name: prometheus-port
               containerPort: {{ .Values.global.cnPrometheusPort }}

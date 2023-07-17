@@ -16,9 +16,7 @@ metadata:
 {{- end }}
 spec:
   ports:
-    - port: 9444
-      name: tcp-{{ include "link.name" . }}-ssl
-    - port: 8074
+    - port: 9091
       name: tcp-{{ include "link.name" . }}-http
   selector:
     app: {{ .Release.Name }}-{{ include "link.name" . }}
