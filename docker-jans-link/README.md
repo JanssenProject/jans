@@ -123,7 +123,7 @@ The following key-value pairs are the defaults:
 To enable prefix on `STDOUT` logging, set the `enable_stdout_log_prefix` key. Example:
 
 ```
-{"cacherefresh_log_target":"STDOUT","persistence_log_target":"STDOUT","enable_stdout_log_prefix":true}
+{"link_log_target":"STDOUT","persistence_log_target":"STDOUT","enable_stdout_log_prefix":true}
 ```
 
 ### Hybrid mapping
