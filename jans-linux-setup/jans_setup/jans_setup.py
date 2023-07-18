@@ -133,7 +133,8 @@ if base.current_app.profile == 'jans':
     from setup_app.installers.fido import FidoInstaller
     from setup_app.installers.eleven import ElevenInstaller
     from setup_app.installers.jans_link import JansLinkInstaller
-
+    from setup_app.installers.jans_saml import JansSamlInstaller
+    
 from setup_app.installers.config_api import ConfigApiInstaller
 from setup_app.installers.jans_cli import JansCliInstaller
 from setup_app.installers.rdbm import RDBMInstaller
@@ -252,6 +253,7 @@ if Config.profile == 'jans':
     scimInstaller = ScimInstaller()
     elevenInstaller = ElevenInstaller()
     jans_link_installer = JansLinkInstaller()
+    jans_saml_installer = JansSamlInstaller()
 
 jansCliInstaller = JansCliInstaller()
 
@@ -432,6 +434,11 @@ def main():
                 if (Config.installed_instance and jans_link_installer.install_var in Config.addPostSetupService) or (
                         not Config.installed_instance and Config.get(jans_link_installer.install_var)):
                     jans_link_installer.start_installation()
+
+                if (Config.installed_instance and jans_saml_installer.install_var in Config.addPostSetupService) or (
+                        not Config.installed_instance and Config.get(jans_saml_installer.install_var)):
+                    jans_saml_installer.start_installation()
+
 
             if Config.install_jans_cli:
                 jansCliInstaller.start_installation()

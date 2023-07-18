@@ -1,21 +1,21 @@
 {
-   "applicationName":"saml",
-   "samlTrustRelationshipDn":"ou=trustRelationships,o=jans",
-   "samlEnabled": ${samlEnabled},
-   "selectedIdp": "${selectedIdp}",
-   "idpRootDir":"/opt/idp",
-   "idpTempMetadataFolder":"/temp_metadata",
-   "idpMetadataFolder":"/metadata",
-   "idpMetadataFilePattern":"%s-idp-metadata.xml",
-   "spMetadataFilePattern":"%s-sp-metadata.xml",
-   "idpConfigs":[
-      {
-         "configId":"keycloak",
-         "rootDir":"/keycloak",
-		 "enabled": "${enabled}", 
-         "metadataTempDir":"/temp_metadata",
-		 "metadataDir":"/metadata",
-		 "metadataFilePattern":"%s-idp-metadata.xml",
-      }
-   ]
+  "applicationName":"saml",
+  "samlTrustRelationshipDn":"ou=trustRelationships,o=jans",
+  "samlEnabled": "${saml_enabled}",
+  "selectedIdp": "${selected_idp}",
+  "idpRootDir": "${idp_root_dir}",
+  "idpTempMetadataFolder":"${idp_temp_meta_dir}",
+  "idpMetadataFolder":"${idp_meta_dir}",
+  "idpMetadataFilePattern":"%s-idp-metadata.xml",
+  "spMetadataFilePattern":"%s-sp-metadata.xml",
+  "idpConfigs":[
+    {
+      "configId":"${idp_config_id}",
+      "rootDir":"${idp_config_root_dir}",
+      "enabled": "${idp_confi_enabled}",
+      "metadataTempDir": "${idp_config_temp_meta_dir}",
+      "metadataDir":"${idp_config_meta_dir}",
+      "metadataFilePattern":"%s-idp-metadata.xml",
+    }
+  ]
 }
