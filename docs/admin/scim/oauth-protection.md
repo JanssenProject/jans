@@ -6,6 +6,11 @@ tags:
 ---
 
 ## oauth-protection
+the basic SCIM standard does not define a specific mechanism to prevent unauthorized requests to endpoints
+There are just a few guidelines in section 2 of RFC 7644 concerned with authentication and authorization.
+Jans Server  supports mechanisms to protect your endpoints:
+Standard OAuth tokens is the default and recommended mechanism.
+
   -Launch jans-tui
   
   -Navigate to SCIM 
@@ -16,9 +21,6 @@ tags:
   
   -Click the "Save Configuration" button at the bottom
   
-## Have questions in the meantime?
-
-While this documentation is in progress, you can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussion) or the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). Any questions you have will help determine what information our documentation should cover.
 
 ## Want to contribute?
 
