@@ -1,7 +1,7 @@
 {
    "applicationName":"saml",
-   "samlBaseDn":"ou=trustRelationships,o=jans",
-   "samlEnabled": "${samlEnabled}",
+   "samlTrustRelationshipDn":"ou=trustRelationships,o=jans",
+   "samlEnabled": ${samlEnabled},
    "selectedIdp": "${selectedIdp}",
    "idpRootDir":"/opt/idp",
    "idpTempMetadataFolder":"/temp_metadata",
