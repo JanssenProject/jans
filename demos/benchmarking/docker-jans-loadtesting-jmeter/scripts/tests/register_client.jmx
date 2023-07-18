@@ -9,7 +9,7 @@
         <collectionProp name="Arguments.arguments">
           <elementProp name="host" elementType="Argument">
             <stringProp name="Argument.name">host</stringProp>
-            <stringProp name="Argument.value">jenkins-build.jans.io</stringProp>
+            <stringProp name="Argument.value">FQDN</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
         </collectionProp>
@@ -38,8 +38,8 @@
           <boolProp name="LoopController.continue_forever">false</boolProp>
           <intProp name="LoopController.loops">-1</intProp>
         </elementProp>
-        <stringProp name="ThreadGroup.num_threads">10</stringProp>
-        <stringProp name="ThreadGroup.ramp_time">5</stringProp>
+        <stringProp name="ThreadGroup.num_threads">THREAD_COUNT</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">10</stringProp>
         <longProp name="ThreadGroup.start_time">1479823133000</longProp>
         <longProp name="ThreadGroup.end_time">1479823133000</longProp>
         <boolProp name="ThreadGroup.scheduler">false</boolProp>
@@ -73,8 +73,8 @@
   &quot;application_type&quot; : &quot;web&quot;,&#xd;
   &quot;scope&quot; : &quot;openid profile address email phone user_name&quot;,&#xd;
   &quot;minimum_acr_priority_list&quot; : [ ],&#xd;
-  &quot;redirect_uris&quot; : [ &quot;https://jenkins-build.jans.io/jans-auth-rp/home.htm&quot;, &quot;https://client.example.com/cb&quot;, &quot;https://client.example.com/cb1&quot;, &quot;https://client.example.com/cb2&quot; ],&#xd;
-  &quot;sector_identifier_uri&quot; : &quot;https://jenkins-build.jans.io/jans-auth/sectoridentifier/a55ede29-8f5a-461d-b06e-76caee8d40b5&quot;,&#xd;
+  &quot;redirect_uris&quot; : [ &quot;https://FQDN/jans-auth-rp/home.htm&quot;, &quot;https://client.example.com/cb&quot;, &quot;https://client.example.com/cb1&quot;, &quot;https://client.example.com/cb2&quot; ],&#xd;
+  &quot;sector_identifier_uri&quot; : &quot;https://FQDN/jans-auth/sectoridentifier/a55ede29-8f5a-461d-b06e-76caee8d40b5&quot;,&#xd;
   &quot;client_name&quot; : &quot;jans test app&quot;,&#xd;
   &quot;additional_audience&quot; : [ ],&#xd;
   &quot;response_types&quot; : [ &quot;code&quot;, &quot;id_token&quot; ]&#xd;
@@ -144,7 +144,7 @@
             <hashTree/>
             <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response Assertion" enabled="true">
               <collectionProp name="Asserion.test_strings">
-                <stringProp name="135960981">&quot;client_id&quot;</stringProp>
+                <stringProp name="135960981">&quot;DCR_CLIENT_ID&quot;</stringProp>
               </collectionProp>
               <stringProp name="Assertion.custom_message"></stringProp>
               <stringProp name="Assertion.test_field">Assertion.response_data</stringProp>
@@ -469,7 +469,7 @@
           <boolProp name="LoopController.continue_forever">false</boolProp>
           <stringProp name="LoopController.loops">1</stringProp>
         </elementProp>
-        <stringProp name="ThreadGroup.num_threads">2000</stringProp>
+        <stringProp name="ThreadGroup.num_threads">THREAD_COUNT</stringProp>
         <stringProp name="ThreadGroup.ramp_time">5</stringProp>
         <longProp name="ThreadGroup.start_time">1482159304000</longProp>
         <longProp name="ThreadGroup.end_time">1482159304000</longProp>
@@ -513,7 +513,7 @@
           <stringProp name="parameters"></stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="cacheKey">true</stringProp>
-          <stringProp name="script">String credentials = vars.get(&quot;client_id&quot;) + &quot;:&quot; + vars.get(&quot;client_secret&quot;);
+          <stringProp name="script">String credentials = &quot;DCR_CLIENT_ID&quot; + &quot;:&quot; + &quot;DCR_CLIENT_SECRET&quot;;
 String clientHeader = &quot;Basic &quot; + org.apache.commons.codec.binary.Base64.encodeBase64String(credentials.getBytes(&quot;UTF-8&quot;));
 log.info(&quot;Credentials: &quot; + credentials + &quot;, clientHeader: &quot; + clientHeader);
 OUT.println(&quot;Credentials: &quot; + credentials + &quot;, clientHeader: &quot; + clientHeader);
@@ -532,7 +532,7 @@ vars.put(&quot;client_header&quot;, clientHeader);</stringProp>
               </elementProp>
               <elementProp name="client_id" elementType="HTTPArgument">
                 <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                <stringProp name="Argument.value">${client_id}</stringProp>
+                <stringProp name="Argument.value">DCR_CLIENT_ID</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
                 <boolProp name="HTTPArgument.use_equals">true</boolProp>
                 <stringProp name="Argument.name">client_id</stringProp>
