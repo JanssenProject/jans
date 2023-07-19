@@ -206,6 +206,7 @@ class Config:
         self.install_jans_link = True
         self.loadTestData = False
         self.allowPreReleasedFeatures = False
+        self.install_jans_saml = True
 
         # backward compatibility
         self.os_type = base.os_type
