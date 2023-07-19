@@ -2276,7 +2276,7 @@
       ]
     },
     {
-      "path": "/jans-config-api/saml/samlClient",
+      "path": "/jans-config-api/saml/trust-relationship",
       "conditions": [
         {
           "httpMethods": [
@@ -2368,7 +2368,7 @@
       ]
     },
     {
-      "path": "/jans-config-api/saml/clientScope",
+      "path": "/jans-config-api/saml/scope",
       "conditions": [
         {
           "httpMethods": [
@@ -2377,13 +2377,13 @@
           "scopes": [
             {
               "inum": "1800.01.60",
-              "name": "https://jans.io/oauth/config/saml-client-scope.readonly"
+              "name": "https://jans.io/oauth/config/saml-scope.readonly"
             }
           ],
           "groupScopes": [
             {
               "inum": "1800.01.61",
-              "name": "https://jans.io/oauth/config/saml-client-scope.write"
+              "name": "https://jans.io/oauth/config/saml-scope.write"
             }
           ],
           "superScopes": [
@@ -2400,7 +2400,7 @@
           "scopes": [
             {
               "inum": "1800.01.61",
-              "name": "https://jans.io/oauth/config/saml-client-scope.write"
+              "name": "https://jans.io/oauth/config/saml-scope.write"
             }
           ],
           "groupScopes": [],

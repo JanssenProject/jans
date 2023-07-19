@@ -15,7 +15,7 @@
       "enabled": "${idp_confi_enabled}",
       "metadataTempDir": "${idp_config_temp_meta_dir}",
       "metadataDir":"${idp_config_meta_dir}",
-      "metadataFilePattern":"%s-idp-metadata.xml",
+      "metadataFilePattern":"%s-idp-metadata.xml"
     }
   ]
 }

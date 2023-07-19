@@ -7,9 +7,9 @@
 package io.jans.configapi.plugin.saml.service;
 
 import io.jans.configapi.plugin.saml.model.TrustRelationship;
-import io.jans.configapi.configuration.ConfigurationFactory;
-import io.jans.configapi.plugin.saml.model.config.KeycloakConfig;
-import io.jans.orm.PersistenceEntryManager;
+import io.jans.configapi.plugin.saml.service.SamlConfigService;
+import io.jans.configapi.plugin.saml.model.config.SamlAppConfiguration;
+import io.jans.configapi.plugin.saml.model.config.SamlConf;
 import io.jans.service.document.store.service.DocumentStoreService;
 import io.jans.service.document.store.conf.DocumentStoreType;
 import io.jans.service.document.store.service.LocalDocumentStoreService;
@@ -19,7 +19,6 @@ import io.jans.util.INumGenerator;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.core.Response;
 
 import java.io.File;
 import java.io.InputStream;
@@ -32,14 +31,17 @@ import org.slf4j.Logger;
 @ApplicationScoped
 public class SamlIdpService {
 
-    private static final String IDP_ROOT_DIR = "/opt/idp";
-    private static final String KEYCLOAK_IDP_ROOT_DIR = IDP_ROOT_DIR + "/keycloak";
-    private static final String KEYCLOAK_IDP_METADATA_DIR = "metadatafile";
-    private static final String KEYCLOAK_IDP_METADATA_TEMP_DIR = "temp_metadata";
-    private static final String SAML_SP_METADATA_FILE_PATTERN = "%s-sp-metadata.xml";
+    private final String IDP_ROOT_DIR = getIdpRoot();
+    private final String KEYCLOAK_IDP_ROOT_DIR = IDP_ROOT_DIR + "/keycloak";
+    private final String KEYCLOAK_IDP_METADATA_DIR = "metadatafile";
+    private final String KEYCLOAK_IDP_METADATA_TEMP_DIR = "temp_metadata";
+    private final String SAML_SP_METADATA_FILE_PATTERN = "%s-sp-metadata.xml";
 
     @Inject
     Logger logger;
+    
+    @Inject 
+    SamlConfigService samlConfigService;
 
     @Inject
     private DocumentStoreService documentStoreService;
@@ -82,7 +84,7 @@ public class SamlIdpService {
 
     private String getTempMetadataFilename(String idpMetadataFolder, String fileName) {
         logger.error("documentStoreService:{}, localDocumentStoreService:{}, idpMetadataFolder:{}, fileName:{}",documentStoreService, localDocumentStoreService, idpMetadataFolder, fileName);
-        synchronized (getClass()) {
+        synchronized (SamlIdpService.class) {
             String possibleTemp;
             do {
                 possibleTemp = fileName + INumGenerator.generate(2);
@@ -113,14 +115,7 @@ public class SamlIdpService {
             
             InputStream newFile = documentStoreService.readDocumentAsStream(spMetadataFile);      
             logger.error("SP File read newFile:{}",newFile);
-            
-            /*
-             * String newName = idpMetadataTempFolder + "puja123.xml";
-             * logger.error("Renaming file newName:{}",newName); boolean renamed =
-             * documentStoreService.renameDocument(spMetadataFile, spMetadataFile);
-             * logger.error("File renabled? renamed:{}",renamed);
-             */
-            
+                     
             if (result) {
                 return tempFileName;
             }
@@ -131,6 +126,21 @@ public class SamlIdpService {
         }
 
         return null;
+    }
+    
+    private SamlAppConfiguration find() {
+        SamlAppConfiguration samlAppConfiguration = samlConfigService.find();
+        logger.error("  samlAppConfiguration():{}", samlAppConfiguration);
+        return samlAppConfiguration;
+    }
+    
+    private String getIdpRoot() {
+        SamlAppConfiguration samlAppConfiguration = samlConfigService.find();
+        String idpRoot = null;
+        if(samlAppConfiguration==null) {
+            return idpRoot;
+        }
+        return samlAppConfiguration.getIdpRootDir();
     }
 
 }

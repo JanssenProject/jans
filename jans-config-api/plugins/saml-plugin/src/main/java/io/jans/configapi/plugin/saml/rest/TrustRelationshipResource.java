@@ -38,7 +38,7 @@ import io.jans.configapi.plugin.saml.form.TrustRelationshipForm;
 import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 import org.slf4j.Logger;
 
-@Path(Constants.SAML_CLIENT)
+@Path(Constants.SAML_TRUST_RELATIONSHIP)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class TrustRelationshipResource extends BaseResource {
@@ -113,7 +113,7 @@ public class TrustRelationshipResource extends BaseResource {
             "SAML - Trust Relationship" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.SAML_WRITE_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "clientList", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA, array = @ArraySchema(schema = @Schema(implementation = TrustRelationship.class)))),
+            @ApiResponse(responseCode = "201", description = "Trust Relationship List", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA, array = @ArraySchema(schema = @Schema(implementation = TrustRelationship.class)))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
@@ -137,7 +137,7 @@ public class TrustRelationshipResource extends BaseResource {
             "SAML - Trust Relationship" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.SAML_WRITE_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "clientList", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA, array = @ArraySchema(schema = @Schema(implementation = TrustRelationship.class)))),
+            @ApiResponse(responseCode = "201", description = "Newly created Trust Relationship", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = TrustRelationship.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
@@ -204,7 +204,7 @@ public class TrustRelationshipResource extends BaseResource {
     @Path(Constants.ID_PATH_PARAM)
     @ProtectedApi(scopes = { Constants.SAML_WRITE_ACCESS })
     public Response deleteTrustRelationship(
-            @Parameter(description = "Unique Id of client") @PathParam(Constants.ID) @NotNull String id) {
+            @Parameter(description = "Unique Id of Trust Relationship") @PathParam(Constants.ID) @NotNull String id) {
 
         logger.error("Delete client identified by id:{}", id);
 

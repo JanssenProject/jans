@@ -27,13 +27,9 @@ import io.jans.util.StringHelper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -61,13 +57,15 @@ public class SamlService {
     OrganizationService organizationService;
 
     @Inject
-    private transient InumService inumService;
+    private InumService inumService;
 
     @Inject
     DocumentStoreConfiguration documentStoreConfiguration;
 
     @Inject
     SamlIdpService samlIdpService;
+    
+    @Inject 
 
     public String baseDn() {
         // return staticConfiguration.getBaseDn().getTrustRelationshipDn();
@@ -119,13 +117,11 @@ public class SamlService {
     }
 
     public TrustRelationship getTrustContainerFederation(TrustRelationship trustRelationship) {
-        TrustRelationship relationshipByDn = getRelationshipByDn(trustRelationship.getDn());
-        return relationshipByDn;
+        return getRelationshipByDn(trustRelationship.getDn());
     }
 
     public TrustRelationship getTrustContainerFederation(String dn) {
-        TrustRelationship relationshipByDn = getRelationshipByDn(dn);
-        return relationshipByDn;
+        return getRelationshipByDn(dn);
     }
 
     public List<TrustRelationship> getAllTrustRelationships(int sizeLimit) {
@@ -194,7 +190,8 @@ public class SamlService {
 
     }
 
-    public TrustRelationship addTrustRelationship(TrustRelationship trustRelationship, InputStream file) throws IOException {
+    public TrustRelationship addTrustRelationship(TrustRelationship trustRelationship, InputStream file)
+            throws IOException {
         log.error("Add new trustRelationship:{}, file:{}", trustRelationship, file);
         setTrustRelationship(trustRelationship, false);
         persistenceEntryManager.persist(trustRelationship);
@@ -256,39 +253,43 @@ public class SamlService {
         case FILE:
             try {
                 if (saveSpMetaDataFileSourceTypeFile(trustRelationship, file)) {
-
+                    log.error("Successfully saved SP meta-data file:{}", file);
                 } else {
-                    log.error("Failed to save SP meta-data file {}");
+                    log.error("Failed to save SP meta-data file {}", file);
                     return false;
                 }
-            } catch (IOException ex) {
+            } catch (Exception ex) {
                 log.error("Failed to download SP metadata", ex);
                 return false;
             }
+
             return true;
+        default:
+            break;
         }
+
         return true;
     }
 
     private boolean saveSpMetaDataFileSourceTypeFile(TrustRelationship trustRelationship, InputStream file)
-            throws IOException {
-        
-        log.error("TrustRelationship trustRelationship:{}", trustRelationship, file);
+    {
+
+        log.error("trustRelationship:{}, file:{}", trustRelationship, file);
         // To-be-removed
         LocalDocumentStoreConfiguration localConfiguration = getDocumentStoreConfiguration();
         log.error("localConfiguration:{}", localConfiguration);
-        
+
         String spMetadataFileName = trustRelationship.getSpMetaDataFN();
         boolean emptySpMetadataFileName = StringHelper.isEmpty(spMetadataFileName);
         log.error("emptySpMetadataFileName:{}", emptySpMetadataFileName);
-        if ((file == null) ) {
+        if ((file == null)) {
             log.error("File is null");
             if (emptySpMetadataFileName) {
                 log.debug("The trust relationship {} has an empty Metadata filename", trustRelationship.getInum());
                 return false;
             }
             String filePath = samlIdpService.getSpMetadataFilePath(spMetadataFileName);
-            log.error("filePath:{}",filePath);
+            log.error("filePath:{}", filePath);
             if (filePath == null) {
                 log.debug("The trust relationship {} has an invalid Metadata file storage path",
                         trustRelationship.getInum());
@@ -298,7 +299,7 @@ public class SamlService {
             if (samlIdpService.isLocalDocumentStoreType()) {
 
                 File newFile = new File(filePath);
-                log.error("newFile:{}",newFile);
+                log.error("newFile:{}", newFile);
                 if (!newFile.exists()) {
                     log.debug(
                             "The trust relationship {} metadata used local storage but the SP metadata file `{}` was not found",
@@ -309,9 +310,9 @@ public class SamlService {
             return true;
         }
         if (emptySpMetadataFileName) {
-            log.error("emptySpMetadataFileName:{}",emptySpMetadataFileName);
+            log.error("emptySpMetadataFileName:{}", emptySpMetadataFileName);
             spMetadataFileName = samlIdpService.getSpNewMetadataFileName(trustRelationship);
-            log.error("spMetadataFileName:{}",spMetadataFileName);
+            log.error("spMetadataFileName:{}", spMetadataFileName);
             trustRelationship.setSpMetaDataFN(spMetadataFileName);
             /*
              * if (trustRelationship.getDn() == null) { String dn =
@@ -321,15 +322,13 @@ public class SamlService {
              */
         }
         InputStream targetStream = file;
-        log.error("targetStream:{}, spMetadataFileName:{}",targetStream, spMetadataFileName);
+        log.error("targetStream:{}, spMetadataFileName:{}", targetStream, spMetadataFileName);
         String result = samlIdpService.saveSpMetadataFile(spMetadataFileName, targetStream);
         if (StringHelper.isNotEmpty(result)) {
             // metadataValidationTimer.queue(result);
         } else {
             log.error("Failed to save SP meta-data file. Please check if you provide correct file");
         }
-
-       
 
         return false;
 

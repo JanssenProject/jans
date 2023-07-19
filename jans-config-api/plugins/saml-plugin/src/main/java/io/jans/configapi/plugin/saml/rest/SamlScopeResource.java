@@ -27,7 +27,7 @@ import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.ProtocolMapperRepresentation;
 import org.slf4j.Logger;
 
-@Path(Constants.SAML_CLIENT_SCOPE)
+@Path(Constants.SAML_SCOPE)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class SamlScopeResource extends BaseResource {
@@ -40,14 +40,14 @@ public class SamlScopeResource extends BaseResource {
 
     @Operation(summary = "Get Client Scope", description = "Get Client Scope", operationId = "get-saml-client-scope", tags = {
             "SAML - Client Scope" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    Constants.SAML_CLIENT_SCOPE_READ_ACCESS }))
+                    Constants.SAML_SCOPE_READ_ACCESS }))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = ProtocolMapperRepresentation.class)))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @Path(Constants.CLIENTID_PATH)
-    @ProtectedApi(scopes = { Constants.SAML_CLIENT_SCOPE_READ_ACCESS })
+    @ProtectedApi(scopes = { Constants.SAML_SCOPE_READ_ACCESS })
     public Response getClientScope(
             @Parameter(description = "Client Id") @PathParam(Constants.CLIENTID) @NotNull String clientId) {
         List<ProtocolMapperRepresentation> protocolMappers = null;
@@ -66,14 +66,14 @@ public class SamlScopeResource extends BaseResource {
 
     @Operation(summary = "Add new Client Scope", description = "Add new Client Scope", operationId = "post-saml-client-scope", tags = {
             "SAML - Client Scope" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    Constants.SAML_CLIENT_SCOPE_WRITE_ACCESS }))
+                    Constants.SAML_SCOPE_WRITE_ACCESS }))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = ProtocolMapperRepresentation.class)))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
     @Path("test"+Constants.CLIENTID_PATH)
-    @ProtectedApi(scopes = { Constants.SAML_CLIENT_SCOPE_WRITE_ACCESS })
+    @ProtectedApi(scopes = { Constants.SAML_SCOPE_WRITE_ACCESS })
     public Response addClientScopeNew(
             @Parameter(description = "Client Id") @PathParam(Constants.CLIENTID) @NotNull String clientId,
             @Valid @NotNull ProtocolMapperRepresentation protocolMapperRepresentation) {
@@ -101,7 +101,7 @@ public class SamlScopeResource extends BaseResource {
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
     @Path(Constants.CLIENTID_PATH)
-    @ProtectedApi(scopes = { Constants.SAML_CLIENT_SCOPE_WRITE_ACCESS })
+    @ProtectedApi(scopes = { Constants.SAML_SCOPE_WRITE_ACCESS })
     public Response addClientScope(
             @Parameter(description = "Client Id") @PathParam(Constants.CLIENTID) @NotNull String clientId,
             @Valid @NotNull ProtocolMapperRepresentation protocolMapperRepresentation) {
@@ -125,14 +125,14 @@ public class SamlScopeResource extends BaseResource {
 
     @Operation(summary = "Update Client Scope", description = "Update Client Scope", operationId = "post-saml-client-scope", tags = {
             "SAML - Client Scope" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    Constants.SAML_CLIENT_SCOPE_WRITE_ACCESS }))
+                    Constants.SAML_SCOPE_WRITE_ACCESS }))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = ProtocolMapperRepresentation.class)))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PUT
     @Path(Constants.CLIENTID_PATH)
-    @ProtectedApi(scopes = { Constants.SAML_CLIENT_SCOPE_WRITE_ACCESS })
+    @ProtectedApi(scopes = { Constants.SAML_SCOPE_WRITE_ACCESS })
     public Response updateClientScope(
             @Parameter(description = "Client Id") @PathParam(Constants.CLIENTID) @NotNull String clientId,
             @Valid List<ProtocolMapperRepresentation> protocolMapperRepresentationList) {

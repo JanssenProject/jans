@@ -61,8 +61,8 @@ public class SamlConfigResource extends BaseResource {
     @ProtectedApi(scopes = { Constants.SAML_CONFIG_READ_ACCESS }, groupScopes = {Constants.SAML_CONFIG_WRITE_ACCESS }, superScopes = {
             ApiAccessConstants.SUPER_ADMIN_READ_ACCESS, ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getSamlConfiguration() {
-        SamlAppConfiguration samlConfiguration = samlConfigService.find();;
-        logger.debug("SAML details samlConfiguration():{}", samlConfiguration);
+        SamlAppConfiguration samlConfiguration = samlConfigService.find();
+        logger.error("SAML details samlConfiguration():{}", samlConfiguration);
         return Response.ok(samlConfiguration).build();
     }
 
@@ -80,13 +80,13 @@ public class SamlConfigResource extends BaseResource {
             ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response patchSamlConfiguration(@NotNull String jsonPatchString)
             throws JsonPatchException, IOException {
-        logger.debug("Config API - jsonPatchString:{} ", jsonPatchString);
+        logger.error("Config API - jsonPatchString:{} ", jsonPatchString);
         SamlConf conf = samlConfigService.findSamlConf();
         SamlAppConfiguration samlConfiguration = Jackson.applyPatch(jsonPatchString, conf.getDynamicConf());
         conf.setDynamicConf(samlConfiguration);
         samlConfigService.mergeSamlConfig(conf);
         samlConfiguration = samlConfigService.find();
-        logger.debug("SAML post patch - samlConfiguration:{}", samlConfiguration);
+        logger.error("SAML post patch - samlConfiguration:{}", samlConfiguration);
         return Response.ok(samlConfiguration).build();
     }
 }
