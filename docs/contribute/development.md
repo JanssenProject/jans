@@ -127,11 +127,11 @@ Using an IDE, get Janssen server code from
 Janssen Server is composed of multiple modules. Each module have it's own set of tests. 
 Below are the instructions for configuring each module for tests.
 
-#### Configuring the client module
+#### Configuring the server and the client modules
 
 ##### setup certificate
 
-- Update Java cacerts
+- Update cacerts
 
   extract certificate for Janssen server with name `janssen2.op.io`
 
@@ -140,8 +140,9 @@ Below are the instructions for configuring each module for tests.
   ```
   this command takes few seconds to return.
 
-Update cacerts of your JRE which is being used by the code workspace. For example, if JRE being used my maven is 
-`/usr/lib/jvm/java-11-amazon-corretto`. It will prompt for cert store password. The default is `changeit`.
+Update cacerts of your JRE which is being used by the code workspace. For example,  
+`/usr/lib/jvm/java-11-amazon-corretto`. When running the command below, it will prompt for cert store password. Provide
+the correct password. The default password is `changeit`.
 
   ```
   keytool -import -alias janssen2.op.io -keystore /usr/lib/jvm/java-11-amazon-corretto/lib/security/cacerts -file /tmp/httpd.crt
@@ -149,22 +150,36 @@ Update cacerts of your JRE which is being used by the code workspace. For exampl
 
 ##### Profile setup
 
-Follow the steps below to configure workspace and run tests for the client module.
+Since Janssen Server has been installed with test data load, it also creates profile files required to run the test. 
+These files are kept on the VM under `/opt/jans/jans-setup/output/test/jans-auth` directory. Copy this directory to
+developer workstation.
 
-- Under `jans-auth-server/client/profile` module, make a copy of default profile directory and name the new profile 
-  as `janssen2.op.io`
-- Under `jans-auth-server/client/profile/default` directory, Edit `config-oxauth-test-data.properties` file and update 
-  the hostname in the value of the following properties:
-    - `test.server.name=<old-host>:8443` -> `test.server.name=janssen2.op.io` (Remember to remove the port)
-    - `swd.resource=acct:test_user@<old-host>:8443` -> `swd.resource=acct:test_user@janssen2.op.io` (Remember to remove 
-      the port)
+Follow the steps below to configure the profile for the client module. Same steps should be followed for
+setting up profile for server module.
+
+1. Under `jans-auth-server/client/profile` module, create a new directory and name it as `janssen2.op.io`
+2. Copy the contents of `jans-auth/client` directory in the newly created `janssen2.op.io` directory
+3. Copy keystore file `/client/profiles/default/client_keystore.p12` from `default` directory to 
+   the `janssen2.op.io` directory
+
+Once above steps have been followed for client and server modules, local copy of `jans-auth` directory that was copied 
+from `janssen2.op.io` can be deleted.
+
+#### Configuring the Agama Module
+
+Agama module code resides under `jans/agama` directory.
+
+Follow the steps below to configure Agama module to run the integration tests.
+
+1. Remove existing profile if any by deleting the directory `engine/profiles/janssen2.op.io`
+
+
+
 - now at, `jans-auth-server/client` directory level, run the following maven command
 
   ```
   mvn -Dcfg=default -Dcvss-score=9 -Dfindbugs.skip=true -Dlog4j.default.log.level=TRACE -Ddependency.check=false -DskipTests clean install
   ```
-
-  this will create new artifacts under `client/target` as per mentioned in profile `default`
 
 - Now run client tests by creating intellij run config as below
 
