@@ -471,18 +471,31 @@ Create the client needed to run the test by executing the following. Make sure t
     ./config-cli-tui.pyz --host $FQDN --client-id $TUI_CLIENT_ID --client-secret $TUI_CLIENT_SECRET --no-tui --operation-id=post-oauth-openid-client --data=ropc_client.json
     ```
 
-5. Save the client id and secret from the response and enter them along with your FQDN in the yaml file `load_test_ropc.yaml`  under `DCR_CLIENT_ID`, `DCR_CLIENT_SECRET` and `FQDN` respectively then execute :
+5. You will need to load the sectorIdentifier into your persistence.For MySQL that statement would be the following taking into account the `FQDN`:
+
+    ```sql
+    INSERT INTO jansSectorIdentifier (doc_id, dn, jansId, jansRedirectURI, objectClass)
+    VALUES (
+      'a55ede29-8f5a-461d-b06e-76caee8d40b5',
+      'jansId=a55ede29-8f5a-461d-b06e-76caee8d40b5,ou=sector_identifiers,o=jans',
+      'a55ede29-8f5a-461d-b06e-76caee8d40b5',
+      '{"v": ["https://www.jans.org", "http://localhost:80/jans-auth-rp/home.htm", "https://localhost:8443/jans-auth-rp/home.htm", "https://$FQDN/jans-auth-rp/home.htm", "https://$FQDN/jans-auth-client/test/resources/jwks.json", "https://client.example.org/callback", "https://client.example.org/callback2", "https://client.other_company.example.net/callback", "https://client.example.com/cb", "https://client.example.com/cb1", "https://client.example.com/cb2"]}',
+      'jansSectorIdentifier'
+    );
+    ```
+
+6. Save the client id and secret from the response and enter them along with your FQDN in the yaml file `load_test_ropc.yaml`  under `DCR_CLIENT_ID`, `DCR_CLIENT_SECRET` and `FQDN` respectively then execute :
 
     ```bash
     kubectl apply -f load_test_dcr.yaml
     ```
 
-6. The janssen setup by default installs an HPA which will automatically scale your pods if the metrics server is installed according to traffic. To load it very quickly scale the auth-server manually:
+7. The janssen setup by default installs an HPA which will automatically scale your pods if the metrics server is installed according to traffic. To load it very quickly scale the auth-server manually:
     ```bash
     kubectl scale deploy janssen-auth-server -n jans --replicas=40
    ```
    
-7. Finally, scale the load test. The replica number here should be manually controlled.
+8. Finally, scale the load test. The replica number here should be manually controlled.
     ```bash
     kubectl scale deploy load-testing-ropc -n load --replicas=20
    ```
