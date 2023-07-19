@@ -399,3 +399,90 @@ Create the client needed to run the test by executing the following. Make sure t
     ```bash
     kubectl scale deploy load-testing-ropc -n load --replicas=20
    ```
+
+#### DCR flow
+
+##### Resources needed for DCR client jmeter test
+
+ The below resources were [calculated](#kubernetes-cluster-load-test-resources) when creating the nodes above.
+
+| NAME        | # of pods | RAM(GiB) | CPU | Total RAM(GiB) | Total CPU |
+|-------------|-----------|----------|-----|----------------|-----------|
+| DCR test    | 20        | 8        | 1.3 | 190            | 24        |
+| Grand Total |           |          |     | 190 GiB        | 24        |
+
+##### Setup Client
+
+Create the client needed to run the test by executing the following. Make sure to change the `FQDN`  :
+
+1. Create a folder called `load_test`.
+
+    ```bash
+    mkdir -p load_test && cd load_test
+    ```
+
+2. Create the client json file
+
+    ```bash
+    FQDN=example.gluu.info
+    cat << EOF > dcr_client.json
+    {
+        "dn": null,
+        "inum": null,
+        "displayName": "DCR Flow Load Test Client",
+        "redirectUris": [
+          "https://$FQDN"
+        ],
+        "responseTypes": [
+          "id_token",
+          "code"
+        ],
+        "grantTypes": [
+          "authorization_code",
+          "implicit",
+          "refresh_token",
+          "password"
+        ],
+        "tokenEndpointAuthMethod": "client_secret_basic",
+        "scopes": [
+          "openid",
+          "profile",
+          "email",
+          "user_name"
+        ],
+        "trustedClient": true,
+        "includeClaimsInIdToken": false,
+        "accessTokenAsJwt": false,
+        "disabled": false,
+        "deletable": false,
+        "description": "DCR Flow Load Testing Client"
+    }
+    EOF
+    ```
+3. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/load_test_dcr.yaml) into the folder.
+
+4. Download or build [config-cli-tui](../config-guide/jans-tui/README.md) and run:
+
+    ```bash
+    # Notice the namespace is jans here . Change it if it was changed during installation of janssen previously
+    TUI_CLIENT_ID=$(kubectl get cm cn -o json -n jans | grep '"tui_client_id":' | sed -e 's#.*:\(\)#\1#' | tr -d '"' | tr -d "," | tr -d '[:space:]')
+    TUI_CLIENT_SECRET=$(kubectl get secret cn -o json -n jans | grep '"tui_client_pw":' | sed -e 's#.*:\(\)#\1#' | tr -d '"' | tr -d "," | tr -d '[:space:]' | base64 -d)
+    # add -noverify if your fqdn is not registered
+    ./config-cli-tui.pyz --host $FQDN --client-id $TUI_CLIENT_ID --client-secret $TUI_CLIENT_SECRET --no-tui --operation-id=post-oauth-openid-client --data=ropc_client.json
+    ```
+
+5. Save the client id and secret from the response and enter them along with your FQDN in the yaml file `load_test_ropc.yaml`  under `DCR_CLIENT_ID`, `DCR_CLIENT_SECRET` and `FQDN` respectively then execute :
+
+    ```bash
+    kubectl apply -f load_test_dcr.yaml
+    ```
+
+6. The janssen setup by default installs an HPA which will automatically scale your pods if the metrics server is installed according to traffic. To load it very quickly scale the auth-server manually:
+    ```bash
+    kubectl scale deploy janssen-auth-server -n jans --replicas=40
+   ```
+   
+7. Finally, scale the load test. The replica number here should be manually controlled.
+    ```bash
+    kubectl scale deploy load-testing-ropc -n load --replicas=20
+   ```
