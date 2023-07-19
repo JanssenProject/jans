@@ -12,10 +12,10 @@
       {
          "configId":"keycloak",
          "rootDir":"/keycloak",
-		 "enabled": "${enabled}", 
+         "enabled": ${enabled}, 
          "metadataTempDir":"/temp_metadata",
-		 "metadataDir":"/metadata",
-		 "metadataFilePattern":"%s-idp-metadata.xml",
+         "metadataDir":"/metadata",
+         "metadataFilePattern":"%s-idp-metadata.xml"
       }
    ]
 }

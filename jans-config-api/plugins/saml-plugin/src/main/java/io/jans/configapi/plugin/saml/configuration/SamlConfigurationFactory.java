@@ -23,7 +23,6 @@ import io.jans.service.cdi.event.ConfigurationUpdate;
 import io.jans.service.cdi.event.Scheduled;
 import io.jans.service.timer.event.TimerEvent;
 import io.jans.service.timer.schedule.TimerSchedule;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
 import java.io.File;
@@ -85,7 +84,7 @@ public class SamlConfigurationFactory {
 
     // timer events
     public static final String PERSISTENCE_CONFIGUARION_RELOAD_EVENT_TYPE = "persistenceConfigurationReloadEvent";
-    public static final String BASE_CONFIGURATION_RELOAD_EVENT_TYPE = "baseConfigurationReloadEvent";
+    public static final String SAML_BASE_CONFIGURATION_RELOAD_EVENT_TYPE = "saml_baseConfigurationReloadEvent";
 
     private static final int DEFAULT_INTERVAL = 30; // 30 seconds
     private AtomicBoolean isActive;
@@ -95,8 +94,6 @@ public class SamlConfigurationFactory {
     private static final String BASE_DIR;
     private static final String DIR = BASE_DIR + File.separator + "conf" + File.separator;
     private static final String BASE_PROPERTIES_FILE = DIR + Constants.BASE_PROPERTIES_FILE_NAME;
-    private static final String APP_PROPERTIES_FILE = DIR + Constants.LDAP_PROPERTIES_FILE_NAME;
-    private static final String SALT_FILE_NAME = Constants.SALT_FILE_NAME;
 
     // saml config
     public static final String SAML_CONFIGURATION_ENTRY = "saml_ConfigurationEntryDN";
@@ -112,7 +109,7 @@ public class SamlConfigurationFactory {
 
     @PostConstruct
     public void init() {
-        log.info("Initializing SamlConfigurationFactory ");
+        log.error("Initializing SamlConfigurationFactory ");
         this.isActive = new AtomicBoolean(true);
         try {
             
@@ -131,14 +128,14 @@ public class SamlConfigurationFactory {
 
     
     public void create() {
-        log.info("Loading SAML Configuration");
+        log.error("Loading SAML Configuration");
 
         // load SAML config from DB
         if (!loadSamlConfigFromDb()) {
             log.error("Failed to load SAML configuration from persistence. Please fix it!!!.");
             throw new ConfigurationException("Failed to load SAML configuration from persistence.");
         } else {
-            log.info("SAML Configuration loaded successfully - samlLoadedRevision:{}, samlAppConfiguration:{}",
+            log.error("SAML Configuration loaded successfully - samlLoadedRevision:{}, samlAppConfiguration:{}",
                     this.samlLoadedRevision, getSamlAppConfiguration());
         }
 
@@ -154,21 +151,12 @@ public class SamlConfigurationFactory {
     }
 
     private void loadBaseConfiguration() {
-        log.info("Loading base configuration - BASE_PROPERTIES_FILE:{}", BASE_PROPERTIES_FILE);
+        log.error("Loading base configuration - BASE_PROPERTIES_FILE:{}", BASE_PROPERTIES_FILE);
 
         this.baseConfiguration = createFileConfiguration(BASE_PROPERTIES_FILE);
         this.baseConfigurationFileLastModifiedTime = new File(BASE_PROPERTIES_FILE).lastModified();
 
         log.debug("Loaded base configuration:{}", baseConfiguration.getProperties());
-    }
-
-    private String confDir() {
-        final String confDir = this.baseConfiguration.getString("confDir", null);
-        if (StringUtils.isNotBlank(confDir)) {
-            return confDir;
-        }
-
-        return DIR;
     }
 
     private FileConfiguration createFileConfiguration(String fileName) {
@@ -181,8 +169,6 @@ public class SamlConfigurationFactory {
             throw new ConfigurationException("Failed to load configuration from " + fileName, ex);
         }
     }
-
-    
 
     private boolean loadSamlConfigFromDb() {
         log.debug("Loading Api configuration from '{}' DB...", baseConfiguration.getString("persistence.type"));
@@ -217,7 +203,7 @@ public class SamlConfigurationFactory {
             throw new ConfigurationException("Failed to load SAML Configuration From DB " + samlConf);
         }
 
-        log.info("samlAppConfigurationFromDb = ....");
+        log.error("samlAppConfigurationFromDb:{}",samlConf);
         if (samlConf.getDynamicConf() != null) {
             this.samlAppConfiguration = samlConf.getDynamicConf();
         }
@@ -286,7 +272,7 @@ public class SamlConfigurationFactory {
             if (lastModified > baseConfigurationFileLastModifiedTime) {
                 // Reload configuration only if it was modified
                 loadBaseConfiguration();
-                event.select(BaseConfigurationReload.Literal.INSTANCE).fire(BASE_CONFIGURATION_RELOAD_EVENT_TYPE);
+                event.select(BaseConfigurationReload.Literal.INSTANCE).fire(SAML_BASE_CONFIGURATION_RELOAD_EVENT_TYPE);
             }
         }
 

@@ -9,7 +9,7 @@ import io.jans.as.model.configuration.Configuration;
 public class SamlAppConfiguration implements Configuration {
 
     private String applicationName;
-    private String samlBaseDn;
+    private String samlTrustRelationshipDn;
     private boolean samlEnabled;
     private String selectedIdp;
     private String idpRootDir;
@@ -28,12 +28,12 @@ public class SamlAppConfiguration implements Configuration {
         this.applicationName = applicationName;
     }
 
-    public String getSamlBaseDn() {
-        return samlBaseDn;
+    public String getSamlTrustRelationshipDn() {
+        return samlTrustRelationshipDn;
     }
 
-    public void setSamlBaseDn(String samlBaseDn) {
-        this.samlBaseDn = samlBaseDn;
+    public void setSamlTrustRelationshipDn(String samlTrustRelationshipDn) {
+        this.samlTrustRelationshipDn = samlTrustRelationshipDn;
     }
 
     public boolean isSamlEnabled() {
@@ -102,11 +102,11 @@ public class SamlAppConfiguration implements Configuration {
 
     @Override
     public String toString() {
-        return "SamlConfig [applicationName=" + applicationName + ", samlBaseDn=" + samlBaseDn + ", samlEnabled="
-                + samlEnabled + ", selectedIdp=" + selectedIdp + ", idpRootDir=" + idpRootDir
-                + ", idpTempMetadataFolder=" + idpTempMetadataFolder + ", idpMetadataFolder=" + idpMetadataFolder
-                + ", idpMetadataFilePattern=" + idpMetadataFilePattern + ", spMetadataFilePattern="
-                + spMetadataFilePattern + ", idpConfigs=" + idpConfigs + "]";
+        return "SamlAppConfiguration [applicationName=" + applicationName + ", samlTrustRelationshipDn="
+                + samlTrustRelationshipDn + ", samlEnabled=" + samlEnabled + ", selectedIdp=" + selectedIdp
+                + ", idpRootDir=" + idpRootDir + ", idpTempMetadataFolder=" + idpTempMetadataFolder
+                + ", idpMetadataFolder=" + idpMetadataFolder + ", idpMetadataFilePattern=" + idpMetadataFilePattern
+                + ", spMetadataFilePattern=" + spMetadataFilePattern + ", idpConfigs=" + idpConfigs + "]";
     }
 
 }
