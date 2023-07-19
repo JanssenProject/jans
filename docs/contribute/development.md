@@ -162,25 +162,25 @@ setting up profile for server module.
 3. Copy keystore file `/client/profiles/default/client_keystore.p12` from `default` directory to 
    the `janssen2.op.io` directory
 
-Once above steps have been followed for client and server modules, local copy of `jans-auth` directory that was copied 
-from `janssen2.op.io` can be deleted.
-
 #### Configuring the Agama Module
 
 Agama module code resides under `jans/agama` directory.
 
-Follow the steps below to configure Agama module to run the integration tests.
+Follow the steps below from `agama` directory to configure the module to run the integration tests.
 
-1. Remove existing profile if any by deleting the directory `engine/profiles/janssen2.op.io`
+1. Remove existing profile if any by deleting and recreating the directory `engine/profiles/janssen2.op.io`
+2. Copy the file `jans-auth/config-agama-test.properties` to the `engine/profiles/janssen2.op.io/` directory
 
+Once above steps have been followed, the local copy of `jans-auth` directory that was copied
+from `janssen2.op.io` can be deleted.
 
+### Running The Tests
 
-- now at, `jans-auth-server/client` directory level, run the following maven command
+Each module in Janssen Server has it's own tests that has to be executed separately.
+For example, to run integration tests for `jans-auth-server` module, run the following maven command at the directory
+level:
 
   ```
-  mvn -Dcfg=default -Dcvss-score=9 -Dfindbugs.skip=true -Dlog4j.default.log.level=TRACE -Ddependency.check=false -DskipTests clean install
+  mvn -Dcfg=janssen2.op.io test
   ```
 
-- Now run client tests by creating intellij run config as below
-
-![](../assets/image-run-integ-test-jans-vm.png)
