@@ -45,10 +45,13 @@ configure `auth-server` module for remote debugging.
 
 ## Run Integration Tests with a Janssen Server VM
 
-In this guide, we will look at steps to run the Janssen integration test suite against a locally installed Janssen 
-server on the developer machine.
+In this guide, we will look at steps to run the Janssen integration test suite against an installed Janssen 
+Server.
 
 ### Component Setup
+
+Instructions in this guide can be used if Janssen Server is installed on a VM. Either locally on developer workstation 
+itself(as shown below) or on a remote cloud VM.
 
 ![Component Diagram](../assets/image-run-integration-test-from-workspace-06122022.png)
 
@@ -60,18 +63,21 @@ following installation instructions.
 - Make a note 
 of the `host name` that you assign to the Janssen server during the installation. For this guide, the Janssen host name 
 would be `janssen2.op.io`
-- Install with test data load. This can be achieved by using `-t` switch when invoking the setup script.
+- Choose to install with test data load. This can be achieved by using `-t` switch when invoking the setup script
+  from installation instructions.
 
 Use the [VM installation guide](../admin/install/vm-install/README.md) for complete set of instructions.
 
-Once the installation is successfully complete, check if the `.well-known` end-points (sample below) of the 
-Janssen server from the browser to ascertain that the 
+Once the installation is successfully complete, check if the `.well-known` end-points of the 
+Janssen server from the browser. Successful response will ascertain that the 
 Janssen server running inside local VM is healthy and also accessible from the developer's machine. 
 
 !!! Note
     Based on developer setup it may be necessary to add appropriate IP-HOST mapping to the developer workstation. For
     instance, on a Linux based developer workstation, this means adding a mapping to `/etc/hosts` file. Make sure that 
     VM's IP is mapped to a FQDN like `janssen2.op.io`. Refering to VM with `localhost` or just IP will not work.
+
+URI for OpenID configuration `.well-known` endpoint:
 
   ```
   https://janssen2.op.io/jans-auth/.well-known/openid-configuration
@@ -114,45 +120,47 @@ Response received should be JSON formatted Janssen configuration details, simila
     
   ```
 
-### Configure developer workspace
+### Setup The Certificates
 
-Now that we have Janssen Server running in a VM and it is accessible from developer workstation as well, we will
-create and configure the developer workspace in order to run integration tests.
+In order to run the tests against the installed Janssen Server, the workstation JRE needs to have appropriate 
+certificate installed. Update cacerts using steps below:
 
-We are going to configure the developer workspace in IntelliJIdea IDE. Developer can use any IDE for this purpose. 
 
-Using an IDE, get Janssen server code from 
-[Janssen GitHub repository](https://github.com/JanssenProject/jans).
-
-Janssen Server is composed of multiple modules. Each module have it's own set of tests. 
-Below are the instructions for configuring each module for tests.
-
-#### Configuring the server and the client modules
-
-##### setup certificate
-
-- Update cacerts
-
-  extract certificate for Janssen server with name `janssen2.op.io`
-
+- extract certificate for Janssen server with name `janssen2.op.io`
   ```
   openssl s_client -connect test.local.jans.io:443 2>&1 |sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > /tmp/httpd.crt
   ```
   this command takes few seconds to return.
 
-Update cacerts of your JRE which is being used by the code workspace. For example,  
+- Update cacerts of your JRE which is being used by the code workspace. For example,  
 `/usr/lib/jvm/java-11-amazon-corretto`. When running the command below, it will prompt for cert store password. Provide
 the correct password. The default password is `changeit`.
-
   ```
   keytool -import -alias janssen2.op.io -keystore /usr/lib/jvm/java-11-amazon-corretto/lib/security/cacerts -file /tmp/httpd.crt
   ``` 
 
+### Configure developer workspace
+
+Now that we have Janssen Server running in a VM and it is accessible from developer workstation as well, we will
+create and configure the code base on developer workspace in order to run integration tests.
+
+Get Janssen server code from [Janssen GitHub repository](https://github.com/JanssenProject/jans).
+
+Janssen Server is composed of multiple modules. Each module has its own set of tests. 
+Below are the instructions for configuring each module for tests.
+
+#### Configuring the server and the client modules
+
 ##### Profile setup
 
-Since Janssen Server has been installed with test data load, it also creates profile files required to run the test. 
-These files are kept on the VM under `/opt/jans/jans-setup/output/test/jans-auth` directory. Copy this directory to
-developer workstation.
+Many Janssen Server module and sub-modules use test configuration stored in a directory named `profile`. Profile 
+directory contains files that hold important information required to run tests. Developers can create one or more
+profiles and use them to run tests against different Janssen Servers. 
+
+Since Janssen Server has been installed with test data, the installer also created the profile files required to run 
+the test. 
+These files are kept on the VM under `/opt/jans/jans-setup/output/test/jans-auth` directory. Copy over this directory to
+any location on the developer workstation.
 
 Follow the steps below to configure the profile for the client module. Same steps should be followed for
 setting up profile for server module.
