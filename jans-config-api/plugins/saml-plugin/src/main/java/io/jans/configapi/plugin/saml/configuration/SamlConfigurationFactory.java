@@ -102,7 +102,10 @@ public class SamlConfigurationFactory {
     private long samlLoadedRevision = -1;
     private FileConfiguration baseConfiguration;
     
-
+    public String getSamlConfigurationDn() {
+        return this.baseConfiguration.getString(SAML_CONFIGURATION_ENTRY_DN);
+    }
+    
     public FileConfiguration getBaseConfiguration() {
         return baseConfiguration;
     }
