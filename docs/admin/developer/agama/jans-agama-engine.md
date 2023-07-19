@@ -329,12 +329,22 @@ A class/interface is accessible to Agama code as long as it is part of:
 
 Additionally, it is possible to upload source code on the fly to augment the classpath. Any valid Java or Groovy file is accepted and must be located under `/opt/jans/jetty/jans-auth/agama/scripts`. A class named `com.acme.Person` for instance, must reside in `com/acme/Person` under the `scripts` directory.
 
-!!! Note
+This provides "hot" reloading thus becoming a real time saver while developing flows because there is no need to restart the jans-auth webapp. Also, only the files that get modified are effectively re-compiled. These benefits come at a cost and this is explained in in the following.
+
+!!! Important
     Only files with extensions `java` or `groovy` in the `scripts` directory are accounted by the engine
+
+#### Limitations of code added "on the fly"
 
 Note classes in `scripts` directory can only be accessed through `Call` directives. As an example suppose you added classes `A` and `B` to `scripts`, and `A` depends on `B`. `Call`s using class `A` will work and any change to files `A` and/or `B` will be picked automatically. On the contrary, trying to load this kind of classes using `Class.forName` either from a jar file in `custom/libs` or from Agama itself will degenerate in `ClassNotFoundException`. Note `A` and `B` can also depend on classes found in any of the three locations listed above.
 
-This "hot" reloading feature can be a big time saver while developing flows because there is no need to restart the jans-auth webapp. Also, only the files that get modified are effectively re-compiled.
+Provided Java source code (.java files) are actually interpreted as Groovy code. 99% of times this is not a concern since Groovy can be considered a super set of Java, however, there are a few minor discrepancies that may exhibit unexpected behaviors. These differences are described [here](https://groovy-lang.org/differences.html).
+
+We consider the following to be remarkable:
+
+- Array literals in shorthand syntax not allowed, e.g. `int[] array = {1, 2, 3}`. Use `int[] array = new int[] {1, 2, 3}` instead
+- String interpolation: `"hello $mark"` evaluates the value of variable `mark` and prepends `hello ` to it!. To avoid this use a backslash, like in `"hello \$mark"`. Learn more about interpolation [here](http://groovy-lang.org/syntax.html#_string_interpolation). In general, prepend ocurrences of `$` in your string literals with a `\`
+- Usage of `==` operator actually calls the `equals` method. Most of times this is fine but can be a problem when you are overriding `equals` in your class and make use of `==`. This will introduce a recursive call in your implementation and may degenerate in a stack overflow. If possible, use the `===` operator or the `is` method in these cases
 
 ### OOP prose warning
 
