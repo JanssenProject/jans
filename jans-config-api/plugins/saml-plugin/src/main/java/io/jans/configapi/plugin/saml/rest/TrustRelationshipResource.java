@@ -116,9 +116,9 @@ public class TrustRelationshipResource extends BaseResource {
             @ApiResponse(responseCode = "201", description = "Trust Relationship List", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA, array = @ArraySchema(schema = @Schema(implementation = TrustRelationship.class)))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
-    @POST
     @ProtectedApi(scopes = { Constants.SAML_WRITE_ACCESS }, groupScopes = {}, superScopes = {
             Constants.SAML_WRITE_ACCESS })
+    @POST
     public Response createTrustRelationship(@Valid TrustRelationship trustRelationship) throws Exception {
         logger.debug(" Create trustRelationship:{}", trustRelationship);
         checkResourceNotNull(trustRelationship, SAML_TRUST_RELATIONSHIP);
@@ -140,11 +140,11 @@ public class TrustRelationshipResource extends BaseResource {
             @ApiResponse(responseCode = "201", description = "Newly created Trust Relationship", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = TrustRelationship.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
-    @POST
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Path("/upload")
     @ProtectedApi(scopes = { Constants.SAML_WRITE_ACCESS }, groupScopes = {}, superScopes = {
             Constants.SAML_WRITE_ACCESS })
+    @POST
     public Response createTrustRelationshipWithFile(@MultipartForm TrustRelationshipForm trustRelationshipForm,
             InputStream metadatafile) throws IOException {
         logger.debug(" Create trustRelationshipForm:{} ", trustRelationshipForm);
@@ -179,18 +179,18 @@ public class TrustRelationshipResource extends BaseResource {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = TrustRelationship.class)))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
-    @PUT
     @ProtectedApi(scopes = { Constants.SAML_WRITE_ACCESS })
-    public Response updateTrustRelationship(@Valid TrustRelationship TrustRelationship) {
+    @PUT
+    public Response updateTrustRelationship(@Valid TrustRelationship trustRelationship) throws IOException {
 
-        logger.error("Update TrustRelationship:{}", TrustRelationship);
+        logger.error("Update trustRelationship:{}", trustRelationship);
 
         // TO-DO validation of TrustRelationship
-        TrustRelationship = samlService.updateTrustRelationship(TrustRelationship);
+        trustRelationship = samlService.updateTrustRelationship(trustRelationship);
 
-        logger.error("Post update TrustRelationship:{}", TrustRelationship);
+        logger.error("Post update trustRelationship:{}", trustRelationship);
 
-        return Response.ok(TrustRelationship).build();
+        return Response.ok(trustRelationship).build();
     }
 
     @Operation(summary = "Delete TrustRelationship", description = "Delete TrustRelationship", operationId = "put-trust-relationship", tags = {
@@ -200,9 +200,9 @@ public class TrustRelationshipResource extends BaseResource {
             @ApiResponse(responseCode = "204", description = "No Content", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = TrustRelationship.class)))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
-    @DELETE
     @Path(Constants.ID_PATH_PARAM)
     @ProtectedApi(scopes = { Constants.SAML_WRITE_ACCESS })
+    @DELETE
     public Response deleteTrustRelationship(
             @Parameter(description = "Unique Id of Trust Relationship") @PathParam(Constants.ID) @NotNull String id) {
 

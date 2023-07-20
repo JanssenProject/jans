@@ -7,9 +7,6 @@
 package io.jans.configapi.plugin.saml.service;
 
 import io.jans.configapi.plugin.saml.model.TrustRelationship;
-import io.jans.configapi.plugin.saml.service.SamlConfigService;
-import io.jans.configapi.plugin.saml.model.config.SamlAppConfiguration;
-import io.jans.configapi.plugin.saml.model.config.SamlConf;
 import io.jans.service.document.store.service.DocumentStoreService;
 import io.jans.service.document.store.conf.DocumentStoreType;
 import io.jans.service.document.store.service.LocalDocumentStoreService;
@@ -31,16 +28,10 @@ import org.slf4j.Logger;
 @ApplicationScoped
 public class SamlIdpService {
 
-    private final String IDP_ROOT_DIR = getIdpRoot();
-    private final String KEYCLOAK_IDP_ROOT_DIR = IDP_ROOT_DIR + "/keycloak";
-    private final String KEYCLOAK_IDP_METADATA_DIR = "metadatafile";
-    private final String KEYCLOAK_IDP_METADATA_TEMP_DIR = "temp_metadata";
-    private final String SAML_SP_METADATA_FILE_PATTERN = "%s-sp-metadata.xml";
-
     @Inject
     Logger logger;
-    
-    @Inject 
+
+    @Inject
     SamlConfigService samlConfigService;
 
     @Inject
@@ -50,13 +41,11 @@ public class SamlIdpService {
     private LocalDocumentStoreService localDocumentStoreService;
 
     public boolean isLocalDocumentStoreType() {
-
         return documentStoreService.getProviderType() == DocumentStoreType.LOCAL;
     }
 
     public String getSpMetadataFilePath(String spMetaDataFN) {
-        // if (appConfiguration.getShibboleth3IdpRootDir() == null) {
-        if (StringUtils.isBlank(KEYCLOAK_IDP_ROOT_DIR)) {
+        if (StringUtils.isBlank(samlConfigService.getSelectedIdpConfigRootDir())) {
             throw new InvalidConfigurationException(
                     "Failed to return SP meta-data file due to undefined IDP root folder");
         }
@@ -66,7 +55,8 @@ public class SamlIdpService {
     }
 
     public String getIdpMetadataDir() {
-        return KEYCLOAK_IDP_ROOT_DIR + File.separator + KEYCLOAK_IDP_METADATA_DIR + File.separator;
+        return samlConfigService.getSelectedIdpConfigRootDir() + File.separator
+                + samlConfigService.getSelectedIdpConfigMetadataDir() + File.separator;
     }
 
     public String getSpNewMetadataFileName(TrustRelationship trustRel) {
@@ -75,47 +65,50 @@ public class SamlIdpService {
 
     public String getSpNewMetadataFileName(String inum) {
         String relationshipInum = StringHelper.removePunctuation(inum);
-        return String.format(SAML_SP_METADATA_FILE_PATTERN, relationshipInum);
+        return String.format(samlConfigService.getSpMetadataFilePattern(), relationshipInum);
     }
 
     public String getIdpMetadataTempDir() {
-        return KEYCLOAK_IDP_ROOT_DIR + File.separator + KEYCLOAK_IDP_METADATA_TEMP_DIR + File.separator;
+        return samlConfigService.getSelectedIdpConfigRootDir() + File.separator
+                + samlConfigService.getSelectedIdpConfigMetadataTempDir() + File.separator;
     }
 
     private String getTempMetadataFilename(String idpMetadataFolder, String fileName) {
-        logger.error("documentStoreService:{}, localDocumentStoreService:{}, idpMetadataFolder:{}, fileName:{}",documentStoreService, localDocumentStoreService, idpMetadataFolder, fileName);
+        logger.error("documentStoreService:{}, localDocumentStoreService:{}, idpMetadataFolder:{}, fileName:{}",
+                documentStoreService, localDocumentStoreService, idpMetadataFolder, fileName);
         synchronized (SamlIdpService.class) {
             String possibleTemp;
             do {
                 possibleTemp = fileName + INumGenerator.generate(2);
-                logger.error("possibleTemp:{}",possibleTemp);
+                logger.error("possibleTemp:{}", possibleTemp);
             } while (documentStoreService.hasDocument(idpMetadataFolder + possibleTemp));
             return possibleTemp;
         }
     }
 
     public String saveSpMetadataFile(String spMetadataFileName, InputStream stream) {
-        logger.error("spMetadataFileName:{}, stream:{}",spMetadataFileName, stream);
-        // if (appConfiguration.getShibboleth3IdpRootDir() == null) {
-        if (StringUtils.isBlank(KEYCLOAK_IDP_ROOT_DIR)) {
+        logger.error("spMetadataFileName:{}, stream:{}", spMetadataFileName, stream);
+
+        if (StringUtils.isBlank(samlConfigService.getSelectedIdpConfigRootDir())) {
             throw new InvalidConfigurationException(
                     "Failed to save SP meta-data file due to undefined IDP root folder");
         }
 
         String idpMetadataTempFolder = getIdpMetadataTempDir();
-        logger.error("idpMetadataTempFolder:{}",idpMetadataTempFolder);
+        logger.error("idpMetadataTempFolder:{}", idpMetadataTempFolder);
         String tempFileName = getTempMetadataFilename(idpMetadataTempFolder, spMetadataFileName);
-        logger.error("idpMetadataTempFolder:{}, tempFileName:{}",idpMetadataTempFolder, tempFileName);
+        logger.error("idpMetadataTempFolder:{}, tempFileName:{}", idpMetadataTempFolder, tempFileName);
         String spMetadataFile = idpMetadataTempFolder + tempFileName;
-        logger.error("documentStoreService:{}, spMetadataFile:{}, localDocumentStoreService:{} ",documentStoreService, spMetadataFile, localDocumentStoreService);
+        logger.error("documentStoreService:{}, spMetadataFile:{}, localDocumentStoreService:{} ", documentStoreService,
+                spMetadataFile, localDocumentStoreService);
         try {
             boolean result = documentStoreService.saveDocumentStream(spMetadataFile, stream,
                     List.of("jans-server", "Keycloak"));
-            logger.error("SP File saving result:{}",result);
-            
-            InputStream newFile = documentStoreService.readDocumentAsStream(spMetadataFile);      
-            logger.error("SP File read newFile:{}",newFile);
-                     
+            logger.error("SP File saving result:{}", result);
+
+            InputStream newFile = documentStoreService.readDocumentAsStream(spMetadataFile);
+            logger.error("SP File read newFile:{}", newFile);
+
             if (result) {
                 return tempFileName;
             }
@@ -126,21 +119,6 @@ public class SamlIdpService {
         }
 
         return null;
-    }
-    
-    private SamlAppConfiguration find() {
-        SamlAppConfiguration samlAppConfiguration = samlConfigService.find();
-        logger.error("  samlAppConfiguration():{}", samlAppConfiguration);
-        return samlAppConfiguration;
-    }
-    
-    private String getIdpRoot() {
-        SamlAppConfiguration samlAppConfiguration = samlConfigService.find();
-        String idpRoot = null;
-        if(samlAppConfiguration==null) {
-            return idpRoot;
-        }
-        return samlAppConfiguration.getIdpRootDir();
     }
 
 }
