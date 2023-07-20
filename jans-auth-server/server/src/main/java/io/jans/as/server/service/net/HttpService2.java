@@ -97,11 +97,29 @@ public class HttpService2 implements Serializable {
 	}
 
 	public CloseableHttpClient getHttpsClient() {
+    	return getHttpsClient(RequestConfig.custom().build());
+	}
+
+	public CloseableHttpClient getHttpsClient(RequestConfig requestConfig) {
     	log.trace("Connection manager stats: {}", connectionManager.getTotalStats());
 
     	return HttpClients.custom()
-				.setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
+				.setDefaultRequestConfig(RequestConfig.copy(requestConfig).setCookieSpec(CookieSpecs.STANDARD).build())
 				.setConnectionManager(connectionManager).build();
+	}
+
+	public CloseableHttpClient getHttpsClient(HttpRoutePlanner routerPlanner) {
+    	log.trace("Connection manager stats: {}", connectionManager.getTotalStats());
+
+    	return getHttpsClient(RequestConfig.custom().build(), routerPlanner);
+	}
+
+	public CloseableHttpClient getHttpsClient(RequestConfig requestConfig, HttpRoutePlanner routerPlanner) {
+    	log.trace("Connection manager stats: {}", connectionManager.getTotalStats());
+
+    	return HttpClients.custom()
+				.setDefaultRequestConfig(RequestConfig.copy(requestConfig).setCookieSpec(CookieSpecs.STANDARD).build())
+				.setConnectionManager(connectionManager).setRoutePlanner(routerPlanner).build();
 	}
 
 	public CloseableHttpClient getHttpsClient(String trustStoreType, String trustStorePath, String trustStorePassword) throws KeyManagementException, NoSuchAlgorithmException, KeyStoreException, CertificateException, IOException {
@@ -207,7 +225,7 @@ public class HttpService2 implements Serializable {
 	}
 
 	public byte[] getResponseContent(HttpResponse httpResponse) throws IOException {
-        if ((httpResponse == null) || !isResponseStastusCodeOk(httpResponse)) {
+		if ((httpResponse == null) || !isResponseStastusCodeOk(httpResponse)) {
         	return null;
         }
 
@@ -226,7 +244,7 @@ public class HttpService2 implements Serializable {
 	}
 
 	public void consume(HttpResponse httpResponse) throws IOException {
-        if ((httpResponse == null) || !isResponseStastusCodeOk(httpResponse)) {
+		if ((httpResponse == null) || !isResponseStastusCodeOk(httpResponse)) {
         	return;
         }
 
@@ -263,15 +281,18 @@ public class HttpService2 implements Serializable {
 
 	public boolean isResponseStastusCodeOk(HttpResponse httpResponse) {
 		int responseStastusCode = httpResponse.getStatusLine().getStatusCode();
-		if ((responseStastusCode == HttpStatus.SC_OK) || (responseStastusCode == HttpStatus.SC_CREATED) || (responseStastusCode == HttpStatus.SC_ACCEPTED) ||
-			(responseStastusCode == HttpStatus.SC_NON_AUTHORITATIVE_INFORMATION) || (responseStastusCode == HttpStatus.SC_NO_CONTENT) || (responseStastusCode == HttpStatus.SC_RESET_CONTENT) ||
-			(responseStastusCode == HttpStatus.SC_PARTIAL_CONTENT) || (responseStastusCode == HttpStatus.SC_MULTI_STATUS)) {
+		if ((responseStastusCode == HttpStatus.SC_OK) || (responseStastusCode == HttpStatus.SC_CREATED) || (responseStastusCode == HttpStatus.SC_ACCEPTED)
+				|| (responseStastusCode == HttpStatus.SC_NON_AUTHORITATIVE_INFORMATION) || (responseStastusCode == HttpStatus.SC_NO_CONTENT) || (responseStastusCode == HttpStatus.SC_RESET_CONTENT)
+				|| (responseStastusCode == HttpStatus.SC_PARTIAL_CONTENT) || (responseStastusCode == HttpStatus.SC_MULTI_STATUS)) {
 			return true;
 		}
-
+		
 		return false;
 	}
-	
+
+	public boolean isResponseStatusCodeOk(HttpResponse httpResponse) {
+		return isResponseStastusCodeOk(httpResponse); 
+	}
 
 	public boolean isContentTypeXml(HttpResponse httpResponse) {
 		Header contentType = httpResponse.getEntity().getContentType();
@@ -301,14 +322,14 @@ public class HttpService2 implements Serializable {
     }
 
 	public HttpRoutePlanner buildDefaultRoutePlanner(final String hostname, final int port, final String scheme) {
-		// Creating an HttpHost object for proxy
-		HttpHost proxyHost = new HttpHost(hostname, port, scheme);
-
-		return new DefaultProxyRoutePlanner(proxyHost);
-	}
+		//Creating an HttpHost object for proxy
+		HttpHost proxyHost = new HttpHost(hostname, port, scheme); 
+    	
+    	return new DefaultProxyRoutePlanner(proxyHost);
+    }
 
 	public HttpRoutePlanner buildDefaultRoutePlanner(final String proxy) {
 		return buildDefaultRoutePlanner(proxy, -1, null);
-	}
-		
+    }
+
 }
