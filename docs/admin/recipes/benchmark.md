@@ -372,6 +372,7 @@ Create the client needed to run the test by executing the following. Make sure t
     }
     EOF
     ```
+
 3. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/load_test_ropc.yaml) into the folder.
 
 4. Download or build [config-cli-tui](../config-guide/jans-tui/README.md) and run:
@@ -459,7 +460,9 @@ Create the client needed to run the test by executing the following. Make sure t
     }
     EOF
     ```
+
 3. Copy the following [yaml](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/demos/benchmarking/docker-jans-loadtesting-jmeter/yaml/load-test/load_test_dcr.yaml) into the folder.
+
 
 4. Download or build [config-cli-tui](../config-guide/jans-tui/README.md) and run:
 
@@ -468,7 +471,7 @@ Create the client needed to run the test by executing the following. Make sure t
     TUI_CLIENT_ID=$(kubectl get cm cn -o json -n jans | grep '"tui_client_id":' | sed -e 's#.*:\(\)#\1#' | tr -d '"' | tr -d "," | tr -d '[:space:]')
     TUI_CLIENT_SECRET=$(kubectl get secret cn -o json -n jans | grep '"tui_client_pw":' | sed -e 's#.*:\(\)#\1#' | tr -d '"' | tr -d "," | tr -d '[:space:]' | base64 -d)
     # add -noverify if your fqdn is not registered
-    ./config-cli-tui.pyz --host $FQDN --client-id $TUI_CLIENT_ID --client-secret $TUI_CLIENT_SECRET --no-tui --operation-id=post-oauth-openid-client --data=ropc_client.json
+    ./config-cli-tui.pyz --host $FQDN --client-id $TUI_CLIENT_ID --client-secret $TUI_CLIENT_SECRET --no-tui --operation-id=post-oauth-openid-client --data=dcr_client.json
     ```
 
 5. You will need to load the sectorIdentifier into your persistence.For MySQL that statement would be the following taking into account the `FQDN`:
