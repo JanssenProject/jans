@@ -67,27 +67,7 @@ public class TrustRelationshipResource extends BaseResource {
         return Response.ok(trustRelationshipList).build();
     }
 
-    @Operation(summary = "Get TrustRelationship by name", description = "Get TrustRelationship by name", operationId = "get-trust-relationship-by-name", tags = {
-            "SAML - Trust Relationship" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    Constants.SAML_READ_ACCESS }))
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = TrustRelationship.class)))),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "500", description = "InternalServerError") })
-    @GET
-    @ProtectedApi(scopes = { Constants.SAML_READ_ACCESS })
-    @Path(Constants.CLIENTID_PATH)
-    public Response getTrustRelationshipByName(
-            @Parameter(description = "Name") @PathParam(Constants.CLIENTID) @NotNull String clientName) {
-        logger.error("Searching client by name: {}", clientName);
-
-        List<TrustRelationship> trustRelationships = samlService.getAllTrustRelationshipByName(clientName);
-
-        logger.error("TrustRelationships found by clientName:{}, trustRelationship:{}", clientName, trustRelationships);
-
-        return Response.ok(trustRelationships).build();
-    }
-
+   
     @Operation(summary = "Get TrustRelationship by Id", description = "Get TrustRelationship by Id", operationId = "get-trust-relationship-by-id", tags = {
             "SAML - Trust Relationship" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.SAML_READ_ACCESS }))
@@ -133,7 +113,7 @@ public class TrustRelationshipResource extends BaseResource {
         return Response.status(Response.Status.CREATED).entity(trustRelationship).build();
     }
 
-    @Operation(summary = "Create Trust Relationship with File", description = "Create Trust Relationship with File", operationId = "post-trust-relationship-file", tags = {
+    @Operation(summary = "Create Trust Relationship with Metadata File", description = "Create Trust Relationship with Metadata File", operationId = "post-trust-relationship-metadata-file", tags = {
             "SAML - Trust Relationship" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.SAML_WRITE_ACCESS }))
     @ApiResponses(value = {
@@ -159,7 +139,6 @@ public class TrustRelationshipResource extends BaseResource {
         logger.debug(" Create metaDataFile:{} ", metaDataFile);
         if (metaDataFile != null) {
             logger.debug(" Create metaDataFile.available():{}", metaDataFile.available());
-            // inputStream = new FileInputStream(metaDataFile);
         }
 
         // TO-DO validation of TrustRelationship
@@ -176,7 +155,7 @@ public class TrustRelationshipResource extends BaseResource {
             "SAML - Trust Relationship" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.SAML_WRITE_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = TrustRelationship.class)))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TrustRelationship.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @ProtectedApi(scopes = { Constants.SAML_WRITE_ACCESS })

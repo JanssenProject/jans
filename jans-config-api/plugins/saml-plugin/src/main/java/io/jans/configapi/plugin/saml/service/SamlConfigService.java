@@ -57,6 +57,28 @@ public class SamlConfigService {
         return selectedIdp;
     }
     
+    public boolean isSamlEnabled() {
+        final SamlConf samlConf = findSamlConf();
+        logger.error("  samlConf:{}, samlConf.getDynamicConf():{}", samlConf, samlConf.getDynamicConf());
+        SamlAppConfiguration samlAppConfiguration =  samlConf.getDynamicConf();
+        boolean isSamlEnabled = false;
+        if(samlAppConfiguration!=null) {
+            isSamlEnabled = samlAppConfiguration.isSamlEnabled();
+        }
+        return isSamlEnabled;
+    }
+    
+    public String getIdpRootDir() {
+        final SamlConf samlConf = findSamlConf();
+        logger.error("  samlConf:{}, samlConf.getDynamicConf():{}", samlConf, samlConf.getDynamicConf());
+        SamlAppConfiguration samlAppConfiguration =  samlConf.getDynamicConf();
+        String idpRootDir = null;
+        if(samlAppConfiguration!=null) {
+            idpRootDir = samlAppConfiguration.getIdpRootDir();
+        }
+        return idpRootDir;
+    }
+    
     public String getTrustRelationshipDn() {
         final SamlConf samlConf = findSamlConf();
         logger.error("  samlConf:{}, samlConf.getDynamicConf():{}", samlConf, samlConf.getDynamicConf());

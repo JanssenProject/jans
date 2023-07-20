@@ -240,9 +240,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/TrustRelationship'
+                $ref: '#/components/schemas/TrustRelationship'
         "401":
           description: Unauthorized
         "500":
@@ -281,9 +279,9 @@ paths:
     post:
       tags:
       - SAML - Trust Relationship
-      summary: Create Trust Relationship with File
-      description: Create Trust Relationship with File
-      operationId: post-trust-relationship-file
+      summary: Create Trust Relationship with Metadata File
+      description: Create Trust Relationship with Metadata File
+      operationId: post-trust-relationship-metadata-file
       requestBody:
         content:
           multipart/form-data:
@@ -354,36 +352,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TrustRelationship'
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/saml.readonly
-  /saml/trust-relationship/{clientId}:
-    get:
-      tags:
-      - SAML - Trust Relationship
-      summary: Get TrustRelationship by name
-      description: Get TrustRelationship by name
-      operationId: get-trust-relationship-by-name
-      parameters:
-      - name: clientId
-        in: path
-        description: Name
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/TrustRelationship'
         "401":
           description: Unauthorized
         "500":

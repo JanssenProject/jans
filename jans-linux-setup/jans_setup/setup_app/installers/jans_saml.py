@@ -27,8 +27,6 @@ class JansSamlInstaller(JettyInstaller):
         self.saml_enabled = True
         self.selected_idp = 'keycloak' #To be set based on selected Idp during install
         self.idp_root_dir = '/opt/idp/configs/'
-        self.idp_temp_meta_dir = os.path.join(self.idp_root_dir, 'temp_metadata')
-        self.idp_meta_dir = os.path.join(self.idp_root_dir, 'metadata')
         
         # sample config
         self.idp_config_id = 'keycloak'
@@ -60,8 +58,7 @@ class JansSamlInstaller(JettyInstaller):
         self.dbUtils.import_ldif([self.ldif_config_fn])
 
     def create_folders(self):
-        for saml_dir in (self.idp_root_dir, self.idp_temp_meta_dir, self.idp_meta_dir,
-                self.idp_config_root_dir, self.idp_config_temp_meta_dir, self.idp_config_meta_dir
+        for saml_dir in (self.idp_root_dir, self.idp_config_root_dir, self.idp_config_temp_meta_dir, self.idp_config_meta_dir
                 ):
             self.createDirs(saml_dir)
 

@@ -45,9 +45,10 @@ public class SamlIdpService {
     }
 
     public String getSpMetadataFilePath(String spMetaDataFN) {
-        if (StringUtils.isBlank(samlConfigService.getSelectedIdpConfigRootDir())) {
+        if (StringUtils.isBlank(samlConfigService.getIdpRootDir())||
+                StringUtils.isBlank(samlConfigService.getSelectedIdpConfigRootDir())) {
             throw new InvalidConfigurationException(
-                    "Failed to return SP meta-data file due to undefined IDP root folder");
+                    "Failed to return IDP Metadata file path due to undefined IDP root folder");
         }
 
         String idpMetadataFolder = getIdpMetadataDir();
@@ -55,7 +56,13 @@ public class SamlIdpService {
     }
 
     public String getIdpMetadataDir() {
-        return samlConfigService.getSelectedIdpConfigRootDir() + File.separator
+        if (StringUtils.isBlank(samlConfigService.getIdpRootDir())||
+                StringUtils.isBlank(samlConfigService.getSelectedIdpConfigRootDir()) ||
+                StringUtils.isBlank(samlConfigService.getSelectedIdpConfigMetadataDir())) {
+            throw new InvalidConfigurationException(
+                    "Failed to return IDP Metadata directory due to undefined IDP root folder");
+        }
+        return samlConfigService.getIdpRootDir() + File.separator + samlConfigService.getSelectedIdpConfigRootDir() + File.separator
                 + samlConfigService.getSelectedIdpConfigMetadataDir() + File.separator;
     }
 
@@ -69,7 +76,14 @@ public class SamlIdpService {
     }
 
     public String getIdpMetadataTempDir() {
-        return samlConfigService.getSelectedIdpConfigRootDir() + File.separator
+        if (StringUtils.isBlank(samlConfigService.getIdpRootDir())||
+                StringUtils.isBlank(samlConfigService.getSelectedIdpConfigRootDir()) ||
+                StringUtils.isBlank(samlConfigService.getSelectedIdpConfigMetadataTempDir())) {
+            throw new InvalidConfigurationException(
+                    "Failed to return IDP Metadata Temp directory due to undefined IDP root folder");
+        }
+        
+        return samlConfigService.getIdpRootDir()+ File.separator + samlConfigService.getSelectedIdpConfigRootDir() + File.separator
                 + samlConfigService.getSelectedIdpConfigMetadataTempDir() + File.separator;
     }
 
