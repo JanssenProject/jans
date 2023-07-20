@@ -2,45 +2,42 @@
 
 ## Remote Debugging
 
-Janssen Server modules run as a Java process. Hence, like any other Java process the module
-JVMs can be configured to open a debug port where a remote debugger can be attached. The steps below will show how to configure `auth-server` module for remote debugging.
+Janssen Server modules run as Java processes. Hence, like any other Java process the JVM running the module
+can be configured to open a debug port where a remote debugger can be attached. The steps below will show how to
+configure `auth-server` module for remote debugging.
 
 1. Pass the command-line options to the JVM
 
-   On the Janssen Server host, open the service config file `/etc/default/jans-auth` and add the following JVM parameters to as `JAVA_OPTIONS`
-
+   On the Janssen Server host, open the service config file `/etc/default/jans-auth` and add the following JVM
+   parameters to as `JAVA_OPTIONS`
     ```
     -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=6001
     ```
-   This will open port 6001 for the remote debugger. Any other port can also be used based on availability.
+   This will open the port `6001` for the remote debugger. Any other port can also be used based on availability.
 
 2. Restart `jans-auth` services
-
     ```
     systemctl restart jans-auth.service
     ```
 
 3. Check if the port is open and accessible from within the Janssen Server host
-
    Use the `jdb` tool from JDK to test if the JVM port has been opened
-
-    ```
-    ./<path-to-JDK>/bin/jdb -attach 6001
-    ```
-
+   ```
+   ./<path-to-JDK>/bin/jdb -attach 6001
+   ```
    if the port is open, it'll give you output like the below:
-
-    ```
-    Set uncaught java.lang.Throwable
-    Set deferred uncaught java.lang.Throwable
-    Initializing jdb ...
-    >
-    ```
-   press ctrl+c to come out of it.
+   ```
+   Set uncaught java.lang.Throwable
+   Set deferred uncaught java.lang.Throwable
+   Initializing jdb ...
+   >
+   ```
+   press `ctrl+c` to come out of it.
 
 4. Ensure that the port is accessible from outside the host VM as well and firewalls are configured accordingly
 
-5. Connect to the remote port on the Janssen Server host from the Janssen workspace. Use any IDE (Intellij, Eclipse, etc.) to create and run a remote debugging profile providing IP and debug port of the Janssen Server host.
+5. Connect to the remote port on the Janssen Server host from the developer workstation. Use any IDE (Intellij, Eclipse,
+   etc.) to create and run a remote debugging profile. Provide IP and debug port of the Janssen Server host.
 
    For IntelliJIdea, create a debug configuration as below:
 
@@ -48,23 +45,45 @@ JVMs can be configured to open a debug port where a remote debugger can be attac
 
 ## Run Integration Tests with a Janssen Server VM
 
-In this guide, we will look at steps to run the Janssen integration test suite against a locally installed Janssen server on the developer machine.
+In this guide, we will look at steps to run the Janssen integration test suite against an installed Janssen
+Server.
 
 ### Component Setup
+
+Instructions in this guide can be used if Janssen Server is installed on a VM. Either locally on the developer workstation
+itself(as shown below) or on a remote cloud VM.
 
 ![Component Diagram](../assets/image-run-integration-test-from-workspace-06122022.png)
 
 ### Install Janssen Server
 
-Install the Janssen server using one of the methods described in [this](../admin/install/README.md) guide. Make a note of the `host name` that you assign to the Janssen server during the installation. For this guide, the Janssen host name would be `janssen2.op.io`
+Install the Janssen server using one of the methods described in the installation guide. Note the points below when
+following installation instructions.
 
-Now access the `.well-known` end-points (sample below) of the Janssen server from the browser to ascertain that the Janssen server running inside local VM is healthy and also accessible from the developer's machine.
+- Make a note
+  of the `host name` that you assign to the Janssen server during the installation. For this guide, the Janssen hostname
+  would be `janssen2.op.io`
+- Choose to install with test data load. This can be achieved by using `-t` switch when invoking the setup script
+  from installation instructions.
+
+Use the [VM installation guide](../admin/install/vm-install/README.md) for a complete set of instructions.
+
+Once the installation is complete, check if the `.well-known` end-points of the
+Janssen server from the browser. A successful response will ascertain that the
+The Janssen server running inside local VM is healthy and also accessible from the developer's machine.
+
+!!! Note
+Based on developer setup it may be necessary to add appropriate IP-HOST mapping to the developer workstation. For
+instance, on a Linux-based developer workstation, this means adding a mapping to `/etc/hosts` file. Make sure that
+VM's IP is mapped to a FQDN like `janssen2.op.io`. Refering to VM with `localhost` or just IP will not work.
+
+URI for OpenID configuration `.well-known` endpoint:
 
   ```
   https://janssen2.op.io/jans-auth/.well-known/openid-configuration
   ```
 
-Response received should be JSON formatted Janssen configuration details, similar to those below.
+The response received should be JSON formatted Janssen configuration details, similar to those below.
 
   ```
   {
@@ -101,49 +120,74 @@ Response received should be JSON formatted Janssen configuration details, simila
     
   ```
 
+### Setup The Certificates
+
+To run the tests against the installed Janssen Server, the workstation JRE needs to have the appropriate
+certificate installed. Update cacerts using the steps below:
 
 
-### Configure developer workspace
-
-We are going to configure the developer workspace in IntelliJIdea IDE. Using IDE, get Janssen server code from [Janssen GitHub repository](https://github.com/JanssenProject/jans).
-
-Janssen Server is composed of multiple modules. Below are the instructions for configuring each module for tests.
-
-#### Auth-server client module
-
-##### setup certificate
-
-- Update Java cacerts
-
-  extract certificate for Janssen server with name `janssen2.op.io`
-
+- extract certificate for Janssen server with name `janssen2.op.io`
   ```
   openssl s_client -connect test.local.jans.io:443 2>&1 |sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > /tmp/httpd.crt
   ```
-  this command takes few seconds to return.
+  this command takes a few seconds to return.
 
-Update cacerts of your JRE which is being used by the code workspace. For example, if JRE being used my maven is `/usr/lib/jvm/java-11-amazon-corretto`. It will prompt for cert store password. The default is `changeit`.
-
+- Update cacerts of your JRE which is being used by the code workspace. For example,  
+  `/usr/lib/jvm/java-11-amazon-corretto`. When running the command below, it will prompt for cert store password. Provide
+  the correct password. The default password is `changeit`.
   ```
   keytool -import -alias janssen2.op.io -keystore /usr/lib/jvm/java-11-amazon-corretto/lib/security/cacerts -file /tmp/httpd.crt
   ``` 
 
+### Configure developer workspace
+
+Now that we have Janssen Server running in a VM and it is accessible from the developer workstation as well, we will
+create and configure the code base on the developer workspace to run integration tests.
+
+Get Janssen server code from [Janssen GitHub repository](https://github.com/JanssenProject/jans).
+
+Janssen Server is composed of multiple modules. Each module has its own set of tests.
+Below are the instructions for configuring each module for tests.
+
+#### Configuring the server and the client modules
+
 ##### Profile setup
 
-Follow the steps below to configure workspace and run tests for the client module.
+Many Janssen Server modules and sub-modules use test configuration stored in a directory named `profile`. The profile
+directory contains files that hold important information required to run tests. Developers can create one or more
+profiles and use them to run tests against different Janssen Servers.
 
-- Under `jans-auth-server/client/profile` module, make a copy of default profile directory and name the new profile as `janssen2.op.io`
-- Under `jans-auth-server/client/profile/default` directory, Edit `config-oxauth-test-data.properties` file and update the hostname in the value of the following properties:
-    - `test.server.name=<old-host>:8443` -> `test.server.name=janssen2.op.io` (Remember to remove the port)
-    - `swd.resource=acct:test_user@<old-host>:8443` -> `swd.resource=acct:test_user@janssen2.op.io` (Remember to remove the port)
-- now at, `jans-auth-server/client` directory level, run the following maven command
+Since Janssen Server has been installed with test data, the installer also created the profile files required to run
+the test.
+These files are kept on the VM under `/opt/jans/jans-setup/output/test/jans-auth` directory. Copy over this directory to
+any location on the developer workstation.
+
+Follow the steps below to configure the profile for the client module. The same steps should be followed for
+setting up a profile for the server module.
+
+1. Under `jans-auth-server/client/profile` module, create a new directory and name it as `janssen2.op.io`
+2. Copy the contents of `jans-auth/client` directory into the newly created `janssen2.op.io` directory
+3. Copy keystore file `/client/profiles/default/client_keystore.p12` from `default` directory to
+   the `janssen2.op.io` directory
+
+#### Configuring the Agama Module
+
+Agama module code resides under `jans/agama` directory.
+
+Follow the steps below from `agama` directory to configure the module to run the integration tests.
+
+1. Remove existing profile if any by deleting and recreating the directory `engine/profiles/janssen2.op.io`
+2. Copy the file `jans-auth/config-agama-test.properties` to the `engine/profiles/janssen2.op.io/` directory
+
+Once the above steps have been followed, the local copy of `jans-auth` directory that was copied
+from `janssen2.op.io` can be deleted.
+
+### Running The Tests
+
+Each module in Janssen Server has its tests that have to be executed separately.
+For example, to run integration tests for `jans-auth-server` module, run the following maven command at the directory
+level:
 
   ```
-  mvn -Dcfg=default -Dcvss-score=9 -Dfindbugs.skip=true -Dlog4j.default.log.level=TRACE -Ddependency.check=false -DskipTests clean install
+  mvn -Dcfg=janssen2.op.io test
   ```
-
-  this will create new artifacts under `client/target` as per mentioned in profile `default`
-
-- Now run client tests by creating intellij run config as below
-
-![](../assets/image-run-integ-test-jans-vm.png)
