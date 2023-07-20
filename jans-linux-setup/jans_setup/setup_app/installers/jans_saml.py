@@ -38,7 +38,7 @@ class JansSamlInstaller(JettyInstaller):
         self.output_folder = os.path.join(Config.output_dir, self.service_name)
         self.templates_folder = os.path.join(Config.templateFolder, self.service_name)
         self.ldif_config_fn = os.path.join(self.output_folder, 'configuration.ldif')
-        self.config_json_fn = os.path.join(self.templates_folder, 'jans-idp-config.json')
+        self.config_json_fn = os.path.join(self.templates_folder, 'jans-saml-config.json')
 
     def install(self):
         """installation steps"""

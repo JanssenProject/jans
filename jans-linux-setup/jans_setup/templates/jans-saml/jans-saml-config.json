@@ -10,7 +10,7 @@
     {
       "configId":"${idp_config_id}",
       "rootDir":"${idp_config_root_dir}",
-      "enabled": "${idp_confi_enabled}",
+      "enabled": "${idp_config_enabled}",
       "metadataTempDir": "${idp_config_temp_meta_dir}",
       "metadataDir":"${idp_config_meta_dir}",
       "metadataFilePattern":"%s-idp-metadata.xml"
