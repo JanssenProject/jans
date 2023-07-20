@@ -514,7 +514,6 @@ class Plugin(DialogUtils):
                     name='maxConnections',
                     widget=Spinner(value=data.get('maxConnections', 2)),
                     style=cli_style.edit_text_required,
-                    #widget_style=widget_style
                 ),
 
                 self.app.getTitledText(
