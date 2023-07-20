@@ -26,6 +26,7 @@ import javax.net.ssl.SSLContext;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
@@ -34,12 +35,14 @@ import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.routing.HttpRoutePlanner;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.ssl.SSLContexts;
 import org.apache.http.ssl.TrustStrategy;
@@ -53,6 +56,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
+
 /**
  * Provides operations with http/https requests
  *
@@ -296,4 +300,15 @@ public class HttpService2 implements Serializable {
     	return redirectUrl.toLowerCase();
     }
 
+	public HttpRoutePlanner buildDefaultRoutePlanner(final String hostname, final int port, final String scheme) {
+		// Creating an HttpHost object for proxy
+		HttpHost proxyHost = new HttpHost(hostname, port, scheme);
+
+		return new DefaultProxyRoutePlanner(proxyHost);
+	}
+
+	public HttpRoutePlanner buildDefaultRoutePlanner(final String proxy) {
+		return buildDefaultRoutePlanner(proxy, -1, null);
+	}
+		
 }
