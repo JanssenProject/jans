@@ -327,18 +327,18 @@ A class/interface is accessible to Agama code as long as it is part of:
 - `jans-auth.war > WEB-INF/classes` or,
 - `/opt/jans/jetty/jans-auth/custom/libs/*.jar` (may require edition of `jans-auth.xml` descriptor)   
 
-Additionally, it is possible to upload source code on the fly to augment the classpath. Any valid Java or Groovy file is accepted and must be located under `/opt/jans/jetty/jans-auth/agama/scripts`. A class named `com.acme.Person` for instance, must reside in `com/acme/Person` under the `scripts` directory.
-
-This provides "hot" reloading thus becoming a real time saver while developing flows because there is no need to restart the jans-auth webapp. Also, only the files that get modified are effectively re-compiled. These benefits come at a cost and this is explained in in the following.
+Additionally, it is possible to upload source code on the fly to augment the classpath. Any valid Java or Groovy file is accepted and must be located under `/opt/jans/jetty/jans-auth/agama/scripts`. For instance, a class named `com.acme.Person` must reside in folder `/opt/jans/jetty/jans-auth/agama/scripts/com/acme`.
 
 !!! Important
-    Only files with extensions `java` or `groovy` in the `scripts` directory are accounted by the engine
+    Only files with extensions `.java` or `.groovy` are accounted
+
+The `scripts` directory provides automatic "hot" reloading. This is a valuable time saver for developers because there is no need to restart the jans-auth webapp when sources are modified. This feature has some limitations which are explained in the following.
 
 #### Limitations of code added "on the fly"
 
-Note classes in `scripts` directory can only be accessed through `Call` directives. As an example suppose you added classes `A` and `B` to `scripts`, and `A` depends on `B`. `Call`s using class `A` will work and any change to files `A` and/or `B` will be picked automatically. On the contrary, trying to load this kind of classes using `Class.forName` either from a jar file in `custom/libs` or from Agama itself will degenerate in `ClassNotFoundException`. Note `A` and `B` can also depend on classes found in any of the three locations listed above.
+Classes in `scripts` directory can only be accessed through `Call` directives. As an example suppose you added classes `A` and `B` to `scripts`, and `A` depends on `B`. `Call`s using class `A` will work and any change to files `A` and/or `B` will be picked automatically. On the contrary, trying to load this kind of classes using `Class.forName` either from a jar file in `custom/libs` or from Agama itself will degenerate in `ClassNotFoundException`. Note `A` and `B` can also depend on classes found at any of the locations listed at the beginning of this section.
 
-Provided Java source code (.java files) are actually interpreted as Groovy code. 99% of times this is not a concern since Groovy can be considered a super set of Java, however, there are a few minor discrepancies that may exhibit unexpected behaviors. These differences are described [here](https://groovy-lang.org/differences.html).
+Note Java sources are actually interpreted as Groovy code. 99% of times this is not a concern since Groovy can be considered a superset of Java, however, there are some minor discrepancies that may exhibit unexpected behaviors. These differences are described [here](https://groovy-lang.org/differences.html).
 
 We consider the following to be remarkable:
 
