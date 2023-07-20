@@ -30,9 +30,14 @@ from settings import LOGGING_CONFIG
 DEFAULT_SIG_KEYS = "RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512"
 DEFAULT_ENC_KEYS = "RSA1_5 RSA-OAEP ECDH-ES"
 
-DEFAULT_CONFIG_FILE = "/app/db/config.json"
-DEFAULT_SECRET_FILE = "/app/db/secret.json"
-DEFAULT_GENERATE_FILE = "/app/db/generate.json"
+CONFIGURATOR_DIR = "/opt/jans/configurator"
+DB_DIR = os.environ.get("CN_CONFIGURATOR_DB_DIR", f"{CONFIGURATOR_DIR}/db")
+CERTS_DIR = os.environ.get("CN_CONFIGURATOR_CERTS_DIR", f"{CONFIGURATOR_DIR}/certs")
+JAVALIBS_DIR = f"{CONFIGURATOR_DIR}/javalibs"
+
+DEFAULT_CONFIG_FILE = f"{DB_DIR}/config.json"
+DEFAULT_SECRET_FILE = f"{DB_DIR}/secret.json"
+DEFAULT_GENERATE_FILE = f"{DB_DIR}/generate.json"
 
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("configurator")
@@ -54,15 +59,15 @@ def generate_openid_keys_hourly(passwd, jks_path, jwks_path, dn, exp=48, sig_key
     cmd = " ".join([
         "java",
         "-Dlog4j.defaultInitOverride=true",
-        "-cp /app/javalibs/*",
+        f"-cp {JAVALIBS_DIR}/*",
         "io.jans.as.client.util.KeyGenerator",
-        "-enc_keys", enc_keys,
-        "-sig_keys", sig_keys,
-        "-dnname", "{!r}".format(dn),
-        "-expiration_hours", "{}".format(exp),
-        "-keystore", jks_path,
-        "-keypasswd", passwd,
-        "-key_ops_type", "all",
+        f"-enc_keys {enc_keys}",
+        f"-sig_keys {sig_keys}",
+        f"-dnname {dn!r}",
+        f"-expiration_hours {exp}",
+        f"-keystore {jks_path}",
+        f"-keypasswd {passwd}",
+        "-key_ops_type all",
     ])
     out, err, retcode = exec_cmd(cmd)
     if retcode == 0:
@@ -71,34 +76,20 @@ def generate_openid_keys_hourly(passwd, jks_path, jwks_path, dn, exp=48, sig_key
     return out, err, retcode
 
 
-def export_openid_keys(keystore, keypasswd, alias, export_file):
-    cmd = " ".join([
-        "java",
-        "-Dlog4j.defaultInitOverride=true",
-        "-cp /app/javalibs/*",
-        "io.jans.as.client.util.KeyExporter",
-        "-keystore {}".format(keystore),
-        "-keypasswd {}".format(keypasswd),
-        "-alias {}".format(alias),
-        "-exportfile {}".format(export_file),
-    ])
-    return exec_cmd(cmd)
-
-
 def generate_pkcs12(suffix, passwd, hostname):
     # Convert key to pkcs12
     cmd = " ".join([
         "openssl",
         "pkcs12",
         "-export",
-        "-inkey /etc/certs/{}.key".format(suffix),
-        "-in /etc/certs/{}.crt".format(suffix),
-        "-out /etc/certs/{}.pkcs12".format(suffix),
-        "-name {}".format(hostname),
-        "-passout pass:{}".format(passwd),
+        f"-inkey {CERTS_DIR}/{suffix}.key",
+        f"-in {CERTS_DIR}/{suffix}.crt",
+        f"-out {CERTS_DIR}/{suffix}.pkcs12",
+        f"-name {hostname}",
+        f"-passout pass:{passwd}",
     ])
     _, err, retcode = exec_cmd(cmd)
-    assert retcode == 0, "Failed to generate PKCS12 file; reason={}".format(err)
+    assert retcode == 0, f"Failed to generate PKCS12 file; reason={err}"
 
 
 class CtxManager:
@@ -220,16 +211,17 @@ class CtxGenerator:
             self.get_config("state"),
             self.get_config("city"),
             extra_dns=["ldap"],
+            base_dir=CERTS_DIR,
         )
-        with open("/etc/certs/opendj.pem", "w") as fw:
-            with open("/etc/certs/opendj.crt") as fr:
+        with open(f"{CERTS_DIR}/opendj.pem", "w") as fw:
+            with open(f"{CERTS_DIR}/opendj.crt") as fr:
                 ldap_ssl_cert = fr.read()
                 self.set_secret(
                     "ldap_ssl_cert",
                     partial(encode_text, ldap_ssl_cert, encoded_salt),
                 )
 
-            with open("/etc/certs/opendj.key") as fr:
+            with open(f"{CERTS_DIR}/opendj.key") as fr:
                 ldap_ssl_key = fr.read()
                 self.set_secret(
                     "ldap_ssl_key",
@@ -245,7 +237,7 @@ class CtxGenerator:
 
         generate_pkcs12("opendj", ldap_truststore_pass, hostname)
 
-        with open(self.get_config("ldapTrustStoreFn"), "rb") as fr:
+        with open(f"{CERTS_DIR}/opendj.pkcs12", "rb") as fr:
             self.set_secret(
                 "ldap_pkcs12_base64",
                 partial(encode_text, fr.read(), encoded_salt),
@@ -267,9 +259,9 @@ class CtxGenerator:
         self.set_secret("pairwiseCalculationKey", partial(get_sys_random_chars, random.randint(20, 30)))
         self.set_secret("pairwiseCalculationSalt", partial(get_sys_random_chars, random.randint(20, 30)))
 
-        auth_openid_jks_fn = self.set_config("auth_openid_jks_fn", "/etc/certs/auth-keys.jks")
+        self.set_config("auth_openid_jks_fn", "/etc/certs/auth-keys.jks")
         self.set_secret("auth_openid_jks_pass", get_random_chars)
-        auth_openid_jwks_fn = self.set_config("auth_openid_jwks_fn", "/etc/certs/auth-keys.json")
+        self.set_config("auth_openid_jwks_fn", "/etc/certs/auth-keys.json")
         self.set_config("auth_legacyIdTokenClaims", "false")
         self.set_config("auth_openidScopeBackwardCompatibility", "false")
 
@@ -308,8 +300,8 @@ class CtxGenerator:
 
         _, err, retcode = generate_openid_keys_hourly(
             self.get_secret("auth_openid_jks_pass"),
-            self.get_config("auth_openid_jks_fn"),
-            auth_openid_jwks_fn,
+            f"{CERTS_DIR}/auth-keys.jks",
+            f"{CERTS_DIR}/auth-keys.json",
             self.get_config("default_openid_jks_dn_name"),
             exp=exp,
             sig_keys=sig_keys,
@@ -319,28 +311,27 @@ class CtxGenerator:
             logger.error(f"Unable to generate auth keys; reason={err}")
             raise click.Abort()
 
-        basedir, fn = os.path.split(auth_openid_jwks_fn)
         self.set_secret(
             "auth_openid_key_base64",
-            partial(encode_template, fn, self.ctx, basedir),
+            partial(encode_template, "auth-keys.json", self.ctx, CERTS_DIR),
         )
 
         # auth keys
         self.set_config("auth_key_rotated_at", lambda: int(time.time()))
 
-        with open(auth_openid_jks_fn, "rb") as fr:
+        with open(f"{CERTS_DIR}/auth-keys.jks", "rb") as fr:
             self.set_secret(
                 "auth_jks_base64",
                 partial(encode_text, fr.read(), encoded_salt),
             )
 
     def web_ctx(self):
-        ssl_cert = "/etc/certs/web_https.crt"
-        ssl_key = "/etc/certs/web_https.key"
-        ssl_csr = "/etc/certs/web_https.csr"
+        ssl_cert = f"{CERTS_DIR}/web_https.crt"
+        ssl_key = f"{CERTS_DIR}/web_https.key"
+        ssl_csr = f"{CERTS_DIR}/web_https.csr"
 
-        ssl_ca_cert = "/etc/certs/ca.crt"
-        ssl_ca_key = "/etc/certs/ca.key"
+        ssl_ca_cert = f"{CERTS_DIR}/ca.crt"
+        ssl_ca_key = f"{CERTS_DIR}/ca.key"
 
         # get cert and key (if available) with priorities below:
         #
@@ -395,6 +386,7 @@ class CtxGenerator:
                 country_code,
                 state,
                 city,
+                base_dir=CERTS_DIR,
             )
 
             logger.info(f"Creating self-generated {ssl_csr}, {ssl_cert}, and {ssl_key}")
@@ -408,6 +400,7 @@ class CtxGenerator:
                 country_code,
                 state,
                 city,
+                base_dir=CERTS_DIR,
             )
 
         try:
@@ -473,7 +466,7 @@ def _save_generated_ctx(manager, data, type_):
     else:
         backend = manager.secret
 
-    logger.info("Saving {} to backend".format(type_))
+    logger.info(f"Saving {type_} to backend")
     backend.set_all(data)
 
 
@@ -509,9 +502,9 @@ def _dump_to_file(manager, filepath, type_):
     else:
         backend = manager.secret
 
-    logger.info("Saving {} to {}".format(type_, filepath))
+    logger.info(f"Saving {type_} to {filepath}")
 
-    data = {"_{}".format(type_): backend.get_all()}
+    data = {f"_{type_}": backend.get_all()}
     data = json.dumps(data, sort_keys=True, indent=4)
     with open(filepath, "w") as f:
         f.write(data)
