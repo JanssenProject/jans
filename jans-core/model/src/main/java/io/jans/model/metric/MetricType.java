@@ -11,8 +11,6 @@ import io.jans.model.metric.counter.CounterMetricEntry;
 import io.jans.model.metric.ldap.MetricEntry;
 import io.jans.model.metric.timer.TimerMetricData;
 import io.jans.model.metric.timer.TimerMetricEntry;
-import io.jans.model.metric.audit.AuditMetricData;
-import io.jans.model.metric.audit.AuditMetricEntry;
 import io.jans.orm.annotation.AttributeEnum;
 
 import java.util.HashMap;
@@ -43,9 +41,7 @@ public enum MetricType implements AttributeEnum {
 	TOKEN_REFRESH_TOKEN_COUNT("tkn_refresh_token_count",
             "Count successfull issued refresh tokens", CounterMetricData.class, CounterMetricEntry.class),
 	TOKEN_LONG_LIVED_ACCESS_TOKEN_COUNT("tkn_long_lived_access_token_count",
-            "Count successfull issued long lived access tokens", CounterMetricData.class, CounterMetricEntry.class),
-
-	AUDIT("audit", "audit", AuditMetricData.class, AuditMetricEntry.class);
+            "Count successfull issued long lived access tokens", CounterMetricData.class, CounterMetricEntry.class);
 
     private String value;
     private String displayName;
