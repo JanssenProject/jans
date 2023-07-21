@@ -39,8 +39,8 @@ spec:
         name: load-test-dcr
         resources:
           requests:
-            memory: "8000Mi"
-            cpu: "1300m"
+            memory: "2000Mi"
+            cpu: "800m"
           limits:
-            memory: "8000Mi"
-            cpu: "1300m"
+            memory: "2000Mi"
+            cpu: "800m"
