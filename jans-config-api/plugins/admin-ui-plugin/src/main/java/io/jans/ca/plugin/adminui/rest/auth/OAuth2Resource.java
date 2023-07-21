@@ -75,11 +75,11 @@ public class OAuth2Resource {
     @GET
     @Path(OAUTH2_ACCESS_TOKEN)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAccessToken(@QueryParam("code") String code, @PathParam("appType") String appType) {
+    public Response getAccessToken(@QueryParam("code") String code, @PathParam("codeVerifier") String codeVerifier, @PathParam("appType") String appType) {
 
         try {
             log.info("Access token request to Auth Server.");
-            TokenResponse tokenResponse = oAuth2Service.getAccessToken(code, appType);
+            TokenResponse tokenResponse = oAuth2Service.getAccessToken(code, codeVerifier, appType);
             log.info("Access token received from Auth Server.");
             return Response.ok(tokenResponse).build();
         } catch (ApplicationException e) {
