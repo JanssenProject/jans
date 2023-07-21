@@ -1,0 +1,7 @@
+dn: ou=casa,ou=configuration,o=jans
+objectClass: jansAppConf
+objectClass: top
+ou: casa
+jansConfApp::%(casa_config_base64)s
+
+

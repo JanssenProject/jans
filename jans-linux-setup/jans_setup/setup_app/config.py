@@ -199,7 +199,7 @@ class Config:
         self.install_scim_server = True
         self.installFido2 = True
         self.install_config_api = True
-        self.installCasa = False
+        self.install_casa = False
         self.installOxd = False
         self.installEleven = False
         self.install_jans_cli = True
