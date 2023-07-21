@@ -608,6 +608,27 @@ class PropertiesUtils(SetupUtils):
             Config.addPostSetupService.append('install_jans_link')
 
 
+
+    def prompt_for_jans_saml(self):
+        if Config.installed_instance and Config.install_jans_saml:
+            return
+
+        prompt = self.getPrompt("Install Jans SAML?",
+                                            self.getDefaultOption(Config.install_jans_saml)
+                                            )[0].lower()
+
+        Config.install_jans_saml = prompt == 'y'
+        if Config.install_jans_saml:
+            while True:
+                selected_idp = self.getPrompt("  Please enter selected IDP")
+                if selected_idp:
+                    Config.saml_selected_idp = selected_idp
+                    break
+
+        if Config.installed_instance and Config.install_jans_saml:
+            Config.addPostSetupService.append('install_jans_saml')
+
+
     def promptForConfigApi(self):
         if Config.installed_instance and Config.install_config_api:
             return
@@ -954,6 +975,7 @@ class PropertiesUtils(SetupUtils):
             self.promptForScimServer()
             self.promptForFido2Server()
             self.prompt_for_jans_link()
+            self.prompt_for_jans_saml()
             #self.promptForEleven()
             #if (not Config.installOxd) and Config.oxd_package:
             #    self.promptForOxd()

@@ -85,7 +85,7 @@ To check usage of this script run help command
                      [-couchbase-admin-user COUCHBASE_ADMIN_USER] [-couchbase-admin-password COUCHBASE_ADMIN_PASSWORD]
                      [-couchbase-bucket-prefix COUCHBASE_BUCKET_PREFIX] [-couchbase-hostname COUCHBASE_HOSTNAME] [--no-data]
                      [--no-jsauth] [-ldap-admin-password LDAP_ADMIN_PASSWORD] [--no-config-api] [--no-scim] [--no-fido2]
-                     [--install-eleven] [--install-cache-refresh] [--load-config-api-test] [-config-patch-creds CONFIG_PATCH_CREDS]
+                     [--install-eleven] [--install-cache-refresh] [--install-jans-saml] [--load-config-api-test] [-config-patch-creds CONFIG_PATCH_CREDS]
                      [-spanner-project SPANNER_PROJECT] [-spanner-instance SPANNER_INSTANCE] [-spanner-database SPANNER_DATABASE]
                      [-spanner-emulator-host SPANNER_EMULATOR_HOST | -google-application-credentials GOOGLE_APPLICATION_CREDENTIALS]
                      [-test-client-id TEST_CLIENT_ID] [-test-client-pw TEST_CLIENT_PW]
@@ -160,6 +160,7 @@ Below are the optional arguments:
 | --no-scim | Do not install Scim Server |
 | --no-fido2 | Do not install Fido2 Server |
 | --install-eleven | Install Eleven Server |
+| --install-jans-saml | Install Jans SAML |
 | --load-config-api-test | Load Config Api Test Data |
 | --install-cache-refresh | Install Cache Refresh Server |
 | -config-patch-creds CONFIG_PATCH_CREDS | password:username for downloading auto test ciba password |

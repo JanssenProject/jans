@@ -2,7 +2,7 @@
   "applicationName":"saml",
   "samlTrustRelationshipDn":"ou=trustRelationships,o=jans",
   "samlEnabled": "${saml_enabled}",
-  "selectedIdp": "${selected_idp}",
+  "selectedIdp": "${saml_selected_idp}",
   "idpRootDir": "${idp_root_dir}",
   "idpMetadataFilePattern":"%s-idp-metadata.xml",
   "spMetadataFilePattern":"%s-sp-metadata.xml",
