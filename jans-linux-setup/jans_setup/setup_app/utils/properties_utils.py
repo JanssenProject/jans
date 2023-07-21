@@ -608,6 +608,20 @@ class PropertiesUtils(SetupUtils):
             Config.addPostSetupService.append('install_jans_link')
 
 
+    def prompt_for_casa(self):
+        if Config.installed_instance and Config.install_casa:
+            return
+
+        prompt = self.getPrompt("Install Gluu/Flex Casa?",
+                                self.getDefaultOption(Config.install_casa)
+                            )[0].lower()
+
+        Config.install_casa = prompt == 'y'
+
+        if Config.installed_instance and Config.install_casa:
+            Config.addPostSetupService.append(Config.install_casa)
+
+
     def promptForConfigApi(self):
         if Config.installed_instance and Config.install_config_api:
             return
@@ -954,6 +968,8 @@ class PropertiesUtils(SetupUtils):
             self.promptForScimServer()
             self.promptForFido2Server()
             self.prompt_for_jans_link()
+            self.prompt_for_casa()
+
             #self.promptForEleven()
             #if (not Config.installOxd) and Config.oxd_package:
             #    self.promptForOxd()
