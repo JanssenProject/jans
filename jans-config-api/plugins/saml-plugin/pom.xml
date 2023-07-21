@@ -14,7 +14,6 @@
 		<httpclient.version>4.5.13</httpclient.version>
 		<jans.version>${project.version}</jans.version>
 		
-		<keycloak.version>20.0.2</keycloak.version>
 	</properties>
 
 	<dependencies>
@@ -39,38 +38,6 @@
 			<groupId>io.jans</groupId>
 			<artifactId>jans-core-document-store</artifactId>
 			<version>${jans.version}</version>
-		</dependency>
-
-		<!-- keycloak -->
-		<dependency>
-		    <groupId>org.keycloak</groupId>
-		    <artifactId>keycloak-admin-client-jakarta</artifactId>
-		   <version>${keycloak.version}</version>
-		</dependency>
-		<dependency>
-		    <groupId>org.keycloak</groupId>
-		    <artifactId>keycloak-core</artifactId>
-		   <version>${keycloak.version}</version>
-		</dependency>
-		<dependency>
-		    <groupId>org.keycloak</groupId>
-		    <artifactId>keycloak-common</artifactId>
-		   <version>${keycloak.version}</version>
-		</dependency>
-		<dependency>
-		    <groupId>org.keycloak</groupId>
-		    <artifactId>keycloak-server-spi</artifactId>
-		   <version>${keycloak.version}</version>
-		</dependency>
-		<dependency>
-		    <groupId>org.keycloak</groupId>
-		    <artifactId>keycloak-server-spi-private</artifactId>
-		   <version>${keycloak.version}</version>
-		</dependency>
-		<dependency>
-		    <groupId>org.keycloak</groupId>
-		    <artifactId>keycloak-services</artifactId>
-		   <version>${keycloak.version}</version>
 		</dependency>
 		
 		<!-- Microprofile -->
@@ -125,19 +92,15 @@
 		 <dependency>
             <groupId>org.apache.james</groupId>
             <artifactId>apache-mime4j-dom</artifactId>
-            <version>0.8.3</version>
         </dependency>
         <dependency>
             <groupId>org.apache.james</groupId>
             <artifactId>apache-mime4j-storage</artifactId>
-            <version>0.8.3</version>
         </dependency>
         <dependency>
             <groupId>org.apache.james</groupId>
             <artifactId>apache-mime4j-core</artifactId>
-            <version>0.8.3</version>
         </dependency>
-
 
 		<!-- Testing -->
 		<dependency>

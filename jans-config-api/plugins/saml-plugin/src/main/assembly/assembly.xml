@@ -13,9 +13,6 @@
 			<outputDirectory>/</outputDirectory>
 			<useProjectArtifact>false</useProjectArtifact>
 			<includes>
-				<include>org.keycloak:keycloak-admin-client-jakarta</include>
-				<include>org.keycloak:keycloak-core</include>
-				<include>org.keycloak:keycloak-common</include>
 				<include>org.jboss.resteasy:resteasy-multipart-provider</include>
 				<include>org.apache.james:apache-mime4j-dom</include>
 				<include>org.apache.james:apache-mime4j-storage</include>

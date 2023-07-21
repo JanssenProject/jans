@@ -45,10 +45,8 @@ public class SamlIdpService {
     }
 
     public String getSpMetadataFilePath(String spMetaDataFN) {
-        if (StringUtils.isBlank(samlConfigService.getIdpRootDir())||
-                StringUtils.isBlank(samlConfigService.getSelectedIdpConfigRootDir())) {
-            throw new InvalidConfigurationException(
-                    "Failed to return IDP Metadata file path due to undefined IDP root folder");
+        if (StringUtils.isBlank(getIdpMetadataDir())) {
+            throw new InvalidConfigurationException("Failed to return IDP Metadata file path as undefined!");
         }
 
         String idpMetadataFolder = getIdpMetadataDir();
@@ -56,14 +54,10 @@ public class SamlIdpService {
     }
 
     public String getIdpMetadataDir() {
-        if (StringUtils.isBlank(samlConfigService.getIdpRootDir())||
-                StringUtils.isBlank(samlConfigService.getSelectedIdpConfigRootDir()) ||
-                StringUtils.isBlank(samlConfigService.getSelectedIdpConfigMetadataDir())) {
-            throw new InvalidConfigurationException(
-                    "Failed to return IDP Metadata directory due to undefined IDP root folder");
+        if (StringUtils.isBlank(samlConfigService.getSelectedIdpConfigMetadataDir())) {
+            throw new InvalidConfigurationException("Failed to return IDP Metadata file path as undefined!");
         }
-        return samlConfigService.getIdpRootDir() + File.separator + samlConfigService.getSelectedIdpConfigRootDir() + File.separator
-                + samlConfigService.getSelectedIdpConfigMetadataDir() + File.separator;
+        return samlConfigService.getSelectedIdpConfigMetadataDir() + File.separator;
     }
 
     public String getSpNewMetadataFileName(TrustRelationship trustRel) {
@@ -76,15 +70,11 @@ public class SamlIdpService {
     }
 
     public String getIdpMetadataTempDir() {
-        if (StringUtils.isBlank(samlConfigService.getIdpRootDir())||
-                StringUtils.isBlank(samlConfigService.getSelectedIdpConfigRootDir()) ||
-                StringUtils.isBlank(samlConfigService.getSelectedIdpConfigMetadataTempDir())) {
-            throw new InvalidConfigurationException(
-                    "Failed to return IDP Metadata Temp directory due to undefined IDP root folder");
+        if (StringUtils.isBlank(samlConfigService.getSelectedIdpConfigMetadataTempDir())) {
+            throw new InvalidConfigurationException("Failed to return IDP Metadata Temp directory as undefined!");
         }
-        
-        return samlConfigService.getIdpRootDir()+ File.separator + samlConfigService.getSelectedIdpConfigRootDir() + File.separator
-                + samlConfigService.getSelectedIdpConfigMetadataTempDir() + File.separator;
+
+        return samlConfigService.getSelectedIdpConfigMetadataTempDir() + File.separator;
     }
 
     private String getTempMetadataFilename(String idpMetadataFolder, String fileName) {
@@ -104,8 +94,7 @@ public class SamlIdpService {
         logger.error("spMetadataFileName:{}, stream:{}", spMetadataFileName, stream);
 
         if (StringUtils.isBlank(samlConfigService.getSelectedIdpConfigRootDir())) {
-            throw new InvalidConfigurationException(
-                    "Failed to save SP meta-data file due to undefined IDP root folder");
+            throw new InvalidConfigurationException("Failed to save SP meta-data file due to undefined!");
         }
 
         String idpMetadataTempFolder = getIdpMetadataTempDir();
@@ -117,7 +106,7 @@ public class SamlIdpService {
                 spMetadataFile, localDocumentStoreService);
         try {
             boolean result = documentStoreService.saveDocumentStream(spMetadataFile, stream,
-                    List.of("jans-server", "Keycloak"));
+                    List.of("jans-server", samlConfigService.getSelectedIdpConfigID()));
             logger.error("SP File saving result:{}", result);
 
             InputStream newFile = documentStoreService.readDocumentAsStream(spMetadataFile);

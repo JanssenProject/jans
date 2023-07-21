@@ -38,7 +38,6 @@ public class ApiApplication extends Application {
 
         classes.add(SamlConfigResource.class);
         classes.add(TrustRelationshipResource.class);
-        classes.add(SamlScopeResource.class);
 				
         return classes;
     }

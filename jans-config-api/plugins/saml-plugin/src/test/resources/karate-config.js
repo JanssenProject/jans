@@ -43,7 +43,8 @@ function() {
         issuer: issuer,
         accessToken: '123',
         
-        samlUrl: baseUrl + '/jans-config-api/saml/saml-config',
+	    samlTrustRelationshipUrl: baseUrl + '/jans-config-api/saml/trust-relationship',
+        samlConfigUrl: baseUrl + '/jans-config-api/saml/samlConfig',
     };
 
     karate.configure('connectTimeout', 30000);

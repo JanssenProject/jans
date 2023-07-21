@@ -1,11 +1,11 @@
 package io.jans.configapi.plugin.saml.rest;
 
+import io.jans.configapi.plugin.saml.model.TrustRelationship;
+import io.jans.configapi.plugin.saml.form.TrustRelationshipForm;
 import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.plugin.saml.util.Constants;
-import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.AttributeNames;
-import io.jans.model.GluuAttribute;
 import io.jans.configapi.plugin.saml.service.SamlService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,14 +26,11 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.IOException;
 import java.util.*;
 
-import io.jans.configapi.plugin.saml.model.TrustRelationship;
-import io.jans.configapi.plugin.saml.form.TrustRelationshipForm;
+
 
 import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 import org.slf4j.Logger;
@@ -67,7 +64,6 @@ public class TrustRelationshipResource extends BaseResource {
         return Response.ok(trustRelationshipList).build();
     }
 
-   
     @Operation(summary = "Get TrustRelationship by Id", description = "Get TrustRelationship by Id", operationId = "get-trust-relationship-by-id", tags = {
             "SAML - Trust Relationship" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.SAML_READ_ACCESS }))
@@ -92,14 +88,15 @@ public class TrustRelationshipResource extends BaseResource {
     @Operation(summary = "Create Trust Relationship without File", description = "Create Trust Relationship without File", operationId = "post-trust-relationship", tags = {
             "SAML - Trust Relationship" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.SAML_WRITE_ACCESS }))
+    @RequestBody(description = "Trust Relationship object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TrustRelationship.class), examples = @ExampleObject(name = "Request example", value = "example/trust-relationship/trust-relationship-post.json")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Trust Relationship List", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA, array = @ArraySchema(schema = @Schema(implementation = TrustRelationship.class)))),
+            @ApiResponse(responseCode = "201", description = "Trust Relationship ", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = TrustRelationship.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @ProtectedApi(scopes = { Constants.SAML_WRITE_ACCESS }, groupScopes = {}, superScopes = {
             Constants.SAML_WRITE_ACCESS })
     @POST
-    public Response createTrustRelationship(@Valid TrustRelationship trustRelationship) throws Exception {
+    public Response createTrustRelationship(@Valid TrustRelationship trustRelationship) throws IOException {
         logger.debug(" Create trustRelationship:{}", trustRelationship);
         checkResourceNotNull(trustRelationship, SAML_TRUST_RELATIONSHIP);
         checkNotNull(trustRelationship.getClientId(), AttributeNames.NAME);
@@ -116,8 +113,9 @@ public class TrustRelationshipResource extends BaseResource {
     @Operation(summary = "Create Trust Relationship with Metadata File", description = "Create Trust Relationship with Metadata File", operationId = "post-trust-relationship-metadata-file", tags = {
             "SAML - Trust Relationship" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.SAML_WRITE_ACCESS }))
+    @RequestBody(description = "Trust Relationship object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TrustRelationship.class), examples = @ExampleObject(name = "Request example", value = "example/trust-relationship/trust-relationship-post.json")))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Newly created Trust Relationship", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = TrustRelationship.class))),
+            @ApiResponse(responseCode = "201", description = "Newly created Trust Relationship", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = TrustRelationshipForm.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -154,6 +152,7 @@ public class TrustRelationshipResource extends BaseResource {
     @Operation(summary = "Update TrustRelationship", description = "Update TrustRelationship", operationId = "put-trust-relationship", tags = {
             "SAML - Trust Relationship" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.SAML_WRITE_ACCESS }))
+    @RequestBody(description = "Trust Relationship object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TrustRelationship.class), examples = @ExampleObject(name = "Request example", value = "example/trust-relationship/trust-relationship-put.json")))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TrustRelationship.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -176,7 +175,7 @@ public class TrustRelationshipResource extends BaseResource {
             "SAML - Trust Relationship" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.SAML_WRITE_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "No Content", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = TrustRelationship.class)))),
+            @ApiResponse(responseCode = "204", description = "No Content"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @Path(Constants.ID_PATH_PARAM)

@@ -13,11 +13,9 @@ public class SamlAppConfiguration implements Configuration {
     private boolean samlEnabled;
     private String selectedIdp;
     private String idpRootDir;
-    private String idpTempMetadataFolder;
-    private String idpMetadataFolder;
     private String idpMetadataFilePattern;
     private String spMetadataFilePattern;
-    
+
     private List<IdpConfig> idpConfigs;
 
     public String getApplicationName() {
@@ -60,22 +58,6 @@ public class SamlAppConfiguration implements Configuration {
         this.idpRootDir = idpRootDir;
     }
 
-    public String getIdpTempMetadataFolder() {
-        return idpTempMetadataFolder;
-    }
-
-    public void setIdpTempMetadataFolder(String idpTempMetadataFolder) {
-        this.idpTempMetadataFolder = idpTempMetadataFolder;
-    }
-
-    public String getIdpMetadataFolder() {
-        return idpMetadataFolder;
-    }
-
-    public void setIdpMetadataFolder(String idpMetadataFolder) {
-        this.idpMetadataFolder = idpMetadataFolder;
-    }
-
     public String getIdpMetadataFilePattern() {
         return idpMetadataFilePattern;
     }
@@ -104,10 +86,8 @@ public class SamlAppConfiguration implements Configuration {
     public String toString() {
         return "SamlAppConfiguration [applicationName=" + applicationName + ", samlTrustRelationshipDn="
                 + samlTrustRelationshipDn + ", samlEnabled=" + samlEnabled + ", selectedIdp=" + selectedIdp
-                + ", idpRootDir=" + idpRootDir + ", idpTempMetadataFolder=" + idpTempMetadataFolder
-                + ", idpMetadataFolder=" + idpMetadataFolder + ", idpMetadataFilePattern=" + idpMetadataFilePattern
+                + ", idpRootDir=" + idpRootDir + ", idpMetadataFilePattern=" + idpMetadataFilePattern
                 + ", spMetadataFilePattern=" + spMetadataFilePattern + ", idpConfigs=" + idpConfigs + "]";
     }
 
 }
-
