@@ -53,7 +53,26 @@ paths:
             examples:
               Request example:
                 description: Request example
-                value: ""
+                value: |
+                  {
+                    "applicationName":"saml",
+                    "samlTrustRelationshipDn":"ou=trustRelationships,o=jans",
+                    "samlEnabled": "true",
+                    "selectedIdp": "keycloak",
+                    "idpRootDir": "/opt/idp/configs/",
+                    "idpMetadataFilePattern":"%s-idp-metadata.xml",
+                    "spMetadataFilePattern":"%s-sp-metadata.xml",
+                    "idpConfigs":[
+                      {
+                        "configId":"keycloak",
+                        "rootDir":"/opt/idp/configs/keycloak",
+                        "enabled": "true",
+                        "metadataTempDir": "/opt/idp/configs/keycloak/temp_metadata",
+                        "metadataDir":"/opt/idp/configs/keycloak/metadata",
+                        "metadataFilePattern":"%s-idp-metadata.xml"
+                      }
+                    ]
+                  }
       responses:
         "200":
           description: Ok
@@ -85,7 +104,25 @@ paths:
             examples:
               Request json example:
                 description: Request json example
-                value: ""
+                value: |
+                  [{
+                      "op": "replace",
+                      "path": "/samlEnabled",
+                      "value": false
+                  },
+                  {
+                     "op": "add",
+                      "path": "/idpConfigs/1",
+                      "value":  {
+                              "configId": "shibboleth",
+                              "rootDir": "/opt/idp/configs/shibboleth",
+                              "enabled": false,
+                              "metadataTempDir": "/opt/idp/configs/shibboleth/temp_metadata",
+                              "metadataDir": "/opt/idp/configs/shibboleth/metadata",
+                              "metadataFilePattern": "%s-idp-metadata.xml"
+                          }
+                  }
+                  ]
       responses:
         "200":
           description: Ok
@@ -206,7 +243,7 @@ paths:
           content:
             multipart/form-data:
               schema:
-                $ref: '#/components/schemas/TrustRelationship'
+                $ref: '#/components/schemas/TrustRelationshipForm'
         "401":
           description: Unauthorized
         "500":
