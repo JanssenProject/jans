@@ -849,6 +849,8 @@ nginx-ingress:
     # Specify if certificates are passed to upstream server
     # nginx.ingress.kubernetes.io/auth-tls-pass-certificate-to-upstream: "true"
     additionalAnnotations: {}
+    # Change ingressClassName to "public" if using microk8s
+    ingressClassName: nginx
     path: /
     hosts:
       - demoexample.jans.io
