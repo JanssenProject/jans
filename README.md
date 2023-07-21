@@ -3,17 +3,17 @@
 ## Welcome to the Janssen Project
 
 Linux Foundation Janssen Project is a collaboration hub for digital identity
-infrastructure software. It is also the home of Agama, a domain specific
+infrastructure software. It is also the home of Agama, a domain-specific
 language and archive format for interoperable identity orchestration.
 
 Janssen software is used by domains to self-host a modern digital authentication
 service. It provides a common control plane for infrastructure that is comprised
-of many open source software components. It plays well with existing IAM
+of many open-source software components. It plays well with existing IAM
 infrastructure like KeyCloak and Microsoft Active Directory, as well as cloud
 identity solutions like Okta. By design, Janssen also enables domains to select
-*ala carte* which identity services to run.
+*a la carte* which identity services to run.
 
-We've proud to say that we've been recognized as a
+We're proud to say that we've been recognized as a
 [Digital Public Good](https://app.digitalpublicgoods.net/a/10470).
 
 [![The Linux Foundation](https://img.shields.io/badge/Member-The%20Linux%20Foundation-blue?style=flat-square)](https://www.linuxfoundation.org/press/press-release/the-janssen-project-takes-on-worlds-most-demanding-digital-trust-challenges-at-linux-foundation)
@@ -66,32 +66,32 @@ A partial list of software in this project:
 
 1. **[jans-auth-server](jans-auth-server)**: A very complete Java OAuth
 Authorization Server and an OIDF certified OpenID Connect Provider. It's the
-upstream open source used in [Gluu Flex](https://gluu.org).
+upstream open-source used in [Gluu Flex](https://gluu.org).
 
 1. **[jans-fido2](jans-fido2)**: A FIDO Server that enables people to
 authenticate with USB, NFC, BT or platform FIDO devices.
 
 1. **[jans-scim](jans-scim)**: [SCIM](http://www.simplecloud.info/) JSON/REST
 [API](https://datatracker.ietf.org/doc/html/rfc7644#section-3.2) for identity
-provisioning automation for users and fido devices persisted in the Janssen
+provisioning automation for users and Fido devices persisted in the Janssen
 database.
 
 1. **[jans-config-api](jans-config-api)**: Java Config API Server: service
-provides single control plane for all Janssen services.
+provides a single control plane for all Janssen services.
 
 1. **[jans-cli-tui](jans-cli-tui)**: Text-only tools for interactive and
 single-line configuration for those who don't like long curl commands.
 
 1. **[Agama](https://docs.jans.io/head/agama/introduction/)**: Language
 reference and Java implementation. Agama offers an interoperable way to design
-authentication flows, coded in a DSL purpose built for writing identity journeys.
+authentication flows, coded in a DSL purpose-built for writing identity journeys.
 
 1. **[Jans Tarp](demos/jans-tarp)**: A fun test browser plugin for invoking
 OpenID Connect authentication flows (i.e. a "test RP").
 
 ### Installation
 
-You can install Janssen in a Kubernetes cluster or as a single VM. Check out they
+You can install Janssen in a Kubernetes cluster or as a single VM. Check out the
 [Janssen Documentation](https://docs.jans.io/head/admin/install/) for all
 the details.
 
@@ -99,7 +99,7 @@ the details.
 
 A BIG thanks to all the amazing contributors!! 👏 👏
 
-There are many ways you can contribute. Of course, you can contribute code. But we also need people to write documentation and guides, to help us with testing, to answer questions on the forums and chat, to review PRs, to help us with devops and CI/CD, to provide feedback on usability, and to promote the project through outreach. Also, by sharing metrics with us, we can gain valuable insights into how the software performs in the wild.
+There are many ways you can contribute. Of course, you can contribute code. But we also need people to write documentation and guides, to help us with testing, to answer questions on the forums and chat, to review PRs, to help us with DevOps and CI/CD, to provide feedback on usability, and to promote the project through outreach. Also, by sharing metrics with us, we can gain valuable insights into how the software performs in the wild.
 
 <a href="https://digitalpublicgoods.net/">
   <img src="https://github.com/JanssenProject/jans/blob/main/docs/assets/DPGA_color_logo.png" alt="DPGA" width="113"/>
@@ -138,21 +138,21 @@ Visit [Janssen Documentation Site](https://docs.jans.io/) for documentation arou
 
 ### Design Goals
 
-The Janssen Project is aligned with the goals of cloud native infrastructure to enable:
+The Janssen Project is aligned with the goals of cloud-native infrastructure to enable:
 
 1. High Concurrency: For digital identity infrastructure, the number of users is not necessarily related to performance. If you have a billion users who never login, you can do this with a monolithic platform. Concurrency is hard. Janssen is designed to scale horizontally--enabling hypothetically any concurrency by adding more compute and memory.
 
-2. Highly Available: Digital identity infrastructure is mission critical. For many applications, if you can't login, you're dead in the water. Robustness is a fundamental consideration.
+2. Highly Available: Digital identity infrastructure is mission-critical. For many applications, if you can't login, you're dead in the water. Robustness is a fundamental consideration.
 
-3. Flexible while Upgradable: Open source gives you the freedom to modify the code. But having your own fork of the code might make it hard to upgrade--you'll have to merge changes. Janssen provides standard interfaces that make it possible to implement custom business logic in an upgrade-friendly manner.
+3. Flexible while Upgradable: Open-source gives you the freedom to modify the code. But having your own fork of the code might make it hard to upgrade--you'll have to merge changes. Janssen provides standard interfaces that make it possible to implement custom business logic in an upgrade-friendly manner.
 
 ## Governance
 
-Janssen is a Linux Foundation project, governed according to the [charter](https://docs.jans.io/head/governance/charter/). Technical oversight of the project is the responsibility of the Technical Steering Committee ("TSC"). Day to day decision-making is in the hands of the Contributors. The TSC helps to guide the direction of the project and to improve the quality and security of the development process.
+Janssen is a Linux Foundation project, governed according to the [charter](https://docs.jans.io/head/governance/charter/). Technical oversight of the project is the responsibility of the Technical Steering Committee ("TSC"). Day-to-day decision-making is in the hands of the Contributors. The TSC helps to guide the direction of the project and to improve the quality and security of the development process.
 
 ## Support
 
-If you find a bug in a Janssen project, would like to suggest a new feature,
+If you find a bug in the Janssen project, would like to suggest a new feature, or
 have a "howto" or "usage" question,
 [GitHub Discussions](https://github.com/JanssenProject/jans/discussion) is the
 main channel for community support. There is also a [community chat on Gitter](https://app.gitter.im/#/room/#JanssenProject_Lobby:gitter.im).
@@ -184,9 +184,9 @@ Below is the list of current mega releases that hold information about every sin
 ### History
 
 In 2020, [Gluu](https://gluu.org) decided to give contributors a role in the
-governance of its core open source software, and collaborated with the
+governance of its core open-source software, and collaborated with the
 Linux Foundation to charter a new project, called the Janssen Project. The
-Gluu team believed the Janssen Project would provide a vendor neutral home for
+Gluu team believed the Janssen Project would provide a vendor-neutral home for
 the code which would help us build a bigger community.
 
 Much of the initial software for the Janssen Project is a fork of Gluu
@@ -198,4 +198,4 @@ assets.
 
 ### Why the name Janssen?
 
-Pigeons (or doves if you like...) are universally regarded as a symbol of peace. But they are also fast. Powered by a handful of seeds, a well-trained racing pigeon can fly 1000 kilometers in a day. The Janssen brothers of Arendonk in Belgium bred the world's fastest family of racing pigeons. Like competitive animal husbandry, building a complex open source infrastructure requires tenacity, and a long-term commitment to incremental improvement. Janssen racing pigeons revolutionized the sport. The Janssen Project seeks to revolutionize open source identity and access management infrastructure.
+Pigeons (or doves if you like...) are universally regarded as a symbol of peace. But they are also fast. Powered by a handful of seeds, a well-trained racing pigeon can fly 1000 kilometers in a day. The Janssen brothers of Arendonk in Belgium bred the world's fastest family of racing pigeons. Like competitive animal husbandry, building a complex open-source infrastructure requires tenacity, and a long-term commitment to incremental improvement. Janssen racing pigeons revolutionized the sport. The Janssen Project seeks to revolutionize open-source identity and access management infrastructure.
