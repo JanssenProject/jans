@@ -2,7 +2,9 @@ import copy
 import asyncio
 from collections import OrderedDict
 from typing import Any, Optional
-from prompt_toolkit.layout.containers import HSplit, DynamicContainer, VSplit, Window, HorizontalAlign
+from prompt_toolkit.layout.containers import HSplit, DynamicContainer,\
+    VSplit, Window, HorizontalAlign, ConditionalContainer
+from prompt_toolkit.filters import Condition
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.widgets import Button, Label, Box, Dialog
 from prompt_toolkit.application import Application
@@ -311,6 +313,30 @@ class Plugin(DialogUtils):
                                 width=D()
                                 )
 
+        self.inum_db_server_container = HSplit(self.get_ldap_config_entries(self.data.get('inumConfig'), widget_style=cli_style.black_bg_widget), width=D())
+
+        self.default_inum_db_server_checkbox = self.app.getTitledCheckBox(
+                                title=_("Default Inum Server"), 
+                                name='defaultInumServer', 
+                                checked=self.data.get('defaultInumServer', False),
+                                style=cli_style.check_box
+                                )
+
+
+        self.tabs['inum_db_server'] = HSplit([
+                                self.default_inum_db_server_checkbox ,
+                                ConditionalContainer(
+                                    content=self.inum_db_server_container,
+                                    filter=Condition(lambda: not self.default_inum_db_server_checkbox.me.checked),
+                                ),
+                                Window(height=1),
+                                save_config_buttonc,
+                                ],
+                                width=D()
+                                )
+
+
+
         self.nav_selection_changed(list(self.tabs)[0])
 
     async def get_configuration(self) -> None:
@@ -343,7 +369,12 @@ class Plugin(DialogUtils):
         """
         self.nav_bar = JansNavBar(
                     self.app,
-                    entries=[('configuration', 'C[o]nfiguration'), ('customer_backend', 'Customer [B]ackend Key Attributes'), ('source_backend', 'Source Backend [L]DAP Server')],
+                    entries=[
+                            ('configuration', 'C[o]nfiguration'),
+                            ('customer_backend', 'Customer [B]ackend Key Attributes'),
+                            ('source_backend', 'Source Backend [L]DAP Server'),
+                            ('inum_db_server', '[I]num DB Server'),
+                            ],
                     selection_changed=self.nav_selection_changed,
                     select=0,
                     jans_name='fido:nav_bar'
@@ -397,6 +428,28 @@ class Plugin(DialogUtils):
         customer_backend = self.make_data_from_dialog(tabs={'customer_backend': self.tabs['customer_backend']})
 
         new_data = copy.deepcopy(self.data)
+        new_data['defaultInumServer'] = self.default_inum_db_server_checkbox.me.checked
+        if not self.default_inum_db_server_checkbox.me.checked:
+            inum_config = self.make_data_from_dialog(tabs={'inum_config': self.inum_db_server_container})
+            inum_config['servers'] = inum_config['servers'].split()
+            inum_config['baseDNs'] = inum_config['baseDNs'].split()
+
+            if 'inumConfig' in new_data:
+                new_data['inumConfig'].update(inum_config)
+            else:
+                new_data['inumConfig'] = inum_config
+
+            if not 'useAnonymousBind' in new_data['inumConfig']:
+                new_data['inumConfig']['useAnonymousBind'] = False
+
+            if not 'level' in new_data['inumConfig']:
+                new_data['inumConfig']['level'] = 0
+
+            if not 'version' in new_data['inumConfig']:
+                new_data['inumConfig']['version'] = 0
+            else:
+                new_data['inumConfig']['version'] += 1
+
         if 'sourceConfigs' not in new_data:
             new_data['sourceConfigs'] = []
 
@@ -426,27 +479,25 @@ class Plugin(DialogUtils):
 
         asyncio.ensure_future(coroutine())
 
-    def edit_source_config_dialog(self, data=None, selected=None):
-        if data:
-            title = _("Edit Source LDAP Config")
-        else:
-            data = {}
-            title = _("Add new Source LDAP Config")
 
-        body = HSplit([
+    def get_ldap_config_entries(self, data, widget_style=None):
+
+        ldap_config_entires = [
 
                 self.app.getTitledText(
                     title=_("Name"),
                     name='configId',
                     value=data.get('configId',''),
-                    style=cli_style.edit_text_required
+                    style=cli_style.edit_text_required,
+                    widget_style=widget_style
                 ),
 
                 self.app.getTitledText(
                     title=_("Bind DN"),
                     name='bindDN',
                     value=data.get('bindDN',''),
-                    style=cli_style.edit_text_required
+                    style=cli_style.edit_text_required,
+                    widget_style=widget_style
                 ),
 
                 self.app.getTitledText(
@@ -454,14 +505,15 @@ class Plugin(DialogUtils):
                     name='bindPassword',
                     value=data.get('bindPassword') or '',
                     style=cli_style.edit_text_required,
-                    jans_help=_("Bind password for LDAP")
+                    jans_help=_("Bind password for LDAP"),
+                    widget_style=widget_style
                 ),
 
                 self.app.getTitledWidget(
                     title=_("Max Connections"),
                     name='maxConnections',
-                    widget=Spinner(value=self.data.get('maxConnections', 2)),
-                    style=cli_style.edit_text_required
+                    widget=Spinner(value=data.get('maxConnections', 2)),
+                    style=cli_style.edit_text_required,
                 ),
 
                 self.app.getTitledText(
@@ -469,7 +521,8 @@ class Plugin(DialogUtils):
                     name='servers',
                     value=' '.join(data.get('servers',[])),
                     style=cli_style.edit_text_required,
-                    jans_help=_("Space seperated server:port")
+                    jans_help=_("Space seperated server:port"),
+                    widget_style=widget_style
                 ),
 
                 self.app.getTitledText(
@@ -477,24 +530,36 @@ class Plugin(DialogUtils):
                     name='baseDNs',
                     value=' '.join(data.get('baseDNs',[])),
                     style=cli_style.edit_text_required,
-                    jans_help=_("Space seperated base dns")
+                    jans_help=_("Space seperated base dns"),
+                    widget_style=widget_style
                 ),
 
                 self.app.getTitledCheckBox(
                     title=_("Use SSL"), 
                     name='useSSL', 
                     checked=data.get('useSSL', False),
-                    style=cli_style.check_box
+                    style=cli_style.check_box,
+                    widget_style=widget_style
                 ),
                 self.app.getTitledCheckBox(
                     title=_("Enable"), 
                     name='enabled', 
                     checked=data.get('enabled', False),
-                    style=cli_style.check_box
+                    style=cli_style.check_box,
+                    widget_style=widget_style
                 ),
-            ],
-            width=D()
-            )
+            ]
+
+        return ldap_config_entires
+
+    def edit_source_config_dialog(self, data=None, selected=None):
+        if data:
+            title = _("Edit Source LDAP Config")
+        else:
+            data = {}
+            title = _("Add new Source LDAP Config")
+
+        body = HSplit(self.get_ldap_config_entries(data), width=D())
 
         def save_source_config(dialog):
             sc_data = self.make_data_from_dialog(tabs={'sc': dialog.body})
