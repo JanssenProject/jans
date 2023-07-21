@@ -27,15 +27,20 @@ func resourceScope() *schema.Resource {
 				Computed:    true,
 				Description: "",
 			},
+			"expiration_date": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Expiry date of the Scope.",
+			},
+			"deletable": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Specifies if the scope can be deleted.",
+			},
 			"inum": {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "Unique id identifying the .",
-			},
-			"description": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "A human-readable string describing the scope.",
 			},
 			"display_name": {
 				Type:        schema.TypeString,
@@ -52,6 +57,11 @@ func resourceScope() *schema.Resource {
 				Optional: true,
 				Description: `A URL for a graphic icon representing the scope. The referenced icon MAY be used by the authorization server 
 						in any user interface it presents to the resource owner.`,
+			},
+			"description": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "A human-readable string describing the scope.",
 			},
 			"scope_type": {
 				Type:        schema.TypeString,
@@ -148,31 +158,21 @@ func resourceScope() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
-			"uma_type": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Description: "Specifies if the scope is of type UMA.",
-			},
-			"deletable": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Description: "Specifies if the scope can be deleted.",
-			},
-			"expiration_date": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Expiry date of the Scope.",
-			},
-			"base_dn": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "Base distinguished name of the scope.",
-			},
 			"clients": {
 				Type:        schema.TypeList,
 				Optional:    true,
 				Description: "Clients associated with the scope.",
 				Elem:        resourceOidcClient(),
+			},
+			"uma_type": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Specifies if the scope is of type UMA.",
+			},
+			"base_dn": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Base distinguished name of the scope.",
 			},
 		},
 	}

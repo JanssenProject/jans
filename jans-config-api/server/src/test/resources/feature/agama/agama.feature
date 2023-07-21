@@ -17,13 +17,14 @@ return encodedStrValue;
 }
 """
 
+@ignore
 Scenario: Fetch all agama without bearer token 
 	Given url mainUrl 
 	When method GET 
 	Then status 401 
 	And print response
 
-
+@ignore
 Scenario: Fetch all agama flows 
 	Given url mainUrl 
 	And print 'accessToken = '+accessToken

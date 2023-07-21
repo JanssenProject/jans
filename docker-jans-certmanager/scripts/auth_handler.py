@@ -196,9 +196,9 @@ class AuthHandler(BaseHandler):
 
         self.rotation_interval = opts.get("interval", 48)
         self.push_keys = as_boolean(opts.get("push-to-container", True))
-        self.key_strategy = opts.get("key-strategy", "OLDER")
+        self.key_strategy = opts.get("key-strategy", "NEWER")
         self.privkey_push_delay = int(opts.get("privkey-push-delay", 0))
-        self.privkey_push_strategy = opts.get("privkey-push-strategy", "OLDER")
+        self.privkey_push_strategy = opts.get("privkey-push-strategy", "NEWER")
         self.sig_keys = resolve_sig_keys(opts.get("sig-keys", SIG_KEYS))
         self.enc_keys = resolve_enc_keys(opts.get("enc-keys", ENC_KEYS))
 

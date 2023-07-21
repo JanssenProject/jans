@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.0.15-1](https://github.com/JanssenProject/jans/compare/docker-jans-certmanager-v1.0.14-1...docker-jans-certmanager-v1.0.15-1) (2023-07-12)
+
+
+### Bug Fixes
+
+* prepare for 1.0.15 release ([0e3cc2f](https://github.com/JanssenProject/jans/commit/0e3cc2f5ea287c2c35f45def54f074daa473ec49))
+
+## [1.0.14-1](https://github.com/JanssenProject/jans/compare/docker-jans-certmanager-v1.0.13-1...docker-jans-certmanager-v1.0.14-1) (2023-06-12)
+
+
+### Features
+
+* **charts:** add missing options for auth-server-key-rotation ([#5044](https://github.com/JanssenProject/jans/issues/5044)) ([ef43fab](https://github.com/JanssenProject/jans/commit/ef43fab22b5bfa8ae8dcf0cffb8c544326c88d01))
+
+
+### Bug Fixes
+
+* prepare for 1.0.14 release ([25ccadf](https://github.com/JanssenProject/jans/commit/25ccadf85327ea14685c6066dc6609919e4f2865))
+
 ## [1.0.13-1](https://github.com/JanssenProject/jans/compare/docker-jans-certmanager-v1.0.12-1...docker-jans-certmanager-v1.0.13-1) (2023-05-10)
 
 

@@ -23,6 +23,7 @@ type RedisConfiguration struct {
 	SentinelMasterGroupName string `schema:"sentinel_master_group_name" json:"sentinelMasterGroupName"`
 	UseSSL                  bool   `schema:"use_ssl" json:"useSSL"`
 	SslTrustStoreFilePath   string `schema:"ssl_trust_store_file_path" json:"sslTrustStoreFilePath"`
+	SslTrustStorePassword   string `schema:"ssl_trust_store_password" json:"sslTrustStorePassword"`
 	MaxIdleConnections      int    `schema:"max_idle_connections" json:"maxIdleConnections"`
 	MaxTotalConnections     int    `schema:"max_total_connections" json:"maxTotalConnections"`
 	ConnectionTimeout       int    `schema:"connection_timeout" json:"connectionTimeout"`

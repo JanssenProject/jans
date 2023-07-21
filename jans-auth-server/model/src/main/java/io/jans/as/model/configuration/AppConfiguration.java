@@ -469,6 +469,9 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "The interval for configuration update in seconds")
     private int configurationUpdateInterval;
 
+    @DocProperty(description = "Boolean value specifying whether to log not_found entity exception as error or as trace. Default value is false (trace).")
+    private Boolean logNotFoundEntityAsError;
+
     @DocProperty(description = "Choose if client can update Grant Type values")
     private Boolean enableClientGrantTypeUpdate;
 
@@ -592,7 +595,7 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Choose whether to support front channel session logout")
     private Boolean frontChannelLogoutSessionSupported;
 
-    @DocProperty(description = "Specify the logging level for oxAuth loggers")
+    @DocProperty(description = "Specify the logging level of loggers")
     private String loggingLevel;
 
     @DocProperty(description = "Logging layout used for Jans Authorization Server loggers")
@@ -630,6 +633,9 @@ public class AppConfiguration implements Configuration {
     private Boolean returnDeviceSecretFromAuthzEndpoint = false;
 
     // DCR
+    @DocProperty(description = "Boolean value specifying whether to allow to set client's expiration time in seconds during dynamic registration.", defaultValue = "false")
+    private Boolean dcrForbidExpirationTimeInRequest = false;
+
     @DocProperty(description = "Boolean value enables DCR signature validation. Default is false", defaultValue = "false")
     private Boolean dcrSignatureValidationEnabled = false;
 
@@ -654,8 +660,8 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Boolean value indicating if DCR authorization allowed with MTLS", defaultValue = "false")
     private Boolean dcrAuthorizationWithMTLS = false;
 
-    @DocProperty(description = "List of DCR issuers")
-    private List<String> dcrIssuers = new ArrayList<>();
+    @DocProperty(description = "List of trusted SSA issuers with configuration (e.g. automatically granted scopes).")
+    private Map<String, TrustedIssuerConfig> trustedSsaIssuers = new HashMap<>();
 
     @DocProperty(description = "Cache in local memory cache attributes, scopes, clients and organization entry with expiration 60 seconds", defaultValue = "false")
     private Boolean useLocalCache = false;
@@ -833,6 +839,9 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Defines if Response body will be logged. Default value is false", defaultValue = "false")
     private Boolean httpLoggingResponseBodyContent = false;
 
+    @DocProperty(description = "Force Authentication Filtker to process OPTIONS request", defaultValue = "true")
+    private Boolean skipAuthenticationFilterOptionsMethod = true;
+
     public Map<String, String> getDateFormatterPatterns() {
         return dateFormatterPatterns;
     }
@@ -879,6 +888,15 @@ public class AppConfiguration implements Configuration {
 
     public void setRotateDeviceSecret(Boolean rotateDeviceSecret) {
         this.rotateDeviceSecret = rotateDeviceSecret;
+    }
+
+    public Boolean getLogNotFoundEntityAsError() {
+        if (logNotFoundEntityAsError == null) logNotFoundEntityAsError = false;
+        return logNotFoundEntityAsError;
+    }
+
+    public void setLogNotFoundEntityAsError(Boolean logNotFoundEntityAsError) {
+        this.logNotFoundEntityAsError = logNotFoundEntityAsError;
     }
 
     public Boolean getRequirePkce() {
@@ -1282,13 +1300,13 @@ public class AppConfiguration implements Configuration {
         this.dcrAuthorizationWithMTLS = dcrAuthorizationWithMTLS;
     }
 
-    public List<String> getDcrIssuers() {
-        if (dcrIssuers == null) dcrIssuers = new ArrayList<>();
-        return dcrIssuers;
+    public Map<String, TrustedIssuerConfig> getTrustedSsaIssuers() {
+        if (trustedSsaIssuers == null) trustedSsaIssuers = new HashMap<>();
+        return trustedSsaIssuers;
     }
 
-    public void setDcrIssuers(List<String> dcrIssuers) {
-        this.dcrIssuers = dcrIssuers;
+    public void setTrustedSsaIssuers(Map<String, TrustedIssuerConfig> trustedSsaIssuers) {
+        this.trustedSsaIssuers = trustedSsaIssuers;
     }
 
     public Boolean getForceIdTokenHintPrecense() {
@@ -2169,6 +2187,17 @@ public class AppConfiguration implements Configuration {
 
     public void setJansId(String jansId) {
         this.jansId = jansId;
+    }
+
+    public Boolean getDcrForbidExpirationTimeInRequest() {
+        if (dcrForbidExpirationTimeInRequest == null) {
+            dcrForbidExpirationTimeInRequest = false;
+        }
+        return dcrForbidExpirationTimeInRequest;
+    }
+
+    public void setDcrForbidExpirationTimeInRequest(Boolean dcrForbidExpirationTimeInRequest) {
+        this.dcrForbidExpirationTimeInRequest = dcrForbidExpirationTimeInRequest;
     }
 
     public int getDynamicRegistrationExpirationTime() {
@@ -3193,4 +3222,13 @@ public class AppConfiguration implements Configuration {
     public void setHttpLoggingResponseBodyContent(Boolean httpLoggingResponseBodyContent) {
         this.httpLoggingResponseBodyContent = httpLoggingResponseBodyContent;
     }
+
+	public Boolean isSkipAuthenticationFilterOptionsMethod() {
+		return skipAuthenticationFilterOptionsMethod;
+	}
+
+	public void setSkipAuthenticationFilterOptionsMethod(Boolean skipAuthenticationFilterOptionsMethod) {
+		this.skipAuthenticationFilterOptionsMethod = skipAuthenticationFilterOptionsMethod;
+	}
+
 }

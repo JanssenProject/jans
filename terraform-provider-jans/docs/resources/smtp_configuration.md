@@ -37,15 +37,20 @@ resource "jans_smtp_configuration" "global" {
 
 ### Optional
 
+- `connect_protection` (String) Connect protection type. Possible values are None, StartTls, SslTls.
 - `from_email_address` (String) Email Address of the Sender.
 - `from_name` (String) Name of the sender.
 - `host` (String) Hostname of the SMTP server.
-- `password` (String) Password for the SMTP.
+- `key_store` (String)
+- `key_store_alias` (String)
+- `key_store_password` (String)
 - `port` (Number) Port number of the SMTP server.
 - `requires_authentication` (Boolean) Boolean value with default value false. It true it will enable sender authentication.
-- `requires_ssl` (Boolean) Boolean value with default value false. If true, SSL will be enabled.
+- `signing_algorithm` (String)
+- `smtp_authentication_account_password` (String)
+- `smtp_authentication_account_username` (String)
 - `trust_host` (Boolean) Boolean value with default value false.
-- `user_name` (String) Username of the SMTP.
+- `valid` (Boolean) Boolean value with default value false.
 
 ### Read-Only
 

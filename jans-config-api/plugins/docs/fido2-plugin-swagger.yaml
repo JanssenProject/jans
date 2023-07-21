@@ -167,6 +167,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/RequestedParty'
+        metadataUrlsProvider:
+          type: string
     RequestedParty:
       type: object
       properties:
@@ -258,8 +260,7 @@ components:
         challange:
           type: string
         challengeHash:
-          type: integer
-          format: int32
+          type: string
         creationDate:
           type: string
           format: date-time

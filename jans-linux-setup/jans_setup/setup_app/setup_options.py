@@ -18,6 +18,7 @@ def get_setup_options():
         'installOxd': False,
         'installFido2': True,
         'installEleven': False,
+        'install_jans_link': True,
         'loadTestData': False,
         'allowPreReleasedFeatures': False,
         'listenAllInterfaces': False,
@@ -97,6 +98,10 @@ def get_setup_options():
 
         if base.argsp.no_fido2:
             setupOptions['installFido2'] = False
+
+        if base.argsp.install_jans_link:
+            setupOptions['install_jans_link'] = True
+
 
         if base.argsp.jans_max_mem:
             setupOptions['jans_max_mem'] = base.argsp.jans_max_mem

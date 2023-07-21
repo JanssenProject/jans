@@ -6,17 +6,7 @@
 
 package io.jans.as.client.ws.rs;
 
-import io.jans.as.client.AuthorizationRequest;
-import io.jans.as.client.AuthorizationResponse;
-import io.jans.as.client.AuthorizeClient;
-import io.jans.as.client.BaseTest;
-import io.jans.as.client.RegisterClient;
-import io.jans.as.client.RegisterRequest;
-import io.jans.as.client.RegisterResponse;
-import io.jans.as.client.TokenClient;
-import io.jans.as.client.TokenRequest;
-import io.jans.as.client.TokenResponse;
-
+import io.jans.as.client.*;
 import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.common.AuthenticationMethod;
 import io.jans.as.model.common.GrantType;
@@ -35,15 +25,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static io.jans.as.client.client.Asserter.*;
-import static io.jans.as.model.register.RegisterRequestParam.CLIENT_NAME;
-import static io.jans.as.model.register.RegisterRequestParam.ID_TOKEN_SIGNED_RESPONSE_ALG;
-import static io.jans.as.model.register.RegisterRequestParam.REDIRECT_URIS;
-import static io.jans.as.model.register.RegisterRequestParam.RESPONSE_TYPES;
-import static io.jans.as.model.register.RegisterRequestParam.SCOPE;
-import static org.testng.Assert.assertEquals;
+import static io.jans.as.client.client.Asserter.assertRegisterResponseClaimsNotNull;
+import static io.jans.as.model.register.RegisterRequestParam.*;
 import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 /**
@@ -63,11 +47,18 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
             final String sectorIdentifierUri) throws Exception {
         showTitle("omittedResponseTypes");
 
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_POST);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -95,11 +86,6 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
 
         // 3. Request authorization
         List<ResponseType> responseTypes = Arrays.asList(ResponseType.CODE);
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String state = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
@@ -157,10 +143,17 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
             final List<ResponseType> responseTypes, final String sectorIdentifierUri) throws Exception {
         showTitle("omittedResponseTypesFail");
 
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -186,11 +179,6 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String state = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
@@ -223,6 +211,11 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
         List<ResponseType> responseTypes = Arrays.asList(
                 ResponseType.CODE,
                 ResponseType.ID_TOKEN);
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
@@ -230,6 +223,7 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setTokenEndpointAuthMethod(AuthenticationMethod.CLIENT_SECRET_POST);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -256,11 +250,6 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String state = UUID.randomUUID().toString();
         String nonce = UUID.randomUUID().toString();
 
@@ -326,6 +315,12 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
             final List<ResponseType> responseTypes, final String sectorIdentifierUri) throws Exception {
         showTitle("responseTypesCodeIdTokenFail");
 
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
@@ -333,6 +328,7 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
                 ResponseType.CODE,
                 ResponseType.ID_TOKEN));
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -358,11 +354,6 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String state = UUID.randomUUID().toString();
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, null);
@@ -393,11 +384,18 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
                 ResponseType.TOKEN,
                 ResponseType.ID_TOKEN);
 
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
+
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(responseTypes);
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -423,11 +421,6 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -452,8 +445,8 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
                 .check();
     }
 
-    @DataProvider(name = "responseTypesTokenIdTokenFailDataProvider")
-    public Object[][] responseTypesTokenIdTokenFailDataProvider(ITestContext context) {
+    @DataProvider(name = "responseTypesTokenIdTokenDataProvider")
+    public Object[][] responseTypesTokenIdTokenDataProvider(ITestContext context) {
         String redirectUris = context.getCurrentXmlTest().getParameter("redirectUris");
         String redirectUri = context.getCurrentXmlTest().getParameter("redirectUri");
         String userId = context.getCurrentXmlTest().getParameter("userId");
@@ -468,19 +461,25 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
         };
     }
 
-    @Test(dataProvider = "responseTypesTokenIdTokenFailDataProvider")
-    public void responseTypesTokenIdTokenFail(
+    @Test(dataProvider = "responseTypesTokenIdTokenDataProvider")
+    public void responseTypesTokenIdToken(
             final String redirectUris, final String redirectUri, final String userId, final String userSecret,
             final List<ResponseType> responseTypes, final String sectorIdentifierUri) throws Exception {
         showTitle("responseTypesTokenIdTokenFail");
+
+        List<String> scopes = Arrays.asList(
+                "openid",
+                "profile",
+                "address",
+                "email");
 
         // 1. Register client
         RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app",
                 StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(Arrays.asList(
-                ResponseType.TOKEN,
                 ResponseType.ID_TOKEN));
         registerRequest.setSectorIdentifierUri(sectorIdentifierUri);
+        registerRequest.setScope(scopes);
 
         RegisterClient registerClient = new RegisterClient(registrationEndpoint);
         registerClient.setRequest(registerRequest);
@@ -488,6 +487,7 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
 
         showClient(registerClient);
         AssertBuilder.registerResponse(registerResponse).created().check();
+        assertTrue(registerResponse.getResponseTypes().contains(ResponseType.CODE));
 
         String clientId = registerResponse.getClientId();
         String registrationAccessToken = registerResponse.getRegistrationAccessToken();
@@ -506,11 +506,6 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
         assertRegisterResponseClaimsNotNull(readClientResponse, RESPONSE_TYPES, REDIRECT_URIS. APPLICATION_TYPE, CLIENT_NAME, ID_TOKEN_SIGNED_RESPONSE_ALG, SCOPE);
 
         // 3. Request authorization
-        List<String> scopes = Arrays.asList(
-                "openid",
-                "profile",
-                "address",
-                "email");
         String nonce = UUID.randomUUID().toString();
         String state = UUID.randomUUID().toString();
 
@@ -528,7 +523,5 @@ public class ResponseTypesRestrictionHttpTest extends BaseTest {
         showClient(authorizeClient);
         assertTrue(authorizationResponse.getStatus() == 302
                 || authorizationResponse.getStatus() == 400, "Unexpected response code: " + authorizationResponse.getStatus());
-        assertNotNull(authorizationResponse.getErrorType(), "The error type is null");
-        assertNotNull(authorizationResponse.getErrorDescription(), "The error description is null");
     }
 }

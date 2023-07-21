@@ -40,6 +40,7 @@ import io.jans.as.server.security.Identity;
 import io.jans.as.server.service.*;
 import io.jans.as.server.service.ciba.CibaRequestService;
 import io.jans.as.server.service.external.ExternalPostAuthnService;
+import io.jans.as.server.service.external.ExternalSelectAccountService;
 import io.jans.as.server.service.external.ExternalUpdateTokenService;
 import io.jans.as.server.service.external.context.ExternalPostAuthnContext;
 import io.jans.as.server.service.external.context.ExternalUpdateTokenContext;
@@ -157,6 +158,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
     @Inject
     private AuthzRequestService authzRequestService;
+
+    @Inject
+    private ExternalSelectAccountService externalSelectAccountService;
 
     @Context
     private HttpServletRequest servletRequest;
@@ -361,7 +365,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         ClientAuthorization clientAuthorization = null;
         boolean clientAuthorizationFetched = false;
         if (!scopes.isEmpty()) {
-            final Pair<ClientAuthorization, Boolean> pair = fetchClientAuthorization(authzRequest, client, sessionUser, user, scopes);
+            final Pair<ClientAuthorization, Boolean> pair = grantAccessOrFetchClientAuthorization(authzRequest, client, sessionUser, user, scopes);
             clientAuthorization = pair.getFirst();
             clientAuthorizationFetched = pair.getSecond();
         }
@@ -530,7 +534,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
 
     private void checkPromptSelectAccount(AuthzRequest authzRequest, List<Prompt> prompts) {
         if (prompts.contains(Prompt.SELECT_ACCOUNT)) {
-            throw new WebApplicationException(redirectToSelectAccountPage(authzRequest, prompts));
+            log.debug("Redirecting to Select Account");
+            throw new NoLogWebApplicationException(redirectToSelectAccountPage(authzRequest, prompts));
         }
     }
 
@@ -548,7 +553,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             clientAuthorizationsService.clearAuthorizations(clientAuthorization, authzRequest.getClient().getPersistClientAuthorizations());
 
             prompts.remove(Prompt.CONSENT);
-            log.debug("Redirect to authorization page, request {}", authzRequest);
+            log.debug("Redirect to authorization page on prompt=consent, request {}", authzRequest);
 
             throw new NoLogWebApplicationException(redirectToAuthorizationPage(authzRequest, prompts));
         }
@@ -586,7 +591,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         }
     }
 
-    private Pair<ClientAuthorization, Boolean> fetchClientAuthorization(AuthzRequest authzRequest, Client client, SessionId sessionUser, User user, Set<String> scopes) {
+    private Pair<ClientAuthorization, Boolean> grantAccessOrFetchClientAuthorization(AuthzRequest authzRequest, Client client, SessionId sessionUser, User user, Set<String> scopes) {
         ClientAuthorization clientAuthorization = null;
         boolean clientAuthorizationFetched = false;
 
@@ -596,26 +601,39 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             log.debug("Redirect to authorization page, request {}", authzRequest);
             throw new NoLogWebApplicationException(redirectToAuthorizationPage(authzRequest, prompts));
         }
+
         // There is no need to present the consent page:
-        // If Client is a Trusted Client.
-        // If a client is configured for pairwise identifiers, and the openid scope is the only scope requested.
-        // Also, we should make sure that the claims request is not enabled.
-        if (client.getTrustedClient() || isPairwiseWithOnlyOpenIdScope(client, authzRequest, scopes)) {
+        // - If Client is a Trusted Client.
+        // - If session already contains all scopes
+        // - If a client is configured for pairwise identifiers, and the openid scope is the only scope requested.
+        //   Also, we should make sure that the claims request is not enabled.
+        final boolean clientHasAllScopes = sessionIdService.hasClientAllScopes(sessionUser, client.getClientId(), scopes);
+        final boolean permissionGrantedForClient = isTrue(sessionUser.isPermissionGrantedForClient(client.getClientId()));
+        final boolean pairwiseWithOnlyOpenIdScope = isPairwiseWithOnlyOpenIdScope(client, authzRequest, scopes);
+        if (client.getTrustedClient() || (clientHasAllScopes && permissionGrantedForClient) || pairwiseWithOnlyOpenIdScope) {
+            log.trace("Granting access to session {}, clientTrusted: {}, clientHasAllScopes: {}, permissionGrantedForClient: {}, pairwiseWithOnlyOpenIdScope: {}",
+                    sessionUser.getId(), client.getTrustedClient(), clientHasAllScopes, permissionGrantedForClient, pairwiseWithOnlyOpenIdScope);
             sessionUser.addPermission(authzRequest.getClientId(), true);
             sessionIdService.updateSessionId(sessionUser);
         } else {
             clientAuthorization = clientAuthorizationsService.find(user.getAttribute("inum"), client.getClientId());
             clientAuthorizationFetched = true;
-            if (clientAuthorization != null && clientAuthorization.getScopes() != null) {
-                if (log.isTraceEnabled())
-                    log.trace("ClientAuthorization - scope: {}, dn: {}, requestedScope: {}", authzRequest.getScope(), clientAuthorization.getDn(), scopes);
-                if (Arrays.asList(clientAuthorization.getScopes()).containsAll(scopes)) {
-                    sessionUser.addPermission(authzRequest.getClientId(), true);
-                    sessionIdService.updateSessionId(sessionUser);
-                } else {
-                    log.debug("Redirect to authorization page, request {}", authzRequest);
-                    throw new NoLogWebApplicationException(redirectToAuthorizationPage(authzRequest, prompts));
-                }
+
+            if (clientAuthorization == null || clientAuthorization.getScopes() == null || clientAuthorization.getScopes().length == 0) {
+                log.trace("Redirect to authorization page, no appropriate clientAuthorization, clientId: {}", client.getClientId());
+                throw new NoLogWebApplicationException(redirectToAuthorizationPage(authzRequest, prompts));
+            }
+
+            if (log.isTraceEnabled())
+                log.trace("Found clientAuthorization - scope: {}, dn: {}, requestedScope: {}", authzRequest.getScope(), clientAuthorization.getDn(), scopes);
+
+            if (Arrays.asList(clientAuthorization.getScopes()).containsAll(scopes)) {
+                log.trace("Granting access to session {}, clientAuthorization has all scopes {}", sessionUser.getId(), clientAuthorization.getScopes());
+                sessionUser.addPermission(authzRequest.getClientId(), true);
+                sessionIdService.updateSessionId(sessionUser);
+            } else {
+                log.debug("Redirect to authorization page, request {}", authzRequest);
+                throw new NoLogWebApplicationException(redirectToAuthorizationPage(authzRequest, prompts));
             }
         }
         return new Pair<>(clientAuthorization, clientAuthorizationFetched);
@@ -853,12 +871,28 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     }
 
     private Response redirectToSelectAccountPage(AuthzRequest authzRequest, List<Prompt> prompts) {
-        return redirectTo("/selectAccount", authzRequest, prompts);
+        ExecutionContext executionContext = ExecutionContext.of(authzRequest);
+        executionContext.setAppConfiguration(appConfiguration);
+        executionContext.setAttributeService(attributeService);
+
+        String page = "/selectAccount";
+
+        String selectAccountPageFromScript = externalSelectAccountService.externalGetSelectAccountPage(executionContext);
+        if (StringUtils.isNotBlank(selectAccountPageFromScript)) {
+            if (selectAccountPageFromScript.endsWith(".xhtml")) {
+                selectAccountPageFromScript = StringUtils.removeEnd(selectAccountPageFromScript, ".xhtml");
+            }
+            page = selectAccountPageFromScript;
+        }
+
+        return redirectTo(page, authzRequest, prompts);
     }
 
     private Response redirectTo(String pathToRedirect, AuthzRequest authzRequest, List<Prompt> prompts) {
 
         final URI contextUri = URI.create(appConfiguration.getIssuer()).resolve(servletRequest.getContextPath() + pathToRedirect + configurationFactory.getFacesMapping());
+
+        log.debug("Redirecting to {}", contextUri);
 
         final RedirectUri redirect = authzRequest.getRedirectUriResponse().getRedirectUri();
         redirect.setBaseRedirectUri(contextUri.toString());

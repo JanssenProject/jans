@@ -48,6 +48,7 @@ resource "jans_uma_resource" "test" {
 - `resources` (List of String) List of assosiated resource.
 - `scope_expression` (String) Resource scope expression.
 - `scopes` (List of String) Applicable resource scopes.
+- `ttl` (Number) Specifies the time in seconds that the resource will be valid.
 - `type` (String) Resource type.
 
 ### Read-Only

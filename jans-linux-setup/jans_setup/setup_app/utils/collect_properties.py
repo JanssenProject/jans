@@ -105,7 +105,7 @@ class CollectProperties(SetupUtils, BaseInstaller):
              Config.mapping_locations = {'default': jans_hybrid_properties['storage.default']}
              storages = [ storage.strip() for storage in jans_hybrid_properties['storages'].split(',') ]
 
-             for ml, m in (('user', 'people'), ('cache', 'cache'), ('site', 'cache-refresh'), ('token', 'tokens')):
+             for ml, m in (('user', 'people'), ('cache', 'cache'), ('site', 'link'), ('token', 'tokens')):
                  for storage in storages:
                      if m in jans_hybrid_properties.get('storage.{}.mapping'.format(storage),[]):
                          Config.mapping_locations[ml] = storage
@@ -238,6 +238,7 @@ class CollectProperties(SetupUtils, BaseInstaller):
         Config.installFido2 = os.path.exists(os.path.join(Config.jetty_base, 'jans-fido2/start.ini'))
         Config.installEleven = os.path.exists(os.path.join(Config.jetty_base, 'jans-eleven/start.ini'))
         Config.install_config_api = os.path.exists(os.path.join(Config.jansOptFolder, 'jans-config-api'))
+        Config.install_jans_link = os.path.exists(os.path.join(Config.jansOptFolder, 'jans-link'))
 
     def save(self):
         if os.path.exists(Config.setup_properties_fn):

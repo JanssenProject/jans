@@ -154,10 +154,6 @@ public class SmtpConfiguration implements java.io.Serializable {
     public void setSmtpAuthenticationAccountPasswordDecrypted(String smtpAuthenticationAccountPasswordDecrypted) {
         this.smtpAuthenticationAccountPasswordDecrypted = smtpAuthenticationAccountPasswordDecrypted;
     }
-    
-    public SmtpConnectProtectionType[] getConnectProtectionList() {
-        return SmtpConnectProtectionType.values();
-    }
 
     public String getKeyStore() {
         return keyStore;

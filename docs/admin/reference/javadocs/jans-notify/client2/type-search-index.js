@@ -1,1 +1,0 @@
-typeSearchIndex = [{"l":"All Classes","url":"allclasses-index.html"},{"p":"io.jans.notify.client","l":"NotifyClientFactory"},{"p":"io.jans.notify.client","l":"NotifyClientService"},{"p":"io.jans.notify.client","l":"NotifyMetadataClientService"}]

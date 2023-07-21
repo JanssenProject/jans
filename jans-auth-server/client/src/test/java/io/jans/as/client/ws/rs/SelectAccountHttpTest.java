@@ -7,11 +7,7 @@
 package io.jans.as.client.ws.rs;
 
 import com.google.common.collect.Lists;
-import io.jans.as.client.AuthorizationRequest;
-import io.jans.as.client.AuthorizationResponse;
-import io.jans.as.client.AuthorizeClient;
-import io.jans.as.client.BaseTest;
-import io.jans.as.client.RegisterResponse;
+import io.jans.as.client.*;
 import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.client.page.LoginPage;
 import io.jans.as.client.page.PageConfig;
@@ -30,15 +26,12 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
+import java.net.URLDecoder;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -96,7 +89,11 @@ public class SelectAccountHttpTest extends BaseTest {
 
         output("4. both Account 1 and Account 2 sessions must be in current_sessions cookie");
         assertEquals(account2SessionId, assertSessionIdCookie());
-        List<Object> currentSessions = new JSONArray(driver.manage().getCookieNamed("current_sessions").getValue()).toList();
+
+        final String currentSessionsCookieValue = driver.manage().getCookieNamed("current_sessions").getValue();
+        output("current_sessions cookie value = " + currentSessionsCookieValue);
+
+        List<Object> currentSessions = new JSONArray(URLDecoder.decode(currentSessionsCookieValue, "UTF-8")).toList();
         assertTrue(currentSessions.contains(account1SessionId));
         assertTrue(currentSessions.contains(account2SessionId));
 

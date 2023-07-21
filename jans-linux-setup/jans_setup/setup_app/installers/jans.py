@@ -77,6 +77,8 @@ class JansInstaller(BaseInstaller, SetupUtils):
             if Config.profile == 'jans' or  Config.profile == 'disa-stig':
                 txt += 'Install Fido2 Server'.ljust(30) + repr(Config.installFido2).rjust(35) + (' *' if 'installFido2' in Config.addPostSetupService else '') + "\n"
                 txt += 'Install Scim Server'.ljust(30) + repr(Config.install_scim_server).rjust(35) + (' *' if 'install_scim_server' in Config.addPostSetupService else '') + "\n"
+                txt += 'Install Jans Link Server'.ljust(30) + repr(Config.install_jans_link).rjust(35) + (' *' if 'install_jans_link' in Config.addPostSetupService else '') + "\n"
+                #txt += 'Install Oxd '.ljust(30) + repr(Config.installOxd).rjust(35) + (' *' if 'installOxd' in Config.addPostSetupService else '') + "\n"
 
             if Config.profile == 'jans' and Config.installEleven or Config.profile == 'disa-stig' and Config.installEleven:
                 txt += 'Install Eleven Server'.ljust(30) + repr(Config.installEleven).rjust(35) + (' *' if 'installEleven' in Config.addPostSetupService else '') + "\n"
@@ -113,6 +115,23 @@ class JansInstaller(BaseInstaller, SetupUtils):
         
         if not Config.installed_instance and Config.profile == static.SetupProfiles.DISA_STIG:
             self.remove_pcks11_keys()
+
+
+        for f in oxauth_client_jar_zf.namelist():
+            if os.path.basename(f) == 'KeyGenerator.class':
+                p, e = os.path.splitext(f)
+                Config.non_setup_properties['key_gen_path'] = p.replace(os.path.sep, '.')
+            elif os.path.basename(f) == 'KeyExporter.class':
+                p, e = os.path.splitext(f)
+                Config.non_setup_properties['key_export_path'] = p.replace(os.path.sep, '.')
+
+        if (not 'key_gen_path' in Config.non_setup_properties) or (not 'key_export_path' in Config.non_setup_properties):
+            self.logIt("Can't determine key generator and/or key exporter path form {}".format(Config.non_setup_properties['oxauth_client_jar_fn']), True, True)
+        else:
+            self.logIt("Key generator path was determined as {}".format(Config.non_setup_properties['key_export_path']))
+
+
+        self.extract_scripts()
 
 
     def configureSystem(self):
@@ -473,6 +492,8 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
     def post_install_tasks(self):
 
+        self.apply_selinux_plicies()
+
         self.deleteLdapPw()
 
         self.dbUtils.bind(force=True)
@@ -561,6 +582,20 @@ class JansInstaller(BaseInstaller, SetupUtils):
         #enable scripts
         self.enable_scripts(base.argsp.enable_script)
 
+    def apply_selinux_plicies(self):
+        self.logIt("Applying SELinux Policies")
+        setsebool_cmd = shutil.which('setsebool')
+
+        if not setsebool_cmd:
+            self.logIt("SELinux setsebool command not found")
+            return
+
+        selinux_policies = ['httpd_can_network_connect 1 -P']
+
+        for se_pol in selinux_policies:
+            cmd = [setsebool_cmd] + se_pol.split()
+            self.run(cmd)
+
     def enable_scripts(self, inums, enable=True):
         if inums:
             for inum in inums:
@@ -607,6 +642,30 @@ class JansInstaller(BaseInstaller, SetupUtils):
                     ]
 
         self.run(cmd_cert_gen)
+
+    def order_services(self):
+
+        service_list = [
+                        ('jans-eleven', 'installEleven'),
+                        ('jans-auth', 'installOxAuth'),
+                        ('jans-config-api', 'install_config_api'),
+                        ('jans-fido2', 'installFido2'),
+                        ('jans-link', 'install_jans_link'),
+                        ('jans-scim', 'install_scim_server'),
+                        ]
+        service_listr = service_list[:]
+        service_listr.reverse()
+        for i, service in enumerate(service_listr):
+            order_var_str = 'order_{}_service'.format(service[0].replace('-','_'))
+            for sservice in (service_listr[i+1:]):
+                if getattr(Config, sservice[1]):
+                    Config.templateRenderingDict[order_var_str] = sservice[0]+'.service'
+                    break
+                else:
+                    if service[0] != 'jans-auth':
+                        Config.templateRenderingDict[order_var_str] = 'jans-auth.service'
+                    else:
+                        Config.templateRenderingDict['order_jans_auth_service'] =  'jans-eleven.service' if Config.installEleven else  Config.backend_service
 
     def genRandomString(self, N):
         return ''.join(random.SystemRandom().choice(string.ascii_lowercase

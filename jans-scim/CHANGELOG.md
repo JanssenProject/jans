@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.0.15](https://github.com/JanssenProject/jans/compare/jans-scim-v1.0.14...jans-scim-v1.0.15) (2023-07-12)
+
+
+### Bug Fixes
+
+* prepare for 1.0.15 release ([0e3cc2f](https://github.com/JanssenProject/jans/commit/0e3cc2f5ea287c2c35f45def54f074daa473ec49))
+* refactor date parsing [#5273](https://github.com/JanssenProject/jans/issues/5273) ([#5281](https://github.com/JanssenProject/jans/issues/5281)) ([b2eafac](https://github.com/JanssenProject/jans/commit/b2eafac87c9c8c2d2b5bf70d6e998a4581bd9ef1))
+
+## [1.0.14](https://github.com/JanssenProject/jans/compare/jans-scim-v1.0.13...jans-scim-v1.0.14) (2023-06-12)
+
+
+### Bug Fixes
+
+* prepare for 1.0.14 release ([25ccadf](https://github.com/JanssenProject/jans/commit/25ccadf85327ea14685c6066dc6609919e4f2865))
+
 ## [1.0.13](https://github.com/JanssenProject/jans/compare/jans-scim-v1.0.12...jans-scim-v1.0.13) (2023-05-10)
 
 

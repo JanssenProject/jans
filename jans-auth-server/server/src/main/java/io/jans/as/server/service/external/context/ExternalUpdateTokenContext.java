@@ -13,6 +13,7 @@ import io.jans.as.model.common.GrantType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaims;
+import io.jans.as.model.jwt.JwtHeader;
 import io.jans.as.server.model.common.AccessToken;
 import io.jans.as.server.model.common.AuthorizationGrant;
 import io.jans.as.server.model.common.ExecutionContext;
@@ -84,6 +85,11 @@ public class ExternalUpdateTokenContext extends ExternalScriptContext {
     public JwtClaims getClaims() {
         Jwt jwt = getJwt();
         return jwt != null ? jwt.getClaims() : null;
+    }
+
+    public JwtHeader getHeader() {
+        Jwt jwt = getJwt();
+        return jwt != null ? jwt.getHeader() : null;
     }
 
     public Jwt getJwt() {

@@ -47,6 +47,7 @@ resource "jans_json_web_key" "test" {
 						sensitive.
 - `descr` (String) key description.
 - `e` (String) The exponent for the RSA public key.
+- `key_ops_type` (List of String) The key operations type.
 - `n` (String) The modulus for the RSA public key.
 - `name` (String) Name of the key.
 - `x` (String) The x member contains the x coordinate for the elliptic curve point. It is represented 

@@ -3,13 +3,15 @@ import debugpy
 
 import os
 import re
+import io
 import sys
 import time
 import sqlalchemy
 import shutil
+import zipfile
 
 from string import Template
-
+from schema import AttributeType
 from setup_app import paths
 from setup_app.static import AppType, InstallOption
 from setup_app.config import Config
@@ -18,7 +20,7 @@ from setup_app.static import InstallTypes
 from setup_app.installers.base import BaseInstaller
 from setup_app.utils.setup_utils import SetupUtils
 from setup_app.utils.package_utils import packageUtils
-
+from setup_app.pylib.ldif4.ldif import LDIFParser
 
 class RDBMInstaller(BaseInstaller, SetupUtils):
 
@@ -40,14 +42,15 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
         self.register_progess()
         self.output_dir = os.path.join(Config.output_dir, Config.rdbm_type)
         self.common_lib_dir = os.path.join(Config.jetty_base, 'common/libs/spanner')
+        self.opendj_attributes = []
 
     @property
     def qchar(self):
         return '`' if Config.rdbm_type in ('mysql', 'spanner') else '"'
 
     def install(self):
-#        debugpy.breakpoint();    
-    
+#        debugpy.breakpoint();
+
         if Config.rdbm_type == 'spanner':
             self.extract_libs()
         self.local_install()
@@ -61,6 +64,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
             schema_ = base.readJsonFile(schema_full_path)
             self.jans_attributes += schema_.get('attributeTypes', [])
 
+        self.prepare()
         self.create_tables(jans_schema_files)
         self.create_subtables()
 
@@ -69,6 +73,23 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
         self.import_ldif()
         self.create_indexes()
         self.rdbmProperties()
+
+    def prepare(self):
+        # we need opendj package for getting attribute descriptions
+        base.current_app.OpenDjInstaller.check_for_download()
+
+        if os.path.exists(base.current_app.OpenDjInstaller.source_files[0][0]):
+            opendj_zip = zipfile.ZipFile(base.current_app.OpenDjInstaller.source_files[0][0])
+
+            for fn in opendj_zip.namelist():
+                if 'opendj/template/config/schema/' in fn and fn.endswith('.ldif'):
+                    schema_io = io.BytesIO(opendj_zip.read(fn))
+                    parser = LDIFParser(schema_io)
+                    for _, entry in parser.parse():
+                        if 'attributeTypes' in entry:
+                            for attr_str in entry['attributeTypes']:
+                                attr_type = AttributeType(attr_str)
+                                self.opendj_attributes.append(attr_type.tokens)
 
     def reset_rdbm_db(self):
         self.logIt("Resetting DB {}".format(Config.rdbm_db))
@@ -112,15 +133,15 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                     self.restart('mariadb')
                     self.fix_unit_file('mariadb')
                     self.enable('mariadb')
-                    Config.start_auth_after = 'mariadb.service'
+                    Config.backend_service = 'mariadb.service'
 
                 elif base.clone_type == 'rpm':
                     self.restart('mysqld')
                     self.enable('mysqld')
-                    Config.start_auth_after = 'mysqld.service'
+                    Config.backend_service = 'mysqld.service'
 
                 else:
-                    Config.start_auth_after = 'mysql.service'
+                    Config.backend_service = 'mysql.service'
 
                 result, conn = self.dbUtils.mysqlconnection(log=False)
                 if not result:
@@ -135,10 +156,10 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
             elif Config.rdbm_type == 'pgsql':
                 if base.clone_type == 'rpm':
                     self.run(['postgresql-setup', 'initdb'])
-                    Config.start_auth_after = 'postgresql.service'
+                    Config.backend_service = 'postgresql.service'
                 elif base.clone_type == 'deb':
                     self.run([paths.cmd_chmod, '640', '/etc/ssl/private/ssl-cert-snakeoil.key'])
-                    Config.start_auth_after = 'postgresql.service'
+                    Config.backend_service = 'postgresql.service'
 
                 self.restart('postgresql')
 
@@ -195,11 +216,33 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
         return data_type
 
 
+    def get_attr_description(self, attrname):
+        desc = ''
+        for attrib in self.dbUtils.jans_attributes:
+            if attrname in attrib['names']:
+                desc = attrib.get('desc')
+                break
+        else:
+            for attrib in self.opendj_attributes:
+                if attrname in attrib['NAME']:
+                    desc_t = attrib.get('DESC')
+                    if desc_t and desc_t[0]:
+                        desc = desc_t[0]
+                    break
+        return desc
+
     def get_col_def(self, attrname, sql_tbl_name):
         data_type = self.get_sql_col_type(attrname, sql_tbl_name)
         col_def = '{0}{1}{0} {2}'.format(self.qchar, attrname, data_type)
-        if Config.rdbm_type == 'mysql' and data_type == 'JSON':
-            col_def += ' comment "json"'
+
+        if Config.rdbm_type == 'mysql':
+            desc = self.get_attr_description(attrname)
+            if desc:
+                col_def += ' COMMENT "{}"'.format(desc)
+
+        if Config.rdbm_type == 'mysql' and self.dbUtils.mariadb and data_type == 'JSON':
+            col_def += ', CONSTRAINT {0}{1}{0} CHECK (JSON_VALID({0}{1}{0}))'.format(self.qchar, attrname)
+
         return col_def
 
     def create_tables(self, jans_schema_files):
@@ -248,7 +291,8 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                     continue
                 attr_list += all_schema[s]['may']
 
-            cols_ =[]
+            cols_ = []
+            col_comments = []
             for attrname in attr_list:
                 if attrname in cols_:
                     continue
@@ -260,8 +304,12 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                 col_def = self.get_col_def(attrname, sql_tbl_name) 
                 sql_tbl_cols.append(col_def)
 
-            #debugpy.breakpoint();
+                if Config.rdbm_type == 'pgsql':
+                    desc = self.get_attr_description(attrname)
+                    if desc:
+                        col_comments.append('''COMMENT ON COLUMN "{}"."{}" IS '{}';'''.format(sql_tbl_name, attrname, desc))
 
+            #debugpy.breakpoint();
             if not self.dbUtils.table_exists(sql_tbl_name):
                 doc_id_type = self.get_sql_col_type('doc_id', sql_tbl_name)
                 if Config.rdbm_type == 'pgsql':
@@ -271,6 +319,11 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                 else:
                     sql_cmd = 'CREATE TABLE `{}` (`doc_id` {} NOT NULL UNIQUE, `objectClass` VARCHAR(48), dn VARCHAR(128), {}, PRIMARY KEY (`doc_id`));'.format(sql_tbl_name, doc_id_type, ', '.join(sql_tbl_cols))
                 self.dbUtils.exec_rdbm_query(sql_cmd)
+                
+                for comment_sql in col_comments:
+                    self.dbUtils.exec_rdbm_query(comment_sql)
+                    tables.append(comment_sql)
+
                 tables.append(sql_cmd)
 
         #debugpy.breakpoint();

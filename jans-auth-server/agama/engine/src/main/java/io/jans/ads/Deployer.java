@@ -150,7 +150,8 @@ public class Deployer {
 
         if (Files.isDirectory(pcode) && Files.isDirectory(pweb)) {
             
-            try {  
+            try {
+                //craft a path so assets of different projects do not collide, see jans#4501
                 String prjBasepath = makeShortSafePath(prjId);
                 Set<String> flowIds = createFlows(pcode, dd, prjBasepath);
                 if (dd.getError() == null) {
@@ -231,6 +232,9 @@ public class Deployer {
         }
         
         Map<String, String> flowsOutcome = new HashMap<>();
+        ProjectMetadata prjMetadata = dd.getProjectMetadata();
+        List<String> noDirectLaunch = Optional.ofNullable(
+                prjMetadata.getNoDirectLaunchFlows()).orElse(Collections.emptyList());
         
         for (Path p: flowsPaths) {
             String error = null;
@@ -265,7 +269,7 @@ public class Deployer {
                 meta.setInputs(tresult.getInputs());
                 meta.setTimeout(tresult.getTimeout());
                 meta.setTimestamp(System.currentTimeMillis());
-                meta.setAuthor(dd.getProjectMetadata().getAuthor());
+                meta.setAuthor(prjMetadata.getAuthor());
 
                 if (prvMeta != null) {
                     meta.setDisplayName(prvMeta.getDisplayName());
@@ -280,8 +284,8 @@ public class Deployer {
                 
                 fl.setQname(qname);
                 fl.setTransHash(futils.hash(compiled));
-                // revision = 0 and enabled by default assumed
-                fl.setEnabled(true);
+                // revision = 0 assumed by default                
+                fl.setEnabled(!noDirectLaunch.contains(qname));
                 
                 if (add) {
                     fl.setDn(dnFromQname(qname));

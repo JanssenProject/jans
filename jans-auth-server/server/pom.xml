@@ -9,7 +9,7 @@
 	<parent>
 		<groupId>io.jans</groupId>
 		<artifactId>jans-auth-server-parent</artifactId>
-		<version>1.0.14-SNAPSHOT</version>
+		<version>1.0.16-SNAPSHOT</version>
 	</parent>
 
 	<prerequisites>
@@ -379,10 +379,6 @@
 		</dependency>
 
 		<!-- jans-notify -->
-		<dependency>
-			<groupId>io.jans</groupId>
-			<artifactId>jans-notify-model</artifactId>
-		</dependency>
 		<dependency>
 			<groupId>io.jans</groupId>
 			<artifactId>jans-notify-client</artifactId>

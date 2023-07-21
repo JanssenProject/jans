@@ -66,7 +66,7 @@ parser.add_argument('--cli-test-client', help="Use config api test client for CL
 parser.add_argument('--import-ldif', help="Render ldif templates from directory and import them in Database")
 
 parser.add_argument('-enable-script', action='append', help="inum of script to enable", required=False)
-parser.add_argument('-disable-script', action='append', help="inum of script to enable", required=False)
+parser.add_argument('-disable-script', action='append', help="inum of script to disable", required=False)
 
 if PROFILE == JANS_PROFILE or PROFILE == DISA_STIG_PROFILE:
 
@@ -95,6 +95,8 @@ if PROFILE == JANS_PROFILE or PROFILE == DISA_STIG_PROFILE:
 
     parser.add_argument('--no-scim', help="Do not install Scim Server", action='store_true')
     parser.add_argument('--no-fido2', help="Do not install Fido2 Server", action='store_true')
+    parser.add_argument('--install-jans-link', help="Install Link Server", action='store_true')
+
     #parser.add_argument('--oxd-use-jans-storage', help="Use Jans Storage for Oxd Server", action='store_true')
     parser.add_argument('--load-config-api-test', help="Load Config Api Test Data", action='store_true')
 

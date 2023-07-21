@@ -1,5 +1,44 @@
 # Changelog
 
+## [1.0.15](https://github.com/JanssenProject/jans/compare/jans-config-api-v1.0.14...jans-config-api-v1.0.15) (2023-07-12)
+
+
+### Features
+
+* **config-api:** cache config plugin refresh attributes ([#5276](https://github.com/JanssenProject/jans/issues/5276)) ([84dc3ee](https://github.com/JanssenProject/jans/commit/84dc3eed60f57da791557a61a738cc18ed8bdbc6))
+* **config-api:** rename cache-refresh-plugin to jans-link-plugin ([#5457](https://github.com/JanssenProject/jans/issues/5457)) ([98d984c](https://github.com/JanssenProject/jans/commit/98d984cc25198067ae07e4e48377deb06175e506))
+* **jans-link:** change schema name cache refresh to link ([#5484](https://github.com/JanssenProject/jans/issues/5484)) ([412f753](https://github.com/JanssenProject/jans/commit/412f753f1f11337b51ab1e212b9bd013021102be))
+
+
+### Bug Fixes
+
+* admin-ui should redirect to login page if license has been already activated [#5282](https://github.com/JanssenProject/jans/issues/5282) ([#5283](https://github.com/JanssenProject/jans/issues/5283)) ([11f6fa6](https://github.com/JanssenProject/jans/commit/11f6fa6c1c3b150411ea2d8ee9bdf787f0f59524))
+* **config-api:** cache refresh pwd encryption and agama spec ([#5449](https://github.com/JanssenProject/jans/issues/5449)) ([f931ce7](https://github.com/JanssenProject/jans/commit/f931ce7330b68cdb9bdfc3dfff9b5d6581be019d))
+* prepare for 1.0.15 release ([0e3cc2f](https://github.com/JanssenProject/jans/commit/0e3cc2f5ea287c2c35f45def54f074daa473ec49))
+
+
+### Documentation
+
+* **config-api:** rectify agama doc title ([#5314](https://github.com/JanssenProject/jans/issues/5314)) ([ea743c6](https://github.com/JanssenProject/jans/commit/ea743c6d356e9104ebe3af9a73e5831b91812094))
+
+## [1.0.14](https://github.com/JanssenProject/jans/compare/jans-config-api-v1.0.13...jans-config-api-v1.0.14) (2023-06-12)
+
+
+### Features
+
+* **config-api:** cache-refresh plugin code ([#5000](https://github.com/JanssenProject/jans/issues/5000)) ([eed9526](https://github.com/JanssenProject/jans/commit/eed9526415996278b52806cfe37a4dfb5076aa00))
+* **jans-auth-server:** added ability to set client expiration via DCR [#5057](https://github.com/JanssenProject/jans/issues/5057) ([#5185](https://github.com/JanssenProject/jans/issues/5185)) ([a15054b](https://github.com/JanssenProject/jans/commit/a15054b1c3350d6ee0bb9c92d39f6b2d992abfa1))
+* **jans-auth-server:** made not found exceptions logging level configurable [#4973](https://github.com/JanssenProject/jans/issues/4973) ([#4982](https://github.com/JanssenProject/jans/issues/4982)) ([98be22b](https://github.com/JanssenProject/jans/commit/98be22b81d365b631d2b7ffcf76d1f3a5ea1935b))
+
+
+### Bug Fixes
+
+* **config-api:** resolved dependency conflict for CustomScriptService ([3121833](https://github.com/JanssenProject/jans/commit/312183373f72f7916b3c4c6cc5176420bba3bae0))
+* **config-api:** revert hide smtp and client model utility method ([#4976](https://github.com/JanssenProject/jans/issues/4976)) ([6519744](https://github.com/JanssenProject/jans/commit/651974408565441951b6a4ca80a4ab555c01352f))
+* **config-api:** test compile issue for cache refresh plugin ([#5144](https://github.com/JanssenProject/jans/issues/5144)) ([af3e707](https://github.com/JanssenProject/jans/commit/af3e7075896cec36f32ee91947dfa1304ca1ebbd))
+* **jans-auth-server:** Illegal op_policy_uri parameter: - exclude entries with blank values from discovery response (oxauth counterpart) [#4888](https://github.com/JanssenProject/jans/issues/4888) ([#4934](https://github.com/JanssenProject/jans/issues/4934)) ([8603290](https://github.com/JanssenProject/jans/commit/8603290cee37c609f9572760c8cf299aba80160e))
+* prepare for 1.0.14 release ([25ccadf](https://github.com/JanssenProject/jans/commit/25ccadf85327ea14685c6066dc6609919e4f2865))
+
 ## [1.0.13](https://github.com/JanssenProject/jans/compare/jans-config-api-v1.0.12...jans-config-api-v1.0.13) (2023-05-10)
 
 

@@ -167,6 +167,7 @@ class OpenDjInstaller(BaseInstaller, SetupUtils):
 
         self.logIt("Running OpenDJ Setup")
 
+        Config.backend_service = 'opendj.service'
         Config.templateRenderingDict['opendj_pck11_setup_key_fn'] = self.opendj_pck11_setup_key_fn
         Config.templateRenderingDict['opendj_trusstore_setup_key_fn'] = self.opendj_trusstore_setup_key_fn
 

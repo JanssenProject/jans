@@ -218,7 +218,7 @@ class BaseInstaller:
 
                 if force or not os.path.exists(src):
                     self.download_file(url, src)
-                    
+
     def download_fips_files(self, force=False, downloads=[]):
         if hasattr(self, 'source_fips_files'):
             for i, item in enumerate(self.source_fips_files[:]):
@@ -231,7 +231,7 @@ class BaseInstaller:
 
                 if force or not os.path.exists(src):
                     self.download_file(url, src)
-                    
+
     def profile_templates(self, temp_dir=None, recursive=False):
         if not temp_dir:
             if not hasattr(self, 'templates_folder'):

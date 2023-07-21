@@ -31,7 +31,7 @@ tags:
 - name: OAuth - UMA Resources
 - name: OAuth - Scopes
 - name: Agama - Configuration
-- name: Agama - Developer Studio
+- name: Agama
 - name: Statistics - User
 - name: Health - Check
 - name: Server Stats
@@ -177,10 +177,10 @@ paths:
   /api/v1/agama-deployment/{name}:
     get:
       tags:
-      - Agama - Developer Studio
+      - Agama
       summary: Fetches deployed Agama project based on name.
       description: Fetches deployed Agama project based on name.
-      operationId: get-agama-dev-studio-prj-by-name
+      operationId: get-agama-prj-by-name
       parameters:
       - name: name
         in: path
@@ -201,8 +201,6 @@ paths:
                   value: ""
         "204":
           description: No Content
-        "400":
-          description: Bad Request
         "401":
           description: Unauthorized
         "404":
@@ -214,10 +212,10 @@ paths:
         - https://jans.io/oauth/config/agama.readonly
     post:
       tags:
-      - Agama - Developer Studio
+      - Agama
       summary: Deploy an Agama project.
       description: Deploy an Agama project.
-      operationId: post-agama-dev-studio-prj
+      operationId: post-agama-prj
       parameters:
       - name: name
         in: path
@@ -257,10 +255,10 @@ paths:
         - https://jans.io/oauth/config/agama.write
     delete:
       tags:
-      - Agama - Developer Studio
+      - Agama
       summary: Delete a deployed Agama project.
       description: Delete a deployed Agama project.
-      operationId: delete-agama-dev-studio-prj
+      operationId: delete-agama-prj
       parameters:
       - name: name
         in: path
@@ -271,8 +269,6 @@ paths:
       responses:
         "204":
           description: No Content
-        "400":
-          description: Bad Request
         "401":
           description: Unauthorized
         "404":
@@ -287,10 +283,10 @@ paths:
   /api/v1/agama-deployment/configs/{name}:
     get:
       tags:
-      - Agama - Developer Studio
+      - Agama
       summary: Retrieve the list of configs based on name.
       description: Retrieve the list of configs based on name.
-      operationId: get-agama-dev-prj-configs
+      operationId: get-agama-prj-configs
       parameters:
       - name: name
         in: path
@@ -318,10 +314,10 @@ paths:
         - https://jans.io/oauth/config/agama.readonly
     put:
       tags:
-      - Agama - Developer Studio
+      - Agama
       summary: Update an Agama project.
       description: Update an Agama project.
-      operationId: put-agama-dev-studio-prj
+      operationId: put-agama-prj
       parameters:
       - name: name
         in: path
@@ -360,13 +356,13 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/agama.write
-  /api/v1/agama-deployment/list:
+  /api/v1/agama-deployment:
     get:
       tags:
-      - Agama - Developer Studio
+      - Agama
       summary: Retrieve the list of projects deployed currently.
       description: Retrieve the list of projects deployed currently.
-      operationId: get-agama-dev-prj
+      operationId: get-agama-prj
       parameters:
       - name: start
         in: query
@@ -396,311 +392,6 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/agama.readonly
-  /api/v1/agama:
-    get:
-      tags:
-      - Agama - Configuration
-      summary: Fetches all agama flow.
-      description: Fetches all agama flow.
-      operationId: get-agama-flows
-      parameters:
-      - name: pattern
-        in: query
-        description: Search pattern
-        schema:
-          type: string
-          default: ""
-      - name: limit
-        in: query
-        description: Search size - max size of the results to return
-        schema:
-          type: integer
-          format: int32
-          default: 50
-      - name: startIndex
-        in: query
-        description: The 1-based index of the first query result
-        schema:
-          type: integer
-          format: int32
-          default: 0
-      - name: sortBy
-        in: query
-        description: Attribute whose value will be used to order the returned response
-        schema:
-          type: string
-          default: agFlowQname
-      - name: sortOrder
-        in: query
-        description: Order in which the sortBy param is applied. Allowed values are
-          "ascending" and "descending"
-        schema:
-          type: string
-          default: ascending
-      - name: includeSource
-        in: query
-        description: Boolean flag to indicate agama source is to be included
-        schema:
-          type: boolean
-          default: false
-      responses:
-        "200":
-          description: Agama Flows
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PagedResult'
-              examples:
-                Response json example:
-                  description: Response json example
-                  value: |
-                    {
-                        "start": 0,
-                        "totalEntriesCount": 1,
-                        "entriesCount": 1,
-                        "entries": [
-                            {
-                                "dn": "agFlowQname=test,ou=flows,ou=agama,o=jans",
-                                "qname": "test",
-                                "revision": -1,
-                                "enabled": false,
-                                "metadata": {
-                                    "timestamp": 1666786067495
-                                },
-                                "source": "Flow test\n\tBasepath \"hello\"\n\nin = { name: \"John\" }\nRRF \"index.ftlh\" in\n\nLog \"Done!\"\nFinish \"john_doe\"",
-                                "baseDn": "agFlowQname=test,ou=flows,ou=agama,o=jans"
-                            }
-                        ]
-                    }
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/agama.readonly
-        - https://jans.io/oauth/config/agama.write
-        - https://jans.io/oauth/config/read-all
-    post:
-      tags:
-      - Agama - Configuration
-      summary: Create a new agama flow
-      description: Create a new agama flow
-      operationId: post-agama-flow
-      requestBody:
-        description: Agama Flow
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Flow'
-            examples:
-              Request example:
-                description: Request example
-                value: |
-                  {
-                    "enabled": false,
-                    "source":"Flow test\n\tBasepath \"hello\"\n\nin = { name: \"John\" }\nRRF \"index.ftlh\" in\n\nLog \"Done!\"\nFinish \"john_doe\"",
-                    "qname": "test"
-                  }
-      responses:
-        "201":
-          description: Created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Flow'
-              examples:
-                Response example:
-                  description: Response example
-                  value: |
-                    {
-                      "enabled": false,
-                      "source":"Flow test\n\tBasepath \"hello\"\n\nin = { name: \"John\" }\nRRF \"index.ftlh\" in\n\nLog \"Done!\"\nFinish \"john_doe\"",
-                      "qname": "test"
-                    }
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/agama.write
-  /api/v1/agama/{qname}:
-    get:
-      tags:
-      - Agama - Configuration
-      summary: Gets an agama flow based on Qname.
-      description: Gets an agama flow based on Qname.
-      operationId: get-agama-flow
-      parameters:
-      - name: qname
-        in: path
-        description: Agama Flow name
-        required: true
-        schema:
-          type: string
-      - name: includeSource
-        in: query
-        description: Boolean flag to indicate agama source is to be included
-        schema:
-          type: boolean
-          default: false
-      responses:
-        "200":
-          description: Agama Flow
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Flow'
-              examples:
-                Response json example:
-                  description: Response json example
-                  value: |
-                    {
-                        "dn": "agFlowQname=test,ou=flows,ou=agama,o=jans",
-                        "qname": "test",
-                        "revision": -1,
-                        "enabled": false,
-                        "metadata": {
-                            "timestamp": 1666786067495
-                        },
-                        "baseDn": "agFlowQname=test,ou=flows,ou=agama,o=jans"
-                    }
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/agama.readonly
-        - https://jans.io/oauth/config/agama.write
-        - https://jans.io/oauth/config/read-all
-    post:
-      tags:
-      - Agama - Configuration
-      summary: Create a new agama flow from source
-      description: Create a new agama flow from source.
-      operationId: post-agama-flow-from-source
-      parameters:
-      - name: qname
-        in: path
-        description: Agama Flow name
-        required: true
-        schema:
-          type: string
-      requestBody:
-        description: Agama Flow
-        content:
-          text/plain:
-            schema:
-              type: string
-            examples:
-              Request example:
-                description: Request example
-                value: "//This is a comment\nFlow test\n    Basepath \"hello\" \n\n\
-                  in = { name: \"John\" }\nRRF \"index.ftlh\" in\n\nLog \"Done!\"\n\
-                  Finish \"john_doe\"\n"
-      responses:
-        "201":
-          description: Created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Flow'
-              examples:
-                Response example:
-                  description: Response example
-                  value: |
-                    {
-                      "enabled": false,
-                      "source":"Flow test\n\tBasepath \"hello\"\n\nin = { name: \"John\" }\nRRF \"index.ftlh\" in\n\nLog \"Done!\"\nFinish \"john_doe\"",
-                      "qname": "test"
-                    }
-        "400":
-          description: Bad Request
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/agama.write
-    delete:
-      tags:
-      - Agama - Configuration
-      summary: Deletes an agama flow based on Qname
-      description: Deletes an agama flow based on Qname
-      operationId: delete-agama-flow
-      parameters:
-      - name: qname
-        in: path
-        description: Agama Flow name
-        required: true
-        schema:
-          type: string
-      responses:
-        "204":
-          description: No Content
-        "401":
-          description: Unauthorized
-        "404":
-          description: Not Found
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/agama.delete
-    patch:
-      tags:
-      - Agama - Configuration
-      summary: Partially modify a Agama Flow
-      description: Partially modify a Agama Flow
-      operationId: patch-agama-flow
-      parameters:
-      - name: qname
-        in: path
-        description: Agama Flow name
-        required: true
-        schema:
-          type: string
-      requestBody:
-        description: JsonPatch object
-        content:
-          application/json-patch+json:
-            schema:
-              type: array
-              items:
-                $ref: '#/components/schemas/JsonPatch'
-            examples:
-              Request example:
-                description: Request example
-                value: |
-                  [{ "op": "replace", "path": "/source", "value": "Flow test\n\tBasepath \"hello\"\n\nin = { name: \"John\" }\nRRF \"index.ftlh\" in\n\nLog \"Done!\"\nFinish \"john_doe\""}]
-      responses:
-        "200":
-          description: Patched Agama Flow
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Flow'
-              examples:
-                Response example:
-                  description: Response example
-                  value: |
-                    {
-                      "enabled": false,
-                      "source":"Flow test\n\tBasepath \"hello\"\n\nin = { name: \"John\" }\nRRF \"index.ftlh\" in\n\nLog \"Done!\"\nFinish \"john_doe\"",
-                      "qname": "test"
-                    }
-        "401":
-          description: Unauthorized
-        "404":
-          description: Not Found
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/agama.write
   /api/v1/agama/syntax-check/{qname}:
     post:
       tags:
@@ -736,57 +427,6 @@ paths:
         - https://jans.io/oauth/config/agama.readonly
         - https://jans.io/oauth/config/agama.write
         - https://jans.io/oauth/config/read-all
-  /api/v1/agama/source/{qname}:
-    put:
-      tags:
-      - Agama - Configuration
-      summary: Update agama flow from source file
-      description: Update agama flow from source file.
-      operationId: put-agama-flow-from-source
-      parameters:
-      - name: qname
-        in: path
-        description: Agama Flow name
-        required: true
-        schema:
-          type: string
-      requestBody:
-        description: String representing patch-document.
-        content:
-          text/plain:
-            schema:
-              type: string
-            examples:
-              Request example:
-                description: Request example
-                value: "//This is a comment\nFlow test\n    Basepath \"hello\" \n\n\
-                  in = { name: \"John\" }\nRRF \"index.ftlh\" in\n\nLog \"Done!\"\n\
-                  Finish \"john_doe\"\n"
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Flow'
-              examples:
-                Response example:
-                  description: Response example
-                  value: |
-                    {
-                      "enabled": false,
-                      "source":"Flow test\n\tBasepath \"hello\"\n\nin = { name: \"John\" }\nRRF \"index.ftlh\" in\n\nLog \"Done!\"\nFinish \"john_doe\"",
-                      "qname": "test"
-                    }
-        "401":
-          description: Unauthorized
-        "404":
-          description: Not Found
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/agama.write
   /api/v1/attributes:
     get:
       tags:
@@ -7652,12 +7292,12 @@ components:
           type: array
           items:
             type: string
+        error:
+          type: string
         flowsError:
           type: object
           additionalProperties:
             type: string
-        error:
-          type: string
         projectMetadata:
           $ref: '#/components/schemas/ProjectMetadata'
     ProjectMetadata:
@@ -7677,6 +7317,10 @@ components:
           type: object
           additionalProperties:
             type: object
+        noDirectLaunch:
+          type: array
+          items:
+            type: string
     PagedResult:
       type: object
       properties:
@@ -7693,57 +7337,6 @@ components:
           type: array
           items:
             type: object
-    Flow:
-      type: object
-      properties:
-        dn:
-          type: string
-        qname:
-          type: string
-        transHash:
-          type: string
-        revision:
-          type: integer
-          format: int32
-        enabled:
-          type: boolean
-        metadata:
-          $ref: '#/components/schemas/FlowMetadata'
-        source:
-          type: string
-        transpiled:
-          type: string
-        codeError:
-          type: string
-        baseDn:
-          type: string
-    FlowMetadata:
-      type: object
-      properties:
-        funcName:
-          type: string
-        inputs:
-          type: array
-          items:
-            type: string
-        timeout:
-          type: integer
-          format: int32
-        displayName:
-          type: string
-        author:
-          type: string
-        timestamp:
-          type: integer
-          format: int64
-        description:
-          type: string
-        properties:
-          type: object
-          additionalProperties:
-            type: object
-    JsonPatch:
-      type: object
     AttributeValidation:
       type: object
       properties:
@@ -7857,17 +7450,17 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        userCanAccess:
-          type: boolean
-        adminCanAccess:
+        userCanView:
           type: boolean
         adminCanView:
           type: boolean
         adminCanEdit:
           type: boolean
-        userCanView:
-          type: boolean
         userCanEdit:
+          type: boolean
+        userCanAccess:
+          type: boolean
+        adminCanAccess:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -8290,6 +7883,8 @@ components:
         configurationUpdateInterval:
           type: integer
           format: int32
+        logNotFoundEntityAsError:
+          type: boolean
         enableClientGrantTypeUpdate:
           type: boolean
         dynamicGrantTypeDefault:
@@ -8431,6 +8026,8 @@ components:
           type: boolean
         returnDeviceSecretFromAuthzEndpoint:
           type: boolean
+        dcrForbidExpirationTimeInRequest:
+          type: boolean
         dcrSignatureValidationEnabled:
           type: boolean
         dcrSignatureValidationSharedSecret:
@@ -8447,10 +8044,10 @@ components:
           type: boolean
         dcrAuthorizationWithMTLS:
           type: boolean
-        dcrIssuers:
-          type: array
-          items:
-            type: string
+        trustedSsaIssuers:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/TrustedIssuerConfig'
         useLocalCache:
           type: boolean
         fapiCompatibility:
@@ -8602,6 +8199,10 @@ components:
             type: string
         httpLoggingResponseBodyContent:
           type: boolean
+        skipAuthenticationFilterOptionsMethod:
+          type: boolean
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8611,8 +8212,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -8805,11 +8404,20 @@ components:
           type: string
         sharedSecret:
           type: string
+    TrustedIssuerConfig:
+      type: object
+      properties:
+        automaticallyGrantedScopes:
+          type: array
+          items:
+            type: string
     PersistenceConfiguration:
       type: object
       properties:
         persistenceType:
           type: string
+    JsonPatch:
+      type: object
     CacheConfiguration:
       type: object
       properties:
@@ -9231,20 +8839,6 @@ components:
           - tls_client_auth
           - self_signed_tls_client_auth
           - none
-        allAuthenticationMethods:
-          uniqueItems: true
-          type: array
-          items:
-            type: string
-            enum:
-            - client_secret_basic
-            - client_secret_post
-            - client_secret_jwt
-            - private_key_jwt
-            - access_token
-            - tls_client_auth
-            - self_signed_tls_client_auth
-            - none
         baseDn:
           type: string
         inum:
@@ -9341,6 +8935,9 @@ components:
           type: array
           items:
             type: string
+        requestedLifetime:
+          type: integer
+          format: int32
     CustomObjectAttribute:
       type: object
       properties:
@@ -9352,10 +8949,10 @@ components:
           type: array
           items:
             type: object
-        value:
-          type: object
         displayValue:
           type: string
+        value:
+          type: object
     LocalizedString:
       type: object
       properties:
@@ -9476,14 +9073,6 @@ components:
       properties:
         valid:
           type: boolean
-        connectProtectionList:
-          type: array
-          items:
-            type: string
-            enum:
-            - None
-            - StartTls
-            - SslTls
         host:
           type: string
         port:
@@ -9562,6 +9151,7 @@ components:
           - spontaneous_scope
           - end_session
           - post_authn
+          - select_account
           - scim
           - ciba_end_user_notification
           - revoke_token
@@ -9599,14 +9189,14 @@ components:
           type: boolean
         internal:
           type: boolean
+        locationPath:
+          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
-        locationPath:
-          type: string
         baseDn:
           type: string
     ScriptError:

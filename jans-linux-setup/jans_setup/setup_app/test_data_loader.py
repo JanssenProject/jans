@@ -335,6 +335,9 @@ class TestDataLoader(BaseInstaller, SetupUtils):
 
         self.enable_cusom_scripts()
 
+        # make scope offline_access as default
+        self.dbUtils.set_configuration("jansDefScope", "true", "inum=C4F6,ou=scopes,o=jans")
+
         if self.dbUtils.moddb == static.BackendTypes.LDAP:
             # Update LDAP schema
             Config.pbar.progress(self.service_name, "Updating schema", False)

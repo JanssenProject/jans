@@ -2,6 +2,7 @@
 
 import sys
 import os
+import glob
 import argparse
 import zipfile
 import shutil
@@ -42,7 +43,8 @@ parser.add_argument('-uninstall', help="Uninstall Jans server and removes all fi
 parser.add_argument('--args', help="Arguments to be passed to setup.py")
 parser.add_argument('-yes', help="No prompt", action='store_true')
 parser.add_argument('--keep-downloads', help="Keep downloaded files (applicable for uninstallation only)", action='store_true')
-parser.add_argument('--profile', help="Setup profile", choices=['jans', 'openbanking', 'disa-stig'], default='jans')
+parser.add_argument('--keep-setup', help="Keep setup files for future install", action='store_true')
+parser.add_argument('--profile', help="Setup profile", choices=['jans', 'openbanking'], default='jans')
 parser.add_argument('-download-exit', help="Downloads files and exits", action='store_true')
 parser.add_argument('--setup-branch', help="Jannsen setup github branch", default="main")
 parser.add_argument('--setup-dir', help="Setup directory", default=os.path.join(jans_dir, 'jans-setup'))
@@ -55,11 +57,6 @@ argsp = parser.parse_args()
 bacup_ext = '-back.' + time.ctime()
 
 def check_install_dependencies():
-
-    try:
-        from distutils import dist
-    except ImportError:
-        package_dependencies.append('python3-distutils')
 
     try:
         import ldap3
@@ -230,21 +227,41 @@ def uninstall_jans():
                 os.remove(default_fn)
             print("Stopping", service)
             os.system('systemctl stop ' + service)
+            os.system('systemctl disable ' + service)
+            unit_fn = os.path.join('/etc/systemd/system', service + '.service')
+            if os.path.exists(unit_fn):
+                os.remove(unit_fn)
 
-    if argsp.profile == 'jans' or argsp.profile == 'disa-stig':
+    if os.path.exists('/opt/opendj/bin/stop-ds') and (argsp.profile == 'jans' or argsp.profile == 'disa-stig'):
         print("Stopping OpenDj Server")
         os.system('/opt/opendj/bin/stop-ds')
+        os.system('systemctl disable opendj')
+        os.remove('/etc/systemd/system/opendj.service')
 
-    remove_list = ['/etc/certs', '/etc/jans', '/opt/jans', '/opt/amazon-corretto*', '/opt/jre', '/opt/node*', '/opt/jetty*', '/opt/jython*']
+    os.system('systemctl daemon-reload')
+    os.system('systemctl reset-failed')
+
+    remove_list = ['/etc/certs', '/etc/jans', '/opt/amazon-corretto*', '/opt/jre', '/opt/node*', '/opt/jetty*', '/opt/jython*']
     if argsp.profile == 'jans' or argsp.profile == 'disa-stig':
         remove_list.append('/opt/opendj')
     if not argsp.keep_downloads:
         remove_list.append('/opt/dist')
 
+    if not argsp.keep_setup:
+        remove_list.append('/opt/jans')
+    else:
+        for rdir in glob.glob('/opt/jans/*'):
+            if rdir != '/opt/jans/jans-setup':
+                remove_list.append(rdir)
+        os.system('rm -r -f /opt/jans/jans-setup/output')
+        os.system('rm -f /opt/jans/jans-setup/logs/*.log')
+        os.system('rm -f /opt/jans/jans-setup/setup.properties.last')
+
     for p in remove_list:
-        cmd = 'rm -r -f ' + p
-        print("Executing", cmd)
-        os.system('rm -r -f ' + p)
+        if glob.glob(p):
+            cmd = 'rm -r -f ' + p
+            print("Executing", cmd)
+            os.system('rm -r -f ' + p)
 
     apache_conf_fn_list = []
 

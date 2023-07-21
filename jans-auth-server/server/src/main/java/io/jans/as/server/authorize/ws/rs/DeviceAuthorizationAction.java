@@ -43,7 +43,10 @@ import static io.jans.as.server.service.DeviceAuthorizationService.*;
  */
 @Named
 @RequestScoped
+@SuppressWarnings("java:S1948")
 public class DeviceAuthorizationAction implements Serializable {
+
+    private static final String INVALID_USER_CODE_MESSAGE_KEY = "device.authorization.invalid.user.code";
 
     @Inject
     private Logger log;
@@ -106,6 +109,11 @@ public class DeviceAuthorizationAction implements Serializable {
      * Reset data in session or create a new one whether there is no session.
      */
     public void initializeSession() {
+        initializeOrCreateSession();
+    }
+
+    @SuppressWarnings("java:S1117")
+    public SessionId initializeOrCreateSession() {
         SessionId sessionId = sessionIdService.getSessionId();
         Map<String, String> sessionAttributes = sessionId != null ? sessionId.getSessionAttributes() : new HashMap<>();
         sessionAttributes.put(Constants.DEVICE_AUTHORIZATION, Boolean.TRUE.toString());
@@ -129,61 +137,76 @@ public class DeviceAuthorizationAction implements Serializable {
             sessionAttributes.put(SESSION_ATTEMPTS, String.valueOf(attempts));
             sessionId.setSessionAttributes(sessionAttributes);
             sessionIdService.updateSessionId(sessionId);
+            log.debug("Updated session for device authorization grant page, sessionId: {}", sessionId.getId());
         }
+        return sessionId;
     }
 
     /**
      * Processes user code introduced or loaded in the veritification page and redirects whether user code is correct
      * or return an error if there is something wrong.
      */
+    @SuppressWarnings("java:S1117")
     public void processUserCodeVerification() {
-        SessionId session = sessionIdService.getSessionId();
-        if (session == null) {
-            facesMessages.add(FacesMessage.SEVERITY_WARN, languageBean.getMessage("error.errorEncountered"));
-            return;
-        }
-
-        if (!preventBruteForcing(session)) {
-            facesMessages.add(FacesMessage.SEVERITY_WARN, languageBean.getMessage("device.authorization.brute.forcing.msg"));
-            return;
-        }
-
-        String userCode;
-        if (StringUtils.isBlank(userCodePart1) && StringUtils.isBlank(userCodePart2)) {
-            userCode = session.getSessionAttributes().get(SESSION_USER_CODE);
-        } else {
-            userCode = userCodePart1 + '-' + userCodePart2;
-        }
-        userCode = userCode.toUpperCase();
-
-        if (!validateFormat(userCode)) {
-            facesMessages.add(FacesMessage.SEVERITY_WARN, languageBean.getMessage("device.authorization.invalid.user.code"));
-            return;
-        }
-
-        DeviceAuthorizationCacheControl cacheData = deviceAuthorizationService.getDeviceAuthzByUserCode(userCode);
-        log.debug("Verifying device authorization cache data: {}", cacheData);
-
-        String message = null;
-        if (cacheData != null) {
-            if (cacheData.getStatus() == DeviceAuthorizationStatus.PENDING) {
-                session.getSessionAttributes().put(SESSION_USER_CODE, userCode);
-                session.getSessionAttributes().remove(SESSION_LAST_ATTEMPT);
-                session.getSessionAttributes().remove(SESSION_ATTEMPTS);
-                sessionIdService.updateSessionId(session);
-
-                redirectToAuthorization(cacheData);
-            } else if (cacheData.getStatus() == DeviceAuthorizationStatus.DENIED) {
-                message = languageBean.getMessage("device.authorization.access.denied.msg");
-            } else {
-                message = languageBean.getMessage("device.authorization.expired.code.msg");
+        try {
+            SessionId session = sessionIdService.getSessionId();
+            if (session == null) {
+                log.trace("No session found during device authorization, creating new unauthenticated session ...");
+                session = initializeOrCreateSession();
             }
-        } else {
-            message = languageBean.getMessage("device.authorization.invalid.user.code");
-        }
 
-        if (message != null) {
-            facesMessages.add(FacesMessage.SEVERITY_WARN, message);
+            if (!preventBruteForcing(session)) {
+                log.trace("Brute force prevention during device authorization, sessionId: {}", session.getId());
+                facesMessages.add(FacesMessage.SEVERITY_WARN, languageBean.getMessage("device.authorization.brute.forcing.msg"));
+                return;
+            }
+
+            final String userCode;
+            if (StringUtils.isBlank(userCodePart1) && StringUtils.isBlank(userCodePart2)) {
+                userCode = session.getSessionAttributes().get(SESSION_USER_CODE).toUpperCase();
+            } else {
+                userCode = (userCodePart1 + '-' + userCodePart2).toUpperCase();
+            }
+
+            if (!validateFormat(userCode)) {
+                log.trace("Invalid user code during device authorization, userCode: {}, sessionId: {}", userCode, session.getId());
+                facesMessages.add(FacesMessage.SEVERITY_WARN, languageBean.getMessage(INVALID_USER_CODE_MESSAGE_KEY));
+                return;
+            }
+
+            DeviceAuthorizationCacheControl cacheData = deviceAuthorizationService.getDeviceAuthzByUserCode(userCode);
+            log.debug("Verifying device authorization cache data: {}", cacheData);
+
+            String message = null;
+            if (cacheData != null) {
+                if (cacheData.getStatus() == DeviceAuthorizationStatus.PENDING) {
+                    session.getSessionAttributes().put(SESSION_USER_CODE, userCode);
+                    session.getSessionAttributes().remove(SESSION_LAST_ATTEMPT);
+                    session.getSessionAttributes().remove(SESSION_ATTEMPTS);
+                    sessionIdService.updateSessionId(session);
+
+                    redirectToAuthorization(cacheData);
+                } else if (cacheData.getStatus() == DeviceAuthorizationStatus.DENIED) {
+                    log.trace("Cache data status=DENIED during device authorization, userCode: {}, sessionId: {}", userCode, session.getId());
+                    message = languageBean.getMessage("device.authorization.access.denied.msg");
+                } else {
+                    log.trace("Cache data EXPIRED during device authorization, userCode: {}, sessionId: {}", userCode, session.getId());
+                    message = languageBean.getMessage("device.authorization.expired.code.msg");
+                }
+            } else {
+                log.trace("Unable to validate user code during device authorization, userCode: {}, sessionId: {}", userCode, session.getId());
+                message = languageBean.getMessage(INVALID_USER_CODE_MESSAGE_KEY);
+            }
+
+            if (message != null) {
+                log.trace("Message during device authorization, message: {}, userCode: {}, sessionId: {}", message, userCode, session.getId());
+                facesMessages.add(FacesMessage.SEVERITY_WARN, message);
+            }
+        } catch (Exception e) {
+            log.error("Failed to process user code validation", e);
+
+            facesMessages.clear();
+            facesMessages.add(FacesMessage.SEVERITY_WARN, languageBean.getMessage(INVALID_USER_CODE_MESSAGE_KEY));
         }
     }
 

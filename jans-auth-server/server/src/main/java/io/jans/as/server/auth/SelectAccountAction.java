@@ -11,14 +11,15 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.session.SessionId;
+import io.jans.as.model.authorize.AuthorizeErrorResponseType;
+import io.jans.as.server.model.common.ExecutionContext;
 import io.jans.as.server.security.Identity;
 import io.jans.as.server.service.CookieService;
+import io.jans.as.server.service.ErrorHandlerService;
 import io.jans.as.server.service.RequestParameterService;
 import io.jans.as.server.service.SessionIdService;
+import io.jans.as.server.service.external.ExternalSelectAccountService;
 import io.jans.jsf2.service.FacesService;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.faces.context.ExternalContext;
@@ -26,6 +27,9 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Map;
@@ -65,6 +69,12 @@ public class SelectAccountAction {
 
     @Inject
     private Authenticator authenticator;
+
+    @Inject
+    private ExternalSelectAccountService externalSelectAccountService;
+
+    @Inject
+    private ErrorHandlerService errorHandlerService;
 
 
     // OAuth 2.0 request parameters
@@ -113,9 +123,19 @@ public class SelectAccountAction {
                 log.trace("User: {}, sessionId: {}", uid, session.getId());
                 currentSessions.add(session);
                 uids.add(uid);
+            } else {
+                log.trace("Unable to find session for session_id: {}", session.getId());
             }
         }
         log.trace("Found {} sessions", currentSessions.size());
+
+        ExecutionContext executionContext = ExecutionContext.of(externalContext);
+        executionContext.setCurrentSessions(currentSessions);
+
+        final boolean isOk = externalSelectAccountService.externalPrepare(executionContext);
+        if (!isOk) {
+            errorHandlerService.handleError("selectAccount.forbiddenByScript", AuthorizeErrorResponseType.ACCESS_DENIED, "Forbidden by select account script.");
+        }
     }
 
     public List<SessionId> getCurrentSessions() {
@@ -127,12 +147,22 @@ public class SelectAccountAction {
             log.debug("Selected account: {}", selectedSessionId);
             clearSessionIdCookie();
             Optional<SessionId> selectedSession = currentSessions.stream().filter(s -> s.getId().equals(selectedSessionId)).findAny();
-            if (!selectedSession.isPresent()) {
+            if (selectedSession.isEmpty()) {
                 log.debug("Unable to find session.");
                 return;
             }
             cookieService.createSessionIdCookie(selectedSession.get(), false);
             identity.setSessionId(selectedSession.get());
+
+            ExecutionContext executionContext = ExecutionContext.of(externalContext);
+            executionContext.setSessionId(selectedSession.get());
+
+            final boolean isOk = externalSelectAccountService.externalOnSelect(executionContext);
+            if (!isOk) {
+                log.debug("SelectAccount is forbidded by onSelect() method of external script.");
+                return;
+            }
+
             authenticator.authenticateBySessionId(selectedSessionId);
             String uri = buildAuthorizationUrl();
             log.trace("RedirectTo: {}", uri);
@@ -144,11 +174,24 @@ public class SelectAccountAction {
 
     public String getName(SessionId sessionId) {
         final User user = sessionId.getUser();
+
+        ExecutionContext executionContext = ExecutionContext.of(externalContext);
+        executionContext.setSessionId(sessionId);
+        executionContext.setUser(user);
+
+        final String externalDisplayName = externalSelectAccountService.externalGetAccountDisplayName(executionContext);
+        if (StringUtils.isNotBlank(externalDisplayName)) {
+            log.trace("External display name '{}' is used for sessionId {}", executionContext, sessionId.getId());
+            return externalDisplayName;
+        }
+
         final String displayName = user.getAttribute("displayName");
         if (StringUtils.isNotBlank(displayName)) {
             return displayName;
         }
-        if (StringUtils.isNotBlank(displayName)) {
+
+        // usually fallback option since display name has to be provided
+        if (StringUtils.isNotBlank(user.getUserId())) {
             return user.getUserId();
         }
         return user.getDn();

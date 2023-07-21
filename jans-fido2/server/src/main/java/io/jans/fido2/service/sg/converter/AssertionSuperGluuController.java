@@ -131,8 +131,8 @@ public class AssertionSuperGluuController {
         }
 
         if (StringHelper.isEmpty(userName) && StringHelper.isEmpty(keyHandle)) {
-            String reasonError = "invalid : username or keyhandle";
-            String descriptionError = "The request should contains either username or keyhandle";
+            String reasonError = "invalid: username or keyHandle";
+            String descriptionError = "The request should contains either username or keyHandle";
             throw Fido2ErrorResponseFactory.createBadRequestException(Fido2ErrorResponseType.INVALID_USERNAME_OR_KEYHANDLE, reasonError, descriptionError, ThreadContext.get(Constants.CORRELATION_ID_HEADER));
         }
 
@@ -147,7 +147,7 @@ public class AssertionSuperGluuController {
         params.put("username", userName);
         params.put("session_id", sessionId);
 
-        log.debug("Prepared U2F_V2 assertions options request: {}", params.toString());
+        log.debug("Prepared U2F_V2 assertions options request: {}", params);
         return params;
     }
 
@@ -237,7 +237,7 @@ public class AssertionSuperGluuController {
             throw new Fido2RuntimeException("Failed to prepare attestationObject");
         }
 
-        log.debug("Prepared U2F_V2 assertion verify request: {}", params.toString());
+        log.debug("Prepared U2F_V2 assertion verify request: {}", params);
         return params;
     }
 
@@ -251,7 +251,7 @@ public class AssertionSuperGluuController {
         return authenticateResponse;
     }
 
-    private byte[] generateAuthData(ClientData clientData, RawAuthenticateResponse rawAuthenticateResponse) throws IOException {
+    private byte[] generateAuthData(ClientData clientData, RawAuthenticateResponse rawAuthenticateResponse) {
         byte[] rpIdHash = digestService.hashSha256(clientData.getOrigin());
         byte[] flags = new byte[]{AuthenticatorDataParser.FLAG_USER_PRESENT};
         byte[] counter = ByteBuffer.allocate(4).putInt((int) rawAuthenticateResponse.getCounter()).array();

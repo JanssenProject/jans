@@ -140,6 +140,7 @@ if base.current_app.profile == SetupProfiles.JANS or base.current_app.profile ==
     from setup_app.installers.scim import ScimInstaller
     from setup_app.installers.fido import FidoInstaller
     from setup_app.installers.eleven import ElevenInstaller
+    from setup_app.installers.jans_link import JansLinkInstaller
 
 from setup_app.installers.config_api import ConfigApiInstaller
 from setup_app.installers.jans_cli import JansCliInstaller
@@ -261,6 +262,7 @@ if Config.profile == SetupProfiles.JANS or Config.profile == SetupProfiles.DISA_
 
 if Config.profile == SetupProfiles.JANS:
     elevenInstaller = ElevenInstaller()
+    jans_link_installer = JansLinkInstaller()
 
 jansCliInstaller = JansCliInstaller()
 
@@ -413,6 +415,8 @@ def main():
 #                    debugpy.breakpoint();
                     rdbmInstaller.start_installation()
 
+            jansInstaller.order_services()
+
             if (Config.installed_instance and 'installHttpd' in Config.addPostSetupService) or (
                     not Config.installed_instance and Config.installHttpd):
                 httpdinstaller.configure()
@@ -442,6 +446,10 @@ def main():
                 if (Config.installed_instance and elevenInstaller.install_var in Config.addPostSetupService) or (
                         not Config.installed_instance and Config.get(elevenInstaller.install_var)):
                     elevenInstaller.start_installation()
+
+                if (Config.installed_instance and jans_link_installer.install_var in Config.addPostSetupService) or (
+                        not Config.installed_instance and Config.get(jans_link_installer.install_var)):
+                    jans_link_installer.start_installation()
 
             if Config.install_jans_cli:
                 jansCliInstaller.start_installation()

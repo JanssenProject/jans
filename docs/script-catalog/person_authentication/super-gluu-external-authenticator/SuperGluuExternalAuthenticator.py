@@ -7,6 +7,7 @@
 from com.google.android.gcm.server import Sender, Message
 from java.util import Arrays
 from org.apache.http.params import CoreConnectionPNames
+from org.apache.http.entity import ContentType
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.as.server.security import Identity
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
@@ -14,7 +15,7 @@ from io.jans.as.server.model.config import ConfigurationFactory
 from io.jans.as.server.service import AuthenticationService
 from io.jans.as.server.service import SessionIdService
 from io.jans.as.common.service.common.fido2 import RegistrationPersistenceService
-from io.jans.as.server.service.net import HttpService
+from io.jans.as.server.service.net import HttpService, HttpService2
 from io.jans.as.server.util import ServerUtil
 from io.jans.util import StringHelper
 from io.jans.as.common.service.common import EncryptionService
@@ -23,20 +24,18 @@ from io.jans.service import MailService
 from io.jans.as.server.service.push.sns import PushPlatform
 from io.jans.as.server.service.push.sns import PushSnsService
 from io.jans.notify.client import NotifyClientFactory
-from java.util import Arrays, HashMap, IdentityHashMap, Date
+from java.util import Arrays, HashMap, Collections, IdentityHashMap, Date
 from java.time import ZonedDateTime
 from java.time.format import DateTimeFormatter
 from io.jans.as.model.configuration import AppConfiguration
-import datetime
-import urllib
-import sys
-import json
-
-import datetime
-import urllib
+from io.jans.as.server.service.custom import CustomScriptService
 
 import sys
 import json
+import base64
+import datetime
+import urllib
+import token
 
 try:
     from com.notnoop.apns import APNS
@@ -76,8 +75,6 @@ class PersonAuthentication(PersonAuthenticationType):
         if not (self.oneStep or self.twoStep):
             print "Super-Gluu. Initialization. Valid authentication_mode values are one_step and two_step"
             return False
-
-        self.enabledPushNotifications = self.initPushNotificationService(configurationAttributes)
 
         self.androidUrl = None
         if configurationAttributes.containsKey("supergluu_android_download_url"):
@@ -120,6 +117,39 @@ class PersonAuthentication(PersonAuthenticationType):
                 return False
             else:
                 self.audit_attribute = configurationAttributes.get("audit_attribute").getValue2()
+
+        # SSA section
+        if not configurationAttributes.containsKey("AS_CLIENT_ID"):
+            print "Super-Gluu. Scan. Initialization. Property AS_CLIENT_ID is mandatory"
+            return False
+        self.AS_CLIENT_ID = configurationAttributes.get("AS_CLIENT_ID").getValue2()
+
+        if not configurationAttributes.containsKey("AS_CLIENT_SECRET"):
+            print "Super-Gluu. Scan. Initialization. Property AS_CLIENT_SECRET is mandatory"
+            return False
+        self.AS_CLIENT_SECRET = configurationAttributes.get("AS_CLIENT_SECRET").getValue2()
+
+        # SSA section
+        if not configurationAttributes.containsKey("AS_ENDPOINT"):
+            print "Super-Gluu. Scan. Initialization. Property AS_ENDPOINT is mandatory"
+            return False
+        self.AS_ENDPOINT = configurationAttributes.get("AS_ENDPOINT").getValue2()
+
+        if not configurationAttributes.containsKey("AS_SSA"):
+            print "Super-Gluu. Scan. Initialization. Property AS_SSA is mandatory"
+            return False
+        self.AS_SSA = configurationAttributes.get("AS_SSA").getValue2()
+
+        # Upon client creation, this value is populated, after that this call will not go through in subsequent script restart
+        if StringHelper.isEmptyString(self.AS_CLIENT_ID):
+            clientRegistrationResponse = self.registerScanClient(self.AS_ENDPOINT, self.AS_ENDPOINT, self.AS_SSA, customScript)
+            if clientRegistrationResponse == None:
+                return False
+
+            self.AS_CLIENT_ID = clientRegistrationResponse['client_id']
+            self.AS_CLIENT_SECRET = clientRegistrationResponse['client_secret']
+
+        self.enabledPushNotifications = self.initPushNotificationService(configurationAttributes)
 
         print "Super-Gluu. Initialized successfully. oneStep: '%s', twoStep: '%s', pushNotifications: '%s', customLabel: '%s'" % (self.oneStep, self.twoStep, self.enabledPushNotifications, self.customLabel)
 
@@ -722,31 +752,13 @@ class PersonAuthentication(PersonAuthenticationType):
         encryptionService = CdiUtil.bean(EncryptionService)
 
         if android_creds["enabled"]:
-            gluu_access_key = android_creds["access_key"]
-            gluu_secret_access_key = android_creds["secret_access_key"]
-
-            try:
-                gluu_secret_access_key = encryptionService.decrypt(gluu_secret_access_key)
-            except:
-                # Ignore exception. Password is not encrypted
-                print "Super-Gluu. Initialize Gluu notification services. Assuming that 'gluu_secret_access_key' in not encrypted"
-
             self.pushAndroidService = gluuClient
-            self.pushAndroidServiceAuth = notifyClientFactory.getAuthorization(gluu_access_key, gluu_secret_access_key);
+            self.gluu_android_platform_id = android_creds["platform_id"]
             print "Super-Gluu. Initialize Gluu notification services. Created Android notification service"
 
         if ios_creds["enabled"]:
-            gluu_access_key = ios_creds["access_key"]
-            gluu_secret_access_key = ios_creds["secret_access_key"]
-
-            try:
-                gluu_secret_access_key = encryptionService.decrypt(gluu_secret_access_key)
-            except:
-                # Ignore exception. Password is not encrypted
-                print "Super-Gluu. Initialize Gluu notification services. Assuming that 'gluu_secret_access_key' in not encrypted"
-
-            self.pushAppleService = gluuClient
-            self.pushAppleServiceAuth = notifyClientFactory.getAuthorization(gluu_access_key, gluu_secret_access_key);
+            self.pushAndroidService = gluuClient
+            self.gluu_ios_platform_id = android_creds["platform_id"]
             print "Super-Gluu. Initialize Gluu notification services. Created iOS notification service"
 
         enabled = self.pushAndroidService != None or self.pushAppleService != None
@@ -844,7 +856,7 @@ class PersonAuthentication(PersonAuthenticationType):
                                 if debug:
                                     print "Super-Gluu. Send iOS SNS push notification. token: '%s', message: '%s', send_notification_result: '%s', apple_push_platform: '%s'" % (push_token, push_message, send_notification_result, apple_push_platform)
                             elif self.pushGluuMode:
-                                send_notification_result = self.pushAppleService.sendNotification(self.pushAppleServiceAuth, targetEndpointArn, push_message)
+                                send_notification_result = self.pushAppleService.sendNotification(self.buildNotifyAuthorizationHeader(), targetEndpointArn, push_message, self.gluu_ios_platform_id)
                                 if debug:
                                     print "Super-Gluu. Send iOS Gluu push notification. token: '%s', message: '%s', send_notification_result: '%s'" % (push_token, push_message, send_notification_result)
                         else:
@@ -891,7 +903,7 @@ class PersonAuthentication(PersonAuthenticationType):
                                 if debug:
                                     print "Super-Gluu. Send Android SNS push notification. token: '%s', message: '%s', send_notification_result: '%s'" % (push_token, push_message, send_notification_result)
                             elif self.pushGluuMode:
-                                send_notification_result = self.pushAndroidService.sendNotification(self.pushAndroidServiceAuth, targetEndpointArn, push_message)
+                                send_notification_result = self.pushAndroidService.sendNotification(self.buildNotifyAuthorizationHeader(), targetEndpointArn, push_message, self.gluu_android_platform_id)
                                 if debug:
                                     print "Super-Gluu. Send Android Gluu push notification. token: '%s', message: '%s', send_notification_result: '%s'" % (push_token, push_message, send_notification_result)
                         else:
@@ -921,18 +933,17 @@ class PersonAuthentication(PersonAuthenticationType):
         pushClient = None
         pushClientAuth = None
         platformApplicationArn = None
+        platformId = None
         if platform == PushPlatform.GCM:
             pushClient = self.pushAndroidService
+            platformId = self.gluu_android_platform_id
             if self.pushSnsMode:
                 platformApplicationArn = self.pushAndroidPlatformArn
-            if self.pushGluuMode:
-                pushClientAuth = self.pushAndroidServiceAuth
         elif platform == PushPlatform.APNS:
             pushClient = self.pushAppleService
+            platformId = self.gluu_ios_platform_id
             if self.pushSnsMode:
                 platformApplicationArn = self.pushApplePlatformArn
-            if self.pushGluuMode:
-                pushClientAuth = self.pushAppleServiceAuth
         else:
             return None
 
@@ -944,7 +955,7 @@ class PersonAuthentication(PersonAuthenticationType):
             targetEndpointArn = pushSnsService.createPlatformArn(pushClient, platformApplicationArn, pushToken, user)
         else:
             customUserData = pushSnsService.getCustomUserData(user)
-            registerDeviceResponse = pushClient.registerDevice(pushClientAuth, pushToken, customUserData);
+            registerDeviceResponse = pushClient.registerDevice(self.buildNotifyAuthorizationHeader(), pushToken, customUserData, platformId);
             if registerDeviceResponse != None and registerDeviceResponse.getStatusCode() == 200:
                 targetEndpointArn = registerDeviceResponse.getEndpointArn()
 
@@ -1070,3 +1081,101 @@ class PersonAuthentication(PersonAuthenticationType):
             subject = "User log in: %s" % user_id
             body = "User log in: %s" % user_id
             mailService.sendMail(self.audit_email, subject, body)
+
+    def buildNotifyAuthorizationHeader(self):
+        token = self.getAccessTokenJansServer(self.AS_ENDPOINT, self.AS_CLIENT_ID, self.AS_CLIENT_SECRET)
+        authorizationHeader =  "Bearer %s" % token
+        
+        return authorizationHeader
+
+    def getAccessTokenJansServer(self, asBaseUrl, asClientId, asClientSecret):
+        endpointUrl = asBaseUrl + "/jans-auth/restv1/token"
+
+        body = "grant_type=client_credentials&scope=https://api.gluu.org/auth/scopes/scan.supergluu"
+
+        authData = base64.b64encode(("%s:%s" % (asClientId, asClientSecret)).encode('utf-8'))
+        headers = {"Accept" : "application/json"}
+
+        try:
+            httpService = CdiUtil.bean(HttpService2)
+            httpClient =  httpService.getHttpsClient()
+            resultResponse = httpService.executePost(httpClient, endpointUrl, authData, headers, body, ContentType.APPLICATION_FORM_URLENCODED)
+            httpResponse = resultResponse.getHttpResponse()
+            httpResponseStatusCode = httpResponse.getStatusLine().getStatusCode()
+            print "Super-Gluu. Scan. Get token response status code: %s" % httpResponseStatusCode
+
+            if not httpService.isResponseStastusCodeOk(httpResponse):
+                print "Super-Gluu. Scan. Get invalid token response"
+                httpService.consume(httpResponse)
+                return False
+
+            bytes = httpService.getResponseContent(httpResponse)
+
+            response = httpService.convertEntityToString(bytes)
+        except:
+            print "Super-Gluu. Scan. Failed to send token request: ", sys.exc_info()[1]
+            return False
+
+        response_data = json.loads(response)
+
+        access_token = response_data["access_token"];
+        if StringHelper.isEmpty(access_token):
+            print "Super-Gluu. Scan. Faield to get access token"
+            return None
+
+        return access_token
+
+    def registerScanClient(self, asBaseUrl, asRedirectUri, asSSA, customScript):
+        print "Super-Gluu. Scan. Attempting to register client"
+
+        redirect_str = "[\"%s\"]" % asRedirectUri
+        data_org = {'redirect_uris': json.loads(redirect_str),
+                    'software_statement': asSSA}
+        body = json.dumps(data_org)
+
+        endpointUrl = asBaseUrl + "/jans-auth/restv1/register"
+        headers = {"Accept" : "application/json"}
+
+        try:
+            httpService = CdiUtil.bean(HttpService2)
+            httpClient =  httpService.getHttpsClient()
+            resultResponse = httpService.executePost(httpClient, endpointUrl, None, headers, body, ContentType.APPLICATION_JSON)
+            httpResponse = resultResponse.getHttpResponse()
+            httpResponseStatusCode = httpResponse.getStatusLine().getStatusCode()
+            print "Super-Gluu. Scan. Get client registration response status code: %s" % httpResponseStatusCode
+
+            if not httpService.isResponseStastusCodeOk(httpResponse):
+                print "Super-Gluu. Scan. Get invalid registration"
+                httpService.consume(httpResponse)
+                return None
+
+            bytes = httpService.getResponseContent(httpResponse)
+
+            response = httpService.convertEntityToString(bytes)
+        except:
+            print "Super-Gluu. Scan. Failed to send client registration request: ", sys.exc_info()[1]
+            return None
+
+        response_data = json.loads(response)
+        client_id = response_data["client_id"]
+        client_secret = response_data["client_secret"]
+
+        print "Super-Gluu. Scan. Registered client: %s" % client_id
+
+        print "Super-Gluu. Scan. Attempting to store client credentials in script parameters"
+        try:
+            custScriptService = CdiUtil.bean(CustomScriptService)
+            customScript = custScriptService.getScriptByDisplayName(customScript.getName())
+            for conf in customScript.getConfigurationProperties():
+                if (StringHelper.equalsIgnoreCase(conf.getValue1(), "AS_CLIENT_ID")):
+                    conf.setValue2(client_id)
+                elif (StringHelper.equalsIgnoreCase(conf.getValue1(), "AS_CLIENT_SECRET")):
+                    conf.setValue2(client_secret)
+            custScriptService.update(customScript)    
+
+            print "Super-Gluu. Scan. Stored client credentials in script parameters"
+        except: 
+            print "Super-Gluu. Scan. Failed to store client credentials.", sys.exc_info()[1]
+            return None
+
+        return {'client_id' : client_id, 'client_secret' : client_secret}

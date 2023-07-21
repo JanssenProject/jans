@@ -347,6 +347,19 @@ class JCA_CLI:
             self.cli_logger.debug('requests response headers: %s', str(response.headers))
             self.cli_logger.debug('requests response text: %s', str(response.text))
 
+    def log_cmd(self, operation_id, url_suffix, endpoint_args, data):
+
+        cmdl = [sys.executable, __file__, '--operation-id', operation_id]
+        if url_suffix:
+            cmdl += ['--url-suffix', '"{}"'.format(url_suffix)]
+        if endpoint_args:
+            cmdl += ['--endpoint-args', '"{}"'.format(endpoint_args)]
+        if data:
+            cmdl += ['--data', "'{}'".format(json.dumps(data))]
+
+        with open(os.path.join(log_dir, 'cli_cmd.log'), 'a') as w:
+            w.write(' '.join(cmdl) + '\n')
+
     def set_user(self):
         self.auth_username = None
         self.auth_password = None
@@ -489,7 +502,6 @@ class JCA_CLI:
             raise ValueError(
                 self.colored_text("Unable to connect jans-auth server:\n {}".format(str(e)), error_color))
 
-
         self.log_response(response)
 
         if self.wrapped:
@@ -498,6 +510,10 @@ class JCA_CLI:
             print(response.status_code)
             print(response.text)
 
+        for key in ('user_data', 'access_token_enc', 'access_token'):
+            if key in config['DEFAULT']:
+                config['DEFAULT'].pop(key)
+        write_config()
 
 
     def check_access_token(self):
@@ -1067,17 +1083,29 @@ class JCA_CLI:
                                     for apptype in path['requestBody'].get('content', {}):
                                         if 'schema' in path['requestBody']['content'][apptype]:
                                             if path['requestBody']['content'][apptype]['schema'].get('type') == 'object' and '$ref' not in path['requestBody']['content'][apptype]['schema']:
-                                                print('  Parameters:')
-                                                for param in path['requestBody']['content'][apptype]['schema']['properties']:
-                                                    req_s = '*' if param in path['requestBody']['content'][apptype]['schema'].get('required', []) else ''
-                                                    print('    {}{}: {}'.format(param, req_s, path['requestBody']['content'][apptype]['schema']['properties'][param].get('description') or "Description not found for this property"))
+                                                
+                                                for prop_var in ('properties', 'additionalProperties'):
+                                                    if prop_var in path['requestBody']['content'][apptype]['schema']:
+                                                        break
+                                                else:
+                                                    prop_var = None
+                                                if prop_var:
+                                                    print('  Parameters:')
+                                                    for param in path['requestBody']['content'][apptype]['schema'][prop_var]:
+                                                        req_s = '*' if param in path['requestBody']['content'][apptype]['schema'].get('required', []) else ''
+                                                        if isinstance(path['requestBody']['content'][apptype]['schema'][prop_var][param], dict) and path['requestBody']['content'][apptype]['schema'][prop_var][param].get('description'):
+                                                            desc = path['requestBody']['content'][apptype]['schema'][prop_var][param]['description']
+                                                        else:
+                                                            desc = "Description not found for this property"
+                                                        print('    {}{}: {}'.format(param, req_s, desc))
 
-                                            elif path['requestBody']['content'][apptype]['schema'].get('type') == 'array':
+                                            elif path['requestBody']['content'][apptype]['schema'].get('type') == 'array' and '$ref' in path['requestBody']['content'][apptype]['schema']['items']:
                                                 schema_path = path['requestBody']['content'][apptype]['schema']['items']['$ref']
                                                 print('  Schema: Array of {}{}'.format(mode_suffix, os.path.basename(schema_path)))
                                             else:
-                                                schema_path = path['requestBody']['content'][apptype]['schema']['$ref']
-                                                print('  Schema: {}{}'.format(mode_suffix, os.path.basename(schema_path)))
+                                                if '$ref' in path['requestBody']['content'][apptype]['schema']:
+                                                    schema_path = path['requestBody']['content'][apptype]['schema']['$ref']
+                                                    print('  Schema: {}{}'.format(mode_suffix, os.path.basename(schema_path)))
                             break
         if schema_path:
             print()
@@ -1096,14 +1124,18 @@ class JCA_CLI:
 
     def get_json_from_file(self, data_fn):
 
-        if not os.path.exists(data_fn):
-            self.exit_with_error("Can't find file {}".format(data_fn))
+        if not os.path.isfile(data_fn):
+            try:
+                data = json.loads(data_fn)
+            except Exception as e:
+                self.exit_with_error("Error parsing json: {}".format(e))
 
-        try:
-            with open(data_fn) as f:
-                data = json.load(f)
-        except:
-            self.exit_with_error("Error parsing json file {}".format(data_fn))
+        else:
+            try:
+                with open(data_fn) as f:
+                    data = json.load(f)
+            except Exception as e:
+                self.exit_with_error("Error parsing json file {}: {}".format(data_fn, e))
 
         if isinstance(data, list):
             for entry in data:
@@ -1272,7 +1304,20 @@ class JCA_CLI:
                     else:
                         data = [{'op': pop, 'path': '/'+ pdata.lstrip('/')}]
 
-        caller_function = getattr(self, 'process_command_' + path['__method__'])
+        call_method = path['__method__'].lower()
+        caller_function = getattr(self, 'process_command_' + call_method)
+
+        cmd_data = data
+        if not data and data_fn:
+            for key in op_path.get('requestBody', {}).get('content', {}).keys():
+                if 'zip' in key:
+                    break
+            else:
+                cmd_data = self.get_json_from_file(data_fn)
+
+        if call_method in ('post', 'put', 'patch'):
+            self.log_cmd(operation_id, url_suffix, endpoint_args, cmd_data)
+
         return caller_function(path, suffix_param, endpoint_params, data_fn, data=data)
 
 

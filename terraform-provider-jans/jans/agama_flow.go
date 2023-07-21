@@ -17,13 +17,16 @@ type FlowMetadata struct {
 }
 
 type AgamaFlow struct {
-	Dn        string       `schema:"dn" json:"dn"`
-	Qname     string       `schema:"qname" json:"qname"`
-	Revision  int          `schema:"revision" json:"revision"`
-	Enabled   bool         `schema:"enabled" json:"enabled"`
-	Metadata  FlowMetadata `schema:"metadata" json:"metadata"`
-	Source    string       `schema:"source" json:"source"`
-	CodeError string       `schema:"code_error" json:"codeError"`
+	Dn         string       `schema:"dn" json:"dn"`
+	Qname      string       `schema:"qname" json:"qname"`
+	TransHash  string       `schema:"trans_hash" json:"transHash"`
+	Revision   int          `schema:"revision" json:"revision"`
+	Enabled    bool         `schema:"enabled" json:"enabled"`
+	Metadata   FlowMetadata `schema:"metadata" json:"metadata"`
+	Source     string       `schema:"source" json:"source"`
+	Transpiled string       `schema:"transpiled" json:"transpiled"`
+	CodeError  string       `schema:"code_error" json:"codeError"`
+	BaseDn     string       `schema:"base_dn" json:"baseDn"`
 }
 
 // GetAgamaFlows returns all currently configured Agama flows.

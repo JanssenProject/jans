@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.0.15](https://github.com/JanssenProject/jans/compare/jans-pycloudlib-v1.0.14...jans-pycloudlib-v1.0.15) (2023-07-12)
+
+
+### Features
+
+* **docker:** add deletion support for persistence ([#5370](https://github.com/JanssenProject/jans/issues/5370)) ([96be085](https://github.com/JanssenProject/jans/commit/96be0853b2d04a13df15e7e053a89f4607d9c0e1))
+
+
+### Bug Fixes
+
+* **jans-pycloudlib:** unable to parse mysql server version ([#5337](https://github.com/JanssenProject/jans/issues/5337)) ([9a3024c](https://github.com/JanssenProject/jans/commit/9a3024c5c3eb02e57f656f80dcf65a2f423e3e72))
+* prepare for 1.0.15 release ([0e3cc2f](https://github.com/JanssenProject/jans/commit/0e3cc2f5ea287c2c35f45def54f074daa473ec49))
+
+## [1.0.14](https://github.com/JanssenProject/jans/compare/jans-pycloudlib-v1.0.13...jans-pycloudlib-v1.0.14) (2023-06-12)
+
+
+### Bug Fixes
+
+* prepare for 1.0.14 release ([25ccadf](https://github.com/JanssenProject/jans/commit/25ccadf85327ea14685c6066dc6609919e4f2865))
+
 ## [1.0.13](https://github.com/JanssenProject/jans/compare/jans-pycloudlib-v1.0.12...jans-pycloudlib-v1.0.13) (2023-05-10)
 
 

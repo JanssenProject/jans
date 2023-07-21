@@ -25,19 +25,25 @@ func TestSMTPConfig(t *testing.T) {
 		t.Error("expected empty host")
 	}
 
-	cfg = &SMTPConfiguration{
-		Host:                   "smtp.janssen.io",
-		Port:                   587,
-		RequiresSSL:            true,
-		TrustHost:              true,
-		FromName:               "Janssen",
-		FromEmailAddress:       "jans@janssen.io",
-		RequiresAuthentication: true,
-		UserName:               "janssen",
-		Password:               "p4ssw0rd",
+	cfgUpdate := &SMTPConfiguration{
+		Valid: true,
+		// ConnectProtectionList:             []string{"None"},
+		Host:                              "smtp.janssen.io",
+		Port:                              587,
+		ConnectProtection:                 "None",
+		TrustHost:                         true,
+		FromName:                          "Janssen",
+		FromEmailAddress:                  "jans@janssen.io",
+		RequiresAuthentication:            true,
+		SmtpAuthenticationAccountUsername: "janssen",
+		SmtpAuthenticationAccountPassword: "p4ssw0rd",
+		KeyStore:                          "key.jks",
+		KeyStorePassword:                  "changeit",
+		KeyStoreAlias:                     "jans",
+		SigningAlgorithm:                  "RS256",
 	}
 
-	_, err = client.UpdateSMTPConfiguration(ctx, cfg)
+	_, err = client.UpdateSMTPConfiguration(ctx, cfgUpdate)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -48,23 +54,12 @@ func TestSMTPConfig(t *testing.T) {
 	}
 
 	filter := cmp.FilterPath(func(p cmp.Path) bool {
-		return p.String() == "Password"
+		return p.String() == "SmtpAuthenticationAccountPassword" ||
+			p.String() == "KeyStorePassword"
 	}, cmp.Ignore())
 
-	if diff := cmp.Diff(cfg, updatedConfig, filter); diff != "" {
+	if diff := cmp.Diff(cfgUpdate, updatedConfig, filter); diff != "" {
 		t.Errorf("Got different configuration after update: %s", diff)
-	}
-
-	cfg = &SMTPConfiguration{
-		Host:                   "",
-		Port:                   0,
-		RequiresSSL:            false,
-		TrustHost:              false,
-		FromName:               "",
-		FromEmailAddress:       "",
-		RequiresAuthentication: false,
-		UserName:               "",
-		Password:               "",
 	}
 
 	if _, err := client.UpdateSMTPConfiguration(ctx, cfg); err != nil {

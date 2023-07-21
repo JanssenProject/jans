@@ -5,7 +5,7 @@
 	<groupId>io.jans</groupId>
 	<artifactId>jans-auth-server-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>1.0.14-SNAPSHOT</version>
+	<version>1.0.16-SNAPSHOT</version>
 	<name>Jans authentication server parent</name>
 	<distributionManagement>
 		<repository>
@@ -37,7 +37,7 @@
 
 		<slf4j.version>1.7.25</slf4j.version>
 
-		<swagger.version>1.3.13</swagger.version>
+		<swagger.version>2.2.10</swagger.version>
 
 		<jetty.version>11.0.15</jetty.version>
 
@@ -205,11 +205,6 @@
 			<dependency>
 				<groupId>io.jans</groupId>
 				<artifactId>jans-notify-client</artifactId>
-				<version>${jans-notify.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>io.jans</groupId>
-				<artifactId>jans-notify-model</artifactId>
 				<version>${jans-notify.version}</version>
 			</dependency>
 			<dependency>

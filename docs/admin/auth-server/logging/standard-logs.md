@@ -5,13 +5,21 @@ tags:
   - logging
 ---
 
-## This content is in progress
+# Standard Logs
 
-The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.
+All `jans-auth-server` log files are located in `/opt/jans/jetty/jans-auth/logs/`.
+
+1. `jans-auth.log` - main AS log file. All logs during execution goes here.
+1. `jans-auth_script.log`: - contains [custom interception scripts](../developer/interception-scripts.md) related log messages. Use `scriptLogger` inside custom script to log messages to this log file.
+1. `jans-auth_persistence.log` - log which contains entries from AS persistance layer 
+1. `jans-auth_persistence_duration.log` - log which contains duration of query execution. It can be useful during performance issues investigation 
+1. `jans-auth_persistence_ldap_statistics.log` - contains LDAP statistic information 
+1. `jans-auth_audit.log` - contains audit log information (audit is disabled by default and can be enabled via `enabledOAuthAuditLogging` AS configuration property) 
+1. `http_request_response.log` - contains http request/response data. It can be enabled via `httpLoggingEnabled` AS configuration property.
 
 ## Have questions in the meantime?
 
-While this documentation is in progress, you can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussion) or the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). Any questions you have will help determine what information our documentation should cover.
+You can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussion) or the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). Any questions you have will help determine what information our documentation should cover.
 
 ## Want to contribute?
 

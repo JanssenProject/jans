@@ -164,6 +164,16 @@ func resourceFido2Configuration() *schema.Resource {
 					},
 				},
 			},
+			"old_u2f_migration_enabled": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Boolean value to indicate if U2F migration is to be enabled.",
+			},
+			"super_gluu_enabled": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Boolean value to indicate if SuperGluu is to be enabled.",
+			},
 		},
 	}
 }
@@ -193,12 +203,11 @@ func resourceFido2ConfigurationUpdate(ctx context.Context, d *schema.ResourceDat
 	c := meta.(*jans.Client)
 
 	var fido2Config jans.JansFido2DynConfiguration
-	patches, err := patchFromResourceData(d, &fido2Config)
-	if err != nil {
+	if err := fromSchemaResource(d, &fido2Config); err != nil {
 		return diag.FromErr(err)
 	}
 
-	if _, err := c.PatchFido2Configuration(ctx, patches); err != nil {
+	if _, err := c.UpdateFido2Configuration(ctx, &fido2Config); err != nil {
 		return diag.FromErr(err)
 	}
 

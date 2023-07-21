@@ -30,8 +30,9 @@ import org.slf4j.Logger;
 public class LicenseResource {
 
     static final String IS_ACTIVE = "/isActive";
-    static final String ACTIVATE_LICENSE = "/activateLicense";
-    static final String LICENSE_DETAILS = "/licenseDetails";
+    static final String ACTIVATE = "/activate";
+    static final String TRIAL = "/trial";
+    static final String DETAILS = "/details";
     static final String SSA = "/ssa";
     static final String IS_LICENSE_CONFIG_VALID = "/isConfigValid";
 
@@ -69,6 +70,31 @@ public class LicenseResource {
         }
     }
 
+    @Operation(summary = "Generate trial license", description = "Generate trial license", operationId = "get-trial-license", tags = {
+            "Admin UI - License"}, security = @SecurityRequirement(name = "oauth2", scopes = {
+            SCOPE_LICENSE_READ}))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LicenseApiResponse.class, description = "License response"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LicenseApiResponse.class, description = "License response"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LicenseApiResponse.class, description = "License response")))})
+    @GET
+    @Path(TRIAL)
+    @ProtectedApi(scopes = {SCOPE_LICENSE_READ}, groupScopes = {SCOPE_LICENSE_WRITE}, superScopes = {AppConstants.SCOPE_ADMINUI_READ})
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response trial() {
+        LicenseApiResponse licenseResponse = null;
+        try {
+            log.info("Generate trial license.");
+            licenseResponse = licenseDetailsService.generateTrialLicense();
+            log.info("Generate trial license (true/false): {}", licenseResponse.isApiResult());
+            return Response.ok(licenseResponse).build();
+        } catch (Exception e) {
+            log.error(ErrorResponse.CHECK_LICENSE_ERROR.getDescription(), e);
+            return Response.serverError().entity(licenseResponse).build();
+        }
+    }
+
     @Operation(summary = "Activate license using license-key", description = "Activate license using license-key", operationId = "activate-adminui-license", tags = {
             "Admin UI - License"}, security = @SecurityRequirement(name = "oauth2", scopes = {
             SCOPE_LICENSE_WRITE}))
@@ -79,10 +105,10 @@ public class LicenseResource {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LicenseApiResponse.class, description = "License response")))})
     @POST
-    @Path(ACTIVATE_LICENSE)
+    @Path(ACTIVATE)
     @ProtectedApi(scopes = {SCOPE_LICENSE_WRITE}, superScopes = {AppConstants.SCOPE_ADMINUI_WRITE})
     @Produces(MediaType.APPLICATION_JSON)
-    public Response activateLicense(@Valid @NotNull LicenseRequest licenseRequest) {
+    public Response activate(@Valid @NotNull LicenseRequest licenseRequest) {
         LicenseApiResponse licenseResponse = null;
         try {
             log.info("Trying to activate license using licese-key.");
@@ -108,7 +134,7 @@ public class LicenseResource {
     @Path(SSA)
     @ProtectedApi(scopes = {SCOPE_LICENSE_WRITE}, superScopes = {AppConstants.SCOPE_ADMINUI_WRITE})
     @Produces(MediaType.APPLICATION_JSON)
-    public Response postSSA(@Valid @NotNull SSARequest ssaRequest) {
+    public Response ssa(@Valid @NotNull SSARequest ssaRequest) {
         LicenseApiResponse licenseResponse = null;
         try {
             log.info("Trying to execute post ssa.");
@@ -155,10 +181,10 @@ public class LicenseResource {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError")})
     @GET
-    @Path(LICENSE_DETAILS)
+    @Path(DETAILS)
     @ProtectedApi(scopes = {SCOPE_LICENSE_READ}, groupScopes = {SCOPE_LICENSE_WRITE}, superScopes = {AppConstants.SCOPE_ADMINUI_READ})
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getLicenseDetails() {
+    public Response details() {
         try {
             log.info("Trying to fetch license details.");
             LicenseResponse licenseResponse = licenseDetailsService.getLicenseDetails();

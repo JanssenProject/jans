@@ -162,6 +162,13 @@ public class AuthenticationFilter implements Filter {
             final String requestUrl = httpRequest.getRequestURL().toString();
             log.trace("Get request to: '{}'", requestUrl);
 
+            final String method = httpRequest.getMethod();
+            if (appConfiguration.isSkipAuthenticationFilterOptionsMethod() && "OPTIONS".equals(method)) {
+                log.trace("Ignoring '{}' request to to: '{}'", method, requestUrl);
+                filterChain.doFilter(httpRequest, httpResponse);
+                return;
+            }
+
             boolean tokenEndpoint = requestUrl.endsWith("/token");
             boolean tokenRevocationEndpoint = requestUrl.endsWith("/revoke");
             boolean backchannelAuthenticationEnpoint = requestUrl.endsWith("/bc-authorize");

@@ -31,6 +31,13 @@ The Janssen Authorization server will serve a DCR request if the following confi
 
 1. `dynamicRegistrationEnabled` : `true` or `false`
 2. `dynamicRegistrationExpirationTime` : Expiration time in seconds for clients created with dynamic registration, 0 or -1 means never expire
+3. `dcrForbidExpirationTimeInRequest` : Boolean value specifying whether to allow to set client's expiration time in seconds during dynamic registration.. Default value is `false`.
+
+**Client expiration**
+
+Client expiration is set based on `dynamicRegistrationExpirationTime` AS configuration property or otherwise 
+if `dcrForbidExpirationTimeInRequest` is `false` then it can be requested in Dynamic Client Registration Request via `lifetime` parameter 
+which expected value in seconds. 
 
 Configure the Janssen AS using steps explained in the [link](#curl-commands-to-configure-jans-auth-server)
 
@@ -76,6 +83,7 @@ in example below:
     "backchannel_logout_session_required": false,
     "client_name": "my.jans.client",
     "par_lifetime": 600,
+    "lifetime": 3600,
     "spontaneous_scopes": [],
     "id_token_signed_response_alg": "RS256",
     "access_token_as_jwt": false,
@@ -163,6 +171,23 @@ parameters:
 point to JWKS URI.
  - `dcrSignatureValidationSoftwareStatementJwksClaim` - specifies claim name inside software statement. Value of claim 
 should point to inlined JWKS.
+ - `trustedSsaIssuers` - map of trusted SSA issuers with configuration (e.g. automatically granted scopes). When empty - no issuers validation is performed. When not empty - AS forces validation and each SSA must match at least one entry from list.
+   - `automaticallyGrantedScopes` - automatically granted scopes for trusted issuer
+    ```json
+    {
+      "https://trusted.as.com": {
+        "automaticallyGrantedScopes": [
+          "a",
+          "b"
+        ]
+      },
+      "https://another-trusted.as.com": {
+        "automaticallyGrantedScopes": [
+          "d"
+        ]
+      }
+    }
+    ``` 
 
 Configure the AS using steps explained in the [link](#curl-commands-to-configure-jans-auth-server)
 
@@ -493,9 +518,25 @@ When create entry in `dcrSsaValidationConfigs` configuration property :
 
 **Via other configuration properties**
 
+* **trustedSsaIssuers** - map of trusted SSA issuers with configuration (e.g. automatically granted scopes). When empty - no issuers validation is performed. When not empty - AS forces validation and each SSA must match at least one entry from list.
+  * **automaticallyGrantedScopes** - automatically granted scopes for trusted issuer
+    ```json
+    {
+      "https://trusted.as.com": {
+        "automaticallyGrantedScopes": [
+          "a",
+          "b"
+        ]
+      },
+      "https://another-trusted.as.com": {
+        "automaticallyGrantedScopes": [
+          "d"
+        ]
+      }
+    }
+    ``` 
 * **dcrSignatureValidationJwks** - specifies JWKS for DCR's validations
 * **dcrSignatureValidationJwksUri** - specifies JWKS URI for  DCR's validations
-* **dcrIssuers** - List of issues if MTLS private key is used to sign DCR JWT
 * **dcrSignatureValidationSharedSecret** - if HMAC is used, this is the shared secret
 * **dcrSignatureValidationEnabled** - boolean value enables DCR signature validation. Default is false
 * **dcrSignatureValidationSoftwareStatementJwksURIClaim** - specifies claim name inside software statement. Value of claim should point to JWKS URI

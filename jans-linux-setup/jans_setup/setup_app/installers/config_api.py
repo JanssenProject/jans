@@ -82,6 +82,9 @@ class ConfigApiInstaller(JettyInstaller):
         if Config.installFido2:
             self.install_plugin('fido2-plugin')
 
+        if Config.install_jans_link:
+            self.install_plugin('jans-link-plugin')
+
         self.enable()
 
 
