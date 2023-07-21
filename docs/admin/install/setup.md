@@ -160,6 +160,8 @@ Below are the optional arguments:
 | --no-scim | Do not install Scim Server |
 | --no-fido2 | Do not install Fido2 Server |
 | --install-eleven | Install Eleven Server |
+| --install-jans-link | Install Link Server |
+| --install-casa | Install Gluu/Flex Casa Server |
 | --load-config-api-test | Load Config Api Test Data |
 | --install-cache-refresh | Install Cache Refresh Server |
 | -config-patch-creds CONFIG_PATCH_CREDS | password:username for downloading auto test ciba password |
