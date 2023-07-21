@@ -112,7 +112,7 @@ public class SamlConfigurationFactory {
 
     @PostConstruct
     public void init() {
-        log.error("Initializing SamlConfigurationFactory ");
+        log.info("Initializing SamlConfigurationFactory ");
         this.isActive = new AtomicBoolean(true);
         try {
             
@@ -131,7 +131,7 @@ public class SamlConfigurationFactory {
 
     
     public void create() {
-        log.error("Loading SAML Configuration");
+        log.info("Loading SAML Configuration");
 
         // load SAML config from DB
         if (!loadSamlConfigFromDb()) {
@@ -154,7 +154,7 @@ public class SamlConfigurationFactory {
     }
 
     private void loadBaseConfiguration() {
-        log.error("Loading base configuration - BASE_PROPERTIES_FILE:{}", BASE_PROPERTIES_FILE);
+        log.debug("Loading base configuration - BASE_PROPERTIES_FILE:{}", BASE_PROPERTIES_FILE);
 
         this.baseConfiguration = createFileConfiguration(BASE_PROPERTIES_FILE);
         this.baseConfigurationFileLastModifiedTime = new File(BASE_PROPERTIES_FILE).lastModified();
@@ -206,7 +206,7 @@ public class SamlConfigurationFactory {
             throw new ConfigurationException("Failed to load SAML Configuration From DB " + samlConf);
         }
 
-        log.error("samlAppConfigurationFromDb:{}",samlConf);
+        log.info("samlAppConfigurationFromDb:{}",samlConf);
         if (samlConf.getDynamicConf() != null) {
             this.samlAppConfiguration = samlConf.getDynamicConf();
         }

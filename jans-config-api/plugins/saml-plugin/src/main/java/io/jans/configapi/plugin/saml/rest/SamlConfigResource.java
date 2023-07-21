@@ -63,7 +63,7 @@ public class SamlConfigResource extends BaseResource {
                     ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response getSamlConfiguration() {
         SamlAppConfiguration samlConfiguration = samlConfigService.find();
-        logger.error("SAML details samlConfiguration():{}", samlConfiguration);
+        logger.info("SAML details samlConfiguration():{}", samlConfiguration);
         return Response.ok(samlConfiguration).build();
     }
 
@@ -75,16 +75,15 @@ public class SamlConfigResource extends BaseResource {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SamlAppConfiguration.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
-    @PUT
-    @ProtectedApi(scopes = { Constants.SAML_CONFIG_WRITE_ACCESS }, groupScopes = {}, superScopes = {
+    @PUT    @ProtectedApi(scopes = { Constants.SAML_CONFIG_WRITE_ACCESS }, groupScopes = {}, superScopes = {
             ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response updateSamlConfiguration(@Valid SamlAppConfiguration samlConfiguration) {
-        logger.error("Update SAML details samlConfiguration():{}", samlConfiguration);
+        logger.info("Update SAML details samlConfiguration():{}", samlConfiguration);
         SamlConf conf = samlConfigService.findSamlConf();
         conf.setDynamicConf(samlConfiguration);
         samlConfigService.mergeSamlConfig(conf);
         samlConfiguration = samlConfigService.find();
-        logger.error("SAML post update - samlConfiguration:{}", samlConfiguration);
+        logger.info("SAML post update - samlConfiguration:{}", samlConfiguration);
         return Response.ok(samlConfiguration).build();
 
     }
@@ -102,13 +101,13 @@ public class SamlConfigResource extends BaseResource {
     @ProtectedApi(scopes = { Constants.SAML_CONFIG_WRITE_ACCESS }, groupScopes = {}, superScopes = {
             ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response patchSamlConfiguration(@NotNull String jsonPatchString) throws JsonPatchException, IOException {
-        logger.error("Config API - jsonPatchString:{} ", jsonPatchString);
+        logger.info("Config API - jsonPatchString:{} ", jsonPatchString);
         SamlConf conf = samlConfigService.findSamlConf();
         SamlAppConfiguration samlConfiguration = Jackson.applyPatch(jsonPatchString, conf.getDynamicConf());
         conf.setDynamicConf(samlConfiguration);
         samlConfigService.mergeSamlConfig(conf);
         samlConfiguration = samlConfigService.find();
-        logger.error("SAML post patch - samlConfiguration:{}", samlConfiguration);
+        logger.info("SAML post patch - samlConfiguration:{}", samlConfiguration);
         return Response.ok(samlConfiguration).build();
     }
 }

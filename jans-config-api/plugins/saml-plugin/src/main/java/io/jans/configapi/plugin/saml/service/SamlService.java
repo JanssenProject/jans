@@ -75,7 +75,7 @@ public class SamlService {
             try {
                 return persistenceEntryManager.find(TrustRelationship.class, dn);
             } catch (Exception e) {
-                log.info(e.getMessage());
+                log.error(e.getMessage());
             }
 
         }
@@ -101,11 +101,11 @@ public class SamlService {
     }
 
     public List<TrustRelationship> getAllTrustRelationshipByName(String name) {
-        log.error("Search TrustRelationship with name:{}", name);
+        log.info("Search TrustRelationship with name:{}", name);
 
         String[] targetArray = new String[] { name };
         Filter displayNameFilter = Filter.createEqualityFilter(AttributeConstants.DISPLAY_NAME, targetArray);
-        log.error("Search TrustRelationship with displayNameFilter:{}", displayNameFilter);
+        log.debug("Search TrustRelationship with displayNameFilter:{}", displayNameFilter);
         return persistenceEntryManager.findEntries(getDnForTrustRelationship(null), TrustRelationship.class,
                 displayNameFilter);
     }
@@ -125,7 +125,7 @@ public class SamlService {
 
     public List<TrustRelationship> searchTrustRelationship(String pattern, int sizeLimit) {
 
-        log.error("Search TrustRelationship with pattern:{}, sizeLimit:{}", pattern, sizeLimit);
+        log.info("Search TrustRelationship with pattern:{}, sizeLimit:{}", pattern, sizeLimit);
 
         String[] targetArray = new String[] { pattern };
         Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.DISPLAY_NAME, null, targetArray,
@@ -135,7 +135,7 @@ public class SamlService {
         Filter inumFilter = Filter.createSubstringFilter(AttributeConstants.INUM, null, targetArray, null);
         Filter searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter, inumFilter);
 
-        log.error("Search TrustRelationship with searchFilter:{}", searchFilter);
+        log.info("Search TrustRelationship with searchFilter:{}", searchFilter);
         return persistenceEntryManager.findEntries(getDnForTrustRelationship(null), TrustRelationship.class,
                 searchFilter, sizeLimit);
     }
@@ -146,7 +146,7 @@ public class SamlService {
     }
 
     public PagedResult<Client> getTrustRelationship(SearchRequest searchRequest) {
-        log.error("Search TrustRelationship with searchRequest:{}", searchRequest);
+        log.info("Search TrustRelationship with searchRequest:{}", searchRequest);
 
         Filter searchFilter = null;
         List<Filter> filters = new ArrayList<>();
@@ -164,7 +164,7 @@ public class SamlService {
             searchFilter = Filter.createORFilter(filters);
         }
 
-        log.trace("TrustRelationship pattern searchFilter:{}", searchFilter);
+        log.debug("TrustRelationship pattern searchFilter:{}", searchFilter);
         List<Filter> fieldValueFilters = new ArrayList<>();
         if (searchRequest.getFieldValueMap() != null && !searchRequest.getFieldValueMap().isEmpty()) {
             for (Map.Entry<String, String> entry : searchRequest.getFieldValueMap().entrySet()) {
@@ -176,7 +176,7 @@ public class SamlService {
                     Filter.createANDFilter(fieldValueFilters));
         }
 
-        log.error("TrustRelationship searchFilter:{}", searchFilter);
+        log.info("TrustRelationship searchFilter:{}", searchFilter);
 
         return persistenceEntryManager.findPagedEntries(getDnForTrustRelationship(null), Client.class, searchFilter,
                 null, searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
@@ -189,7 +189,7 @@ public class SamlService {
     }
 
     public TrustRelationship addTrustRelationship(TrustRelationship trustRelationship, InputStream file) throws IOException{
-        log.error("Add new trustRelationship:{}, file:{}", trustRelationship, file);
+        log.info("Add new trustRelationship:{}, file:{}", trustRelationship, file);
         setTrustRelationshipDefaultValue(trustRelationship, false);
         persistenceEntryManager.persist(trustRelationship);
 
@@ -245,19 +245,20 @@ public class SamlService {
     }
 
     private boolean saveSpMetaDataFileSourceTypeFile(TrustRelationship trustRelationship, InputStream file) {
-        log.error("trustRelationship:{}, file:{}", trustRelationship, file);
+        log.info("trustRelationship:{}, file:{}", trustRelationship, file);
 
         String spMetadataFileName = trustRelationship.getSpMetaDataFN();
         boolean emptySpMetadataFileName = StringHelper.isEmpty(spMetadataFileName);
-        log.error("emptySpMetadataFileName:{}", emptySpMetadataFileName);
+        log.debug("emptySpMetadataFileName:{}", emptySpMetadataFileName);
         if ((file == null)) {
-            log.error("File is null");
+            log.trace("File is null");
             if (emptySpMetadataFileName) {
                 log.debug("The trust relationship {} has an empty Metadata filename", trustRelationship.getInum());
                 return false;
             }
             String filePath = samlIdpService.getSpMetadataFilePath(spMetadataFileName);
-            log.error("filePath:{}", filePath);
+            log.debug("filePath:{}", filePath);
+            
             if (filePath == null) {
                 log.debug("The trust relationship {} has an invalid Metadata file storage path",
                         trustRelationship.getInum());
@@ -267,7 +268,8 @@ public class SamlService {
             if (samlIdpService.isLocalDocumentStoreType()) {
 
                 File newFile = new File(filePath);
-                log.error("newFile:{}", newFile);
+                log.debug("newFile:{}", newFile);
+                
                 if (!newFile.exists()) {
                     log.debug(
                             "The trust relationship {} metadata used local storage but the SP metadata file `{}` was not found",
@@ -278,14 +280,14 @@ public class SamlService {
             return true;
         }
         if (emptySpMetadataFileName) {
-            log.error("emptySpMetadataFileName:{}", emptySpMetadataFileName);
+            log.info("emptySpMetadataFileName:{}", emptySpMetadataFileName);
             spMetadataFileName = samlIdpService.getSpNewMetadataFileName(trustRelationship);
-            log.error("spMetadataFileName:{}", spMetadataFileName);
+            log.info("spMetadataFileName:{}", spMetadataFileName);
             trustRelationship.setSpMetaDataFN(spMetadataFileName);
 
         }
         InputStream targetStream = file;
-        log.error("targetStream:{}, spMetadataFileName:{}", targetStream, spMetadataFileName);
+        log.info("targetStream:{}, spMetadataFileName:{}", targetStream, spMetadataFileName);
         String result = samlIdpService.saveSpMetadataFile(spMetadataFileName, targetStream);
         if (StringHelper.isNotEmpty(result)) {
             // metadataValidationTimer.queue(result);

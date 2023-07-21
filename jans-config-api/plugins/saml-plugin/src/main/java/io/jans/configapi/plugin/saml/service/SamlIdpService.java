@@ -78,39 +78,41 @@ public class SamlIdpService {
     }
 
     private String getTempMetadataFilename(String idpMetadataFolder, String fileName) {
-        logger.error("documentStoreService:{}, localDocumentStoreService:{}, idpMetadataFolder:{}, fileName:{}",
+        logger.info("documentStoreService:{}, localDocumentStoreService:{}, idpMetadataFolder:{}, fileName:{}",
                 documentStoreService, localDocumentStoreService, idpMetadataFolder, fileName);
         synchronized (SamlIdpService.class) {
             String possibleTemp;
             do {
                 possibleTemp = fileName + INumGenerator.generate(2);
-                logger.error("possibleTemp:{}", possibleTemp);
+                logger.debug("possibleTemp:{}", possibleTemp);
             } while (documentStoreService.hasDocument(idpMetadataFolder + possibleTemp));
             return possibleTemp;
         }
     }
 
     public String saveSpMetadataFile(String spMetadataFileName, InputStream stream) {
-        logger.error("spMetadataFileName:{}, stream:{}", spMetadataFileName, stream);
+        logger.info("spMetadataFileName:{}, stream:{}", spMetadataFileName, stream);
 
         if (StringUtils.isBlank(samlConfigService.getSelectedIdpConfigRootDir())) {
             throw new InvalidConfigurationException("Failed to save SP meta-data file due to undefined!");
         }
 
         String idpMetadataTempFolder = getIdpMetadataTempDir();
-        logger.error("idpMetadataTempFolder:{}", idpMetadataTempFolder);
+        logger.debug("idpMetadataTempFolder:{}", idpMetadataTempFolder);
+        
         String tempFileName = getTempMetadataFilename(idpMetadataTempFolder, spMetadataFileName);
-        logger.error("idpMetadataTempFolder:{}, tempFileName:{}", idpMetadataTempFolder, tempFileName);
+        logger.debug("idpMetadataTempFolder:{}, tempFileName:{}", idpMetadataTempFolder, tempFileName);
+        
         String spMetadataFile = idpMetadataTempFolder + tempFileName;
-        logger.error("documentStoreService:{}, spMetadataFile:{}, localDocumentStoreService:{} ", documentStoreService,
+        logger.debug("documentStoreService:{}, spMetadataFile:{}, localDocumentStoreService:{} ", documentStoreService,
                 spMetadataFile, localDocumentStoreService);
         try {
             boolean result = documentStoreService.saveDocumentStream(spMetadataFile, stream,
                     List.of("jans-server", samlConfigService.getSelectedIdpConfigID()));
-            logger.error("SP File saving result:{}", result);
+            logger.debug("SP File saving result:{}", result);
 
             InputStream newFile = documentStoreService.readDocumentAsStream(spMetadataFile);
-            logger.error("SP File read newFile:{}", newFile);
+            logger.debug("SP File read newFile:{}", newFile);
 
             if (result) {
                 return tempFileName;

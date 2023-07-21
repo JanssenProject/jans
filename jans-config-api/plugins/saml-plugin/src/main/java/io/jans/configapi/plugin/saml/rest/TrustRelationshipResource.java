@@ -60,7 +60,7 @@ public class TrustRelationshipResource extends BaseResource {
     @ProtectedApi(scopes = { Constants.SAML_READ_ACCESS })
     public Response getAllTrustRelationship() {
         List<TrustRelationship> trustRelationshipList = samlService.getAllTrustRelationship();
-        logger.error("All trustRelationshipList:{}", trustRelationshipList);
+        logger.info("All trustRelationshipList:{}", trustRelationshipList);
         return Response.ok(trustRelationshipList).build();
     }
 
@@ -76,11 +76,11 @@ public class TrustRelationshipResource extends BaseResource {
     @Path(Constants.ID_PATH + Constants.ID_PATH_PARAM)
     public Response getTrustRelationshipById(
             @Parameter(description = "Unique identifier - Id") @PathParam(Constants.ID) @NotNull String id) {
-        logger.error("Searching TrustRelationship by id: {}", id);
+        logger.info("Searching TrustRelationship by id: {}", id);
 
         TrustRelationship trustRelationship = samlService.getTrustRelationshipByInum(id);
 
-        logger.error("TrustRelationship found by id:{}, trustRelationship:{}", id, trustRelationship);
+        logger.info("TrustRelationship found by id:{}, trustRelationship:{}", id, trustRelationship);
 
         return Response.ok(trustRelationship).build();
     }
@@ -97,7 +97,7 @@ public class TrustRelationshipResource extends BaseResource {
             Constants.SAML_WRITE_ACCESS })
     @POST
     public Response createTrustRelationship(@Valid TrustRelationship trustRelationship) throws IOException {
-        logger.debug(" Create trustRelationship:{}", trustRelationship);
+        logger.info(" Create trustRelationship:{}", trustRelationship);
         checkResourceNotNull(trustRelationship, SAML_TRUST_RELATIONSHIP);
         checkNotNull(trustRelationship.getClientId(), AttributeNames.NAME);
         // TO-DO validation of TrustRelationship
@@ -106,7 +106,7 @@ public class TrustRelationshipResource extends BaseResource {
         trustRelationship.setDn(samlService.getDnForTrustRelationship(inum));
         trustRelationship = samlService.addTrustRelationship(trustRelationship, null);
 
-        logger.error("Create created by TrustRelationship:{}", trustRelationship);
+        logger.info("Create created by TrustRelationship:{}", trustRelationship);
         return Response.status(Response.Status.CREATED).entity(trustRelationship).build();
     }
 
@@ -125,7 +125,7 @@ public class TrustRelationshipResource extends BaseResource {
     @POST
     public Response createTrustRelationshipWithFile(@MultipartForm TrustRelationshipForm trustRelationshipForm,
             InputStream metadatafile) throws IOException {
-        logger.debug(" Create trustRelationshipForm:{} ", trustRelationshipForm);
+        logger.info(" Create trustRelationshipForm:{} ", trustRelationshipForm);
         checkResourceNotNull(trustRelationshipForm, SAML_TRUST_RELATIONSHIP_FORM);
 
         TrustRelationship trustRelationship = trustRelationshipForm.getTrustRelationship();
@@ -145,7 +145,7 @@ public class TrustRelationshipResource extends BaseResource {
         trustRelationship.setDn(samlService.getDnForTrustRelationship(inum));
         trustRelationship = samlService.addTrustRelationship(trustRelationship, metaDataFile);
 
-        logger.error("Create created by TrustRelationship:{}", trustRelationship);
+        logger.info("Create created by TrustRelationship:{}", trustRelationship);
         return Response.status(Response.Status.CREATED).entity(trustRelationship).build();
     }
 
@@ -161,12 +161,12 @@ public class TrustRelationshipResource extends BaseResource {
     @PUT
     public Response updateTrustRelationship(@Valid TrustRelationship trustRelationship) throws IOException {
 
-        logger.error("Update trustRelationship:{}", trustRelationship);
+        logger.info("Update trustRelationship:{}", trustRelationship);
 
         // TO-DO validation of TrustRelationship
         trustRelationship = samlService.updateTrustRelationship(trustRelationship);
 
-        logger.error("Post update trustRelationship:{}", trustRelationship);
+        logger.info("Post update trustRelationship:{}", trustRelationship);
 
         return Response.ok(trustRelationship).build();
     }
@@ -184,7 +184,7 @@ public class TrustRelationshipResource extends BaseResource {
     public Response deleteTrustRelationship(
             @Parameter(description = "Unique Id of Trust Relationship") @PathParam(Constants.ID) @NotNull String id) {
 
-        logger.error("Delete client identified by id:{}", id);
+        logger.info("Delete client identified by id:{}", id);
 
         TrustRelationship trustRelationship = samlService.getTrustRelationshipByInum(id);
         if (trustRelationship == null) {

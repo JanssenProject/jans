@@ -57,20 +57,20 @@ public class SamlAppInitializer {
 
 
     public void onAppStart(@Observes @Initialized(ApplicationScoped.class) Object init) {
-        log.error("=============  Initializing SAML  ========================");
-        log.error("init:{}", init);
+        log.info("=============  Initializing SAML Plugin ========================");
+        log.debug("init:{}", init);
 
         // configuration
         this.samlConfigurationFactory.create();
 
-        log.error("==============  APPLICATION IS UP AND RUNNING ===================");
+        log.info("==============  SAML Plugin IS UP AND RUNNING ===================");
     }
 
     public void destroy(@Observes @BeforeDestroyed(ApplicationScoped.class) ServletContext init) {
-        log.error("================================================================");
-        log.error("===========  SAML APPLICATION STOPPED  ==========================");
-        log.error("init:{}", init);
-        log.error("================================================================");
+        log.info("================================================================");
+        log.info("===========  SAML Plugin STOPPED  ==========================");
+        log.info("init:{}", init);
+        log.info("================================================================");
     }
 
     @Produces

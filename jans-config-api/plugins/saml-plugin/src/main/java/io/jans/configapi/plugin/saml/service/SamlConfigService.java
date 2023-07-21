@@ -34,11 +34,11 @@ public class SamlConfigService {
             throw new InvalidConfigurationException("Saml Configuration DN is undefined!");
         }
 
-        logger.error(" dn:{}", dn);
+        logger.info(" dn:{}", dn);
         SamlConf samlConf = persistenceManager.find(dn, SamlConf.class, null);
-        logger.error(" samlConf:{}", samlConf);
+        logger.info(" samlConf:{}", samlConf);
 
-        return persistenceManager.find(dn, SamlConf.class, null);
+        return samlConf;
     }
 
     public void mergeSamlConfig(SamlConf samlConf) {
@@ -62,7 +62,7 @@ public class SamlConfigService {
 
     public boolean isSamlEnabled() {
         final SamlConf samlConf = getSamlConf();
-        logger.error("samlConf.getDynamicConf():{}", samlConf.getDynamicConf());
+        logger.debug("samlConf.getDynamicConf():{}", samlConf.getDynamicConf());
         SamlAppConfiguration samlAppConfiguration = samlConf.getDynamicConf();
         boolean isSamlEnabled = false;
         if (samlAppConfiguration != null) {
@@ -171,7 +171,7 @@ public class SamlConfigService {
         if (samlConf == null) {
             throw new InvalidConfigurationException("SamlConf is undefined!");
         }
-        logger.error("  samlConf:{}, samlConf.getDynamicConf():{}", samlConf, samlConf.getDynamicConf());
+        logger.debug("  samlConf:{}, samlConf.getDynamicConf():{}", samlConf, samlConf.getDynamicConf());
         return samlConf;
     }
 }
