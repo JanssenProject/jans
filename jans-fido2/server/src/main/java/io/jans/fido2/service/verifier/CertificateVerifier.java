@@ -30,11 +30,8 @@ import java.security.cert.CertPathValidatorException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.PKIXParameters;
-import java.security.cert.PKIXRevocationChecker;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
-import java.util.Collections;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -98,7 +95,7 @@ public class CertificateVerifier {
             } else {
                 throw new Fido2RuntimeException("Problem with certificate");
             }
-        } catch (InvalidAlgorithmParameterException | CertificateException e) {
+        } catch (NoSuchAlgorithmException | InvalidAlgorithmParameterException | CertificateException e) {
             log.warn("Cert verification problem {}", e.getMessage(), e);
             throw new Fido2RuntimeException("Problem with certificate");
         }

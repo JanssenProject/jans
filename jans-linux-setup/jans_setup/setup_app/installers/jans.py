@@ -98,7 +98,6 @@ class JansInstaller(BaseInstaller, SetupUtils):
                         s = s + "%s\n%s\n%s\n\n" % (key, "-" * len(key), val)
             return s
 
-
     def initialize(self):
         self.logIt("jans.initialize()...")
         self.service_name = 'jans'
@@ -111,11 +110,25 @@ class JansInstaller(BaseInstaller, SetupUtils):
             print("Please ensure that you are running this script inside Jans container.")
             sys.exit(1)
 
-        self.extract_scripts()
-        
-        if not Config.installed_instance and Config.profile == static.SetupProfiles.DISA_STIG:
-            self.remove_pcks11_keys()
+#        client_jar_files = [
+#                    os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-auth-client/{0}/jans-auth-client-{0}-jar-with-dependencies.jar').format(base.current_app.app_info['ox_version']),
+#                    os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-auth-client/{0}/jans-auth-client-{0}-jar-without-provider-dependencies.jar').format(base.current_app.app_info['ox_version'])
+#                   ]
 
+        client_jar_files = [
+                    os.path.join(base.current_app.app_info['BASE_SERVER'], '_out/jans-auth-client-jar-without-provider-dependencies.jar'),
+                    os.path.join(base.current_app.app_info['BASE_SERVER'], '_out/jans-auth-client-jar-with-dependencies.jar')
+                   ]
+
+        client_jar_file = Config.non_setup_properties['jans_auth_client_noprivder_jar_fn'] if Config.profile == SetupProfiles.DISA_STIG else Config.non_setup_properties['jans_auth_client_jar_fn']
+
+        if not os.path.exists(client_jar_file):
+            oxauth_client_jar_url = client_jar_files[0 if Config.profile == SetupProfiles.DISA_STIG else 1]
+            self.logIt("Downloading {}".format(os.path.basename(oxauth_client_jar_url)))
+            base.download(oxauth_client_jar_url, client_jar_file)
+
+        self.logIt("Determining key generator path")
+        oxauth_client_jar_zf = zipfile.ZipFile(client_jar_file)
 
         for f in oxauth_client_jar_zf.namelist():
             if os.path.basename(f) == 'KeyGenerator.class':
@@ -126,13 +139,14 @@ class JansInstaller(BaseInstaller, SetupUtils):
                 Config.non_setup_properties['key_export_path'] = p.replace(os.path.sep, '.')
 
         if (not 'key_gen_path' in Config.non_setup_properties) or (not 'key_export_path' in Config.non_setup_properties):
-            self.logIt("Can't determine key generator and/or key exporter path form {}".format(Config.non_setup_properties['oxauth_client_jar_fn']), True, True)
+            self.logIt("Can't determine key generator and/or key exporter path form {}".format(client_jar_file), True, True)
         else:
             self.logIt("Key generator path was determined as {}".format(Config.non_setup_properties['key_export_path']))
 
-
         self.extract_scripts()
 
+        if not Config.installed_instance and Config.profile == static.SetupProfiles.DISA_STIG:
+            self.remove_pkcs11_keys()
 
     def configureSystem(self):
         self.logIt("Configuring system", 'jans')

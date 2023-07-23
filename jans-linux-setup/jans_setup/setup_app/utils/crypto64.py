@@ -458,7 +458,7 @@ class Crypto64:
             print("{}Can't download certificate{}".format(static.colors.DANGER, static.colors.ENDC))
             print(e)
 
-    def remove_pcks11_keys(self, keys=['server-cert', 'admin-cert', 'dummy']):
+    def remove_pkcs11_keys(self, keys=['server-cert', 'admin-cert', 'dummy']):
         output = self.run([Config.cmd_keytool, '-list', '-keystore', 'NONE', '-storetype', 'PKCS11', '-storepass', 'changeit'])
         for l in output.splitlines():
             ls = l.strip()
