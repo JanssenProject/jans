@@ -1956,6 +1956,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://jans.io/docs/head/admin/vm-ops/upgrade/</loc>
+         <lastmod>2023-07-24</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://jans.io/docs/head/admin/vm-ops/web-services/</loc>
          <lastmod>2023-07-24</lastmod>
          <changefreq>daily</changefreq>
