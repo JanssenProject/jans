@@ -142,6 +142,10 @@ style = Style.from_dict(
         # black background widget
         "black-bg-widget": "bg:black fg:white",
 
+        # white background widget
+        "white-bg-widget": "bg:white fg:black",
+
+
         ### table
         "table-white-header": "nounderline bold fg:ansiblack bg:White",
         "table-white-data": "nounderline fg:ansiblack bg:LightGray",

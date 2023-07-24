@@ -19,6 +19,7 @@ class cli_style:
     navbar_entriescolor = 'class:plugin-navbar-entriescolor'
     tab_selected = 'class:tab-selected'
     black_bg_widget = 'class:black-bg-widget'
+    white_bg_widget = 'class:white-bg-widget'
     black_bg = 'class:plugin-black-bg'
     textarea = 'class:textarea'
     drop_down = 'class:plugin-dropdown'
