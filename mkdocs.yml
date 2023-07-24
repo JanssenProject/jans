@@ -96,6 +96,7 @@ nav:
     - Health Check: admin/kubernetes-ops/health-check.md
   - VM Operation Guide:
     - admin/vm-ops/README.md
+    - Upgrade: admin/vm-ops/upgrade.md
     - Backup: admin/vm-ops/backup.md
     - Logs: admin/vm-ops/logs.md
     - Checking Service Status: admin/vm-ops/checking-service-status.md
