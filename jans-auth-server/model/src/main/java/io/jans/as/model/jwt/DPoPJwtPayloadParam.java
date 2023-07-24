@@ -33,6 +33,11 @@ public final class DPoPJwtPayloadParam {
     public static final String HTU = "htu";
 
     /**
+     * Nonce
+     */
+    public static final String NONCE = "nonce";
+
+    /**
      * Time at which the JWT was created.
      */
     public static final String IAT = "iat";
