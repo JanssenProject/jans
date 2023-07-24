@@ -1,0 +1,30 @@
+connection.project=%(spanner_project)s
+connection.instance=%(spanner_instance)s
+connection.database=%(spanner_database)s
+
+# Prefix connection.client-property.key=value will be coverterd to key=value
+# This is reserved for future usage
+#connection.client-property=clientPropertyValue
+
+# spanner creds or emulator
+%(spanner_creds)s
+
+# Password hash method
+password.encryption.method=SSHA-256
+
+# Connection pool size
+#connection.pool.max-sessions=400
+#connection.pool.min-sessions=100
+#connection.pool.inc-step=25
+
+# Max time needed to create connection pool in milliseconds
+connection.pool.create-max-wait-time-millis=20000
+
+# Maximum allowed statement result set size
+statement.limit.default-maximum-result-size=1000
+
+# Maximum allowed delete statement result set size
+statement.limit.maximum-result-delete-size=10000
+
+binaryAttributes=objectGUID
+certificateAttributes=userCertificate
