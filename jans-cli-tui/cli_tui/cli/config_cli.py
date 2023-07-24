@@ -1110,7 +1110,10 @@ class JCA_CLI:
         if schema_path:
             print()
             scim_arg = ' -scim' if '-scim' in sys.argv else ''
-            print("To get sample schema type {0}{3} --schema <schma>, for example {0}{3} --schema {2}{1}".format(sys.argv[0], os.path.basename(schema_path), mode_suffix, scim_arg))
+            schema_path_string = '{}{}'.format(mode_suffix, os.path.basename(schema_path))
+            if ' ' in schema_path_string:
+                schema_path_string = '\"{}\"'.format(schema_path_string)
+            print("To get sample schema type {0}{2} --schema <schma>, for example {0}{2} --schema {1}".format(sys.argv[0], schema_path_string, scim_arg))
 
     def render_json_entry(self, val):
         if isinstance(val, str) and val.startswith('_file '):
