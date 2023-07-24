@@ -235,8 +235,11 @@ def configure_logging():
         else:
             config[key] = file_aliases[key]
 
-    if as_boolean(custom_config.get("enable_stdout_log_prefix")):
-        config["log_prefix"] = "${sys:log.console.prefix}%X{log.console.group} - "
+    if any([
+        as_boolean(custom_config.get("enable_stdout_log_prefix")),
+        as_boolean(os.environ.get("CN_ENABLE_STDOUT_LOG_PREFIX")),
+    ]):
+        config["log_prefix"] = "${sys:config_api.log.console.prefix}%X{config_api.log.console.group} - "
 
     with open("/app/templates/log4j2.xml") as f:
         txt = f.read()
@@ -266,7 +269,7 @@ def configure_admin_ui_logging():
 
     # ensure custom config is ``dict`` type
     if not isinstance(custom_config, dict):
-        logger.warning("Invalid data type for CN_CONFIG_API_APP_LOGGERS; fallback to defaults")
+        logger.warning("Invalid data type for CN_ADMIN_UI_PLUGIN_LOGGERS; fallback to defaults")
         custom_config = {}
 
     # list of supported levels; OFF is not supported
@@ -305,8 +308,11 @@ def configure_admin_ui_logging():
         else:
             config[key] = file_aliases[key]
 
-    if as_boolean(custom_config.get("enable_stdout_log_prefix")):
-        config["log_prefix"] = "${sys:log.console.prefix.admin-ui}%X{log.console.group.admin-ui} - "
+    if any([
+        as_boolean(custom_config.get("enable_stdout_log_prefix")),
+        as_boolean(os.environ.get("CN_ENABLE_STDOUT_LOG_PREFIX")),
+    ]):
+        config["log_prefix"] = "${sys:admin_ui.log.console.prefix}%X{admin_ui.log.console.group} - "
 
     with open("/app/plugins/admin-ui/log4j2-adminui.xml") as f:
         txt = f.read()
