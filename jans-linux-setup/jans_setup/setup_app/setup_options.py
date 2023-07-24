@@ -18,7 +18,8 @@ def get_setup_options():
         'installOxd': False,
         'installFido2': True,
         'installEleven': False,
-        'install_cache_refresh': True,
+        'install_jans_link': True,
+        'install_casa': False,
         'loadTestData': False,
         'allowPreReleasedFeatures': False,
         'listenAllInterfaces': False,
@@ -102,9 +103,11 @@ def get_setup_options():
         if base.argsp.install_eleven:
             setupOptions['installEleven'] = True
 
-        if base.argsp.install_cache_refresh:
-            setupOptions['install_cache_refresh'] = True
+        if base.argsp.install_jans_link:
+            setupOptions['install_jans_link'] = True
 
+        if base.argsp.with_casa:
+            setupOptions['install_casa'] = True
 
         if base.argsp.jans_max_mem:
             setupOptions['jans_max_mem'] = base.argsp.jans_max_mem

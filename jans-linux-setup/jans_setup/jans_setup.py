@@ -132,7 +132,9 @@ if base.current_app.profile == 'jans':
     from setup_app.installers.scim import ScimInstaller
     from setup_app.installers.fido import FidoInstaller
     from setup_app.installers.eleven import ElevenInstaller
-    from setup_app.installers.cache_refresh import CacheRefreshInstaller
+    from setup_app.installers.jans_link import JansLinkInstaller
+    from setup_app.installers.casa import CasaInstaller
+
 
 from setup_app.installers.config_api import ConfigApiInstaller
 from setup_app.installers.jans_cli import JansCliInstaller
@@ -251,7 +253,8 @@ if Config.profile == 'jans':
     fidoInstaller = FidoInstaller()
     scimInstaller = ScimInstaller()
     elevenInstaller = ElevenInstaller()
-    cache_refresh_installer = CacheRefreshInstaller()
+    casa_installer = CasaInstaller()
+    jans_link_installer = JansLinkInstaller()
 
 jansCliInstaller = JansCliInstaller()
 
@@ -429,9 +432,14 @@ def main():
                         not Config.installed_instance and Config.get(elevenInstaller.install_var)):
                     elevenInstaller.start_installation()
 
-                if (Config.installed_instance and cache_refresh_installer.install_var in Config.addPostSetupService) or (
-                        not Config.installed_instance and Config.get(cache_refresh_installer.install_var)):
-                    cache_refresh_installer.start_installation()
+                if (Config.installed_instance and casa_installer.install_var in Config.addPostSetupService) or (
+                        not Config.installed_instance and Config.get(casa_installer.install_var)):
+                    casa_installer.start_installation()
+
+
+                if (Config.installed_instance and jans_link_installer.install_var in Config.addPostSetupService) or (
+                        not Config.installed_instance and Config.get(jans_link_installer.install_var)):
+                    jans_link_installer.start_installation()
 
             if Config.install_jans_cli:
                 jansCliInstaller.start_installation()

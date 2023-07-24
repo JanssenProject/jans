@@ -7,6 +7,7 @@ public enum ErrorResponse {
     AUTHORIZATION_CODE_BLANK("Bad Request: Authourization `code` blank or empty."),
     USER_INFO_JWT_BLANK("User-Info jwt is blank or empty. Generating token with default scopes."),
     CODE_OR_TOKEN_REQUIRED("Bad Request: Either `code` or `access_token` is required."),
+    CODE_VERIFIER_REQUIRED("Bad Request: `code_verifier` is required."),
     CHECK_LICENSE_ERROR("Error in checking license status. Check logs for further details."),
     ERROR_IN_LICENSE_CONFIGURATION_VALIDATION("Error in validating license configuration."),
     ACTIVATE_LICENSE_ERROR("Error in activating License. Check logs for further details."),

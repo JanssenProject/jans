@@ -152,6 +152,8 @@ class DropDownWidget:
         else:
             if select_one_option:
                 self.display_value = self.value_list[0][1] if self.value_list else _("Enter to Select")
+            else:
+                self.display_value = self.value_list[0][1]
 
         self.dropdown = True
         self.window = Window(

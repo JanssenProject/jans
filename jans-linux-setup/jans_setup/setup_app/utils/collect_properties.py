@@ -20,6 +20,7 @@ from setup_app.utils.properties_utils import propertiesUtils
 from setup_app.pylib.jproperties import Properties
 from setup_app.installers.jetty import JettyInstaller
 from setup_app.installers.base import BaseInstaller
+from setup_app.installers.casa import CasaInstaller
 
 class CollectProperties(SetupUtils, BaseInstaller):
 
@@ -105,7 +106,7 @@ class CollectProperties(SetupUtils, BaseInstaller):
              Config.mapping_locations = {'default': jans_hybrid_properties['storage.default']}
              storages = [ storage.strip() for storage in jans_hybrid_properties['storages'].split(',') ]
 
-             for ml, m in (('user', 'people'), ('cache', 'cache'), ('site', 'cache-refresh'), ('token', 'tokens')):
+             for ml, m in (('user', 'people'), ('cache', 'cache'), ('site', 'link'), ('token', 'tokens')):
                  for storage in storages:
                      if m in jans_hybrid_properties.get('storage.{}.mapping'.format(storage),[]):
                          Config.mapping_locations[ml] = storage
@@ -153,6 +154,7 @@ class CollectProperties(SetupUtils, BaseInstaller):
                     ('jca_test_client_id', '1802.', {'pw': 'jca_test_client_pw', 'encoded':'jca_test_client_encoded_pw'}),
                     ('scim_client_id', '1201.', {'pw': 'scim_client_pw', 'encoded':'scim_client_encoded_pw'}),
                     ('admin_ui_client_id', '1901.', {'pw': 'admin_ui_client_pw', 'encoded': 'admin_ui_client_encoded_pw'}),
+                    ('casa_client_id', CasaInstaller.client_id_prefix),
                     ]
         self.check_clients(client_var_id_list, create=False)
 
@@ -234,11 +236,12 @@ class CollectProperties(SetupUtils, BaseInstaller):
         if not Config.get('ip'):
             Config.ip = self.detect_ip()
 
-        Config.install_scim_server = os.path.exists(os.path.join(Config.jetty_base, 'jans-scim/start.ini'))
-        Config.installFido2 = os.path.exists(os.path.join(Config.jetty_base, 'jans-fido2/start.ini'))
-        Config.installEleven = os.path.exists(os.path.join(Config.jetty_base, 'jans-eleven/start.ini'))
+        Config.install_scim_server = os.path.exists(os.path.join(Config.jetty_base, 'jans-scim/start.d'))
+        Config.installFido2 = os.path.exists(os.path.join(Config.jetty_base, 'jans-fido2/start.d'))
+        Config.installEleven = os.path.exists(os.path.join(Config.jetty_base, 'jans-eleven/start.d'))
         Config.install_config_api = os.path.exists(os.path.join(Config.jansOptFolder, 'jans-config-api'))
-        Config.install_cache_refresh = os.path.exists(os.path.join(Config.jansOptFolder, 'jans-cache-refresh'))
+        Config.install_jans_link = os.path.exists(os.path.join(Config.jansOptFolder, 'jans-link'))
+        Config.install_casa = os.path.exists(os.path.join(Config.jetty_base, 'casa/start.d'))
 
     def save(self):
         if os.path.exists(Config.setup_properties_fn):

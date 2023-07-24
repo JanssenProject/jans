@@ -161,10 +161,6 @@ components:
             type: string
         personCustomObjectClass:
           type: string
-        personObjectClassDisplayNames:
-          type: array
-          items:
-            type: string
         contactObjectClassTypes:
           type: array
           items:
@@ -194,18 +190,18 @@ components:
         cleanServiceInterval:
           type: integer
           format: int32
-        vdsCacheRefreshEnabled:
+        linkEnabled:
           type: boolean
-        cacheRefreshServerIpAddress:
+        serverIpAddress:
           type: string
-        vdsCacheRefreshPollingInterval:
+        pollingInterval:
           type: string
-        vdsCacheRefreshLastUpdate:
+        lastUpdate:
           type: string
           format: date-time
-        vdsCacheRefreshLastUpdateCount:
+        lastUpdateCount:
           type: string
-        vdsCacheRefreshProblemCount:
+        problemCount:
           type: string
         useLocalCache:
           type: boolean

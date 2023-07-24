@@ -199,11 +199,11 @@ class Config:
         self.install_scim_server = True
         self.installFido2 = True
         self.install_config_api = True
-        self.installCasa = False
+        self.install_casa = False
         self.installOxd = False
         self.installEleven = False
         self.install_jans_cli = True
-        self.install_cache_refresh = True
+        self.install_jans_link = True
         self.loadTestData = False
         self.allowPreReleasedFeatures = False
 
@@ -296,7 +296,7 @@ class Config:
         self.ldif_agama = os.path.join(self.output_dir, 'agama.ldif')
 
         self.ldif_metric = os.path.join(self.staticFolder, 'metric/o_metric.ldif')
-        self.ldif_site = os.path.join(self.install_dir, 'static/cache-refresh/o_site.ldif')
+        self.ldif_site = os.path.join(self.install_dir, 'static/jans-link/o_site.ldif')
         self.ldif_configuration = os.path.join(self.output_dir, 'configuration.ldif')
 
         self.system_profile_update_init = os.path.join(self.output_dir, 'system_profile_init')
@@ -389,8 +389,8 @@ class Config:
 
                         ('site',     {   'ldif': [self.ldif_site],
                                         'memory_allocation': 100,
-                                        'mapping': 'cache-refresh',
-                                        'document_key_prefix': ['site_', 'cache-refresh_'],
+                                        'mapping': 'jans-link',
+                                        'document_key_prefix': ['site_', 'jans-link_'],
                                     }),
 
                         ('cache',    {   'ldif': [],

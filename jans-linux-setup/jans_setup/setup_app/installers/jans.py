@@ -75,7 +75,8 @@ class JansInstaller(BaseInstaller, SetupUtils):
             if Config.profile == 'jans':
                 txt += 'Install Fido2 Server'.ljust(30) + repr(Config.installFido2).rjust(35) + (' *' if 'installFido2' in Config.addPostSetupService else '') + "\n"
                 txt += 'Install Scim Server'.ljust(30) + repr(Config.install_scim_server).rjust(35) + (' *' if 'install_scim_server' in Config.addPostSetupService else '') + "\n"
-                txt += 'Install Cache Refresh Server'.ljust(30) + repr(Config.install_cache_refresh).rjust(35) + (' *' if 'install_cache_refresh' in Config.addPostSetupService else '') + "\n"
+                txt += 'Install Jans Link Server'.ljust(30) + repr(Config.install_jans_link).rjust(35) + (' *' if 'install_jans_link' in Config.addPostSetupService else '') + "\n"
+                txt += 'Install Gluu/Flex Casa Server'.ljust(30) + repr(Config.install_casa).rjust(35) + (' *' if 'install_casa' in Config.addPostSetupService else '') + "\n"
                 #txt += 'Install Oxd '.ljust(30) + repr(Config.installOxd).rjust(35) + (' *' if 'installOxd' in Config.addPostSetupService else '') + "\n"
 
             if Config.profile == 'jans' and Config.installEleven:
@@ -133,29 +134,6 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
         self.extract_scripts()
 
-    def disable_selinux(self):
-        self.logIt("Disabling SELinux")
-        setenforce_cmd = shutil.which('setenforce')
-        selinux_config_fn = '/etc/selinux/config'
-
-        if setenforce_cmd:
-            self.run([setenforce_cmd, '0'])
-
-        if not os.path.exists(selinux_config_fn):
-            return
-
-        selinux_config = self.readFile(selinux_config_fn).splitlines()
-        for i, line in enumerate(selinux_config):
-            if not line.startswith('#'):
-                n = line.find('=')
-                if n > -1:
-                    ckey = line[:n].strip()
-                    cval = line[n+1:].strip()
-                    if ckey == 'SELINUX' and  cval == 'enforcing':
-                        selinux_config[i] = 'SELINUX=disabled'
-                        self.writeFile(selinux_config_fn, '\n'.join(selinux_config))
-                        Config.post_messages.append("{}SELinux was disabled permanently{}.".format(static.colors.WARNING, static.colors.ENDC))
-                        break
 
     def configureSystem(self):
         self.logIt("Configuring system", 'jans')
@@ -500,8 +478,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
     def post_install_tasks(self):
 
-        if base.argsp.disable_selinux:
-            self.disable_selinux()
+        self.apply_selinux_plicies()
 
         self.deleteLdapPw()
 
@@ -589,6 +566,20 @@ class JansInstaller(BaseInstaller, SetupUtils):
         #enable scripts
         self.enable_scripts(base.argsp.enable_script)
 
+    def apply_selinux_plicies(self):
+        self.logIt("Applying SELinux Policies")
+        setsebool_cmd = shutil.which('setsebool')
+
+        if not setsebool_cmd:
+            self.logIt("SELinux setsebool command not found")
+            return
+
+        selinux_policies = ['httpd_can_network_connect 1 -P']
+
+        for se_pol in selinux_policies:
+            cmd = [setsebool_cmd] + se_pol.split()
+            self.run(cmd)
+
     def enable_scripts(self, inums, enable=True):
         if inums:
             for inum in inums:
@@ -630,8 +621,9 @@ class JansInstaller(BaseInstaller, SetupUtils):
                         ('jans-eleven', 'installEleven'),
                         ('jans-auth', 'installOxAuth'),
                         ('jans-config-api', 'install_config_api'),
+                        ('casa', 'install_casa'),
                         ('jans-fido2', 'installFido2'),
-                        ('jans-cache-refresh', 'install_cache_refresh'),
+                        ('jans-link', 'install_jans_link'),
                         ('jans-scim', 'install_scim_server'),
                         ]
         service_listr = service_list[:]

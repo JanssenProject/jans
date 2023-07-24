@@ -1083,17 +1083,29 @@ class JCA_CLI:
                                     for apptype in path['requestBody'].get('content', {}):
                                         if 'schema' in path['requestBody']['content'][apptype]:
                                             if path['requestBody']['content'][apptype]['schema'].get('type') == 'object' and '$ref' not in path['requestBody']['content'][apptype]['schema']:
-                                                print('  Parameters:')
-                                                for param in path['requestBody']['content'][apptype]['schema']['properties']:
-                                                    req_s = '*' if param in path['requestBody']['content'][apptype]['schema'].get('required', []) else ''
-                                                    print('    {}{}: {}'.format(param, req_s, path['requestBody']['content'][apptype]['schema']['properties'][param].get('description') or "Description not found for this property"))
+                                                
+                                                for prop_var in ('properties', 'additionalProperties'):
+                                                    if prop_var in path['requestBody']['content'][apptype]['schema']:
+                                                        break
+                                                else:
+                                                    prop_var = None
+                                                if prop_var:
+                                                    print('  Parameters:')
+                                                    for param in path['requestBody']['content'][apptype]['schema'][prop_var]:
+                                                        req_s = '*' if param in path['requestBody']['content'][apptype]['schema'].get('required', []) else ''
+                                                        if isinstance(path['requestBody']['content'][apptype]['schema'][prop_var][param], dict) and path['requestBody']['content'][apptype]['schema'][prop_var][param].get('description'):
+                                                            desc = path['requestBody']['content'][apptype]['schema'][prop_var][param]['description']
+                                                        else:
+                                                            desc = "Description not found for this property"
+                                                        print('    {}{}: {}'.format(param, req_s, desc))
 
-                                            elif path['requestBody']['content'][apptype]['schema'].get('type') == 'array':
+                                            elif path['requestBody']['content'][apptype]['schema'].get('type') == 'array' and '$ref' in path['requestBody']['content'][apptype]['schema']['items']:
                                                 schema_path = path['requestBody']['content'][apptype]['schema']['items']['$ref']
                                                 print('  Schema: Array of {}{}'.format(mode_suffix, os.path.basename(schema_path)))
                                             else:
-                                                schema_path = path['requestBody']['content'][apptype]['schema']['$ref']
-                                                print('  Schema: {}{}'.format(mode_suffix, os.path.basename(schema_path)))
+                                                if '$ref' in path['requestBody']['content'][apptype]['schema']:
+                                                    schema_path = path['requestBody']['content'][apptype]['schema']['$ref']
+                                                    print('  Schema: {}{}'.format(mode_suffix, os.path.basename(schema_path)))
                             break
         if schema_path:
             print()

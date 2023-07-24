@@ -50,18 +50,22 @@ public class OAuth2Service extends BaseService {
     /**
      * Calls token endpoint from the Identity Provider and returns a valid Access Token.
      */
-    public TokenResponse getAccessToken(String code, String appType) throws ApplicationException {
+    public TokenResponse getAccessToken(String code, String codeVerifier, String appType) throws ApplicationException {
         try {
             log.debug("Getting access token with code");
             if (Strings.isNullOrEmpty(code)) {
                 log.error(ErrorResponse.AUTHORIZATION_CODE_BLANK.getDescription());
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.AUTHORIZATION_CODE_BLANK.getDescription());
             }
+            if (Strings.isNullOrEmpty(codeVerifier)) {
+                log.error(ErrorResponse.CODE_VERIFIER_REQUIRED.getDescription());
+                throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.CODE_VERIFIER_REQUIRED.getDescription());
+            }
             AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration(appType);
 
             TokenRequest tokenRequest = new TokenRequest(GrantType.AUTHORIZATION_CODE);
             tokenRequest.setCode(code);
-
+            tokenRequest.setCodeVerifier(codeVerifier);
             tokenRequest.setAuthUsername(auiConfiguration.getAuthServerClientId());
             tokenRequest.setAuthPassword(encryptionService.decrypt(auiConfiguration.getAuthServerClientSecret()));
             tokenRequest.setGrantType(GrantType.AUTHORIZATION_CODE);
@@ -150,8 +154,13 @@ public class OAuth2Service extends BaseService {
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.CODE_OR_TOKEN_REQUIRED.getDescription());
             }
 
+            if (Strings.isNullOrEmpty(userInfoRequest.getCodeVerifier())) {
+                log.error(ErrorResponse.CODE_VERIFIER_REQUIRED.getDescription());
+                throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.CODE_VERIFIER_REQUIRED.getDescription());
+            }
+
             if (org.apache.logging.log4j.util.Strings.isNotBlank(userInfoRequest.getCode()) && org.apache.logging.log4j.util.Strings.isBlank(accessToken)) {
-                TokenResponse tokenResponse = getAccessToken(userInfoRequest.getCode(), appType);
+                TokenResponse tokenResponse = getAccessToken(userInfoRequest.getCode(), userInfoRequest.getCodeVerifier(), appType);
                 accessToken = tokenResponse.getAccessToken();
             }
             log.debug("Access Token : {}", accessToken);

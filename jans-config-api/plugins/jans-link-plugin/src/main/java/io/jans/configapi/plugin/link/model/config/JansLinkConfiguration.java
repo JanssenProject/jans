@@ -54,28 +54,135 @@ public class JansLinkConfiguration implements Configuration {
     // In seconds; will be converted to millis
 
     private List<String> supportedUserStatus= Arrays.asList("active","inactive");
-
     private String loggingLevel;
     private String loggingLayout;
     private String externalLoggerConfiguration;
-
     private int metricReporterInterval;
     private int metricReporterKeepDataDays;
     private Boolean metricReporterEnabled;
     private Boolean disableJdkLogger = true;
-
     // in seconds
     private int cleanServiceInterval;
+    private boolean linkEnabled;
+    private String serverIpAddress;
+    private String pollingInterval;
 
-    private boolean vdsCacheRefreshEnabled;
-    private String cacheRefreshServerIpAddress;
-    private String vdsCacheRefreshPollingInterval;
-    private Date vdsCacheRefreshLastUpdate;
-    private String vdsCacheRefreshLastUpdateCount;
-    private String vdsCacheRefreshProblemCount;
+    private Date lastUpdate;
+    private String lastUpdateCount;
+    private String problemCount;
 
     private Boolean useLocalCache = false;
+    
+    
+    public boolean isLinkEnabled() {
+        return linkEnabled;
+    }
 
+    public void setLinkEnabled(boolean linkEnabled) {
+        this.linkEnabled = linkEnabled;
+    }
+
+    public String getServerIpAddress() {
+        return serverIpAddress;
+    }
+
+    public void setServerIpAddress(String serverIpAddress) {
+        this.serverIpAddress = serverIpAddress;
+    }
+
+    public String getPollingInterval() {
+        return pollingInterval;
+    }
+
+    public void setPollingInterval(String pollingInterval) {
+        this.pollingInterval = pollingInterval;
+    }
+
+    public Date getLastUpdate() {
+        return lastUpdate;
+    }
+
+    public void setLastUpdate(Date lastUpdate) {
+        this.lastUpdate = lastUpdate;
+    }
+
+    public String getLastUpdateCount() {
+        return lastUpdateCount;
+    }
+
+    public void setLastUpdateCount(String lastUpdateCount) {
+        this.lastUpdateCount = lastUpdateCount;
+    }
+
+    public String getProblemCount() {
+        return problemCount;
+    }
+
+    public void setProblemCount(String problemCount) {
+        this.problemCount = problemCount;
+    }
+
+    public String getBaseDN() {
+        return baseDN;
+    }
+
+    public String[] getPersonObjectClassTypes() {
+        return personObjectClassTypes;
+    }
+
+    public String getPersonCustomObjectClass() {
+        return personCustomObjectClass;
+    }
+
+    public String[] getContactObjectClassTypes() {
+        return contactObjectClassTypes;
+    }
+
+
+    public boolean isAllowPersonModification() {
+        return allowPersonModification;
+    }
+
+    public String getLoggingLevel() {
+        return loggingLevel;
+    }
+
+    public String getLoggingLayout() {
+        return loggingLayout;
+    }
+
+    public String getExternalLoggerConfiguration() {
+        return externalLoggerConfiguration;
+    }
+
+    public int getMetricReporterInterval() {
+        return metricReporterInterval;
+    }
+
+    public List<String> getSupportedUserStatus() {
+        return supportedUserStatus;
+    }
+
+    public int getMetricReporterKeepDataDays() {
+        return metricReporterKeepDataDays;
+    }
+
+    public Boolean getMetricReporterEnabled() {
+        return metricReporterEnabled;
+    }
+
+    public Boolean getDisableJdkLogger() {
+        return disableJdkLogger;
+    }
+
+    public int getCleanServiceInterval() {
+        return cleanServiceInterval;
+    }
+
+    public Boolean getUseLocalCache() {
+        return useLocalCache;
+    }
+    
     public List<GluuLdapConfiguration> getSourceConfigs() {
         return sourceConfigs;
     }
@@ -148,20 +255,20 @@ public class JansLinkConfiguration implements Configuration {
         this.updateMethod = updateMethod;
     }
 
-    public boolean isDefaultInumServer() {
-        return defaultInumServer;
-    }
-
-    public void setDefaultInumServer(boolean defaultInumServer) {
-        this.defaultInumServer = defaultInumServer;
-    }
-
     public boolean isKeepExternalPerson() {
         return keepExternalPerson;
     }
 
     public void setKeepExternalPerson(boolean keepExternalPerson) {
         this.keepExternalPerson = keepExternalPerson;
+    }
+
+    public boolean isDefaultInumServer() {
+        return defaultInumServer;
+    }
+
+    public void setDefaultInumServer(boolean defaultInumServer) {
+        this.defaultInumServer = defaultInumServer;
     }
 
     public boolean isUseSearchLimit() {
@@ -194,182 +301,6 @@ public class JansLinkConfiguration implements Configuration {
 
     public void setSnapshotMaxCount(int snapshotMaxCount) {
         this.snapshotMaxCount = snapshotMaxCount;
-    }
-
-    public String getBaseDN() {
-        return baseDN;
-    }
-
-    public void setBaseDN(String baseDN) {
-        this.baseDN = baseDN;
-    }
-
-    public String[] getPersonObjectClassTypes() {
-        return personObjectClassTypes;
-    }
-
-    public void setPersonObjectClassTypes(String[] personObjectClassTypes) {
-        this.personObjectClassTypes = personObjectClassTypes;
-    }
-
-    public String getPersonCustomObjectClass() {
-        return personCustomObjectClass;
-    }
-
-    public void setPersonCustomObjectClass(String personCustomObjectClass) {
-        this.personCustomObjectClass = personCustomObjectClass;
-    }
-
-    public String[] getPersonObjectClassDisplayNames() {
-        return personObjectClassDisplayNames;
-    }
-
-    public void setPersonObjectClassDisplayNames(String[] personObjectClassDisplayNames) {
-        this.personObjectClassDisplayNames = personObjectClassDisplayNames;
-    }
-
-    public String[] getContactObjectClassTypes() {
-        return contactObjectClassTypes;
-    }
-
-    public void setContactObjectClassTypes(String[] contactObjectClassTypes) {
-        this.contactObjectClassTypes = contactObjectClassTypes;
-    }
-
-    public boolean isAllowPersonModification() {
-        return allowPersonModification;
-    }
-
-    public void setAllowPersonModification(boolean allowPersonModification) {
-        this.allowPersonModification = allowPersonModification;
-    }
-
-    public List<String> getSupportedUserStatus() {
-        return supportedUserStatus;
-    }
-
-    public void setSupportedUserStatus(List<String> supportedUserStatus) {
-        this.supportedUserStatus = supportedUserStatus;
-    }
-
-    public String getLoggingLevel() {
-        return loggingLevel;
-    }
-
-    public void setLoggingLevel(String loggingLevel) {
-        this.loggingLevel = loggingLevel;
-    }
-
-    public String getLoggingLayout() {
-        return loggingLayout;
-    }
-
-    public void setLoggingLayout(String loggingLayout) {
-        this.loggingLayout = loggingLayout;
-    }
-
-    public String getExternalLoggerConfiguration() {
-        return externalLoggerConfiguration;
-    }
-
-    public void setExternalLoggerConfiguration(String externalLoggerConfiguration) {
-        this.externalLoggerConfiguration = externalLoggerConfiguration;
-    }
-
-    public int getMetricReporterInterval() {
-        return metricReporterInterval;
-    }
-
-    public void setMetricReporterInterval(int metricReporterInterval) {
-        this.metricReporterInterval = metricReporterInterval;
-    }
-
-    public int getMetricReporterKeepDataDays() {
-        return metricReporterKeepDataDays;
-    }
-
-    public void setMetricReporterKeepDataDays(int metricReporterKeepDataDays) {
-        this.metricReporterKeepDataDays = metricReporterKeepDataDays;
-    }
-
-    public Boolean getMetricReporterEnabled() {
-        return metricReporterEnabled;
-    }
-
-    public void setMetricReporterEnabled(Boolean metricReporterEnabled) {
-        this.metricReporterEnabled = metricReporterEnabled;
-    }
-
-    public Boolean getDisableJdkLogger() {
-        return disableJdkLogger;
-    }
-
-    public void setDisableJdkLogger(Boolean disableJdkLogger) {
-        this.disableJdkLogger = disableJdkLogger;
-    }
-
-    public int getCleanServiceInterval() {
-        return cleanServiceInterval;
-    }
-
-    public void setCleanServiceInterval(int cleanServiceInterval) {
-        this.cleanServiceInterval = cleanServiceInterval;
-    }
-
-    public boolean isVdsCacheRefreshEnabled() {
-        return vdsCacheRefreshEnabled;
-    }
-
-    public void setVdsCacheRefreshEnabled(boolean vdsCacheRefreshEnabled) {
-        this.vdsCacheRefreshEnabled = vdsCacheRefreshEnabled;
-    }
-
-    public String getCacheRefreshServerIpAddress() {
-        return cacheRefreshServerIpAddress;
-    }
-
-    public void setCacheRefreshServerIpAddress(String cacheRefreshServerIpAddress) {
-        this.cacheRefreshServerIpAddress = cacheRefreshServerIpAddress;
-    }
-
-    public String getVdsCacheRefreshPollingInterval() {
-        return vdsCacheRefreshPollingInterval;
-    }
-
-    public void setVdsCacheRefreshPollingInterval(String vdsCacheRefreshPollingInterval) {
-        this.vdsCacheRefreshPollingInterval = vdsCacheRefreshPollingInterval;
-    }
-
-    public Date getVdsCacheRefreshLastUpdate() {
-        return vdsCacheRefreshLastUpdate;
-    }
-
-    public void setVdsCacheRefreshLastUpdate(Date vdsCacheRefreshLastUpdate) {
-        this.vdsCacheRefreshLastUpdate = vdsCacheRefreshLastUpdate;
-    }
-
-    public String getVdsCacheRefreshLastUpdateCount() {
-        return vdsCacheRefreshLastUpdateCount;
-    }
-
-    public void setVdsCacheRefreshLastUpdateCount(String vdsCacheRefreshLastUpdateCount) {
-        this.vdsCacheRefreshLastUpdateCount = vdsCacheRefreshLastUpdateCount;
-    }
-
-    public String getVdsCacheRefreshProblemCount() {
-        return vdsCacheRefreshProblemCount;
-    }
-
-    public void setVdsCacheRefreshProblemCount(String vdsCacheRefreshProblemCount) {
-        this.vdsCacheRefreshProblemCount = vdsCacheRefreshProblemCount;
-    }
-
-    public Boolean getUseLocalCache() {
-        return useLocalCache;
-    }
-
-    public void setUseLocalCache(Boolean useLocalCache) {
-        this.useLocalCache = useLocalCache;
     }
 
 }

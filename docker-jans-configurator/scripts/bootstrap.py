@@ -23,7 +23,6 @@ from jans.pycloudlib.utils import generate_ssl_certkey
 from jans.pycloudlib.utils import generate_ssl_ca_certkey
 from jans.pycloudlib.utils import generate_signed_ssl_certkey
 from jans.pycloudlib.utils import as_boolean
-from jans.pycloudlib.utils import generate_keystore
 
 from parameter import params_from_file
 from settings import LOGGING_CONFIG
@@ -31,9 +30,14 @@ from settings import LOGGING_CONFIG
 DEFAULT_SIG_KEYS = "RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512"
 DEFAULT_ENC_KEYS = "RSA1_5 RSA-OAEP ECDH-ES"
 
-DEFAULT_CONFIG_FILE = "/app/db/config.json"
-DEFAULT_SECRET_FILE = "/app/db/secret.json"
-DEFAULT_GENERATE_FILE = "/app/db/generate.json"
+CONFIGURATOR_DIR = "/opt/jans/configurator"
+DB_DIR = os.environ.get("CN_CONFIGURATOR_DB_DIR", f"{CONFIGURATOR_DIR}/db")
+CERTS_DIR = os.environ.get("CN_CONFIGURATOR_CERTS_DIR", f"{CONFIGURATOR_DIR}/certs")
+JAVALIBS_DIR = f"{CONFIGURATOR_DIR}/javalibs"
+
+DEFAULT_CONFIG_FILE = f"{DB_DIR}/config.json"
+DEFAULT_SECRET_FILE = f"{DB_DIR}/secret.json"
+DEFAULT_GENERATE_FILE = f"{DB_DIR}/generate.json"
 
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("configurator")
@@ -51,60 +55,25 @@ def encode_template(fn, ctx, base_dir="/app/templates"):
         return generate_base64_contents(safe_render(f.read(), data))
 
 
-def generate_openid_keys(passwd, jks_path, jwks_path, dn, exp=365, sig_keys=DEFAULT_SIG_KEYS, enc_keys=DEFAULT_ENC_KEYS):
-    cmd = " ".join([
-        "java",
-        "-Dlog4j.defaultInitOverride=true",
-        "-cp /app/javalibs/*",
-        "io.jans.as.client.util.KeyGenerator",
-        "-enc_keys", enc_keys,
-        "-sig_keys", sig_keys,
-        "-dnname", "{!r}".format(dn),
-        "-expiration", "{}".format(exp),
-        "-keystore", jks_path,
-        "-keypasswd", passwd,
-        "-key_ops_type", "all",
-    ])
-    out, err, retcode = exec_cmd(cmd)
-    if retcode == 0:
-        with open(jwks_path, "w") as f:
-            f.write(out.decode())
-    return out, err, retcode
-
-
 def generate_openid_keys_hourly(passwd, jks_path, jwks_path, dn, exp=48, sig_keys=DEFAULT_SIG_KEYS, enc_keys=DEFAULT_ENC_KEYS):
     cmd = " ".join([
         "java",
         "-Dlog4j.defaultInitOverride=true",
-        "-cp /app/javalibs/*",
+        f"-cp {JAVALIBS_DIR}/*",
         "io.jans.as.client.util.KeyGenerator",
-        "-enc_keys", enc_keys,
-        "-sig_keys", sig_keys,
-        "-dnname", "{!r}".format(dn),
-        "-expiration_hours", "{}".format(exp),
-        "-keystore", jks_path,
-        "-keypasswd", passwd,
-        "-key_ops_type", "all",
+        f"-enc_keys {enc_keys}",
+        f"-sig_keys {sig_keys}",
+        f"-dnname {dn!r}",
+        f"-expiration_hours {exp}",
+        f"-keystore {jks_path}",
+        f"-keypasswd {passwd}",
+        "-key_ops_type all",
     ])
     out, err, retcode = exec_cmd(cmd)
     if retcode == 0:
         with open(jwks_path, "w") as f:
             f.write(out.decode())
     return out, err, retcode
-
-
-def export_openid_keys(keystore, keypasswd, alias, export_file):
-    cmd = " ".join([
-        "java",
-        "-Dlog4j.defaultInitOverride=true",
-        "-cp /app/javalibs/*",
-        "io.jans.as.client.util.KeyExporter",
-        "-keystore {}".format(keystore),
-        "-keypasswd {}".format(keypasswd),
-        "-alias {}".format(alias),
-        "-exportfile {}".format(export_file),
-    ])
-    return exec_cmd(cmd)
 
 
 def generate_pkcs12(suffix, passwd, hostname):
@@ -113,14 +82,14 @@ def generate_pkcs12(suffix, passwd, hostname):
         "openssl",
         "pkcs12",
         "-export",
-        "-inkey /etc/certs/{}.key".format(suffix),
-        "-in /etc/certs/{}.crt".format(suffix),
-        "-out /etc/certs/{}.pkcs12".format(suffix),
-        "-name {}".format(hostname),
-        "-passout pass:{}".format(passwd),
+        f"-inkey {CERTS_DIR}/{suffix}.key",
+        f"-in {CERTS_DIR}/{suffix}.crt",
+        f"-out {CERTS_DIR}/{suffix}.pkcs12",
+        f"-name {hostname}",
+        f"-passout pass:{passwd}",
     ])
     _, err, retcode = exec_cmd(cmd)
-    assert retcode == 0, "Failed to generate PKCS12 file; reason={}".format(err)
+    assert retcode == 0, f"Failed to generate PKCS12 file; reason={err}"
 
 
 class CtxManager:
@@ -242,16 +211,17 @@ class CtxGenerator:
             self.get_config("state"),
             self.get_config("city"),
             extra_dns=["ldap"],
+            base_dir=CERTS_DIR,
         )
-        with open("/etc/certs/opendj.pem", "w") as fw:
-            with open("/etc/certs/opendj.crt") as fr:
+        with open(f"{CERTS_DIR}/opendj.pem", "w") as fw:
+            with open(f"{CERTS_DIR}/opendj.crt") as fr:
                 ldap_ssl_cert = fr.read()
                 self.set_secret(
                     "ldap_ssl_cert",
                     partial(encode_text, ldap_ssl_cert, encoded_salt),
                 )
 
-            with open("/etc/certs/opendj.key") as fr:
+            with open(f"{CERTS_DIR}/opendj.key") as fr:
                 ldap_ssl_key = fr.read()
                 self.set_secret(
                     "ldap_ssl_key",
@@ -267,7 +237,7 @@ class CtxGenerator:
 
         generate_pkcs12("opendj", ldap_truststore_pass, hostname)
 
-        with open(self.get_config("ldapTrustStoreFn"), "rb") as fr:
+        with open(f"{CERTS_DIR}/opendj.pkcs12", "rb") as fr:
             self.set_secret(
                 "ldap_pkcs12_base64",
                 partial(encode_text, fr.read(), encoded_salt),
@@ -289,9 +259,9 @@ class CtxGenerator:
         self.set_secret("pairwiseCalculationKey", partial(get_sys_random_chars, random.randint(20, 30)))
         self.set_secret("pairwiseCalculationSalt", partial(get_sys_random_chars, random.randint(20, 30)))
 
-        auth_openid_jks_fn = self.set_config("auth_openid_jks_fn", "/etc/certs/auth-keys.jks")
+        self.set_config("auth_openid_jks_fn", "/etc/certs/auth-keys.jks")
         self.set_secret("auth_openid_jks_pass", get_random_chars)
-        auth_openid_jwks_fn = self.set_config("auth_openid_jwks_fn", "/etc/certs/auth-keys.json")
+        self.set_config("auth_openid_jwks_fn", "/etc/certs/auth-keys.json")
         self.set_config("auth_legacyIdTokenClaims", "false")
         self.set_config("auth_openidScopeBackwardCompatibility", "false")
 
@@ -330,8 +300,8 @@ class CtxGenerator:
 
         _, err, retcode = generate_openid_keys_hourly(
             self.get_secret("auth_openid_jks_pass"),
-            self.get_config("auth_openid_jks_fn"),
-            auth_openid_jwks_fn,
+            f"{CERTS_DIR}/auth-keys.jks",
+            f"{CERTS_DIR}/auth-keys.json",
             self.get_config("default_openid_jks_dn_name"),
             exp=exp,
             sig_keys=sig_keys,
@@ -341,156 +311,27 @@ class CtxGenerator:
             logger.error(f"Unable to generate auth keys; reason={err}")
             raise click.Abort()
 
-        basedir, fn = os.path.split(auth_openid_jwks_fn)
         self.set_secret(
             "auth_openid_key_base64",
-            partial(encode_template, fn, self.ctx, basedir),
+            partial(encode_template, "auth-keys.json", self.ctx, CERTS_DIR),
         )
 
         # auth keys
         self.set_config("auth_key_rotated_at", lambda: int(time.time()))
 
-        with open(auth_openid_jks_fn, "rb") as fr:
+        with open(f"{CERTS_DIR}/auth-keys.jks", "rb") as fr:
             self.set_secret(
                 "auth_jks_base64",
                 partial(encode_text, fr.read(), encoded_salt),
             )
 
-    def passport_rs_ctx(self):
-        encoded_salt = self.get_secret("encoded_salt")
-        self.set_config("passport_rs_client_id", lambda: f"1501.{uuid4()}")
-        passport_rs_client_jks_fn = self.set_config("passport_rs_client_jks_fn", "/etc/certs/passport-rs.jks")
-        passport_rs_client_jwks_fn = self.set_config("passport_rs_client_jwks_fn", "/etc/certs/passport-rs-keys.json")
-        passport_rs_client_jks_pass = self.set_secret("passport_rs_client_jks_pass", get_random_chars)
-        self.set_secret(
-            "passport_rs_client_jks_pass_encoded",
-            partial(encode_text, passport_rs_client_jks_pass, encoded_salt),
-        )
-
-        out, err, retcode = generate_openid_keys(
-            passport_rs_client_jks_pass,
-            passport_rs_client_jks_fn,
-            passport_rs_client_jwks_fn,
-            self.get_config("default_openid_jks_dn_name"),
-        )
-        if retcode != 0:
-            logger.error(f"Unable to generate Passport RS keys; reason={err}")
-            raise click.Abort()
-
-        passport_rs_client_cert_alg = self.set_config("passport_rs_client_cert_alg", "RS512")
-
-        cert_alias = ""
-        for key in json.loads(out)["keys"]:
-            if key["alg"] == passport_rs_client_cert_alg:
-                cert_alias = key["kid"]
-                break
-
-        self.set_config("passport_rs_client_cert_alias", cert_alias)
-
-        basedir, fn = os.path.split(passport_rs_client_jwks_fn)
-        self.set_secret(
-            "passport_rs_client_base64_jwks",
-            partial(encode_template, fn, self.ctx, basedir),
-        )
-
-        with open(passport_rs_client_jks_fn, "rb") as fr:
-            self.set_secret(
-                "passport_rs_jks_base64",
-                partial(encode_text, fr.read(), encoded_salt),
-            )
-        self.set_config("passport_resource_id", lambda: f"1504.{uuid4()}")
-
-    def passport_rp_ctx(self):
-        encoded_salt = self.get_secret("encoded_salt")
-        self.set_config("passport_rp_client_id", lambda: f"1502.{uuid4()}")
-        self.set_config("passport_rp_ii_client_id", lambda: f"1503.{uuid4()}")
-        passport_rp_client_jks_pass = self.set_secret("passport_rp_client_jks_pass", get_random_chars)
-        passport_rp_client_jks_fn = self.set_config("passport_rp_client_jks_fn", "/etc/certs/passport-rp.jks")
-        passport_rp_client_jwks_fn = self.set_config("passport_rp_client_jwks_fn", "/etc/certs/passport-rp-keys.json")
-        passport_rp_client_cert_fn = self.set_config("passport_rp_client_cert_fn", "/etc/certs/passport-rp.pem")
-        passport_rp_client_cert_alg = self.set_config("passport_rp_client_cert_alg", "RS512")
-
-        out, err, code = generate_openid_keys(
-            passport_rp_client_jks_pass,
-            passport_rp_client_jks_fn,
-            passport_rp_client_jwks_fn,
-            self.get_config("default_openid_jks_dn_name"),
-        )
-        if code != 0:
-            logger.error(f"Unable to generate Passport RP keys; reason={err}")
-            raise click.Abort()
-
-        cert_alias = ""
-        for key in json.loads(out)["keys"]:
-            if key["alg"] == passport_rp_client_cert_alg:
-                cert_alias = key["kid"]
-                break
-
-        self.set_config("passport_rp_client_cert_alias", cert_alias)
-
-        _, err, retcode = export_openid_keys(
-            passport_rp_client_jks_fn,
-            passport_rp_client_jks_pass,
-            cert_alias,
-            passport_rp_client_cert_fn,
-        )
-        if retcode != 0:
-            logger.error(f"Unable to generate Passport RP client cert; reason={err}")
-            raise click.Abort()
-
-        basedir, fn = os.path.split(passport_rp_client_jwks_fn)
-        self.set_secret("passport_rp_client_base64_jwks", partial(encode_template, fn, self.ctx, basedir))
-
-        with open(passport_rp_client_jks_fn, "rb") as fr:
-            self.set_secret(
-                "passport_rp_jks_base64",
-                partial(encode_text, fr.read(), encoded_salt),
-            )
-
-        with open(passport_rp_client_cert_fn) as fr:
-            self.set_secret(
-                "passport_rp_client_cert_base64",
-                partial(encode_text, fr.read(), encoded_salt),
-            )
-
-    def passport_sp_ctx(self):
-        encoded_salt = self.get_secret("encoded_salt")
-        # passportSpKeyPass = self.set_secret("passportSpKeyPass", get_random_chars())  # noqa: N806
-        _ = self.set_secret("passportSpKeyPass", get_random_chars)  # noqa: N806
-        self.set_config("passportSpTLSCACert", '/etc/certs/passport-sp.pem')
-        passportSpTLSCert = self.set_config("passportSpTLSCert", '/etc/certs/passport-sp.crt')  # noqa: N806
-        passportSpTLSKey = self.set_config("passportSpTLSKey", '/etc/certs/passport-sp.key')  # noqa: N806
-        self.set_secret("passportSpJksPass", get_random_chars)
-        self.set_config("passportSpJksFn", '/etc/certs/passport-sp.jks')
-
-        generate_ssl_certkey(
-            "passport-sp",
-            self.get_config("admin_email"),
-            self.get_config("hostname"),
-            self.get_config("orgName"),
-            self.get_config("country_code"),
-            self.get_config("state"),
-            self.get_config("city"),
-        )
-        with open(passportSpTLSCert) as f:
-            self.set_secret(
-                "passport_sp_cert_base64",
-                partial(encode_text, f.read(), encoded_salt),
-            )
-
-        with open(passportSpTLSKey) as f:
-            self.set_secret(
-                "passport_sp_key_base64",
-                partial(encode_text, f.read(), encoded_salt),
-            )
-
     def web_ctx(self):
-        ssl_cert = "/etc/certs/web_https.crt"
-        ssl_key = "/etc/certs/web_https.key"
-        ssl_csr = "/etc/certs/web_https.csr"
+        ssl_cert = f"{CERTS_DIR}/web_https.crt"
+        ssl_key = f"{CERTS_DIR}/web_https.key"
+        ssl_csr = f"{CERTS_DIR}/web_https.csr"
 
-        ssl_ca_cert = "/etc/certs/ca.crt"
-        ssl_ca_key = "/etc/certs/ca.key"
+        ssl_ca_cert = f"{CERTS_DIR}/ca.crt"
+        ssl_ca_key = f"{CERTS_DIR}/ca.key"
 
         # get cert and key (if available) with priorities below:
         #
@@ -545,6 +386,7 @@ class CtxGenerator:
                 country_code,
                 state,
                 city,
+                base_dir=CERTS_DIR,
             )
 
             logger.info(f"Creating self-generated {ssl_csr}, {ssl_cert}, and {ssl_key}")
@@ -558,6 +400,7 @@ class CtxGenerator:
                 country_code,
                 state,
                 city,
+                base_dir=CERTS_DIR,
             )
 
         try:
@@ -584,165 +427,12 @@ class CtxGenerator:
         with open(ssl_key) as f:
             self.set_secret("ssl_key", f.read)
 
-    def oxshibboleth_ctx(self):
-        encoded_salt = self.get_secret("encoded_salt")
-        hostname = self.get_config("hostname")
-        admin_email = self.get_config("admin_email")
-        orgName = self.get_config("orgName")  # noqa: N806
-        country_code = self.get_config("country_code")
-        state = self.get_config("state")
-        city = self.get_config("city")
-        self.set_config("idp_client_id", lambda: f"1101.{uuid4()}")
-        self.set_secret(
-            "idpClient_encoded_pw",
-            partial(encode_text, get_random_chars(), encoded_salt),
-        )
-        shibJksFn = self.set_config("shibJksFn", "/etc/certs/shibIDP.jks")  # noqa: N806
-        shibJksPass = self.set_secret("shibJksPass", get_random_chars)  # noqa: N806
-        self.set_secret(
-            "encoded_shib_jks_pw",
-            partial(encode_text, shibJksPass, encoded_salt),
-        )
-
-        generate_ssl_certkey(
-            "shibIDP",
-            admin_email,
-            hostname,
-            orgName,
-            country_code,
-            state,
-            city,
-        )
-
-        generate_keystore("shibIDP", hostname, shibJksPass)
-
-        with open("/etc/certs/shibIDP.crt") as f:
-            self.set_secret(
-                "shibIDP_cert",
-                partial(encode_text, f.read(), encoded_salt),
-            )
-
-        with open("/etc/certs/shibIDP.key") as f:
-            self.set_secret(
-                "shibIDP_key",
-                partial(encode_text, f.read(), encoded_salt),
-            )
-
-        with open(shibJksFn, "rb") as f:
-            self.set_secret(
-                "shibIDP_jks_base64",
-                partial(encode_text, f.read(), encoded_salt),
-            )
-
-        self.set_config("shibboleth_version", "v3")
-        self.set_config("idp3Folder", "/opt/shibboleth-idp")
-
-        idp3_signing_cert = "/etc/certs/idp-signing.crt"
-        idp3_signing_key = "/etc/certs/idp-signing.key"
-
-        generate_ssl_certkey(
-            "idp-signing",
-            admin_email,
-            hostname,
-            orgName,
-            country_code,
-            state,
-            city,
-        )
-
-        with open(idp3_signing_cert) as f:
-            self.set_secret("idp3SigningCertificateText", f.read)
-
-        with open(idp3_signing_key) as f:
-            self.set_secret("idp3SigningKeyText", f.read)
-
-        idp3_encryption_cert = "/etc/certs/idp-encryption.crt"
-        idp3_encryption_key = "/etc/certs/idp-encryption.key"
-
-        generate_ssl_certkey(
-            "idp-encryption",
-            admin_email,
-            hostname,
-            orgName,
-            country_code,
-            state,
-            city,
-        )
-
-        with open(idp3_encryption_cert) as f:
-            self.set_secret("idp3EncryptionCertificateText", f.read)
-
-        with open(idp3_encryption_key) as f:
-            self.set_secret("idp3EncryptionKeyText", f.read)
-
-        _, err, code = gen_idp3_key(shibJksPass)
-        if code != 0:
-            logger.warninging(f"Unable to generate Shibboleth sealer; reason={err}")
-            raise click.Abort()
-
-        with open("/etc/certs/sealer.jks", "rb") as f:
-            self.set_secret(
-                "sealer_jks_base64",
-                partial(encode_text, f.read(), encoded_salt),
-            )
-
-        with open("/etc/certs/sealer.kver") as f:
-            self.set_secret(
-                "sealer_kver_base64",
-                partial(encode_text, f.read(), encoded_salt),
-            )
-
-    def radius_ctx(self):
-        encoded_salt = self.get_secret("encoded_salt")
-        self.set_config("jans_radius_client_id", f'1701.{uuid4()}')
-        self.set_secret(
-            "jans_ro_encoded_pw",
-            partial(encode_text, get_random_chars(), encoded_salt),
-        )
-
-        radius_jwt_pass = self.set_secret(
-            "radius_jwt_pass",
-            partial(encode_text, get_random_chars(), encoded_salt),
-        )
-
-        out, err, code = generate_openid_keys(
-            radius_jwt_pass,
-            "/etc/certs/jans-radius.jks",
-            "/etc/certs/jans-radius.keys",
-            self.get_config("default_openid_jks_dn_name"),
-        )
-        if code != 0:
-            logger.error(f"Unable to generate Radius keys; reason={err}")
-            raise click.Abort()
-
-        for key in json.loads(out)["keys"]:
-            if key["alg"] == "RS512":
-                self.set_config("radius_jwt_keyId", key["kid"])
-                break
-
-        with open("/etc/certs/jans-radius.jks", "rb") as fr:
-            self.set_secret(
-                "radius_jks_base64",
-                partial(encode_text, fr.read(), encoded_salt),
-            )
-
-        basedir, fn = os.path.split("/etc/certs/jans-radius.keys")
-        self.set_secret(
-            "jans_ro_client_base64_jwks",
-            partial(encode_template, fn, self.ctx, basedir),
-        )
-
     def couchbase_ctx(self):
         # TODO: move this to persistence-loader?
         self.set_config("couchbaseTrustStoreFn", "/etc/certs/couchbase.pkcs12")
         self.set_secret("couchbase_shib_user_password", get_random_chars)
         self.set_secret("couchbase_password", self.params["couchbase_pw"])
         self.set_secret("couchbase_superuser_password", self.params["couchbase_superuser_pw"])
-
-    def jackrabbit_ctx(self):
-        # self.set_secret("jca_pw", get_random_chars())
-        # self.set_secret("jca_pw", "admin")
-        pass
 
     def sql_ctx(self):
         self.set_secret("sql_password", self.params["sql_pw"])
@@ -760,16 +450,8 @@ class CtxGenerator:
         if "redis" in opt_scopes:
             self.redis_ctx()
 
-        # self.passport_rs_ctx()
-        # self.passport_rp_ctx()
-        # self.passport_sp_ctx()
-        # self.oxshibboleth_ctx()
-        # self.radius_ctx()
-
         if "couchbase" in opt_scopes:
             self.couchbase_ctx()
-
-        # self.jackrabbit_ctx()
 
         if "sql" in opt_scopes:
             self.sql_ctx()
@@ -778,26 +460,13 @@ class CtxGenerator:
         return self.ctx
 
 
-def gen_idp3_key(storepass):
-    cmd = " ".join([
-        "java",
-        "-classpath '/app/javalibs/*'",
-        "net.shibboleth.utilities.java.support.security.BasicKeystoreKeyStrategyTool",
-        "--storefile /etc/certs/sealer.jks",
-        "--versionfile /etc/certs/sealer.kver",
-        "--alias secret",
-        "--storepass {}".format(storepass),
-    ])
-    return exec_cmd(cmd)
-
-
 def _save_generated_ctx(manager, data, type_):
     if type_ == "config":
         backend = manager.config
     else:
         backend = manager.secret
 
-    logger.info("Saving {} to backend".format(type_))
+    logger.info(f"Saving {type_} to backend")
     backend.set_all(data)
 
 
@@ -833,9 +502,9 @@ def _dump_to_file(manager, filepath, type_):
     else:
         backend = manager.secret
 
-    logger.info("Saving {} to {}".format(type_, filepath))
+    logger.info(f"Saving {type_} to {filepath}")
 
-    data = {"_{}".format(type_): backend.get_all()}
+    data = {f"_{type_}": backend.get_all()}
     data = json.dumps(data, sort_keys=True, indent=4)
     with open(filepath, "w") as f:
         f.write(data)
