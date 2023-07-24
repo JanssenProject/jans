@@ -406,6 +406,9 @@ public class RegisterService {
         if (requestObject.getRequirePar() != null) {
             client.getAttributes().setRequirePar(requestObject.getRequirePar());
         }
+        if (requestObject.getDpopBoundAccessToken() != null) {
+            client.getAttributes().setDpopBoundAccessToken(requestObject.getDpopBoundAccessToken());
+        }
 
         if (StringUtils.isNotBlank(requestObject.getSoftwareId())) {
             client.setSoftwareId(requestObject.getSoftwareId());

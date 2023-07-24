@@ -174,8 +174,6 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
         scope = ServerUtil.urlDecode(scope); // it may be encoded in uma case
 
-        String dpopStr = runDPoP(request, auditLog);
-
         try {
             tokenRestWebServiceValidator.validateParams(grantType, code, redirectUri, refreshToken, auditLog);
 
@@ -184,6 +182,7 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
 
             Client client = tokenRestWebServiceValidator.validateClient(getClient(), auditLog);
             tokenRestWebServiceValidator.validateGrantType(gt, client, auditLog);
+            String dpopStr = runDPoP(request, client, auditLog);
 
             final Function<JsonWebResponse, Void> idTokenTokingBindingPreprocessing = TokenBindingMessage.createIdTokenTokingBindingPreprocessing(
                     tokenBindingHeader, client.getIdTokenTokenBindingCnf()); // for all except authorization code grant
@@ -595,10 +594,17 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         return Response.status(status).type(MediaType.APPLICATION_JSON_TYPE).entity(errorResponseFactory.errorAsJson(type, reason));
     }
 
-    private String runDPoP(HttpServletRequest httpRequest, OAuth2AuditLog oAuth2AuditLog) {
+    private String runDPoP(HttpServletRequest httpRequest, Client client, OAuth2AuditLog oAuth2AuditLog) {
         try {
             String dpopStr = httpRequest.getHeader(TokenRequestParam.DPOP);
-            if (StringUtils.isBlank(dpopStr)) return null;
+            final boolean isDpopBlank = StringUtils.isBlank(dpopStr);
+
+            if (isTrue(client.getAttributes().getDpopBoundAccessToken()) && isDpopBlank) {
+                log.debug("Client requires DPoP bound access token. Invalid request - DPoP header is not set.");
+                throw new WebApplicationException(response(error(400, TokenErrorResponseType.INVALID_DPOP_PROOF, "Invalid request - DPoP header is not set."), oAuth2AuditLog));
+            }
+
+            if (isDpopBlank) return null;
 
             Jwt dpop = Jwt.parseOrThrow(dpopStr);
 

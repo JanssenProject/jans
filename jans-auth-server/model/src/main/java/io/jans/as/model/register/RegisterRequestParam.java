@@ -376,6 +376,11 @@ public enum RegisterRequestParam {
     KEEP_CLIENT_AUTHORIZATION_AFTER_EXPIRATION("keep_client_authorization_after_expiration"),
 
     /**
+     * boolean value specifying whether the client always uses DPoP for token requests. If omitted, the default value is false.
+     */
+    DPOP_BOUND_ACCESS_TOKEN("dpop_bound_access_tokens"),
+
+    /**
      * String containing a space-separated list of scope values.
      */
     SCOPE("scope"),
