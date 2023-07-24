@@ -76,6 +76,9 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<DBDocumentSto
 		Document oxDocument = null;
 		try {
 			oxDocument = documentService.getDocumentByDisplayName(DisplayName);
+			if(oxDocument != null) {
+				return true;
+			}
 		} catch (Exception e) {
 			log.error("Failed to check if path '" + DisplayName + "' exists in repository", e);
 		}
@@ -115,7 +118,7 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<DBDocumentSto
 		oxDocument.setDisplayName(name);
 		
 		 try {
-			String documentContent = Base64.getEncoder().encodeToString(IOUtils.toByteArray(documentStream));
+			String documentContent = new String(documentStream.readAllBytes(), StandardCharsets.UTF_8);
 			oxDocument.setDocument(documentContent);
 			String inum = documentService.generateInumForNewDocument();
 			oxDocument.setInum(inum);	
@@ -158,7 +161,7 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<DBDocumentSto
 			return null;
 		}
 
-		InputStream InputStream = new ByteArrayInputStream(Base64.getDecoder().decode(filecontecnt));
+		InputStream InputStream = new ByteArrayInputStream(filecontecnt.getBytes());
 		return InputStream;
 	}
 
