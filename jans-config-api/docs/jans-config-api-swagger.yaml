@@ -7452,17 +7452,17 @@ components:
           type: string
         whitePagesCanView:
           type: boolean
-        adminCanEdit:
-          type: boolean
         userCanView:
+          type: boolean
+        adminCanEdit:
           type: boolean
         adminCanView:
           type: boolean
-        adminCanAccess:
+        userCanAccess:
           type: boolean
         userCanEdit:
           type: boolean
-        userCanAccess:
+        adminCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -8045,9 +8045,9 @@ components:
         dcrAuthorizationWithMTLS:
           type: boolean
         trustedSsaIssuers:
-          type: array
-          items:
-            type: string
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/TrustedIssuerConfig'
         useLocalCache:
           type: boolean
         fapiCompatibility:
@@ -8157,6 +8157,11 @@ components:
         dpopJtiCacheTime:
           type: integer
           format: int32
+        dpopUseNonce:
+          type: boolean
+        dpopNonceCacheTime:
+          type: integer
+          format: int32
         allowIdTokenWithoutImplicitGrantType:
           type: boolean
         discoveryCacheLifetimeInMinutes:
@@ -8201,8 +8206,6 @@ components:
           type: boolean
         skipAuthenticationFilterOptionsMethod:
           type: boolean
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -8212,6 +8215,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -8404,6 +8409,13 @@ components:
           type: string
         sharedSecret:
           type: string
+    TrustedIssuerConfig:
+      type: object
+      properties:
+        automaticallyGrantedScopes:
+          type: array
+          items:
+            type: string
     PersistenceConfiguration:
       type: object
       properties:
@@ -8893,6 +8905,8 @@ components:
           type: integer
           format: int32
         requirePar:
+          type: boolean
+        dpopBoundAccessToken:
           type: boolean
         jansAuthSignedRespAlg:
           type: string

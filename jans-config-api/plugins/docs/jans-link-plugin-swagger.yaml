@@ -20,8 +20,8 @@ paths:
     get:
       tags:
       - Jans Link - Configuration
-      summary: Gets Jans Link configuration.
-      description: Gets Jans Link configuration.
+      summary: Gets Jans Link App configuration.
+      description: Gets Jans Link App configuration.
       operationId: get-jans-link-properties
       responses:
         "200":
@@ -29,7 +29,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/JansLinkConfiguration'
+                $ref: '#/components/schemas/AppConfiguration'
         "401":
           description: Unauthorized
         "500":
@@ -48,14 +48,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/JansLinkConfiguration'
+              $ref: '#/components/schemas/AppConfiguration'
       responses:
         "200":
           description: JansLinkConfiguration
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/JansLinkConfiguration'
+                $ref: '#/components/schemas/AppConfiguration'
         "401":
           description: Unauthorized
         "500":
@@ -65,50 +65,7 @@ paths:
         - https://jans.io/oauth/config/jans-link.write
 components:
   schemas:
-    CacheRefreshAttributeMapping:
-      type: object
-      properties:
-        source:
-          type: string
-        destination:
-          type: string
-    GluuLdapConfiguration:
-      type: object
-      properties:
-        configId:
-          type: string
-        bindDN:
-          type: string
-        bindPassword:
-          type: string
-        servers:
-          type: array
-          items:
-            type: string
-        maxConnections:
-          type: integer
-          format: int32
-        useSSL:
-          type: boolean
-        baseDNs:
-          type: array
-          items:
-            type: string
-        primaryKey:
-          type: string
-        localPrimaryKey:
-          type: string
-        useAnonymousBind:
-          type: boolean
-        enabled:
-          type: boolean
-        version:
-          type: integer
-          format: int32
-        level:
-          type: integer
-          format: int32
-    JansLinkConfiguration:
+    AppConfiguration:
       type: object
       properties:
         sourceConfigs:
@@ -205,6 +162,49 @@ components:
           type: string
         useLocalCache:
           type: boolean
+    CacheRefreshAttributeMapping:
+      type: object
+      properties:
+        source:
+          type: string
+        destination:
+          type: string
+    GluuLdapConfiguration:
+      type: object
+      properties:
+        configId:
+          type: string
+        bindDN:
+          type: string
+        bindPassword:
+          type: string
+        servers:
+          type: array
+          items:
+            type: string
+        maxConnections:
+          type: integer
+          format: int32
+        useSSL:
+          type: boolean
+        baseDNs:
+          type: array
+          items:
+            type: string
+        primaryKey:
+          type: string
+        localPrimaryKey:
+          type: string
+        useAnonymousBind:
+          type: boolean
+        enabled:
+          type: boolean
+        version:
+          type: integer
+          format: int32
+        level:
+          type: integer
+          format: int32
   securitySchemes:
     oauth2:
       type: oauth2
