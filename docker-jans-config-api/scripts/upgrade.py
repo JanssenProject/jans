@@ -93,6 +93,17 @@ def _transform_api_dynamic_config(conf):
             },
         ]
         should_update = True
+
+    # current plugin names to lookup to
+    plugins_names = tuple(plugin["name"] for plugin in conf["plugins"])
+
+    if "jans-link" not in plugins_names:
+        conf["plugins"].append({
+            "name": "jans-link",
+            "description": "jans-link plugin",
+            "className": "io.jans.configapi.plugin.link.rest.ApiApplication",
+        })
+        should_update = True
     return conf, should_update
 
 

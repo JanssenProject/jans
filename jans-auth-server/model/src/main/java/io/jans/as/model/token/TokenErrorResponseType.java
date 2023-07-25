@@ -82,6 +82,16 @@ public enum TokenErrorResponseType implements IErrorType {
     ACCESS_DENIED("access_denied"),
 
     /**
+     * Use DPoP nonce. Returned when nonce claim is not in DPoP jwt.
+     */
+    USE_DPOP_NONCE("use_dpop_nonce"),
+
+    /**
+     * Use new DPoP nonce. Returned when new nonce claim is required in DPoP jwt.
+     */
+    USE_NEW_DPOP_NONCE("use_new_dpop_nonce"),
+
+    /**
      * DPoP. If the DPoP proof is invalid, the authorization server issues an error response with "invalid_dpop_proof"
      * as the value of the "error" parameter.
      */

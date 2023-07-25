@@ -75,3 +75,7 @@ dependencies:
     - name: persistence
       condition: global.persistence.enabled
       version: 1.0.16-dev
+
+    - name: link
+      condition: global.link.enabled
+      version: 1.0.16-dev

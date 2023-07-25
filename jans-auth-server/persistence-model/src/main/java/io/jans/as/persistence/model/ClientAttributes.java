@@ -80,6 +80,9 @@ public class ClientAttributes implements Serializable {
     @JsonProperty("requirePar")
     private Boolean requirePar;
 
+    @JsonProperty("dpopBoundAccessToken")
+    private Boolean dpopBoundAccessToken;
+
     @JsonProperty("jansAuthSignedRespAlg")
     private String authorizationSignedResponseAlg;
 
@@ -121,6 +124,15 @@ public class ClientAttributes implements Serializable {
 
     @JsonProperty("requestedLifetime")
     private Integer requestedLifetime; // in seconds
+
+    public Boolean getDpopBoundAccessToken() {
+        if (dpopBoundAccessToken == null) dpopBoundAccessToken = false;
+        return dpopBoundAccessToken;
+    }
+
+    public void setDpopBoundAccessToken(Boolean dpopBoundAccessToken) {
+        this.dpopBoundAccessToken = dpopBoundAccessToken;
+    }
 
     public Integer getRequestedLifetime() {
         return requestedLifetime;
@@ -442,6 +454,8 @@ public class ClientAttributes implements Serializable {
                 ", minimumAcrPriorityList=" + minimumAcrPriorityList +
                 ", defaultPromptLogin=" + defaultPromptLogin +
                 ", requestedLifetime=" + requestedLifetime +
+                ", requirePar=" + requirePar +
+                ", dpopBoundAccessToken=" + dpopBoundAccessToken +
                 '}';
     }
 }

@@ -480,7 +480,7 @@ class Plugin(DialogUtils):
         asyncio.ensure_future(coroutine())
 
 
-    def get_ldap_config_entries(self, data, widget_style=None):
+    def get_ldap_config_entries(self, data, widget_style=cli_style.white_bg_widget):
 
         ldap_config_entires = [
 
