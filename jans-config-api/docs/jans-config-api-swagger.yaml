@@ -7452,15 +7452,15 @@ components:
           type: string
         whitePagesCanView:
           type: boolean
-        adminCanView:
-          type: boolean
-        userCanEdit:
+        userCanView:
           type: boolean
         adminCanEdit:
           type: boolean
-        userCanView:
+        adminCanView:
           type: boolean
         userCanAccess:
+          type: boolean
+        userCanEdit:
           type: boolean
         adminCanAccess:
           type: boolean
@@ -8155,6 +8155,11 @@ components:
           type: integer
           format: int32
         dpopJtiCacheTime:
+          type: integer
+          format: int32
+        dpopUseNonce:
+          type: boolean
+        dpopNonceCacheTime:
           type: integer
           format: int32
         allowIdTokenWithoutImplicitGrantType:
@@ -8901,6 +8906,8 @@ components:
           format: int32
         requirePar:
           type: boolean
+        dpopBoundAccessToken:
+          type: boolean
         jansAuthSignedRespAlg:
           type: string
         jansAuthEncRespAlg:
@@ -8949,10 +8956,10 @@ components:
           type: array
           items:
             type: object
-        value:
-          type: object
         displayValue:
           type: string
+        value:
+          type: object
     LocalizedString:
       type: object
       properties:
