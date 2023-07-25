@@ -842,6 +842,28 @@ def _transform_auth_errors_config(conf):
             "uri": None,
         })
         should_update = True
+
+    # dpop as part of token errors
+    dpop_errors = [
+        {
+             "id":"use_dpop_nonce",
+             "description":"Authorization server requires nonce in DPoP proof.",
+             "uri": None
+        },
+        {
+             "id":"use_new_dpop_nonce",
+             "description":"Authorization server requires new nonce in DPoP proof.",
+             "uri": None
+        },
+    ]
+    token_err_ids = [err["id"] for err in conf["token"]]
+
+    for err in dpop_errors:
+        if err["id"] in token_err_ids:
+            continue
+        conf["token"].append(err)
+        should_update = True
+
     return conf, should_update
 
 
