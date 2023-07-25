@@ -348,7 +348,8 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
             }
         }
 
-        scope = authorizationGrant.checkScopesPolicy(scope);
+        authorizationGrant.checkScopesPolicy(scope);
+        scope = authorizationGrant.getScopesAsString();
 
         AccessToken accToken = authorizationGrant.createAccessToken(executionContext); // create token after scopes are checked
 
