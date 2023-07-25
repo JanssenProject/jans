@@ -58,6 +58,10 @@ public class BaseService {
                 body.putSingle("ujwt", userInfoJwt);
             }
 
+            if (!Strings.isNullOrEmpty(tokenRequest.getCodeVerifier())) {
+                body.putSingle("code_verifier", tokenRequest.getCodeVerifier());
+            }
+
             body.putSingle("grant_type", tokenRequest.getGrantType().getValue());
             body.putSingle("redirect_uri", tokenRequest.getRedirectUri());
             body.putSingle("client_id", tokenRequest.getAuthUsername());

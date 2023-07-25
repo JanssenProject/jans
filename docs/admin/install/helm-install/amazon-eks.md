@@ -158,65 +158,91 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
 
 
 
+    - Couchbase for pesistence storage
+      
+        Add the following yaml snippet to your `override.yaml` file:
 
+        ```yaml
+        global:
+          cnPersistenceType: couchbase
+
+        config:
+          configmap:
+            # The prefix of couchbase buckets. This helps with separation in between different environments and allows for the same couchbase cluster to be used by different setups of Janssen.
+            cnCouchbaseBucketPrefix: jans
+            # -- Couchbase certificate authority string. This must be encoded using base64. This can also be found in your couchbase UI Security > Root Certificate. In mTLS setups this is not required.
+            cnCouchbaseCrt: SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo=
+            # -- The number of replicas per index created. Please note that the number of index nodes must be one greater than the number of index replicas. That means if your couchbase cluster only has 2 index nodes you cannot place the number of replicas to be higher than 1.
+            cnCouchbaseIndexNumReplica: 0
+            # -- Couchbase password for the restricted user config.configmap.cnCouchbaseUser that is often used inside the services. The password must contain one digit, one uppercase letter, one lower case letter and one symbol
+            cnCouchbasePassword: P@ssw0rd
+            # -- The Couchbase super user (admin) username. This user is used during initialization only.
+            cnCouchbaseSuperUser: admin
+            # -- Couchbase password for the superuser config.configmap.cnCouchbaseSuperUser that is used during the initialization process. The password must contain one digit, one uppercase letter, one lower case letter and one symbol
+            cnCouchbaseSuperUserPassword: Test1234#
+            # -- Couchbase URL. This should be in FQDN format for either remote or local Couchbase clusters. The address can be an internal address inside the kubernetes cluster
+            cnCouchbaseUrl: cbjanssen.default.svc.cluster.local
+            # -- Couchbase restricted user
+            cnCouchbaseUser: janssen
+        ```
 
 
 
     - MySQL for persistence storage
 
-      In a production environment, a production grade MySQL server should be used such as `Amazon RDS`
+        In a production environment, a production grade MySQL server should be used such as `Amazon RDS`
 
-      For testing purposes, you can deploy it on the EKS cluster using the following commands:
+        For testing purposes, you can deploy it on the EKS cluster using the following commands:
 
-      ```
-      helm repo add bitnami https://charts.bitnami.com/bitnami
-      helm install my-release --set auth.rootPassword=Test1234#,auth.database=jans bitnami/mysql -n jans
-      ```
+        ```
+        helm repo add bitnami https://charts.bitnami.com/bitnami
+        helm install my-release --set auth.rootPassword=Test1234#,auth.database=jans bitnami/mysql -n jans
+        ```
 
-      Add the following yaml snippet to your `override.yaml` file:
-      
-      ```yaml
-      
-      global:
-        cnPersistenceType: sql
-      config:
-        configmap:
-          cnSqlDbName: jans
-          cnSqlDbPort: 3306
-          cnSqlDbDialect: mysql
-          cnSqlDbHost: my-release-mysql.jans.svc
-          cnSqlDbUser: root
-          cnSqlDbTimezone: UTC
-          cnSqldbUserPassword: Test1234#
-      ```
+        Add the following yaml snippet to your `override.yaml` file:
+        
+        ```yaml
+        
+        global:
+          cnPersistenceType: sql
+        config:
+          configmap:
+            cnSqlDbName: jans
+            cnSqlDbPort: 3306
+            cnSqlDbDialect: mysql
+            cnSqlDbHost: my-release-mysql.jans.svc
+            cnSqlDbUser: root
+            cnSqlDbTimezone: UTC
+            cnSqldbUserPassword: Test1234#
+        ```
 
-      So if your desired configuration has FQDN and MySQL, the final `override.yaml` file will look something like that:
+        So if your desired configuration has FQDN and MySQL, the final `override.yaml` file will look something like that:
 
-      ```yaml
-      global:
-        cnPersistenceType: sql
-        isFqdnRegistered: true
-        fqdn: demoexample.jans.org #CHANGE-THIS to the FQDN used for Jans
-      nginx-ingress:
-        ingress:
-            path: /
-            hosts:
-            - demoexample.jans.org #CHANGE-THIS to the FQDN used for Jans
-            tls:
-            - secretName: tls-certificate
+        ```yaml
+        global:
+          cnPersistenceType: sql
+          isFqdnRegistered: true
+          fqdn: demoexample.jans.org #CHANGE-THIS to the FQDN used for Jans
+        nginx-ingress:
+          ingress:
+              path: /
               hosts:
-              - demoexample.jans.org #CHANGE-THIS to the FQDN used for Jans  
-      config:
-        configmap:
-          lbAddr: http:// #Add LB address from previous command
-          cnSqlDbName: jans
-          cnSqlDbPort: 3306
-          cnSqlDbDialect: mysql
-          cnSqlDbHost: my-release-mysql.jans.svc
-          cnSqlDbUser: root
-          cnSqlDbTimezone: UTC
-          cnSqldbUserPassword: Test1234#
-      ```
+              - demoexample.jans.org #CHANGE-THIS to the FQDN used for Jans
+              tls:
+              - secretName: tls-certificate
+                hosts:
+                - demoexample.jans.org #CHANGE-THIS to the FQDN used for Jans  
+        config:
+          configmap:
+            lbAddr: http:// #Add LB address from previous command
+            cnSqlDbName: jans
+            cnSqlDbPort: 3306
+            cnSqlDbDialect: mysql
+            cnSqlDbHost: my-release-mysql.jans.svc
+            cnSqlDbUser: root
+            cnSqlDbTimezone: UTC
+            cnSqldbUserPassword: Test1234#
+        ```
 
 3.  Install Jans
 
