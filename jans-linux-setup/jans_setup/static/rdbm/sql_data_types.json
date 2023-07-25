@@ -902,7 +902,7 @@
   },
   "adsPrjDeplDetails": {
     "mysql": {
-      "type": "MEDIUMTEXT"
+      "type": "TEXT"
     },
     "pgsql": {
       "type": "TEXT"
