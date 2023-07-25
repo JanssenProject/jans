@@ -189,8 +189,11 @@ def configure_logging():
         if config[key] == "FILE":
             config[key] = value
 
-    if as_boolean(custom_config.get("enable_stdout_log_prefix")):
-        config["log_prefix"] = "${sys:log.console.prefix}%X{log.console.group} - "
+    if any([
+        as_boolean(custom_config.get("enable_stdout_log_prefix")),
+        as_boolean(os.environ.get("CN_ENABLE_STDOUT_LOG_PREFIX")),
+    ]) :
+        config["log_prefix"] = "${sys:fido2.log.console.prefix}%X{fido2.log.console.group} - "
 
     with open("/app/templates/log4j2.xml") as f:
         txt = f.read()

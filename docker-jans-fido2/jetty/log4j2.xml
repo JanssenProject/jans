@@ -2,7 +2,7 @@
 
 <Configuration packages="io.jans.log">
     <Properties>
-        <Property name="log.console.prefix" value="fido2" />
+        <Property name="fido2.log.console.prefix" value="fido2" />
     </Properties>
     <Appenders>
         <Console name="STDOUT" target="SYSTEM_OUT">
@@ -60,47 +60,47 @@
         </Logger>
 
 		<Logger name="io.jans.orm" level="$persistence_log_level" additivity="false">
-            <Property name="log.console.group">-persistence</Property>
+            <Property name="fido2.log.console.group">-persistence</Property>
 			<AppenderRef ref="$persistence_log_target" />
 		</Logger>
 
 		<Logger name="com.unboundid.ldap.sdk.LDAPConnection" level="$persistence_log_level" additivity="false">
-            <Property name="log.console.group">-persistence</Property>
+            <Property name="fido2.log.console.group">-persistence</Property>
 			<AppenderRef ref="$persistence_log_target" />
 		</Logger>
 
 		<logger name="com.couchbase.client" level="$persistence_log_level" additivity="false">
-            <Property name="log.console.group">-persistence</Property>
+            <Property name="fido2.log.console.group">-persistence</Property>
 			<AppenderRef ref="$persistence_log_target" />
 		</logger>
 
 		<Logger name="io.jans.orm.ldap.operation.watch" level="$persistence_duration_log_level" additivity="false">
-            <Property name="log.console.group">-persistence-duration</Property>
+            <Property name="fido2.log.console.group">-persistence-duration</Property>
 			<AppenderRef ref="$persistence_duration_log_target" />
 		</Logger>
 
 		<Logger name="io.jans.orm.couchbase.operation.watch" level="$persistence_duration_log_level" additivity="false">
-            <Property name="log.console.group">-persistence-duration</Property>
+            <Property name="fido2.log.console.group">-persistence-duration</Property>
 			<AppenderRef ref="$persistence_duration_log_target" />
 		</Logger>
 
 		<Logger name="io.jans.orm.watch" level="$persistence_duration_log_level" additivity="false">
-            <Property name="log.console.group">-persistence-duration</Property>
+            <Property name="fido2.log.console.group">-persistence-duration</Property>
 			<AppenderRef ref="$persistence_duration_log_target" />
 		</Logger>
 
 		<Logger name="io.jans.service.PythonService" level="$script_log_level" additivity="false">
-            <Property name="log.console.group">-script</Property>
+            <Property name="fido2.log.console.group">-script</Property>
 			<AppenderRef ref="$script_log_target" />
 		</Logger>
 
 		<Logger name="io.jans.service.custom.script" level="$script_log_level" additivity="false">
-            <Property name="log.console.group">-script</Property>
+            <Property name="fido2.log.console.group">-script</Property>
 			<AppenderRef ref="$script_log_target" />
 		</Logger>
 
 		<Logger name="io.jans.fido2.service.shared" level="$script_log_level" additivity="false">
-            <Property name="log.console.group">-script</Property>
+            <Property name="fido2.log.console.group">-script</Property>
 			<AppenderRef ref="$script_log_target" />
 		</Logger>
 

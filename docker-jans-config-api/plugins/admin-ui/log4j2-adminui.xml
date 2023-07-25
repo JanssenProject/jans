@@ -2,7 +2,7 @@
 
 <Configuration packages="io.jans.log">
     <Properties>
-        <Property name="log.console.prefix.admin-ui" value="config-api" />
+        <Property name="admin_ui.log.console.prefix" value="config-api" />
     </Properties>
     <Appenders>
         <Console name="AdminUI_Console" target="SYSTEM_OUT">
@@ -34,11 +34,11 @@
 
     <Loggers>
         <Logger name="io.jans.ca.plugin.adminui.rest.logging" level="$admin_ui_audit_log_level" additivity="false">
-            <Property name="log.console.group.admin-ui">/admin-ui-audit</Property>
+            <Property name="admin_ui.log.console.group">-admin-ui-audit</Property>
             <AppenderRef ref="$admin_ui_audit_log_target" />
         </Logger>
         <Logger name="io.jans.ca.plugin.adminui" level="$admin_ui_log_level" additivity="false">
-            <Property name="log.console.group.admin-ui">/admin-ui</Property>
+            <Property name="admin_ui.log.console.group">-admin-ui</Property>
             <AppenderRef ref="$admin_ui_log_target" />
         </Logger>
     </Loggers>
