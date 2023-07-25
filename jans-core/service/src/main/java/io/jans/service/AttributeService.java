@@ -18,7 +18,7 @@ import org.slf4j.Logger;
 
 import com.unboundid.ldap.sdk.schema.AttributeTypeDefinition;
 
-import io.jans.model.GluuAttribute;
+import io.jans.model.JansAttribute;
 import io.jans.model.SchemaEntry;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.search.filter.Filter;
@@ -50,9 +50,9 @@ public abstract class AttributeService implements Serializable {
     @Inject
     protected LocalCacheService localCacheService;
 
-    public List<GluuAttribute> getAttributesByAttribute(String attributeName, String attributeValue, String baseDn) {
+    public List<JansAttribute> getAttributesByAttribute(String attributeName, String attributeValue, String baseDn) {
         Filter filter = Filter.createEqualityFilter(attributeName, attributeValue);
-        List<GluuAttribute> result = persistenceEntryManager.findEntries(baseDn, GluuAttribute.class, filter);
+        List<JansAttribute> result = persistenceEntryManager.findEntries(baseDn, JansAttribute.class, filter);
 
         return result;
     }
@@ -77,7 +77,7 @@ public abstract class AttributeService implements Serializable {
      *
      * @return Attribute
      */
-    public GluuAttribute getAttributeByName(String name) {
+    public JansAttribute getAttributeByName(String name) {
         return getAttributeByName(name, getAllAttributes());
     }
 
@@ -86,8 +86,8 @@ public abstract class AttributeService implements Serializable {
      *
      * @return Attribute
      */
-    public GluuAttribute getAttributeByName(String name, List<GluuAttribute> attributes) {
-        for (GluuAttribute attribute : attributes) {
+    public JansAttribute getAttributeByName(String name, List<JansAttribute> attributes) {
+        for (JansAttribute attribute : attributes) {
             if (attribute.getName().equals(name)) {
                 return attribute;
             }
@@ -102,12 +102,12 @@ public abstract class AttributeService implements Serializable {
 	 * @param inum Inum
 	 * @return Attribute
 	 */
-	public GluuAttribute getAttributeByInum(String inum) {
+	public JansAttribute getAttributeByInum(String inum) {
 		return getAttributeByInum(inum, getAllAtributesImpl(getDnForAttribute(null)));
 	}
 
-	public GluuAttribute getAttributeByInum(String inum, List<GluuAttribute> attributes) {
-		for (GluuAttribute attribute : attributes) {
+	public JansAttribute getAttributeByInum(String inum, List<JansAttribute> attributes) {
+		for (JansAttribute attribute : attributes) {
 			if (attribute.getInum().equals(inum)) {
 				return attribute;
 			}
@@ -115,15 +115,15 @@ public abstract class AttributeService implements Serializable {
 		return null;
 	}
 
-    public List<GluuAttribute> getAllAttributes() {
+    public List<JansAttribute> getAllAttributes() {
         return getAllAttributes(getDnForAttribute(null));
     }
 
     @SuppressWarnings("unchecked")
-    public List<GluuAttribute> getAllAttributes(String baseDn) {
+    public List<JansAttribute> getAllAttributes(String baseDn) {
     	BaseCacheService usedCacheService = getCacheService();
 
-    	List<GluuAttribute> attributeList = (List<GluuAttribute>) usedCacheService.get(OxConstants.CACHE_ATTRIBUTE_CACHE_NAME,
+    	List<JansAttribute> attributeList = (List<JansAttribute>) usedCacheService.get(OxConstants.CACHE_ATTRIBUTE_CACHE_NAME,
                 OxConstants.CACHE_ATTRIBUTE_KEY_LIST);
         if (attributeList == null) {
             attributeList = getAllAtributesImpl(baseDn);
@@ -133,15 +133,15 @@ public abstract class AttributeService implements Serializable {
         return attributeList;
     }
 
-    public Map<String, GluuAttribute> getAllAttributesMap() {
+    public Map<String, JansAttribute> getAllAttributesMap() {
         return getAllAttributesMap(getDnForAttribute(null));
     }
 
     @SuppressWarnings("unchecked")
-    public Map<String, GluuAttribute> getAllAttributesMap(String baseDn) {
+    public Map<String, JansAttribute> getAllAttributesMap(String baseDn) {
     	BaseCacheService usedCacheService = getCacheService();
 
-    	Map<String, GluuAttribute> attributeMap = (Map<String, GluuAttribute>) usedCacheService.get(OxConstants.CACHE_ATTRIBUTE_CACHE_NAME,
+    	Map<String, JansAttribute> attributeMap = (Map<String, JansAttribute>) usedCacheService.get(OxConstants.CACHE_ATTRIBUTE_CACHE_NAME,
                 OxConstants.CACHE_ATTRIBUTE_KEY_MAP);
         if (attributeMap == null) {
         	attributeMap = getAllAttributesMapImpl(baseDn);
@@ -152,19 +152,19 @@ public abstract class AttributeService implements Serializable {
         return attributeMap;
     }
 
-	private Map<String, GluuAttribute> getAllAttributesMapImpl(String baseDn) {
-		List<GluuAttribute> attributeList = getAllAttributes(baseDn);
+	private Map<String, JansAttribute> getAllAttributesMapImpl(String baseDn) {
+		List<JansAttribute> attributeList = getAllAttributes(baseDn);
 
-		Map<String, GluuAttribute> attributeMap = new HashMap<>();
-		for (GluuAttribute attribute : attributeList) {
+		Map<String, JansAttribute> attributeMap = new HashMap<>();
+		for (JansAttribute attribute : attributeList) {
 			attributeMap.put(StringHelper.toLowerCase(attribute.getName()), attribute);
 		}
 
 		return attributeMap;
 	}
 
-    protected List<GluuAttribute> getAllAtributesImpl(String baseDn) {
-        List<GluuAttribute> attributeList = persistenceEntryManager.findEntries(baseDn, GluuAttribute.class, null);
+    protected List<JansAttribute> getAllAtributesImpl(String baseDn) {
+        List<JansAttribute> attributeList = persistenceEntryManager.findEntries(baseDn, JansAttribute.class, null);
 
         return attributeList;
     }

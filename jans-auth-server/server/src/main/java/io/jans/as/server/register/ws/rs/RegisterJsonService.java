@@ -18,7 +18,7 @@ import io.jans.as.persistence.model.Scope;
 import io.jans.as.server.ciba.CIBARegisterClientResponseService;
 import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.ScopeService;
-import io.jans.model.GluuAttribute;
+import io.jans.model.JansAttribute;
 import io.jans.orm.model.base.CustomObjectAttribute;
 import io.jans.util.security.StringEncrypter;
 import jakarta.ejb.Stateless;
@@ -166,8 +166,8 @@ public class RegisterJsonService {
         if (claimDns != null) {
             claimNames = new String[claimDns.length];
             for (int i = 0; i < claimDns.length; i++) {
-                GluuAttribute gluuAttribute = attributeService.getAttributeByDn(claimDns[i]);
-                claimNames[i] = gluuAttribute.getClaimName();
+                JansAttribute jansAttribute = attributeService.getAttributeByDn(claimDns[i]);
+                claimNames[i] = jansAttribute.getClaimName();
             }
         }
 
