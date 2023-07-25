@@ -20,6 +20,7 @@ def get_setup_options():
         'installEleven': False,
         'install_jans_link': True,
         'install_casa': False,
+        'install_jans_saml': False,
         'loadTestData': False,
         'allowPreReleasedFeatures': False,
         'listenAllInterfaces': False,
@@ -108,6 +109,8 @@ def get_setup_options():
 
         if base.argsp.with_casa:
             setupOptions['install_casa'] = True
+        if base.argsp.install_jans_saml:
+            setupOptions['install_jans_saml'] = True
 
         if base.argsp.jans_max_mem:
             setupOptions['jans_max_mem'] = base.argsp.jans_max_mem
