@@ -7,8 +7,8 @@
 package io.jans.configapi.plugin.link.service;
 
 import io.jans.configapi.configuration.ConfigurationFactory;
-import io.jans.configapi.plugin.link.model.config.Conf;
-import io.jans.configapi.plugin.link.model.config.JansLinkConfiguration;
+import io.jans.link.model.config.AppConfiguration;
+import io.jans.link.model.config.Conf;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.BasePersistenceException;
 import org.slf4j.Logger;
@@ -30,8 +30,7 @@ public class JansLinkService {
 
     public Conf findConf() {
         try {
-            String configurationDn = configurationFactory.getBaseConfiguration()
-                    .getString("link_ConfigurationEntryDN");
+            String configurationDn = configurationFactory.getBaseConfiguration().getString("link_ConfigurationEntryDN");
             return persistenceManager.find(Conf.class, configurationDn);
         } catch (BasePersistenceException var3) {
             logger.error("Failed to load jans-link configuration from LDAP");
@@ -39,9 +38,9 @@ public class JansLinkService {
         }
     }
 
-    public JansLinkConfiguration find() {
+    public AppConfiguration find() {
         final Conf conf = findConf();
-        return conf.getDynamicConf();
+        return conf.getDynamic();
     }
 
     public void mergeConf(Conf conf) {
@@ -49,9 +48,9 @@ public class JansLinkService {
         persistenceManager.merge(conf);
     }
 
-    public void merge(JansLinkConfiguration jansLinkConfigJson) {
+    public void merge(AppConfiguration appConfiguration) {
         Conf conf = this.findConf();
-        conf.setDynamicConf(jansLinkConfigJson);
+        conf.setDynamic(appConfiguration);
         mergeConf(conf);
     }
 }
