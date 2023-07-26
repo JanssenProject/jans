@@ -43,6 +43,9 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "The authorization endpoint URL")
     private String authorizationEndpoint;
 
+    @DocProperty(description = "The authorization challenge endpoint URL")
+    private String authorizationChallengeEndpoint;
+
     @DocProperty(description = "The token endpoint URL")
     private String tokenEndpoint;
 
@@ -90,6 +93,9 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "URL for Mutual TLS (mTLS) Client Authentication and Certificate-Bound Access Tokens (MTLS) Endpoint")
     private String mtlsAuthorizationEndpoint;
+
+    @DocProperty(description = "URL for Mutual TLS (mTLS) Client Authentication and Certificate-Bound Access Tokens (MTLS) Authorization Challenge Endpoint")
+    private String mtlsAuthorizationChallengeEndpoint;
 
     @DocProperty(description = "URL for Mutual TLS (mTLS) Authorization token Endpoint")
     private String mtlsTokenEndpoint;
@@ -1501,6 +1507,24 @@ public class AppConfiguration implements Configuration {
      */
     public void setAuthorizationEndpoint(String authorizationEndpoint) {
         this.authorizationEndpoint = authorizationEndpoint;
+    }
+
+    /**
+     * Gets authorization challenge endpoint.
+     *
+     * @return authorization challenge endpoint
+     */
+    public String getAuthorizationChallengeEndpoint() {
+        return authorizationChallengeEndpoint;
+    }
+
+    /**
+     * Sets authorization challenge endpoint
+     *
+     * @param authorizationChallengeEndpoint authorization challenge endpoint
+     */
+    public void setAuthorizationChallengeEndpoint(String authorizationChallengeEndpoint) {
+        this.authorizationChallengeEndpoint = authorizationChallengeEndpoint;
     }
 
     /**
@@ -3073,6 +3097,24 @@ public class AppConfiguration implements Configuration {
 
     public void setMtlsAuthorizationEndpoint(String mtlsAuthorizationEndpoint) {
         this.mtlsAuthorizationEndpoint = mtlsAuthorizationEndpoint;
+    }
+
+    /**
+     * Gets MTLS Authorization Challenge Endpoint.
+     *
+     * @return MTLS Authorization Challenge Endpoint.
+     */
+    public String getMtlsAuthorizationChallengeEndpoint() {
+        return mtlsAuthorizationChallengeEndpoint;
+    }
+
+    /**
+     * Sets MTLS Authorization Challenge Endpoint.
+     *
+     * @param mtlsAuthorizationChallengeEndpoint MTLS Authorization Challenge Endpoint.
+     */
+    public void setMtlsAuthorizationChallengeEndpoint(String mtlsAuthorizationChallengeEndpoint) {
+        this.mtlsAuthorizationChallengeEndpoint = mtlsAuthorizationChallengeEndpoint;
     }
 
     public String getMtlsTokenEndpoint() {

@@ -73,6 +73,7 @@ public class UmaMetadataWS {
             c.setRegistrationEndpoint(appConfiguration.getRegistrationEndpoint());
             c.setTokenEndpoint(appConfiguration.getTokenEndpoint());
             c.setAuthorizationEndpoint(appConfiguration.getAuthorizationEndpoint());
+            c.setAuthorizationChallengeEndpoint(appConfiguration.getAuthorizationChallengeEndpoint());
             c.setIntrospectionEndpoint(baseEndpointUri + "/rpt/status");
             c.setResourceRegistrationEndpoint(baseEndpointUri + "/host/rsrc/resource_set");
             c.setPermissionEndpoint(baseEndpointUri + "/host/rsrc_pr");
