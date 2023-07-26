@@ -902,16 +902,13 @@
   },
   "adsPrjDeplDetails": {
     "mysql": {
-      "size": 2048,
-      "type": "VARCHAR"
+      "type": "TEXT"
     },
     "pgsql": {
-      "size": 2048,
-      "type": "VARCHAR"
+      "type": "TEXT"
     },
     "spanner": {
-      "size": 2048,
-      "type": "STRING"
+      "type": "STRING(MAX)"
     }
   }
 }
