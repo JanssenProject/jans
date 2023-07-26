@@ -57,8 +57,8 @@ public class OAuth2Discovery {
     @XmlElement(name = "authorization_endpoint")
     private String authorizationEndpoint;
 
-    @JsonProperty(value = "authorization_challenge_request_endpoint")
-    @XmlElement(name = "authorization_challenge_request_endpoint")
+    @JsonProperty(value = "authorization_challenge_endpoint")
+    @XmlElement(name = "authorization_challenge_endpoint")
     private String authorizationChallengeEndpoint;
 
     @JsonProperty(value = "token_endpoint")
