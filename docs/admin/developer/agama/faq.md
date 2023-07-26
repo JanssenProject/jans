@@ -130,7 +130,7 @@ Call java.lang.String#join "" strings
 
 See the examples in the Looping section of the [language reference](../../../agama/language-reference.md#looping).
 
-## How to know the number of iterations carried out by a loop once it has finished?
+### How to know the number of iterations carried out by a loop once it has finished?
 
 You can assign this value to a variable at the top of your loop declaration. See the examples in the Looping section of the [language reference](../../../agama/language-reference.md#looping).
 
