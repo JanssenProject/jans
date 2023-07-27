@@ -164,6 +164,7 @@ func TestOIDCClient(t *testing.T) {
 			ParLifetime:                             600,
 			RequirePar:                              false,
 			JansDefaultPromptLogin:                  false,
+			MinimumAcrLevel:                         -1,
 		},
 		Description:  "Test client",
 		Organization: "inum=1200.33AFBA,ou=scopes,o=jans",
