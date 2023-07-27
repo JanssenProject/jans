@@ -58,7 +58,8 @@ if missing_idetifiers:
     print("Missing identifier(s):", ', '.join(missing_idetifiers))
     sys.exit()
 
-cur_path = Path(os.path.dirname(__file__))
+
+cur_path = Path(os.path.dirname(os.path.realpath(__file__)))
 setup_dir = cur_path.parent.joinpath('jans_setup').as_posix()
 sys.path.append(setup_dir)
 
@@ -96,7 +97,8 @@ for grp in Config.mapping_locations:
 class ExternalDataLoader(SetupUtils):
 
     def __init__(self):
-        self.output_dir = '/tmp/output'
+        self.output_dir = os.path.join(setup_dir, 'external_output')
+        print("Rendered files will be stored in", self.output_dir)
         self.dbUtils = dbUtils
         self.load_ldif_list = []
 
