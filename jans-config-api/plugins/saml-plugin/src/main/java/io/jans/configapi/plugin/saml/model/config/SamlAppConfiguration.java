@@ -15,7 +15,10 @@ public class SamlAppConfiguration implements Configuration {
     private String idpRootDir;
     private String idpMetadataFilePattern;
     private String spMetadataFilePattern;
-
+    private String spMetadataFile;
+    private boolean configGeneration;
+    private boolean ignoreValidation;
+    
     private List<IdpConfig> idpConfigs;
 
     public String getApplicationName() {
@@ -73,6 +76,30 @@ public class SamlAppConfiguration implements Configuration {
     public void setSpMetadataFilePattern(String spMetadataFilePattern) {
         this.spMetadataFilePattern = spMetadataFilePattern;
     }
+    
+    public String getSpMetadataFile() {
+        return spMetadataFile;
+    }
+
+    public void setSpMetadataFile(String spMetadataFile) {
+        this.spMetadataFile = spMetadataFile;
+    }
+
+    public boolean isConfigGeneration() {
+        return configGeneration;
+    }
+
+    public void setConfigGeneration(boolean configGeneration) {
+        this.configGeneration = configGeneration;
+    }
+
+    public boolean isIgnoreValidation() {
+        return ignoreValidation;
+    }
+
+    public void setIgnoreValidation(boolean ignoreValidation) {
+        this.ignoreValidation = ignoreValidation;
+    }
 
     public List<IdpConfig> getIdpConfigs() {
         return idpConfigs;
@@ -87,7 +114,7 @@ public class SamlAppConfiguration implements Configuration {
         return "SamlAppConfiguration [applicationName=" + applicationName + ", samlTrustRelationshipDn="
                 + samlTrustRelationshipDn + ", samlEnabled=" + samlEnabled + ", selectedIdp=" + selectedIdp
                 + ", idpRootDir=" + idpRootDir + ", idpMetadataFilePattern=" + idpMetadataFilePattern
-                + ", spMetadataFilePattern=" + spMetadataFilePattern + ", idpConfigs=" + idpConfigs + "]";
-    }
-
+                + ", spMetadataFilePattern=" + spMetadataFilePattern + ", configGeneration=" + configGeneration
+                + ", ignoreValidation=" + ignoreValidation + ", idpConfigs=" + idpConfigs + "]";
+    }   
 }

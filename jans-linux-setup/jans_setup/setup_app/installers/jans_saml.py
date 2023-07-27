@@ -25,6 +25,8 @@ class JansSamlInstaller(JettyInstaller):
         self.register_progess()
 
         self.saml_enabled = True
+        self.config_generation = True
+        self.ignore_validation = True
         self.idp_root_dir = '/opt/idp/configs/'
 
         # sample config

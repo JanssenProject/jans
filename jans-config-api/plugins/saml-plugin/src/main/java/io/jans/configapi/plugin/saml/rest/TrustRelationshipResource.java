@@ -57,7 +57,7 @@ public class TrustRelationshipResource extends BaseResource {
     @GET
     @ProtectedApi(scopes = { Constants.SAML_READ_ACCESS })
     public Response getAllTrustRelationship() {
-        List<TrustRelationship> trustRelationshipList = samlService.getAllTrustRelationship();
+        List<TrustRelationship> trustRelationshipList = samlService.getAllTrustRelationships();
         logger.info("All trustRelationshipList:{}", trustRelationshipList);
         return Response.ok(trustRelationshipList).build();
     }

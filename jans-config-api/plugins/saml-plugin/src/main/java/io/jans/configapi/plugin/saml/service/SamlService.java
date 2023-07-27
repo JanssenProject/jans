@@ -12,6 +12,7 @@ import io.jans.as.common.service.OrganizationService;
 import io.jans.as.common.util.AttributeConstants;
 import io.jans.configapi.configuration.ConfigurationFactory;
 import io.jans.configapi.plugin.saml.model.TrustRelationship;
+import io.jans.model.GluuStatus;
 import io.jans.model.SearchRequest;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.PagedResult;
@@ -92,8 +93,16 @@ public class SamlService {
         return result;
     }
 
-    public List<TrustRelationship> getAllTrustRelationship() {
+    public List<TrustRelationship> getAllTrustRelationships() {
         return persistenceEntryManager.findEntries(getDnForTrustRelationship(null), TrustRelationship.class, null);
+    }
+    
+    public List<TrustRelationship> getAllActiveTrustRelationships() {
+        TrustRelationship trustRelationship = new TrustRelationship();
+        trustRelationship.setBaseDn(getDnForTrustRelationship(null));
+        trustRelationship.setStatus(GluuStatus.ACTIVE);
+
+        return persistenceEntryManager.findEntries(trustRelationship);
     }
 
     public List<TrustRelationship> getAllTrustRelationshipByInum(String inum) {
@@ -121,6 +130,15 @@ public class SamlService {
     public List<TrustRelationship> getAllTrustRelationships(int sizeLimit) {
         return persistenceEntryManager.findEntries(getDnForTrustRelationship(null), TrustRelationship.class, null,
                 sizeLimit);
+    }
+    
+    public TrustRelationship getTrustByUnpunctuatedInum(String unpunctuated) {
+        for (TrustRelationship trust : getAllTrustRelationships()) {
+            if (StringHelper.removePunctuation(trust.getInum()).equals(unpunctuated)) {
+                return trust;
+            }
+        }
+        return null;
     }
 
     public List<TrustRelationship> searchTrustRelationship(String pattern, int sizeLimit) {
@@ -299,13 +317,13 @@ public class SamlService {
 
     }
 
-    public String getSpNewMetadataFileName(TrustRelationship trustRel) {
-        return getSpNewMetadataFileName(trustRel.getInum());
-    }
-
-    public String getSpNewMetadataFileName(String inum) {
-        String relationshipInum = StringHelper.removePunctuation(inum);
-        return String.format(getSpMetadataFilePattern(), relationshipInum);
-    }
+    /*
+     * public String getSpNewMetadataFileName(TrustRelationship trustRel) { return
+     * getSpNewMetadataFileName(trustRel.getInum()); }
+     * 
+     * public String getSpNewMetadataFileName(String inum) { String relationshipInum
+     * = StringHelper.removePunctuation(inum); return
+     * String.format(getSpMetadataFilePattern(), relationshipInum); }
+     */
 
 }

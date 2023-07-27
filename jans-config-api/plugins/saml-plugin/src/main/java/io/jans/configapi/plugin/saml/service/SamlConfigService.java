@@ -100,6 +100,17 @@ public class SamlConfigService {
         }
         return spMetadataFilePattern;
     }
+    
+    public String getSpMetadataFile() {
+        final SamlConf samlConf = getSamlConf();
+        SamlAppConfiguration samlAppConfiguration = samlConf.getDynamicConf();
+        String spMetadataFile = null;
+        if (samlAppConfiguration != null) {
+            spMetadataFile = samlAppConfiguration.getSpMetadataFile();
+        }
+        return spMetadataFile;
+    }
+
 
     public IdpConfig getSelectedIdpConfig() {
         final SamlConf samlConf = getSamlConf();

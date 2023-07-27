@@ -13,12 +13,22 @@ import io.jans.service.document.store.service.LocalDocumentStoreService;
 import io.jans.util.exception.InvalidConfigurationException;
 import io.jans.util.StringHelper;
 import io.jans.util.INumGenerator;
+import io.jans.xml.GluuErrorHandler;
+import io.jans.xml.XMLValidator;
+
+import javax.xml.parsers.ParserConfigurationException;
+import org.xml.sax.SAXException;
+import org.opensaml.saml.common.xml.SAMLSchemaBuilder;
+import org.opensaml.saml.common.xml.SAMLSchemaBuilder.SAML1Version;
+import org.opensaml.xml.parse.XMLParserException;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import javax.xml.validation.Schema;
 
 import java.io.File;
 import java.io.InputStream;
+import java.io.IOException;
 import java.util.*;
 
 import org.apache.commons.io.IOUtils;
@@ -39,6 +49,8 @@ public class SamlIdpService {
 
     @Inject
     private LocalDocumentStoreService localDocumentStoreService;
+    
+    private Schema samlSchema;
 
     public boolean isLocalDocumentStoreType() {
         return documentStoreService.getProviderType() == DocumentStoreType.LOCAL;
@@ -125,5 +137,20 @@ public class SamlIdpService {
 
         return null;
     }
+    
+    public GluuErrorHandler validateMetadata(String metadataPath)
+            throws ParserConfigurationException, SAXException, IOException, XMLParserException {
+        if (samlSchema == null) {
+            final List<String> validationLog = new ArrayList<String>();
+            validationLog.add(GluuErrorHandler.SCHEMA_CREATING_ERROR_MESSAGE);
+            validationLog.add("Failed to load SAML schema");
+            return new GluuErrorHandler(false, true, validationLog);
+        }
+
+        try (InputStream stream = documentStoreService.readDocumentAsStream(metadataPath)) {
+            return XMLValidator.validateMetadata(stream, samlSchema);
+        }
+    }
+
 
 }

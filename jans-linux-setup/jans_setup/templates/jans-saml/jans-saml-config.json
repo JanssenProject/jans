@@ -6,6 +6,9 @@
   "idpRootDir": "${idp_root_dir}",
   "idpMetadataFilePattern":"%s-idp-metadata.xml",
   "spMetadataFilePattern":"%s-sp-metadata.xml",
+  "spMetadataFile":"sp-metadata.xml",
+  "configGeneration": "${config_generation}",
+  "ignoreValidation": "${ignore_validation}",
   "idpConfigs":[
     {
       "configId":"${idp_config_id}",
