@@ -51,17 +51,17 @@ tags:
 | jansUmaResourcePermission  |
 
 ### adsPrjDeployment
-| Field             | Type          | Null | Key | Default | Comment                                   |
-| ----------------- | ------------- | ---- | --- | ------- | ----------------------------------------- |
-| doc_id            | varchar(64)   | NO   | PRI | None    |                                           |
-| objectClass       | varchar(48)   | YES  |     | None    |                                           |
-| dn                | varchar(128)  | YES  |     | None    |                                           |
-| jansId            | varchar(128)  | YES  |     | None    | Identifier                                |
-| jansStartDate     | datetime(3)   | YES  |     | None    | Start date                                |
-| jansActive        | smallint      | YES  |     | None    |                                           |
-| jansEndDate       | datetime(3)   | YES  |     | None    | End date                                  |
-| adsPrjAssets      | longtext      | YES  |     | None    | Assets of an ADS project                  |
-| adsPrjDeplDetails | varchar(2048) | YES  |     | None    | Misc details associated to an ADS project |
+| Field             | Type         | Null | Key | Default | Comment                                   |
+| ----------------- | ------------ | ---- | --- | ------- | ----------------------------------------- |
+| doc_id            | varchar(64)  | NO   | PRI | None    |                                           |
+| objectClass       | varchar(48)  | YES  |     | None    |                                           |
+| dn                | varchar(128) | YES  |     | None    |                                           |
+| jansId            | varchar(128) | YES  |     | None    | Identifier                                |
+| jansStartDate     | datetime(3)  | YES  |     | None    | Start date                                |
+| jansActive        | smallint     | YES  |     | None    |                                           |
+| jansEndDate       | datetime(3)  | YES  |     | None    | End date                                  |
+| adsPrjAssets      | longtext     | YES  |     | None    | Assets of an ADS project                  |
+| adsPrjDeplDetails | text         | YES  |     | None    | Misc details associated to an ADS project |
 
 ### agmFlow
 | Field             | Type         | Null | Key | Default | Comment                                                                  |
