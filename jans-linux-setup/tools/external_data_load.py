@@ -34,8 +34,6 @@ for arg in remaining:
 
     other_argsp[akey] = aval
 
-print(other_argsp)
-
 def get_template_identifiers(tmp):
     return re.findall(r'\%\((.*?)\)s', tmp, re.MULTILINE)
 
