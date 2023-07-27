@@ -68,9 +68,9 @@ func resourceScript() *schema.Resource {
 						"person_authentication", "introspection", "resource_owner_password_credentials",
 						"application_session", "cache_refresh", "client_registration", "id_generator",
 						"uma_rpt_policy", "uma_rpt_claims", "uma_claims_gathering", "consent_gathering",
-						"dynamic_scope", "spontaneous_scope", "end_session", "post_authn", "scim",
-						"ciba_end_user_notification", "revoke_token", "persistence_extension", "idp",
-						"discovery", "update_token", "config_api",
+						"dynamic_scope", "spontaneous_scope", "end_session", "post_authn", "select_account",
+						"scim", "ciba_end_user_notification", "revoke_token", "persistence_extension",
+						"idp", "discovery", "update_token", "config_api",
 					}
 					return validateEnum(v, enums)
 				},

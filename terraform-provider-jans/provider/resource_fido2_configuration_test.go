@@ -62,8 +62,8 @@ func TestResourceFido2Config_Mapping(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if len(patches) != 20 {
-		t.Errorf("Got %d patches, expected 20", len(patches))
+	if len(patches) != 22 {
+		t.Errorf("Got %d patches, expected 22", len(patches))
 	}
 
 	if err := fromSchemaResource(data, &newCfg); err != nil {

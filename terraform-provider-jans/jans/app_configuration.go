@@ -96,6 +96,10 @@ type SsaValidationConfig struct {
 	SharedSecret               string   `schema:"shared_secret" json:"shared_secret"`
 }
 
+type TrustedIssuerConfig struct {
+	AutomaticallyGrantedScopes []string `schema:"automatically_granted_scopes" json:"automatically_granted_scopes"`
+}
+
 // AppConfiguration represents the Janssen authorization server
 // configuration properties
 type AppConfiguration struct {
@@ -243,6 +247,7 @@ type AppConfiguration struct {
 	ServerSessionIdLifetime                                   int                                   `schema:"server_session_id_lifetime" json:"serverSessionIdLifetime"`
 	ActiveSessionAuthorizationScope                           string                                `schema:"active_session_authorization_scope" json:"activeSessionAuthorizationScope"`
 	ConfigurationUpdateInterval                               int                                   `schema:"configuration_update_interval" json:"configurationUpdateInterval"`
+	LogNotFoundEntityAsError                                  bool                                  `schema:"log_not_found_entity_as_error" json:"logNotFoundEntityAsError"`
 	EnableClientGrantTypeUpdate                               bool                                  `schema:"enable_client_grant_type_update" json:"enableClientGrantTypeUpdate"`
 	DynamicGrantTypeDefault                                   []string                              `schema:"dynamic_grant_type_default" json:"dynamicGrantTypeDefault"`
 	CssLocation                                               string                                `schema:"css_location" json:"cssLocation"`
@@ -269,6 +274,7 @@ type AppConfiguration struct {
 	JansElevenVerifySignatureEndpoint                         string                                `schema:"jans_eleven_verify_signature_endpoint" json:"jansElevenVerifySignatureEndpoint"`
 	JansElevenDeleteKeyEndpoint                               string                                `schema:"jans_eleven_delete_key_endpoint" json:"jansElevenDeleteKeyEndpoint"`
 	IntrospectionAccessTokenMustHaveUmaProtectionScope        bool                                  `schema:"introspection_access_token_must_have_uma_protection_scope" json:"introspectionAccessTokenMustHaveUmaProtectionScope"`
+	IntrospectionAccessTokenMustHaveIntrospectionScope        bool                                  `schema:"introspection_access_token_must_have_introspection_scope" json:"introspectionAccessTokenMustHaveIntrospectionScope"`
 	IntrospectionSkipAuthorization                            bool                                  `schema:"introspection_skip_authorization" json:"introspectionSkipAuthorization"`
 	EndSessionWithAccessToken                                 bool                                  `schema:"end_session_with_access_token" json:"endSessionWithAccessToken"`
 	CookieDomain                                              string                                `schema:"cookie_domain" json:"cookieDomain"`
@@ -294,6 +300,7 @@ type AppConfiguration struct {
 	DisableU2fEndpoint                                        bool                                  `schema:"disable_u2f_endpoint" json:"disableU2fEndpoint"`
 	RotateDeviceSecret                                        bool                                  `schema:"rotate_device_secret" json:"rotateDeviceSecret"`
 	ReturnDeviceSecretFromAuthzEndpoint                       bool                                  `schema:"return_device_secret_from_authz_endpoint" json:"returnDeviceSecretFromAuthzEndpoint"`
+	DcrForbidExpirationTimeInRequest                          bool                                  `schema:"dcr_forbid_expiration_time_in_request" json:"dcrForbidExpirationTimeInRequest"`
 	DcrSignatureValidationEnabled                             bool                                  `schema:"dcr_signature_validation_enabled" json:"dcrSignatureValidationEnabled"`
 	DcrSignatureValidationSharedSecret                        string                                `schema:"dcr_signature_validation_shared_secret" json:"dcrSignatureValidationSharedSecret"`
 	DcrSignatureValidationSoftwareStatementJwksUriClaim       string                                `schema:"dcr_signature_validation_software_statement_jwks_uri_claim" json:"dcrSignatureValidationSoftwareStatementJwksUriClaim"`
@@ -302,7 +309,7 @@ type AppConfiguration struct {
 	DcrSignatureValidationJwksUri                             string                                `schema:"dcr_signature_validation_jwks_uri" json:"dcrSignatureValidationJwksUri"`
 	DcrAuthorizationWithClientCredentials                     bool                                  `schema:"dcr_authorization_with_client_credentials" json:"dcrAuthorizationWithClientCredentials"`
 	DcrAuthorizationWithMTLS                                  bool                                  `schema:"dcr_authorization_with_mtls" json:"dcrAuthorizationWithMTLS"`
-	DcrIssuers                                                []string                              `schema:"dcr_issuers" json:"dcrIssuers"`
+	TrustedSSAIssuers                                         []TrustedIssuerConfig                 `schema:"trusted_ssa_issuers" json:"trustedSsaIssuers"`
 	UseLocalCache                                             bool                                  `schema:"use_local_cache" json:"useLocalCache"`
 	FapiCompatibility                                         bool                                  `schema:"fapi_compatibility" json:"fapiCompatibility"`
 	ForceIdTokenHintPrecense                                  bool                                  `schema:"force_id_token_hint_precense" json:"forceIdTokenHintPrecense"`
@@ -313,6 +320,7 @@ type AppConfiguration struct {
 	RemoveRefreshTokensForClientOnLogout                      bool                                  `schema:"remove_refresh_tokens_for_client_on_logout" json:"removeRefreshTokensForClientOnLogout"`
 	SkipRefreshTokenDuringRefreshing                          bool                                  `schema:"skip_refresh_token_during_refreshing" json:"skipRefreshTokenDuringRefreshing"`
 	RefreshTokenExtendLifetimeOnRotation                      bool                                  `schema:"refresh_token_extend_lifetime_on_rotation" json:"refreshTokenExtendLifetimeOnRotation"`
+	AllowBlankValuesInDiscoveryResponse                       bool                                  `schema:"allow_blank_values_in_discovery_response" json:"allowBlankValuesInDiscoveryResponse"`
 	CheckUserPresenceOnRefreshToken                           bool                                  `schema:"check_user_presence_on_refresh_token" json:"checkUserPresenceOnRefreshToken"`
 	ConsentGatheringScriptBackwardCompatibility               bool                                  `schema:"consent_gathering_script_backward_compatibility" json:"consentGatheringScriptBackwardCompatibility"`
 	IntrospectionScriptBackwardCompatibility                  bool                                  `schema:"introspection_script_backward_compatibility" json:"introspectionScriptBackwardCompatibility"`
@@ -346,6 +354,8 @@ type AppConfiguration struct {
 	DpopSigningAlgValuesSupported                             []string                              `schema:"dpop_signing_alg_values_supported" json:"dpopSigningAlgValuesSupported"`
 	DpopTimeframe                                             int                                   `schema:"dpop_timeframe" json:"dpopTimeframe"`
 	DpopJtiCacheTime                                          int                                   `schema:"dpop_jti_cache_time" json:"dpopJtiCacheTime"`
+	DpopUseNonce                                              bool                                  `schema:"dpop_use_nonce" json:"dpopUseNonce"`
+	DpopNonceCacheTime                                        int                                   `schema:"dpop_nonce_cache_time" json:"dpopNonceCacheTime"`
 	AllowIdTokenWithoutImplicitGrantType                      bool                                  `schema:"allow_id_token_without_implicit_grant_type" json:"allowIdTokenWithoutImplicitGrantType"`
 	DiscoveryCacheLifetimeInMinutes                           int                                   `schema:"discovery_cache_lifetime_in_minutes" json:"discoveryCacheLifetimeInMinutes"`
 	DiscoveryAllowedKeys                                      []string                              `schema:"discovery_allowed_keys" json:"discoveryAllowedKeys"`
@@ -359,8 +369,10 @@ type AppConfiguration struct {
 	SsaConfiguration                                          SsaConfiguration                      `schema:"ssa_configuration" json:"ssaConfiguration"`
 	BlockWebviewAuthorizationEnabled                          bool                                  `schema:"block_webview_authorization_enabled" json:"blockWebviewAuthorizationEnabled"`
 	DateFormatterPatterns                                     map[string]string                     `schema:"date_formatter_patterns" json:"dateFormatterPatterns"`
-	Fapi                                                      bool                                  `schema:"fapi" json:"fapi"`
 	AllResponseTypesSupported                                 []string                              `schema:"all_response_types_supported" json:"allResponseTypesSupported"`
+	HttpLoggingResponseBodyContent                            bool                                  `schema:"http_logging_response_body_content" json:"httpLoggingResponseBodyContent"`
+	SkipAuthenticationFilterOptionsMethod                     bool                                  `schema:"skip_authentication_filter_options_method" json:"skipAuthenticationFilterOptionsMethod"`
+	Fapi                                                      bool                                  `schema:"fapi" json:"fapi"`
 }
 
 // GetAppConfiguration returns all Janssen authorization server configuration

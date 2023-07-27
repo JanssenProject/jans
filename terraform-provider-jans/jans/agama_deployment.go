@@ -11,6 +11,7 @@ type ProjectMetadata struct {
 	Type        string `json:"type" schema:"type"`
 	Description string `json:"description" schema:"description"`
 	// Configs     []string `json:"configs" schema:"configs"`
+	NoDirectLaunch []string `json:"noDirectLaunch" schema:"no_direct_launch"`
 }
 
 type DeploymentDetails struct {
@@ -48,7 +49,7 @@ func (c *Client) GetAgamaDeployments(ctx context.Context) ([]AgamaDeployment, er
 	}
 	ret := response{}
 
-	if err := c.get(ctx, "/jans-config-api/api/v1/agama-deployment/list", token, &ret); err != nil {
+	if err := c.get(ctx, "/jans-config-api/api/v1/agama-deployment", token, &ret); err != nil {
 		return nil, fmt.Errorf("get request failed: %w", err)
 	}
 

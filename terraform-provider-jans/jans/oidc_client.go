@@ -24,6 +24,7 @@ type OidcClientAttribute struct {
 	RopcScripts                             []string `schema:"ropc_scripts" json:"ropcScripts,omitempty"`
 	ParLifetime                             int      `schema:"par_lifetime" json:"parLifetime,omitempty"`
 	RequirePar                              bool     `schema:"require_par" json:"requirePar,omitempty"`
+	DpopBoundAccessToken                    bool     `schema:"dpop_bound_access_token" json:"dpopBoundAccessToken,omitempty"`
 	JansAuthSignedRespAlg                   string   `schema:"jans_auth_signed_resp_alg" json:"jansAuthSignedRespAlg,omitempty"`
 	JansAuthEncRespAlg                      string   `schema:"jans_auth_enc_resp_alg" json:"jansAuthEncRespAlg,omitempty"`
 	JansAuthEncRespEnc                      string   `schema:"jans_auth_enc_resp_enc" json:"jansAuthEncRespEnc,omitempty"`
@@ -31,6 +32,13 @@ type OidcClientAttribute struct {
 	RedirectUrisRegex                       string   `schema:"redirect_uris_regex" json:"redirectUrisRegex,omitempty"`
 	JansAuthorizedAcr                       []string `schema:"jans_authorized_acr" json:"jansAuthorizedAcr,omitempty"`
 	JansDefaultPromptLogin                  bool     `schema:"jans_default_prompt_login" json:"jansDefaultPromptLogin,omitempty"`
+	IdTokenLifetime                         int      `schema:"id_token_lifetime" json:"idTokenLifetime,omitempty"`
+	AllowOfflineAccessWithoutConsent        bool     `schema:"allow_offline_access_without_consent" json:"allowOfflineAccessWithoutConsent,omitempty"`
+	MinimumAcrLevel                         int      `schema:"minimum_acr_level" json:"minimumAcrLevel,omitempty"`
+	MinimumAcrLevelAutoresolve              bool     `schema:"minimum_acr_level_autoresolve" json:"minimumAcrLevelAutoresolve,omitempty"`
+	AdditionalTokenEndpointAuthMethods      []string `schema:"additional_token_endpoint_auth_methods" json:"additionalTokenEndpointAuthMethods,omitempty"`
+	MinimumAcrPriorityList                  []string `schema:"minimum_acr_priority_list" json:"minimumAcrPriorityList,omitempty"`
+	RequestedLifetime                       int      `schema:"requested_lifetime" json:"requestedLifetime,omitempty"`
 }
 
 // OidcClient is the definition of an OpenId Connect Client.
