@@ -1,7 +1,7 @@
 /*
  * oxAuth is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
  *
- * Copyright (c) 2014, Gluu
+ * Copyright (c) 2014, Janssen Project
  */
 
 package io.jans.as.server.servlet;
@@ -27,7 +27,7 @@ import io.jans.as.server.service.external.ExternalAuthenticationService;
 import io.jans.as.server.service.external.ExternalDynamicScopeService;
 import io.jans.as.server.service.token.TokenService;
 import io.jans.as.server.util.ServerUtil;
-import io.jans.model.GluuAttribute;
+import io.jans.model.JansAttribute;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONArray;
@@ -432,7 +432,7 @@ public class FapiOpenIdConfiguration extends HttpServlet {
      * <li>scope_to_claims_mapping</li>
      * </ul>
      * will be moved from /.well-known/openid-configuration to
-     * /.well-known/gluu-configuration
+     * /.well-known/openid-configuration
      */
     @Deprecated
     private JSONArray createScopeToClaimsMapping(JSONArray scopesSupported, JSONArray claimsSupported) {
@@ -467,7 +467,7 @@ public class FapiOpenIdConfiguration extends HttpServlet {
                     final List<String> claimIdList = scope.getClaims();
                     if (claimIdList != null && !claimIdList.isEmpty()) {
                         for (String claimDn : claimIdList) {
-                            final GluuAttribute attribute = attributeService.getAttributeByDn(claimDn);
+                            final JansAttribute attribute = attributeService.getAttributeByDn(claimDn);
                             final String claimName = attribute.getClaimName();
                             if (StringUtils.isNotBlank(claimName)) {
                                 claimsList.put(claimName);
@@ -503,7 +503,7 @@ public class FapiOpenIdConfiguration extends HttpServlet {
      * <li>scope_to_claims_mapping</li>
      * </ul>
      * will be moved from /.well-known/openid-configuration to
-     * /.well-known/gluu-configuration
+     * /.well-known/openid-configuration
      */
     @Deprecated
     private JSONObject createAuthLevelMapping() {
