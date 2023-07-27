@@ -658,7 +658,7 @@ tags:
 | jansStartDate     | timestamp without time zone | None                     | YES  | None    | Start date                                |
 | jansEndDate       | timestamp without time zone | None                     | YES  | None    | End date                                  |
 | adsPrjAssets      | text                        | None                     | YES  | None    | Assets of an ADS project                  |
-| adsPrjDeplDetails | character varying           | 2048                     | YES  | None    | Misc details associated to an ADS project |
+| adsPrjDeplDetails | text                        | None                     | YES  | None    | Misc details associated to an ADS project |
 
 ### jansDocument
 | Field              | Type                        | Character Maximum Length | Null | Default | Comment                                                       |
