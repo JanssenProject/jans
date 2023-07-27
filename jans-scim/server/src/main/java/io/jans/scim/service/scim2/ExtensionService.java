@@ -23,7 +23,7 @@ import jakarta.inject.Inject;
 
 import org.apache.commons.lang.StringUtils;
 
-import io.jans.model.GluuAttribute;
+import io.jans.model.JansAttribute;
 import io.jans.scim.model.conf.AppConfiguration;
 import io.jans.scim.model.scim2.BaseScimResource;
 import io.jans.scim.model.scim2.extensions.Extension;
@@ -56,7 +56,7 @@ public class ExtensionService {
 
                 Map<String, ExtensionField> fields = new HashMap<>();
 
-                for (GluuAttribute attribute : attributeService.getSCIMRelatedAttributes()) {
+                for (JansAttribute attribute : attributeService.getSCIMRelatedAttributes()) {
                     if (Optional.ofNullable(attribute.getScimCustomAttr()).orElse(false)) {
                         // first non-null check is needed because certain entries do not have the multivalue attribute set
 

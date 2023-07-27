@@ -1,13 +1,13 @@
 /*
- * oxTrust is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * Janssen Project is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
  *
- * Copyright (c) 2014, Gluu
+ * Copyright (c) 2014, Janssen Project
  */
 
 package io.jans.link.service;
 
 import io.jans.link.model.GluuCustomPerson;
-import io.jans.model.GluuAttribute;
+import io.jans.model.JansAttribute;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.util.INumGenerator;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -51,8 +51,8 @@ public class InumService implements Serializable {
 
 
 	public boolean containsAttribute(String inum) {
-		String dn = "inum=" + inum + ",ou=attributes,o=gluu";
-		return ldapEntryManager.contains(dn, GluuAttribute.class);
+		String dn = "inum=" + inum + ",ou=attributes,o=jans";
+		return ldapEntryManager.contains(dn, JansAttribute.class);
 	}
 
 	public boolean containsPerson(String inum) {

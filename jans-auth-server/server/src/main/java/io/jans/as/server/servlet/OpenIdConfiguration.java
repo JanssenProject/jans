@@ -20,7 +20,7 @@ import io.jans.as.server.service.external.ExternalAuthenticationService;
 import io.jans.as.server.service.external.ExternalDiscoveryService;
 import io.jans.as.server.service.external.ExternalDynamicScopeService;
 import io.jans.as.server.util.ServerUtil;
-import io.jans.model.GluuAttribute;
+import io.jans.model.JansAttribute;
 import io.jans.util.OxConstants;
 import jakarta.inject.Inject;
 import jakarta.servlet.annotation.WebServlet;
@@ -347,7 +347,7 @@ public class OpenIdConfiguration extends HttpServlet {
      * <li>scope_to_claims_mapping</li>
      * </ul>
      * will be moved from /.well-known/openid-configuration to
-     * /.well-known/gluu-configuration
+     * /.well-known/openid-configuration
      */
     @Deprecated
     @SuppressWarnings("java:S3776")
@@ -383,7 +383,7 @@ public class OpenIdConfiguration extends HttpServlet {
                     final List<String> claimIdList = scope.getClaims();
                     if (claimIdList != null && !claimIdList.isEmpty()) {
                         for (String claimDn : claimIdList) {
-                            final GluuAttribute attribute = attributeService.getAttributeByDn(claimDn);
+                            final JansAttribute attribute = attributeService.getAttributeByDn(claimDn);
                             final String claimName = attribute.getClaimName();
                             if (StringUtils.isNotBlank(claimName) && !Boolean.TRUE.equals(attribute.getJansHideOnDiscovery())) {
                                 claimsList.put(claimName);
@@ -419,7 +419,7 @@ public class OpenIdConfiguration extends HttpServlet {
      * <li>scope_to_claims_mapping</li>
      * </ul>
      * will be moved from /.well-known/openid-configuration to
-     * /.well-known/gluu-configuration
+     * /.well-known/openid-configuration
      */
     @Deprecated
     private JSONObject createAuthLevelMapping() {

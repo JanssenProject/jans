@@ -4,7 +4,7 @@ package io.jans.configapi.service.auth;
 import static io.jans.as.model.util.Util.escapeLog;
 import io.jans.as.common.util.AttributeConstants;
 import io.jans.configapi.util.ApiConstants;
-import io.jans.model.GluuAttribute;
+import io.jans.model.JansAttribute;
 import io.jans.model.SearchRequest;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;
@@ -28,9 +28,9 @@ public class AttributeService extends io.jans.as.common.service.AttributeService
         return false;
     }
 
-    public PagedResult<GluuAttribute> searchGluuAttributes(SearchRequest searchRequest, String status) {
+    public PagedResult<JansAttribute> searchJansAttributes(SearchRequest searchRequest, String status) {
         if (log.isInfoEnabled()) {
-            log.info("Search GluuAttributes with searchRequest:{}, status:{}", escapeLog(searchRequest), escapeLog(status));
+            log.info("Search JansAttributes with searchRequest:{}, status:{}", escapeLog(searchRequest), escapeLog(status));
         }
 
         Filter activeFilter = null;
@@ -76,32 +76,32 @@ public class AttributeService extends io.jans.as.common.service.AttributeService
             searchFilter = Filter.createANDFilter(searchFilter, activeFilter);
         }
 
-        log.info("GluuAttributes final searchFilter:{}", searchFilter);
+        log.info("JansAttributes final searchFilter:{}", searchFilter);
 
-        return persistenceEntryManager.findPagedEntries(getDnForAttribute(null), GluuAttribute.class, searchFilter,
+        return persistenceEntryManager.findPagedEntries(getDnForAttribute(null), JansAttribute.class, searchFilter,
                 null, searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
                 searchRequest.getStartIndex(), searchRequest.getCount(), searchRequest.getMaxCount());
 
     }
 
-    public GluuAttribute getAttributeUsingDn(String dn) {
-        GluuAttribute result = null;
+    public JansAttribute getAttributeUsingDn(String dn) {
+        JansAttribute result = null;
         try {
-            result = persistenceEntryManager.find(GluuAttribute.class, dn);
+            result = persistenceEntryManager.find(JansAttribute.class, dn);
         } catch (Exception ex) {
             log.error("Failed to load attribute with dn:{}, ex:{}", dn, ex);
         }
         return result;
     }
 
-    public GluuAttribute getAttributeUsingName(String claimName) {
-        GluuAttribute gluuAttribute = null;
+    public JansAttribute getAttributeUsingName(String claimName) {
+        JansAttribute jansAttribute = null;
         try {
-            gluuAttribute = getByClaimName(claimName);
+            jansAttribute = getByClaimName(claimName);
         } catch (Exception ex) {
             log.error("Failed to load attribute with name:{}, ex:{}", claimName, ex);
         }
-        return gluuAttribute;
+        return jansAttribute;
     }
 
 }

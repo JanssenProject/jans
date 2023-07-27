@@ -27,7 +27,7 @@ import io.jans.scim.service.antlr.scimFilter.antlr4.ScimFilterBaseListener;
 import io.jans.scim.service.antlr.scimFilter.antlr4.ScimFilterLexer;
 import io.jans.scim.service.antlr.scimFilter.antlr4.ScimFilterParser;
 import io.jans.scim.service.antlr.scimFilter.util.FilterUtil;
-import io.jans.model.GluuAttribute;
+import io.jans.model.JansAttribute;
 import io.jans.orm.model.PersistenceConfiguration;
 import io.jans.orm.search.filter.Filter;
 import io.jans.orm.service.PersistanceFactoryService;
@@ -109,8 +109,8 @@ public class ScimFilterParserService {
             if (StringUtils.isEmpty(filter))
                 ldapFilter=defaultFilter;
             else {
-            	List<GluuAttribute> allAttributes = attrService.getAllAttributes();
-            	Map<String, GluuAttribute> allAttributesMap = buildAttributesMap(allAttributes);
+            	List<JansAttribute> allAttributes = attrService.getAllAttributes();
+            	Map<String, JansAttribute> allAttributesMap = buildAttributesMap(allAttributes);
                 FilterListener filterListener = new FilterListener(clazz, allAttributesMap, ldapBackend);
                 walkTree(FilterUtil.preprocess(filter, clazz), filterListener);
                 ldapFilter = filterListener.getFilter();
@@ -127,9 +127,9 @@ public class ScimFilterParserService {
 
     }
 
-    private Map<String, GluuAttribute> buildAttributesMap(List<GluuAttribute> attributes) {
-    	Map<String, GluuAttribute> attributesMap = new HashMap<>();
-    	for(GluuAttribute attribute : attributes ) {
+    private Map<String, JansAttribute> buildAttributesMap(List<JansAttribute> attributes) {
+    	Map<String, JansAttribute> attributesMap = new HashMap<>();
+    	for(JansAttribute attribute : attributes ) {
     		attributesMap.put(StringHelper.toLowerCase(attribute.getName()), attribute);
     	}
 

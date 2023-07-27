@@ -4,7 +4,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import io.jans.scim.model.scim2.AttributeDefinition.Type;
-import io.jans.model.GluuAttribute;
+import io.jans.model.JansAttribute;
 import io.jans.orm.search.filter.Filter;
 import io.jans.orm.util.StringHelper;
 import io.jans.scim.model.scim2.BaseScimResource;
@@ -37,10 +37,10 @@ public class FilterListener extends ScimFilterBaseListener {
     private String error;
     private SubFilterGenerator subFilterGenerator;
     private ExtensionService extService;
-    private Map<String, GluuAttribute> attributesMap;
+    private Map<String, JansAttribute> attributesMap;
     private boolean ldapBackend;
 	
-    public FilterListener(Class<? extends BaseScimResource> resourceClass, Map<String, GluuAttribute> attributesMap, boolean ldapBackend) {
+    public FilterListener(Class<? extends BaseScimResource> resourceClass, Map<String, JansAttribute> attributesMap, boolean ldapBackend) {
         filter = new ArrayDeque<>();
         extService = CdiUtil.bean(ExtensionService.class);
         this.resourceClass = resourceClass;
@@ -173,9 +173,9 @@ public class FilterListener extends ScimFilterBaseListener {
  		Boolean multiValued;
 		// Determine attribute multivalued from ou=attributes
 		String dbAttributeLower = StringHelper.toLowerCase(dbAttribute);
-		GluuAttribute gluuAttribute = attributesMap.get(dbAttributeLower);
-		if (gluuAttribute != null) {
-			multiValued = (gluuAttribute.getOxMultiValuedAttribute() != null) && gluuAttribute.getOxMultiValuedAttribute();
+		JansAttribute jansAttribute = attributesMap.get(dbAttributeLower);
+		if (jansAttribute != null) {
+			multiValued = (jansAttribute.getOxMultiValuedAttribute() != null) && jansAttribute.getOxMultiValuedAttribute();
 			return multiValued;
 
 		}

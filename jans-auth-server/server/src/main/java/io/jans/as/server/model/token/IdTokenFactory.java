@@ -31,7 +31,7 @@ import io.jans.as.server.service.external.ExternalDynamicScopeService;
 import io.jans.as.server.service.external.ExternalUpdateTokenService;
 import io.jans.as.server.service.external.context.DynamicScopeExternalContext;
 import io.jans.as.server.service.external.context.ExternalUpdateTokenContext;
-import io.jans.model.GluuAttribute;
+import io.jans.model.JansAttribute;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.custom.script.type.auth.PersonAuthenticationType;
 import jakarta.ejb.Stateless;
@@ -307,12 +307,12 @@ public class IdTokenFactory {
                 JSONObject idTokenObj = claimsObj.getJSONObject("id_token");
                 for (Iterator<String> it = idTokenObj.keys(); it.hasNext(); ) {
                     String claimName = it.next();
-                    GluuAttribute gluuAttribute = attributeService.getByClaimName(claimName);
+                    JansAttribute jansAttribute = attributeService.getByClaimName(claimName);
 
-                    if (gluuAttribute != null) {
-                        String ldapClaimName = gluuAttribute.getName();
+                    if (jansAttribute != null) {
+                        String ldapClaimName = jansAttribute.getName();
 
-                        Object attribute = user.getAttribute(ldapClaimName, false, gluuAttribute.getOxMultiValuedAttribute());
+                        Object attribute = user.getAttribute(ldapClaimName, false, jansAttribute.getOxMultiValuedAttribute());
 
                         if (attribute instanceof List) {
                             jwr.getClaims().setClaim(claimName, (List) attribute);
@@ -349,17 +349,17 @@ public class IdTokenFactory {
 
         for (Claim claim : requestObject.getIdTokenMember().getClaims()) {
             boolean optional = true; // ClaimValueType.OPTIONAL.equals(claim.getClaimValue().getClaimValueType());
-            GluuAttribute gluuAttribute = attributeService.getByClaimName(claim.getName());
+            JansAttribute jansAttribute = attributeService.getByClaimName(claim.getName());
 
-            if (gluuAttribute == null) {
+            if (jansAttribute == null) {
                 continue;
             }
 
             Client client = authorizationGrant.getClient();
 
-            if (validateRequesteClaim(gluuAttribute, client.getClaims(), scopes)) {
-                String ldapClaimName = gluuAttribute.getName();
-                Object attribute = authorizationGrant.getUser().getAttribute(ldapClaimName, optional, gluuAttribute.getOxMultiValuedAttribute());
+            if (validateRequesteClaim(jansAttribute, client.getClaims(), scopes)) {
+                String ldapClaimName = jansAttribute.getName();
+                Object attribute = authorizationGrant.getUser().getAttribute(ldapClaimName, optional, jansAttribute.getOxMultiValuedAttribute());
                 jwr.getClaims().setClaimFromJsonObject(claim.getName(), attribute);
             }
         }
@@ -378,14 +378,14 @@ public class IdTokenFactory {
         return jwrService.encode(jwr, client);
     }
 
-    private boolean validateRequesteClaim(GluuAttribute gluuAttribute, String[] clientAllowedClaims, Collection<String> scopes) {
-        if (gluuAttribute == null) {
+    private boolean validateRequesteClaim(JansAttribute jansAttribute, String[] clientAllowedClaims, Collection<String> scopes) {
+        if (jansAttribute == null) {
             return false;
         }
 
         if (clientAllowedClaims != null) {
             for (String clientAllowedClaim : clientAllowedClaims) {
-                if (gluuAttribute.getDn().equals(clientAllowedClaim)) {
+                if (jansAttribute.getDn().equals(clientAllowedClaim)) {
                     return true;
                 }
             }
@@ -396,7 +396,7 @@ public class IdTokenFactory {
 
             if (scope != null && scope.getClaims() != null) {
                 for (String claimDn : scope.getClaims()) {
-                    if (gluuAttribute.getDisplayName().equals(attributeService.getAttributeByDn(claimDn).getDisplayName())) {
+                    if (jansAttribute.getDisplayName().equals(attributeService.getAttributeByDn(claimDn).getDisplayName())) {
                         return true;
                     }
                 }

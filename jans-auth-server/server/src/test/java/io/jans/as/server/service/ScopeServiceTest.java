@@ -6,7 +6,7 @@ import io.jans.as.common.service.AttributeService;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.persistence.model.Scope;
-import io.jans.model.GluuAttribute;
+import io.jans.model.JansAttribute;
 import io.jans.model.attribute.AttributeDataType;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.service.CacheService;
@@ -110,12 +110,12 @@ public class ScopeServiceTest {
     }
 
     @Test
-    public void getClaims_GluuAttributeClaimNameBlank_EmptyResult() throws Exception {
+    public void getClaims_JansAttributeClaimNameBlank_EmptyResult() throws Exception {
         User user = new User();
         Scope scope = new Scope();
         scope.setClaims(Lists.newArrayList("claim1", "claim2"));
 
-        when(attributeService.getAttributeByDn(anyString())).thenReturn(new GluuAttribute());
+        when(attributeService.getAttributeByDn(anyString())).thenReturn(new JansAttribute());
 
         Map<String, Object> result = scopeService.getClaims(user, scope);
 
@@ -128,14 +128,14 @@ public class ScopeServiceTest {
     }
 
     @Test
-    public void getClaims_GluuAttributeLdapNameBlank_EmptyResult() throws Exception {
+    public void getClaims_JansAttributeLdapNameBlank_EmptyResult() throws Exception {
         User user = new User();
         Scope scope = new Scope();
         scope.setClaims(Lists.newArrayList("claim1", "claim2"));
 
-        GluuAttribute gluuAttribute = new GluuAttribute();
-        gluuAttribute.setClaimName("CLAIM_NAME");
-        when(attributeService.getAttributeByDn(anyString())).thenReturn(gluuAttribute);
+        JansAttribute jansAttribute = new JansAttribute();
+        jansAttribute.setClaimName("CLAIM_NAME");
+        when(attributeService.getAttributeByDn(anyString())).thenReturn(jansAttribute);
 
         Map<String, Object> result = scopeService.getClaims(user, scope);
 
@@ -157,7 +157,7 @@ public class ScopeServiceTest {
         Scope scope = new Scope();
         scope.setClaims(Lists.newArrayList("uid", "updatedAt", "createdAt", "emailVerified", "lastLogon", "metadata"));
 
-        mockRegularGluuAttributesMapping();
+        mockRegularJansAttributesMapping();
         when(entryManager.decodeTime(anyString(), anyString())).thenReturn(createdAndUpdatedAt);
 
         Map<String, Object> result = scopeService.getClaims(user, scope);
@@ -188,7 +188,7 @@ public class ScopeServiceTest {
         Scope scope = new Scope();
         scope.setClaims(Lists.newArrayList("uid", "updatedAt", "createdAt", "emailVerified", "lastLogon", "metadata"));
 
-        mockRegularGluuAttributesMapping();
+        mockRegularJansAttributesMapping();
         when(entryManager.decodeTime(anyString(), anyString())).thenReturn(lastLogon);
 
         Map<String, Object> result = scopeService.getClaims(user, scope);
@@ -218,7 +218,7 @@ public class ScopeServiceTest {
         scope.setClaims(Lists.newArrayList("uid", "updatedAt", "createdAt", "emailVerified", "lastLogon",
                 "metadata", "tmp"));
 
-        mockRegularGluuAttributesMapping();
+        mockRegularJansAttributesMapping();
         when(entryManager.decodeTime(anyString(), anyString())).thenReturn(createdAndUpdatedAt);
 
         Map<String, Object> result = scopeService.getClaims(user, scope);
@@ -237,29 +237,29 @@ public class ScopeServiceTest {
         verifyNoMoreInteractions(attributeService);
     }
 
-    private void mockRegularGluuAttributesMapping() {
-        GluuAttribute attributeUid = new GluuAttribute();
+    private void mockRegularJansAttributesMapping() {
+        JansAttribute attributeUid = new JansAttribute();
         attributeUid.setName("uid");
         attributeUid.setClaimName("uid");
-        GluuAttribute attributeUpdatedAt = new GluuAttribute();
+        JansAttribute attributeUpdatedAt = new JansAttribute();
         attributeUpdatedAt.setName("updatedAt");
         attributeUpdatedAt.setClaimName("updated_at");
-        GluuAttribute attributeCreatedAt = new GluuAttribute();
+        JansAttribute attributeCreatedAt = new JansAttribute();
         attributeCreatedAt.setName("createdAt");
         attributeCreatedAt.setClaimName("created_at");
-        GluuAttribute attributeBoolean = new GluuAttribute();
+        JansAttribute attributeBoolean = new JansAttribute();
         attributeBoolean.setDataType(AttributeDataType.BOOLEAN);
         attributeBoolean.setName("emailVerified");
         attributeBoolean.setClaimName("email_verified");
-        GluuAttribute attributeDate = new GluuAttribute();
+        JansAttribute attributeDate = new JansAttribute();
         attributeDate.setDataType(AttributeDataType.DATE);
         attributeDate.setName("lastLogon");
         attributeDate.setClaimName("last_logon");
-        GluuAttribute attributeJson = new GluuAttribute();
+        JansAttribute attributeJson = new JansAttribute();
         attributeJson.setDataType(AttributeDataType.JSON);
         attributeJson.setName("metadata");
         attributeJson.setClaimName("metadata");
-        GluuAttribute attributeTmp = new GluuAttribute();
+        JansAttribute attributeTmp = new JansAttribute();
         attributeTmp.setDataType(AttributeDataType.STRING);
         attributeTmp.setName("tmp");
         attributeTmp.setClaimName("tmp");

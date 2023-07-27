@@ -30,7 +30,7 @@ import java.util.Arrays;
  */
 @DataEntry(sortBy = { "displayName" })
 @ObjectClass(value = "jansAttr")
-public class GluuAttribute extends Entry implements Serializable {
+public class JansAttribute extends Entry implements Serializable {
 
 	private static final long serialVersionUID = 4817004894646725606L;
 
@@ -394,10 +394,10 @@ public class GluuAttribute extends Entry implements Serializable {
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	public boolean equals(Object obj) {
-		if (!(obj instanceof GluuAttribute)) {
+		if (!(obj instanceof JansAttribute)) {
 			return false;
 		}
-		GluuAttribute other = (GluuAttribute) obj;
+		JansAttribute other = (JansAttribute) obj;
 		if (inum == null) {
 			if (other.inum != null)
 				return false;

@@ -23,7 +23,7 @@ import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.util.AttributeNames;
 import io.jans.configapi.util.AuthUtil;
-import io.jans.model.GluuAttribute;
+import io.jans.model.JansAttribute;
 import io.jans.configapi.core.util.Jackson;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
@@ -412,15 +412,15 @@ public class ClientsResource extends ConfigBaseResource {
 
         for (String claim : claims) {
             logger.debug("Is claim:{} valid-DN?:{}", claim, authUtil.isValidDn(claim));
-            GluuAttribute gluuAttribute = null;
+            JansAttribute jansAttribute = null;
             if (authUtil.isValidDn(claim)) {
-                gluuAttribute = attributeService.getAttributeUsingDn(claim);
+                jansAttribute = attributeService.getAttributeUsingDn(claim);
             } else {
-                gluuAttribute = attributeService.getAttributeUsingName(claim);
+                jansAttribute = attributeService.getAttributeUsingName(claim);
             }
-            logger.debug("Attribute from DB - {}'", gluuAttribute);
-            if (gluuAttribute != null) {
-                validClaims.add(gluuAttribute.getDn());
+            logger.debug("Attribute from DB - {}'", jansAttribute);
+            if (jansAttribute != null) {
+                validClaims.add(jansAttribute.getDn());
             } else {
                 invalidClaims.add(claim);
             }
