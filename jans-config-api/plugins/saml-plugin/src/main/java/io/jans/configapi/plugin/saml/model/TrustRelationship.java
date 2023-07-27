@@ -95,24 +95,7 @@ public class TrustRelationship extends Entry implements Serializable {
     @AttributeName(name = "jansRegistrationAccessTkn")
     private String registrationAccessToken;
 
-    /**
-     * Valid URI pattern a browser can redirect to after a successful login. Simple
-     * wildcards are allowed such as 'http://example.com/*'. Relative path can be
-     * specified too such as /my/relative/path/*. Relative paths are relative to the
-     * client root URL, or if none is specified the auth server root URL is used.
-     * For SAML, you must set valid URI patterns if you are relying on the consumer
-     * service URL embedded with the login request.
-     */
-    @AttributeName(name = "jansRedirectURI")
-    private List<String> redirectUris;
-
-    @AttributeName(name = "jansWebOrigins")
-    private List<String> webOrigins;
-
     private Boolean consentRequired;
-
-    @AttributeName(name = "jansSAMLMetaDataFilter")
-    private List<String> jansSAMLMetaDataFilter;
 
     /**
      * Trust Relationship SP metadata type - file, URI, federation
@@ -133,16 +116,8 @@ public class TrustRelationship extends Entry implements Serializable {
     @AttributeName(name = "jansMetaLocation")
     private String metaLocation;
 
-    private Boolean jansIsFed;
-
     @AttributeName(name = "jansEntityId")
     private List<String> jansEntityId;
-
-    @AttributeName(name = "jansEntityTyp")
-    private EntityType entityType;
-
-    @AttributeName(name = "jansProfileConf")
-    private List<String> jansProfileConf;
 
     @AttributeName(name = "jansReleasedAttr")
     private List<String> releasedAttributes;
@@ -155,9 +130,6 @@ public class TrustRelationship extends Entry implements Serializable {
     @AttributeName(name = "jansPostLogoutRedirectURI")
     private String spLogoutURL;
 
-    @AttributeName
-    private String protocol;
-
     @AttributeName(name = "jansStatus")
     private GluuStatus status;
 
@@ -168,7 +140,7 @@ public class TrustRelationship extends Entry implements Serializable {
     private List<String> validationLog;
 
     private Map<String, ProfileConfiguration> profileConfigurations = new HashMap<String, ProfileConfiguration>();
-
+    
     public String getInum() {
         return inum;
     }
@@ -281,36 +253,12 @@ public class TrustRelationship extends Entry implements Serializable {
         this.registrationAccessToken = registrationAccessToken;
     }
 
-    public List<String> getRedirectUris() {
-        return redirectUris;
-    }
-
-    public void setRedirectUris(List<String> redirectUris) {
-        this.redirectUris = redirectUris;
-    }
-
-    public List<String> getWebOrigins() {
-        return webOrigins;
-    }
-
-    public void setWebOrigins(List<String> webOrigins) {
-        this.webOrigins = webOrigins;
-    }
-
     public Boolean getConsentRequired() {
         return consentRequired;
     }
 
     public void setConsentRequired(Boolean consentRequired) {
         this.consentRequired = consentRequired;
-    }
-
-    public List<String> getJansSAMLMetaDataFilter() {
-        return jansSAMLMetaDataFilter;
-    }
-
-    public void setJansSAMLMetaDataFilter(List<String> jansSAMLMetaDataFilter) {
-        this.jansSAMLMetaDataFilter = jansSAMLMetaDataFilter;
     }
 
     public MetadataSourceType getSpMetaDataSourceType() {
@@ -345,36 +293,12 @@ public class TrustRelationship extends Entry implements Serializable {
         this.metaLocation = metaLocation;
     }
 
-    public Boolean getJansIsFed() {
-        return jansIsFed;
-    }
-
-    public void setJansIsFed(Boolean jansIsFed) {
-        this.jansIsFed = jansIsFed;
-    }
-
     public List<String> getJansEntityId() {
         return jansEntityId;
     }
 
     public void setJansEntityId(List<String> jansEntityId) {
         this.jansEntityId = jansEntityId;
-    }
-
-    public EntityType getEntityType() {
-        return entityType;
-    }
-
-    public void setEntityType(EntityType entityType) {
-        this.entityType = entityType;
-    }
-
-    public List<String> getJansProfileConf() {
-        return jansProfileConf;
-    }
-
-    public void setJansProfileConf(List<String> jansProfileConf) {
-        this.jansProfileConf = jansProfileConf;
     }
 
     public List<String> getReleasedAttributes() {
@@ -399,14 +323,6 @@ public class TrustRelationship extends Entry implements Serializable {
 
     public void setSpLogoutURL(String spLogoutURL) {
         this.spLogoutURL = spLogoutURL;
-    }
-
-    public String getProtocol() {
-        return protocol;
-    }
-
-    public void setProtocol(String protocol) {
-        this.protocol = protocol;
     }
 
     public GluuStatus getStatus() {
@@ -452,6 +368,7 @@ public class TrustRelationship extends Entry implements Serializable {
     public static void sortByDataSourceType(List<TrustRelationship> trustRelationships) {
         Collections.sort(trustRelationships, new SortByDatasourceTypeComparator());
     }
+    
 
     @Override
     public String toString() {
@@ -460,16 +377,12 @@ public class TrustRelationship extends Entry implements Serializable {
                 + ", baseUrl=" + baseUrl + ", surrogateAuthRequired=" + surrogateAuthRequired + ", enabled=" + enabled
                 + ", alwaysDisplayInConsole=" + alwaysDisplayInConsole + ", clientAuthenticatorType="
                 + clientAuthenticatorType + ", secret=" + secret + ", registrationAccessToken="
-                + registrationAccessToken + ", redirectUris=" + redirectUris + ", webOrigins=" + webOrigins
-                + ", consentRequired=" + consentRequired + ", jansSAMLMetaDataFilter=" + jansSAMLMetaDataFilter
-                + ", spMetaDataSourceType=" + spMetaDataSourceType + ", spMetaDataFN=" + spMetaDataFN
-                + ", spMetaDataURL=" + spMetaDataURL + ", metaLocation=" + metaLocation + ", jansIsFed=" + jansIsFed
-                + ", jansEntityId=" + jansEntityId + ", entityType=" + entityType + ", jansProfileConf="
-                + jansProfileConf + ", releasedAttributes=" + releasedAttributes + ", url=" + url + ", spLogoutURL="
-                + spLogoutURL + ", protocol=" + protocol + ", status=" + status + ", validationStatus="
-                + validationStatus + ", validationLog=" + validationLog + ", profileConfigurations="
-                + profileConfigurations + "]";
-    }   
-    
+                + registrationAccessToken + ", consentRequired=" + consentRequired + ", spMetaDataSourceType="
+                + spMetaDataSourceType + ", spMetaDataFN=" + spMetaDataFN + ", spMetaDataURL=" + spMetaDataURL
+                + ", metaLocation=" + metaLocation + ", jansEntityId=" + jansEntityId + ", releasedAttributes="
+                + releasedAttributes + ", url=" + url + ", spLogoutURL=" + spLogoutURL + ", status=" + status
+                + ", validationStatus=" + validationStatus + ", validationLog=" + validationLog
+                + ", profileConfigurations=" + profileConfigurations + "]";
+    }
     
 }

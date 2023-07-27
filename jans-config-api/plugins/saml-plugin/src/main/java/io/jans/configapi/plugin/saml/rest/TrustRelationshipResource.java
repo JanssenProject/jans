@@ -30,8 +30,6 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.util.*;
 
-
-
 import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 import org.slf4j.Logger;
 
@@ -83,31 +81,6 @@ public class TrustRelationshipResource extends BaseResource {
         logger.info("TrustRelationship found by id:{}, trustRelationship:{}", id, trustRelationship);
 
         return Response.ok(trustRelationship).build();
-    }
-
-    @Operation(summary = "Create Trust Relationship without File", description = "Create Trust Relationship without File", operationId = "post-trust-relationship", tags = {
-            "SAML - Trust Relationship" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    Constants.SAML_WRITE_ACCESS }))
-    @RequestBody(description = "Trust Relationship object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TrustRelationship.class), examples = @ExampleObject(name = "Request example", value = "example/trust-relationship/trust-relationship-post.json")))
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Trust Relationship ", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = TrustRelationship.class))),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "500", description = "InternalServerError") })
-    @ProtectedApi(scopes = { Constants.SAML_WRITE_ACCESS }, groupScopes = {}, superScopes = {
-            Constants.SAML_WRITE_ACCESS })
-    @POST
-    public Response createTrustRelationship(@Valid TrustRelationship trustRelationship) throws IOException {
-        logger.info(" Create trustRelationship:{}", trustRelationship);
-        checkResourceNotNull(trustRelationship, SAML_TRUST_RELATIONSHIP);
-        checkNotNull(trustRelationship.getClientId(), AttributeNames.NAME);
-        // TO-DO validation of TrustRelationship
-        String inum = samlService.generateInumForNewRelationship();
-        trustRelationship.setInum(inum);
-        trustRelationship.setDn(samlService.getDnForTrustRelationship(inum));
-        trustRelationship = samlService.addTrustRelationship(trustRelationship, null);
-
-        logger.info("Create created by TrustRelationship:{}", trustRelationship);
-        return Response.status(Response.Status.CREATED).entity(trustRelationship).build();
     }
 
     @Operation(summary = "Create Trust Relationship with Metadata File", description = "Create Trust Relationship with Metadata File", operationId = "post-trust-relationship-metadata-file", tags = {
@@ -174,8 +147,7 @@ public class TrustRelationshipResource extends BaseResource {
     @Operation(summary = "Delete TrustRelationship", description = "Delete TrustRelationship", operationId = "put-trust-relationship", tags = {
             "SAML - Trust Relationship" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.SAML_WRITE_ACCESS }))
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "No Content"),
+    @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "No Content"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @Path(Constants.ID_PATH_PARAM)

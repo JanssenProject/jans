@@ -7450,29 +7450,19 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        whitePagesCanView:
-          type: boolean
-<<<<<<< HEAD
-        userCanEdit:
-          type: boolean
         adminCanAccess:
-=======
+          type: boolean
+        userCanAccess:
+          type: boolean
         userCanView:
->>>>>>> 5be02780d2b68806499e4266d851163277337f10
           type: boolean
         adminCanEdit:
+          type: boolean
+        userCanEdit:
           type: boolean
         adminCanView:
           type: boolean
-<<<<<<< HEAD
-        adminCanEdit:
-=======
-        userCanAccess:
->>>>>>> 5be02780d2b68806499e4266d851163277337f10
-          type: boolean
-        userCanView:
-          type: boolean
-        adminCanAccess:
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -9206,14 +9196,14 @@ components:
           type: boolean
         internal:
           type: boolean
-        locationPath:
-          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
+        locationPath:
+          type: string
         baseDn:
           type: string
     ScriptError:
