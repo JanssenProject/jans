@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.2](https://github.com/JanssenProject/terraform-provider-jans/compare/v0.7.1...v0.7.2) (2023-07-27)
+
+
+### Bug Fixes
+
+* update README 
+
 ## [0.7.1](https://github.com/JanssenProject/terraform-provider-jans/compare/v0.7.0...v0.7.1) (2023-06-05)
 
 
