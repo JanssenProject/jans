@@ -214,7 +214,7 @@ public class CacheRefreshTimer {
 			return false;
 		}
 
-		long poolingInterval = StringHelper.toInteger(currentConfiguration.getPollingInterval()) * 60 * 1000;
+		long poolingInterval = StringHelper.toInteger(currentConfiguration.getPollingInterval());
 		if (poolingInterval < 0) {
 			return false;
 		}
@@ -263,6 +263,7 @@ public class CacheRefreshTimer {
 		}
 
 		long timeDiffrence = System.currentTimeMillis() - this.lastFinishedTime;
+		timeDiffrence = timeDiffrence/1000;
 
 		return timeDiffrence >= poolingInterval;
 	}
