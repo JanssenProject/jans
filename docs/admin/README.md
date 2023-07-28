@@ -52,6 +52,9 @@ configuration tools to write Janssen software configuration to the database.
 * **Script Catalog** Examples of doing useful stuff with the various Janssen
 interception scripts.
 
+* **User Management** How to use `jans-link` and other available tools for 
+user management
+
 ---
 
 !!! Contribute
