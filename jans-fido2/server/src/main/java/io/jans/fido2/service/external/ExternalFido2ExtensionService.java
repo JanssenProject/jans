@@ -16,9 +16,9 @@ import jakarta.ws.rs.WebApplicationException;
  */
 @ApplicationScoped
 @DependsOn("appInitializer")
-public class ExternalFido2Service extends ExternalScriptService {
+public class ExternalFido2ExtensionService extends ExternalScriptService {
 
-    public ExternalFido2Service() {
+    public ExternalFido2ExtensionService() {
         super(CustomScriptType.FIDO2_EXTENSION);
     }
 

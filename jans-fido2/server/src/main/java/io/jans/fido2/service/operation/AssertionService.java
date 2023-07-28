@@ -19,7 +19,7 @@ import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.ChallengeGenerator;
 import io.jans.fido2.service.DataMapperService;
-import io.jans.fido2.service.external.ExternalFido2Service;
+import io.jans.fido2.service.external.ExternalFido2ExtensionService;
 import io.jans.fido2.service.external.context.ExternalFido2Context;
 import io.jans.fido2.service.persist.AuthenticationPersistenceService;
 import io.jans.fido2.service.persist.RegistrationPersistenceService;
@@ -94,7 +94,7 @@ public class AssertionService {
 
 
     @Inject
-    private ExternalFido2Service externalFido2InterceptionService;
+    private ExternalFido2ExtensionService externalFido2InterceptionService;
 
     @Inject
     private Base64Service base64Service;
