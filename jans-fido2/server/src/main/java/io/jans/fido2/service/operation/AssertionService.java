@@ -19,8 +19,8 @@ import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.ChallengeGenerator;
 import io.jans.fido2.service.DataMapperService;
-import io.jans.fido2.service.external.ExternalFido2InterceptionService;
-import io.jans.fido2.service.external.context.ExternalFido2InterceptionContext;
+import io.jans.fido2.service.external.ExternalFido2Service;
+import io.jans.fido2.service.external.context.ExternalFido2Context;
 import io.jans.fido2.service.persist.AuthenticationPersistenceService;
 import io.jans.fido2.service.persist.RegistrationPersistenceService;
 import io.jans.fido2.service.persist.UserSessionIdService;
@@ -94,7 +94,7 @@ public class AssertionService {
 
 
     @Inject
-    private ExternalFido2InterceptionService externalFido2InterceptionService;
+    private ExternalFido2Service externalFido2InterceptionService;
 
     @Inject
     private Base64Service base64Service;
@@ -112,8 +112,8 @@ public class AssertionService {
         log.debug("Assertion options {}", params);
 
         // Apply external custom scripts
-        ExternalFido2InterceptionContext externalFido2InterceptionContext = new ExternalFido2InterceptionContext(params, httpRequest, httpResponse);
-        boolean externalInterceptContext = externalFido2InterceptionService.interceptAuthenticateAssertion(params, externalFido2InterceptionContext);
+        ExternalFido2Context externalFido2InterceptionContext = new ExternalFido2Context(params, httpRequest, httpResponse);
+        boolean externalInterceptContext = externalFido2InterceptionService.authenticateAssertionStart(params, externalFido2InterceptionContext);
 
         boolean superGluu = commonVerifiers.hasSuperGluu(params);
         boolean oneStep = commonVerifiers.isSuperGluuOneStepMode(params);
@@ -217,6 +217,9 @@ public class AssertionService {
 
 		authenticationPersistenceService.save(authenticationEntity);
 
+		externalFido2InterceptionContext.addToContext(null, authenticationEntity);
+		externalFido2InterceptionService.authenticateAssertionFinish(params, externalFido2InterceptionContext);
+
 		return optionsResponseNode;
 	}
 
@@ -224,8 +227,8 @@ public class AssertionService {
 		log.debug("authenticateResponse {}", params);
 
         // Apply external custom scripts
-        ExternalFido2InterceptionContext externalFido2InterceptionContext = new ExternalFido2InterceptionContext(params, httpRequest, httpResponse);
-        boolean externalInterceptContext = externalFido2InterceptionService.interceptVerifyAssertion(params, externalFido2InterceptionContext);
+        ExternalFido2Context externalFido2InterceptionContext = new ExternalFido2Context(params, httpRequest, httpResponse);
+        boolean externalInterceptContext = externalFido2InterceptionService.verifyAssertionStart(params, externalFido2InterceptionContext);
 
         boolean superGluu = commonVerifiers.hasSuperGluu(params);
         boolean oneStep = commonVerifiers.isSuperGluuOneStepMode(params);
@@ -321,6 +324,9 @@ public class AssertionService {
 
 		finishResponseNode.put("status", "ok");
 		finishResponseNode.put("errorMessage", "");
+
+		externalFido2InterceptionContext.addToContext(registrationEntry, authenticationEntity);
+		externalFido2InterceptionService.verifyAssertionFinish(finishResponseNode, externalFido2InterceptionContext);
 
 		return finishResponseNode;
 	}
