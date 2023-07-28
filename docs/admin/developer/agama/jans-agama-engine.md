@@ -40,9 +40,15 @@ Things to highlight:
 
 ## Authentication and `Finish`
 
-When a top-level flow (i.e. one with no parents) finishes successfully, the selection of the user to authenticate is driven by the `userId` passed in `data`, as in `Finish { success: true, data: { userId: "john_doe", ... } }`.
+When a top-level flow (i.e. one with no parents) finishes successfully, the selection of the user to authenticate is driven by the `userId` passed in `data`, as in
 
-By default `userId` maps to the `uid` attribute that generally all user entries already have in the database of Jans Server, in other words, the "user name". This attribute is configurable though via property `finish_userid_db_attribute` of the [bridge script](./engine-bridge-config.md#bridge-configuration). In some cases, you would like to change that to `mail` in order to do things like `Finish { success: true, data: { userId: "john_doe@jd.me" } }` for instance. 
+```
+obj = { success: true, data: { userId: "john_doe" } }
+// map literals cannot be passed directly to Finish - a variable can be used instead
+Finish obj 
+```
+
+By default `userId` maps to the `uid` attribute that generally all user entries already have in the database of Jans Server, in other words, the "user name". This attribute is configurable though via property `finish_userid_db_attribute` of the [bridge script](./engine-bridge-config.md#bridge-configuration). In some cases, you would like to change that to `mail` in order to pass things like `{ success: true, data: { userId: "john_doe@jd.me" } }` for instance. 
 
 !!! Important
     If the database lookup does not produce exactly one user entry, this is treated as a failed authentication attempt by the authentication server.
