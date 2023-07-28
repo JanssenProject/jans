@@ -8758,7 +8758,7 @@ nav:
       - admin/usermgmt/README.md
       - Using SCIM: admin/usermgmt/usermgmt-scim.md
       - Using CLI/TUI: admin/usermgmt/usermgmt-cli-tui.md
-      - Cache Refresh: admin/usermgmt/usermgmt-cache-refresh.md
+      - Using jans-link: admin/usermgmt/usermgmt-jans-link.md
 - Contribute:
   - Contribution Guidelines: CONTRIBUTING.md
   - Code of Conduct: CODE_OF_CONDUCT.md
