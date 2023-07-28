@@ -221,6 +221,7 @@ public class AppInitializer {
         supportedCustomScriptTypes.remove(CustomScriptType.SCIM);
         supportedCustomScriptTypes.remove(CustomScriptType.IDP);
         supportedCustomScriptTypes.remove(CustomScriptType.CONFIG_API);
+        supportedCustomScriptTypes.remove(CustomScriptType.FIDO2_EXTENSION);
 
         statService.init();
 
