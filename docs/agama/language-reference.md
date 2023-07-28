@@ -406,7 +406,8 @@ Finish it.nonsense
 
 **Notes:**
 
-- Any statements found after `Finish` is not reached and thus, not executed
+- Unless otherwise stated by the concrete engine implementation, a _map_ literal should not be passed directly as argument. This means the following is illegal: `Finish { success: false, error: "spacetime singularity" }`. The examples above list several syntactically valid usages
+- Any statement found after `Finish` is not reached and thus, not executed
 - If no `Finish` statement is found in a flow's execution, this will degenerate in flow [crash](./execution-rules.md#crashed-flows)
 - When a flow is finished and was used as [subflow](#subflows) (part of the execution of a bigger parent flow), the parent does not terminate. Execution continues at the following instruction that triggered the subflow. More on `Trigger` later
 - Using `data` in the `Finish` directive is an effective way to communicate information to callers (parent flows)
