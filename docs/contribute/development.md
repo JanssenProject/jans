@@ -195,4 +195,38 @@ level:
   mvn -Dcfg=janssen2.op.io test
   ```
 
-#### Configuring the jans-config-cli module
+#### Configuring the jans-core module
+
+This module does not require a profile setup. It can be built with below maven
+command.
+
+```shell
+mvn clean compile install
+```
+
+#### Configuring the jans-link module
+
+This module does not require a profile setup. It can be built with below maven
+command.
+
+```shell
+mvn clean compile install
+```
+
+#### Configuring the jans-orm module
+
+This module does not require a profile setup. It can be built with below maven
+command.
+
+```shell
+mvn clean compile install
+```
+
+#### Configuring the agama module
+
+This module does not require a profile setup. It can be built with below maven
+command.
+
+```shell
+mvn clean compile install
+```
