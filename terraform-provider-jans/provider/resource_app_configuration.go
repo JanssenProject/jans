@@ -1916,7 +1916,6 @@ func resourceAppConfiguration() *schema.Resource {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Description: "Demonstration of Proof-of-Possession (DPoP) nonce usage.",
-				Default:     3600,
 			},
 			"dpop_nonce_cache_time": {
 				Type:        schema.TypeInt,
