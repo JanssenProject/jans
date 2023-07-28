@@ -751,7 +751,7 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/head/admin/developer/scripts/fido2-interception/</loc>
+         <loc>https://jans.io/docs/head/admin/developer/scripts/fido2-extension/</loc>
          <lastmod>2023-07-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
@@ -2216,7 +2216,7 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/head/script-catalog/fido2_interception/</loc>
+         <loc>https://jans.io/docs/head/script-catalog/fido2_extension/</loc>
          <lastmod>2023-07-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
