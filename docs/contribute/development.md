@@ -149,9 +149,12 @@ Get Janssen server code from [Janssen GitHub repository](https://github.com/Jans
 Janssen Server is composed of multiple modules. Each module has its own set of tests.
 Below are the instructions for configuring each module for tests.
 
-#### Configuring the server and the client modules
+#### Configuring the jans-auth-server module
 
-##### Profile setup
+Configuring `jans-auth-server` module involves setting up profiles for `client`,
+`server` and `agama` sub-modules.
+
+##### Profile setup for client and server modules
 
 Many Janssen Server modules and sub-modules use test configuration stored in a directory named `profile`. The profile
 directory contains files that hold important information required to run tests. Developers can create one or more
@@ -170,7 +173,7 @@ setting up a profile for the server module.
 3. Copy keystore file `/client/profiles/default/client_keystore.p12` from `default` directory to
    the `janssen2.op.io` directory
 
-#### Configuring the Agama Module
+##### Profile setup for agama sub-module
 
 Agama module code resides under `jans/agama` directory.
 
@@ -182,7 +185,7 @@ Follow the steps below from `agama` directory to configure the module to run the
 Once the above steps have been followed, the local copy of `jans-auth` directory that was copied
 from `janssen2.op.io` can be deleted.
 
-### Running The Tests
+##### Running The Tests
 
 Each module in Janssen Server has its tests that have to be executed separately.
 For example, to run integration tests for `jans-auth-server` module, run the following maven command at the directory
@@ -191,3 +194,5 @@ level:
   ```
   mvn -Dcfg=janssen2.op.io test
   ```
+
+#### Configuring the jans-config-cli module
