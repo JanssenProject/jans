@@ -127,7 +127,7 @@ public class AppInitializer {
 				.initPythonInterpreter(configurationFactory.getBaseConfiguration().getString("pythonModulesDir", null));
 
 		// Initialize script manager
-		List<CustomScriptType> supportedCustomScriptTypes = Lists.newArrayList(CustomScriptType.FIDO2_INTERCEPTION);
+		List<CustomScriptType> supportedCustomScriptTypes = Lists.newArrayList(CustomScriptType.FIDO2_EXTENSION);
 
 		// Start timer
 		initSchedulerService();

@@ -40,7 +40,7 @@ calling external APIs
 1. Resource Owner Password Credentials
 1. UMA 2 RPT Authorization Policies
 1. UMA 2 Claims-Gathering
-1. [Fido2 Interception](./scripts/fido2-interception.md) : Interception of attestation and assertion endpoints.
+1. [Fido2 Extension](./scripts/fido2-extension.md) : Extension of attestation and assertion endpoints.
 
 ## Implementation languages - Jython or pure Java
 
