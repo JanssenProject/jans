@@ -21,8 +21,8 @@ import io.jans.fido2.model.conf.RequestedParty;
 import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.ChallengeGenerator;
 import io.jans.fido2.service.DataMapperService;
-import io.jans.fido2.service.external.ExternalFido2InterceptionService;
-import io.jans.fido2.service.external.context.ExternalFido2InterceptionContext;
+import io.jans.fido2.service.external.ExternalFido2Service;
+import io.jans.fido2.service.external.context.ExternalFido2Context;
 import io.jans.fido2.service.persist.RegistrationPersistenceService;
 import io.jans.fido2.service.persist.UserSessionIdService;
 import io.jans.fido2.service.verifier.AttestationVerifier;
@@ -83,7 +83,7 @@ public class AttestationService {
 	private Base64Service base64Service;
 
     @Inject
-    private ExternalFido2InterceptionService externalFido2InterceptionService;
+    private ExternalFido2Service externalFido2InterceptionService;
 
 	@Context
 	private HttpServletRequest httpRequest;
@@ -100,8 +100,8 @@ public class AttestationService {
         log.debug("Attestation options {}", params);
 
         // Apply external custom scripts
-        ExternalFido2InterceptionContext externalFido2InterceptionContext = new ExternalFido2InterceptionContext(params, httpRequest, httpResponse);
-        boolean externalInterceptContext = externalFido2InterceptionService.interceptRegisterAttestation(params, externalFido2InterceptionContext);
+        ExternalFido2Context externalFido2InterceptionContext = new ExternalFido2Context(params, httpRequest, httpResponse);
+        boolean externalInterceptContext = externalFido2InterceptionService.registerAttestationStart(params, externalFido2InterceptionContext);
 
         // Verify request parameters
         commonVerifiers.verifyAttestationOptions(params);
@@ -202,7 +202,10 @@ public class AttestationService {
 
 		registrationPersistenceService.save(registrationEntry);
 
-		log.debug("Saved in LDAP");
+		log.debug("Saved in DB");
+
+		externalFido2InterceptionContext.addToContext(registrationEntry, null);
+		externalFido2InterceptionService.registerAttestationFinish(params, externalFido2InterceptionContext);
 
 		return optionsResponseNode;
 	}
@@ -211,8 +214,8 @@ public class AttestationService {
 		log.debug("Attestation verify {}", params);
 
         // Apply external custom scripts
-        ExternalFido2InterceptionContext externalFido2InterceptionContext = new ExternalFido2InterceptionContext(params, httpRequest, httpResponse);
-        boolean externalInterceptContext = externalFido2InterceptionService.interceptVerifyAttestation(params, externalFido2InterceptionContext);
+        ExternalFido2Context externalFido2InterceptionContext = new ExternalFido2Context(params, httpRequest, httpResponse);
+        boolean externalInterceptContext = externalFido2InterceptionService.verifyAttestationStart(params, externalFido2InterceptionContext);
 
         boolean superGluu = commonVerifiers.hasSuperGluu(params);
         boolean oneStep = commonVerifiers.isSuperGluuOneStepMode(params);
@@ -319,6 +322,9 @@ public class AttestationService {
 
 		finishResponseNode.put("status", "ok");
 		finishResponseNode.put("errorMessage", "");
+
+		externalFido2InterceptionContext.addToContext(registrationEntry, null);
+		externalFido2InterceptionService.verifyAttestationFinish(params, externalFido2InterceptionContext);
 
 		return finishResponseNode;
 	}
