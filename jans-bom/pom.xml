@@ -726,6 +726,11 @@
 				<artifactId>opensaml-saml-api</artifactId>
 				<version>3.4.6</version>
 			</dependency>
+		    <dependency>
+                <groupId>org.opensaml</groupId>
+                <artifactId>xmltooling</artifactId>
+                <version>1.4.4</version>
+            </dependency>
 			<dependency>
 			    <groupId>org.apache.santuario</groupId>
 			    <artifactId>xmlsec</artifactId>
@@ -959,15 +964,8 @@
             	<groupId>org.apache.james</groupId>
             	<artifactId>apache-mime4j-core</artifactId>
             	<version>${apache.james.version}</version>
-            </dependency>
-            
-            <!-- opensaml -->
-			<dependency>
-				<groupId>org.opensaml</groupId>
-				<artifactId>xmltooling</artifactId>
-				<version>1.4.6</version>
-			</dependency>
-			
+            </dependency>         
+		
 		</dependencies>
 	</dependencyManagement>
 

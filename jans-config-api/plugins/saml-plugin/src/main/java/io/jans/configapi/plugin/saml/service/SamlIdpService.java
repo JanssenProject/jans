@@ -49,7 +49,7 @@ public class SamlIdpService {
 
     @Inject
     private LocalDocumentStoreService localDocumentStoreService;
-    
+
     private Schema samlSchema;
 
     public boolean isLocalDocumentStoreType() {
@@ -58,7 +58,7 @@ public class SamlIdpService {
 
     public String getSpMetadataFilePath(String spMetaDataFN) {
         if (StringUtils.isBlank(getIdpMetadataDir())) {
-            throw new InvalidConfigurationException("Failed to return IDP Metadata file path as undefined!");
+            throw new InvalidConfigurationException("Failed to return IDP metadata file path as undefined!");
         }
 
         String idpMetadataFolder = getIdpMetadataDir();
@@ -67,9 +67,16 @@ public class SamlIdpService {
 
     public String getIdpMetadataDir() {
         if (StringUtils.isBlank(samlConfigService.getSelectedIdpConfigMetadataDir())) {
-            throw new InvalidConfigurationException("Failed to return IDP Metadata file path as undefined!");
+            throw new InvalidConfigurationException("Failed to return IDP metadata file path as undefined!");
         }
         return samlConfigService.getSelectedIdpConfigMetadataDir() + File.separator;
+    }
+
+    public String getSpMetadataFile() {
+        if (StringUtils.isBlank(samlConfigService.getSpMetadataFile())) {
+            throw new InvalidConfigurationException("Failed to return IDP SP metadata file name as undefined!");
+        }
+        return samlConfigService.getSpMetadataFile();
     }
 
     public String getSpNewMetadataFileName(TrustRelationship trustRel) {
@@ -83,7 +90,7 @@ public class SamlIdpService {
 
     public String getIdpMetadataTempDir() {
         if (StringUtils.isBlank(samlConfigService.getSelectedIdpConfigMetadataTempDir())) {
-            throw new InvalidConfigurationException("Failed to return IDP Metadata Temp directory as undefined!");
+            throw new InvalidConfigurationException("Failed to return IDP metadata Temp directory as undefined!");
         }
 
         return samlConfigService.getSelectedIdpConfigMetadataTempDir() + File.separator;
@@ -106,15 +113,15 @@ public class SamlIdpService {
         logger.info("spMetadataFileName:{}, stream:{}", spMetadataFileName, stream);
 
         if (StringUtils.isBlank(samlConfigService.getSelectedIdpConfigRootDir())) {
-            throw new InvalidConfigurationException("Failed to save SP meta-data file due to undefined!");
+            throw new InvalidConfigurationException("Failed to save SP metadata file due to undefined!");
         }
 
         String idpMetadataTempFolder = getIdpMetadataTempDir();
         logger.debug("idpMetadataTempFolder:{}", idpMetadataTempFolder);
-        
+
         String tempFileName = getTempMetadataFilename(idpMetadataTempFolder, spMetadataFileName);
         logger.debug("idpMetadataTempFolder:{}, tempFileName:{}", idpMetadataTempFolder, tempFileName);
-        
+
         String spMetadataFile = idpMetadataTempFolder + tempFileName;
         logger.debug("documentStoreService:{}, spMetadataFile:{}, localDocumentStoreService:{} ", documentStoreService,
                 spMetadataFile, localDocumentStoreService);
@@ -130,14 +137,14 @@ public class SamlIdpService {
                 return tempFileName;
             }
         } catch (Exception ex) {
-            logger.error("Failed to write SP meta-data file '{}'", spMetadataFile, ex);
+            logger.error("Failed to write SP metadata file '{}'", spMetadataFile, ex);
         } finally {
             IOUtils.closeQuietly(stream);
         }
 
         return null;
     }
-    
+
     public GluuErrorHandler validateMetadata(String metadataPath)
             throws ParserConfigurationException, SAXException, IOException, XMLParserException {
         if (samlSchema == null) {
@@ -152,5 +159,14 @@ public class SamlIdpService {
         }
     }
 
+    public boolean renameMetadata(String metadataPath, String destinationMetadataPath) {
+        try {
+            return documentStoreService.renameDocument(metadataPath, destinationMetadataPath);
+        } catch (Exception ex) {
+            logger.error("Failed to rename metadata '{}' to '{}'", metadataPath, destinationMetadataPath, ex);
+        }
+
+        return false;
+    }
 
 }

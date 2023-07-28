@@ -39,6 +39,12 @@
 			<artifactId>jans-core-document-store</artifactId>
 			<version>${jans.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-core-saml</artifactId>
+			<version>${jans.version}</version>
+		</dependency>
+		
 		
 		<!-- Microprofile -->
 		<dependency>
@@ -104,9 +110,9 @@
         
 	    <!-- opensaml -->
 	    <dependency>
-    	    <groupId>org.opensaml</groupId>
-            <artifactId>opensaml-saml-api</artifactId>
-	    </dependency>
+			<groupId>org.opensaml</groupId>
+			<artifactId>opensaml-saml-api</artifactId>
+		</dependency>
 	    <dependency>
 			<groupId>org.opensaml</groupId>
 			<artifactId>xmltooling</artifactId>

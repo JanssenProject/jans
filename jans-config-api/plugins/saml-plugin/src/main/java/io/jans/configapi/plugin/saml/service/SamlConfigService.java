@@ -100,7 +100,7 @@ public class SamlConfigService {
         }
         return spMetadataFilePattern;
     }
-    
+
     public String getSpMetadataFile() {
         final SamlConf samlConf = getSamlConf();
         SamlAppConfiguration samlAppConfiguration = samlConf.getDynamicConf();
@@ -110,7 +110,6 @@ public class SamlConfigService {
         }
         return spMetadataFile;
     }
-
 
     public IdpConfig getSelectedIdpConfig() {
         final SamlConf samlConf = getSamlConf();

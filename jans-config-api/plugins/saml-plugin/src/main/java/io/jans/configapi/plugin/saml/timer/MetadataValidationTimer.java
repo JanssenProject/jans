@@ -6,7 +6,6 @@
 
 package io.jans.configapi.plugin.saml.timer;
 
-
 import io.jans.configapi.plugin.saml.event.MetadataValidationEvent;
 import io.jans.configapi.plugin.saml.model.config.SamlAppConfiguration;
 import io.jans.configapi.plugin.saml.model.TrustRelationship;
@@ -23,8 +22,6 @@ import io.jans.service.timer.schedule.TimerSchedule;
 import io.jans.util.StringHelper;
 import io.jans.xml.GluuErrorHandler;
 
-
-
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
@@ -34,8 +31,6 @@ import jakarta.inject.Named;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -45,7 +40,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.slf4j.Logger;
-
 
 @ApplicationScoped
 @Named
@@ -75,7 +69,6 @@ public class MetadataValidationTimer {
 
     private LinkedBlockingQueue<String> metadataUpdates;
 
-    
     @PostConstruct
     public void init() {
         this.isActive = new AtomicBoolean(true);
@@ -116,10 +109,9 @@ public class MetadataValidationTimer {
         }
     }
 
-    private void procesMetadataValidation() {
+    private void procesMetadataValidation() throws Exception {
         log.debug("Starting metadata validation");
-        boolean result = validateMetadata(samlIdpService.getIdpMetadataTempDir(),
-                samlIdpService.getIdpMetadataDir());
+        boolean result = validateMetadata(samlIdpService.getIdpMetadataTempDir(), samlIdpService.getIdpMetadataDir());
         log.debug("Metadata validation finished with result: '{}'", result);
 
         if (result) {
@@ -145,7 +137,7 @@ public class MetadataValidationTimer {
     }
 
     public String getValidationStatus(String gluuSAMLspMetaDataFN, TrustRelationship trust) {
-        if (trust.getValidationStatus() == null && trust.getGluuContainerFederation() != null) {
+        if (trust.getValidationStatus() == null) {
             return ValidationStatus.SUCCESS.getDisplayName();
         }
         if (trust.getValidationStatus() == null) {
@@ -171,7 +163,7 @@ public class MetadataValidationTimer {
         boolean createConfig = samlAppConfiguration.isConfigGeneration();
         if (createConfig) {
             List<TrustRelationship> trustRelationships = samlService.getAllActiveTrustRelationships();
-            //samlIdpService.generateConfigurationFiles(trustRelationships);
+            // samlIdpService.generateConfigurationFiles(trustRelationships);
 
             log.info("IDP config generation files finished. TR count: '{}'", trustRelationships.size());
         }
@@ -181,7 +173,8 @@ public class MetadataValidationTimer {
      * @param shib3IdpTempmetadataFolder
      * @param shib3IdpMetadataFolder
      */
-    private boolean validateMetadata(String shib3IdpTempmetadataFolder, String shib3IdpMetadataFolder) {
+    private boolean validateMetadata(String shib3IdpTempmetadataFolder, String shib3IdpMetadataFolder)
+            throws Exception {
         boolean result = false;
         log.trace("Starting metadata validation process.");
 
@@ -198,8 +191,8 @@ public class MetadataValidationTimer {
                 String destinationMetadataName = metadataFN.replaceAll(".{4}\\..{4}$", "");
                 String destinationMetadataPath = shib3IdpMetadataFolder + destinationMetadataName;
 
-                TrustRelationship tr = samlService.getTrustByUnpunctuatedInum(
-                        metadataFN.split("-" + samlIdpService.getSpMetadataFile())[0]);
+                TrustRelationship tr = samlService
+                        .getTrustByUnpunctuatedInum(metadataFN.split("-" + samlIdpService.getSpMetadataFile())[0]);
                 if (tr == null) {
                     metadataUpdates.add(metadataFN);
                     return false;
@@ -231,11 +224,12 @@ public class MetadataValidationTimer {
                      * destinationMetadataPath); tr.setStatus(GluuStatus.INACTIVE); } else {
                      * tr.setSpMetaDataFN(destinationMetadataName); }
                      */
-                   // boolean federation = samlIdpService.isFederation(tr);
-                   // tr.setFederation(federation);
+                    // boolean federation = samlIdpService.isFederation(tr);
+                    // tr.setFederation(federation);
                     String metadataFile = samlIdpService.getIdpMetadataDir() + tr.getSpMetaDataFN();
 
-                    //List<String> entityIdList = samlMetadataParser.getEntityIdFromMetadataFile(metadataFile);
+                    // List<String> entityIdList =
+                    // samlMetadataParser.getEntityIdFromMetadataFile(metadataFile);
                     List<String> entityIdList = null;
                     Set<String> entityIdSet = new TreeSet<String>();
                     Set<String> duplicatesSet = new TreeSet<String>();
@@ -259,7 +253,7 @@ public class MetadataValidationTimer {
                                 + Arrays.toString(duplicatesSet.toArray()));
                     }
                     tr.setValidationLog(validationLog);
-                   //tr.setUniqueGluuEntityId(entityIdSet);
+                    // tr.setUniqueGluuEntityId(entityIdSet);
                     tr.setStatus(GluuStatus.ACTIVE);
 
                     samlService.updateTrustRelationship(tr);
@@ -273,8 +267,8 @@ public class MetadataValidationTimer {
                     } else {
                         tr.setSpMetaDataFN(destinationMetadataName);
                     }
-                   // boolean federation = samlIdpService.isFederation(tr);
-                    //tr.setFederation(federation);
+                    // boolean federation = samlIdpService.isFederation(tr);
+                    // tr.setFederation(federation);
                     String metadataFile = samlIdpService.getIdpMetadataDir() + tr.getSpMetaDataFN();
 
                     List<String> entityIdList = samlMetadataParser.getEntityIdFromMetadataFile(metadataFile);
@@ -287,7 +281,7 @@ public class MetadataValidationTimer {
                         }
                     }
 
-                  //  tr.setUniqueGluuEntityId(entityIdSet);
+                    // tr.setUniqueGluuEntityId(entityIdSet);
                     tr.setStatus(GluuStatus.ACTIVE);
                     validationLog = tr.getValidationLog();
                     if (!duplicatesSet.isEmpty()) {

@@ -13,10 +13,14 @@
 			<outputDirectory>/</outputDirectory>
 			<useProjectArtifact>false</useProjectArtifact>
 			<includes>
+				<include>io.jans:jans-core-document-store</include>
+			    <include>io.jans:jans-core-saml</include>
 				<include>org.jboss.resteasy:resteasy-multipart-provider</include>
 				<include>org.apache.james:apache-mime4j-dom</include>
 				<include>org.apache.james:apache-mime4j-storage</include>
 				<include>org.apache.james:apache-mime4j-core</include>
+				<include>org.opensaml:opensaml-saml-api</include>
+				<include>org.opensaml:xmltooling</include>
 			</includes>
 			<scope>runtime</scope>
 		</dependencySet>
