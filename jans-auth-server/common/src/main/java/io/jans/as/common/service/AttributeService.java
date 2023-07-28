@@ -8,7 +8,7 @@ package io.jans.as.common.service;
 
 import io.jans.as.common.util.AttributeConstants;
 import io.jans.as.model.config.StaticConfiguration;
-import io.jans.model.GluuAttribute;
+import io.jans.model.JansAttribute;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.search.filter.Filter;
 import io.jans.service.BaseCacheService;
@@ -36,24 +36,24 @@ public abstract class AttributeService extends io.jans.service.AttributeService 
     private StaticConfiguration staticConfiguration;
 
     /**
-     * returns GluuAttribute by Dn
+     * returns JansAttribute by Dn
      *
-     * @return GluuAttribute
+     * @return JansAttribute
      */
-    public GluuAttribute getAttributeByDn(String dn) {
+    public JansAttribute getAttributeByDn(String dn) {
         BaseCacheService usedCacheService = getCacheService();
 
-        return usedCacheService.getWithPut(dn, () -> persistenceEntryManager.find(GluuAttribute.class, dn), 60);
+        return usedCacheService.getWithPut(dn, () -> persistenceEntryManager.find(JansAttribute.class, dn), 60);
     }
 
-    public GluuAttribute getByLdapName(String name) {
+    public JansAttribute getByLdapName(String name) {
         BaseCacheService usedCacheService = getCacheService();
         return usedCacheService.getWithPut(OxConstants.CACHE_ATTRIBUTE_DB_NAME + "_" + name, () -> {
-            List<GluuAttribute> gluuAttributes = getAttributesByAttribute("jansAttrName", name, staticConfiguration.getBaseDn().getAttributes());
-            if (gluuAttributes.size() > 0) {
-                for (GluuAttribute gluuAttribute : gluuAttributes) {
-                    if (gluuAttribute.getName() != null && gluuAttribute.getName().equals(name)) {
-                        return gluuAttribute;
+            List<JansAttribute> jansAttributes = getAttributesByAttribute("jansAttrName", name, staticConfiguration.getBaseDn().getAttributes());
+            if (jansAttributes.size() > 0) {
+                for (JansAttribute jansAttribute : jansAttributes) {
+                    if (jansAttribute.getName() != null && jansAttribute.getName().equals(name)) {
+                        return jansAttribute;
                     }
                 }
             }
@@ -62,14 +62,14 @@ public abstract class AttributeService extends io.jans.service.AttributeService 
         }, 30);
     }
 
-    public GluuAttribute getByClaimName(String name) {
+    public JansAttribute getByClaimName(String name) {
         BaseCacheService usedCacheService = getCacheService();
         return usedCacheService.getWithPut(OxConstants.CACHE_ATTRIBUTE_CLAIM_NAME + "_" + name, () -> {
-            List<GluuAttribute> gluuAttributes = getAttributesByAttribute("jansClaimName", name, staticConfiguration.getBaseDn().getAttributes());
-            if (gluuAttributes.size() > 0) {
-                for (GluuAttribute gluuAttribute : gluuAttributes) {
-                    if (gluuAttribute.getClaimName() != null && gluuAttribute.getClaimName().equals(name)) {
-                        return gluuAttribute;
+            List<JansAttribute> jansAttributes = getAttributesByAttribute("jansClaimName", name, staticConfiguration.getBaseDn().getAttributes());
+            if (jansAttributes.size() > 0) {
+                for (JansAttribute jansAttribute : jansAttributes) {
+                    if (jansAttribute.getClaimName() != null && jansAttribute.getClaimName().equals(name)) {
+                        return jansAttribute;
                     }
                 }
             }
@@ -89,10 +89,10 @@ public abstract class AttributeService extends io.jans.service.AttributeService 
     }
 
     public boolean containsAttribute(String dn) {
-        return persistenceEntryManager.contains(dn, GluuAttribute.class);
+        return persistenceEntryManager.contains(dn, JansAttribute.class);
     }
 
-    public List<GluuAttribute> getAllAttributes() {
+    public List<JansAttribute> getAllAttributes() {
         return getAllAttributes(staticConfiguration.getBaseDn().getAttributes());
     }
 
@@ -108,9 +108,9 @@ public abstract class AttributeService extends io.jans.service.AttributeService 
         List<String> claims = new ArrayList<String>();
 
         for (String claimName : claimNames) {
-            GluuAttribute gluuAttribute = getByClaimName(claimName);
-            if (gluuAttribute != null) {
-                claims.add(gluuAttribute.getDn());
+            JansAttribute jansAttribute = getByClaimName(claimName);
+            if (jansAttribute != null) {
+                claims.add(jansAttribute.getDn());
             }
         }
         return claims;
@@ -123,7 +123,7 @@ public abstract class AttributeService extends io.jans.service.AttributeService 
         return cacheService;
     }
 
-    public List<GluuAttribute> searchAttributes(String pattern, int sizeLimit) throws Exception {
+    public List<JansAttribute> searchAttributes(String pattern, int sizeLimit) throws Exception {
         String baseDn = getDnForAttribute(null);
 
         String[] targetArray = new String[]{pattern};
@@ -142,26 +142,26 @@ public abstract class AttributeService extends io.jans.service.AttributeService 
             searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter, nameFilter);
         }
 
-        return persistenceEntryManager.findEntries(baseDn, GluuAttribute.class,
+        return persistenceEntryManager.findEntries(baseDn, JansAttribute.class,
                 searchFilter, sizeLimit);
     }
 
-    public List<GluuAttribute> searchAttributes(int sizeLimit) throws Exception {
-        return persistenceEntryManager.findEntries(getDnForAttribute(null), GluuAttribute.class,
+    public List<JansAttribute> searchAttributes(int sizeLimit) throws Exception {
+        return persistenceEntryManager.findEntries(getDnForAttribute(null), JansAttribute.class,
                 null, sizeLimit);
     }
 
-    public List<GluuAttribute> searchAttributes(int sizeLimit, boolean active) throws Exception {
+    public List<JansAttribute> searchAttributes(int sizeLimit, boolean active) throws Exception {
         Filter activeFilter = Filter.createEqualityFilter(AttributeConstants.JANS_STATUS, "active");
         if (!active) {
             activeFilter = Filter.createEqualityFilter(AttributeConstants.JANS_STATUS, "inactive");
         }
-        return persistenceEntryManager.findEntries(getDnForAttribute(null), GluuAttribute.class,
+        return persistenceEntryManager.findEntries(getDnForAttribute(null), JansAttribute.class,
                 activeFilter, sizeLimit);
 
     }
 
-    public List<GluuAttribute> findAttributes(String pattern, int sizeLimit, boolean active) throws Exception {
+    public List<JansAttribute> findAttributes(String pattern, int sizeLimit, boolean active) throws Exception {
         Filter activeFilter = Filter.createEqualityFilter(AttributeConstants.JANS_STATUS, "active");
         if (!active) {
             activeFilter = Filter.createEqualityFilter(AttributeConstants.JANS_STATUS, "inactive");
@@ -171,30 +171,30 @@ public abstract class AttributeService extends io.jans.service.AttributeService 
         Filter descriptionFilter = Filter.createSubstringFilter(AttributeConstants.DESCRIPTION, null, targetArray, null);
         Filter nameFilter = Filter.createSubstringFilter(AttributeConstants.JANS_ATTR_NAME, null, targetArray, null);
         Filter searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter, nameFilter);
-        return persistenceEntryManager.findEntries(getDnForAttribute(null), GluuAttribute.class,
+        return persistenceEntryManager.findEntries(getDnForAttribute(null), JansAttribute.class,
                 Filter.createANDFilter(searchFilter, activeFilter), sizeLimit);
     }
 
-    public GluuAttribute getAttributeByInum(String inum) {
-        GluuAttribute result = null;
+    public JansAttribute getAttributeByInum(String inum) {
+        JansAttribute result = null;
         try {
-            result = persistenceEntryManager.find(GluuAttribute.class, getDnForAttribute(inum));
+            result = persistenceEntryManager.find(JansAttribute.class, getDnForAttribute(inum));
         } catch (Exception ex) {
             logger.error("Failed to load client entry", ex);
         }
         return result;
     }
 
-    public void removeAttribute(GluuAttribute attribute) {
+    public void removeAttribute(JansAttribute attribute) {
         logger.trace("Removing attribute {}", attribute.getDisplayName());
         persistenceEntryManager.remove(attribute);
     }
 
-    public void addAttribute(GluuAttribute attribute) {
+    public void addAttribute(JansAttribute attribute) {
         persistenceEntryManager.persist(attribute);
     }
 
-    public void updateAttribute(GluuAttribute attribute) {
+    public void updateAttribute(JansAttribute attribute) {
         persistenceEntryManager.merge(attribute);
     }
 

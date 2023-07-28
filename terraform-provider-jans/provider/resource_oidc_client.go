@@ -607,6 +607,11 @@ func resourceOidcClient() *schema.Resource {
 							Optional:    true,
 							Description: "boolean value to indicate of Pushed Authorisation Request(PAR)is required.",
 						},
+						"dpop_bound_access_token": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: "boolean value to indicate if DPoP bound access token is required.",
+						},
 						"jans_auth_signed_resp_alg": {
 							Type:        schema.TypeString,
 							Optional:    true,
@@ -645,6 +650,47 @@ func resourceOidcClient() *schema.Resource {
 							Optional: true,
 							Description: `sets prompt=login to the authorization request, which causes the authorization server 
 									to force the user to sign in again before it will show the authorization prompt.`,
+						},
+						"id_token_lifetime": {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Description: "Specifies the Client-specific ID Token expiration.",
+						},
+						"allow_offline_access_without_consent": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: "Specifies whether to allow offline access without consent.",
+						},
+						"minimum_acr_level": {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Description: "Specifies the minimum Authentication Context Class Reference (ACR) level.",
+						},
+						"minimum_acr_level_autoresolve": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: "Specifies whether to automatically resolve minimum ACR level.",
+						},
+						"additional_token_endpoint_auth_methods": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Description: "List of additional token endpoint authentication methods.",
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+						},
+						"minimum_acr_priority_list": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Description: "List of minimum ACR priority list.",
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+						},
+						"requested_lifetime": {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Description: "List of requested lifetime.",
 						},
 					},
 				},

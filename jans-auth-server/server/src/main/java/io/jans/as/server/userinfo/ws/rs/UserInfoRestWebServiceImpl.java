@@ -52,7 +52,7 @@ import io.jans.as.server.service.external.ExternalDynamicScopeService;
 import io.jans.as.server.service.external.context.DynamicScopeExternalContext;
 import io.jans.as.server.service.token.TokenService;
 import io.jans.as.server.util.ServerUtil;
-import io.jans.model.GluuAttribute;
+import io.jans.model.JansAttribute;
 import io.jans.orm.exception.EntryPersistenceException;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
@@ -378,12 +378,12 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                 for (Iterator<String> it = userInfoObj.keys(); it.hasNext(); ) {
                     String claimName = it.next();
                     boolean optional = true; // ClaimValueType.OPTIONAL.equals(claim.getClaimValue().getClaimValueType());
-                    GluuAttribute gluuAttribute = attributeService.getByClaimName(claimName);
+                    JansAttribute jansAttribute = attributeService.getByClaimName(claimName);
 
-                    if (gluuAttribute != null) {
-                        String ldapClaimName = gluuAttribute.getName();
+                    if (jansAttribute != null) {
+                        String ldapClaimName = jansAttribute.getName();
 
-                        Object attribute = user.getAttribute(ldapClaimName, optional, gluuAttribute.getOxMultiValuedAttribute());
+                        Object attribute = user.getAttribute(ldapClaimName, optional, jansAttribute.getOxMultiValuedAttribute());
                         jsonWebResponse.getClaims().setClaimFromJsonObject(claimName, attribute);
                     }
                 }
@@ -394,14 +394,14 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                 && authorizationGrant.getJwtAuthorizationRequest().getUserInfoMember() != null) {
             for (Claim claim : authorizationGrant.getJwtAuthorizationRequest().getUserInfoMember().getClaims()) {
                 boolean optional = true; // ClaimValueType.OPTIONAL.equals(claim.getClaimValue().getClaimValueType());
-                GluuAttribute gluuAttribute = attributeService.getByClaimName(claim.getName());
+                JansAttribute jansAttribute = attributeService.getByClaimName(claim.getName());
 
-                if (gluuAttribute != null) {
+                if (jansAttribute != null) {
                     Client client = authorizationGrant.getClient();
 
-                    if (validateRequesteClaim(gluuAttribute, client.getClaims(), scopes)) {
-                        String ldapClaimName = gluuAttribute.getName();
-                        Object attribute = user.getAttribute(ldapClaimName, optional, gluuAttribute.getOxMultiValuedAttribute());
+                    if (validateRequesteClaim(jansAttribute, client.getClaims(), scopes)) {
+                        String ldapClaimName = jansAttribute.getName();
+                        Object attribute = user.getAttribute(ldapClaimName, optional, jansAttribute.getOxMultiValuedAttribute());
                         jsonWebResponse.getClaims().setClaimFromJsonObject(claim.getName(), attribute);
                     }
                 }
@@ -419,14 +419,14 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         return jsonWebResponse.toString();
     }
 
-    public boolean validateRequesteClaim(GluuAttribute gluuAttribute, String[] clientAllowedClaims, Collection<String> scopes) {
-        if (gluuAttribute == null) {
-            log.trace("gluuAttribute is null.");
+    public boolean validateRequesteClaim(JansAttribute jansAttribute, String[] clientAllowedClaims, Collection<String> scopes) {
+        if (jansAttribute == null) {
+            log.trace("jansAttribute is null.");
             return false;
         }
         if (clientAllowedClaims != null) {
             for (String clientAllowedClaim : clientAllowedClaims) {
-                if (gluuAttribute.getDn().equals(clientAllowedClaim)) {
+                if (jansAttribute.getDn().equals(clientAllowedClaim)) {
                     return true;
                 }
             }
@@ -437,7 +437,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
 
             if (scope != null && scope.getClaims() != null) {
                 for (String claimDn : scope.getClaims()) {
-                    if (gluuAttribute.getDisplayName().equals(attributeService.getAttributeByDn(claimDn).getDisplayName())) {
+                    if (jansAttribute.getDisplayName().equals(attributeService.getAttributeByDn(claimDn).getDisplayName())) {
                         return true;
                     }
                 }

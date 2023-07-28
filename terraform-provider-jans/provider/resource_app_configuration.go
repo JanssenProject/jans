@@ -62,6 +62,21 @@ func resourceSsaConfiguration() *schema.Resource {
 	}
 }
 
+func resourceTrustedSsaIssuers() *schema.Resource {
+
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"automatically_granted_scopes": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+		},
+	}
+}
+
 func resourceSsaValidationConfig() *schema.Resource {
 
 	return &schema.Resource{
@@ -1204,6 +1219,11 @@ func resourceAppConfiguration() *schema.Resource {
 				Optional:    true,
 				Description: "The interval for configuration update in seconds.",
 			},
+			"log_not_found_entity_as_error": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Boolean value specifying whether to log not found entity as error.",
+			},
 			"enable_client_grant_type_update": {
 				Type:        schema.TypeBool,
 				Optional:    true,
@@ -1362,6 +1382,11 @@ func resourceAppConfiguration() *schema.Resource {
 				Optional:    true,
 				Description: "Reject introspection requests if access_token in Authorization header does not have uma_protection scope.",
 			},
+			"introspection_access_token_must_have_introspection_scope": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Reject introspection requests if access_token in Authorization header does not have introspection scope.",
+			},
 			"introspection_skip_authorization": {
 				Type:        schema.TypeBool,
 				Optional:    true,
@@ -1517,6 +1542,11 @@ func resourceAppConfiguration() *schema.Resource {
 				Optional:    true,
 				Description: "Boolean value to specify if the device secret should be returned by the authz endpoint.",
 			},
+			"dcr_forbid_expiration_time_in_request": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Boolean value to specify if the expiration time should be forbidden in DCR request.",
+			},
 			"dcr_signature_validation_enabled": {
 				Type:        schema.TypeBool,
 				Optional:    true,
@@ -1557,13 +1587,11 @@ func resourceAppConfiguration() *schema.Resource {
 				Optional:    true,
 				Description: "Boolean value indicating if DCR authorization allowed with MTLS.",
 			},
-			"dcr_issuers": {
+			"trusted_ssa_issuers": {
 				Type:        schema.TypeList,
 				Optional:    true,
-				Description: "List of DCR issuers.",
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
+				Description: "List of trusted SSA issuers.",
+				Elem:        resourceTrustedSsaIssuers(),
 			},
 			"use_local_cache": {
 				Type:        schema.TypeBool,
@@ -1614,6 +1642,11 @@ func resourceAppConfiguration() *schema.Resource {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Description: "Boolean value specifying whether to extend refresh tokens on rotation.",
+			},
+			"allow_blank_values_in_discovery_response": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Boolean value specifying whether to allow blank values in discovery response.",
 			},
 			"check_user_presence_on_refresh_token": {
 				Type:        schema.TypeBool,
@@ -1879,6 +1912,17 @@ func resourceAppConfiguration() *schema.Resource {
 				Description: "Demonstration of Proof-of-Possession (DPoP) cache time.",
 				Default:     3600,
 			},
+			"dpop_use_nonce": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Demonstration of Proof-of-Possession (DPoP) nonce usage.",
+				Default:     3600,
+			},
+			"dpop_nonce_cache_time": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "Demonstration of Proof-of-Possession (DPoP) nonce cache time.",
+			},
 			"allow_id_token_without_implicit_grant_type": {
 				Type:        schema.TypeBool,
 				Optional:    true,
@@ -2017,10 +2061,15 @@ func resourceAppConfiguration() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
-			"fapi": {
+			"http_logging_response_body_content": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Description: "Boolean value specifying whether to enable FAPI.",
+				Description: "Boolean value specifying whether to log response body content.",
+			},
+			"skip_authentication_filter_options_method": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Boolean value specifying whether to skip authentication filter for options method calls.",
 			},
 			"all_response_types_supported": {
 				Type:        schema.TypeList,
@@ -2035,6 +2084,11 @@ func resourceAppConfiguration() *schema.Resource {
 						return validateEnum(v, enums)
 					},
 				},
+			},
+			"fapi": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Boolean value specifying whether to enable FAPI.",
 			},
 		},
 		Importer: &schema.ResourceImporter{

@@ -12,7 +12,7 @@ import jakarta.faces.convert.Converter;
 import jakarta.faces.convert.FacesConverter;
 import jakarta.inject.Inject;
 
-import io.jans.model.GluuAttribute;
+import io.jans.model.JansAttribute;
 import io.jans.service.AttributeService;
 
 @FacesConverter("io.jans.jsf2.converter.AttributeNameConverter")
@@ -32,8 +32,8 @@ public class AttributeNameConverter implements Converter {
 	@Override
 	public String getAsString(FacesContext context, UIComponent component, Object value) {
 		String string = null;
-		if (value instanceof GluuAttribute) {
-			string = ((GluuAttribute) value).getName();
+		if (value instanceof JansAttribute) {
+			string = ((JansAttribute) value).getName();
 		}
 
 		return string;

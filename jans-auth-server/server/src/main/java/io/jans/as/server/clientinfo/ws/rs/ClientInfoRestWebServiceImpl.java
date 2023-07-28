@@ -21,7 +21,7 @@ import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.ScopeService;
 import io.jans.as.server.service.token.TokenService;
 import io.jans.as.server.util.ServerUtil;
-import io.jans.model.GluuAttribute;
+import io.jans.model.JansAttribute;
 import io.jans.orm.model.base.LocalizedString;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Path;
@@ -118,7 +118,7 @@ public class ClientInfoRestWebServiceImpl implements ClientInfoRestWebService {
 
                 if (scope.getClaims() != null) {
                     for (String claimDn : scope.getClaims()) {
-                        GluuAttribute attribute = attributeService.getAttributeByDn(claimDn);
+                        JansAttribute attribute = attributeService.getAttributeByDn(claimDn);
 
                         String ldapName = attribute.getName();
                         Object attributeValue = clientService.getAttribute(client, ldapName);

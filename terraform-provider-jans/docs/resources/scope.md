@@ -191,11 +191,15 @@ Read-Only:
 Optional:
 
 - `additional_audience` (List of String) List of additional client audience.
+- `additional_token_endpoint_auth_methods` (List of String) List of additional token endpoint authentication methods.
+- `allow_offline_access_without_consent` (Boolean) Specifies whether to allow offline access without consent.
 - `allow_spontaneous_scopes` (Boolean) boolean, whether to allow spontaneous scopes for client.
 - `backchannel_logout_session_required` (Boolean) Boolean value specifying whether the RP requires that a sid (session ID) Claim be included in 
 									the Logout Token to identify the RP session with the OP when true. Default value is false.
 - `backchannel_logout_uri` (List of String) List of RP URL that will cause the RP to log itself out when sent a Logout Token by the OP.
 - `consent_gathering_scripts` (List of String) List of consent gathering scripts.
+- `dpop_bound_access_token` (Boolean) boolean value to indicate if DPoP bound access token is required.
+- `id_token_lifetime` (Number) Specifies the Client-specific ID Token expiration.
 - `introspection_scripts` (List of String) List of introspection scripts.
 - `jans_auth_enc_resp_alg` (String) JWE alg algorithm JWA required for encrypting authorization responses.
 - `jans_auth_enc_resp_enc` (String) JWE enc algorithm JWA required for encrypting auhtorization responses.
@@ -205,9 +209,13 @@ Optional:
 									to force the user to sign in again before it will show the authorization prompt.
 - `jans_sub_attr` (String) custom subject identifier attribute.
 - `keep_client_authorization_after_expiration` (Boolean) boolean property which indicates whether to keep client authorization after expiration.
+- `minimum_acr_level` (Number) Specifies the minimum Authentication Context Class Reference (ACR) level.
+- `minimum_acr_level_autoresolve` (Boolean) Specifies whether to automatically resolve minimum ACR level.
+- `minimum_acr_priority_list` (List of String) List of minimum ACR priority list.
 - `par_lifetime` (Number) represents the lifetime of Pushed Authorisation Request (PAR).
 - `post_authn_scripts` (List of String) List of post authentication scripts.
 - `redirect_uris_regex` (String) If set, redirectUri must match to this regexp
+- `requested_lifetime` (Number) List of requested lifetime.
 - `require_par` (Boolean) boolean value to indicate of Pushed Authorisation Request(PAR)is required.
 - `ropc_scripts` (List of String) List of Resource Owner Password Credentials (ROPC) scripts.
 - `rpt_claims_scripts` (List of String) List of Requesting Party Token (RPT) claims scripts.

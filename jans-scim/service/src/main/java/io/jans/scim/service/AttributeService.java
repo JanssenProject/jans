@@ -15,7 +15,7 @@ import jakarta.enterprise.event.Event;
 import jakarta.enterprise.inject.Any;
 import jakarta.inject.Inject;
 
-import io.jans.model.GluuAttribute;
+import io.jans.model.JansAttribute;
 import io.jans.orm.model.base.CustomObjectAttribute;
 import io.jans.scim.model.GluuCustomAttribute;
 import io.jans.scim.model.conf.AppConfiguration;
@@ -49,11 +49,11 @@ public class AttributeService extends io.jans.service.AttributeService {
 	 * @return Attribute
 	 * @throws Exception Unexpected failure
 	 */
-	public List<GluuAttribute> getSCIMRelatedAttributes() throws Exception {
-		List<GluuAttribute> attributes = getAllAttributes();
+	public List<JansAttribute> getSCIMRelatedAttributes() throws Exception {
+		List<JansAttribute> attributes = getAllAttributes();
 
-		List<GluuAttribute> result = new ArrayList<GluuAttribute>();
-		for (GluuAttribute attribute : attributes) {
+		List<JansAttribute> result = new ArrayList<JansAttribute>();
+		for (JansAttribute attribute : attributes) {
 			boolean isEmpty = attribute.getScimCustomAttr() == null;
 			if (!isEmpty) {
 				if ((attribute.getScimCustomAttr() != null) && attribute.getScimCustomAttr()) {
@@ -83,10 +83,10 @@ public class AttributeService extends io.jans.service.AttributeService {
 	}
 
 	@Override
-	protected List<GluuAttribute> getAllAtributesImpl(String baseDn) {
-		List<GluuAttribute> attributeList = persistenceEntryManager.findEntries(baseDn, GluuAttribute.class, null);
+	protected List<JansAttribute> getAllAtributesImpl(String baseDn) {
+		List<JansAttribute> attributeList = persistenceEntryManager.findEntries(baseDn, JansAttribute.class, null);
 		String customOrigin = getCustomOrigin();
-		for (GluuAttribute attribute : attributeList) {
+		for (JansAttribute attribute : attributeList) {
 			attribute.setCustom(customOrigin.equals(attribute.getOrigin()));
 		}
 
@@ -103,11 +103,11 @@ public class AttributeService extends io.jans.service.AttributeService {
 			return;
 		}
 		
-		Map<String, GluuAttribute> allAttributesMap = getAllAttributesMap();
+		Map<String, JansAttribute> allAttributesMap = getAllAttributesMap();
 		for (GluuCustomAttribute customAttribute : customAttributes) {
 			String attributeName = StringHelper.toLowerCase(customAttribute.getName());
 			
-			GluuAttribute attribute = allAttributesMap.get(attributeName);
+			JansAttribute attribute = allAttributesMap.get(attributeName);
 			if (attribute != null) {
 				customAttribute.setMetadata(attribute);
 			}
@@ -119,11 +119,11 @@ public class AttributeService extends io.jans.service.AttributeService {
 			return;
 		}
 		
-		Map<String, GluuAttribute> allAttributesMap = getAllAttributesMap();
+		Map<String, JansAttribute> allAttributesMap = getAllAttributesMap();
 		for (CustomObjectAttribute customAttribute : customAttributes) {
 			String attributeName = StringHelper.toLowerCase(customAttribute.getName());
 			
-			GluuAttribute attribute = allAttributesMap.get(attributeName);
+			JansAttribute attribute = allAttributesMap.get(attributeName);
 			if (attribute != null) {
 				boolean multiValued = Boolean.TRUE.equals(attribute.getOxMultiValuedAttribute());
 				customAttribute.setMultiValued(multiValued);
