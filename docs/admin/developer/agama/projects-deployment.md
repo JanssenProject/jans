@@ -62,7 +62,7 @@ The following tables summarize the available endpoints. All URLs are relative to
 
 |Endpoint -> |`/agama-deployment/{name}`|
 |-|-|
-|Purpose|Add or replace an ADS project to the server|
+|Purpose|Add or replace an Agama project to the server|
 |Method|POST|
 |Path params|`name` (the project's name)|
 |Body|The binary contents of a `.gama` file; example [here](#sample-file). Ensure to use header `Content-Type: application/zip`|
@@ -91,7 +91,7 @@ The following tables summarize the available endpoints. All URLs are relative to
 
 |Endpoint -> |`/agama-deployment/{name}`|
 |-|-|
-|Purpose|Undeploy an ADS project from the server. Entails removing flows and assets initally supplied|
+|Purpose|Undeploy an Agama project from the server. Entails removing flows and assets initally supplied|
 |Method|DELETE|
 |Path params|`name` (the project's name)|
 |Status|204 (scheduled for removal), 409 (the project is being deployed currently), 404 (unknown project)|
