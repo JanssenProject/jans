@@ -1901,12 +1901,12 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/head/admin/usermgmt/usermgmt-cache-refresh/</loc>
+         <loc>https://jans.io/docs/head/admin/usermgmt/usermgmt-cli-tui/</loc>
          <lastmod>2023-07-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/head/admin/usermgmt/usermgmt-cli-tui/</loc>
+         <loc>https://jans.io/docs/head/admin/usermgmt/usermgmt-jans-link/</loc>
          <lastmod>2023-07-28</lastmod>
          <changefreq>daily</changefreq>
     </url>
