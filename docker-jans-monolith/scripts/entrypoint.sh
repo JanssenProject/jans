@@ -104,7 +104,7 @@ start_services() {
 
 check_installed_jans
 start_services
-
+run_java_tests
 
 # use -F option to follow (and retry) logs
 tail -F /opt/jans/jetty/jans-auth/logs/*.log \
