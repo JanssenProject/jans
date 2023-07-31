@@ -175,7 +175,7 @@ public class CertificateService {
     }
 
     public CertificateFactory instanceCertificateFactory(String type) throws CertificateException {
-        return CertificateFactory.getInstance(type);
+        return CertificateFactory.getInstance(type, SecurityProviderUtility.getBCProvider());
     }
 
     public CertificateFactory instanceCertificateFactoryX509() {
@@ -187,7 +187,7 @@ public class CertificateService {
     }
 
     public CertPathValidator instanceCertPathValidator(String algorithm) throws NoSuchAlgorithmException {
-        return CertPathValidator.getInstance(algorithm);
+        return CertPathValidator.getInstance(algorithm, SecurityProviderUtility.getBCProvider());
     }
 
     public CertPathValidator instanceCertPathValidatorPKIX() {
