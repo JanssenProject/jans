@@ -76,9 +76,9 @@ Let's have an example on `importing` the current `logging level` of a deployment
     - **VM:** grab `client_id` and `client_pw` from `/opt/jans/jans-setup/setup.properties.last` file.
 
     - **K8s:** 
-        1. client_id: `kubectl get cm cn -n <namespace> -o yaml | grep jca_client_id` 
+        1. client_id: `kubectl get cm cn -n <namespace> -o yaml | grep test_client_id` 
 
-        2. Get client_secret: `kubectl get secret cn -n <namespace> -o yaml | grep jca_client_pw`. This client secret has to be decoded before use.
+        2. Get client_secret: `kubectl get secret cn -n <namespace> -o yaml | grep test_client_pw`. This client secret has to be decoded before use.
 
         3. Decode the client_secret: `echo "client_secret" | base64 -d`
 
