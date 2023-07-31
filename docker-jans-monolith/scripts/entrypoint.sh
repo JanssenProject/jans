@@ -65,8 +65,8 @@ install_jans() {
   echo "*****   PLEASE NOTE THAT THIS MAY TAKE A WHILE TO FINISH. PLEASE BE PATIENT!!   *****"
   echo "Executing https://raw.githubusercontent.com/JanssenProject/jans/${JANS_SOURCE_VERSION}/jans-linux-setup/jans_setup/install.py > install.py"
   curl https://raw.githubusercontent.com/JanssenProject/jans/"${JANS_SOURCE_VERSION}"/jans-linux-setup/jans_setup/install.py > install.py
-  echo "Executing python3 install.py -yes --args=-f setup.properties -n -t -test-client-id=${TEST_CLIENT_ID} -test-client-secret=${TEST_CLIENT_SECRET} --test-client-trusted"
-  python3 install.py -yes --args="-f setup.properties -n"
+  echo "Executing python3 install.py -yes --args=-f setup.properties -n -t"
+  python3 install.py -yes --args="-f setup.properties -n -t"
   echo "*****   Setup script completed!!    *****"
 
 }
