@@ -430,6 +430,24 @@ class PersistenceSetup:
             ).decode()
             self.manager.secret.set("jca_client_encoded_pw", ctx["jca_client_encoded_pw"])
 
+        # test client
+        ctx["test_client_id"] = self.manager.config.get("test_client_id")
+        if not ctx["test_client_id"]:
+            ctx["test_client_id"] = f"{uuid4()}"
+            self.manager.config.set("test_client_id", ctx["test_client_id"])
+
+        ctx["test_client_pw"] = self.manager.secret.get("test_client_pw")
+        if not ctx["test_client_pw"]:
+            ctx["test_client_pw"] = get_random_chars()
+            self.manager.secret.set("test_client_pw", ctx["test_client_pw"])
+
+        ctx["test_client_encoded_pw"] = self.manager.secret.get("test_client_encoded_pw")
+        if not ctx["test_client_encoded_pw"]:
+            ctx["test_client_encoded_pw"] = encode_text(
+                ctx["test_client_pw"], self.manager.secret.get("encoded_salt"),
+            ).decode()
+            self.manager.secret.set("test_client_encoded_pw", ctx["test_client_encoded_pw"])
+
         # pre-populate config_api_dynamic_conf_base64
         with open("/app/templates/jans-config-api/dynamic-conf.json") as f:
             tmpl = Template(f.read())
@@ -468,7 +486,7 @@ class PersistenceSetup:
             logger.info("Missing scopes creation is enabled!")
             self.generate_scopes_ldif()
 
-        files = ["config.ldif", "scopes.ldif", "clients.ldif", "scim-scopes.ldif"]
+        files = ["config.ldif", "scopes.ldif", "clients.ldif", "scim-scopes.ldif", "testing-clients.ldif"]
         ldif_files = [f"/app/templates/jans-config-api/{file_}" for file_ in files]
 
         for file_ in ldif_files:
