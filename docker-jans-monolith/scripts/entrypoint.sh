@@ -81,11 +81,48 @@ check_installed_jans() {
   fi
 }
 
+run_auth_server_test() {
+    WORKING_DIRECTORY=$PWD
+    echo "*****   cloning jans auth server folder!!   *****"
+    git clone --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
+    && cd /tmp/jans \
+    && git sparse-checkout init --cone \
+    && git checkout "${JANS_SOURCE_VERSION}" \
+    && git sparse-checkout set jans-auth-server \
+    && cd jans-auth-server \
+    && echo "Copying auth server test profiles from ephemeral server" \
+    && cp -R /opt/jans/jans-setup/output/test/jans-auth ./ \
+    && echo "Creating auth server profile folders" \
+    && mkdir -p ./client/profiles/${CN_HOSTNAME} \
+    && mkdir -p ./server/profiles/${CN_HOSTNAME} \
+    && echo "Copying auth server profile files" \
+    && cp ./jans-auth/client/* ./client/profiles/${CN_HOSTNAME} \
+    && cp ./jans-auth/server/* ./server/profiles${CN_HOSTNAME} \
+    && echo "Copying auth server keystores from default profile" \
+    && cp -f ./client/profiles/default/client_keystore.p12 ./client/profiles/${CN_HOSTNAME} \
+    && cp -f ./server/profiles/default/client_keystore.p12 ./server/profiles/${CN_HOSTNAME} \
+    && echo "echo remove test profile folder" \
+    && rm -rf ./jans-auth \
+    && cd agama \
+    && cp /opt/jans/jans-setup/output/test/jans-auth/config-agama-test.properties . \
+    && mkdir -p ./engine/profiles/${CN_HOSTNAME} \
+    && mv config-agama-test.properties ./engine/profiles/$PROFILE_NAME/config-agama-test.properties  \
+    && cd .. \
+    && echo "check if the compilation and install is ok without running the tests" \
+    && mvn -Dcfg=jans-opensuse.lxd -Dmaven.test.skip=true -fae clean compile install \
+    && ehco "install the jans cert in local keystore" \
+    && openssl s_client -connect jans-opensuse.lxd:443 2>&1 |sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' > /tmp/httpd.crt \
+    && sudo keytool -import -alias ${CN_HOSTNAME} -keystore /usr/lib64/jvm/java-11-openjdk-11/lib/security/cacerts -file /tmp/httpd.crt \
+    && mvn -Dcfg=${CN_HOSTNAME} -Dmaven.test.skip=false test \
+    && cd "$WORKING_DIRECTORY"
+}
+
 run_java_tests() {
   if [[ "${RUN_JAVA_TESTS}" == "true" ]]; then
     echo "*****  Installing maven!!   *****"
     apt-get install -y maven
     echo "*****   Running Java tests!!   *****"
+    run_auth_server_test
     echo "*****   Running Auth server tests!!   *****"
     mvn -Dcfg=demoexample.jans.io -f /opt/jans/jans-setup/output/test/jans-auth test
     echo "*****   Java tests completed!!   *****"
