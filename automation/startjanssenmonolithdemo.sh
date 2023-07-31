@@ -53,7 +53,7 @@ pip3 install dockerfile-parse ruamel.yaml
 
 # switching to version defined by JANS_BUILD_COMMIT
 if [[ "$JANS_BUILD_COMMIT" ]]; then
-  python3 -c "from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('/tmp/jans/docker-jans-monolith') ; dfparser.envs['JANS_SOURCE_VERSION'] = '$JANS_BUILD_COMMIT'"
+  python3 -c "from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('/tmp/jans/docker-jans-monolith') ; dfparser.envs['JANS_SOURCE_VERSION'] = '$JANS_BUILD_COMMIT' ; dfparser.envs['RUN_JAVA_TESTS'] = 'true'"
 
   # as JANS_SOURCE_VERSION is changed, allow docker compose to rebuild image on-the-fly
   # and use the respective image instead of the default image
