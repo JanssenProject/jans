@@ -97,6 +97,9 @@ echo -e "Testing scim-configuration endpoint.. \n"
 docker exec docker-jans-monolith-jans-1 curl -f -k https://localhost/.well-known/scim-configuration
 echo -e "Testing fido2-configuration endpoint.. \n"
 docker exec docker-jans-monolith-jans-1 curl -f -k https://localhost/.well-known/fido2-configuration
+echo -e "copying reports.. \n"
+docker exec docker-jans-monolith-jans-1 ls -l /jans/jans-auth-server/opt/jans/jetty/jans-auth
+docker cp docker-jans-monolith-jans-1:/jans/jans-auth-server/opt/jans/jetty/jans-auth/*testng-results.xml /tmp/reports
 EOF
 sudo bash testendpoints.sh
 echo -e "You may re-execute bash testendpoints.sh to do a quick test to check the configuration endpoints."

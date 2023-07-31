@@ -65,7 +65,7 @@ install_jans() {
   echo "*****   PLEASE NOTE THAT THIS MAY TAKE A WHILE TO FINISH. PLEASE BE PATIENT!!   *****"
   echo "Executing https://raw.githubusercontent.com/JanssenProject/jans/${JANS_SOURCE_VERSION}/jans-linux-setup/jans_setup/install.py > install.py"
   curl https://raw.githubusercontent.com/JanssenProject/jans/"${JANS_SOURCE_VERSION}"/jans-linux-setup/jans_setup/install.py > install.py
-  echo "Executing python3 install.py -yes --args=-f setup.properties -n -test-client-id=${TEST_CLIENT_ID} -test-client-secret=${TEST_CLIENT_SECRET} --test-client-trusted"
+  echo "Executing python3 install.py -yes --args=-f setup.properties -n -t -test-client-id=${TEST_CLIENT_ID} -test-client-secret=${TEST_CLIENT_SECRET} --test-client-trusted"
   python3 install.py -yes --args="-f setup.properties -n"
   echo "*****   Setup script completed!!    *****"
 
@@ -81,6 +81,19 @@ check_installed_jans() {
   fi
 }
 
+run_java_tests() {
+  if [[ "${RUN_JAVA_TESTS}" == "true" ]]; then
+    echo "*****  Installing maven!!   *****"
+    apt-get install -y maven
+    echo "*****   Running Java tests!!   *****"
+    echo "*****   Running Auth server tests!!   *****"
+    mvn -Dcfg=demoexample.jans.io -f /opt/jans/jans-setup/output/test/jans-auth test
+    echo "*****   Java tests completed!!   *****"
+  else
+    echo "Maven has not been installed. Enable RUN_JAVA_TESTS to run tests."
+  fi
+}
+
 start_services() {
   /etc/init.d/apache2 start
   /opt/dist/scripts/jans-auth start
@@ -91,6 +104,7 @@ start_services() {
 
 check_installed_jans
 start_services
+
 
 # use -F option to follow (and retry) logs
 tail -F /opt/jans/jetty/jans-auth/logs/*.log \
