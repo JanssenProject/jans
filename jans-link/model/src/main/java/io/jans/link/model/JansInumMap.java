@@ -44,7 +44,7 @@ public class JansInumMap extends Entry implements Serializable {
 	@AttributeName(name = "jansTertiaryKeyAttrName")
 	private String tertiaryKeyAttrName;
 
-	@AttributeName(name = "tertiaryKeyValue")
+	@AttributeName(name = "jansTertiaryKeyValue")
 	private String[] tertiaryKeyValues;
 
 	@AttributeName(name = "jansStatus")
