@@ -11,11 +11,9 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.cert.CertificateEncodingException;
 
-import io.jans.as.model.config.Constants;
-import io.jans.fido2.model.u2f.error.Fido2ErrorResponseFactory;
-import io.jans.fido2.model.u2f.error.Fido2ErrorResponseType;
+import io.jans.fido2.model.error.ErrorResponseFactory;
+import io.jans.fido2.model.assertion.AssertionErrorResponseType;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.logging.log4j.ThreadContext;
 import org.slf4j.Logger;
 
 
@@ -29,7 +27,6 @@ import io.jans.as.model.fido.u2f.protocol.RegisterResponse;
 import io.jans.fido2.ctap.AttestationFormat;
 import io.jans.fido2.exception.Fido2RpRuntimeException;
 import io.jans.fido2.exception.Fido2RuntimeException;
-import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.service.AuthenticatorDataParser;
 import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.CoseService;
@@ -40,7 +37,6 @@ import io.jans.fido2.service.persist.UserSessionIdService;
 import io.jans.fido2.service.sg.RawRegistrationService;
 import io.jans.fido2.service.verifier.CommonVerifiers;
 import io.jans.fido2.sg.SuperGluuMode;
-import io.jans.service.net.NetworkService;
 import io.jans.util.StringHelper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -63,9 +59,6 @@ public class AttestationSuperGluuController {
     private DataMapperService dataMapperService;
 
     @Inject
-    private CommonVerifiers commonVerifiers;
-
-    @Inject
     private Base64Service base64Service;
 
     @Inject
@@ -75,16 +68,13 @@ public class AttestationSuperGluuController {
 	private CoseService coseService;
 
 	@Inject
-	private NetworkService networkService;
-
-	@Inject
 	private DigestService digestService;
 
 	@Inject
 	private UserSessionIdService userSessionIdService;
 
     @Inject
-    private AppConfiguration appConfiguration;
+    private ErrorResponseFactory errorResponseFactory;
 
     /* Example for one_step:
      *  - request:
@@ -129,8 +119,7 @@ public class AttestationSuperGluuController {
         boolean valid = userSessionIdService.isValidSessionId(sessionId, userName);
         if (!valid) {
             String reasonError = String.format("session_id '%s' is invalid", sessionId);
-            String descriptionError = "The session_id is null, blank or invalid, this param is required.";
-            throw Fido2ErrorResponseFactory.createBadRequestException(Fido2ErrorResponseType.INVALID_ID_SESSION, reasonError, descriptionError, ThreadContext.get(Constants.CORRELATION_ID_HEADER));
+            throw errorResponseFactory.badRequestException(AssertionErrorResponseType.INVALID_SESSION_ID, reasonError);
         }
 
         ObjectNode params = dataMapperService.createObjectNode();

@@ -9,6 +9,7 @@ package io.jans.fido2.service.app;
 import java.io.File;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import io.jans.fido2.model.error.ErrorResponseFactory;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
@@ -71,6 +72,8 @@ public class ConfigurationFactory {
 	@Inject
 	private Instance<AbstractCryptoProvider> abstractCryptoProviderInstance;
 
+	private ErrorResponseFactory errorResponseFactory;
+
 	public final static String PERSISTENCE_CONFIGUARION_RELOAD_EVENT_TYPE = "persistenceConfigurationReloadEvent";
 	public final static String BASE_CONFIGUARION_RELOAD_EVENT_TYPE = "baseConfigurationReloadEvent";
 
@@ -124,6 +127,7 @@ public class ConfigurationFactory {
 			loadBaseConfiguration();
 
 			this.confDir = confDir();
+			log.debug("confDir: {}", confDir);
 
 			String certsDir = this.baseConfiguration.getString("certsDir");
 			if (StringHelper.isEmpty(certsDir)) {
@@ -246,6 +250,12 @@ public class ConfigurationFactory {
 		return staticConf;
 	}
 
+	@Produces
+	@ApplicationScoped
+	public ErrorResponseFactory getFido2ErrorResponseFactory() {
+		return errorResponseFactory;
+	}
+
 	public BaseDnConfiguration getBaseDn() {
 		return getStaticConfiguration().getBaseDn();
 	}
@@ -273,6 +283,7 @@ public class ConfigurationFactory {
 				if (this.loaded) {
 					destroy(AppConfiguration.class);
 					destroy(StaticConfiguration.class);
+//					destroy(Fido2ErrorResponseFactory.class);
 
 					destroyCryptoProviderInstance(AbstractCryptoProvider.class);
 				}
@@ -324,6 +335,9 @@ public class ConfigurationFactory {
 		}
 		if (conf.getStaticConf() != null) {
 			staticConf = conf.getStaticConf();
+		}
+		if (conf.getErrors() != null) {
+			errorResponseFactory = new ErrorResponseFactory(conf.getErrors(), conf.getDynamicConf());
 		}
 	}
 

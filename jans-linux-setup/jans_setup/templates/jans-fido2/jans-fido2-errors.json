@@ -1,0 +1,46 @@
+{
+  "common": [
+    {
+      "id": "invalid_request",
+      "description": "The request is missing a required parameter, includes an unsupported parameter or parameter value, or is otherwise malformed",
+      "uri": null
+    },
+    {
+      "id": "unknown_error",
+      "description": "Unknown or not found error",
+      "uri": null
+    }
+  ],
+  "assertion": [
+    {
+      "id": "invalid_session_id",
+      "description": "The request contains invalid session_id",
+      "uri": null
+    },
+    {
+      "id": "invalid_username_or_key_handle",
+      "description": "The request contains invalid username or key handle",
+      "uri": null
+    },
+    {
+      "id": "invalid_authenticate_type",
+      "description": "The request contains an unsupported authentication type",
+      "uri": null
+    },
+    {
+      "id": "conflict_with_super_gluu",
+      "description": "The request contains conflicts with Super Gluu parameters",
+      "uri": null
+    },
+    {
+      "id": "keys_not_found",
+      "description": "Can't find associated key(s)",
+      "uri": null
+    },
+    {
+      "id": "auto_enrollment_disabled",
+      "description": "Auto enrollment is disabled",
+      "uri": null
+    }
+  ]
+}

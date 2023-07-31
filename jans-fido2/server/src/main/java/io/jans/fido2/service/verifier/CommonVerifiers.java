@@ -7,11 +7,12 @@
 package io.jans.fido2.service.verifier;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 
+import io.jans.fido2.model.assertion.AssertionErrorResponseType;
+import io.jans.fido2.model.error.ErrorResponseFactory;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.StringUtils;
@@ -23,7 +24,6 @@ import io.jans.fido2.ctap.AttestationConveyancePreference;
 import io.jans.fido2.ctap.AuthenticatorAttachment;
 import io.jans.fido2.ctap.TokenBindingSupport;
 import io.jans.fido2.exception.Fido2CompromisedDevice;
-import io.jans.fido2.exception.Fido2RpRuntimeException;
 import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.auth.AuthData;
 import io.jans.fido2.model.auth.CredAndCounterData;
@@ -69,6 +69,9 @@ public class CommonVerifiers {
 
     @Inject
     private Instance<AttestationFormatProcessor> supportedAttestationFormats;
+
+    @Inject
+    private ErrorResponseFactory errorResponseFactory;
 
     public void verifyRpIdHash(AuthData authData, String domain) {
         byte[] retrievedRpIdHash = authData.getRpIdHash();
@@ -122,7 +125,7 @@ public class CommonVerifiers {
         long count = Collections.singletonList(params.hasNonNull("username"))
                 .parallelStream().filter(f -> !f).count();
         if (count != 0) {
-            throw new Fido2RuntimeException("Invalid parameters");
+            throw errorResponseFactory.invalidRequest("Invalid parameters");
         }
     }
 
@@ -165,9 +168,9 @@ public class CommonVerifiers {
     protected String verifyThatString(JsonNode node, String fieldName) {
         if (!node.isTextual()) {
             if (node.fieldNames().hasNext()) {
-                throw new Fido2RuntimeException("Invalid field " + node.fieldNames().next() + ". There is no filed " + fieldName);
+                throw errorResponseFactory.invalidRequest("Invalid field " + node.fieldNames().next() + ". There is no filed " + fieldName);
             } else {
-                throw new Fido2RuntimeException("Field hasn't sub field " + fieldName);
+                throw errorResponseFactory.invalidRequest("Field hasn't sub field " + fieldName);
             }
         }
 
@@ -463,7 +466,7 @@ public class CommonVerifiers {
         if (params.hasNonNull(SUPER_GLUU_REQUEST) || params.hasNonNull(SUPER_GLUU_MODE) ||
             params.hasNonNull(SUPER_GLUU_APP_ID) || params.hasNonNull(SUPER_GLUU_KEY_HANDLE) ||
                 params.hasNonNull(SUPER_GLUU_REQUEST_CANCEL)) {
-            throw new Fido2RpRuntimeException("Input request conflicts with Super Gluu parameters");
+            throw errorResponseFactory.badRequestException(AssertionErrorResponseType.CONFLICT_WITH_SUPER_GLUU, "Input request conflicts with Super Gluu parameters");
         }
     }
 
@@ -491,7 +494,7 @@ public class CommonVerifiers {
 
     private void validateNodeNotNull(JsonNode node) throws Fido2RuntimeException {
         if ((node == null) || node.isNull()) {
-            throw new Fido2RuntimeException("Invalid data, value is null");
+            throw errorResponseFactory.invalidRequest("Invalid data, value is null");
         }
     }
 }
