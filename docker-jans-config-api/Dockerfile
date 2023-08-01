@@ -267,6 +267,8 @@ RUN chmod +x /app/scripts/entrypoint.sh
 # unquote apiApprovedIssuer
 RUN sed -i 's/"${apiApprovedIssuer}"/${apiApprovedIssuer}/g' /app/templates/jans-config-api/dynamic-conf.json
 
+RUN sed -i 's/\(<New id="DefaultHandler" class="org.eclipse.jetty.server.handler.DefaultHandler"\)\/\(>\)/\1\2<Set name="showContexts">false<\/Set><\/New>/' /opt/jetty/etc/jetty.xml
+
 # create non-root user
 RUN adduser -s /bin/sh -h /home/1000 -D -G root -u 1000 jetty
 
@@ -280,8 +282,6 @@ RUN chmod -R g=u ${JETTY_BASE}/jans-config-api/custom \
     && chmod -R g=u /etc/jans \
     && chmod 664 /etc/hosts.back \
     && chmod 664 /usr/java/latest/jre/lib/security/cacerts \
-    && chmod 664 /opt/jetty/etc/jetty.xml \
-    && chmod 664 /opt/jetty/etc/webdefault.xml \
     && chmod -R g=u /app/templates/jans-config-api \
     && chown -R 1000:0 ${JETTY_BASE}/common/libs \
     && chown -R 1000:0 /usr/share/java \

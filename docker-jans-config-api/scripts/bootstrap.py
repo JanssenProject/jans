@@ -104,8 +104,6 @@ def main():
         "changeit",
     )
 
-    modify_jetty_xml()
-    modify_webdefault_xml()
     configure_logging()
 
     persistence_setup = PersistenceSetup(manager)
@@ -129,40 +127,6 @@ def main():
     except ValueError:
         # likely secret is not created yet
         logger.warning("Unable to pull file smtp-keys.pkcs12 from secrets")
-
-
-def modify_jetty_xml():
-    fn = "/opt/jetty/etc/jetty.xml"
-    with open(fn) as f:
-        txt = f.read()
-
-    # disable contexts
-    updates = re.sub(
-        r'<New id="DefaultHandler" class="org.eclipse.jetty.server.handler.DefaultHandler"/>',
-        r'<New id="DefaultHandler" class="org.eclipse.jetty.server.handler.DefaultHandler">\n\t\t\t\t <Set name="showContexts">false</Set>\n\t\t\t </New>',
-        txt,
-        flags=re.DOTALL | re.M,
-    )
-
-    with open(fn, "w") as f:
-        f.write(updates)
-
-
-def modify_webdefault_xml():
-    fn = "/opt/jetty/etc/webdefault.xml"
-    with open(fn) as f:
-        txt = f.read()
-
-    # disable dirAllowed
-    updates = re.sub(
-        r'(<param-name>dirAllowed</param-name>)(\s*)(<param-value>)true(</param-value>)',
-        r'\1\2\3false\4',
-        txt,
-        flags=re.DOTALL | re.M,
-    )
-
-    with open(fn, "w") as f:
-        f.write(updates)
 
 
 def configure_logging():
